@@ -60,6 +60,9 @@ Future<T?> showSheet<T>({
     true => showModalBottomSheet<T>(
       context: context,
       isScrollControlled: props.isScrollControlled,
+      sheetAnimationStyle: context.disableAnimations
+          ? AnimationStyle.noAnimation
+          : AnimationStyle(curve: AppSpringCurves.sheet),
       builder: (_) {
         return SheetProvider(
           type: SheetType.bottomSheet,

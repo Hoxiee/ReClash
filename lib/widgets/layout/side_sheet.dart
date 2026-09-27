@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:reclash/common/ui/color.dart';
+import 'package:reclash/common/ui/motion.dart';
 import 'package:reclash/common/util/context.dart';
 import 'package:reclash/common/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
@@ -8,7 +9,6 @@ import 'package:flutter/rendering.dart';
 
 const Duration _bottomSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
-const Curve _modalBottomSheetCurve = Easing.standardDecelerate;
 const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
 
 Duration _enterDurationOf(BuildContext context) =>
@@ -345,7 +345,7 @@ class _ModalSideSheet<T> extends StatefulWidget {
 }
 
 class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
-  ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
+  ParametricCurve<double> animationCurve = AppSpringCurves.sheet;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {

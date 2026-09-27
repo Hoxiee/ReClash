@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 class Dialogs {
   Dialogs._();
 
-  static const _enterDuration = Duration(milliseconds: 300);
+  static const _enterDuration = Duration(milliseconds: 380);
   static const _exitDuration = Duration(milliseconds: 200);
 
   /// How long the dialog takes to fade out. [showMessage] resolves when the
@@ -32,9 +32,10 @@ class Dialogs {
     return showModal<T>(
       useRootNavigator: false,
       context: callerContext,
-      configuration: FadeScaleTransitionConfiguration(
+      configuration: _SpringFadeScaleConfiguration(
         barrierColor: Colors.black38,
         barrierDismissible: dismissible ?? true,
+        barrierLabel: 'Dismiss',
         transitionDuration: callerContext.motionDuration(_enterDuration),
         reverseTransitionDuration: callerContext.motionDuration(_exitDuration),
       ),
@@ -233,6 +234,37 @@ class _UpdatingMessageItem extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
+      ),
+    );
+  }
+}
+
+class _SpringFadeScaleConfiguration extends ModalConfiguration {
+  const _SpringFadeScaleConfiguration({
+    required super.barrierColor,
+    required super.barrierDismissible,
+    required super.barrierLabel,
+    required super.transitionDuration,
+    required super.reverseTransitionDuration,
+  });
+
+  @override
+  Widget transitionBuilder(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
+      child: ScaleTransition(
+        scale: animation.drive(
+          Tween<double>(
+            begin: 0.9,
+            end: 1,
+          ).chain(CurveTween(curve: AppSpringCurves.morph)),
+        ),
+        child: child,
       ),
     );
   }

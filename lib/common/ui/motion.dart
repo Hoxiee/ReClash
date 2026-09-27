@@ -16,3 +16,31 @@ class SpringCurve extends Curve {
   double transformInternal(double t) =>
       _simulation.x(t * seconds) + _residual * t;
 }
+
+class AppSprings {
+  AppSprings._();
+
+  static final route = SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 440),
+  );
+
+  static final sheet = SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 420),
+  );
+
+  static final morph = SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 420),
+    bounce: 0.28,
+  );
+}
+
+class AppSpringCurves {
+  AppSpringCurves._();
+
+  static final route = SpringCurve(AppSprings.route, seconds: 0.5);
+
+  static final sheet = SpringCurve(AppSprings.sheet, seconds: 0.5);
+
+  /// Overshoots past 1 mid-flight, so drive a scale with it, never an opacity.
+  static final morph = SpringCurve(AppSprings.morph, seconds: 0.55);
+}

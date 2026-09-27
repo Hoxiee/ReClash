@@ -49,11 +49,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.byType(FadeTransition), findsWidgets);
+      expect(find.byType(ScaleTransition), findsWidgets);
       await tester.pumpAndSettle();
       expect(find.text('pushed page'), findsOneWidget);
     });
 
-    testWidgets('uses the shared-axis route on a mobile view', (tester) async {
+    testWidgets('uses the spring slide route on a mobile view', (tester) async {
       setViewWidth(400);
       await pumpHost(tester);
 
@@ -61,6 +62,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('pushed page'), findsOneWidget);
+    });
+
+    testWidgets('drives a spring slide and fade on a mobile push', (
+      tester,
+    ) async {
+      setViewWidth(400);
+      await pumpHost(tester);
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+
+      expect(find.byType(SlideTransition), findsWidgets);
+      expect(find.byType(FadeTransition), findsWidgets);
+
+      await tester.pumpAndSettle();
+      expect(find.text('pushed page'), findsOneWidget);
+      expect(tester.takeException(), null);
     });
 
     testWidgets('pops back to the origin', (tester) async {
@@ -85,23 +104,23 @@ void main() {
       expect(route.barrierColor, isNull);
       expect(route.barrierLabel, isNull);
       expect(route.maintainState, isTrue);
-      expect(route.transitionDuration, const Duration(milliseconds: 200));
+      expect(route.transitionDuration, const Duration(milliseconds: 320));
       expect(
         route.reverseTransitionDuration,
-        const Duration(milliseconds: 200),
+        const Duration(milliseconds: 320),
       );
     });
 
-    test('mobile route uses the longer shared-axis duration', () {
+    test('mobile route uses the longer spring duration', () {
       final route = CommonRoute<void>(builder: (_) => const SizedBox());
 
       expect(route.barrierColor, isNull);
       expect(route.barrierLabel, isNull);
       expect(route.maintainState, isTrue);
-      expect(route.transitionDuration, const Duration(milliseconds: 300));
+      expect(route.transitionDuration, const Duration(milliseconds: 440));
       expect(
         route.reverseTransitionDuration,
-        const Duration(milliseconds: 300),
+        const Duration(milliseconds: 440),
       );
     });
   });
@@ -324,7 +343,7 @@ void main() {
       await tester.pump();
 
       final route = ModalRoute.of(tester.element(find.text('pushed page')));
-      expect(route!.transitionDuration, const Duration(milliseconds: 300));
+      expect(route!.transitionDuration, const Duration(milliseconds: 440));
       expect(route.animation!.isCompleted, isFalse);
       await tester.pumpAndSettle();
     });

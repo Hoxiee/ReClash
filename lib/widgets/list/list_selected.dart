@@ -285,43 +285,27 @@ class DecorationListItem extends StatelessWidget {
             ),
           );
         }
-        return OpenContainer<dynamic>(
-          transitionDuration: context.motionDuration(commonDuration),
-          closedBuilder: (context, action) {
-            Future<void> openAction() async {
-              final isMobile = context.isMobileView;
-              if (!isMobile || kDebugMode) {
-                final res = await showExtend(
-                  context,
-                  props: ExtendProps(
-                    blur: openDelegate.blur,
-                    maxWidth: openDelegate.maxWidth,
-                    forceFull: openDelegate.forceFull,
-                  ),
-                  builder: (_) {
-                    return child;
-                  },
-                );
-                if (onChanged != null) {
-                  onChanged(res);
-                }
-                return;
-              }
-              action();
-            }
+        Future<void> openAction() async {
+          final res = await showExtend(
+            context,
+            props: ExtendProps(
+              blur: openDelegate.blur,
+              maxWidth: openDelegate.maxWidth,
+              forceFull: openDelegate.forceFull,
+            ),
+            builder: (_) => child,
+          );
+          if (onChanged != null) {
+            onChanged(res);
+          }
+        }
 
-            return _buildActionCard(
-              proxyDecorator: proxyDecorator,
-              borderRadius: borderRadius,
-              isEnd: isEnd,
-              onTap: openAction,
-              trailing: effectiveTrailing,
-            );
-          },
-          onClosed: onChanged,
-          openBuilder: (_, action) {
-            return child;
-          },
+        return _buildActionCard(
+          proxyDecorator: proxyDecorator,
+          borderRadius: borderRadius,
+          isEnd: isEnd,
+          onTap: openAction,
+          trailing: effectiveTrailing,
         );
       case final _CheckboxAction checkboxDelegate:
         effectiveOnPressed = checkboxDelegate.onChanged == null

@@ -3,13 +3,11 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/base/inherited.dart';
-import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../base/card.dart';
 import '../base/focus.dart';
 import '../input/input.dart';
-import '../layout/open_container.dart';
 import '../layout/scaffold.dart';
 import '../layout/sheet.dart';
 
@@ -373,36 +371,20 @@ class ListItem<T> extends StatelessWidget {
       case final _OpenAction openDelegate:
         final child = openDelegate.widget;
         final onChanged = openDelegate.onChanged;
-        return OpenContainer<dynamic>(
-          transitionDuration: context.motionDuration(commonDuration),
-          closedBuilder: (context, action) {
-            Future<void> openAction() async {
-              final isMobile = context.isMobileView;
-              if (!isMobile || kDebugMode) {
-                final res = await showExtend(
-                  context,
-                  props: ExtendProps(
-                    blur: openDelegate.blur,
-                    maxWidth: openDelegate.maxWidth,
-                    forceFull: openDelegate.forceFull,
-                  ),
-                  builder: (_) {
-                    return child;
-                  },
-                );
-                if (onChanged != null) {
-                  onChanged(res);
-                }
-                return;
-              }
-              action();
+        return _buildListTile(
+          onTap: () async {
+            final res = await showExtend(
+              context,
+              props: ExtendProps(
+                blur: openDelegate.blur,
+                maxWidth: openDelegate.maxWidth,
+                forceFull: openDelegate.forceFull,
+              ),
+              builder: (_) => child,
+            );
+            if (onChanged != null) {
+              onChanged(res);
             }
-
-            return _buildListTile(onTap: openAction);
-          },
-          onClosed: onChanged,
-          openBuilder: (_, action) {
-            return child;
           },
         );
       case final _NextAction nextDelegate:

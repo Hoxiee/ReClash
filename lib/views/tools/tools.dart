@@ -29,6 +29,8 @@ const toolsDoctorPaneId = 'doctor';
 
 const _toolsListPaneWidth = 360.0;
 
+const _toolsPaneSwapDuration = Duration(milliseconds: 320);
+
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
 
@@ -188,8 +190,10 @@ class _ToolViewState extends ConsumerState<ToolsView> {
 
   Widget _buildDetailPane() {
     final detail = _selectedDetail;
+    final Widget content;
     if (detail == null) {
-      return Center(
+      content = Center(
+        key: const ValueKey('tools-detail-placeholder'),
         child: Padding(
           padding: AppInsets.xxl,
           child: Text(
@@ -201,19 +205,36 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           ),
         ),
       );
+    } else {
+      content = SettingsPaneScope(
+        key: ValueKey(_selectedPaneId),
+        active: false,
+        selectedId: null,
+        onSelect: _selectPane,
+        child: SheetProvider(
+          type: SheetType.page,
+          child: Navigator(
+            onDidRemovePage: (_) {},
+            pages: [MaterialPage<void>(child: detail)],
+          ),
+        ),
+      );
     }
-    return SettingsPaneScope(
-      active: false,
-      selectedId: null,
-      onSelect: _selectPane,
-      child: SheetProvider(
-        type: SheetType.page,
-        child: Navigator(
-          key: ValueKey(_selectedPaneId),
-          onDidRemovePage: (_) {},
-          pages: [MaterialPage<void>(child: detail)],
+    return AnimatedSwitcher(
+      duration: context.motionDuration(_toolsPaneSwapDuration),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
+        child: ScaleTransition(
+          scale: animation.drive(
+            Tween<double>(
+              begin: 0.98,
+              end: 1,
+            ).chain(CurveTween(curve: AppSpringCurves.morph)),
+          ),
+          child: child,
         ),
       ),
+      child: content,
     );
   }
 }
