@@ -7,10 +7,12 @@ import 'package:reclash/models/common.dart';
 import 'package:reclash/state.dart';
 
 extension NumExt on num {
+  static final _trailingZeros = RegExp(r'0*$');
+
   String fixed({int decimals = 2}) {
     String formatted = toStringAsFixed(decimals);
     if (formatted.contains('.')) {
-      formatted = formatted.replaceAll(RegExp(r'0*$'), '');
+      formatted = formatted.replaceAll(_trailingZeros, '');
       if (formatted.endsWith('.')) {
         formatted = formatted.substring(0, formatted.length - 1);
       }

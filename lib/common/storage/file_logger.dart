@@ -59,9 +59,13 @@ class FileLogger {
       while (_queue.isNotEmpty) {
         // ignore: close_sinks
         final sink = await _ensureSink();
-        while (_queue.isNotEmpty) {
-          sink.writeln(_queue.removeAt(0));
+        // Drain the current backlog by index and drop it in one pass; repeated
+        // removeAt(0) would rewrite the tail on every line (O(n^2)).
+        final count = _queue.length;
+        for (var i = 0; i < count; i++) {
+          sink.writeln(_queue[i]);
         }
+        _queue.removeRange(0, count);
         await sink.flush();
       }
     } catch (_) {

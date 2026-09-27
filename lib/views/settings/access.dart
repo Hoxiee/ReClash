@@ -27,6 +27,11 @@ class _AccessViewState extends ConsumerState<AccessView> {
   bool _isInit = false;
   bool _installedAppsPermissionGranted = true;
 
+  // The sorted app list is O(n log n); a search keystroke changes only the
+  // query, so the sort is memoized on the inputs that actually reorder it.
+  (List<Package>, List<String>, AccessSortType, bool, bool)? _viewListKey;
+  List<Package>? _viewListCache;
+
   final _completer = Completer();
 
   @override
@@ -634,19 +639,40 @@ class _AccessViewState extends ConsumerState<AccessView> {
     _pinList();
   }
 
+  List<Package> _sortedPackages(
+    List<Package> packages,
+    AccessControlProps accessControl,
+  ) {
+    final pined = _pinedList ?? const <String>[];
+    final key = (
+      packages,
+      pined,
+      accessControl.sort,
+      accessControl.isFilterSystemApp,
+      accessControl.isFilterNonInternetApp,
+    );
+    final cached = _viewListCache;
+    if (cached != null && key == _viewListKey) {
+      return cached;
+    }
+    final result = packages.getViewList(
+      pinedList: pined,
+      sortType: accessControl.sort,
+      isFilterNonInternetApp: accessControl.isFilterNonInternetApp,
+      isFilterSystemApp: accessControl.isFilterSystemApp,
+    );
+    _viewListKey = key;
+    _viewListCache = result;
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(loadingProvider(LoadingTag.access));
     final query = ref.watch(queryProvider(QueryTag.access));
     final packages = ref.watch(packagesProvider);
     final accessControl = ref.watch(accessControlStateProvider);
-    final viewPackages = packages
-        .getViewList(
-          pinedList: _pinedList ?? [],
-          sortType: accessControl.sort,
-          isFilterNonInternetApp: accessControl.isFilterNonInternetApp,
-          isFilterSystemApp: accessControl.isFilterSystemApp,
-        )
+    final viewPackages = _sortedPackages(packages, accessControl)
         .where(
           (package) =>
               package.label.toLowerCase().contains(query) ||
