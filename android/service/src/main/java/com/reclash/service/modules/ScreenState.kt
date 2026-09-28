@@ -28,8 +28,8 @@ data class ScreenSnapshot(val screenOn: Boolean, val deviceIdle: Boolean)
 // available, and a watchdog re-samples while we believe the screen is on to
 // catch a missed off. Screen-on wakeups are delivered reliably, so nothing
 // ticks once we know it is off.
-internal fun resolveScreenOn(anyDisplayOn: Boolean?, interactive: Boolean): Boolean =
-    anyDisplayOn ?: interactive
+internal fun resolveScreenOn(mainDisplayOn: Boolean?, interactive: Boolean): Boolean =
+    mainDisplayOn ?: interactive
 
 internal class ScreenState(
     private val service: Service,
@@ -72,16 +72,17 @@ internal class ScreenState(
     private fun sample(): ScreenSnapshot {
         val interactive = power?.isInteractive ?: true
         val idle = power?.isDeviceIdleMode ?: false
-        return ScreenSnapshot(resolveScreenOn(anyDisplayOn(), interactive), idle)
+        return ScreenSnapshot(resolveScreenOn(mainDisplayOn(), interactive), idle)
     }
 
-    // null when the display state cannot be read, so the caller falls back to
-    // isInteractive. A doze/off/unknown main display is not "on"; only STATE_ON
-    // counts, which keeps always-on-display out of the screen-on verdict.
-    private fun anyDisplayOn(): Boolean? {
-        val states = displays?.displays?.map { it.state } ?: return null
-        if (states.isEmpty()) return null
-        return states.any { it == Display.STATE_ON }
+    // The default display's own state is the screen-on truth: STATE_ON means the
+    // user-facing panel is lit, while doze/off/suspend (always-on-display) and any
+    // secondary or virtual display are not - a secondary display left STATE_ON was
+    // stranding the whole tunnel in the screen-on state overnight. null when the
+    // state cannot be read, so the caller falls back to isInteractive.
+    private fun mainDisplayOn(): Boolean? {
+        val display = displays?.getDisplay(Display.DEFAULT_DISPLAY) ?: return null
+        return display.state == Display.STATE_ON
     }
 
     private companion object {

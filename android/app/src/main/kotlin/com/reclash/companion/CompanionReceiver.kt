@@ -79,8 +79,10 @@ internal class CompanionReceiver private constructor(context: Context) {
     private fun acquireWifiLock() {
         if (wifiLock != null) return
         val wifi = appContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return
-        // LOW_LATENCY is foreground-only; a background LAN listener needs HIGH_PERF overnight.
-        wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "reclash:companion").apply {
+        // A control-plane LAN listener tolerates Wi-Fi power save: the foreground
+        // service keeps the radio associated, so a plain FULL lock stays reachable
+        // without HIGH_PERF disabling power save and draining the battery overnight.
+        wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL, "reclash:companion").apply {
             setReferenceCounted(false)
             runCatching { acquire() }
         }

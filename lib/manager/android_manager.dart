@@ -20,10 +20,17 @@ class AndroidManager extends ConsumerStatefulWidget {
 }
 
 class _AndroidContainerState extends ConsumerState<AndroidManager>
-    with ServiceListener {
+    with ServiceListener, WidgetsBindingObserver {
+  // No frame-level idle pacer exists on mobile (Render is desktop-only), so a
+  // lone timer freezes the ambient hero loops after the UI goes untouched.
+  static const _idleTimeout = Duration(seconds: 6);
+  Timer? _idleTimer;
+  DateTime _lastInteractionAt = DateTime.now();
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     ref.listenManual(appSettingProvider.select((state) => state.hidden), (
       prev,
       next,
@@ -47,7 +54,10 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     });
     service?.addListener(this);
     app?.onPackagesChanged = _reloadPackages;
+    app?.onPowerSaveChanged = _applyPowerSave;
     unawaited(_syncPauseState());
+    unawaited(_syncPowerSave());
+    _markInteraction();
     unawaited(service?.deliverPendingWidgetSelections());
   }
 
@@ -56,6 +66,36 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       return;
     }
     unawaited(ref.read(systemActionProvider.notifier).getPackages());
+  }
+
+  void _applyPowerSave(bool value) {
+    if (!mounted) return;
+    ref.read(powerSaveModeProvider.notifier).value = value;
+  }
+
+  Future<void> _syncPowerSave() async {
+    final value = await app?.isPowerSaveMode();
+    if (!mounted || value == null) return;
+    ref.read(powerSaveModeProvider.notifier).value = value;
+  }
+
+  void _markInteraction() {
+    _lastInteractionAt = DateTime.now();
+    if (ref.read(uiIdleProvider)) {
+      ref.read(uiIdleProvider.notifier).value = false;
+    }
+    _idleTimer ??= Timer(_idleTimeout, _onIdleTick);
+  }
+
+  void _onIdleTick() {
+    _idleTimer = null;
+    if (!mounted) return;
+    final remaining = _idleTimeout - DateTime.now().difference(_lastInteractionAt);
+    if (remaining <= Duration.zero) {
+      ref.read(uiIdleProvider.notifier).value = true;
+    } else {
+      _idleTimer = Timer(remaining, _onIdleTick);
+    }
   }
 
   Future<void> _syncPauseState() async {
@@ -80,11 +120,26 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
 
   @override
   void dispose() {
+    _idleTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     if (app?.onPackagesChanged == _reloadPackages) {
       app?.onPackagesChanged = null;
     }
+    if (app?.onPowerSaveChanged == _applyPowerSave) {
+      app?.onPowerSaveChanged = null;
+    }
     service?.removeListener(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _markInteraction();
+    } else {
+      _idleTimer?.cancel();
+      _idleTimer = null;
+    }
   }
 
   @override
@@ -108,6 +163,12 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _markInteraction(),
+      onPointerMove: (_) => _markInteraction(),
+      onPointerSignal: (_) => _markInteraction(),
+      child: widget.child,
+    );
   }
 }

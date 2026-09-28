@@ -106,6 +106,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         }
     }
 
+    private var powerSaveContext: Context? = null
+
+    private val powerSaveReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            channel.invokeMethod("powerSaveChanged", isPowerSaveMode())
+        }
+    }
+
     private var skipNotificationPermissionRequest = false
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -209,6 +217,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
             "isBatteryOptimizationDisabled" -> {
                 result.success(isBatteryOptimizationDisabled())
+            }
+
+            "isPowerSaveMode" -> {
+                result.success(isPowerSaveMode())
             }
 
             "openBatteryOptimizationSettings" -> {
@@ -400,6 +412,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         val powerManager = getSystemService(GlobalState.application, PowerManager::class.java)
         return powerManager?.isIgnoringBatteryOptimizations(GlobalState.application.packageName)
             ?: false
+    }
+
+    private fun isPowerSaveMode(): Boolean {
+        val powerManager = getSystemService(GlobalState.application, PowerManager::class.java)
+        return powerManager?.isPowerSaveMode ?: false
     }
 
     @SuppressLint("BatteryLife")
@@ -630,6 +647,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             MethodChannel(flutterPluginBinding.binaryMessenger, "${Components.PACKAGE_NAME}/app")
         channel.setMethodCallHandler(this)
         watchPackageChanges(flutterPluginBinding.applicationContext)
+        watchPowerSave(flutterPluginBinding.applicationContext)
     }
 
     private fun watchPackageChanges(context: Context) {
@@ -643,9 +661,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         packageChangeContext = context
     }
 
+    private fun watchPowerSave(context: Context) {
+        val filter = IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+        context.registerReceiverCompat(powerSaveReceiver, filter)
+        powerSaveContext = context
+    }
+
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         packageChangeContext?.unregisterReceiver(packageChangeReceiver)
         packageChangeContext = null
+        powerSaveContext?.unregisterReceiver(powerSaveReceiver)
+        powerSaveContext = null
         channel.setMethodCallHandler(null)
         scope.cancel()
         invokeVpnPrepareCallback(false)

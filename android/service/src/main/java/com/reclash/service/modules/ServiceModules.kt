@@ -42,7 +42,7 @@ internal class ServiceModules(private val service: Service) {
             }
         }
         val nextModules = buildList {
-            add(NotificationModule(service, nextScope, pauseSupported = pauseModule != null))
+            add(NotificationModule(service, nextScope, screenState, pauseSupported = pauseModule != null))
             add(networkModule)
             // First, so Suspend and WakeLock read a sampled screen state at start.
             add(screenState)

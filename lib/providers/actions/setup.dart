@@ -19,6 +19,7 @@ class SetupAction extends _$SetupAction {
   CoreController get _core => ref.read(coreHandlerProvider);
 
   Timer? _runtimeTimer;
+  int _runtimeTick = 0;
   bool _runtimeUpdatesEnabled = true;
   final _setupScheduler = SerialTaskScheduler();
   final _listenerScheduler = SerialTaskScheduler();
@@ -139,6 +140,7 @@ class SetupAction extends _$SetupAction {
     if (_startTime == null || !_runtimeUpdatesEnabled) {
       return;
     }
+    _runtimeTick = 0;
     _refreshRunningState();
     _runtimeTimer = Timer.periodic(
       const Duration(seconds: 1),
@@ -148,7 +150,13 @@ class SetupAction extends _$SetupAction {
 
   void _refreshRunningState() {
     _updateRunTime();
-    unawaited(ref.read(commonActionProvider.notifier).updateTraffic());
+    // The elapsed clock stays 1 Hz, but the core recomputes speed on its own
+    // 1 Hz ticker regardless of when we read it, so sampling traffic every other
+    // tick keeps the readout accurate while halving the bridge crossings and
+    // sparkline repaints that ran every second the app was foreground.
+    if (_runtimeTick++ % 2 == 0) {
+      unawaited(ref.read(commonActionProvider.notifier).updateTraffic());
+    }
   }
 
   void _updateRunTime() {

@@ -35,6 +35,7 @@ class App {
   late MethodChannel methodChannel;
   Function()? onExit;
   Function()? onPackagesChanged;
+  Function(bool)? onPowerSaveChanged;
 
   App._internal() {
     methodChannel = const MethodChannel('$packageName/app');
@@ -46,6 +47,8 @@ class App {
           }
         case 'packagesChanged':
           onPackagesChanged?.call();
+        case 'powerSaveChanged':
+          onPowerSaveChanged?.call(call.arguments == true);
         default:
           throw MissingPluginException();
       }
@@ -211,6 +214,15 @@ class App {
   Future<bool?> isBatteryOptimizationDisabled() async {
     if (!Platform.isAndroid) return true;
     return methodChannel.invokeMethod<bool>('isBatteryOptimizationDisabled');
+  }
+
+  Future<bool> isPowerSaveMode() async {
+    if (!Platform.isAndroid) return false;
+    try {
+      return await methodChannel.invokeMethod<bool>('isPowerSaveMode') ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool?> openBatteryOptimizationSettings() async {

@@ -203,6 +203,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   HeroPalette? _tintTo;
   double _activityFrom = 0;
   bool _still = false;
+  bool _motionDisabled = false;
+  bool _uiIdle = false;
   bool _minimumConnectingElapsed = true;
   HeroOrbPhase? _deferredPhase;
   Timer? _connectingHold;
@@ -303,6 +305,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       if (!mounted) return;
       _setPhase(next);
     }, fireImmediately: true);
+    _uiIdle = ref.read(uiIdleProvider);
+    ref.listenManual(uiIdleProvider, (_, next) {
+      if (!mounted || next == _uiIdle) return;
+      _uiIdle = next;
+      _refreshStill();
+    });
   }
 
   @override
@@ -310,9 +318,19 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     super.didChangeDependencies();
     // Off-screen (pager/inactive route) is as motionless as reduce-motion: both
     // fold into `_still` so the ambient loops stop instead of burning frames.
-    final still =
+    _motionDisabled =
         (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
         !PageActivityScope.isActiveOf(context);
+    _refreshStill();
+  }
+
+  // A settled UI counts as still on mobile, but only outside sweeping states:
+  // freezing a connecting/checking orb the user is waiting on reads as a hang.
+  bool _computeStill(HeroStatus status) =>
+      _motionDisabled || (_uiIdle && !status.isSweeping);
+
+  void _refreshStill() {
+    final still = _computeStill(_status);
     if (still == _still) return;
     _still = still;
     if (still) {
@@ -547,6 +565,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _applyStatus(HeroStatus status) {
+    // Sweeping states pull the orb out of an idle freeze, so recompute against
+    // the incoming status before any loop reads `_still`.
+    _still = _computeStill(status);
     final previous = _status;
     final changed = previous != status;
     if (changed) {

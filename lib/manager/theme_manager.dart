@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 
@@ -62,11 +63,13 @@ class ThemeManager extends ConsumerWidget {
     final reduceMotion = ref.watch(
       appSettingProvider.select((state) => state.reduceMotion),
     );
+    final powerSave = ref.watch(powerSaveModeProvider);
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScaleFactor),
-        disableAnimations:
-            MediaQuery.of(context).disableAnimations || reduceMotion,
+        disableAnimations: MediaQuery.of(context).disableAnimations ||
+            reduceMotion ||
+            powerSave,
         padding: padding.copyWith(
           top: padding.top > height * 0.3 ? 20.0 : padding.top,
         ),

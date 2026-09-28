@@ -658,6 +658,24 @@ class ScreenOff extends _$ScreenOff with AutoDisposeNotifierMixin {
   }
 }
 
+/// OS battery-saver mirrored from Android; folds animation to reduce-motion.
+@Riverpod(keepAlive: true)
+class PowerSaveMode extends _$PowerSaveMode with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
+/// Foreground untouched long enough to freeze ambient loops; mobile-only.
+@Riverpod(keepAlive: true)
+class UiIdle extends _$UiIdle with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class BatteryOptimizationDisable extends _$BatteryOptimizationDisable
     with AutoDisposeNotifierMixin {

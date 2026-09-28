@@ -2404,6 +2404,129 @@ abstract class _$ScreenOff extends $Notifier<bool> {
   }
 }
 
+/// The OS battery-saver state, mirrored from Android so animations fold to
+/// reduce-motion while power save is on; false where no such signal exists.
+
+@ProviderFor(PowerSaveMode)
+final powerSaveModeProvider = PowerSaveModeProvider._();
+
+/// The OS battery-saver state, mirrored from Android so animations fold to
+/// reduce-motion while power save is on; false where no such signal exists.
+final class PowerSaveModeProvider
+    extends $NotifierProvider<PowerSaveMode, bool> {
+  /// The OS battery-saver state, mirrored from Android so animations fold to
+  /// reduce-motion while power save is on; false where no such signal exists.
+  PowerSaveModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'powerSaveModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$powerSaveModeHash();
+
+  @$internal
+  @override
+  PowerSaveMode create() => PowerSaveMode();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$powerSaveModeHash() => r'59787699df1121045589e70ddbcaf80e78b278f0';
+
+/// The OS battery-saver state, mirrored from Android so animations fold to
+/// reduce-motion while power save is on; false where no such signal exists.
+
+abstract class _$PowerSaveMode extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// True once the foreground UI has gone untouched long enough to freeze ambient
+/// loops; armed only on mobile, which has no frame-level idle pacer.
+
+@ProviderFor(UiIdle)
+final uiIdleProvider = UiIdleProvider._();
+
+/// True once the foreground UI has gone untouched long enough to freeze ambient
+/// loops; armed only on mobile, which has no frame-level idle pacer.
+final class UiIdleProvider extends $NotifierProvider<UiIdle, bool> {
+  /// True once the foreground UI has gone untouched long enough to freeze ambient
+  /// loops; armed only on mobile, which has no frame-level idle pacer.
+  UiIdleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'uiIdleProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$uiIdleHash();
+
+  @$internal
+  @override
+  UiIdle create() => UiIdle();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$uiIdleHash() => r'1d3e296931b2cc26527ccdf9e8844c0c1200ac3c';
+
+/// True once the foreground UI has gone untouched long enough to freeze ambient
+/// loops; armed only on mobile, which has no frame-level idle pacer.
+
+abstract class _$UiIdle extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(BatteryOptimizationDisable)
 final batteryOptimizationDisableProvider =
     BatteryOptimizationDisableProvider._();

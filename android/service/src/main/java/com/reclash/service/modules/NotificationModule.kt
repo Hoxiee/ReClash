@@ -5,14 +5,11 @@ import android.app.Service
 import android.app.Service.STOP_FOREGROUND_REMOVE
 import android.content.Intent
 import android.os.Build
-import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import androidx.core.content.getSystemService
 import com.reclash.common.Components
 import com.reclash.common.GlobalState
 import com.reclash.common.QuickAction
 import com.reclash.common.quickIntent
-import com.reclash.common.receiveBroadcastFlow
 import com.reclash.common.startForeground
 import com.reclash.common.toPendingIntent
 import com.reclash.core.Core
@@ -38,7 +35,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 internal data class ExtendedNotificationParams(
@@ -195,6 +191,7 @@ private fun NotificationParams.doctorText(
 internal class NotificationModule(
     private val service: Service,
     private val scope: CoroutineScope,
+    private val screenState: ScreenState,
     private val pauseSupported: Boolean,
 ) : ServiceModule {
     override fun start() {
@@ -219,18 +216,14 @@ internal class NotificationModule(
         }
     }
 
-    private fun interactiveFlow(): Flow<Boolean> = service.receiveBroadcastFlow {
-        addAction(Intent.ACTION_SCREEN_ON)
-        addAction(Intent.ACTION_SCREEN_OFF)
-    }.map { screenInteractive() }
-        .onStart { emit(screenInteractive()) }
-        .distinctUntilChanged()
-
+    // Gated on ScreenState's default-display verdict, not raw isInteractive: an
+    // always-on display or an OEM lock screen reads as interactive, and keying the
+    // per-second rebuild off that leaked the ticker while the panel was dark.
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun ticker(): Flow<Unit> = combine(
         ServiceConfig.notificationParams.map { it.needsTicker }.distinctUntilChanged(),
-        interactiveFlow(),
-    ) { needed, interactive -> needed && interactive }
+        screenState.state.map { it.screenOn }.distinctUntilChanged(),
+    ) { needed, screenOn -> needed && screenOn }
         .distinctUntilChanged()
         .flatMapLatest { live ->
             if (live) {
@@ -260,9 +253,6 @@ internal class NotificationModule(
         val group = component.group ?: activeServerGroup ?: return null
         return runCatching { Core.getActiveServerState(group) }.getOrNull()
     }
-
-    private fun screenInteractive(): Boolean =
-        service.getSystemService<PowerManager>()?.isInteractive != false
 
     private val builder: NotificationCompat.Builder by lazy {
         val intent = Intent().setComponent(Components.mainActivity)
