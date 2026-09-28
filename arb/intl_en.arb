@@ -2349,6 +2349,8 @@
   "serviceManage": "Manage services",
   "serviceCheck": "Check",
   "serviceCheckAll": "Check all",
+  "serviceAutoCheckActive": "Auto-check active",
+  "serviceAutoCheckAll": "Auto-check all",
   "serviceCheckedAt": "Checked at {time}",
   "@serviceCheckedAt": {
     "placeholders": {

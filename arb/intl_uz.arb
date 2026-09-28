@@ -2228,6 +2228,8 @@
   "serviceManage": "Xizmatlarni sozlash",
   "serviceCheck": "Tekshirish",
   "serviceCheckAll": "Hammasini tekshirish",
+  "serviceAutoCheckActive": "Faolni avtomatik tekshirish",
+  "serviceAutoCheckAll": "Hamasini avtomatik tekshirish",
   "serviceCheckedAt": "{time} da tekshirildi",
   "outboundIp": "Chiquvchi IP",
   "ipAddress": "IP manzil",

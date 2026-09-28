@@ -2228,6 +2228,8 @@
   "serviceManage": "Қызметтерді баптау",
   "serviceCheck": "Тексеру",
   "serviceCheckAll": "Барлығын тексеру",
+  "serviceAutoCheckActive": "Белсендіні автоматты тексеру",
+  "serviceAutoCheckAll": "Барлығын автоматты тексеру",
   "serviceCheckedAt": "{time} тексерілді",
   "outboundIp": "Шығыс IP",
   "ipAddress": "IP мекенжай",

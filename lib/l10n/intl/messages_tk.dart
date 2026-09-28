@@ -2939,6 +2939,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "HWID ýollamagy ýapsaňyz, abunalaryň köpüsi işlemez. Dowam etmelimi?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Serwer"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Işjeňi awtomat barla",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Ählisini awtomat barla",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Elýeterli"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloklanan"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Barla"),

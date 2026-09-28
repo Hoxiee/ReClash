@@ -2082,6 +2082,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "关闭 HWID 后，大多数订阅将无法使用。要继续吗？",
     ),
     "server": MessageLookupByLibrary.simpleMessage("服务器"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage("自动检查当前服务"),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage("自动检查全部服务"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("可用"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("已封锁"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("检查"),

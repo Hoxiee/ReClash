@@ -2095,6 +2095,8 @@
   "serviceManage": "サービスを管理",
   "serviceCheck": "チェック",
   "serviceCheckAll": "すべてチェック",
+  "serviceAutoCheckActive": "アクティブを自動チェック",
+  "serviceAutoCheckAll": "すべて自動チェック",
   "serviceCheckedAt": "{time} にチェック",
   "outboundIp": "アウトバウンドIP",
   "ipAddress": "IPアドレス",

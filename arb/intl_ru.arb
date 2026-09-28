@@ -2126,6 +2126,8 @@
   "serviceManage": "Настроить сервисы",
   "serviceCheck": "Проверить",
   "serviceCheckAll": "Проверить все",
+  "serviceAutoCheckActive": "Проверять активный",
+  "serviceAutoCheckAll": "Проверять все",
   "serviceCheckedAt": "Проверено в {time}",
   "@serviceCheckedAt": {
     "placeholders": {

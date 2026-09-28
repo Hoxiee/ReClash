@@ -2228,6 +2228,8 @@
   "serviceManage": "Hyzmatlary dolandyr",
   "serviceCheck": "Barla",
   "serviceCheckAll": "Ählisini barla",
+  "serviceAutoCheckActive": "Işjeňi awtomat barla",
+  "serviceAutoCheckAll": "Ählisini awtomat barla",
   "serviceCheckedAt": "{time}-de barlandy",
   "outboundIp": "Çykyş IP",
   "ipAddress": "IP salgy",

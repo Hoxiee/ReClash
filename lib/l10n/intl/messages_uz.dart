@@ -3017,6 +3017,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "HWID yuborishni oʻchirsangiz, obunalarning aksariyati ishlamay qoladi. Davom etasizmi?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Faolni avtomatik tekshirish",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Hamasini avtomatik tekshirish",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Mavjud"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloklangan"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Tekshirish"),

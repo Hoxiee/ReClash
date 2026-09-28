@@ -292,6 +292,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default([]) List<String> serviceOrder,
     @Default([]) List<String> disabledServices,
     @Default('') String currentService,
+    @Default(true) bool serviceAutoCheckActive,
+    @Default(true) bool serviceAutoCheckAll,
     @Default(false) bool hideIp,
   }) = _AppSettingProps;
 

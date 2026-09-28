@@ -16698,6 +16698,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Auto-check active`
+  String get serviceAutoCheckActive {
+    return Intl.message(
+      'Auto-check active',
+      name: 'serviceAutoCheckActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-check all`
+  String get serviceAutoCheckAll {
+    return Intl.message(
+      'Auto-check all',
+      name: 'serviceAutoCheckAll',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Checked at {time}`
   String serviceCheckedAt(String time) {
     return Intl.message(

@@ -2950,6 +2950,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "HWID жіберуді өшірсеңіз, жазылымдардың көпшілігі жұмыс істемей қалады. Жалғастырасыз ба?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Сервер"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Белсендіні автоматты тексеру",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Барлығын автоматты тексеру",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Қолжетімді"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Бұғатталған"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Тексеру"),

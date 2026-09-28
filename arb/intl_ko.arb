@@ -2228,6 +2228,8 @@
   "serviceManage": "서비스 관리",
   "serviceCheck": "확인",
   "serviceCheckAll": "모두 확인",
+  "serviceAutoCheckActive": "활성 자동 확인",
+  "serviceAutoCheckAll": "전체 자동 확인",
   "serviceCheckedAt": "{time}에 확인함",
   "outboundIp": "아웃바운드 IP",
   "ipAddress": "IP 주소",

@@ -2972,6 +2972,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "При отключении HWID большинство подписок перестанет работать. Продолжить?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Сервер"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Проверять активный",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Проверять все",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокирован"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Проверить"),

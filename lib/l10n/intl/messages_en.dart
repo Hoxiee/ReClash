@@ -2850,6 +2850,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Turning off HWID will stop most subscriptions from working. Continue?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Auto-check active",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Auto-check all",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Available"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Check"),

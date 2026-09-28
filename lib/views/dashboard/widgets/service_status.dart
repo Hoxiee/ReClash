@@ -177,7 +177,9 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
     if (notification is ScrollStartNotification) {
       _scrolling = true;
     } else if (notification is ScrollEndNotification) {
-      _show(_targetIn(ref.read(enabledServiceTargetsProvider)));
+      if (ref.read(appSettingProvider).serviceAutoCheckActive) {
+        _show(_targetIn(ref.read(enabledServiceTargetsProvider)));
+      }
       if (mounted) setState(() => _scrolling = false);
     }
     return false;
@@ -207,7 +209,10 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
       targets,
       ref.watch(appSettingProvider.select((state) => state.currentService)),
     );
-    if (!_scrolling) _show(target);
+    final autoCheckActive = ref.watch(
+      appSettingProvider.select((state) => state.serviceAutoCheckActive),
+    );
+    if (!_scrolling) _show(autoCheckActive ? target : null);
     final entry = ref.watch(
       serviceStatusProvider.select((state) => state.entryOf(target)),
     );
@@ -365,8 +370,7 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
   }
 }
 
-/// Lists every enabled service at once and probes them on open, reading the
-/// keep-alive cache so a re-open shows the last verdicts without new traffic.
+/// Lists every enabled service; auto-check on open follows [AppSettingProps.serviceAutoCheckAll].
 class ServiceStatusSheet extends ConsumerStatefulWidget {
   const ServiceStatusSheet({super.key});
 
@@ -380,6 +384,9 @@ class _ServiceStatusSheetState extends ConsumerState<ServiceStatusSheet> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
+        return;
+      }
+      if (!ref.read(appSettingProvider).serviceAutoCheckAll) {
         return;
       }
       final targets = ref.read(enabledServiceTargetsProvider);
@@ -594,6 +601,12 @@ class ServiceManageView extends ConsumerWidget {
     final l = context.appLocalizations;
     final targets = ref.watch(serviceTargetsProvider);
     final enabled = ref.watch(enabledServiceTargetsProvider);
+    final autoCheckActive = ref.watch(
+      appSettingProvider.select((state) => state.serviceAutoCheckActive),
+    );
+    final autoCheckAll = ref.watch(
+      appSettingProvider.select((state) => state.serviceAutoCheckAll),
+    );
     final settings = ref.read(appSettingProvider.notifier);
 
     void reorder(int oldIndex, int newIndex) {
@@ -638,6 +651,23 @@ class ServiceManageView extends ConsumerWidget {
       child: CommonScaffold(
         title: l.serviceManage,
         floatBody: true,
+        menuItems: [
+          CommonPopupMenuItem(
+            glyph: autoCheckActive ? AppGlyphs.check : AppGlyphs.checkboxBlank,
+            label: l.serviceAutoCheckActive,
+            onPressed: () => settings.update(
+              (state) =>
+                  state.copyWith(serviceAutoCheckActive: !autoCheckActive),
+            ),
+          ),
+          CommonPopupMenuItem(
+            glyph: autoCheckAll ? AppGlyphs.check : AppGlyphs.checkboxBlank,
+            label: l.serviceAutoCheckAll,
+            onPressed: () => settings.update(
+              (state) => state.copyWith(serviceAutoCheckAll: !autoCheckAll),
+            ),
+          ),
+        ],
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(

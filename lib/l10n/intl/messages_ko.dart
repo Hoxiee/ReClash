@@ -2382,6 +2382,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "HWID를 끄면 대부분의 구독이 작동하지 않습니다. 계속할까요?",
     ),
     "server": MessageLookupByLibrary.simpleMessage("서버"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage("활성 자동 확인"),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage("전체 자동 확인"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("사용 가능"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("차단됨"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("확인"),

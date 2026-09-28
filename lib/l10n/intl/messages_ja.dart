@@ -2403,6 +2403,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "HWID の送信をオフにすると、ほとんどのサブスクリプションが使えなくなります。続行しますか？",
     ),
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "アクティブを自動チェック",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage("すべて自動チェック"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("利用可能"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("ブロック"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("チェック"),

@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/ip_quality.dart';
 import 'package:reclash/providers/providers.dart';
@@ -13,6 +15,7 @@ import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/service_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
 
@@ -203,5 +206,49 @@ void main() {
       serviceTargetsForRegion(AppRegion.china),
       contains(ServiceTarget.bilibili),
     );
+  });
+
+  test('service auto-checks default to on', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.listen(appSettingProvider, (_, _) {});
+    expect(container.read(appSettingProvider).serviceAutoCheckActive, isTrue);
+    expect(container.read(appSettingProvider).serviceAutoCheckAll, isTrue);
+  });
+
+  testWidgets('manage overflow toggles the auto-check options', (tester) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final subscription = container.listen(appSettingProvider, (_, _) {});
+    addTearDown(subscription.close);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
+            appRegionProvider.overrideWithValue(AppRegion.other),
+          ],
+          child: const ServiceManageView(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await tester.pumpAndSettle();
+    expect(find.text('Auto-check active'), findsOneWidget);
+    expect(find.text('Auto-check all'), findsOneWidget);
+
+    await tester.tap(find.text('Auto-check active'));
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).serviceAutoCheckActive, isFalse);
+
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Auto-check all'));
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).serviceAutoCheckAll, isFalse);
   });
 }

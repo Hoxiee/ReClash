@@ -2095,6 +2095,8 @@
   "serviceManage": "管理服务",
   "serviceCheck": "检查",
   "serviceCheckAll": "全部检查",
+  "serviceAutoCheckActive": "自动检查当前服务",
+  "serviceAutoCheckAll": "自动检查全部服务",
   "serviceCheckedAt": "检查于 {time}",
   "outboundIp": "出站 IP",
   "ipAddress": "IP 地址",

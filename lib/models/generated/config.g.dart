@@ -139,6 +139,8 @@ _AppSettingProps _$AppSettingPropsFromJson(
           .toList() ??
       const [],
   currentService: json['currentService'] as String? ?? '',
+  serviceAutoCheckActive: json['serviceAutoCheckActive'] as bool? ?? true,
+  serviceAutoCheckAll: json['serviceAutoCheckAll'] as bool? ?? true,
   hideIp: json['hideIp'] as bool? ?? false,
 );
 
@@ -182,6 +184,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'serviceOrder': instance.serviceOrder,
       'disabledServices': instance.disabledServices,
       'currentService': instance.currentService,
+      'serviceAutoCheckActive': instance.serviceAutoCheckActive,
+      'serviceAutoCheckAll': instance.serviceAutoCheckAll,
       'hideIp': instance.hideIp,
     };
 
