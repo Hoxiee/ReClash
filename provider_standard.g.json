@@ -1,0 +1,558 @@
+{
+  "$generated": "tool/gen_provider_standard.dart — do not edit by hand",
+  "headers": [
+    {
+      "canonical": "hwidMaxDevicesReached",
+      "sourceKeys": [
+        "x-hwid-max-devices-reached"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "hwidNotSupported",
+      "sourceKeys": [
+        "x-hwid-not-supported"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "announce",
+      "sourceKeys": [
+        "reclash-announce",
+        "announce"
+      ],
+      "transform": "base64"
+    },
+    {
+      "canonical": "supportUrl",
+      "sourceKeys": [
+        "reclash-supporturl",
+        "support-url",
+        "flclashx-supporturl"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "reportUrl",
+      "sourceKeys": [
+        "reclash-reporturl",
+        "report-url"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "updateIntervalMinutes",
+      "sourceKeys": [
+        "reclash-autoupdateinterval"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "updateIntervalMinutes",
+      "sourceKeys": [
+        "profile-update-interval",
+        "flclashx-autoupdateinterval"
+      ],
+      "transform": "hours-to-minutes"
+    },
+    {
+      "canonical": "serviceName",
+      "sourceKeys": [
+        "reclash-servicename",
+        "flclashx-servicename"
+      ],
+      "transform": "base64"
+    },
+    {
+      "canonical": "serviceLogo",
+      "sourceKeys": [
+        "reclash-servicelogo",
+        "flclashx-servicelogo"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "serverInfoGroup",
+      "sourceKeys": [
+        "reclash-serverinfo",
+        "flclashx-serverinfo"
+      ],
+      "transform": "base64"
+    },
+    {
+      "canonical": "activeText",
+      "sourceKeys": [
+        "reclash-activetext"
+      ],
+      "transform": "base64-trimmed"
+    },
+    {
+      "canonical": "buyPlanUrl",
+      "sourceKeys": [
+        "reclash-buyplan",
+        "flclashx-buyplan"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "buyTrafficUrl",
+      "sourceKeys": [
+        "reclash-buytraffic",
+        "flclashx-buytraffic"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "proxiesView",
+      "sourceKeys": [
+        "reclash-view",
+        "flclashx-view"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "themeHex",
+      "sourceKeys": [
+        "reclash-hex",
+        "flclashx-hex"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "background",
+      "sourceKeys": [
+        "reclash-background",
+        "flclashx-background"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "heroRing",
+      "sourceKeys": [
+        "reclash-heroring"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "heroEffect",
+      "sourceKeys": [
+        "reclash-heroeffect"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "panelWidgets",
+      "sourceKeys": [
+        "reclash-widgets"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "widgetsApplyMode",
+      "sourceKeys": [
+        "reclash-custom"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "panelSettings",
+      "sourceKeys": [
+        "reclash-settings"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "newDomain",
+      "sourceKeys": [
+        "reclash-newdomain",
+        "flclashx-newdomain"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "fallbackHosts",
+      "sourceKeys": [
+        "reclash-fallbackhosts"
+      ],
+      "transform": "none"
+    },
+    {
+      "canonical": "profileTitle",
+      "sourceKeys": [
+        "profile-title"
+      ],
+      "transform": "none"
+    }
+  ],
+  "externalCommon": [
+    "subscription-userinfo",
+    "content-disposition"
+  ],
+  "widgets": [
+    {
+      "id": "networkSpeed",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "trafficUsage",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "networkDetection",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "tunButton",
+      "platforms": [
+        "Linux",
+        "MacOS",
+        "Windows"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "vpnButton",
+      "platforms": [
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "systemProxyButton",
+      "platforms": [
+        "Linux",
+        "MacOS",
+        "Windows"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "intranetIp",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "memoryInfo",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "goroutineInfo",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "metaInfo",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "announce",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "serviceInfo",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "changeServerButton",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "smartRouting",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "desyncStrategy",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "byedpi"
+      ]
+    },
+    {
+      "id": "desyncTest",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "byedpi"
+      ]
+    },
+    {
+      "id": "desyncEngine",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "byedpi"
+      ]
+    },
+    {
+      "id": "serviceStatus",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn"
+      ]
+    },
+    {
+      "id": "connections",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "dnsQueries",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "requests",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "runTime",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "proxyGroups",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "profiles",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    },
+    {
+      "id": "overrideDnsButton",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ]
+    }
+  ],
+  "tokens": {
+    "view": {
+      "type": [
+        "tab",
+        "list"
+      ],
+      "sort": [
+        "default",
+        "none",
+        "delay",
+        "name"
+      ],
+      "layout": [
+        "loose",
+        "standard",
+        "tight"
+      ],
+      "icon": [
+        "none",
+        "standard",
+        "icon"
+      ],
+      "card": [
+        "expand",
+        "shrink",
+        "min",
+        "oneline"
+      ]
+    },
+    "themeVariants": [
+      "tonalspot",
+      "fidelity",
+      "monochrome",
+      "neutral",
+      "vibrant",
+      "expressive",
+      "content"
+    ],
+    "themeFlags": [
+      "pureblack"
+    ],
+    "heroEffect": [
+      "aurora"
+    ],
+    "constraints": {
+      "heroRingColours": 3,
+      "backgroundOpacityMin": 1,
+      "backgroundOpacityMax": 100,
+      "hexDigits": [
+        6,
+        8
+      ]
+    }
+  }
+}
