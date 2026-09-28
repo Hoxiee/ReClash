@@ -648,6 +648,16 @@ class NativePause extends _$NativePause with AutoDisposeNotifierMixin {
   }
 }
 
+/// The core's screen-off signal, mirrored from the Android service so Dart-side
+/// timers idle when the display is off, not merely when the app is backgrounded.
+@Riverpod(keepAlive: true)
+class ScreenOff extends _$ScreenOff with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class BatteryOptimizationDisable extends _$BatteryOptimizationDisable
     with AutoDisposeNotifierMixin {

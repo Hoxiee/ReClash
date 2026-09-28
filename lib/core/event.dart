@@ -46,6 +46,8 @@ abstract mixin class CoreEventListener {
   void onDoctorStatus(DoctorStatus status) {}
 
   void onRouteChanged(RouteSnapshot snapshot) {}
+
+  void onScreenChanged(bool screenOff) {}
 }
 
 class CoreEventManager {
@@ -98,6 +100,9 @@ class CoreEventManager {
                   Map<String, Object?>.from(event.data as Map),
                 ),
               );
+              break;
+            case CoreEventType.screenChanged:
+              listener.onScreenChanged(event.data as bool);
               break;
             case CoreEventType.geoUpdate:
               final data = event.data as Map<String, dynamic>;

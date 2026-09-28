@@ -1179,6 +1179,24 @@ void main() {
         await action.setRunning(false);
       });
 
+      testWidgets('parks the poll when the Android screen is off', (
+        tester,
+      ) async {
+        createContainer();
+        await action.setRunning(true);
+        for (final lifecycleState in [null, AppLifecycleState.inactive]) {
+          action.updateRuntimeActivity(
+            lifecycleState: lifecycleState,
+            isAndroid: true,
+            screenOff: true,
+          );
+          final trafficCount = commonAction.updateTrafficCount;
+          await tester.pump(const Duration(seconds: 3));
+          expect(commonAction.updateTrafficCount, trafficCount);
+        }
+        await action.setRunning(false);
+      });
+
       testWidgets('keeps desktop background polling for tray consumers', (
         tester,
       ) async {

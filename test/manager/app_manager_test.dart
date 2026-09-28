@@ -26,11 +26,13 @@ class _RecordingSetupAction extends SetupAction {
   void updateRuntimeActivity({
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
+    bool screenOff = false,
   }) {
     activityUpdates.add((state: lifecycleState, isAndroid: isAndroid));
     super.updateRuntimeActivity(
       lifecycleState: lifecycleState,
       isAndroid: isAndroid,
+      screenOff: screenOff,
     );
   }
 }
@@ -42,11 +44,13 @@ class _RecordingDoctor extends ConnectionDoctor {
   Future<DoctorSnapshot> updateActivity({
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
+    bool screenOff = false,
   }) {
     activityUpdates.add((state: lifecycleState, isAndroid: isAndroid));
     return super.updateActivity(
       lifecycleState: lifecycleState,
       isAndroid: isAndroid,
+      screenOff: screenOff,
     );
   }
 }

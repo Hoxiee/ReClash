@@ -1,18 +1,17 @@
 package com.reclash.service.modules
 
 import android.app.Service
-import android.content.Intent
-import android.os.Build
 import android.os.PowerManager
+import android.os.SystemClock
 import androidx.core.content.getSystemService
 import com.reclash.common.GlobalState
-import com.reclash.common.receiveBroadcastFlow
 import com.reclash.service.ServiceConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal class WakeLockModule(
     private val service: Service,
+    private val screenState: ScreenState,
     private val scope: CoroutineScope,
 ) : ServiceModule {
     private val power: PowerManager?
@@ -20,20 +19,14 @@ internal class WakeLockModule(
 
     private var lock: PowerManager.WakeLock? = null
     private var graceConsumed = false
+    private var screenOnAt: Long? = null
     @Volatile
     private var stopped = false
 
     override fun start() {
         stopped = false
         scope.launch {
-            service.receiveBroadcastFlow {
-                addAction(Intent.ACTION_SCREEN_ON)
-                addAction(Intent.ACTION_SCREEN_OFF)
-                addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    addAction(PowerManager.ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED)
-                }
-            }.collect { apply() }
+            screenState.state.collect { apply() }
         }
         // A StateFlow replays its current value, which is also the initial evaluation.
         scope.launch {
@@ -51,12 +44,24 @@ internal class WakeLockModule(
     private fun apply() {
         if (stopped) return
         val manager = power ?: return
-        val screenOn = manager.isInteractive
-        if (screenOn) graceConsumed = false
+        val snapshot = screenState.state.value
+        val screenOn = snapshot.screenOn
+        if (screenOn) {
+            if (screenOnAt == null) screenOnAt = SystemClock.elapsedRealtime()
+        } else {
+            val onAt = screenOnAt
+            if (onAt != null) {
+                graceConsumed = graceConsumedAfterWake(
+                    SystemClock.elapsedRealtime() - onAt,
+                    WakeLockPolicy.BRIEF_WAKE_MS,
+                )
+                screenOnAt = null
+            }
+        }
         when (
             wakeLockAction(
                 screenOn = screenOn,
-                deviceIdle = manager.isDeviceIdleMode,
+                deviceIdle = snapshot.deviceIdle,
                 paused = ServiceConfig.pauseState.value.paused,
                 graceConsumed = graceConsumed,
             )

@@ -108,6 +108,13 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(manualPauseProvider.notifier).clear();
       }
     });
+    // The screen-off signal arrives out of band from lifecycle changes, so a
+    // re-sync folds it into the Android runtime gates when it flips.
+    ref.listenManual(screenOffProvider, (prev, next) {
+      if (prev != next) {
+        _syncRuntimeActivity(WidgetsBinding.instance.lifecycleState);
+      }
+    });
     ref.listenManual(isStartProvider, (prev, next) {
       if (prev != next && !next) {
         ref.read(manualPauseProvider.notifier).clear();
@@ -157,10 +164,15 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   }
 
   void _syncRuntimeActivity(AppLifecycleState? state) {
+    final screenOff = ref.read(screenOffProvider);
     unawaited(
       ref
           .read(connectionDoctorProvider.notifier)
-          .updateActivity(lifecycleState: state, isAndroid: system.isAndroid)
+          .updateActivity(
+            lifecycleState: state,
+            isAndroid: system.isAndroid,
+            screenOff: screenOff,
+          )
           .catchError((Object error) {
             commonPrint.log(
               'Connection doctor resume refresh failed: $error',
@@ -174,10 +186,15 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         .updateRuntimeActivity(
           lifecycleState: state,
           isAndroid: system.isAndroid,
+          screenOff: screenOff,
         );
     ref
         .read(routeTrackerProvider.notifier)
-        .updateActivity(lifecycleState: state, isAndroid: system.isAndroid);
+        .updateActivity(
+          lifecycleState: state,
+          isAndroid: system.isAndroid,
+          screenOff: screenOff,
+        );
   }
 
   void _requestUiActiveSync({bool force = false}) {

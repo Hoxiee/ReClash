@@ -39,14 +39,18 @@ class ConnectionDoctor extends _$ConnectionDoctor {
   Future<DoctorSnapshot> updateActivity({
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
+    bool screenOff = false,
   }) {
     if (!isAndroid) {
       return Future.value(state);
     }
+    // Inactive stays visible for a foreground UI; the core's screen-off signal
+    // sleeps the active probes when the display is off.
     final enabled =
-        lifecycleState == null ||
-        lifecycleState == AppLifecycleState.resumed ||
-        lifecycleState == AppLifecycleState.inactive;
+        (lifecycleState == null ||
+            lifecycleState == AppLifecycleState.resumed ||
+            lifecycleState == AppLifecycleState.inactive) &&
+        !screenOff;
     return _setUpdatesEnabled(enabled);
   }
 

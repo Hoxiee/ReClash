@@ -205,14 +205,18 @@ class RouteTracker extends _$RouteTracker {
   void updateActivity({
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
+    bool screenOff = false,
   }) {
     if (!isAndroid) {
       return;
     }
+    // Inactive stays visible for a foreground UI, but the core's screen-off
+    // signal parks the route watch when the display is actually off.
     final active =
-        lifecycleState == null ||
-        lifecycleState == AppLifecycleState.resumed ||
-        lifecycleState == AppLifecycleState.inactive;
+        (lifecycleState == null ||
+            lifecycleState == AppLifecycleState.resumed ||
+            lifecycleState == AppLifecycleState.inactive) &&
+        !screenOff;
     _setActive(active);
   }
 

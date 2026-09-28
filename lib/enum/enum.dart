@@ -352,6 +352,7 @@ enum CoreEventType {
   rcxStatus,
   doctorStatus,
   routeChanged,
+  screenChanged,
 }
 
 enum InvokeMessageType { protect, process }

@@ -105,14 +105,19 @@ class SetupAction extends _$SetupAction {
   void updateRuntimeActivity({
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
+    bool screenOff = false,
   }) {
     if (!isAndroid) {
       return;
     }
+    // Lifecycle alone leaves inactive counted as visible, so a locked screen
+    // whose UI never paused would keep the 1 Hz poll running; the core's own
+    // screen-off signal is ANDed in to park it while the display is off.
     final enabled =
-        lifecycleState == null ||
-        lifecycleState == AppLifecycleState.resumed ||
-        lifecycleState == AppLifecycleState.inactive;
+        (lifecycleState == null ||
+            lifecycleState == AppLifecycleState.resumed ||
+            lifecycleState == AppLifecycleState.inactive) &&
+        !screenOff;
     _setRuntimeEnabled(enabled);
   }
 

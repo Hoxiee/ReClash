@@ -202,6 +202,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.rcxStatus: 'rcxStatus',
   CoreEventType.doctorStatus: 'doctorStatus',
   CoreEventType.routeChanged: 'routeChanged',
+  CoreEventType.screenChanged: 'screenChanged',
 };
 
 _InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>

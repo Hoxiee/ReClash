@@ -49,4 +49,14 @@ class WakeLockPolicyTest {
     fun `the grace window covers a short transfer without spanning standby`() {
         assertEquals(120_000L, WakeLockPolicy.GRACE_MS)
     }
+
+    @Test
+    fun `a glance leaves the grace spent so no fresh lock is taken`() {
+        assertEquals(true, graceConsumedAfterWake(1_000L, WakeLockPolicy.BRIEF_WAKE_MS))
+    }
+
+    @Test
+    fun `a real session re-arms the grace for the next screen off`() {
+        assertEquals(false, graceConsumedAfterWake(30_000L, WakeLockPolicy.BRIEF_WAKE_MS))
+    }
 }

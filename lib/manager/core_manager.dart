@@ -280,4 +280,10 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
     super.onRouteChanged(snapshot);
   }
+
+  @override
+  void onScreenChanged(bool screenOff) {
+    ref.read(screenOffProvider.notifier).value = screenOff;
+    super.onScreenChanged(screenOff);
+  }
 }

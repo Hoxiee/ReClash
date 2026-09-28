@@ -756,6 +756,10 @@ func handleScreenOff(off bool) {
 		if !off {
 			signalOdometerWake()
 		}
+		sendMessage(Message{
+			Type: ScreenChangedMessage,
+			Data: off,
+		})
 	}
 }
 

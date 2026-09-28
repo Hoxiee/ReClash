@@ -196,15 +196,16 @@ type Message struct {
 }
 
 const (
-	LogMessage          MessageType = "log"
-	DelayMessage        MessageType = "delay"
-	RequestMessage      MessageType = "request"
-	LoadedMessage       MessageType = "loaded"
-	GeoUpdateMessage    MessageType = "geoUpdate"
-	RcxStatusMessage    MessageType = "rcxStatus"
-	DoctorStatusMessage MessageType = "doctorStatus"
-	DnsMessage          MessageType = "dns"
-	RouteChangedMessage MessageType = "routeChanged"
+	LogMessage           MessageType = "log"
+	DelayMessage         MessageType = "delay"
+	RequestMessage       MessageType = "request"
+	LoadedMessage        MessageType = "loaded"
+	GeoUpdateMessage     MessageType = "geoUpdate"
+	RcxStatusMessage     MessageType = "rcxStatus"
+	DoctorStatusMessage  MessageType = "doctorStatus"
+	DnsMessage           MessageType = "dns"
+	RouteChangedMessage  MessageType = "routeChanged"
+	ScreenChangedMessage MessageType = "screenChanged"
 )
 
 type GeoUpdateStatus struct {

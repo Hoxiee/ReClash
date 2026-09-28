@@ -24,6 +24,7 @@ internal class ServiceModules(private val service: Service) {
         if (scope != null) return
 
         val nextScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val screenState = ScreenState(service, nextScope)
         val networkModule = NetworkObserveModule(service)
         // Only the VPN can pause: tearing a proxy listener down has no meaning here.
         val pauseModule = (service as? VpnService)?.let { vpn ->
@@ -43,8 +44,10 @@ internal class ServiceModules(private val service: Service) {
         val nextModules = buildList {
             add(NotificationModule(service, nextScope, pauseSupported = pauseModule != null))
             add(networkModule)
-            add(SuspendModule(service, nextScope))
-            add(WakeLockModule(service, nextScope))
+            // First, so Suspend and WakeLock read a sampled screen state at start.
+            add(screenState)
+            add(SuspendModule(screenState, nextScope))
+            add(WakeLockModule(service, screenState, nextScope))
             if (pauseModule != null) add(pauseModule)
             add(desyncModule)
         }

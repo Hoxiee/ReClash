@@ -2343,6 +2343,67 @@ abstract class _$NativePause extends $Notifier<bool?> {
   }
 }
 
+/// The core's screen-off signal, mirrored from the Android service so Dart-side
+/// timers idle when the display is off, not merely when the app is backgrounded.
+
+@ProviderFor(ScreenOff)
+final screenOffProvider = ScreenOffProvider._();
+
+/// The core's screen-off signal, mirrored from the Android service so Dart-side
+/// timers idle when the display is off, not merely when the app is backgrounded.
+final class ScreenOffProvider extends $NotifierProvider<ScreenOff, bool> {
+  /// The core's screen-off signal, mirrored from the Android service so Dart-side
+  /// timers idle when the display is off, not merely when the app is backgrounded.
+  ScreenOffProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'screenOffProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$screenOffHash();
+
+  @$internal
+  @override
+  ScreenOff create() => ScreenOff();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$screenOffHash() => r'95c4681d4598097e3e4fcebca2ea889dd7a99bbc';
+
+/// The core's screen-off signal, mirrored from the Android service so Dart-side
+/// timers idle when the display is off, not merely when the app is backgrounded.
+
+abstract class _$ScreenOff extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(BatteryOptimizationDisable)
 final batteryOptimizationDisableProvider =
     BatteryOptimizationDisableProvider._();
