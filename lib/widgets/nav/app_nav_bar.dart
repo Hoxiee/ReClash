@@ -3,9 +3,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -13,6 +11,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/nav/nav_motion.dart';
 
 const double _barHeight = 64;
 const double _barPadding = 4;
@@ -78,10 +77,6 @@ final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
 
-double _rubberBand(double overshoot, double limit) {
-  final pull = 1 - 1 / (overshoot.abs() * 0.55 / limit + 1);
-  return limit * pull * overshoot.sign;
-}
 
 // A soft, wide drop in the manner of iOS rather than a Material elevation.
 List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
@@ -114,72 +109,6 @@ List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
   final size = (width: painter.width, height: painter.height);
   painter.dispose();
   return size;
-}
-
-/// A value that springs toward a target the finger may move every frame.
-///
-/// The [Ticker] restarts with each retarget and its first frame reads no
-/// elapsed time, so retargeting on every pointer move holds the value still
-/// while the finger keeps moving. [jumpTo] serves reduced motion, landing in
-/// a single frame without a ticker.
-class _Spring extends ChangeNotifier implements ValueListenable<double> {
-  _Spring(TickerProvider vsync, this._value) {
-    _ticker = vsync.createTicker(_tick);
-  }
-
-  late final Ticker _ticker;
-  double _value;
-  double _target = 0;
-  SpringSimulation? _simulation;
-  double _now = 0;
-  double _start = 0;
-
-  @override
-  double get value => _value;
-
-  double get target => _simulation == null ? _value : _target;
-
-  double get velocity => _simulation?.dx(_now - _start) ?? 0;
-
-  void springTo(double target, SpringDescription spring) {
-    _simulation = SpringSimulation(spring, _value, target, velocity);
-    _target = target;
-    if (_ticker.isActive) {
-      _start = _now;
-      return;
-    }
-    _now = _start = 0;
-    _ticker.start();
-  }
-
-  void jumpTo(double target) {
-    _simulation = null;
-    if (_ticker.isActive) {
-      _ticker.stop();
-    }
-    _value = _target = target;
-    notifyListeners();
-  }
-
-  void _tick(Duration elapsed) {
-    _now = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
-    final simulation = _simulation!;
-    final time = _now - _start;
-    if (simulation.isDone(time)) {
-      _value = _target;
-      _simulation = null;
-      _ticker.stop();
-    } else {
-      _value = simulation.x(time);
-    }
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _ticker.dispose();
-    super.dispose();
-  }
 }
 
 class NavBarDestination {
@@ -437,9 +366,9 @@ class ElasticPress extends StatefulWidget {
 
 class _ElasticPressState extends State<ElasticPress>
     with TickerProviderStateMixin {
-  late final _Spring _lift = _Spring(this, 0);
-  late final _Spring _pullX = _Spring(this, 0);
-  late final _Spring _pullY = _Spring(this, 0);
+  late final NavSpring _lift = NavSpring(this, 0);
+  late final NavSpring _pullX = NavSpring(this, 0);
+  late final NavSpring _pullY = NavSpring(this, 0);
   late final Listenable _motion = Listenable.merge([_lift, _pullX, _pullY]);
   int? _pointer;
   Offset _origin = Offset.zero;
@@ -469,8 +398,8 @@ class _ElasticPressState extends State<ElasticPress>
     }
     final limit = context.size!.shortestSide * _pullLimit;
     final pull = event.localPosition - _origin;
-    _pullX.springTo(_rubberBand(pull.dx, limit), _trackSpring);
-    _pullY.springTo(_rubberBand(pull.dy, limit), _trackSpring);
+    _pullX.springTo(navRubberBand(pull.dx, limit), _trackSpring);
+    _pullY.springTo(navRubberBand(pull.dy, limit), _trackSpring);
   }
 
   void _handlePointerEnd(PointerEvent event) {
@@ -669,12 +598,12 @@ class FloatingNavigationBar extends StatefulWidget {
 
 class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     with TickerProviderStateMixin {
-  late final _Spring _lens = _Spring(this, _selectedIndex.toDouble());
-  late final _Spring _lift = _Spring(this, 0);
-  late final _Spring _hover = _Spring(this, 0);
-  late final _Spring _hoverShow = _Spring(this, 0);
-  late final _Spring _swell = _Spring(this, 0);
-  late final _Spring _stretch = _Spring(this, 0);
+  late final NavSpring _lens = NavSpring(this, _selectedIndex.toDouble());
+  late final NavSpring _lift = NavSpring(this, 0);
+  late final NavSpring _hover = NavSpring(this, 0);
+  late final NavSpring _hoverShow = NavSpring(this, 0);
+  late final NavSpring _swell = NavSpring(this, 0);
+  late final NavSpring _stretch = NavSpring(this, 0);
   late final Listenable _barMotion = Listenable.merge([_swell, _stretch]);
   late final Listenable _motion = Listenable.merge([_lens, _lift]);
   late final Listenable _hoverMotion = Listenable.merge([_hover, _hoverShow]);
@@ -696,7 +625,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _reduceMotion = context.disableAnimations;
   }
 
-  void _settle(_Spring spring, double target, SpringDescription description) {
+  void _settle(NavSpring spring, double target, SpringDescription description) {
     if (_reduceMotion) {
       spring.jumpTo(target);
     } else {
@@ -732,10 +661,10 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final extent = (width - _barPadding * 2) / widget.destinations.length;
     final position = (dx - _barPadding) / extent - 0.5;
     if (position < 0) {
-      return _rubberBand(position, _overdrag);
+      return navRubberBand(position, _overdrag);
     }
     if (position > _lastIndex) {
-      return _lastIndex + _rubberBand(position - _lastIndex, _overdrag);
+      return _lastIndex + navRubberBand(position - _lastIndex, _overdrag);
     }
     return position;
   }
@@ -842,7 +771,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         localPosition.dx - localPosition.dx.clamp(0.0, size.width);
     _settle(
       _stretch,
-      _rubberBand(overshoot, size.shortestSide * _pullLimit),
+      navRubberBand(overshoot, size.shortestSide * _pullLimit),
       _trackSpring,
     );
     final position = _positionAt(localPosition);
@@ -1120,7 +1049,7 @@ class _FloatingBarItemState extends State<_FloatingBarItem>
       },
     ),
   };
-  late final _Spring _parallax = _Spring(this, 0);
+  late final NavSpring _parallax = NavSpring(this, 0);
   bool _focused = false;
   bool _reduceMotion = false;
 

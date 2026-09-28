@@ -9,11 +9,17 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/nav/nav_motion.dart';
 
 final _itemShape = AppShape.all(NavRailMetrics.itemCorner);
 
 class AppNavRail extends ConsumerWidget {
-  const AppNavRail({super.key, this.leading, this.onToPage});
+  const AppNavRail({
+    super.key,
+    this.expanded = false,
+    this.onToggle,
+    this.onToPage,
+  });
 
   @visibleForTesting
   static const Key highlightKey = Key('nav-rail-highlight');
@@ -21,7 +27,11 @@ class AppNavRail extends ConsumerWidget {
   @visibleForTesting
   static const Key focusRingKey = Key('nav-rail-focus-ring');
 
-  final Widget? leading;
+  @visibleForTesting
+  static const Key toggleKey = Key('nav-rail-toggle');
+
+  final bool expanded;
+  final VoidCallback? onToggle;
   final void Function(PageLabel label)? onToPage;
 
   static int _indexOf(PageLabel label, List<NavigationItem> items) {
@@ -40,59 +50,54 @@ class AppNavRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allItems = ref.watch(currentNavigationItemsStateProvider).value;
+    final items = ref.watch(currentNavigationItemsStateProvider).value;
     final currentLabel = ref.watch(currentPageLabelProvider);
-    // Tools is lifted out of the scrolling group and pinned to the foot of the
-    // rail, where About used to sit; About stays reachable from inside Tools.
-    NavigationItem? toolsItem;
-    final items = <NavigationItem>[];
-    for (final item in allItems) {
-      if (item.label == PageLabel.tools) {
-        toolsItem = item;
-      } else {
-        items.add(item);
-      }
-    }
-    final toolsSelected = currentLabel == PageLabel.tools;
-    final selectedIndex = toolsSelected ? -1 : _indexOf(currentLabel, items);
-    final leading = this.leading;
-    return SizedBox(
-      width: NavRailMetrics.width,
-      child: Column(
-        children: [
-          if (leading != null) ...[
-            leading,
-            const SizedBox(height: AppSpacing.md),
-          ],
-          Expanded(
-            child: _RailBody(
-              items: items,
-              selectedIndex: selectedIndex,
-              onToPage: (label) => _handleTap(ref, label),
-              toolsItem: toolsItem,
-              toolsSelected: toolsSelected,
+    final selectedIndex = _indexOf(currentLabel, items);
+    // Width and slot height animate together; the morph spring overshoots >1
+    // and would tear a size, so the fold rides the bounce-free standard easing.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: expanded ? 1.0 : 0.0),
+      duration: context.motionDuration(NavRailMetrics.expandDuration),
+      curve: Easing.standard,
+      builder: (context, progress, _) => SizedBox(
+        width: lerpDouble(
+          NavRailMetrics.compactWidth,
+          NavRailMetrics.expandedWidth,
+          progress,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: _RailBody(
+                items: items,
+                selectedIndex: selectedIndex,
+                onToPage: (label) => _handleTap(ref, label),
+                progress: progress,
+              ),
             ),
-          ),
-        ],
+            _RailToggle(
+              progress: progress,
+              onToggle: onToggle,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _RailBody extends StatelessWidget {
+class _RailBody extends StatefulWidget {
   const _RailBody({
     required this.items,
     required this.selectedIndex,
     required this.onToPage,
-    this.toolsItem,
-    this.toolsSelected = false,
+    required this.progress,
   });
 
   final List<NavigationItem> items;
   final int selectedIndex;
   final void Function(PageLabel label) onToPage;
-  final NavigationItem? toolsItem;
-  final bool toolsSelected;
+  final double progress;
 
   static int _groupOf(PageLabel label) => switch (label) {
     PageLabel.dashboard => 0,
@@ -111,16 +116,89 @@ class _RailBody extends StatelessWidget {
       boundaries * NavRailMetrics.dividerExtent;
 
   @override
+  State<_RailBody> createState() => _RailBodyState();
+}
+
+final _railHoverSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 260),
+  bounce: 0.18,
+);
+final _railFadeSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 200),
+);
+final _railPressSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 300),
+  bounce: 0.24,
+);
+
+class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
+  late final NavSpring _hover = NavSpring(
+    this,
+    widget.selectedIndex.clamp(0, math.max(0, widget.items.length - 1)).toDouble(),
+  );
+  late final NavSpring _hoverShow = NavSpring(this, 0);
+  Listenable get _hoverMotion => Listenable.merge([_hover, _hoverShow]);
+
+  bool get _reduceMotion => context.disableAnimations;
+
+  void _spring(NavSpring spring, double target, SpringDescription description) {
+    if (_reduceMotion) {
+      spring.jumpTo(target);
+    } else {
+      spring.springTo(target, description);
+    }
+  }
+
+  int _nearestIndex(double y, List<double> centers) {
+    var best = 0;
+    var bestGap = double.infinity;
+    for (var i = 0; i < centers.length; i++) {
+      final gap = (centers[i] - y).abs();
+      if (gap < bestGap) {
+        bestGap = gap;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  void _onHover(double y, List<double> centers) {
+    if (centers.isEmpty) {
+      return;
+    }
+    _spring(_hover, _nearestIndex(y, centers).toDouble(), _railHoverSpring);
+    _spring(_hoverShow, 1, _railFadeSpring);
+  }
+
+  void _onExit() => _spring(_hoverShow, 0, _railFadeSpring);
+
+  @override
+  void dispose() {
+    _hover.dispose();
+    _hoverShow.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final items = widget.items;
     if (items.isEmpty) {
       return const SizedBox.shrink();
     }
     final colorScheme = context.colorScheme;
     final colors = _RailColors(colorScheme);
-    const slotHeight = NavRailMetrics.stackedSlotHeight;
+    // The slot is a compact square when folded and grows taller to seat a label
+    // when open, so the folded icons read smaller than the expanded stack.
+    final slotHeight = lerpDouble(
+      NavRailMetrics.compactSlotHeight,
+      NavRailMetrics.expandedSlotHeight,
+      widget.progress,
+    )!;
     final boundaries = <int>[
       for (var i = 1; i < items.length; i++)
-        if (_groupOf(items[i].label) != _groupOf(items[i - 1].label)) i,
+        if (_RailBody._groupOf(items[i].label) !=
+            _RailBody._groupOf(items[i - 1].label))
+          i,
     ];
 
     return FocusTraversalGroup(
@@ -130,7 +208,7 @@ class _RailBody extends StatelessWidget {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final extent = _extentOf(
+                final extent = _RailBody._extentOf(
                   items.length,
                   boundaries.length,
                   slotHeight,
@@ -149,36 +227,64 @@ class _RailBody extends StatelessWidget {
                 }
                 final centers = [for (final top in tops) top + slotHeight / 2];
 
-                final body = Stack(
-                  children: [
-                    for (final dividerY in dividers)
-                      Positioned(
-                        top: dividerY,
-                        left: NavRailMetrics.pillInsetX + 4,
-                        right: NavRailMetrics.pillInsetX + 4,
-                        height: NavRailMetrics.hairline,
-                        child: ColoredBox(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.6,
+                final body = MouseRegion(
+                  onHover: (event) => _onHover(event.localPosition.dy, centers),
+                  onExit: (_) => _onExit(),
+                  child: Stack(
+                    children: [
+                      for (final dividerY in dividers)
+                        Positioned(
+                          top: dividerY,
+                          left: NavRailMetrics.pillInsetX + 4,
+                          right: NavRailMetrics.pillInsetX + 4,
+                          height: NavRailMetrics.hairline,
+                          child: ColoredBox(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
+                      AnimatedBuilder(
+                        animation: _hoverMotion,
+                        builder: (context, _) => _HoverGhost(
+                          centers: centers,
+                          position: _hover.value,
+                          slotHeight: slotHeight,
+                          opacity: _hoverShow.value,
+                          color: colors.hoverGhost,
+                        ),
                       ),
-                    _SlotLayer(
-                      items: items,
-                      tops: tops,
-                      slotHeight: slotHeight,
-                      selectedIndex: selectedIndex,
-                      colors: colors,
-                      onToPage: onToPage,
-                    ),
-                    if (selectedIndex >= 0)
-                      _SelectionIndicator(
-                        key: AppNavRail.highlightKey,
-                        color: colors.indicator,
-                        index: selectedIndex,
-                        centers: centers,
+                      AnimatedBuilder(
+                        animation: _hoverMotion,
+                        builder: (context, _) {
+                          final show = _hoverShow.value;
+                          final hoverAt = _hover.value;
+                          final emphasis = [
+                            for (var i = 0; i < items.length; i++)
+                              show *
+                                  math.max(0, 1 - (hoverAt - i).abs()).toDouble(),
+                          ];
+                          return _SlotLayer(
+                            items: items,
+                            tops: tops,
+                            slotHeight: slotHeight,
+                            selectedIndex: widget.selectedIndex,
+                            colors: colors,
+                            onToPage: widget.onToPage,
+                            hover: emphasis,
+                            progress: widget.progress,
+                          );
+                        },
                       ),
-                  ],
+                      if (widget.selectedIndex >= 0)
+                        _SelectionIndicator(
+                          key: AppNavRail.highlightKey,
+                          color: colors.indicator,
+                          index: widget.selectedIndex,
+                          centers: centers,
+                        ),
+                    ],
+                  ),
                 );
 
                 if (extent <= constraints.maxHeight) {
@@ -194,53 +300,22 @@ class _RailBody extends StatelessWidget {
               },
             ),
           ),
-          if (toolsItem case final tools?) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: NavRailMetrics.pillInsetX + 4,
-              ),
-              child: ColoredBox(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-                child: const SizedBox(
-                  height: NavRailMetrics.hairline,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-            const SizedBox(height: NavRailMetrics.groupGap),
-            Padding(
-              padding: EdgeInsets.only(bottom: NavRailMetrics.padding.bottom),
-              child: SizedBox(
-                height: slotHeight,
-                width: double.infinity,
-                child: FocusTraversalOrder(
-                  order: NumericFocusOrder(items.length.toDouble()),
-                  child: _RailSlot(
-                    glyph: tools.glyph,
-                    label: tools.label.label,
-                    colors: colors,
-                    selected: toolsSelected,
-                    onToPage: () => onToPage(tools.label),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-/// Sidebar palette: selection reads as a soft [selectedFill] tint
-/// plus the primary edge [indicator], and hover/press/focus ride the same
-/// low-alpha [overlay] rather than an ink splash.
+/// Sidebar palette: selection reads as a soft [selectedFill] tint plus the
+/// primary [indicator]; hover rides the same
+/// low-alpha [overlay] and a magnet [hoverGhost] rather than an ink splash.
 class _RailColors {
   _RailColors(ColorScheme scheme)
     : selectedFill = scheme.onSurface.withValues(alpha: 0.08),
       foreground = scheme.onSurface,
       foregroundMuted = scheme.onSurfaceVariant,
       indicator = scheme.primary,
+      hoverGhost = scheme.onSurface.withValues(alpha: 0.07),
       focusRing = scheme.primary,
       overlay = WidgetStateProperty.fromMap({
         WidgetState.pressed: scheme.onSurface.withValues(alpha: 0.06),
@@ -253,8 +328,50 @@ class _RailColors {
   final Color foreground;
   final Color foregroundMuted;
   final Color indicator;
+  final Color hoverGhost;
   final Color focusRing;
   final WidgetStateProperty<Color> overlay;
+}
+
+class _HoverGhost extends StatelessWidget {
+  const _HoverGhost({
+    required this.centers,
+    required this.position,
+    required this.slotHeight,
+    required this.opacity,
+    required this.color,
+  });
+
+  final List<double> centers;
+  final double position;
+  final double slotHeight;
+  final double opacity;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    if (opacity <= 0.001 || centers.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final low = position.floor().clamp(0, centers.length - 1);
+    final high = position.ceil().clamp(0, centers.length - 1);
+    final center = lerpDouble(centers[low], centers[high], position - low)!;
+    final height = slotHeight - NavRailMetrics.pillInsetY * 2;
+    return Positioned(
+      top: center - height / 2,
+      left: NavRailMetrics.pillInsetX,
+      right: NavRailMetrics.pillInsetX,
+      height: height,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: color.withValues(alpha: color.a * opacity.clamp(0, 1)),
+            shape: _itemShape,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _SlotLayer extends StatelessWidget {
@@ -265,6 +382,8 @@ class _SlotLayer extends StatelessWidget {
     required this.selectedIndex,
     required this.colors,
     required this.onToPage,
+    required this.hover,
+    required this.progress,
   });
 
   final List<NavigationItem> items;
@@ -273,6 +392,8 @@ class _SlotLayer extends StatelessWidget {
   final int selectedIndex;
   final _RailColors colors;
   final void Function(PageLabel label) onToPage;
+  final List<double> hover;
+  final double progress;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -290,6 +411,8 @@ class _SlotLayer extends StatelessWidget {
               label: items[i].label.label,
               colors: colors,
               selected: i == selectedIndex,
+              hover: hover[i],
+              progress: progress,
               onToPage: () => onToPage(items[i].label),
             ),
           ),
@@ -304,6 +427,8 @@ class _RailSlot extends StatefulWidget {
     required this.label,
     required this.colors,
     required this.selected,
+    required this.progress,
+    this.hover = 0,
     this.onToPage,
   });
 
@@ -311,14 +436,17 @@ class _RailSlot extends StatefulWidget {
   final String label;
   final _RailColors colors;
   final bool selected;
+  final double progress;
+  final double hover;
   final VoidCallback? onToPage;
 
   @override
   State<_RailSlot> createState() => _RailSlotState();
 }
 
-class _RailSlotState extends State<_RailSlot> {
+class _RailSlotState extends State<_RailSlot> with TickerProviderStateMixin {
   late final FocusNode _focusNode = FocusNode(onKeyEvent: _handleKey);
+  late final NavSpring _press = NavSpring(this, 0);
   bool _focused = false;
 
   @override
@@ -331,9 +459,18 @@ class _RailSlotState extends State<_RailSlot> {
     if (mounted) setState(() {});
   }
 
+  void _setPressed(bool pressed) {
+    if (context.disableAnimations) {
+      _press.jumpTo(pressed ? 1 : 0);
+    } else {
+      _press.springTo(pressed ? 1 : 0, _railPressSpring);
+    }
+  }
+
   @override
   void dispose() {
     FocusHighlightVisibility.visible.removeListener(_handleFocusVisibility);
+    _press.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -387,33 +524,64 @@ class _RailSlotState extends State<_RailSlot> {
   @override
   Widget build(BuildContext context) {
     final colors = widget.colors;
-    final color = widget.selected ? colors.foreground : colors.foregroundMuted;
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+    final hover = widget.hover.clamp(0.0, 1.0);
+    final color = Color.lerp(
+      colors.foregroundMuted,
+      colors.foreground,
+      widget.selected ? 1.0 : hover,
+    )!;
+    final fill = widget.selected ? 1.0 : hover * 0.7;
+    // Folded the label collapses its box entirely so it never pads the square;
+    // it grows and fades in under the icon only as the rail opens.
+    final labelReveal = ((widget.progress - 0.4) / 0.6).clamp(0.0, 1.0);
+    final inner = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GlyphIcon(
             widget.glyph,
             size: NavRailMetrics.iconSize,
             color: color,
-            fill: widget.selected ? 1 : 0,
+            fill: fill,
           ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            widget.label,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
+          ClipRect(
+            child: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: labelReveal,
+              child: Opacity(
+                opacity: labelReveal,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.xxs),
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
+                      fontWeight: widget.selected
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
       ),
+    );
+    // Press dips the content without touching its footprint, so the strict
+    // per-locale slot bounds stay intact while the tap still feels physical.
+    final content = AnimatedBuilder(
+      animation: _press,
+      builder: (context, child) => Transform.scale(
+        scale: lerpDouble(1, 0.94, _press.value.clamp(0.0, 1.0)),
+        child: child,
+      ),
+      child: inner,
     );
     final onToPage = widget.onToPage;
     const padding = EdgeInsets.symmetric(
@@ -451,6 +619,7 @@ class _RailSlotState extends State<_RailSlot> {
               Positioned.fill(
                 child: InkWell(
                   onTap: onToPage,
+                  onHighlightChanged: _setPressed,
                   onFocusChange: (value) => setState(() => _focused = value),
                   focusNode: _focusNode,
                   customBorder: shape,
@@ -468,8 +637,6 @@ class _RailSlotState extends State<_RailSlot> {
   }
 }
 
-/// The selection bar moves by stretching toward the new slot before
-/// its trailing edge catches up, rather than sliding at a fixed height.
 class _SelectionIndicator extends StatefulWidget {
   const _SelectionIndicator({
     super.key,
@@ -550,6 +717,74 @@ class _SelectionIndicatorState extends State<_SelectionIndicator>
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The collapse/expand control at the foot of the rail. Its glyph morphs with
+/// [progress] so the sidebar mark folds open as the rail widens.
+class _RailToggle extends StatelessWidget {
+  const _RailToggle({
+    required this.progress,
+    this.onToggle,
+  });
+
+  final double progress;
+  final VoidCallback? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final colors = _RailColors(colorScheme);
+    final shape = _itemShape;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: NavRailMetrics.pillInsetX + 4,
+          ),
+          child: ColoredBox(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+            child: const SizedBox(
+              height: NavRailMetrics.hairline,
+              width: double.infinity,
+            ),
+          ),
+        ),
+        const SizedBox(height: NavRailMetrics.groupGap),
+        Padding(
+          padding: EdgeInsets.only(
+            left: NavRailMetrics.pillInsetX,
+            right: NavRailMetrics.pillInsetX,
+            top: NavRailMetrics.pillInsetY,
+            bottom: NavRailMetrics.padding.bottom + NavRailMetrics.pillInsetY,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            shape: shape,
+            child: InkWell(
+              key: AppNavRail.toggleKey,
+              onTap: onToggle,
+              customBorder: shape,
+              mouseCursor: SystemMouseCursors.basic,
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: colors.overlay,
+              child: SizedBox(
+                height: NavRailMetrics.compactSlotHeight,
+                width: double.infinity,
+                child: Center(
+                  child: GlyphIcon(
+                    AppGlyphs.sidebar(progress),
+                    size: NavRailMetrics.iconSize,
+                    color: colors.foregroundMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -270,6 +270,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool isAnimateToPage,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
+    @Default(false) bool sidebarExpanded,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool setupCompleted,
     @Default(0) int setupStep,

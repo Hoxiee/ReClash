@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -314,19 +315,34 @@ class AppSidebarContainer extends ConsumerWidget {
 
   Widget _buildBackground({
     required BuildContext context,
+    required bool active,
     required Widget child,
   }) {
-    return Material(
-      color: context.colorScheme.surfaceContainer,
+    final colorScheme = context.colorScheme;
+    final panel = Material(
+      // Card opacity keeps the rail near-solid; a wallpaper wants it frosted, so
+      // drop to a glass alpha and let the backdrop blur carry the image through.
+      color: active
+          ? colorScheme.surfaceContainer.withValues(alpha: 0.5)
+          : colorScheme.surfaceContainer,
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: Border(
             right: BorderSide(
-              color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
             ),
           ),
         ),
         child: child,
+      ),
+    );
+    if (!active) {
+      return panel;
+    }
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: panel,
       ),
     );
   }
@@ -412,47 +428,65 @@ class AppSidebarContainer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMobileView = ref.watch(isMobileViewProvider);
-    return Container(
-      color: context.colorScheme.surfaceContainer,
-      child: Row(
-        children: [
-          AnimatedVisibility.sidebar(
-            visible: !isMobileView,
-            child: _buildBackground(
-              context: context,
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    if (system.isMacOS) const SizedBox(height: 22),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: ScrollConfiguration(
-                        behavior: const HiddenBarScrollBehavior(),
-                        child: AppNavRail(
-                          leading: navigationPort?.buildStatusMark(),
-                          onToPage: (label) => _handleToPage(ref, label),
+    final sidebarExpanded = ref.watch(
+      appSettingProvider.select((state) => state.sidebarExpanded),
+    );
+    // One wallpaper spans the whole shell so the rail shares the content's
+    // continuous backdrop instead of standing as an opaque cut-out beside it.
+    return AppWallpaper(
+      // The painted wallpaper sits behind this builder, so a solid fill here
+      // would hide it; tint only when there is no wallpaper to show through.
+      builder: (context, active) => Container(
+        color: active ? null : context.colorScheme.surfaceContainer,
+        child: Row(
+          children: [
+            AnimatedVisibility.sidebar(
+              visible: !isMobileView,
+              child: _buildBackground(
+                context: context,
+                active: active,
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      if (system.isMacOS) const SizedBox(height: 22),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: ScrollConfiguration(
+                          behavior: const HiddenBarScrollBehavior(),
+                          child: AppNavRail(
+                            expanded: sidebarExpanded,
+                            onToggle: () => ref
+                                .read(appSettingProvider.notifier)
+                                .update(
+                                  (state) => state.copyWith(
+                                    sidebarExpanded: !state.sidebarExpanded,
+                                  ),
+                                ),
+                            onToPage: (label) => _handleToPage(ref, label),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Focus(
-              canRequestFocus: false,
-              onKeyEvent: (node, event) => _handleContentKey(ref, node, event),
-              // One backdrop for the whole content region: pages, per-page
-              // navigators and side sheets share it, so nested scaffolds no
-              // longer each paint a mis-aligned crop.
-              child: ClipRect(
-                child: AppWallpaper(builder: (context, _) => child),
+            Expanded(
+              flex: 1,
+              child: Focus(
+                canRequestFocus: false,
+                onKeyEvent: (node, event) =>
+                    _handleContentKey(ref, node, event),
+                // One backdrop for the whole content region: pages, per-page
+                // navigators and side sheets share it, so nested scaffolds no
+                // longer each paint a mis-aligned crop.
+                child: ClipRect(
+                  child: AppWallpaper(builder: (context, _) => child),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

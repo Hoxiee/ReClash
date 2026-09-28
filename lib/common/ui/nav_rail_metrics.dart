@@ -2,10 +2,15 @@ import 'package:flutter/widgets.dart';
 import 'package:reclash/common/ui/nav_bar_metrics.dart';
 
 abstract final class NavRailMetrics {
-  static const double width = 80;
+  /// Collapsed the rail is a column of square squircle buttons; expanded it
+  /// widens and each slot grows taller to seat a label under the icon. Width
+  /// and slot height both ride the bounce-free standard easing off one progress.
+  static const double compactWidth = 48;
+  static const double expandedWidth = 80;
+  static const Duration expandDuration = Duration(milliseconds: 250);
 
-  static const double iconSlotHeight = 52;
-  static const double stackedSlotHeight = 64;
+  static const double compactSlotHeight = 44;
+  static const double expandedSlotHeight = 58;
 
   static const double pillInsetX = 6;
   static const double pillInsetY = 4;

@@ -55,7 +55,7 @@ void main() {
   Future<void> pumpRail(
     WidgetTester tester, {
     double viewWidth = 800,
-    bool showLabel = false,
+    bool expanded = false,
     double height = 500,
     Locale? locale,
   }) async {
@@ -73,11 +73,6 @@ void main() {
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(viewSizeProvider.notifier).value = Size(viewWidth, 600);
-    if (showLabel) {
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(showLabel: true));
-    }
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -88,7 +83,10 @@ void main() {
           child: Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
-              child: SizedBox(height: height, child: const AppNavRail()),
+              child: SizedBox(
+                height: height,
+                child: AppNavRail(expanded: expanded),
+              ),
             ),
           ),
         ),
@@ -109,8 +107,6 @@ void main() {
     await pumpRail(tester);
     final start = highlightRect(tester);
 
-    // Tools is pinned and carries no indicator, so the stretch is measured
-    // against a scrollable slot instead.
     goTo(PageLabel.logs);
     await tester.pump();
     expect(highlightRect(tester).top, closeTo(start.top, 0.5));
@@ -145,39 +141,37 @@ void main() {
 
     expect(
       profilesY - dashboardY,
-      greaterThan(NavRailMetrics.stackedSlotHeight),
+      greaterThan(NavRailMetrics.compactSlotHeight),
     );
     expect(
       requestsY - profilesY,
-      greaterThan(NavRailMetrics.stackedSlotHeight),
+      greaterThan(NavRailMetrics.compactSlotHeight),
     );
     // Requests and logs share a group, so no divider stretches the gap.
-    expect(logsY - requestsY, NavRailMetrics.stackedSlotHeight);
+    expect(logsY - requestsY, NavRailMetrics.compactSlotHeight);
 
-    // Tools is pinned outside the scroll body, so only the two intra-list
-    // group boundaries render as Positioned hairlines.
+    // Three group boundaries render as Positioned hairlines: dashboard|profiles,
+    // profiles|requests, and logs|tools.
     final divider = find.byWidgetPredicate(
       (widget) =>
           widget is Positioned && widget.height == NavRailMetrics.hairline,
     );
-    expect(divider, findsNWidgets(2));
+    expect(divider, findsNWidgets(3));
   });
 
-  testWidgets('tools sits pinned at the rail bottom', (tester) async {
+  testWidgets('tools sits in the scrolling list with an indicator', (
+    tester,
+  ) async {
     await pumpRail(tester);
 
     final logsY = tester.getCenter(find.byGlyph(AppGlyphs.logs).first).dy;
     final tools = find.byGlyph(AppGlyphs.tools).first;
-    final toolsY = tester.getCenter(tools).dy;
-    expect(toolsY, greaterThan(logsY));
+    expect(tester.getCenter(tools).dy, greaterThan(logsY));
 
-    final railBottom = tester.getRect(find.byType(AppNavRail)).bottom;
-    expect(railBottom - toolsY, lessThan(NavRailMetrics.stackedSlotHeight));
-
-    // Selecting the pinned slot removes the sliding indicator entirely.
+    // Tools is an ordinary destination now, so selecting it keeps the bar.
     goTo(PageLabel.tools);
     await tester.pumpAndSettle();
-    expect(find.byKey(AppNavRail.highlightKey), findsNothing);
+    expect(find.byKey(AppNavRail.highlightKey), findsOneWidget);
 
     goTo(PageLabel.dashboard);
     await tester.pumpAndSettle();
@@ -186,35 +180,184 @@ void main() {
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
   });
 
-  testWidgets('tools stays pinned while the rail scrolls', (tester) async {
+  testWidgets('tools scrolls with the list and stays reachable', (
+    tester,
+  ) async {
     await pumpRail(tester, height: 180);
 
-    final toolsCenter = tester.getCenter(find.byGlyph(AppGlyphs.tools).first);
-    await tester.drag(
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    await tester.dragUntilVisible(
+      find.byGlyph(AppGlyphs.tools).first,
       find.byType(SingleChildScrollView),
-      const Offset(0, -400),
+      const Offset(0, -60),
     );
     await tester.pumpAndSettle();
-    expect(tester.getCenter(find.byGlyph(AppGlyphs.tools).first), toolsCenter);
-
     await tester.tap(find.byGlyph(AppGlyphs.tools).first);
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('labels stack under the icons without widening the rail', (
-    tester,
-  ) async {
-    await pumpRail(tester, showLabel: true);
+  testWidgets('the foot toggle flips the rail width', (tester) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
-    expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
-    expect(find.text(PageLabel.dashboard.label), findsOneWidget);
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
 
-    container.read(viewSizeProvider.notifier).value = const Size(1400, 600);
+    var expanded = false;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 500,
+                child: StatefulBuilder(
+                  builder: (context, setState) => AppNavRail(
+                    expanded: expanded,
+                    onToggle: () => setState(() => expanded = !expanded),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.compactWidth,
+    );
+
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.expandedWidth,
+    );
+  });
+
+  testWidgets('the width never overshoots its expanded target', (tester) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
+
+    var expanded = false;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 500,
+                child: StatefulBuilder(
+                  builder: (context, setState) => AppNavRail(
+                    expanded: expanded,
+                    onToggle: () => setState(() => expanded = !expanded),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
+    // The morph spring overshoots >1; if it ever drove the width the rail would
+    // flare past its target. Sampling mid-flight guards the bounce-free easing.
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 40));
+      final width = tester.getSize(find.byType(AppNavRail)).width;
+      expect(width, lessThanOrEqualTo(NavRailMetrics.expandedWidth + 0.01));
+      expect(
+        width,
+        greaterThanOrEqualTo(NavRailMetrics.compactWidth - 0.01),
+      );
+    }
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('reduced motion snaps the rail to its target width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          includeNavigatorKey: false,
+          child: MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  height: 500,
+                  child: AppNavRail(expanded: true),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.expandedWidth,
+    );
+  });
+
+  testWidgets('expanding widens the rail and reveals labels', (tester) async {
+    await pumpRail(tester, expanded: true);
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.expandedWidth,
+    );
     expect(find.text(PageLabel.dashboard.label), findsOneWidget);
   });
 
@@ -222,7 +365,7 @@ void main() {
     testWidgets('the selected label stays inside its slot in $locale', (
       tester,
     ) async {
-      await pumpRail(tester, showLabel: true, locale: locale);
+      await pumpRail(tester, expanded: true, locale: locale);
 
       for (final item in items()) {
         goTo(item.label);
@@ -254,19 +397,19 @@ void main() {
     });
   }
 
-  testWidgets('short windows preserve labels and keep tools reachable', (
+  testWidgets('short windows keep the labels and tools reachable', (
     tester,
   ) async {
-    await pumpRail(tester, showLabel: true, height: 340);
+    await pumpRail(tester, expanded: true, height: 260);
 
     expect(find.byType(SingleChildScrollView), findsOneWidget);
     expect(find.text(PageLabel.dashboard.label), findsOneWidget);
-    await tester.drag(
+    await tester.dragUntilVisible(
+      find.byGlyph(AppGlyphs.tools).first,
       find.byType(SingleChildScrollView),
-      const Offset(0, -200),
+      const Offset(0, -60),
     );
     await tester.pumpAndSettle();
-    // Tools is pinned, so it is tappable without scrolling the list.
     await tester.tap(find.byGlyph(AppGlyphs.tools).first);
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
