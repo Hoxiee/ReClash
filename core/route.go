@@ -4,10 +4,12 @@ import (
 	"context"
 	"maps"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -35,6 +37,11 @@ type routeTracker struct {
 var (
 	currentRoute routeTracker
 
+	// A url-test/fallback/load-balance group moves its own pick on a health
+	// check with no event to announce it, so only such a config needs the poll;
+	// a config of manual selectors changes picks solely through events.
+	routeHasAutoGroup atomic.Bool
+
 	publishRoute = func(state RouteState) {
 		sendMessage(Message{Type: RouteChangedMessage, Data: state})
 	}
@@ -60,6 +67,7 @@ func routeStamp() (epoch, picksVersion uint64) {
 
 func readPicks() (map[string]string, map[string]uint32) {
 	picks := map[string]string{}
+	hasAuto := false
 	for name, proxy := range tunnel.AllProxies() {
 		outbound, ok := proxy.(*adapter.Proxy)
 		if !ok {
@@ -70,7 +78,12 @@ func readPicks() (map[string]string, map[string]uint32) {
 			continue
 		}
 		picks[name] = group.Now()
+		switch group.Type() {
+		case C.URLTest, C.Fallback, C.LoadBalance:
+			hasAuto = true
+		}
 	}
+	routeHasAutoGroup.Store(hasAuto)
 	providers := tunnel.ProvidersSnapshot()
 	versions := make(map[string]uint32, len(providers))
 	for name, p := range providers {
@@ -163,7 +176,8 @@ func stopRoutePollLocked() {
 // With the listeners down the host pins every probe to DIRECT, so the picks
 // do not matter until they come back. A screen-off device says nothing about
 // the route either, and polling then is the drain the health check already
-// learned to avoid.
+// learned to avoid. A manual-selector config moves its picks only through
+// events, so the scan there would never see a change and is skipped outright.
 func pollRoute(ctx context.Context) {
 	ticker := time.NewTicker(routePollInterval)
 	defer ticker.Stop()
@@ -172,7 +186,7 @@ func pollRoute(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			if isRunning.Load() && !isScreenOff.Load() {
+			if isRunning.Load() && !isScreenOff.Load() && routeHasAutoGroup.Load() {
 				refreshRoute()
 			}
 		}
