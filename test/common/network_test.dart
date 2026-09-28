@@ -190,6 +190,131 @@ void main() {
         isFalse,
       );
     });
+
+    test('matches an IPv6 subnet rule against the local IPv6s', () {
+      expect(
+        smartPauseMatches(['fd00:db8:1::/48'], ipv6s: ['fd00:db8:1::42']),
+        isTrue,
+      );
+      expect(
+        smartPauseMatches(['fd00:db8:2::/48'], ipv6s: ['fd00:db8:1::42']),
+        isFalse,
+      );
+    });
+
+    test('treats a bare IPv6 rule as a /128 host rule', () {
+      expect(smartPauseMatches(['fe80::1'], ipv6s: ['fe80::1']), isTrue);
+      expect(smartPauseMatches(['fe80::1'], ipv6s: ['fe80::2']), isFalse);
+    });
+
+    test('matches a non-byte-aligned IPv6 prefix', () {
+      expect(
+        smartPauseMatches(['2001:db8::/33'], ipv6s: ['2001:db8:8000::1']),
+        isFalse,
+      );
+      expect(
+        smartPauseMatches(['2001:db8::/32'], ipv6s: ['2001:db8:8000::1']),
+        isTrue,
+      );
+    });
+
+    test('never matches a ::/0 rule', () {
+      expect(smartPauseMatches(['::/0'], ipv6s: ['fd00::1']), isFalse);
+    });
+
+    test('an IPv4 rule never matches an IPv6 address', () {
+      expect(
+        smartPauseMatches(['192.168.1.0/24'], ipv6s: ['fd00::1']),
+        isFalse,
+      );
+      expect(smartPauseMatches(['fd00::/8'], ipv4s: ['192.168.1.5']), isFalse);
+    });
+
+    test('strict lists need both an SSID and a subnet hit', () {
+      const networks = ['Home', '192.168.1.0/24'];
+      expect(
+        smartPauseMatches(
+          networks,
+          ssid: 'Home',
+          ipv4s: ['192.168.1.20'],
+          strict: true,
+        ),
+        isTrue,
+      );
+      expect(smartPauseMatches(networks, ssid: 'Home', strict: true), isFalse);
+      expect(
+        smartPauseMatches(
+          networks,
+          ssid: 'Evil Twin',
+          ipv4s: ['192.168.1.20'],
+          strict: true,
+        ),
+        isFalse,
+      );
+      expect(
+        smartPauseMatches(networks, ssid: 'Home', ipv4s: ['192.168.1.20']),
+        isTrue,
+      );
+    });
+
+    test('strict falls back to either hit without both rule kinds', () {
+      expect(smartPauseMatches(['Home'], ssid: 'Home', strict: true), isTrue);
+      expect(
+        smartPauseMatches(
+          ['192.168.1.0/24'],
+          ipv4s: ['192.168.1.20'],
+          strict: true,
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('smartPauseMatchedRules', () {
+    test('names the rules that hit', () {
+      expect(
+        smartPauseMatchedRules(
+          ['Home', '192.168.1.0/24', 'Office'],
+          ssid: 'Home',
+          ipv4s: ['192.168.1.20'],
+        ),
+        ['Home', '192.168.1.0/24'],
+      );
+    });
+
+    test('is empty when nothing hits', () {
+      expect(
+        smartPauseMatchedRules(['Home'], ssid: 'Cafe', ipv4s: ['10.0.0.9']),
+        isEmpty,
+      );
+    });
+  });
+
+  group('smartPauseIsBroadRule', () {
+    test('flags wide subnets', () {
+      expect(smartPauseIsBroadRule('10.0.0.0/8'), isTrue);
+      expect(smartPauseIsBroadRule('192.168.0.0/16'), isTrue);
+      expect(smartPauseIsBroadRule('fd00::/8'), isTrue);
+      expect(smartPauseIsBroadRule('0.0.0.0/0'), isTrue);
+    });
+
+    test('accepts home-sized subnets and SSIDs', () {
+      expect(smartPauseIsBroadRule('192.168.1.0/24'), isFalse);
+      expect(smartPauseIsBroadRule('fd00:db8:1::/48'), isFalse);
+      expect(smartPauseIsBroadRule('fe80::1'), isFalse);
+      expect(smartPauseIsBroadRule('Home'), isFalse);
+    });
+  });
+
+  group('getLocalIPv6s', () {
+    test('lists IPv6 addresses and skips IPv4 ones', () async {
+      listing([
+        _FakeInterface('wlan0', [_v6('fd00::1'), _v4('192.168.1.20')]),
+        _FakeInterface('eth0', [_v6('fe80::2')]),
+      ]);
+
+      expect(await getLocalIPv6s(), ['fd00::1', 'fe80::2']);
+    });
   });
 
   group('isSubnetRule', () {
@@ -197,6 +322,12 @@ void main() {
       expect(isSubnetRule('192.168.1.0/24'), isTrue);
       expect(isSubnetRule('10.1.2.3'), isTrue);
       expect(isSubnetRule(' 10.1.2.3/32 '), isTrue);
+    });
+
+    test('accepts IPv6 CIDRs and bare IPv6s', () {
+      expect(isSubnetRule('fd00::/8'), isTrue);
+      expect(isSubnetRule('fe80::1'), isTrue);
+      expect(isSubnetRule(' [fd00::1]/64 '), isTrue);
     });
 
     test('rejects SSIDs and malformed CIDRs', () {
@@ -216,6 +347,17 @@ void main() {
 
     test('passes a non-IPv4 string through untouched', () {
       expect(ipv4ToSubnetCidr('fe80::1'), 'fe80::1');
+    });
+  });
+
+  group('ipv6ToSubnetCidr', () {
+    test('reduces an address to its /64', () {
+      expect(ipv6ToSubnetCidr('fd00:db8:1:2:3:4:5:6'), 'fd00:db8:1:2::/64');
+      expect(ipv6ToSubnetCidr('fd00::42'), 'fd00:0:0:0::/64');
+    });
+
+    test('passes a non-IPv6 string through untouched', () {
+      expect(ipv6ToSubnetCidr('192.168.1.20'), '192.168.1.20');
     });
   });
 }

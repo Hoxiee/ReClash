@@ -229,6 +229,16 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             title: TooltipText(
               text: Text(network, maxLines: 2, overflow: TextOverflow.ellipsis),
             ),
+            trailing: smartPauseIsBroadRule(network)
+                ? Tooltip(
+                    message: context.appLocalizations.broadNetworkWarn,
+                    child: GlyphIcon(
+                      AppGlyphs.warning,
+                      size: 18,
+                      color: context.colorScheme.warning,
+                    ),
+                  )
+                : null,
             isSelected: isSelected,
             onSelected: () {
               ref.read(itemsProvider(key).notifier).update((state) {
@@ -417,6 +427,20 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
               },
             ),
           ),
+        if (vpnSetting.smartPauseEnabled)
+          FadeSlideEnterBox(
+            child: DecorationListItem.toggle(
+              contentPadding: _togglePadding,
+              title: Text(appLocalizations.smartPauseStrict),
+              subtitle: Text(appLocalizations.smartPauseStrictDesc),
+              value: vpnSetting.smartPauseStrict,
+              onChanged: (value) {
+                ref.read(vpnSettingProvider.notifier).update((state) {
+                  return state.copyWith(smartPauseStrict: value);
+                });
+              },
+            ),
+          ),
       ],
     );
   }
@@ -436,18 +460,31 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       return const SliverPadding(padding: EdgeInsets.zero);
     }
     final colorScheme = context.colorScheme;
-    final matched = smartPauseMatches(
+    final matched = smartPauseMatchedRules(
       networks,
       ssid: ref.watch(currentSSIDProvider),
       ipv4s: ref.watch(currentIPv4sProvider),
+      ipv6s: ref.watch(currentIPv6sProvider),
+      strict: vpnSetting.smartPauseStrict,
     );
+    final lastEvent = ref.watch(smartPauseLastEventProvider);
+    final subtitle = matched.isEmpty
+        ? null
+        : lastEvent == null
+        ? matched.first
+        : appLocalizations.smartPauseMatchedOn(
+            matched.first,
+            MaterialLocalizations.of(
+              context,
+            ).formatTimeOfDay(TimeOfDay.fromDateTime(lastEvent.at)),
+          );
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       sliver: SliverToBoxAdapter(
         child: DecoratedBox(
           decoration: ShapeDecoration(
             shape: AppShape.xl,
-            color: matched
+            color: matched.isNotEmpty
                 ? colorScheme.primary.withValues(alpha: 0.10)
                 : colorScheme.surfaceContainerHigh,
           ),
@@ -456,23 +493,40 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             child: Row(
               children: [
                 GlyphIcon(
-                  matched ? AppGlyphs.pause : AppGlyphs.locate,
+                  matched.isNotEmpty ? AppGlyphs.pause : AppGlyphs.locate,
                   size: 18,
-                  color: matched
+                  color: matched.isNotEmpty
                       ? colorScheme.primary
                       : colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    matched
-                        ? appLocalizations.trustedNow
-                        : appLocalizations.notTrustedNow,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: matched
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        matched.isNotEmpty
+                            ? appLocalizations.trustedNow
+                            : appLocalizations.notTrustedNow,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: matched.isNotEmpty
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: matched.isNotEmpty
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],

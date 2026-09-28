@@ -433,6 +433,7 @@ abstract class VpnProps with _$VpnProps {
     @Default(false) bool smartPauseEnabled,
     @Default([]) List<String> smartPauseNetworks,
     @Default(false) bool smartPauseCloseConnections,
+    @Default(false) bool smartPauseStrict,
     @Default(defaultAccessControlProps) AccessControlProps accessControlProps,
   }) = _VpnProps;
 

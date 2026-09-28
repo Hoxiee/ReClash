@@ -15,12 +15,15 @@ typedef ConnectivityReader = Future<List<ConnectivityResult>> Function();
 
 typedef Ipv4sReader = Future<List<String>> Function();
 
+typedef Ipv6sReader = Future<List<String>> Function();
+
 class ConnectivityManager extends ConsumerStatefulWidget {
   final Function(List<ConnectivityResult> results)? onConnectivityChanged;
   final Stream<List<ConnectivityResult>>? connectivityStream;
   final SsidReader? readSsid;
   final ConnectivityReader? readConnectivity;
   final Ipv4sReader? readIpv4s;
+  final Ipv6sReader? readIpv6s;
   final bool? isDesktop;
   final Widget child;
 
@@ -31,6 +34,7 @@ class ConnectivityManager extends ConsumerStatefulWidget {
     this.readSsid,
     this.readConnectivity,
     this.readIpv4s,
+    this.readIpv6s,
     this.isDesktop,
     required this.child,
   });
@@ -45,12 +49,14 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   late final SsidReader _readSsid =
       widget.readSsid ?? WifiSsidManager.instance.getSsid;
   late final Ipv4sReader _readIpv4s = widget.readIpv4s ?? getLocalIPv4s;
+  late final Ipv6sReader _readIpv6s = widget.readIpv6s ?? getLocalIPv6s;
 
   bool get _isDesktop => widget.isDesktop ?? system.isDesktop;
   Timer? _pollTimer;
 
   int _ssidRequestId = 0;
   int _ipv4RequestId = 0;
+  int _ipv6RequestId = 0;
   bool _onWifi = false;
 
   @override
@@ -83,6 +89,7 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
 
   Future<void> _bootstrap() async {
     unawaited(_updateIpv4s());
+    unawaited(_updateIpv6s());
     final readConnectivity =
         widget.readConnectivity ?? Connectivity().checkConnectivity;
     try {
@@ -97,12 +104,14 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
     );
     unawaited(_updateSsid());
     unawaited(_updateIpv4s());
+    unawaited(_updateIpv6s());
     widget.onConnectivityChanged?.call(results);
   }
 
   void _syncRules(bool? previous, bool next) {
     unawaited(_updateSsid());
     unawaited(_updateIpv4s());
+    unawaited(_updateIpv6s());
     // A Wi-Fi-to-Wi-Fi roam can pass without a connectivity event, so the
     // rules are re-read on a timer while any rule exists. Android decides
     // natively off its own network callbacks and needs no poll.
@@ -110,6 +119,7 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
       _pollTimer ??= Timer.periodic(_pollInterval, (_) {
         unawaited(_updateSsid());
         unawaited(_updateIpv4s());
+        unawaited(_updateIpv6s());
       });
     } else {
       _pollTimer?.cancel();
@@ -162,6 +172,22 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
         return;
       }
       ref.read(currentIPv4sProvider.notifier).value = ipv4s;
+    } catch (error) {
+      commonPrint.log(
+        'Unable to enumerate local addresses: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
+  Future<void> _updateIpv6s() async {
+    final requestId = ++_ipv6RequestId;
+    try {
+      final ipv6s = await _readIpv6s();
+      if (requestId != _ipv6RequestId || !mounted) {
+        return;
+      }
+      ref.read(currentIPv6sProvider.notifier).value = ipv6s;
     } catch (error) {
       commonPrint.log(
         'Unable to enumerate local addresses: $error',

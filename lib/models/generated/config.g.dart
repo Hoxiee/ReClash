@@ -299,6 +299,7 @@ _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
       const [],
   smartPauseCloseConnections:
       json['smartPauseCloseConnections'] as bool? ?? false,
+  smartPauseStrict: json['smartPauseStrict'] as bool? ?? false,
   accessControlProps: json['accessControlProps'] == null
       ? defaultAccessControlProps
       : AccessControlProps.fromJson(
@@ -315,6 +316,7 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'smartPauseEnabled': instance.smartPauseEnabled,
   'smartPauseNetworks': instance.smartPauseNetworks,
   'smartPauseCloseConnections': instance.smartPauseCloseConnections,
+  'smartPauseStrict': instance.smartPauseStrict,
   'accessControlProps': instance.accessControlProps,
 };
 

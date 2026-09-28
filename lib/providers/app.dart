@@ -629,6 +629,33 @@ class CurrentIPv4s extends _$CurrentIPv4s with AutoDisposeNotifierMixin {
   }
 }
 
+@Riverpod(keepAlive: true)
+class CurrentIPv6s extends _$CurrentIPv6s with AutoDisposeNotifierMixin {
+  @override
+  List<String> build() {
+    return const [];
+  }
+
+  @override
+  bool updateShouldNotify(List<String> previous, List<String> next) {
+    return !listEquals(previous, next);
+  }
+}
+
+/// The last Smart Pause transition, so the status names the rule behind it.
+@Riverpod(keepAlive: true)
+class SmartPauseLastEvent extends _$SmartPauseLastEvent
+    with AutoDisposeNotifierMixin {
+  @override
+  ({bool paused, String rule, DateTime at})? build() {
+    return null;
+  }
+
+  void record({required bool paused, required String rule}) {
+    state = (paused: paused, rule: rule, at: DateTime.now());
+  }
+}
+
 /// Plain reachability from the last connectivity report; null before the first.
 @Riverpod(keepAlive: true)
 class NetworkReachable extends _$NetworkReachable

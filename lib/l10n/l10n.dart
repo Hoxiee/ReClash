@@ -430,6 +430,84 @@ class AppLocalizations {
     );
   }
 
+  /// `Overview`
+  String get toolsOverview {
+    return Intl.message('Overview', name: 'toolsOverview', desc: '', args: []);
+  }
+
+  /// `Diagnostics`
+  String get toolsCategoryDiagnostics {
+    return Intl.message(
+      'Diagnostics',
+      name: 'toolsCategoryDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Personalization`
+  String get toolsCategoryPersonalization {
+    return Intl.message(
+      'Personalization',
+      name: 'toolsCategoryPersonalization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configuration`
+  String get toolsCategoryConfiguration {
+    return Intl.message(
+      'Configuration',
+      name: 'toolsCategoryConfiguration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System`
+  String get toolsCategorySystem {
+    return Intl.message(
+      'System',
+      name: 'toolsCategorySystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search tools`
+  String get toolsSearchHint {
+    return Intl.message(
+      'Search tools',
+      name: 'toolsSearchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing matches your search`
+  String get toolsNoResults {
+    return Intl.message(
+      'Nothing matches your search',
+      name: 'toolsNoResults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0{No results} =1{1 result} other{{count} results}}`
+  String toolsSearchResultsCount(int count) {
+    return Intl.plural(
+      count,
+      zero: 'No results',
+      one: '1 result',
+      other: '$count results',
+      name: 'toolsSearchResultsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Logs`
   String get logs {
     return Intl.message('Logs', name: 'logs', desc: '', args: []);
@@ -7504,6 +7582,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Require SSID and subnet together`
+  String get smartPauseStrict {
+    return Intl.message(
+      'Require SSID and subnet together',
+      name: 'smartPauseStrict',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When both kinds of rules exist, pause only if an SSID and a subnet both match`
+  String get smartPauseStrictDesc {
+    return Intl.message(
+      'When both kinds of rules exist, pause only if an SSID and a subnet both match',
+      name: 'smartPauseStrictDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matched {rule} • {time}`
+  String smartPauseMatchedOn(Object rule, Object time) {
+    return Intl.message(
+      'Matched $rule • $time',
+      name: 'smartPauseMatchedOn',
+      desc: '',
+      args: [rule, time],
+    );
+  }
+
+  /// `Broad rule — trusts a large address range`
+  String get broadNetworkWarn {
+    return Intl.message(
+      'Broad rule — trusts a large address range',
+      name: 'broadNetworkWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The system requires location permission to read the Wi-Fi name. On Android choose "Allow all the time", otherwise the Wi-Fi name cannot be read while the app is in the background.`
   String get locationPermissionDesc {
     return Intl.message(
@@ -8114,6 +8232,36 @@ class AppLocalizations {
     return Intl.message(
       'Another VPN is capturing traffic — tap to retry',
       name: 'heroBlockedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription is invalid`
+  String get heroConfigInvalidTitle {
+    return Intl.message(
+      'Subscription is invalid',
+      name: 'heroConfigInvalidTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact your provider's support`
+  String get heroConfigInvalidHint {
+    return Intl.message(
+      'Contact your provider\'s support',
+      name: 'heroConfigInvalidHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This subscription's configuration is invalid and cannot be used. Contact your provider's support.`
+  String get subscriptionConfigInvalidTip {
+    return Intl.message(
+      'This subscription\'s configuration is invalid and cannot be used. Contact your provider\'s support.',
+      name: 'subscriptionConfigInvalidTip',
       desc: '',
       args: [],
     );

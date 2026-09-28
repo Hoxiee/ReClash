@@ -39,9 +39,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _syncRuntimeActivity(WidgetsBinding.instance.lifecycleState);
-    _milestoneTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      _refreshMilestones();
-    });
+    _startMilestoneTimer();
     ref.listenManual(checkIpProvider, (prev, next) {
       if (prev != next && next.isInit && next.needsIpCheck) {
         ref.read(networkDetectionProvider.notifier).startCheck();
@@ -62,6 +60,22 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       if (prev != next) {
         ref.read(proxiesActionProvider.notifier).updateGroupsDebounce();
       }
+    });
+    ref.listenManual(pausedProvider, (prev, next) {
+      if (prev == next || !ref.read(isStartProvider)) {
+        return;
+      }
+      final vpn = ref.read(vpnSettingProvider);
+      final rule = smartPauseMatchedRules(
+        vpn.smartPauseNetworks,
+        ssid: ref.read(currentSSIDProvider),
+        ipv4s: ref.read(currentIPv4sProvider),
+        ipv6s: ref.read(currentIPv6sProvider),
+        strict: vpn.smartPauseStrict,
+      ).firstOrNull;
+      ref
+          .read(smartPauseLastEventProvider.notifier)
+          .record(paused: next, rule: rule ?? '');
     });
     if (system.isDesktop) {
       void syncPause() {
@@ -236,6 +250,17 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     });
   }
 
+  void _startMilestoneTimer() {
+    _milestoneTimer ??= Timer.periodic(const Duration(minutes: 1), (_) {
+      _refreshMilestones();
+    });
+  }
+
+  void _stopMilestoneTimer() {
+    _milestoneTimer?.cancel();
+    _milestoneTimer = null;
+  }
+
   void _refreshMilestones() {
     if (!mounted ||
         ref.read(coreStatusProvider) != CoreStatus.connected ||
@@ -268,6 +293,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     _syncRuntimeActivity(state);
     _requestUiActiveSync();
     if (state == AppLifecycleState.resumed) {
+      _startMilestoneTimer();
       _refreshMilestones();
       permissions.check(ref.read);
       render?.resume();
@@ -279,6 +305,9 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(routeTrackerProvider.notifier).markResumed();
         ref.read(setupActionProvider.notifier).tryCheckIp();
       });
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _stopMilestoneTimer();
     }
   }
 

@@ -34,6 +34,15 @@ class _TestLocationPermissions extends LocationPermissions {
   WifiSsidPermission build() => _initial;
 }
 
+class _TestCurrentSSID extends CurrentSSID {
+  _TestCurrentSSID(this._ssid);
+
+  final String? _ssid;
+
+  @override
+  String? build() => _ssid;
+}
+
 void main() {
   late ProviderContainer container;
 
@@ -44,6 +53,7 @@ void main() {
     WifiSsidPermission permission = WifiSsidPermission.denied,
     bool isAndroid = false,
     bool isMacOS = false,
+    String? ssid,
     Locale? locale,
     Size size = const Size(1400, 1000),
   }) async {
@@ -62,6 +72,8 @@ void main() {
         locationPermissionsProvider.overrideWith(
           () => _TestLocationPermissions(permission),
         ),
+        if (ssid != null)
+          currentSSIDProvider.overrideWith(() => _TestCurrentSSID(ssid)),
       ],
     );
     addTearDown(container.dispose);
@@ -179,7 +191,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(vpnSettingProvider).smartPauseEnabled, isTrue);
 
-    await tester.tap(find.byType(Switch).last);
+    await tester.tap(find.byType(Switch).at(1));
     await tester.pumpAndSettle();
     expect(
       container.read(vpnSettingProvider).smartPauseCloseConnections,
@@ -355,6 +367,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No Wi-Fi networks found'), findsOneWidget);
+  });
+
+  testWidgets('the strict switch toggles joint matching', (tester) async {
+    await pumpView(tester, networks: ['Home']);
+
+    expect(container.read(vpnSettingProvider).smartPauseStrict, isFalse);
+
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+    expect(container.read(vpnSettingProvider).smartPauseStrict, isTrue);
+  });
+
+  testWidgets('a broad rule carries a warning icon', (tester) async {
+    await pumpView(tester, networks: ['Home', '10.0.0.0/8']);
+
+    expect(find.byGlyph(AppGlyphs.warning), findsOneWidget);
+  });
+
+  testWidgets('a narrow subnet carries no warning icon', (tester) async {
+    await pumpView(tester, networks: ['192.168.1.0/24']);
+
+    expect(find.byGlyph(AppGlyphs.warning), findsNothing);
+  });
+
+  testWidgets('the status names the matched rule', (tester) async {
+    await pumpView(tester, networks: ['Home'], ssid: 'Home');
+
+    expect(
+      find.text('Current network is trusted — VPN paused here'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Home'), findsWidgets);
+  });
+
+  testWidgets('the status shows the last transition time', (tester) async {
+    await pumpView(tester, networks: ['Home'], ssid: 'Home');
+    container
+        .read(smartPauseLastEventProvider.notifier)
+        .record(paused: true, rule: 'Home');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Home •'), findsOneWidget);
   });
 }
 

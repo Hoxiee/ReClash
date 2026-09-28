@@ -25,6 +25,7 @@ internal data class NetworkInfo(
     @Volatile var losingUntilMillis: Long = 0,
     @Volatile var dnsList: List<InetAddress> = emptyList(),
     @Volatile var ipv4List: List<String> = emptyList(),
+    @Volatile var ipv6List: List<String> = emptyList(),
     @Volatile var ssid: String? = null,
     @Volatile var transport: String = "",
     @Volatile var validated: Boolean = false,
@@ -88,7 +89,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     }
     private val mainHandler = Handler(Looper.getMainLooper())
     private var currentDnsList = listOf<String>()
-    private var lastIpv4Union = emptyList<String>()
+    private var lastIpUnion = emptyList<String>()
     private var lastSsidUnion = emptyList<String>()
     private var lastNetworkFacts: NetworkFacts? = null
     private var lastPrimary: PrimaryNetwork? = null
@@ -215,6 +216,8 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             info.dnsList = linkProperties.dnsServers
             info.ipv4List = linkProperties.linkAddresses
                 .mapNotNull { (it.address as? Inet4Address)?.hostAddress }
+            info.ipv6List = linkProperties.linkAddresses
+                .mapNotNull { (it.address as? Inet6Address)?.hostAddress }
             info.gateways = linkProperties.routes
                 .filter { it.isDefaultRoute }
                 .mapNotNull { it.gateway?.hostAddress }
@@ -278,14 +281,15 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
 
     @Synchronized
     private fun updatePhysical() {
-        val ipv4Union = networkInfos.values.flatMap { it.ipv4List }.distinct().sorted()
+        val ipUnion = (networkInfos.values.flatMap { it.ipv4List } +
+            networkInfos.values.flatMap { it.ipv6List }).distinct().sorted()
         val ssidUnion = networkInfos.values.mapNotNull { it.ssid }.distinct().sorted()
-        if (ipv4Union == lastIpv4Union && ssidUnion == lastSsidUnion) {
+        if (ipUnion == lastIpUnion && ssidUnion == lastSsidUnion) {
             return
         }
-        lastIpv4Union = ipv4Union
+        lastIpUnion = ipUnion
         lastSsidUnion = ssidUnion
-        onPhysicalNetworksChanged?.invoke(ipv4Union, ssidUnion)
+        onPhysicalNetworksChanged?.invoke(ipUnion, ssidUnion)
     }
 
     // The routing engine lives in the core, which outlives the Dart isolate, so the
@@ -347,7 +351,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         } finally {
             networkInfos.clear()
             updateRouting()
-            lastIpv4Union = emptyList()
+            lastIpUnion = emptyList()
             lastSsidUnion = emptyList()
             lastPrimary = null
             resetThrottle.reset()

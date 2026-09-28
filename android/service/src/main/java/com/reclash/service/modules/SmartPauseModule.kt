@@ -26,13 +26,13 @@ internal class SmartPauseModule(
     private var eventJob: Job? = null
     private var events = Channel<String>(Channel.CONFLATED)
 
-    @Volatile private var lastIpv4: List<String> = emptyList()
+    @Volatile private var lastIps: List<String> = emptyList()
     @Volatile private var lastSsids: List<String> = emptyList()
     @Volatile private var manualAnchor: List<String>? = null
     @Volatile private var transitionAttempts = 0
 
     fun onPhysicalNetworksChanged(ips: List<String>, ssids: List<String>) {
-        lastIpv4 = ips
+        lastIps = ips
         lastSsids = ssids
         events.trySend("network")
     }
@@ -83,11 +83,23 @@ internal class SmartPauseModule(
             paused = pauseState.paused,
             sessionAgeMs = (uptimeMillis() - ServiceConfig.sessionStartedAt).coerceAtLeast(0L),
         )
-        val networkKnown = lastIpv4.isNotEmpty() || lastSsids.isNotEmpty()
-        val trusted = isTrusted(config)
-        when (evaluateSmartPause(config, session, networkKnown, trusted)) {
+        val networkKnown = lastIps.isNotEmpty() || lastSsids.isNotEmpty()
+        val ssidRule = TrustedNetworkMatcher.matchSsid(lastSsids, config.networks)
+        val subnetRules = TrustedNetworkMatcher.matchedIpRules(lastIps, config.networks)
+        val matchedRule = ssidRule ?: subnetRules.firstOrNull()
+        val trusted = matchedRule != null
+        when (
+            evaluateSmartPause(
+                config,
+                session,
+                networkKnown,
+                trusted,
+                ssidHit = ssidRule != null,
+                subnetHit = subnetRules.isNotEmpty(),
+            )
+        ) {
             SmartPauseDecision.PAUSE -> {
-                log("SmartPause ($reason): trusted network, pausing")
+                log("SmartPause ($reason): trusted network ($matchedRule), pausing")
                 runTransition("pause") { applyPause() }
             }
 
@@ -165,21 +177,38 @@ internal class SmartPauseModule(
     }.getOrDefault(false)
 
     private fun isTrusted(config: SmartPauseConfig): Boolean =
-        TrustedNetworkMatcher.matchesAny(lastIpv4, config.networks) ||
-            TrustedNetworkMatcher.matchesSsid(lastSsids, config.networks)
+        TrustedNetworkMatcher.matchSsid(lastSsids, config.networks) != null ||
+            TrustedNetworkMatcher.matchedIpRules(lastIps, config.networks).isNotEmpty()
 
     private fun currentAnchor(): List<String> =
         if (lastSsids.isNotEmpty()) {
             lastSsids
         } else {
-            lastIpv4.map { "${it.substringBeforeLast('.')}.0/24" }.sorted()
+            lastIps.map { ip ->
+                if (ip.contains(':')) {
+                    anchorIpv6Subnet(ip)
+                } else {
+                    "${ip.substringBeforeLast('.')}.0/24"
+                }
+            }.sorted()
         }
+
+    private fun anchorIpv6Subnet(ip: String): String {
+        val bytes = TrustedNetworkMatcher.parseIpBytes(ip) ?: return ip
+        if (bytes.size != 16) return ip
+        val head = (0 until 4).joinToString(":") { i ->
+            (((bytes[i * 2].toInt() and 0xFF) shl 8) or (bytes[i * 2 + 1].toInt() and 0xFF))
+                .toString(16)
+        }
+        return "$head::/64"
+    }
 
     private fun currentConfig(): SmartPauseConfig {
         val options = ServiceConfig.vpnOptions
         return SmartPauseConfig(
             enabled = options?.smartPauseEnabled == true,
             networks = options?.smartPauseNetworks.orEmpty(),
+            strict = options?.smartPauseStrict == true,
         )
     }
 

@@ -2228,6 +2228,135 @@ abstract class _$CurrentIPv4s extends $Notifier<List<String>> {
   }
 }
 
+@ProviderFor(CurrentIPv6s)
+final currentIPv6sProvider = CurrentIPv6sProvider._();
+
+final class CurrentIPv6sProvider
+    extends $NotifierProvider<CurrentIPv6s, List<String>> {
+  CurrentIPv6sProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentIPv6sProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentIPv6sHash();
+
+  @$internal
+  @override
+  CurrentIPv6s create() => CurrentIPv6s();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<String>>(value),
+    );
+  }
+}
+
+String _$currentIPv6sHash() => r'bc5e6841725214eccaba654dd5f1e49195b4574c';
+
+abstract class _$CurrentIPv6s extends $Notifier<List<String>> {
+  List<String> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<List<String>, List<String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<String>, List<String>>,
+              List<String>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// The last Smart Pause transition and the rule behind it, so the settings
+/// screen can name the match instead of only showing a generic banner.
+
+@ProviderFor(SmartPauseLastEvent)
+final smartPauseLastEventProvider = SmartPauseLastEventProvider._();
+
+/// The last Smart Pause transition and the rule behind it, so the settings
+/// screen can name the match instead of only showing a generic banner.
+final class SmartPauseLastEventProvider
+    extends
+        $NotifierProvider<
+          SmartPauseLastEvent,
+          ({DateTime at, bool paused, String rule})?
+        > {
+  /// The last Smart Pause transition and the rule behind it, so the settings
+  /// screen can name the match instead of only showing a generic banner.
+  SmartPauseLastEventProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'smartPauseLastEventProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$smartPauseLastEventHash();
+
+  @$internal
+  @override
+  SmartPauseLastEvent create() => SmartPauseLastEvent();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(({DateTime at, bool paused, String rule})? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<({DateTime at, bool paused, String rule})?>(value),
+    );
+  }
+}
+
+String _$smartPauseLastEventHash() =>
+    r'181d297f71445dbf679ca9b78400c3b8937728e4';
+
+/// The last Smart Pause transition and the rule behind it, so the settings
+/// screen can name the match instead of only showing a generic banner.
+
+abstract class _$SmartPauseLastEvent
+    extends $Notifier<({DateTime at, bool paused, String rule})?> {
+  ({DateTime at, bool paused, String rule})? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({DateTime at, bool paused, String rule})?,
+              ({DateTime at, bool paused, String rule})?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({DateTime at, bool paused, String rule})?,
+                ({DateTime at, bool paused, String rule})?
+              >,
+              ({DateTime at, bool paused, String rule})?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Plain reachability from the last connectivity report; null before the first.
 
 @ProviderFor(NetworkReachable)
@@ -2404,18 +2533,15 @@ abstract class _$ScreenOff extends $Notifier<bool> {
   }
 }
 
-/// The OS battery-saver state, mirrored from Android so animations fold to
-/// reduce-motion while power save is on; false where no such signal exists.
+/// OS battery-saver mirrored from Android; folds animation to reduce-motion.
 
 @ProviderFor(PowerSaveMode)
 final powerSaveModeProvider = PowerSaveModeProvider._();
 
-/// The OS battery-saver state, mirrored from Android so animations fold to
-/// reduce-motion while power save is on; false where no such signal exists.
+/// OS battery-saver mirrored from Android; folds animation to reduce-motion.
 final class PowerSaveModeProvider
     extends $NotifierProvider<PowerSaveMode, bool> {
-  /// The OS battery-saver state, mirrored from Android so animations fold to
-  /// reduce-motion while power save is on; false where no such signal exists.
+  /// OS battery-saver mirrored from Android; folds animation to reduce-motion.
   PowerSaveModeProvider._()
     : super(
         from: null,
@@ -2445,8 +2571,7 @@ final class PowerSaveModeProvider
 
 String _$powerSaveModeHash() => r'59787699df1121045589e70ddbcaf80e78b278f0';
 
-/// The OS battery-saver state, mirrored from Android so animations fold to
-/// reduce-motion while power save is on; false where no such signal exists.
+/// OS battery-saver mirrored from Android; folds animation to reduce-motion.
 
 abstract class _$PowerSaveMode extends $Notifier<bool> {
   bool build();
@@ -2466,17 +2591,14 @@ abstract class _$PowerSaveMode extends $Notifier<bool> {
   }
 }
 
-/// True once the foreground UI has gone untouched long enough to freeze ambient
-/// loops; armed only on mobile, which has no frame-level idle pacer.
+/// Foreground untouched long enough to freeze ambient loops; mobile-only.
 
 @ProviderFor(UiIdle)
 final uiIdleProvider = UiIdleProvider._();
 
-/// True once the foreground UI has gone untouched long enough to freeze ambient
-/// loops; armed only on mobile, which has no frame-level idle pacer.
+/// Foreground untouched long enough to freeze ambient loops; mobile-only.
 final class UiIdleProvider extends $NotifierProvider<UiIdle, bool> {
-  /// True once the foreground UI has gone untouched long enough to freeze ambient
-  /// loops; armed only on mobile, which has no frame-level idle pacer.
+  /// Foreground untouched long enough to freeze ambient loops; mobile-only.
   UiIdleProvider._()
     : super(
         from: null,
@@ -2506,8 +2628,7 @@ final class UiIdleProvider extends $NotifierProvider<UiIdle, bool> {
 
 String _$uiIdleHash() => r'1d3e296931b2cc26527ccdf9e8844c0c1200ac3c';
 
-/// True once the foreground UI has gone untouched long enough to freeze ambient
-/// loops; armed only on mobile, which has no frame-level idle pacer.
+/// Foreground untouched long enough to freeze ambient loops; mobile-only.
 
 abstract class _$UiIdle extends $Notifier<bool> {
   bool build();

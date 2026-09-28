@@ -300,4 +300,30 @@ void main() {
     expect(calls, ['resume', 'pause']);
     expect(container.read(manualPauseProvider).paused, isFalse);
   });
+
+  testWidgets('a policy transition records the matched rule', (tester) async {
+    final container = await pumpManager(tester);
+    container
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: ['Office'],
+          ),
+        );
+    container.read(currentSSIDProvider.notifier).value = 'Office';
+    container.read(runTimeProvider.notifier).update((_) => 1);
+    await tester.pump(_debounce);
+
+    final event = container.read(smartPauseLastEventProvider);
+    expect(event?.paused, isTrue);
+    expect(event?.rule, 'Office');
+
+    container.read(currentSSIDProvider.notifier).value = 'Cafe';
+    await tester.pump(_debounce);
+
+    final resumed = container.read(smartPauseLastEventProvider);
+    expect(resumed?.paused, isFalse);
+    expect(resumed?.rule, isEmpty);
+  });
 }

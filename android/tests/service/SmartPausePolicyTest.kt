@@ -204,4 +204,68 @@ class SmartPausePolicyTest {
         assertFalse(TrustedNetworkMatcher.matchesSsid(listOf("Home Wi-Fi"), listOf("  ")))
         assertFalse(TrustedNetworkMatcher.matchesSsid(emptyList(), listOf("home wi-fi")))
     }
+
+    @Test
+    fun `ipv6 subnet rules match local ipv6 addresses`() {
+        val networks = listOf("fd00:db8:1::/48", "fe80::1")
+        assertTrue(TrustedNetworkMatcher.matchesAny(listOf("fd00:db8:1::42"), networks))
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("fd00:db8:2::42"), networks))
+        assertTrue(TrustedNetworkMatcher.matchesAny(listOf("fe80::1"), networks))
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("fe80::2"), networks))
+        assertTrue(TrustedNetworkMatcher.matchesAny(listOf("2001:db8::1"), listOf("2001:db8::/32")))
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("2001:db8:8000::1"), listOf("2001:db8::/33")))
+    }
+
+    @Test
+    fun `ipv6 and ipv4 families never cross-match`() {
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("fd00::1"), listOf("192.168.1.0/24")))
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("192.168.1.5"), listOf("fd00::/8")))
+        assertFalse(TrustedNetworkMatcher.matchesAny(listOf("fd00::1"), listOf("::/0")))
+    }
+
+    @Test
+    fun `strict config needs both an ssid and a subnet hit`() {
+        val strict = SmartPauseConfig(
+            enabled = true,
+            networks = listOf("Home Wi-Fi", "192.168.1.0/24"),
+            strict = true,
+        )
+        assertEquals(
+            SmartPauseDecision.PAUSE,
+            evaluateSmartPause(strict, session(), true, trusted = true, ssidHit = true, subnetHit = true),
+        )
+        assertEquals(
+            SmartPauseDecision.NONE,
+            evaluateSmartPause(strict, session(), true, trusted = true, ssidHit = true, subnetHit = false),
+        )
+        assertEquals(
+            SmartPauseDecision.NONE,
+            evaluateSmartPause(strict, session(), true, trusted = true, ssidHit = false, subnetHit = true),
+        )
+    }
+
+    @Test
+    fun `strict falls back without both rule kinds`() {
+        val strictSsids = SmartPauseConfig(enabled = true, networks = listOf("Home Wi-Fi"), strict = true)
+        assertEquals(
+            SmartPauseDecision.PAUSE,
+            evaluateSmartPause(strictSsids, session(), true, trusted = true),
+        )
+        assertEquals(
+            SmartPauseDecision.RESUME,
+            evaluateSmartPause(strictSsids, session(paused = true), true, trusted = false),
+        )
+    }
+
+    @Test
+    fun `non-strict config keeps the combined trust signal`() {
+        val loose = SmartPauseConfig(
+            enabled = true,
+            networks = listOf("Home Wi-Fi", "192.168.1.0/24"),
+        )
+        assertEquals(
+            SmartPauseDecision.PAUSE,
+            evaluateSmartPause(loose, session(), true, trusted = true, ssidHit = true, subnetHit = false),
+        )
+    }
 }

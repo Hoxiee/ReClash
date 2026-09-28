@@ -41,6 +41,7 @@ void main() {
     required SsidReader readSsid,
     void Function(List<ConnectivityResult>)? onConnectivityChanged,
     Ipv4sReader? readIpv4s,
+    Ipv6sReader? readIpv6s,
     bool? isDesktop,
     List<String> networks = const ['Home'],
   }) async {
@@ -51,6 +52,7 @@ void main() {
           connectivityStream: connectivity.stream,
           readSsid: readSsid,
           readIpv4s: readIpv4s,
+          readIpv6s: readIpv6s,
           isDesktop: isDesktop,
           onConnectivityChanged: onConnectivityChanged,
           child: const SizedBox.shrink(),
@@ -267,6 +269,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(currentIPv4sProvider), isEmpty);
+  });
+
+  testWidgets('publishes IPv6 addresses alongside IPv4 ones', (tester) async {
+    var v6 = ['fd00::42'];
+    await pumpManager(
+      tester,
+      readSsid: () async => 'Home',
+      readIpv4s: () async => ['192.168.1.55'],
+      readIpv6s: () async => v6,
+    );
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+    expect(container.read(currentIPv6sProvider), ['fd00::42']);
+
+    v6 = [];
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+
+    expect(container.read(currentIPv6sProvider), isEmpty);
   });
 
   testWidgets('off desktop nothing is polled, but events still land', (

@@ -272,6 +272,7 @@ SharedState sharedState(Ref ref) {
       smartPauseEnabled: vpnSetting.smartPauseEnabled,
       smartPauseNetworks: vpnSetting.smartPauseNetworks,
       smartPauseCloseConnections: vpnSetting.smartPauseCloseConnections,
+      smartPauseStrict: vpnSetting.smartPauseStrict,
       desyncEnabled: desyncSetting.enabled,
       desyncOnly: desyncSetting.enabled && desyncSetting.onlyDpi,
       desyncPort: desyncSetting.port,
@@ -316,8 +317,10 @@ List<String> networkAnchor(Ref ref) {
   if (ssid != null && ssid.isNotEmpty) {
     return [ssid];
   }
-  final anchors = ref.watch(currentIPv4sProvider).map(ipv4ToSubnetCidr).toList()
-    ..sort();
+  final anchors = [
+    ...ref.watch(currentIPv4sProvider).map(ipv4ToSubnetCidr),
+    ...ref.watch(currentIPv6sProvider).map(ipv6ToSubnetCidr),
+  ]..sort();
   return anchors;
 }
 
@@ -342,6 +345,7 @@ bool paused(Ref ref) {
       (state) => (
         enabled: state.smartPauseEnabled,
         networks: state.smartPauseNetworks,
+        strict: state.smartPauseStrict,
       ),
     ),
   );
@@ -355,6 +359,8 @@ bool paused(Ref ref) {
     smartPause.networks,
     ssid: ref.watch(currentSSIDProvider),
     ipv4s: ref.watch(currentIPv4sProvider),
+    ipv6s: ref.watch(currentIPv6sProvider),
+    strict: smartPause.strict,
   );
 }
 

@@ -41,6 +41,7 @@ class SmartPauseModuleTest {
     private fun options(
         enabled: Boolean = true,
         networks: List<String> = listOf("192.168.1.0/24", "Home Wi-Fi"),
+        strict: Boolean = false,
     ) = VpnOptions(
         enable = true,
         port = 7890,
@@ -60,6 +61,7 @@ class SmartPauseModuleTest {
         smartPauseEnabled = enabled,
         smartPauseNetworks = networks,
         smartPauseCloseConnections = true,
+        smartPauseStrict = strict,
     )
 
     // The default log seam hits android.util.Log, which is not mocked on the JVM.
@@ -244,5 +246,42 @@ class SmartPauseModuleTest {
         runCurrent()
         assertEquals(0, actions.pauseCalls)
         assertEquals(0, actions.resumeCalls)
+    }
+
+    @Test
+    fun `trusted ipv6 subnet pauses`() = runTest {
+        ServiceConfig.updateVpnOptions(options(networks = listOf("fd00:db8:1::/48")))
+        val module = module({ 60_000L })
+        module.start()
+        module.onPhysicalNetworksChanged(listOf("fd00:db8:1::42"), emptyList())
+        advanceTimeBy(SmartPausePolicy.DECISION_DEBOUNCE_MS)
+        runCurrent()
+        assertEquals(1, actions.pauseCalls)
+    }
+
+    @Test
+    fun `strict config ignores a lone subnet hit`() = runTest {
+        ServiceConfig.updateVpnOptions(
+            options(networks = listOf("Home Wi-Fi", "192.168.1.0/24"), strict = true),
+        )
+        val module = module({ 60_000L })
+        module.start()
+        module.onPhysicalNetworksChanged(listOf("192.168.1.55"), listOf("Other Wi-Fi"))
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, actions.pauseCalls)
+    }
+
+    @Test
+    fun `strict config pauses on a combined hit`() = runTest {
+        ServiceConfig.updateVpnOptions(
+            options(networks = listOf("Home Wi-Fi", "192.168.1.0/24"), strict = true),
+        )
+        val module = module({ 60_000L })
+        module.start()
+        module.onPhysicalNetworksChanged(listOf("192.168.1.55"), listOf("Home Wi-Fi"))
+        advanceTimeBy(SmartPausePolicy.DECISION_DEBOUNCE_MS)
+        runCurrent()
+        assertEquals(1, actions.pauseCalls)
     }
 }

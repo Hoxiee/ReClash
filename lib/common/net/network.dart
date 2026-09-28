@@ -33,6 +33,10 @@ extension InternetAddressExt on InternetAddress {
   bool get isIPv4 {
     return type == InternetAddressType.IPv4;
   }
+
+  bool get isIPv6 {
+    return type == InternetAddressType.IPv6;
+  }
 }
 
 Future<String?> getLocalIpAddress() async {
@@ -73,26 +77,122 @@ Future<List<String>> getLocalIPv4s() async {
   ];
 }
 
-/// SSID rules match exactly; subnet rules accept bare IPv4s as /32.
+Future<List<String>> getLocalIPv6s() async {
+  final interfaces = await listNetworkInterfaces(includeLoopback: false);
+  return [
+    for (final interface in interfaces)
+      for (final address in interface.addresses)
+        if (address.isIPv6) address.address,
+  ];
+}
+
+/// SSID rules match exactly; subnet rules accept bare IPs as host routes.
+/// A strict list pauses only when an SSID rule and a subnet rule both hit.
 /// Hand-mirrored by Kotlin's TrustedNetworkMatcher in SmartPause.kt.
 bool smartPauseMatches(
   List<String> networks, {
   String? ssid,
   List<String> ipv4s = const [],
+  List<String> ipv6s = const [],
+  bool strict = false,
 }) {
+  return smartPauseMatchedRules(
+    networks,
+    ssid: ssid,
+    ipv4s: ipv4s,
+    ipv6s: ipv6s,
+    strict: strict,
+  ).isNotEmpty;
+}
+
+List<String> smartPauseMatchedRules(
+  List<String> networks, {
+  String? ssid,
+  List<String> ipv4s = const [],
+  List<String> ipv6s = const [],
+  bool strict = false,
+}) {
+  String? ssidHit;
   final trustedSsid = ssid?.trim().toLowerCase();
   if (trustedSsid != null && trustedSsid.isNotEmpty) {
     for (final network in networks) {
       if (network.trim().toLowerCase() == trustedSsid) {
-        return true;
+        ssidHit = network;
+        break;
       }
     }
   }
-  return ipv4s.any((ipv4) => _inTrustedSubnets(ipv4, networks));
+  final subnetHits = [
+    for (final network in networks)
+      if (_parseCidrV4(network) != null
+          ? ipv4s.any((ipv4) => _inTrustedSubnets(ipv4, [network]))
+          : _parseCidrV6(network) != null &&
+                ipv6s.any((ipv6) => _inTrustedSubnetsV6(ipv6, network)))
+        network,
+  ];
+  if (strict &&
+      networks.any((network) => !isSubnetRule(network)) &&
+      networks.any(isSubnetRule)) {
+    return ssidHit != null && subnetHits.isNotEmpty
+        ? [ssidHit, ...subnetHits]
+        : const [];
+  }
+  final matched = [...subnetHits];
+  if (ssidHit != null) {
+    matched.insert(0, ssidHit);
+  }
+  return matched;
 }
 
-/// A rule that parses as an IPv4 subnet needs no location permission to match.
-bool isSubnetRule(String network) => _parseCidr(network) != null;
+/// A rule that parses as an IPv4 or IPv6 subnet needs no location permission.
+bool isSubnetRule(String network) =>
+    _parseCidrV4(network) != null || _parseCidrV6(network) != null;
+
+/// Home subnets are /24 and site allocations are /48 or longer; anything
+/// wider trusts networks the user has never seen.
+bool smartPauseIsBroadRule(String network) {
+  final v4 = _parseCidrV4(network);
+  if (v4 != null) {
+    return v4.$2 <= 16;
+  }
+  final v6 = _parseCidrV6(network);
+  if (v6 != null) {
+    return v6.prefix < 48;
+  }
+  return false;
+}
+
+/// A /64 is the smallest anchor that survives a SLAAC renewal.
+String ipv6ToSubnetCidr(String ipv6) {
+  final bytes = _parseIpv6(ipv6);
+  if (bytes == null) {
+    return ipv6;
+  }
+  final head = [
+    for (var i = 0; i < 4; i++)
+      ((bytes[i * 2] << 8) | bytes[i * 2 + 1]).toRadixString(16),
+  ].join(':');
+  return '$head::/64';
+}
+
+Uint8List? _parseIpv6(String text) {
+  var host = text.trim();
+  if (host.startsWith('[') && host.endsWith(']')) {
+    host = host.substring(1, host.length - 1);
+  }
+  final zone = host.indexOf('%');
+  if (zone != -1) {
+    host = host.substring(0, zone);
+  }
+  if (!host.contains(':')) {
+    return null;
+  }
+  final parsed = InternetAddress.tryParse(host);
+  if (parsed == null || parsed.type != InternetAddressType.IPv6) {
+    return null;
+  }
+  return parsed.rawAddress;
+}
 
 /// A /24 is the smallest anchor that survives a DHCP renewal.
 String ipv4ToSubnetCidr(String ipv4) {
@@ -109,7 +209,7 @@ bool _inTrustedSubnets(String ipv4, List<String> networks) {
     return false;
   }
   for (final network in networks) {
-    final cidr = _parseCidr(network);
+    final cidr = _parseCidrV4(network);
     if (cidr == null) {
       continue;
     }
@@ -146,7 +246,7 @@ int? _parseIpv4(String text) {
   return value;
 }
 
-(int, int)? _parseCidr(String text) {
+(int, int)? _parseCidrV4(String text) {
   final trimmed = text.trim();
   final slash = trimmed.indexOf('/');
   final addressPart = slash == -1 ? trimmed : trimmed.substring(0, slash);
@@ -161,4 +261,50 @@ int? _parseIpv4(String text) {
   }
   final mask = prefix == 0 ? 0 : -1 << (32 - prefix);
   return (address & mask, prefix);
+}
+
+({Uint8List network, int prefix})? _parseCidrV6(String text) {
+  final trimmed = text.trim();
+  final slash = trimmed.indexOf('/');
+  final addressPart = slash == -1 ? trimmed : trimmed.substring(0, slash);
+  final prefixPart = slash == -1 ? '128' : trimmed.substring(slash + 1);
+  final prefix = int.tryParse(prefixPart);
+  if (prefix == null || prefix < 0 || prefix > 128) {
+    return null;
+  }
+  final address = _parseIpv6(addressPart);
+  if (address == null) {
+    return null;
+  }
+  final masked = Uint8List.fromList(address);
+  for (var i = prefix; i < 128; i++) {
+    masked[i ~/ 8] &= ~(1 << (7 - i % 8));
+  }
+  return (network: masked, prefix: prefix);
+}
+
+bool _inTrustedSubnetsV6(String ipv6, String network) {
+  final address = _parseIpv6(ipv6);
+  final cidr = _parseCidrV6(network);
+  if (address == null || cidr == null || cidr.prefix <= 0) {
+    return false;
+  }
+  return _maskedPrefixEqual(address, cidr.network, cidr.prefix);
+}
+
+bool _maskedPrefixEqual(Uint8List address, Uint8List network, int prefix) {
+  final full = prefix ~/ 8;
+  for (var i = 0; i < full; i++) {
+    if (address[i] != network[i]) {
+      return false;
+    }
+  }
+  final rest = prefix % 8;
+  if (rest != 0) {
+    final mask = 0xFF << (8 - rest) & 0xFF;
+    if ((address[full] & mask) != (network[full] & mask)) {
+      return false;
+    }
+  }
+  return true;
 }

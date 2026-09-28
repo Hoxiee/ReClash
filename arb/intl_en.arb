@@ -46,6 +46,21 @@
   "profiles": "Profiles",
   "tools": "Tools",
   "toolsSelectPanePlaceholder": "Select a setting to view it here.",
+  "toolsOverview": "Overview",
+  "toolsCategoryDiagnostics": "Diagnostics",
+  "toolsCategoryPersonalization": "Personalization",
+  "toolsCategoryConfiguration": "Configuration",
+  "toolsCategorySystem": "System",
+  "toolsSearchHint": "Search tools",
+  "toolsNoResults": "Nothing matches your search",
+  "toolsSearchResultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
+  "@toolsSearchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "logs": "Logs",
   "logsAndDiagnostics": "Logs and diagnostics",
   "logsDesc": "Captured log records",
@@ -894,6 +909,10 @@
   "closeConnectionsDesc": "Drop every open connection when the VPN pauses",
   "trustedNow": "Current network is trusted — VPN paused here",
   "notTrustedNow": "Current network is not trusted",
+  "smartPauseStrict": "Require SSID and subnet together",
+  "smartPauseStrictDesc": "When both kinds of rules exist, pause only if an SSID and a subnet both match",
+  "smartPauseMatchedOn": "Matched {rule} • {time}",
+  "broadNetworkWarn": "Broad rule — trusts a large address range",
   "locationPermissionDesc": "The system requires location permission to read the Wi-Fi name. On Android choose \"Allow all the time\", otherwise the Wi-Fi name cannot be read while the app is in the background.",
   "locationPermissionDeniedMessage": "Location permission was denied, so the current Wi-Fi name cannot be read. Please enable location permission manually in system settings.",
   "authorized": "Authorized",
@@ -963,6 +982,9 @@
   "heroNoNetworkHint": "Waiting for a connection",
   "heroBlockedTitle": "Tunnel is blocked",
   "heroBlockedHint": "Another VPN is capturing traffic — tap to retry",
+  "heroConfigInvalidTitle": "Subscription is invalid",
+  "heroConfigInvalidHint": "Contact your provider's support",
+  "subscriptionConfigInvalidTip": "This subscription's configuration is invalid and cannot be used. Contact your provider's support.",
   "connectedFor": "Connected {time}",
   "trafficFreeOfTotal": "free of {total}",
   "subscriptionCaption": "Subscription",
@@ -2491,4 +2513,5 @@
   "companionReceiverExplainPhone": "Other phones on this network can control this phone while the receiver is on.",
   "companionScanWithPhone": "Open ReClash on your phone and scan this code",
   "companionSendFromPhone": "Send from this phone",
-  "companionEnterUrl": "Enter a URL"}
+  "companionEnterUrl": "Enter a URL"
+}

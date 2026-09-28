@@ -55,6 +55,7 @@ abstract class VpnOptions with _$VpnOptions {
     @Default(false) bool smartPauseEnabled,
     @Default([]) List<String> smartPauseNetworks,
     @Default(false) bool smartPauseCloseConnections,
+    @Default(false) bool smartPauseStrict,
     @Default(false) bool desyncEnabled,
     @Default(false) bool desyncOnly,
     @Default(defaultDesyncPort) int desyncPort,
