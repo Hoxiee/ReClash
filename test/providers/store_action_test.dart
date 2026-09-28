@@ -11,6 +11,7 @@ import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
@@ -47,6 +48,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(0);
+    registerFallbackValue(const OdometerSignal(OdometerSignalKind.prepareDown));
     home = Directory.systemTemp.createTempSync('reclash-store-');
     AppPath.supportDirectory = () async => home;
     AppPath.temporaryDirectory = () async => home;
@@ -63,6 +65,12 @@ void main() {
     await preferences.setVersion(7);
     core = _MockCoreHandlerInterface();
     when(() => core.clearEffect(any())).thenAnswer((_) async => '');
+    when(() => core.stopListener()).thenAnswer((_) async => true);
+    when(() => core.getTraffic(any())).thenAnswer((_) async => const Traffic());
+    when(
+      () => core.getTotalTraffic(any()),
+    ).thenAnswer((_) async => const Traffic());
+    when(() => core.signalOdometer(any())).thenAnswer((_) async => true);
     testDatabase = db.Database(NativeDatabase.memory());
     db.database = testDatabase;
     _RecordingSystemAction.exits.clear();
@@ -186,6 +194,47 @@ void main() {
             'saving on the way out would write the config back over the '
             'preferences that were just cleared.',
       );
+    });
+
+    test('stops the running tunnel before wiping', () async {
+      final container = buildContainer();
+      container.read(runTimeProvider.notifier).value = 0;
+
+      await container.read(storeActionProvider.notifier).handleClear();
+
+      verify(() => core.stopListener()).called(1);
+      expect(
+        container.read(runTimeProvider),
+        isNull,
+        reason: 'the tunnel is down before its profiles are deleted.',
+      );
+      expect(_RecordingSystemAction.exits, [false]);
+    });
+
+    test('skips the tunnel stop when it is already down', () async {
+      final container = buildContainer();
+
+      await container.read(storeActionProvider.notifier).handleClear();
+
+      verifyNever(() => core.stopListener());
+      expect(_RecordingSystemAction.exits, [false]);
+    });
+
+    test('a failed tunnel stop never blocks the wipe', () async {
+      when(() => core.stopListener()).thenThrow(Exception('tunnel stuck'));
+      final container = buildContainer();
+      container.read(runTimeProvider.notifier).value = 0;
+
+      await container.read(storeActionProvider.notifier).handleClear();
+
+      expect(
+        await preferences.getVersion(),
+        0,
+        reason:
+            'the exit at the end tears the tunnel down anyway, so a stop '
+            'failure must not cancel the wipe.',
+      );
+      expect(_RecordingSystemAction.exits, [false]);
     });
 
     test('a pending preference save never lands after the clear', () async {

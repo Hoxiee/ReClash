@@ -173,6 +173,16 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
         .update((state) => state?.copyWith(fileName: value));
   }
 
+  Future<void> _handleClearData() async {
+    final confirmed = await dialogs.showCommonDialog<bool>(
+      child: const ClearDataConfirmDialog(),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    await ref.read(storeActionProvider.notifier).handleClear();
+  }
+
   Future<void> _handleUpdateRestoreStrategy() async {
     final restoreStrategy = ref.read(
       appSettingProvider.select((state) => state.restoreStrategy),
@@ -302,6 +312,19 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
             ],
             enterDelay: const Duration(milliseconds: 100),
           ),
+          SettingSection(
+            title: appLocalizations.dangerZone,
+            items: [
+              DecorationListItem(
+                invalid: true,
+                onPressed: _handleClearData,
+                leading: const GlyphIcon(AppGlyphs.warning),
+                title: Text(appLocalizations.clearData),
+                subtitle: Text(appLocalizations.clearDataDesc),
+              ),
+            ],
+            enterDelay: const Duration(milliseconds: 150),
+          ),
           const SettingBottomInset(),
         ],
       ),
@@ -360,6 +383,110 @@ class _RestoreStrategyItem extends ConsumerWidget {
       trailing: FilledButton(
         onPressed: onPressed,
         child: Text(restoreStrategy.label),
+      ),
+    );
+  }
+}
+
+class ClearDataConfirmDialog extends StatefulWidget {
+  const ClearDataConfirmDialog({super.key});
+
+  static const confirmDelay = Duration(seconds: 3);
+
+  @override
+  State<ClearDataConfirmDialog> createState() => _ClearDataConfirmDialogState();
+}
+
+class _ClearDataConfirmDialogState extends State<ClearDataConfirmDialog> {
+  late int _secondsLeft;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _secondsLeft = ClearDataConfirmDialog.confirmDelay.inSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) {
+        return;
+      }
+      if (_secondsLeft <= 1) {
+        _timer?.cancel();
+        setState(() => _secondsLeft = 0);
+        return;
+      }
+      setState(() => _secondsLeft--);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final locked = _secondsLeft > 0;
+    return CommonDialog(
+      title: appLocalizations.clearData,
+      actions: [
+        TextButton(
+          autofocus: true,
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(appLocalizations.cancel),
+        ),
+        TextButton(
+          style: locked
+              ? null
+              : TextButton.styleFrom(foregroundColor: colorScheme.error),
+          onPressed: locked ? null : () => Navigator.of(context).pop(true),
+          child: Text(
+            locked
+                ? '${appLocalizations.confirm} ($_secondsLeft)'
+                : appLocalizations.confirm,
+          ),
+        ),
+      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            spacing: AppSpacing.sm,
+            children: [
+              GlyphIcon(AppGlyphs.warning, color: colorScheme.error),
+              Expanded(
+                child: Text(
+                  appLocalizations.clearDataIrreversible,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    color: colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(appLocalizations.clearDataWarning),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            appLocalizations.clearDataBackupHint,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (locked) ...[
+            const SizedBox(height: AppSpacing.md),
+            LinearProgressIndicator(
+              value:
+                  1 -
+                  _secondsLeft / ClearDataConfirmDialog.confirmDelay.inSeconds,
+              color: colorScheme.error,
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -5977,6 +5977,51 @@ class AppLocalizations {
     );
   }
 
+  /// `Danger zone`
+  String get dangerZone {
+    return Intl.message('Danger zone', name: 'dangerZone', desc: '', args: []);
+  }
+
+  /// `Delete all profiles, settings and files. The app will close.`
+  String get clearDataDesc {
+    return Intl.message(
+      'Delete all profiles, settings and files. The app will close.',
+      name: 'clearDataDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This cannot be undone.`
+  String get clearDataIrreversible {
+    return Intl.message(
+      'This cannot be undone.',
+      name: 'clearDataIrreversible',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash will permanently delete:\n• All profiles and their files\n• All settings, including the WebDAV binding\n• Scripts, rules and other local data\n• Cached provider data\n\nThe app will close when done.`
+  String get clearDataWarning {
+    return Intl.message(
+      'ReClash will permanently delete:\n• All profiles and their files\n• All settings, including the WebDAV binding\n• Scripts, rules and other local data\n• Cached provider data\n\nThe app will close when done.',
+      name: 'clearDataWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back up first with the buttons above — a backup is the only way back.`
+  String get clearDataBackupHint {
+    return Intl.message(
+      'Back up first with the buttons above — a backup is the only way back.',
+      name: 'clearDataBackupHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading...`
   String get loading {
     return Intl.message('Loading...', name: 'loading', desc: '', args: []);

@@ -560,6 +560,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tile grid with a start button",
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear data"),
+    "clearDataBackupHint": MessageLookupByLibrary.simpleMessage(
+      "Back up first with the buttons above — a backup is the only way back.",
+    ),
+    "clearDataDesc": MessageLookupByLibrary.simpleMessage(
+      "Delete all profiles, settings and files. The app will close.",
+    ),
+    "clearDataIrreversible": MessageLookupByLibrary.simpleMessage(
+      "This cannot be undone.",
+    ),
+    "clearDataWarning": MessageLookupByLibrary.simpleMessage(
+      "ReClash will permanently delete:\n• All profiles and their files\n• All settings, including the WebDAV binding\n• Scripts, rules and other local data\n• Cached provider data\n\nThe app will close when done.",
+    ),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
     "clientNotSupported": MessageLookupByLibrary.simpleMessage(
       "Client not supported",
@@ -823,6 +835,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
+    "dangerZone": MessageLookupByLibrary.simpleMessage("Danger zone"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "darkAt": MessageLookupByLibrary.simpleMessage("Dark at"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),

@@ -47,8 +47,23 @@ class StoreAction extends _$StoreAction {
     });
   }
 
+  Future<void> _stopTunnelBeforeClear() async {
+    if (!ref.read(isStartProvider)) {
+      return;
+    }
+    try {
+      await ref.read(setupActionProvider.notifier).setRunning(false);
+    } catch (error) {
+      commonPrint.log(
+        'Tunnel stop before clear failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+
   Future handleClear() async {
     debouncer.cancel(FunctionTag.savePreferences);
+    await _stopTunnelBeforeClear();
     final profileIds = ref
         .read(profilesProvider)
         .map((item) => item.id)

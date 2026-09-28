@@ -133,6 +133,212 @@ void main() {
     });
   });
 
+  group('ClearDataConfirmDialog', () {
+    Future<bool?> openClearData(
+      WidgetTester tester, {
+      required String action,
+      Duration wait = Duration.zero,
+    }) async {
+      bool? result;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () async {
+                    result = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => const ClearDataConfirmDialog(),
+                    );
+                  },
+                  child: const Text('open clear data'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open clear data'));
+      await tester.pumpAndSettle();
+      if (wait != Duration.zero) {
+        await tester.pump(wait);
+      }
+      await tester.tap(find.text(action));
+      await tester.pumpAndSettle();
+      return result;
+    }
+
+    testWidgets('locks confirm behind a 3 second countdown', (tester) async {
+      await pumpDialog(tester, const ClearDataConfirmDialog());
+
+      expect(find.text('Confirm (3)'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextButton>(find.widgetWithText(TextButton, 'Confirm (3)'))
+            .onPressed,
+        isNull,
+      );
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Confirm (2)'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('Confirm'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextButton>(find.widgetWithText(TextButton, 'Confirm'))
+            .onPressed,
+        isNotNull,
+      );
+    });
+
+    testWidgets('shows the irreversible warning and the backup hint', (
+      tester,
+    ) async {
+      await pumpDialog(tester, const ClearDataConfirmDialog());
+
+      expect(find.text('This cannot be undone.'), findsOneWidget);
+      expect(
+        find.textContaining('ReClash will permanently delete:'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('All profiles'), findsOneWidget);
+      expect(
+        find.textContaining('a backup is the only way back'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('confirm turns red once the countdown ends', (tester) async {
+      await pumpDialog(tester, const ClearDataConfirmDialog());
+
+      final locked = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Confirm (3)'),
+      );
+      expect(locked.style?.foregroundColor, isNull);
+
+      await tester.pump(ClearDataConfirmDialog.confirmDelay);
+
+      final unlocked = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Confirm'),
+      );
+      expect(
+        unlocked.style?.foregroundColor?.resolve({}),
+        Theme.of(
+          tester.element(find.widgetWithText(TextButton, 'Confirm')),
+        ).colorScheme.error,
+      );
+    });
+
+    testWidgets('cancelling returns false', (tester) async {
+      expect(await openClearData(tester, action: 'Cancel'), isFalse);
+    });
+
+    testWidgets('confirming after the countdown returns true', (tester) async {
+      expect(
+        await openClearData(
+          tester,
+          action: 'Confirm',
+          wait: ClearDataConfirmDialog.confirmDelay,
+        ),
+        isTrue,
+      );
+    });
+
+    testWidgets('disposing before the countdown ends raises nothing', (
+      tester,
+    ) async {
+      await pumpDialog(tester, const ClearDataConfirmDialog());
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: SizedBox.shrink()),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 5));
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('shows the Russian warning', (tester) async {
+      tester.view.physicalSize = const Size(1200, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            locale: Locale('ru'),
+            child: Scaffold(body: ClearDataConfirmDialog()),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Очистить данные'), findsOneWidget);
+      expect(find.text('Это действие нельзя отменить.'), findsOneWidget);
+      expect(find.textContaining('навсегда удалит:'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('BackupAndRestore clear data row', () {
+    Future<void> pumpScreen(WidgetTester tester) async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: BackupAndRestore()),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows the danger zone with the clear data row', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+
+      expect(find.text('Danger zone'), findsOneWidget);
+      expect(find.text('Clear data'), findsOneWidget);
+      expect(
+        find.text(
+          'Delete all profiles, settings and files. The app will close.',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('clear data asks for confirmation and aborts on cancel', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+
+      await tester.ensureVisible(find.text('Clear data'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear data'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('This cannot be undone.'), findsOneWidget);
+      expect(
+        find.textContaining('ReClash will permanently delete:'),
+        findsOneWidget,
+      );
+      expect(find.text('Confirm (3)'), findsOneWidget);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('This cannot be undone.'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('WebDAVFormDialog', () {
     testWidgets('rejects an empty form and stores nothing', (tester) async {
       await pumpDialog(tester, const WebDAVFormDialog());

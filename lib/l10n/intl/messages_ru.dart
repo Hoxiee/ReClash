@@ -574,6 +574,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сетка плиток и кнопка запуска",
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),
+    "clearDataBackupHint": MessageLookupByLibrary.simpleMessage(
+      "Сначала сделайте резервную копию кнопками выше — это единственный способ всё вернуть.",
+    ),
+    "clearDataDesc": MessageLookupByLibrary.simpleMessage(
+      "Удаление всех профилей, настроек и файлов. Приложение закроется.",
+    ),
+    "clearDataIrreversible": MessageLookupByLibrary.simpleMessage(
+      "Это действие нельзя отменить.",
+    ),
+    "clearDataWarning": MessageLookupByLibrary.simpleMessage(
+      "ReClash навсегда удалит:\n• Все профили и их файлы\n• Все настройки, включая привязку WebDAV\n• Скрипты, правила и другие локальные данные\n• Кэшированные данные провайдеров\n\nПо завершении приложение закроется.",
+    ),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Очистить поиск"),
     "clientNotSupported": MessageLookupByLibrary.simpleMessage(
       "Клиент не поддерживается",
@@ -837,6 +849,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "custom": MessageLookupByLibrary.simpleMessage("Вручную"),
     "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
+    "dangerZone": MessageLookupByLibrary.simpleMessage("Опасная зона"),
     "dark": MessageLookupByLibrary.simpleMessage("Тёмная"),
     "darkAt": MessageLookupByLibrary.simpleMessage("Тёмная в"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель"),
