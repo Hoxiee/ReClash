@@ -235,6 +235,42 @@ class AuthenticationPasswordItem extends ConsumerWidget {
   }
 }
 
+class SendDeviceIdentityItem extends ConsumerWidget {
+  const SendDeviceIdentityItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final region = ref.watch(appRegionProvider);
+    final sendIdentity = ref.watch(
+      appSettingProvider.select((state) => state.sendDeviceIdentity),
+    );
+    return DecorationListItem.toggle(
+      leading: const GlyphIcon(AppGlyphs.deviceInfo),
+      title: Text(appLocalizations.sendDeviceIdentity),
+      subtitle: Text(appLocalizations.sendDeviceIdentityDesc),
+      value: sendIdentity,
+      onChanged: (value) async {
+        if (!value &&
+            regionAllowsFacet(region, RegionalFacetId.deviceIdentity)) {
+          final confirmed = await dialogs.showMessage(
+            context: context,
+            title: appLocalizations.sendDeviceIdentity,
+            message: TextSpan(
+              text: appLocalizations.sendDeviceIdentityDisableWarning,
+            ),
+            confirmText: appLocalizations.turnOff,
+          );
+          if (confirmed != true || !context.mounted) return;
+        }
+        ref
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(sendDeviceIdentity: value));
+      },
+    );
+  }
+}
+
 ConfigToggleItem _clashToggle({
   required Glyph icon,
   required ConfigLabel title,
@@ -304,20 +340,7 @@ class GeneralListView extends ConsumerWidget {
           ),
         SettingSection(
           title: appLocalizations.identity,
-          items: [
-            const UaItem(),
-            ConfigToggleItem(
-              leading: const GlyphIcon(AppGlyphs.deviceInfo),
-              title: (l) => l.sendDeviceIdentity,
-              subtitle: (l) => l.sendDeviceIdentityDesc,
-              selector: appSettingProvider.select(
-                (state) => state.sendDeviceIdentity,
-              ),
-              onChanged: (ref, value) => ref
-                  .read(appSettingProvider.notifier)
-                  .update((state) => state.copyWith(sendDeviceIdentity: value)),
-            ),
-          ],
+          items: const [UaItem(), SendDeviceIdentityItem()],
           enterDelay: const Duration(milliseconds: 100),
         ),
         SettingSection(
