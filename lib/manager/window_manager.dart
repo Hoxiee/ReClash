@@ -8,8 +8,11 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart' hide captionGlyphSize;
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/active_server.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:window/window.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);
@@ -380,6 +383,7 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
       onDragStart: desktopWindow.startDragging,
       onDoubleTap: caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
+      leading: system.isMacOS ? null : const WindowStatusIndicator(),
       actions: system.isMacOS
           ? null
           : WindowHeaderActions(
@@ -402,6 +406,7 @@ class WindowHeaderBar extends StatelessWidget {
     required this.onDragStart,
     required this.onDoubleTap,
     this.title,
+    this.leading,
     this.actions,
   });
 
@@ -409,13 +414,16 @@ class WindowHeaderBar extends StatelessWidget {
   final VoidCallback onDragStart;
   final VoidCallback onDoubleTap;
   final Widget? title;
+  final Widget? leading;
   final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       shape: Border(
-        bottom: BorderSide(color: context.colorScheme.outlineVariant),
+        bottom: BorderSide(
+          color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
       ),
       child: SizedBox(
         height: height,
@@ -428,14 +436,24 @@ class WindowHeaderBar extends StatelessWidget {
                   onDragStart();
                 },
                 onDoubleTap: onDoubleTap,
-                child: ColoredBox(
-                  color: context.colorScheme.surfaceContainerHighest,
-                ),
+                child: ColoredBox(color: context.colorScheme.surface),
               ),
             ),
             if (title != null)
               Positioned.fill(
                 child: IgnorePointer(child: Center(child: title)),
+              ),
+            if (leading != null)
+              PositionedDirectional(
+                top: 0,
+                bottom: 0,
+                start: 0,
+                child: IgnorePointer(
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 10),
+                    child: Center(child: leading),
+                  ),
+                ),
               ),
             if (actions != null)
               Positioned(
@@ -457,6 +475,19 @@ class WindowHeaderBar extends StatelessWidget {
                       foregroundColor: WidgetStatePropertyAll(
                         context.colorScheme.onSurface,
                       ),
+                      overlayColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return context.colorScheme.onSurface.withValues(
+                            alpha: 0.12,
+                          );
+                        }
+                        if (states.contains(WidgetState.hovered)) {
+                          return context.colorScheme.onSurface.withValues(
+                            alpha: 0.08,
+                          );
+                        }
+                        return null;
+                      }),
                     ),
                   ),
                   child: actions!,
@@ -468,6 +499,10 @@ class WindowHeaderBar extends StatelessWidget {
     );
   }
 }
+
+/// Fixed rather than themed: the close affordance stays the same alarming red
+/// in every colour scheme, matching the platform convention.
+const _closeHoverColor = Color(0xFFEE2C3C);
 
 class WindowHeaderActions extends StatelessWidget {
   const WindowHeaderActions({
@@ -538,17 +573,17 @@ class WindowHeaderActions extends StatelessWidget {
                   final active =
                       states.contains(WidgetState.hovered) ||
                       states.contains(WidgetState.pressed);
-                  return active ? context.colorScheme.error : null;
+                  return active ? _closeHoverColor : null;
                 }),
                 foregroundColor: WidgetStateProperty.resolveWith((states) {
                   final active =
                       states.contains(WidgetState.hovered) ||
                       states.contains(WidgetState.pressed);
-                  return active ? context.colorScheme.onError : null;
+                  return active ? Colors.white : null;
                 }),
                 overlayColor: WidgetStateProperty.resolveWith((states) {
                   return states.contains(WidgetState.pressed)
-                      ? context.colorScheme.onError.opacity12
+                      ? Colors.white.withValues(alpha: 0.12)
                       : Colors.transparent;
                 }),
               ),
@@ -561,6 +596,97 @@ class WindowHeaderActions extends StatelessWidget {
     );
   }
 }
+
+/// The connection state carried into the title bar, so a window shrunk to a
+/// strip still says whether the tunnel is up. Mirrors the hero orb's vocabulary.
+class WindowStatusIndicator extends ConsumerWidget {
+  const WindowStatusIndicator({super.key});
+
+  static const double _dotSize = 8;
+  static const double _maxLabelWidth = 270;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = heroStatusOf(
+      ref.watch(heroLifecycleProvider),
+      ref.watch(connectionDoctorProvider.select(heroDoctorHealthOf)),
+    );
+    final configInvalid =
+        status == HeroStatus.broken &&
+        ref.watch(
+          runRequestStateProvider.select(
+            (state) => state.fault == RunRequestFault.configInvalid,
+          ),
+        );
+    final dotColor = heroPaletteOf(context, status).accent;
+    final baseLabel = _statusLabel(
+      context.appLocalizations,
+      status,
+      configInvalid,
+    );
+    final serverName = ref.watch(
+      activeServerProvider.select((server) => server.displayName),
+    );
+    final label =
+        (status == HeroStatus.secured || status == HeroStatus.degraded) &&
+            serverName.isNotEmpty
+        ? '$baseLabel • $serverName'
+        : baseLabel;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: context.motionDuration(const Duration(milliseconds: 320)),
+          width: _dotSize,
+          height: _dotSize,
+          decoration: BoxDecoration(
+            color: dotColor,
+            shape: BoxShape.circle,
+            boxShadow: status.isLive
+                ? [
+                    BoxShadow(
+                      color: dotColor.withValues(alpha: 0.5),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
+          ),
+        ),
+        const SizedBox(width: 8),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxLabelWidth),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _statusLabel(
+  AppLocalizations l,
+  HeroStatus status, [
+  bool configInvalid = false,
+]) => switch (status) {
+  HeroStatus.offline => l.noNetwork,
+  HeroStatus.off => l.heroNotProtected,
+  HeroStatus.checking || HeroStatus.diagnosing => l.heroChecking,
+  HeroStatus.connecting => l.heroConnecting,
+  HeroStatus.reconnecting => l.heroReconnecting,
+  HeroStatus.paused => l.heroPaused,
+  HeroStatus.blocked => l.heroBlockedTitle,
+  HeroStatus.broken =>
+    configInvalid ? l.heroConfigInvalidTitle : l.heroLinkBroken,
+  HeroStatus.subscriptionExpired => l.dashboardSubscriptionExpired,
+  HeroStatus.secured || HeroStatus.degraded => l.connected,
+};
 
 enum CaptionGlyph { minimize, maximize, restore, close }
 
