@@ -46,6 +46,44 @@ void main() {
     expect(closed, isFalse);
   });
 
+  testWidgets('modal side sheet floats as an inset, rounded, raised card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => FilledButton(
+              onPressed: () => showModalSideSheet<void>(
+                context: context,
+                builder: (_) => const SizedBox.expand(child: Text('Content')),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    final material = tester.widget<Material>(
+      find
+          .ancestor(of: find.text('Content'), matching: find.byType(Material))
+          .first,
+    );
+    expect(material.elevation, 3);
+    expect(material.clipBehavior, Clip.antiAlias);
+    expect(material.shape, isA<RoundedSuperellipseBorder>());
+
+    final sheetRect = tester.getRect(find.byType(SideSheet));
+    final screen = tester.getSize(find.byType(MaterialApp));
+    expect(sheetRect.top, 16);
+    expect(screen.width - sheetRect.right, 16);
+    expect(screen.height - sheetRect.bottom, 16);
+  });
+
   testWidgets(
     'modal side sheet animates, returns a value, and uses a barrier',
     (tester) async {

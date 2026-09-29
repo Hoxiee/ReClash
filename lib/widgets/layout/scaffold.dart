@@ -761,7 +761,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         extendBodyBehindAppBar: barFloats,
         body: PanelProfileBackground(enabled: !active, child: foreground),
         resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-        backgroundColor: active ? Colors.transparent : widget.backgroundColor,
+        backgroundColor: active || form.isSideSheet
+            ? Colors.transparent
+            : widget.backgroundColor,
         floatingActionButton: fab,
       ),
     );
@@ -1173,6 +1175,7 @@ class _SheetForm {
   const _SheetForm({
     required this.isSheet,
     required this.isBottomSheet,
+    required this.isSideSheet,
     required this.pop,
     required this.dockedSearch,
   });
@@ -1188,6 +1191,7 @@ class _SheetForm {
     return _SheetForm(
       isSheet: provider != null,
       isBottomSheet: isBottomSheet,
+      isSideSheet: provider?.type == SheetType.sideSheet,
       pop: isModal
           ? _SheetPop.of(context, provider, hasActions: hasActions)
           : null,
@@ -1197,6 +1201,7 @@ class _SheetForm {
 
   final bool isSheet;
   final bool isBottomSheet;
+  final bool isSideSheet;
   final _SheetPop? pop;
   final AppBarSearchState? dockedSearch;
 

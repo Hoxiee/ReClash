@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
@@ -10,6 +11,10 @@ import 'package:reclash/common/util/context.dart';
 const Duration _bottomSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
+
+/// The desktop side sheet floats as a card, inset from the top, trailing, and
+/// bottom window edges so its rounded corners and shadow read against the scrim.
+const EdgeInsets _sideSheetMargin = EdgeInsets.fromLTRB(0, 16, 16, 16);
 
 Duration _enterDurationOf(BuildContext context) =>
     context.motionDuration(_bottomSheetEnterDuration);
@@ -90,17 +95,20 @@ class _SideSheetState extends State<SideSheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final Color color = widget.backgroundColor ?? colorScheme.surface;
-    final Color surfaceTintColor = colorScheme.surfaceTint;
-    final Color shadowColor = widget.shadowColor ?? Colors.transparent;
-    final double elevation = widget.elevation ?? 0;
-    final ShapeBorder shape = widget.shape ?? AppShape.none;
+    final Color color =
+        widget.backgroundColor ?? colorScheme.surfaceContainerLow;
+    // The container role already carries the panel tone; an elevation tint on
+    // top only muddies it with a warm cast, so the shadow alone conveys depth.
+    const Color surfaceTintColor = Colors.transparent;
+    final Color shadowColor = widget.shadowColor ?? colorScheme.shadow;
+    final double elevation = widget.elevation ?? 3;
+    final ShapeBorder shape = widget.shape ?? AppShape.xl;
 
     final BoxConstraints constraints =
         widget.constraints ??
         const BoxConstraints(maxWidth: 320, minWidth: 320);
 
-    final Clip clipBehavior = widget.clipBehavior ?? Clip.none;
+    final Clip clipBehavior = widget.clipBehavior ?? Clip.antiAlias;
 
     final Widget sideSheet = Material(
       key: _childKey,
@@ -125,6 +133,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     required this.animationValue,
     required this.isScrollControlled,
     required this.scrollControlDisabledMaxHeightRatio,
+    required this.margin,
     super.child,
   });
 
@@ -132,6 +141,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   final double animationValue;
   final bool isScrollControlled;
   final double scrollControlDisabledMaxHeightRatio;
+  final EdgeInsets margin;
 
   @override
   _RenderSideSheetLayoutWithSizeListener createRenderObject(
@@ -142,6 +152,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
       animationValue: animationValue,
       isScrollControlled: isScrollControlled,
       scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
+      margin: margin,
     );
   }
 
@@ -155,6 +166,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     renderObject.isScrollControlled = isScrollControlled;
     renderObject.scrollControlDisabledMaxHeightRatio =
         scrollControlDisabledMaxHeightRatio;
+    renderObject.margin = margin;
   }
 }
 
@@ -165,11 +177,13 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     required double animationValue,
     required bool isScrollControlled,
     required double scrollControlDisabledMaxHeightRatio,
+    required EdgeInsets margin,
   }) : _onChildSizeChanged = onChildSizeChanged,
        _animationValue = animationValue,
        _isScrollControlled = isScrollControlled,
        _scrollControlDisabledMaxHeightRatio =
            scrollControlDisabledMaxHeightRatio,
+       _margin = margin,
        super(child);
 
   Size _lastSize = Size.zero;
@@ -220,6 +234,18 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     }
 
     _scrollControlDisabledMaxHeightRatio = newValue;
+    markNeedsLayout();
+  }
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+
+  set margin(EdgeInsets newValue) {
+    if (_margin == newValue) {
+      return;
+    }
+
+    _margin = newValue;
     markNeedsLayout();
   }
 
@@ -277,11 +303,16 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(maxHeight: constraints.maxHeight);
+    return BoxConstraints(
+      maxHeight: math.max(0.0, constraints.maxHeight - _margin.vertical),
+    );
   }
 
   Offset _getPositionForChild(Size size, Size childSize) {
-    return Offset(size.width - childSize.width * animationValue, 0.0);
+    return Offset(
+      size.width - (childSize.width + _margin.right) * animationValue,
+      _margin.top,
+    );
   }
 
   @override
@@ -411,6 +442,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
               isScrollControlled: widget.isScrollControlled,
               scrollControlDisabledMaxHeightRatio:
                   widget.scrollControlDisabledMaxHeightRatio,
+              margin: _sideSheetMargin,
               child: child,
             ),
           ),
@@ -553,8 +585,8 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
           final colorScheme = Theme.of(context).colorScheme;
           return _ModalSideSheet<T>(
             route: this,
-            backgroundColor: backgroundColor ?? colorScheme.surface,
-            elevation: elevation ?? 0,
+            backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
+            elevation: elevation ?? 3,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,
