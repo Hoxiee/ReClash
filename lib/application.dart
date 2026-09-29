@@ -273,7 +273,11 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _autoUpdateProfilesTask() {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
-      await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
+      // Screen-off parks the network wake; the next tick refreshes once the
+      // screen returns, so a pocketed phone does not spin the radio overnight.
+      if (!ref.read(screenOffProvider)) {
+        await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
+      }
       if (!mounted) {
         return;
       }
