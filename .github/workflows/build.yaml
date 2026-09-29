@@ -6,9 +6,41 @@ on:
       - main
     tags:
       - 'v*'
+    # CHANGELOG.md stays out so its verify gate still runs; release tags carry a
+    # non-doc version bump, so a `v*` push is never skipped as docs-only.
+    paths-ignore:
+      - 'README*.md'
+      - 'PROVIDER_HEADERS.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'SUPPORT.md'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - '.agents/**'
+      - '.github/release_notes/**'
+      - '.github/release_template.md'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - 'snapshots/**'
+      - 'LICENSE'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'README*.md'
+      - 'PROVIDER_HEADERS.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'SUPPORT.md'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - '.agents/**'
+      - '.github/release_notes/**'
+      - '.github/release_template.md'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - 'snapshots/**'
+      - 'LICENSE'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -460,6 +492,9 @@ jobs:
           path: ./dist
           if-no-files-found: error
           overwrite: true
+          # Only this run consumes these; the release assets are the permanent
+          # copy, so expire fast instead of billing storage for 90 days.
+          retention-days: 1
 
   validate-linux-packages:
     name: Validate Linux pacman packages
