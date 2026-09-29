@@ -20,6 +20,11 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 4,
       child: NetworkDetection(),
     ),
+    DashboardWidget.connectionPath => const GridItem(
+      key: ValueKey(DashboardWidget.connectionPath),
+      crossAxisCellCount: 8,
+      child: ConnectionPath(),
+    ),
     DashboardWidget.tunButton => const GridItem(
       key: ValueKey(DashboardWidget.tunButton),
       crossAxisCellCount: 4,

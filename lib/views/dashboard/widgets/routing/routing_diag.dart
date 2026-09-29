@@ -580,6 +580,7 @@ class _ContextGrid extends StatelessWidget {
       ('transport', ctx.transport),
       ('reachF', ctx.reachF),
       ('reachD', ctx.reachD),
+      ('reachS', ctx.reachS),
       ('direct', ctx.direct),
       ('probesLeft', '${ctx.probesLeft}'),
       ('candidates', '${ctx.candidates}'),

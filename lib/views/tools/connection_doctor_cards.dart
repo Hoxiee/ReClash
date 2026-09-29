@@ -1,29 +1,13 @@
 part of 'connection_doctor.dart';
 
-class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
+// Start, cancel, DNS flush, and export are the same real levers on the answer
+// screen and inside the expert console, so both states drive them through one
+// mixin instead of keeping two copies of the busy-guard plumbing.
+mixin _DoctorActionsMixin<T extends ConsumerStatefulWidget>
+    on ConsumerState<T> {
   String? _busyAction;
-  bool _initializing = true;
-  bool _showTechnicalDetails = false;
 
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_bootstrap());
-  }
-
-  // Opening the screen is a deliberate visit, so it answers with a live check
-  // instead of the passive idle state that made the old screen look empty.
-  Future<void> _bootstrap() async {
-    await _refresh(showError: false);
-    if (!mounted) return;
-    final snapshot = ref.read(connectionDoctorProvider);
-    final idle =
-        snapshot.state != DoctorExamState.examining &&
-        (!snapshot.isFresh || snapshot.state == DoctorExamState.observing);
-    if (idle && snapshot.action('startStandard')?.eligible == true) {
-      await _start(DoctorExamMode.standard, showError: false);
-    }
-  }
+  bool get _busy => _busyAction != null;
 
   Future<void> _refresh({required bool showError}) async {
     try {
@@ -32,8 +16,6 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
       if (showError) {
         dialogs.showNotifier(compactError(error), level: MessageLevel.error);
       }
-    } finally {
-      if (mounted) setState(() => _initializing = false);
     }
   }
 
@@ -61,42 +43,17 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
     }, showError: showError);
   }
 
-  Future<void> _applyRemedy(DoctorRemedy remedy) async {
-    switch (remedy) {
-      case DoctorRemedy.startVpn:
-        await _runAction('startVpn', () async {
-          await ref.read(setupActionProvider.notifier).setRunning(true);
-        });
-      case DoctorRemedy.recheck:
-        await _start(DoctorExamMode.standard);
-      case DoctorRemedy.deepCheck:
-        await _start(DoctorExamMode.deep);
-      case DoctorRemedy.flushDns:
-        await _runAction('flushDns', () async {
-          await ref.read(connectionDoctorProvider.notifier).flushDns();
-        });
-      case DoctorRemedy.pickNode:
-        _leaveTo(PageLabel.proxies);
-      case DoctorRemedy.openProfiles:
-        _leaveTo(PageLabel.profiles);
-      case DoctorRemedy.openDns:
-        await _openConfig(const DnsView());
-      case DoctorRemedy.openAdvanced:
-        await _openConfig(const AdvancedConfigView());
-      case DoctorRemedy.exportReport:
-        await _exportReport();
-    }
+  Future<void> _cancel() {
+    return _runAction('cancel', () async {
+      await ref.read(connectionDoctorProvider.notifier).cancel();
+    });
   }
 
-  // The Doctor is opened as a sheet or a pushed route; leaving for a main tab
-  // means closing it first so the tab is what the user lands on.
-  void _leaveTo(PageLabel page) {
-    final navigator = Navigator.of(context);
-    if (navigator.canPop()) navigator.pop();
-    ref.read(currentPageLabelProvider.notifier).toPage(page, returnable: true);
+  Future<void> _flushDns() {
+    return _runAction('flushDns', () async {
+      await ref.read(connectionDoctorProvider.notifier).flushDns();
+    });
   }
-
-  Future<void> _openConfig(Widget view) => BaseNavigator.push(context, view);
 
   Future<void> _exportReport() async {
     final appLocalizations = context.appLocalizations;
@@ -128,6 +85,70 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
       }
     });
   }
+}
+
+class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
+    with _DoctorActionsMixin {
+  bool _initializing = true;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_bootstrap());
+  }
+
+  // Opening the screen is a deliberate visit, so it answers with a live check
+  // instead of the passive idle state that made the old screen look empty.
+  Future<void> _bootstrap() async {
+    try {
+      await _refresh(showError: false);
+      if (!mounted) return;
+      final snapshot = ref.read(connectionDoctorProvider);
+      final idle =
+          snapshot.state != DoctorExamState.examining &&
+          (!snapshot.isFresh || snapshot.state == DoctorExamState.observing);
+      if (idle && snapshot.action('startStandard')?.eligible == true) {
+        await _start(DoctorExamMode.standard, showError: false);
+      }
+    } finally {
+      if (mounted) setState(() => _initializing = false);
+    }
+  }
+
+  Future<void> _applyRemedy(DoctorRemedy remedy) async {
+    switch (remedy) {
+      case DoctorRemedy.startVpn:
+        await _runAction('startVpn', () async {
+          await ref.read(setupActionProvider.notifier).setRunning(true);
+        });
+      case DoctorRemedy.recheck:
+        await _start(DoctorExamMode.standard);
+      case DoctorRemedy.deepCheck:
+        await _start(DoctorExamMode.deep);
+      case DoctorRemedy.flushDns:
+        await _flushDns();
+      case DoctorRemedy.pickNode:
+        _leaveTo(PageLabel.proxies);
+      case DoctorRemedy.openProfiles:
+        _leaveTo(PageLabel.profiles);
+      case DoctorRemedy.openDns:
+        await _openConfig(const DnsView());
+      case DoctorRemedy.openAdvanced:
+        await _openConfig(const AdvancedConfigView());
+      case DoctorRemedy.exportReport:
+        await _exportReport();
+    }
+  }
+
+  // The Doctor is opened as a sheet or a pushed route; leaving for a main tab
+  // means closing it first so the tab is what the user lands on.
+  void _leaveTo(PageLabel page) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) navigator.pop();
+    ref.read(currentPageLabelProvider.notifier).toPage(page, returnable: true);
+  }
+
+  Future<void> _openConfig(Widget view) => BaseNavigator.push(context, view);
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +163,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
         IconButtonData(
           glyph: AppGlyphs.refresh,
           tooltip: appLocalizations.doctorRefresh,
-          isLoading: _busyAction != null,
+          isLoading: _busy,
           onPressed: () => unawaited(_refresh(showError: true)),
         ),
       ],
@@ -154,17 +175,13 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
             child: _DoctorAnswerCard(
               snapshot: snapshot,
               answer: answer,
-              busy: _busyAction != null,
+              busy: _busy,
               canStart: snapshot.action('startStandard')?.eligible == true,
               canFlushDns: snapshot.action('flushDns')?.eligible == true,
               canCancel: snapshot.action('cancel')?.eligible == true,
               onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
               onStart: () => unawaited(_start(DoctorExamMode.standard)),
-              onCancel: () => unawaited(
-                _runAction('cancel', () async {
-                  await ref.read(connectionDoctorProvider.notifier).cancel();
-                }),
-              ),
+              onCancel: () => unawaited(_cancel()),
             ),
           ),
           if (snapshot.supported)
@@ -187,28 +204,14 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
                 DecorationListItem(
                   leading: const GlyphIcon(AppGlyphs.sliders),
                   title: Text(appLocalizations.doctorTechnicalDetails),
-                  trailing: GlyphIcon(
-                    _showTechnicalDetails
-                        ? AppGlyphs.chevronUp
-                        : AppGlyphs.chevronDown,
-                  ),
-                  onPressed: () => setState(
-                    () => _showTechnicalDetails = !_showTechnicalDetails,
+                  subtitle: Text(appLocalizations.doctorWaterfallDesc),
+                  trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                  onPressed: () => unawaited(
+                    BaseNavigator.push(context, const DoctorConsoleView()),
                   ),
                 ),
               ],
             ),
-          if (_showTechnicalDetails) ...[
-            _DoctorExpertActions(
-              snapshot: snapshot,
-              busy: _busyAction != null,
-              onDeepCheck: () => unawaited(_start(DoctorExamMode.deep)),
-              onExport: () => unawaited(_exportReport()),
-            ),
-            _DoctorDetails(snapshot: snapshot),
-            _DoctorEvidenceSection(snapshot: snapshot),
-            _DoctorHistorySection(snapshot: snapshot),
-          ],
           _DoctorLimitationsSection(snapshot: snapshot),
           const SettingBottomInset(),
         ],
@@ -427,43 +430,6 @@ class _RemedyButton extends StatelessWidget {
   }
 }
 
-/// Deep check and report export live here: real controls, but for the curious,
-/// not the answer everyone needs.
-class _DoctorExpertActions extends StatelessWidget {
-  const _DoctorExpertActions({
-    required this.snapshot,
-    required this.busy,
-    required this.onDeepCheck,
-    required this.onExport,
-  });
-
-  final DoctorSnapshot snapshot;
-  final bool busy;
-  final VoidCallback onDeepCheck;
-  final VoidCallback onExport;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!snapshot.supported) return const SizedBox.shrink();
-    final appLocalizations = context.appLocalizations;
-    final canStart = snapshot.action('startStandard')?.eligible == true;
-    return SettingSection(
-      items: [
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.search),
-          title: Text(appLocalizations.doctorDeepExam),
-          onPressed: busy || !canStart ? null : onDeepCheck,
-        ),
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.share),
-          title: Text(appLocalizations.doctorExportReport),
-          onPressed: busy ? null : onExport,
-        ),
-      ],
-    );
-  }
-}
-
 class _DoctorDetails extends StatelessWidget {
   const _DoctorDetails({required this.snapshot});
 
@@ -531,23 +497,27 @@ class DoctorTimingPreview extends StatelessWidget {
             padding: AppInsets.lg,
             child: Text(context.appLocalizations.developerFindingsDesc),
           ),
-          _DoctorEvidenceSection(
-            snapshot: DoctorSnapshot(
-              supported: true,
-              evidence: [
-                for (final (index, layer) in [
-                  DoctorLayer.dns,
-                  DoctorLayer.route,
-                  DoctorLayer.dial,
-                  DoctorLayer.transport,
-                  DoctorLayer.marker,
-                ].indexed)
-                  DoctorEvidence(
-                    layer: layer,
-                    durationBucketMs: (index + 1) * 25,
-                    offsetMillis: index * 100,
-                  ),
-              ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: _DoctorWaterfallCard(
+              snapshot: DoctorSnapshot(
+                supported: true,
+                evidence: [
+                  for (final (index, layer) in [
+                    DoctorLayer.dns,
+                    DoctorLayer.route,
+                    DoctorLayer.dial,
+                    DoctorLayer.transport,
+                    DoctorLayer.marker,
+                  ].indexed)
+                    DoctorEvidence(
+                      layer: layer,
+                      outcome: DoctorEvidenceOutcome.succeeded,
+                      durationBucketMs: (index + 1) * 25,
+                      offsetMillis: index * 100,
+                    ),
+                ],
+              ),
             ),
           ),
         ],

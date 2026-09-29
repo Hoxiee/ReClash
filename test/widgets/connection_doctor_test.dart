@@ -46,6 +46,10 @@ DoctorSnapshot _snapshot({
   DoctorProgress progress = const DoctorProgress(),
   int? freshUntil,
   int evidenceDropped = 0,
+  DoctorCapabilities capabilities = const DoctorCapabilities(),
+  DoctorGenerations generations = const DoctorGenerations(),
+  DoctorGenerations startGenerations = const DoctorGenerations(),
+  List<DoctorHealAudit> healAudit = const [],
   List<DoctorEvidence> evidence = const [],
   List<DoctorAction> actions = const [],
   List<DoctorIncident> incidents = const [],
@@ -67,6 +71,10 @@ DoctorSnapshot _snapshot({
     progress: progress,
     freshUntil: freshUntil ?? DateTime.now().millisecondsSinceEpoch + 60000,
     evidenceDropped: evidenceDropped,
+    capabilities: capabilities,
+    generations: generations,
+    startGenerations: startGenerations,
+    healAudit: healAudit,
     evidence: evidence,
     actions: actions,
     incidents: incidents,
@@ -692,22 +700,31 @@ void main() {
         freshUntil: DateTime.now().millisecondsSinceEpoch - 1,
         evidenceDropped: 7,
       ),
+      size: const Size(900, 1400),
     );
 
+    // The freshness and dropped-evidence caveats stay on the main screen. The
+    // stale caveat doubles as the diagnosis meaning, so it shows more than once.
     expect(find.text('Outdated'), findsNothing);
+    expect(
+      find.text(
+        'The environment may have changed. Refresh or run a new check before acting on this result.',
+      ),
+      findsWidgets,
+    );
+    expect(
+      find.text(
+        '7 evidence events were dropped under load; confidence was not increased.',
+      ),
+      findsOneWidget,
+    );
+
+    // The console carries the stale status inside its diagnosis rows.
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
-    expect(find.text('Outdated'), findsOneWidget);
-    final staleHint = find.text(
-      'The environment may have changed. Refresh or run a new check before acting on this result.',
-    );
-    await tester.scrollUntilVisible(staleHint, 200);
-    expect(staleHint, findsOneWidget);
-    final dropped = find.text(
-      '7 evidence events were dropped under load; confidence was not increased.',
-    );
-    await tester.scrollUntilVisible(dropped, 200);
-    expect(dropped, findsOneWidget);
+    final outdated = find.text('Outdated');
+    await tester.scrollUntilVisible(outdated, 200);
+    expect(outdated, findsOneWidget);
   });
 
   testWidgets('only exposes eligible actions and forwards their parameters', (
@@ -745,9 +762,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
-    final deepCheck = find.text('Deep check');
-    await tester.scrollUntilVisible(deepCheck, 200);
-    await tester.tap(deepCheck);
+    // Deep is now a mode segment on the console, run by the shared button.
+    await tester.tap(find.text('Deep'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Run a check'));
     await tester.pumpAndSettle();
 
     final starts = verify(
@@ -789,6 +807,86 @@ void main() {
     await tester.pumpAndSettle();
 
     verifyNever(() => core.exportDoctorReport());
+  });
+
+  testWidgets('console warns when evidence predates a change', (tester) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(
+        generations: const DoctorGenerations(config: 3),
+        startGenerations: const DoctorGenerations(config: 1),
+      ),
+    );
+
+    // The drift caveat is an expert detail, kept off the verdict screen.
+    expect(
+      find.textContaining('Network or configuration changed since this check'),
+      findsNothing,
+    );
+    await tester.tap(find.text('Technical details'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Network or configuration changed since this check'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('console records repair attempts and their outcome', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(
+        healAudit: const [DoctorHealAudit(actionId: 'flushDns', outcome: 'ok')],
+      ),
+    );
+
+    await tester.tap(find.text('Technical details'));
+    await tester.pumpAndSettle();
+    final attempts = find.text('Repair attempts');
+    await tester.scrollUntilVisible(attempts, 200);
+    expect(attempts, findsOneWidget);
+    expect(find.text('Flush DNS cache'), findsOneWidget);
+    expect(find.text('ok'), findsOneWidget);
+  });
+
+  testWidgets('console shows the empty repair audit when none ran', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(tester, core, _snapshot());
+
+    await tester.tap(find.text('Technical details'));
+    await tester.pumpAndSettle();
+    final empty = find.text('No repair attempts yet');
+    await tester.scrollUntilVisible(empty, 200);
+    expect(empty, findsOneWidget);
+  });
+
+  testWidgets('console run panel disables the check when ineligible', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(
+        state: DoctorExamState.complete,
+        actions: const [DoctorAction(id: 'startStandard', eligible: false)],
+      ),
+    );
+
+    await tester.tap(find.text('Technical details'));
+    await tester.pumpAndSettle();
+    expect(find.text('Not available right now'), findsOneWidget);
+    final runButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Run a check'),
+    );
+    expect(runButton.onPressed, isNull);
   });
 
   testWidgets('Tools puts Doctor immediately before Requests', (tester) async {

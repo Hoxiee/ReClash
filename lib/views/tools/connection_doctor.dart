@@ -17,6 +17,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'connection_doctor_path.dart';
 
 part 'connection_doctor_cards.dart';
+part 'connection_doctor_console.dart';
 part 'connection_doctor_labels.dart';
 
 class ConnectionDoctorView extends ConsumerStatefulWidget {

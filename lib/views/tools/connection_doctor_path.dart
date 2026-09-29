@@ -5,25 +5,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 
-typedef _DoctorPathState = DoctorStageState;
-
-class _DoctorPathStage {
-  const _DoctorPathStage({
-    required this.id,
-    required this.label,
-    required this.icon,
-    required this.state,
-    required this.dimmed,
-    required this.culprit,
-  });
-
-  final String id;
-  final String label;
-  final Glyph icon;
-  final _DoctorPathState state;
-  final bool dimmed;
-  final bool culprit;
-}
+import 'doctor_path.dart';
 
 class ConnectionDoctorPathMap extends StatefulWidget {
   const ConnectionDoctorPathMap({
@@ -45,8 +27,6 @@ class ConnectionDoctorPathMap extends StatefulWidget {
 
 class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
     with SingleTickerProviderStateMixin {
-  static const _stageIds = ['app', 'ingress', 'route', 'internet', 'response'];
-
   late final AnimationController _intro = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 640),
@@ -74,7 +54,7 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
     final states = {for (final stage in snapshot.stages) stage.id: stage.state};
     return [
       snapshot.pathKind.name,
-      for (final id in _stageIds) '$id:${states[id]?.name ?? '_'}',
+      for (final id in doctorPathStageIds) '$id:${states[id]?.name ?? '_'}',
     ].join('|');
   }
 
@@ -84,54 +64,13 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
     super.dispose();
   }
 
-  List<_DoctorPathStage> _stages(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final snapshot = widget.snapshot;
-    final stageStates = snapshot.isFresh
-        ? {for (final stage in snapshot.stages) stage.id: stage.state}
-        : const <String, DoctorStageState>{};
-    final labels = {
-      'app': appLocalizations.doctorPathApp,
-      'ingress': _ingressLabel(context, snapshot.pathKind),
-      'route': appLocalizations.doctorPathRoute,
-      'internet': appLocalizations.doctorPathInternet,
-      'response': appLocalizations.doctorPathResponse,
-    };
-    final icons = {
-      'app': AppGlyphs.appsList,
-      'ingress': _ingressIcon(snapshot.pathKind),
-      'route': AppGlyphs.route,
-      'internet': AppGlyphs.language,
-      'response': AppGlyphs.mailRead,
-    };
-    final failedIndex = _stageIds.indexWhere(
-      (id) => stageStates[id] == DoctorStageState.failed,
-    );
-    final blame = widget.blame;
-    final blameIndex = snapshot.isFresh && blame != null
-        ? _stageIds.indexOf(blame)
-        : -1;
-    final culpritIndex = failedIndex != -1 ? failedIndex : blameIndex;
-    return [
-      for (final (index, id) in _stageIds.indexed)
-        _DoctorPathStage(
-          id: id,
-          label: labels[id]!,
-          icon: icons[id]!,
-          // A blamed-but-unmarked stage still reads as the fault, so the red
-          // node always matches the verdict above the map.
-          state: index == culpritIndex && failedIndex == -1
-              ? DoctorStageState.failed
-              : stageStates[id] ?? DoctorStageState.unknown,
-          culprit: index == culpritIndex,
-          dimmed: culpritIndex != -1 && index > culpritIndex,
-        ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final stages = _stages(context);
+    final stages = resolveDoctorPathStages(
+      context,
+      widget.snapshot,
+      widget.blame,
+    );
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,30 +108,10 @@ double _staged(double progress, int index, int count) {
   return Curves.easeOutCubic.transform(local);
 }
 
-String _ingressLabel(BuildContext context, DoctorPathKind pathKind) {
-  final appLocalizations = context.appLocalizations;
-  return switch (pathKind) {
-    DoctorPathKind.vpn => appLocalizations.doctorPathIngressVpn,
-    DoctorPathKind.tun => appLocalizations.doctorPathIngressTun,
-    DoctorPathKind.localProxy => appLocalizations.doctorPathIngressLocalProxy,
-    DoctorPathKind.direct => appLocalizations.doctorPathIngressDirect,
-    DoctorPathKind.byeDpi => appLocalizations.doctorPathIngressByeDpi,
-    DoctorPathKind.unknown => appLocalizations.doctorPathIngress,
-  };
-}
-
-Glyph _ingressIcon(DoctorPathKind pathKind) => switch (pathKind) {
-  DoctorPathKind.vpn || DoctorPathKind.tun => AppGlyphs.vpn,
-  DoctorPathKind.localProxy => AppGlyphs.router,
-  DoctorPathKind.direct => AppGlyphs.arrowForward,
-  DoctorPathKind.byeDpi => AppGlyphs.shield,
-  DoctorPathKind.unknown => AppGlyphs.deviceInfo,
-};
-
 class _HorizontalDoctorPath extends StatelessWidget {
   const _HorizontalDoctorPath({required this.stages, required this.progress});
 
-  final List<_DoctorPathStage> stages;
+  final List<DoctorPathStage> stages;
   final double progress;
 
   @override
@@ -221,7 +140,7 @@ class _HorizontalDoctorPath extends StatelessWidget {
 class _VerticalDoctorPath extends StatelessWidget {
   const _VerticalDoctorPath({required this.stages, required this.progress});
 
-  final List<_DoctorPathStage> stages;
+  final List<DoctorPathStage> stages;
   final double progress;
 
   @override
@@ -253,14 +172,14 @@ class _DoctorPathNode extends StatelessWidget {
     this.vertical = false,
   });
 
-  final _DoctorPathStage stage;
+  final DoctorPathStage stage;
   final double reveal;
   final bool vertical;
 
   @override
   Widget build(BuildContext context) {
-    final stateLabel = _pathStateLabel(context, stage.state);
-    final visual = _pathVisual(context, stage.state);
+    final stateLabel = doctorPathStateLabel(context, stage.state);
+    final visual = doctorPathVisual(context, stage.state);
     final diameter = stage.culprit ? 52.0 : 44.0;
     final glow = _glow(visual, stage);
     final marker = Transform.scale(
@@ -358,8 +277,8 @@ class _DoctorPathNode extends StatelessWidget {
 }
 
 ({Color color, double alpha, double blur, double spread})? _glow(
-  ({Color foreground, Color background, Glyph? icon}) visual,
-  _DoctorPathStage stage,
+  DoctorPathVisual visual,
+  DoctorPathStage stage,
 ) {
   if (stage.culprit) {
     return (color: visual.foreground, alpha: 0.6, blur: 20, spread: 1);
@@ -388,13 +307,13 @@ class _DoctorPathConnector extends StatelessWidget {
     this.vertical = false,
   });
 
-  final _DoctorPathState state;
+  final DoctorStageState state;
   final double fill;
   final bool vertical;
 
   @override
   Widget build(BuildContext context) {
-    final color = _pathVisual(context, state).foreground;
+    final color = doctorPathVisual(context, state).foreground;
     final track = context.colorScheme.surfaceContainerHighest;
     final progress = math.max(0.02, fill);
     if (vertical) {
@@ -422,9 +341,9 @@ class _DoctorPathConnector extends StatelessWidget {
   );
 }
 
-_DoctorPathState _connectorState(
-  _DoctorPathStage current,
-  _DoctorPathStage next,
+DoctorStageState _connectorState(
+  DoctorPathStage current,
+  DoctorPathStage next,
 ) {
   if (next.state == DoctorStageState.failed) return DoctorStageState.failed;
   if (next.state == DoctorStageState.checking) {
@@ -438,60 +357,4 @@ _DoctorPathState _connectorState(
     return DoctorStageState.consequence;
   }
   return DoctorStageState.unknown;
-}
-
-({Color foreground, Color background, Glyph? icon}) _pathVisual(
-  BuildContext context,
-  _DoctorPathState state,
-) {
-  final colors = context.colorScheme;
-  final success = colors.success;
-  final successBackground = Color.alphaBlend(
-    success.withValues(alpha: 0.16),
-    colors.surfaceContainerHighest,
-  );
-  return switch (state) {
-    DoctorStageState.passed => (
-      foreground: success,
-      background: successBackground,
-      icon: AppGlyphs.check,
-    ),
-    DoctorStageState.failed => (
-      foreground: colors.error,
-      background: colors.errorContainer,
-      icon: AppGlyphs.error,
-    ),
-    DoctorStageState.checking => (
-      foreground: colors.primary,
-      background: colors.primaryContainer,
-      icon: AppGlyphs.sync,
-    ),
-    DoctorStageState.notApplicable => (
-      foreground: colors.outline,
-      background: colors.surfaceContainerHighest,
-      icon: AppGlyphs.remove,
-    ),
-    DoctorStageState.consequence => (
-      foreground: colors.outline,
-      background: colors.surfaceContainerHighest,
-      icon: AppGlyphs.subItem,
-    ),
-    DoctorStageState.unknown => (
-      foreground: colors.outline,
-      background: colors.surfaceContainerHighest,
-      icon: AppGlyphs.circleOutline,
-    ),
-  };
-}
-
-String _pathStateLabel(BuildContext context, _DoctorPathState state) {
-  final appLocalizations = context.appLocalizations;
-  return switch (state) {
-    DoctorStageState.passed => appLocalizations.doctorPathPassed,
-    DoctorStageState.failed => appLocalizations.doctorPathFailed,
-    DoctorStageState.checking => appLocalizations.doctorPathChecking,
-    DoctorStageState.unknown => appLocalizations.doctorPathUnknown,
-    DoctorStageState.notApplicable => appLocalizations.doctorPathNotApplicable,
-    DoctorStageState.consequence => appLocalizations.doctorPathConsequence,
-  };
 }

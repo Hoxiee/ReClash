@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -30,22 +29,22 @@ void main() {
 
   group('rulePresetsForRegion', () {
     test('surfaces only the home domestic preset per region', () {
-      expect(rulePresetsForRegion(AppRegion.russia).first, RulePreset.russiaDirect);
-      expect(rulePresetsForRegion(AppRegion.iran).first, RulePreset.iranDirect);
-      expect(rulePresetsForRegion(AppRegion.china).first, RulePreset.chinaDirect);
+      expect(rulePresetsForRegion('RU').first, RulePreset.russiaDirect);
+      expect(rulePresetsForRegion('IR').first, RulePreset.iranDirect);
+      expect(rulePresetsForRegion('CN').first, RulePreset.chinaDirect);
 
       expect(
-        rulePresetsForRegion(AppRegion.russia),
+        rulePresetsForRegion('RU'),
         isNot(contains(RulePreset.iranDirect)),
       );
       expect(
-        rulePresetsForRegion(AppRegion.russia),
+        rulePresetsForRegion('RU'),
         isNot(contains(RulePreset.chinaDirect)),
       );
     });
 
     test('other region gets the shared presets without any domestic head', () {
-      final presets = rulePresetsForRegion(AppRegion.other);
+      final presets = rulePresetsForRegion(otherRegionCode);
       expect(presets, isNot(contains(RulePreset.russiaDirect)));
       expect(presets, isNot(contains(RulePreset.iranDirect)));
       expect(presets, isNot(contains(RulePreset.chinaDirect)));
@@ -64,7 +63,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         globalRulesProvider.overrideWith(() => rules),
-        appRegionProvider.overrideWithValue(AppRegion.russia),
+        appRegionProvider.overrideWithValue('RU'),
       ],
     );
     addTearDown(container.dispose);

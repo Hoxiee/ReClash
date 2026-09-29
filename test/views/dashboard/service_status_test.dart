@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/ip_quality.dart';
@@ -71,7 +70,7 @@ Future<void> _pump(
       includeNavigatorKey: false,
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
-        appRegionProvider.overrideWithValue(AppRegion.other),
+        appRegionProvider.overrideWithValue(otherRegionCode),
         ...overrides,
       ],
       child: child,
@@ -192,18 +191,18 @@ void main() {
       ServiceTarget.whatsapp,
       ServiceTarget.yandex,
     ];
-    final russia = serviceTargetsForRegion(AppRegion.russia);
+    final russia = serviceTargetsForRegion('RU');
     expect(russia, containsAll(ruExtras));
     expect(russia.take(3), ruLeaders);
     expect(russia, isNot(contains(ServiceTarget.bilibili)));
-    for (final region in [AppRegion.iran, AppRegion.other, AppRegion.china]) {
+    for (final region in ['IR', otherRegionCode, 'CN']) {
       final targets = serviceTargetsForRegion(region);
       for (final extra in [...ruExtras, ...ruLeaders]) {
         expect(targets, isNot(contains(extra)), reason: '$region has $extra');
       }
     }
     expect(
-      serviceTargetsForRegion(AppRegion.china),
+      serviceTargetsForRegion('CN'),
       contains(ServiceTarget.bilibili),
     );
   });
@@ -228,7 +227,7 @@ void main() {
           includeNavigatorKey: false,
           overrides: [
             profilesProvider.overrideWith(TestProfiles.new),
-            appRegionProvider.overrideWithValue(AppRegion.other),
+            appRegionProvider.overrideWithValue(otherRegionCode),
           ],
           child: const ServiceManageView(),
         ),

@@ -2,6 +2,7 @@ export 'active_server.dart';
 export 'announce.dart';
 export 'change_server_button.dart';
 export 'connection_mode.dart';
+export 'connection_path.dart';
 export 'connections.dart';
 export 'dashboard_info_card.dart';
 export 'desync_cards.dart';

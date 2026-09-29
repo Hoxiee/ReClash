@@ -158,8 +158,10 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
     unawaited(
       showSheet(
         context: context,
-        props: const SheetProps(isScrollControlled: true),
-        builder: (_) => const ServiceStatusSheet(),
+        props: nestedPagedSheetProps,
+        builder: (_) => NestedPagedSheet(
+          builder: (_) => const ServiceStatusSheet(),
+        ),
       ),
     );
   }
@@ -396,10 +398,9 @@ class _ServiceStatusSheetState extends ConsumerState<ServiceStatusSheet> {
 
   void _openManage(BuildContext context) {
     unawaited(
-      showSheet(
-        context: context,
-        props: const SheetProps(isScrollControlled: true),
-        builder: (_) => const ServiceManageView(),
+      pushPagedSheet(
+        context,
+        PagedSheetRoute(builder: (_) => const ServiceManageView()),
       ),
     );
   }
@@ -428,21 +429,31 @@ class _ServiceStatusSheetState extends ConsumerState<ServiceStatusSheet> {
             onPressed: () => _openManage(context),
           ),
         ],
-        body: ListView.builder(
-          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 20),
-          itemCount: targets.length,
-          itemBuilder: (context, index) {
-            final target = targets[index];
-            return ItemPositionProvider(
-              position: ItemPosition.get(index, targets.length),
-              child: _ServiceRow(
-                target: target,
-                check: state.valueOf(target),
-                loading: state.isLoading(target),
-                onCheck: () => services.refresh([target]),
+        body: CustomScrollView(
+          shrinkWrap: true,
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(height: context.contentTopPadding),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              sliver: SliverList.builder(
+                itemCount: targets.length,
+                itemBuilder: (context, index) {
+                  final target = targets[index];
+                  return ItemPositionProvider(
+                    position: ItemPosition.get(index, targets.length),
+                    child: _ServiceRow(
+                      target: target,
+                      check: state.valueOf(target),
+                      loading: state.isLoading(target),
+                      onCheck: () => services.refresh([target]),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -669,6 +680,7 @@ class ServiceManageView extends ConsumerWidget {
           ),
         ],
         body: CustomScrollView(
+          shrinkWrap: true,
           slivers: [
             SliverToBoxAdapter(
               child: SizedBox(height: context.contentTopPadding),

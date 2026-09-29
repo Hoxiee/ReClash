@@ -148,7 +148,7 @@ void main() {
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(appSettingProvider.notifier).value = const AppSettingProps(
-      region: AppRegion.russia,
+      region: 'RU',
     );
 
     await tester.pumpWidget(
