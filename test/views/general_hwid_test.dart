@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/general.dart';
@@ -11,7 +10,7 @@ import '../helpers/test_profiles.dart';
 
 Future<ProviderContainer> _pump(
   WidgetTester tester, {
-  required AppRegion region,
+  required String region,
   required bool sendIdentity,
 }) async {
   tester.view.physicalSize = const Size(1000, 1600);
@@ -55,7 +54,7 @@ void main() {
   testWidgets('settings confirm HWID disable in Russia', (tester) async {
     final container = await _pump(
       tester,
-      region: AppRegion.russia,
+      region: 'RU',
       sendIdentity: true,
     );
 
@@ -72,7 +71,7 @@ void main() {
   testWidgets('settings skip HWID confirm outside Russia', (tester) async {
     final container = await _pump(
       tester,
-      region: AppRegion.iran,
+      region: 'IR',
       sendIdentity: true,
     );
 

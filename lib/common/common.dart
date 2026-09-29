@@ -28,6 +28,7 @@ export 'net/http.dart';
 export 'net/network.dart';
 export 'net/proxy.dart';
 export 'net/request.dart';
+export 'regional/country_profile.dart';
 export 'regional/region_detection.dart';
 export 'regional/regional.dart';
 export 'regional/regional_network.dart';

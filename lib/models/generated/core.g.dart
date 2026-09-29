@@ -393,6 +393,9 @@ _RcxConfigParams _$RcxConfigParamsFromJson(
   canaryDomestic: (json['cd'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
+  censorSNI:
+      (json['cs'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
   openMarkers: (json['om'] as List<dynamic>)
       .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -451,6 +454,7 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'cc': instance.censorCountries,
       'cf': instance.canaryForeign,
       'cd': instance.canaryDomestic,
+      'cs': instance.censorSNI,
       'om': instance.openMarkers,
       'dm': instance.domesticMarkers,
       'lm': instance.localMarkers,
@@ -643,6 +647,7 @@ _RcxLinkReport _$RcxLinkReportFromJson(Map<String, dynamic> json) =>
       metered: json['metered'] as bool? ?? false,
       foreign: json['foreign'] as String? ?? 'unknown',
       domestic: json['domestic'] as String? ?? 'unknown',
+      sni: json['sni'] as String? ?? 'unknown',
       since: (json['since'] as num?)?.toInt() ?? 0,
     );
 
@@ -654,6 +659,7 @@ Map<String, dynamic> _$RcxLinkReportToJson(_RcxLinkReport instance) =>
       'metered': instance.metered,
       'foreign': instance.foreign,
       'domestic': instance.domestic,
+      'sni': instance.sni,
       'since': instance.since,
     };
 
@@ -915,6 +921,7 @@ _RcxDiagContext _$RcxDiagContextFromJson(Map<String, dynamic> json) =>
       validated: json['validated'] as bool? ?? false,
       reachF: json['reachF'] as String? ?? '',
       reachD: json['reachD'] as String? ?? '',
+      reachS: json['reachS'] as String? ?? '',
       direct: json['direct'] as String? ?? '',
       probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
       candidates: (json['candidates'] as num?)?.toInt() ?? 0,
@@ -944,6 +951,7 @@ Map<String, dynamic> _$RcxDiagContextToJson(_RcxDiagContext instance) =>
       'validated': instance.validated,
       'reachF': instance.reachF,
       'reachD': instance.reachD,
+      'reachS': instance.reachS,
       'direct': instance.direct,
       'probesLeft': instance.probesLeft,
       'candidates': instance.candidates,

@@ -653,9 +653,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.iran);
+    expect(props.preset, 'ir');
     expect(props.enabled, isFalse);
-    expect(container.read(appSettingProvider).region, AppRegion.iran);
+    expect(container.read(appSettingProvider).region, 'IR');
   });
 
   testWidgets('leaving the region unpicked leaves the engine off', (
@@ -671,7 +671,7 @@ void main() {
     );
 
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.preset, neutralPreset);
     expect(props.enabled, isFalse);
   });
 
@@ -948,14 +948,14 @@ void main() {
     );
     await _toFinish(tester);
 
-    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(
       find.byKey(const ValueKey('setup-smart-routing-preset')),
       findsWidgets,
     );
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.russia);
+    expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
   });
 
@@ -972,14 +972,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(
       find.byKey(const ValueKey('setup-smart-routing-preset')),
       findsWidgets,
     );
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.russia);
+    expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
   });
 
@@ -996,10 +996,10 @@ void main() {
     );
     await _toFinish(tester);
 
-    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.russia);
+    expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
   });
 

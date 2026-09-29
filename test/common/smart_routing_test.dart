@@ -10,17 +10,20 @@ void main() {
     test(
       'every preset ships the data the engine needs to measure anything',
       () {
-        for (final preset in SmartRoutingPreset.values) {
-          final bundle = preset.bundle;
-          if (preset == SmartRoutingPreset.off) {
+        for (final preset in [
+          neutralPreset,
+          ...shippedCountryCodes.map(presetForRegion),
+        ]) {
+          final bundle = bundleForPreset(preset);
+          if (preset == neutralPreset) {
             expect(bundle.openMarkers, isEmpty);
             continue;
           }
-          expect(bundle.censorCountries, isNotEmpty, reason: preset.name);
-          expect(bundle.canaryForeign, isNotEmpty, reason: preset.name);
-          expect(bundle.canaryDomestic, isNotEmpty, reason: preset.name);
-          expect(bundle.openMarkers, isNotEmpty, reason: preset.name);
-          expect(bundle.domesticMarkers, isNotEmpty, reason: preset.name);
+          expect(bundle.censorCountries, isNotEmpty, reason: preset);
+          expect(bundle.canaryForeign, isNotEmpty, reason: preset);
+          expect(bundle.canaryDomestic, isNotEmpty, reason: preset);
+          expect(bundle.openMarkers, isNotEmpty, reason: preset);
+          expect(bundle.domesticMarkers, isNotEmpty, reason: preset);
         }
       },
     );
@@ -59,7 +62,7 @@ void main() {
         expect(enabled.canaryForeign, isNotEmpty);
         expect(custom.withEnabled(false), custom);
         const emptyCountry = SmartRoutingProps(
-          preset: SmartRoutingPreset.russia,
+          preset: 'ru',
         );
         expect(emptyCountry.withEnabled(true).openMarkers, isEmpty);
       },
@@ -77,8 +80,8 @@ void main() {
 
     test('neutral preset is operable without a country classification', () {
       final other = const SmartRoutingProps(enabled: true)
-          .applyPreset(SmartRoutingPreset.russia)
-          .applyPreset(SmartRoutingPreset.off);
+          .applyPreset('ru')
+          .applyPreset(neutralPreset);
       expect(other.rcxParams.enabled, isTrue);
       expect(other.rcxParams.openMarkers, isNotEmpty);
       expect(other.censorCountries, isEmpty);
@@ -87,15 +90,15 @@ void main() {
       expect(other.domesticMarkers, isEmpty);
       expect(other.breakerPatterns, isEmpty);
       expect(other.matchesPreset, isTrue);
-      expect(SmartRoutingPreset.off.bundle.openMarkers, isEmpty);
+      expect(bundleForPreset(neutralPreset).openMarkers, isEmpty);
     });
 
     test('picking a region never turns the engine off', () {
       const props = SmartRoutingProps(enabled: true, waveWidth: 4);
-      final applied = props.applyPreset(SmartRoutingPreset.russia);
+      final applied = props.applyPreset('ru');
 
       expect(applied.enabled, isTrue);
-      expect(applied.preset, SmartRoutingPreset.russia);
+      expect(applied.preset, 'ru');
     });
 
     test('a region says nothing about how often the engine looks', () {
@@ -104,7 +107,7 @@ void main() {
         dwellSeconds: 600,
         waveWidth: 4,
       );
-      final applied = props.applyPreset(SmartRoutingPreset.russia);
+      final applied = props.applyPreset('ru');
 
       expect(applied.dwellSeconds, 600);
       expect(applied.waveWidth, 4);
@@ -114,7 +117,7 @@ void main() {
     test('a moved knob is visible, and resetting puts it back', () {
       final edited = const SmartRoutingProps(
         enabled: true,
-      ).applyPreset(SmartRoutingPreset.russia).copyWith(requireUdp: true);
+      ).applyPreset('ru').copyWith(requireUdp: true);
 
       expect(edited.matchesPreset, isFalse);
       expect(edited.applyPreset(edited.preset).matchesPreset, isTrue);
@@ -160,7 +163,7 @@ void main() {
 
     test('a hand-moved pace unsticks the strategy it belonged to', () {
       final edited = const SmartRoutingProps(enabled: true)
-          .applyPreset(SmartRoutingPreset.off)
+          .applyPreset(neutralPreset)
           .applyStrategy(SmartRoutingStrategy.saver)
           .copyWith(dwellSeconds: 30);
 
@@ -172,7 +175,7 @@ void main() {
     test('the wire payload carries the stored data, not the preset name', () {
       final params = const SmartRoutingProps(
         enabled: true,
-      ).applyPreset(SmartRoutingPreset.russia).rcxParams;
+      ).applyPreset('ru').rcxParams;
 
       expect(params.preset, 'ru');
       expect(params.defaultsVersion, smartRoutingDefaultsVersion);
@@ -183,9 +186,35 @@ void main() {
       expect(params.breakerPatterns, contains('lte'));
     });
 
+    test('the russia preset arms the censored-SNI canary against SNI-DPI', () {
+      final params = const SmartRoutingProps(
+        enabled: true,
+      ).applyPreset('ru').rcxParams;
+
+      expect(params.censorSNI, isNotEmpty);
+    });
+
+    test('every censoring preset arms a censored SNI, not only Russia', () {
+      for (final preset in ['ru', 'ir', 'cn']) {
+        final params = const SmartRoutingProps(
+          enabled: true,
+        ).applyPreset(preset).rcxParams;
+
+        expect(params.censorSNI, isNotEmpty, reason: preset);
+      }
+    });
+
+    test('a neutral preset carries no censored SNI to forge a whitelist', () {
+      final params = const SmartRoutingProps(
+        enabled: true,
+      ).applyPreset(neutralPreset).rcxParams;
+
+      expect(params.censorSNI, isEmpty);
+    });
+
     test('a canary the user corrects is what the core receives', () {
       final corrected = const SmartRoutingProps(enabled: true)
-          .applyPreset(SmartRoutingPreset.russia)
+          .applyPreset('ru')
           .copyWith(canaryForeign: ['8.8.8.8:443']);
 
       expect(corrected.matchesPreset, isFalse);
@@ -407,7 +436,7 @@ void main() {
 
   group('a section reset touches only the facets it owns', () {
     final russia = const SmartRoutingProps().applyPreset(
-      SmartRoutingPreset.russia,
+      'ru',
     );
 
     test('resetting Pace leaves the Ranking bands, and the reverse', () {

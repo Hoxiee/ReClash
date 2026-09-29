@@ -1122,6 +1122,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "Inspect DNS lookups resolved through the tunnel",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The check found where the connection stops working.",
     ),
@@ -1140,6 +1143,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "Check cancelled",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Active"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("Inactive"),
@@ -1199,8 +1229,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorExportReport": MessageLookupByLibrary.simpleMessage("Export report"),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("Flush DNS cache"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("Current"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "The check found a connection problem but could not identify a more specific cause.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "The app reached the internet through the expected connection path.",
@@ -1245,6 +1281,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Standard"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "No usable evidence yet",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
       "No completed checks yet",
@@ -1334,6 +1373,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage(
       "Traffic was routed incorrectly",
     ),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("Evidence scope"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("This app"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("Local inbound"),
@@ -1428,6 +1468,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN is not active",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("What to try"),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
@@ -3211,6 +3257,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "A server here counts as local, so it is held back until a shutdown",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage(
+      "Censored SNI",
+    ),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "A blocked domain sent as the SNI to reachable foreign IPs; a cut handshake exposes name-based filtering",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("Chosen server"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "No server chosen yet",
@@ -3631,6 +3683,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Preset"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("China"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Egypt"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Iran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Other"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russia"),

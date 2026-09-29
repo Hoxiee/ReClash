@@ -1,41 +1,27 @@
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/util/provider_reader.dart';
-import 'package:reclash/enum/enum.dart';
 
 enum RegionalFacetId {
-  smartRouting,
   clashDns,
   desync,
   packageMatcher,
   deviceIdentity,
-  season,
 }
 
-// Absence = available everywhere; a value = the only regions that may use it.
-const _facetRegions = <RegionalFacetId, Set<AppRegion>>{
-  RegionalFacetId.desync: {AppRegion.russia, AppRegion.iran},
-  RegionalFacetId.deviceIdentity: {AppRegion.russia},
-  RegionalFacetId.packageMatcher: {
-    AppRegion.russia,
-    AppRegion.iran,
-    AppRegion.china,
-  },
-};
+Set<RegionalFacetId> regionCapabilities(String? code) =>
+    capabilitiesForCode(code);
 
-Set<RegionalFacetId> regionCapabilities(AppRegion region) => {
-  for (final id in RegionalFacetId.values)
-    if (_facetRegions[id]?.contains(region) ?? true) id,
-};
-
-bool regionAllowsFacet(AppRegion region, RegionalFacetId id) =>
-    _facetRegions[id]?.contains(region) ?? true;
+bool regionAllowsFacet(String? code, RegionalFacetId id) =>
+    capabilitiesForCode(code).contains(id);
 
 class RegionalDefaults<T> {
   const RegionalDefaults(this._table, this._fallback);
 
-  final Map<AppRegion, T> _table;
+  final Map<String, T> _table;
   final T _fallback;
 
-  T forRegion(AppRegion region) => _table[region] ?? _fallback;
+  T forRegion(String? code) =>
+      _table[normalizedRegionCode(code)] ?? _fallback;
 
   bool isShipped(T value) => _fallback == value || _table.containsValue(value);
 }
@@ -44,7 +30,7 @@ class RegionalDefaults<T> {
 abstract interface class SeededRegionalFacet {
   RegionalFacetId get id;
 
-  bool isPristineFor(ProviderReader read, AppRegion region);
+  bool isPristineFor(ProviderReader read, String? code);
 
-  void applyDefaults(ProviderReader read, AppRegion region);
+  void applyDefaults(ProviderReader read, String? code);
 }

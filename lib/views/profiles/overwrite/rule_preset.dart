@@ -66,10 +66,10 @@ enum RulePreset {
 // A domestic-direct preset belongs only to its home region; the utility
 // presets below it apply everywhere. Mirrors bypassForRegion's head+shared
 // shape so the two regional tables read the same way.
-const _regionalPresetHead = <AppRegion, List<RulePreset>>{
-  AppRegion.russia: [RulePreset.russiaDirect],
-  AppRegion.iran: [RulePreset.iranDirect],
-  AppRegion.china: [RulePreset.chinaDirect],
+const _regionalPresetHead = <String, List<RulePreset>>{
+  'RU': [RulePreset.russiaDirect],
+  'IR': [RulePreset.iranDirect],
+  'CN': [RulePreset.chinaDirect],
 };
 
 const _sharedPresets = [
@@ -81,8 +81,8 @@ const _sharedPresets = [
   RulePreset.bittorrentDirect,
 ];
 
-List<RulePreset> rulePresetsForRegion(AppRegion region) => [
-  ...?_regionalPresetHead[region],
+List<RulePreset> rulePresetsForRegion(String? code) => [
+  ...?_regionalPresetHead[normalizedRegionCode(code)],
   ..._sharedPresets,
 ];
 

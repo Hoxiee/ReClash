@@ -1,3 +1,4 @@
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
@@ -11,6 +12,7 @@ class SmartRoutingBundle {
     this.censorCountries = const [],
     this.canaryForeign = const [],
     this.canaryDomestic = const [],
+    this.censorSNI = const [],
     this.openMarkers = const [],
     this.domesticMarkers = const [],
     this.localMarkers = const [],
@@ -26,6 +28,7 @@ class SmartRoutingBundle {
   final List<String> censorCountries;
   final List<String> canaryForeign;
   final List<String> canaryDomestic;
+  final List<String> censorSNI;
   final List<RcxMarker> openMarkers;
   final List<RcxMarker> domesticMarkers;
   final List<RcxMarker> localMarkers;
@@ -68,6 +71,11 @@ const _russia = SmartRoutingBundle(
     '94.140.14.14:443',
   ],
   canaryDomestic: ['77.88.8.8:443', '213.180.204.242:443'],
+  // A domain the ТСПУ SNI-DPI cuts, dialed at the foreign anycast IPs the plain
+  // canary already reaches: transit is proven there, so a ClientHello that draws
+  // no ServerHello is censorship, not a dark link. This is the only signal that
+  // arms the censoring ranking on a network that whitelists the bare IPs.
+  censorSNI: ['rutracker.org'],
   // Both hosts are unreachable from every Russian egress while working abroad,
   // so reaching either proves a node is abroad and a home-country dud cannot.
   // Two of them means one host going dark does not blind the engine. Telegram
@@ -110,46 +118,107 @@ const _neutral = SmartRoutingBundle(
   countryEchoes: _countryEchoes,
 );
 
-const _smartRoutingBundles = {
-  SmartRoutingPreset.off: SmartRoutingBundle(),
-  SmartRoutingPreset.russia: _russia,
-  SmartRoutingPreset.iran: SmartRoutingBundle(
-    censorCountries: ['IR'],
-    canaryForeign: [
-      '1.1.1.1:443',
-      '9.9.9.9:443',
-      '8.8.8.8:443',
-      '94.140.14.14:443',
-    ],
-    canaryDomestic: ['5.200.200.200:443'],
-    openMarkers: [
-      RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
-    ],
-    domesticMarkers: [
-      RcxMarker(url: 'https://www.aparat.com/', statuses: [200, 301, 302]),
-    ],
-    egressEchoes: _egressEchoes,
-    countryEchoes: _countryEchoes,
-  ),
-  SmartRoutingPreset.china: SmartRoutingBundle(
-    censorCountries: ['CN'],
-    canaryForeign: [
-      '1.1.1.1:443',
-      '9.9.9.9:443',
-      '8.8.8.8:443',
-      '94.140.14.14:443',
-    ],
-    canaryDomestic: ['223.5.5.5:443'],
-    openMarkers: [
-      RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
-    ],
-    domesticMarkers: [
-      RcxMarker(url: 'https://www.baidu.com/', statuses: [200, 301, 302]),
-    ],
-    egressEchoes: _egressEchoes,
-    countryEchoes: _countryEchoes,
-  ),
+const _iran = SmartRoutingBundle(
+  censorCountries: ['IR'],
+  censorSNI: ['www.instagram.com'],
+  canaryForeign: [
+    '1.1.1.1:443',
+    '9.9.9.9:443',
+    '8.8.8.8:443',
+    '94.140.14.14:443',
+  ],
+  canaryDomestic: ['5.200.200.200:443'],
+  openMarkers: [
+    RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
+  ],
+  domesticMarkers: [
+    RcxMarker(url: 'https://www.aparat.com/', statuses: [200, 301, 302]),
+  ],
+  egressEchoes: _egressEchoes,
+  countryEchoes: _countryEchoes,
+);
+
+const _china = SmartRoutingBundle(
+  censorCountries: ['CN'],
+  censorSNI: ['www.google.com'],
+  canaryForeign: [
+    '1.1.1.1:443',
+    '9.9.9.9:443',
+    '8.8.8.8:443',
+    '94.140.14.14:443',
+  ],
+  canaryDomestic: ['223.5.5.5:443'],
+  openMarkers: [
+    RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
+  ],
+  domesticMarkers: [
+    RcxMarker(url: 'https://www.baidu.com/', statuses: [200, 301, 302]),
+  ],
+  egressEchoes: _egressEchoes,
+  countryEchoes: _countryEchoes,
+);
+
+// VERIFY before ship: canaryDomestic (a TE Data resolver reachable on :443) and
+// domesticMarkers (a reliably-Egyptian host) are best-effort until measured.
+const _egypt = SmartRoutingBundle(
+  censorCountries: ['EG'],
+  canaryForeign: [
+    '1.1.1.1:443',
+    '9.9.9.9:443',
+    '8.8.8.8:443',
+    '94.140.14.14:443',
+  ],
+  canaryDomestic: ['163.121.128.134:443'],
+  openMarkers: [
+    RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
+  ],
+  domesticMarkers: [
+    RcxMarker(url: 'https://www.te.eg/', statuses: [200, 301, 302]),
+  ],
+  egressEchoes: _egressEchoes,
+  countryEchoes: _countryEchoes,
+);
+
+// Keyed by the lower-case preset wire, which doubles as the ISO code a region
+// carries. Adding a country is one entry here plus its [CountryProfile] record.
+const _bundles = <String, SmartRoutingBundle>{
+  'ru': _russia,
+  'ir': _iran,
+  'cn': _china,
+  'eg': _egypt,
 };
+
+/// The neutral preset seeds an operable engine with no country claim. Any code
+/// without a shipped bundle falls back to it, so an unknown region still runs.
+const neutralPreset = 'off';
+
+/// The raw bundle a preset predefines. The neutral preset and any unshipped
+/// code carry an empty bundle; the operable neutral seed ([_neutral]) is what
+/// [SmartRoutingPropsRcx.applyPreset] and enablement lay down instead.
+SmartRoutingBundle bundleForPreset(String preset) {
+  final code = preset.trim().toLowerCase();
+  if (code.isEmpty || code == neutralPreset) return const SmartRoutingBundle();
+  return _bundles[code] ?? const SmartRoutingBundle();
+}
+
+/// The preset wire an upper-case region code seeds, and its inverse. The two
+/// stores stay a case flip apart, except that no shipped country is [off] on the
+/// routing side and [otherRegionCode] on the region side.
+String presetForRegion(String? code) {
+  final normalized = code?.trim().toUpperCase();
+  return (normalized == null ||
+          normalized.isEmpty ||
+          normalized == otherRegionCode)
+      ? neutralPreset
+      : normalized.toLowerCase();
+}
+
+String regionForPreset(String preset) {
+  final code = preset.trim().toLowerCase();
+  return (code.isEmpty || code == neutralPreset)
+      ? otherRegionCode
+      : code.toUpperCase();
+}
 
 /// The pace belongs to the strategy, not to the region that seeds the rest.
 class SmartRoutingPacing {
@@ -214,18 +283,6 @@ extension SmartRoutingStrategyWire on SmartRoutingStrategy {
   };
 }
 
-extension SmartRoutingPresetBundle on SmartRoutingPreset {
-  SmartRoutingBundle get bundle =>
-      _smartRoutingBundles[this] ?? const SmartRoutingBundle();
-
-  String get wire => switch (this) {
-    SmartRoutingPreset.off => 'off',
-    SmartRoutingPreset.russia => 'ru',
-    SmartRoutingPreset.iran => 'ir',
-    SmartRoutingPreset.china => 'cn',
-  };
-}
-
 /// Reset spares the user-owned avoidCountries/nodeRules, as applyPreset does.
 enum RoutingFacetGroup {
   pacing,
@@ -238,16 +295,24 @@ enum RoutingFacetGroup {
 }
 
 extension SmartRoutingPropsRcx on SmartRoutingProps {
+  bool get _presetIsNeutral {
+    final code = preset.trim().toLowerCase();
+    return code.isEmpty || code == neutralPreset;
+  }
+
   /// A preset seeds every field it owns, so picking a region also rewrites the
   /// canaries and markers the user could since have edited. Enablement is the
   /// user's, never the preset's.
-  SmartRoutingProps applyPreset(SmartRoutingPreset value) {
-    final bundle = value == SmartRoutingPreset.off ? _neutral : value.bundle;
+  SmartRoutingProps applyPreset(String preset) {
+    final code = preset.trim().toLowerCase();
+    final neutral = code.isEmpty || code == neutralPreset;
+    final bundle = neutral ? _neutral : bundleForPreset(preset);
     return copyWith(
-      preset: value,
+      preset: preset,
       censorCountries: bundle.censorCountries,
       canaryForeign: bundle.canaryForeign,
       canaryDomestic: bundle.canaryDomestic,
+      censorSNI: bundle.censorSNI,
       openMarkers: bundle.openMarkers,
       domesticMarkers: bundle.domesticMarkers,
       localMarkers: bundle.localMarkers,
@@ -263,12 +328,10 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
 
   SmartRoutingProps withEnabled(bool value) => copyWith(
     enabled: value,
-    canaryForeign:
-        value && preset == SmartRoutingPreset.off && canaryForeign.isEmpty
+    canaryForeign: value && _presetIsNeutral && canaryForeign.isEmpty
         ? _neutral.canaryForeign
         : canaryForeign,
-    openMarkers:
-        value && preset == SmartRoutingPreset.off && openMarkers.isEmpty
+    openMarkers: value && _presetIsNeutral && openMarkers.isEmpty
         ? _neutral.openMarkers
         : openMarkers,
   );
@@ -279,12 +342,10 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
   SmartRoutingProps withUnlocked(bool value) => copyWith(
     unlocked: value,
     enabled: value && enabled,
-    canaryForeign:
-        value && preset == SmartRoutingPreset.off && canaryForeign.isEmpty
+    canaryForeign: value && _presetIsNeutral && canaryForeign.isEmpty
         ? _neutral.canaryForeign
         : canaryForeign,
-    openMarkers:
-        value && preset == SmartRoutingPreset.off && openMarkers.isEmpty
+    openMarkers: value && _presetIsNeutral && openMarkers.isEmpty
         ? _neutral.openMarkers
         : openMarkers,
   );
@@ -345,6 +406,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       RoutingFacetGroup.probes => copyWith(
         canaryForeign: seed.canaryForeign,
         canaryDomestic: seed.canaryDomestic,
+        censorSNI: seed.censorSNI,
       ),
       RoutingFacetGroup.censorship => copyWith(
         censorCountries: seed.censorCountries,
@@ -367,12 +429,13 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
 
   RcxConfigParams rcxParamsFor(Profile? profile) => RcxConfigParams(
     enabled: enabled,
-    preset: preset.wire,
+    preset: preset,
     strategy: strategy.wire,
     defaultsVersion: smartRoutingDefaultsVersion,
     censorCountries: censorCountries,
     canaryForeign: canaryForeign,
     canaryDomestic: canaryDomestic,
+    censorSNI: censorSNI,
     openMarkers: openMarkers,
     domesticMarkers: domesticMarkers,
     localMarkers: localMarkers,

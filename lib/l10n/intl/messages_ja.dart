@@ -933,6 +933,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "トンネル経由で解決された DNS クエリを確認します",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "最初に失敗したレイヤーを確認しました。",
     ),
@@ -949,6 +952,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "確認をキャンセルしました",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("有効"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("無効"),
@@ -996,8 +1026,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorExportReport": MessageLookupByLibrary.simpleMessage("レポートをエクスポート"),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("DNS キャッシュを消去"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("最新"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "接続の問題を検出しましたが、詳しい原因を特定できませんでした。",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "観測した経路は正常に完了しました。",
@@ -1033,6 +1069,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeDeep": MessageLookupByLibrary.simpleMessage("詳細"),
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("標準"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage("利用できる証拠はまだありません"),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
+    ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage("完了した確認はありません"),
     "doctorNoNetworkDesc": MessageLookupByLibrary.simpleMessage(
       "デバイスが Wi-Fi またはモバイルデータに接続されていません。",
@@ -1107,6 +1146,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "現在のプロファイルでは、この接続に使える経路を選択できませんでした。",
     ),
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage("通信の経路が正しくありません"),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("証拠の範囲"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("このアプリ"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("ローカル入口"),
@@ -1193,6 +1233,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN が有効ではありません",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("試すこと"),
     "domain": MessageLookupByLibrary.simpleMessage("ドメイン"),
@@ -2680,6 +2726,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "その地域のサーバーは国内扱いになり、遮断時まで使われません",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage("検閲対象のSNI"),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "到達可能な海外IPへSNIとして送る遮断ドメイン。ハンドシェイクが切られれば名前ベースのフィルタリングを検出します",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("選択中のサーバー"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "まだサーバーが選ばれていません",
@@ -3020,6 +3070,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("プリセット"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("中国"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("エジプト"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("イラン"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("その他"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("ロシア"),

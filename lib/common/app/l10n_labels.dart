@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/routing/smart_routing.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 
@@ -79,16 +81,24 @@ extension UiOutboundModeL10n on UiOutboundMode {
   }
 }
 
-extension SmartRoutingPresetL10n on SmartRoutingPreset {
-  String get label {
-    final appLocalizations = currentAppLocalizations;
-    return switch (this) {
-      SmartRoutingPreset.off => appLocalizations.smartRoutingPresetOff,
-      SmartRoutingPreset.russia => appLocalizations.smartRoutingPresetRussia,
-      SmartRoutingPreset.iran => appLocalizations.smartRoutingPresetIran,
-      SmartRoutingPreset.china => appLocalizations.smartRoutingPresetChina,
-    };
-  }
+/// The single localization seam for region names: adding a country is one arm
+/// here plus its ARB key, never a new enum value.
+String regionLabel(String? code) {
+  final appLocalizations = currentAppLocalizations;
+  return switch (normalizedRegionCode(code)) {
+    'RU' => appLocalizations.smartRoutingPresetRussia,
+    'IR' => appLocalizations.smartRoutingPresetIran,
+    'CN' => appLocalizations.smartRoutingPresetChina,
+    'EG' => appLocalizations.smartRoutingPresetEgypt,
+    _ => appLocalizations.appRegionOther,
+  };
+}
+
+String presetLabel(String preset) {
+  final code = preset.trim().toLowerCase();
+  return code.isEmpty || code == neutralPreset
+      ? currentAppLocalizations.smartRoutingPresetOff
+      : regionLabel(regionForPreset(preset));
 }
 
 extension SmartRoutingStrategyL10n on SmartRoutingStrategy {

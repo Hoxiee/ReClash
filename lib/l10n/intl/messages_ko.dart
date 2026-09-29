@@ -932,6 +932,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "터널을 통해 확인된 DNS 조회를 살펴봅니다",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "첫 번째 실패 계층을 확인했습니다.",
     ),
@@ -947,6 +950,33 @@ class MessageLookup extends MessageLookupByLibrary {
       "진단은 변경되지 않았습니다. 다시 검사할 수 있습니다.",
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage("검사 취소됨"),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
+    ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("활성"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("비활성"),
     "doctorCaptureNotApplicable": MessageLookupByLibrary.simpleMessage("해당 없음"),
@@ -991,8 +1021,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorExportReport": MessageLookupByLibrary.simpleMessage("보고서 내보내기"),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("DNS 캐시 비우기"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("최신"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "연결 문제를 발견했지만 더 구체적인 원인을 확인하지 못했습니다.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "관찰된 경로가 성공적으로 완료되었습니다.",
@@ -1027,6 +1063,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("표준"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "아직 사용할 수 있는 근거가 없음",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage("완료된 검사가 없음"),
     "doctorNoNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -1096,6 +1135,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "현재 프로필이 이 연결에 사용할 경로를 선택하지 못했습니다.",
     ),
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage("트래픽 경로가 잘못됨"),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("근거 범위"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("이 앱"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("로컬 진입"),
@@ -1182,6 +1222,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN이 활성화되지 않음",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("시도할 방법"),
     "domain": MessageLookupByLibrary.simpleMessage("도메인"),
@@ -2661,6 +2707,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "이 국가의 서버는 국내로 간주되어 차단이 시작되기 전까지 보류됩니다",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage("검열되는 SNI"),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "도달 가능한 해외 IP로 SNI로 보내는 차단된 도메인; 핸드셰이크가 끊기면 이름 기반 필터링이 드러납니다",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("선택된 서버"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "아직 선택된 서버가 없습니다",
@@ -2999,6 +3049,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("프리셋"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("중국"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("이집트"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("이란"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("기타"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("러시아"),

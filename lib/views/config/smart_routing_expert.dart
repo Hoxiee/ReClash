@@ -100,6 +100,12 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 value: props.canaryDomestic,
                 write: (state, value) => state.copyWith(canaryDomestic: value),
               ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingCensorSni,
+                desc: appLocalizations.smartRoutingCensorSniDesc,
+                value: props.censorSNI,
+                write: (state, value) => state.copyWith(censorSNI: value),
+              ),
             ],
           ),
           SettingSection(

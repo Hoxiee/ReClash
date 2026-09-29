@@ -1150,6 +1150,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "Просмотр DNS-запросов, разрешённых через туннель",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Сейчас недоступно",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "Проверка нашла место, где соединение перестаёт работать.",
     ),
@@ -1170,6 +1173,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "Проверка отменена",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Охват диагностики",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "Проба входа приложения",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "Статус ByeDPI",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Отмена проверок",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "Сброс кэша DNS",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "Проверка по запросу",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Пассивное наблюдение",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Обезличенный экспорт",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "Подтверждение входа TUN",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Активна"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("Неактивна"),
@@ -1231,8 +1261,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("Очистить кэш DNS"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("Актуально"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Сеть или конфигурация изменились после этой проверки; её данные могут быть неактуальны.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "Проверка обнаружила проблему с соединением, но не смогла точнее определить причину.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Попытки восстановления",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "Приложение вышло в интернет по ожидаемому пути соединения.",
@@ -1279,6 +1315,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Стандартная"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "Полезных данных пока нет",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Пока нет попыток восстановления",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
       "Завершённых проверок пока нет",
@@ -1374,6 +1413,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage(
       "Трафик направлен неправильно",
     ),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Запустить проверку"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("Область данных"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("Это приложение"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage(
@@ -1472,6 +1512,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN не активен",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage("Каскад задержек"),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Каждая полоса — проба на пути соединения: позиция задаётся моментом старта, длина — временем выполнения.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("Что попробовать"),
     "domain": MessageLookupByLibrary.simpleMessage("Домен"),
@@ -3337,6 +3381,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "Сервер из такой страны считается местным, поэтому его берегут до шатдауна",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage(
+      "Цензурируемый SNI",
+    ),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "Заблокированный домен как SNI к доступным зарубежным IP; оборванный handshake выдаёт фильтрацию по имени",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage(
       "Выбранный сервер",
     ),
@@ -3775,6 +3825,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Пресет"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Китай"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Египет"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Иран"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Другое"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Россия"),

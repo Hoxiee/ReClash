@@ -1165,6 +1165,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "Tunnel orqali hal qilingan DNS soʻrovlarini koʻring",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1185,6 +1188,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "Check cancelled",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Faol"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("Faol emas"),
@@ -1248,8 +1278,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS keshini tozalash",
     ),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("Dolzarb"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "Tekshiruv ulanish muammosini topdi, ammo aniq sababini aniqlay olmadi.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "The observed path completed successfully.",
@@ -1294,6 +1330,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Standard"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "No usable evidence yet",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
       "No completed checks yet",
@@ -1397,6 +1436,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage(
       "Trafik notoʻgʻri yoʻnaltirildi",
     ),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("Evidence scope"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("This app"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("Local inbound"),
@@ -1491,6 +1531,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN faol emas",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage(
       "Nima qilish mumkin",
@@ -3394,6 +3440,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "Bu yerdagi server mahalliy hisoblanadi va internet butunlay oʻchirilguncha ushlab turiladi",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage(
+      "Tsenzura qilinadigan SNI",
+    ),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "Yetib boradigan xorijiy IP-larga SNI sifatida yuboriladigan bloklangan domen; uzilgan handshake nom boʻyicha filtrlashni fosh qiladi",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage(
       "Tanlangan server",
     ),
@@ -3836,6 +3888,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Xitoy"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Misr"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Eron"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Boshqa"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Rossiya"),

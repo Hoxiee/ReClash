@@ -303,11 +303,11 @@ class GeneralListView extends ConsumerWidget {
         SettingSection(
           top: 16,
           items: [
-            ConfigOptionsItem<AppRegion>(
+            ConfigOptionsItem<String>(
               leading: const GlyphIcon(AppGlyphs.appRegion),
               title: (l) => l.appRegion,
-              options: AppRegion.values,
-              textBuilder: (region) => region.label(context),
+              options: [...shippedCountryCodes, otherRegionCode],
+              textBuilder: (code) => regionLabel(code),
               selector: appRegionProvider,
               onChanged: (ref, value) => selectAppRegion(ref.read, value),
             ),

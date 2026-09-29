@@ -1145,6 +1145,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "Tunnel arkaly çözülen DNS soraglaryna serediň",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1163,6 +1166,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "Check cancelled",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Işjeň"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("Işjeň däl"),
@@ -1226,8 +1256,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "DNS keşini arassala",
     ),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("Täze"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "Barlag birikme meselesini tapdy, ýöne anyk sebäbini kesgitläp bilmedi.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "The observed path completed successfully.",
@@ -1272,6 +1308,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Standard"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "No usable evidence yet",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
       "No completed checks yet",
@@ -1367,6 +1406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage(
       "Trafik nädogry ugrukdyryldy",
     ),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("Evidence scope"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("This app"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("Local inbound"),
@@ -1461,6 +1501,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN işjeň däl",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("Näme synanyşmaly"),
     "domain": MessageLookupByLibrary.simpleMessage("Domen"),
@@ -3306,6 +3352,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ýurtlardaky serwerler ýerli hasaplanýar, şonuň üçin bloklanma bolýança saklanýar",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage(
+      "Senzuralanýan SNI",
+    ),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "Elýeterli daşary ýurt IP-lerine SNI hökmünde iberilýän petiklenen domen; kesilen handshake at boýunça süzgüçi ýüze çykarýar",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage(
       "Saýlanan serwer",
     ),
@@ -3740,6 +3792,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Taýynlama"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Çin"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Müsür"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Eýran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Başga"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russiýa"),

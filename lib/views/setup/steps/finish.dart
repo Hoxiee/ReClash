@@ -419,7 +419,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                     Text(
                       appLocalizations.setupSummaryRouting(
                         routing.unlocked
-                            ? routing.preset.label
+                            ? presetLabel(routing.preset)
                             : appLocalizations.off,
                       ),
                     ),

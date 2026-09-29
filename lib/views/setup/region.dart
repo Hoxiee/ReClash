@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -23,15 +22,15 @@ class SetupRegionSettings extends ConsumerWidget {
       child: SetupCard(
         child: Column(
           children: [
-            ListItem<AppRegion>.options(
+            ListItem<String>.options(
               key: const ValueKey('setup-app-region'),
               leading: const GlyphIcon(AppGlyphs.language),
               title: Text(l10n.appRegion),
-              subtitle: Text(region.label(context)),
+              subtitle: Text(regionLabel(region)),
               dialogTitle: l10n.appRegion,
-              options: AppRegion.values,
+              options: [...shippedCountryCodes, otherRegionCode],
               value: region,
-              textBuilder: (value) => value.label(context),
+              textBuilder: (value) => regionLabel(value),
               onChanged: (value) {
                 if (!context.mounted || value == null) return;
                 selectAppRegion(ref.read, value);

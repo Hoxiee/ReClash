@@ -88,4 +88,9 @@ class DomesticPackageMatcherTest {
             assertFalse(region, matcher.hasClassSignatures(region))
         }
     }
+
+    @Test
+    fun `the manifest ships exactly the regions that carry data`() {
+        assertEquals(setOf("ru", "ir", "cn", "eg"), matcher.domesticRegions)
+    }
 }

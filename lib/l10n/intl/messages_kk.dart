@@ -1138,6 +1138,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
       "Туннель арқылы шешілген DNS сұрауларын қарау",
     ),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1158,6 +1161,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
       "Check cancelled",
+    ),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
     ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Белсенді"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage(
@@ -1221,8 +1251,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("DNS кэшін тазалау"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("Өзекті"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "Тексеру қосылым мәселесін тапты, бірақ нақты себебін анықтай алмады.",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
       "The observed path completed successfully.",
@@ -1267,6 +1303,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Standard"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
       "No usable evidence yet",
+    ),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
     ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
       "No completed checks yet",
@@ -1362,6 +1401,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage(
       "Трафик қате бағытталды",
     ),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("Evidence scope"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("This app"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("Local inbound"),
@@ -1454,6 +1494,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
       "VPN белсенді емес",
+    ),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
     ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage(
       "Не істеуге болады",
@@ -3321,6 +3367,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "Ондағы сервер жергілікті деп саналады, сондықтан өшіру басталғанға дейін ұсталып тұрады",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage(
+      "Цензураланатын SNI",
+    ),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "Қолжетімді шетелдік IP-ге SNI ретінде жіберілетін бұғатталған домен; үзілген handshake атау бойынша сүзгілеуді әшкерелейді",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage(
       "Таңдалған сервер",
     ),
@@ -3751,6 +3803,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Қытай"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Мысыр"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Иран"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Басқа"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Ресей"),

@@ -16,7 +16,7 @@ const _profileId = 77;
 
 final _russia = const SmartRoutingProps(
   enabled: true,
-).applyPreset(SmartRoutingPreset.russia);
+).applyPreset('ru');
 
 Future<void> _reveal(
   WidgetTester tester,
@@ -109,7 +109,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -127,7 +127,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -147,7 +147,7 @@ void main() {
         tester,
         props: const SmartRoutingProps(
           enabled: true,
-          preset: SmartRoutingPreset.russia,
+          preset: 'ru',
           openMarkers: [
             RcxMarker(url: 'https://example.com/open', statuses: [204]),
           ],
@@ -179,7 +179,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -203,7 +203,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -290,7 +290,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -413,7 +413,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
     );
@@ -432,7 +432,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
     );
@@ -459,7 +459,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
     );
 
@@ -477,7 +477,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
     );
@@ -508,7 +508,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
     );
@@ -535,7 +535,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
       size: const Size(360, 800),
@@ -559,7 +559,7 @@ void main() {
       tester,
       props: const SmartRoutingProps(
         enabled: true,
-        preset: SmartRoutingPreset.russia,
+        preset: 'ru',
       ),
       profile: profile,
     );
@@ -596,7 +596,7 @@ void main() {
     final props = container.read(smartRoutingSettingProvider);
     expect(props.unlocked, isTrue);
     expect(props.enabled, isFalse);
-    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.preset, neutralPreset);
     expect(props.openMarkers, isNotEmpty);
     expect(props.canaryForeign, isNotEmpty);
     expect(props.censorCountries, isEmpty);

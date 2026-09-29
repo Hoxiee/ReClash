@@ -1,0 +1,12 @@
+# layer A: IR namespace zone + flagship routes and clean vendors
+ir.
+cab.snapp
+express.snapp
+taxi.tap30
+mob.banking.android
+com.tosan
+com.sabaidea
+com.aparat
+com.samanpr
+com.shatelland
+com.adpdigital

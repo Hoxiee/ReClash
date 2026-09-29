@@ -103,6 +103,7 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.systemProxyButton,
   DashboardWidget.tunButton,
   DashboardWidget.networkDetection,
+  DashboardWidget.connectionPath,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
   DashboardWidget.smartRouting,
@@ -251,8 +252,7 @@ extension NotificationSettingsProjection on NotificationSettings {
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
-    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
-    AppRegion? region,
+    @JsonKey(fromJson: sanitizeRegionCode) String? region,
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
@@ -454,11 +454,12 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
   const factory SmartRoutingProps({
     @Default(false) bool enabled,
     @Default(false) bool unlocked,
-    @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,
+    @Default('off') String preset,
     @Default(SmartRoutingStrategy.balanced) SmartRoutingStrategy strategy,
     @Default([]) List<String> censorCountries,
     @Default([]) List<String> canaryForeign,
     @Default([]) List<String> canaryDomestic,
+    @Default([]) List<String> censorSNI,
     @Default([]) List<RcxMarker> openMarkers,
     @Default([]) List<RcxMarker> domesticMarkers,
     @Default([]) List<RcxMarker> localMarkers,

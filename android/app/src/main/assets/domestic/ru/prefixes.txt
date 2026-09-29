@@ -1,0 +1,24 @@
+# layer A: RU namespace zones + confirmed vendor prefixes
+ru.
+su.
+com.yandex
+com.vk
+com.vkontakte
+com.megafon
+com.wildberries
+com.sberbank
+com.sbermarket
+com.sberauto
+com.salute
+com.sdkit
+com.zvooq
+com.rutube
+com.rostelecom
+com.ozon
+com.magnit
+com.mts
+com.vkusvill
+com.lenta
+com.gnivts
+com.dartit
+com.indygomobi

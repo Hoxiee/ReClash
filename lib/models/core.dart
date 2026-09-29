@@ -268,6 +268,7 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'cc') required List<String> censorCountries,
     @JsonKey(name: 'cf') required List<String> canaryForeign,
     @JsonKey(name: 'cd') required List<String> canaryDomestic,
+    @JsonKey(name: 'cs') @Default([]) List<String> censorSNI,
     @JsonKey(name: 'om') required List<RcxMarker> openMarkers,
     @JsonKey(name: 'dm') required List<RcxMarker> domesticMarkers,
     @JsonKey(name: 'lm') @Default([]) List<RcxMarker> localMarkers,
@@ -409,6 +410,7 @@ abstract class RcxLinkReport with _$RcxLinkReport {
     @Default(false) bool metered,
     @Default('unknown') String foreign,
     @Default('unknown') String domestic,
+    @Default('unknown') String sni,
     @Default(0) int since,
   }) = _RcxLinkReport;
 
@@ -582,6 +584,7 @@ abstract class RcxDiagContext with _$RcxDiagContext {
     @Default(false) bool validated,
     @Default('') String reachF,
     @Default('') String reachD,
+    @Default('') String reachS,
     @Default('') String direct,
     @Default(0) int probesLeft,
     @Default(0) int candidates,

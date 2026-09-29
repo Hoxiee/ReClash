@@ -16,12 +16,14 @@ class AppSetting extends _$AppSetting with AutoDisposeNotifierMixin {
   }
 }
 
-final appRegionProvider = Provider<AppRegion>((ref) {
-  final region = ref.watch(appSettingProvider.select((state) => state.region));
-  return region ??
-      AppRegion.fromPreset(
-        ref.watch(smartRoutingSettingProvider.select((state) => state.preset)),
-      );
+final appRegionProvider = Provider<String>((ref) {
+  final region = normalizedRegionCode(
+    ref.watch(appSettingProvider.select((state) => state.region)),
+  );
+  if (region != null) return region;
+  return regionForPreset(
+    ref.watch(smartRoutingSettingProvider.select((state) => state.preset)),
+  );
 });
 
 final regionCapabilitiesProvider = Provider<Set<RegionalFacetId>>((ref) {
@@ -39,14 +41,14 @@ class _DnsFacet implements SeededRegionalFacet {
   RegionalFacetId get id => RegionalFacetId.clashDns;
 
   @override
-  bool isPristineFor(ProviderReader read, AppRegion region) =>
+  bool isPristineFor(ProviderReader read, String? code) =>
       isShippedDns(read(patchClashConfigProvider).dns);
 
   @override
-  void applyDefaults(ProviderReader read, AppRegion region) {
+  void applyDefaults(ProviderReader read, String? code) {
     read(
       patchClashConfigProvider.notifier,
-    ).update((state) => state.copyWith(dns: dnsForRegion(region)));
+    ).update((state) => state.copyWith(dns: dnsForRegion(code)));
   }
 }
 
@@ -57,37 +59,39 @@ class _BypassDomainFacet implements SeededRegionalFacet {
   RegionalFacetId get id => RegionalFacetId.clashDns;
 
   @override
-  bool isPristineFor(ProviderReader read, AppRegion region) =>
+  bool isPristineFor(ProviderReader read, String? code) =>
       isShippedBypass(read(networkSettingProvider).bypassDomain);
 
   @override
-  void applyDefaults(ProviderReader read, AppRegion region) {
+  void applyDefaults(ProviderReader read, String? code) {
     read(
       networkSettingProvider.notifier,
-    ).update((state) => state.copyWith(bypassDomain: bypassForRegion(region)));
+    ).update((state) => state.copyWith(bypassDomain: bypassForRegion(code)));
   }
 }
 
 const _seededFacets = <SeededRegionalFacet>[_DnsFacet(), _BypassDomainFacet()];
 
-void selectAppRegion(ProviderReader read, AppRegion region) {
+void selectAppRegion(ProviderReader read, String code) {
+  final normalized = normalizedRegionCode(code) ?? otherRegionCode;
   final previous = read(appRegionProvider);
-  if (read(appSettingProvider).region == region) return;
+  if (normalizedRegionCode(read(appSettingProvider).region) == normalized) {
+    return;
+  }
   read(appSettingProvider.notifier).update(
     (state) => state.copyWith(
-      region: region,
-      sendDeviceIdentity:
-          region == AppRegion.russia || state.sendDeviceIdentity,
+      region: normalized,
+      sendDeviceIdentity: normalized == 'RU' || state.sendDeviceIdentity,
     ),
   );
-  if (previous != region) {
+  if (previous != normalized) {
     read(
       smartRoutingSettingProvider.notifier,
-    ).update((state) => state.applyPreset(region.preset));
+    ).update((state) => state.applyPreset(presetForRegion(normalized)));
   }
   for (final facet in _seededFacets) {
     if (facet.isPristineFor(read, previous)) {
-      facet.applyDefaults(read, region);
+      facet.applyDefaults(read, normalized);
     }
   }
 }
@@ -99,7 +103,7 @@ void seedRegionIfUnset(
 ) {
   if (read(appSettingProvider).region != null) return;
   final region = detectRegion(signals, locale);
-  if (region == AppRegion.other) return;
+  if (region == null) return;
   selectAppRegion(
     read,
     region,
@@ -114,19 +118,20 @@ Config seedRegionIfUnsetConfig(
 ) {
   if (config.appSettingProps.region != null) return config;
   final region = detectRegion(signals, locale);
-  if (region == AppRegion.other) return config;
-  final previous = AppRegion.fromPreset(config.smartRoutingProps.preset);
+  if (region == null) return config;
+  final previous = regionForPreset(config.smartRoutingProps.preset);
   var next = config.copyWith(
     appSettingProps: config.appSettingProps.copyWith(
       region: region,
       sendDeviceIdentity:
-          region == AppRegion.russia ||
-          config.appSettingProps.sendDeviceIdentity,
+          region == 'RU' || config.appSettingProps.sendDeviceIdentity,
     ),
   );
   if (previous != region) {
     next = next.copyWith(
-      smartRoutingProps: next.smartRoutingProps.applyPreset(region.preset),
+      smartRoutingProps: next.smartRoutingProps.applyPreset(
+        presetForRegion(region),
+      ),
     );
   }
   if (isShippedDns(next.patchClashConfig.dns)) {

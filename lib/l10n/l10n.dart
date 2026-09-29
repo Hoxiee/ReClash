@@ -8692,6 +8692,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Egypt`
+  String get smartRoutingPresetEgypt {
+    return Intl.message(
+      'Egypt',
+      name: 'smartRoutingPresetEgypt',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Local servers during a shutdown`
   String get smartRoutingDomestic {
     return Intl.message(
@@ -10862,6 +10872,26 @@ class AppLocalizations {
     return Intl.message(
       'Reached directly to tell a whitelist network from no connectivity at all',
       name: 'smartRoutingCanariesDomesticDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Censored SNI`
+  String get smartRoutingCensorSni {
+    return Intl.message(
+      'Censored SNI',
+      name: 'smartRoutingCensorSni',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A blocked domain sent as the SNI to reachable foreign IPs; a cut handshake exposes name-based filtering`
+  String get smartRoutingCensorSniDesc {
+    return Intl.message(
+      'A blocked domain sent as the SNI to reachable foreign IPs; a cut handshake exposes name-based filtering',
+      name: 'smartRoutingCensorSniDesc',
       desc: '',
       args: [],
     );
@@ -17778,6 +17808,161 @@ class AppLocalizations {
     return Intl.message(
       'Enter a URL',
       name: 'companionEnterUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency waterfall`
+  String get doctorWaterfall {
+    return Intl.message(
+      'Latency waterfall',
+      name: 'doctorWaterfall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Each bar is a probe on the connection path, placed by when it started and how long it took.`
+  String get doctorWaterfallDesc {
+    return Intl.message(
+      'Each bar is a probe on the connection path, placed by when it started and how long it took.',
+      name: 'doctorWaterfallDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run a check`
+  String get doctorRun {
+    return Intl.message('Run a check', name: 'doctorRun', desc: '', args: []);
+  }
+
+  /// `Diagnostic coverage`
+  String get doctorCapabilities {
+    return Intl.message(
+      'Diagnostic coverage',
+      name: 'doctorCapabilities',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passive witness`
+  String get doctorCapabilityPassiveWitness {
+    return Intl.message(
+      'Passive witness',
+      name: 'doctorCapabilityPassiveWitness',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On-demand check`
+  String get doctorCapabilityExplicitExam {
+    return Intl.message(
+      'On-demand check',
+      name: 'doctorCapabilityExplicitExam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancellable checks`
+  String get doctorCapabilityCancel {
+    return Intl.message(
+      'Cancellable checks',
+      name: 'doctorCapabilityCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS cache flush`
+  String get doctorCapabilityDnsFlush {
+    return Intl.message(
+      'DNS cache flush',
+      name: 'doctorCapabilityDnsFlush',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App ingress probe`
+  String get doctorCapabilityAppIngressProbe {
+    return Intl.message(
+      'App ingress probe',
+      name: 'doctorCapabilityAppIngressProbe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN ingress proof`
+  String get doctorCapabilityTunIngressProof {
+    return Intl.message(
+      'TUN ingress proof',
+      name: 'doctorCapabilityTunIngressProof',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ByeDPI status`
+  String get doctorCapabilityByedpiStatus {
+    return Intl.message(
+      'ByeDPI status',
+      name: 'doctorCapabilityByedpiStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Redacted export`
+  String get doctorCapabilityRedactedExport {
+    return Intl.message(
+      'Redacted export',
+      name: 'doctorCapabilityRedactedExport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repair attempts`
+  String get doctorHealAttempts {
+    return Intl.message(
+      'Repair attempts',
+      name: 'doctorHealAttempts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No repair attempts yet`
+  String get doctorNoHealAttempts {
+    return Intl.message(
+      'No repair attempts yet',
+      name: 'doctorNoHealAttempts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network or configuration changed since this check ran; its evidence may no longer hold.`
+  String get doctorGenerationDrift {
+    return Intl.message(
+      'Network or configuration changed since this check ran; its evidence may no longer hold.',
+      name: 'doctorGenerationDrift',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not available right now`
+  String get doctorActionUnavailable {
+    return Intl.message(
+      'Not available right now',
+      name: 'doctorActionUnavailable',
       desc: '',
       args: [],
     );

@@ -80,11 +80,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   Map<String, dynamic> json,
 ) => _AppSettingProps(
   locale: json['locale'] as String?,
-  region: $enumDecodeNullable(
-    _$AppRegionEnumMap,
-    json['region'],
-    unknownValue: JsonKey.nullForUndefinedEnumValue,
-  ),
+  region: sanitizeRegionCode(json['region']),
   dashboardWidgets: json['dashboardWidgets'] == null
       ? defaultDashboardWidgets
       : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
@@ -147,7 +143,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
-      'region': _$AppRegionEnumMap[instance.region],
+      'region': instance.region,
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
@@ -189,13 +185,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'hideIp': instance.hideIp,
     };
 
-const _$AppRegionEnumMap = {
-  AppRegion.russia: 'ru',
-  AppRegion.iran: 'ir',
-  AppRegion.china: 'cn',
-  AppRegion.other: 'other',
-};
-
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',
   RestoreStrategy.override: 'override',
@@ -205,6 +194,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.networkSpeed: 'networkSpeed',
   DashboardWidget.trafficUsage: 'trafficUsage',
   DashboardWidget.networkDetection: 'networkDetection',
+  DashboardWidget.connectionPath: 'connectionPath',
   DashboardWidget.tunButton: 'tunButton',
   DashboardWidget.vpnButton: 'vpnButton',
   DashboardWidget.systemProxyButton: 'systemProxyButton',
@@ -331,9 +321,7 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
 ) => _SmartRoutingProps(
   enabled: json['enabled'] as bool? ?? false,
   unlocked: json['unlocked'] as bool? ?? false,
-  preset:
-      $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
-      SmartRoutingPreset.off,
+  preset: json['preset'] as String? ?? 'off',
   strategy:
       $enumDecodeNullable(_$SmartRoutingStrategyEnumMap, json['strategy']) ??
       SmartRoutingStrategy.balanced,
@@ -351,6 +339,9 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
       (json['canaryDomestic'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
+      const [],
+  censorSNI:
+      (json['censorSNI'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
   openMarkers:
       (json['openMarkers'] as List<dynamic>?)
@@ -415,11 +406,12 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
 ) => <String, dynamic>{
   'enabled': instance.enabled,
   'unlocked': instance.unlocked,
-  'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
+  'preset': instance.preset,
   'strategy': _$SmartRoutingStrategyEnumMap[instance.strategy]!,
   'censorCountries': instance.censorCountries,
   'canaryForeign': instance.canaryForeign,
   'canaryDomestic': instance.canaryDomestic,
+  'censorSNI': instance.censorSNI,
   'openMarkers': instance.openMarkers.map((e) => e.toJson()).toList(),
   'domesticMarkers': instance.domesticMarkers.map((e) => e.toJson()).toList(),
   'localMarkers': instance.localMarkers.map((e) => e.toJson()).toList(),
@@ -438,13 +430,6 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'absCeilingMs': instance.absCeilingMs,
   'degradeConfirmSeconds': instance.degradeConfirmSeconds,
   'proofTtlMinutes': instance.proofTtlMinutes,
-};
-
-const _$SmartRoutingPresetEnumMap = {
-  SmartRoutingPreset.off: 'off',
-  SmartRoutingPreset.russia: 'ru',
-  SmartRoutingPreset.iran: 'ir',
-  SmartRoutingPreset.china: 'cn',
 };
 
 const _$SmartRoutingStrategyEnumMap = {

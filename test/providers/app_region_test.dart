@@ -25,31 +25,31 @@ void main() {
   test('region defaults to nullable without changing HWID or routing', () {
     final container = _container();
 
-    expect(container.read(appRegionProvider), AppRegion.other);
+    expect(container.read(appRegionProvider), otherRegionCode);
     expect(container.read(appSettingProvider).region, isNull);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
   });
 
-  for (final region in AppRegion.values) {
-    test('explicit ${region.name} persists independently of routing', () {
+  for (final region in [...shippedCountryCodes, otherRegionCode]) {
+    test('explicit $region persists independently of routing', () {
       final container = _container();
       selectAppRegion(container.read, region);
 
       final saved = _roundTrip(container.read(configProvider));
       expect(saved.appSettingProps.region, region);
-      expect(
-        saved.appSettingProps.sendDeviceIdentity,
-        region == AppRegion.russia,
-      );
+      expect(saved.appSettingProps.sendDeviceIdentity, region == 'RU');
       expect(saved.smartRoutingProps.enabled, isFalse);
-      expect(saved.smartRoutingProps.preset, region.preset);
+      expect(saved.smartRoutingProps.preset, presetForRegion(region));
     });
   }
 
-  for (final preset in SmartRoutingPreset.values) {
+  for (final preset in [
+    neutralPreset,
+    ...shippedCountryCodes.map(presetForRegion),
+  ]) {
     for (final enabled in [false, true]) {
-      test('legacy ${preset.name}/$enabled falls back without migration', () {
+      test('legacy $preset/$enabled falls back without migration', () {
         final routing = SmartRoutingProps(enabled: enabled).applyPreset(preset);
         final original = Config(
           themeProps: defaultThemeProps,
@@ -57,7 +57,7 @@ void main() {
         );
         final container = _container(_roundTrip(original));
 
-        expect(container.read(appRegionProvider), AppRegion.fromPreset(preset));
+        expect(container.read(appRegionProvider), regionForPreset(preset));
         expect(container.read(configProvider), original);
         expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
       });
@@ -66,7 +66,7 @@ void main() {
 
   test('existing RU preset enables HWID only on its first explicit choice', () {
     final routing = const SmartRoutingProps()
-        .applyPreset(SmartRoutingPreset.russia)
+        .applyPreset('ru')
         .copyWith(
           openMarkers: const [
             RcxMarker(url: 'https://example.com/', statuses: [200]),
@@ -77,14 +77,14 @@ void main() {
     );
 
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-    selectAppRegion(container.read, AppRegion.russia);
+    selectAppRegion(container.read, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(container.read(smartRoutingSettingProvider), routing);
 
     container
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(sendDeviceIdentity: false));
-    selectAppRegion(container.read, AppRegion.russia);
+    selectAppRegion(container.read, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
     expect(container.read(smartRoutingSettingProvider), routing);
   });
@@ -93,18 +93,18 @@ void main() {
     'manual HWID off survives save, restart and same-region confirmation',
     () {
       final first = _container();
-      selectAppRegion(first.read, AppRegion.russia);
+      selectAppRegion(first.read, 'RU');
       first
           .read(appSettingProvider.notifier)
           .update((state) => state.copyWith(sendDeviceIdentity: false));
       final second = _container(_roundTrip(first.read(configProvider)));
-      expect(second.read(appRegionProvider), AppRegion.russia);
-      selectAppRegion(second.read, AppRegion.russia);
+      expect(second.read(appRegionProvider), 'RU');
+      selectAppRegion(second.read, 'RU');
       expect(second.read(appSettingProvider).sendDeviceIdentity, isFalse);
 
-      selectAppRegion(second.read, AppRegion.iran);
+      selectAppRegion(second.read, 'IR');
       expect(second.read(appSettingProvider).sendDeviceIdentity, isFalse);
-      selectAppRegion(second.read, AppRegion.russia);
+      selectAppRegion(second.read, 'RU');
       expect(second.read(appSettingProvider).sendDeviceIdentity, isTrue);
     },
   );
@@ -113,20 +113,20 @@ void main() {
     'actual region change preserves enablement and custom strategy pacing',
     () {
       final routing = const SmartRoutingProps(enabled: true)
-          .applyPreset(SmartRoutingPreset.russia)
+          .applyPreset('ru')
           .applyStrategy(SmartRoutingStrategy.saver)
           .copyWith(dwellSeconds: 333, waveWidth: 7);
       final container = _container(
         Config(
           themeProps: defaultThemeProps,
-          appSettingProps: const AppSettingProps(region: AppRegion.russia),
+          appSettingProps: const AppSettingProps(region: 'RU'),
           smartRoutingProps: routing,
         ),
       );
 
-      selectAppRegion(container.read, AppRegion.china);
+      selectAppRegion(container.read, 'CN');
       final changed = container.read(smartRoutingSettingProvider);
-      expect(changed, routing.applyPreset(SmartRoutingPreset.china));
+      expect(changed, routing.applyPreset('cn'));
       expect(changed.enabled, isTrue);
       expect(changed.strategy, SmartRoutingStrategy.saver);
       expect(changed.dwellSeconds, 333);
@@ -139,7 +139,7 @@ void main() {
     'same region does not reset custom markers or independently edited preset',
     () {
       final routing = const SmartRoutingProps(enabled: true)
-          .applyPreset(SmartRoutingPreset.iran)
+          .applyPreset('ir')
           .copyWith(
             openMarkers: const [
               RcxMarker(url: 'https://example.com/', statuses: [200]),
@@ -148,12 +148,12 @@ void main() {
       final container = _container(
         Config(
           themeProps: defaultThemeProps,
-          appSettingProps: const AppSettingProps(region: AppRegion.russia),
+          appSettingProps: const AppSettingProps(region: 'RU'),
           smartRoutingProps: routing,
         ),
       );
 
-      selectAppRegion(container.read, AppRegion.russia);
+      selectAppRegion(container.read, 'RU');
       expect(container.read(smartRoutingSettingProvider), routing);
       expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
     },
@@ -163,14 +163,14 @@ void main() {
     final container = _container(
       Config(
         themeProps: defaultThemeProps,
-        appSettingProps: const AppSettingProps(region: AppRegion.russia),
+        appSettingProps: const AppSettingProps(region: 'RU'),
         smartRoutingProps: const SmartRoutingProps(
           enabled: true,
-        ).applyPreset(SmartRoutingPreset.russia),
+        ).applyPreset('ru'),
       ),
     );
 
-    selectAppRegion(container.read, AppRegion.other);
+    selectAppRegion(container.read, otherRegionCode);
     final routing = container.read(smartRoutingSettingProvider);
     expect(routing.enabled, isTrue);
     expect(routing.rcxParams.openMarkers, isNotEmpty);
@@ -178,7 +178,7 @@ void main() {
     expect(routing.canaryDomestic, isEmpty);
     expect(routing.domesticMarkers, isEmpty);
     expect(routing.breakerPatterns, isEmpty);
-    expect(SmartRoutingPreset.off.bundle.openMarkers, isEmpty);
+    expect(bundleForPreset(neutralPreset).openMarkers, isEmpty);
   });
 
   test(
@@ -203,13 +203,13 @@ void main() {
         appSettingProps: AppSettingProps(sendDeviceIdentity: consent),
         smartRoutingProps: const SmartRoutingProps(
           enabled: true,
-        ).applyPreset(SmartRoutingPreset.russia),
+        ).applyPreset('ru'),
       );
       final backup =
           jsonDecode(jsonEncode(original.toJson())) as Map<String, Object?>;
       (backup['appSettingProps'] as Map<String, Object?>).remove('region');
       final restored = _container(Config.fromJson(backup));
-      expect(restored.read(appRegionProvider), AppRegion.russia);
+      expect(restored.read(appRegionProvider), 'RU');
       expect(restored.read(appSettingProvider).sendDeviceIdentity, consent);
       expect(restored.read(appSettingProvider).region, isNull);
     }
@@ -222,11 +222,11 @@ void main() {
       const RegionSignals(simCountry: 'ru'),
       const Locale('en'),
     );
-    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(
       container.read(smartRoutingSettingProvider).preset,
-      SmartRoutingPreset.russia,
+      'ru',
     );
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
   });
@@ -246,7 +246,7 @@ void main() {
     final container = _container(
       const Config(
         themeProps: defaultThemeProps,
-        appSettingProps: AppSettingProps(region: AppRegion.china),
+        appSettingProps: AppSettingProps(region: 'CN'),
       ),
     );
     seedRegionIfUnset(
@@ -254,7 +254,7 @@ void main() {
       const RegionSignals(simCountry: 'ru'),
       const Locale('ru'),
     );
-    expect(container.read(appSettingProvider).region, AppRegion.china);
+    expect(container.read(appSettingProvider).region, 'CN');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
   });
 
@@ -264,12 +264,12 @@ void main() {
       const RegionSignals(simCountry: 'ru'),
       const Locale('en'),
     );
-    expect(seeded.appSettingProps.region, AppRegion.russia);
+    expect(seeded.appSettingProps.region, 'RU');
     expect(seeded.appSettingProps.sendDeviceIdentity, isTrue);
-    expect(seeded.smartRoutingProps.preset, SmartRoutingPreset.russia);
+    expect(seeded.smartRoutingProps.preset, 'ru');
     expect(seeded.smartRoutingProps.enabled, isFalse);
-    expect(seeded.patchClashConfig.dns, dnsForRegion(AppRegion.russia));
-    expect(seeded.networkProps.bypassDomain, bypassForRegion(AppRegion.russia));
+    expect(seeded.patchClashConfig.dns, dnsForRegion('RU'));
+    expect(seeded.networkProps.bypassDomain, bypassForRegion('RU'));
   });
 
   test('config seed is a no-op for an unshipped region or explicit choice', () {
@@ -287,7 +287,7 @@ void main() {
     );
     const chosen = Config(
       themeProps: defaultThemeProps,
-      appSettingProps: AppSettingProps(region: AppRegion.china),
+      appSettingProps: AppSettingProps(region: 'CN'),
     );
     expect(
       identical(
@@ -317,12 +317,12 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(
       container.read(patchClashConfigProvider).dns,
-      dnsForRegion(AppRegion.russia),
+      dnsForRegion('RU'),
     );
     expect(
       container.read(networkSettingProvider).bypassDomain,
-      bypassForRegion(AppRegion.russia),
+      bypassForRegion('RU'),
     );
-    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).region, 'RU');
   });
 }

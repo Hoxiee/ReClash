@@ -299,7 +299,7 @@ class _RegionDetailsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
-    final region = AppRegion.fromPreset(props.preset);
+    final code = regionForPreset(props.preset);
     final facets = <(String, List<String>)>[
       (appLocalizations.smartRoutingCensor, props.censorCountries),
       (appLocalizations.smartRoutingCanariesForeign, props.canaryForeign),
@@ -320,7 +320,7 @@ class _RegionDetailsPage extends ConsumerWidget {
       (appLocalizations.smartRoutingBreakerPatterns, props.breakerPatterns),
     ];
     return CommonScaffold(
-      title: region.label(context),
+      title: regionLabel(code),
       floatBody: true,
       body: SettingsListView(
         children: [

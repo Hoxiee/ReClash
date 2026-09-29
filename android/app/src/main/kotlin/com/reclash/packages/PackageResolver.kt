@@ -41,7 +41,7 @@ internal class PackageResolver(
     }
 
     fun getDomesticPackageNames(region: String): List<String> {
-        if (region !in DOMESTIC_REGIONS) {
+        if (region !in matcher.domesticRegions) {
             return emptyList()
         }
         return installedPackages
@@ -145,8 +145,6 @@ internal class PackageResolver(
 
         private const val ANDROID_PACKAGE_NAME = "android"
         private const val MAX_DEX_SIZE_BYTES = 15_000_000L
-
-        private val DOMESTIC_REGIONS = setOf("ru", "ir", "cn")
 
         private val PACKAGE_INFO_FLAGS = PackageManager.GET_ACTIVITIES or
             PackageManager.GET_SERVICES or

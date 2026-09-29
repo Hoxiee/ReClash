@@ -824,6 +824,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS模式"),
     "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS查询"),
     "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage("查看通过隧道解析的 DNS 请求"),
+    "doctorActionUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Not available right now",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage("已确认第一个故障层。"),
     "doctorBrokenTitle": MessageLookupByLibrary.simpleMessage("发现连接问题"),
     "doctorByeDpiFailedDesc": MessageLookupByLibrary.simpleMessage(
@@ -837,6 +840,33 @@ class MessageLookup extends MessageLookupByLibrary {
       "诊断结果未改变，可重新检查。",
     ),
     "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage("检查已取消"),
+    "doctorCapabilities": MessageLookupByLibrary.simpleMessage(
+      "Diagnostic coverage",
+    ),
+    "doctorCapabilityAppIngressProbe": MessageLookupByLibrary.simpleMessage(
+      "App ingress probe",
+    ),
+    "doctorCapabilityByedpiStatus": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI status",
+    ),
+    "doctorCapabilityCancel": MessageLookupByLibrary.simpleMessage(
+      "Cancellable checks",
+    ),
+    "doctorCapabilityDnsFlush": MessageLookupByLibrary.simpleMessage(
+      "DNS cache flush",
+    ),
+    "doctorCapabilityExplicitExam": MessageLookupByLibrary.simpleMessage(
+      "On-demand check",
+    ),
+    "doctorCapabilityPassiveWitness": MessageLookupByLibrary.simpleMessage(
+      "Passive witness",
+    ),
+    "doctorCapabilityRedactedExport": MessageLookupByLibrary.simpleMessage(
+      "Redacted export",
+    ),
+    "doctorCapabilityTunIngressProof": MessageLookupByLibrary.simpleMessage(
+      "TUN ingress proof",
+    ),
     "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("已启用"),
     "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("未启用"),
     "doctorCaptureNotApplicable": MessageLookupByLibrary.simpleMessage("不适用"),
@@ -877,8 +907,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorExportReport": MessageLookupByLibrary.simpleMessage("导出报告"),
     "doctorFlushDns": MessageLookupByLibrary.simpleMessage("清除 DNS 缓存"),
     "doctorFresh": MessageLookupByLibrary.simpleMessage("当前"),
+    "doctorGenerationDrift": MessageLookupByLibrary.simpleMessage(
+      "Network or configuration changed since this check ran; its evidence may no longer hold.",
+    ),
     "doctorGenericDesc": MessageLookupByLibrary.simpleMessage(
       "检查发现了连接问题，但无法确定更具体的原因。",
+    ),
+    "doctorHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "Repair attempts",
     ),
     "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage("观察到的网络路径已成功完成。"),
     "doctorHealthyEasterEgg": MessageLookupByLibrary.simpleMessage(
@@ -908,6 +944,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorModeDeep": MessageLookupByLibrary.simpleMessage("深度"),
     "doctorModeStandard": MessageLookupByLibrary.simpleMessage("标准"),
     "doctorNoEvidence": MessageLookupByLibrary.simpleMessage("暂无可用证据"),
+    "doctorNoHealAttempts": MessageLookupByLibrary.simpleMessage(
+      "No repair attempts yet",
+    ),
     "doctorNoIncidents": MessageLookupByLibrary.simpleMessage("暂无已完成的检查"),
     "doctorNoNetworkDesc": MessageLookupByLibrary.simpleMessage(
       "设备未连接到 Wi-Fi 或移动数据网络。",
@@ -968,6 +1007,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "当前配置无法为此连接选择可用路由。",
     ),
     "doctorRouteTitle": MessageLookupByLibrary.simpleMessage("流量路由错误"),
+    "doctorRun": MessageLookupByLibrary.simpleMessage("Run a check"),
     "doctorScope": MessageLookupByLibrary.simpleMessage("证据范围"),
     "doctorScopeApp": MessageLookupByLibrary.simpleMessage("此应用"),
     "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("本地入口"),
@@ -1043,6 +1083,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "应用需要 VPN 保护，但 TUN 路径未启用。",
     ),
     "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage("VPN 未启用"),
+    "doctorWaterfall": MessageLookupByLibrary.simpleMessage(
+      "Latency waterfall",
+    ),
+    "doctorWaterfallDesc": MessageLookupByLibrary.simpleMessage(
+      "Each bar is a probe on the connection path, placed by when it started and how long it took.",
+    ),
     "doctorWhatToTry": MessageLookupByLibrary.simpleMessage("可以尝试"),
     "domain": MessageLookupByLibrary.simpleMessage("域名"),
     "download": MessageLookupByLibrary.simpleMessage("下载"),
@@ -2333,6 +2379,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "这些地区的服务器算作本地，因此会保留到断网封锁时再用",
     ),
+    "smartRoutingCensorSni": MessageLookupByLibrary.simpleMessage("受审查的SNI"),
+    "smartRoutingCensorSniDesc": MessageLookupByLibrary.simpleMessage(
+      "把被封锁的域名作为SNI发往可达的境外IP；握手被切断即暴露按名称的过滤",
+    ),
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("已选服务器"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage("尚未选择服务器"),
     "smartRoutingCoolFor": m89,
@@ -2615,6 +2665,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("预设"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("中国"),
     "smartRoutingPresetEdited": m98,
+    "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("埃及"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("伊朗"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("其他"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("俄罗斯"),
