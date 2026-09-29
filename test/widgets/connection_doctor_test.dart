@@ -16,6 +16,7 @@ import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/ntp.dart';
+import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/network_detection.dart' as view;
 import 'package:reclash/views/settings/url_scheme.dart';
 import 'package:reclash/views/tools/connection_doctor.dart';
@@ -1090,6 +1091,30 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools search indexes settings buried two screens deep', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    // Canaries live under Smart routing's region details, two screens in; they
+    // still have to answer a search and open the screen that owns them.
+    await tester.enterText(find.byType(TextField), 'canary');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('canaries'), findsWidgets);
+
+    await tester.tap(find.textContaining('Foreign canaries').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(SmartRoutingView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -507,7 +507,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const _DisclaimerItem(),
       ),
       _ToolSearchEntry(l.about, _ToolCategory.system, const _InfoItem()),
-      ..._deepSettings(l),
+      ..._deepSettings(l, enableDeveloperMode),
     ];
   }
 
@@ -555,13 +555,28 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const SmartPauseView(),
       ),
       _DeepOwner(l.desync, 'desync', AppGlyphs.bolt, const DesyncView()),
+      _DeepOwner(
+        l.backupAndRestore,
+        'backup',
+        AppGlyphs.cloudSync,
+        const BackupAndRestore(),
+      ),
+      _DeepOwner(
+        l.developerMode,
+        'developer',
+        AppGlyphs.cpu,
+        const DeveloperView(),
+      ),
     ];
   }
 
   /// Settings that live inside a tool screen, surfaced as their own results.
   /// Tapping one opens the owning screen (its breadcrumb names where it lives);
   /// labels reuse the screens' own strings so the two never drift apart.
-  List<_ToolSearchEntry> _deepSettings(AppLocalizations l) {
+  List<_ToolSearchEntry> _deepSettings(
+    AppLocalizations l,
+    bool enableDeveloperMode,
+  ) {
     final owners = {for (final owner in _deepOwners(l)) owner.paneId: owner};
     final advanced = owners['advanced']!;
     final basic = owners['config']!;
@@ -573,6 +588,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     final smartRouting = owners['smartRouting']!;
     final smartPause = owners['smartPause']!;
     final desync = owners['desync']!;
+    final backup = owners['backup']!;
+    final developer = owners['developer']!;
 
     _ToolSearchEntry entry(
       String title,
@@ -649,6 +666,48 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.smartRoutingRegionCard, smartRouting, config, extra: 'region'),
       entry(l.smartRoutingRegionSeeds, smartRouting, config, extra: 'region'),
       entry(
+        l.smartRoutingCanariesForeign,
+        smartRouting,
+        config,
+        extra: 'region canary probe',
+      ),
+      entry(
+        l.smartRoutingCanariesDomestic,
+        smartRouting,
+        config,
+        extra: 'region canary probe',
+      ),
+      entry(
+        l.smartRoutingMarkersOpen,
+        smartRouting,
+        config,
+        extra: 'region marker probe',
+      ),
+      entry(
+        l.smartRoutingMarkersDomestic,
+        smartRouting,
+        config,
+        extra: 'region marker probe',
+      ),
+      entry(
+        l.smartRoutingMarkersLocal,
+        smartRouting,
+        config,
+        extra: 'region marker probe',
+      ),
+      entry(
+        l.smartRoutingNameHints,
+        smartRouting,
+        config,
+        extra: 'region name hint',
+      ),
+      entry(
+        l.smartRoutingBreakerPatterns,
+        smartRouting,
+        config,
+        extra: 'region breaker pattern',
+      ),
+      entry(
         l.desync,
         desync,
         config,
@@ -679,7 +738,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.geodataLoader, basic, config, extra: 'geo'),
       entry(l.appendSystemDns, basic, config, extra: 'dns'),
       entry(l.sendDeviceIdentity, basic, config),
-      entry(l.authentication, basic, config),
+      entry(l.authentication, basic, config, extra: 'account password login'),
       entry('Hosts', basic, config),
       entry(l.useHosts, dns, config, extra: 'hosts'),
       entry(l.useSystemHosts, dns, config, extra: 'hosts'),
@@ -691,6 +750,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.nameserverPolicy, dns, config),
       entry(l.nameserver, dns, config),
       entry(l.fallback, dns, config),
+      entry(l.fallbackFilter, dns, config, extra: 'dns'),
+      entry(l.proxyNameserver, dns, config, extra: 'dns'),
       entry(l.minimizeOnExit, app, system),
       entry(l.autoLaunch, app, system),
       entry(l.silentLaunch, app, system),
@@ -721,6 +782,23 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.seasonalDecorations, appearance, personalization),
       entry(l.providerEffects, appearance, personalization),
       entry(l.milestoneDecorations, appearance, personalization),
+      entry(
+        l.appearanceBackground,
+        appearance,
+        personalization,
+        extra: 'wallpaper image',
+      ),
+      entry(l.webDAVConfiguration, backup, system, extra: 'webdav remote sync'),
+      entry(l.restoreStrategy, backup, system, extra: 'restore import'),
+      entry(l.clearData, backup, system, extra: 'reset wipe danger'),
+      if (enableDeveloperMode) ...[
+        entry(l.developerSubscriptions, developer, system, extra: 'report'),
+        entry(l.developerFindings, developer, system, extra: 'findings'),
+        entry(l.crashTest, developer, system, extra: 'crash'),
+        entry(l.logsTest, developer, system, extra: 'log'),
+        entry(l.messageTest, developer, system, extra: 'notification'),
+        entry(l.pruneCache, developer, system, extra: 'cache'),
+      ],
     ];
   }
 
