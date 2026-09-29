@@ -680,6 +680,32 @@ void main() {
     expect(find.byKey(HeroOrb.collapseKey), findsNothing);
   });
 
+  testWidgets('an idle freeze during the hold never cuts the cinematic short', (
+    tester,
+  ) async {
+    final result = await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2400));
+
+    // The idle timer fires while the finger is still down: the nova passes, and
+    // a freeze here used to abort before the collapse ever reached the big bang.
+    await _pumpUntil(tester, find.byKey(HeroOrb.novaKey));
+    result.container.read(uiIdleProvider.notifier).value = true;
+    await tester.pump();
+
+    await _pumpUntil(tester, find.byKey(HeroOrb.singularityKey));
+    expect(find.byKey(HeroOrb.singularityKey), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump();
+    expect(find.byKey(HeroOrb.singularityKey), findsNothing);
+  });
+
   testWidgets('a release during the collapse never reaches the big bang', (
     tester,
   ) async {

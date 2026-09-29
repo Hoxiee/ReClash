@@ -139,6 +139,11 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   late final AnimationController _ripple;
   late final AnimationController _morph;
   late final AnimationController _settle;
+
+  /// 0 = fully live, 1 = at rest. Idle folds the ambient loops through this
+  /// instead of cutting them, so the orb eases to its calm pose; the loops keep
+  /// running until it reaches 1 so no phase snaps mid-blend.
+  late final AnimationController _stillness;
   late final AnimationController _tint;
 
   /// Decays over a new fault's first cycle, making its opening pulse deepest.
@@ -248,6 +253,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       value: 1,
       duration: const Duration(milliseconds: 900),
     );
+    _stillness = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 760),
+    )..addStatusListener((status) {
+      if (status == AnimationStatus.completed) _freezeAmbientLoops();
+    });
     _onset = AnimationController(
       vsync: this,
       value: 1,
@@ -262,8 +273,11 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       vsync: this,
       duration: _novaCharge,
       reverseDuration: const Duration(milliseconds: 260),
-    )..addStatusListener(_handleCharge);
-    _nova = AnimationController(vsync: this, duration: _novaDuration);
+    )
+      ..addStatusListener(_handleCharge)
+      ..addStatusListener(_handleCinematicSettle);
+    _nova = AnimationController(vsync: this, duration: _novaDuration)
+      ..addStatusListener(_handleCinematicSettle);
     _collapse =
         AnimationController(
             vsync: this,
@@ -271,6 +285,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
             reverseDuration: const Duration(milliseconds: 620),
           )
           ..addStatusListener(_handleCollapse)
+          ..addStatusListener(_handleCinematicSettle)
           ..addStatusListener((status) {
             if (status == AnimationStatus.dismissed && !_spent) {
               _hideCinematic();
@@ -279,12 +294,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _singularity = AnimationController(
       vsync: this,
       duration: _singularityDuration,
-    )..addListener(_driveImpact);
+    )
+      ..addListener(_driveImpact)
+      ..addStatusListener(_handleCinematicSettle);
     _regrow = AnimationController(
       vsync: this,
       value: 1,
       duration: _regrowDuration,
-    );
+    )..addStatusListener(_handleCinematicSettle);
     ref.listenManual(runTimeProvider, (_, runtime) {
       final now = DateTime.now();
       final previous = _sessionTick;
@@ -329,9 +346,69 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   bool _computeStill(HeroStatus status) =>
       _motionDisabled || (_uiIdle && !status.isSweeping);
 
+  // Still is the intent; settled-still is the arrival. The ambient loops keep
+  // turning through the wind-down so their phases stay continuous, and only
+  // once the blend lands do they park.
+  bool get _settledStill => _still && _stillness.isCompleted;
+
+  double get _stillFactor => Curves.easeInOut.transform(_stillness.value);
+
+  // The hold cinematic (charge → nova → collapse → singularity → regrow) owns
+  // the orb until it settles; an idle freeze landing mid-flight would reset it
+  // with a snap, so stillness waits while any stage runs or a finger holds it.
+  bool get _cinematicActive =>
+      _chargeOrigin != null ||
+      _charge.isAnimating ||
+      _nova.isAnimating ||
+      _collapse.isAnimating ||
+      _singularity.isAnimating ||
+      !_regrow.isCompleted;
+
+  void _reevaluateStill() {
+    if (!mounted || _cinematicActive) return;
+    _refreshStill();
+  }
+
+  void _handleCinematicSettle(AnimationStatus status) {
+    if (status == AnimationStatus.completed ||
+        status == AnimationStatus.dismissed) {
+      _reevaluateStill();
+    }
+  }
+
+  void _syncStillness() {
+    final instant = _motionDisabled;
+    if (_still) {
+      if (instant) {
+        _stillness.value = 1;
+        _freezeAmbientLoops();
+      } else if (_stillness.status != AnimationStatus.completed &&
+          _stillness.status != AnimationStatus.forward) {
+        _stillness.forward();
+      }
+    } else {
+      if (instant) {
+        _stillness.value = 0;
+      } else if (_stillness.status != AnimationStatus.dismissed &&
+          _stillness.status != AnimationStatus.reverse) {
+        _stillness.reverse();
+      }
+    }
+  }
+
+  void _freezeAmbientLoops() {
+    if (!_still) return;
+    _breathe.stop();
+    _stopFlow();
+    _aurora.stop();
+  }
+
   void _refreshStill() {
     final still = _computeStill(_status);
     if (still == _still) return;
+    // Defer the freeze until the egg cinematic ends; a controller settle re-runs
+    // this once nothing is in flight.
+    if (still && _cinematicActive) return;
     _still = still;
     if (still) {
       final deferred = _deferredPhase;
@@ -402,6 +479,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _ripple.dispose();
     _morph.dispose();
     _settle.dispose();
+    _stillness.dispose();
     _onset.dispose();
     _tint.dispose();
     super.dispose();
@@ -452,7 +530,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _startFlow() {
-    if (_still || !_status.flows) return;
+    if (_settledStill || !_status.flows) return;
     if (!_flow.isAnimating) {
       _flowTickAt = null;
       _flow.repeat();
@@ -481,6 +559,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   void _finishFiniteMotion() {
     _cancelCharge();
+    _hideCinematic();
     _landingTimer?.cancel();
     _landingTimer = null;
     for (final timer in _pulseTimers) {
@@ -537,7 +616,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   void _runBreathing() {
     final wanted =
-        !_still && _status != HeroStatus.off && _status != HeroStatus.offline;
+        !_settledStill &&
+        _status != HeroStatus.off &&
+        _status != HeroStatus.offline;
     if (!wanted) {
       _breathe.stop();
       return;
@@ -551,7 +632,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _runSweep() {
-    final wanted = _status.isSweeping && !_still;
+    final wanted = _status.isSweeping && !_settledStill;
     if (!wanted) {
       _sweep.stop();
       return;
@@ -566,8 +647,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   void _applyStatus(HeroStatus status) {
     // Sweeping states pull the orb out of an idle freeze, so recompute against
-    // the incoming status before any loop reads `_still`.
-    _still = _computeStill(status);
+    // the incoming status before any loop reads `_still`. A running egg keeps
+    // the orb awake so a status change cannot park it mid-cinematic.
+    _still = _computeStill(status) && !_cinematicActive;
     final previous = _status;
     final changed = previous != status;
     if (changed) {
@@ -587,7 +669,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     setState(() => _status = status);
 
     if (changed) {
-      if (_still) {
+      if (_settledStill) {
         _morph.value = 1;
         _onset.value = 1;
       } else {
@@ -601,7 +683,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
     if (status.isLive && !status.isTransitioning) {
       if (!previous.isLive || previous.isTransitioning) {
-        if (_still) {
+        if (_settledStill) {
           _draw.value = 1;
           _ripple.value = 1;
         } else {
@@ -610,21 +692,22 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
         }
       }
     } else if (!status.isLive) {
-      if (_still) {
+      if (_settledStill) {
         _draw.value = 0;
       } else {
         _draw.reverse();
       }
     }
 
+    _syncStillness();
     _runBreathing();
     _runSweep();
-    if (status.flows && !_still) {
+    if (status.flows && !_settledStill) {
       _startFlow();
       if (!_aurora.isAnimating) _aurora.repeat();
     } else {
       _stopFlow();
-      if (!_still &&
+      if (!_settledStill &&
           (status == HeroStatus.paused ||
               status == HeroStatus.diagnosing ||
               status.isAlert)) {
@@ -757,6 +840,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _sparks = _novaSparks(math.Random(DateTime.now().microsecondsSinceEpoch));
     _press.reverse();
     _ripple.forward(from: 0);
+    _showCinematic();
     final android = defaultTargetPlatform == TargetPlatform.android;
     if (android) HapticFeedback.heavyImpact();
     _landingTimer?.cancel();
@@ -770,6 +854,10 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       if (!mounted) return;
       _nova.value = 0;
       _maybeCollapse();
+      // A finger that never made it to the collapse leaves the overlay empty.
+      if (!_collapse.isAnimating && !_singularity.isAnimating) {
+        _hideCinematic();
+      }
     });
   }
 
@@ -942,8 +1030,13 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   Widget _buildCinematic(BuildContext overlayContext) {
     return IgnorePointer(
       child: AnimatedBuilder(
-        animation: Listenable.merge([_collapse, _singularity, _tint]),
+        animation: Listenable.merge([_nova, _collapse, _singularity, _tint]),
         builder: (context, _) {
+          // The nova blast overflows the orb far past its neighbours, so it
+          // rides the overlay above the cards instead of under them.
+          if (_nova.value > 0 && _nova.value < 1) {
+            return Stack(children: [_overlayNova()]);
+          }
           final s = _singularity.value;
           final sWarp = s < _evaporatePeak
               ? _evaporatePeak *
@@ -1109,6 +1202,43 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
             ],
           );
         },
+      ),
+    );
+  }
+
+  // The overlay twin of the in-tree nova: anchored on the orb's screen rect and
+  // carrying the same kick, tilt and scale so the blast tracks the orb body
+  // while painting above the surrounding cards.
+  Widget _overlayNova() {
+    final rect = _cinematicOrbRect;
+    final cine = rect.width / heroOrbBaseSize;
+    final spread = _novaSpread * cine;
+    return Positioned.fromRect(
+      rect: Rect.fromLTWH(
+        rect.left - spread,
+        rect.top - spread,
+        rect.width + spread * 2,
+        rect.height + spread * 2,
+      ),
+      child: Transform.translate(
+        offset: _orbKick * cine,
+        child: Transform.rotate(
+          angle: _orbTilt,
+          child: Transform.scale(
+            scale: _orbScale,
+            child: CustomPaint(
+              key: HeroOrb.novaKey,
+              painter: _HeroNovaPainter(
+                progress: _nova.value,
+                palette: _currentPalette,
+                scale: cine,
+                ringRadius: rect.width / 2 - (_ringStroke / 2 + 1.5) * cine,
+                coreRadius: rect.width / 2 - _coreInset * cine,
+                sparks: _sparks,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1418,6 +1548,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                           _morph,
                           _ripple,
                           _settle,
+                          _stillness,
                           _tint,
                           _nova,
                           _collapse,
@@ -1427,11 +1558,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                         builder: (context, _) {
                           // A cosine: a period change alters speed, never
                           // current depth.
-                          final pulse = _still
-                              ? 0.0
-                              : 0.5 -
-                                    0.5 * math.cos(2 * math.pi * _breatheValue);
-                          final activity = _still ? 0.4 : _activity;
+                          final still = _stillFactor;
+                          final pulse =
+                              (0.5 -
+                                  0.5 * math.cos(2 * math.pi * _breatheValue)) *
+                              (1 - still);
+                          final activity = lerpDouble(_activity, 0.4, still)!;
                           final halo =
                               (_status.isSweeping
                                   ? Curves.easeOutCubic.transform(_morph.value)
@@ -1453,7 +1585,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                   ? _seasonalGlow(_currentPalette.glow)
                                   : _currentPalette.glow,
                               intensity: math.max(halo, _orbGlow),
-                              ripple: _still ? 1 : _ripple.value,
+                              ripple: lerpDouble(_ripple.value, 1, still)!,
                               orbRadius: size / 2,
                             ),
                           );
@@ -1462,7 +1594,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                     ),
                   ),
                   AnimatedBuilder(
-                    animation: _breathe,
+                    animation: Listenable.merge([_breathe, _stillness]),
                     child: Semantics(
                       button: true,
                       enabled: _canTap,
@@ -1485,18 +1617,21 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                             _aurora,
                             _morph,
                             _settle,
+                            _stillness,
                             _onset,
                             _tint,
                           ]),
                           child: coreChild,
                           builder: (context, child) {
                             final palette = _palette = _currentPalette;
-                            final still = _still;
-                            final pulse = still
-                                ? 0.0
-                                : 0.5 -
-                                      0.5 *
-                                          math.cos(2 * math.pi * _breatheValue);
+                            final still = _stillFactor;
+                            final pulse =
+                                (0.5 -
+                                    0.5 *
+                                        math.cos(
+                                          2 * math.pi * _breatheValue,
+                                        )) *
+                                (1 - still);
                             return CustomPaint(
                               size: Size.square(size),
                               painter: _HeroOrbPainter(
@@ -1509,20 +1644,22 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                 drawProgress: Curves.easeOutCubic.transform(
                                   _draw.value,
                                 ),
-                                sweep: still ? 0.18 : _sweepValue,
+                                sweep: lerpDouble(_sweepValue, 0.18, still)!,
                                 handoff: _handoff,
-                                flow: still ? 0.12 : _flowPhase,
-                                aurora: still ? 0.2 : _aurora.value,
+                                flow: _flowPhase,
+                                aurora: _aurora.value,
                                 pulse: pulse,
-                                activity: still ? 0.4 : _activity,
+                                activity: lerpDouble(_activity, 0.4, still)!,
                                 morph: Curves.easeOutCubic.transform(
                                   _morph.value,
                                 ),
                                 transitionProgress: Curves.easeOutCubic
                                     .transform(_morph.value),
-                                onset: still
-                                    ? 1
-                                    : Curves.easeOut.transform(_onset.value),
+                                onset: lerpDouble(
+                                  Curves.easeOut.transform(_onset.value),
+                                  1,
+                                  still,
+                                )!,
                                 trackColor:
                                     colorScheme.outlineVariant.opacity60,
                                 coreColor: colorScheme.surfaceContainerHigh
@@ -1541,9 +1678,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                       ),
                     ),
                     builder: (context, child) {
-                      final pulse = _still
-                          ? 0.0
-                          : 0.5 - 0.5 * math.cos(2 * math.pi * _breatheValue);
+                      final pulse =
+                          (0.5 - 0.5 * math.cos(2 * math.pi * _breatheValue)) *
+                          (1 - _stillFactor);
                       final amplitude = switch (_status) {
                         HeroStatus.secured => 0.022,
                         HeroStatus.degraded => 0.014,
@@ -1591,7 +1728,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                         animation: Listenable.merge([_nova, _charge, _tint]),
                         builder: (context, _) {
                           final coreRadius = size / 2 - _coreInset * scale;
-                          if (_nova.value > 0 && _nova.value < 1) {
+                          if (_cinematicEntry == null &&
+                              _nova.value > 0 &&
+                              _nova.value < 1) {
                             return CustomPaint(
                               key: HeroOrb.novaKey,
                               painter: _HeroNovaPainter(
