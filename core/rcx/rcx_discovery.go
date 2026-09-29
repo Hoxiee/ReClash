@@ -212,6 +212,7 @@ func (e *rcxEngine) warmPool(candidates []rcxCandidate, now time.Time) map[strin
 		Terrain: e.terrainCurrent(), Incumbent: e.incumbent, Pin: e.pin(),
 		Policy: e.cfg.policy(), Now: now,
 	}
+	input.Policy.Censoring = rcxEffectiveCensoring(input)
 	compare := rcxCompareFor(input.Policy.Strategy)
 	type rankedNode struct {
 		name string
@@ -264,7 +265,7 @@ func (e *rcxEngine) planMaintenance(candidates []rcxCandidate, members []rcxMemb
 		if _, ok := warm[m.Name]; !ok {
 			continue
 		}
-		if !e.proofDue(m.Name, now) || c.Circuit || now.Before(c.CoolUntil) {
+		if (!e.proofDue(m.Name, now) && !e.latencyStale(c, now)) || c.Circuit || now.Before(c.CoolUntil) {
 			continue
 		}
 		pool = append(pool, rcxProbeNode{Name: m.Name, Key: m.key(), Provider: m.Provider, Transport: m.Transport, Type: m.Type, Port: m.Port})

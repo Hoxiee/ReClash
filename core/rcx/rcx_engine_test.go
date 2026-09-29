@@ -58,6 +58,7 @@ type fakeRuntime struct {
 	exits         map[string]string
 	results       map[string]rcxProbeResult
 	reach         map[string]rcxProbeOutcome
+	reachSNI      map[string]rcxProbeOutcome
 	conns         map[string]rcxConnSample
 	hang          map[string]bool
 	panics        map[string]bool
@@ -244,6 +245,19 @@ func (r *fakeRuntime) Reach(ctx context.Context, addr string, domestic bool) rcx
 		return outcome
 	}
 	return rcxProbeFail
+}
+
+func (r *fakeRuntime) ReachSNI(ctx context.Context, addr, serverName string) rcxProbeOutcome {
+	r.mu.Lock()
+	outcome, ok := r.reachSNI[serverName]
+	r.mu.Unlock()
+	if ctx.Err() != nil {
+		return rcxProbeOverloaded
+	}
+	if ok {
+		return outcome
+	}
+	return rcxProbeOverloaded
 }
 
 func (r *fakeRuntime) CloseConnections(ids []string) {
@@ -2945,6 +2959,11 @@ func TestEngineRenewsTheIncumbentProofBeforeItExpires(t *testing.T) {
 		engine.ledger.NoteProbe(name, engine.envKey, rcxRoleOpen, rcxProbeOK, 90, runtime.Now())
 		runtime.advance(time.Second)
 	}
+	engine.envSince = runtime.Now().Add(-time.Hour)
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	for _, name := range []string{"a", "b", "c", "d"} {
+		engine.ledger.NoteQualitySample(name, engine.envKey, marker, engine.qualityEpoch(), 90, runtime.Now())
+	}
 	if wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain); len(wave) != 0 {
 		t.Fatalf("wave = %v, want none: every proof in the park is fresh", wave)
 	}
@@ -3497,7 +3516,7 @@ func TestCanaryGroupOutlivesABlackHoledAddress(t *testing.T) {
 	defer cancel()
 
 	var rows []rcxCanaryReport
-	got := engine.reachAny(ctx, []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows)
+	got := engine.reachAny(ctx, []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows, "")
 
 	if got != rcxProbeOK {
 		t.Errorf("outcome = %s, want ok: a black hole must not spend the whole round",
@@ -3509,7 +3528,7 @@ func TestCanaryGroupReportsMeasuredAddressesInOrder(t *testing.T) {
 	engine := newTestEngine(newFakeRuntime(), "ru")
 
 	var rows []rcxCanaryReport
-	engine.reachAny(context.Background(), []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows)
+	engine.reachAny(context.Background(), []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows, "")
 
 	if len(rows) != 2 {
 		t.Fatalf("rows = %d, want one per measured address", len(rows))
@@ -3596,7 +3615,7 @@ func TestCanaryRoundOutlivesAPanickingDial(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 
 	var rows []rcxCanaryReport
-	got := engine.reachAny(context.Background(), []string{"1.1.1.1:443"}, false, time.Second, &rows)
+	got := engine.reachAny(context.Background(), []string{"1.1.1.1:443"}, false, time.Second, &rows, "")
 
 	if got != rcxProbeOverloaded {
 		t.Errorf("outcome = %s, want overloaded: a panicked dial measured nothing",

@@ -151,6 +151,7 @@ const (
 	pauseTunMethod                   CoreMethod = "pauseTun"
 	resumeTunMethod                  CoreMethod = "resumeTun"
 	setUiActiveMethod                CoreMethod = "setUiActive"
+	screenOffMethod                  CoreMethod = "screenOff"
 	updateDnsMethod                  CoreMethod = "updateDns"
 	crashMethod                      CoreMethod = "crash"
 	setupConfigMethod                CoreMethod = "setupConfig"

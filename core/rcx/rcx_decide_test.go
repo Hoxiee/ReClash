@@ -677,6 +677,53 @@ func TestDecideStillOrdersUnmeasuredNodesByHostPingWhenNotCensored(t *testing.T)
 	}
 }
 
+// A confirmed whitelist terrain arms the censoring posture even with no
+// CensorCountries configured, so a user behind a measured DPI wall in an
+// unshipped region gets the same escape ranking as a named censored country:
+// the deterministic order, never a fronted home node's small host-ping.
+func TestDecideArmsCensoringFromMeasuredWhitelistWithoutConfiguredCountry(t *testing.T) {
+	near := rcxNode("near", foreignUntested())
+	near.Evidence, near.MedianMs, near.HostMs = rcxEvidenceNone, 0, 25
+	near.Order = 5
+	far := rcxNode("far", foreignUntested())
+	far.Evidence, far.MedianMs, far.HostMs = rcxEvidenceNone, 0, 300
+	far.Order = 1
+
+	policy := rcxTestPolicy()
+	policy.Censoring = false
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainWhitelist,
+		Candidates: []rcxCandidate{near, far},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "far" {
+		t.Fatalf("decision = %+v, want the measured whitelist to arm censoring ranking", got)
+	}
+}
+
+func TestEffectiveCensoringUnionsConfiguredAndMeasured(t *testing.T) {
+	cases := []struct {
+		name       string
+		configured bool
+		terrain    rcxTerrain
+		want       bool
+	}{
+		{"neither", false, rcxTerrainNormal, false},
+		{"configured only", true, rcxTerrainNormal, true},
+		{"measured only", false, rcxTerrainWhitelist, true},
+		{"both", true, rcxTerrainWhitelist, true},
+		{"unknown terrain", false, rcxTerrainUnknown, false},
+	}
+	for _, tc := range cases {
+		in := rcxDecisionInput{Terrain: tc.terrain}
+		in.Policy.Censoring = tc.configured
+		if got := rcxEffectiveCensoring(in); got != tc.want {
+			t.Errorf("%s: rcxEffectiveCensoring = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
 func TestDecideKeepsAReachingFastIncumbentOverASlowerHealthyNode(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	throttled := rcxNode("nl-1", foreignProven())

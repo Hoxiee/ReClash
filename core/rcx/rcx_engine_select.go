@@ -102,7 +102,7 @@ func (e *rcxEngine) tryAutomaticMainSelect(to string, reason rcxReason, now time
 		return false
 	}
 	if rcxDeathSwitch(reason) {
-		e.runtime.CloseConnections(e.drainIDs(from))
+		e.runtime.CloseConnections(e.drainIDs(from, e.screenDead == from))
 	}
 	e.noteSwitch(from, to, reason, now)
 	if e.screenOff {

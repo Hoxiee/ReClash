@@ -31,7 +31,8 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 			previous.Egress != next.Egress,
 		)
 		if previous.Canaries != next.Canaries {
-			e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+			e.reachF, e.reachD, e.reachS = rcxProbeOverloaded, rcxProbeOverloaded, rcxProbeOverloaded
+			e.reachStableRounds = 0
 			e.lastReachAt = time.Time{}
 		}
 	}

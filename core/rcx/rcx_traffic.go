@@ -93,10 +93,12 @@ drain:
 }
 
 type rcxNodeFlow struct {
-	live     int
-	stalled  int
-	progress bool
-	open     bool
+	live      int
+	stalled   int
+	progress  bool
+	open      bool
+	downDelta int64 // bytes the node's live connections pulled since the last sample
+	demand    bool  // an uplink still growing: requests are in flight, so a crawl is a squeeze
 }
 
 // Only what comes back proves transit: a black hole absorbs upload unacknowledged.
@@ -140,6 +142,8 @@ func (e *rcxEngine) sampleTraffic() {
 		switch {
 		case answered:
 			flow.progress = true
+			flow.downDelta += conn.Down - previous[conn.Key]
+			flow.demand = flow.demand || uploading
 			flow.open = flow.open || rcxMarkerRelated(markers, conn.Host)
 			if conn.Node == e.incumbent {
 				answeredKeys = append(answeredKeys, conn.Key)
@@ -156,9 +160,17 @@ func (e *rcxEngine) sampleTraffic() {
 	if alive {
 		e.noteLinkAlive(now)
 	}
+	elapsed := now.Sub(e.lastSampleAt)
+	e.lastSampleAt = now
 	for node, flow := range flows {
+		key := e.key(node)
 		switch {
+		// A trickle under active demand still reports progress, so it must be
+		// caught before notePayload clears the very verdict a squeeze earns.
+		case flow.progress && e.throttling(flow, elapsed, now):
+			e.trackThrottle(node, now)
 		case flow.progress:
+			delete(e.throttled, key)
 			e.notePayload(node, flow.open, now)
 			if node == e.incumbent {
 				for _, key := range answeredKeys {
@@ -168,7 +180,8 @@ func (e *rcxEngine) sampleTraffic() {
 		case flow.stalled*2 > flow.live:
 			e.trackFrozenPayload(node, now)
 		default:
-			delete(e.downFrozen, e.key(node))
+			delete(e.downFrozen, key)
+			delete(e.throttled, key)
 		}
 	}
 	active := make(map[string]struct{}, len(flows))
@@ -178,6 +191,11 @@ func (e *rcxEngine) sampleTraffic() {
 	for key := range e.downFrozen {
 		if _, ok := active[key]; !ok {
 			delete(e.downFrozen, key)
+		}
+	}
+	for key := range e.throttled {
+		if _, ok := active[key]; !ok {
+			delete(e.throttled, key)
 		}
 	}
 	e.harvestOpenSightings(now)
@@ -288,6 +306,51 @@ func (e *rcxEngine) trackFrozenPayload(node string, now time.Time) {
 		return
 	}
 	if now.Sub(frozen) < e.confirmWindow(key, node) {
+		return
+	}
+	e.ledger.NoteDegraded(key, e.envKey, now)
+	e.escrowNegative(node, 0, now)
+	if node == e.incumbent {
+		e.ledger.NoteIncumbentStalled(key, e.envKey, now)
+	}
+}
+
+func (e *rcxEngine) throttleFloorBytesPerSec() float64 {
+	return float64(e.cfg.ThrottleFloorKBps) * 1024
+}
+
+// A squeeze is transit that answers but crawls: bytes still return, so the freeze
+// detector never trips, yet the rate sits under the floor while requests keep going
+// out. Idle links never qualify — no demand, no accusation. A lone crawling flow is
+// a slow endpoint, not a throttle; only a whole connection set held under the floor is.
+func (e *rcxEngine) throttling(flow *rcxNodeFlow, elapsed time.Duration, now time.Time) bool {
+	if !flow.demand || flow.live < rcxThrottleMinConns || !e.chargesNegative(now) {
+		return false
+	}
+	floor := e.throttleFloorBytesPerSec()
+	if floor <= 0 {
+		return false
+	}
+	if elapsed < rcxThrottleMinSample || elapsed > rcxThrottleMaxSample {
+		return false
+	}
+	return float64(flow.downDelta)/elapsed.Seconds() < floor
+}
+
+func (e *rcxEngine) trackThrottle(node string, now time.Time) {
+	key := e.key(node)
+	if now.Before(e.ledger.CoolUntil(key, e.envKey, now)) {
+		return
+	}
+	if e.runtime.Mode() != "rule" || e.runtime.Members() == nil {
+		return
+	}
+	since := e.throttled[key]
+	if since.IsZero() {
+		e.throttled[key] = now
+		return
+	}
+	if now.Sub(since) < e.confirmWindow(key, node) {
 		return
 	}
 	e.ledger.NoteDegraded(key, e.envKey, now)

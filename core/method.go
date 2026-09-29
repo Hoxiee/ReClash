@@ -295,6 +295,10 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	setUiActiveMethod: withArguments(func(active *bool, response MethodResponse) {
 		response.success(handleSetUiActive(*active))
 	}),
+	screenOffMethod: withArguments(func(off *bool, response MethodResponse) {
+		handleScreenOff(*off)
+		response.success(true)
+	}),
 	getMemoryStatsMethod: withoutArguments(func(response MethodResponse) {
 		safeGo(response, func() {
 			response.success(handleGetMemoryStats())

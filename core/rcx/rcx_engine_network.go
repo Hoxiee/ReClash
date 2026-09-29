@@ -47,10 +47,11 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 		e.envSince = e.runtime.Now()
 		e.reachWarm = true
 		e.reachBlind = 0
+		e.reachStableRounds = 0
 		e.terrain.forget()
 		e.migrateEnvironment(aliases, primary)
 		e.supersedeProbe()
-		e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+		e.reachF, e.reachD, e.reachS = rcxProbeOverloaded, rcxProbeOverloaded, rcxProbeOverloaded
 		// Carry the working node across the handoff instead of dropping it: a foreign
 		// node that opened the world (OpenedOnce is per-marker, not per-env) stays
 		// admissible on the new link, so wifi<->cellular verifies rather than re-picks.
@@ -275,11 +276,13 @@ func (e *rcxEngine) classifyTerrain(measured bool) {
 		UnvalidatedFor: e.terrain.unvalidatedFor(now),
 		ForeignReach:   e.reachF,
 		DomesticReach:  e.reachD,
+		SNIReach:       e.reachS,
 	})
 	terrain = e.terrain.settle(terrain, measured)
 	if terrain == rcxTerrainOffline {
 		e.rollbackEscrow()
 	}
+	e.trackReachStability(terrain, measured)
 	if !e.terrain.observe(terrain, now) {
 		return
 	}
@@ -342,7 +345,7 @@ func (e *rcxEngine) applyRunning(running bool) {
 		e.persist(true)
 		return
 	}
-	e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+	e.reachF, e.reachD, e.reachS = rcxProbeOverloaded, rcxProbeOverloaded, rcxProbeOverloaded
 	e.supersedeReach()
 	if !e.screenOff {
 		e.startWakeProbe()
@@ -371,7 +374,7 @@ func (e *rcxEngine) applySuspend(suspended bool) {
 	}
 	e.suspendTo = now
 	e.accountedAt = now
-	e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+	e.reachF, e.reachD, e.reachS = rcxProbeOverloaded, rcxProbeOverloaded, rcxProbeOverloaded
 	e.supersedeReach()
 	if !e.screenOff {
 		e.startWakeProbe()
@@ -400,7 +403,32 @@ func (e *rcxEngine) reachInterval() time.Duration {
 	if e.terrain.terrain == rcxTerrainNormal {
 		return rcxReachRefresh
 	}
-	return rcxReachUrgent
+	return e.urgentReachInterval()
+}
+
+// A confirmed whitelist that keeps re-proving stable stretches its 30s reprobe
+// toward rcxReachBackoffCap, sparing a censored user's radio; trackReachStability
+// resets the streak on any flip, so a real change is still caught within 30s.
+func (e *rcxEngine) urgentReachInterval() time.Duration {
+	if e.reachStableRounds < rcxReachSteady {
+		return rcxReachUrgent
+	}
+	interval := rcxReachUrgent * time.Duration(e.reachStableRounds-rcxReachSteady+2)
+	if interval > rcxReachBackoffCap {
+		return rcxReachBackoffCap
+	}
+	return interval
+}
+
+func (e *rcxEngine) trackReachStability(terrain rcxTerrain, measured bool) {
+	if !measured || terrain != rcxTerrainWhitelist ||
+		!e.freshlyOpenProven(e.key(e.incumbent), e.runtime.Now()) {
+		e.reachStableRounds = 0
+		return
+	}
+	if e.reachStableRounds < rcxReachSteadyCap {
+		e.reachStableRounds++
+	}
 }
 
 // A stale terrain says nothing: unknown keeps the last-resort rows honest.

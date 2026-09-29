@@ -353,6 +353,28 @@ func (e *rcxEngine) proofDue(node string, now time.Time) bool {
 	return now.Sub(at) >= e.ledger.ProofTTL()/2
 }
 
+// A busy incumbent keeps OpenWorld=Proven from marker traffic while its measured
+// median ages to nothing, blinding the switch gate; re-probe such a protected node
+// to restore it. Transit-only proof can't be restored by an open probe, so skip it
+// rather than re-select a blocked-marker node every tick.
+func (e *rcxEngine) latencyStale(c rcxCandidate, now time.Time) bool {
+	if c.MedianMs > 0 {
+		return false
+	}
+	if c.Facts.OpenWorld != rcxProofProven {
+		return false
+	}
+	if c.Name == e.incumbent || c.Name == e.pin() {
+		return true
+	}
+	for _, name := range e.standbyNames() {
+		if name == c.Name {
+			return true
+		}
+	}
+	return false
+}
+
 func (e *rcxEngine) startProbe(candidates []rcxCandidate, members []rcxMember, kind rcxWaveKind) {
 	if e.wakePending || e.suspended {
 		return
@@ -531,25 +553,44 @@ func (e *rcxEngine) startReach() {
 	gen := e.reachGen
 	configGen := e.configGen
 	quit := e.quit
+	sni := ""
+	if len(e.cfg.CensorSNI) > 0 {
+		sni = e.cfg.CensorSNI[0]
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	e.reachCancel = cancel
 	safeGoDetached("rcx canary round", func() {
 		var (
 			domesticRows    []rcxCanaryReport
 			domesticOutcome rcxProbeOutcome
+			sniOutcome      = rcxProbeOverloaded
 		)
 		done := make(chan struct{})
 		safeGoDetached("rcx canary domestic", func() {
 			defer close(done)
-			domesticOutcome = e.reachGroup(ctx, domestic, true, dial, &domesticRows)
+			domesticOutcome = e.reachGroup(ctx, domestic, true, dial, &domesticRows, "")
+		})
+		sniDone := make(chan struct{})
+		safeGoDetached("rcx canary sni", func() {
+			defer close(sniDone)
+			// A censored SNI dialed at the same anycast IPs the foreign canary
+			// reaches: transit is proven by that canary, so a cut here is the DPI,
+			// not a dark link. Skipped when no censored SNI is configured.
+			if sni == "" {
+				return
+			}
+			var sniRows []rcxCanaryReport
+			sniOutcome = e.reachGroup(ctx, foreign, false, dial, &sniRows, sni)
 		})
 		foreignRows := make([]rcxCanaryReport, 0, len(foreign))
-		foreignOutcome := e.reachGroup(ctx, foreign, false, dial, &foreignRows)
+		foreignOutcome := e.reachGroup(ctx, foreign, false, dial, &foreignRows, "")
 		<-done
+		<-sniDone
 		e.sendResult(rcxEvent{
 			Kind:      rcxEventTerrainReach,
 			Foreign:   foreignOutcome,
 			Domestic:  domesticOutcome,
+			SNI:       sniOutcome,
 			Canaries:  append(foreignRows, domesticRows...),
 			Gen:       gen,
 			ConfigGen: configGen,
@@ -564,10 +605,11 @@ func (e *rcxEngine) reachGroup(
 	domestic bool,
 	dial time.Duration,
 	rows *[]rcxCanaryReport,
+	sni string,
 ) rcxProbeOutcome {
 	ctx, cancel := context.WithTimeout(parent, dial+2*time.Second)
 	defer cancel()
-	return e.reachAny(ctx, addresses, domestic, dial, rows)
+	return e.reachAny(ctx, addresses, domestic, dial, rows, sni)
 }
 
 // In order, one black-holed address spends the round the others needed.
@@ -577,6 +619,7 @@ func (e *rcxEngine) reachAny(
 	domestic bool,
 	dial time.Duration,
 	rows *[]rcxCanaryReport,
+	sni string,
 ) rcxProbeOutcome {
 	if len(addresses) == 0 {
 		return rcxProbeOverloaded
@@ -609,7 +652,11 @@ func (e *rcxEngine) reachAny(
 			}()
 			dialCtx, cancelDial := context.WithTimeout(ctx, dial)
 			defer cancelDial()
-			outcome = e.runtime.Reach(dialCtx, address, domestic)
+			if sni != "" {
+				outcome = e.runtime.ReachSNI(dialCtx, address, sni)
+			} else {
+				outcome = e.runtime.Reach(dialCtx, address, domestic)
+			}
 		})
 	}
 

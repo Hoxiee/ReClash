@@ -198,6 +198,45 @@ func TestClassifyTerrainSeparatesWhitelistFromOffline(t *testing.T) {
 	}
 }
 
+func TestClassifyTerrainReadsACutCensoredSNIAsWhitelist(t *testing.T) {
+	got := rcxClassifyTerrain(rcxTerrainFacts{
+		Validated:     true,
+		ForeignReach:  rcxProbeOK,
+		DomesticReach: rcxProbeOK,
+		SNIReach:      rcxProbeFail,
+	})
+
+	if got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist: plain transit reaches the IP but the censored SNI is cut", got)
+	}
+}
+
+func TestClassifyTerrainStaysNormalWhenTheCensoredSNIAlsoPasses(t *testing.T) {
+	got := rcxClassifyTerrain(rcxTerrainFacts{
+		Validated:     true,
+		ForeignReach:  rcxProbeOK,
+		DomesticReach: rcxProbeOK,
+		SNIReach:      rcxProbeOK,
+	})
+
+	if got != rcxTerrainNormal {
+		t.Errorf("terrain = %s, want normal: the censored SNI got through untouched", got)
+	}
+}
+
+func TestClassifyTerrainStaysNormalWhenTheCensoredSNIIsInconclusive(t *testing.T) {
+	got := rcxClassifyTerrain(rcxTerrainFacts{
+		Validated:     true,
+		ForeignReach:  rcxProbeOK,
+		DomesticReach: rcxProbeOK,
+		SNIReach:      rcxProbeOverloaded,
+	})
+
+	if got != rcxTerrainNormal {
+		t.Errorf("terrain = %s, want normal: an unmeasured SNI canary must not forge a whitelist", got)
+	}
+}
+
 func TestClassifyTerrainReadsAnUnansweredForeignCanaryAsAWhitelist(t *testing.T) {
 	got := rcxClassifyTerrain(rcxTerrainFacts{
 		Validated:     true,

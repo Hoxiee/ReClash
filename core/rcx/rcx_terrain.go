@@ -133,6 +133,7 @@ type rcxTerrainFacts struct {
 	UnvalidatedFor time.Duration
 	ForeignReach   rcxProbeOutcome
 	DomesticReach  rcxProbeOutcome
+	SNIReach       rcxProbeOutcome
 	PortalMarker   bool
 }
 
@@ -148,6 +149,10 @@ func rcxClassifyTerrain(facts rcxTerrainFacts) rcxTerrain {
 		return rcxTerrainUnknown
 	}
 	switch {
+	// Transit works to the anycast IP but a censored SNI is cut on the way: a
+	// bare-IP canary cannot see this, so an SNI-DPI network reads Normal without it.
+	case facts.ForeignReach == rcxProbeOK && facts.SNIReach == rcxProbeFail:
+		return rcxTerrainWhitelist
 	case facts.DomesticReach == rcxProbeOK && facts.ForeignReach != rcxProbeOK:
 		return rcxTerrainWhitelist
 	case facts.ForeignReach == rcxProbeOK:

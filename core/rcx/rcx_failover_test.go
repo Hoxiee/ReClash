@@ -215,6 +215,25 @@ func TestDeathSwitchDrainsOnlyStalledTrackerIDs(t *testing.T) {
 	}
 }
 
+func TestDeathSwitchDrainsAllConnsAfterOffScreenDeath(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("dead", "alive")
+	engine := newTestEngine(runtime, "ru")
+	runtime.openConn("stalled", "dead", "api.example")
+	runtime.openConn("moving", "dead", "cdn.example")
+	runtime.openConn("other", "alive", "x.example")
+	engine.incidentConns = map[string]struct{}{}
+
+	got := engine.drainIDs("dead", true)
+	closed := map[string]bool{}
+	for _, id := range got {
+		closed[id] = true
+	}
+	if len(got) != 2 || !closed["stalled"] || !closed["moving"] {
+		t.Fatalf("drainIDs(all) = %v, want both dead-node conns closed and none from a live node", got)
+	}
+}
+
 func TestFailedWaveStillCountsIndependentProviderFailures(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = providerMembers("one", "a", "b")

@@ -362,6 +362,7 @@ type rcxCandidate struct {
 	Recurrence       int
 	QualityConfirmed bool
 	Circuit          bool
+	Stalled          bool
 	// User-rule outcomes, resolved against a candidate's attributes and measured
 	// egress before ranking. Ignore/AvoidExit block; LastResort caps the verdict;
 	// Prefer only breaks a tie in the node's favour.
@@ -610,12 +611,13 @@ func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
 	return gain >= absolute && gain >= required
 }
 
-// True when best is clearly slower than the incumbent (beyond one latency step);
-// a missing timing on either side answers false, so it never blocks a move alone.
-func rcxSlowerThanIncumbent(incumbent, best rcxCandidate) bool {
-	inc := rcxDiscoveryLatency(incumbent)
-	alt := rcxDiscoveryLatency(best)
-	if inc <= 0 || alt <= 0 {
+// Fail-closed: an unknown incumbent median counts as a trade-down (the old guard allowed it).
+func rcxTradesDown(incumbent, best rcxCandidate) bool {
+	inc, alt := incumbent.MedianMs, best.MedianMs
+	if inc <= 0 {
+		return true
+	}
+	if alt <= 0 {
 		return false
 	}
 	return alt > inc+rcxLatencyStep
@@ -650,7 +652,14 @@ func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
 	return rcxLatBucket(c.HostMs, bands)
 }
 
+// A confirmed whitelist terrain is itself a censorship signal that arms the full posture.
+func rcxEffectiveCensoring(in rcxDecisionInput) bool {
+	return in.Policy.Censoring || in.Terrain == rcxTerrainWhitelist
+}
+
 func rcxDecide(in rcxDecisionInput) rcxDecision {
+	configuredCensoring := in.Policy.Censoring
+	in.Policy.Censoring = rcxEffectiveCensoring(in)
 	var best *rcxCandidate
 	var bestKey rcxKey
 	var incumbentKey rcxKey
@@ -717,9 +726,9 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	if !incumbentEligible {
-		// Fleeing a transient foreign-node death to a censored-side exit surfaces
-		// real traffic at home; hold and let probes recover a foreign node.
-		if in.Policy.Censoring && incumbentPresent &&
+		// Only a configured home censor punishes real traffic surfaced at home; a
+		// merely measured whitelist leaves a domestic node as a valid last resort.
+		if configuredCensoring && incumbentPresent &&
 			!rcxExitsDomestic(incumbentCand.Facts) && rcxExitsDomestic(best.Facts) {
 			return rcxDecision{Reason: rcxReasonStranded, Detail: in.Incumbent}
 		}
@@ -758,9 +767,10 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	reason := rcxReasonHold
 	reliabilityGain := bestKey.recurrence < incumbentKey.recurrence ||
 		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded
-	// A reaching incumbent that merely flapped keeps the route: reliability alone
-	// never trades a working fast node away for a measurably slower one.
-	if reliabilityGain && incumbentReaches && rcxSlowerThanIncumbent(incumbent, *best) {
+	// Escape a degraded incumbent only when trapped — unmeasured egress or stalled payload.
+	degradedEscape := incumbentKey.degraded && !bestKey.degraded &&
+		(incumbent.MedianMs <= 0 || incumbent.Stalled)
+	if reliabilityGain && incumbentReaches && !degradedEscape && rcxTradesDown(incumbent, *best) {
 		reliabilityGain = false
 	}
 	if reliabilityGain {
@@ -867,6 +877,7 @@ type rcxRanked struct {
 
 // The decision's own key and order: a second ordering would drift from it.
 func rcxRank(in rcxDecisionInput) []rcxRanked {
+	in.Policy.Censoring = rcxEffectiveCensoring(in)
 	compare := rcxCompareFor(in.Policy.Strategy)
 	ranked := make([]rcxRanked, 0, len(in.Candidates))
 	for _, c := range in.Candidates {

@@ -48,7 +48,7 @@ func (c rcxConfig) fingerprints() rcxConfigFingerprints {
 	return rcxConfigFingerprints{
 		Open:      rcxMarkersFingerprint(c.OpenMarkers),
 		Domestic:  rcxMarkersFingerprint(c.DomesticMarkers),
-		Canaries:  rcxStringsFingerprint(c.CanaryForeign, c.CanaryDomestic),
+		Canaries:  rcxStringsFingerprint(c.CanaryForeign, c.CanaryDomestic, c.CensorSNI),
 		Countries: rcxStringsFingerprint(c.CensorCountries),
 		Lanes:     rcxLanesFingerprint(c.Lanes),
 		Egress:    rcxStringsFingerprint(c.EgressEchoes) + "|" + rcxMarkersFingerprint(c.LocalMarkers),
@@ -114,6 +114,7 @@ type rcxConfig struct {
 	CensorCountries         []string        `json:"cc"`
 	CanaryForeign           []string        `json:"cf"`
 	CanaryDomestic          []string        `json:"cd"`
+	CensorSNI               []string        `json:"cs"`
 	OpenMarkers             []rcxMarker     `json:"om"`
 	DomesticMarkers         []rcxMarker     `json:"dm"`
 	LocalMarkers            []rcxMarker     `json:"lm"`
@@ -133,6 +134,7 @@ type rcxConfig struct {
 	ProofTTLMinutes         int             `json:"pttl"`
 	DegradeConfirmSeconds   int             `json:"dgc"`
 	AbsCeilingMs            int             `json:"acm"`
+	ThrottleFloorKBps       int             `json:"tfk"`
 }
 
 type rcxRuleAction string
@@ -206,12 +208,16 @@ const (
 	rcxLaneRoleForeign  = "foreign"
 	rcxLaneRoleDomestic = "domestic"
 
-	rcxDwellSeconds       = 90
-	rcxWaveWidth          = 12
-	rcxProofTTLMinutes    = 30
-	rcxDegradeConfirmSec  = 60
-	rcxAbsCeilingMs       = 300
-	rcxColdConfirmSec     = 15
+	rcxDwellSeconds      = 90
+	rcxWaveWidth         = 12
+	rcxProofTTLMinutes   = 30
+	rcxDegradeConfirmSec = 60
+	rcxAbsCeilingMs      = 300
+	rcxColdConfirmSec    = 15
+	// Aggregate per-node download floor: sustained transit under demand below it reads
+	// as a squeeze. Anchored at the ~128 kbit/s clamp operators throttle video to.
+	rcxThrottleFloorKBps  = 16
+	rcxThrottleMinConns   = 3
 	rcxProbeConcurrency   = 2
 	rcxProbeStaggerMs     = 250
 	rcxLiveWindowSeconds  = 60
@@ -268,6 +274,7 @@ func rcxDefaultConfig() rcxConfig {
 		ProofTTLMinutes:         rcxProofTTLMinutes,
 		DegradeConfirmSeconds:   rcxDegradeConfirmSec,
 		AbsCeilingMs:            rcxAbsCeilingMs,
+		ThrottleFloorKBps:       rcxThrottleFloorKBps,
 	}
 }
 
@@ -287,6 +294,9 @@ func (c rcxConfig) normalized() rcxConfig {
 	}
 	if c.AbsCeilingMs <= 0 {
 		c.AbsCeilingMs = rcxAbsCeilingMs
+	}
+	if c.ThrottleFloorKBps <= 0 {
+		c.ThrottleFloorKBps = rcxThrottleFloorKBps
 	}
 	if !rcxKnownStrategy(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced

@@ -23,6 +23,7 @@ type rcxRuntime interface {
 	Locate(ctx context.Context, node, echo string) string
 	Test(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
 	Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome
+	ReachSNI(ctx context.Context, addr, serverName string) rcxProbeOutcome
 	Sweep(ctx context.Context, nodes []string)
 	Connections() []rcxConnSample
 	CloseConnections(ids []string)
@@ -82,6 +83,7 @@ type rcxEngine struct {
 	portal           bool
 	reachF           rcxProbeOutcome
 	reachD           rcxProbeOutcome
+	reachS           rcxProbeOutcome
 	canaries         []rcxCanaryReport
 	incumbent        string
 	since            time.Time
@@ -127,6 +129,7 @@ type rcxEngine struct {
 	reachAgain          bool
 	reachBlind          int
 	reachWarm           bool
+	reachStableRounds   int
 	sweeping            bool
 	sweptAt             time.Time
 	envSince            time.Time
@@ -136,6 +139,8 @@ type rcxEngine struct {
 	hostLinked          bool
 	wantPick            string
 	downFrozen          map[string]time.Time
+	throttled           map[string]time.Time
+	lastSampleAt        time.Time
 	charged             map[string]int
 	chargedAt           time.Time
 	escrowReach         bool
@@ -186,6 +191,7 @@ func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 		control:       newRcxControl(),
 		wake:          make(chan struct{}, 1),
 		downFrozen:    map[string]time.Time{},
+		throttled:     map[string]time.Time{},
 		openSeen:      map[string]rcxOpenSighting{},
 		charged:       map[string]int{},
 		providerFails: map[string]time.Time{},

@@ -619,6 +619,46 @@ func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) 
 	return rcxVerifyTLS(ctx, conn, address)
 }
 
+// A censored SNI dialed at an anycast IP the plain canary already reaches: TCP
+// transit is proven there, so a ClientHello that never draws a ServerHello is
+// the SNI-DPI cutting the flow, not a dark link. The offered cert cannot match
+// the spoofed name, so verification is skipped -- only whether the handshake
+// completes tells us the name got through. A silent drop shows as the dial
+// deadline; a reset shows as a handshake error; both read as blocked. Only a
+// superseded round (parent cancel) is inconclusive.
+func (rcxCoreRuntime) ReachSNI(ctx context.Context, address, serverName string) rcx.ProbeOutcome {
+	direct := lookupProxy("DIRECT")
+	if direct == nil {
+		return rcx.ProbeOverloaded
+	}
+	target, err := netip.ParseAddrPort(address)
+	if err != nil {
+		return rcx.ProbeOverloaded
+	}
+	metadata := &constant.Metadata{
+		NetWork: constant.TCP,
+		Type:    constant.INNER,
+		DstIP:   target.Addr(),
+		DstPort: target.Port(),
+	}
+	conn, err := direct.DialContext(ctx, metadata)
+	if err != nil {
+		return rcx.ProbeOverloaded
+	}
+	defer conn.Close()
+	tlsConn := mihomoTLS.Client(conn, &mihomoTLS.Config{
+		ServerName:         rcx.HostOf(serverName),
+		InsecureSkipVerify: true,
+	})
+	if err := tlsConn.HandshakeContext(ctx); err != nil {
+		if errors.Is(ctx.Err(), context.Canceled) {
+			return rcx.ProbeOverloaded
+		}
+		return rcx.ProbeFail
+	}
+	return rcx.ProbeOK
+}
+
 // The host's delay test over the whole park, run on the engine's own schedule
 // rather than the health-check cadence. The window gates queueing only: a
 // cancelled URLTest is recorded as dead by the adapter, so a dial already in

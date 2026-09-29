@@ -296,10 +296,16 @@ func (e *rcxEngine) watchIncumbent() {
 	e.startProbe(e.candidates(members), members, rcxWaveIncident)
 }
 
-func (e *rcxEngine) drainIDs(node string) []string {
+// A node declared dead off-screen was never watched for stalls, so its incident set is
+// empty and untrustworthy; drain every connection still on it rather than close nothing.
+func (e *rcxEngine) drainIDs(node string, all bool) []string {
 	ids := make([]string, 0, len(e.incidentConns))
 	for _, conn := range e.runtime.Connections() {
 		if conn.Node != node {
+			continue
+		}
+		if all {
+			ids = append(ids, conn.Key)
 			continue
 		}
 		if _, stalled := e.incidentConns[conn.Key]; stalled {

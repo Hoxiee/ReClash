@@ -50,6 +50,7 @@ type rcxDiagContext struct {
 	Validated     bool   `json:"validated"`
 	ReachF        string `json:"reachF"`
 	ReachD        string `json:"reachD"`
+	ReachS        string `json:"reachS"`
 	Direct        string `json:"direct"`
 	ProbesLeft    int    `json:"probesLeft"`
 	Candidates    int    `json:"candidates"`
@@ -202,6 +203,7 @@ func (entry rcxDiagEntry) signature() uint64 {
 		diagHashString(h, c.Transport)
 		diagHashString(h, c.ReachF)
 		diagHashString(h, c.ReachD)
+		diagHashString(h, c.ReachS)
 		diagHashString(h, strconv.Itoa(c.Eligible))
 		diagHashString(h, strconv.Itoa(c.Candidates))
 		diagHashString(h, strconv.FormatBool(c.ScreenOff))
@@ -322,6 +324,7 @@ func (e *rcxEngine) diagContext(input rcxDecisionInput, ranked []rcxRanked) *rcx
 		Validated:     e.validated,
 		ReachF:        rcxOutcomeName(e.reachF),
 		ReachD:        rcxOutcomeName(e.reachD),
+		ReachS:        rcxOutcomeName(e.reachS),
 		Direct:        e.direct,
 		ProbesLeft:    e.budget.Remaining(e.runtime.Now()),
 		Candidates:    len(ranked),

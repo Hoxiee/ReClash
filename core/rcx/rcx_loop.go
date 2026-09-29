@@ -45,6 +45,7 @@ type rcxEvent struct {
 	Results    []rcxProbeResult
 	Foreign    rcxProbeOutcome
 	Domestic   rcxProbeOutcome
+	SNI        rcxProbeOutcome
 	Canaries   []rcxCanaryReport
 	Gen        uint32
 	ConfigGen  uint32
@@ -91,13 +92,21 @@ const (
 	rcxWarmPoolCap    = 16
 	rcxHistoryDepth   = 12
 
-	rcxReachRefresh  = 5 * time.Minute
-	rcxReachUrgent   = 30 * time.Second
-	rcxTerrainMaxAge = 10 * time.Minute
+	rcxReachRefresh    = 5 * time.Minute
+	rcxReachUrgent     = 30 * time.Second
+	rcxReachSteady     = 4               // confirmed-whitelist rounds held at the urgent cadence
+	rcxReachSteadyCap  = 8               // streak ceiling; the reprobe interval is pinned by here
+	rcxReachBackoffCap = 3 * time.Minute // ceiling the relaxed whitelist reprobe grows toward
+	rcxTerrainMaxAge   = 10 * time.Minute
 
 	rcxConnStallAge    = 10 * time.Second
 	rcxOpenSightWindow = time.Minute
 	rcxOpenSightCap    = 64
+
+	// A throttle floor is a rate, so a sample too short to divide or so long it
+	// spans a park would mis-read one; both bounds fence the estimate to a live tick.
+	rcxThrottleMinSample = 3 * time.Second
+	rcxThrottleMaxSample = 90 * time.Second
 
 	// The handoff answers a live network change, so it buys a narrow wave it can
 	// finish inside the window a user spends reading the screen.
@@ -256,7 +265,7 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.reaching = false
 		e.reachCancel = nil
 		{
-			e.reachF, e.reachD = event.Foreign, event.Domestic
+			e.reachF, e.reachD, e.reachS = event.Foreign, event.Domestic, event.SNI
 			e.canaries = event.Canaries
 			e.lastReachAt = e.runtime.Now()
 			e.reachWarm = false

@@ -89,6 +89,7 @@ type rcxLinkReport struct {
 	Metered   bool   `json:"metered"`
 	Foreign   string `json:"foreign"`
 	Domestic  string `json:"domestic"`
+	SNI       string `json:"sni"`
 	Since     int64  `json:"since"`
 }
 
@@ -174,6 +175,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 			Metered:   e.metered,
 			Foreign:   rcxOutcomeName(e.reachF),
 			Domestic:  rcxOutcomeName(e.reachD),
+			SNI:       rcxOutcomeName(e.reachS),
 			Since:     rcxMillis(e.terrain.since),
 		},
 		Canaries:   append([]rcxCanaryReport(nil), e.canaries...),

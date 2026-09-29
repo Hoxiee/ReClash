@@ -153,6 +153,7 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 			CoolUntil:        e.ledger.CoolUntil(key, e.envKey, now),
 			InSkeleton:       true,
 			Degraded:         e.ledger.Degraded(key, e.envKey, now),
+			Stalled:          e.ledger.Stalled(key, e.envKey),
 			Circuit:          e.providerCircuitOpenFor(member.Provider, member.Name, incumbent, now),
 			Ignore:           rule == rcxRuleIgnore,
 			AvoidExit:        e.cfg.avoidsCountry(e.ledger.ExitCountry(key)),
