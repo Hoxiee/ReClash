@@ -48,8 +48,17 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.byType(FadeTransition), findsWidgets);
-      expect(find.byType(ScaleTransition), findsWidgets);
+      final route = ModalRoute.of(tester.element(find.text('pushed page')));
+      expect(route!.animation!.isCompleted, isFalse);
+      final fades = find.ancestor(
+        of: find.text('pushed page'),
+        matching: find.byType(FadeTransition),
+      );
+      expect(fades, findsWidgets);
+      for (final element in fades.evaluate()) {
+        final fade = element.widget as FadeTransition;
+        expect(fade.child, isNot(isA<ScaleTransition>()));
+      }
       await tester.pumpAndSettle();
       expect(find.text('pushed page'), findsOneWidget);
     });
@@ -64,9 +73,7 @@ void main() {
       expect(find.text('pushed page'), findsOneWidget);
     });
 
-    testWidgets('drives a spring fade and scale on a mobile push', (
-      tester,
-    ) async {
+    testWidgets('drives a fast fade without scaling the page', (tester) async {
       setViewWidth(400);
       await pumpHost(tester);
 
@@ -74,8 +81,18 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
 
-      expect(find.byType(FadeTransition), findsWidgets);
-      expect(find.byType(ScaleTransition), findsWidgets);
+      final route = ModalRoute.of(tester.element(find.text('pushed page')));
+      expect(route!.animation!.isCompleted, isFalse);
+      final fades = find.ancestor(
+        of: find.text('pushed page'),
+        matching: find.byType(FadeTransition),
+      );
+      expect(fades, findsWidgets);
+      for (final element in fades.evaluate()) {
+        final fade = element.widget as FadeTransition;
+        expect(fade.child, isNot(isA<ScaleTransition>()));
+        expect(fade.opacity.value, 1.0);
+      }
 
       await tester.pumpAndSettle();
       expect(find.text('pushed page'), findsOneWidget);
@@ -345,6 +362,30 @@ void main() {
       final route = ModalRoute.of(tester.element(find.text('pushed page')));
       expect(route!.transitionDuration, const Duration(milliseconds: 300));
       expect(route.animation!.isCompleted, isFalse);
+      await tester.pumpAndSettle();
+    });
+  });
+
+  group('opaque route cover', () {
+    testWidgets('the incoming page hides the origin behind solid paint', (
+      tester,
+    ) async {
+      setViewWidth(400);
+      await pumpHost(tester);
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+
+      final covers = tester.widgetList<ColoredBox>(
+        find.ancestor(
+          of: find.text('pushed page'),
+          matching: find.byType(ColoredBox),
+        ),
+      );
+      expect(covers, isNotEmpty);
+      expect(covers.every((cover) => cover.color.a == 1.0), isTrue);
+      expect(tester.takeException(), null);
       await tester.pumpAndSettle();
     });
   });

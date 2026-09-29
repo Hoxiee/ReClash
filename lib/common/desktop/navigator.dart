@@ -10,6 +10,27 @@ const _mobileRouteDuration = Duration(milliseconds: 300);
 
 const _mobileRouteReverseDuration = Duration(milliseconds: 240);
 
+const _routeFade = Interval(0.0, 0.35, curve: Curves.easeOut);
+
+Widget _opaqueRouteBody(
+  BuildContext context,
+  Animation<double> animation,
+  Widget child,
+) {
+  // The pages paint their own wallpaper, so this cover looks redundant once
+  // the fade completes. It hides the outgoing route from the first frame, so
+  // a slow fade cannot double-expose two pages at once. The page itself only
+  // fades and stays full-bleed: scaling it would inset the app-bar scrim and
+  // bare its corners against the cover whenever a wallpaper is set.
+  return ColoredBox(
+    color: Theme.of(context).colorScheme.surface,
+    child: FadeTransition(
+      opacity: animation.drive(CurveTween(curve: _routeFade)),
+      child: child,
+    ),
+  );
+}
+
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
     if (!context.isMobileView) {
@@ -71,18 +92,7 @@ class CommonDesktopRoute<T> extends PageRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: FadeTransition(
-        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
-        child: ScaleTransition(
-          scale: animation.drive(
-            Tween<double>(
-              begin: 0.98,
-              end: 1,
-            ).chain(CurveTween(curve: AppSpringCurves.morph)),
-          ),
-          child: result,
-        ),
-      ),
+      child: _opaqueRouteBody(context, animation, result),
     );
   }
 
@@ -124,18 +134,7 @@ class CommonRoute<T> extends PageRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: FadeTransition(
-        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
-        child: ScaleTransition(
-          scale: animation.drive(
-            Tween<double>(
-              begin: 0.98,
-              end: 1,
-            ).chain(CurveTween(curve: AppSpringCurves.morph)),
-          ),
-          child: result,
-        ),
-      ),
+      child: _opaqueRouteBody(context, animation, result),
     );
   }
 }
