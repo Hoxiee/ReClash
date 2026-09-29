@@ -164,6 +164,7 @@ ReClash-View: type:list; sort:delay; layout:tight; icon:none; card:min
 | `networkSpeed` | Windows, MacOS, Linux, Android | vpn, byedpi | Live upload and download rates. |
 | `trafficUsage` | Windows, MacOS, Linux, Android | vpn, byedpi | Session upload, download and total traffic. |
 | `networkDetection` | Windows, MacOS, Linux, Android | vpn, byedpi | Connectivity and latency probe. |
+| `connectionPath` | Windows, MacOS, Linux, Android | vpn, byedpi | Connection-path stages from app to response. |
 | `tunButton` | Linux, MacOS, Windows | vpn, byedpi | Toggles the TUN system tunnel. |
 | `vpnButton` | Android | vpn, byedpi | Toggles the VPN service. |
 | `systemProxyButton` | Linux, MacOS, Windows | vpn, byedpi | Toggles the system proxy. |

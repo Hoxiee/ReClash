@@ -35,6 +35,7 @@ import '../settings/url_scheme.dart';
 import 'connection_doctor.dart';
 import 'core.dart';
 import 'findings.dart';
+import 'tools_search_index.g.dart';
 
 const toolsDoctorPaneId = 'doctor';
 
@@ -570,236 +571,41 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     ];
   }
 
-  /// Settings that live inside a tool screen, surfaced as their own results.
-  /// Tapping one opens the owning screen (its breadcrumb names where it lives);
-  /// labels reuse the screens' own strings so the two never drift apart.
+  /// Settings inside a tool screen, from the generated `deepSettingSpecs`.
   List<_ToolSearchEntry> _deepSettings(
     AppLocalizations l,
     bool enableDeveloperMode,
   ) {
     final owners = {for (final owner in _deepOwners(l)) owner.paneId: owner};
-    final advanced = owners['advanced']!;
-    final basic = owners['config']!;
-    final app = owners['application']!;
-    final appearance = owners['appearance']!;
-    final network = owners['network']!;
-    final dns = owners['dns']!;
-    final ntp = owners['ntp']!;
-    final smartRouting = owners['smartRouting']!;
-    final smartPause = owners['smartPause']!;
-    final desync = owners['desync']!;
-    final backup = owners['backup']!;
-    final developer = owners['developer']!;
-
-    _ToolSearchEntry entry(
-      String title,
-      _DeepOwner owner,
-      _ToolCategory category, {
-      String extra = '',
-      String? focus,
-    }) {
-      return _ToolSearchEntry(
-        '$title $extra ${owner.label}',
-        category,
-        _DeepSettingResult(
-          glyph: owner.glyph,
-          title: title,
-          owner: owner,
-          focus: focus ?? title,
+    const categories = {
+      'diagnostics': _ToolCategory.diagnostics,
+      'personalization': _ToolCategory.personalization,
+      'configuration': _ToolCategory.configuration,
+      'system': _ToolCategory.system,
+    };
+    final entries = <_ToolSearchEntry>[];
+    for (final spec in deepSettingSpecs(l)) {
+      if (spec.developerOnly && !enableDeveloperMode) {
+        continue;
+      }
+      final owner = owners[spec.paneId];
+      if (owner == null) {
+        continue;
+      }
+      entries.add(
+        _ToolSearchEntry(
+          '${spec.title} ${owner.label}',
+          categories[spec.category] ?? _ToolCategory.configuration,
+          _DeepSettingResult(
+            glyph: owner.glyph,
+            title: spec.title,
+            owner: owner,
+            focus: spec.title,
+          ),
         ),
       );
     }
-
-    const config = _ToolCategory.configuration;
-    const system = _ToolCategory.system;
-    const personalization = _ToolCategory.personalization;
-    return [
-      entry(l.network, advanced, config),
-      entry('DNS', advanced, config, extra: l.dnsDesc),
-      entry(
-        l.overrideEntries,
-        dns,
-        config,
-        extra: 'dns override',
-        focus: l.overrideDns,
-      ),
-      entry('NTP', advanced, config, extra: l.ntpDesc),
-      entry(
-        l.overrideEntries,
-        ntp,
-        config,
-        extra: 'ntp override',
-        focus: l.overrideNtp,
-      ),
-      entry(l.dialerProxy, ntp, config),
-      entry(l.addedRules, advanced, config),
-      entry(l.script, advanced, config),
-      entry('VPN', network, config),
-      entry(l.tun, network, config),
-      entry(l.allowBypass, network, config),
-      entry(l.systemProxy, network, config, extra: 'proxy'),
-      entry(l.autoSetSystemDns, network, config, extra: 'dns'),
-      entry(l.dnsHijacking, network, config, extra: 'dns'),
-      entry(l.stackMode, network, config, extra: 'tun stack'),
-      entry(l.interfaceNameMode, network, config, extra: 'interface'),
-      entry(l.interfaceName, network, config, extra: 'interface'),
-      entry(l.routeMode, network, config, extra: 'route'),
-      entry(l.overrideNetworkSettings, network, config),
-      entry(l.bypassDomain, network, config),
-      entry(l.routeAddress, network, config, extra: 'route'),
-      entry(l.smartPause, smartPause, config),
-      entry(l.trustedNetworks, smartPause, config),
-      entry(l.smartPauseStrict, smartPause, config),
-      entry(l.smartPauseFullStop, smartPause, config),
-      entry(l.smartPauseCloseConnections, smartPause, config),
-      entry(l.ignoreBatteryOptimization, smartPause, config, extra: 'battery'),
-      entry(l.locationPermission, smartPause, config, extra: 'location'),
-      entry(l.smartRouting, smartRouting, config),
-      entry(l.smartRoutingStrategy, smartRouting, config),
-      entry(l.smartRoutingBehaviour, smartRouting, config),
-      entry(l.smartRoutingDomestic, smartRouting, config),
-      entry(l.smartRoutingCensor, smartRouting, config),
-      entry(l.smartRoutingManualHold, smartRouting, config),
-      entry(l.smartRoutingRequireUdp, smartRouting, config),
-      entry(l.smartRoutingServiceRoutes, smartRouting, config),
-      entry(l.smartRoutingDiagnostics, smartRouting, config),
-      entry(l.smartRoutingRegionCard, smartRouting, config, extra: 'region'),
-      entry(l.smartRoutingRegionSeeds, smartRouting, config, extra: 'region'),
-      entry(
-        l.smartRoutingCanariesForeign,
-        smartRouting,
-        config,
-        extra: 'region canary probe',
-      ),
-      entry(
-        l.smartRoutingCanariesDomestic,
-        smartRouting,
-        config,
-        extra: 'region canary probe',
-      ),
-      entry(
-        l.smartRoutingMarkersOpen,
-        smartRouting,
-        config,
-        extra: 'region marker probe',
-      ),
-      entry(
-        l.smartRoutingMarkersDomestic,
-        smartRouting,
-        config,
-        extra: 'region marker probe',
-      ),
-      entry(
-        l.smartRoutingMarkersLocal,
-        smartRouting,
-        config,
-        extra: 'region marker probe',
-      ),
-      entry(
-        l.smartRoutingNameHints,
-        smartRouting,
-        config,
-        extra: 'region name hint',
-      ),
-      entry(
-        l.smartRoutingBreakerPatterns,
-        smartRouting,
-        config,
-        extra: 'region breaker pattern',
-      ),
-      entry(
-        l.desync,
-        desync,
-        config,
-        extra: 'dpi',
-        focus: l.desyncFeatureEnable,
-      ),
-      entry(l.desyncFeatureEnable, desync, config, extra: 'dpi'),
-      entry(l.desyncEngine, desync, config),
-      entry(l.desyncForceTcp, desync, config),
-      entry(l.desyncCache, desync, config),
-      entry(l.desyncCacheTtl, desync, config, extra: 'ttl'),
-      entry(l.desyncRouting, desync, config),
-      entry(l.desyncRoutingRules, desync, config),
-      entry(l.desyncSaveCurrent, desync, config),
-      entry(l.desyncArgs, desync, config, extra: 'byedpi'),
-      entry(l.desyncDefaultName, desync, config),
-      entry(l.desyncActiveStrategy, desync, config, extra: 'strategy'),
-      entry(l.userAgent, basic, config, extra: 'ua'),
-      entry(l.port, basic, config, extra: 'port mixed'),
-      entry(l.testUrl, basic, config),
-      entry(l.keepAliveIntervalDesc, basic, config, extra: 'keep alive'),
-      entry(l.allowLan, basic, config, extra: 'lan'),
-      entry(l.appRegion, basic, config),
-      entry('IPv6', basic, config),
-      entry(l.unifiedDelay, basic, config),
-      entry(l.tcpConcurrent, basic, config, extra: 'tcp'),
-      entry(l.findProcessMode, basic, config),
-      entry(l.geodataLoader, basic, config, extra: 'geo'),
-      entry(l.appendSystemDns, basic, config, extra: 'dns'),
-      entry(l.sendDeviceIdentity, basic, config),
-      entry(l.authentication, basic, config, extra: 'account password login'),
-      entry('Hosts', basic, config),
-      entry(l.useHosts, dns, config, extra: 'hosts'),
-      entry(l.useSystemHosts, dns, config, extra: 'hosts'),
-      entry(l.respectRules, dns, config),
-      entry(l.dnsMode, dns, config, extra: 'enhanced fakeip'),
-      entry(l.fakeipRange, dns, config),
-      entry(l.fakeipFilter, dns, config),
-      entry(l.defaultNameserver, dns, config),
-      entry(l.nameserverPolicy, dns, config),
-      entry(l.nameserver, dns, config),
-      entry(l.fallback, dns, config),
-      entry(l.fallbackFilter, dns, config, extra: 'dns'),
-      entry(l.proxyNameserver, dns, config, extra: 'dns'),
-      entry(l.minimizeOnExit, app, system),
-      entry(l.autoLaunch, app, system),
-      entry(l.silentLaunch, app, system),
-      entry(l.highPriorityAutoLaunch, app, system, extra: 'autostart'),
-      entry(l.autoRun, app, system),
-      entry(l.exclude, app, system),
-      entry(l.autoCloseConnections, app, system),
-      entry(l.onlyStatisticsProxy, app, system),
-      entry(l.autoCheckUpdate, app, system, extra: 'update'),
-      entry(l.checkCertificate, app, system),
-      entry(l.logLevel, app, system, extra: 'log'),
-      entry(l.logcat, app, system, extra: 'log'),
-      entry(l.crashlytics, app, system, extra: 'log'),
-      entry(l.setupRerun, app, system, extra: 'setup wizard'),
-      entry(l.notification, app, system),
-      entry(l.themeMode, appearance, personalization),
-      entry(l.textScale, appearance, personalization),
-      entry(l.dashboardStyle, appearance, personalization),
-      entry(l.pureBlackMode, appearance, personalization, extra: 'amoled'),
-      entry(l.predictiveBack, appearance, personalization, extra: 'motion'),
-      entry(l.schedule, appearance, personalization),
-      entry(l.contrast, appearance, personalization),
-      entry(l.themeColor, appearance, personalization, extra: 'color'),
-      entry(l.colorSchemes, appearance, personalization, extra: 'color'),
-      entry(l.appearanceIcon, appearance, personalization, extra: 'app icon'),
-      entry(l.pageAnimation, appearance, personalization, extra: 'motion'),
-      entry(l.reduceMotion, appearance, personalization, extra: 'motion'),
-      entry(l.seasonalDecorations, appearance, personalization),
-      entry(l.providerEffects, appearance, personalization),
-      entry(l.milestoneDecorations, appearance, personalization),
-      entry(
-        l.appearanceBackground,
-        appearance,
-        personalization,
-        extra: 'wallpaper image',
-      ),
-      entry(l.webDAVConfiguration, backup, system, extra: 'webdav remote sync'),
-      entry(l.restoreStrategy, backup, system, extra: 'restore import'),
-      entry(l.clearData, backup, system, extra: 'reset wipe danger'),
-      if (enableDeveloperMode) ...[
-        entry(l.developerSubscriptions, developer, system, extra: 'report'),
-        entry(l.developerFindings, developer, system, extra: 'findings'),
-        entry(l.crashTest, developer, system, extra: 'crash'),
-        entry(l.logsTest, developer, system, extra: 'log'),
-        entry(l.messageTest, developer, system, extra: 'notification'),
-        entry(l.pruneCache, developer, system, extra: 'cache'),
-      ],
-    ];
+    return entries;
   }
 
   /// Keeps entries every token matches, then orders them by how strongly they
@@ -1956,12 +1762,31 @@ int _tokenTier(String token, String haystack, List<String> words) {
       best = best < 2 ? 2 : best;
       continue;
     }
-    if (candidate.length >= 4 &&
-        words.any((word) => _within1(candidate, word))) {
-      best = best < 1 ? 1 : best;
+    if (candidate.length >= 4) {
+      final stem = _stemPlural(candidate);
+      if (words.any(
+        (word) =>
+            _within1(candidate, word) ||
+            (word.length >= 4 && _stemPlural(word) == stem),
+      )) {
+        best = best < 1 ? 1 : best;
+      }
     }
   }
   return best;
+}
+
+/// A crude singular of an English word so a query in one number still matches a
+/// label in the other ('canary' ↔ 'canaries'). Only the endings these labels
+/// use, not a full stemmer.
+String _stemPlural(String word) {
+  if (word.length > 4 && word.endsWith('ies')) {
+    return '${word.substring(0, word.length - 3)}y';
+  }
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) {
+    return word.substring(0, word.length - 1);
+  }
+  return word;
 }
 
 /// The spellings a single token is allowed to match under: itself, its two

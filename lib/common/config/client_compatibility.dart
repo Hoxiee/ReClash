@@ -8,7 +8,7 @@ import 'package:reclash/enum/enum.dart';
 // actually served sing-box JSON.
 const legacyClashUserAgent = 'ClashForAndroid/2.5.12';
 const metaClashUserAgent = 'ClashMetaForAndroid/2.11.7.Meta';
-const _happUa = 'Happ/3.26.1';
+const _happUa = 'Happ/4.4.1';
 const _incyVersion = '3.3.1';
 const _v2rayngUa = 'v2rayNG/1.9.24';
 const _singboxUa = 'Karing/1.0.0';

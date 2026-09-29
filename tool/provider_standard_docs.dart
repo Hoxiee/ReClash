@@ -221,6 +221,7 @@ const widgetDocs = <String, String>{
   'networkSpeed': 'Live upload and download rates.',
   'trafficUsage': 'Session upload, download and total traffic.',
   'networkDetection': 'Connectivity and latency probe.',
+  'connectionPath': 'Connection-path stages from app to response.',
   'tunButton': 'Toggles the TUN system tunnel.',
   'vpnButton': 'Toggles the VPN service.',
   'systemProxyButton': 'Toggles the system proxy.',

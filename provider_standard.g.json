@@ -317,6 +317,20 @@
       "purpose": "Connectivity and latency probe."
     },
     {
+      "id": "connectionPath",
+      "platforms": [
+        "Windows",
+        "MacOS",
+        "Linux",
+        "Android"
+      ],
+      "modes": [
+        "vpn",
+        "byedpi"
+      ],
+      "purpose": "Connection-path stages from app to response."
+    },
+    {
       "id": "tunButton",
       "platforms": [
         "Linux",
