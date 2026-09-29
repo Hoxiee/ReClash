@@ -158,6 +158,10 @@ final heroLifecycleProvider = Provider<HeroOrbPhase>((ref) {
       request.fault == RunRequestFault.ingressBlocked) {
     return HeroOrbPhase.blocked;
   }
+  if (phase == HeroOrbPhase.off &&
+      request.fault == RunRequestFault.configInvalid) {
+    return HeroOrbPhase.failed;
+  }
   final probing = ref.watch(
     pendingDelayTestsProvider.select((state) => state.isNotEmpty),
   );

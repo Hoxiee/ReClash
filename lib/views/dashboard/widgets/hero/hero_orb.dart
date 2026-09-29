@@ -1795,7 +1795,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.degraded => context.appLocalizations.heroProtected,
     HeroStatus.subscriptionExpired =>
       context.appLocalizations.dashboardSubscriptionExpired,
-    HeroStatus.broken => context.appLocalizations.heroLinkBroken,
+    HeroStatus.broken =>
+      ref.watch(
+            runRequestStateProvider.select(
+              (state) => state.fault == RunRequestFault.configInvalid,
+            ),
+          )
+          ? context.appLocalizations.heroConfigInvalidTitle
+          : context.appLocalizations.heroLinkBroken,
     HeroStatus.blocked => context.appLocalizations.heroBlockedTitle,
     HeroStatus.paused => context.appLocalizations.heroPaused,
   };

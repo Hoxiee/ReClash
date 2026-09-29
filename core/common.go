@@ -485,6 +485,12 @@ func loadConfig(path string) (*config.Config, error) {
 	return executor.ParseWithBytes(buf)
 }
 
+// ConfigApplyFailedToken prefixes the setupConfig error when the profile could
+// not be parsed and the empty built-in default was applied instead. The host
+// splits on it to show a subscription-invalid message; keep it in sync with the
+// Dart ConfigInvalidException classifier.
+const ConfigApplyFailedToken = "config-apply-failed"
+
 func applyConfig(params *SetupParams) error {
 	runtime.GC()
 	configMu.Lock()
@@ -497,9 +503,11 @@ func applyConfig(params *SetupParams) error {
 		// reports the error, but it applies a config with no proxies in it.
 		// From the UI that is indistinguishable from a subscription that went
 		// dead: the profile still lists every node, every delay test answers
-		// Timeout, and nothing routes. Name the real cause in the log.
-		logError(
-			"config apply failed, falling back to the built-in default - no proxies will be available: %v",
+		// Timeout, and nothing routes. Name the real cause in the log at
+		// warning level: the host surfaces the wrapped return error to the
+		// user, so an error-level line here would only double the toast.
+		log.Warnln(
+			"[APP] config apply failed, falling back to the built-in default - no proxies will be available: %v",
 			err,
 		)
 		fallback, fallbackErr := config.ParseRawConfig(config.DefaultRawConfig())
@@ -518,7 +526,11 @@ func applyConfig(params *SetupParams) error {
 	rcxEngineInstance.OnConfigApplied()
 	doctorBumpGenerations(doctorGenerationChange{Config: true, Routing: true})
 	if err != nil {
-		return err
+		// A parse failure means the applied config is the empty fallback, not
+		// the subscription. Tag it so the host can tell an unusable profile
+		// apart from a transient RPC error and show a "contact support"
+		// message instead of the raw mihomo diagnostic.
+		return fmt.Errorf("%s: %w", ConfigApplyFailedToken, err)
 	}
 	return requestedTunError()
 }

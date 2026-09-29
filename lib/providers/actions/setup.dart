@@ -242,8 +242,13 @@ class SetupAction extends _$SetupAction {
           force: true,
           preloadInvoke: () => _setCoreRunning(request),
         );
-      } catch (_) {
+      } catch (error) {
         applied = false;
+        if (error is ConfigInvalidException && _isCurrent(request)) {
+          ref
+              .read(runRequestStateProvider.notifier)
+              .markFault(RunRequestFault.configInvalid);
+        }
       }
       if (!applied && _isCurrent(request)) {
         await globalState.safeRun(() => setRunning(false));
@@ -379,7 +384,7 @@ class SetupAction extends _$SetupAction {
         ),
       );
       ref.read(checkIpNumProvider.notifier).add();
-      if (message.isNotEmpty) throw MessageException(message);
+      if (message.isNotEmpty) throw coreSetupException(message);
     });
   }
 
@@ -857,7 +862,7 @@ class SetupAction extends _$SetupAction {
             preloadInvoke: preloadInvoke,
           );
           if (message.isNotEmpty) {
-            throw MessageException(message);
+            throw coreSetupException(message);
           }
         } catch (error, stackTrace) {
           setupFailed = true;

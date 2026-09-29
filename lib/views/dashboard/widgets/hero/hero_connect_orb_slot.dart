@@ -109,6 +109,13 @@ class _OrbCaption extends ConsumerWidget {
       runTimeProvider.select((value) => value == null ? null : value ~/ 60000),
     );
     final isConnected = runMinutes != null && status != HeroStatus.paused;
+    final configInvalid =
+        status == HeroStatus.broken &&
+        ref.watch(
+          runRequestStateProvider.select(
+            (state) => state.fault == RunRequestFault.configInvalid,
+          ),
+        );
 
     final title = variant == HeroOrbVariant.byedpi
         ? switch (status) {
@@ -120,7 +127,10 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.reconnecting => appLocalizations.byedpiReconnecting,
             HeroStatus.paused => appLocalizations.byedpiPaused,
             HeroStatus.blocked => appLocalizations.heroBlockedTitle,
-            HeroStatus.broken => appLocalizations.heroLinkBroken,
+            HeroStatus.broken =>
+              configInvalid
+                  ? appLocalizations.heroConfigInvalidTitle
+                  : appLocalizations.heroLinkBroken,
             HeroStatus.subscriptionExpired =>
               appLocalizations.dashboardSubscriptionExpired,
             HeroStatus.secured ||
@@ -135,7 +145,10 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.reconnecting => appLocalizations.heroReconnecting,
             HeroStatus.paused => appLocalizations.heroPaused,
             HeroStatus.blocked => appLocalizations.heroBlockedTitle,
-            HeroStatus.broken => appLocalizations.heroLinkBroken,
+            HeroStatus.broken =>
+              configInvalid
+                  ? appLocalizations.heroConfigInvalidTitle
+                  : appLocalizations.heroLinkBroken,
             HeroStatus.subscriptionExpired =>
               appLocalizations.dashboardSubscriptionExpired,
             HeroStatus.secured || HeroStatus.degraded => activeText,
@@ -155,7 +168,10 @@ class _OrbCaption extends ConsumerWidget {
               heroDurationWords(runMinutes ?? 0),
             ),
             HeroStatus.subscriptionExpired => displayName,
-            HeroStatus.broken => displayName,
+            HeroStatus.broken =>
+              configInvalid
+                  ? appLocalizations.heroConfigInvalidHint
+                  : displayName,
           }
         : switch (status) {
             HeroStatus.offline => appLocalizations.heroNoNetworkHint,
@@ -170,7 +186,9 @@ class _OrbCaption extends ConsumerWidget {
               appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
             HeroStatus.subscriptionExpired => displayName,
             HeroStatus.broken =>
-              ref.watch(isStartProvider)
+              configInvalid
+                  ? appLocalizations.heroConfigInvalidHint
+                  : ref.watch(isStartProvider)
                   ? appLocalizations.stop
                   : appLocalizations.heroTapToConnect,
           };

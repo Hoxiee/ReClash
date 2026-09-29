@@ -50,7 +50,13 @@ HeroServiceLine heroServiceLineOf({
   required bool routingEnabled,
   required Mode mode,
   RcxStatus? routingStatus,
+  bool configInvalid = false,
 }) {
+  // The orb caption already names an invalid subscription and points at
+  // support, so the service line steps aside instead of accusing the link.
+  if (configInvalid) {
+    return HeroServiceLine.idle;
+  }
   if (status == HeroStatus.paused) {
     return HeroServiceLine.paused;
   }
@@ -228,6 +234,13 @@ class HeroServiceRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final doctor = ref.watch(connectionDoctorProvider);
+    final configInvalid =
+        status == HeroStatus.broken &&
+        ref.watch(
+          runRequestStateProvider.select(
+            (state) => state.fault == RunRequestFault.configInvalid,
+          ),
+        );
     final line = heroServiceLineOf(
       status: status,
       doctorAlerts: connectionDoctorTakesHero(doctor),
@@ -236,6 +249,7 @@ class HeroServiceRow extends ConsumerWidget {
       ),
       mode: ref.watch(patchClashConfigProvider.select((state) => state.mode)),
       routingStatus: ref.watch(smartRoutingStatusProvider),
+      configInvalid: configInvalid,
     );
     final muted = context.colorScheme.onSurfaceVariant.withValues(alpha: 0.7);
     final view = heroServiceLineViewOf(

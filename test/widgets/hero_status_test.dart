@@ -390,6 +390,35 @@ void main() {
       );
     });
 
+    test('an invalid config settles into a visible failed phase', () {
+      final container = ProviderContainer(
+        overrides: [
+          isStartProvider.overrideWithValue(false),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          initProvider.overrideWithBuild((_, _) => true),
+          networkReachableProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(runRequestStateProvider.notifier);
+      final revision = notifier.begin(true);
+      notifier.markFault(RunRequestFault.configInvalid);
+      notifier.finish(revision);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.failed);
+      expect(
+        heroStatusOf(HeroOrbPhase.failed, HeroHealth.unknown),
+        HeroStatus.broken,
+      );
+
+      notifier.begin(true);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.connecting);
+      expect(
+        container.read(runRequestStateProvider).fault,
+        RunRequestFault.none,
+      );
+    });
+
     test('a cleanup stop keeps the ingress block until a retry', () {
       final container = ProviderContainer(
         overrides: [
@@ -924,6 +953,21 @@ void main() {
       );
       expect(find.text('You are protected'), findsOne);
       expect(find.text('Connection issue: Transport'), findsOne);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('an invalid subscription config names itself under the orb', (
+      tester,
+    ) async {
+      final container = await pumpHero(tester, running: false);
+      container
+          .read(runRequestStateProvider.notifier)
+          .markFault(RunRequestFault.configInvalid);
+      await tester.pump();
+      expect(find.text('Subscription is invalid'), findsOne);
+      expect(find.text("Contact your provider's support"), findsOne);
+      expect(find.text('Connection is not working'), findsNothing);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
     });

@@ -7,6 +7,26 @@ final class MessageException implements Exception {
   String toString() => message;
 }
 
+final class ConfigInvalidException implements Exception {
+  const ConfigInvalidException(this.detail);
+
+  final String detail;
+
+  @override
+  String toString() => 'Subscription config is invalid: $detail';
+}
+
+// Keep in sync with `ConfigApplyFailedToken` in `core/common.go`.
+const _configApplyFailedToken = 'config-apply-failed';
+
+Exception coreSetupException(String message) {
+  const prefix = '$_configApplyFailedToken: ';
+  if (message.startsWith(prefix)) {
+    return ConfigInvalidException(message.substring(prefix.length));
+  }
+  return MessageException(message);
+}
+
 enum ProfileImportFailure {
   invalidUrl,
   invalidQrCode,

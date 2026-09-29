@@ -31,4 +31,23 @@ void main() {
     expect(stackTrace, isNotNull);
     expect(stackTrace.toString(), isNotEmpty);
   });
+
+  test('coreSetupException classifies the config-apply token', () {
+    final error = coreSetupException(
+      'config-apply-failed: proxy group[0]: Proxy: `use` or `proxies` missing',
+    );
+
+    expect(error, isA<ConfigInvalidException>());
+    expect(
+      (error as ConfigInvalidException).detail,
+      'proxy group[0]: Proxy: `use` or `proxies` missing',
+    );
+  });
+
+  test('coreSetupException leaves other messages as MessageException', () {
+    final error = coreSetupException('transport disconnected');
+
+    expect(error, isA<MessageException>());
+    expect(error.toString(), 'transport disconnected');
+  });
 }

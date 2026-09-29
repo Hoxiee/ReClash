@@ -117,6 +117,8 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
   return networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
       switch (error) {
+        ConfigInvalidException() =>
+          appLocalizations.subscriptionConfigInvalidTip,
         CoreMethodException(:final message) => message,
         _ => error.toString(),
       };

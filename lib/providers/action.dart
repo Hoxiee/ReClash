@@ -47,7 +47,7 @@ part 'generated/action.g.dart';
 
 enum RunRequestPhase { idle, starting, stopping }
 
-enum RunRequestFault { none, ingressBlocked }
+enum RunRequestFault { none, ingressBlocked, configInvalid }
 
 @immutable
 class RunRequestState {
