@@ -27,10 +27,10 @@ const _iconVariants = [
   'spark',
 ];
 
-class AppearanceColorSections extends ConsumerStatefulWidget {
-  const AppearanceColorSections({super.key, this.isAndroid});
+const _headerButtonHeight = 32.0;
 
-  final bool? isAndroid;
+class AppearanceColorSections extends ConsumerStatefulWidget {
+  const AppearanceColorSections({super.key});
 
   @override
   ConsumerState<AppearanceColorSections> createState() =>
@@ -151,26 +151,6 @@ class _AppearanceColorSectionsState
     _update((state) => state.copyWith(schemeVariant: next));
   }
 
-  Future<void> _handleSelectIcon(String variant) async {
-    final asset = 'assets/images/icon_variants/$variant.png';
-    final confirmed = await dialogs.showCommonDialog<bool>(
-      child: _AppIconPreviewDialog(
-        asset: asset,
-        label: _iconVariantLabel(context, variant),
-      ),
-    );
-    if (confirmed != true || !mounted) {
-      return;
-    }
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(iconVariant: variant));
-    await app?.setIconVariant(variant);
-    if (mounted) {
-      context.showNotifier(context.appLocalizations.appIconChangeNote);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -190,53 +170,81 @@ class _AppearanceColorSectionsState
         ),
       ),
     );
-    final iconVariant = ref.watch(
-      appSettingProvider.select((state) => state.iconVariant),
-    );
     final rewards = ref.watch(
       visibleMilestonesProvider.select((state) => state.unlocked),
     );
-    const iconVariants = _iconVariants;
     final primaryColor = themeColors.primaryColor;
-    final isDynamic = primaryColor == null;
     final removable = _removablePrimaryColor;
     return SliverMainAxisGroup(
       slivers: [
-        SettingSection.sliver(
-          title: appLocalizations.themeColor,
-          items: [
-            DecorationListItem.toggle(
-              leading: const GlyphIcon(AppGlyphs.eyedropper),
-              title: Text(appLocalizations.systemColor),
-              subtitle: Text(appLocalizations.systemColorDesc),
-              value: isDynamic,
-              onChanged: (value) {
+        SliverToBoxAdapter(
+          child: FadeSlideEnterBox(
+            child: CommonPopScope(
+              onPop: (_) {
+                if (removable == null) {
+                  return true;
+                }
                 _clearRemovable();
-                _update(
-                  (state) => state.copyWith(
-                    primaryColor: value
-                        ? null
-                        : (state.primaryColors.contains(defaultPrimaryColor)
-                              ? defaultPrimaryColor
-                              : state.primaryColors.firstOrNull),
-                  ),
-                );
+                return false;
               },
-            ),
-            if (isDynamic) const _SystemSeedItem(),
-            DecorationListItem(
-              leading: const GlyphIcon(AppGlyphs.gradient),
-              title: Text(appLocalizations.colorSchemes),
-              trailing: Text(
-                themeColors.schemeVariant.label,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurface.opacity60,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InfoHeader(
+                    info: Info(
+                      label: appLocalizations.themeColor,
+                      glyph: AppGlyphs.palette,
+                    ),
+                    actions: [
+                      if (removable == null)
+                        CommonMinFilledButtonTheme(
+                          child: FilledButton.tonal(
+                            onPressed: () => _handleChangeSchemeVariant(
+                              themeColors.schemeVariant,
+                            ),
+                            child: Text(themeColors.schemeVariant.label),
+                          ),
+                        ),
+                      if (removable != null)
+                        CommonMinFilledButtonTheme(
+                          child: FilledButton(
+                            onPressed: _clearRemovable,
+                            child: Text(appLocalizations.cancel),
+                          ),
+                        ),
+                      if (removable == null && !themeColors.isDefault)
+                        ElasticButton(
+                          child: IconButton.filledTonal(
+                            tooltip: appLocalizations.reset,
+                            iconSize: 18,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints.tightFor(
+                              width: _headerButtonHeight,
+                              height: _headerButtonHeight,
+                            ),
+                            visualDensity: VisualDensity.standard,
+                            onPressed: _handleReset,
+                            icon: const GlyphIcon(AppGlyphs.reset, fill: 1),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: _PrimaryColorGrid(
+                      colors: [null, ...themeColors.primaryColors],
+                      selectedColor: primaryColor,
+                      removableColor: removable,
+                      onSelect: _handleSelectColor,
+                      onRequestRemove: _markRemovable,
+                      onDelete: _handleDel,
+                      onAdd: _handleAdd,
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () =>
-                  _handleChangeSchemeVariant(themeColors.schemeVariant),
             ),
-          ],
+          ),
         ),
         if (rewards.contains('porcelain'))
           SettingSection.sliver(
@@ -256,83 +264,6 @@ class _AppearanceColorSectionsState
                           : [...state.primaryColors, color],
                       schemeVariant: DynamicSchemeVariant.monochrome,
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-        SettingSection.sliver(
-          title: appLocalizations.palette,
-          // One always-present action: a swap of label keeps the header height
-          // stable, unlike showing and hiding a button.
-          actions: [
-            CommonMinFilledButtonTheme(
-              child: FilledButton.tonal(
-                onPressed: removable != null
-                    ? _clearRemovable
-                    : (themeColors.isDefault ? null : _handleReset),
-                child: Text(
-                  removable != null
-                      ? appLocalizations.cancel
-                      : appLocalizations.reset,
-                ),
-              ),
-            ),
-          ],
-          items: [
-            CommonPopScope(
-              onPop: (_) {
-                if (removable == null) {
-                  return true;
-                }
-                _clearRemovable();
-                return false;
-              },
-              child: DisabledMask(
-                status: isDynamic,
-                child: ActivateBox(
-                  active: !isDynamic,
-                  child: _PrimaryColorGrid(
-                    colors: [
-                      if (!isDynamic) null,
-                      ...themeColors.primaryColors,
-                    ],
-                    selectedColor: primaryColor,
-                    removableColor: removable,
-                    onSelect: _handleSelectColor,
-                    onRequestRemove: _markRemovable,
-                    onDelete: _handleDel,
-                    onAdd: _handleAdd,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (widget.isAndroid ?? system.isAndroid)
-          SettingSection.sliver(
-            title: appLocalizations.appearanceIcon,
-            items: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  const spacing = 12.0;
-                  final columns = max((constraints.maxWidth / 112).floor(), 2);
-                  final tileWidth =
-                      (constraints.maxWidth - spacing * (columns - 1)) /
-                      columns;
-                  return Wrap(
-                    spacing: spacing,
-                    runSpacing: spacing,
-                    children: [
-                      for (final variant in iconVariants)
-                        _AppIconTile(
-                          asset: 'assets/images/icon_variants/$variant.png',
-                          label: _iconVariantLabel(context, variant),
-                          width: tileWidth,
-                          isSelected: iconVariant == variant,
-                          onPressed: () => _handleSelectIcon(variant),
-                        ),
-                    ],
                   );
                 },
               ),
@@ -359,42 +290,6 @@ String _iconVariantLabel(BuildContext context, String variant) {
     'spark' => appLocalizations.appIconSpark,
     _ => appLocalizations.defaultText,
   };
-}
-
-class _SystemSeedItem extends ConsumerWidget {
-  const _SystemSeedItem();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final seed = ref.watch(dynamicColorProvider).accentColor;
-    final hex = (seed.toARGB32() & 0xFFFFFF)
-        .toRadixString(16)
-        .padLeft(6, '0')
-        .toUpperCase();
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      leading: const GlyphIcon(AppGlyphs.drop),
-      title: Text(context.appLocalizations.systemSeed),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 8,
-        children: [
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(color: seed, shape: BoxShape.circle),
-          ),
-          Text(
-            '#$hex',
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurface.opacity60,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _PrimaryColorGrid extends StatelessWidget {
@@ -680,6 +575,77 @@ class _PaletteDialogState extends State<_PaletteDialog> {
           SizedBox(width: 300, child: Palette(controller: _controller)),
         ],
       ),
+    );
+  }
+}
+
+class AppearanceIconSection extends ConsumerStatefulWidget {
+  const AppearanceIconSection({super.key, this.isAndroid});
+
+  final bool? isAndroid;
+
+  @override
+  ConsumerState<AppearanceIconSection> createState() =>
+      _AppearanceIconSectionState();
+}
+
+class _AppearanceIconSectionState extends ConsumerState<AppearanceIconSection> {
+  Future<void> _handleSelectIcon(String variant) async {
+    final asset = 'assets/images/icon_variants/$variant.png';
+    final confirmed = await dialogs.showCommonDialog<bool>(
+      child: _AppIconPreviewDialog(
+        asset: asset,
+        label: _iconVariantLabel(context, variant),
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(iconVariant: variant));
+    await app?.setIconVariant(variant);
+    if (mounted) {
+      context.showNotifier(context.appLocalizations.appIconChangeNote);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(widget.isAndroid ?? system.isAndroid)) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+    final appLocalizations = context.appLocalizations;
+    final iconVariant = ref.watch(
+      appSettingProvider.select((state) => state.iconVariant),
+    );
+    return SettingSection.sliver(
+      title: appLocalizations.appearanceIcon,
+      glyph: AppGlyphs.iconTile,
+      items: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const spacing = 12.0;
+            final columns = max((constraints.maxWidth / 112).floor(), 2);
+            final tileWidth =
+                (constraints.maxWidth - spacing * (columns - 1)) / columns;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                for (final variant in _iconVariants)
+                  _AppIconTile(
+                    asset: 'assets/images/icon_variants/$variant.png',
+                    label: _iconVariantLabel(context, variant),
+                    width: tileWidth,
+                    isSelected: iconVariant == variant,
+                    onPressed: () => _handleSelectIcon(variant),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

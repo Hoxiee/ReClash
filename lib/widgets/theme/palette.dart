@@ -79,7 +79,7 @@ class _PaletteState extends State<Palette> {
                 ],
                 onChanged: _onHueChanged,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               _GradientSlider(
                 value: _chroma.clamp(0, maxChroma),
                 max: maxChroma,
@@ -92,14 +92,14 @@ class _PaletteState extends State<Palette> {
                 ],
                 onChanged: _onChromaChanged,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _ToneStrip(
                 hue: _hue,
                 chroma: _chroma,
                 selectedTone: _tone,
                 onToneSelected: _onToneSelected,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(

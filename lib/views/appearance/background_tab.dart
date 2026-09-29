@@ -66,12 +66,21 @@ class AppearanceBackgroundTab extends ConsumerWidget {
         absorbing: busy,
         child: SettingsScrollView(
           slivers: [
-            if (busy)
-              const SliverToBoxAdapter(child: LinearProgressIndicator()),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            SliverToBoxAdapter(
+              child: AnimatedSwitcher(
+                duration: context.motionDuration(
+                  const Duration(milliseconds: 200),
+                ),
+                child: busy
+                    ? const LinearProgressIndicator()
+                    : const SizedBox(width: double.infinity),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
             SettingSection.sliver(
               title: l10n.wallpaperTitle,
               subTitle: l10n.wallpaperDescription,
+              glyph: AppGlyphs.wallpaper,
               items: [const _WallpaperGallery()],
             ),
             if (hasFile) ...[
@@ -88,6 +97,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
               ),
               SettingSection.sliver(
                 title: l10n.wallpaperLayout,
+                glyph: AppGlyphs.customize,
                 items: [
                   DecorationListItem.options(
                     title: Text(l10n.wallpaperFit),
@@ -125,6 +135,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
               ),
               SettingSection.sliver(
                 title: l10n.wallpaperEffects,
+                glyph: AppGlyphs.blur,
                 items: [
                   slider(
                     l10n.wallpaperOpacity,
@@ -151,6 +162,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
             ],
             SettingSection.sliver(
               title: l10n.wallpaperReadability,
+              glyph: AppGlyphs.eye,
               items: [
                 slider(
                   l10n.wallpaperCardOpacity,
@@ -399,7 +411,7 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: ShapeDecoration(color: color, shape: AppShape.circle),
       child: child,
     );
   }

@@ -106,7 +106,7 @@ class _SettingsTabsState extends State<SettingsTabs> {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: SizedBox(
         width: double.infinity,
         child: CommonTabBar<int>(

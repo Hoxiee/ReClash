@@ -5,6 +5,8 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'color_sections.dart';
+
 class AppearanceMotionTab extends ConsumerWidget {
   const AppearanceMotionTab({super.key});
 
@@ -34,6 +36,7 @@ class AppearanceMotionTab extends ConsumerWidget {
         SettingSection.sliver(
           top: 12,
           title: appLocalizations.animations,
+          glyph: AppGlyphs.motion,
           items: [
             DecorationListItem.toggle(
               leading: const GlyphIcon(AppGlyphs.motion),
@@ -72,6 +75,7 @@ class AppearanceMotionTab extends ConsumerWidget {
         ),
         SettingSection.sliver(
           title: appLocalizations.appearance,
+          glyph: AppGlyphs.sparkle,
           items: [
             DecorationListItem.toggle(
               leading: const GlyphIcon(AppGlyphs.snow),
@@ -104,6 +108,7 @@ class AppearanceMotionTab extends ConsumerWidget {
             ),
           ],
         ),
+        const AppearanceIconSection(),
         const SettingBottomInset.sliver(),
       ],
     );

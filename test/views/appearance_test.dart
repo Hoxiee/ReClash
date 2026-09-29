@@ -199,7 +199,7 @@ void main() {
             locale: locale,
             child: const Scaffold(
               body: CustomScrollView(
-                slivers: [AppearanceColorSections(isAndroid: true)],
+                slivers: [AppearanceIconSection(isAndroid: true)],
               ),
             ),
           ),
@@ -432,7 +432,15 @@ void main() {
           );
 
       await pumpAppearanceView(tester);
-      await tester.tap(find.byGlyph(AppGlyphs.reset));
+      await tester.tap(
+        find.descendant(
+          of: find.ancestor(
+            of: find.byGlyph(AppGlyphs.textSize),
+            matching: find.byType(InfoHeader),
+          ),
+          matching: find.byGlyph(AppGlyphs.reset),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.scale, 1);

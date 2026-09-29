@@ -69,9 +69,7 @@ class AppearanceThemeTab extends ConsumerWidget {
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         const _LayoutChoice(),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         const _ThemeModeChoice(),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         const _PureBlackChoice(),
         SettingSection.sliver(
           items: [
@@ -171,45 +169,47 @@ class _LayoutChoice extends ConsumerWidget {
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(newDashboard: value));
     return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoHeader(
-            info: Info(
-              label: appLocalizations.dashboardStyle,
-              glyph: AppGlyphs.dashboard,
+      child: FadeSlideEnterBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InfoHeader(
+              info: Info(
+                label: appLocalizations.dashboardStyle,
+                glyph: AppGlyphs.dashboard,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
-              spacing: 12,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _LayoutCard(
-                    label: appLocalizations.classicDashboard,
-                    description: appLocalizations.classicDashboardDesc,
-                    isSelected: !hero,
-                    onPressed: () => select(false),
-                    scheme: scheme,
-                    hero: false,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                spacing: 12,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _LayoutCard(
+                      label: appLocalizations.classicDashboard,
+                      description: appLocalizations.classicDashboardDesc,
+                      isSelected: !hero,
+                      onPressed: () => select(false),
+                      scheme: scheme,
+                      hero: false,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _LayoutCard(
-                    label: appLocalizations.newDashboardTitle,
-                    description: appLocalizations.newDashboardDesc,
-                    isSelected: hero,
-                    onPressed: () => select(true),
-                    scheme: scheme,
-                    hero: true,
+                  Expanded(
+                    child: _LayoutCard(
+                      label: appLocalizations.newDashboardTitle,
+                      description: appLocalizations.newDashboardDesc,
+                      isSelected: hero,
+                      onPressed: () => select(true),
+                      scheme: scheme,
+                      hero: true,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -296,39 +296,41 @@ class _ThemeModeChoice extends ConsumerWidget {
       hero: hero,
     );
     return SliverToBoxAdapter(
-      child: PreviewChoiceGroup<ThemeMode?>(
-        info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
-        value: scheduled ? null : themeMode,
-        choices: [
-          PreviewChoice(
-            value: ThemeMode.system,
-            label: appLocalizations.auto,
-            pictogram: MiniScreenThumb(
-              screen: MiniSplitScreen(light: light, dark: dark),
+      child: FadeSlideEnterBox(
+        child: PreviewChoiceGroup<ThemeMode?>(
+          info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
+          value: scheduled ? null : themeMode,
+          choices: [
+            PreviewChoice(
+              value: ThemeMode.system,
+              label: appLocalizations.auto,
+              pictogram: MiniScreenThumb(
+                screen: MiniSplitScreen(light: light, dark: dark),
+              ),
             ),
-          ),
-          PreviewChoice(
-            value: ThemeMode.light,
-            label: appLocalizations.light,
-            pictogram: MiniScreenThumb(screen: light),
-          ),
-          PreviewChoice(
-            value: ThemeMode.dark,
-            label: appLocalizations.dark,
-            pictogram: MiniScreenThumb(screen: dark),
-          ),
-        ],
-        onChanged: (value) {
-          if (value == null) {
-            return;
-          }
-          ref
-              .read(themeSettingProvider.notifier)
-              .update(
-                (state) =>
-                    state.copyWith(scheduledTheme: false, themeMode: value),
-              );
-        },
+            PreviewChoice(
+              value: ThemeMode.light,
+              label: appLocalizations.light,
+              pictogram: MiniScreenThumb(screen: light),
+            ),
+            PreviewChoice(
+              value: ThemeMode.dark,
+              label: appLocalizations.dark,
+              pictogram: MiniScreenThumb(screen: dark),
+            ),
+          ],
+          onChanged: (value) {
+            if (value == null) {
+              return;
+            }
+            ref
+                .read(themeSettingProvider.notifier)
+                .update(
+                  (state) =>
+                      state.copyWith(scheduledTheme: false, themeMode: value),
+                );
+          },
+        ),
       ),
     );
   }
@@ -352,27 +354,29 @@ class _PureBlackChoice extends ConsumerWidget {
       ),
     );
     return SliverToBoxAdapter(
-      child: PreviewChoiceGroup<bool>(
-        info: Info(
-          label: appLocalizations.pureBlackMode,
-          glyph: AppGlyphs.pureBlack,
+      child: FadeSlideEnterBox(
+        child: PreviewChoiceGroup<bool>(
+          info: Info(
+            label: appLocalizations.pureBlackMode,
+            glyph: AppGlyphs.pureBlack,
+          ),
+          value: pureBlack,
+          choices: [
+            PreviewChoice(
+              value: false,
+              label: appLocalizations.standard,
+              pictogram: preview(false),
+            ),
+            PreviewChoice(
+              value: true,
+              label: appLocalizations.pureBlack,
+              pictogram: preview(true),
+            ),
+          ],
+          onChanged: (value) => ref
+              .read(themeSettingProvider.notifier)
+              .update((state) => state.copyWith(pureBlack: value)),
         ),
-        value: pureBlack,
-        choices: [
-          PreviewChoice(
-            value: false,
-            label: appLocalizations.standard,
-            pictogram: preview(false),
-          ),
-          PreviewChoice(
-            value: true,
-            label: appLocalizations.pureBlack,
-            pictogram: preview(true),
-          ),
-        ],
-        onChanged: (value) => ref
-            .read(themeSettingProvider.notifier)
-            .update((state) => state.copyWith(pureBlack: value)),
       ),
     );
   }
@@ -412,162 +416,168 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
     final divisions = ((maxTextScale - minTextScale) / _TextScaleItem._step)
         .round();
     return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoHeader(
-            info: Info(
-              label: appLocalizations.textScale,
-              glyph: AppGlyphs.textSize,
-            ),
-            actions: [
-              if (textScale.enable && textScale.scale != 1)
-                ElasticButton(
-                  child: IconButton.filledTonal(
-                    tooltip: appLocalizations.reset,
-                    iconSize: 18,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: _headerButtonHeight,
-                      height: _headerButtonHeight,
-                    ),
-                    visualDensity: VisualDensity.standard,
-                    onPressed: () =>
-                        _update((state) => state.copyWith(scale: 1)),
-                    icon: const GlyphIcon(AppGlyphs.reset, fill: 1),
-                  ),
-                ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Column(
-              spacing: 8,
-              children: [
-                _SegmentedToggle(
-                  value: textScale.enable,
-                  offLabel: appLocalizations.followSystem,
-                  onLabel: appLocalizations.custom,
-                  onChanged: (value) =>
-                      _update((state) => state.copyWith(enable: value)),
-                ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  decoration: ShapeDecoration(
-                    color: colorScheme.surfaceContainerLow,
-                    shape: AppShape.lg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 12,
-                        children: [
-                          Expanded(
-                            child: AnimatedSize(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOutCubic,
-                              alignment: Alignment.topLeft,
-                              child: MediaQuery(
-                                data: MediaQuery.of(context).copyWith(
-                                  textScaler: TextScaler.linear(scale),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      'Aa',
-                                      style: context.textTheme.titleLarge,
-                                    ),
-                                    Text(
-                                      appLocalizations.textScalePreview,
-                                      style: context.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: ShapeDecoration(
-                              color: colorScheme.secondaryContainer,
-                              shape: AppShape.full,
-                            ),
-                            child: Text(
-                              percent,
-                              style: context.textTheme.labelLarge?.copyWith(
-                                color: colorScheme.onSecondaryContainer,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+      child: FadeSlideEnterBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InfoHeader(
+              info: Info(
+                label: appLocalizations.textScale,
+                glyph: AppGlyphs.textSize,
+              ),
+              actions: [
+                if (textScale.enable && textScale.scale != 1)
+                  ElasticButton(
+                    child: IconButton.filledTonal(
+                      tooltip: appLocalizations.reset,
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(
+                        width: _headerButtonHeight,
+                        height: _headerButtonHeight,
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      MediaQuery.withNoTextScaling(
-                        child: Row(
+                      visualDensity: VisualDensity.standard,
+                      onPressed: () =>
+                          _update((state) => state.copyWith(scale: 1)),
+                      icon: const GlyphIcon(AppGlyphs.reset, fill: 1),
+                    ),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                spacing: 8,
+                children: [
+                  _SegmentedToggle(
+                    value: textScale.enable,
+                    offLabel: appLocalizations.followSystem,
+                    onLabel: appLocalizations.custom,
+                    onChanged: (value) =>
+                        _update((state) => state.copyWith(enable: value)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    decoration: ShapeDecoration(
+                      color: colorScheme.surfaceContainerLow,
+                      shape: AppShape.lg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 12,
                           children: [
-                            ExcludeSemantics(
-                              child: Text(
-                                'A',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
                             Expanded(
-                              child: SliderTheme(
-                                data: SliderDefaultsM3(context),
-                                child: Slider(
-                                  padding: EdgeInsets.zero,
-                                  min: minTextScale,
-                                  max: maxTextScale,
-                                  divisions: divisions,
-                                  value: scale,
-                                  label: percent,
-                                  onChanged: textScale.enable
-                                      ? (value) =>
-                                            setState(() => _draft = value)
-                                      : null,
-                                  onChangeEnd: (value) => _update(
-                                    (state) => state.copyWith(scale: value),
+                              child: AnimatedSize(
+                                duration: context.motionDuration(
+                                  const Duration(milliseconds: 200),
+                                ),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment.topLeft,
+                                child: MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(
+                                    textScaler: TextScaler.linear(scale),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        'Aa',
+                                        style: context.textTheme.titleLarge,
+                                      ),
+                                      Text(
+                                        appLocalizations.textScalePreview,
+                                        style: context.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                            ExcludeSemantics(
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: ShapeDecoration(
+                                color: colorScheme.secondaryContainer,
+                                shape: AppShape.full,
+                              ),
                               child: Text(
-                                'A',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                  color: colorScheme.onSurfaceVariant,
+                                percent,
+                                style: context.textTheme.labelLarge?.copyWith(
+                                  color: colorScheme.onSecondaryContainer,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.sm),
+                        MediaQuery.withNoTextScaling(
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              ExcludeSemantics(
+                                child: Text(
+                                  'A',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: SliderTheme(
+                                  data: SliderDefaultsM3(context),
+                                  child: Slider(
+                                    padding: EdgeInsets.zero,
+                                    min: minTextScale,
+                                    max: maxTextScale,
+                                    divisions: divisions,
+                                    value: scale,
+                                    label: percent,
+                                    onChanged: textScale.enable
+                                        ? (value) =>
+                                              setState(() => _draft = value)
+                                        : null,
+                                    onChangeEnd: (value) => _update(
+                                      (state) => state.copyWith(scale: value),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ExcludeSemantics(
+                                child: Text(
+                                  'A',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -602,7 +612,7 @@ class _SegmentedToggle extends StatelessWidget {
       child: Stack(
         children: [
           AnimatedAlign(
-            duration: const Duration(milliseconds: 250),
+            duration: context.motionDuration(const Duration(milliseconds: 250)),
             curve: Curves.easeOutCubic,
             alignment: value
                 ? AlignmentDirectional.centerEnd
@@ -637,7 +647,9 @@ class _SegmentedToggle extends StatelessWidget {
                         onTap: option == value ? null : () => onChanged(option),
                         child: Center(
                           child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
+                            duration: context.motionDuration(
+                              const Duration(milliseconds: 200),
+                            ),
                             style: context.textTheme.labelLarge!.copyWith(
                               color: option == value
                                   ? colorScheme.onSecondaryContainer

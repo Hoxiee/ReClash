@@ -406,7 +406,9 @@ class _MiniPageContent extends StatelessWidget {
               children: [
                 _MiniLine(color: _mid, width: unit * 5, height: unit * 0.9),
                 SizedBox(height: unit * 0.8),
-                Expanded(child: _MiniBars(color: colorScheme.primary, unit: unit)),
+                Expanded(
+                  child: _MiniBars(color: colorScheme.primary, unit: unit),
+                ),
               ],
             ),
           ),
@@ -449,7 +451,11 @@ class _MiniPageContent extends StatelessWidget {
         ),
         SizedBox(height: unit * 0.7),
         Center(
-          child: _MiniLine(color: _faint, width: unit * 3.6, height: unit * 0.7),
+          child: _MiniLine(
+            color: _faint,
+            width: unit * 3.6,
+            height: unit * 0.7,
+          ),
         ),
         SizedBox(height: unit * 1.2),
         _trafficCard(),
@@ -834,7 +840,7 @@ class _MiniOrb extends StatelessWidget {
             width: size * 0.74,
             height: size * 0.74,
             decoration: ShapeDecoration(
-              shape: CircleBorder(
+              shape: AppShape.circle.copyWith(
                 side: BorderSide(color: color, width: stroke),
               ),
             ),
