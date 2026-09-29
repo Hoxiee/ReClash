@@ -57,15 +57,32 @@ class ToolsView extends ConsumerStatefulWidget {
 /// seeds the stack; opening a screen inside a tool pushes another level, so the
 /// column drills in place with a back affordance instead of floating a sheet.
 class _PaneEntry {
-  const _PaneEntry({required this.id, required this.detail, this.title});
+  const _PaneEntry({
+    required this.id,
+    required this.detail,
+    this.title,
+    this.focusTarget,
+    this.focusNonce = 0,
+  });
 
   final String id;
   final Widget detail;
   final Widget? title;
+  final String? focusTarget;
+  final int focusNonce;
+}
+
+/// One tool's recency-and-frequency record, the input to the "last used" order.
+class _RecentStat {
+  const _RecentStat({required this.count, required this.lastAt});
+
+  final int count;
+  final int lastAt;
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
   final List<_PaneEntry> _paneStack = [];
+  int _focusSeq = 0;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   String _query = '';
@@ -80,6 +97,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   final ValueNotifier<Widget?> _detailActions = ValueNotifier(null);
 
   static const _recentToolLimit = 6;
+
+  // Keep more history than we show so a tool that scrolls off the visible list
+  // still carries its visit count when it is opened again.
+  static const _recentStatCap = 40;
+
+  // Frecency store: per tool, how many times it was opened and when last. The
+  // shown order blends both, so a daily driver outranks a one-off from earlier.
+  final Map<String, _RecentStat> _recentStats = {};
   List<String> _recentIds = const [];
 
   // The matches currently on screen, so Enter can open the top one without the
@@ -89,11 +114,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   @override
   void initState() {
     super.initState();
-    preferences.getRecentToolIds().then((ids) {
-      if (mounted && ids.isNotEmpty) {
-        setState(() => _recentIds = ids);
-      }
-    });
+    _loadRecents();
   }
 
   @override
@@ -104,19 +125,102 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     super.dispose();
   }
 
-  /// Remembers the tool just opened so the empty detail pane can offer a way
-  /// straight back to recent work; most-recent first, capped, and persisted so
-  /// the list survives a restart.
-  void _recordRecent(String id) {
-    final next = [id, ..._recentIds.where((existing) => existing != id)];
-    if (next.length > _recentToolLimit) {
-      next.removeRange(_recentToolLimit, next.length);
+  Future<void> _loadRecents() async {
+    var stats = _statsFromRaw(await preferences.getRecentToolStats());
+    if (stats.isEmpty) {
+      // Migrate the recency-only list: newest first, one seed visit each so
+      // frequency starts fair rather than pretending old opens never happened.
+      final legacy = await preferences.getRecentToolIds();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      stats = {
+        for (final (index, id) in legacy.indexed)
+          id: _RecentStat(count: 1, lastAt: now - index),
+      };
     }
-    if (listEquals(next, _recentIds)) {
+    if (!mounted || stats.isEmpty) {
       return;
     }
-    setState(() => _recentIds = next);
-    preferences.saveRecentToolIds(next);
+    setState(() {
+      _recentStats
+        ..clear()
+        ..addAll(stats);
+      _recentIds = _rankRecents();
+    });
+  }
+
+  /// Remembers the tool just opened so the empty detail pane can offer a way
+  /// straight back to recent work, ranked by how often and how lately it was
+  /// used, and persisted so the list survives a restart.
+  void _recordRecent(String id) {
+    final existing = _recentStats[id];
+    _recentStats[id] = _RecentStat(
+      count: (existing?.count ?? 0) + 1,
+      lastAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _pruneRecents();
+    setState(() => _recentIds = _rankRecents());
+    preferences.saveRecentToolStats(_statsToRaw());
+  }
+
+  // A visit is worth more while it is fresh and repeated visits stack, so a
+  // frequently opened tool ranks above one touched once long ago.
+  double _recentScore(_RecentStat stat) {
+    final ageMs = DateTime.now().millisecondsSinceEpoch - stat.lastAt;
+    final recency = switch (ageMs) {
+      < Duration.millisecondsPerHour => 4.0,
+      < Duration.millisecondsPerDay => 3.0,
+      < Duration.millisecondsPerDay * 7 => 2.0,
+      < Duration.millisecondsPerDay * 30 => 1.0,
+      _ => 0.5,
+    };
+    return stat.count * recency;
+  }
+
+  List<String> _rankRecents() {
+    final entries = _recentStats.entries.toList()
+      ..sort((a, b) {
+        final byScore = _recentScore(b.value).compareTo(_recentScore(a.value));
+        if (byScore != 0) {
+          return byScore;
+        }
+        return b.value.lastAt.compareTo(a.value.lastAt);
+      });
+    return [for (final entry in entries.take(_recentToolLimit)) entry.key];
+  }
+
+  void _pruneRecents() {
+    if (_recentStats.length <= _recentStatCap) {
+      return;
+    }
+    final ranked = _recentStats.entries.toList()
+      ..sort((a, b) => _recentScore(b.value).compareTo(_recentScore(a.value)));
+    for (final entry in ranked.skip(_recentStatCap)) {
+      _recentStats.remove(entry.key);
+    }
+  }
+
+  Map<String, _RecentStat> _statsFromRaw(List<Map<String, dynamic>> raw) {
+    final result = <String, _RecentStat>{};
+    for (final entry in raw) {
+      final id = entry['id'];
+      if (id is! String) {
+        continue;
+      }
+      final count = entry['count'];
+      final at = entry['at'];
+      result[id] = _RecentStat(
+        count: count is int && count > 0 ? count : 1,
+        lastAt: at is int ? at : 0,
+      );
+    }
+    return result;
+  }
+
+  List<Map<String, dynamic>> _statsToRaw() {
+    return [
+      for (final entry in _recentStats.entries)
+        {'id': entry.key, 'count': entry.value.count, 'at': entry.value.lastAt},
+    ];
   }
 
   void _onSearch(String value) {
@@ -176,7 +280,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
 
   void _selectRootPane(SettingsPaneSelection selection) {
     _recordRecent(selection.id);
-    if (_paneStack.length == 1 && _paneStack.first.id == selection.id) {
+    final sameRoot =
+        _paneStack.length == 1 && _paneStack.first.id == selection.id;
+    if (sameRoot && selection.focusTarget == null) {
       return;
     }
     _detailActions.value = null;
@@ -188,13 +294,16 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             id: selection.id,
             detail: selection.detail,
             title: selection.title,
+            focusTarget: selection.focusTarget,
+            focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
           ),
         );
     });
   }
 
   void _pushPane(SettingsPaneSelection selection) {
-    if (_paneStack.isNotEmpty && _paneStack.last.id == selection.id) {
+    final sameTop = _paneStack.isNotEmpty && _paneStack.last.id == selection.id;
+    if (sameTop && selection.focusTarget == null) {
       return;
     }
     _detailActions.value = null;
@@ -204,6 +313,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           id: selection.id,
           detail: selection.detail,
           title: selection.title,
+          focusTarget: selection.focusTarget,
+          focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
         ),
       );
     });
@@ -321,7 +432,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       for (final navigationItem in navigationItems)
         _ToolSearchEntry(
           '${navigationItem.label.label} '
-              '${navigationItem.label.description ?? ''}',
+          '${navigationItem.label.description ?? ''}',
           _ToolCategory.diagnostics,
           _navigationItem(navigationItem),
         ),
@@ -330,7 +441,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         _ToolCategory.personalization,
         const _ThemeItem(),
       ),
-      _ToolSearchEntry(l.language, _ToolCategory.personalization, const _LocaleItem()),
+      _ToolSearchEntry(
+        l.language,
+        _ToolCategory.personalization,
+        const _LocaleItem(),
+      ),
       _ToolSearchEntry(
         '${l.basicConfig} ${l.basicConfigDesc}',
         _ToolCategory.configuration,
@@ -341,7 +456,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         _ToolCategory.configuration,
         const _AdvancedConfigItem(),
       ),
-      _ToolSearchEntry(l.urlScheme, _ToolCategory.configuration, const _UrlSchemeItem()),
+      _ToolSearchEntry(
+        l.urlScheme,
+        _ToolCategory.configuration,
+        const _UrlSchemeItem(),
+      ),
       if (system.isAndroid)
         _ToolSearchEntry(
           '${l.accessControl} ${l.accessControlDesc}',
@@ -377,8 +496,16 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           const _LoopbackItem(),
         ),
       if (enableDeveloperMode)
-        _ToolSearchEntry(l.developerMode, _ToolCategory.system, const _DeveloperItem()),
-      _ToolSearchEntry(l.disclaimer, _ToolCategory.system, const _DisclaimerItem()),
+        _ToolSearchEntry(
+          l.developerMode,
+          _ToolCategory.system,
+          const _DeveloperItem(),
+        ),
+      _ToolSearchEntry(
+        l.disclaimer,
+        _ToolCategory.system,
+        const _DisclaimerItem(),
+      ),
       _ToolSearchEntry(l.about, _ToolCategory.system, const _InfoItem()),
       ..._deepSettings(l),
     ];
@@ -440,6 +567,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     final basic = owners['config']!;
     final app = owners['application']!;
     final appearance = owners['appearance']!;
+    final network = owners['network']!;
     final dns = owners['dns']!;
     final ntp = owners['ntp']!;
     final smartRouting = owners['smartRouting']!;
@@ -451,6 +579,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       _DeepOwner owner,
       _ToolCategory category, {
       String extra = '',
+      String? focus,
     }) {
       return _ToolSearchEntry(
         '$title $extra ${owner.label}',
@@ -459,6 +588,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           glyph: owner.glyph,
           title: title,
           owner: owner,
+          focus: focus ?? title,
         ),
       );
     }
@@ -469,17 +599,44 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return [
       entry(l.network, advanced, config),
       entry('DNS', advanced, config, extra: l.dnsDesc),
-      entry(l.overrideEntries, dns, config, extra: 'dns override'),
+      entry(
+        l.overrideEntries,
+        dns,
+        config,
+        extra: 'dns override',
+        focus: l.overrideDns,
+      ),
       entry('NTP', advanced, config, extra: l.ntpDesc),
-      entry(l.overrideEntries, ntp, config, extra: 'ntp override'),
+      entry(
+        l.overrideEntries,
+        ntp,
+        config,
+        extra: 'ntp override',
+        focus: l.overrideNtp,
+      ),
       entry(l.dialerProxy, ntp, config),
       entry(l.addedRules, advanced, config),
       entry(l.script, advanced, config),
+      entry('VPN', network, config),
+      entry(l.tun, network, config),
+      entry(l.allowBypass, network, config),
+      entry(l.systemProxy, network, config, extra: 'proxy'),
+      entry(l.autoSetSystemDns, network, config, extra: 'dns'),
+      entry(l.dnsHijacking, network, config, extra: 'dns'),
+      entry(l.stackMode, network, config, extra: 'tun stack'),
+      entry(l.interfaceNameMode, network, config, extra: 'interface'),
+      entry(l.interfaceName, network, config, extra: 'interface'),
+      entry(l.routeMode, network, config, extra: 'route'),
+      entry(l.overrideNetworkSettings, network, config),
+      entry(l.bypassDomain, network, config),
+      entry(l.routeAddress, network, config, extra: 'route'),
       entry(l.smartPause, smartPause, config),
       entry(l.trustedNetworks, smartPause, config),
       entry(l.smartPauseStrict, smartPause, config),
       entry(l.smartPauseFullStop, smartPause, config),
       entry(l.smartPauseCloseConnections, smartPause, config),
+      entry(l.ignoreBatteryOptimization, smartPause, config, extra: 'battery'),
+      entry(l.locationPermission, smartPause, config, extra: 'location'),
       entry(l.smartRouting, smartRouting, config),
       entry(l.smartRoutingStrategy, smartRouting, config),
       entry(l.smartRoutingBehaviour, smartRouting, config),
@@ -490,15 +647,29 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.smartRoutingServiceRoutes, smartRouting, config),
       entry(l.smartRoutingDiagnostics, smartRouting, config),
       entry(l.smartRoutingRegionCard, smartRouting, config, extra: 'region'),
-      entry(l.desync, desync, config, extra: 'dpi'),
+      entry(l.smartRoutingRegionSeeds, smartRouting, config, extra: 'region'),
+      entry(
+        l.desync,
+        desync,
+        config,
+        extra: 'dpi',
+        focus: l.desyncFeatureEnable,
+      ),
       entry(l.desyncFeatureEnable, desync, config, extra: 'dpi'),
       entry(l.desyncEngine, desync, config),
       entry(l.desyncForceTcp, desync, config),
       entry(l.desyncCache, desync, config),
+      entry(l.desyncCacheTtl, desync, config, extra: 'ttl'),
       entry(l.desyncRouting, desync, config),
+      entry(l.desyncRoutingRules, desync, config),
+      entry(l.desyncSaveCurrent, desync, config),
+      entry(l.desyncArgs, desync, config, extra: 'byedpi'),
+      entry(l.desyncDefaultName, desync, config),
+      entry(l.desyncActiveStrategy, desync, config, extra: 'strategy'),
       entry(l.userAgent, basic, config, extra: 'ua'),
       entry(l.port, basic, config, extra: 'port mixed'),
       entry(l.testUrl, basic, config),
+      entry(l.keepAliveIntervalDesc, basic, config, extra: 'keep alive'),
       entry(l.allowLan, basic, config, extra: 'lan'),
       entry(l.appRegion, basic, config),
       entry('IPv6', basic, config),
@@ -510,9 +681,20 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.sendDeviceIdentity, basic, config),
       entry(l.authentication, basic, config),
       entry('Hosts', basic, config),
+      entry(l.useHosts, dns, config, extra: 'hosts'),
+      entry(l.useSystemHosts, dns, config, extra: 'hosts'),
+      entry(l.respectRules, dns, config),
+      entry(l.dnsMode, dns, config, extra: 'enhanced fakeip'),
+      entry(l.fakeipRange, dns, config),
+      entry(l.fakeipFilter, dns, config),
+      entry(l.defaultNameserver, dns, config),
+      entry(l.nameserverPolicy, dns, config),
+      entry(l.nameserver, dns, config),
+      entry(l.fallback, dns, config),
       entry(l.minimizeOnExit, app, system),
       entry(l.autoLaunch, app, system),
       entry(l.silentLaunch, app, system),
+      entry(l.highPriorityAutoLaunch, app, system, extra: 'autostart'),
       entry(l.autoRun, app, system),
       entry(l.exclude, app, system),
       entry(l.autoCloseConnections, app, system),
@@ -520,14 +702,25 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       entry(l.autoCheckUpdate, app, system, extra: 'update'),
       entry(l.checkCertificate, app, system),
       entry(l.logLevel, app, system, extra: 'log'),
+      entry(l.logcat, app, system, extra: 'log'),
+      entry(l.crashlytics, app, system, extra: 'log'),
+      entry(l.setupRerun, app, system, extra: 'setup wizard'),
       entry(l.notification, app, system),
       entry(l.themeMode, appearance, personalization),
       entry(l.textScale, appearance, personalization),
       entry(l.dashboardStyle, appearance, personalization),
       entry(l.pureBlackMode, appearance, personalization, extra: 'amoled'),
-      entry(l.predictiveBack, appearance, personalization),
+      entry(l.predictiveBack, appearance, personalization, extra: 'motion'),
       entry(l.schedule, appearance, personalization),
       entry(l.contrast, appearance, personalization),
+      entry(l.themeColor, appearance, personalization, extra: 'color'),
+      entry(l.colorSchemes, appearance, personalization, extra: 'color'),
+      entry(l.appearanceIcon, appearance, personalization, extra: 'app icon'),
+      entry(l.pageAnimation, appearance, personalization, extra: 'motion'),
+      entry(l.reduceMotion, appearance, personalization, extra: 'motion'),
+      entry(l.seasonalDecorations, appearance, personalization),
+      entry(l.providerEffects, appearance, personalization),
+      entry(l.milestoneDecorations, appearance, personalization),
     ];
   }
 
@@ -1026,7 +1219,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
                   // Zero appBarInset for tools that read it in their own build
                   // (above their CommonScaffold); the shared bar already owns
                   // the top clearance, so the tool body sits flush beneath it.
-                  child: FloatingBarScope(inset: 0, child: entry.detail),
+                  child: FloatingBarScope(
+                    inset: 0,
+                    child: SettingFocusScope(
+                      target: entry.focusTarget,
+                      nonce: entry.focusNonce,
+                      child: entry.detail,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1524,11 +1724,13 @@ class _DeepSettingResult extends StatelessWidget {
     required this.glyph,
     required this.title,
     required this.owner,
+    required this.focus,
   });
 
   final Glyph glyph;
   final String title;
   final _DeepOwner owner;
+  final String focus;
 
   @override
   Widget build(BuildContext context) {
@@ -1540,11 +1742,15 @@ class _DeepSettingResult extends StatelessWidget {
             id: owner.paneId,
             detail: owner.detail,
             title: Text(owner.label),
+            focusTarget: focus,
           ),
         );
         return;
       }
-      showExtend(context, builder: (_) => owner.detail);
+      showExtend(
+        context,
+        builder: (_) => SettingFocusScope(target: focus, child: owner.detail),
+      );
     }
 
     return DecorationListItem(
@@ -1610,10 +1816,7 @@ class _HighlightText extends StatelessWidget {
         return;
       }
       spans.add(
-        TextSpan(
-          text: buffer.toString(),
-          style: runHit ? highlight : null,
-        ),
+        TextSpan(text: buffer.toString(), style: runHit ? highlight : null),
       );
       buffer.clear();
     }
@@ -1637,10 +1840,9 @@ String _normalizeQuery(String value) {
 }
 
 List<String> _queryTokens(String query) {
-  return _normalizeQuery(query)
-      .split(RegExp(r'\s+'))
-      .where((token) => token.isNotEmpty)
-      .toList();
+  return _normalizeQuery(
+    query,
+  ).split(RegExp(r'\s+')).where((token) => token.isNotEmpty).toList();
 }
 
 /// Splits a normalized haystack into whole words (length ≥ 3), the unit that
@@ -1756,12 +1958,38 @@ String _translate(String value, Map<String, String> table) {
 /// The physical-key pairing between the Russian ЙЦУКЕН layout and US QWERTY, so
 /// text typed with the wrong layout active can be remapped to what was meant.
 const _layoutPairs = <String, String>{
-  'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u',
-  'ш': 'i', 'щ': 'o', 'з': 'p', 'х': '[', 'ъ': ']',
-  'ф': 'a', 'ы': 's', 'в': 'd', 'а': 'f', 'п': 'g', 'р': 'h', 'о': 'j',
-  'л': 'k', 'д': 'l', 'ж': ';', 'э': "'",
-  'я': 'z', 'ч': 'x', 'с': 'c', 'м': 'v', 'и': 'b', 'т': 'n', 'ь': 'm',
-  'б': ',', 'ю': '.',
+  'й': 'q',
+  'ц': 'w',
+  'у': 'e',
+  'к': 'r',
+  'е': 't',
+  'н': 'y',
+  'г': 'u',
+  'ш': 'i',
+  'щ': 'o',
+  'з': 'p',
+  'х': '[',
+  'ъ': ']',
+  'ф': 'a',
+  'ы': 's',
+  'в': 'd',
+  'а': 'f',
+  'п': 'g',
+  'р': 'h',
+  'о': 'j',
+  'л': 'k',
+  'д': 'l',
+  'ж': ';',
+  'э': "'",
+  'я': 'z',
+  'ч': 'x',
+  'с': 'c',
+  'м': 'v',
+  'и': 'b',
+  'т': 'n',
+  'ь': 'm',
+  'б': ',',
+  'ю': '.',
 };
 
 const _cyrToLat = _layoutPairs;

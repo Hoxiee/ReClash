@@ -1065,6 +1065,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Tools desktop search highlights the exact row it lands on', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.enterText(find.byType(TextField), 'ntp');
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('NTP').first);
+    await tester.pumpAndSettle();
+
+    // Opening the owning screen wraps the matched row in its focus target, so
+    // it scrolls into view and pulses instead of leaving the reader at the top.
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_SettingFocusTarget',
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Tools search remaps a query typed on the wrong layout', (
     tester,
   ) async {
@@ -1086,9 +1114,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tools search bridges synonyms across languages', (
-    tester,
-  ) async {
+  testWidgets('Tools search bridges synonyms across languages', (tester) async {
     final core = _MockCoreHandler();
     await _pumpDoctor(
       tester,

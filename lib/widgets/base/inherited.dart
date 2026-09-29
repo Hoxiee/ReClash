@@ -267,11 +267,36 @@ class SettingsPaneSelection {
   /// The row's label, so the pane titles itself instead of the tool drawing one.
   final Widget? title;
 
+  final String? focusTarget;
+
   const SettingsPaneSelection({
     required this.id,
     required this.detail,
     this.title,
+    this.focusTarget,
   });
+}
+
+/// Names a setting the enclosing screen should scroll to and pulse once, so a
+/// deep search hit lands on its exact row; [nonce] re-fires an open screen.
+class SettingFocusScope extends InheritedWidget {
+  final String? target;
+  final int nonce;
+
+  const SettingFocusScope({
+    super.key,
+    required this.target,
+    this.nonce = 0,
+    required super.child,
+  });
+
+  static SettingFocusScope? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SettingFocusScope>();
+  }
+
+  @override
+  bool updateShouldNotify(SettingFocusScope oldWidget) =>
+      target != oldWidget.target || nonce != oldWidget.nonce;
 }
 
 /// Marks a subtree as a list-detail pane body that already has a heading, so a

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/base/inherited.dart';
 
@@ -491,6 +492,7 @@ class ListItem<T> extends StatelessWidget {
 class ListHeader extends StatelessWidget {
   final String title;
   final String? subTitle;
+  final Glyph? glyph;
   final List<Widget> actions;
   final EdgeInsets? padding;
   final double? space;
@@ -499,6 +501,7 @@ class ListHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.subTitle,
+    this.glyph,
     this.padding,
     List<Widget>? actions,
     this.space,
@@ -518,25 +521,42 @@ class ListHeader extends StatelessWidget {
         spacing: actions.isEmpty ? 0 : 12,
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: subTitle == null
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.labelLarge?.copyWith(
+                if (glyph != null) ...[
+                  GlyphIcon(
+                    glyph!,
+                    size: 20,
                     color: context.colorScheme.onSurfaceVariant.opacity80,
-                    fontWeight: FontWeight.w600,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.labelLarge?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant.opacity80,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (subTitle != null)
+                        Text(
+                          subTitle!,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.outline,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                if (subTitle != null)
-                  Text(
-                    subTitle!,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.outline,
-                    ),
-                  ),
               ],
             ),
           ),

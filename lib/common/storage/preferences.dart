@@ -255,6 +255,31 @@ class Preferences {
     await preferences?.setStringList('recentToolIds', ids);
   }
 
+  Future<List<Map<String, dynamic>>> getRecentToolStats() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    final raw = preferences?.getString('recentToolStats');
+    if (raw == null || raw.isEmpty) {
+      return const [];
+    }
+    try {
+      final decoded = json.decode(raw);
+      if (decoded is! List) {
+        return const [];
+      }
+      return decoded
+          .whereType<Map>()
+          .map((entry) => entry.cast<String, dynamic>())
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> saveRecentToolStats(List<Map<String, dynamic>> stats) async {
+    final preferences = await sharedPreferencesCompleter.future;
+    await preferences?.setString('recentToolStats', json.encode(stats));
+  }
+
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
     await sharedPreferencesIns?.clear();

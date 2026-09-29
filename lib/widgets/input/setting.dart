@@ -60,6 +60,7 @@ class SettingSection extends StatelessWidget {
     required this.items,
     this.title,
     this.subTitle,
+    this.glyph,
     this.actions,
     this.top,
     this.bottom = 0,
@@ -72,6 +73,7 @@ class SettingSection extends StatelessWidget {
     required this.items,
     this.title,
     this.subTitle,
+    this.glyph,
     this.actions,
     this.top,
     this.bottom = 0,
@@ -82,6 +84,7 @@ class SettingSection extends StatelessWidget {
   final List<Widget> items;
   final String? title;
   final String? subTitle;
+  final Glyph? glyph;
   final List<Widget>? actions;
   final double? top;
   final double bottom;
@@ -92,7 +95,12 @@ class SettingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final header = (title != null && items.isNotEmpty)
-        ? ListHeader(title: title!, subTitle: subTitle, actions: actions)
+        ? ListHeader(
+            title: title!,
+            subTitle: subTitle,
+            glyph: glyph,
+            actions: actions,
+          )
         : null;
     // A header carries its own leading gap (listHeaderPadding.top), so titled
     // groups stay tight. A header-less group has nothing to separate it from

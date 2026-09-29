@@ -219,10 +219,7 @@ class DecorationListItem extends StatelessWidget {
       ItemPosition.end,
       ItemPosition.startAndEnd,
     ].contains(position);
-    final borderRadius = AppRadius.vertical(
-      top: isStart ? AppCorner.xl : AppCorner.none,
-      bottom: isEnd ? AppCorner.xl : AppCorner.none,
-    );
+    final borderRadius = _itemBorderRadius(isStart, isEnd);
     Widget? effectiveTrailing = trailing;
     VoidCallback? effectiveOnPressed = onPressed;
     switch (_action) {
@@ -276,25 +273,35 @@ class DecorationListItem extends StatelessWidget {
         if (paneScope != null && paneScope.active) {
           if (paneScope.pushes) {
             final id = paneId ?? 'push:${identityHashCode(child)}';
-            return _buildActionCard(
-              proxyDecorator: proxyDecorator,
-              borderRadius: borderRadius,
-              isEnd: isEnd,
-              trailing: effectiveTrailing,
-              onTap: () => paneScope.onSelect(
-                SettingsPaneSelection(id: id, detail: child, title: title),
+            return _wrapFocus(
+              context,
+              _buildActionCard(
+                proxyDecorator: proxyDecorator,
+                borderRadius: borderRadius,
+                isEnd: isEnd,
+                trailing: effectiveTrailing,
+                onTap: () => paneScope.onSelect(
+                  SettingsPaneSelection(id: id, detail: child, title: title),
+                ),
               ),
             );
           }
           if (paneId != null) {
-            return _buildActionCard(
-              proxyDecorator: proxyDecorator,
-              borderRadius: borderRadius,
-              isEnd: isEnd,
-              trailing: effectiveTrailing,
-              selected: paneScope.selectedId == paneId,
-              onTap: () => paneScope.onSelect(
-                SettingsPaneSelection(id: paneId, detail: child, title: title),
+            return _wrapFocus(
+              context,
+              _buildActionCard(
+                proxyDecorator: proxyDecorator,
+                borderRadius: borderRadius,
+                isEnd: isEnd,
+                trailing: effectiveTrailing,
+                selected: paneScope.selectedId == paneId,
+                onTap: () => paneScope.onSelect(
+                  SettingsPaneSelection(
+                    id: paneId,
+                    detail: child,
+                    title: title,
+                  ),
+                ),
               ),
             );
           }
@@ -314,12 +321,15 @@ class DecorationListItem extends StatelessWidget {
           }
         }
 
-        return _buildActionCard(
-          proxyDecorator: proxyDecorator,
-          borderRadius: borderRadius,
-          isEnd: isEnd,
-          onTap: openAction,
-          trailing: effectiveTrailing,
+        return _wrapFocus(
+          context,
+          _buildActionCard(
+            proxyDecorator: proxyDecorator,
+            borderRadius: borderRadius,
+            isEnd: isEnd,
+            onTap: openAction,
+            trailing: effectiveTrailing,
+          ),
         );
       case final _CheckboxAction checkboxDelegate:
         effectiveOnPressed = checkboxDelegate.onChanged == null
@@ -339,13 +349,26 @@ class DecorationListItem extends StatelessWidget {
       case _DefaultAction():
         break;
     }
-    return _buildActionCard(
-      proxyDecorator: proxyDecorator,
-      borderRadius: borderRadius,
-      isEnd: isEnd,
-      trailing: effectiveTrailing,
-      onTap: effectiveOnPressed,
+    return _wrapFocus(
+      context,
+      _buildActionCard(
+        proxyDecorator: proxyDecorator,
+        borderRadius: borderRadius,
+        isEnd: isEnd,
+        trailing: effectiveTrailing,
+        onTap: effectiveOnPressed,
+      ),
     );
+  }
+
+  Widget _wrapFocus(BuildContext context, Widget card) {
+    final scope = SettingFocusScope.of(context);
+    final target = scope?.target;
+    final label = title is Text ? (title as Text).data : null;
+    if (target == null || label == null || label != target) {
+      return card;
+    }
+    return _SettingFocusTarget(nonce: scope!.nonce, child: card);
   }
 
   Widget _tappableTrailing(BuildContext context, Widget trailing) {
@@ -399,6 +422,104 @@ class DecorationListItem extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+BorderRadius _itemBorderRadius(bool isStart, bool isEnd) {
+  return AppRadius.vertical(
+    top: isStart ? AppCorner.xl : AppCorner.none,
+    bottom: isEnd ? AppCorner.xl : AppCorner.none,
+  );
+}
+
+/// Scrolls itself into view and pulses a primary wash once when a search hit
+/// names its row, then fades the wash to nothing so the row settles unchanged.
+class _SettingFocusTarget extends StatefulWidget {
+  const _SettingFocusTarget({required this.nonce, required this.child});
+
+  final int nonce;
+  final Widget child;
+
+  @override
+  State<_SettingFocusTarget> createState() => _SettingFocusTargetState();
+}
+
+class _SettingFocusTargetState extends State<_SettingFocusTarget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _fire();
+  }
+
+  @override
+  void didUpdateWidget(_SettingFocusTarget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.nonce != widget.nonce) {
+      _fire();
+    }
+  }
+
+  void _fire() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Scrollable.ensureVisible(
+        context,
+        alignment: 0.5,
+        duration: context.motionDuration(const Duration(milliseconds: 320)),
+        curve: Curves.easeInOutCubic,
+      );
+      _pulse
+        ..reset()
+        ..forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final position = ItemPositionProvider.of(context)?.position;
+    final borderRadius = _itemBorderRadius(
+      [ItemPosition.start, ItemPosition.startAndEnd].contains(position),
+      [ItemPosition.end, ItemPosition.startAndEnd].contains(position),
+    );
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        final glow = (1 - Curves.easeOutCubic.transform(_pulse.value)) * 0.32;
+        return Stack(
+          children: [
+            child!,
+            if (glow > 0.001)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.primary.withValues(
+                        alpha: glow,
+                      ),
+                      borderRadius: borderRadius,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+      child: widget.child,
     );
   }
 }
