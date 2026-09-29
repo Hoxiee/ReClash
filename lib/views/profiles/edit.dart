@@ -39,13 +39,8 @@ Map<String, dynamic>? _proxyMapping(Object? node) {
 
 class EditProfileView extends ConsumerStatefulWidget {
   final Profile profile;
-  final BuildContext context;
 
-  const EditProfileView({
-    super.key,
-    required this.context,
-    required this.profile,
-  });
+  const EditProfileView({super.key, required this.profile});
 
   @override
   ConsumerState<EditProfileView> createState() => _EditProfileViewState();
@@ -358,15 +353,16 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             _handleBack();
             return false;
           },
-          child: FloatLayout(
-            floatingWidget: FloatWrapper(
-              child: CommonFloatingActionButton(
+          child: CommonScaffold(
+            title: appLocalizations.edit,
+            iconActions: [
+              IconButtonData(
+                glyph: AppGlyphs.save,
                 onPressed: _handleConfirm,
-                icon: const GlyphIcon(AppGlyphs.save),
-                label: appLocalizations.save,
+                tooltip: appLocalizations.save,
               ),
-            ),
-            child: Form(
+            ],
+            body: Form(
               key: _formKey,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),

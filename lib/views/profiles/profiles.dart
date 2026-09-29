@@ -248,10 +248,7 @@ class ProfileItem extends ConsumerWidget {
   void _handleShowEditExtendPage(BuildContext context) {
     showExtend(
       context,
-      builder: (context) => AdaptiveSheetScaffold(
-        title: context.appLocalizations.edit,
-        body: EditProfileView(profile: profile, context: context),
-      ),
+      builder: (_) => EditProfileView(profile: profile),
     );
   }
 
