@@ -1,12 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
-
-// ReClash's shell always floats its navigation pill, so previews draw it that
-// way; the docked branch stays for correctness should that ever change.
-const bool _floatingBar = true;
 
 class PreviewChoice<T> {
   const PreviewChoice({
@@ -159,158 +153,42 @@ class MiniScreenThumb extends StatelessWidget {
   }
 }
 
-class _ColorSchemeTween extends Tween<ColorScheme> {
-  _ColorSchemeTween({super.end});
+/// A phone-shaped frame around a [MiniScreen], bordered like the device edge.
+class MiniScreenFrame extends StatelessWidget {
+  const MiniScreenFrame({super.key, required this.screen});
 
-  @override
-  ColorScheme lerp(double t) => ColorScheme.lerp(begin!, end!, t);
-}
-
-/// The home page as the theme settings will draw it; its destinations can be
-/// tapped to try the page-switch animation.
-class ThemeLivePreview extends ConsumerStatefulWidget {
-  const ThemeLivePreview({super.key});
-
-  @override
-  ConsumerState<ThemeLivePreview> createState() => _ThemeLivePreviewState();
-}
-
-class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
-    with SingleTickerProviderStateMixin {
-  static const double _phoneWidth = 168;
-  static const _duration = Duration(milliseconds: 300);
-
-  late final AnimationController _slide = AnimationController(
-    vsync: this,
-    duration: kTabScrollDuration,
-  );
-  late final CurvedAnimation _slideCurve = CurvedAnimation(
-    parent: _slide,
-    curve: Curves.easeOut,
-  );
-  int _selected = 0;
-  int? _previous;
-
-  Future<void> _select(int index) async {
-    if (index == _selected) {
-      return;
-    }
-    final animate = ref.read(appSettingProvider).isAnimateToPage;
-    if (!animate) {
-      setState(() {
-        _previous = null;
-        _selected = index;
-      });
-      _slide.value = 1;
-      return;
-    }
-    setState(() {
-      _previous = _selected;
-      _selected = index;
-    });
-    await _slide.forward(from: 0).orCancel.catchError((_) {});
-    if (mounted && _selected == index) {
-      setState(() => _previous = null);
-    }
-  }
-
-  @override
-  void dispose() {
-    _slideCurve.dispose();
-    _slide.dispose();
-    super.dispose();
-  }
+  final Widget screen;
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(
-      themeSettingProvider.select((state) => state.themeMode),
-    );
-    final pureBlack = ref.watch(
-      themeSettingProvider.select((state) => state.pureBlack),
-    );
-    final hero = ref.watch(newDashboardEnabledProvider);
-    final brightness = switch (themeMode) {
-      ThemeMode.light => Brightness.light,
-      ThemeMode.dark => Brightness.dark,
-      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
-    };
-    final colorScheme = ref
-        .watch(genColorSchemeProvider(brightness))
-        .toPureBlack(pureBlack);
-    final corner = AppCorner.fit(_phoneWidth);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerLow,
-        shape: AppShape.xxl,
-      ),
-      child: SizedBox(
-        width: _phoneWidth,
-        child: AspectRatio(
-          aspectRatio: 9 / 17,
-          child: DecoratedBox(
-            position: DecorationPosition.foreground,
-            decoration: ShapeDecoration(
-              shape: AppShape.all(corner).copyWith(
-                side: BorderSide(color: context.colorScheme.outlineVariant),
-              ),
-            ),
-            child: ClipRSuperellipse(
-              borderRadius: AppRadius.all(corner),
-              child: TweenAnimationBuilder<ColorScheme>(
-                tween: _ColorSchemeTween(end: colorScheme),
-                duration: _duration,
-                builder: (_, colorScheme, _) => AnimatedBuilder(
-                  animation: _slideCurve,
-                  builder: (_, _) => MiniScreen(
-                    colorScheme: colorScheme,
-                    hero: hero,
-                    selected: _selected,
-                    previous: _previous,
-                    progress: _previous == null ? 1 : _slideCurve.value,
-                    onSelect: _select,
-                  ),
-                ),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final corner = AppCorner.fit(constraints.maxWidth);
+        return DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: ShapeDecoration(
+            shape: AppShape.all(corner).copyWith(
+              side: BorderSide(color: context.colorScheme.outlineVariant),
             ),
           ),
-        ),
-      ),
+          child: ClipRSuperellipse(
+            borderRadius: AppRadius.all(corner),
+            child: screen,
+          ),
+        );
+      },
     );
   }
 }
 
-enum _MiniPage { cards, list }
-
 /// A phone-shaped sketch of the home page, drawn in [colorScheme].
-///
-/// With [previous], the page is caught [progress] of the way through a slide
-/// switch from it toward [selected].
 class MiniScreen extends StatelessWidget {
-  const MiniScreen({
-    super.key,
-    required this.colorScheme,
-    this.hero = false,
-    this.selected = 0,
-    this.previous,
-    this.progress = 1,
-    this.onSelect,
-  });
+  const MiniScreen({super.key, required this.colorScheme, this.hero = false});
 
   static const int destinationCount = 4;
 
   final ColorScheme colorScheme;
   final bool hero;
-  final int selected;
-  final int? previous;
-  final double progress;
-  final ValueChanged<int>? onSelect;
-
-  static _MiniPage _pageOf(int index) =>
-      index.isEven ? _MiniPage.cards : _MiniPage.list;
 
   @override
   Widget build(BuildContext context) {
@@ -319,111 +197,60 @@ class MiniScreen extends StatelessWidget {
         final width = constraints.maxWidth;
         final unit = width / 20;
         final margin = unit * 1.5;
-        final barHeight = _floatingBar ? unit * 3.2 : unit * 3.6;
+        final barHeight = unit * 3.2;
         final fabSize = unit * 3.2;
-        final previous = this.previous;
-        final hasFab = previous == null || progress > 0.5
-            ? selected == 0
-            : previous == 0;
-        final pageBottom = _floatingBar ? 0.0 : barHeight;
-        final direction = previous != null && previous > selected ? -1 : 1;
-        Widget pageAt(int index, double offset) {
-          return Positioned(
-            left: offset,
-            width: width,
-            top: 0,
-            bottom: pageBottom,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(margin, margin, margin, 0),
-              child: ClipRect(
-                child: OverflowBox(
-                  alignment: Alignment.topCenter,
-                  maxHeight: double.infinity,
-                  child: _MiniPageContent(
-                    colorScheme: colorScheme,
-                    page: _pageOf(index),
-                    hero: hero && index == 0,
-                    seed: index,
-                    unit: unit,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final destinations = _MiniDestinations(
-          colorScheme: colorScheme,
-          selected: selected,
-          unit: unit,
-          onSelect: onSelect,
-        );
         return ColoredBox(
           color: colorScheme.surface,
           child: Stack(
             children: [
-              if (previous == null)
-                pageAt(selected, 0)
-              else ...[
-                pageAt(previous, -direction * width * progress),
-                pageAt(selected, direction * width * (1 - progress)),
-              ],
-              if (hasFab && !_floatingBar)
-                Positioned(
-                  right: margin,
-                  bottom: barHeight + margin,
-                  width: fabSize * 1.6,
-                  height: fabSize,
-                  child: _MiniBlock(
-                    color: colorScheme.primaryContainer,
-                    extent: fabSize,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(margin, margin, margin, 0),
+                  child: ClipRect(
+                    child: OverflowBox(
+                      alignment: Alignment.topCenter,
+                      maxHeight: double.infinity,
+                      child: _MiniPageContent(
+                        colorScheme: colorScheme,
+                        hero: hero,
+                        unit: unit,
+                      ),
+                    ),
                   ),
                 ),
-              if (_floatingBar)
-                Positioned(
-                  left: margin,
-                  right: margin + (hasFab ? fabSize + unit * 0.6 : 0),
-                  bottom: margin,
-                  height: barHeight,
-                  child: DecoratedBox(
-                    decoration: ShapeDecoration(
-                      color: colorScheme.surfaceContainer,
-                      shape: AppShape.full,
-                      shadows: [
-                        BoxShadow(
-                          color: colorScheme.shadow.withValues(alpha: 0.12),
-                          blurRadius: unit,
-                          offset: Offset(0, unit * 0.3),
-                        ),
-                      ],
-                    ),
-                    child: destinations,
-                  ),
-                )
-              else
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: barHeight,
-                  child: ColoredBox(
+              ),
+              Positioned(
+                left: margin,
+                right: margin + fabSize + unit * 0.6,
+                bottom: margin,
+                height: barHeight,
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(
                     color: colorScheme.surfaceContainer,
-                    child: destinations,
+                    shape: AppShape.full,
+                    shadows: [
+                      BoxShadow(
+                        color: colorScheme.shadow.withValues(alpha: 0.12),
+                        blurRadius: unit,
+                        offset: Offset(0, unit * 0.3),
+                      ),
+                    ],
+                  ),
+                  child: _MiniDestinations(colorScheme: colorScheme, unit: unit),
+                ),
+              ),
+              Positioned(
+                right: margin,
+                bottom: margin,
+                width: fabSize,
+                height: fabSize,
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(
+                    color: colorScheme.primaryContainer,
+                    shape: AppShape.full,
                   ),
                 ),
-              if (hasFab && _floatingBar)
-                Positioned(
-                  right: margin,
-                  bottom: margin,
-                  width: fabSize,
-                  height: fabSize,
-                  child: DecoratedBox(
-                    decoration: ShapeDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: AppShape.full,
-                    ),
-                  ),
-                ),
+              ),
             ],
           ),
         );
@@ -432,7 +259,6 @@ class MiniScreen extends StatelessWidget {
   }
 }
 
-/// Two [MiniScreen]s split on a diagonal, for the "follow system" thumbnail.
 class MiniSplitScreen extends StatelessWidget {
   const MiniSplitScreen({super.key, required this.light, required this.dark});
 
@@ -469,16 +295,12 @@ class _DiagonalClipper extends CustomClipper<Path> {
 class _MiniPageContent extends StatelessWidget {
   const _MiniPageContent({
     required this.colorScheme,
-    required this.page,
     required this.hero,
-    required this.seed,
     required this.unit,
   });
 
   final ColorScheme colorScheme;
-  final _MiniPage page;
   final bool hero;
-  final int seed;
   final double unit;
 
   Widget _heroColumn() {
@@ -662,109 +484,62 @@ class _MiniPageContent extends StatelessWidget {
             height: unit * 1.1,
           ),
         ),
-        ...switch (page) {
-          _MiniPage.cards => [
-            _MiniCard(
-              color: card,
-              height: unit * 5,
-              unit: unit,
-              child: Row(
-                spacing: unit,
-                children: [
-                  _MiniDot(color: colorScheme.primary, size: unit * 2.2),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: unit * 0.6,
-                      children: [
-                        _MiniLine(color: line, width: unit * 6, height: unit),
-                        _MiniLine(
-                          color: line,
-                          width: unit * 3.5,
-                          height: unit * 0.8,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              spacing: unit,
-              children: [
-                Expanded(
-                  child: _MiniCard(color: card, height: unit * 4, unit: unit),
-                ),
-                Expanded(
-                  child: _MiniCard(
-                    color: colorScheme.secondaryContainer,
-                    height: unit * 4,
-                    unit: unit,
-                  ),
-                ),
-              ],
-            ),
-            for (var i = 0; i < 3; i++)
-              _MiniCard(color: card, height: unit * 4.5, unit: unit),
-          ],
-          _MiniPage.list => [
-            for (var i = 0; i < 7; i++)
-              SizedBox(
-                height: unit * 2.6,
-                child: Row(
-                  spacing: unit,
+        _MiniCard(
+          color: card,
+          height: unit * 5,
+          unit: unit,
+          child: Row(
+            spacing: unit,
+            children: [
+              _MiniDot(color: colorScheme.primary, size: unit * 2.2),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: unit * 0.6,
                   children: [
-                    _MiniDot(
-                      color: i == 0
-                          ? colorScheme.tertiaryContainer
-                          : colorScheme.secondaryContainer,
-                      size: unit * 2.2,
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: unit * 0.5,
-                        children: [
-                          _MiniLine(
-                            color: line,
-                            width: unit * (8 - (i + seed) % 3 * 1.5),
-                            height: unit * 0.8,
-                          ),
-                          _MiniLine(
-                            color: line.withValues(alpha: 0.2),
-                            width: unit * 4,
-                            height: unit * 0.6,
-                          ),
-                        ],
-                      ),
+                    _MiniLine(color: line, width: unit * 6, height: unit),
+                    _MiniLine(
+                      color: line,
+                      width: unit * 3.5,
+                      height: unit * 0.8,
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
+        Row(
+          spacing: unit,
+          children: [
+            Expanded(
+              child: _MiniCard(color: card, height: unit * 4, unit: unit),
+            ),
+            Expanded(
+              child: _MiniCard(
+                color: colorScheme.secondaryContainer,
+                height: unit * 4,
+                unit: unit,
+              ),
+            ),
           ],
-        },
+        ),
+        for (var i = 0; i < 3; i++)
+          _MiniCard(color: card, height: unit * 4.5, unit: unit),
       ],
     );
   }
 }
 
 class _MiniDestinations extends StatelessWidget {
-  const _MiniDestinations({
-    required this.colorScheme,
-    required this.selected,
-    required this.unit,
-    required this.onSelect,
-  });
+  const _MiniDestinations({required this.colorScheme, required this.unit});
 
   final ColorScheme colorScheme;
-  final int selected;
   final double unit;
-  final ValueChanged<int>? onSelect;
 
   Widget _buildDestination(int index) {
-    if (index != selected) {
+    if (index != 0) {
       return _MiniDot(color: colorScheme.onSurfaceVariant, size: unit * 0.9);
     }
     return Container(
@@ -784,22 +559,10 @@ class _MiniDestinations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onSelect = this.onSelect;
     return Row(
       children: [
         for (var i = 0; i < MiniScreen.destinationCount; i++)
-          Expanded(
-            child: onSelect == null
-                ? Center(child: _buildDestination(i))
-                : MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => onSelect(i),
-                      child: Center(child: _buildDestination(i)),
-                    ),
-                  ),
-          ),
+          Expanded(child: Center(child: _buildDestination(i))),
       ],
     );
   }

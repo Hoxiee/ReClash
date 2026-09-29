@@ -70,8 +70,6 @@ class AppearanceThemeTab extends ConsumerWidget {
     return SettingsScrollView(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
-        const SliverToBoxAdapter(child: ThemeLivePreview()),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const _LayoutChoice(),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const _ThemeModeChoice(),
@@ -125,16 +123,6 @@ class AppearanceThemeTab extends ConsumerWidget {
         const _PureBlackChoice(),
         SettingSection.sliver(
           items: [
-            if (predictiveBackSupported)
-              DecorationListItem.toggle(
-                leading: const GlyphIcon(AppGlyphs.dragHandle),
-                title: Text(appLocalizations.predictiveBack),
-                value: theme.predictiveBack,
-                onChanged: (value) => _update(
-                  ref,
-                  (state) => state.copyWith(predictiveBack: value),
-                ),
-              ),
             SettingSliderItem(
               leading: Tooltip(
                 message: theme.pureBlack
@@ -154,6 +142,20 @@ class AppearanceThemeTab extends ConsumerWidget {
           ],
         ),
         const _TextScaleItem(),
+        if (predictiveBackSupported)
+          SettingSection.sliver(
+            items: [
+              DecorationListItem.toggle(
+                leading: const GlyphIcon(AppGlyphs.dragHandle),
+                title: Text(appLocalizations.predictiveBack),
+                value: theme.predictiveBack,
+                onChanged: (value) => _update(
+                  ref,
+                  (state) => state.copyWith(predictiveBack: value),
+                ),
+              ),
+            ],
+          ),
         const AppearanceColorSections(),
         const SettingBottomInset.sliver(),
       ],
@@ -181,32 +183,108 @@ class _LayoutChoice extends ConsumerWidget {
     final scheme = ref
         .watch(genColorSchemeProvider(brightness))
         .toPureBlack(pureBlack);
-    Widget thumb(bool value) => MiniScreenThumb(
-      alignment: Alignment.topCenter,
-      screen: MiniScreen(colorScheme: scheme, hero: value),
-    );
+    void select(bool value) => ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(newDashboard: value));
     return SliverToBoxAdapter(
-      child: PreviewChoiceGroup<bool>(
-        info: Info(
-          label: appLocalizations.dashboardStyle,
-          glyph: AppGlyphs.dashboard,
-        ),
-        value: hero,
-        choices: [
-          PreviewChoice(
-            value: false,
-            label: appLocalizations.classicDashboard,
-            pictogram: thumb(false),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InfoHeader(
+            info: Info(
+              label: appLocalizations.dashboardStyle,
+              glyph: AppGlyphs.dashboard,
+            ),
           ),
-          PreviewChoice(
-            value: true,
-            label: appLocalizations.newDashboardTitle,
-            pictogram: thumb(true),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              spacing: 12,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _LayoutCard(
+                    label: appLocalizations.classicDashboard,
+                    description: appLocalizations.classicDashboardDesc,
+                    isSelected: !hero,
+                    onPressed: () => select(false),
+                    scheme: scheme,
+                    hero: false,
+                  ),
+                ),
+                Expanded(
+                  child: _LayoutCard(
+                    label: appLocalizations.newDashboardTitle,
+                    description: appLocalizations.newDashboardDesc,
+                    isSelected: hero,
+                    onPressed: () => select(true),
+                    scheme: scheme,
+                    hero: true,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-        onChanged: (value) => ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(newDashboard: value)),
+      ),
+    );
+  }
+}
+
+/// A big dashboard-style option: a framed [MiniScreen] over its name and a
+/// one-line description, selectable as a whole card.
+class _LayoutCard extends StatelessWidget {
+  const _LayoutCard({
+    required this.label,
+    required this.description,
+    required this.isSelected,
+    required this.onPressed,
+    required this.scheme,
+    required this.hero,
+  });
+
+  final String label;
+  final String description;
+  final bool isSelected;
+  final VoidCallback onPressed;
+  final ColorScheme scheme;
+  final bool hero;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: isSelected,
+      child: CommonCard(
+        radius: AppCorner.lg,
+        isSelected: isSelected,
+        onPressed: onPressed,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Center(
+              child: SizedBox(
+                height: 138,
+                child: AspectRatio(
+                  aspectRatio: 0.62,
+                  child: ExcludeSemantics(
+                    child: MiniScreenFrame(
+                      screen: MiniScreen(colorScheme: scheme, hero: hero),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Text(label, style: context.textTheme.labelLarge),
+            Text(
+              description,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
