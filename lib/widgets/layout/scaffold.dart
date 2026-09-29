@@ -94,6 +94,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     null,
   );
 
+  // The pane bar this scaffold last fed and the widget it fed, so a rebuild
+  // only republishes when the actions widget actually changes and dispose can
+  // tell whether it is still the one on screen.
+  ValueNotifier<Widget?>? _relaySink;
+  Widget? _relayedActions;
+
   bool get _isSearch {
     return _appBarState.value.searchState?.query != null;
   }
@@ -213,6 +219,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
   @override
   void dispose() {
+    // Stop feeding a shared pane bar that outlives this scaffold, or it would
+    // keep painting a disposed tool's actions.
+    final relaySink = _relaySink;
+    if (relaySink != null && relaySink.value == _relayedActions) {
+      relaySink.value = null;
+    }
     _appBarState.dispose();
     _textController.dispose();
     _searchFocusNode.dispose();
@@ -510,6 +522,44 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
   }
 
+  /// A chrome-suppressed pane keeps no app bar of its own, so its actions are
+  /// built here and handed to the shared bar. The result stays reactive to
+  /// edit/search/loading through the same [_appBarState] the real bar reads.
+  Widget _relayActions(
+    _SheetForm form,
+    VoidCallback? backAction,
+    IconButtonData? primaryAction,
+  ) {
+    return ValueListenableBuilder<AppBarState>(
+      valueListenable: _appBarState,
+      builder: (_, state, _) {
+        final actions = _buildActions(
+          state.searchState != null,
+          primaryAction,
+          state.actions.isNotEmpty ? state.actions : widget.actions ?? const [],
+          form,
+          backAction,
+        );
+        if (actions.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return TonalButtonTheme(
+          child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+        );
+      },
+    );
+  }
+
+  void _publishRelayActions(Widget actions, ValueNotifier<Widget?> sink) {
+    _relaySink = sink;
+    _relayedActions = actions;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _relayedActions == actions) {
+        sink.value = actions;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(widget.appBar != null || widget.title != null);
@@ -563,6 +613,43 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         bottomInset: bottomInset,
         fab: fab,
         form: form,
+      );
+    }
+    // Inside a list-detail pane that already draws its own heading, drop the
+    // app bar and top inset so the tool body sits flush under the shared bar.
+    if (ToolsPaneChrome.suppressOf(context)) {
+      final sink = ToolsPaneChrome.actionsSinkOf(context);
+      if (sink != null) {
+        _publishRelayActions(
+          _relayActions(form, backAction, actionInBar ? primaryAction : null),
+          sink,
+        );
+      }
+      final chromelessBody = MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: FloatingBarScope(
+          inset: 0,
+          child: DockedPageScope(
+            docked: false,
+            child: hasFab
+                ? BottomInsetScope(
+                    inset:
+                        bottomInset +
+                        BottomInsetScope.floatingActionButtonInset,
+                    child: widget.body,
+                  )
+                : widget.body,
+          ),
+        ),
+      );
+      // Stay transparent: the outer shell already paints the wallpaper, so a
+      // second one here would seam against it at the pane divider.
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: chromelessBody,
+        resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+        floatingActionButton: fab,
       );
     }
     final barFloats = widget.appBar == null;

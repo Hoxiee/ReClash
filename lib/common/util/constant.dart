@@ -122,6 +122,7 @@ const keyboardModifierListEquality = SetEquality<KeyboardModifier>();
 
 const proxiesListStoreKey = PageStorageKey<String>('proxies_list');
 const toolsStoreKey = PageStorageKey<String>('tools');
+const toolsDesktopIndexKey = PageStorageKey<String>('tools-desktop-index');
 const profilesStoreKey = PageStorageKey<String>('profiles');
 
 const defaultPrimaryColor = 0XFFD8C0C3;

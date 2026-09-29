@@ -231,16 +231,18 @@ class SheetSettlingScope extends InheritedWidget {
       settling != oldWidget.settling;
 }
 
-/// When [active], an `open` list item selects into the detail pane instead of
-/// pushing; the detail pane nests an inactive scope so its own items push.
+/// When [active], an `open` item drives the detail pane, not a sheet: a
+/// selecting scope ([pushes] false) swaps its root, a pushing one drills deeper.
 class SettingsPaneScope extends InheritedWidget {
   final bool active;
+  final bool pushes;
   final String? selectedId;
   final void Function(SettingsPaneSelection selection) onSelect;
 
   const SettingsPaneScope({
     super.key,
     required this.active,
+    this.pushes = false,
     required this.selectedId,
     required this.onSelect,
     required super.child,
@@ -253,6 +255,7 @@ class SettingsPaneScope extends InheritedWidget {
   @override
   bool updateShouldNotify(SettingsPaneScope oldWidget) =>
       active != oldWidget.active ||
+      pushes != oldWidget.pushes ||
       selectedId != oldWidget.selectedId ||
       onSelect != oldWidget.onSelect;
 }
@@ -261,7 +264,52 @@ class SettingsPaneSelection {
   final String id;
   final Widget detail;
 
-  const SettingsPaneSelection({required this.id, required this.detail});
+  /// The row's label, so the pane titles itself instead of the tool drawing one.
+  final Widget? title;
+
+  const SettingsPaneSelection({
+    required this.id,
+    required this.detail,
+    this.title,
+  });
+}
+
+/// Marks a subtree as a list-detail pane body that already has a heading, so a
+/// [CommonScaffold]/[BaseScaffold] inside it drops its app bar and top inset
+/// instead of stacking a second bar. Scoped to the tool's root; pushed pages
+/// regain full chrome.
+class ToolsPaneChrome extends InheritedWidget {
+  final bool suppressChrome;
+
+  /// Where a chrome-suppressed scaffold publishes the actions it would have
+  /// drawn in its own app bar, so the shared pane bar can render them instead
+  /// of dropping them with the rest of the chrome.
+  final ValueNotifier<Widget?>? actionsSink;
+
+  const ToolsPaneChrome({
+    super.key,
+    required this.suppressChrome,
+    this.actionsSink,
+    required super.child,
+  });
+
+  static bool suppressOf(BuildContext context) {
+    return context
+            .dependOnInheritedWidgetOfExactType<ToolsPaneChrome>()
+            ?.suppressChrome ??
+        false;
+  }
+
+  static ValueNotifier<Widget?>? actionsSinkOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<ToolsPaneChrome>()
+        ?.actionsSink;
+  }
+
+  @override
+  bool updateShouldNotify(ToolsPaneChrome oldWidget) =>
+      suppressChrome != oldWidget.suppressChrome ||
+      actionsSink != oldWidget.actionsSink;
 }
 
 extension SheetHeightExt on WidgetRef {

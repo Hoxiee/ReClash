@@ -9,12 +9,14 @@ const sheetSearchMinItemCount = 10;
 
 class SearchField extends StatefulWidget {
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
   final TextEditingController? controller;
   final FocusNode? focusNode;
 
   const SearchField({
     super.key,
     required this.onChanged,
+    this.onSubmitted,
     this.controller,
     this.focusNode,
   });
@@ -52,6 +54,7 @@ class _SearchFieldState extends State<SearchField> {
           textInputAction: TextInputAction.search,
           inputFormatters: TextInputLimits.limit(TextInputLimits.search),
           onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
           decoration: InputDecoration(
             hintText: appLocalizations.search,
             prefixIcon: const GlyphIcon(AppGlyphs.search, size: 20),

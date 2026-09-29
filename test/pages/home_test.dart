@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart'
     hide CaptionGlyph, CaptionIcon, captionGlyphSize;
@@ -392,12 +393,18 @@ void main() {
       );
       await tester.pump();
 
+      final toolsList = find.descendant(
+        of: find.byKey(toolsDesktopIndexKey),
+        matching: find.byType(Scrollable),
+      );
+
       final applicationItem = find.text('Application');
       await tester.scrollUntilVisible(
         applicationItem,
         500,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: toolsList,
       );
+      await tester.pumpAndSettle();
       await tester.tap(applicationItem);
       await tester.pumpAndSettle();
       expect(find.byType(ApplicationSettingView), findsOneWidget);
@@ -406,7 +413,7 @@ void main() {
       await tester.scrollUntilVisible(
         logItem,
         500,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: toolsList,
       );
       await tester.tap(logItem);
       await tester.pumpAndSettle();

@@ -14,6 +14,8 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/config/advanced.dart';
+import 'package:reclash/views/config/ntp.dart';
 import 'package:reclash/views/dashboard/widgets/network_detection.dart' as view;
 import 'package:reclash/views/settings/url_scheme.dart';
 import 'package:reclash/views/tools/connection_doctor.dart';
@@ -832,7 +834,7 @@ void main() {
     expect(find.text('Watching real traffic'), findsOneWidget);
   });
 
-  testWidgets('Tools desktop shows a placeholder before any selection', (
+  testWidgets('Tools desktop shows the placeholder before any selection', (
     tester,
   ) async {
     final core = _MockCoreHandler();
@@ -885,6 +887,8 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(find.text('URL Scheme'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('URL Scheme'));
     await tester.pumpAndSettle();
 
@@ -954,6 +958,171 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byType(UrlSchemeView), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools desktop drills into a sub-screen in place', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Advanced configuration'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Advanced configuration'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('NTP'), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.arrowBack), findsNothing);
+
+    await tester.tap(find.text('NTP'));
+    await tester.pumpAndSettle();
+
+    // Opening a row pushes the sub-screen into the same column with a back
+    // affordance instead of floating a blurred sheet over the whole page.
+    expect(find.byType(NtpView), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.arrowBack), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NtpView), findsNothing);
+    expect(find.text('NTP'), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.arrowBack), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools desktop breadcrumb jumps back to an outer level', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Advanced configuration'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Advanced configuration'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('NTP'));
+    await tester.pumpAndSettle();
+
+    // Two levels deep the detail bar shows the parent as a tappable crumb;
+    // tapping it pops straight back to that level instead of one step at a time.
+    final crumb = find.widgetWithText(TextButton, 'Advanced configuration');
+    expect(crumb, findsOneWidget);
+    expect(find.byType(NtpView), findsOneWidget);
+
+    await tester.tap(crumb);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NtpView), findsNothing);
+    expect(find.byGlyph(AppGlyphs.arrowBack), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools desktop search reaches a setting inside a screen', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.enterText(find.byType(TextField), 'ntp');
+    await tester.pumpAndSettle();
+
+    // The result is grouped under the same heading its tool lives beneath, and
+    // NTP is a setting one screen deep rather than a top-level tool row.
+    expect(find.text('Configuration'), findsOneWidget);
+    expect(find.textContaining('NTP'), findsWidgets);
+
+    await tester.tap(find.textContaining('NTP').first);
+    await tester.pumpAndSettle();
+
+    // A deep hit opens the screen that owns the setting, not the setting alone.
+    expect(find.byType(AdvancedConfigView), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools search remaps a query typed on the wrong layout', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    // 'тез' is what 'ntp' becomes on the Russian ЙЦУКЕН layout; the search
+    // remaps the keys back so a wrong-layout query still lands.
+    await tester.enterText(find.byType(TextField), 'тез');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('NTP'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools search bridges synonyms across languages', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    // 'цвет' (colour) is not a word in any English label; the synonym map ties
+    // it to the appearance screen anyway.
+    await tester.enterText(find.byType(TextField), 'цвет');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Appearance'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Tools search tolerates a single typo', (tester) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    // 'advenced' is one substitution from 'advanced' and matches no label as a
+    // substring, so only the bounded fuzzy fallback can reach the screen.
+    await tester.enterText(find.byType(TextField), 'advenced');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Advanced configuration'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

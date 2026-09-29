@@ -273,17 +273,31 @@ class DecorationListItem extends StatelessWidget {
         final onChanged = openDelegate.onChanged;
         final paneScope = SettingsPaneScope.of(context);
         final paneId = this.paneId;
-        if (paneId != null && paneScope != null && paneScope.active) {
-          return _buildActionCard(
-            proxyDecorator: proxyDecorator,
-            borderRadius: borderRadius,
-            isEnd: isEnd,
-            trailing: effectiveTrailing,
-            selected: paneScope.selectedId == paneId,
-            onTap: () => paneScope.onSelect(
-              SettingsPaneSelection(id: paneId, detail: child),
-            ),
-          );
+        if (paneScope != null && paneScope.active) {
+          if (paneScope.pushes) {
+            final id = paneId ?? 'push:${identityHashCode(child)}';
+            return _buildActionCard(
+              proxyDecorator: proxyDecorator,
+              borderRadius: borderRadius,
+              isEnd: isEnd,
+              trailing: effectiveTrailing,
+              onTap: () => paneScope.onSelect(
+                SettingsPaneSelection(id: id, detail: child, title: title),
+              ),
+            );
+          }
+          if (paneId != null) {
+            return _buildActionCard(
+              proxyDecorator: proxyDecorator,
+              borderRadius: borderRadius,
+              isEnd: isEnd,
+              trailing: effectiveTrailing,
+              selected: paneScope.selectedId == paneId,
+              onTap: () => paneScope.onSelect(
+                SettingsPaneSelection(id: paneId, detail: child, title: title),
+              ),
+            );
+          }
         }
         Future<void> openAction() async {
           final res = await showExtend(

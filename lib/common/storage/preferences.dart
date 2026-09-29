@@ -245,6 +245,16 @@ class Preferences {
     );
   }
 
+  Future<List<String>> getRecentToolIds() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    return preferences?.getStringList('recentToolIds') ?? const [];
+  }
+
+  Future<void> saveRecentToolIds(List<String> ids) async {
+    final preferences = await sharedPreferencesCompleter.future;
+    await preferences?.setStringList('recentToolIds', ids);
+  }
+
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
     await sharedPreferencesIns?.clear();
