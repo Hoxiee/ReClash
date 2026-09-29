@@ -6,14 +6,18 @@
       "sourceKeys": [
         "x-hwid-max-devices-reached"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "`true`",
+      "purpose": "Shows the device-limit message and offers `reclash-supporturl` when available."
     },
     {
       "canonical": "hwidNotSupported",
       "sourceKeys": [
         "x-hwid-not-supported"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "`true`",
+      "purpose": "Shows that the selected client/device mode is unsupported."
     },
     {
       "canonical": "announce",
@@ -21,7 +25,9 @@
         "reclash-announce",
         "announce"
       ],
-      "transform": "base64"
+      "transform": "base64",
+      "value": "Plain text or Base64",
+      "purpose": "Provider announcement. Takes priority over `announce`."
     },
     {
       "canonical": "supportUrl",
@@ -30,7 +36,9 @@
         "support-url",
         "flclashx-supporturl"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Provider support URL",
+      "purpose": "Support page. Use an absolute HTTPS URL."
     },
     {
       "canonical": "reportUrl",
@@ -38,14 +46,18 @@
         "reclash-reporturl",
         "report-url"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Provider issue-report URL",
+      "purpose": "Subscription issue-report action. Use an absolute HTTPS URL."
     },
     {
       "canonical": "updateIntervalMinutes",
       "sourceKeys": [
         "reclash-autoupdateinterval"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Positive integer (minutes for `reclash-autoupdateinterval`, hours for the aliases)",
+      "purpose": "Sets the profile update interval."
     },
     {
       "canonical": "updateIntervalMinutes",
@@ -53,7 +65,9 @@
         "profile-update-interval",
         "flclashx-autoupdateinterval"
       ],
-      "transform": "hours-to-minutes"
+      "transform": "hours-to-minutes",
+      "value": "Positive integer (minutes for `reclash-autoupdateinterval`, hours for the aliases)",
+      "purpose": "Sets the profile update interval."
     },
     {
       "canonical": "serviceName",
@@ -61,7 +75,9 @@
         "reclash-servicename",
         "flclashx-servicename"
       ],
-      "transform": "base64"
+      "transform": "base64",
+      "value": "Plain text or Base64",
+      "purpose": "Provider name shown in the dashboard."
     },
     {
       "canonical": "serviceLogo",
@@ -69,7 +85,9 @@
         "reclash-servicelogo",
         "flclashx-servicelogo"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Absolute HTTPS image URL",
+      "purpose": "Provider logo shown in the dashboard and connection control."
     },
     {
       "canonical": "serverInfoGroup",
@@ -77,14 +95,18 @@
         "reclash-serverinfo",
         "flclashx-serverinfo"
       ],
-      "transform": "base64"
+      "transform": "base64",
+      "value": "Proxy-group name, plain text or Base64",
+      "purpose": "Group used to resolve the active server shown in the dashboard."
     },
     {
       "canonical": "activeText",
       "sourceKeys": [
         "reclash-activetext"
       ],
-      "transform": "base64-trimmed"
+      "transform": "base64-trimmed",
+      "value": "Plain text or Base64",
+      "purpose": "Replaces the active protection caption under the hero orb and in the Android notification."
     },
     {
       "canonical": "buyPlanUrl",
@@ -92,7 +114,9 @@
         "reclash-buyplan",
         "flclashx-buyplan"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Provider URL",
+      "purpose": "Subscription renewal or plan purchase action. Use an absolute HTTPS URL."
     },
     {
       "canonical": "buyTrafficUrl",
@@ -100,7 +124,9 @@
         "reclash-buytraffic",
         "flclashx-buytraffic"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Provider URL",
+      "purpose": "Extra-traffic purchase action. Use an absolute HTTPS URL."
     },
     {
       "canonical": "proxiesView",
@@ -108,7 +134,9 @@
         "reclash-view",
         "flclashx-view"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Proxy-page tokens",
+      "purpose": "Suggests the proxy-page presentation for this profile."
     },
     {
       "canonical": "themeHex",
@@ -116,7 +144,9 @@
         "reclash-hex",
         "flclashx-hex"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Theme tokens",
+      "purpose": "Applies a theme while this profile is active."
     },
     {
       "canonical": "background",
@@ -124,42 +154,54 @@
         "reclash-background",
         "flclashx-background"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Image URL and optional opacity",
+      "purpose": "Applies a dashboard background while this profile is active."
     },
     {
       "canonical": "heroRing",
       "sourceKeys": [
         "reclash-heroring"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Three colors",
+      "purpose": "Sets the connected-state hero-ring gradient."
     },
     {
       "canonical": "heroEffect",
       "sourceKeys": [
         "reclash-heroeffect"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "`aurora` or `none`",
+      "purpose": "Adds an animated aurora effect to the connected-state hero orb. Default `none`."
     },
     {
       "canonical": "panelWidgets",
       "sourceKeys": [
         "reclash-widgets"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Comma-separated widget names",
+      "purpose": "Suggests dashboard widgets and their order."
     },
     {
       "canonical": "widgetsApplyMode",
       "sourceKeys": [
         "reclash-custom"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "`add` or `update`",
+      "purpose": "Controls how `reclash-widgets` is merged."
     },
     {
       "canonical": "panelSettings",
       "sourceKeys": [
         "reclash-settings"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Comma-separated setting tokens",
+      "purpose": "Supplies application defaults when the profile is first added."
     },
     {
       "canonical": "newDomain",
@@ -167,21 +209,27 @@
         "reclash-newdomain",
         "flclashx-newdomain"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Hostname with optional port",
+      "purpose": "Proposes a subscription-domain migration subject to fetch and configuration checks."
     },
     {
       "canonical": "fallbackHosts",
       "sourceKeys": [
         "reclash-fallbackhosts"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Up to four comma-separated hostnames",
+      "purpose": "Supplies fallback hosts for transient fetch failures."
     },
     {
       "canonical": "profileTitle",
       "sourceKeys": [
         "profile-title"
       ],
-      "transform": "none"
+      "transform": "none",
+      "value": "Profile name, plain UTF-8 or Base64",
+      "purpose": "Names the imported profile unless the user has renamed it. Use `base64:` for non-ASCII text."
     }
   ],
   "externalCommon": [
@@ -200,7 +248,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Live upload and download rates."
     },
     {
       "id": "trafficUsage",
@@ -213,7 +262,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Session upload, download and total traffic."
     },
     {
       "id": "networkDetection",
@@ -226,7 +276,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Connectivity and latency probe."
     },
     {
       "id": "tunButton",
@@ -238,7 +289,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Toggles the TUN system tunnel."
     },
     {
       "id": "vpnButton",
@@ -248,7 +300,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Toggles the VPN service."
     },
     {
       "id": "systemProxyButton",
@@ -260,7 +313,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Toggles the system proxy."
     },
     {
       "id": "intranetIp",
@@ -273,7 +327,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Shows the local network address."
     },
     {
       "id": "memoryInfo",
@@ -286,7 +341,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Core memory usage."
     },
     {
       "id": "goroutineInfo",
@@ -299,7 +355,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Core goroutine count."
     },
     {
       "id": "metaInfo",
@@ -311,7 +368,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Core version and build details."
     },
     {
       "id": "announce",
@@ -323,7 +381,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Provider announcement banner."
     },
     {
       "id": "serviceInfo",
@@ -335,7 +394,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Provider service name and logo."
     },
     {
       "id": "changeServerButton",
@@ -347,7 +407,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Opens the server picker."
     },
     {
       "id": "smartRouting",
@@ -359,7 +420,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Smart-routing control."
     },
     {
       "id": "desyncStrategy",
@@ -371,7 +433,8 @@
       ],
       "modes": [
         "byedpi"
-      ]
+      ],
+      "purpose": "DPI-desync strategy selector."
     },
     {
       "id": "desyncTest",
@@ -383,7 +446,8 @@
       ],
       "modes": [
         "byedpi"
-      ]
+      ],
+      "purpose": "DPI-desync strategy test."
     },
     {
       "id": "desyncEngine",
@@ -395,7 +459,8 @@
       ],
       "modes": [
         "byedpi"
-      ]
+      ],
+      "purpose": "DPI-desync engine selector."
     },
     {
       "id": "serviceStatus",
@@ -407,7 +472,8 @@
       ],
       "modes": [
         "vpn"
-      ]
+      ],
+      "purpose": "Connection state and active-server readout."
     },
     {
       "id": "connections",
@@ -420,7 +486,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Active connections list."
     },
     {
       "id": "dnsQueries",
@@ -433,7 +500,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Recent DNS queries."
     },
     {
       "id": "requests",
@@ -446,7 +514,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Recent proxied requests."
     },
     {
       "id": "runTime",
@@ -459,7 +528,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Connection uptime."
     },
     {
       "id": "proxyGroups",
@@ -472,7 +542,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Proxy-group selectors."
     },
     {
       "id": "profiles",
@@ -485,7 +556,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Profile switcher."
     },
     {
       "id": "overrideDnsButton",
@@ -498,7 +570,8 @@
       "modes": [
         "vpn",
         "byedpi"
-      ]
+      ],
+      "purpose": "Toggles the DNS override."
     }
   ],
   "tokens": {
