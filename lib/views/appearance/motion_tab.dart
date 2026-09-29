@@ -21,6 +21,14 @@ class AppearanceMotionTab extends ConsumerWidget {
       ),
     );
     final milestones = ref.watch(milestoneSettingProvider);
+    // The back-gesture animation is an Android transition, so it belongs with
+    // the other motion controls rather than on the Theme tab.
+    final predictiveBackSupported = system.supportsPredictiveBack(
+      ref.watch(versionProvider),
+    );
+    final predictiveBack = ref.watch(
+      themeSettingProvider.select((state) => state.predictiveBack),
+    );
     return SettingsScrollView(
       slivers: [
         SettingSection.sliver(
@@ -51,6 +59,15 @@ class AppearanceMotionTab extends ConsumerWidget {
                   .read(appSettingProvider.notifier)
                   .update((state) => state.copyWith(reduceMotion: value)),
             ),
+            if (predictiveBackSupported)
+              DecorationListItem.toggle(
+                leading: const GlyphIcon(AppGlyphs.dragHandle),
+                title: Text(appLocalizations.predictiveBack),
+                value: predictiveBack,
+                onChanged: (value) => ref
+                    .read(themeSettingProvider.notifier)
+                    .update((state) => state.copyWith(predictiveBack: value)),
+              ),
           ],
         ),
         SettingSection.sliver(

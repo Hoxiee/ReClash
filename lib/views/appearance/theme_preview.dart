@@ -165,7 +165,12 @@ class MiniScreenFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final corner = AppCorner.fit(constraints.maxWidth);
+        // fit() picks xxl at these widths, which reads as a soap-bar
+        // blob; cap at a phone-like radius.
+        final corner = math.min(
+          AppCorner.fit(constraints.maxWidth),
+          AppCorner.md,
+        );
         return DecoratedBox(
           position: DecorationPosition.foreground,
           decoration: ShapeDecoration(
@@ -242,9 +247,11 @@ class MiniScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              // The hero dashboard has no start FAB; its orb owns the
+              // control, so the nav bar spans the full width there.
               Positioned(
                 left: margin,
-                right: margin + fabSize + unit * 0.6,
+                right: hero ? margin : margin + fabSize + unit * 0.6,
                 bottom: margin,
                 height: barHeight,
                 child: DecoratedBox(
@@ -258,13 +265,14 @@ class MiniScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                right: margin,
-                bottom: margin,
-                width: fabSize,
-                height: fabSize,
-                child: _MiniFab(colorScheme: colorScheme, unit: unit),
-              ),
+              if (!hero)
+                Positioned(
+                  right: margin,
+                  bottom: margin,
+                  width: fabSize,
+                  height: fabSize,
+                  child: _MiniFab(colorScheme: colorScheme, unit: unit),
+                ),
             ],
           ),
         );

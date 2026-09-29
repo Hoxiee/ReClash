@@ -51,9 +51,6 @@ class AppearanceThemeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final predictiveBackSupported = system.supportsPredictiveBack(
-      ref.watch(versionProvider),
-    );
     final theme = ref.watch(
       themeSettingProvider.select(
         (state) => (
@@ -61,18 +58,21 @@ class AppearanceThemeTab extends ConsumerWidget {
           darkAt: state.darkAt ?? _defaultDarkAt,
           lightAt: state.lightAt ?? _defaultLightAt,
           pureBlack: state.pureBlack,
-          predictiveBack: state.predictiveBack,
           contrastLevel: state.contrastLevel,
         ),
       ),
     );
     final contrast = theme.contrastLevel.clamp(-1.0, 1.0);
+    // Group the visual pickers first (layout, mode, pure black), then the
+    // list-style controls, so the tab stops alternating between card and row.
     return SettingsScrollView(
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
         const _LayoutChoice(),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         const _ThemeModeChoice(),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+        const _PureBlackChoice(),
         SettingSection.sliver(
           items: [
             DecorationListItem.toggle(
@@ -119,8 +119,6 @@ class AppearanceThemeTab extends ConsumerWidget {
             ],
           ],
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        const _PureBlackChoice(),
         SettingSection.sliver(
           items: [
             SettingSliderItem(
@@ -142,20 +140,6 @@ class AppearanceThemeTab extends ConsumerWidget {
           ],
         ),
         const _TextScaleItem(),
-        if (predictiveBackSupported)
-          SettingSection.sliver(
-            items: [
-              DecorationListItem.toggle(
-                leading: const GlyphIcon(AppGlyphs.dragHandle),
-                title: Text(appLocalizations.predictiveBack),
-                value: theme.predictiveBack,
-                onChanged: (value) => _update(
-                  ref,
-                  (state) => state.copyWith(predictiveBack: value),
-                ),
-              ),
-            ],
-          ),
         const AppearanceColorSections(),
         const SettingBottomInset.sliver(),
       ],
@@ -258,7 +242,7 @@ class _LayoutCard extends StatelessWidget {
         radius: AppCorner.lg,
         isSelected: isSelected,
         onPressed: onPressed,
-        padding: const EdgeInsets.all(12),
+        padding: AppInsets.md,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 8,
@@ -530,7 +514,7 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       MediaQuery.withNoTextScaling(
                         child: Row(
                           spacing: 12,
