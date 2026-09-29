@@ -826,6 +826,8 @@
   "smartPauseStrictDesc": "Ikkala turdagi qoidalar bo‘lsa, faqat SSID va quyi tarmoq mos kelsa to‘xtatish",
   "smartPauseMatchedOn": "Moslik {rule} • {time}",
   "broadNetworkWarn": "Keng qoida — katta manzil oralig‘iga ishonadi",
+  "smartPauseFullStop": "To‘liq to‘xtatish",
+  "smartPauseFullStopDesc": "Ishonchli tarmoqlarda pauza o‘rniga VPN’ni to‘liq to‘xtatish",
   "locationPermissionDesc": "Tizim Wi-Fi nomini oʻqish uchun joylashuv ruxsatini talab qiladi. Androidda \"Har doim ruxsat berish\"ni tanlang, aks holda ilova fonda ishlayotganda Wi-Fi nomini oʻqib boʻlmaydi.",
   "locationPermissionDeniedMessage": "Joylashuv ruxsati rad etildi, shuning uchun hozirgi Wi-Fi nomini oʻqib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
   "authorized": "Ruxsat berilgan",

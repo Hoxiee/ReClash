@@ -826,6 +826,8 @@
   "smartPauseStrictDesc": "두 종류의 규칙이 모두 있으면 SSID와 서브넷이 모두 일치할 때만 일시 중지",
   "smartPauseMatchedOn": "일치 {rule} • {time}",
   "broadNetworkWarn": "범위가 넓은 규칙 — 많은 주소를 신뢰합니다",
+  "smartPauseFullStop": "완전 중지",
+  "smartPauseFullStopDesc": "신뢰하는 네트워크에서 일시 중지 대신 VPN을 완전히 중지합니다",
   "locationPermissionDesc": "와이파이 이름을 확인하려면 위치 권한이 필요합니다. Android에서는 \"항상 허용\"을 선택하세요. 그렇지 않으면 앱이 백그라운드에 있을 때 와이파이 이름을 확인할 수 없습니다.",
   "locationPermissionDeniedMessage": "위치 권한이 거부되어 현재 와이파이 이름을 확인할 수 없습니다. 시스템 설정에서 위치 권한을 직접 허용해 주세요.",
   "authorized": "승인됨",

@@ -73,6 +73,8 @@ void main() {
 
     when(() => coreInterface.pauseTun()).thenAnswer((_) => log('pause'));
     when(() => coreInterface.resumeTun()).thenAnswer((_) => log('resume'));
+    when(() => coreInterface.stopListener()).thenAnswer((_) => log('stop'));
+    when(() => coreInterface.startListener()).thenAnswer((_) => log('start'));
     when(
       () => coreInterface.closeConnections(),
     ).thenAnswer((_) => log('close'));
@@ -325,5 +327,28 @@ void main() {
     final resumed = container.read(smartPauseLastEventProvider);
     expect(resumed?.paused, isFalse);
     expect(resumed?.rule, isEmpty);
+  });
+
+  testWidgets('a full stop drops the listeners instead of pausing TUN', (
+    tester,
+  ) async {
+    final container = await pumpManager(tester);
+    container
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: ['Office'],
+            smartPauseFullStop: true,
+          ),
+        );
+    container.read(currentSSIDProvider.notifier).value = 'Office';
+    container.read(runTimeProvider.notifier).update((_) => 1);
+    await tester.pump(_debounce);
+    expect(calls, ['stop']);
+
+    container.read(currentSSIDProvider.notifier).value = 'Cafe';
+    await tester.pump(_debounce);
+    expect(calls, ['stop', 'start']);
   });
 }

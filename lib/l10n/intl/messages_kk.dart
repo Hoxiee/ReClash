@@ -3189,6 +3189,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Сенімді желілерде VPN автоматты түрде кідіртіледі",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage("Толық тоқтату"),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Сенімді желілерде кідіртудің орнына VPN-ді толық тоқтату",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSID мен ішкі желіні бірге талап ету",

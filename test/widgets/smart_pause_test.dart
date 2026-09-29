@@ -374,9 +374,19 @@ void main() {
 
     expect(container.read(vpnSettingProvider).smartPauseStrict, isFalse);
 
-    await tester.tap(find.byType(Switch).last);
+    await tester.tap(find.byType(Switch).at(2));
     await tester.pumpAndSettle();
     expect(container.read(vpnSettingProvider).smartPauseStrict, isTrue);
+  });
+
+  testWidgets('the full-stop switch toggles listener shutdown', (tester) async {
+    await pumpView(tester, networks: ['Home']);
+
+    expect(container.read(vpnSettingProvider).smartPauseFullStop, isFalse);
+
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+    expect(container.read(vpnSettingProvider).smartPauseFullStop, isTrue);
   });
 
   testWidgets('a broad rule carries a warning icon', (tester) async {

@@ -66,7 +66,19 @@ class CoreAction extends _$CoreAction {
     }
     if (!isCurrent()) return;
     if (ref.read(pausedProvider)) {
-      await _core.pauseTun();
+      final vpn = ref.read(vpnSettingProvider);
+      if (vpn.smartPauseFullStop &&
+          smartPauseMatches(
+            vpn.smartPauseNetworks,
+            ssid: ref.read(currentSSIDProvider),
+            ipv4s: ref.read(currentIPv4sProvider),
+            ipv6s: ref.read(currentIPv6sProvider),
+            strict: vpn.smartPauseStrict,
+          )) {
+        await _core.stopListener();
+      } else {
+        await _core.pauseTun();
+      }
     }
     if (isCurrent()) {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.connected;

@@ -3172,6 +3172,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Ynamly torlarda VPN-i awtomatiki bes etmek",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage(
+      "Doly bes etmek",
+    ),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Ynamly torlarda bes etmegiň deregine VPN-i doly bes etmek",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSID we tor segmentini bilelikde talap et",

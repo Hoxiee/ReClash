@@ -3205,6 +3205,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Автоматически ставит VPN на паузу в доверенных сетях",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage(
+      "Полная остановка",
+    ),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Полностью останавливать VPN в доверенных сетях вместо паузы",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "Требовать SSID и подсеть вместе",

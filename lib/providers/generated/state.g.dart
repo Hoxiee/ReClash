@@ -1074,7 +1074,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'291224e3e3996bec8eb0d443840583e5021411ea';
+String _$sharedStateHash() => r'7d2471ad5286e191addbec1d4002f9cf6b560912';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1238,7 +1238,7 @@ final class NetworkAnchorProvider
   }
 }
 
-String _$networkAnchorHash() => r'3a92214e3be02f4f1221367bed0c52a7db7f7275';
+String _$networkAnchorHash() => r'f22db0f80fc172253fa557fe5091064ab8b7f6b6';
 
 @ProviderFor(paused)
 final pausedProvider = PausedProvider._();
@@ -1278,7 +1278,7 @@ final class PausedProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$pausedHash() => r'43d09d78697075bb6873aac9b2fe9c282546baec';
+String _$pausedHash() => r'bdd9274f715b1b72f3664d8664dd02de91530beb';
 
 @ProviderFor(tunEnabled)
 final tunEnabledProvider = TunEnabledProvider._();

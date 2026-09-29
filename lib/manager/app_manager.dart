@@ -85,14 +85,25 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         }
         debouncer.call(FunctionTag.smartPause, () async {
           final core = ref.read(coreHandlerProvider);
+          final fullStop = ref.read(
+            vpnSettingProvider.select((state) => state.smartPauseFullStop),
+          );
           try {
             if (ref.read(pausedProvider)) {
-              await core.pauseTun();
+              if (fullStop) {
+                await core.stopListener();
+              } else {
+                await core.pauseTun();
+              }
               if (ref.read(vpnSettingProvider).smartPauseCloseConnections) {
                 await core.closeConnections();
               }
             } else {
-              await core.resumeTun();
+              if (fullStop) {
+                await core.startListener();
+              } else {
+                await core.resumeTun();
+              }
             }
           } catch (error) {
             commonPrint.log(

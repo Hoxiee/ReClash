@@ -2231,6 +2231,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPause": MessageLookupByLibrary.simpleMessage("智能暂停"),
     "smartPauseCloseConnections": MessageLookupByLibrary.simpleMessage("断开连接"),
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage("在受信任的网络中自动暂停 VPN"),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage("完全停止"),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "在受信任的网络中完全停止 VPN，而不是暂停",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage("同时要求 SSID 与网段匹配"),
     "smartPauseStrictDesc": MessageLookupByLibrary.simpleMessage(

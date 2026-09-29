@@ -3085,6 +3085,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Pause the VPN automatically on trusted networks",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage("Full stop"),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Shut the VPN down completely on trusted networks instead of pausing it",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "Require SSID and subnet together",

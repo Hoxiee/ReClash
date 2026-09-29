@@ -2280,22 +2280,19 @@ abstract class _$CurrentIPv6s extends $Notifier<List<String>> {
   }
 }
 
-/// The last Smart Pause transition and the rule behind it, so the settings
-/// screen can name the match instead of only showing a generic banner.
+/// The last Smart Pause transition, so the status names the rule behind it.
 
 @ProviderFor(SmartPauseLastEvent)
 final smartPauseLastEventProvider = SmartPauseLastEventProvider._();
 
-/// The last Smart Pause transition and the rule behind it, so the settings
-/// screen can name the match instead of only showing a generic banner.
+/// The last Smart Pause transition, so the status names the rule behind it.
 final class SmartPauseLastEventProvider
     extends
         $NotifierProvider<
           SmartPauseLastEvent,
           ({DateTime at, bool paused, String rule})?
         > {
-  /// The last Smart Pause transition and the rule behind it, so the settings
-  /// screen can name the match instead of only showing a generic banner.
+  /// The last Smart Pause transition, so the status names the rule behind it.
   SmartPauseLastEventProvider._()
     : super(
         from: null,
@@ -2327,8 +2324,7 @@ final class SmartPauseLastEventProvider
 String _$smartPauseLastEventHash() =>
     r'181d297f71445dbf679ca9b78400c3b8937728e4';
 
-/// The last Smart Pause transition and the rule behind it, so the settings
-/// screen can name the match instead of only showing a generic banner.
+/// The last Smart Pause transition, so the status names the rule behind it.
 
 abstract class _$SmartPauseLastEvent
     extends $Notifier<({DateTime at, bool paused, String rule})?> {

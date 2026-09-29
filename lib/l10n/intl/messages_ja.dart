@@ -2570,6 +2570,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "信頼できるネットワークで自動的にVPNを一時停止します",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage("完全停止"),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "信頼できるネットワークでは一時停止ではなくVPNを完全に停止します",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSIDとサブネットの両方を要求する",

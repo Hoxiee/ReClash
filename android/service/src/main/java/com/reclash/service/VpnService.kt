@@ -282,8 +282,16 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     // Tears only the TUN down; never marks paused a service whose TUN a stop already removed.
+    // A full stop additionally drops every listener, FlClash on-demand style.
     override fun pause(manual: Boolean) {
+        val fullStop = ServiceConfig.vpnOptions?.smartPauseFullStop == true
+        if (fullStop) {
+            Core.stopListeners()
+        }
         val hadTun = tunLifecycle.pause(Core::stopTun)
+        if (!hadTun && !fullStop) {
+            return
+        }
         if (!hadTun) {
             return
         }
@@ -308,6 +316,9 @@ class VpnService : SystemVpnService(), ManagedService {
             )
         ) {
             return
+        }
+        if (ServiceConfig.vpnOptions?.smartPauseFullStop == true) {
+            Core.startListeners()
         }
         ServiceConfig.updatePauseState(PauseState(paused = false, manual = manual))
     }

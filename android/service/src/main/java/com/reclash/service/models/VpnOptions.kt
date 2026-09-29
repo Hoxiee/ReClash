@@ -27,6 +27,7 @@ data class VpnOptions(
     val smartPauseNetworks: List<String> = emptyList(),
     val smartPauseCloseConnections: Boolean = false,
     val smartPauseStrict: Boolean = false,
+    val smartPauseFullStop: Boolean = false,
     val desyncEnabled: Boolean = false,
     val desyncOnly: Boolean = false,
     val desyncPort: Int = 0,

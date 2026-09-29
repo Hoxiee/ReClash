@@ -7667,6 +7667,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Full stop`
+  String get smartPauseFullStop {
+    return Intl.message(
+      'Full stop',
+      name: 'smartPauseFullStop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shut the VPN down completely on trusted networks instead of pausing it`
+  String get smartPauseFullStopDesc {
+    return Intl.message(
+      'Shut the VPN down completely on trusted networks instead of pausing it',
+      name: 'smartPauseFullStopDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The system requires location permission to read the Wi-Fi name. On Android choose "Allow all the time", otherwise the Wi-Fi name cannot be read while the app is in the background.`
   String get locationPermissionDesc {
     return Intl.message(

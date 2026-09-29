@@ -273,6 +273,7 @@ SharedState sharedState(Ref ref) {
       smartPauseNetworks: vpnSetting.smartPauseNetworks,
       smartPauseCloseConnections: vpnSetting.smartPauseCloseConnections,
       smartPauseStrict: vpnSetting.smartPauseStrict,
+      smartPauseFullStop: vpnSetting.smartPauseFullStop,
       desyncEnabled: desyncSetting.enabled,
       desyncOnly: desyncSetting.enabled && desyncSetting.onlyDpi,
       desyncPort: desyncSetting.port,

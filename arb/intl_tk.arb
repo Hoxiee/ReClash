@@ -826,6 +826,8 @@
   "smartPauseStrictDesc": "Iki görnüşli düzgün bar bolsa, diňe SSID we tor segmenti gabat gelse bes et",
   "smartPauseMatchedOn": "Gabat {rule} • {time}",
   "broadNetworkWarn": "Giň düzgün — köp salgy diapazonyna ynanýar",
+  "smartPauseFullStop": "Doly bes etmek",
+  "smartPauseFullStopDesc": "Ynamly torlarda bes etmegiň deregine VPN-i doly bes etmek",
   "locationPermissionDesc": "Ulgam Wi-Fi adyny okamak üçin ýer rugsaty gerek. Android-de \"Ähli wagt rugsat ber\" wariantyny saýlaň, ýogsam programma fonda işleýände Wi-Fi adyny okap bolmaýar.",
   "locationPermissionDeniedMessage": "Ýer rugsaty ret edildi, şonuň üçin häzirki Wi-Fi adyny okap bolmaýar. Ýer rugsatyny ulgam sazlamalarynda el bilen beriň.",
   "authorized": "Rugsat berlen",

@@ -918,6 +918,8 @@
   "smartPauseStrictDesc": "When both kinds of rules exist, pause only if an SSID and a subnet both match",
   "smartPauseMatchedOn": "Matched {rule} • {time}",
   "broadNetworkWarn": "Broad rule — trusts a large address range",
+  "smartPauseFullStop": "Full stop",
+  "smartPauseFullStopDesc": "Shut the VPN down completely on trusted networks instead of pausing it",
   "locationPermissionDesc": "The system requires location permission to read the Wi-Fi name. On Android choose \"Allow all the time\", otherwise the Wi-Fi name cannot be read while the app is in the background.",
   "locationPermissionDeniedMessage": "Location permission was denied, so the current Wi-Fi name cannot be read. Please enable location permission manually in system settings.",
   "authorized": "Authorized",

@@ -3258,6 +3258,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Ishonchli tarmoqlarda VPN avtomatik toʻxtatiladi",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage(
+      "To‘liq to‘xtatish",
+    ),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Ishonchli tarmoqlarda pauza o‘rniga VPN’ni to‘liq to‘xtatish",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSID va quyi tarmoqni birga talab qilish",

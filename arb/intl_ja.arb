@@ -854,6 +854,8 @@
   "smartPauseStrictDesc": "両方の種類のルールがある場合、SSIDとサブネットの両方が一致したときのみ一時停止します",
   "smartPauseMatchedOn": "一致 {rule} • {time}",
   "broadNetworkWarn": "範囲の広いルール — 大量のアドレスを信頼します",
+  "smartPauseFullStop": "完全停止",
+  "smartPauseFullStopDesc": "信頼できるネットワークでは一時停止ではなくVPNを完全に停止します",
   "locationPermissionDesc": "システムの要件により、Wi-Fi 名の取得には位置情報の権限が必要です。Android では「常に許可」を選択してください。そうしないと、アプリがバックグラウンドにあるときに Wi-Fi 名を取得できません。",
   "locationPermissionDeniedMessage": "位置情報の権限が拒否されたため、現在の Wi-Fi 名を取得できません。システム設定で位置情報の権限を手動で有効にしてください。",
   "authorized": "許可済み",

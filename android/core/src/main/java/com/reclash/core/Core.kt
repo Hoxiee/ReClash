@@ -289,6 +289,10 @@ object Core {
 
     fun closeConnections() = invokeWithoutArguments("closeConnections")
 
+    fun stopListeners() = invokeWithoutArguments("stopListener")
+
+    fun startListeners() = invokeWithoutArguments("startListener")
+
     fun rcxNetwork(payload: String) {
         invokeMethod("""{"method":"rcxNetwork","arguments":$payload}""") {}
     }

@@ -441,6 +441,20 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
               },
             ),
           ),
+        if (vpnSetting.smartPauseEnabled)
+          FadeSlideEnterBox(
+            child: DecorationListItem.toggle(
+              contentPadding: _togglePadding,
+              title: Text(appLocalizations.smartPauseFullStop),
+              subtitle: Text(appLocalizations.smartPauseFullStopDesc),
+              value: vpnSetting.smartPauseFullStop,
+              onChanged: (value) {
+                ref.read(vpnSettingProvider.notifier).update((state) {
+                  return state.copyWith(smartPauseFullStop: value);
+                });
+              },
+            ),
+          ),
       ],
     );
   }

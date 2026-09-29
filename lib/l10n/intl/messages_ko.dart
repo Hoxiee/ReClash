@@ -2553,6 +2553,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "신뢰할 수 있는 네트워크에 연결되면 VPN을 자동으로 일시 중지합니다",
     ),
+    "smartPauseFullStop": MessageLookupByLibrary.simpleMessage("완전 중지"),
+    "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "신뢰하는 네트워크에서 일시 중지 대신 VPN을 완전히 중지합니다",
+    ),
     "smartPauseMatchedOn": m82,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSID와 서브넷 함께 일치 요구",
