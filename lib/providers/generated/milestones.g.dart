@@ -49,7 +49,7 @@ final class MilestoneRoutingHistoryProvider
 }
 
 String _$milestoneRoutingHistoryHash() =>
-    r'a5991c4bdd8059600d5f233a881548ae918e677d';
+    r'9ea9a4b8ed3db853359110424a503a8fba11d1b3';
 
 @ProviderFor(Milestones)
 final milestonesProvider = MilestonesProvider._();

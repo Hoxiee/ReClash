@@ -9,27 +9,28 @@ part of '../action.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CommonAction)
-final commonActionProvider = CommonActionProvider._();
+@ProviderFor(AppUpdateAction)
+final appUpdateActionProvider = AppUpdateActionProvider._();
 
-final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
-  CommonActionProvider._()
+final class AppUpdateActionProvider
+    extends $NotifierProvider<AppUpdateAction, void> {
+  AppUpdateActionProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'commonActionProvider',
+        name: r'appUpdateActionProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$commonActionHash();
+  String debugGetCreateSourceHash() => _$appUpdateActionHash();
 
   @$internal
   @override
-  CommonAction create() => CommonAction();
+  AppUpdateAction create() => AppUpdateAction();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -40,60 +41,9 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'46887e0a1e800f181e66738a7df182785b000232';
+String _$appUpdateActionHash() => r'e935fdbc2543ad5b51e6e614f9cee34a7e98fb5f';
 
-abstract class _$CommonAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(SetupAction)
-final setupActionProvider = SetupActionProvider._();
-
-final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
-  SetupActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'setupActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$setupActionHash();
-
-  @$internal
-  @override
-  SetupAction create() => SetupAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$setupActionHash() => r'2acb1b623275b14c3092edaafa2fe5eb1ed2e4db';
-
-abstract class _$SetupAction extends $Notifier<void> {
+abstract class _$AppUpdateAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
@@ -162,6 +112,57 @@ abstract class _$BackupAction extends $Notifier<void> {
   }
 }
 
+@ProviderFor(CommonAction)
+final commonActionProvider = CommonActionProvider._();
+
+final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
+  CommonActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'commonActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$commonActionHash();
+
+  @$internal
+  @override
+  CommonAction create() => CommonAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$commonActionHash() => r'46887e0a1e800f181e66738a7df182785b000232';
+
+abstract class _$CommonAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(CoreAction)
 final coreActionProvider = CoreActionProvider._();
 
@@ -196,263 +197,6 @@ final class CoreActionProvider extends $NotifierProvider<CoreAction, void> {
 String _$coreActionHash() => r'3838198c67dc803f6a95728908b156d053f5225a';
 
 abstract class _$CoreAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(SystemAction)
-final systemActionProvider = SystemActionProvider._();
-
-final class SystemActionProvider extends $NotifierProvider<SystemAction, void> {
-  SystemActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'systemActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$systemActionHash();
-
-  @$internal
-  @override
-  SystemAction create() => SystemAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$systemActionHash() => r'3abf7d95ab5cdc2ff56e99d16ae3932928d399d5';
-
-abstract class _$SystemAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(StoreAction)
-final storeActionProvider = StoreActionProvider._();
-
-final class StoreActionProvider extends $NotifierProvider<StoreAction, void> {
-  StoreActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'storeActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$storeActionHash();
-
-  @$internal
-  @override
-  StoreAction create() => StoreAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$storeActionHash() => r'b8c4621432508a5f38a07e729e3077e1b05394b6';
-
-abstract class _$StoreAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(ThemeAction)
-final themeActionProvider = ThemeActionProvider._();
-
-final class ThemeActionProvider extends $NotifierProvider<ThemeAction, void> {
-  ThemeActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'themeActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$themeActionHash();
-
-  @$internal
-  @override
-  ThemeAction create() => ThemeAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$themeActionHash() => r'71ff53cb15ca8569ee4084bebbfa8f5497ba52a0';
-
-abstract class _$ThemeAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(ProxiesAction)
-final proxiesActionProvider = ProxiesActionProvider._();
-
-final class ProxiesActionProvider
-    extends $NotifierProvider<ProxiesAction, void> {
-  ProxiesActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'proxiesActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$proxiesActionHash();
-
-  @$internal
-  @override
-  ProxiesAction create() => ProxiesAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$proxiesActionHash() => r'1362b4f1a6b685fcaf16deca652678ffc838f998';
-
-abstract class _$ProxiesAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(ProfilesAction)
-final profilesActionProvider = ProfilesActionProvider._();
-
-final class ProfilesActionProvider
-    extends $NotifierProvider<ProfilesAction, void> {
-  ProfilesActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'profilesActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$profilesActionHash();
-
-  @$internal
-  @override
-  ProfilesAction create() => ProfilesAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$profilesActionHash() => r'78400c21abee3c5579e594d030f262c5635f9da0';
-
-abstract class _$ProfilesAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
@@ -522,6 +266,314 @@ abstract class _$GeoResourceAction extends $Notifier<void> {
   }
 }
 
+@ProviderFor(ProfilesAction)
+final profilesActionProvider = ProfilesActionProvider._();
+
+final class ProfilesActionProvider
+    extends $NotifierProvider<ProfilesAction, void> {
+  ProfilesActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profilesActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profilesActionHash();
+
+  @$internal
+  @override
+  ProfilesAction create() => ProfilesAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$profilesActionHash() => r'37187463c8b635fd99304ddaafe41bf5629d6ea9';
+
+abstract class _$ProfilesAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(ProxiesAction)
+final proxiesActionProvider = ProxiesActionProvider._();
+
+final class ProxiesActionProvider
+    extends $NotifierProvider<ProxiesAction, void> {
+  ProxiesActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'proxiesActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxiesActionHash();
+
+  @$internal
+  @override
+  ProxiesAction create() => ProxiesAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$proxiesActionHash() => r'33f7ee69f38f1c6ae7e248f9cf37d8533f0f4091';
+
+abstract class _$ProxiesAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(SetupAction)
+final setupActionProvider = SetupActionProvider._();
+
+final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
+  SetupActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'setupActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$setupActionHash();
+
+  @$internal
+  @override
+  SetupAction create() => SetupAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$setupActionHash() => r'450c0823998be76bc509c973e61a4de63f86962c';
+
+abstract class _$SetupAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(StoreAction)
+final storeActionProvider = StoreActionProvider._();
+
+final class StoreActionProvider extends $NotifierProvider<StoreAction, void> {
+  StoreActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'storeActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$storeActionHash();
+
+  @$internal
+  @override
+  StoreAction create() => StoreAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$storeActionHash() => r'b8c4621432508a5f38a07e729e3077e1b05394b6';
+
+abstract class _$StoreAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(SystemAction)
+final systemActionProvider = SystemActionProvider._();
+
+final class SystemActionProvider extends $NotifierProvider<SystemAction, void> {
+  SystemActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'systemActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$systemActionHash();
+
+  @$internal
+  @override
+  SystemAction create() => SystemAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$systemActionHash() => r'3abf7d95ab5cdc2ff56e99d16ae3932928d399d5';
+
+abstract class _$SystemAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(ThemeAction)
+final themeActionProvider = ThemeActionProvider._();
+
+final class ThemeActionProvider extends $NotifierProvider<ThemeAction, void> {
+  ThemeActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'themeActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$themeActionHash();
+
+  @$internal
+  @override
+  ThemeAction create() => ThemeAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$themeActionHash() => r'71ff53cb15ca8569ee4084bebbfa8f5497ba52a0';
+
+abstract class _$ThemeAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(UpdatingAction)
 final updatingActionProvider = UpdatingActionProvider._();
 
@@ -557,58 +609,6 @@ final class UpdatingActionProvider
 String _$updatingActionHash() => r'f98e26e80cc700f84e880393d0b280a08c37789b';
 
 abstract class _$UpdatingAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(AppUpdateAction)
-final appUpdateActionProvider = AppUpdateActionProvider._();
-
-final class AppUpdateActionProvider
-    extends $NotifierProvider<AppUpdateAction, void> {
-  AppUpdateActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'appUpdateActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$appUpdateActionHash();
-
-  @$internal
-  @override
-  AppUpdateAction create() => AppUpdateAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$appUpdateActionHash() => r'e935fdbc2543ad5b51e6e614f9cee34a7e98fb5f';
-
-abstract class _$AppUpdateAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
