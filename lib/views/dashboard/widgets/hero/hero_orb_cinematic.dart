@@ -33,6 +33,7 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
 
   OverlayEntry? _cinematicEntry;
   Rect _cinematicOrbRect = Rect.zero;
+  Size _cinematicOverlaySize = Size.zero;
   double _cinematicScreenShort = 0;
 
   Offset? _chargeOrigin;
@@ -285,8 +286,15 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
     final box = context.findRenderObject() as RenderBox?;
     final overlay = Overlay.maybeOf(context);
     if (box == null || !box.hasSize || overlay == null) return;
-    _cinematicOrbRect = box.localToGlobal(Offset.zero) & box.size;
-    _cinematicScreenShort = MediaQuery.sizeOf(context).shortestSide;
+    // Anchor against the overlay we insert into, not the render root: on the
+    // desktop panes that overlay is offset, so a bare global rect drifts.
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    _cinematicOrbRect =
+        box.localToGlobal(Offset.zero, ancestor: overlayBox) & box.size;
+    _cinematicOverlaySize = (overlayBox != null && overlayBox.hasSize)
+        ? overlayBox.size
+        : MediaQuery.sizeOf(context);
+    _cinematicScreenShort = _cinematicOverlaySize.shortestSide;
     _cinematicEntry = OverlayEntry(builder: _buildCinematic);
     overlay.insert(_cinematicEntry!);
   }
@@ -384,19 +392,17 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
           );
           final singularitySpin = 3.0 + s * 4 + s * s * 6;
 
-          final screen = MediaQuery.sizeOf(context);
+          final screen = _cinematicOverlaySize.isEmpty
+              ? MediaQuery.sizeOf(context)
+              : _cinematicOverlaySize;
           final screenShort = math.min(screen.width, screen.height);
-          final screenCenter = Offset(screen.width / 2, screen.height / 2);
           final grow = Curves.easeInOutCubic.transform(
             ((collapseLocal - 0.12) / 0.78).clamp(0.0, 1.0),
           );
-          final risePos = showSingularity ? 1.0 : grow;
           final riseScale = showSingularity ? 1.0 : grow;
-          final focal = Offset.lerp(
-            _cinematicOrbRect.center,
-            screenCenter,
-            risePos,
-          )!;
+          // The hole grows in place over the orb; drifting it to the viewport
+          // centre threw it off to the side on the wide desktop panes.
+          final focal = _cinematicOrbRect.center;
           final bodyDia = lerpDouble(
             _cinematicOrbRect.shortestSide * 0.92,
             screenShort * 0.5,
