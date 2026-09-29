@@ -519,6 +519,16 @@
   "subscriptionExpired": "Your subscription has expired",
   "subscriptionExpiresToday": "Your subscription expires today",
   "subscriptionExpiresInDays": "{count, plural, =1{Your subscription expires tomorrow} other{Your subscription expires in {count} days}}",
+  "updateSubscription": "Update subscription",
+  "personalCabinet": "Account portal",
+  "subscriptionTrafficLow": "You have used {percent}% of your traffic",
+  "@subscriptionTrafficLow": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "overrideNetworkSettings": "Override network settings",
   "overrideNetworkSettingsDesc": "Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values",
   "disclaimer": "Disclaimer",

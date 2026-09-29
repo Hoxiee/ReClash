@@ -262,13 +262,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "提供方建议 ${value}";
 
-  static String m119(total) => "剩余（共 ${total}）";
+  static String m118(percent) => "已使用 ${percent}% 的流量";
 
-  static String m120(label) => "${label}必须为URL";
+  static String m120(total) => "剩余（共 ${total}）";
 
-  static String m121(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+  static String m121(label) => "${label}必须为URL";
 
-  static String m122(count) => "${count} 年前";
+  static String m122(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+
+  static String m123(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1744,6 +1746,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pauseVpn": MessageLookupByLibrary.simpleMessage("正在暂停VPN..."),
     "paused": MessageLookupByLibrary.simpleMessage("已暂停"),
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage("永久订阅"),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("个人中心"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("从相册选择"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("选择网络"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("周围可见的 Wi-Fi 网络"),
@@ -3037,6 +3040,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新失败",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "订阅中未找到常规节点地址。面板可能返回了占位配置。尚未测试服务器连接。",
     ),
@@ -3091,7 +3095,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("合计"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("总流量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
@@ -3118,6 +3122,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("下载更新失败"),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage("更新订阅"),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage("下载的文件已损坏"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "upstream": MessageLookupByLibrary.simpleMessage("上游"),
@@ -3152,7 +3157,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("配置文件"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切换"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage("停止时连接，运行时断开"),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -3190,7 +3195,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请选择有效的 PNG、JPEG 或 WebP 图片。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("宝珠不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
@@ -3224,7 +3229,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("写入系统"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage("将获取到的时间同步到系统时钟"),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

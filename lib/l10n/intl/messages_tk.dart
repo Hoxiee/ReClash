@@ -291,14 +291,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "Üpjün edijiniň teklifi: ${value}";
 
-  static String m119(total) => "galýan, umumy ${total}";
+  static String m118(percent) => "Trafigiň ${percent}%-i ulanyldy";
 
-  static String m120(label) => "${label} URL bolmaly";
+  static String m120(total) => "galýan, umumy ${total}";
 
-  static String m121(count) =>
-      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
+  static String m121(label) => "${label} URL bolmaly";
 
   static String m122(count) =>
+      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2455,6 +2457,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Möhletsiz abuna",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("Şahsy kabinet"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Galereýadan saýla"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("Tor saýla"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -4284,6 +4287,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Täzeleniş säwlikleri",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Abunalykda adaty düwün salgylary tapylmady. Panel wagtlaýyn boş konfigurasiýa gaýtaran bolmagy mümkin. Serwerlere baglanyşyk barlanmady.",
     ),
@@ -4356,7 +4360,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Jemi"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jemi trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy porty"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
@@ -4396,6 +4400,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "update": MessageLookupByLibrary.simpleMessage("Täzele"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Täzelenmäni göçürip alyp bolmady",
+    ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage(
+      "Abunany täzelemek",
     ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Göçürip alnan faýl bozuk",
@@ -4451,7 +4458,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Beslenen bolsa baglanýar, işleýän bolsa aýrylýar",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -4503,7 +4510,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Suratyň dury dälligi",
     ),
@@ -4553,7 +4560,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Alnan wagty ulgam sagadyna sinhronlaşdyrmak",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };
 }

@@ -297,14 +297,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "Provayder tavsiya qiladi: ${value}";
 
-  static String m119(total) => "${total} ichidan boʻsh";
+  static String m118(percent) => "Trafikning ${percent}% ishlatildi";
 
-  static String m120(label) => "${label} URL boʻlishi kerak";
+  static String m120(total) => "${total} ichidan boʻsh";
 
-  static String m121(count) =>
-      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+  static String m121(label) => "${label} URL boʻlishi kerak";
 
   static String m122(count) =>
+      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2515,6 +2517,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Abadiy obuna",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("Shaxsiy kabinet"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Albomdan tanlash"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("Tarmoqni tanlash"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -4390,6 +4393,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Yangilanish nosozliklari",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Obunada odatiy tugun manzillari topilmadi. Panel vaqtinchalik bo‘sh konfiguratsiya qaytargan bo‘lishi mumkin. Serverlarga ulanish tekshirilmadi.",
     ),
@@ -4474,7 +4478,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Jami"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jami trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
@@ -4516,6 +4520,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "update": MessageLookupByLibrary.simpleMessage("Yangilash"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Yangilanish yuklab olinmadi.",
+    ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage(
+      "Obunani yangilash",
     ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Yuklab olingan fayl shikastlangan.",
@@ -4573,7 +4580,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Oʻchiq boʻlsa ulaydi, yoniq boʻlsa uzadi",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -4627,7 +4634,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -4681,7 +4688,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Olingan vaqtni tizim soatiga sinxronlash",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",
     ),

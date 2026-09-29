@@ -288,17 +288,19 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "Провайдер предлагает ${value}";
 
-  static String m118(count) =>
+  static String m118(percent) => "Израсходовано ${percent}% трафика";
+
+  static String m119(count) =>
       "${Intl.plural(count, zero: 'Ничего не найдено', one: '1 результат', few: '${count} результата', many: '${count} результатов', other: '${count} результата')}";
 
-  static String m119(total) => "свободно из ${total}";
+  static String m120(total) => "свободно из ${total}";
 
-  static String m120(label) => "Значение «${label}» должно быть URL";
-
-  static String m121(count) =>
-      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+  static String m121(label) => "Значение «${label}» должно быть URL";
 
   static String m122(count) =>
+      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2478,6 +2480,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Бессрочная подписка",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("Личный кабинет"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Выбрать из галереи"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("Выбор сети"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -4321,6 +4324,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Сбои обновления",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "В подписке не найдено обычных адресов узлов. Возможно, панель вернула заглушку. Подключение к серверам не проверялось.",
     ),
@@ -4391,7 +4395,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage(
       "Поиск инструментов",
     ),
-    "toolsSearchResultsCount": m118,
+    "toolsSearchResultsCount": m119,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Выберите настройку, чтобы посмотреть её здесь.",
     ),
@@ -4400,7 +4404,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Всего"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Всего"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -4436,6 +4440,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить обновление",
+    ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage(
+      "Обновить подписку",
     ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Загруженный файл повреждён",
@@ -4489,7 +4496,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Подключить, если остановлено; отключить, если работает",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -4545,7 +4552,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -4601,7 +4608,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Синхронизировать полученное время с системными часами",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };
 }

@@ -263,13 +263,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "プロバイダーの推奨は ${value} です";
 
-  static String m119(total) => "残り（${total} 中）";
+  static String m118(percent) => "データ通信量の ${percent}% を使用しました";
 
-  static String m120(label) => "${label}はURLである必要があります";
+  static String m120(total) => "残り（${total} 中）";
 
-  static String m121(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+  static String m121(label) => "${label}はURLである必要があります";
 
-  static String m122(count) => "${count} 年前";
+  static String m122(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+
+  static String m123(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2005,6 +2007,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "無期限サブスクリプション",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("マイページ"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("アルバムから選択"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを選択"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("周囲の Wi-Fi ネットワーク"),
@@ -3484,6 +3487,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新の失敗",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションに通常のノードアドレスが見つかりません。パネルが仮の設定を返した可能性があります。サーバーへの接続はテストしていません。",
     ),
@@ -3542,7 +3546,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("合計"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("合計トラフィック"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -3573,6 +3577,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "更新をダウンロードできませんでした",
     ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage("サブスクリプションを更新"),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "ダウンロードしたファイルが破損しています",
     ),
@@ -3619,7 +3624,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "停止中なら接続、実行中なら切断します",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("使用済みトラフィック"),
@@ -3659,7 +3664,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("オーブの不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
@@ -3699,7 +3704,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "取得した時刻をシステムクロックに同期します",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

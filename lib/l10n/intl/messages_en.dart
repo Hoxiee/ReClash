@@ -288,17 +288,19 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "The provider suggests ${value}";
 
-  static String m118(count) =>
+  static String m118(percent) => "You have used ${percent}% of your traffic";
+
+  static String m119(count) =>
       "${Intl.plural(count, zero: 'No results', one: '1 result', other: '${count} results')}";
 
-  static String m119(total) => "free of ${total}";
+  static String m120(total) => "free of ${total}";
 
-  static String m120(label) => "${label} must be a URL";
-
-  static String m121(count) =>
-      "You can keep up to ${count} backgrounds. Remove one to add another.";
+  static String m121(label) => "${label} must be a URL";
 
   static String m122(count) =>
+      "You can keep up to ${count} backgrounds. Remove one to add another.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2390,6 +2392,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Perpetual subscription",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("Account portal"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Choose from album"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("Pick a network"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -4155,6 +4158,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Update failures",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.",
     ),
@@ -4219,7 +4223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("Overview"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("Search tools"),
-    "toolsSearchResultsCount": m118,
+    "toolsSearchResultsCount": m119,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Select a setting to view it here.",
     ),
@@ -4228,7 +4232,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -4264,6 +4268,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "update": MessageLookupByLibrary.simpleMessage("Update"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Could not download the update",
+    ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage(
+      "Update subscription",
     ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "The downloaded file is damaged",
@@ -4319,7 +4326,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Connect if stopped, disconnect if running",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -4369,7 +4376,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose a valid PNG, JPEG or WebP image.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("Orb opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
@@ -4411,7 +4418,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Sync the resolved time to the system clock",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

@@ -290,14 +290,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "Провайдер ${value} ұсынады";
 
-  static String m119(total) => "${total} ішінен бос";
+  static String m118(percent) => "Трафиктің ${percent}% жұмсалды";
 
-  static String m120(label) => "${label} URL болуы керек";
+  static String m120(total) => "${total} ішінен бос";
 
-  static String m121(count) =>
-      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+  static String m121(label) => "${label} URL болуы керек";
 
   static String m122(count) =>
+      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2462,6 +2464,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Мәңгілік жазылыс",
     ),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("Жеке кабинет"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Галереядан таңдау"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("Желіні таңдау"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
@@ -4287,6 +4290,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Жаңарту ақаулары",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Жазылымда қалыпты түйін мекенжайлары табылмады. Панель уақытша бос конфигурация қайтарған болуы мүмкін. Серверлерге қосылу тексерілмеді.",
     ),
@@ -4363,7 +4367,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("Барлығы"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Жалпы трафик"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash әртүрлі елдердің адамдары пайдалана алатындай сіздің тіліңізде сөйлейді. Қандай да бір сөз тіркесі көзге оғаш көрінсе — жазыңыз, түзетеміз.",
@@ -4401,6 +4405,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "update": MessageLookupByLibrary.simpleMessage("Жаңарту"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Жаңартуды жүктеу мүмкін болмады",
+    ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage(
+      "Жазылымды жаңарту",
     ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Жүктелген файл зақымдалған",
@@ -4456,7 +4463,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Тоқтатылған болса қосады, істеп тұрса ажыратады",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -4506,7 +4513,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Суреттің мөлдір еместігі",
     ),
@@ -4558,7 +4565,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Алынған уақытты жүйелік сағатпен синхрондау",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };
 }

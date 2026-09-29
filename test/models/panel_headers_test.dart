@@ -172,6 +172,45 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('parses the announcement and web page URLs', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-announceurl': ['https://panel.example.com/news'],
+        'reclash-webpageurl': ['https://panel.example.com/cabinet'],
+      });
+
+      expect(meta.announceUrl, 'https://panel.example.com/news');
+      expect(meta.webPageUrl, 'https://panel.example.com/cabinet');
+      expect(meta.hasContent, isTrue);
+    });
+
+    test('reads the web page URL from the marzban/3x-ui spelling', () {
+      final meta = PanelMeta.fromHeaders({
+        'profile-web-page-url': ['https://panel.example.com/cabinet'],
+      });
+
+      expect(meta.webPageUrl, 'https://panel.example.com/cabinet');
+    });
+
+    test('parses reminder thresholds, sorted and bounded', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-expiredays': ['1, 7, 3, 0, 4000'],
+        'reclash-trafficpercent': ['50,90,150,80'],
+      });
+
+      expect(meta.expireNotifyDays, [7, 3, 1]);
+      expect(meta.trafficNotifyPercent, [90, 80, 50]);
+    });
+
+    test('drops reminder thresholds that parse to nothing valid', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-expiredays': ['0, -2, abc'],
+        'reclash-trafficpercent': [''],
+      });
+
+      expect(meta.expireNotifyDays, isNull);
+      expect(meta.trafficNotifyPercent, isNull);
+    });
+
     test('parses service and widget headers', () {
       final meta = PanelMeta.fromHeaders({
         'reclash-servicename': ['Example VPN'],

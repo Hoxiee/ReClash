@@ -38,8 +38,28 @@ class _SubscriptionSheet extends ConsumerWidget {
         ? profile.realLabel
         : serviceName;
     final title = account != null && account.isNotEmpty ? account : displayName;
+    final supportUrl = panelMeta?.supportUrl;
+    final isUpdating = ref.watch(isUpdatingProvider(profile.updatingKey));
     return AdaptiveSheetScaffold(
       title: title,
+      actions: [
+        if (supportUrl != null && supportUrl.isNotEmpty)
+          IconButtonData(
+            glyph: AppGlyphs.support,
+            tooltip: l10n.support,
+            onPressed: () => unawaited(dialogs.openUrl(supportUrl)),
+          ),
+        IconButtonData(
+          glyph: AppGlyphs.refresh,
+          tooltip: l10n.updateSubscription,
+          isLoading: isUpdating,
+          onPressed: () => unawaited(
+            ref
+                .read(profilesActionProvider.notifier)
+                .updateProfile(profile, showLoading: true),
+          ),
+        ),
+      ],
       body: _Body(profile: profile, displayName: displayName),
     );
   }
@@ -102,7 +122,7 @@ class _Body extends ConsumerWidget {
     final colorScheme = context.colorScheme;
     final buyPlanUrl = panelMeta?.buyPlanUrl;
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
-    final supportUrl = panelMeta?.supportUrl;
+    final webPageUrl = panelMeta?.webPageUrl;
     final reportUrl = panelMeta?.reportUrl;
     Widget link() => GlyphIcon(
       AppGlyphs.link,
@@ -129,12 +149,12 @@ class _Body extends ConsumerWidget {
           trailing: link(),
           onPressed: () => unawaited(dialogs.openUrl(buyTrafficUrl)),
         ),
-      if (supportUrl != null && supportUrl.isNotEmpty)
+      if (webPageUrl != null && webPageUrl.isNotEmpty)
         DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.support),
-          title: Text(l10n.support),
+          leading: const GlyphIcon(AppGlyphs.account),
+          title: Text(l10n.personalCabinet),
           trailing: link(),
-          onPressed: () => unawaited(dialogs.openUrl(supportUrl)),
+          onPressed: () => unawaited(dialogs.openUrl(webPageUrl)),
         ),
       DecorationListItem(
         leading: const GlyphIcon(AppGlyphs.send),

@@ -4342,6 +4342,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Update subscription`
+  String get updateSubscription {
+    return Intl.message(
+      'Update subscription',
+      name: 'updateSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account portal`
+  String get personalCabinet {
+    return Intl.message(
+      'Account portal',
+      name: 'personalCabinet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have used {percent}% of your traffic`
+  String subscriptionTrafficLow(int percent) {
+    return Intl.message(
+      'You have used $percent% of your traffic',
+      name: 'subscriptionTrafficLow',
+      desc: '',
+      args: [percent],
+    );
+  }
+
   /// `Override network settings`
   String get overrideNetworkSettings {
     return Intl.message(

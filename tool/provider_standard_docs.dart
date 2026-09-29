@@ -69,6 +69,34 @@ const headerDocs = <String, Map<String, String>>{
     'purpose': 'Subscription issue-report action. Use an absolute HTTPS URL.',
     'example': 'ReClash-ReportURL: https://example.com/report',
   },
+  'announceUrl': {
+    'value': 'Provider announcement URL',
+    'purpose':
+        'Turns the announcement into a link: opens instead of the dismiss '
+        'button on the announcement sheet and card. Use an absolute HTTPS URL.',
+    'example': 'ReClash-AnnounceURL: https://example.com/news',
+  },
+  'webPageUrl': {
+    'value': 'Provider account URL',
+    'purpose':
+        'Personal-account link in the subscription details. Also read from the '
+        'Profile-Web-Page-Url header that marzban and 3x-ui already emit. Use '
+        'an absolute HTTPS URL.',
+    'example': 'ReClash-WebPageURL: https://example.com/account',
+  },
+  'expireNotifyDays': {
+    'value': 'Comma-separated days',
+    'purpose':
+        'Days-before-expiry the client reminds at. Overrides the default 3,2,1.',
+    'example': 'ReClash-ExpireDays: 7,3,1',
+  },
+  'trafficNotifyPercent': {
+    'value': 'Comma-separated percents',
+    'purpose':
+        'Used-traffic percents the client reminds at on metered plans. '
+        'Overrides the default 90.',
+    'example': 'ReClash-TrafficPercent: 80,95',
+  },
   'updateIntervalMinutes': {
     'value':
         'Positive integer (minutes for `reclash-autoupdateinterval`, hours '

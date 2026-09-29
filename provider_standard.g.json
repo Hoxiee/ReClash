@@ -51,6 +51,43 @@
       "purpose": "Subscription issue-report action. Use an absolute HTTPS URL."
     },
     {
+      "canonical": "announceUrl",
+      "sourceKeys": [
+        "reclash-announceurl"
+      ],
+      "transform": "none",
+      "value": "Provider announcement URL",
+      "purpose": "Turns the announcement into a link: opens instead of the dismiss button on the announcement sheet and card. Use an absolute HTTPS URL."
+    },
+    {
+      "canonical": "webPageUrl",
+      "sourceKeys": [
+        "reclash-webpageurl",
+        "profile-web-page-url"
+      ],
+      "transform": "none",
+      "value": "Provider account URL",
+      "purpose": "Personal-account link in the subscription details. Also read from the Profile-Web-Page-Url header that marzban and 3x-ui already emit. Use an absolute HTTPS URL."
+    },
+    {
+      "canonical": "expireNotifyDays",
+      "sourceKeys": [
+        "reclash-expiredays"
+      ],
+      "transform": "none",
+      "value": "Comma-separated days",
+      "purpose": "Days-before-expiry the client reminds at. Overrides the default 3,2,1."
+    },
+    {
+      "canonical": "trafficNotifyPercent",
+      "sourceKeys": [
+        "reclash-trafficpercent"
+      ],
+      "transform": "none",
+      "value": "Comma-separated percents",
+      "purpose": "Used-traffic percents the client reminds at on metered plans. Overrides the default 90."
+    },
+    {
       "canonical": "updateIntervalMinutes",
       "sourceKeys": [
         "reclash-autoupdateinterval"

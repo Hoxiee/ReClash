@@ -274,14 +274,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m117(value) => "제공자 권장값: ${value}";
 
-  static String m119(total) => "전체 ${total} 중 사용 가능";
+  static String m118(percent) => "트래픽의 ${percent}%를 사용했습니다";
 
-  static String m120(label) => "${label}은(는) URL이어야 합니다";
+  static String m120(total) => "전체 ${total} 중 사용 가능";
 
-  static String m121(count) =>
-      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
+  static String m121(label) => "${label}은(는) URL이어야 합니다";
 
   static String m122(count) =>
+      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1년 전', other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1984,6 +1986,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pauseVpn": MessageLookupByLibrary.simpleMessage("VPN 일시정지 중…"),
     "paused": MessageLookupByLibrary.simpleMessage("일시 중지됨"),
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage("무기한 구독"),
+    "personalCabinet": MessageLookupByLibrary.simpleMessage("내 계정"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("앨범에서 선택"),
     "pickNetwork": MessageLookupByLibrary.simpleMessage("네트워크 선택"),
     "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("주변 와이파이 네트워크"),
@@ -3451,6 +3454,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "업데이트 실패",
     ),
+    "subscriptionTrafficLow": m118,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "이 구독에서 일반적인 노드 주소를 찾지 못했습니다. 패널이 임시 구성을 반환했을 수 있습니다. 서버 연결은 테스트하지 않았습니다.",
     ),
@@ -3509,7 +3513,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "total": MessageLookupByLibrary.simpleMessage("합계"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("전체 트래픽"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
-    "trafficFreeOfTotal": m119,
+    "trafficFreeOfTotal": m120,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -3542,6 +3546,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "업데이트를 다운로드할 수 없습니다.",
     ),
+    "updateSubscription": MessageLookupByLibrary.simpleMessage("구독 업데이트"),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "다운로드한 파일이 손상됐습니다.",
     ),
@@ -3588,7 +3593,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "중지 상태면 연결하고, 실행 중이면 연결을 해제합니다",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("호스트 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 호스트 사용"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("사용 트래픽"),
@@ -3628,7 +3633,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m121,
+    "wallpaperLibraryFull": m122,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("오브 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
@@ -3666,7 +3671,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "확인된 시간을 시스템 시계에 동기화합니다",
     ),
-    "yearsAgo": m122,
+    "yearsAgo": m123,
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어(간체)"),
   };
 }

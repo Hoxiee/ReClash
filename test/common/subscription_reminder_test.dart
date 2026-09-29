@@ -33,16 +33,23 @@ Profile _profile({
   PanelMeta? panelMeta,
   String label = 'Plan',
   int id = 42,
+  int used = 0,
+  int total = 0,
 }) {
+  final hasInfo = until != null || total != 0 || used != 0;
   return Profile(
     id: id,
     label: label,
     autoUpdateDuration: const Duration(hours: 12),
     panelMeta: panelMeta,
-    subscriptionInfo: until == null
+    subscriptionInfo: !hasInfo
         ? null
         : SubscriptionInfo(
-            expire: _now.add(until).millisecondsSinceEpoch ~/ 1000,
+            download: used,
+            total: total,
+            expire: until == null
+                ? 0
+                : _now.add(until).millisecondsSinceEpoch ~/ 1000,
           ),
   );
 }
@@ -196,6 +203,95 @@ void main() {
 
     expect(store.writes, 1);
   });
+  test('a panel widens the expiry lead window past the default', () async {
+    final store = _NoticeStore();
+
+    await _reminder(store).check(
+      _profile(
+        until: const Duration(days: 6, minutes: 1),
+        panelMeta: const PanelMeta(expireNotifyDays: [7]),
+      ),
+    );
+
+    expect(store.shown.single.message, 'Your subscription expires in 6 days');
+  });
+
+  test('traffic crossing the default 90% fires once with the top band', () async {
+    final store = _NoticeStore();
+    final reminder = _reminder(store);
+    final profile = _profile(
+      until: const Duration(days: 40),
+      total: 100,
+      used: 95,
+    );
+
+    await reminder.check(profile);
+    await reminder.check(profile);
+
+    expect(store.shown, hasLength(1));
+    expect(store.shown.single.message, 'You have used 95% of your traffic');
+    expect(store.writes, 1);
+  });
+
+  test('a panel sets its own traffic bands and top-up label', () async {
+    final store = _NoticeStore();
+
+    await _reminder(store).check(
+      _profile(
+        until: const Duration(days: 40),
+        total: 100,
+        used: 60,
+        panelMeta: const PanelMeta(
+          trafficNotifyPercent: [50, 80],
+          buyTrafficUrl: 'https://panel.test/topup',
+        ),
+      ),
+    );
+
+    expect(store.shown.single.message, 'You have used 60% of your traffic');
+    expect(store.shown.single.actionUrl, 'https://panel.test/topup');
+    expect(store.shown.single.actionLabel, 'Top up traffic');
+  });
+
+  test('traffic below every band stays quiet', () async {
+    final store = _NoticeStore();
+
+    await _reminder(store).check(
+      _profile(until: const Duration(days: 40), total: 100, used: 10),
+    );
+
+    expect(store.shown, isEmpty);
+    expect(store.writes, 0);
+  });
+
+  test('a fresh cycle re-arms a spent traffic band', () async {
+    final store = _NoticeStore();
+    final reminder = _reminder(store);
+
+    await reminder.check(
+      _profile(until: const Duration(days: 40), total: 100, used: 95),
+    );
+    await reminder.check(
+      _profile(until: const Duration(days: 40), total: 100, used: 20),
+    );
+    await reminder.check(
+      _profile(until: const Duration(days: 40), total: 100, used: 92),
+    );
+
+    expect(store.shown, hasLength(2));
+    expect(store.shown.last.message, 'You have used 92% of your traffic');
+  });
+
+  test('unlimited plans never fire a traffic reminder', () async {
+    final store = _NoticeStore();
+
+    await _reminder(store).check(
+      _profile(until: const Duration(days: 40), total: 0, used: 5000),
+    );
+
+    expect(store.shown, isEmpty);
+  });
+
   group('startup sweep', () {
     final profiles = [_profile(id: 1), _profile(id: 2), _profile(id: 3)];
 

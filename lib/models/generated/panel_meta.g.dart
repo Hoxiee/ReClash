@@ -10,8 +10,16 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   hwidMaxDevicesReached: json['hwidMaxDevicesReached'] as bool? ?? false,
   hwidNotSupported: json['hwidNotSupported'] as bool? ?? false,
   announce: json['announce'] as String?,
+  announceUrl: json['announceUrl'] as String?,
+  webPageUrl: json['webPageUrl'] as String?,
   supportUrl: json['supportUrl'] as String?,
   reportUrl: json['reportUrl'] as String?,
+  expireNotifyDays: (json['expireNotifyDays'] as List<dynamic>?)
+      ?.map((e) => (e as num).toInt())
+      .toList(),
+  trafficNotifyPercent: (json['trafficNotifyPercent'] as List<dynamic>?)
+      ?.map((e) => (e as num).toInt())
+      .toList(),
   updateIntervalMinutes: (json['updateIntervalMinutes'] as num?)?.toInt(),
   serviceName: json['serviceName'] as String?,
   serviceLogo: json['serviceLogo'] as String?,
@@ -46,8 +54,12 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'hwidMaxDevicesReached': instance.hwidMaxDevicesReached,
       'hwidNotSupported': instance.hwidNotSupported,
       'announce': instance.announce,
+      'announceUrl': instance.announceUrl,
+      'webPageUrl': instance.webPageUrl,
       'supportUrl': instance.supportUrl,
       'reportUrl': instance.reportUrl,
+      'expireNotifyDays': instance.expireNotifyDays,
+      'trafficNotifyPercent': instance.trafficNotifyPercent,
       'updateIntervalMinutes': instance.updateIntervalMinutes,
       'serviceName': instance.serviceName,
       'serviceLogo': instance.serviceLogo,

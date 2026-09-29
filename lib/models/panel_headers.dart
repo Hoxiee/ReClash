@@ -77,6 +77,22 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'reportUrl',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-announceurl'],
+    canonicalKey: 'announceUrl',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-webpageurl', 'profile-web-page-url'],
+    canonicalKey: 'webPageUrl',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-expiredays'],
+    canonicalKey: 'expireNotifyDays',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-trafficpercent'],
+    canonicalKey: 'trafficNotifyPercent',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-autoupdateinterval'],
     canonicalKey: 'updateIntervalMinutes',
   ),

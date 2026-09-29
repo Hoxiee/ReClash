@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
@@ -40,11 +41,22 @@ class Announce extends ConsumerWidget {
   /// desktop split stays collapsed beside the orb.
   final bool expanded;
 
-  void _showAnnounceSheet(BuildContext context, String text) {
+  void _showAnnounceSheet(BuildContext context, String text, String? url) {
+    final hasUrl = url != null && url.isNotEmpty;
     showSheet(
       context: context,
       builder: (_) => AdaptiveSheetScaffold(
         title: context.appLocalizations.announce,
+        showConfirmAction: false,
+        actions: hasUrl
+            ? [
+                IconButtonData(
+                  glyph: AppGlyphs.openExternal,
+                  tooltip: context.appLocalizations.openInBrowser,
+                  onPressed: () => dialogs.openUrl(url),
+                ),
+              ]
+            : const [],
         body: SingleChildScrollView(
           padding: AppInsets.lg,
           child: SelectionArea(child: AnnounceText(text: text, links: true)),
@@ -55,22 +67,27 @@ class Announce extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final announce = ref.watch(
-      currentProfileProvider.select((state) => state?.panelMeta?.announce),
+    final panelMeta = ref.watch(
+      currentProfileProvider.select((state) => state?.panelMeta),
     );
-    final text = announce?.trim();
+    final text = panelMeta?.announce?.trim();
+    final url = panelMeta?.announceUrl?.trim();
+    final hasUrl = url != null && url.isNotEmpty;
     final hasAnnouncement = text != null && text.isNotEmpty;
     final showFull = expanded && hasAnnouncement;
+    final showAction = hasAnnouncement && (showFull ? hasUrl : true);
     return DashboardInfoCard(
       height: showFull ? null : DashboardWidgetMetrics.heightOf(context, 2),
       icon: AppGlyphs.announce,
       label: context.appLocalizations.announce,
-      action: hasAnnouncement && !showFull
+      action: showAction
           ? const GlyphIcon(AppGlyphs.openExternal, size: 18)
           : null,
-      onPressed: hasAnnouncement && !showFull
-          ? () => _showAnnounceSheet(context, text)
-          : null,
+      onPressed: !showAction
+          ? null
+          : showFull
+          ? () => dialogs.openUrl(url!)
+          : () => _showAnnounceSheet(context, text, url),
       child: showFull
           ? _AnnounceFull(text: text)
           : _AnnounceCollapsed(text: text, hasAnnouncement: hasAnnouncement),

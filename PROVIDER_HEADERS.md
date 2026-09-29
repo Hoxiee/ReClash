@@ -16,6 +16,10 @@ Profile-Title: Example VPN
 ReClash-Announce: Maintenance is scheduled for Sunday.
 ReClash-SupportURL: https://support.example.com
 ReClash-ReportURL: https://example.com/report
+ReClash-AnnounceURL: https://example.com/news
+ReClash-WebPageURL: https://example.com/account
+ReClash-ExpireDays: 7,3,1
+ReClash-TrafficPercent: 80,95
 ReClash-AutoUpdateInterval: 60
 ReClash-ServiceName: Example VPN
 ReClash-ServiceLogo: https://cdn.example.com/logo.svg
@@ -46,6 +50,10 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 | `announce` | `reclash-announce`, `announce` | `base64` | Plain text or Base64 | Provider announcement. Takes priority over `announce`. |
 | `supportUrl` | `reclash-supporturl`, `support-url`, `flclashx-supporturl` | — | Provider support URL | Support page. Use an absolute HTTPS URL. |
 | `reportUrl` | `reclash-reporturl`, `report-url` | — | Provider issue-report URL | Subscription issue-report action. Use an absolute HTTPS URL. |
+| `announceUrl` | `reclash-announceurl` | — | Provider announcement URL | Turns the announcement into a link: opens instead of the dismiss button on the announcement sheet and card. Use an absolute HTTPS URL. |
+| `webPageUrl` | `reclash-webpageurl`, `profile-web-page-url` | — | Provider account URL | Personal-account link in the subscription details. Also read from the Profile-Web-Page-Url header that marzban and 3x-ui already emit. Use an absolute HTTPS URL. |
+| `expireNotifyDays` | `reclash-expiredays` | — | Comma-separated days | Days-before-expiry the client reminds at. Overrides the default 3,2,1. |
+| `trafficNotifyPercent` | `reclash-trafficpercent` | — | Comma-separated percents | Used-traffic percents the client reminds at on metered plans. Overrides the default 90. |
 | `updateIntervalMinutes` | `reclash-autoupdateinterval` | — | Positive integer (minutes for `reclash-autoupdateinterval`, hours for the aliases) | Sets the profile update interval. |
 | `updateIntervalMinutes` | `profile-update-interval`, `flclashx-autoupdateinterval` | `hours-to-minutes` | Positive integer (minutes for `reclash-autoupdateinterval`, hours for the aliases) | Sets the profile update interval. |
 | `serviceName` | `reclash-servicename`, `flclashx-servicename` | `base64` | Plain text or Base64 | Provider name shown in the dashboard. |
