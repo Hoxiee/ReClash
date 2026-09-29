@@ -134,21 +134,16 @@ class RuleItem extends StatelessWidget {
                       if (invalid) _buildInfoWidget(context),
                       if (rule.realTarget != null)
                         Flexible(
-                          child: TooltipText(
-                            text: Text(
-                              hasMatch &&
-                                      rule.realTarget!.toUpperCase() ==
-                                          RuleAction.MATCH.value
-                                  ? context.appLocalizations.matchTarget
-                                  : rule.realTarget!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.toJetBrainsMono
-                                  .copyWith(color: checkResult.color),
-                            ),
+                          child: EmojiText(
+                            hasMatch &&
+                                    rule.realTarget!.toUpperCase() ==
+                                        RuleAction.MATCH.value
+                                ? context.appLocalizations.matchTarget
+                                : rule.realTarget!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.bodyMedium?.toJetBrainsMono
+                                .copyWith(color: checkResult.color),
                           ),
                         ),
                     ],

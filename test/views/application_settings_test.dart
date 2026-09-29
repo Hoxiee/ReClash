@@ -105,7 +105,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(label));
+    await tester.tap(find.text(label, findRichText: true));
     await tester.pumpAndSettle();
   }
 

@@ -108,12 +108,12 @@ class _Harness {
     await tester.tap(find.text(currentAppLocalizations.proxyType));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text(action.name),
+      find.text(action.name, findRichText: true),
       300,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(action.name).last);
+    await tester.tap(find.text(action.name, findRichText: true).last);
     await tester.pumpAndSettle();
   }
 }
@@ -154,12 +154,14 @@ void main() {
     await tester.pumpAndSettle();
     // SUB_RULE sits far down a lazily built list, so scroll it into existence.
     await tester.scrollUntilVisible(
-      find.text(RuleAction.SUB_RULE.name),
+      find.text(RuleAction.SUB_RULE.name, findRichText: true),
       300,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(RuleAction.SUB_RULE.name).last);
+    await tester.tap(
+      find.text(RuleAction.SUB_RULE.name, findRichText: true).last,
+    );
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextFormField), 'example.com');
@@ -178,12 +180,12 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.proxyType));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text(RuleAction.MATCH.name),
+      find.text(RuleAction.MATCH.name, findRichText: true),
       300,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(RuleAction.MATCH.name).last);
+    await tester.tap(find.text(RuleAction.MATCH.name, findRichText: true).last);
     await tester.pumpAndSettle();
 
     expect(find.text(currentAppLocalizations.content), findsNothing);
@@ -208,12 +210,14 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.proxyType));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
-      find.text(RuleAction.SUB_RULE.name),
+      find.text(RuleAction.SUB_RULE.name, findRichText: true),
       300,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(RuleAction.SUB_RULE.name).last);
+    await tester.tap(
+      find.text(RuleAction.SUB_RULE.name, findRichText: true).last,
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text(currentAppLocalizations.proxyType));
@@ -222,7 +226,7 @@ void main() {
     final sheet = find.byType(OverwriteSelectionSheet<RuleAction>);
     final item = find.descendant(
       of: sheet,
-      matching: find.text(RuleAction.SUB_RULE.name),
+      matching: find.text(RuleAction.SUB_RULE.name, findRichText: true),
     );
     expect(item, findsOne);
     final viewport = tester.getRect(
@@ -243,7 +247,7 @@ void main() {
 
     await tester.tap(find.text(currentAppLocalizations.splitStrategy));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('DIRECT').last);
+    await tester.tap(find.text('DIRECT', findRichText: true).last);
     await tester.pumpAndSettle();
 
     await harness.save(tester);

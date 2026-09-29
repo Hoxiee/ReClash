@@ -181,12 +181,10 @@ class _OverwriteSelectionSheetState<T>
         subtitle: section.subtitleBuilder != null
             ? TooltipLabel(section.subtitleBuilder!(context, item))
             : null,
-        title: TooltipText(
-          text: Text(
-            widget.labelBuilder(item),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+        title: EmojiText(
+          widget.labelBuilder(item),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         isSelected: isSelected,
         trailing: isSelected ? const GlyphIcon(AppGlyphs.check) : null,

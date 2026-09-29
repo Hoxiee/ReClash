@@ -276,7 +276,7 @@ class _MatchTargetItem extends ConsumerWidget {
         !clashConfig.proxies.any((item) => item.name == matchTarget);
     return MoreActionButton(
       label: appLocalizations.matchTarget,
-      trailing: Text(
+      trailing: EmojiText(
         matchTarget ?? appLocalizations.followProfile,
         style: context.textTheme.bodyMedium?.toJetBrainsMono.copyWith(
           color: invalid

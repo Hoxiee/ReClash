@@ -332,18 +332,18 @@ void main() {
     );
     await tester.pump();
     final l10n = AppLocalizations.current;
-    expect(find.text(l10n.followProfile), findsOneWidget);
+    expect(find.text(l10n.followProfile, findRichText: true), findsOneWidget);
 
     await tester.tap(find.text(l10n.matchTarget));
     await tester.pumpAndSettle();
     expect(find.byType(OverwriteSelectionSheet<String>), findsOneWidget);
-    expect(find.text('Proxy'), findsOneWidget);
+    expect(find.text('Proxy', findRichText: true), findsOneWidget);
 
-    await tester.tap(find.text('HK'));
+    await tester.tap(find.text('HK', findRichText: true));
     await tester.pumpAndSettle();
     expect(find.byType(OverwriteSelectionSheet<String>), findsNothing);
     expect(container.read(profilesProvider).first.matchTarget, 'HK');
-    expect(find.text('HK'), findsOneWidget);
+    expect(find.text('HK', findRichText: true), findsOneWidget);
     expect(tester.takeException(), null);
   });
 }
