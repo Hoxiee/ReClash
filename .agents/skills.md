@@ -9,6 +9,7 @@ Repo-scoped Codex skills live under `.agents/skills/*/SKILL.md`. Codex can disco
 - `ui-work`: Flutter UI, widgets, Material You styling, navigation surfaces, async feedback, and user-facing interactions.
 - `core-platform`: Core lifecycle/process ownership, Android services, Go event delivery, desktop IPC, platform managers,
   VPN/TUN, and Windows Helper flow.
+- `provider-standard`: subscription-response header/widget/appearance-token changes and the generated PROVIDER_HEADERS.md + vendored site JSON.
 
 ## Authoring Notes
 
