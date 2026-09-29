@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -196,25 +198,46 @@ class MiniScreen extends StatelessWidget {
       builder: (_, constraints) {
         final width = constraints.maxWidth;
         final unit = width / 20;
-        final margin = unit * 1.5;
-        final barHeight = unit * 3.2;
-        final fabSize = unit * 3.2;
-        return ColoredBox(
-          color: colorScheme.surface,
+        final margin = unit * 1.4;
+        final barHeight = unit * 2.9;
+        final fabSize = unit * 2.9;
+        final statusTop = unit * 1.1;
+        final contentTop = statusTop + unit * 1.9;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.alphaBlend(
+                  colorScheme.surfaceTint.withValues(alpha: hero ? 0.06 : 0),
+                  colorScheme.surface,
+                ),
+                colorScheme.surface,
+              ],
+            ),
+          ),
           child: Stack(
             children: [
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(margin, margin, margin, 0),
-                  child: ClipRect(
-                    child: OverflowBox(
-                      alignment: Alignment.topCenter,
-                      maxHeight: double.infinity,
-                      child: _MiniPageContent(
-                        colorScheme: colorScheme,
-                        hero: hero,
-                        unit: unit,
-                      ),
+              Positioned(
+                top: statusTop,
+                left: margin,
+                right: margin,
+                child: _MiniStatusBar(colorScheme: colorScheme, unit: unit),
+              ),
+              Positioned(
+                top: contentTop,
+                left: margin,
+                right: margin,
+                bottom: margin + barHeight + unit * 0.6,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.topCenter,
+                    maxHeight: double.infinity,
+                    child: _MiniPageContent(
+                      colorScheme: colorScheme,
+                      hero: hero,
+                      unit: unit,
                     ),
                   ),
                 ),
@@ -226,17 +249,13 @@ class MiniScreen extends StatelessWidget {
                 height: barHeight,
                 child: DecoratedBox(
                   decoration: ShapeDecoration(
-                    color: colorScheme.surfaceContainer,
+                    color: colorScheme.surfaceContainerHigh,
                     shape: AppShape.full,
-                    shadows: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withValues(alpha: 0.12),
-                        blurRadius: unit,
-                        offset: Offset(0, unit * 0.3),
-                      ),
-                    ],
                   ),
-                  child: _MiniDestinations(colorScheme: colorScheme, unit: unit),
+                  child: _MiniDestinations(
+                    colorScheme: colorScheme,
+                    unit: unit,
+                  ),
                 ),
               ),
               Positioned(
@@ -244,12 +263,7 @@ class MiniScreen extends StatelessWidget {
                 bottom: margin,
                 width: fabSize,
                 height: fabSize,
-                child: DecoratedBox(
-                  decoration: ShapeDecoration(
-                    color: colorScheme.primaryContainer,
-                    shape: AppShape.full,
-                  ),
-                ),
+                child: _MiniFab(colorScheme: colorScheme, unit: unit),
               ),
             ],
           ),
@@ -292,6 +306,39 @@ class _DiagonalClipper extends CustomClipper<Path> {
   bool shouldReclip(_DiagonalClipper oldClipper) => false;
 }
 
+/// The thin top strip: a clock and a couple of indicators, just enough to read
+/// as a phone rather than a floating panel.
+class _MiniStatusBar extends StatelessWidget {
+  const _MiniStatusBar({required this.colorScheme, required this.unit});
+
+  final ColorScheme colorScheme;
+  final double unit;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = colorScheme.onSurface.withValues(alpha: 0.32);
+    return SizedBox(
+      height: unit * 1.1,
+      child: Row(
+        children: [
+          _MiniLine(color: ink, width: unit * 2.4, height: unit * 0.7),
+          const Spacer(),
+          _MiniDot(color: ink, size: unit * 0.7),
+          SizedBox(width: unit * 0.45),
+          Container(
+            width: unit * 1.7,
+            height: unit * 0.85,
+            decoration: ShapeDecoration(
+              color: ink,
+              shape: AppShape.all(AppCorner.fit(unit)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MiniPageContent extends StatelessWidget {
   const _MiniPageContent({
     required this.colorScheme,
@@ -303,231 +350,158 @@ class _MiniPageContent extends StatelessWidget {
   final bool hero;
   final double unit;
 
-  Widget _heroColumn() {
-    final card = colorScheme.surfaceContainer;
-    final subtle = colorScheme.onSurface.withValues(alpha: 0.72);
-    final line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+  Color get _strong => colorScheme.onSurface.withValues(alpha: 0.78);
+  Color get _mid => colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+  Color get _faint => colorScheme.onSurfaceVariant.withValues(alpha: 0.32);
+
+  @override
+  Widget build(BuildContext context) {
+    return hero ? _heroColumn() : _classicColumn();
+  }
+
+  // The classic dashboard: a title, then an arrangeable grid of widget tiles.
+  Widget _classicColumn() {
+    final tile = colorScheme.surfaceContainer;
+    Widget iconTile(Color accent) =>
+        _MiniTile(color: tile, accent: accent, unit: unit, lineColor: _mid);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: unit * 1.2),
-        Center(
-          child: _MiniRing(
-            ring: colorScheme.primary,
-            center: colorScheme.primary,
-            size: unit * 6.5,
-            stroke: unit * 0.6,
+        Row(
+          children: [
+            _MiniLine(color: _strong, width: unit * 5, height: unit * 1.2),
+            const Spacer(),
+            _MiniDot(color: colorScheme.surfaceContainerHigh, size: unit * 2),
+          ],
+        ),
+        SizedBox(height: unit * 1.3),
+        SizedBox(
+          height: unit * 7,
+          child: Row(
+            spacing: unit,
+            children: [
+              Expanded(child: iconTile(colorScheme.primaryContainer)),
+              Expanded(child: iconTile(colorScheme.tertiaryContainer)),
+            ],
           ),
         ),
         SizedBox(height: unit),
-        Center(
-          child: _MiniLine(color: subtle, width: unit * 6, height: unit * 1.1),
+        SizedBox(
+          height: unit * 5.6,
+          child: _MiniTile(
+            color: tile,
+            accent: colorScheme.secondaryContainer,
+            unit: unit,
+            lineColor: _mid,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _MiniLine(color: _mid, width: unit * 5, height: unit * 0.9),
+                SizedBox(height: unit * 0.8),
+                Expanded(child: _MiniBars(color: colorScheme.primary, unit: unit)),
+              ],
+            ),
+          ),
         ),
-        SizedBox(height: unit * 0.5),
-        Center(
-          child: _MiniLine(color: line, width: unit * 4, height: unit * 0.7),
-        ),
-        SizedBox(height: unit * 1.4),
-        _MiniCard(
-          color: card,
-          height: unit * 5,
-          unit: unit,
+        SizedBox(height: unit),
+        SizedBox(
+          height: unit * 7,
           child: Row(
-            spacing: unit * 0.9,
+            spacing: unit,
             children: [
-              _MiniDot(color: colorScheme.tertiaryContainer, size: unit * 2.6),
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: unit * 0.5,
-                  children: [
-                    _MiniLine(
-                      color: subtle,
-                      width: unit * 4,
-                      height: unit * 0.8,
-                    ),
-                    _MiniLine(
-                      color: line,
-                      width: unit * 2.6,
-                      height: unit * 0.6,
-                    ),
-                  ],
-                ),
+                child: iconTile(colorScheme.primary.withValues(alpha: 0.85)),
               ),
-              _signalBars(colorScheme.primary),
+              Expanded(
+                child: iconTile(colorScheme.tertiary.withValues(alpha: 0.85)),
+              ),
             ],
           ),
         ),
-        SizedBox(height: unit * 0.8),
-        _MiniCard(
-          color: card,
-          height: unit * 6,
-          unit: unit,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: unit * 0.7,
-            children: [
-              Row(
-                spacing: unit * 0.7,
-                children: [
-                  _MiniDot(color: colorScheme.primary, size: unit * 1.4),
-                  _MiniLine(color: subtle, width: unit * 3, height: unit * 0.8),
-                  const Spacer(),
-                  Container(
-                    width: unit * 4,
-                    height: unit * 1.6,
-                    decoration: ShapeDecoration(
-                      color: colorScheme.tertiaryContainer,
-                      shape: AppShape.full,
-                    ),
-                  ),
-                ],
-              ),
-              _MiniLine(color: subtle, width: unit * 5, height: unit * 1.3),
-              _progressBar(0.98),
-            ],
+      ],
+    );
+  }
+
+  // The new dashboard: the connection ring up top, live traffic below it.
+  Widget _heroColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: unit * 0.4),
+        Center(
+          child: _MiniOrb(
+            color: colorScheme.primary,
+            size: unit * 8.2,
+            stroke: unit * 0.7,
           ),
         ),
+        SizedBox(height: unit * 1.3),
+        Center(
+          child: _MiniLine(color: _strong, width: unit * 6, height: unit * 1.1),
+        ),
+        SizedBox(height: unit * 0.7),
+        Center(
+          child: _MiniLine(color: _faint, width: unit * 3.6, height: unit * 0.7),
+        ),
+        SizedBox(height: unit * 1.2),
+        _trafficCard(),
         SizedBox(height: unit * 0.9),
         Row(
           spacing: unit,
           children: [
-            Expanded(child: _pillButton(card)),
-            Expanded(child: _pillButton(card)),
-            _MiniDot(color: card, size: unit * 3),
+            Expanded(child: _pillChip()),
+            Expanded(child: _pillChip()),
           ],
         ),
       ],
     );
   }
 
-  Widget _signalBars(Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        for (var i = 1; i <= 4; i++) ...[
-          if (i > 1) SizedBox(width: unit * 0.35),
-          Container(
-            width: unit * 0.5,
-            height: unit * (0.5 + i * 0.4),
-            decoration: ShapeDecoration(
-              color: color.withValues(alpha: 0.3 + i * 0.16),
-              shape: AppShape.all(AppCorner.fit(unit)),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _progressBar(double ratio) {
-    return SizedBox(
-      height: unit * 0.9,
-      child: Stack(
+  Widget _trafficCard() {
+    return _MiniCard(
+      color: colorScheme.surfaceContainer,
+      height: unit * 6.6,
+      unit: unit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DecoratedBox(
-            decoration: ShapeDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.15),
-              shape: AppShape.full,
-            ),
-            child: const SizedBox.expand(),
-          ),
-          FractionallySizedBox(
-            widthFactor: ratio,
-            child: DecoratedBox(
-              decoration: ShapeDecoration(
-                color: colorScheme.primary,
-                shape: AppShape.full,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pillButton(Color color) {
-    return SizedBox(
-      height: unit * 3,
-      child: DecoratedBox(
-        decoration: ShapeDecoration(color: color, shape: AppShape.full),
-        child: Center(
-          child: _MiniLine(
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
-            width: unit * 3,
-            height: unit * 0.9,
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (hero) {
-      return _heroColumn();
-    }
-    final card = colorScheme.surfaceContainer;
-    final line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: unit,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: unit * 0.5),
-          child: _MiniLine(
-            color: colorScheme.onSurface.withValues(alpha: 0.72),
-            width: unit * 7,
-            height: unit * 1.1,
-          ),
-        ),
-        _MiniCard(
-          color: card,
-          height: unit * 5,
-          unit: unit,
-          child: Row(
-            spacing: unit,
+          Row(
             children: [
-              _MiniDot(color: colorScheme.primary, size: unit * 2.2),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: unit * 0.6,
-                  children: [
-                    _MiniLine(color: line, width: unit * 6, height: unit),
-                    _MiniLine(
-                      color: line,
-                      width: unit * 3.5,
-                      height: unit * 0.8,
-                    ),
-                  ],
-                ),
-              ),
+              _trafficStat(colorScheme.primary),
+              const Spacer(),
+              _trafficStat(colorScheme.tertiary),
             ],
           ),
-        ),
-        Row(
-          spacing: unit,
-          children: [
-            Expanded(
-              child: _MiniCard(color: card, height: unit * 4, unit: unit),
-            ),
-            Expanded(
-              child: _MiniCard(
-                color: colorScheme.secondaryContainer,
-                height: unit * 4,
-                unit: unit,
-              ),
-            ),
-          ],
-        ),
-        for (var i = 0; i < 3; i++)
-          _MiniCard(color: card, height: unit * 4.5, unit: unit),
+          SizedBox(height: unit * 0.8),
+          Expanded(child: _MiniSparkline(color: colorScheme.primary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _trafficStat(Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _MiniDot(color: color, size: unit * 1),
+        SizedBox(width: unit * 0.6),
+        _MiniLine(color: _mid, width: unit * 3, height: unit * 0.8),
       ],
+    );
+  }
+
+  Widget _pillChip() {
+    return SizedBox(
+      height: unit * 2.6,
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          shape: AppShape.full,
+        ),
+        child: Center(
+          child: _MiniLine(color: _mid, width: unit * 3, height: unit * 0.8),
+        ),
+      ),
     );
   }
 }
@@ -568,6 +542,161 @@ class _MiniDestinations extends StatelessWidget {
   }
 }
 
+/// The launch button: a filled disc carrying a small power glyph.
+class _MiniFab extends StatelessWidget {
+  const _MiniFab({required this.colorScheme, required this.unit});
+
+  final ColorScheme colorScheme;
+  final double unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colorScheme.primaryContainer,
+        shape: AppShape.full,
+      ),
+      child: Center(
+        child: SizedBox.square(
+          dimension: unit * 1.4,
+          child: CustomPaint(
+            painter: _PowerGlyphPainter(colorScheme.onPrimaryContainer),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PowerGlyphPainter extends CustomPainter {
+  _PowerGlyphPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.shortestSide * 0.16;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide * 0.36;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    const gap = 0.9;
+    canvas.drawArc(
+      rect,
+      -math.pi / 2 + gap / 2,
+      math.pi * 2 - gap,
+      false,
+      paint,
+    );
+    canvas.drawLine(
+      Offset(center.dx, center.dy - radius * 1.05),
+      Offset(center.dx, center.dy - radius * 0.1),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PowerGlyphPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// One card in the classic grid: a tinted icon chip over two text lines, or a
+/// caller-supplied [child].
+class _MiniTile extends StatelessWidget {
+  const _MiniTile({
+    required this.color,
+    required this.accent,
+    required this.unit,
+    required this.lineColor,
+    this.child,
+  });
+
+  final Color color;
+  final Color accent;
+  final double unit;
+  final Color lineColor;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(unit * 0.9),
+      decoration: ShapeDecoration(
+        color: color,
+        shape: AppShape.all(AppCorner.fit(unit * 7)),
+      ),
+      child:
+          child ??
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: unit * 2.2,
+                height: unit * 2.2,
+                decoration: ShapeDecoration(
+                  color: accent,
+                  shape: AppShape.all(AppCorner.fit(unit * 2.2)),
+                ),
+              ),
+              const Spacer(),
+              _MiniLine(
+                color: lineColor,
+                width: unit * 4.5,
+                height: unit * 0.8,
+              ),
+              SizedBox(height: unit * 0.5),
+              _MiniLine(
+                color: lineColor,
+                width: unit * 2.8,
+                height: unit * 0.6,
+              ),
+            ],
+          ),
+    );
+  }
+}
+
+/// A short row of rising bars, standing in for a stat or traffic widget. The
+/// bars scale to the height they are given so the tile never overflows.
+class _MiniBars extends StatelessWidget {
+  const _MiniBars({required this.color, required this.unit});
+
+  final Color color;
+  final double unit;
+
+  static const _factors = [0.42, 0.62, 0.5, 0.82, 0.66, 1.0];
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final extent = constraints.maxHeight;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (var i = 0; i < _factors.length; i++) ...[
+              if (i > 0) SizedBox(width: unit * 0.5),
+              Container(
+                width: unit * 0.9,
+                height: extent * _factors[i],
+                decoration: ShapeDecoration(
+                  color: color.withValues(alpha: 0.32 + i * 0.11),
+                  shape: AppShape.all(AppCorner.fit(unit)),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _MiniCard extends StatelessWidget {
   const _MiniCard({
     required this.color,
@@ -589,7 +718,7 @@ class _MiniCard extends StatelessWidget {
       child: _MiniBlock(
         color: color,
         extent: height,
-        padding: EdgeInsets.symmetric(horizontal: unit),
+        padding: EdgeInsets.all(unit),
         child: child,
       ),
     );
@@ -659,37 +788,113 @@ class _MiniDot extends StatelessWidget {
   }
 }
 
-class _MiniRing extends StatelessWidget {
-  const _MiniRing({
-    required this.ring,
-    required this.center,
+/// The connection ring: a glowing halo, a stroked ring, and a solid core.
+class _MiniOrb extends StatelessWidget {
+  const _MiniOrb({
+    required this.color,
     required this.size,
     required this.stroke,
   });
 
-  final Color ring;
-  final Color center;
+  final Color color;
   final double size;
   final double stroke;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        shape: CircleBorder(
-          side: BorderSide(color: ring, width: stroke),
-        ),
-      ),
-      child: SizedBox(
-        width: size * 0.4,
-        height: size * 0.4,
-        child: DecoratedBox(
-          decoration: ShapeDecoration(color: center, shape: AppShape.circle),
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox.expand(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    color.withValues(alpha: 0.32),
+                    color.withValues(alpha: 0),
+                  ],
+                  stops: const [0.35, 1],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: size * 0.74,
+            height: size * 0.74,
+            decoration: ShapeDecoration(
+              shape: CircleBorder(
+                side: BorderSide(color: color, width: stroke),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: size * 0.3,
+            height: size * 0.3,
+            child: DecoratedBox(
+              decoration: ShapeDecoration(color: color, shape: AppShape.circle),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/// A filled area sparkline standing in for the live traffic trace.
+class _MiniSparkline extends StatelessWidget {
+  const _MiniSparkline({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _SparklinePainter(color),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  _SparklinePainter(this.color);
+
+  final Color color;
+
+  static const _points = [0.3, 0.5, 0.35, 0.62, 0.45, 0.72, 0.55, 0.88, 0.7];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final line = Path();
+    for (var i = 0; i < _points.length; i++) {
+      final x = size.width * i / (_points.length - 1);
+      final y = size.height * (1 - _points[i]);
+      if (i == 0) {
+        line.moveTo(x, y);
+      } else {
+        line.lineTo(x, y);
+      }
+    }
+    final fill = Path.from(line)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(fill, Paint()..color = color.withValues(alpha: 0.16));
+    canvas.drawPath(
+      line,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.height * 0.07
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_SparklinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

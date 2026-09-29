@@ -571,7 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "classicDashboard": MessageLookupByLibrary.simpleMessage("Классическая"),
     "classicDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "Сетка плиток и кнопка запуска",
+      "Настраиваемая сетка виджетов с кнопкой запуска",
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),
     "clearDataBackupHint": MessageLookupByLibrary.simpleMessage(
@@ -2132,7 +2132,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "neverUsed": MessageLookupByLibrary.simpleMessage("Ещё не использовался"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("Обновлённый вид"),
     "newDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "Кольцо подключения и трафик под ним",
+      "Кольцо подключения и живой график трафика под ним",
     ),
     "newDashboardTitle": MessageLookupByLibrary.simpleMessage("Новая"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),

@@ -557,7 +557,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "classicDashboard": MessageLookupByLibrary.simpleMessage("Classic"),
     "classicDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "Tile grid with a start button",
+      "Customizable grid of widgets with a launch button",
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear data"),
     "clearDataBackupHint": MessageLookupByLibrary.simpleMessage(
@@ -2064,7 +2064,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "neverUsed": MessageLookupByLibrary.simpleMessage("Not used yet"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("New look"),
     "newDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "Connection ring with traffic below",
+      "Connection ring with a live traffic graph below",
     ),
     "newDashboardTitle": MessageLookupByLibrary.simpleMessage("New"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),

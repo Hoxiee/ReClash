@@ -12502,10 +12502,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Tile grid with a start button`
+  /// `Customizable grid of widgets with a launch button`
   String get classicDashboardDesc {
     return Intl.message(
-      'Tile grid with a start button',
+      'Customizable grid of widgets with a launch button',
       name: 'classicDashboardDesc',
       desc: '',
       args: [],
@@ -12517,10 +12517,10 @@ class AppLocalizations {
     return Intl.message('New', name: 'newDashboardTitle', desc: '', args: []);
   }
 
-  /// `Connection ring with traffic below`
+  /// `Connection ring with a live traffic graph below`
   String get newDashboardDesc {
     return Intl.message(
-      'Connection ring with traffic below',
+      'Connection ring with a live traffic graph below',
       name: 'newDashboardDesc',
       desc: '',
       args: [],

@@ -470,7 +470,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです"),
     "classicDashboard": MessageLookupByLibrary.simpleMessage("クラシック"),
-    "classicDashboardDesc": MessageLookupByLibrary.simpleMessage("タイル配置と開始ボタン"),
+    "classicDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "ウィジェットのカスタマイズ可能なグリッドと起動ボタン",
+    ),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("検索をクリア"),
     "clientNotSupported": MessageLookupByLibrary.simpleMessage("クライアント未対応"),
@@ -1716,7 +1718,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "neutralScheme": MessageLookupByLibrary.simpleMessage("ニュートラル"),
     "neverUsed": MessageLookupByLibrary.simpleMessage("まだ使用されていません"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("新しいデザイン"),
-    "newDashboardDesc": MessageLookupByLibrary.simpleMessage("接続リングと下部のトラフィック"),
+    "newDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "接続リングとその下のライブトラフィックグラフ",
+    ),
     "newDashboardTitle": MessageLookupByLibrary.simpleMessage("新しい"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("次の一致"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("お知らせはありません"),
