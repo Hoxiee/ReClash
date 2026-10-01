@@ -276,6 +276,8 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
                 subtitle: Text(
                   appLocalizations.desyncTestDomainsCount(sites.length),
                 ),
+                forceFull: false,
+                preferSheet: true,
                 widget: const _DesyncTestSitesPage(),
               ),
             for (final outcome in outcomes)

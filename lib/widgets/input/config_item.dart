@@ -219,6 +219,8 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
       title: Text(label),
       subtitle: buildSubtitle(appLocalizations),
       blur: false,
+      forceFull: false,
+      preferSheet: true,
       maxWidth: maxWidth,
       widget: ListInputPage(
         title: label,

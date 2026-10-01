@@ -359,6 +359,8 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 subtitle: Text(
                   appLocalizations.desyncArgsCount(props.strategyArgs.length),
                 ),
+                forceFull: false,
+                preferSheet: true,
                 widget: _DesyncArgsEditor(
                   initialText: desyncArgsToText(props.strategyArgs),
                 ),

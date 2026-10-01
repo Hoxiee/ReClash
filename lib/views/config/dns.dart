@@ -454,6 +454,8 @@ class _PolicyItem extends ConsumerWidget {
           ? null
           : Text(description(appLocalizations)),
       blur: false,
+      forceFull: false,
+      preferSheet: true,
       widget: MapInputPage(
         title: title,
         map: policy,

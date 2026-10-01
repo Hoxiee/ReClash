@@ -135,6 +135,7 @@ class _ServiceRouteItem extends StatelessWidget {
       subtitle: Text(view.text),
       blur: false,
       forceFull: false,
+      preferSheet: true,
       maxWidth: 400,
       widget: _ServiceRoutePage(title: title, capabilityId: capabilityId),
     );

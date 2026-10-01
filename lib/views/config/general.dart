@@ -28,6 +28,8 @@ class UaItem extends ConsumerWidget {
       search: const SettingSearch(),
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
+      forceFull: false,
+      preferSheet: true,
       widget: const UserAgentsView(),
     );
   }
@@ -154,6 +156,8 @@ class HostsItem extends ConsumerWidget {
       title: const Text('Hosts'),
       subtitle: Text(appLocalizations.hostsDesc),
       blur: false,
+      forceFull: false,
+      preferSheet: true,
       widget: MapInputPage(
         title: 'Hosts',
         map: hosts,
