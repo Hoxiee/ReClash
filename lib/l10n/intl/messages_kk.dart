@@ -458,6 +458,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданба баптауларын реттеу",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage(
+      "Қолданылған конфигурация",
+    ),
     "authentication": MessageLookupByLibrary.simpleMessage("Аутентификация"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "Жергілікті прокси портына логин мен құпиясөз талап етіледі, басқа қолданбалар оны пайдалана алмайды",

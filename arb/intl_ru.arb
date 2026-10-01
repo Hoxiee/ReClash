@@ -610,6 +610,7 @@
   "basicConfig": "Базовая конфигурация",
   "basicConfigDesc": "Изменения базовой конфигурации применяются глобально",
   "advancedConfig": "Расширенная конфигурация",
+  "appliedConfig": "Применённая конфигурация",
   "advancedConfigDesc": "Прочие параметры конфигурации",
   "selectedCountTitle": "Выбрано: {count}",
   "addRule": "Добавить правило",

@@ -448,6 +448,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Adjust application settings",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage(
+      "Applied configuration",
+    ),
     "authentication": MessageLookupByLibrary.simpleMessage("Authentication"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "Require credentials on the local proxy port to keep other local apps from using it",

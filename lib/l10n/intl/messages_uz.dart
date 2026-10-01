@@ -469,6 +469,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova sozlamalarini moslash",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage(
+      "Qoʻllanilgan konfiguratsiya",
+    ),
     "authentication": MessageLookupByLibrary.simpleMessage("Autentifikatsiya"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "Mahalliy proksi portida parol soʻralsin — boshqa ilovalar undan foydalana olmasin",

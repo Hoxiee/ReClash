@@ -638,6 +638,7 @@
   "basicConfig": "Basic configuration",
   "basicConfigDesc": "Modify the basic configuration globally",
   "advancedConfig": "Advanced configuration",
+  "appliedConfig": "Applied configuration",
   "advancedConfigDesc": "Provides diverse configuration options",
   "selectedCountTitle": "{count} selected",
   "addRule": "Add rule",

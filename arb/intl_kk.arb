@@ -539,6 +539,7 @@
   "basicConfig": "Негізгі конфигурация",
   "basicConfigDesc": "Негізгі конфигурацияны бүкіл қолданба үшін өзгерту",
   "advancedConfig": "Кеңейтілген конфигурация",
+  "appliedConfig": "Қолданылған конфигурация",
   "advancedConfigDesc": "Әртүрлі баптау мүмкіндіктері",
   "selectedCountTitle": "{count} таңдалды",
   "addRule": "Ереже қосу",

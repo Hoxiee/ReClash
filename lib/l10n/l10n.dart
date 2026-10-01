@@ -5102,6 +5102,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Applied configuration`
+  String get appliedConfig {
+    return Intl.message(
+      'Applied configuration',
+      name: 'appliedConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Provides diverse configuration options`
   String get advancedConfigDesc {
     return Intl.message(

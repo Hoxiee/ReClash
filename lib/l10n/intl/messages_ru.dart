@@ -458,6 +458,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Настройки самого приложения",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage(
+      "Применённая конфигурация",
+    ),
     "authentication": MessageLookupByLibrary.simpleMessage("Аутентификация"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "Требовать учётные данные на локальном порту прокси, чтобы другие приложения не могли им воспользоваться",

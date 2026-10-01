@@ -567,6 +567,7 @@
   "basicConfig": "基础配置",
   "basicConfigDesc": "全局修改基础配置",
   "advancedConfig": "进阶配置",
+  "appliedConfig": "已应用的配置",
   "advancedConfigDesc": "提供多样化配置",
   "selectedCountTitle": "已选择 {count} 项",
   "addRule": "添加规则",

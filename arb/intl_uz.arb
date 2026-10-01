@@ -539,6 +539,7 @@
   "basicConfig": "Asosiy konfiguratsiya",
   "basicConfigDesc": "Asosiy konfiguratsiyani global darajada oʻzgartirish",
   "advancedConfig": "Kengaytirilgan konfiguratsiya",
+  "appliedConfig": "Qoʻllanilgan konfiguratsiya",
   "advancedConfigDesc": "Turli konfiguratsiya imkoniyatlari",
   "selectedCountTitle": "{count} ta tanlangan",
   "addRule": "Qoida qoʻshish",

@@ -461,6 +461,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "Programma sazlamalaryny düzüň",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage(
+      "Ulanylýan sazlamalar",
+    ),
     "authentication": MessageLookupByLibrary.simpleMessage("Şahsyýet tanamak"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "Ýerli proksi portunda parol talap edilýär, beýleki ýerli programmalar ony ulanyp bilmeýär",

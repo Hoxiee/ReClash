@@ -539,6 +539,7 @@
   "basicConfig": "Esasy sazlamalar",
   "basicConfigDesc": "Esasy sazlamalary umumylykda üýtgetmek",
   "advancedConfig": "Giňişleýin sazlamalar",
+  "appliedConfig": "Ulanylýan sazlamalar",
   "advancedConfigDesc": "Dürli sazlama wariantlary",
   "selectedCountTitle": "{count} saýlandy",
   "addRule": "Düzgün goş",

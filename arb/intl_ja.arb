@@ -567,6 +567,7 @@
   "basicConfig": "基本設定",
   "basicConfigDesc": "基本設定をグローバルに変更します",
   "advancedConfig": "詳細設定",
+  "appliedConfig": "適用中の設定",
   "advancedConfigDesc": "多彩な設定項目を提供します",
   "selectedCountTitle": "{count} 件選択中",
   "addRule": "ルールを追加",

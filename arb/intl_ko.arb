@@ -539,6 +539,7 @@
   "basicConfig": "기본 설정",
   "basicConfigDesc": "기본 설정을 전역으로 수정합니다",
   "advancedConfig": "고급 설정",
+  "appliedConfig": "적용된 설정",
   "advancedConfigDesc": "다양한 설정 옵션을 제공합니다",
   "selectedCountTitle": "{count}개 선택됨",
   "addRule": "규칙 추가",

@@ -409,6 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "application": MessageLookupByLibrary.simpleMessage("애플리케이션"),
     "applicationDesc": MessageLookupByLibrary.simpleMessage("앱의 세부 설정을 변경합니다"),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage("적용된 설정"),
     "authentication": MessageLookupByLibrary.simpleMessage("인증"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "로컬 프록시 포트에 인증을 요구해 다른 앱이 이 포트를 사용하지 못하도록 합니다",

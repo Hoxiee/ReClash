@@ -396,6 +396,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "アプリケーション関連の設定を変更します",
     ),
+    "appliedConfig": MessageLookupByLibrary.simpleMessage("適用中の設定"),
     "authentication": MessageLookupByLibrary.simpleMessage("認証"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "ローカルプロキシポートに認証を要求し、他のアプリによる無断利用を防ぎます",
