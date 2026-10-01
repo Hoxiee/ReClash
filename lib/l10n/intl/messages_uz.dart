@@ -3173,6 +3173,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Mavjud"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloklangan"),
+    "serviceCategoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "serviceCategoryCore": MessageLookupByLibrary.simpleMessage("Asosiy"),
+    "serviceCategoryGaming": MessageLookupByLibrary.simpleMessage("Oʻyinlar"),
+    "serviceCategoryMessengers": MessageLookupByLibrary.simpleMessage(
+      "Messenjerlar",
+    ),
+    "serviceCategorySocial": MessageLookupByLibrary.simpleMessage(
+      "Ijtimoiy tarmoqlar",
+    ),
+    "serviceCategoryStreaming": MessageLookupByLibrary.simpleMessage(
+      "Striming",
+    ),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Tekshirish"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage(
       "Hammasini tekshirish",

@@ -2988,6 +2988,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Available"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
+    "serviceCategoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "serviceCategoryCore": MessageLookupByLibrary.simpleMessage("Essentials"),
+    "serviceCategoryGaming": MessageLookupByLibrary.simpleMessage("Gaming"),
+    "serviceCategoryMessengers": MessageLookupByLibrary.simpleMessage(
+      "Messengers",
+    ),
+    "serviceCategorySocial": MessageLookupByLibrary.simpleMessage("Social"),
+    "serviceCategoryStreaming": MessageLookupByLibrary.simpleMessage(
+      "Streaming",
+    ),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Check"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Check all"),
     "serviceCheckedAt": m80,

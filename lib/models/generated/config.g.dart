@@ -114,7 +114,6 @@ _AppSettingProps _$AppSettingPropsFromJson(
   crashlytics: json['crashlytics'] as bool? ?? false,
   minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
   hidden: json['hidden'] as bool? ?? false,
-  developerMode: json['developerMode'] as bool? ?? false,
   smartRoutingDiagnostics: json['smartRoutingDiagnostics'] as bool? ?? false,
   restoreStrategy:
       $enumDecodeNullable(_$RestoreStrategyEnumMap, json['restoreStrategy']) ??
@@ -139,9 +138,14 @@ _AppSettingProps _$AppSettingPropsFromJson(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  enabledServices:
+      (json['enabledServices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   currentService: json['currentService'] as String? ?? '',
   serviceAutoCheckActive: json['serviceAutoCheckActive'] as bool? ?? true,
-  serviceAutoCheckAll: json['serviceAutoCheckAll'] as bool? ?? true,
+  serviceAutoCheckAll: json['serviceAutoCheckAll'] as bool? ?? false,
   hideIp: json['hideIp'] as bool? ?? false,
 );
 
@@ -173,7 +177,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'crashlytics': instance.crashlytics,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
-      'developerMode': instance.developerMode,
       'smartRoutingDiagnostics': instance.smartRoutingDiagnostics,
       'restoreStrategy': _$RestoreStrategyEnumMap[instance.restoreStrategy]!,
       'showTrayTitle': instance.showTrayTitle,
@@ -184,6 +187,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'reduceMotion': instance.reduceMotion,
       'serviceOrder': instance.serviceOrder,
       'disabledServices': instance.disabledServices,
+      'enabledServices': instance.enabledServices,
       'currentService': instance.currentService,
       'serviceAutoCheckActive': instance.serviceAutoCheckActive,
       'serviceAutoCheckAll': instance.serviceAutoCheckAll,

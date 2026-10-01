@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -921,16 +920,42 @@ class _ServiceStatusSheetState extends ConsumerState<ServiceStatusSheet> {
   }
 }
 
-/// Reorders the region catalog and toggles services on or off, writing the
-/// user's order and disabled set back through [appSettingProvider]. The menu
-/// gates the card's live checks and the sheet's open-time sweep.
+String _categoryLabel(AppLocalizations l, ServiceCategory category) {
+  return switch (category) {
+    ServiceCategory.core => l.serviceCategoryCore,
+    ServiceCategory.messengers => l.serviceCategoryMessengers,
+    ServiceCategory.ai => l.serviceCategoryAi,
+    ServiceCategory.streaming => l.serviceCategoryStreaming,
+    ServiceCategory.social => l.serviceCategorySocial,
+    ServiceCategory.gaming => l.serviceCategoryGaming,
+  };
+}
+
+Glyph _categoryGlyph(ServiceCategory category) {
+  return switch (category) {
+    ServiceCategory.core => AppGlyphs.globeSearch,
+    ServiceCategory.messengers => AppGlyphs.send,
+    ServiceCategory.ai => AppGlyphs.sparkle,
+    ServiceCategory.streaming => AppGlyphs.play,
+    ServiceCategory.social => AppGlyphs.account,
+    ServiceCategory.gaming => AppGlyphs.puzzle,
+  };
+}
+
+/// Groups the whole catalog by [ServiceCategory] and toggles services on or
+/// off, writing the user's order, opt-outs, and opt-ins back through
+/// [appSettingProvider]. A service is checked when its region default has not
+/// been switched off, or when the user switched a non-default on; reordering
+/// stays within a category. The menu gates the card's live checks and the
+/// sheet's open-time sweep.
 class ServiceManageView extends ConsumerWidget {
   const ServiceManageView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
-    final targets = ref.watch(serviceTargetsProvider);
+    final catalog = ref.watch(serviceTargetsProvider);
+    final defaults = ref.watch(defaultServicesProvider);
     final enabled = ref.watch(enabledServiceTargetsProvider);
     final autoCheckActive = ref.watch(
       appSettingProvider.select((state) => state.serviceAutoCheckActive),
@@ -940,42 +965,84 @@ class ServiceManageView extends ConsumerWidget {
     );
     final settings = ref.read(appSettingProvider.notifier);
 
-    void reorder(int oldIndex, int newIndex) {
-      settings.update(
-        (state) => state.copyWith(
-          serviceOrder: [
-            for (final target in targets.copyAndReorder(oldIndex, newIndex))
-              target.id,
-          ],
-        ),
-      );
+    List<ServiceTarget> membersOf(ServiceCategory category) => [
+      for (final target in catalog)
+        if (target.category == category) target,
+    ];
+
+    void reorderIn(ServiceCategory category, int oldIndex, int newIndex) {
+      final moved = membersOf(category).copyAndReorder(oldIndex, newIndex);
+      final order = <String>[];
+      for (final c in ServiceCategory.values) {
+        final members = c == category ? moved : membersOf(c);
+        order.addAll(members.map((target) => target.id));
+      }
+      settings.update((state) => state.copyWith(serviceOrder: order));
     }
 
     void toggle(ServiceTarget target, bool value) {
       settings.update((state) {
         final disabled = {...state.disabledServices};
+        final enabledIds = {...state.enabledServices};
         if (value) {
           disabled.remove(target.id);
+          if (!defaults.contains(target)) enabledIds.add(target.id);
         } else {
-          disabled.add(target.id);
+          enabledIds.remove(target.id);
+          if (defaults.contains(target)) disabled.add(target.id);
         }
-        return state.copyWith(disabledServices: disabled.toList());
+        return state.copyWith(
+          disabledServices: disabled.toList(),
+          enabledServices: enabledIds.toList(),
+        );
       });
     }
 
-    Widget itemAt(int index) {
-      final target = targets[index];
+    Widget itemAt(List<ServiceTarget> members, int index) {
+      final target = members[index];
       final isEnabled = enabled.contains(target);
       final locked = isEnabled && enabled.length == 1;
       return _ServiceManageItem(
         key: ValueKey(target),
         target: target,
         index: index,
-        position: ItemPosition.get(index, targets.length),
+        position: ItemPosition.get(index, members.length),
         enabled: isEnabled,
         onChanged: locked ? null : (value) => toggle(target, value),
       );
     }
+
+    final sections = <Widget>[
+      SliverToBoxAdapter(child: SizedBox(height: context.contentTopPadding)),
+    ];
+    for (final category in ServiceCategory.values) {
+      final members = membersOf(category);
+      if (members.isEmpty) continue;
+      sections.add(
+        SliverToBoxAdapter(
+          child: ListHeader(
+            title: _categoryLabel(l, category),
+            glyph: _categoryGlyph(category),
+          ),
+        ),
+      );
+      sections.add(
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverReorderableList(
+            itemBuilder: (_, index) => itemAt(members, index),
+            itemCount: members.length,
+            proxyDecorator: (child, index, animation) =>
+                commonProxyDecorator(itemAt(members, index), index, animation),
+            onReorderItem: (oldIndex, newIndex) =>
+                reorderIn(category, oldIndex, newIndex),
+          ),
+        ),
+      );
+    }
+    sections.add(
+      const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+    );
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: ref.sheetHeight(context, 0.8)),
@@ -999,25 +1066,7 @@ class ServiceManageView extends ConsumerWidget {
             ),
           ),
         ],
-        body: CustomScrollView(
-          shrinkWrap: true,
-          slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(height: context.contentTopPadding),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverReorderableList(
-                itemBuilder: (_, index) => itemAt(index),
-                itemCount: targets.length,
-                proxyDecorator: (child, index, animation) =>
-                    commonProxyDecorator(itemAt(index), index, animation),
-                onReorderItem: reorder,
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-          ],
-        ),
+        body: CustomScrollView(shrinkWrap: true, slivers: sections),
       ),
     );
   }
@@ -1235,17 +1284,6 @@ class _ServicePagerState extends State<_ServicePager> {
     }
   }
 
-  void _onPointerSignal(PointerSignalEvent event) {
-    if (event is! PointerScrollEvent) return;
-    final delta = event.scrollDelta.dx.abs() > event.scrollDelta.dy.abs()
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
-    if (delta == 0) return;
-    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
-      _select(widget.index + (delta > 0 ? 1 : -1));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final index = widget.index;
@@ -1269,20 +1307,17 @@ class _ServicePagerState extends State<_ServicePager> {
               ? () => _select(index + 1)
               : null,
           onDecrease: index > 0 ? () => _select(index - 1) : null,
-          child: Listener(
-            onPointerSignal: _onPointerSignal,
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: PointerDeviceKind.values.toSet(),
-                scrollbars: false,
-              ),
-              child: PageView.builder(
-                controller: widget.controller,
-                itemCount: targets.length,
-                onPageChanged: widget.onChanged,
-                itemBuilder: (context, itemIndex) =>
-                    widget.itemBuilder(context, targets[itemIndex]),
-              ),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: PointerDeviceKind.values.toSet(),
+              scrollbars: false,
+            ),
+            child: PageView.builder(
+              controller: widget.controller,
+              itemCount: targets.length,
+              onPageChanged: widget.onChanged,
+              itemBuilder: (context, itemIndex) =>
+                  widget.itemBuilder(context, targets[itemIndex]),
             ),
           ),
         ),

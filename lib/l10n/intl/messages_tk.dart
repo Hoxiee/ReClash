@@ -3095,6 +3095,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Elýeterli"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloklanan"),
+    "serviceCategoryAi": MessageLookupByLibrary.simpleMessage("AI"),
+    "serviceCategoryCore": MessageLookupByLibrary.simpleMessage("Esasy"),
+    "serviceCategoryGaming": MessageLookupByLibrary.simpleMessage("Oýunlar"),
+    "serviceCategoryMessengers": MessageLookupByLibrary.simpleMessage(
+      "Messenjerler",
+    ),
+    "serviceCategorySocial": MessageLookupByLibrary.simpleMessage(
+      "Sosial ulgamlar",
+    ),
+    "serviceCategoryStreaming": MessageLookupByLibrary.simpleMessage(
+      "Striming",
+    ),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Barla"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Ählisini barla"),
     "serviceCheckedAt": m80,

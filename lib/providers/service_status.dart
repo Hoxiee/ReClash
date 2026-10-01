@@ -9,24 +9,37 @@ import 'routed_probe.dart';
 
 part 'generated/service_status.g.dart';
 
-/// The region's full catalog, before the user's order/disable choices.
+/// The whole catalog, grouped by category and sequenced by the user's order.
 final serviceTargetsProvider = Provider<List<ServiceTarget>>((ref) {
-  return serviceTargetsForRegion(ref.watch(appRegionProvider));
-});
-
-/// The region catalog reordered by the user and pruned of disabled services.
-final enabledServiceTargetsProvider = Provider<List<ServiceTarget>>((ref) {
-  final allowed = ref.watch(serviceTargetsProvider);
   final order = ref.watch(
     appSettingProvider.select((state) => state.serviceOrder),
   );
+  return catalogInUserOrder(order);
+});
+
+/// The services the current region checks out of the box.
+final defaultServicesProvider = Provider<List<ServiceTarget>>((ref) {
+  return defaultServicesForRegion(ref.watch(appRegionProvider));
+});
+
+/// The region defaults with the user's on/off choices applied, in catalog order.
+final enabledServiceTargetsProvider = Provider<List<ServiceTarget>>((ref) {
+  final order = ref.watch(
+    appSettingProvider.select((state) => state.serviceOrder),
+  );
+  final defaults = ref.watch(defaultServicesProvider);
   final disabled = ref
       .watch(appSettingProvider.select((state) => state.disabledServices))
       .toSet();
-  return [
-    for (final target in orderServiceTargets(order, allowed))
-      if (!disabled.contains(target.id)) target,
-  ];
+  final enabled = ref
+      .watch(appSettingProvider.select((state) => state.enabledServices))
+      .toSet();
+  return enabledServiceTargets(
+    order: order,
+    defaults: defaults,
+    disabled: disabled,
+    enabled: enabled,
+  );
 });
 
 @Riverpod(keepAlive: true)

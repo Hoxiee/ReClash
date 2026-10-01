@@ -3108,6 +3108,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокирован"),
+    "serviceCategoryAi": MessageLookupByLibrary.simpleMessage("ИИ"),
+    "serviceCategoryCore": MessageLookupByLibrary.simpleMessage("Основное"),
+    "serviceCategoryGaming": MessageLookupByLibrary.simpleMessage("Игры"),
+    "serviceCategoryMessengers": MessageLookupByLibrary.simpleMessage(
+      "Мессенджеры",
+    ),
+    "serviceCategorySocial": MessageLookupByLibrary.simpleMessage("Соцсети"),
+    "serviceCategoryStreaming": MessageLookupByLibrary.simpleMessage(
+      "Стриминг",
+    ),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Проверить"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Проверить все"),
     "serviceCheckedAt": m80,

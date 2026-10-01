@@ -127,7 +127,8 @@ void main() {
     expect(find.text('Google'), findsOne);
     expect(find.text('YouTube'), findsOne);
     expect(find.text('Netflix'), findsOne);
-    // China-only bilibili is absent from the other-region catalog.
+    // bilibili ships in every region's catalog now, but it is only a China
+    // default, so it stays off — and out of the sheet — in other regions.
     expect(find.text('bilibili'), findsNothing);
   });
 
@@ -178,41 +179,61 @@ void main() {
     expect(find.text('—'), findsNothing);
   });
 
-  test('russia adds the RU-5 services while other regions do not', () {
-    const ruExtras = [
-      ServiceTarget.instagram,
-      ServiceTarget.x,
-      ServiceTarget.discord,
-      ServiceTarget.twitch,
-      ServiceTarget.steam,
-    ];
-    const ruLeaders = [
+  test('each region seeds its own default-checked services', () {
+    expect(defaultServicesForRegion('RU'), const [
       ServiceTarget.telegram,
-      ServiceTarget.whatsapp,
-      ServiceTarget.yandex,
-    ];
-    final russia = serviceTargetsForRegion('RU');
-    expect(russia, containsAll(ruExtras));
-    expect(russia.take(3), ruLeaders);
-    expect(russia, isNot(contains(ServiceTarget.bilibili)));
-    for (final region in ['IR', otherRegionCode, 'CN']) {
-      final targets = serviceTargetsForRegion(region);
-      for (final extra in [...ruExtras, ...ruLeaders]) {
-        expect(targets, isNot(contains(extra)), reason: '$region has $extra');
-      }
+      ServiceTarget.youtube,
+      ServiceTarget.instagram,
+      ServiceTarget.discord,
+      ServiceTarget.chatgpt,
+      ServiceTarget.claude,
+      ServiceTarget.x,
+    ]);
+    // bilibili seeds only in China; it never checks out of the box elsewhere.
+    expect(defaultServicesForRegion('CN'), contains(ServiceTarget.bilibili));
+    for (final region in ['RU', 'IR', 'EG', otherRegionCode]) {
+      expect(
+        defaultServicesForRegion(region),
+        isNot(contains(ServiceTarget.bilibili)),
+        reason: '$region seeds bilibili',
+      );
     }
+    // The catalog is region-independent: every service can be enabled from the
+    // manage sheet in any region.
     expect(
-      serviceTargetsForRegion('CN'),
-      contains(ServiceTarget.bilibili),
+      catalogInUserOrder(const []),
+      containsAll(ServiceTarget.values),
     );
   });
 
-  test('service auto-checks default to on', () {
+  test('the catalog never interleaves categories', () {
+    final catalog = catalogInUserOrder(const []);
+    for (var i = 1; i < catalog.length; i++) {
+      expect(
+        catalog[i].category.index,
+        greaterThanOrEqualTo(catalog[i - 1].category.index),
+      );
+    }
+  });
+
+  test('a default opts out while a non-default opts in', () {
+    final enabled = enabledServiceTargets(
+      order: const [],
+      defaults: defaultServicesForRegion(otherRegionCode),
+      disabled: {ServiceTarget.google.id},
+      enabled: {ServiceTarget.steam.id},
+    );
+    expect(enabled, isNot(contains(ServiceTarget.google)));
+    expect(enabled, contains(ServiceTarget.steam));
+    expect(enabled, contains(ServiceTarget.youtube));
+  });
+
+  test('active auto-check defaults on, auto-check all defaults off', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     container.listen(appSettingProvider, (_, _) {});
     expect(container.read(appSettingProvider).serviceAutoCheckActive, isTrue);
-    expect(container.read(appSettingProvider).serviceAutoCheckAll, isTrue);
+    expect(container.read(appSettingProvider).serviceAutoCheckAll, isFalse);
   });
 
   testWidgets('manage overflow toggles the auto-check options', (tester) async {
@@ -248,6 +269,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Auto-check all'));
     await tester.pumpAndSettle();
-    expect(container.read(appSettingProvider).serviceAutoCheckAll, isFalse);
+    // Auto-check all now ships off, so the first tap turns it on.
+    expect(container.read(appSettingProvider).serviceAutoCheckAll, isTrue);
   });
 }

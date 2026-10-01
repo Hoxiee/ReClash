@@ -14,33 +14,55 @@ const routedOutbound = '';
 
 const outboundIpTimeoutDuration = Duration(seconds: 6);
 
-enum ServiceTarget {
-  google('google', 'Google', 'google'),
-  github('github', 'GitHub', 'github'),
-  youtube('youtube', 'YouTube', 'youtube'),
-  chatgpt('chatgpt', 'ChatGPT', 'openai'),
-  claude('claude', 'Claude', 'claude'),
-  gemini('gemini', 'Gemini', 'gemini'),
-  netflix('netflix', 'Netflix', 'netflix'),
-  disneyPlus('disney-plus', 'Disney+', 'disneyplus'),
-  primeVideo('prime-video', 'Prime Video', 'primevideo'),
-  spotify('spotify', 'Spotify', 'spotify'),
-  tiktok('tiktok', 'TikTok', 'tiktok'),
-  bilibili('bilibili', 'bilibili', 'bilibili'),
-  instagram('instagram', 'Instagram', 'instagram'),
-  x('x', 'X', 'x'),
-  discord('discord', 'Discord', 'discord'),
-  twitch('twitch', 'Twitch', 'twitch'),
-  steam('steam', 'Steam', 'steam'),
-  telegram('telegram', 'Telegram', 'telegram'),
-  whatsapp('whatsapp', 'WhatsApp', 'whatsapp'),
-  yandex('yandex', 'Yandex', 'yandex');
+/// Groups the catalog in the manage sheet. The declaration order is the order
+/// the sections render in; [ServiceTarget.values] is kept in the same grouping
+/// so the catalog reads category by category without a separate sort key.
+enum ServiceCategory {
+  core('core'),
+  messengers('messengers'),
+  ai('ai'),
+  streaming('streaming'),
+  social('social'),
+  gaming('gaming');
 
-  const ServiceTarget(this.id, this.label, this.icon);
+  const ServiceCategory(this.id);
+
+  final String id;
+}
+
+enum ServiceTarget {
+  google('google', 'Google', 'google', ServiceCategory.core),
+  github('github', 'GitHub', 'github', ServiceCategory.core),
+  yandex('yandex', 'Yandex', 'yandex', ServiceCategory.core),
+  telegram('telegram', 'Telegram', 'telegram', ServiceCategory.messengers),
+  whatsapp('whatsapp', 'WhatsApp', 'whatsapp', ServiceCategory.messengers),
+  discord('discord', 'Discord', 'discord', ServiceCategory.messengers),
+  chatgpt('chatgpt', 'ChatGPT', 'openai', ServiceCategory.ai),
+  claude('claude', 'Claude', 'claude', ServiceCategory.ai),
+  gemini('gemini', 'Gemini', 'gemini', ServiceCategory.ai),
+  youtube('youtube', 'YouTube', 'youtube', ServiceCategory.streaming),
+  netflix('netflix', 'Netflix', 'netflix', ServiceCategory.streaming),
+  disneyPlus('disney-plus', 'Disney+', 'disneyplus', ServiceCategory.streaming),
+  primeVideo(
+    'prime-video',
+    'Prime Video',
+    'primevideo',
+    ServiceCategory.streaming,
+  ),
+  spotify('spotify', 'Spotify', 'spotify', ServiceCategory.streaming),
+  twitch('twitch', 'Twitch', 'twitch', ServiceCategory.streaming),
+  bilibili('bilibili', 'bilibili', 'bilibili', ServiceCategory.streaming),
+  instagram('instagram', 'Instagram', 'instagram', ServiceCategory.social),
+  x('x', 'X', 'x', ServiceCategory.social),
+  tiktok('tiktok', 'TikTok', 'tiktok', ServiceCategory.social),
+  steam('steam', 'Steam', 'steam', ServiceCategory.gaming);
+
+  const ServiceTarget(this.id, this.label, this.icon, this.category);
 
   final String id;
   final String label;
   final String icon;
+  final ServiceCategory category;
 
   static ServiceTarget? byId(String id) {
     for (final target in values) {
@@ -74,71 +96,101 @@ enum ServiceProbeStatus {
   }
 }
 
-// bilibili is China-only; every other region starts from the same set without
-// it. Russia adds the RU-5 reachability probes below.
-const _serviceWithoutBilibili = [
-  ServiceTarget.google,
-  ServiceTarget.github,
+// The catalog is region-independent: every region can enable every service in
+// the manage sheet. A region only decides which services are checked out of the
+// box, below. Picks lean on what the region actually tends to restrict, so the
+// card answers "does my connection reach what I came for" without noise.
+const _defaultServicesRussia = [
+  ServiceTarget.telegram,
+  ServiceTarget.youtube,
+  ServiceTarget.instagram,
+  ServiceTarget.discord,
+  ServiceTarget.chatgpt,
+  ServiceTarget.claude,
+  ServiceTarget.x,
+];
+
+const _defaultServicesIran = [
+  ServiceTarget.telegram,
+  ServiceTarget.instagram,
+  ServiceTarget.whatsapp,
   ServiceTarget.youtube,
   ServiceTarget.chatgpt,
   ServiceTarget.claude,
-  ServiceTarget.gemini,
-  ServiceTarget.netflix,
-  ServiceTarget.disneyPlus,
-  ServiceTarget.primeVideo,
-  ServiceTarget.spotify,
-  ServiceTarget.tiktok,
 ];
 
-const _serviceRussia = [
+const _defaultServicesChina = [
+  ServiceTarget.google,
+  ServiceTarget.youtube,
+  ServiceTarget.chatgpt,
+  ServiceTarget.claude,
   ServiceTarget.telegram,
-  ServiceTarget.whatsapp,
-  ServiceTarget.yandex,
-  ..._serviceWithoutBilibili,
-  ServiceTarget.instagram,
-  ServiceTarget.x,
-  ServiceTarget.discord,
-  ServiceTarget.twitch,
-  ServiceTarget.steam,
+  ServiceTarget.bilibili,
 ];
 
-const _regionalServiceTargets = RegionalDefaults<List<ServiceTarget>>({
-  'CN': [
-    ServiceTarget.google,
-    ServiceTarget.github,
-    ServiceTarget.youtube,
-    ServiceTarget.chatgpt,
-    ServiceTarget.claude,
-    ServiceTarget.gemini,
-    ServiceTarget.netflix,
-    ServiceTarget.disneyPlus,
-    ServiceTarget.primeVideo,
-    ServiceTarget.spotify,
-    ServiceTarget.tiktok,
-    ServiceTarget.bilibili,
-  ],
-  'RU': _serviceRussia,
-  'IR': _serviceWithoutBilibili,
-}, _serviceWithoutBilibili);
+const _defaultServicesEgypt = [
+  ServiceTarget.google,
+  ServiceTarget.youtube,
+  ServiceTarget.chatgpt,
+  ServiceTarget.claude,
+  ServiceTarget.whatsapp,
+];
 
-List<ServiceTarget> serviceTargetsForRegion(String? code) =>
-    _regionalServiceTargets.forRegion(code);
+const _defaultServicesOther = [
+  ServiceTarget.google,
+  ServiceTarget.youtube,
+  ServiceTarget.chatgpt,
+  ServiceTarget.claude,
+  ServiceTarget.netflix,
+];
 
-/// Applies the user's [order] on top of the region's [allowed] catalog: it
-/// reorders and, together with a disabled filter, prunes — it never re-adds a
-/// service the region does not ship.
-List<ServiceTarget> orderServiceTargets(
-  List<String> order,
-  List<ServiceTarget> allowed,
-) {
-  final allowedSet = allowed.toSet();
-  return {
-    for (final id in order)
-      if (ServiceTarget.byId(id) case final target?
-          when allowedSet.contains(target))
-        target,
-    ...allowed,
-  }.toList();
+const _regionalDefaultServices = RegionalDefaults<List<ServiceTarget>>({
+  'RU': _defaultServicesRussia,
+  'IR': _defaultServicesIran,
+  'CN': _defaultServicesChina,
+  'EG': _defaultServicesEgypt,
+}, _defaultServicesOther);
+
+/// The services a region checks before the user touches the manage sheet.
+List<ServiceTarget> defaultServicesForRegion(String? code) =>
+    _regionalDefaultServices.forRegion(code);
+
+/// The whole catalog grouped by [ServiceCategory] (section order), with the
+/// user's [order] deciding the sequence inside each group; services the order
+/// does not mention keep their catalog position. The result stays category by
+/// category so the manage sheet and the card's reel read the same way.
+List<ServiceTarget> catalogInUserOrder(List<String> order) {
+  final rank = <String, int>{
+    for (final (index, id) in order.indexed) id: index,
+  };
+  final targets = [...ServiceTarget.values];
+  targets.sort((a, b) {
+    final byCategory = a.category.index.compareTo(b.category.index);
+    if (byCategory != 0) return byCategory;
+    final ra = rank[a.id] ?? order.length + a.index;
+    final rb = rank[b.id] ?? order.length + b.index;
+    return ra.compareTo(rb);
+  });
+  return targets;
+}
+
+/// The services checked right now: the region's defaults minus the ones the
+/// user switched off ([disabled]), plus any non-default the user switched on
+/// ([enabled]). Returned in catalog (category/user) order.
+List<ServiceTarget> enabledServiceTargets({
+  required List<String> order,
+  required List<ServiceTarget> defaults,
+  required Set<String> disabled,
+  required Set<String> enabled,
+}) {
+  final defaultSet = defaults.toSet();
+  bool isOn(ServiceTarget target) => defaultSet.contains(target)
+      ? !disabled.contains(target.id)
+      : enabled.contains(target.id);
+  return [
+    for (final target in catalogInUserOrder(order))
+      if (isOn(target)) target,
+  ];
 }
 
 @immutable

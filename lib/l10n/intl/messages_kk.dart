@@ -3104,6 +3104,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Қолжетімді"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Бұғатталған"),
+    "serviceCategoryAi": MessageLookupByLibrary.simpleMessage("ЖИ"),
+    "serviceCategoryCore": MessageLookupByLibrary.simpleMessage("Негізгі"),
+    "serviceCategoryGaming": MessageLookupByLibrary.simpleMessage("Ойындар"),
+    "serviceCategoryMessengers": MessageLookupByLibrary.simpleMessage(
+      "Мессенджерлер",
+    ),
+    "serviceCategorySocial": MessageLookupByLibrary.simpleMessage(
+      "Әлеуметтік желілер",
+    ),
+    "serviceCategoryStreaming": MessageLookupByLibrary.simpleMessage(
+      "Стриминг",
+    ),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Тексеру"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Барлығын тексеру"),
     "serviceCheckedAt": m80,

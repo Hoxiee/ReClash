@@ -17373,6 +17373,61 @@ class AppLocalizations {
     );
   }
 
+  /// `Essentials`
+  String get serviceCategoryCore {
+    return Intl.message(
+      'Essentials',
+      name: 'serviceCategoryCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Messengers`
+  String get serviceCategoryMessengers {
+    return Intl.message(
+      'Messengers',
+      name: 'serviceCategoryMessengers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AI`
+  String get serviceCategoryAi {
+    return Intl.message('AI', name: 'serviceCategoryAi', desc: '', args: []);
+  }
+
+  /// `Streaming`
+  String get serviceCategoryStreaming {
+    return Intl.message(
+      'Streaming',
+      name: 'serviceCategoryStreaming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Social`
+  String get serviceCategorySocial {
+    return Intl.message(
+      'Social',
+      name: 'serviceCategorySocial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gaming`
+  String get serviceCategoryGaming {
+    return Intl.message(
+      'Gaming',
+      name: 'serviceCategoryGaming',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Check`
   String get serviceCheck {
     return Intl.message('Check', name: 'serviceCheck', desc: '', args: []);
