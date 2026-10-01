@@ -205,6 +205,23 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         _reconcilePage();
       }
     });
+    // A tool opened as a full-screen route or side sheet lives on a navigator
+    // chosen by the view width, so a breakpoint crossing strands it over a
+    // layout that no longer matches. Dismiss transient routes on the change.
+    ref.listenManual(viewModeProvider, (prev, next) {
+      if (prev == next) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).popUntil((route) => route.isFirst);
+      });
+    });
   }
 
   int get _pageIndex {
@@ -212,7 +229,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
   }
 
-  Future<void> _toPage(PageLabel pageLabel, [bool ignoreAnimateTo = false]) async {
+  Future<void> _toPage(
+    PageLabel pageLabel, [
+    bool ignoreAnimateTo = false,
+  ]) async {
     if (!mounted) {
       return;
     }

@@ -117,6 +117,30 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     super.initState();
     _searchFocus.addListener(_onSearchFocusChanged);
     _loadRecents();
+    // Crossing a layout breakpoint swaps the two-pane shell for the list and
+    // changes how rows open; drop the drilled pane and any stale overlay.
+    ref.listenManual(viewModeProvider, (prev, next) {
+      if (prev == next) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        // Clear only this page's nested side sheet; the root navigator (the
+        // mobile full-screen route) is the home shell's to reset.
+        if (next != ViewMode.mobile) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+        if (_paneStack.isEmpty && _detailActions.value == null) {
+          return;
+        }
+        setState(() {
+          _paneStack.clear();
+          _detailActions.value = null;
+        });
+      });
+    });
   }
 
   @override
@@ -306,7 +330,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     if (sameRoot && selection.focusTarget == null) {
       return;
     }
-    _detailActions.value = null;
+    // Re-selecting the same pane keeps the detail element, which never
+    // republishes its relayed actions; only a real pane change resets them.
+    if (!sameRoot) {
+      _detailActions.value = null;
+    }
     setState(() {
       _paneStack
         ..clear()
@@ -327,17 +355,24 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     if (sameTop && selection.focusTarget == null) {
       return;
     }
-    _detailActions.value = null;
+    if (!sameTop) {
+      _detailActions.value = null;
+    }
     setState(() {
-      _paneStack.add(
-        _PaneEntry(
-          id: selection.id,
-          detail: selection.detail,
-          title: selection.title,
-          focusTarget: selection.focusTarget,
-          focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
-        ),
+      final entry = _PaneEntry(
+        id: selection.id,
+        detail: selection.detail,
+        title: selection.title,
+        focusTarget: selection.focusTarget,
+        focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
       );
+      // Re-targeting the current pane replaces it in place so the detail
+      // element survives with its relayed actions; a new pane is pushed.
+      if (sameTop) {
+        _paneStack[_paneStack.length - 1] = entry;
+      } else {
+        _paneStack.add(entry);
+      }
     });
   }
 
