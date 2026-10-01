@@ -1214,12 +1214,6 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       gate: 'always',
     ),
     DeepSettingSpec(
-      title: l.developerSubscriptions,
-      paneId: 'developer',
-      category: 'info',
-      gate: 'developerMode',
-    ),
-    DeepSettingSpec(
       title: l.options,
       paneId: 'developer',
       category: 'info',
@@ -1251,12 +1245,6 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
     ),
     DeepSettingSpec(
       title: l.pruneCache,
-      paneId: 'developer',
-      category: 'info',
-      gate: 'developerMode',
-    ),
-    DeepSettingSpec(
-      title: l.developerMode,
       paneId: 'developer',
       category: 'info',
       gate: 'developerMode',

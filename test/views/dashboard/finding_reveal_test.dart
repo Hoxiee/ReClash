@@ -47,9 +47,6 @@ void main() {
       addTearDown(container.dispose);
       globalState.container = container;
       container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(developerMode: true));
-      container
           .read(viewSizeProvider.notifier)
           .update((_) => const Size(1100, 1600));
       await tester.pumpWidget(
@@ -73,16 +70,7 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump();
-      final event = find.byKey(const ValueKey('preview-finding-pi'));
-      await tester.scrollUntilVisible(
-        event,
-        350,
-        scrollable: find.descendant(
-          of: find.byType(FindingPreviewView),
-          matching: find.byType(Scrollable),
-        ),
-      );
-      await tester.tap(event);
+      container.read(findingPreviewProvider.notifier).showFinding('pi');
       await tester.pump();
       expect(container.read(findingPreviewProvider).pending, 'pi');
       active.value = true;

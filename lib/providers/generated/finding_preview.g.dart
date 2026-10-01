@@ -41,7 +41,7 @@ final class FindingPreviewProvider
   }
 }
 
-String _$findingPreviewHash() => r'e62344b72a00ea2e98d7cca351c4d8eb8bcb3a65';
+String _$findingPreviewHash() => r'dd4b6912749e2aa8af03bb6c7f5b7536834ff7fb';
 
 abstract class _$FindingPreview extends $Notifier<FindingPreviewState> {
   FindingPreviewState build();

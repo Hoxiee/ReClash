@@ -105,11 +105,11 @@ void main() {
     final container = buildContainer(core);
     final notifier = container.read(milestonesProvider.notifier);
 
-    expect(notifier.discover('marks'), isTrue);
-    expect(notifier.discover('marks'), isFalse);
+    expect(notifier.discover('turn'), isTrue);
+    expect(notifier.discover('turn'), isFalse);
     final settings = container.read(milestoneSettingProvider);
-    expect(settings.unlocked, {'marks'});
-    expect(settings.revealQueue, ['marks']);
+    expect(settings.unlocked, {'turn'});
+    expect(settings.revealQueue, ['turn']);
   });
 
   test('does not discover findings while they are disabled', () {
@@ -120,7 +120,7 @@ void main() {
         .update((state) => state.copyWith(findingsEnabled: false));
 
     expect(
-      container.read(milestonesProvider.notifier).discover('marks'),
+      container.read(milestonesProvider.notifier).discover('turn'),
       isFalse,
     );
     expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
@@ -133,17 +133,17 @@ void main() {
         .read(milestoneSettingProvider.notifier)
         .update(
           (_) => const MilestoneProps(
-            unlocked: {'vigil', 'marks'},
-            revealedAt: {'vigil': 1, 'marks': 2},
+            unlocked: {'vigil', 'turn'},
+            revealedAt: {'vigil': 1, 'turn': 2},
           ),
         );
 
     container.read(milestonesProvider.notifier).resetFindings();
     final settings = container.read(milestoneSettingProvider);
 
-    expect(settings.unlocked, {'vigil', 'marks'});
+    expect(settings.unlocked, {'vigil', 'turn'});
     expect(settings.revealedAt, isEmpty);
-    expect(settings.revealQueue, containsAll(['vigil', 'marks']));
+    expect(settings.revealQueue, containsAll(['vigil', 'turn']));
   });
 
   test('disconnect invalidates an in-flight refresh', () async {

@@ -105,14 +105,7 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
         final appLocalizations = context.appLocalizations;
         final isLoading = ref.watch(loadingProvider(LoadingTag.profiles));
         final state = ref.watch(profilesStateProvider);
-        final developerMode = ref.watch(
-          appSettingProvider.select((state) => state.developerMode),
-        );
-        final visibleProfiles = developerMode
-            ? state.profiles
-            : state.profiles
-                  .where((profile) => !isDeveloperSubscriptionProfile(profile))
-                  .toList();
+        final visibleProfiles = state.profiles;
         final spacing = 14.mAp;
         return CommonScaffold(
           isLoading: isLoading,
@@ -581,8 +574,6 @@ class _ProfileCardTitle extends StatelessWidget {
                     '${native ? '' : ' · Experimental'}',
                 icon: native ? null : AppGlyphs.beaker,
               ),
-            if (isDeveloperSubscriptionProfile(profile))
-              const CommonChip(label: 'Dev'),
           ],
         ),
         const SizedBox(height: 6),

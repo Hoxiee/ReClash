@@ -25,9 +25,6 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
     container.read(findingPreviewProvider.notifier).showAllRewards();
     final config = container.read(desyncSettingProvider);
     final doctor = container.read(connectionDoctorProvider);
@@ -79,9 +76,6 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
     container.read(findingPreviewProvider.notifier).showFinding('pi');
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -99,7 +93,7 @@ void main() {
     expect(find.text('Reset findings?'), findsNothing);
   });
 
-  testWidgets('preview controls are transient and can be reset', (
+  testWidgets('season preview overlays the real motif and resets to automatic', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1100, 1600);
@@ -109,9 +103,6 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -120,31 +111,15 @@ void main() {
     );
     await tester.pumpAndSettle();
     final localizations = currentAppLocalizations;
-    await tester.tap(find.text(localizations.developerAllRewards));
-    await tester.pumpAndSettle();
-    expect(container.read(visibleMilestonesProvider).unlocked.length, 8);
-    expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
 
     await tester.tap(find.text(localizations.developerSeasonNewYear));
     await tester.pumpAndSettle();
     expect(container.read(visibleSeasonProvider), SeasonalMotif.newYear);
-    final apply = find.text(localizations.developerPatinaApply);
-    await tester.scrollUntilVisible(apply, 300);
-    await tester.tap(apply);
-    await tester.pumpAndSettle();
-    expect(container.read(findingPreviewProvider).patinaDays, 120);
+    expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
 
-    final event = find.byKey(const ValueKey('preview-finding-pi'));
-    await tester.scrollUntilVisible(event, 350);
-    await tester.tap(event);
+    await tester.tap(find.text(localizations.developerPreviewAutomatic));
     await tester.pumpAndSettle();
-    expect(container.read(findingPreviewProvider).pending, 'pi');
-    expect(container.read(milestoneSettingProvider).revealedAt, isEmpty);
-    final reset = find.text(localizations.developerPreviewReset);
-    await tester.scrollUntilVisible(reset, -400);
-    await tester.tap(reset);
-    await tester.pumpAndSettle();
-    expect(container.read(findingPreviewProvider).enabled, isFalse);
+    expect(container.read(findingPreviewProvider).season, isNull);
     expect(tester.takeException(), isNull);
   });
 }

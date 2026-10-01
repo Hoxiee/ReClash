@@ -8,7 +8,6 @@ export 'config.dart';
 export 'connection_doctor.dart';
 export 'core.dart';
 export 'desync.dart';
-export 'developer_subscription.dart';
 export 'ip_quality.dart';
 export 'odometer.dart';
 export 'panel_appearance.dart';

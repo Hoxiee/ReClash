@@ -5,67 +5,15 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
-import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/misc/finding_preview.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 class DeveloperView extends ConsumerWidget {
   const DeveloperView({super.key});
-
-  String _subscriptionDescription(
-    AppLocalizations appLocalizations,
-    DeveloperSubscriptionId id,
-  ) => switch (id) {
-    DeveloperSubscriptionId.prism =>
-      appLocalizations.developerSubscriptionPrismDesc,
-    DeveloperSubscriptionId.orbit =>
-      appLocalizations.developerSubscriptionOrbitDesc,
-    DeveloperSubscriptionId.atlas =>
-      appLocalizations.developerSubscriptionAtlasDesc,
-    DeveloperSubscriptionId.ember =>
-      appLocalizations.developerSubscriptionEmberDesc,
-  };
-
-  Widget _getSubscriptionsList(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    return SettingSection(
-      search: const SettingSearch(),
-      title: appLocalizations.developerSubscriptions,
-      items: [
-        for (final fixture in developerSubscriptions)
-          DecorationListItem(
-            leading: SizedBox.square(
-              dimension: 32,
-              child: ImageCacheWidget(
-                src: fixture.logo,
-                fit: BoxFit.contain,
-                defaultWidget: const GlyphIcon(AppGlyphs.cloud),
-              ),
-            ),
-            title: Text(fixture.name),
-            subtitle: Text(
-              _subscriptionDescription(appLocalizations, fixture.id),
-            ),
-            onPressed: () async {
-              final installed = await ref
-                  .read(profilesActionProvider.notifier)
-                  .installDeveloperSubscription(fixture);
-              if (installed && context.mounted) {
-                context.showNotifier(
-                  appLocalizations.developerSubscriptionInstalled(fixture.name),
-                  level: MessageLevel.success,
-                );
-              }
-            },
-          ),
-      ],
-    );
-  }
 
   Widget _getDeveloperList(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
@@ -144,45 +92,22 @@ class DeveloperView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
-    final enable = ref.watch(
-      appSettingProvider.select((state) => state.developerMode),
-    );
     return BaseScaffold(
       title: appLocalizations.developerMode,
       body: ListView(
         padding: EdgeInsets.only(top: context.appBarInset),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: CommonCard(
-              type: CommonCardType.filled,
-              radius: AppCorner.md,
-              child: ListItem.toggle(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                search: const SettingSearch(),
-                title: Text(appLocalizations.developerMode),
-                value: enable,
-                onChanged: (value) {
-                  ref
-                      .read(appSettingProvider.notifier)
-                      .update((state) => state.copyWith(developerMode: value));
-                },
-              ),
-            ),
-          ),
-          _getSubscriptionsList(context, ref),
           _getDeveloperList(context, ref),
-          if (enable)
-            SettingSection(
-              items: [
-                DecorationListItem.open(
-                  leading: const GlyphIcon(AppGlyphs.beaker),
-                  search: const SettingSearch(),
-                  title: Text(appLocalizations.developerFindings),
-                  widget: const FindingPreviewView(),
-                ),
-              ],
-            ),
+          SettingSection(
+            items: [
+              DecorationListItem.open(
+                leading: const GlyphIcon(AppGlyphs.beaker),
+                search: const SettingSearch(),
+                title: Text(appLocalizations.developerFindings),
+                widget: const FindingPreviewView(),
+              ),
+            ],
+          ),
           const SettingBottomInset(),
         ],
       ),

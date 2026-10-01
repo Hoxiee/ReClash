@@ -2,39 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
-import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/developer.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';
 
-class _RecordingProfilesAction extends ProfilesAction {
-  static final installed = <DeveloperSubscription>[];
-
-  @override
-  Future<bool> installDeveloperSubscription(
-    DeveloperSubscription fixture,
-  ) async {
-    installed.add(fixture);
-    return true;
-  }
-}
-
-ProviderContainer _containerFor(
-  WidgetTester tester, {
-  List<Override> overrides = const [],
-}) {
+ProviderContainer _containerFor(WidgetTester tester) {
   const size = Size(1400, 1000);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final container = ProviderContainer(overrides: overrides);
+  final container = ProviderContainer();
   addTearDown(container.dispose);
   globalState.container = container;
   container.read(viewSizeProvider.notifier).update((_) => size);
@@ -59,41 +40,6 @@ void main() {
     // canCrashCore reads appEnv, which only the real app bootstrap populates.
     // 'dev' also enables the crash-test row.
     globalState.appEnv = 'dev';
-  });
-
-  testWidgets('toggles developer mode through the header switch', (
-    tester,
-  ) async {
-    final container = _containerFor(tester);
-    await _pumpDeveloperView(tester, container);
-
-    final initial = container.read(appSettingProvider).developerMode;
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
-
-    expect(container.read(appSettingProvider).developerMode, !initial);
-    expect(tester.takeException(), null);
-  });
-
-  testWidgets('shows and installs each developer subscription', (tester) async {
-    _RecordingProfilesAction.installed.clear();
-    final container = _containerFor(
-      tester,
-      overrides: [
-        profilesActionProvider.overrideWith(_RecordingProfilesAction.new),
-      ],
-    );
-    await _pumpDeveloperView(tester, container);
-
-    for (final fixture in developerSubscriptions) {
-      expect(find.text(fixture.name), findsOne);
-    }
-
-    await tester.tap(find.text(developerSubscriptions[1].name));
-    await tester.pumpAndSettle();
-
-    expect(_RecordingProfilesAction.installed, [developerSubscriptions[1]]);
-    expect(tester.takeException(), null);
   });
 
   testWidgets('logs test fills the log buffer', (tester) async {

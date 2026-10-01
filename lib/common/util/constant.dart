@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -160,3 +161,8 @@ const backupDatabaseName = 'database.sqlite';
 const configJsonName = 'config.json';
 
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
+
+/// Developer surfaces (the Tools "Developer" screen and the findings preview)
+/// are compiled in only for debug builds or when built with
+/// `--dart-define=DEVELOPER=true`; release builds drop them entirely.
+const developerBuild = kDebugMode || bool.fromEnvironment('DEVELOPER');

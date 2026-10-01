@@ -114,65 +114,6 @@ void main() {
     }
   });
 
-  testWidgets('developer fixture profiles carry a Dev badge', (tester) async {
-    final fixture = developerSubscriptions[1];
-    final devProfile = Profile.normal(
-      label: 'dev',
-    ).copyWith(panelMeta: PanelMeta(serviceLogo: fixture.logo));
-    final container = await pumpProfiles(
-      tester,
-      profiles: [
-        devProfile,
-        Profile.normal(label: 'plain'),
-      ],
-    );
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
-    await tester.pump();
-
-    final devCard = find.ancestor(
-      of: find.text('dev'),
-      matching: find.byType(ListItem),
-    );
-    expect(
-      tester
-          .widgetList<CommonChip>(
-            find.descendant(of: devCard, matching: find.byType(CommonChip)),
-          )
-          .map((chip) => chip.label),
-      contains('Dev'),
-    );
-    final plainCard = find.ancestor(
-      of: find.text('plain'),
-      matching: find.byType(ListItem),
-    );
-    expect(
-      find.descendant(of: plainCard, matching: find.byType(CommonChip)),
-      findsNothing,
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('developer fixture profiles are hidden when developer mode is '
-      'off', (tester) async {
-    final fixture = developerSubscriptions[1];
-    final devProfile = Profile.normal(
-      label: 'dev',
-    ).copyWith(panelMeta: PanelMeta(serviceLogo: fixture.logo));
-    await pumpProfiles(
-      tester,
-      profiles: [
-        devProfile,
-        Profile.normal(label: 'plain'),
-      ],
-    );
-
-    expect(find.text('dev'), findsNothing);
-    expect(find.text('plain'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('subscription menu item opens the subscription sheet', (
     tester,
   ) async {

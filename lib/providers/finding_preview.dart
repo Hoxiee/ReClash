@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/common/milestones/milestone_rules.dart';
 import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/models/models.dart';
@@ -20,7 +20,6 @@ const findingIds = [
   'crown',
   'oscilloscope',
   'singularity',
-  'marks',
   'pi',
   'turn',
 ];
@@ -50,12 +49,11 @@ class FindingPreview extends _$FindingPreview {
 
   @override
   FindingPreviewState build() {
-    ref.watch(appSettingProvider.select((state) => state.developerMode));
     ref.onDispose(() => _expiry?.cancel());
     return const FindingPreviewState();
   }
 
-  bool get _allowed => ref.read(appSettingProvider).developerMode;
+  bool get _allowed => developerBuild;
 
   void showFinding(String id) {
     if (!_allowed || !findingIds.contains(id)) return;

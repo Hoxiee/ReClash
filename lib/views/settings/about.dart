@@ -196,34 +196,6 @@ class _IdentityCard extends ConsumerStatefulWidget {
 }
 
 class _IdentityCardState extends ConsumerState<_IdentityCard> {
-  int _tapCount = 0;
-  DateTime? _lastTapAt;
-
-  void _handleTap() {
-    if (!ref.read(milestoneSettingProvider).findingsEnabled) return;
-    final now = DateTime.now();
-    if (_lastTapAt == null ||
-        now.difference(_lastTapAt!) > const Duration(milliseconds: 650)) {
-      _tapCount = 0;
-    }
-    _lastTapAt = now;
-    _tapCount++;
-    if (_tapCount < 7) return;
-    _tapCount = 0;
-    ref.read(milestonesProvider.notifier).discover('marks');
-    showExtend(context, builder: (_) => const MarksView());
-  }
-
-  void _enableDeveloperMode() {
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
-    context.showNotifier(
-      context.appLocalizations.developerModeEnableTip,
-      level: MessageLevel.success,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -231,62 +203,55 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
     final colorScheme = context.colorScheme;
     final version = globalState.packageInfo.version;
     final platform = SupportPlatform.currentPlatform.name;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _handleTap,
-      child: Column(
-        spacing: 20,
-        children: [
-          _DeveloperModeDetector(
-            onEnterDeveloperMode: _enableDeveloperMode,
-            child: SvgPicture.asset(
-              'assets/images/marks/reclash-mark-color.svg',
-              height: 136,
+    return Column(
+      spacing: 20,
+      children: [
+        SvgPicture.asset(
+          'assets/images/marks/reclash-mark-color.svg',
+          height: 136,
+        ),
+        Column(
+          spacing: 12,
+          children: [
+            _Wordmark(text: appName, style: textTheme.headlineMedium),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _Pill(
+                  label: 'v$version',
+                  color: colorScheme.primaryContainer,
+                  foregroundColor: colorScheme.onPrimaryContainer,
+                ),
+                _Pill(
+                  label: platform,
+                  color: colorScheme.surfaceContainerHighest,
+                  foregroundColor: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ],
+        ),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Text(
+            appLocalizations.desc,
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              height: 1.5,
             ),
           ),
-          Column(
-            spacing: 12,
-            children: [
-              _Wordmark(text: appName, style: textTheme.headlineMedium),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  _Pill(
-                    label: 'v$version',
-                    color: colorScheme.primaryContainer,
-                    foregroundColor: colorScheme.onPrimaryContainer,
-                  ),
-                  _Pill(
-                    label: platform,
-                    color: colorScheme.surfaceContainerHighest,
-                    foregroundColor: colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Text(
-              appLocalizations.desc,
-              textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ),
-          const _SeasonAnniversary(),
-          const _CrownHistory(),
-          FilledButton.tonalIcon(
-            onPressed: widget.onCheckUpdate,
-            icon: const GlyphIcon(AppGlyphs.sync, size: 20, fill: 1),
-            label: Text(appLocalizations.checkUpdate),
-          ),
-        ],
-      ),
+        ),
+        const _SeasonAnniversary(),
+        const _CrownHistory(),
+        FilledButton.tonalIcon(
+          onPressed: widget.onCheckUpdate,
+          icon: const GlyphIcon(AppGlyphs.sync, size: 20, fill: 1),
+          label: Text(appLocalizations.checkUpdate),
+        ),
+      ],
     );
   }
 }
@@ -409,45 +374,6 @@ class _CrownHistory extends ConsumerWidget {
   }
 }
 
-class MarksView extends StatelessWidget {
-  const MarksView({super.key});
-
-  static const _assets = [
-    'assets/images/marks/reclash-mark-color.svg',
-    'assets/images/marks/reclash-icon-primary.svg',
-    'assets/images/marks/reclash-avatar-aurora.svg',
-    'assets/images/marks/reclash-avatar-midnight.svg',
-    'assets/images/marks/reclash-avatar-porcelain.svg',
-    'assets/images/marks/reclash-avatar-electric.svg',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return AdaptiveSheetScaffold(
-      title: context.appLocalizations.findingMarks,
-      body: GridView.builder(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          16,
-          16,
-          16 + BottomInsetScope.of(context),
-        ),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 180,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-        ),
-        itemCount: _assets.length,
-        itemBuilder: (_, index) => CommonCard(
-          type: CommonCardType.filled,
-          padding: const EdgeInsets.all(18),
-          child: SvgPicture.asset(_assets[index]),
-        ),
-      ),
-    );
-  }
-}
-
 class _CreditItem extends StatelessWidget {
   final Credit credit;
 
@@ -468,51 +394,5 @@ class _CreditItem extends StatelessWidget {
         dialogs.openUrl(credit.link);
       },
     );
-  }
-}
-
-class _DeveloperModeDetector extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onEnterDeveloperMode;
-
-  const _DeveloperModeDetector({
-    required this.onEnterDeveloperMode,
-    required this.child,
-  });
-
-  @override
-  State<_DeveloperModeDetector> createState() => _DeveloperModeDetectorState();
-}
-
-class _DeveloperModeDetectorState extends State<_DeveloperModeDetector> {
-  int _counter = 0;
-  Timer? _timer;
-
-  void _handleTap() {
-    _counter++;
-    if (_counter >= 5) {
-      widget.onEnterDeveloperMode();
-      _resetCounter();
-    } else {
-      _timer?.cancel();
-      _timer = Timer(const Duration(seconds: 1), _resetCounter);
-    }
-  }
-
-  void _resetCounter() {
-    _counter = 0;
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(onTap: _handleTap, child: widget.child);
   }
 }

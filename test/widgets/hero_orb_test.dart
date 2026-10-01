@@ -78,9 +78,7 @@ void main() {
     );
     result.container
         .read(appSettingProvider.notifier)
-        .update(
-          (state) => state.copyWith(developerMode: true, reduceMotion: true),
-        );
+        .update((state) => state.copyWith(reduceMotion: true));
     final preview = result.container.read(findingPreviewProvider.notifier);
     preview.setSeason(SeasonalMotif.drift);
     await tester.pumpAndSettle();
@@ -102,6 +100,12 @@ void main() {
         ),
       ),
     );
+    // appSettingProvider auto-disposes once the orb tree unmounts, so the
+    // reduce-motion flag must be re-asserted for the overlay's own tree or the
+    // snow ticker runs forever and pumpAndSettle never returns.
+    result.container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(reduceMotion: true));
     await tester.pumpAndSettle();
     final snow = find.descendant(
       of: find.byType(SeasonalDashboardOverlay),
@@ -143,9 +147,6 @@ void main() {
     expect(paintLayers(), initial);
     expect(find.text('IS'), findsNothing);
 
-    result.container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
     result.container
         .read(findingPreviewProvider.notifier)
         .showFinding('meridian');

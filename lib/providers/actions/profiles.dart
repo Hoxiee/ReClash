@@ -638,44 +638,6 @@ class ProfilesAction extends _$ProfilesAction {
     return _prepareLink(ProfileLinkImportRequest(url));
   }
 
-  Future<bool> installDeveloperSubscription(
-    DeveloperSubscription fixture,
-  ) async {
-    final profiles = ref.read(profilesProvider);
-    final existing = profiles
-        .where((profile) => profile.panelMeta?.serviceLogo == fixture.logo)
-        .firstOrNull;
-    final base = existing ?? Profile.normal(label: fixture.name);
-    final previousMeta = existing?.panelMeta;
-    final content = await rootBundle.loadString(fixture.configAsset);
-    final saved = await globalState.loadingRun<Profile>(
-      tag: LoadingTag.profiles,
-      () {
-        return base
-            .copyWith(
-              label: existing?.userLabel == true
-                  ? existing!.label
-                  : fixture.name,
-              url: '',
-              autoUpdate: false,
-              subscriptionInfo: fixture.subscriptionInfo,
-              panelMeta: fixture.panelMeta,
-            )
-            .saveFileWithString(
-              content,
-              validate: (path) => _core.validateConfig(path),
-            );
-      },
-      title: currentAppLocalizations.addProfile,
-    );
-    if (saved == null) return false;
-    putProfile(saved);
-    if (saved.id == ref.read(currentProfileIdProvider)) {
-      applyPanelWidgetsFromMeta(saved.panelMeta, previousMeta: previousMeta);
-    }
-    return true;
-  }
-
   @visibleForTesting
   Future<bool> confirmAndApplyPanelSettings(PanelMeta? meta) async {
     final tokens = meta?.settings;

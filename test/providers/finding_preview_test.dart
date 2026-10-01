@@ -1,29 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 
 void main() {
-  ProviderContainer containerFor({bool developer = true}) {
+  ProviderContainer containerFor() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: developer));
     return container;
   }
-
-  test('preview cannot run outside developer mode', () {
-    final container = containerFor(developer: false);
-    final preview = container.read(findingPreviewProvider.notifier);
-    preview.showFinding('vigil');
-    preview.showAllRewards();
-    preview.setSeason(SeasonalMotif.newYear);
-    preview.setPatinaDays(120);
-    expect(container.read(findingPreviewProvider).enabled, isFalse);
-    expect(preview.activate(calm: true), isFalse);
-  });
 
   test('all finding previews leave real settings and counters unchanged', () {
     final container = containerFor();
@@ -74,20 +59,6 @@ void main() {
     expect(preview.activate(calm: true), isTrue);
   });
 
-  test('disabling developer mode discards preview state', () async {
-    final container = containerFor();
-    final preview = container.read(findingPreviewProvider.notifier);
-    preview.showAllRewards();
-    preview.setSeason(SeasonalMotif.newYear);
-    preview.setPatinaDays(120);
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: false));
-    await container.pump();
-    expect(container.read(findingPreviewProvider).enabled, isFalse);
-    expect(container.read(visibleMilestonesProvider).unlocked, isEmpty);
-  });
-
   test('appearance master switch suppresses preview rewards and events', () {
     final container = containerFor();
     final preview = container.read(findingPreviewProvider.notifier);
@@ -101,9 +72,9 @@ void main() {
 
   test('gestures in preview do not award real findings', () {
     final container = containerFor();
-    container.read(findingPreviewProvider.notifier).showFinding('marks');
+    container.read(findingPreviewProvider.notifier).showFinding('turn');
     expect(
-      container.read(milestonesProvider.notifier).discover('marks'),
+      container.read(milestonesProvider.notifier).discover('turn'),
       isFalse,
     );
     expect(container.read(milestoneSettingProvider).unlocked, isEmpty);

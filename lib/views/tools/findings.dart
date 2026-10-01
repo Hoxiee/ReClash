@@ -22,7 +22,6 @@ const _relicIds = <String>[
 const _momentIds = <String>[
   'oscilloscope',
   'singularity',
-  'marks',
   'pi',
   'turn',
 ];
@@ -450,20 +449,6 @@ class _FindingGlyph extends CustomPainter {
           stroke,
         );
         canvas.drawCircle(c, r * 0.34, stroke);
-      case 'marks':
-        for (var i = 0; i < 3; i++) {
-          final o = Offset(
-            c.dx - r * 0.4 + i * r * 0.4,
-            c.dy - r * 0.3 + i * r * 0.3,
-          );
-          canvas.drawRRect(
-            RRect.fromRectAndRadius(
-              Rect.fromCenter(center: o, width: r, height: r),
-              Radius.circular(r * 0.25),
-            ),
-            stroke,
-          );
-        }
       case 'pi':
         canvas.drawLine(
           Offset(c.dx - r * 0.8, c.dy - r * 0.5),
@@ -512,7 +497,6 @@ String findingName(BuildContext context, String id) => switch (id) {
   'crown' => context.appLocalizations.findingCrown,
   'oscilloscope' => context.appLocalizations.findingOscilloscope,
   'singularity' => context.appLocalizations.findingSingularity,
-  'marks' => context.appLocalizations.findingMarks,
   'pi' => context.appLocalizations.findingPi,
   'turn' => context.appLocalizations.findingTurn,
   _ => id,
@@ -529,7 +513,6 @@ String findingDescription(BuildContext context, String id) => switch (id) {
   'crown' => context.appLocalizations.milestoneRevealCrown,
   'oscilloscope' => context.appLocalizations.findingOscilloscopeDesc,
   'singularity' => context.appLocalizations.findingSingularityDesc,
-  'marks' => context.appLocalizations.findingMarksDesc,
   'pi' => context.appLocalizations.findingPiDesc,
   'turn' => context.appLocalizations.findingTurnDesc,
   _ => '',

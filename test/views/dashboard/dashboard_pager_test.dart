@@ -166,9 +166,6 @@ void main() {
       overrides: [heroLifecycleProvider.overrideWithValue(HeroOrbPhase.on)],
     );
     container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(developerMode: true));
-    container
         .read(findingPreviewProvider.notifier)
         .setSeason(SeasonalMotif.newYear);
     await tester.pump();

@@ -10,15 +10,9 @@ void main() {
   Future<void> pumpAdvancedConfig(
     WidgetTester tester, {
     required bool supported,
-    required bool developerMode,
   }) async {
     final container = ProviderContainer(
-      overrides: [
-        byeDpiSupportedProvider.overrideWithValue(supported),
-        appSettingProvider.overrideWithBuild(
-          (_, _) => AppSettingProps(developerMode: developerMode),
-        ),
-      ],
+      overrides: [byeDpiSupportedProvider.overrideWithValue(supported)],
     );
     addTearDown(container.dispose);
 
@@ -31,16 +25,14 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('shows ByeDPI without developer mode on supported platforms', (
-    tester,
-  ) async {
-    await pumpAdvancedConfig(tester, supported: true, developerMode: false);
+  testWidgets('shows ByeDPI on supported platforms', (tester) async {
+    await pumpAdvancedConfig(tester, supported: true);
 
     expect(find.text('DPI bypass'), findsOneWidget);
   });
 
   testWidgets('hides ByeDPI on unsupported platforms', (tester) async {
-    await pumpAdvancedConfig(tester, supported: false, developerMode: true);
+    await pumpAdvancedConfig(tester, supported: false);
 
     expect(find.text('DPI bypass'), findsNothing);
   });
