@@ -122,6 +122,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     ref.listenManual(
       effectiveDesyncSettingProvider.select(
         (state) => (
+          featureEnabled: state.featureEnabled,
           enabled: state.enabled,
           onlyDpi: state.onlyDpi,
           port: state.port,

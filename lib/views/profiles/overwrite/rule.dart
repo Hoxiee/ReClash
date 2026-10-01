@@ -262,7 +262,7 @@ class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
   }
 
   void _initState() {
-    final desync = ref.read(effectiveDesyncSettingProvider).enabled;
+    final desync = ref.read(effectiveDesyncSettingProvider).featureEnabled;
     _targetItems = [
       ...RuleTarget.targetNames(
         desync: desync,

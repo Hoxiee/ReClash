@@ -564,11 +564,11 @@ class SetupAction extends _$SetupAction {
         serviceRules: setupState.serviceRules,
         authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
-        desync: desync.enabled,
+        desync: desync.featureEnabled,
         desyncPort: desync.port,
         desyncCategories: desync.categories,
         desyncForceTcp: desync.forceTcp,
-        desyncOnly: desync.enabled && desync.onlyDpi,
+        desyncOnly: desync.featureEnabled && desync.onlyDpi,
       ),
     );
     return res;
