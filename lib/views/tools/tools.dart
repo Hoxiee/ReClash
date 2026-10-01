@@ -843,10 +843,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final appSetting = ref.watch(
-      appSettingProvider.select(
-        (state) => (locale: state.locale, developerMode: state.developerMode),
-      ),
+    final locale = ref.watch(
+      appSettingProvider.select((state) => state.locale),
     );
     final hasFindings = ref.watch(
       visibleMilestonesProvider.select((state) => state.revealedAt.isNotEmpty),
@@ -861,12 +859,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     final tokens = searching ? _queryTokens(query) : const <String>[];
     final matches = searching
         ? _filterIndex(
-            _index(
-              navigationItems,
-              appSetting.developerMode,
-              hasFindings,
-              appSetting.locale,
-            ),
+            _index(navigationItems, developerBuild, hasFindings, locale),
             tokens,
           )
         : const <_ToolSearchEntry>[];
@@ -875,7 +868,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     if (viewMode == ViewMode.desktop) {
       final categories = _getDesktopCategories(
         navigationItems,
-        appSetting.developerMode,
+        developerBuild,
         hasFindings,
       );
       final rootId = _paneStack.isEmpty ? null : _paneStack.first.id;
@@ -929,7 +922,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
                 Expanded(
                   child: _buildDetailPane(
                     navigationItems,
-                    appSetting.developerMode,
+                    developerBuild,
                     hasFindings,
                   ),
                 ),
@@ -949,11 +942,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         else
           ..._resultSections(matches),
       ] else ...[
-        ..._getMobileCategories(
-          navigationItems,
-          appSetting.developerMode,
-          hasFindings,
-        ),
+        ..._getMobileCategories(navigationItems, developerBuild, hasFindings),
         const CoreSection(),
       ],
       const SettingBottomInset(),

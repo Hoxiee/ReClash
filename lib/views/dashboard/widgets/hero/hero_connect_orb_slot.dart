@@ -73,7 +73,6 @@ String _milestoneRevealText(AppLocalizations localizations, String id) =>
       'crown' => localizations.milestoneRevealCrown,
       'oscilloscope' => localizations.findingOscilloscopeDesc,
       'singularity' => localizations.findingSingularityDesc,
-      'marks' => localizations.findingMarksDesc,
       'pi' => localizations.findingPiDesc,
       'turn' => localizations.findingTurnDesc,
       _ => '',
