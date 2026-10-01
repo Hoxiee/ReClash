@@ -6,42 +6,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
-import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
 import 'package:reclash/widgets/widgets.dart';
-
-/// The decision, promoted to the headline: the chosen server against its
-/// closest rivals, each naming the first rung it lost on. The full ladder and
-/// every rival stay one tab away; this is the "why" a glance should already give.
-class RoutingWhyCard extends StatelessWidget {
-  const RoutingWhyCard({
-    super.key,
-    required this.report,
-    required this.chosen,
-    required this.rivals,
-  });
-
-  final RcxReport report;
-  final RcxCandidateReport chosen;
-  final List<RcxCandidateReport> rivals;
-
-  @override
-  Widget build(BuildContext context) {
-    return RoutingCard(
-      child: Column(
-        children: [
-          for (var at = 0; at < rivals.length; at++) ...[
-            if (at > 0) const RoutingHairline(),
-            RoutingDuelRow(
-              report: report,
-              chosen: chosen,
-              candidate: rivals[at],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class RoutingVerdictCard extends StatelessWidget {
   const RoutingVerdictCard({

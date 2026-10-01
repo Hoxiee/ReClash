@@ -6,7 +6,6 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_tab.dart';
-import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
 
 import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';
@@ -126,12 +125,14 @@ Future<void> _pump(
   await tester.pumpAndSettle();
 }
 
-// The live view is one flowing scroll now, not three tabs; the former tab-open
-// helpers are no-ops so the existing steps read the same, and both former
-// per-tab scrollables resolve to the single list.
+// Details fold into the overview tab now, so opening them stays put; the
+// ranking lives on its own tab, which this helper switches to.
 Future<void> _openDetails(WidgetTester tester) async {}
 
-Future<void> _openRanking(WidgetTester tester) async {}
+Future<void> _openRanking(WidgetTester tester) async {
+  await tester.tap(find.text('Ranking'));
+  await tester.pumpAndSettle();
+}
 
 final _rankingScroll = find.byType(Scrollable).last;
 
@@ -477,45 +478,6 @@ void main() {
     expect(find.text('Last switchover'), findsOne);
   });
 
-  testWidgets('the ranking tab reads the ladder the strategy actually uses', (
-    tester,
-  ) async {
-    await _pump(tester, enabled: true, report: _report);
-    final ladder = find.byType(RoutingLadderCard);
-    await tester.scrollUntilVisible(ladder, 200, scrollable: _rankingScroll);
-    await tester.pumpAndSettle();
-
-    Finder inLadder(String label) =>
-        find.descendant(of: ladder, matching: find.text(label));
-    expect(inLadder('Everyday'), findsOne);
-    expect(inLadder('Allowed to compete'), findsOne);
-    expect(inLadder('Fit for this network'), findsOne);
-    expect(inLadder('Stable tiebreak'), findsOne);
-    expect(inLadder('Reaches the open internet'), findsOne);
-    expect(inLadder('Does not fit'), findsOne);
-  });
-
-  testWidgets('lowest latency never ranks by a terrain fit it ignores', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      enabled: true,
-      report: _report.copyWith(
-        status: _report.status.copyWith(strategy: 'lowest-latency'),
-      ),
-    );
-    final ladder = find.byType(RoutingLadderCard);
-    await tester.scrollUntilVisible(ladder, 200, scrollable: _rankingScroll);
-    await tester.pumpAndSettle();
-
-    Finder inLadder(String label) =>
-        find.descendant(of: ladder, matching: find.text(label));
-    expect(inLadder('Fast'), findsOne);
-    expect(inLadder('Fit for this network'), findsNothing);
-    expect(inLadder('Has carried traffic'), findsOne);
-  });
-
   testWidgets('a rival names the line it lost on and both readings of it', (
     tester,
   ) async {
@@ -569,6 +531,7 @@ void main() {
           ],
         ),
       );
+      await _openRanking(tester);
       await tester.scrollUntilVisible(
         find.text('Ranks higher at: Verdict'),
         200,
@@ -587,6 +550,7 @@ void main() {
       enabled: true,
       report: _report.copyWith(candidates: [_report.candidates.first]),
     );
+    await _openRanking(tester);
     await tester.scrollUntilVisible(
       find.text('No other servers to compare with'),
       200,

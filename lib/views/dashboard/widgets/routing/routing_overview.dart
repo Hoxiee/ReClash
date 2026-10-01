@@ -5,6 +5,7 @@ import 'package:reclash/core/controller.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_diag.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
@@ -124,58 +125,52 @@ class _RoutingLiveViewState extends ConsumerState<RoutingLiveView>
                   ? appLocalizations.smartRoutingSearching
                   : appLocalizations.smartRoutingWaitingTunnel,
             ),
-            (true, final RcxReport report) => _liveBody(context, report),
+            (true, final RcxReport report) => DefaultTabController(
+              length: 2,
+              child: Column(
+                children: [
+                  SettingsTabs(
+                    labels: [
+                      appLocalizations.smartRoutingTabOverview,
+                      appLocalizations.smartRoutingTabRanking,
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _overview(context, report),
+                        _ranking(context, report),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           },
         ),
       ),
     );
   }
 
-  /// One flowing story instead of three tabs: what the engine chose, why it beat
-  /// the rest rung by rung, the network it is on, the routes services got, how
-  /// much of the park is alive, and — under the technical toggle — the raw round
-  /// and engine state. The transparency the tabs buried now leads the scroll.
-  Widget _liveBody(BuildContext context, RcxReport report) {
+  /// What the engine chose, the network it is on first because that is what the
+  /// person most needs to see, then the round, service routes, park health, and
+  /// — under the technical toggle — the raw engine state. The server-by-server
+  /// ranking is its own tab: hundreds of rows have no place in this glance.
+  Widget _overview(BuildContext context, RcxReport report) {
     final appLocalizations = context.appLocalizations;
-    final rows = report.candidates;
-    final chosenIndex = rows.indexWhere((row) => row.current);
-    final pickedIndex = chosenIndex >= 0
-        ? chosenIndex
-        : rows.isEmpty
-        ? -1
-        : 0;
-    final chosen = pickedIndex < 0 ? null : rows[pickedIndex];
-    final rivals = [
-      for (var at = 0; at < rows.length; at++)
-        if (at != pickedIndex) rows[at],
-    ];
     return CustomScrollView(
       slivers: [
         const SliverPadding(padding: EdgeInsets.only(top: 8)),
         routingSliver(
           RoutingVerdictCard(report: report, technical: _technical),
         ),
-        routingHeader(appLocalizations.smartRoutingSectionLadder),
-        routingSliver(RoutingLadderCard(report: report, chosen: chosen)),
-        routingHeader(appLocalizations.smartRoutingSectionRivals),
-        if (chosen == null || rivals.isEmpty)
-          routingSliver(
-            RoutingNotice(
-              icon: AppGlyphs.swap,
-              text: appLocalizations.smartRoutingNoRivals,
-            ),
-          )
-        else
-          routingSliver(
-            RoutingWhyCard(report: report, chosen: chosen, rivals: rivals),
-          ),
-        routingHeader(appLocalizations.smartRoutingSectionRound),
-        routingSliver(RoutingRoundCard(report: report, technical: _technical)),
         routingHeader(appLocalizations.smartRoutingSectionNetwork),
         routingSliver(RoutingNetworkCard(report: report)),
         routingSliver(
           RoutingEvidenceCard(report: report, technical: _technical),
         ),
+        routingHeader(appLocalizations.smartRoutingSectionRound),
+        routingSliver(RoutingRoundCard(report: report, technical: _technical)),
         routingHeader(appLocalizations.smartRoutingServiceRoutes),
         routingSliver(RoutingLanesCard(report: report)),
         routingHeader(appLocalizations.smartRoutingSectionHealth),
@@ -193,6 +188,64 @@ class _RoutingLiveViewState extends ConsumerState<RoutingLiveView>
           routingHeader(appLocalizations.smartRoutingSectionEngine),
           routingSliver(RoutingEngineCard(report: report)),
         ],
+        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+      ],
+    );
+  }
+
+  /// Every rival against the chosen server, naming the rung it won or lost on.
+  /// A lazy sliver list keeps a park of hundreds cheap: only the rows on screen
+  /// are built, so this tab can be scrolled without the engine feeling it.
+  Widget _ranking(BuildContext context, RcxReport report) {
+    final appLocalizations = context.appLocalizations;
+    final rows = report.candidates;
+    final chosenIndex = rows.indexWhere((row) => row.current);
+    final pickedIndex = chosenIndex >= 0
+        ? chosenIndex
+        : rows.isEmpty
+        ? -1
+        : 0;
+    final chosen = pickedIndex < 0 ? null : rows[pickedIndex];
+    final rivals = [
+      for (var at = 0; at < rows.length; at++)
+        if (at != pickedIndex) rows[at],
+    ];
+    return CustomScrollView(
+      slivers: [
+        const SliverPadding(padding: EdgeInsets.only(top: 8)),
+        routingHeader(appLocalizations.smartRoutingSectionRivals),
+        if (chosen == null || rivals.isEmpty)
+          routingSliver(
+            RoutingNotice(
+              icon: AppGlyphs.swap,
+              text: appLocalizations.smartRoutingNoRivals,
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            sliver: DecoratedSliver(
+              decoration: routingCardDecoration(context),
+              sliver: SliverList.builder(
+                itemCount: rivals.length,
+                itemBuilder: (_, at) => Padding(
+                  padding: EdgeInsets.only(
+                    left: routingCardPadding.left,
+                    right: routingCardPadding.right,
+                    top: at == 0 ? routingCardPadding.top : 0,
+                    bottom: at == rivals.length - 1
+                        ? routingCardPadding.bottom
+                        : 0,
+                  ),
+                  child: RoutingDuelRow(
+                    report: report,
+                    chosen: chosen,
+                    candidate: rivals[at],
+                  ),
+                ),
+              ),
+            ),
+          ),
         const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
       ],
     );
