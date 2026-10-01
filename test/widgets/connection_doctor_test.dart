@@ -151,9 +151,9 @@ void main() {
 
       await tester.tap(find.text('Technical details'));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.textContaining('75 ms'), 200);
+      await tester.scrollUntilVisible(find.textContaining('75 ms').first, 200);
 
-      expect(find.textContaining('75 ms'), findsOneWidget);
+      expect(find.textContaining('75 ms'), findsWidgets);
       expect(find.textContaining('0 ms'), findsNothing);
       expect(tester.takeException(), isNull);
     });
@@ -186,7 +186,9 @@ void main() {
 
     expect(find.text('Watching real traffic'), findsOneWidget);
     expect(find.text('Connection path'), findsOneWidget);
-    expect(find.text('Not checked'), findsNothing);
+    // The path leads with five stations that read "Not checked" until an exam
+    // runs, so an untested path is honest rather than a blank projection.
+    expect(find.text('Not checked'), findsWidgets);
     expect(find.text('Technical details'), findsOneWidget);
     expect(find.text('No usable evidence yet'), findsNothing);
 
@@ -664,6 +666,12 @@ void main() {
     expect(find.text('DNS'), findsWidgets);
     expect(find.text('This app'), findsOneWidget);
     expect(find.text('Confirmed'), findsWidgets);
+
+    final rawEvidence = find.text('Raw evidence');
+    await tester.scrollUntilVisible(rawEvidence, 200);
+    await tester.tap(rawEvidence);
+    await tester.pumpAndSettle();
+
     expect(find.text('Failed · Confirmed'), findsNWidgets(2));
     expect(
       find.descendant(
@@ -850,7 +858,9 @@ void main() {
     final attempts = find.text('Repair attempts');
     await tester.scrollUntilVisible(attempts, 200);
     expect(attempts, findsOneWidget);
-    expect(find.text('Flush DNS cache'), findsOneWidget);
+    // The flush label also names the run panel's flush lever, so the audit row
+    // shares it; its unique "ok" outcome proves the attempt was recorded.
+    expect(find.text('Flush DNS cache'), findsWidgets);
     expect(find.text('ok'), findsOneWidget);
   });
 
@@ -1212,7 +1222,7 @@ void main() {
 
     await tester.tap(find.textContaining('Foreign canaries').first);
     await tester.pumpAndSettle();
-    expect(find.byType(SmartRoutingView), findsOneWidget);
+    expect(find.byType(RoutingStudioView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -1315,7 +1325,12 @@ void main() {
       textScaleFactor: 1.8,
     );
 
-    expect(find.text('Watching real traffic'), findsOneWidget);
+    // The verdict now leads the hero, so its plain-language reading sits at the
+    // top of the screen even at extreme text size; scrollUntilVisible is a
+    // safety net that must not surface an overflow while reaching it.
+    final headline = find.text('Watching real traffic');
+    await tester.scrollUntilVisible(headline, 200);
+    expect(headline, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

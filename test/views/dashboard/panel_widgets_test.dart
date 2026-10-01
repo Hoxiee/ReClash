@@ -221,7 +221,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
-      expect(find.text('Used traffic'), findsOneWidget);
+      expect(find.text('Subscription info'), findsOneWidget);
       expect(find.text('Subscription report'), findsOneWidget);
     });
 

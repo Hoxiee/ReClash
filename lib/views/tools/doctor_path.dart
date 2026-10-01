@@ -13,6 +13,7 @@ class DoctorPathStage {
   const DoctorPathStage({
     required this.id,
     required this.label,
+    required this.description,
     required this.icon,
     required this.state,
     required this.dimmed,
@@ -21,6 +22,10 @@ class DoctorPathStage {
 
   final String id;
   final String label;
+
+  /// A plain-language line under the station name saying what this stage does
+  /// or why it failed. Empty while a stage is only being checked or is unknown.
+  final String description;
   final Glyph icon;
   final DoctorStageState state;
   final bool dimmed;
@@ -62,17 +67,88 @@ List<DoctorPathStage> resolveDoctorPathStages(
   final culpritIndex = failedIndex != -1 ? failedIndex : blameIndex;
   return [
     for (final (index, id) in doctorPathStageIds.indexed)
-      DoctorPathStage(
-        id: id,
-        label: labels[id]!,
-        icon: icons[id]!,
-        state: index == culpritIndex && failedIndex == -1
-            ? DoctorStageState.failed
-            : stageStates[id] ?? DoctorStageState.unknown,
-        culprit: index == culpritIndex,
-        dimmed: culpritIndex != -1 && index > culpritIndex,
-      ),
+      () {
+        final dimmed = culpritIndex != -1 && index > culpritIndex;
+        final DoctorStageState state;
+        if (dimmed) {
+          // Nothing past the break was validly reached, so a raw "passed" probe
+          // below it must never read as a working station — that green check
+          // fights the "skipped, break upstream" line under it.
+          state = DoctorStageState.consequence;
+        } else if (index == culpritIndex && failedIndex == -1) {
+          state = DoctorStageState.failed;
+        } else {
+          state = stageStates[id] ?? DoctorStageState.unknown;
+        }
+        return DoctorPathStage(
+          id: id,
+          label: labels[id]!,
+          description: _doctorPathDescription(context, id, state, dimmed),
+          icon: icons[id]!,
+          state: state,
+          culprit: index == culpritIndex,
+          dimmed: dimmed,
+        );
+      }(),
   ];
+}
+
+/// The line under a station name. Passed stages describe what they do; a failed
+/// stage says what broke; a downstream consequence says it was skipped. Stages
+/// still being checked or never reached carry no line, so the state chip alone
+/// speaks for them.
+String _doctorPathDescription(
+  BuildContext context,
+  String id,
+  DoctorStageState state,
+  bool dimmed,
+) {
+  final appLocalizations = context.appLocalizations;
+  if (dimmed || state == DoctorStageState.consequence) {
+    return appLocalizations.doctorPathDescConsequence;
+  }
+  if (state == DoctorStageState.passed) {
+    return switch (id) {
+      'app' => appLocalizations.doctorPathDescAppOk,
+      'ingress' => appLocalizations.doctorPathDescIngressOk,
+      'route' => appLocalizations.doctorPathDescRouteOk,
+      'internet' => appLocalizations.doctorPathDescInternetOk,
+      'response' => appLocalizations.doctorPathDescResponseOk,
+      _ => '',
+    };
+  }
+  if (state == DoctorStageState.failed) {
+    return switch (id) {
+      'app' => appLocalizations.doctorPathDescAppFail,
+      'ingress' => appLocalizations.doctorPathDescIngressFail,
+      'route' => appLocalizations.doctorPathDescRouteFail,
+      'internet' => appLocalizations.doctorPathDescInternetFail,
+      'response' => appLocalizations.doctorPathDescResponseFail,
+      _ => '',
+    };
+  }
+  return '';
+}
+
+/// One plain-language sentence for the hero subtitle that reads the whole path
+/// at a glance: examining, idle, stale, a named break, or an all-clear.
+String doctorPathSummary(
+  BuildContext context,
+  DoctorSnapshot snapshot,
+  List<DoctorPathStage> stages,
+) {
+  final appLocalizations = context.appLocalizations;
+  if (!snapshot.supported) return appLocalizations.doctorPathSummaryUnsupported;
+  if (snapshot.state == DoctorExamState.examining) {
+    return appLocalizations.doctorPathSummaryExamining;
+  }
+  final hasData = snapshot.stages.isNotEmpty || snapshot.evidence.isNotEmpty;
+  if (!hasData) return appLocalizations.doctorPathSummaryIdle;
+  if (!snapshot.isFresh) return appLocalizations.doctorPathSummaryStale;
+  for (final stage in stages) {
+    if (stage.culprit) return appLocalizations.doctorPathSummaryBreak(stage.label);
+  }
+  return appLocalizations.doctorPathSummaryHealthy;
 }
 
 String doctorPathIngressLabel(BuildContext context, DoctorPathKind pathKind) {

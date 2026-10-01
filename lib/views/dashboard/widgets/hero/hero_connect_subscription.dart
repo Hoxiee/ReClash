@@ -35,7 +35,8 @@ class _SubscriptionStrip extends StatelessWidget {
     final expireDate = subscriptionExpireDate(sub.expire);
     final now = DateTime.now();
     final expired = subscriptionIsExpired(expire: sub.expire, now: now);
-    final expiresIn = expireDate?.difference(now).inDays;
+    final remaining = expireDate?.difference(now);
+    final expiresIn = remaining?.inDays;
     final daysLeft = expired
         ? null
         : expiresIn == null || expiresIn > 0
@@ -94,7 +95,7 @@ class _SubscriptionStrip extends StatelessWidget {
                       SubscriptionPill(
                         color: daysColor,
                         label:
-                            '${context.appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
+                            '${context.appLocalizations.remaining} ${heroTimeLeftWords(remaining!)}',
                       ),
                   ],
                 ),

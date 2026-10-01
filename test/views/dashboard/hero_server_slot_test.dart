@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/ip_quality/ip_quality_text.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/ip_quality.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_connect.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -49,6 +54,7 @@ void main() {
     WidgetTester tester, {
     required ActiveServerInfo Function() server,
     List<Group> groups = const [],
+    List<Override> extraOverrides = const [],
   }) async {
     tester.view.physicalSize = const Size(900, 1600);
     tester.view.devicePixelRatio = 1;
@@ -67,6 +73,7 @@ void main() {
         activeServerProvider.overrideWith((ref) => server()),
         initProvider.overrideWithBuild((_, _) => true),
         coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+        ...extraOverrides,
       ],
     );
     addTearDown(container.dispose);
@@ -132,5 +139,41 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byKey(_serverKey), findsNothing);
     expect(find.byKey(_noneKey), findsOneWidget);
+  });
+
+  testWidgets('the egress IP opens the outbound IP sheet, not proxies', (
+    tester,
+  ) async {
+    const ip = '1.2.3.4';
+    final container = await pumpHero(
+      tester,
+      server: () => _server(displayName: 'Tokyo'),
+      extraOverrides: [
+        runTimeProvider.overrideWithBuild((_, _) => 90000),
+        networkDetectionProvider.overrideWithValue(
+          const NetworkDetectionState(
+            isLoading: false,
+            ipInfo: IpInfo(ip: ip, countryCode: 'US'),
+          ),
+        ),
+        ipQualityProvider(
+          ip,
+        ).overrideWith((ref) => Completer<IpQuality>().future),
+      ],
+    );
+    final pageBefore = container.read(currentPageLabelProvider);
+
+    final ipText = find.widgetWithText(IpQualityText, ip);
+    expect(ipText, findsOneWidget);
+    expect(tester.widget<IpQualityText>(ipText).openDetails, isTrue);
+
+    await tester.tap(ipText);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Outbound IP'), findsOneWidget);
+    expect(container.read(currentPageLabelProvider), pageBefore);
+    expect(find.byKey(_serverKey), findsOneWidget);
   });
 }

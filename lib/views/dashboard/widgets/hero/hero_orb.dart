@@ -1045,9 +1045,11 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                         animation: Listenable.merge([_nova, _charge, _tint]),
                         builder: (context, _) {
                           final coreRadius = size / 2 - _coreInset * scale;
-                          if (_cinematicEntry == null &&
-                              _nova.value > 0 &&
-                              _nova.value < 1) {
+                          // In-tree, not in an overlay: the blast must share the
+                          // orb's exact geometry or its ring drifts off the orb's
+                          // own. The elastic flow paints this head last, so it
+                          // still sits above the cards.
+                          if (_nova.value > 0 && _nova.value < 1) {
                             return CustomPaint(
                               key: HeroOrb.novaKey,
                               painter: _HeroNovaPainter(

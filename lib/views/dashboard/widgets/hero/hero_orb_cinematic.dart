@@ -160,7 +160,6 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
     _sparks = _novaSparks(math.Random(DateTime.now().microsecondsSinceEpoch));
     _press.reverse();
     _ripple.forward(from: 0);
-    _showCinematic();
     final android = defaultTargetPlatform == TargetPlatform.android;
     if (android) HapticFeedback.heavyImpact();
     _landingTimer?.cancel();
@@ -174,10 +173,6 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
       if (!mounted) return;
       _nova.value = 0;
       _maybeCollapse();
-      // A finger that never made it to the collapse leaves the overlay empty.
-      if (!_collapse.isAnimating && !_singularity.isAnimating) {
-        _hideCinematic();
-      }
     });
   }
 
@@ -284,10 +279,12 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
   void _showCinematic() {
     if (_cinematicEntry != null) return;
     final box = context.findRenderObject() as RenderBox?;
-    final overlay = Overlay.maybeOf(context);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (box == null || !box.hasSize || overlay == null) return;
-    // Anchor against the overlay we insert into, not the render root: on the
-    // desktop panes that overlay is offset, so a bare global rect drifts.
+    // Ride the root overlay, not the nearest one: a desktop pane's overlay is
+    // offset and clips to the pane, so the blast could neither cover the window
+    // nor anchor cleanly. Measuring the orb in the root overlay's own
+    // coordinates launches the hole from the button on any layout.
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
     _cinematicOrbRect =
         box.localToGlobal(Offset.zero, ancestor: overlayBox) & box.size;
@@ -357,13 +354,8 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
   Widget _buildCinematic(BuildContext overlayContext) {
     return IgnorePointer(
       child: AnimatedBuilder(
-        animation: Listenable.merge([_nova, _collapse, _singularity, _tint]),
+        animation: Listenable.merge([_collapse, _singularity, _tint]),
         builder: (context, _) {
-          // The nova blast overflows the orb far past its neighbours, so it
-          // rides the overlay above the cards instead of under them.
-          if (_nova.value > 0 && _nova.value < 1) {
-            return Stack(children: [_overlayNova()]);
-          }
           final s = _singularity.value;
           final sWarp = s < _evaporatePeak
               ? _evaporatePeak *
@@ -396,13 +388,21 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
               ? MediaQuery.sizeOf(context)
               : _cinematicOverlaySize;
           final screenShort = math.min(screen.width, screen.height);
+          final screenCenter = Offset(screen.width / 2, screen.height / 2);
           final grow = Curves.easeInOutCubic.transform(
             ((collapseLocal - 0.12) / 0.78).clamp(0.0, 1.0),
           );
+          final risePos = showSingularity ? 1.0 : grow;
           final riseScale = showSingularity ? 1.0 : grow;
-          // The hole grows in place over the orb; drifting it to the viewport
-          // centre threw it off to the side on the wide desktop panes.
-          final focal = _cinematicOrbRect.center;
+          // The hole tears free of the button and rides to the window centre as
+          // it grows, then detonates there. Both ends live in the root
+          // overlay's coordinates, so it leaves the orb and lands dead-centre on
+          // any resolution instead of drifting off a wide desktop pane.
+          final focal = Offset.lerp(
+            _cinematicOrbRect.center,
+            screenCenter,
+            risePos,
+          )!;
           final bodyDia = lerpDouble(
             _cinematicOrbRect.shortestSide * 0.92,
             screenShort * 0.5,
@@ -527,43 +527,6 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
             ],
           );
         },
-      ),
-    );
-  }
-
-  // The overlay twin of the in-tree nova: anchored on the orb's screen rect and
-  // carrying the same kick, tilt and scale so the blast tracks the orb body
-  // while painting above the surrounding cards.
-  Widget _overlayNova() {
-    final rect = _cinematicOrbRect;
-    final cine = rect.width / heroOrbBaseSize;
-    final spread = _novaSpread * cine;
-    return Positioned.fromRect(
-      rect: Rect.fromLTWH(
-        rect.left - spread,
-        rect.top - spread,
-        rect.width + spread * 2,
-        rect.height + spread * 2,
-      ),
-      child: Transform.translate(
-        offset: _orbKick * cine,
-        child: Transform.rotate(
-          angle: _orbTilt,
-          child: Transform.scale(
-            scale: _orbScale,
-            child: CustomPaint(
-              key: HeroOrb.novaKey,
-              painter: _HeroNovaPainter(
-                progress: _nova.value,
-                palette: _currentPalette,
-                scale: cine,
-                ringRadius: rect.width / 2 - (_ringStroke / 2 + 1.5) * cine,
-                coreRadius: rect.width / 2 - _coreInset * cine,
-                sparks: _sparks,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

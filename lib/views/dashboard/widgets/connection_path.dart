@@ -21,7 +21,7 @@ class ConnectionPath extends ConsumerWidget {
     final snapshot = ref.watch(connectionDoctorProvider);
     final answer = connectionDoctorAnswer(appLocalizations, snapshot);
     return DashboardInfoCard(
-      height: DashboardWidgetMetrics.heightOf(context, 2),
+      height: DashboardWidgetMetrics.heightOf(context, 1.5),
       icon: AppGlyphs.route,
       label: appLocalizations.doctorPathTitle,
       action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
@@ -154,7 +154,7 @@ class _MiniPathNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = doctorPathVisual(context, stage.state);
-    final diameter = stage.culprit ? 34.0 : 30.0;
+    final diameter = stage.culprit ? 30.0 : 26.0;
     return Tooltip(
       message: '${stage.label} · ${doctorPathStateLabel(context, stage.state)}',
       child: Opacity(
@@ -188,7 +188,7 @@ class _MiniConnector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 3,
+      height: 2,
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       decoration: BoxDecoration(color: color, borderRadius: AppRadius.full),
     );

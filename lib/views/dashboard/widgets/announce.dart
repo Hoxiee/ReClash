@@ -47,7 +47,6 @@ class Announce extends ConsumerWidget {
       context: context,
       builder: (_) => AdaptiveSheetScaffold(
         title: context.appLocalizations.announce,
-        showConfirmAction: false,
         actions: hasUrl
             ? [
                 IconButtonData(

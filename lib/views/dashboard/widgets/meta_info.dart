@@ -58,7 +58,8 @@ class _SubscriptionCard extends StatelessWidget {
     final expired =
         info != null && subscriptionIsExpired(expire: expire, now: now);
     final expireDate = subscriptionExpireDate(expire);
-    final expiresInDays = expireDate?.difference(now).inDays;
+    final remaining = expireDate?.difference(now);
+    final expiresInDays = remaining?.inDays;
     final daysLeft = expiresInDays == null
         ? null
         : expiresInDays > 0
@@ -106,8 +107,7 @@ class _SubscriptionCard extends StatelessWidget {
     } else if (daysLeft != null) {
       pill = SubscriptionPill(
         color: daysUrgent ? colorScheme.error : colorScheme.primary,
-        label:
-            '${appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
+        label: '${appLocalizations.remaining} ${heroTimeLeftWords(remaining!)}',
       );
     } else {
       pill = SubscriptionPill(
@@ -210,17 +210,17 @@ class _SubscriptionCard extends StatelessWidget {
                       ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.xs),
             value,
             if (info != null && !unlimited) ...[
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.xs),
               SubscriptionBar(
                 progress: progress <= 0 ? 0.0 : progress,
                 color: barColor,
               ),
             ],
             if (offers.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

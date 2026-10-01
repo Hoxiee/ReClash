@@ -245,7 +245,7 @@ class _ServerZone extends ConsumerWidget {
       borderRadius: heroCardRadius,
       onTap: () {
         if (smartRouting) {
-          showExtend(context, builder: (_) => const RoutingOverviewView());
+          showExtend(context, builder: (_) => const RoutingLiveView());
           return;
         }
         ref
@@ -279,14 +279,13 @@ class _ServerZone extends ConsumerWidget {
                   if (isConnected) ...[
                     const SizedBox(height: 3),
                     if (ipInfo != null)
-                      Text(
-                        ipInfo.ip,
+                      IpQualityText(
+                        ip: ipInfo.ip,
+                        openDetails: true,
                         style: context.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontFamily: FontFamily.jetBrainsMono.value,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       )
                     else if (networkState.isLoading)
                       Row(

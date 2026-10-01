@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import 'doctor_path.dart';
 
@@ -41,21 +42,18 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
   @override
   void didUpdateWidget(covariant ConnectionDoctorPathMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.blame != widget.blame ||
-        _signature(oldWidget.snapshot) != _signature(widget.snapshot)) {
+    if (_signature(oldWidget.snapshot) != _signature(widget.snapshot)) {
       _intro.forward(from: 0);
     }
   }
 
-  // Restart the cascade only when the stages actually change, not on every
-  // revision tick, so the reveal does not flicker under passive updates.
+  // The reveal cascade is a first-impression flourish, so it plays once for a
+  // given shape of path and never again while an exam ticks. Keying it on the
+  // per-stage states made every check restart the whole animation — that was
+  // the picture "jumping" on each probe. Individual stations now swap colour
+  // and icon in place instead, with no layout move.
   String _signature(DoctorSnapshot snapshot) {
-    if (!snapshot.isFresh) return 'stale';
-    final states = {for (final stage in snapshot.stages) stage.id: stage.state};
-    return [
-      snapshot.pathKind.name,
-      for (final id in doctorPathStageIds) '$id:${states[id]?.name ?? '_'}',
-    ].join('|');
+    return '${snapshot.supported}|${snapshot.isFresh}|${snapshot.pathKind.name}';
   }
 
   @override
@@ -71,14 +69,32 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
       widget.snapshot,
       widget.blame,
     );
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final summary = doctorPathSummary(context, widget.snapshot, stages);
+    final timings = doctorStageTimings(widget.snapshot);
+    final roundTrip = doctorPathRoundTripMs(widget.snapshot);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.appLocalizations.doctorPathTitle,
+                style: context.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            if (roundTrip > 0) MetaChip(label: context.delayText(roundTrip)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        // The one-line reading of the whole path, so the picture is understood
+        // before a single station is examined in detail.
         Text(
-          context.appLocalizations.doctorPathTitle,
-          style: context.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
+          summary,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: context.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -86,13 +102,12 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
           animation: _intro,
           builder: (context, _) {
             final progress = context.disableAnimations ? 1.0 : _intro.value;
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final vertical = constraints.maxWidth < 340 || textScale > 1.3;
-                return vertical
-                    ? _VerticalDoctorPath(stages: stages, progress: progress)
-                    : _HorizontalDoctorPath(stages: stages, progress: progress);
-              },
+            // The journey is always vertical: the stations read as a top-down
+            // route at any width, so nothing cramps on a narrow screen.
+            return _VerticalDoctorPath(
+              stages: stages,
+              timings: timings,
+              progress: progress,
             );
           },
         ),
@@ -108,56 +123,34 @@ double _staged(double progress, int index, int count) {
   return Curves.easeOutCubic.transform(local);
 }
 
-class _HorizontalDoctorPath extends StatelessWidget {
-  const _HorizontalDoctorPath({required this.stages, required this.progress});
-
-  final List<DoctorPathStage> stages;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var index = 0; index < stages.length; index++) ...[
-          Expanded(
-            child: _DoctorPathNode(
-              stage: stages[index],
-              reveal: _staged(progress, index, stages.length),
-            ),
-          ),
-          if (index < stages.length - 1)
-            _DoctorPathConnector(
-              state: _connectorState(stages[index], stages[index + 1]),
-              fill: _staged(progress, index, stages.length),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
 class _VerticalDoctorPath extends StatelessWidget {
-  const _VerticalDoctorPath({required this.stages, required this.progress});
+  const _VerticalDoctorPath({
+    required this.stages,
+    required this.timings,
+    required this.progress,
+  });
 
   final List<DoctorPathStage> stages;
+  final Map<String, int> timings;
   final double progress;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      // Left-align so the narrow connector rail keeps its 18px offset under the
+      // marker column; a centering Column floats it into the middle instead.
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var index = 0; index < stages.length; index++) ...[
           _DoctorPathNode(
             stage: stages[index],
+            millis: timings[stages[index].id] ?? 0,
             reveal: _staged(progress, index, stages.length),
-            vertical: true,
           ),
           if (index < stages.length - 1)
             _DoctorPathConnector(
               state: _connectorState(stages[index], stages[index + 1]),
               fill: _staged(progress, index, stages.length),
-              vertical: true,
             ),
         ],
       ],
@@ -168,19 +161,23 @@ class _VerticalDoctorPath extends StatelessWidget {
 class _DoctorPathNode extends StatelessWidget {
   const _DoctorPathNode({
     required this.stage,
+    required this.millis,
     required this.reveal,
-    this.vertical = false,
   });
 
   final DoctorPathStage stage;
+  final int millis;
   final double reveal;
-  final bool vertical;
 
   @override
   Widget build(BuildContext context) {
     final stateLabel = doctorPathStateLabel(context, stage.state);
     final visual = doctorPathVisual(context, stage.state);
-    final diameter = stage.culprit ? 52.0 : 44.0;
+    // Constant diameter keeps the vertical rail perfectly straight; the culprit
+    // stands out through its glow and bold label, not a wider marker. The
+    // marker reads as proof beneath the verdict, so it stays smaller than the
+    // answer medallion above it.
+    const diameter = 40.0;
     final glow = _glow(visual, stage);
     final marker = Transform.scale(
       scale: 0.82 + 0.18 * reveal,
@@ -190,7 +187,10 @@ class _DoctorPathNode extends StatelessWidget {
         decoration: ShapeDecoration(
           color: visual.background,
           shape: AppShape.circle.copyWith(
-            side: BorderSide(color: visual.foreground, width: 2),
+            side: BorderSide(
+              color: visual.foreground,
+              width: stage.culprit ? 2.5 : 2,
+            ),
           ),
           shadows: glow == null
               ? null
@@ -206,44 +206,26 @@ class _DoctorPathNode extends StatelessWidget {
         child: GlyphIcon(
           visual.icon ?? stage.icon,
           color: visual.foreground,
-          size: stage.culprit ? 26 : 22,
+          size: 20,
         ),
       ),
     );
-    final content = Semantics(
+    return Semantics(
       key: ValueKey('doctor_path_${stage.id}'),
-      label: '${stage.label}, $stateLabel',
-      child: Tooltip(
-        message: stateLabel,
-        child: Opacity(
-          opacity: (stage.dimmed ? 0.5 : 1.0) * (0.35 + 0.65 * reveal),
-          child: vertical
-              ? _verticalBody(context, marker, stateLabel, visual.foreground)
-              : _horizontalBody(context, marker),
+      label: _semanticsLabel(stateLabel),
+      child: Opacity(
+        opacity: (stage.dimmed ? 0.5 : 1.0) * (0.35 + 0.65 * reveal),
+        child: SizedBox(
+          width: double.infinity,
+          child: _verticalBody(context, marker, stateLabel, visual.foreground),
         ),
       ),
     );
-    return vertical
-        ? SizedBox(width: double.infinity, child: content)
-        : content;
   }
 
-  Widget _horizontalBody(BuildContext context, Widget marker) {
-    return Column(
-      children: [
-        marker,
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          stage.label,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: context.textTheme.labelSmall?.copyWith(
-            fontWeight: stage.culprit ? FontWeight.w700 : FontWeight.w600,
-          ),
-        ),
-      ],
-    );
+  String _semanticsLabel(String stateLabel) {
+    final base = '${stage.label}, $stateLabel';
+    return stage.description.isEmpty ? base : '$base. ${stage.description}';
   }
 
   Widget _verticalBody(
@@ -253,22 +235,63 @@ class _DoctorPathNode extends StatelessWidget {
     Color accent,
   ) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         marker,
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(stage.label, style: context.textTheme.bodyMedium),
-              Text(
-                stateLabel,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: accent,
-                  fontWeight: FontWeight.w600,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        stage.label,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          fontWeight: stage.culprit
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (millis > 0 && !stage.dimmed) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        context.delayText(millis),
+                        style: context.textTheme.labelSmall
+                            ?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            )
+                            .toJetBrainsMono,
+                      ),
+                    ],
+                    // Below the break the dimmed marker and the "skipped" line
+                    // already say the station was never reached; a state chip
+                    // there only repeats that in a longer, weaker word.
+                    if (!stage.dimmed) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      AppTag(
+                        stateLabel,
+                        foreground: accent,
+                        background: accent.withValues(alpha: 0.14),
+                      ),
+                    ],
+                  ],
                 ),
-              ),
-            ],
+                if (stage.description.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    stage.description,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ],
@@ -301,38 +324,25 @@ class _DoctorPathNode extends StatelessWidget {
 }
 
 class _DoctorPathConnector extends StatelessWidget {
-  const _DoctorPathConnector({
-    required this.state,
-    required this.fill,
-    this.vertical = false,
-  });
+  const _DoctorPathConnector({required this.state, required this.fill});
 
   final DoctorStageState state;
   final double fill;
-  final bool vertical;
 
   @override
   Widget build(BuildContext context) {
     final color = doctorPathVisual(context, state).foreground;
     final track = context.colorScheme.surfaceContainerHighest;
     final progress = math.max(0.02, fill);
-    if (vertical) {
-      return Container(
-        width: 4,
-        height: 20,
-        margin: const EdgeInsets.only(left: 20),
-        alignment: Alignment.topCenter,
-        decoration: BoxDecoration(color: track, borderRadius: AppRadius.full),
-        child: FractionallySizedBox(heightFactor: progress, child: _bar(color)),
-      );
-    }
+    // Sits centred under the 40px marker (20 − half the 4px track) so the rail
+    // runs straight down the column of stations.
     return Container(
-      width: 14,
-      height: 4,
-      margin: const EdgeInsets.only(top: 20),
-      alignment: Alignment.centerLeft,
+      width: 4,
+      height: 18,
+      margin: const EdgeInsets.only(left: 18),
+      alignment: Alignment.topCenter,
       decoration: BoxDecoration(color: track, borderRadius: AppRadius.full),
-      child: FractionallySizedBox(widthFactor: progress, child: _bar(color)),
+      child: FractionallySizedBox(heightFactor: progress, child: _bar(color)),
     );
   }
 

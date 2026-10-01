@@ -269,7 +269,7 @@ class HeroServiceRow extends ConsumerWidget {
           showExtend(context, builder: (_) => const ConnectionDoctorView());
         },
         HeroServiceTarget.routing => () {
-          showExtend(context, builder: (_) => const RoutingOverviewView());
+          showExtend(context, builder: (_) => const RoutingLiveView());
         },
       },
       child: Padding(

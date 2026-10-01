@@ -86,18 +86,18 @@ void main() {
     await _pump(tester, const ServiceStatusCard());
 
     expect(find.byType(ServiceStatusCard), findsOne);
-    // The picker names the service only by glyph, so a stopped core rests the
-    // egress slot on an em dash.
-    expect(find.text('—'), findsOneWidget);
+    // A stopped core leaves the settled service pending: no verdict pill
+    // reads as checked, and the egress line carries no stale em dash.
+    expect(find.text(String.fromCharCode(0x2014)), findsNothing);
     expect(find.text('Not checked'), findsOne);
     expect(find.byType(SvgPicture), findsWidgets);
   });
 
-  testWidgets('a fresh check fills the card status and node column', (
+  testWidgets('a fresh check fills the card status and egress head', (
     tester,
   ) async {
-    // A resolved-but-failed egress rests the IP slot on an em dash so the
-    // readout settles instead of shimmering; the node column still fills.
+    // A resolved-but-failed egress drops the IP and names the node head
+    // instead, so the readout settles rather than shimmering.
     await _pump(
       tester,
       const ServiceStatusCard(),
@@ -117,7 +117,7 @@ void main() {
 
     expect(find.text('Available'), findsWidgets);
     expect(find.text('42 ms'), findsWidgets);
-    // The selected service's egress head fills the node column.
+    // The selected service's node answers the egress line.
     expect(find.text('US-Node-01'), findsOneWidget);
   });
 
@@ -146,7 +146,6 @@ void main() {
 
     expect(find.text('Available'), findsWidgets);
     expect(find.text('42 ms'), findsWidgets);
-    expect(find.text(countryCodeToEmoji('US')!), findsWidgets);
   });
 
   testWidgets('the shown node resolves its egress IP in the readout', (
@@ -175,6 +174,7 @@ void main() {
     );
 
     expect(find.text('1.2.3.4'), findsOneWidget);
+    expect(find.text(countryCodeToEmoji('US')!), findsWidgets);
     expect(find.text('—'), findsNothing);
   });
 

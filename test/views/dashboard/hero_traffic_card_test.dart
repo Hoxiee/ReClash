@@ -97,8 +97,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Used traffic'), findsOneWidget);
-    expect(find.text('Total traffic'), findsOneWidget);
+    expect(find.text('Subscription info'), findsOneWidget);
     expect(find.text('Subscription report'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());

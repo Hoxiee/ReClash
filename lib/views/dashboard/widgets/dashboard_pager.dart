@@ -568,7 +568,7 @@ class _PageAffordance extends StatelessWidget {
       button: true,
       label: label,
       excludeSemantics: true,
-      child: Tooltip(message: label, child: withArrows),
+      child: withArrows,
     );
   }
 }

@@ -90,6 +90,8 @@ mixin _DoctorActionsMixin<T extends ConsumerStatefulWidget>
 class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     with _DoctorActionsMixin {
   bool _initializing = true;
+  bool _technicalOpen = false;
+  DoctorExamMode _mode = DoctorExamMode.standard;
 
   @override
   void initState() {
@@ -132,9 +134,13 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
       case DoctorRemedy.openProfiles:
         _leaveTo(PageLabel.profiles);
       case DoctorRemedy.openDns:
-        await _openConfig(const DnsView());
+        _openConfig(const DnsView(), paneId: 'dns', title: 'DNS');
       case DoctorRemedy.openAdvanced:
-        await _openConfig(const AdvancedConfigView());
+        _openConfig(
+          const AdvancedConfigView(),
+          paneId: 'advanced',
+          title: context.appLocalizations.advancedConfig,
+        );
       case DoctorRemedy.exportReport:
         await _exportReport();
     }
@@ -148,7 +154,18 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     ref.read(currentPageLabelProvider.notifier).toPage(page, returnable: true);
   }
 
-  Future<void> _openConfig(Widget view) => BaseNavigator.push(context, view);
+  // Inside a desktop two-pane tool the remedy drills into the same detail pane;
+  // a standalone Doctor (sheet or mobile) has no pane and pushes a full route.
+  void _openConfig(Widget view, {required String paneId, required String title}) {
+    final pane = SettingsPaneScope.of(context);
+    if (pane != null && pane.active && pane.pushes) {
+      pane.onSelect(
+        SettingsPaneSelection(id: paneId, detail: view, title: Text(title)),
+      );
+      return;
+    }
+    BaseNavigator.push(context, view);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,63 +184,267 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
           onPressed: () => unawaited(_refresh(showError: true)),
         ),
       ],
-      body: ListView(
-        padding: EdgeInsets.only(top: context.appBarInset),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: _DoctorAnswerCard(
-              snapshot: snapshot,
-              answer: answer,
-              busy: _busy,
-              canStart: snapshot.action('startStandard')?.eligible == true,
-              canFlushDns: snapshot.action('flushDns')?.eligible == true,
-              canCancel: snapshot.action('cancel')?.eligible == true,
-              onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
-              onStart: () => unawaited(_start(DoctorExamMode.standard)),
-              onCancel: () => unawaited(_cancel()),
-            ),
-          ),
-          if (snapshot.supported)
+      body: _DoctorReadingWidth(
+        child: ListView(
+          padding: EdgeInsets.only(top: context.appBarInset),
+          children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: CommonCard(
-                radius: AppCorner.xl,
-                child: Padding(
-                  padding: AppInsets.xl,
-                  child: ConnectionDoctorPathMap(
-                    snapshot: snapshot,
-                    blame: answer.blame,
-                  ),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: _DoctorSmoothResize(
+                child: _DoctorDiagnosisCard(
+                  snapshot: snapshot,
+                  answer: answer,
+                  busy: _busy,
+                  canStart: snapshot.action('startStandard')?.eligible == true,
+                  canFlushDns: snapshot.action('flushDns')?.eligible == true,
+                  canCancel: snapshot.action('cancel')?.eligible == true,
+                  onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
+                  onStart: () => unawaited(_start(DoctorExamMode.standard)),
+                  onCancel: () => unawaited(_cancel()),
                 ),
               ),
             ),
-          if (snapshot.supported)
-            SettingSection(
-              items: [
-                DecorationListItem(
-                  leading: const GlyphIcon(AppGlyphs.sliders),
-                  title: Text(appLocalizations.doctorTechnicalDetails),
-                  subtitle: Text(appLocalizations.doctorWaterfallDesc),
-                  trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                  onPressed: () => unawaited(
-                    BaseNavigator.push(context, const DoctorConsoleView()),
-                  ),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: _DoctorSmoothResize(
+                child: _DoctorStepsCard(answer: answer),
+              ),
             ),
-          _DoctorLimitationsSection(snapshot: snapshot),
-          const SettingBottomInset(),
-        ],
+            if (snapshot.supported)
+              _DoctorTechnicalSection(
+                snapshot: snapshot,
+                open: _technicalOpen,
+                onToggle: () =>
+                    setState(() => _technicalOpen = !_technicalOpen),
+                mode: _mode,
+                busy: _busy,
+                onMode: (mode) => setState(() => _mode = mode),
+                onRun: () => unawaited(_start(_mode)),
+                onCancel: () => unawaited(_cancel()),
+                onFlushDns: () => unawaited(_flushDns()),
+                onExport: () => unawaited(_exportReport()),
+              ),
+            _DoctorLimitationsSection(snapshot: snapshot),
+            const SettingBottomInset(),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// The single answer the screen leads with: what happened, what it means, what
-/// to try, and buttons that carry each fix out.
-class _DoctorAnswerCard extends StatelessWidget {
-  const _DoctorAnswerCard({
+/// Animates a child's height changes instead of snapping, so the verdict and
+/// steps cards glide as an exam moves between checking, result, and idle —
+/// the jumps the old screen showed on every check.
+class _DoctorSmoothResize extends StatelessWidget {
+  const _DoctorSmoothResize({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: context.motionDuration(commonDuration),
+      alignment: Alignment.topCenter,
+      curve: Curves.easeOutCubic,
+      child: child,
+    );
+  }
+}
+
+/// Caps the diagnosis column at a comfortable reading width and centres it, so
+/// the cards stay legible on a wide desktop window instead of stretching edge
+/// to edge; a narrow screen keeps the full width.
+class _DoctorReadingWidth extends StatelessWidget {
+  const _DoctorReadingWidth({required this.child});
+
+  final Widget child;
+
+  static const _maxWidth = 640.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxWidth),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// The expert levers and raw evidence, revealed in place instead of pushed onto
+/// a second screen. A tappable header slides the whole console open and shut so
+/// the verdict stays the lead while the detail is a glide away, never a jump to
+/// another route.
+class _DoctorTechnicalSection extends StatelessWidget {
+  const _DoctorTechnicalSection({
+    required this.snapshot,
+    required this.open,
+    required this.onToggle,
+    required this.mode,
+    required this.busy,
+    required this.onMode,
+    required this.onRun,
+    required this.onCancel,
+    required this.onFlushDns,
+    required this.onExport,
+  });
+
+  final DoctorSnapshot snapshot;
+  final bool open;
+  final VoidCallback onToggle;
+  final DoctorExamMode mode;
+  final bool busy;
+  final ValueChanged<DoctorExamMode> onMode;
+  final VoidCallback onRun;
+  final VoidCallback onCancel;
+  final VoidCallback onFlushDns;
+  final VoidCallback onExport;
+
+  @override
+  Widget build(BuildContext context) {
+    final examining = snapshot.state == DoctorExamState.examining;
+    final flushAction = snapshot.action('flushDns');
+    final drift =
+        snapshot.isFresh && snapshot.startGenerations != snapshot.generations;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, 0),
+          child: _DoctorTechnicalHeader(open: open, onToggle: onToggle),
+        ),
+        AnimatedSize(
+          duration: context.motionDuration(commonDuration),
+          alignment: Alignment.topCenter,
+          curve: Curves.easeOutCubic,
+          child: open
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (drift)
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: _DoctorDriftBanner(),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: _DoctorRunPanel(
+                        mode: mode,
+                        busy: busy,
+                        examining: examining,
+                        canStart:
+                            snapshot.action('startStandard')?.eligible == true,
+                        canCancel: snapshot.action('cancel')?.eligible == true,
+                        canFlushDns: flushAction?.eligible == true,
+                        flushReasonCode:
+                            flushAction?.eligibilityReasonCode ?? '',
+                        progress: snapshot.progress,
+                        onMode: onMode,
+                        onRun: onRun,
+                        onCancel: onCancel,
+                        onFlushDns: onFlushDns,
+                        onExport: onExport,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: _DoctorWaterfallCard(snapshot: snapshot),
+                    ),
+                    _DoctorCapabilitiesSection(snapshot: snapshot),
+                    _DoctorDetails(snapshot: snapshot),
+                    _DoctorHealSection(snapshot: snapshot),
+                    _DoctorHistoryPanel(snapshot: snapshot),
+                    _DoctorEvidenceDisclosure(snapshot: snapshot),
+                  ],
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+}
+
+/// The tap target that opens the inline console: a sliders glyph, the "Technical
+/// details" label, and a chevron that rotates to point down when the section is
+/// open, so the control reads as an in-place disclosure rather than a link out.
+class _DoctorTechnicalHeader extends StatelessWidget {
+  const _DoctorTechnicalHeader({required this.open, required this.onToggle});
+
+  final bool open;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final appLocalizations = context.appLocalizations;
+    return CommonCard(
+      radius: AppCorner.xl,
+      child: InkWell(
+        onTap: onToggle,
+        borderRadius: AppRadius.xl,
+        child: Padding(
+          padding: AppInsets.xl,
+          child: Row(
+            children: [
+              GlyphIcon(AppGlyphs.sliders, color: colors.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  appLocalizations.doctorTechnicalDetails,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              AnimatedRotation(
+                turns: open ? 0.5 : 0,
+                duration: context.motionDuration(commonDuration),
+                child: GlyphIcon(
+                  AppGlyphs.chevronDown,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A progress bar whose fill eases to each new value instead of snapping, so a
+/// completed step glides the bar forward; a null value falls back to the
+/// indeterminate sweep while the total is still unknown.
+class _DoctorProgressBar extends StatelessWidget {
+  const _DoctorProgressBar({required this.value, this.minHeight = 6});
+
+  final double? value;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value == null) {
+      return LinearProgressIndicator(minHeight: minHeight);
+    }
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: value!.clamp(0.0, 1.0)),
+      duration: context.motionDuration(const Duration(milliseconds: 350)),
+      curve: Curves.easeOut,
+      builder: (context, animated, _) =>
+          LinearProgressIndicator(value: animated, minHeight: minHeight),
+    );
+  }
+}
+
+/// The single hero the screen leads with: the plain-language verdict on top,
+/// the live progress while a check runs, the connection path as visual proof,
+/// and the fixes at the foot — one tone-accented surface instead of the three
+/// disjoint cards the old screen stacked.
+class _DoctorDiagnosisCard extends StatelessWidget {
+  const _DoctorDiagnosisCard({
     required this.snapshot,
     required this.answer,
     required this.busy,
@@ -268,60 +489,25 @@ class _DoctorAnswerCard extends StatelessWidget {
         canStart &&
         !examining &&
         !remedies.contains(DoctorRemedy.recheck);
+    final showActions =
+        remedies.isNotEmpty || showStart || (examining && canCancel);
     return CommonCard(
-      type: CommonCardType.filled,
       radius: AppCorner.xl,
-      isError: answer.tone == DoctorAnswerTone.bad,
+      accent: tone,
       child: Padding(
         padding: AppInsets.lg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppMedallion(
-                  icon: _answerIcon(answer.tone),
-                  tone: tone,
-                  size: 44,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        answer.headline,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        answer.meaning,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                      if (answer.isProblem &&
-                          answer.confidence == DoctorConfidence.probable) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          _confidenceLabel(appLocalizations, answer.confidence),
-                          style: context.textTheme.labelMedium?.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            _verdict(context, appLocalizations, colors, tone),
+            if (snapshot.supported &&
+                snapshot.isFresh &&
+                !examining &&
+                snapshot.evidence.isNotEmpty)
+              _DoctorGlance(snapshot: snapshot),
             if (examining) ...[
               const SizedBox(height: AppSpacing.lg),
-              LinearProgressIndicator(value: progressValue, minHeight: 4),
+              _DoctorProgressBar(value: progressValue, minHeight: 6),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 appLocalizations.doctorProgress(
@@ -333,68 +519,208 @@ class _DoctorAnswerCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (answer.steps.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                appLocalizations.doctorWhatToTry,
-                style: context.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              for (final step in answer.steps)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2, right: 8),
-                        child: GlyphIcon(
-                          AppGlyphs.chevronForward,
-                          size: 20,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(step, style: context.textTheme.bodyMedium),
-                      ),
-                    ],
-                  ),
-                ),
+            if (snapshot.supported) ...[
+              const _DoctorSeam(),
+              ConnectionDoctorPathMap(snapshot: snapshot, blame: answer.blame),
             ],
-            if (remedies.isNotEmpty ||
-                showStart ||
-                (examining && canCancel)) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final entry in remedies.asMap().entries)
-                    _RemedyButton(
-                      remedy: entry.value,
-                      primary: entry.key == 0,
-                      onPressed: busy ? null : () => onRemedy(entry.value),
-                    ),
-                  if (showStart)
-                    FilledButton.tonalIcon(
-                      onPressed: busy ? null : onStart,
-                      icon: const GlyphIcon(AppGlyphs.play),
-                      label: Text(appLocalizations.doctorStandardExam),
-                    ),
-                  if (examining && canCancel)
-                    OutlinedButton.icon(
-                      onPressed: busy ? null : onCancel,
-                      icon: const GlyphIcon(AppGlyphs.stop),
-                      label: Text(appLocalizations.doctorCancelExam),
-                    ),
-                ],
+            if (showActions) ...[
+              const _DoctorSeam(),
+              _actions(
+                context,
+                appLocalizations,
+                remedies: remedies,
+                showStart: showStart,
+                examining: examining,
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _verdict(
+    BuildContext context,
+    AppLocalizations appLocalizations,
+    ColorScheme colors,
+    Color tone,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _DoctorVerdictMark(icon: _answerIcon(answer.tone), tone: tone),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                answer.headline,
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                answer.meaning,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              if (answer.isProblem &&
+                  answer.confidence == DoctorConfidence.probable) ...[
+                const SizedBox(height: 6),
+                Text(
+                  _confidenceLabel(appLocalizations, answer.confidence),
+                  style: context.textTheme.labelMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actions(
+    BuildContext context,
+    AppLocalizations appLocalizations, {
+    required List<DoctorRemedy> remedies,
+    required bool showStart,
+    required bool examining,
+  }) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final entry in remedies.asMap().entries)
+          _RemedyButton(
+            remedy: entry.value,
+            primary: entry.key == 0,
+            onPressed: busy ? null : () => onRemedy(entry.value),
+          ),
+        if (showStart)
+          FilledButton.tonalIcon(
+            onPressed: busy ? null : onStart,
+            icon: const GlyphIcon(AppGlyphs.play),
+            label: Text(appLocalizations.doctorStandardExam),
+          ),
+        if (examining && canCancel)
+          OutlinedButton.icon(
+            onPressed: busy ? null : onCancel,
+            icon: const GlyphIcon(AppGlyphs.stop),
+            label: Text(appLocalizations.doctorCancelExam),
+          ),
+      ],
+    );
+  }
+}
+
+/// The verdict glyph as a living mark: a tone-tinted halo behind the medallion
+/// that swells in as the answer resolves, so a settled result lands with weight
+/// instead of appearing flat. One-shot, so it never fights `pumpAndSettle`.
+class _DoctorVerdictMark extends StatelessWidget {
+  const _DoctorVerdictMark({required this.icon, required this.tone});
+
+  final Glyph icon;
+  final Color tone;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(tone),
+      tween: Tween(begin: 0, end: 1),
+      duration: context.motionDuration(commonDuration),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        final eased = value.clamp(0.0, 1.0);
+        return DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: AppShape.md,
+            shadows: [
+              BoxShadow(
+                color: tone.withValues(alpha: 0.4 * eased),
+                blurRadius: 20,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Transform.scale(scale: 0.72 + 0.28 * value, child: child),
+        );
+      },
+      child: AppMedallion(icon: icon, tone: tone, size: 48),
+    );
+  }
+}
+
+/// A quiet at-a-glance readout under the verdict: the machine facts a reader
+/// wants without opening the console — protection and confidence — each a glyph
+/// with its value, dropped when the fact is still unknown.
+class _DoctorGlance extends StatelessWidget {
+  const _DoctorGlance({required this.snapshot});
+
+  final DoctorSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colors = context.colorScheme;
+    final items = <(Glyph, String)>[
+      if (snapshot.captureState != DoctorCaptureState.unknown)
+        (
+          AppGlyphs.shield,
+          _captureStateLabel(appLocalizations, snapshot.captureState),
+        ),
+      if (snapshot.confidence != DoctorConfidence.unknown)
+        (
+          AppGlyphs.checklist,
+          _confidenceLabel(appLocalizations, snapshot.confidence),
+        ),
+    ];
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Wrap(
+        spacing: AppSpacing.lg,
+        runSpacing: AppSpacing.sm,
+        children: [
+          for (final (icon, value) in items)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GlyphIcon(icon, size: 18, color: colors.onSurfaceVariant),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  value,
+                  style: context.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A hairline that separates the verdict, the path proof, and the fixes inside
+/// the diagnosis hero, so the three regions read as one card with structure
+/// rather than three stacked panels.
+class _DoctorSeam extends StatelessWidget {
+  const _DoctorSeam();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: context.colorScheme.outlineVariant,
       ),
     );
   }
@@ -430,6 +756,67 @@ class _RemedyButton extends StatelessWidget {
   }
 }
 
+/// The "what to try" steps, split out of the verdict card so the verdict keeps
+/// a fixed shape and only this block grows when a problem has advice attached.
+class _DoctorStepsCard extends StatelessWidget {
+  const _DoctorStepsCard({required this.answer});
+
+  final DoctorAnswer answer;
+
+  @override
+  Widget build(BuildContext context) {
+    if (answer.steps.isEmpty) return const SizedBox.shrink();
+    final appLocalizations = context.appLocalizations;
+    final colors = context.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: CommonCard(
+        radius: AppCorner.xl,
+        child: Padding(
+          padding: AppInsets.lg,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                appLocalizations.doctorWhatToTry,
+                style: context.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              for (final step in answer.steps)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2, right: 8),
+                        child: GlyphIcon(
+                          AppGlyphs.chevronForward,
+                          size: 20,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(step, style: context.textTheme.bodyMedium),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The console's diagnosis readout: the machine-level facts the verdict was
+/// built from — protection, layer, scope, confidence, freshness — laid out as
+/// a panel so it shares one card language with every other console section
+/// instead of dropping into a list style of its own.
 class _DoctorDetails extends StatelessWidget {
   const _DoctorDetails({required this.snapshot});
 
@@ -439,42 +826,89 @@ class _DoctorDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!snapshot.supported) return const SizedBox.shrink();
     final appLocalizations = context.appLocalizations;
-    return SettingSection(
-      title: appLocalizations.doctorDetails,
-      items: [
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.shield),
-          title: Text(appLocalizations.doctorProtection),
-          trailing: Text(
-            _captureStateLabel(appLocalizations, snapshot.captureState),
+    final rows = <(Glyph, String, String)>[
+      (
+        AppGlyphs.shield,
+        appLocalizations.doctorProtection,
+        _captureStateLabel(appLocalizations, snapshot.captureState),
+      ),
+      (
+        AppGlyphs.layers,
+        appLocalizations.doctorLayer,
+        connectionDoctorLayerLabel(appLocalizations, snapshot.layer),
+      ),
+      (
+        AppGlyphs.target,
+        appLocalizations.doctorScope,
+        _scopeLabel(appLocalizations, snapshot.scope),
+      ),
+      (
+        AppGlyphs.checklist,
+        appLocalizations.doctorConfidence,
+        _confidenceLabel(appLocalizations, snapshot.confidence),
+      ),
+      (
+        AppGlyphs.update,
+        appLocalizations.status,
+        snapshot.isFresh
+            ? appLocalizations.doctorFresh
+            : appLocalizations.doctorStale,
+      ),
+    ];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      child: _DoctorPanel(
+        title: appLocalizations.doctorDetails,
+        icon: AppGlyphs.info,
+        body: Column(
+          children: [
+            for (final (index, (icon, label, value)) in rows.indexed) ...[
+              if (index != 0) const SizedBox(height: AppSpacing.md),
+              _DoctorFactRow(icon: icon, label: label, value: value),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One label/value fact line inside the console diagnosis panel: a quiet
+/// leading glyph, the field name, and its reading pushed to the right edge.
+class _DoctorFactRow extends StatelessWidget {
+  const _DoctorFactRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final Glyph icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    return Row(
+      children: [
+        GlyphIcon(icon, size: 20, color: colors.onSurfaceVariant),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            label,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
           ),
         ),
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.layers),
-          title: Text(appLocalizations.doctorLayer),
-          trailing: Text(
-            connectionDoctorLayerLabel(appLocalizations, snapshot.layer),
-          ),
-        ),
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.target),
-          title: Text(appLocalizations.doctorScope),
-          trailing: Text(_scopeLabel(appLocalizations, snapshot.scope)),
-        ),
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.checklist),
-          title: Text(appLocalizations.doctorConfidence),
-          trailing: Text(
-            _confidenceLabel(appLocalizations, snapshot.confidence),
-          ),
-        ),
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.update),
-          title: Text(appLocalizations.status),
-          trailing: Text(
-            snapshot.isFresh
-                ? appLocalizations.doctorFresh
-                : appLocalizations.doctorStale,
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -524,79 +958,6 @@ class DoctorTimingPreview extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _DoctorEvidenceSection extends StatelessWidget {
-  const _DoctorEvidenceSection({required this.snapshot});
-
-  final DoctorSnapshot snapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!snapshot.supported) return const SizedBox.shrink();
-    final appLocalizations = context.appLocalizations;
-    final evidence = snapshot.evidence.reversed.take(12).toList();
-    return SettingSection(
-      title: appLocalizations.doctorEvidence,
-      items: evidence.isEmpty
-          ? [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.hourglass),
-                title: Text(appLocalizations.doctorNoEvidence),
-              ),
-            ]
-          : [
-              for (final fact in evidence)
-                DecorationListItem(
-                  leading: GlyphIcon(_evidenceIcon(fact.outcome)),
-                  title: Text(
-                    connectionDoctorLayerLabel(appLocalizations, fact.layer),
-                  ),
-                  subtitle: Text(_evidenceDescription(appLocalizations, fact)),
-                  trailing: fact.consequence
-                      ? Tooltip(
-                          message: appLocalizations.doctorEvidenceConsequence,
-                          child: const GlyphIcon(AppGlyphs.subItem),
-                        )
-                      : null,
-                ),
-            ],
-    );
-  }
-}
-
-class _DoctorHistorySection extends StatelessWidget {
-  const _DoctorHistorySection({required this.snapshot});
-
-  final DoctorSnapshot snapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!snapshot.supported) return const SizedBox.shrink();
-    final appLocalizations = context.appLocalizations;
-    final incidents = snapshot.incidents.reversed.take(5).toList();
-    return SettingSection(
-      title: appLocalizations.doctorRecentChecks,
-      items: incidents.isEmpty
-          ? [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.history),
-                title: Text(appLocalizations.doctorNoIncidents),
-              ),
-            ]
-          : [
-              for (final incident in incidents)
-                DecorationListItem(
-                  leading: GlyphIcon(_incidentIcon(incident)),
-                  title: Text(_incidentTitle(appLocalizations, incident)),
-                  subtitle: Text(
-                    '${_modeLabel(appLocalizations, incident.mode)} · '
-                    '${connectionDoctorLayerLabel(appLocalizations, incident.layer)}',
-                  ),
-                ),
-            ],
-    );
-  }
 }
 
 class _DoctorLimitationsSection extends StatelessWidget {

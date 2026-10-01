@@ -35,6 +35,17 @@ String _hoursWord(int hours) => _pluralWord(
   currentAppLocalizations.hoursGenitive,
 );
 
+String heroTimeLeftWords(Duration remaining) {
+  if (remaining.inSeconds <= 0) return '0 ${heroDaysWord(0)}';
+  final days = remaining.inDays;
+  if (days >= 1) return '$days ${heroDaysWord(days)}';
+  final hours = remaining.inHours;
+  if (hours > 0) return '$hours ${_hoursWord(hours)}';
+  final minutes = remaining.inMinutes;
+  if (minutes < 1) return '1 ${_minutesWord(1)}';
+  return '$minutes ${_minutesWord(minutes)}';
+}
+
 String heroDurationWords(int? elapsedMinutes) {
   if (elapsedMinutes == null) return '';
   final minutes = elapsedMinutes;
