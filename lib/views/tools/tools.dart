@@ -581,13 +581,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       ),
       const _DeepOwner('DNS', 'dns', AppGlyphs.dns, DnsView()),
       const _DeepOwner('NTP', 'ntp', AppGlyphs.clock, NtpView()),
-      if (kEnableSmartRouting)
-        _DeepOwner(
-          l.smartRouting,
-          'smartRouting',
-          AppGlyphs.smartRoute,
-          const RoutingStudioView(),
-        ),
+      _DeepOwner(
+        l.smartRouting,
+        'smartRouting',
+        AppGlyphs.smartRoute,
+        const RoutingStudioView(),
+      ),
       _DeepOwner(
         l.smartPause,
         'smartPause',
