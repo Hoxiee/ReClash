@@ -7,11 +7,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
-import 'package:reclash/widgets/widgets.dart';
 
 final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
@@ -33,7 +31,7 @@ bool _exceedsLines(
   return exceeded;
 }
 
-class Announce extends ConsumerWidget {
+class Announce extends ConsumerStatefulWidget {
   const Announce({super.key, this.expanded = false});
 
   /// When set, the tile grows to show the whole announcement instead of
@@ -41,31 +39,62 @@ class Announce extends ConsumerWidget {
   /// desktop split stays collapsed beside the orb.
   final bool expanded;
 
-  void _showAnnounceSheet(BuildContext context, String text, String? url) {
-    final hasUrl = url != null && url.isNotEmpty;
-    showSheet(
+  @override
+  ConsumerState<Announce> createState() => _AnnounceState();
+}
+
+class _AnnounceState extends ConsumerState<Announce> {
+  final _cardKey = GlobalKey();
+
+  // The collapsed tile grows in place into a reading panel that fills the
+  // column, rather than a sheet sliding in from the edge. The open-in-browser
+  // action rides along in the panel header, so the tile keeps no link glyph.
+  void _openMorph(BuildContext context, String? text, String? url) {
+    if (text == null || text.isEmpty) return;
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final cardBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+    if (overlayBox == null || cardBox == null || !cardBox.hasSize) return;
+    final origin = cardBox.localToGlobal(Offset.zero, ancestor: overlayBox);
+    final sourceRect = origin & cardBox.size;
+    // Grow within the neighbouring card column when one marks itself, so the
+    // desktop split fills its own stack instead of the whole screen.
+    final boundaryBox =
+        AnnounceMorphBoundary.boxOf(context)?.currentContext
+                ?.findRenderObject()
+            as RenderBox?;
+    final bounds = boundaryBox != null && boundaryBox.hasSize
+        ? boundaryBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
+              boundaryBox.size
+        : null;
+    final radius = DashboardWidgetMetrics.radiusOf(context);
+    final textScale = DashboardWidgetMetrics.textScaleOf(context);
+    showGeneralDialog<void>(
       context: context,
-      builder: (_) => AdaptiveSheetScaffold(
-        title: context.appLocalizations.announce,
-        actions: hasUrl
-            ? [
-                IconButtonData(
-                  glyph: AppGlyphs.openExternal,
-                  tooltip: context.appLocalizations.openInBrowser,
-                  onPressed: () => dialogs.openUrl(url),
-                ),
-              ]
-            : const [],
-        body: SingleChildScrollView(
-          padding: AppInsets.lg,
-          child: SelectionArea(child: AnnounceText(text: text, links: true)),
-        ),
+      useRootNavigator: false,
+      barrierDismissible: true,
+      barrierLabel: context.appLocalizations.announce,
+      barrierColor: Colors.black54,
+      transitionDuration: context.motionDuration(
+        const Duration(milliseconds: 460),
+      ),
+      pageBuilder: (_, _, _) => const SizedBox.shrink(),
+      transitionBuilder: (_, animation, _, _) => _AnnounceMorph(
+        animation: animation,
+        sourceRect: sourceRect,
+        sourceRadius: radius,
+        overlaySize: overlayBox.size,
+        bounds: bounds,
+        textScale: textScale,
+        text: text,
+        url: url,
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final expanded = widget.expanded;
     final panelMeta = ref.watch(
       currentProfileProvider.select((state) => state?.panelMeta),
     );
@@ -74,19 +103,19 @@ class Announce extends ConsumerWidget {
     final hasUrl = url != null && url.isNotEmpty;
     final hasAnnouncement = text != null && text.isNotEmpty;
     final showFull = expanded && hasAnnouncement;
-    final showAction = hasAnnouncement && (showFull ? hasUrl : true);
     return DashboardInfoCard(
+      key: _cardKey,
       height: showFull ? null : DashboardWidgetMetrics.heightOf(context, 2),
       icon: AppGlyphs.announce,
       label: context.appLocalizations.announce,
-      action: showAction
+      action: showFull && hasUrl
           ? const GlyphIcon(AppGlyphs.openExternal, size: 18)
           : null,
-      onPressed: !showAction
+      onPressed: !hasAnnouncement
           ? null
           : showFull
-          ? () => dialogs.openUrl(url!)
-          : () => _showAnnounceSheet(context, text, url),
+          ? (hasUrl ? () => dialogs.openUrl(url) : null)
+          : () => _openMorph(context, text, url),
       child: showFull
           ? _AnnounceFull(text: text)
           : _AnnounceCollapsed(text: text, hasAnnouncement: hasAnnouncement),
@@ -328,6 +357,258 @@ class _AnnounceTextState extends State<AnnounceText> {
       TextSpan(children: spans),
       maxLines: widget.maxLines,
       overflow: widget.overflow,
+    );
+  }
+}
+
+/// Grows the tapped announcement tile in place into a column-filling reading
+/// panel. The surface rides a [RectTween] on the morph spring from the tile's
+/// own bounds, so the eye follows it open instead of a sheet arriving from the
+/// edge.
+class _AnnounceMorph extends StatelessWidget {
+  const _AnnounceMorph({
+    required this.animation,
+    required this.sourceRect,
+    required this.sourceRadius,
+    required this.overlaySize,
+    required this.bounds,
+    required this.textScale,
+    required this.text,
+    required this.url,
+  });
+
+  final Animation<double> animation;
+  final Rect sourceRect;
+  final double sourceRadius;
+  final Size overlaySize;
+  final Rect? bounds;
+  final double textScale;
+  final String text;
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
+    final limitTop = padding.top + 16;
+    final limitBottom = overlaySize.height - padding.bottom - 16;
+    // Fill the marked neighbour column when present, otherwise the safe area;
+    // either way never outgrow the screen and always cover the source tile.
+    final target = Rect.fromLTRB(
+      sourceRect.left,
+      bounds == null
+          ? min(sourceRect.top, limitTop)
+          : max(min(sourceRect.top, bounds!.top), limitTop),
+      sourceRect.right,
+      bounds == null
+          ? max(sourceRect.bottom, limitBottom)
+          : min(max(sourceRect.bottom, bounds!.bottom), limitBottom),
+    );
+    final morph = CurvedAnimation(parent: animation, curve: AppSpringCurves.morph);
+    final rectTween = RectTween(begin: sourceRect, end: target);
+    final radiusTween = Tween<double>(begin: sourceRadius, end: AppCorner.xxl);
+    // The morph spring overshoots past 1, so hold fades on the linear track to
+    // keep opacity inside [0, 1].
+    final actionsOpacity = animation.drive(
+      CurveTween(curve: const Interval(0.25, 0.85, curve: Curves.easeOut)),
+    );
+    final color = context.colorScheme.surfaceContainerLow;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final rect = rectTween.evaluate(morph) ?? sourceRect;
+        final radius = max(0.0, radiusTween.evaluate(morph));
+        return Stack(
+          children: [
+            Positioned.fromRect(
+              rect: rect,
+              child: Material(
+                color: color,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(radius),
+                ),
+                child: _AnnouncePanel(
+                  text: text,
+                  url: url,
+                  textScale: textScale,
+                  actionsOpacity: actionsOpacity,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// The opened panel: a header mirroring the collapsed tile so the morph starts
+/// seamless, with the full announcement revealed by the growing clip and the
+/// open-in-browser and close actions fading in once the surface has room.
+class _AnnouncePanel extends StatelessWidget {
+  const _AnnouncePanel({
+    required this.text,
+    required this.url,
+    required this.textScale,
+    required this.actionsOpacity,
+  });
+
+  final String text;
+  final String? url;
+  final double textScale;
+  final Animation<double> actionsOpacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasUrl = url != null && url!.isNotEmpty;
+    final theme = Theme.of(context);
+    final scaledTheme = textScale == 1
+        ? theme
+        : theme.copyWith(
+            textTheme: theme.textTheme.apply(fontSizeFactor: textScale),
+          );
+    final appLocalizations = context.appLocalizations;
+    return Theme(
+      data: scaledTheme,
+      child: Builder(
+        builder: (context) {
+          final bodyStyle = context.textTheme.bodyMedium?.copyWith(
+            color: context.colorScheme.onSurface,
+            height: _lineSpacing,
+          );
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    GlyphIcon(
+                      AppGlyphs.announce,
+                      size: 20,
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        appLocalizations.announce,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.titleSmall?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    FadeTransition(
+                      opacity: actionsOpacity,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (hasUrl)
+                            _PanelAction(
+                              glyph: AppGlyphs.openExternal,
+                              tooltip: appLocalizations.openInBrowser,
+                              onPressed: () => dialogs.openUrl(url!),
+                            ),
+                          _PanelAction(
+                            glyph: AppGlyphs.close,
+                            tooltip: appLocalizations.close,
+                            onPressed: () => Navigator.of(context).maybePop(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Expanded(
+                  child: SelectionArea(
+                    child: SingleChildScrollView(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: AnnounceText(
+                          text: text,
+                          links: true,
+                          style: bodyStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Marks the card column the announce morph should grow within. Without it the
+/// opened panel fills the safe area; with it the panel stops at this subtree's
+/// bounds, so the desktop split spans its own stack of cards, not the screen.
+class AnnounceMorphBoundary extends StatefulWidget {
+  const AnnounceMorphBoundary({super.key, required this.child});
+
+  final Widget child;
+
+  static GlobalKey? boxOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_AnnounceMorphScope>()?.boundaryKey;
+
+  @override
+  State<AnnounceMorphBoundary> createState() => _AnnounceMorphBoundaryState();
+}
+
+class _AnnounceMorphBoundaryState extends State<AnnounceMorphBoundary> {
+  final _boundaryKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return _AnnounceMorphScope(
+      boundaryKey: _boundaryKey,
+      child: KeyedSubtree(key: _boundaryKey, child: widget.child),
+    );
+  }
+}
+
+class _AnnounceMorphScope extends InheritedWidget {
+  const _AnnounceMorphScope({required this.boundaryKey, required super.child});
+
+  final GlobalKey boundaryKey;
+
+  @override
+  bool updateShouldNotify(_AnnounceMorphScope oldWidget) =>
+      boundaryKey != oldWidget.boundaryKey;
+}
+
+class _PanelAction extends StatelessWidget {
+  const _PanelAction({
+    required this.glyph,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final Glyph glyph;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkResponse(
+        onTap: onPressed,
+        radius: 22,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: GlyphIcon(
+            glyph,
+            size: 20,
+            color: context.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
     );
   }
 }

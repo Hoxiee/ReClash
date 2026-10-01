@@ -15,6 +15,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
+import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/connection_mode.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_centered_scroll_view.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
@@ -383,20 +384,28 @@ class HeroSplitDetails extends ConsumerWidget {
       controller: scrollController,
       bottomInset: bottomInset,
       children: (metrics) => [
-        _ServerPanel(
-          displayName: activeServer.displayName,
-          nameCountryCode: activeServer.countryCode,
-          delay: activeServer.delay,
-          status: status,
-          accent: accent,
-          otherCodes: activeServer.otherCodes,
-          otherLocations: activeServer.otherLocations,
-          smartRouting: activeServer.smartRouting,
+        AnnounceMorphBoundary(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ServerPanel(
+                displayName: activeServer.displayName,
+                nameCountryCode: activeServer.countryCode,
+                delay: activeServer.delay,
+                status: status,
+                accent: accent,
+                otherCodes: activeServer.otherCodes,
+                otherLocations: activeServer.otherLocations,
+                smartRouting: activeServer.smartRouting,
+              ),
+              if (profile != null) ...[
+                SizedBox(height: metrics.gapCard),
+                ProviderStatusCards(gap: metrics.gapCard),
+              ],
+            ],
+          ),
         ),
-        if (profile != null) ...[
-          SizedBox(height: metrics.gapCard),
-          ProviderStatusCards(gap: metrics.gapCard),
-        ],
       ],
     );
   }
