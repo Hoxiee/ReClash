@@ -1979,18 +1979,7 @@
   "doctorEvidenceConsequence": "Consequence of an earlier fault",
   "doctorRecentChecks": "Soʻnggi tekshiruvlar",
   "doctorNoIncidents": "No completed checks yet",
-  "doctorLimitations": "Bu nimani anglatadi",
-  "doctorUnsupportedHint": "Update Core to use connection diagnosis.",
-  "doctorPassiveHint": "Bu ekran ochilganda bitta tekshiruv bajariladi. Qolgan vaqtda Shifokor faqat haqiqiy trafikni kuzatadi va qoʻshimcha tarmoq faolligini yaratmaydi.",
   "doctorStaleHint": "The environment may have changed. Refresh or run a new check before acting on this result.",
-  "doctorEvidenceDropped": "{count} evidence events were dropped under load; confidence was not increased.",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "Capture",
   "doctorLayerIngress": "VPN ingress",
   "doctorLayerDns": "DNS",

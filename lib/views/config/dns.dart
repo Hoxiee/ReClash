@@ -175,12 +175,15 @@ class DnsView extends ConsumerWidget {
     return CommonScaffold(
       title: 'DNS',
       floatBody: true,
+      iconActions: [
+        if (canAdd)
+          IconButtonData(
+            glyph: AppGlyphs.add,
+            tooltip: appLocalizations.add,
+            onPressed: () => _handleAdd(context, ref),
+          ),
+      ],
       menuItems: [
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.add,
-          label: appLocalizations.add,
-          onPressed: canAdd ? () => _handleAdd(context, ref) : null,
-        ),
         CommonPopupMenuItem(
           glyph: AppGlyphs.compose,
           label: appLocalizations.quickEdit,

@@ -181,53 +181,49 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
           glyph: AppGlyphs.refresh,
           tooltip: appLocalizations.doctorRefresh,
           isLoading: _busy,
-          onPressed: () => unawaited(_refresh(showError: true)),
+          onPressed: () => unawaited(_start(DoctorExamMode.standard)),
         ),
       ],
-      body: _DoctorReadingWidth(
-        child: ListView(
-          padding: EdgeInsets.only(top: context.appBarInset),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _DoctorSmoothResize(
-                child: _DoctorDiagnosisCard(
-                  snapshot: snapshot,
-                  answer: answer,
-                  busy: _busy,
-                  canStart: snapshot.action('startStandard')?.eligible == true,
-                  canFlushDns: snapshot.action('flushDns')?.eligible == true,
-                  canCancel: snapshot.action('cancel')?.eligible == true,
-                  onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
-                  onStart: () => unawaited(_start(DoctorExamMode.standard)),
-                  onCancel: () => unawaited(_cancel()),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: _DoctorSmoothResize(
-                child: _DoctorStepsCard(answer: answer),
-              ),
-            ),
-            if (snapshot.supported)
-              _DoctorTechnicalSection(
+      body: ListView(
+        padding: EdgeInsets.only(top: context.contentTopPadding),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: _DoctorSmoothResize(
+              child: _DoctorDiagnosisCard(
                 snapshot: snapshot,
-                open: _technicalOpen,
-                onToggle: () =>
-                    setState(() => _technicalOpen = !_technicalOpen),
-                mode: _mode,
+                answer: answer,
                 busy: _busy,
-                onMode: (mode) => setState(() => _mode = mode),
-                onRun: () => unawaited(_start(_mode)),
+                canStart: snapshot.action('startStandard')?.eligible == true,
+                canFlushDns: snapshot.action('flushDns')?.eligible == true,
+                canCancel: snapshot.action('cancel')?.eligible == true,
+                onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
+                onStart: () => unawaited(_start(DoctorExamMode.standard)),
                 onCancel: () => unawaited(_cancel()),
-                onFlushDns: () => unawaited(_flushDns()),
-                onExport: () => unawaited(_exportReport()),
               ),
-            _DoctorLimitationsSection(snapshot: snapshot),
-            const SettingBottomInset(),
-          ],
-        ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: _DoctorSmoothResize(
+              child: _DoctorStepsCard(answer: answer),
+            ),
+          ),
+          if (snapshot.supported)
+            _DoctorTechnicalSection(
+              snapshot: snapshot,
+              open: _technicalOpen,
+              onToggle: () => setState(() => _technicalOpen = !_technicalOpen),
+              mode: _mode,
+              busy: _busy,
+              onMode: (mode) => setState(() => _mode = mode),
+              onRun: () => unawaited(_start(_mode)),
+              onCancel: () => unawaited(_cancel()),
+              onFlushDns: () => unawaited(_flushDns()),
+              onExport: () => unawaited(_exportReport()),
+            ),
+          const SettingBottomInset(),
+        ],
       ),
     );
   }
@@ -248,28 +244,6 @@ class _DoctorSmoothResize extends StatelessWidget {
       alignment: Alignment.topCenter,
       curve: Curves.easeOutCubic,
       child: child,
-    );
-  }
-}
-
-/// Caps the diagnosis column at a comfortable reading width and centres it, so
-/// the cards stay legible on a wide desktop window instead of stretching edge
-/// to edge; a narrow screen keeps the full width.
-class _DoctorReadingWidth extends StatelessWidget {
-  const _DoctorReadingWidth({required this.child});
-
-  final Widget child;
-
-  static const _maxWidth = 640.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxWidth),
-        child: child,
-      ),
     );
   }
 }
@@ -958,53 +932,4 @@ class DoctorTimingPreview extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _DoctorLimitationsSection extends StatelessWidget {
-  const _DoctorLimitationsSection({required this.snapshot});
-
-  final DoctorSnapshot snapshot;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final items = <Widget>[];
-    if (!snapshot.supported) {
-      items.add(
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.puzzle),
-          title: Text(appLocalizations.doctorUnsupportedHint),
-        ),
-      );
-    } else {
-      items.add(
-        DecorationListItem(
-          leading: const GlyphIcon(AppGlyphs.eye),
-          title: Text(appLocalizations.doctorPassiveHint),
-        ),
-      );
-      if (!snapshot.isFresh) {
-        items.add(
-          DecorationListItem(
-            leading: const GlyphIcon(AppGlyphs.clock),
-            title: Text(appLocalizations.doctorStaleHint),
-          ),
-        );
-      }
-      if (snapshot.evidenceDropped > 0) {
-        items.add(
-          DecorationListItem(
-            leading: const GlyphIcon(AppGlyphs.warning),
-            title: Text(
-              appLocalizations.doctorEvidenceDropped(snapshot.evidenceDropped),
-            ),
-          ),
-        );
-      }
-    }
-    return SettingSection(
-      title: appLocalizations.doctorLimitations,
-      items: items,
-    );
-  }
 }

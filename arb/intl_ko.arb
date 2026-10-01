@@ -1979,18 +1979,7 @@
   "doctorEvidenceConsequence": "이전 장애의 결과",
   "doctorRecentChecks": "최근 검사",
   "doctorNoIncidents": "완료된 검사가 없음",
-  "doctorLimitations": "결과 이해하기",
-  "doctorUnsupportedHint": "연결 진단을 사용하려면 Core를 업데이트하세요.",
-  "doctorPassiveHint": "이 화면을 열면 검사가 한 번 실행됩니다. 그 외에는 실제 트래픽만 관찰하며 추가 네트워크 활동을 만들지 않습니다.",
   "doctorStaleHint": "환경이 변경되었을 수 있습니다. 작업 전에 새로 고치거나 다시 검사하세요.",
-  "doctorEvidenceDropped": "부하로 인해 근거 이벤트 {count}개가 삭제되었으며 신뢰도는 높이지 않았습니다.",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "캡처",
   "doctorLayerIngress": "VPN 진입",
   "doctorLayerDns": "DNS",

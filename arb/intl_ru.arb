@@ -1926,18 +1926,7 @@
   "doctorEvidenceConsequence": "Следствие более ранней неисправности",
   "doctorRecentChecks": "Недавние проверки",
   "doctorNoIncidents": "Завершённых проверок пока нет",
-  "doctorLimitations": "Как это понимать",
-  "doctorUnsupportedHint": "Обновите Core, чтобы использовать диагностику соединения.",
-  "doctorPassiveHint": "При открытии этого экрана выполняется одна проверка. В остальное время Доктор только наблюдает за реальным трафиком и не создаёт дополнительной сетевой активности.",
   "doctorStaleHint": "Среда могла измениться. Обновите диагноз или запустите новую проверку перед действием.",
-  "doctorEvidenceDropped": "При нагрузке потеряно событий: {count}. Достоверность диагноза не повышалась.",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "Перехват",
   "doctorLayerIngress": "Вход VPN",
   "doctorLayerDns": "DNS",

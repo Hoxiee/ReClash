@@ -196,9 +196,12 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         builder: (context, state, _) {
           final connections = state.list;
           final topInset = context.appBarInset;
+          // In a sheet the connection list is a focused drill-in, so the
+          // running totals belong to the full tab, not the overlay.
+          final showSummary = !context.isInSheet && connections.isNotEmpty;
           return Column(
             children: [
-              if (connections.isNotEmpty)
+              if (showSummary)
                 _SummaryBar(totals: state.totals, topInset: topInset),
               Expanded(
                 child: NullStatusSwitcher(
@@ -212,7 +215,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                   child: TrackerInfoAnimatedList(
                     controller: _scrollController,
                     padding: EdgeInsets.only(
-                      top: connections.isNotEmpty ? 8 : topInset,
+                      top: showSummary ? 8 : topInset,
                       bottom: 16 + BottomInsetScope.of(context),
                     ),
                     trackerInfos: connections,
@@ -300,6 +303,7 @@ class _SummaryCell extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return Expanded(
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           GlyphIcon(glyph, size: 18, color: colorScheme.onSurfaceVariant),

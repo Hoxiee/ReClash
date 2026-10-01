@@ -1876,18 +1876,7 @@
   "doctorEvidenceConsequence": "更早故障导致的结果",
   "doctorRecentChecks": "最近检查",
   "doctorNoIncidents": "暂无已完成的检查",
-  "doctorLimitations": "说明",
-  "doctorUnsupportedHint": "请更新 Core 以使用连接诊断。",
-  "doctorPassiveHint": "打开此页面时会运行一次检查。其余时间医生仅观察真实流量，不会产生额外的网络活动。",
   "doctorStaleHint": "环境可能已变化，请刷新或重新检查后再操作。",
-  "doctorEvidenceDropped": "高负载时丢弃了 {count} 个证据事件，可信度未提高。",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "流量捕获",
   "doctorLayerIngress": "VPN 入口",
   "doctorLayerDns": "DNS",

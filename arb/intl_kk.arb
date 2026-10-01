@@ -1979,18 +1979,7 @@
   "doctorEvidenceConsequence": "Consequence of an earlier fault",
   "doctorRecentChecks": "Соңғы тексерулер",
   "doctorNoIncidents": "No completed checks yet",
-  "doctorLimitations": "Бұл нені білдіреді",
-  "doctorUnsupportedHint": "Update Core to use connection diagnosis.",
-  "doctorPassiveHint": "Бұл экранды ашқанда бір тексеру орындалады. Қалған уақытта Дәрігер тек нақты трафикті бақылайды және қосымша желілік әрекет жасамайды.",
   "doctorStaleHint": "The environment may have changed. Refresh or run a new check before acting on this result.",
-  "doctorEvidenceDropped": "{count} evidence events were dropped under load; confidence was not increased.",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "Capture",
   "doctorLayerIngress": "VPN ingress",
   "doctorLayerDns": "DNS",

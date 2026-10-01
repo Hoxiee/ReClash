@@ -170,10 +170,6 @@ void main() {
       find.text('This Core version does not support connection diagnosis.'),
       findsOneWidget,
     );
-    expect(
-      find.text('Update Core to use connection diagnosis.'),
-      findsOneWidget,
-    );
     expect(find.text('Diagnosis'), findsNothing);
     expect(find.text('Run check'), findsNothing);
   });
@@ -699,7 +695,9 @@ void main() {
     }
   });
 
-  testWidgets('shows stale and dropped-evidence limitations', (tester) async {
+  testWidgets('surfaces a stale diagnosis without presenting it as current', (
+    tester,
+  ) async {
     final core = _MockCoreHandler();
     await _pumpDoctor(
       tester,
@@ -711,20 +709,14 @@ void main() {
       size: const Size(900, 1400),
     );
 
-    // The freshness and dropped-evidence caveats stay on the main screen. The
-    // stale caveat doubles as the diagnosis meaning, so it shows more than once.
+    // The stale caveat is the diagnosis meaning on the main screen; the exam is
+    // never labelled as a current result.
     expect(find.text('Outdated'), findsNothing);
     expect(
       find.text(
         'The environment may have changed. Refresh or run a new check before acting on this result.',
       ),
       findsWidgets,
-    );
-    expect(
-      find.text(
-        '7 evidence events were dropped under load; confidence was not increased.',
-      ),
-      findsOneWidget,
     );
 
     // The console carries the stale status inside its diagnosis rows.

@@ -1876,18 +1876,7 @@
   "doctorEvidenceConsequence": "先行する障害の結果",
   "doctorRecentChecks": "最近の確認",
   "doctorNoIncidents": "完了した確認はありません",
-  "doctorLimitations": "この結果について",
-  "doctorUnsupportedHint": "接続診断を使用するには Core を更新してください。",
-  "doctorPassiveHint": "この画面を開くと確認が 1 回実行されます。それ以外のときは実際の通信を観察するだけで、追加の通信は発生しません。",
   "doctorStaleHint": "環境が変わった可能性があります。操作前に更新または再確認してください。",
-  "doctorEvidenceDropped": "高負荷により {count} 件の証拠を破棄しました。確度は上げていません。",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "キャプチャ",
   "doctorLayerIngress": "VPN 入口",
   "doctorLayerDns": "DNS",

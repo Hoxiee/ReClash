@@ -2156,18 +2156,7 @@
   "doctorEvidenceConsequence": "Consequence of an earlier fault",
   "doctorRecentChecks": "Recent checks",
   "doctorNoIncidents": "No completed checks yet",
-  "doctorLimitations": "What this means",
-  "doctorUnsupportedHint": "Update Core to use connection diagnosis.",
-  "doctorPassiveHint": "Opening this screen runs one check. Between checks the Doctor only watches real traffic and creates no extra network activity.",
   "doctorStaleHint": "The environment may have changed. Refresh or run a new check before acting on this result.",
-  "doctorEvidenceDropped": "{count} evidence events were dropped under load; confidence was not increased.",
-  "@doctorEvidenceDropped": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      }
-    }
-  },
   "doctorLayerCapture": "Capture",
   "doctorLayerIngress": "VPN ingress",
   "doctorLayerDns": "DNS",

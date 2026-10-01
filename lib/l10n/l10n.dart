@@ -15358,36 +15358,6 @@ class AppLocalizations {
     );
   }
 
-  /// `What this means`
-  String get doctorLimitations {
-    return Intl.message(
-      'What this means',
-      name: 'doctorLimitations',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update Core to use connection diagnosis.`
-  String get doctorUnsupportedHint {
-    return Intl.message(
-      'Update Core to use connection diagnosis.',
-      name: 'doctorUnsupportedHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Opening this screen runs one check. Between checks the Doctor only watches real traffic and creates no extra network activity.`
-  String get doctorPassiveHint {
-    return Intl.message(
-      'Opening this screen runs one check. Between checks the Doctor only watches real traffic and creates no extra network activity.',
-      name: 'doctorPassiveHint',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `The environment may have changed. Refresh or run a new check before acting on this result.`
   String get doctorStaleHint {
     return Intl.message(
@@ -15395,16 +15365,6 @@ class AppLocalizations {
       name: 'doctorStaleHint',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `{count} evidence events were dropped under load; confidence was not increased.`
-  String doctorEvidenceDropped(num count) {
-    return Intl.message(
-      '$count evidence events were dropped under load; confidence was not increased.',
-      name: 'doctorEvidenceDropped',
-      desc: '',
-      args: [count],
     );
   }
 

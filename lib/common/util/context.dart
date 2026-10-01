@@ -43,6 +43,8 @@ extension BuildContextExtension on BuildContext {
   bool get isInBottomSheet =>
       SheetProvider.of(this)?.type == SheetType.bottomSheet;
 
+  bool get isInSheet => SheetProvider.of(this) != null;
+
   /// Space the floating bar reserves at the top; pages pad their leading edge
   /// by this so the first item clears the bar yet scrolls under its scrim.
   double get appBarInset =>
