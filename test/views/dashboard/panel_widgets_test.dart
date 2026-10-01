@@ -111,7 +111,7 @@ void main() {
       await tester.tap(find.byType(Announce));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+      expect(find.byTooltip('Close'), findsOneWidget);
       expect(find.text(text), findsNWidgets(2));
     });
   });
@@ -148,7 +148,7 @@ void main() {
       expect(find.text('Remaining 5 days'), findsOneWidget);
     });
 
-    testWidgets('shows the traffic progress for metered subscriptions', (
+    testWidgets('shows the quota bar for metered subscriptions', (
       tester,
     ) async {
       setProfile(
@@ -166,12 +166,14 @@ void main() {
       expect(find.text('50B free of 100B'), findsOneWidget);
     });
 
-    testWidgets('hides the traffic progress for unlimited subscriptions', (
+    testWidgets('omits the free-of-total split for unlimited subscriptions', (
       tester,
     ) async {
       setProfile(
         _profile(
           subscriptionInfo: SubscriptionInfo(
+            upload: 25,
+            download: 25,
             expire:
                 DateTime.now()
                     .add(const Duration(days: 30))
@@ -182,7 +184,9 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
+      expect(find.textContaining('free of'), findsNothing);
       expect(find.byType(SubscriptionBar), findsNothing);
+      expect(find.text('50B'), findsOneWidget);
     });
 
     testWidgets('fits long localized subscription values', (tester) async {

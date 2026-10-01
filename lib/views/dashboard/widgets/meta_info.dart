@@ -24,8 +24,6 @@ class MetaInfo extends ConsumerWidget {
       serviceLogo: panelMeta?.serviceLogo,
       profileLabel: profile?.realLabel ?? '',
       subscriptionInfo: profile?.subscriptionInfo,
-      buyPlanUrl: panelMeta?.buyPlanUrl,
-      buyTrafficUrl: panelMeta?.buyTrafficUrl,
     );
   }
 }
@@ -36,16 +34,12 @@ class _SubscriptionCard extends StatelessWidget {
     required this.serviceLogo,
     required this.profileLabel,
     required this.subscriptionInfo,
-    required this.buyPlanUrl,
-    required this.buyTrafficUrl,
   });
 
   final Profile? profile;
   final String? serviceLogo;
   final String profileLabel;
   final SubscriptionInfo? subscriptionInfo;
-  final String? buyPlanUrl;
-  final String? buyTrafficUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -70,28 +64,21 @@ class _SubscriptionCard extends StatelessWidget {
     final unlimited = info == null || info.unlimited;
     final used = info?.used ?? 0;
     final total = info?.total ?? 0;
+    final free = unlimited ? 0 : (total - used).clamp(0, total);
     final progress = unlimited
         ? 0.0
         : (used / total).clamp(0.0, 1.0).toDouble();
-    final free = unlimited ? 0 : (total - used).clamp(0, total);
     final barColor = progress > 0.9
         ? colorScheme.error
         : progress > 0.7
         ? cautionColor
         : colorScheme.primary;
 
-    final offers = heroBuyOffers(
-      hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
-      hasTrafficUrl: buyTrafficUrl?.isNotEmpty ?? false,
-      daysLeft: daysLeft,
-      total: total,
-      used: used,
-    );
-
     final label = profileLabel.isEmpty
         ? appLocalizations.metaInfo
         : profileLabel;
-    final valueStyle = context.textTheme.titleLarge?.copyWith(
+    final valueStyle = context.textTheme.titleMedium?.copyWith(
+      height: 1,
       fontWeight: FontWeight.w700,
       fontFamily: FontFamily.jetBrainsMono.value,
     );
@@ -140,7 +127,8 @@ class _SubscriptionCard extends StatelessWidget {
             const TextSpan(text: ' '),
             TextSpan(
               text: appLocalizations.trafficFreeOfTotal(total.traffic.show),
-              style: context.textTheme.bodyMedium?.copyWith(
+              style: context.textTheme.bodySmall?.copyWith(
+                height: 1,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
@@ -151,138 +139,81 @@ class _SubscriptionCard extends StatelessWidget {
       );
     }
 
+    final basePadding = DashboardWidgetMetrics.paddingOf(context);
+
     return RepaintBoundary(
-      child: CommonCard(
-        radius: DashboardWidgetMetrics.radiusOf(context),
-        padding: DashboardWidgetMetrics.paddingOf(context),
-        onPressed: () => showSubscriptionSheet(context),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                logo == null || logo.isEmpty
-                    ? GlyphIcon(
-                        AppGlyphs.calendar,
-                        size: 20,
-                        color: colorScheme.onSurfaceVariant,
-                      )
-                    : SizedBox.square(
-                        dimension: 24,
-                        child: ImageCacheWidget(
-                          src: logo,
-                          defaultWidget: GlyphIcon(
-                            AppGlyphs.calendar,
-                            size: 20,
-                            color: colorScheme.onSurfaceVariant,
+      child: SizedBox(
+        height: DashboardWidgetMetrics.heightOf(context, 1),
+        child: CommonCard(
+          radius: DashboardWidgetMetrics.radiusOf(context),
+          // Status pill, figure, and quota bar stack into one unit; the shared
+          // horizontal inset stays, but vertical trims to clear the phone-min
+          // tile without dropping the bar.
+          padding: basePadding.copyWith(
+            top: basePadding.top - 3,
+            bottom: basePadding.bottom - 3,
+          ),
+          onPressed: () => showSubscriptionSheet(context),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  logo == null || logo.isEmpty
+                      ? GlyphIcon(
+                          AppGlyphs.calendar,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        )
+                      : SizedBox.square(
+                          dimension: 22,
+                          child: ImageCacheWidget(
+                            src: logo,
+                            defaultWidget: GlyphIcon(
+                              AppGlyphs.calendar,
+                              size: 20,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
-                      ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      ?pill,
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                currentProfile != null && currentProfile.type == ProfileType.url
-                    ? _UpdateAction(profile: currentProfile)
-                    : GlyphIcon(
-                        AppGlyphs.chevronForward,
-                        size: 20,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.labelLarge?.copyWith(
                         color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
                       ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            value,
-            if (info != null && !unlimited) ...[
-              const SizedBox(height: AppSpacing.xs),
-              SubscriptionBar(
-                progress: progress <= 0 ? 0.0 : progress,
-                color: barColor,
-              ),
-            ],
-            if (offers.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _BuyOfferRow(
-                    offers: offers,
-                    buyPlanUrl: buyPlanUrl,
-                    buyTrafficUrl: buyTrafficUrl,
+                    ),
                   ),
+                  if (pill != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(child: pill),
+                  ],
+                  const SizedBox(width: AppSpacing.xs),
+                  currentProfile != null &&
+                          currentProfile.type == ProfileType.url
+                      ? _UpdateAction(profile: currentProfile)
+                      : GlyphIcon(
+                          AppGlyphs.chevronForward,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                 ],
               ),
+              value,
+              if (info != null && !unlimited)
+                SubscriptionBar(
+                  progress: progress <= 0 ? 0.0 : progress,
+                  color: barColor,
+                ),
             ],
-          ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _BuyOfferRow extends StatelessWidget {
-  const _BuyOfferRow({
-    required this.offers,
-    required this.buyPlanUrl,
-    required this.buyTrafficUrl,
-  });
-
-  final List<HeroBuyOffer> offers;
-  final String? buyPlanUrl;
-  final String? buyTrafficUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final offer in offers) ...[
-          if (offer != offers.first) const SizedBox(width: AppSpacing.xs),
-          Flexible(
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: const Size(0, 28),
-                textStyle: context.textTheme.bodySmall,
-              ),
-              onPressed: () => dialogs.openUrl(
-                offer == HeroBuyOffer.renewPlan ? buyPlanUrl! : buyTrafficUrl!,
-              ),
-              icon: GlyphIcon(
-                heroBuyOfferViewOf(appLocalizations, offer).icon,
-                size: 16,
-              ),
-              label: Text(
-                heroBuyOfferViewOf(appLocalizations, offer).label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }
@@ -312,15 +243,19 @@ class _UpdateAction extends ConsumerWidget {
       child: isUpdating
           ? const SizedBox(
               key: ValueKey('loading'),
-              width: 36,
-              height: 36,
+              width: 24,
+              height: 24,
               child: Padding(
-                padding: AppInsets.sm,
+                padding: AppInsets.xs,
                 child: CommonCircleLoading(),
               ),
             )
           : IconButton(
               key: const ValueKey('update'),
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               style: IconButton.styleFrom(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),

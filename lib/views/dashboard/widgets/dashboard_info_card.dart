@@ -38,7 +38,7 @@ class DashboardInfoCard extends StatelessWidget {
           radius: DashboardWidgetMetrics.radiusOf(context),
           onPressed: onPressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: DashboardWidgetMetrics.paddingOf(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,7 +67,7 @@ class DashboardInfoCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.xs),
                 if (height != null) Expanded(child: child) else child,
               ],
             ),

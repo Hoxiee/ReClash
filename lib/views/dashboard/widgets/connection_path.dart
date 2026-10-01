@@ -21,7 +21,7 @@ class ConnectionPath extends ConsumerWidget {
     final snapshot = ref.watch(connectionDoctorProvider);
     final answer = connectionDoctorAnswer(appLocalizations, snapshot);
     return DashboardInfoCard(
-      height: DashboardWidgetMetrics.heightOf(context, 1.5),
+      height: DashboardWidgetMetrics.heightOf(context, 1),
       icon: AppGlyphs.route,
       label: appLocalizations.doctorPathTitle,
       action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
@@ -99,7 +99,7 @@ class _VerdictLine extends StatelessWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textTheme.bodyMedium?.copyWith(
+        style: context.textTheme.bodySmall?.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -154,7 +154,7 @@ class _MiniPathNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final visual = doctorPathVisual(context, stage.state);
-    final diameter = stage.culprit ? 30.0 : 26.0;
+    final diameter = stage.culprit ? 22.0 : 18.0;
     return Tooltip(
       message: '${stage.label} · ${doctorPathStateLabel(context, stage.state)}',
       child: Opacity(
@@ -172,7 +172,7 @@ class _MiniPathNode extends StatelessWidget {
           child: GlyphIcon(
             visual.icon ?? stage.icon,
             color: visual.foreground,
-            size: stage.culprit ? 18 : 16,
+            size: stage.culprit ? 14 : 12,
           ),
         ),
       ),

@@ -68,6 +68,7 @@ class _GoroutineInfoState extends ConsumerState<GoroutineInfo>
       height: DashboardWidgetMetrics.heightOf(context, 1),
       icon: AppGlyphs.hub,
       label: context.appLocalizations.goroutineInfo,
+      onPressed: () {},
       child: ValueListenableBuilder(
         valueListenable: _countNotifier,
         builder: (_, count, _) {
