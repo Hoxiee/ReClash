@@ -17,6 +17,7 @@ ConfigToggleItem _appSettingToggle({
   required ConfigLabel subtitle,
   required bool Function(AppSettingProps state) select,
   required AppSettingProps Function(AppSettingProps state, bool value) update,
+  SettingSearch? search,
 }) {
   return ConfigToggleItem(
     title: title,
@@ -34,6 +35,7 @@ class LogLevelItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigOptionsItem<LogLevel>(
+      search: const SettingSearch(),
       title: (l) => l.logLevel,
       options: LogLevel.values,
       textBuilder: (logLevel) => logLevel.name,
@@ -66,6 +68,7 @@ class _NotificationItem extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
       leading: const GlyphIcon(AppGlyphs.bell),
+      search: const SettingSearch(gate: SettingGate.android),
       title: Text(appLocalizations.notification),
       subtitle: Text(appLocalizations.notificationProtectionDesc),
       widget: BaseScaffold(
@@ -85,6 +88,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     final behaviorItems = <Widget>[
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.minimizeOnExit,
         subtitle: (l) => l.minimizeOnExitDesc,
         select: (state) => state.minimizeOnExit,
@@ -92,12 +96,14 @@ class _ApplicationGeneralTab extends StatelessWidget {
       ),
       if (system.isDesktop) ...[
         _appSettingToggle(
+          search: const SettingSearch(gate: SettingGate.desktop),
           title: (l) => l.autoLaunch,
           subtitle: (l) => l.autoLaunchDesc,
           select: (state) => state.autoLaunch,
           update: (state, value) => state.copyWith(autoLaunch: value),
         ),
         _appSettingToggle(
+          search: const SettingSearch(gate: SettingGate.desktop),
           title: (l) => l.silentLaunch,
           subtitle: (l) => l.silentLaunchDesc,
           select: (state) => state.silentLaunch,
@@ -105,6 +111,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
         ),
         if (system.isWindows)
           ConfigToggleItem(
+            search: const SettingSearch(gate: SettingGate.windows),
             title: (l) => l.highPriorityAutoLaunch,
             subtitle: (l) => l.highPriorityAutoLaunchDesc,
             selector: appSettingProvider.select(
@@ -125,6 +132,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
           ),
       ],
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.autoRun,
         subtitle: (l) => l.autoRunDesc,
         select: (state) => state.autoRun,
@@ -132,12 +140,14 @@ class _ApplicationGeneralTab extends StatelessWidget {
       ),
       if (system.isAndroid)
         _appSettingToggle(
+          search: const SettingSearch(gate: SettingGate.android),
           title: (l) => l.exclude,
           subtitle: (l) => l.excludeDesc,
           select: (state) => state.hidden,
           update: (state, value) => state.copyWith(hidden: value),
         ),
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.autoCloseConnections,
         subtitle: (l) => l.autoCloseConnectionsDesc,
         select: (state) => state.closeConnections,
@@ -146,18 +156,21 @@ class _ApplicationGeneralTab extends StatelessWidget {
     ];
     final otherItems = <Widget>[
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.onlyStatisticsProxy,
         subtitle: (l) => l.onlyStatisticsProxyDesc,
         select: (state) => state.onlyStatisticsProxy,
         update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
       ),
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.autoCheckUpdate,
         subtitle: (l) => l.autoCheckUpdateDesc,
         select: (state) => state.autoCheckUpdate,
         update: (state, value) => state.copyWith(autoCheckUpdate: value),
       ),
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.checkCertificate,
         subtitle: (l) => l.checkCertificateDesc,
         select: (state) => state.checkCertificate,
@@ -167,6 +180,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
     final logItems = <Widget>[
       const LogLevelItem(),
       _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.logcat,
         subtitle: (l) => l.logcatDesc,
         select: (state) => state.openLogs,
@@ -174,6 +188,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
       ),
       if (system.isAndroid)
         _appSettingToggle(
+          search: const SettingSearch(gate: SettingGate.android),
           title: (l) => l.crashlytics,
           subtitle: (l) => l.crashlyticsTip,
           select: (state) => state.crashlytics,
@@ -184,16 +199,23 @@ class _ApplicationGeneralTab extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(top: 12, items: behaviorItems),
-        SettingSection.sliver(title: appLocalizations.other, items: otherItems),
         SettingSection.sliver(
+          search: const SettingSearch(),
+          title: appLocalizations.other,
+          items: otherItems,
+        ),
+        SettingSection.sliver(
+          search: const SettingSearch(),
           title: appLocalizations.logsAndDiagnostics,
           items: logItems,
         ),
         SettingSection.sliver(
+          search: const SettingSearch(),
           title: appLocalizations.settings,
           items: [
             if (system.isAndroid) const _NotificationItem(),
             DecorationListItem(
+              search: const SettingSearch(),
               title: Text(appLocalizations.setupRerun),
               subtitle: Text(appLocalizations.setupRerunDesc),
               leading: const GlyphIcon(AppGlyphs.reset),

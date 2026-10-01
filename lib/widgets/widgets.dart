@@ -32,6 +32,7 @@ export 'input/input.dart';
 export 'input/reorder_menu.dart';
 export 'input/search_field.dart';
 export 'input/setting.dart';
+export 'input/setting_search.dart';
 export 'layout/float_layout.dart';
 export 'layout/grid.dart';
 export 'layout/motion_grid.dart';

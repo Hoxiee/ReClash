@@ -218,6 +218,7 @@ class _OverrideList extends ConsumerWidget {
               generateSectionV3(
                 items: [
                   ConfigToggleItem(
+                    search: const SettingSearch(),
                     title: (l) => l.overrideDns,
                     selector: overrideDnsProvider,
                     onChanged: (ref, value) =>

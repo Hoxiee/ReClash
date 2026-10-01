@@ -20,6 +20,7 @@ export 'desktop/web_dashboard.dart';
 export 'desktop/webdav.dart';
 export 'desync/desync.dart';
 export 'desync/desync_tester.dart';
+export 'feature_flags.dart';
 export 'ip_quality.dart';
 export 'milestones/snowflake.dart';
 export 'net/dialability.dart';

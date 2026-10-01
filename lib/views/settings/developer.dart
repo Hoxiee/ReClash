@@ -34,6 +34,7 @@ class DeveloperView extends ConsumerWidget {
   Widget _getSubscriptionsList(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     return SettingSection(
+      search: const SettingSearch(),
       title: appLocalizations.developerSubscriptions,
       items: [
         for (final fixture in developerSubscriptions)
@@ -69,9 +70,11 @@ class DeveloperView extends ConsumerWidget {
   Widget _getDeveloperList(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     return SettingSection(
+      search: const SettingSearch(),
       title: appLocalizations.options,
       items: [
         DecorationListItem(
+          search: const SettingSearch(),
           title: Text(appLocalizations.messageTest),
           onPressed: () {
             for (final level in MessageLevel.values) {
@@ -83,6 +86,7 @@ class DeveloperView extends ConsumerWidget {
           },
         ),
         DecorationListItem(
+          search: const SettingSearch(),
           title: Text(appLocalizations.logsTest),
           onPressed: () {
             for (int i = 0; i < 1000; i++) {
@@ -98,6 +102,7 @@ class DeveloperView extends ConsumerWidget {
         ),
         if (globalState.canCrashCore)
           ListItem(
+            search: const SettingSearch(),
             title: Text(appLocalizations.crashTest),
             minVerticalPadding: 12,
             onTap: () async {
@@ -112,6 +117,7 @@ class DeveloperView extends ConsumerWidget {
             },
           ),
         DecorationListItem(
+          search: const SettingSearch(),
           title: Text(appLocalizations.clearData),
           onPressed: () async {
             final storeAction = ref.read(storeActionProvider.notifier);
@@ -125,6 +131,7 @@ class DeveloperView extends ConsumerWidget {
           },
         ),
         DecorationListItem(
+          search: const SettingSearch(),
           title: Text(appLocalizations.pruneCache),
           onPressed: () async {
             await ref.read(storeActionProvider.notifier).shakingStore();
@@ -152,6 +159,7 @@ class DeveloperView extends ConsumerWidget {
               radius: AppCorner.md,
               child: ListItem.toggle(
                 padding: const EdgeInsets.only(left: 16, right: 16),
+                search: const SettingSearch(),
                 title: Text(appLocalizations.developerMode),
                 value: enable,
                 onChanged: (value) {
@@ -169,6 +177,7 @@ class DeveloperView extends ConsumerWidget {
               items: [
                 DecorationListItem.open(
                   leading: const GlyphIcon(AppGlyphs.beaker),
+                  search: const SettingSearch(),
                   title: Text(appLocalizations.developerFindings),
                   widget: const FindingPreviewView(),
                 ),

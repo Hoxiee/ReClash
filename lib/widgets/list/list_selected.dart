@@ -69,6 +69,7 @@ class DecorationListItem extends StatelessWidget {
   final double? minVerticalPadding;
   final bool invalid;
   final String? paneId;
+  final SettingSearch? search;
   final _ListItemAction? _action;
 
   const DecorationListItem({
@@ -83,6 +84,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.invalid = false,
+    this.search,
   }) : paneId = null,
        _action = null;
 
@@ -98,6 +100,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
     this.invalid = false,
+    this.search,
   }) : trailing = null,
        onPressed = null,
        paneId = null,
@@ -120,6 +123,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
     this.invalid = false,
+    this.search,
   }) : onPressed = null,
        paneId = null,
        _action = _OptionsAction<Object?>(
@@ -150,6 +154,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
     this.invalid = false,
+    this.search,
   }) : onPressed = null,
        paneId = null,
        _action = _InputAction(
@@ -174,18 +179,21 @@ class DecorationListItem extends StatelessWidget {
     double? maxWidth,
     bool blur = true,
     bool forceFull = true,
+    bool preferSheet = false,
     ValueChanged<dynamic>? onChanged,
     this.paneId,
     this.isSelected,
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
     this.invalid = false,
+    this.search,
   }) : onPressed = null,
        _action = _OpenAction(
          widget: widget,
          maxWidth: maxWidth,
          blur: blur,
          forceFull: forceFull,
+         preferSheet: preferSheet,
          onChanged: onChanged,
        );
 
@@ -201,6 +209,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
     this.invalid = false,
+    this.search,
   }) : trailing = null,
        onPressed = null,
        paneId = null,
@@ -270,7 +279,10 @@ class DecorationListItem extends StatelessWidget {
         final onChanged = openDelegate.onChanged;
         final paneScope = SettingsPaneScope.of(context);
         final paneId = this.paneId;
-        if (paneScope != null && paneScope.active) {
+        // A sheet-preferring row ignores a pushing pane and slides in as a side
+        // sheet instead, so a list editor overlays the current pane rather than
+        // replacing it one level deeper.
+        if (paneScope != null && paneScope.active && !openDelegate.preferSheet) {
           if (paneScope.pushes) {
             final id = paneId ?? 'push:${identityHashCode(child)}';
             return _wrapFocus(
@@ -536,6 +548,7 @@ class SelectedDecorationListItem extends StatelessWidget {
   final bool invalid;
   final double? minVerticalPadding;
   final Widget? trailing;
+  final SettingSearch? search;
 
   const SelectedDecorationListItem({
     super.key,
@@ -544,6 +557,7 @@ class SelectedDecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.isEditing = false,
     this.invalid = false,
+    this.search,
     required this.title,
     required this.onPressed,
     this.minVerticalPadding,

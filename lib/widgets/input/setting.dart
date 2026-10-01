@@ -8,6 +8,7 @@ import '../base/inherited.dart';
 import '../effect/fade_box.dart';
 import '../list/list.dart';
 import '../theme/theme.dart';
+import 'setting_search.dart';
 
 class SettingInfoCard extends StatelessWidget {
   final Info info;
@@ -66,6 +67,7 @@ class SettingSection extends StatelessWidget {
     this.bottom = 0,
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
+    this.search,
   }) : _isSliver = false;
 
   const SettingSection.sliver({
@@ -79,6 +81,7 @@ class SettingSection extends StatelessWidget {
     this.bottom = 0,
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
+    this.search,
   }) : _isSliver = true;
 
   final List<Widget> items;
@@ -91,6 +94,7 @@ class SettingSection extends StatelessWidget {
   final bool animateEnter;
   final Duration enterDelay;
   final bool _isSliver;
+  final SettingSearch? search;
 
   @override
   Widget build(BuildContext context) {
@@ -224,6 +228,7 @@ class SettingSliderItem extends StatelessWidget {
     this.title,
     this.leading,
     this.resetValue,
+    this.search,
   });
 
   final String? title;
@@ -234,6 +239,7 @@ class SettingSliderItem extends StatelessWidget {
   final double value;
   final ValueChanged<double> onChanged;
   final double? resetValue;
+  final SettingSearch? search;
 
   @override
   Widget build(BuildContext context) {

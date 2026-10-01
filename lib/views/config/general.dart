@@ -25,6 +25,7 @@ class UaItem extends ConsumerWidget {
     );
     return DecorationListItem.open(
       leading: const GlyphIcon(AppGlyphs.computer),
+      search: const SettingSearch(),
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
       widget: const UserAgentsView(),
@@ -43,6 +44,7 @@ class KeepAliveIntervalItem extends ConsumerWidget {
     );
     return DecorationListItem.input(
       leading: const GlyphIcon(AppGlyphs.clock),
+      search: const SettingSearch(gate: SettingGate.desktop),
       title: Text(appLocalizations.keepAliveIntervalDesc),
       subtitle: Text(appLocalizations.secondsCount(keepAliveInterval)),
       dialogTitle: appLocalizations.keepAliveIntervalDesc,
@@ -84,6 +86,7 @@ class TestUrlItem extends ConsumerWidget {
     );
     return DecorationListItem.input(
       leading: const GlyphIcon(AppGlyphs.chart),
+      search: const SettingSearch(),
       title: Text(appLocalizations.testUrl),
       subtitle: Text(testUrl),
       resetValue: defaultTestUrl,
@@ -126,6 +129,7 @@ class PortItem extends ConsumerWidget {
     );
     return DecorationListItem(
       leading: const GlyphIcon(AppGlyphs.target),
+      search: const SettingSearch(),
       title: Text(appLocalizations.port),
       subtitle: Text('$mixedPort'),
       onPressed: () {
@@ -146,6 +150,7 @@ class HostsItem extends ConsumerWidget {
     );
     return DecorationListItem.open(
       leading: const GlyphIcon(AppGlyphs.list),
+      search: const SettingSearch(),
       title: const Text('Hosts'),
       subtitle: Text(appLocalizations.hostsDesc),
       blur: false,
@@ -173,6 +178,7 @@ class AuthenticationItem extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return ConfigToggleItem(
       leading: const GlyphIcon(AppGlyphs.key),
+      search: const SettingSearch(),
       title: (l) => l.authentication,
       subtitle: (l) => l.authenticationDesc,
       selector: networkSettingProvider.select(
@@ -200,6 +206,7 @@ class AuthenticationAccountItem extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return ConfigTextItem(
       leading: const GlyphIcon(AppGlyphs.account),
+      search: const SettingSearch(),
       title: (l) => l.account,
       maxLength: TextInputLimits.userName,
       selector: networkSettingProvider.select(
@@ -222,6 +229,7 @@ class AuthenticationPasswordItem extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return ConfigTextItem(
       leading: const GlyphIcon(AppGlyphs.password),
+      search: const SettingSearch(),
       title: (l) => l.password,
       maxLength: TextInputLimits.password,
       selector: networkSettingProvider.select(
@@ -247,6 +255,7 @@ class SendDeviceIdentityItem extends ConsumerWidget {
     );
     return DecorationListItem.toggle(
       leading: const GlyphIcon(AppGlyphs.deviceInfo),
+      search: const SettingSearch(),
       title: Text(appLocalizations.sendDeviceIdentity),
       subtitle: Text(appLocalizations.sendDeviceIdentityDesc),
       value: sendIdentity,
@@ -277,6 +286,7 @@ ConfigToggleItem _clashToggle({
   required ConfigLabel subtitle,
   required bool Function(PatchClashConfig state) select,
   required PatchClashConfig Function(PatchClashConfig state, bool value) update,
+  SettingSearch? search,
 }) {
   return ConfigToggleItem(
     leading: GlyphIcon(icon),
@@ -305,6 +315,7 @@ class GeneralListView extends ConsumerWidget {
           items: [
             ConfigOptionsItem<String>(
               leading: const GlyphIcon(AppGlyphs.appRegion),
+              search: const SettingSearch(),
               title: (l) => l.appRegion,
               options: [...shippedCountryCodes, otherRegionCode],
               textBuilder: (code) => regionLabel(code),
@@ -314,11 +325,13 @@ class GeneralListView extends ConsumerWidget {
           ],
         ),
         SettingSection(
+          search: const SettingSearch(),
           title: appLocalizations.network,
           items: [
             const PortItem(),
             _clashToggle(
               icon: AppGlyphs.hub,
+              search: const SettingSearch(),
               title: (l) => l.allowLan,
               subtitle: (l) => l.allowLanDesc,
               select: (state) => state.allowLan,
@@ -331,6 +344,7 @@ class GeneralListView extends ConsumerWidget {
         ),
         if (authentication)
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.authentication,
             items: const [
               AuthenticationAccountItem(),
@@ -339,11 +353,13 @@ class GeneralListView extends ConsumerWidget {
             enterDelay: const Duration(milliseconds: 50),
           ),
         SettingSection(
+          search: const SettingSearch(),
           title: appLocalizations.identity,
           items: const [UaItem(), SendDeviceIdentityItem()],
           enterDelay: const Duration(milliseconds: 100),
         ),
         SettingSection(
+          search: const SettingSearch(),
           title: appLocalizations.other,
           items: [
             const TestUrlItem(),
@@ -351,6 +367,7 @@ class GeneralListView extends ConsumerWidget {
             const HostsItem(),
             ConfigToggleItem(
               leading: const GlyphIcon(AppGlyphs.dns),
+              search: const SettingSearch(),
               title: (l) => l.appendSystemDns,
               subtitle: (l) => l.appendSystemDnsTip,
               selector: networkSettingProvider.select(
@@ -362,6 +379,7 @@ class GeneralListView extends ConsumerWidget {
             ),
             _clashToggle(
               icon: AppGlyphs.drop,
+              search: const SettingSearch(),
               title: (l) => 'IPv6',
               subtitle: (l) => l.ipv6Desc,
               select: (state) => state.ipv6,
@@ -369,6 +387,7 @@ class GeneralListView extends ConsumerWidget {
             ),
             _clashToggle(
               icon: AppGlyphs.compress,
+              search: const SettingSearch(),
               title: (l) => l.unifiedDelay,
               subtitle: (l) => l.unifiedDelayDesc,
               select: (state) => state.unifiedDelay,
@@ -376,6 +395,7 @@ class GeneralListView extends ConsumerWidget {
             ),
             _clashToggle(
               icon: AppGlyphs.fastForward,
+              search: const SettingSearch(),
               title: (l) => l.tcpConcurrent,
               subtitle: (l) => l.tcpConcurrentDesc,
               select: (state) => state.tcpConcurrent,
@@ -383,6 +403,7 @@ class GeneralListView extends ConsumerWidget {
             ),
             _clashToggle(
               icon: AppGlyphs.findProcess,
+              search: const SettingSearch(),
               title: (l) => l.findProcessMode,
               subtitle: (l) => l.findProcessModeDesc,
               select: (state) =>
@@ -395,6 +416,7 @@ class GeneralListView extends ConsumerWidget {
             ),
             _clashToggle(
               icon: AppGlyphs.memory,
+              search: const SettingSearch(),
               title: (l) => l.geodataLoader,
               subtitle: (l) => l.geodataLoaderDesc,
               select: (state) =>

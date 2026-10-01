@@ -6,11 +6,12 @@ import 'tools_search_index.dart';
 
 const _generatedPath = 'lib/views/tools/tools_search_index.g.dart';
 
-/// Reads each owner's source, keeps the title hits whose widget type is a known
-/// searchable row, drops duplicates within an owner, and returns them in source
-/// order paired with their owner.
-List<(OwnerSpec, SettingTitle)> collectSettings(String root) {
-  final collected = <(OwnerSpec, SettingTitle)>[];
+/// Reads each owner's source, keeps the rows the author marked with `search:`
+/// (plus the DNS/NTP enum-label maps), drops duplicate titles within an owner,
+/// and returns them in source order paired with their owner. Any author mistake
+/// a scan reports (a bad gate token, a titleless searchable row) is fatal.
+List<(OwnerSpec, SettingHit)> collectSettings(String root) {
+  final collected = <(OwnerSpec, SettingHit)>[];
   for (final owner in ownerSpecs) {
     final seen = <SettingTitle>{};
     for (final relative in owner.files) {
@@ -20,12 +21,14 @@ List<(OwnerSpec, SettingTitle)> collectSettings(String root) {
         exitCode = 1;
         continue;
       }
-      for (final hit in extractTitleHits(file.readAsStringSync())) {
-        if (!rowTypes.contains(hit.enclosingType)) {
-          continue;
-        }
+      final extraction = extractSettingHits(file.readAsStringSync());
+      for (final error in extraction.errors) {
+        stderr.writeln('$relative: $error');
+        exitCode = 1;
+      }
+      for (final hit in extraction.hits) {
         if (seen.add(hit.title)) {
-          collected.add((owner, hit.title));
+          collected.add((owner, hit));
         }
       }
     }
@@ -33,8 +36,8 @@ List<(OwnerSpec, SettingTitle)> collectSettings(String root) {
   return collected;
 }
 
-/// Prints every `title:` the parser sees with its widget type, so the row-type
-/// allowlist can be checked against reality.
+/// Prints every searchable row the parser sees with its owner and gate, so the
+/// baked index can be checked against reality.
 void dumpAll(String root) {
   for (final owner in ownerSpecs) {
     for (final relative in owner.files) {
@@ -42,19 +45,17 @@ void dumpAll(String root) {
       if (!file.existsSync()) {
         continue;
       }
-      for (final hit in extractTitleHits(file.readAsStringSync())) {
+      for (final hit in extractSettingHits(file.readAsStringSync()).hits) {
         final label = hit.title.getter ?? "'${hit.title.literal}'";
-        final gate = rowTypes.contains(hit.enclosingType) ? '  ' : ' x';
         stdout.writeln(
-          '$gate ${owner.paneId.padRight(13)} '
-          '${hit.enclosingType.padRight(26)} $label',
+          '${owner.paneId.padRight(13)} ${hit.gate.padRight(14)} $label',
         );
       }
     }
   }
 }
 
-String render(List<(OwnerSpec, SettingTitle)> settings) {
+String render(List<(OwnerSpec, SettingHit)> settings) {
   final buffer = StringBuffer()
     ..writeln('// GENERATED CODE - DO NOT MODIFY BY HAND')
     ..writeln('// Regenerate with: dart run tool/gen_tools_search_index.dart')
@@ -62,10 +63,8 @@ String render(List<(OwnerSpec, SettingTitle)> settings) {
     ..writeln(
       '// Source of truth is the settings screens themselves; this file',
     )
-    ..writeln('// mirrors every static row title so search can never silently')
-    ..writeln(
-      '// miss one. See tool/tools_search_index.dart for the extractor.',
-    )
+    ..writeln('// mirrors every row an author marked searchable so search can')
+    ..writeln('// never silently miss one. See tool/tools_search_index.dart.')
     ..writeln()
     ..writeln("import 'package:reclash/l10n/l10n.dart';")
     ..writeln()
@@ -73,37 +72,46 @@ String render(List<(OwnerSpec, SettingTitle)> settings) {
       '/// One searchable setting harvested from a tool screen: the row',
     )
     ..writeln(
-      '/// title, the pane it lives in, its category, and whether it is',
+      '/// title, the pane it lives in, its category, the availability gate',
     )
-    ..writeln('/// gated behind developer mode.')
+    ..writeln('/// token, and any extra search keywords.')
     ..writeln('class DeepSettingSpec {')
     ..writeln('  const DeepSettingSpec({')
     ..writeln('    required this.title,')
     ..writeln('    required this.paneId,')
     ..writeln('    required this.category,')
-    ..writeln('    required this.developerOnly,')
+    ..writeln('    required this.gate,')
+    ..writeln('    this.keywords = const [],')
     ..writeln('  });')
     ..writeln()
     ..writeln('  final String title;')
     ..writeln('  final String paneId;')
     ..writeln('  final String category;')
-    ..writeln('  final bool developerOnly;')
+    ..writeln('  final String gate;')
+    ..writeln('  final List<String> keywords;')
     ..writeln('}')
     ..writeln()
-    ..writeln('/// Every static setting row across the tool screens, resolved')
-    ..writeln('/// against the active locale, in source order per owner.')
+    ..writeln('/// Every searchable setting row across the tool screens,')
+    ..writeln('/// resolved against the active locale, in source order per')
+    ..writeln('/// owner.')
     ..writeln('List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {')
     ..writeln('  return [');
-  for (final (owner, title) in settings) {
-    final developer = developerOwners.contains(owner.paneId);
-    final prefix = title.isGetter ? '' : 'const ';
+  for (final (owner, hit) in settings) {
+    final gate = developerOwners.contains(owner.paneId) && hit.gate == 'always'
+        ? 'developerMode'
+        : hit.gate;
+    final prefix = hit.title.isGetter ? '' : 'const ';
     buffer
       ..writeln('    ${prefix}DeepSettingSpec(')
-      ..writeln('      title: ${title.expression},')
+      ..writeln('      title: ${hit.title.expression},')
       ..writeln("      paneId: '${owner.paneId}',")
       ..writeln("      category: '${owner.category}',")
-      ..writeln('      developerOnly: $developer,')
-      ..writeln('    ),');
+      ..writeln("      gate: '$gate',");
+    if (hit.keywords.isNotEmpty) {
+      final literals = hit.keywords.map((k) => "'$k'").join(', ');
+      buffer.writeln('      keywords: const [$literals],');
+    }
+    buffer.writeln('    ),');
   }
   buffer
     ..writeln('  ];')
@@ -115,7 +123,7 @@ Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addFlag('write', negatable: false, help: 'Rewrite the generated index.')
     ..addFlag('check', negatable: false, help: 'Fail if the index is stale.')
-    ..addFlag('dump', negatable: false, help: 'Print every title hit seen.')
+    ..addFlag('dump', negatable: false, help: 'Print every searchable row.')
     ..addOption('root', help: 'Repository root, defaults to the cwd.')
     ..addFlag('help', abbr: 'h', negatable: false);
   final args = parser.parse(arguments);

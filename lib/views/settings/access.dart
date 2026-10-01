@@ -602,11 +602,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
     // colorOf only scales the surface toward the card opacity, which still
     // leaves a near-opaque full-width band over a wallpaper; drop the fill
     // entirely so the backdrop shows through behind the tabs and actions.
-    final wallpaperActive =
-        ref.watch(
-          themeSettingProvider.select((value) => value.wallpaper.enabled),
-        ) &&
-        ref.watch(wallpaperImageProvider).asData?.value != null;
+    final wallpaperActive = ref.watch(effectiveWallpaperImageProvider) != null;
     return Material(
       key: const ValueKey('access-control-panel'),
       color: wallpaperActive ? Colors.transparent : context.colorScheme.surface,

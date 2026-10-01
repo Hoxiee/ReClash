@@ -97,6 +97,84 @@ void _saveBinding(WidgetRef ref, HotKeyAction binding) {
   notifier.value = _withBinding(notifier.value, binding);
 }
 
+void _setActions(WidgetRef ref, List<HotKeyAction> actions) {
+  ref.read(hotKeyActionsProvider.notifier).value = actions;
+}
+
+HotKeyAction _defaultBinding(HotAction action, PhysicalKeyboardKey key) {
+  return HotKeyAction(
+    action: action,
+    key: key.usbHidUsage,
+    modifiers: const {KeyboardModifier.control, KeyboardModifier.alt},
+  );
+}
+
+// Ctrl+Alt chords are the least-reserved primary combination across Windows,
+// Linux and macOS; any the OS still owns simply fail to register and surface as
+// "not registered" rather than doing harm. Destructive actions (exit) and the
+// three narrow mode locks stay unbound so a restore never binds something risky.
+final defaultHotKeyActions = <HotKeyAction>[
+  _defaultBinding(HotAction.view, PhysicalKeyboardKey.keyV),
+  _defaultBinding(HotAction.start, PhysicalKeyboardKey.keyS),
+  _defaultBinding(HotAction.mode, PhysicalKeyboardKey.keyM),
+  _defaultBinding(HotAction.proxy, PhysicalKeyboardKey.keyP),
+  _defaultBinding(HotAction.tun, PhysicalKeyboardKey.keyT),
+  _defaultBinding(HotAction.updateProfiles, PhysicalKeyboardKey.keyU),
+];
+
+class _HotKeyBarActions extends ConsumerWidget {
+  const _HotKeyBarActions();
+
+  Future<void> _confirm(
+    BuildContext context,
+    WidgetRef ref, {
+    required String message,
+    required List<HotKeyAction> next,
+  }) async {
+    final res = await dialogs.showMessage(
+      dangerous: true,
+      message: TextSpan(text: message),
+    );
+    if (res == true && context.mounted) {
+      _setActions(ref, next);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final isEmpty = ref.watch(
+      hotKeyActionsProvider.select((state) => state.isEmpty),
+    );
+    return TonalButtonGroup(
+      children: [
+        IconButton(
+          tooltip: appLocalizations.hotkeyRestoreDefaults,
+          onPressed: () => _confirm(
+            context,
+            ref,
+            message: appLocalizations.hotkeyRestoreDefaultsTip,
+            next: defaultHotKeyActions,
+          ),
+          icon: const GlyphIcon(AppGlyphs.restore),
+        ),
+        IconButton(
+          tooltip: appLocalizations.hotkeyClearAll,
+          onPressed: isEmpty
+              ? null
+              : () => _confirm(
+                  context,
+                  ref,
+                  message: appLocalizations.hotkeyClearAllTip,
+                  next: const [],
+                ),
+          icon: const GlyphIcon(AppGlyphs.clearAll),
+        ),
+      ],
+    );
+  }
+}
+
 class HotKeyView extends StatelessWidget {
   const HotKeyView({super.key});
 
@@ -106,6 +184,7 @@ class HotKeyView extends StatelessWidget {
     final labels = ShortcutLabels.host();
     return BaseScaffold(
       title: appLocalizations.hotkeyManagement,
+      actions: const [_HotKeyBarActions()],
       body: SettingsListView(
         children: [
           const Padding(

@@ -88,9 +88,11 @@ class AboutView extends ConsumerWidget {
       body: ListView(
         padding: EdgeInsets.only(top: context.appBarInset),
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: _IdentityCard(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: _IdentityCard(
+              onCheckUpdate: () => _checkUpdate(context, ref),
+            ),
           ),
           _buildCreditSection(
             title: appLocalizations.madeBy,
@@ -104,13 +106,6 @@ class AboutView extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.more,
             items: [
-              DecorationListItem(
-                title: Text(appLocalizations.checkUpdate),
-                leading: const GlyphIcon(AppGlyphs.update),
-                onPressed: () {
-                  _checkUpdate(context, ref);
-                },
-              ),
               DecorationListItem(
                 title: Text(appLocalizations.sourceCode),
                 subtitle: const Text(repository),
@@ -181,13 +176,18 @@ class AboutView extends ConsumerWidget {
 }
 
 class _IdentityCard extends ConsumerStatefulWidget {
-  const _IdentityCard();
+  const _IdentityCard({required this.onCheckUpdate});
+
+  final VoidCallback onCheckUpdate;
 
   @override
   ConsumerState<_IdentityCard> createState() => _IdentityCardState();
 }
 
 class _IdentityCardState extends ConsumerState<_IdentityCard> {
+  static const _logoSize = 88.0;
+  static const _logoInset = 14.0;
+
   int _tapCount = 0;
   DateTime? _lastTapAt;
 
@@ -206,10 +206,21 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
     showExtend(context, builder: (_) => const MarksView());
   }
 
+  void _enableDeveloperMode() {
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(developerMode: true));
+    context.showNotifier(
+      context.appLocalizations.developerModeEnableTip,
+      level: MessageLevel.success,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final textTheme = context.textTheme;
+    final colorScheme = context.colorScheme;
     final version = globalState.packageInfo.version;
     final platform = SupportPlatform.currentPlatform.name;
     return CommonCard(
@@ -228,64 +239,70 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
         context.showNotifier(appLocalizations.copySuccess);
       },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
-          Row(
-            spacing: 16,
-            children: [
-              _DeveloperModeDetector(
-                onEnterDeveloperMode: () {
-                  ref
-                      .read(appSettingProvider.notifier)
-                      .update((state) => state.copyWith(developerMode: true));
-                  context.showNotifier(
-                    appLocalizations.developerModeEnableTip,
-                    level: MessageLevel.success,
-                  );
-                },
+          _DeveloperModeDetector(
+            onEnterDeveloperMode: _enableDeveloperMode,
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                shape: AppShape.all(AppCorner.fit(_logoSize)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(_logoInset),
                 child: Image.asset(
                   'assets/images/icon.png',
-                  width: 64,
-                  height: 64,
+                  width: _logoSize - _logoInset * 2,
+                  height: _logoSize - _logoInset * 2,
                 ),
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 6,
-                  children: [
-                    Text(
-                      appName,
-                      style: textTheme.headlineSmall?.copyWith(
-                        color: context.colorScheme.onSurface,
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        MetaChip(label: 'v$version'),
-                        MetaChip(label: platform),
-                      ],
-                    ),
-                  ],
+            ),
+          ),
+          Column(
+            spacing: 8,
+            children: [
+              Text(
+                appName,
+                textAlign: TextAlign.center,
+                style: textTheme.headlineSmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
                 ),
+              ),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                alignment: WrapAlignment.center,
+                children: [
+                  MetaChip(label: 'v$version'),
+                  MetaChip(label: platform),
+                ],
               ),
             ],
           ),
-          Text(
-            appLocalizations.desc,
-            style: textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Text(
+              appLocalizations.desc,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ),
           const _SeasonAnniversary(),
           const _CrownHistory(),
+          FilledButton.tonalIcon(
+            onPressed: widget.onCheckUpdate,
+            icon: const GlyphIcon(AppGlyphs.sync, size: 20, fill: 1),
+            label: Text(appLocalizations.checkUpdate),
+          ),
           Text(
             appLocalizations.copyDiagnostics,
+            textAlign: TextAlign.center,
             style: textTheme.labelSmall?.copyWith(
-              color: context.colorScheme.onSurfaceVariant.opacity60,
+              color: colorScheme.onSurfaceVariant.opacity60,
             ),
           ),
         ],
@@ -319,6 +336,7 @@ class _SeasonAnniversary extends ConsumerWidget {
         ? const SizedBox.shrink()
         : Text(
             text,
+            textAlign: TextAlign.center,
             style: context.textTheme.bodySmall?.copyWith(
               color: context.colorScheme.primary,
             ),
@@ -347,6 +365,7 @@ class _CrownHistory extends ConsumerWidget {
         snapshot.totalCoveredMillis ~/ const Duration(days: 1).inMilliseconds;
     return Text(
       context.appLocalizations.crownHistory(date, days),
+      textAlign: TextAlign.center,
       style: context.textTheme.bodySmall?.copyWith(
         color: context.colorScheme.primary,
         fontWeight: FontWeight.w600,

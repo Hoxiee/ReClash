@@ -22,6 +22,7 @@ class AdvancedConfigView extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final generalItems = [
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
         leading: const GlyphIcon(AppGlyphs.key),
@@ -32,6 +33,7 @@ class AdvancedConfigView extends ConsumerWidget {
         ),
       ),
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const GlyphIcon(AppGlyphs.dns),
@@ -39,6 +41,7 @@ class AdvancedConfigView extends ConsumerWidget {
         blur: false,
       ),
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: const Text('NTP'),
         subtitle: Text(appLocalizations.ntpDesc),
         leading: const GlyphIcon(AppGlyphs.clock),
@@ -46,6 +49,7 @@ class AdvancedConfigView extends ConsumerWidget {
         blur: false,
       ),
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: Text(appLocalizations.addedRules),
         subtitle: Text(appLocalizations.controlGlobalAddedRules),
         leading: const GlyphIcon(AppGlyphs.document),
@@ -53,6 +57,7 @@ class AdvancedConfigView extends ConsumerWidget {
         blur: false,
       ),
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: Text(appLocalizations.script),
         subtitle: Text(appLocalizations.overrideScript),
         leading: const GlyphIcon(AppGlyphs.script),
@@ -62,6 +67,7 @@ class AdvancedConfigView extends ConsumerWidget {
     ];
     final extraItems = [
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: Text(appLocalizations.smartPause),
         subtitle: Text(appLocalizations.smartPauseDesc),
         leading: const GlyphIcon(AppGlyphs.signalChart),
@@ -69,17 +75,19 @@ class AdvancedConfigView extends ConsumerWidget {
         blur: false,
       ),
       DecorationListItem.open(
+        search: const SettingSearch(),
         title: Text(appLocalizations.smartRouting),
         subtitle: Text(appLocalizations.smartRoutingDesc),
         leading: const GlyphIcon(AppGlyphs.smartRoute),
         trailing: const ExperimentalBadge(),
-        widget: const SmartRoutingView(),
+        widget: const RoutingStudioView(),
         blur: false,
       ),
       // The engine is an Android JNI module; on desktop the entry would only
       // produce rules pointing at a listener that never exists.
       if (ref.watch(byeDpiSupportedProvider))
         DecorationListItem.open(
+          search: const SettingSearch(gate: SettingGate.byeDpi),
           title: Text(appLocalizations.desync),
           subtitle: Text(appLocalizations.desyncDesc),
           leading: const GlyphIcon(AppGlyphs.bolt),
@@ -94,6 +102,7 @@ class AdvancedConfigView extends ConsumerWidget {
         children: [
           SettingSection(top: 16, items: generalItems),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.extra,
             items: extraItems,
             enterDelay: const Duration(milliseconds: 50),

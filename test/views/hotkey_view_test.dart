@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/hotkey.dart';
+import 'package:reclash/widgets/widgets.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 ProviderContainer _containerFor(
@@ -81,6 +84,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HotKeyRecorder), findsOne);
+  });
+
+  testWidgets('groups the bar actions in one capsule', (tester) async {
+    final container = _containerFor(tester);
+    await _pumpView(tester, container);
+
+    final restoreGroup = find.ancestor(
+      of: find.byGlyph(AppGlyphs.restore),
+      matching: find.byType(TonalButtonGroup),
+    );
+    final clearGroup = find.ancestor(
+      of: find.byGlyph(AppGlyphs.clearAll),
+      matching: find.byType(TonalButtonGroup),
+    );
+    expect(restoreGroup, findsOneWidget);
+    expect(clearGroup, findsOneWidget);
+    expect(restoreGroup.evaluate().single, same(clearGroup.evaluate().single));
+    expect(tester.takeException(), null);
   });
 
   testWidgets('the row remove button clears its binding', (tester) async {

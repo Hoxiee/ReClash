@@ -48,6 +48,12 @@ class CommonPopScope extends StatelessWidget {
 class BackLayerScope extends StatefulWidget {
   final Widget child;
   final VoidCallback onBack;
+
+  /// Arms the back-gesture entry. Toggling this instead of mounting the scope
+  /// lets a caller keep the subtree in place, so a focused field keeps its
+  /// keyboard across the change.
+  final bool enabled;
+
   @visibleForTesting
   final void Function(void Function(Duration) callback)?
   schedulePostFrameCallback;
@@ -56,6 +62,7 @@ class BackLayerScope extends StatefulWidget {
     super.key,
     required this.onBack,
     required this.child,
+    this.enabled = true,
     @visibleForTesting this.schedulePostFrameCallback,
   });
 
@@ -73,15 +80,30 @@ class _BackLayerScopeState extends State<BackLayerScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(BackLayerScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.enabled != widget.enabled) {
+      _sync(force: true);
+    }
+  }
+
+  void _sync({bool force = false}) {
     final route = ModalRoute.of(context);
     final isPageActive = PageActivityScope.isActiveOf(context);
-    if (identical(_route, route) && _isPageActive == isPageActive) {
+    if (!force && identical(_route, route) && _isPageActive == isPageActive) {
       return;
     }
     _detach();
     _route = route;
     _isPageActive = isPageActive;
     final revision = ++_syncRevision;
+    if (!widget.enabled) {
+      return;
+    }
     final schedulePostFrameCallback =
         widget.schedulePostFrameCallback ??
         WidgetsBinding.instance.addPostFrameCallback;

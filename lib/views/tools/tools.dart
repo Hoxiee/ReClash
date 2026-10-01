@@ -115,15 +115,29 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   @override
   void initState() {
     super.initState();
+    _searchFocus.addListener(_onSearchFocusChanged);
     _loadRecents();
   }
 
   @override
   void dispose() {
+    _searchFocus.removeListener(_onSearchFocusChanged);
     _searchController.dispose();
     _searchFocus.dispose();
     _detailActions.dispose();
     super.dispose();
+  }
+
+  void _onSearchFocusChanged() {
+    if (!mounted) {
+      return;
+    }
+    // A live query already arms the back layer, so a focus change mid-search
+    // need not rebuild — which would interrupt an in-flight result tap.
+    if (_query.trim().isNotEmpty) {
+      return;
+    }
+    setState(() {});
   }
 
   Future<void> _loadRecents() async {
@@ -252,6 +266,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     _searchFocus.unfocus();
   }
 
+  void _handleSearchBack() {
+    _searchController.clear();
+    _onSearch('');
+    _searchFocus.unfocus();
+  }
+
   void _focusResults() {
     FocusScope.of(context).focusInDirection(TraversalDirection.down);
   }
@@ -340,12 +360,27 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   Widget _buildMobileNavigationMenu(List<NavigationItem> navigationItems) {
     return SettingSection(
       top: 16,
+      title: context.appLocalizations.toolsCategoryDiagnostics,
       items: [
         const _ConnectionDoctorItem(),
-        for (final navigationItem in navigationItems)
+        for (final navigationItem in _observabilityItems(navigationItems))
           _navigationItem(navigationItem),
       ],
     );
+  }
+
+  List<NavigationItem> _observabilityItems(List<NavigationItem> items) {
+    return [
+      for (final item in items)
+        if (item.label != PageLabel.resources) item,
+    ];
+  }
+
+  List<NavigationItem> _resourceItems(List<NavigationItem> items) {
+    return [
+      for (final item in items)
+        if (item.label == PageLabel.resources) item,
+    ];
   }
 
   DecorationListItem _navigationItem(NavigationItem navigationItem) {
@@ -425,26 +460,29 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const _ConnectionDoctorItem(),
       ),
       if (hasFindings)
-        _ToolSearchEntry(
-          l.findings,
-          _ToolCategory.diagnostics,
-          const _FindingsItem(),
-        ),
-      for (final navigationItem in navigationItems)
+        _ToolSearchEntry(l.findings, _ToolCategory.info, const _FindingsItem()),
+      for (final navigationItem in _observabilityItems(navigationItems))
         _ToolSearchEntry(
           '${navigationItem.label.label} '
           '${navigationItem.label.description ?? ''}',
           _ToolCategory.diagnostics,
           _navigationItem(navigationItem),
         ),
+      for (final navigationItem in _resourceItems(navigationItems))
+        _ToolSearchEntry(
+          '${navigationItem.label.label} '
+          '${navigationItem.label.description ?? ''}',
+          _ToolCategory.configuration,
+          _navigationItem(navigationItem),
+        ),
       _ToolSearchEntry(
         '${l.appearance} ${l.appearanceDesc}',
-        _ToolCategory.personalization,
+        _ToolCategory.application,
         const _ThemeItem(),
       ),
       _ToolSearchEntry(
         l.language,
-        _ToolCategory.personalization,
+        _ToolCategory.application,
         const _LocaleItem(),
       ),
       _ToolSearchEntry(
@@ -459,7 +497,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       ),
       _ToolSearchEntry(
         l.urlScheme,
-        _ToolCategory.configuration,
+        _ToolCategory.application,
         const _UrlSchemeItem(),
       ),
       if (system.isAndroid)
@@ -470,44 +508,44 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         ),
       _ToolSearchEntry(
         '${l.application} ${l.applicationDesc}',
-        _ToolCategory.system,
+        _ToolCategory.application,
         const _SettingItem(),
       ),
       _ToolSearchEntry(
         '${l.backupAndRestore} ${l.backupAndRestoreDesc}',
-        _ToolCategory.system,
+        _ToolCategory.configuration,
         const _BackupItem(),
       ),
-      if (system.isAndroid)
+      if (system.isAndroid && kEnableDeviceCompanion)
         _ToolSearchEntry(
           '${l.devices} ${l.devicesDescription}',
-          _ToolCategory.system,
+          _ToolCategory.application,
           const _DevicesItem(),
         ),
       if (system.isDesktop)
         _ToolSearchEntry(
           '${l.hotkeyManagement} ${l.hotkeyManagementDesc}',
-          _ToolCategory.system,
+          _ToolCategory.application,
           const _HotkeyItem(),
         ),
       if (system.isWindows)
         _ToolSearchEntry(
           '${l.loopback} ${l.loopbackDesc}',
-          _ToolCategory.system,
+          _ToolCategory.diagnostics,
           const _LoopbackItem(),
         ),
       if (enableDeveloperMode)
         _ToolSearchEntry(
           l.developerMode,
-          _ToolCategory.system,
+          _ToolCategory.info,
           const _DeveloperItem(),
         ),
       _ToolSearchEntry(
         l.disclaimer,
-        _ToolCategory.system,
+        _ToolCategory.info,
         const _DisclaimerItem(),
       ),
-      _ToolSearchEntry(l.about, _ToolCategory.system, const _InfoItem()),
+      _ToolSearchEntry(l.about, _ToolCategory.info, const _InfoItem()),
       ..._deepSettings(l, enableDeveloperMode),
     ];
   }
@@ -543,19 +581,21 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       ),
       const _DeepOwner('DNS', 'dns', AppGlyphs.dns, DnsView()),
       const _DeepOwner('NTP', 'ntp', AppGlyphs.clock, NtpView()),
-      _DeepOwner(
-        l.smartRouting,
-        'smartRouting',
-        AppGlyphs.smartRoute,
-        const SmartRoutingView(),
-      ),
+      if (kEnableSmartRouting)
+        _DeepOwner(
+          l.smartRouting,
+          'smartRouting',
+          AppGlyphs.smartRoute,
+          const RoutingStudioView(),
+        ),
       _DeepOwner(
         l.smartPause,
         'smartPause',
         AppGlyphs.signalChart,
         const SmartPauseView(),
       ),
-      _DeepOwner(l.desync, 'desync', AppGlyphs.bolt, const DesyncView()),
+      if (system.isAndroid)
+        _DeepOwner(l.desync, 'desync', AppGlyphs.bolt, const DesyncView()),
       _DeepOwner(
         l.backupAndRestore,
         'backup',
@@ -579,22 +619,25 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     final owners = {for (final owner in _deepOwners(l)) owner.paneId: owner};
     const categories = {
       'diagnostics': _ToolCategory.diagnostics,
-      'personalization': _ToolCategory.personalization,
       'configuration': _ToolCategory.configuration,
-      'system': _ToolCategory.system,
+      'application': _ToolCategory.application,
+      'info': _ToolCategory.info,
     };
     final entries = <_ToolSearchEntry>[];
     for (final spec in deepSettingSpecs(l)) {
-      if (spec.developerOnly && !enableDeveloperMode) {
+      if (!_gateOpen(spec.gate, enableDeveloperMode)) {
         continue;
       }
       final owner = owners[spec.paneId];
       if (owner == null) {
         continue;
       }
+      final keywords = spec.keywords.isEmpty
+          ? ''
+          : ' ${spec.keywords.join(' ')}';
       entries.add(
         _ToolSearchEntry(
-          '${spec.title} ${owner.label}',
+          '${spec.title} ${owner.label}$keywords',
           categories[spec.category] ?? _ToolCategory.configuration,
           _DeepSettingResult(
             glyph: owner.glyph,
@@ -606,6 +649,32 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       );
     }
     return entries;
+  }
+
+  /// Whether a deep row's baked availability token holds in this environment.
+  /// `byeDpi` tracks platform support (mirrors [byeDpiSupportedProvider]), not
+  /// the user's feature toggle, so a desktop build never surfaces DPI rows.
+  bool _gateOpen(String gate, bool enableDeveloperMode) {
+    switch (gate) {
+      case 'byeDpi':
+      case 'android':
+        return system.isAndroid;
+      case 'developerMode':
+        return enableDeveloperMode;
+      case 'desktop':
+        return system.isDesktop;
+      case 'mobile':
+        return !system.isDesktop;
+      case 'windows':
+        return system.isWindows;
+      case 'macos':
+        return system.isMacOS;
+      case 'linux':
+        return system.isLinux;
+      case 'always':
+      default:
+        return true;
+    }
   }
 
   /// Keeps entries every token matches, then orders them by how strongly they
@@ -670,41 +739,46 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return sections;
   }
 
-  List<Widget> _getOtherList(bool enableDeveloperMode, bool hasFindings) {
+  List<Widget> _getMobileCategories(
+    List<NavigationItem> navigationItems,
+    bool enableDeveloperMode,
+    bool hasFindings,
+  ) {
     return [
+      _buildMobileNavigationMenu(navigationItems),
       SettingSection(
-        title: context.appLocalizations.other,
+        title: context.appLocalizations.toolsCategoryConfiguration,
+        items: [
+          const _ConfigItem(),
+          const _AdvancedConfigItem(),
+          for (final navigationItem in _resourceItems(navigationItems))
+            _navigationItem(navigationItem),
+          const _BackupItem(),
+          if (system.isAndroid) const _AccessItem(),
+        ],
+        enterDelay: const Duration(milliseconds: 50),
+      ),
+      SettingSection(
+        title: context.appLocalizations.toolsCategoryApplication,
+        items: [
+          const _SettingItem(),
+          const _ThemeItem(),
+          const _LocaleItem(),
+          if (system.isDesktop) const _HotkeyItem(),
+          if (system.isAndroid && kEnableDeviceCompanion) const _DevicesItem(),
+          const _UrlSchemeItem(),
+        ],
+        enterDelay: const Duration(milliseconds: 75),
+      ),
+      SettingSection(
+        title: context.appLocalizations.toolsCategoryInfo,
         items: [
           if (hasFindings) const _FindingsItem(),
-          const _DisclaimerItem(),
-          const _UrlSchemeItem(),
           if (enableDeveloperMode) const _DeveloperItem(),
+          const _DisclaimerItem(),
           const _InfoItem(),
         ],
         enterDelay: const Duration(milliseconds: 100),
-      ),
-    ];
-  }
-
-  List<Widget> _getSettingList({required bool first}) {
-    return [
-      SettingSection(
-        top: first ? 16 : 0,
-        title: first ? null : context.appLocalizations.settings,
-        items: [
-          if (first) const _ConnectionDoctorItem(),
-          const _LocaleItem(),
-          const _ThemeItem(),
-          const _BackupItem(),
-          if (system.isDesktop) const _HotkeyItem(),
-          if (system.isWindows) const _LoopbackItem(),
-          if (system.isAndroid) const _AccessItem(),
-          if (system.isAndroid) const _DevicesItem(),
-          const _ConfigItem(),
-          const _AdvancedConfigItem(),
-          const _SettingItem(),
-        ],
-        enterDelay: const Duration(milliseconds: 50),
       ),
     ];
   }
@@ -721,35 +795,40 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         title: appLocalizations.toolsCategoryDiagnostics,
         items: [
           const _ConnectionDoctorItem(),
-          if (hasFindings) const _FindingsItem(),
-          for (final navigationItem in navigationItems)
+          for (final navigationItem in _observabilityItems(navigationItems))
             _navigationItem(navigationItem),
+          if (system.isWindows) const _LoopbackItem(),
         ],
         enterDelay: const Duration(milliseconds: 50),
-      ),
-      SettingSection(
-        title: appLocalizations.toolsCategoryPersonalization,
-        items: [const _ThemeItem(), const _LocaleItem()],
-        enterDelay: const Duration(milliseconds: 75),
       ),
       SettingSection(
         title: appLocalizations.toolsCategoryConfiguration,
         items: [
           const _ConfigItem(),
           const _AdvancedConfigItem(),
-          const _UrlSchemeItem(),
+          for (final navigationItem in _resourceItems(navigationItems))
+            _navigationItem(navigationItem),
+          const _BackupItem(),
           if (system.isAndroid) const _AccessItem(),
+        ],
+        enterDelay: const Duration(milliseconds: 75),
+      ),
+      SettingSection(
+        title: appLocalizations.toolsCategoryApplication,
+        items: [
+          const _SettingItem(),
+          const _ThemeItem(),
+          const _LocaleItem(),
+          if (system.isDesktop) const _HotkeyItem(),
+          if (system.isAndroid && kEnableDeviceCompanion) const _DevicesItem(),
+          const _UrlSchemeItem(),
         ],
         enterDelay: const Duration(milliseconds: 100),
       ),
       SettingSection(
-        title: appLocalizations.toolsCategorySystem,
+        title: appLocalizations.toolsCategoryInfo,
         items: [
-          const _SettingItem(),
-          const _BackupItem(),
-          if (system.isAndroid) const _DevicesItem(),
-          if (system.isDesktop) const _HotkeyItem(),
-          if (system.isWindows) const _LoopbackItem(),
+          if (hasFindings) const _FindingsItem(),
           if (enableDeveloperMode) const _DeveloperItem(),
           const _DisclaimerItem(),
           const _InfoItem(),
@@ -870,16 +949,17 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         else
           ..._resultSections(matches),
       ] else ...[
-        if (navigationItems.isNotEmpty)
-          _buildMobileNavigationMenu(navigationItems),
-        ..._getSettingList(first: navigationItems.isEmpty),
-        ..._getOtherList(appSetting.developerMode, hasFindings),
+        ..._getMobileCategories(
+          navigationItems,
+          appSetting.developerMode,
+          hasFindings,
+        ),
         const CoreSection(),
       ],
       const SettingBottomInset(),
     ];
 
-    return _HighlightTokens(
+    final mobile = _HighlightTokens(
       tokens: tokens,
       child: CallbackShortcuts(
         bindings: {
@@ -902,6 +982,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           ),
         ),
       ),
+    );
+    // The scope stays mounted whether or not search is live; arming it through
+    // [enabled] rather than by wrapping on demand keeps the search field (and
+    // its keyboard) from being reparented and rebuilt the moment it gains focus.
+    return BackLayerScope(
+      enabled: searching || _searchFocus.hasFocus,
+      onBack: _handleSearchBack,
+      child: mobile,
     );
   }
 
@@ -1574,16 +1662,16 @@ class _ToolSearchEntry {
 /// grouped search results read top-to-bottom the same way.
 enum _ToolCategory {
   diagnostics,
-  personalization,
   configuration,
-  system;
+  application,
+  info;
 
   String label(AppLocalizations l) {
     return switch (this) {
       _ToolCategory.diagnostics => l.toolsCategoryDiagnostics,
-      _ToolCategory.personalization => l.toolsCategoryPersonalization,
       _ToolCategory.configuration => l.toolsCategoryConfiguration,
-      _ToolCategory.system => l.toolsCategorySystem,
+      _ToolCategory.application => l.toolsCategoryApplication,
+      _ToolCategory.info => l.toolsCategoryInfo,
     };
   }
 }

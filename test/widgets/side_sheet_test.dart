@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/widgets/layout/side_sheet.dart';
 
 void main() {
@@ -82,6 +83,39 @@ void main() {
     expect(sheetRect.top, 16);
     expect(screen.width - sheetRect.right, 16);
     expect(screen.height - sheetRect.bottom, 16);
+  });
+
+  testWidgets('a transparent side sheet surface stays chrome-free', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => FilledButton(
+              onPressed: () => showModalSideSheet<void>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const SizedBox.expand(child: Text('Content')),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    final material = tester.widget<Material>(
+      find
+          .ancestor(of: find.text('Content'), matching: find.byType(Material))
+          .first,
+    );
+    expect(material.elevation, 0);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.shape, AppShape.none);
   });
 
   testWidgets(

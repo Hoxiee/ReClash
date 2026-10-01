@@ -97,18 +97,27 @@ class _SideSheetState extends State<SideSheet> {
     final colorScheme = Theme.of(context).colorScheme;
     final Color color =
         widget.backgroundColor ?? colorScheme.surfaceContainerLow;
+    // A transparent surface means the real card lives one layer in (a paged
+    // sheet floats its own inner card); raising, rounding, or clipping an
+    // invisible surface here would only stamp a phantom frame around the
+    // content, so the card treatment is withheld unless this surface is seen.
+    final bool chromeless = color.a == 0;
     // The container role already carries the panel tone; an elevation tint on
     // top only muddies it with a warm cast, so the shadow alone conveys depth.
     const Color surfaceTintColor = Colors.transparent;
-    final Color shadowColor = widget.shadowColor ?? colorScheme.shadow;
-    final double elevation = widget.elevation ?? 3;
-    final ShapeBorder shape = widget.shape ?? AppShape.xl;
+    final Color shadowColor =
+        widget.shadowColor ??
+        (chromeless ? Colors.transparent : colorScheme.shadow);
+    final double elevation = widget.elevation ?? (chromeless ? 0 : 3);
+    final ShapeBorder shape =
+        widget.shape ?? (chromeless ? AppShape.none : AppShape.xl);
 
     final BoxConstraints constraints =
         widget.constraints ??
         const BoxConstraints(maxWidth: 320, minWidth: 320);
 
-    final Clip clipBehavior = widget.clipBehavior ?? Clip.antiAlias;
+    final Clip clipBehavior =
+        widget.clipBehavior ?? (chromeless ? Clip.none : Clip.antiAlias);
 
     final Widget sideSheet = Material(
       key: _childKey,
@@ -586,7 +595,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
           return _ModalSideSheet<T>(
             route: this,
             backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
-            elevation: elevation ?? 3,
+            elevation: elevation,
             shape: shape,
             clipBehavior: clipBehavior,
             constraints: constraints,

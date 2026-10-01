@@ -12,18 +12,20 @@ class ColorSchemeBox extends StatelessWidget {
   final Color? primaryColor;
   final bool? isSelected;
   final void Function()? onPressed;
+  final double size;
 
   const ColorSchemeBox({
     super.key,
     required this.primaryColor,
     this.onPressed,
     this.isSelected,
+    this.size = 56,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
+    return SizedBox.square(
+      dimension: size,
       child: PrimaryColorBox(
         primaryColor: primaryColor,
         child: Builder(
@@ -38,13 +40,11 @@ class ColorSchemeBox extends StatelessWidget {
                     alignment: Alignment.center,
                     child: const SelectIcon(),
                   ),
-                  child: Container(
+                  child: Padding(
                     padding: AppInsets.sm,
                     child: ClipRSuperellipse(
                       borderRadius: AppRadius.full,
-                      child: SizedBox(
-                        width: 72,
-                        height: 72,
+                      child: SizedBox.expand(
                         child: Grid(
                           crossAxisCount: 2,
                           children: [
@@ -68,9 +68,9 @@ class ColorSchemeBox extends StatelessWidget {
                 ),
                 if (primaryColor == null)
                   const Positioned(
-                    bottom: 4,
-                    right: 4,
-                    child: GlyphIcon(AppGlyphs.eyedropper, size: 20),
+                    bottom: 2,
+                    right: 2,
+                    child: GlyphIcon(AppGlyphs.eyedropper, size: 16),
                   ),
               ],
             );

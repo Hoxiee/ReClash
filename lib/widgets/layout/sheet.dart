@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/models/state.dart';
 import 'package:reclash/providers/app.dart';
@@ -221,11 +220,6 @@ class _SnapSheetHome extends ConsumerWidget {
 
 /// Forwards to [CommonScaffold], which detects the surrounding [SheetType] and
 /// draws the matching bar itself; [sheetTransparentToolBar] maps to [floatBody].
-///
-/// A sheet with no bar controls tucks its close control to the trailing edge.
-/// To keep close on the leading edge across every sheet, a confirm button is
-/// injected on the trailing edge whenever the caller supplies none of its own;
-/// [showConfirmAction] opts a genuinely control-free sheet out of that.
 class AdaptiveSheetScaffold extends StatelessWidget {
   final Widget body;
   final String title;
@@ -235,7 +229,6 @@ class AdaptiveSheetScaffold extends StatelessWidget {
   final List<CommonPopupMenuItem> menuItems;
   final VoidCallback? backAction;
   final AppBarSearchState? searchState;
-  final bool showConfirmAction;
 
   const AdaptiveSheetScaffold({
     super.key,
@@ -247,27 +240,14 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     this.menuItems = const [],
     this.backAction,
     this.searchState,
-    this.showConfirmAction = true,
   });
-
-  bool get _hasCallerControls =>
-      actions.isNotEmpty || menuItems.isNotEmpty || searchState != null;
 
   @override
   Widget build(BuildContext context) {
-    final iconActions = _hasCallerControls || !showConfirmAction
-        ? actions
-        : [
-            IconButtonData(
-              glyph: AppGlyphs.check,
-              tooltip: context.appLocalizations.confirm,
-              onPressed: backAction ?? () => Navigator.of(context).maybePop(),
-            ),
-          ];
     return CommonScaffold(
       title: title,
       centerTitle: centerTitle,
-      iconActions: iconActions,
+      iconActions: actions,
       menuItems: menuItems,
       floatBody: sheetTransparentToolBar,
       backAction: backAction,

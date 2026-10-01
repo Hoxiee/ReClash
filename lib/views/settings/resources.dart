@@ -76,9 +76,35 @@ class ResourcesView extends ConsumerWidget {
           .update((state) => state.copyWith(geoAutoUpdate: value));
     }
 
+    final isUpdating = GeoResource.values.any(
+      (resource) => ref.watch(isUpdatingProvider(resource.updatingKey)),
+    );
+
+    Future<void> updateAll() async {
+      if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+        dialogs.showNotifier(context.appLocalizations.memoryCoreNotRunning);
+        return;
+      }
+      await globalState.safeRun<void>(() async {
+        final action = ref.read(geoResourceActionProvider.notifier);
+        await Future.wait([
+          for (final resource in GeoResource.values)
+            action.updateGeoResource(resource),
+        ]);
+      }, silence: false);
+    }
+
     return CommonScaffold(
       title: context.appLocalizations.resources,
       floatBody: true,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.sync,
+          tooltip: appLocalizations.sync,
+          isLoading: isUpdating,
+          onPressed: updateAll,
+        ),
+      ],
       body: ListView(
         padding: EdgeInsets.only(top: context.appBarInset),
         children: [

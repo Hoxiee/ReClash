@@ -312,6 +312,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             top: 16,
             items: [
               DecorationListItem.toggle(
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.desyncFeatureEnable),
                 subtitle: Text(appLocalizations.desyncFeatureEnableDesc),
                 value: featureEnabled,
@@ -339,6 +340,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             (widget._section == null ||
                 widget._section == _DesyncSection.strategy))
           SettingSection(
+            search: const SettingSearch(gate: SettingGate.byeDpi),
             title: appLocalizations.desyncStrategySection,
             top: widget._section == null ? 0 : 16,
             actions: [
@@ -352,6 +354,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             ],
             items: _locked([
               DecorationListItem.open(
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.desyncArgs),
                 subtitle: Text(
                   appLocalizations.desyncArgsCount(props.strategyArgs.length),
@@ -369,6 +372,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 leading: defaultActive
                     ? const GlyphIcon(AppGlyphs.check)
                     : null,
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.desyncDefaultName),
                 subtitle: const Text('split · disorder · fake · oob · tlsrec'),
                 onPressed: () => _update(
@@ -408,9 +412,11 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             (widget._section == null ||
                 widget._section == _DesyncSection.engine))
           SettingSection(
+            search: const SettingSearch(gate: SettingGate.byeDpi),
             title: appLocalizations.desyncEngine,
             items: _locked([
               DecorationListItem.input(
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.port),
                 subtitle: Text(props.port.toString()),
                 dialogTitle: appLocalizations.port,
@@ -439,6 +445,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 },
               ),
               DecorationListItem.toggle(
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.desyncCache),
                 subtitle: Text(appLocalizations.desyncCacheDesc),
                 value: props.cacheEnabled,
@@ -449,6 +456,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
               ),
               if (props.cacheEnabled)
                 DecorationListItem.options(
+                  search: const SettingSearch(gate: SettingGate.byeDpi),
                   title: Text(appLocalizations.desyncCacheTtl),
                   subtitle: Text(_ttlLabel(appLocalizations, props.cacheTtl)),
                   dialogTitle: appLocalizations.desyncCacheTtl,
@@ -469,6 +477,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             (widget._section == null ||
                 widget._section == _DesyncSection.engine))
           SettingSection(
+            search: const SettingSearch(gate: SettingGate.byeDpi),
             title: appLocalizations.desyncRouting,
             bottom: 24,
             items: _locked([
@@ -484,6 +493,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                   }),
                 ),
               DecorationListItem.toggle(
+                search: const SettingSearch(gate: SettingGate.byeDpi),
                 title: Text(appLocalizations.desyncForceTcp),
                 subtitle: Text(appLocalizations.desyncForceTcpDesc),
                 value: props.forceTcp,
@@ -518,6 +528,7 @@ class _DesyncRoutingRules extends StatelessWidget {
       forceTcp: props.forceTcp,
     );
     return SettingSection(
+      search: const SettingSearch(gate: SettingGate.byeDpi),
       title: appLocalizations.desyncRoutingRules,
       subTitle: appLocalizations.desyncRoutingGeositeNote,
       bottom: 24,
@@ -525,6 +536,7 @@ class _DesyncRoutingRules extends StatelessWidget {
         if (rules.isEmpty)
           DecorationListItem(
             leading: const GlyphIcon(AppGlyphs.route),
+            search: const SettingSearch(gate: SettingGate.byeDpi),
             title: Text(appLocalizations.desyncRoutingNoCategories),
             subtitle: Text(appLocalizations.desyncRoutingNoCategoriesDesc),
           )

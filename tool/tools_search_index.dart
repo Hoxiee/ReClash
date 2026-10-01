@@ -7,10 +7,10 @@ import 'package:analyzer/dart/ast/visitor.dart';
 const ownerSpecs = <OwnerSpec>[
   OwnerSpec('advanced', 'configuration', ['lib/views/config/advanced.dart']),
   OwnerSpec('config', 'configuration', ['lib/views/config/general.dart']),
-  OwnerSpec('application', 'system', [
+  OwnerSpec('application', 'application', [
     'lib/views/settings/application_setting.dart',
   ]),
-  OwnerSpec('appearance', 'personalization', [
+  OwnerSpec('appearance', 'application', [
     'lib/views/appearance/theme_tab.dart',
     'lib/views/appearance/motion_tab.dart',
     'lib/views/appearance/background_tab.dart',
@@ -29,39 +29,28 @@ const ownerSpecs = <OwnerSpec>[
     'lib/views/config/smart_pause.dart',
   ]),
   OwnerSpec('desync', 'configuration', ['lib/views/config/desync.dart']),
-  OwnerSpec('backup', 'system', ['lib/views/settings/backup_and_restore.dart']),
-  OwnerSpec('developer', 'system', ['lib/views/settings/developer.dart']),
+  OwnerSpec('backup', 'configuration', [
+    'lib/views/settings/backup_and_restore.dart',
+  ]),
+  OwnerSpec('developer', 'info', ['lib/views/settings/developer.dart']),
 ];
 
-/// Owners whose rows exist only in developer mode; the index gates them.
+/// Owners whose rows exist only in developer mode; a row that declares no gate
+/// of its own inherits this one.
 const developerOwners = {'developer'};
 
-/// Constructors whose `title:`/`label:` names a searchable row, plus two
-/// synthetic tags: `Info` for a `PreviewChoiceGroup` label and `EnumLabel` for
-/// an enum-switch label map. Titles in any other slot are not fixed settings.
-const rowTypes = <String>{
-  'ConfigToggleItem',
-  'ConfigOptionsItem',
-  'ConfigTextItem',
-  'ConfigListInputItem',
-  'ConfigNextItem',
-  'DecorationListItem',
-  'SelectedDecorationListItem',
-  'SettingSliderItem',
-  'SettingSection',
-  'ListItem',
-  'ListHeader',
-  'Info',
-  'EnumLabel',
-  '_vpnToggle',
-  '_networkToggle',
-  '_clashToggle',
-  '_appSettingToggle',
-  '_pacingItem',
-  '_StringListItem',
-  '_CountryListItem',
-  '_MarkersItem',
-  '_buildPrerequisiteItem',
+/// The availability tokens [SettingGate] offers. The generator refuses any other
+/// token so a typo cannot silently bake an always-visible row.
+const settingGates = <String>{
+  'always',
+  'byeDpi',
+  'developerMode',
+  'android',
+  'desktop',
+  'mobile',
+  'windows',
+  'macos',
+  'linux',
 };
 
 /// Identifiers standing for the l10n object, so `<recv>.getter` reads as key
@@ -104,41 +93,56 @@ class SettingTitle {
   int get hashCode => Object.hash(getter, literal);
 }
 
-class TitleHit {
-  const TitleHit(this.enclosingType, this.title);
+/// One searchable row the author marked with `search:`, carrying its reused
+/// title and the baked descriptor (keywords and gate token).
+class SettingHit {
+  const SettingHit(this.title, this.keywords, this.gate);
 
-  final String enclosingType;
   final SettingTitle title;
+  final List<String> keywords;
+  final String gate;
 }
 
-/// Every static-label `title:`/`label:` in [source], tagged with its owning
-/// type. Syntactic parse only — no package resolution needed.
-List<TitleHit> extractTitleHits(String source) {
+/// Hits and any author mistakes found while scanning one source file; a bad
+/// gate token or a `search:` on a titleless row is a generator error, never a
+/// silent drop.
+class Extraction {
+  const Extraction(this.hits, this.errors);
+
+  final List<SettingHit> hits;
+  final List<String> errors;
+}
+
+/// Every `search:`-marked row in [source] plus the enum-switch label maps
+/// (DNS/NTP per-value screens). Syntactic parse only — no package resolution.
+Extraction extractSettingHits(String source) {
   final result = parseString(content: source, throwIfDiagnostics: false);
-  final visitor = _TitleVisitor();
+  final visitor = _SettingVisitor();
   result.unit.visitChildren(visitor);
-  return visitor.hits;
+  return Extraction(visitor.hits, visitor.errors);
 }
 
-class _TitleVisitor extends RecursiveAstVisitor<void> {
-  final List<TitleHit> hits = [];
+class _SettingVisitor extends RecursiveAstVisitor<void> {
+  final List<SettingHit> hits = [];
+  final List<String> errors = [];
 
   static const _labelArguments = <String>{'title', 'label'};
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    _scan(node.constructorName.type.name.lexeme, node.argumentList);
+    _scan(node.argumentList);
     super.visitInstanceCreationExpression(node);
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    _scan(_calleeName(node), node.argumentList);
+    _scan(node.argumentList);
     super.visitMethodInvocation(node);
   }
 
   /// A `label`/`title` accessor whose body switches over enum cases is the
-  /// label map for a per-enum-value screen (DNS/NTP overrides); harvest each arm.
+  /// label map for a per-enum-value screen (DNS/NTP overrides); harvest each arm
+  /// as an always-available row with no extra keywords.
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
     final name = node.name.lexeme;
@@ -150,7 +154,7 @@ class _TitleVisitor extends RecursiveAstVisitor<void> {
           for (final arm in expression.cases) {
             final title = _classify(arm.expression);
             if (title != null) {
-              hits.add(TitleHit('EnumLabel', title));
+              hits.add(SettingHit(title, const [], 'always'));
             }
           }
         }
@@ -159,30 +163,83 @@ class _TitleVisitor extends RecursiveAstVisitor<void> {
     super.visitMethodDeclaration(node);
   }
 
-  /// The type a call names. Keyword-free constructor calls parse as method
-  /// invocations, so `Widget(...)` is method `Widget` and `Widget.open(...)` is
-  /// method `open` on target `Widget`; fold the latter back to the type.
-  String _calleeName(MethodInvocation node) {
-    final target = node.target;
-    if (target is SimpleIdentifier && target.name.isNotEmpty) {
-      final first = target.name[0];
-      if (first == first.toUpperCase() && first != first.toLowerCase()) {
-        return target.name;
+  /// A call that carries `search:` is a row the author marked searchable. Reuse
+  /// its sibling `title:`/`label:` for the text and bake the descriptor.
+  void _scan(ArgumentList argumentList) {
+    NamedArgument? searchArgument;
+    Expression? titleExpression;
+    for (final argument in argumentList.arguments) {
+      if (argument is! NamedArgument) {
+        continue;
+      }
+      final name = argument.name.lexeme;
+      if (name == 'search') {
+        searchArgument = argument;
+      } else if (_labelArguments.contains(name)) {
+        titleExpression ??= argument.argumentExpression;
       }
     }
-    return node.methodName.name;
+    if (searchArgument == null) {
+      return;
+    }
+    final title = titleExpression == null ? null : _classify(titleExpression);
+    if (title == null) {
+      errors.add('search: on a row without a resolvable title/label literal');
+      return;
+    }
+    final (keywords, gate) = _descriptor(searchArgument.argumentExpression);
+    hits.add(SettingHit(title, keywords, gate));
   }
 
-  void _scan(String enclosing, ArgumentList argumentList) {
-    for (final argument in argumentList.arguments) {
-      if (argument is NamedArgument &&
-          _labelArguments.contains(argument.name.lexeme)) {
-        final title = _classify(argument.argumentExpression);
-        if (title != null) {
-          hits.add(TitleHit(enclosing, title));
+  /// Reads the `SettingSearch(...)` the author passed to `search:`: its keyword
+  /// literals and the gate enum constant as a token.
+  (List<String>, String) _descriptor(Expression expression) {
+    var keywords = const <String>[];
+    var gate = 'always';
+    if (expression is InstanceCreationExpression) {
+      for (final argument in expression.argumentList.arguments) {
+        if (argument is! NamedArgument) {
+          continue;
+        }
+        switch (argument.name.lexeme) {
+          case 'keywords':
+            keywords = _stringList(argument.argumentExpression);
+          case 'gate':
+            final token = _gateToken(argument.argumentExpression);
+            if (token == null || !settingGates.contains(token)) {
+              errors.add('unknown SettingGate: ${argument.argumentExpression}');
+            } else {
+              gate = token;
+            }
         }
       }
     }
+    return (keywords, gate);
+  }
+
+  /// The constant name of a `SettingGate.<name>` reference, seen as a prefixed
+  /// identifier or a property access; else null.
+  String? _gateToken(Expression expression) {
+    if (expression is PrefixedIdentifier) {
+      return expression.identifier.name;
+    }
+    if (expression is PropertyAccess) {
+      return expression.propertyName.name;
+    }
+    return null;
+  }
+
+  List<String> _stringList(Expression expression) {
+    if (expression is! ListLiteral) {
+      return const [];
+    }
+    final values = <String>[];
+    for (final element in expression.elements) {
+      if (element is SimpleStringLiteral) {
+        values.add(element.value);
+      }
+    }
+    return values;
   }
 
   /// The fixed label an expression carries, or null: unwraps `(l) =>` builders

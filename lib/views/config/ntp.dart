@@ -195,6 +195,7 @@ class _OverrideList extends ConsumerWidget {
               generateSectionV3(
                 items: [
                   ConfigToggleItem(
+                    search: const SettingSearch(),
                     title: (l) => l.overrideNtp,
                     selector: overrideNtpProvider,
                     onChanged: (ref, value) =>

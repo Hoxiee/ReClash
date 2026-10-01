@@ -20,9 +20,7 @@ class AppWallpaper extends ConsumerWidget {
     final settings = ref.watch(
       themeSettingProvider.select((value) => value.wallpaper),
     );
-    final image = settings.enabled
-        ? ref.watch(wallpaperImageProvider).asData?.value
-        : null;
+    final image = ref.watch(effectiveWallpaperImageProvider);
     final active = image != null;
     final scoped = WallpaperSurfaceScope(
       opacity: surfaceOpacity ?? settings.cardOpacity,

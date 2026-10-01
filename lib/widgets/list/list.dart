@@ -9,6 +9,7 @@ import 'package:reclash/widgets/base/inherited.dart';
 import '../base/card.dart';
 import '../base/focus.dart';
 import '../input/input.dart';
+import '../input/setting_search.dart';
 import '../layout/scaffold.dart';
 import '../layout/sheet.dart';
 
@@ -49,6 +50,7 @@ final class _OpenAction extends _ListItemAction {
   final double? maxWidth;
   final bool blur;
   final bool forceFull;
+  final bool preferSheet;
   final ValueChanged<dynamic>? onChanged;
 
   const _OpenAction({
@@ -56,6 +58,7 @@ final class _OpenAction extends _ListItemAction {
     this.maxWidth,
     required this.blur,
     required this.forceFull,
+    this.preferSheet = false,
     this.onChanged,
   });
 }
@@ -125,6 +128,7 @@ class ListItem<T> extends StatelessWidget {
   final double? minTileHeight;
   final VisualDensity? visualDensity;
   final void Function()? onTap;
+  final SettingSearch? search;
 
   const ListItem({
     super.key,
@@ -142,6 +146,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = const _DefaultAction();
 
@@ -165,6 +170,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _OpenAction(
          widget: widget,
@@ -193,6 +199,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _NextAction(widget: widget, maxWidth: maxWidth, blur: blur),
        onTap = null;
@@ -218,6 +225,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _OptionsAction<T>(
          title: dialogTitle,
@@ -252,6 +260,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _InputAction(
          title: dialogTitle,
@@ -281,6 +290,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _CheckboxAction(value: value, onChanged: onChanged),
        trailing = null,
@@ -302,6 +312,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _ToggleAction(value: value, onChanged: onChanged),
        trailing = null,
@@ -324,6 +335,7 @@ class ListItem<T> extends StatelessWidget {
     this.minTileHeight,
     this.visualDensity,
     this.minVerticalPadding = 12,
+    this.search,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
   }) : _action = _RadioAction<T>(
          value: value,
@@ -491,6 +503,7 @@ class ListItem<T> extends StatelessWidget {
 
 class ListHeader extends StatelessWidget {
   final String title;
+  final SettingSearch? search;
   final String? subTitle;
   final Glyph? glyph;
   final List<Widget> actions;
@@ -505,6 +518,7 @@ class ListHeader extends StatelessWidget {
     this.padding,
     List<Widget>? actions,
     this.space,
+    this.search,
   }) : actions = actions ?? const [];
 
   @override

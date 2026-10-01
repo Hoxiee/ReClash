@@ -162,6 +162,10 @@ class SubscriptionInfoDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final used = subscriptionInfo.used;
+    final unlimited = subscriptionInfo.unlimited;
+    final free = unlimited
+        ? 0
+        : (subscriptionInfo.total - used).clamp(0, subscriptionInfo.total);
     final expireDate = subscriptionInfo.expire == 0
         ? null
         : DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
@@ -183,10 +187,15 @@ class SubscriptionInfoDetailView extends StatelessWidget {
               ),
               _buildItem(
                 label: appLocalizations.totalTraffic,
-                value: subscriptionInfo.unlimited
+                value: unlimited
                     ? _unlimitedGlyph
                     : subscriptionInfo.total.traffic.show,
               ),
+              if (!unlimited)
+                _buildItem(
+                  label: appLocalizations.remainingTraffic,
+                  value: free.traffic.show,
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

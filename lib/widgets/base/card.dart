@@ -8,6 +8,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
 
 import '../effect/fade_box.dart';
+import '../input/setting_search.dart';
 import '../theme/wallpaper_scope.dart';
 import 'text.dart';
 
@@ -16,8 +17,9 @@ const commonCardIconSize = 20.0;
 class Info {
   final String label;
   final Glyph? glyph;
+  final SettingSearch? search;
 
-  const Info({required this.label, this.glyph});
+  const Info({required this.label, this.glyph, this.search});
 }
 
 class InfoHeader extends StatelessWidget {

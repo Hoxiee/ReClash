@@ -36,6 +36,7 @@ ConfigToggleItem _vpnToggle({
   required bool Function(VpnProps state) select,
   required _VpnUpdate<bool> update,
   ConfigLabel? subtitle,
+  SettingSearch? search,
 }) {
   return ConfigToggleItem(
     title: title,
@@ -50,6 +51,7 @@ ConfigToggleItem _networkToggle({
   required bool Function(NetworkProps state) select,
   required _NetworkUpdate<bool> update,
   ConfigLabel? subtitle,
+  SettingSearch? search,
 }) {
   return ConfigToggleItem(
     title: title,
@@ -65,6 +67,7 @@ class VPNItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _vpnToggle(
+      search: const SettingSearch(gate: SettingGate.android),
       title: (l) => 'VPN',
       subtitle: (l) => l.vpnEnableDesc,
       select: (state) => state.enable,
@@ -79,6 +82,7 @@ class TUNItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigToggleItem(
+      search: const SettingSearch(gate: SettingGate.desktop),
       title: (l) => l.tun,
       subtitle: (l) => l.tunDesc,
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
@@ -94,6 +98,7 @@ class AllowBypassItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _vpnToggle(
+      search: const SettingSearch(gate: SettingGate.android),
       title: (l) => l.allowBypass,
       subtitle: (l) => l.allowBypassDesc,
       select: (state) => state.allowBypass,
@@ -111,6 +116,7 @@ class VpnSystemProxyItem extends ConsumerWidget {
       networkSettingProvider.select((state) => state.authentication.enable),
     );
     return _vpnToggle(
+      search: const SettingSearch(),
       title: (l) => l.systemProxy,
       subtitle: (l) => authenticationEnable
           ? l.authenticationSystemProxyDesc
@@ -127,6 +133,7 @@ class SystemProxyItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _networkToggle(
+      search: const SettingSearch(),
       title: (l) => l.systemProxy,
       subtitle: (l) => l.systemProxyDesc,
       select: (state) => state.systemProxy,
@@ -141,6 +148,7 @@ class Ipv6Item extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _vpnToggle(
+      search: const SettingSearch(gate: SettingGate.android),
       title: (l) => 'IPv6',
       subtitle: (l) => l.ipv6InboundDesc,
       select: (state) => state.ipv6,
@@ -155,6 +163,7 @@ class AutoSetSystemDnsItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _networkToggle(
+      search: const SettingSearch(gate: SettingGate.macos),
       title: (l) => l.autoSetSystemDns,
       select: (state) => state.autoSetSystemDns,
       update: (state, value) => state.copyWith(autoSetSystemDns: value),
@@ -168,6 +177,7 @@ class DNSHijackingItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _vpnToggle(
+      search: const SettingSearch(gate: SettingGate.android),
       title: (l) => l.dnsHijacking,
       select: (state) => state.dnsHijacking,
       update: (state, value) => state.copyWith(dnsHijacking: value),
@@ -181,6 +191,7 @@ class TunStackItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigOptionsItem<TunStack>(
+      search: const SettingSearch(),
       title: (l) => l.stackMode,
       options: TunStack.values,
       textBuilder: (stack) => stack.name,
@@ -197,6 +208,7 @@ class InterfaceNameModeItem extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
     return ConfigOptionsItem<InterfaceNameMode>(
+      search: const SettingSearch(gate: SettingGate.desktop),
       title: (l) => l.interfaceNameMode,
       options: InterfaceNameMode.values,
       textBuilder: (mode) => switch (mode) {
@@ -228,6 +240,7 @@ class InterfaceNameItem extends ConsumerWidget {
       return Container();
     }
     return ConfigTextItem(
+      search: const SettingSearch(gate: SettingGate.desktop),
       title: (l) => l.interfaceName,
       subtitle: (l) => l.interfaceNameDesc,
       maxLength: TextInputLimits.name,
@@ -245,6 +258,7 @@ class RouteModeItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigOptionsItem<RouteMode>(
+      search: const SettingSearch(gate: SettingGate.mobile),
       title: (l) => l.routeMode,
       options: RouteMode.values,
       textBuilder: (mode) => mode.label,
@@ -262,6 +276,7 @@ class OverrideSubscriptionNetworkItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return _networkToggle(
+      search: const SettingSearch(),
       title: (l) => l.overrideNetworkSettings,
       subtitle: (l) => l.overrideNetworkSettingsDesc,
       select: (state) => state.overrideSubscriptionNetwork,
@@ -277,6 +292,7 @@ class BypassDomainItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigListInputItem(
+      search: const SettingSearch(),
       title: (l) => l.bypassDomain,
       subtitle: (l) => l.bypassDomainDesc,
       itemMaxLength: TextInputLimits.domain,
@@ -302,6 +318,7 @@ class RouteAddressItem extends ConsumerWidget {
       return Container();
     }
     return ConfigListInputItem(
+      search: const SettingSearch(gate: SettingGate.mobile),
       title: (l) => l.routeAddress,
       subtitle: (l) => '${l.routeAddressDesc}\n${l.networkDefaultLanBypass}',
       itemMaxLength: TextInputLimits.cidr,
@@ -362,6 +379,7 @@ class NetworkListView extends ConsumerWidget {
         if (system.isAndroid) ...[
           const SettingSection(top: 16, items: [VPNItem()]),
           const SettingSection(
+            search: SettingSearch(),
             title: 'VPN',
             items: [
               VpnSystemProxyItem(),
@@ -372,6 +390,7 @@ class NetworkListView extends ConsumerWidget {
             ],
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.options,
             items: networkOptionsItems(
               isDesktop: system.isDesktop,
@@ -388,6 +407,7 @@ class NetworkListView extends ConsumerWidget {
             items: [SystemProxyItem(), BypassDomainItem()],
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.options,
             items: networkOptionsItems(
               isDesktop: system.isDesktop,

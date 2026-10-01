@@ -17,6 +17,7 @@ import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:reclash/widgets/feedback/loading.dart';
 import 'package:reclash/widgets/input/input.dart';
 import 'package:reclash/widgets/input/setting.dart';
+import 'package:reclash/widgets/input/setting_search.dart';
 import 'package:reclash/widgets/layout/scaffold.dart';
 import 'package:reclash/widgets/list/list.dart';
 
@@ -221,6 +222,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
               if (dav == null)
                 DecorationListItem(
                   leading: const GlyphIcon(AppGlyphs.account),
+                  search: const SettingSearch(),
                   title: Text(appLocalizations.noInfo),
                   subtitle: Text(appLocalizations.pleaseBindWebDAV),
                   trailing: FilledButton.tonal(
@@ -258,6 +260,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                   ),
                 ),
                 DecorationListItem.input(
+                  search: const SettingSearch(),
                   title: Text(appLocalizations.file),
                   subtitle: Text(dav.fileName),
                   dialogTitle: appLocalizations.file,
@@ -272,6 +275,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                   onPressed: () {
                     _backupOnWebDAV();
                   },
+                  search: const SettingSearch(),
                   title: Text(appLocalizations.backup),
                   subtitle: Text(appLocalizations.remoteBackupDesc),
                 ),
@@ -279,6 +283,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                   onPressed: () {
                     _restoreOnWebDAV();
                   },
+                  search: const SettingSearch(),
                   title: Text(appLocalizations.restore),
                   subtitle: Text(appLocalizations.restoreFromWebDAVDesc),
                 ),
@@ -286,12 +291,14 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
             ],
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.local,
             items: [
               DecorationListItem(
                 onPressed: () {
                   _backupOnLocal();
                 },
+                search: const SettingSearch(),
                 title: Text(appLocalizations.backup),
                 subtitle: Text(appLocalizations.localBackupDesc),
               ),
@@ -299,6 +306,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                 onPressed: () {
                   _restoreOnLocal();
                 },
+                search: const SettingSearch(),
                 title: Text(appLocalizations.restore),
                 subtitle: Text(appLocalizations.restoreFromFileDesc),
               ),
@@ -306,6 +314,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
             enterDelay: const Duration(milliseconds: 50),
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.options,
             items: [
               _RestoreStrategyItem(onPressed: _handleUpdateRestoreStrategy),
@@ -313,12 +322,14 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
             enterDelay: const Duration(milliseconds: 100),
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.dangerZone,
             items: [
               DecorationListItem(
                 invalid: true,
                 onPressed: _handleClearData,
                 leading: const GlyphIcon(AppGlyphs.warning),
+                search: const SettingSearch(),
                 title: Text(appLocalizations.clearData),
                 subtitle: Text(appLocalizations.clearDataDesc),
               ),
@@ -379,6 +390,7 @@ class _RestoreStrategyItem extends ConsumerWidget {
     );
     return DecorationListItem(
       onPressed: onPressed,
+      search: const SettingSearch(),
       title: Text(context.appLocalizations.restoreStrategy),
       trailing: FilledButton(
         onPressed: onPressed,
@@ -546,12 +558,14 @@ class _RestorePreviewDialogState extends State<RestorePreviewDialog> {
               child: Column(
                 children: [
                   ListItem<RestoreOption>.radio(
+                    search: const SettingSearch(),
                     title: Text(appLocalizations.restoreOnlyConfig),
                     value: RestoreOption.onlyProfiles,
                     onTap: () =>
                         setState(() => _option = RestoreOption.onlyProfiles),
                   ),
                   ListItem<RestoreOption>.radio(
+                    search: const SettingSearch(),
                     title: Text(appLocalizations.restoreAllData),
                     value: RestoreOption.all,
                     onTap: () => setState(() => _option = RestoreOption.all),

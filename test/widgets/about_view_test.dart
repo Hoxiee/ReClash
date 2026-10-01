@@ -35,13 +35,24 @@ void main() {
     tester,
   ) async {
     final l10n = await pumpAbout(tester);
+    final scrollable = find.byType(Scrollable).first;
 
     expect(find.text(l10n.madeBy), findsOneWidget);
     expect(find.text('Hoxiee'), findsOneWidget);
     expect(find.text(l10n.roleAuthor), findsOneWidget);
 
+    await tester.scrollUntilVisible(
+      find.text(l10n.gratitude),
+      200,
+      scrollable: scrollable,
+    );
     expect(find.text(l10n.gratitude), findsOneWidget);
     for (final name in ['chen08209', 'pluralplay', 'MetaCubeX']) {
+      await tester.scrollUntilVisible(
+        find.text(name),
+        200,
+        scrollable: scrollable,
+      );
       expect(find.text(name), findsOneWidget);
     }
     expect(tester.takeException(), null);
@@ -49,24 +60,32 @@ void main() {
 
   testWidgets('shows version chips and the link section', (tester) async {
     final l10n = await pumpAbout(tester);
+    final scrollable = find.byType(Scrollable).first;
 
     expect(find.text('v1.2.3'), findsOneWidget);
     expect(find.text(l10n.desc), findsOneWidget);
 
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
-    await tester.pump();
-
-    expect(find.text(l10n.sourceCode), findsOneWidget);
-    expect(find.text(l10n.license), findsOneWidget);
-    expect(find.text('Telegram'), findsOneWidget);
+    for (final label in [l10n.sourceCode, l10n.license, 'Telegram']) {
+      await tester.scrollUntilVisible(
+        find.text(label),
+        200,
+        scrollable: scrollable,
+      );
+      expect(find.text(label), findsOneWidget);
+    }
     expect(tester.takeException(), null);
   });
 
   testWidgets('opens the bundled packages license page', (tester) async {
     final l10n = await pumpAbout(tester);
 
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
-    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.text(l10n.licenses),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text(l10n.licenses));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.licenses));
     await tester.pumpAndSettle();
 

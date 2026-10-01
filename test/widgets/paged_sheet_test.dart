@@ -38,6 +38,39 @@ void main() {
     expect(material.clipBehavior, Clip.antiAlias);
   });
 
+  testWidgets('floats as a raised rounded card inside a side sheet', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SheetProvider(
+          type: SheetType.sideSheet,
+          child: SizedBox(
+            width: 400,
+            height: 600,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: PagedSheet(child: SizedBox.expand()),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final context = tester.element(find.byType(PagedSheet));
+    final material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(PagedSheet),
+        matching: find.byType(Material),
+      ),
+    );
+
+    expect(material.color, ColorScheme.of(context).surfaceContainerLow);
+    expect(material.shape, AppShape.xl);
+    expect(material.elevation, 3);
+    expect(material.clipBehavior, Clip.antiAlias);
+  });
+
   testWidgets('pushes, animates, and returns a nested page result', (
     tester,
   ) async {

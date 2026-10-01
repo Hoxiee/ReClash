@@ -1,6 +1,13 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/physics.dart';
 
+/// Main-navigation tab-switch timings. Slide tracks the page across, fade
+/// swaps it in place over a slightly shorter beat.
+const slideTabDuration = Duration(milliseconds: 300);
+const slideTabCurve = Curves.easeOut;
+const fadeTabDuration = Duration(milliseconds: 220);
+const fadeTabCurve = Curves.easeInOut;
+
 /// Plays [spring] over the first [seconds] of an animation, easing out the
 /// remaining residual so the curve still ends exactly at 1.
 class SpringCurve extends Curve {

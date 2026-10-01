@@ -43,6 +43,7 @@ void main() {
     expect(find.byType(Switch), findsOneWidget);
     expect(find.byGlyph(AppGlyphs.more), findsNWidgets(4));
     expect(find.byType(FutureBuilder<FileInfo?>), findsNWidgets(4));
+    expect(find.byGlyph(AppGlyphs.sync), findsOneWidget);
     for (final url in defaultGeoXUrl.values) {
       expect(find.text(url), findsNothing);
     }
@@ -57,7 +58,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(currentAppLocalizations.edit), findsOneWidget);
-    expect(find.text(currentAppLocalizations.sync), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(CommonPopupMenu),
+        matching: find.text(currentAppLocalizations.sync),
+      ),
+      findsOneWidget,
+    );
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());

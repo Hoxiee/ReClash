@@ -7,6 +7,7 @@ import 'package:riverpod/misc.dart' show ProviderListenable;
 import '../feedback/null_status.dart';
 import '../list/list.dart';
 import 'input.dart';
+import 'setting_search.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 
@@ -22,6 +23,7 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
     required this.onChanged,
     this.subtitle,
     this.leading,
+    this.search,
   });
 
   final ProviderListenable<T> selector;
@@ -29,6 +31,7 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   final ConfigLabel? subtitle;
   final ConfigWriter<T> onChanged;
   final Widget? leading;
+  final SettingSearch? search;
 
   Widget buildItem(
     BuildContext context,
@@ -57,6 +60,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     required super.onChanged,
     super.subtitle,
     super.leading,
+    super.search,
   });
 
   @override
@@ -86,6 +90,7 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     required this.textBuilder,
     super.subtitle,
     super.leading,
+    super.search,
   });
 
   final List<T> options;
@@ -129,6 +134,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.showValueAsSubtitle = true,
     super.subtitle,
     super.leading,
+    super.search,
   });
 
   final int? maxLength;
@@ -193,6 +199,7 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
     this.illustration = NullStatusIllustration.data,
     super.subtitle,
     super.leading,
+    super.search,
   });
 
   final int? itemMaxLength;
