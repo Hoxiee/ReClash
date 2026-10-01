@@ -210,3 +210,70 @@ func TestCensorsMatchesCountryCodeCaseInsensitively(t *testing.T) {
 		t.Error("censors(\"DE\") = true, want false")
 	}
 }
+
+func TestLadderValidationAndFallback(t *testing.T) {
+	cases := []struct {
+		name  string
+		in    []rcxRungSpec
+		valid bool
+	}{
+		{"empty falls back", nil, false},
+		{"missing latency", []rcxRungSpec{{ID: rcxRungVerdict, Enabled: true}}, false},
+		{"missing verdict", []rcxRungSpec{{ID: rcxRungLatency, Enabled: true}}, false},
+		{"unknown rung", []rcxRungSpec{{ID: rcxRungVerdict}, {ID: rcxRungLatency}, {ID: rcxRungInvalid}}, false},
+		{"duplicate rung", []rcxRungSpec{{ID: rcxRungVerdict}, {ID: rcxRungLatency}, {ID: rcxRungVerdict}}, false},
+		{"minimal valid", []rcxRungSpec{{ID: rcxRungVerdict}, {ID: rcxRungLatency}}, true},
+		{"default valid", rcxDefaultLadder(), true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := rcxValidLadder(tc.in); got != tc.valid {
+				t.Fatalf("rcxValidLadder = %v, want %v", got, tc.valid)
+			}
+			ladder := rcxConfig{Ladder: tc.in}.ladder()
+			if !tc.valid && !reflect.DeepEqual(ladder, rcxDefaultLadder()) {
+				t.Fatalf("invalid ladder should fall back to default, got %+v", ladder)
+			}
+		})
+	}
+}
+
+func TestNormalizedClampsLadderAndTriggers(t *testing.T) {
+	c := rcxConfig{
+		Strategy:         rcxStrategyBalanced,
+		SwitchImproveMs:  -5,
+		SwitchImprovePct: -1,
+		LatencyStepMs:    -30,
+		Ladder: []rcxRungSpec{
+			{ID: rcxRungVerdict, Enabled: true},
+			{ID: rcxRungRecurrence, Enabled: true, RecurrenceFloor: -3},
+			{ID: rcxRungLatency, Enabled: true, LatencyToleranceMs: -10},
+		},
+	}.normalized()
+	if c.SwitchImproveMs != 0 || c.SwitchImprovePct != 0 || c.LatencyStepMs != 0 {
+		t.Fatalf("negative triggers not clamped: %+v", c)
+	}
+	if c.Ladder[1].RecurrenceFloor != 0 || c.Ladder[2].LatencyToleranceMs != 0 {
+		t.Fatalf("negative thresholds not clamped: %+v", c.Ladder)
+	}
+	bad := rcxConfig{Strategy: rcxStrategyBalanced, Ladder: []rcxRungSpec{{ID: rcxRungVerdict}}}.normalized()
+	if bad.Ladder != nil {
+		t.Fatalf("invalid ladder should normalize to nil, got %+v", bad.Ladder)
+	}
+}
+
+func TestPolicyCarriesLadderAndTriggers(t *testing.T) {
+	c := rcxConfig{
+		Strategy:         rcxStrategyBalanced,
+		SwitchImproveMs:  40,
+		SwitchImprovePct: 25,
+		LatencyStepMs:    45,
+	}.normalized()
+	p := c.policy()
+	if p.SwitchImproveMs != 40 || p.SwitchImprovePct != 25 || p.LatencyStepMs != 45 {
+		t.Fatalf("policy dropped trigger fields: %+v", p)
+	}
+	if !reflect.DeepEqual(p.Ladder, rcxDefaultLadder()) {
+		t.Fatalf("policy ladder = %+v, want default", p.Ladder)
+	}
+}

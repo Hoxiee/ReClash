@@ -126,6 +126,7 @@ type rcxConfig struct {
 	NodeRules               []rcxNodeRule   `json:"nr,omitempty"`
 	AvoidCountries          []string        `json:"ac,omitempty"`
 	LatencyBands            []int           `json:"lb,omitempty"`
+	Ladder                  []rcxRungSpec   `json:"lad,omitempty"`
 	AllowDomesticLastResort bool            `json:"dlr"`
 	RequireUDP              bool            `json:"udp"`
 	RespectPick             bool            `json:"rpk"`
@@ -135,6 +136,9 @@ type rcxConfig struct {
 	DegradeConfirmSeconds   int             `json:"dgc"`
 	AbsCeilingMs            int             `json:"acm"`
 	ThrottleFloorKBps       int             `json:"tfk"`
+	SwitchImproveMs         int             `json:"sim,omitempty"`
+	SwitchImprovePct        int             `json:"sip,omitempty"`
+	LatencyStepMs           int             `json:"lst,omitempty"`
 }
 
 type rcxRuleAction string
@@ -251,6 +255,40 @@ func (c rcxConfig) latencyBands() []int {
 	return rcxDefaultLatencyBands()
 }
 
+// A usable ladder names only known rungs, repeats none, and still carries the two
+// safety-load-bearing rungs (verdict admits, latency ranks). Anything else — a
+// truncated or mis-edited payload — falls back to the shipped default whole.
+func rcxValidLadder(ladder []rcxRungSpec) bool {
+	if len(ladder) == 0 {
+		return false
+	}
+	seen := make(map[rcxRungID]struct{}, len(ladder))
+	var hasVerdict, hasLatency bool
+	for _, spec := range ladder {
+		if !spec.ID.known() {
+			return false
+		}
+		if _, dup := seen[spec.ID]; dup {
+			return false
+		}
+		seen[spec.ID] = struct{}{}
+		switch spec.ID {
+		case rcxRungVerdict:
+			hasVerdict = true
+		case rcxRungLatency:
+			hasLatency = true
+		}
+	}
+	return hasVerdict && hasLatency
+}
+
+func (c rcxConfig) ladder() []rcxRungSpec {
+	if rcxValidLadder(c.Ladder) {
+		return c.Ladder
+	}
+	return rcxDefaultLadder()
+}
+
 // A strategy the host does not know must rank by the shipped order rather than
 // by a zero key, so an unnamed one degrades to balanced instead of to nothing.
 func rcxKnownStrategy(name string) bool {
@@ -301,8 +339,38 @@ func (c rcxConfig) normalized() rcxConfig {
 	if !rcxKnownStrategy(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
 	}
+	if c.SwitchImproveMs < 0 {
+		c.SwitchImproveMs = 0
+	}
+	if c.SwitchImprovePct < 0 {
+		c.SwitchImprovePct = 0
+	}
+	if c.LatencyStepMs < 0 {
+		c.LatencyStepMs = 0
+	}
+	if rcxValidLadder(c.Ladder) {
+		c.Ladder = rcxNormalizeLadder(c.Ladder)
+	} else {
+		c.Ladder = nil
+	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes)
 	return c
+}
+
+// rcxNormalizeLadder clamps a valid ladder's per-rung thresholds so a negative
+// floor or tolerance cannot invert the intended comparison.
+func rcxNormalizeLadder(ladder []rcxRungSpec) []rcxRungSpec {
+	out := make([]rcxRungSpec, len(ladder))
+	for i, spec := range ladder {
+		if spec.RecurrenceFloor < 0 {
+			spec.RecurrenceFloor = 0
+		}
+		if spec.LatencyToleranceMs < 0 {
+			spec.LatencyToleranceMs = 0
+		}
+		out[i] = spec
+	}
+	return out
 }
 
 func rcxNormalizeLanes(lanes []rcxLaneConfig) []rcxLaneConfig {
@@ -394,12 +462,16 @@ func (c rcxConfig) operable() bool {
 func (c rcxConfig) policy() rcxPolicy {
 	return rcxPolicy{
 		LatencyBands:      c.latencyBands(),
+		Ladder:            c.ladder(),
 		Strategy:          c.Strategy,
 		RequireUDP:        c.RequireUDP,
 		AllowDomesticLast: c.AllowDomesticLastResort,
 		Censoring:         len(c.CensorCountries) > 0,
 		DwellSeconds:      c.DwellSeconds,
 		AbsCeilingMs:      c.AbsCeilingMs,
+		SwitchImproveMs:   c.SwitchImproveMs,
+		SwitchImprovePct:  c.SwitchImprovePct,
+		LatencyStepMs:     c.LatencyStepMs,
 	}
 }
 

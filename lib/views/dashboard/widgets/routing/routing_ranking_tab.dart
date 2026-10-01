@@ -5,73 +5,6 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-/// Why this server and not one of the others, rung by rung. The ladder comes
-/// from the strategy the core reports, so the page cannot show the balanced
-/// order while the engine is comparing by latency.
-class RoutingRankingTab extends StatelessWidget {
-  const RoutingRankingTab({super.key, required this.report});
-
-  final RcxReport report;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final rows = report.candidates;
-    final current = rows.indexWhere((row) => row.current);
-    final index = current >= 0
-        ? current
-        : rows.isEmpty
-        ? -1
-        : 0;
-    final chosen = index < 0 ? null : rows[index];
-    final rivals = [
-      for (var at = 0; at < rows.length; at++)
-        if (at != index) rows[at],
-    ];
-    return CustomScrollView(
-      slivers: [
-        const SliverPadding(padding: EdgeInsets.only(top: 8)),
-        routingHeader(appLocalizations.smartRoutingSectionLadder),
-        routingSliver(RoutingLadderCard(report: report, chosen: chosen)),
-        routingHeader(appLocalizations.smartRoutingSectionRivals),
-        if (chosen == null || rivals.isEmpty)
-          routingSliver(
-            RoutingNotice(
-              icon: AppGlyphs.swap,
-              text: appLocalizations.smartRoutingNoRivals,
-            ),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            sliver: DecoratedSliver(
-              decoration: routingCardDecoration(context),
-              sliver: SliverList.builder(
-                itemCount: rivals.length,
-                itemBuilder: (_, at) => Padding(
-                  padding: EdgeInsets.only(
-                    left: routingCardPadding.left,
-                    right: routingCardPadding.right,
-                    top: at == 0 ? routingCardPadding.top : 0,
-                    bottom: at == rivals.length - 1
-                        ? routingCardPadding.bottom
-                        : 0,
-                  ),
-                  child: RoutingDuelRow(
-                    report: report,
-                    chosen: chosen,
-                    candidate: rivals[at],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-      ],
-    );
-  }
-}
-
 /// The ladder in force, numbered, with the chosen server's own reading on each
 /// rung: the page states the rule and the values it was applied to at once.
 class RoutingLadderCard extends StatelessWidget {
@@ -83,10 +16,11 @@ class RoutingLadderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final overrides = RoutingVocabularyScope.of(context);
     final colorScheme = context.colorScheme;
     final chosen = this.chosen;
     final strategy = report.status.strategy;
-    final ladder = routingLadder(strategy);
+    final ladder = routingLadderFromSpecs(report.ladder, strategy);
     return RoutingCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,19 +69,25 @@ class RoutingLadderCard extends StatelessWidget {
                   Expanded(
                     child: chosen == null
                         ? Text(
-                            routingRungLabel(appLocalizations, ladder[step]),
+                            routingRungLabel(
+                              appLocalizations,
+                              ladder[step],
+                              overrides: overrides,
+                            ),
                             style: context.textTheme.bodySmall,
                           )
                         : RoutingStat(
                             label: routingRungLabel(
                               appLocalizations,
                               ladder[step],
+                              overrides: overrides,
                             ),
                             value: routingRungValueLabel(
                               appLocalizations,
                               ladder[step],
                               chosen,
                               report.status.terrain,
+                              overrides: overrides,
                             ),
                           ),
                   ),
@@ -177,6 +117,7 @@ class RoutingDuelRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final overrides = RoutingVocabularyScope.of(context);
     final colorScheme = context.colorScheme;
     final terrain = report.status.terrain;
     final duel = routingDuel(
@@ -184,6 +125,7 @@ class RoutingDuelRow extends StatelessWidget {
       chosen,
       terrain: terrain,
       strategy: report.status.strategy,
+      ladder: report.ladder,
     );
     final rung = duel.rung;
     final ahead = rung != null && duel.won;
@@ -192,10 +134,10 @@ class RoutingDuelRow extends StatelessWidget {
         ? appLocalizations.smartRoutingTiedAll
         : ahead
         ? appLocalizations.smartRoutingWinsAt(
-            routingRungLabel(appLocalizations, rung),
+            routingRungLabel(appLocalizations, rung, overrides: overrides),
           )
         : appLocalizations.smartRoutingLostAt(
-            routingRungLabel(appLocalizations, rung),
+            routingRungLabel(appLocalizations, rung, overrides: overrides),
           );
     final standing = [
       if (candidate.region.isNotEmpty) candidate.region,
@@ -206,8 +148,20 @@ class RoutingDuelRow extends StatelessWidget {
     final versus = rung == null
         ? ''
         : appLocalizations.smartRoutingRungVersus(
-            routingRungValueLabel(appLocalizations, rung, candidate, terrain),
-            routingRungValueLabel(appLocalizations, rung, chosen, terrain),
+            routingRungValueLabel(
+              appLocalizations,
+              rung,
+              candidate,
+              terrain,
+              overrides: overrides,
+            ),
+            routingRungValueLabel(
+              appLocalizations,
+              rung,
+              chosen,
+              terrain,
+              overrides: overrides,
+            ),
           );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

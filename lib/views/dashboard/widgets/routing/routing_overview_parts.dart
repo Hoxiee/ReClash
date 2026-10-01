@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
@@ -6,7 +7,50 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-String routingReasonLabel(AppLocalizations l10n, String reason) =>
+/// The routing vocabularies a user may rename in the studio. A token's label is
+/// looked up as `<vocab>:<token>` in [SmartRoutingProps.labelOverrides] before
+/// falling back to the shipped l10n string, so a rename never reaches the core.
+const routingVocabReason = 'reason';
+const routingVocabVerdict = 'verdict';
+const routingVocabEvidence = 'evidence';
+const routingVocabBlock = 'block';
+const routingVocabOrigin = 'origin';
+const routingVocabRung = 'rung';
+
+String? _override(Map<String, String> overrides, String vocab, String token) {
+  final value = overrides['$vocab:$token'];
+  return value != null && value.isNotEmpty ? value : null;
+}
+
+/// Carries the user's [SmartRoutingProps.labelOverrides] down to the vocabulary
+/// leaves (rows, duel steps, diag lines) so a rename renders live without
+/// passing a map through every row constructor. No scope means no overrides.
+class RoutingVocabularyScope extends InheritedWidget {
+  const RoutingVocabularyScope({
+    required this.overrides,
+    required super.child,
+    super.key,
+  });
+
+  final Map<String, String> overrides;
+
+  static Map<String, String> of(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<RoutingVocabularyScope>()
+          ?.overrides ??
+      const {};
+
+  @override
+  bool updateShouldNotify(RoutingVocabularyScope oldWidget) =>
+      !mapEquals(overrides, oldWidget.overrides);
+}
+
+String routingReasonLabel(
+  AppLocalizations l10n,
+  String reason, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabReason, reason) ??
     switch (reason) {
       'cold-start' => l10n.smartRoutingReasonColdStart,
       'hold' => l10n.smartRoutingReasonHold,
@@ -27,7 +71,12 @@ String routingReasonLabel(AppLocalizations l10n, String reason) =>
       _ => l10n.unknown,
     };
 
-String routingVerdictLabel(AppLocalizations l10n, String verdict) =>
+String routingVerdictLabel(
+  AppLocalizations l10n,
+  String verdict, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabVerdict, verdict) ??
     switch (verdict) {
       'preferred' => l10n.smartRoutingVerdictPreferred,
       'viable' => l10n.smartRoutingVerdictViable,
@@ -35,7 +84,12 @@ String routingVerdictLabel(AppLocalizations l10n, String verdict) =>
       _ => l10n.smartRoutingVerdictReject,
     };
 
-String routingEvidenceLabel(AppLocalizations l10n, String evidence) =>
+String routingEvidenceLabel(
+  AppLocalizations l10n,
+  String evidence, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabEvidence, evidence) ??
     switch (evidence) {
       'live' => l10n.smartRoutingEvidenceLive,
       'fresh' => l10n.smartRoutingEvidenceFresh,
@@ -45,30 +99,52 @@ String routingEvidenceLabel(AppLocalizations l10n, String evidence) =>
 
 /// The block is the gate that actually stopped the node, so it replaces the
 /// verdict in the row: telling the user both would be telling them twice.
-String routingBlockLabel(AppLocalizations l10n, RcxCandidateReport candidate) =>
-    switch (candidate.block) {
+String routingBlockLabel(
+  AppLocalizations l10n,
+  RcxCandidateReport candidate, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabBlock, candidate.block) ??
+    _blockText(l10n, candidate.block, candidate.fails) ??
+    routingVerdictLabel(l10n, candidate.verdict, overrides: overrides);
+
+/// The shipped label for a known gate token, or null when the token is unknown
+/// so the caller can fall back to the verdict. Kept apart from the row label so
+/// the vocabulary editor can preview a gate without inventing a candidate.
+String? _blockText(AppLocalizations l10n, String block, int fails) =>
+    switch (block) {
       'absent' => l10n.smartRoutingBlockAbsent,
       'no-udp' => l10n.smartRoutingBlockNoUdp,
-      'cooling' => l10n.smartRoutingBlockCooling(candidate.fails),
+      'cooling' => l10n.smartRoutingBlockCooling(fails),
       'disproven' => l10n.smartRoutingBlockDisproven,
       'last-resort-barred' => l10n.smartRoutingBlockLastResort,
       'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
       'provider-circuit' => l10n.smartRoutingBlockProviderCircuit,
       'ignored' => l10n.smartRoutingBlockIgnored,
       'avoid-exit' => l10n.smartRoutingBlockAvoidExit,
-      _ => routingVerdictLabel(l10n, candidate.verdict),
+      _ => null,
     };
 
 /// Where the node sits relative to the censored country, in the same two words
 /// the canaries use, so one vocabulary covers both halves of the evidence.
-String routingOriginLabel(AppLocalizations l10n, String origin) =>
+String routingOriginLabel(
+  AppLocalizations l10n,
+  String origin, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabOrigin, origin) ??
     switch (origin) {
       'foreign' => l10n.smartRoutingCanaryForeign,
       'domestic' => l10n.smartRoutingCanaryDomestic,
       _ => l10n.unknown,
     };
 
-String routingRungLabel(AppLocalizations l10n, RoutingRung rung) =>
+String routingRungLabel(
+  AppLocalizations l10n,
+  RoutingRung rung, {
+  Map<String, String> overrides = const {},
+}) =>
+    _override(overrides, routingVocabRung, rung.name) ??
     switch (rung) {
       RoutingRung.admission => l10n.smartRoutingKeyAdmission,
       RoutingRung.verdict => l10n.smartRoutingKeyVerdict,
@@ -90,13 +166,18 @@ String routingRungValueLabel(
   AppLocalizations l10n,
   RoutingRung rung,
   RcxCandidateReport candidate,
-  String terrain,
-) => switch (rung) {
+  String terrain, {
+  Map<String, String> overrides = const {},
+}) => switch (rung) {
   RoutingRung.admission =>
     candidate.eligible
         ? l10n.smartRoutingAdmittedYes
-        : routingBlockLabel(l10n, candidate),
-  RoutingRung.verdict => routingVerdictLabel(l10n, candidate.verdict),
+        : routingBlockLabel(l10n, candidate, overrides: overrides),
+  RoutingRung.verdict => routingVerdictLabel(
+    l10n,
+    candidate.verdict,
+    overrides: overrides,
+  ),
   RoutingRung.misfit =>
     routingRungValue(rung, candidate, terrain) == 0
         ? l10n.smartRoutingFitYes
@@ -109,7 +190,11 @@ String routingRungValueLabel(
     1 => l10n.unknown,
     _ => l10n.smartRoutingProvenNo,
   },
-  RoutingRung.evidence => routingEvidenceLabel(l10n, candidate.evidence),
+  RoutingRung.evidence => routingEvidenceLabel(
+    l10n,
+    candidate.evidence,
+    overrides: overrides,
+  ),
   RoutingRung.latency =>
     candidate.latencyMs > 0 ? '${candidate.latencyMs} ms' : l10n.unknown,
   RoutingRung.unproven =>
@@ -128,6 +213,108 @@ String routingStrategyLabel(AppLocalizations l10n, String strategy) =>
       'saver' => l10n.smartRoutingStrategySaver,
       _ => l10n.smartRoutingStrategyBalanced,
     };
+
+/// The vocabularies the studio editor exposes, in the order it lists them. Rung
+/// tokens are Dart-only; the rest mirror wire tokens the core emits.
+const routingVocabularies = <String>[
+  routingVocabReason,
+  routingVocabVerdict,
+  routingVocabEvidence,
+  routingVocabBlock,
+  routingVocabOrigin,
+  routingVocabRung,
+];
+
+/// Every token a vocabulary can rename, in display order. The lists are the
+/// editor's catalogue; the label switches above stay the single source for the
+/// shipped text each token falls back to.
+List<String> routingVocabTokens(String vocab) => switch (vocab) {
+  routingVocabReason => const [
+    'cold-start',
+    'hold',
+    'incumbent-dead',
+    'verdict-gain',
+    'latency-gain',
+    'reliability-gain',
+    'quality-confirming',
+    'handoff-recovery',
+    'terrain-changed',
+    'stranded',
+    'no-candidate',
+    'dwell-hold',
+    'manual-hold',
+    'degraded',
+    'measuring',
+    'pin-return',
+  ],
+  routingVocabVerdict => const ['preferred', 'viable', 'last-resort', 'reject'],
+  routingVocabEvidence => const ['live', 'fresh', 'stale', 'none'],
+  routingVocabBlock => const [
+    'absent',
+    'no-udp',
+    'cooling',
+    'disproven',
+    'last-resort-barred',
+    'terrain-unfit',
+    'provider-circuit',
+    'ignored',
+    'avoid-exit',
+  ],
+  routingVocabOrigin => const ['foreign', 'domestic'],
+  routingVocabRung => [for (final rung in RoutingRung.values) rung.name],
+  _ => const [],
+};
+
+/// The shipped label a token renames, with no override consulted, so the editor
+/// can show the default beside the current value and detect a no-op edit.
+String routingVocabDefaultLabel(
+  AppLocalizations l10n,
+  String vocab,
+  String token,
+) => switch (vocab) {
+  routingVocabReason => routingReasonLabel(l10n, token),
+  routingVocabVerdict => routingVerdictLabel(l10n, token),
+  routingVocabEvidence => routingEvidenceLabel(l10n, token),
+  routingVocabBlock => _blockText(l10n, token, 0) ?? token,
+  routingVocabOrigin => routingOriginLabel(l10n, token),
+  routingVocabRung => routingRungLabel(l10n, RoutingRung.values.byName(token)),
+  _ => token,
+};
+
+/// The label a token reads as right now: the user's override when set, else the
+/// shipped default.
+String routingVocabEffectiveLabel(
+  AppLocalizations l10n,
+  Map<String, String> overrides,
+  String vocab,
+  String token,
+) =>
+    _override(overrides, vocab, token) ??
+    routingVocabDefaultLabel(l10n, vocab, token);
+
+/// Rung labels are Dart-only chrome, so they may repeat freely; the core-facing
+/// vocabularies must stay one-to-one or a decision would read two ways at once.
+bool routingVocabEnforcesUniqueness(String vocab) => vocab != routingVocabRung;
+
+enum RoutingVocabEditError { none, empty, duplicate }
+
+/// Guards a rename before it is stored: a label may not be blank, and — outside
+/// the rung vocabulary — may not collapse onto another token already reading the
+/// same word. [otherLabels] is the effective label of every other token in the
+/// vocabulary. Pure so the editor and its test share one rule.
+RoutingVocabEditError validateRoutingVocabEdit({
+  required String vocab,
+  required String value,
+  required Iterable<String> otherLabels,
+}) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return RoutingVocabEditError.empty;
+  if (routingVocabEnforcesUniqueness(vocab) &&
+      otherLabels.any((label) => label.trim() == trimmed)) {
+    return RoutingVocabEditError.duplicate;
+  }
+  return RoutingVocabEditError.none;
+}
 
 NetworkFormat routingFormatOf(RcxReport report) =>
     networkFormatOf(report.status.terrain);
@@ -622,6 +809,7 @@ class RoutingCandidateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final overrides = RoutingVocabularyScope.of(context);
     final colorScheme = context.colorScheme;
     final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
     final eligible = candidate.eligible;
@@ -632,7 +820,11 @@ class RoutingCandidateRow extends StatelessWidget {
       if (candidate.degraded) appLocalizations.smartRoutingDegraded,
       if (technical && candidate.region.isNotEmpty) candidate.region,
       if (technical && candidate.origin != 'unknown')
-        routingOriginLabel(appLocalizations, candidate.origin),
+        routingOriginLabel(
+          appLocalizations,
+          candidate.origin,
+          overrides: overrides,
+        ),
       if (technical &&
           (candidate.trust == 'branded' || candidate.trust == 'suspect'))
         candidate.trust,
@@ -684,8 +876,13 @@ class RoutingCandidateRow extends StatelessWidget {
                         ? routingEvidenceLabel(
                             appLocalizations,
                             candidate.evidence,
+                            overrides: overrides,
                           )
-                        : routingBlockLabel(appLocalizations, candidate),
+                        : routingBlockLabel(
+                            appLocalizations,
+                            candidate,
+                            overrides: overrides,
+                          ),
                     ...tags,
                   ].join(' · '),
                   maxLines: 1,

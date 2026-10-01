@@ -1,0 +1,43 @@
+[
+  {
+    "id": "verdict",
+    "on": true
+  },
+  {
+    "id": "misfit",
+    "on": true
+  },
+  {
+    "id": "recurrence",
+    "on": true,
+    "rf": 2
+  },
+  {
+    "id": "degraded",
+    "on": true
+  },
+  {
+    "id": "homeRisk",
+    "on": true
+  },
+  {
+    "id": "latency",
+    "on": true
+  },
+  {
+    "id": "evidence",
+    "on": true
+  },
+  {
+    "id": "unproven",
+    "on": true
+  },
+  {
+    "id": "incumbent",
+    "on": true
+  },
+  {
+    "id": "tiebreak",
+    "on": true
+  }
+]

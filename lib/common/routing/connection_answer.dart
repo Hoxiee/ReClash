@@ -111,6 +111,31 @@ String _stageForLayer(DoctorLayer layer) => switch (layer) {
   DoctorLayer.unknown => 'response',
 };
 
+/// Measured time per path stage, summed over the layers it covers. Positive
+/// buckets only; empty while stale, so the picture never annotates dead numbers.
+Map<String, int> doctorStageTimings(DoctorSnapshot snapshot) {
+  if (!snapshot.isFresh) return const {};
+  final byStage = <String, int>{};
+  for (final fact in snapshot.evidence) {
+    if (fact.durationBucketMs <= 0) continue;
+    final stage = _stageForLayer(fact.layer);
+    byStage[stage] = (byStage[stage] ?? 0) + fact.durationBucketMs;
+  }
+  return byStage;
+}
+
+/// The path's wall-clock total: the farthest probe end, as the console reads it.
+int doctorPathRoundTripMs(DoctorSnapshot snapshot) {
+  if (!snapshot.isFresh) return 0;
+  var maxEnd = 0;
+  for (final fact in snapshot.evidence) {
+    if (fact.durationBucketMs <= 0) continue;
+    final end = fact.offsetMillis + fact.durationBucketMs;
+    if (end > maxEnd) maxEnd = end;
+  }
+  return maxEnd;
+}
+
 /// Turns a snapshot into the one answer the screen leads with. Pure so the
 /// whole cause-code table is testable without a widget tree.
 DoctorAnswer doctorAnswerOf(DoctorSnapshot snapshot, DoctorAnswerText text) {

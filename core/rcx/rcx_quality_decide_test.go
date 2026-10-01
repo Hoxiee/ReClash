@@ -33,7 +33,7 @@ func TestQualityLatencyThresholds(t *testing.T) {
 		{"fractional threshold", rcxStrategyBalanced, 201, 161, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := rcxLatencyImproves(tc.strategy, tc.incumbent, tc.challenger); got != tc.want {
+			if got := rcxLatencyImproves(rcxPolicy{Strategy: tc.strategy}, tc.incumbent, tc.challenger); got != tc.want {
 				t.Fatalf("latency improvement = %v, want %v", got, tc.want)
 			}
 		})

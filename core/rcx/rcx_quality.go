@@ -90,7 +90,7 @@ func (e *rcxEngine) finishQuality(now time.Time) {
 	if reliable && from > 0 && to > from+rcxLatencyStep {
 		reliable = false
 	}
-	if from <= 0 || to <= 0 || !reliable && !rcxLatencyImproves(e.cfg.Strategy, from, to) {
+	if from <= 0 || to <= 0 || !reliable && !rcxLatencyImproves(e.cfg.policy(), from, to) {
 		q.Rounds = 0
 		return
 	}

@@ -7,26 +7,34 @@ enum _MarkerKind { open, domestic, local }
 /// string-list editor: a bare URL would silently mean "any completed exchange".
 class _MarkersItem extends StatelessWidget {
   const _MarkersItem({
+    required this.glyph,
     required this.title,
     required this.desc,
     required this.markers,
     required this.kind,
+    this.search,
   });
 
+  final Glyph glyph;
   final String title;
   final String desc;
   final List<RcxMarker> markers;
   final _MarkerKind kind;
+  final SettingSearch? search;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
+      leading: GlyphIcon(glyph),
       title: Text(title),
       subtitle: Text(
         markers.isEmpty ? desc : appLocalizations.entriesCount(markers.length),
       ),
       blur: false,
+      forceFull: false,
+      preferSheet: true,
+      maxWidth: 400,
       widget: _MarkersPage(title: title, kind: kind),
     );
   }
@@ -379,6 +387,8 @@ class _RulesItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     return DecorationListItem.open(
+      leading: const GlyphIcon(AppGlyphs.rules),
+      search: const SettingSearch(),
       title: Text(l10n.smartRoutingRules),
       subtitle: Text(
         rules.isEmpty
@@ -386,6 +396,9 @@ class _RulesItem extends StatelessWidget {
             : l10n.rulesCount(rules.length),
       ),
       blur: false,
+      forceFull: false,
+      preferSheet: true,
+      maxWidth: 400,
       widget: const _RulesPage(),
     );
   }

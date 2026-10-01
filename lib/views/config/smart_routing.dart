@@ -11,6 +11,8 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_diag.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_ladder_editor.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 part 'smart_routing_expert.dart';
@@ -22,6 +24,9 @@ const _waveChoices = [4, 8, 12, 20];
 const _ceilingChoices = [200, 300, 450, 650, 900];
 const _degradeChoices = [30, 60, 90, 120];
 const _proofTtlChoices = [15, 20, 30, 45, 60];
+const _switchImproveMsChoices = [0, 20, 30, 50, 80, 120];
+const _switchImprovePctChoices = [0, 10, 15, 20, 30];
+const _latencyStepChoices = [0, 10, 20, 30, 50];
 
 /// Where each strategy sits on the three axes a user actually weighs, on a 1..3
 /// scale. Presentation only: the engine ranks by pacing numbers, not by these.
@@ -44,48 +49,66 @@ Future<bool> confirmSmartRoutingExperimental(BuildContext context) {
   );
 }
 
-/// Everything a preset seeds is editable here, because a preset is named defaults
-/// and nothing more: canaries and markers go stale, and a user on a network the
-/// region table never modelled has to be able to correct them.
-class SmartRoutingView extends ConsumerWidget {
-  const SmartRoutingView({super.key});
+/// Matches the tools detail pane cap so the studio fills that column instead of
+/// narrowing a second time inside it.
+const _studioReadingWidth = 840.0;
 
-  void _update(WidgetRef ref, SmartRoutingProps Function(SmartRoutingProps) f) {
+/// The one screen that is the smart-routing editor. Its spine is the decision
+/// pipeline in the order the engine runs it, but it reads as a settings menu,
+/// not one endless scroll: the decision core a user actually tunes — strategy,
+/// the admission gates, the comparison ladder — stays inline, and every later
+/// stage (switch triggers, pace, the measured signals, service routes,
+/// behaviour, backup, the log) is a drill-in row that opens its own page. It is
+/// pure settings; the live read-out lives on the dashboard, not here. A preset
+/// only seeds these values — nothing here stops being editable because a
+/// strategy filled it in.
+class RoutingStudioView extends ConsumerStatefulWidget {
+  const RoutingStudioView({super.key});
+
+  @override
+  ConsumerState<RoutingStudioView> createState() => _RoutingStudioViewState();
+}
+
+class _RoutingStudioViewState extends ConsumerState<RoutingStudioView> {
+  void _update(SmartRoutingProps Function(SmartRoutingProps) f) {
     ref.read(smartRoutingSettingProvider.notifier).update(f);
   }
 
-  Future<void> _handleEnabled(
-    BuildContext context,
-    WidgetRef ref,
-    bool value,
-  ) async {
+  Future<void> _handleEnabled(BuildContext context, bool value) async {
     if (value && !await confirmSmartRoutingExperimental(context)) {
       return;
     }
     if (!context.mounted) {
       return;
     }
-    _update(ref, (state) => state.withUnlocked(value));
+    _update((state) => state.withUnlocked(value));
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
-    final profile = ref.watch(currentProfileProvider);
-    final servicePolicies = {
-      for (final policy in profile?.serviceRoutePolicies ?? const [])
-        policy.capabilityId: policy,
-    };
-    final laneStatusById = {
-      for (final lane in ref.watch(
-        smartRoutingStatusProvider.select(
-          (status) => status?.lanes ?? const <RcxLaneStatus>[],
+    return CommonScaffold(
+      title: appLocalizations.smartRouting,
+      floatBody: true,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _studioReadingWidth),
+          child: SettingsScrollView(slivers: _masterSlivers(context, props)),
         ),
-      ))
-        lane.id: lane,
-    };
+      ),
+    );
+  }
+
+  List<Widget> _masterSlivers(BuildContext context, SmartRoutingProps props) {
+    final appLocalizations = context.appLocalizations;
     final slivers = <Widget>[
+      SliverToBoxAdapter(
+        child: Builder(
+          builder: (context) => SizedBox(height: context.appBarInset),
+        ),
+      ),
       SettingSection.sliver(
         top: 16,
         items: [
@@ -99,7 +122,7 @@ class SmartRoutingView extends ConsumerWidget {
             ),
             subtitle: Text(appLocalizations.smartRoutingDesc),
             value: props.unlocked,
-            onChanged: (value) => _handleEnabled(context, ref, value),
+            onChanged: (value) => _handleEnabled(context, value),
           ),
         ],
       ),
@@ -107,43 +130,10 @@ class SmartRoutingView extends ConsumerWidget {
 
     if (props.unlocked) {
       slivers.addAll([
-        _regionSection(context, props),
-        _strategySection(context, ref, props),
-        _behaviourSection(context, ref, props),
-        SettingSection.sliver(
-          title: appLocalizations.smartRoutingServiceRoutes,
-          items: [
-            for (final capabilityId in effectiveCapabilityIds(
-              profile?.capabilityManifest,
-            ))
-              _ServiceRouteItem(
-                capabilityId: capabilityId,
-                policy:
-                    servicePolicies[capabilityId] ??
-                    ServiceRoutePolicy(
-                      capabilityId: capabilityId,
-                      fallback: defaultFallbackFor(capabilityId),
-                    ),
-                laneStatus: laneStatusById[capabilityId],
-                manifest: profile?.capabilityManifest,
-                manualSelectors: profile?.manualCapabilitySelectors ?? const [],
-              ),
-          ],
-        ),
-        SettingSection.sliver(
-          bottom: 24,
-          items: [
-            DecorationListItem.open(
-              leading: const GlyphIcon(AppGlyphs.sliders),
-              title: Text(appLocalizations.advancedConfig),
-              subtitle: Text(appLocalizations.advancedConfigDesc),
-              blur: false,
-              forceFull: false,
-              maxWidth: 400,
-              widget: const _AdvancedRoutingPage(),
-            ),
-          ],
-        ),
+        _strategySection(context, props),
+        _admissionSection(context, props),
+        const RoutingLadderEditorSliver(),
+        _pipelineRowsSection(context),
       ]);
     } else {
       slivers.add(
@@ -159,51 +149,21 @@ class SmartRoutingView extends ConsumerWidget {
         ),
       );
     }
-
-    return CommonScaffold(
-      title: appLocalizations.smartRouting,
-      floatBody: true,
-      body: SettingsScrollView(
-        slivers: [
-          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
-          ...slivers,
-          const SettingBottomInset.sliver(),
-        ],
-      ),
-    );
+    slivers.add(const SettingBottomInset.sliver());
+    return slivers;
   }
 
-  Widget _regionSection(BuildContext context, SmartRoutingProps props) {
+  Widget _strategySection(BuildContext context, SmartRoutingProps props) {
     final appLocalizations = context.appLocalizations;
     return SettingSection.sliver(
-      items: [
-        DecorationListItem.open(
-          leading: const GlyphIcon(AppGlyphs.globeSearch),
-          title: Text(appLocalizations.smartRoutingRegionCard),
-          subtitle: Text(appLocalizations.smartRoutingRegionCardDesc),
-          blur: false,
-          forceFull: false,
-          maxWidth: 400,
-          widget: const _RegionDetailsPage(),
-        ),
-      ],
-    );
-  }
-
-  Widget _strategySection(
-    BuildContext context,
-    WidgetRef ref,
-    SmartRoutingProps props,
-  ) {
-    final appLocalizations = context.appLocalizations;
-    return SettingSection.sliver(
+      search: const SettingSearch(),
       title: appLocalizations.smartRoutingStrategy,
       actions: [
         if (!props.matchesStrategy) ...[
           const SizedBox(width: AppSpacing.sm),
           CommonMinFilledButtonTheme(
             child: FilledButton.tonal(
-              onPressed: () => _handleReseedStrategy(context, ref),
+              onPressed: () => _handleReseedStrategy(context),
               child: Text(appLocalizations.reset),
             ),
           ),
@@ -215,17 +175,13 @@ class SmartRoutingView extends ConsumerWidget {
             strategy: strategy,
             selected: props.strategy == strategy,
             adjusted: props.strategy == strategy && !props.matchesStrategy,
-            onPressed: () =>
-                _update(ref, (state) => state.applyStrategy(strategy)),
+            onPressed: () => _update((state) => state.applyStrategy(strategy)),
           ),
       ],
     );
   }
 
-  Future<void> _handleReseedStrategy(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _handleReseedStrategy(BuildContext context) async {
     final appLocalizations = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
       dangerous: true,
@@ -235,45 +191,267 @@ class SmartRoutingView extends ConsumerWidget {
     if (confirmed != true) {
       return;
     }
-    _update(ref, (state) => state.applyStrategy(state.strategy));
+    _update((state) => state.applyStrategy(state.strategy));
   }
 
-  Widget _behaviourSection(
-    BuildContext context,
-    WidgetRef ref,
-    SmartRoutingProps props,
-  ) {
+  Widget _admissionSection(BuildContext context, SmartRoutingProps props) {
     final appLocalizations = context.appLocalizations;
-    final diagnostics = ref.watch(
-      appSettingProvider.select((state) => state.smartRoutingDiagnostics),
-    );
     return SettingSection.sliver(
-      title: appLocalizations.smartRoutingBehaviour,
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingKeyAdmission,
       items: [
         DecorationListItem.toggle(
+          leading: const GlyphIcon(AppGlyphs.router),
+          search: const SettingSearch(),
           title: Text(appLocalizations.smartRoutingDomestic),
           subtitle: Text(appLocalizations.smartRoutingDomesticDesc),
           value: props.allowDomesticLastResort,
           onChanged: (value) => _update(
-            ref,
             (state) => state.copyWith(allowDomesticLastResort: value),
           ),
         ),
         DecorationListItem.toggle(
+          leading: const GlyphIcon(AppGlyphs.bolt),
+          search: const SettingSearch(),
           title: Text(appLocalizations.smartRoutingRequireUdp),
           subtitle: Text(appLocalizations.smartRoutingRequireUdpDesc),
           value: props.requireUdp,
           onChanged: (value) =>
-              _update(ref, (state) => state.copyWith(requireUdp: value)),
+              _update((state) => state.copyWith(requireUdp: value)),
         ),
+      ],
+    );
+  }
+
+  Widget _pipelineRowsSection(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return SettingSection.sliver(
+      bottom: 24,
+      items: [
+        _drillRow(
+          context,
+          glyph: AppGlyphs.swap,
+          title: appLocalizations.smartRoutingTriggers,
+          subtitle: appLocalizations.smartRoutingTriggersDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingTriggers,
+            builder: _triggersSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.speed,
+          title: appLocalizations.smartRoutingPacing,
+          subtitle: appLocalizations.smartRoutingPacingDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingPacing,
+            builder: _pacingSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.signalChart,
+          title: appLocalizations.smartRoutingSignals,
+          subtitle: appLocalizations.smartRoutingSignalsDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingSignals,
+            builder: _signalsSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.split,
+          title: appLocalizations.smartRoutingServiceRoutes,
+          subtitle: appLocalizations.smartRoutingServiceRoutesDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingServiceRoutes,
+            builder: _serviceRoutesSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.sliders,
+          title: appLocalizations.smartRoutingBehaviour,
+          subtitle: appLocalizations.smartRoutingBehaviourDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingBehaviour,
+            builder: _behaviourSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.save,
+          title: appLocalizations.smartRoutingBackup,
+          subtitle: appLocalizations.smartRoutingBackupDesc,
+          page: _RoutingSubPage(
+            title: appLocalizations.smartRoutingBackup,
+            builder: _backupSlivers,
+          ),
+        ),
+        _drillRow(
+          context,
+          glyph: AppGlyphs.history,
+          title: appLocalizations.smartRoutingLog,
+          subtitle: appLocalizations.smartRoutingLogDesc,
+          page: const RoutingDiagView(),
+        ),
+      ],
+    );
+  }
+
+  Widget _drillRow(
+    BuildContext context, {
+    required Glyph glyph,
+    required String title,
+    required String subtitle,
+    required Widget page,
+  }) {
+    return DecorationListItem.open(
+      leading: GlyphIcon(glyph),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      blur: false,
+      forceFull: false,
+      maxWidth: 400,
+      widget: page,
+    );
+  }
+}
+
+/// Each pipeline stage past the inline core opens as its own reading-width page,
+/// so a drill row lands on the same centered column the studio uses rather than
+/// a bare full-bleed list. The stage builds its slivers against the live props,
+/// so an edit made on the page settles straight back into the shared config.
+class _RoutingSubPage extends ConsumerWidget {
+  const _RoutingSubPage({required this.title, required this.builder});
+
+  final String title;
+  final List<Widget> Function(BuildContext, WidgetRef, SmartRoutingProps)
+  builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final props = ref.watch(smartRoutingSettingProvider);
+    return CommonScaffold(
+      title: title,
+      floatBody: true,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _studioReadingWidth),
+          child: SettingsScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Builder(
+                  builder: (context) => SizedBox(height: context.appBarInset),
+                ),
+              ),
+              ...builder(context, ref, props),
+              const SettingBottomInset.sliver(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A drill row that opens one more stage page, for pages that are themselves an
+/// index of sub-stages (Signals splits its measured inputs this way). Mirrors
+/// the master list's own [_RoutingStudioViewState._drillRow] so a nested row
+/// reads and opens exactly like a top-level one.
+Widget _routingStageRow(
+  BuildContext context, {
+  required Glyph glyph,
+  required String title,
+  required String subtitle,
+  required List<Widget> Function(BuildContext, WidgetRef, SmartRoutingProps)
+  builder,
+}) {
+  return DecorationListItem.open(
+    leading: GlyphIcon(glyph),
+    title: Text(title),
+    subtitle: Text(subtitle),
+    blur: false,
+    forceFull: false,
+    maxWidth: 400,
+    widget: _RoutingSubPage(title: title, builder: builder),
+  );
+}
+
+List<Widget> _serviceRoutesSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  final profile = ref.watch(currentProfileProvider);
+  final servicePolicies = {
+    for (final policy in profile?.serviceRoutePolicies ?? const [])
+      policy.capabilityId: policy,
+  };
+  final laneStatusById = {
+    for (final lane in ref.watch(
+      smartRoutingStatusProvider.select(
+        (status) => status?.lanes ?? const <RcxLaneStatus>[],
+      ),
+    ))
+      lane.id: lane,
+  };
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingServiceRoutes,
+      subTitle: appLocalizations.smartRoutingServiceRoutesDesc,
+      items: [
+        for (final capabilityId in effectiveCapabilityIds(
+          profile?.capabilityManifest,
+        ))
+          _ServiceRouteItem(
+            capabilityId: capabilityId,
+            policy:
+                servicePolicies[capabilityId] ??
+                ServiceRoutePolicy(
+                  capabilityId: capabilityId,
+                  fallback: defaultFallbackFor(capabilityId),
+                ),
+            laneStatus: laneStatusById[capabilityId],
+            manifest: profile?.capabilityManifest,
+            manualSelectors: profile?.manualCapabilitySelectors ?? const [],
+          ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _behaviourSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  final diagnostics = ref.watch(
+    appSettingProvider.select((state) => state.smartRoutingDiagnostics),
+  );
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingBehaviour,
+      subTitle: appLocalizations.smartRoutingBehaviourDesc,
+      items: [
         DecorationListItem.toggle(
+          leading: const GlyphIcon(AppGlyphs.pin),
+          search: const SettingSearch(),
           title: Text(appLocalizations.smartRoutingManualHold),
           subtitle: Text(appLocalizations.smartRoutingManualHoldDesc),
           value: props.respectPick,
-          onChanged: (value) =>
-              _update(ref, (state) => state.copyWith(respectPick: value)),
+          onChanged: (value) => ref
+              .read(smartRoutingSettingProvider.notifier)
+              .update((state) => state.copyWith(respectPick: value)),
         ),
         DecorationListItem.toggle(
+          leading: const GlyphIcon(AppGlyphs.logs),
+          search: const SettingSearch(),
           title: Text(appLocalizations.smartRoutingDiagnostics),
           subtitle: Text(appLocalizations.smartRoutingDiagnosticsDesc),
           value: diagnostics,
@@ -284,76 +462,41 @@ class SmartRoutingView extends ConsumerWidget {
               ),
         ),
       ],
-    );
-  }
+    ),
+  ];
 }
 
-/// Read-only tour of what the active region sets up. It reads the live props, so
-/// a region that seeds name hints and breaker patterns shows them filled while
-/// one that does not shows them as unused — the difference the user asked to see.
-/// Nothing here is a control; every value is edited under Advanced configuration.
-class _RegionDetailsPage extends ConsumerWidget {
-  const _RegionDetailsPage();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final props = ref.watch(smartRoutingSettingProvider);
-    final code = regionForPreset(props.preset);
-    final facets = <(String, List<String>)>[
-      (appLocalizations.smartRoutingCensor, props.censorCountries),
-      (appLocalizations.smartRoutingCanariesForeign, props.canaryForeign),
-      (appLocalizations.smartRoutingCanariesDomestic, props.canaryDomestic),
-      (
-        appLocalizations.smartRoutingMarkersOpen,
-        [for (final marker in props.openMarkers) marker.url],
-      ),
-      (
-        appLocalizations.smartRoutingMarkersDomestic,
-        [for (final marker in props.domesticMarkers) marker.url],
-      ),
-      (
-        appLocalizations.smartRoutingMarkersLocal,
-        [for (final marker in props.localMarkers) marker.url],
-      ),
-      (appLocalizations.smartRoutingNameHints, props.nameHints),
-      (appLocalizations.smartRoutingBreakerPatterns, props.breakerPatterns),
-    ];
-    return CommonScaffold(
-      title: regionLabel(code),
-      floatBody: true,
-      body: SettingsListView(
-        children: [
-          SettingSection(
-            top: 16,
-            title: appLocalizations.smartRoutingRegionSeeds,
-            subTitle: appLocalizations.smartRoutingRegionHow,
-            items: [
-              for (final (label, values) in facets)
-                DecorationListItem(
-                  title: Text(label),
-                  subtitle: Text(
-                    values.isEmpty
-                        ? appLocalizations.smartRoutingRegionUnused
-                        : values.join(', '),
-                  ),
-                ),
-            ],
-          ),
-          SettingSection(
-            bottom: 24,
-            items: [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.compose),
-                title: Text(appLocalizations.smartRoutingRegionEditNote),
-              ),
-            ],
-          ),
-          const SettingBottomInset(),
-        ],
-      ),
-    );
-  }
+List<Widget> _backupSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingBackup,
+      subTitle: appLocalizations.smartRoutingBackupDesc,
+      items: [
+        DecorationListItem(
+          minVerticalPadding: 8,
+          leading: const GlyphIcon(AppGlyphs.share),
+          search: const SettingSearch(),
+          title: Text(appLocalizations.smartRoutingExport),
+          subtitle: Text(appLocalizations.smartRoutingExportDesc),
+          onPressed: () => _handleExport(context, props),
+        ),
+        DecorationListItem(
+          minVerticalPadding: 8,
+          leading: const GlyphIcon(AppGlyphs.document),
+          search: const SettingSearch(),
+          title: Text(appLocalizations.smartRoutingImport),
+          subtitle: Text(appLocalizations.smartRoutingImportDesc),
+          onPressed: () => _handleImport(context, ref),
+        ),
+      ],
+    ),
+  ];
 }
 
 /// A strategy is a pace, not a region. The card stays a one-line choice; only
@@ -482,28 +625,34 @@ class _TradeoffBars extends StatelessWidget {
 
 class _StringListItem extends ConsumerWidget {
   const _StringListItem({
+    required this.glyph,
     required this.title,
     required this.desc,
     required this.value,
     required this.write,
     this.itemValidator,
     this.itemMaxLength,
+    this.search,
   });
 
+  final Glyph glyph;
   final String title;
   final String desc;
   final List<String> value;
   final SmartRoutingProps Function(SmartRoutingProps, List<String>) write;
   final String? Function(String item)? itemValidator;
   final int? itemMaxLength;
+  final SettingSearch? search;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DecorationListItem.open(
+      leading: GlyphIcon(glyph),
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.join(', ')),
       blur: false,
       forceFull: false,
+      preferSheet: true,
       maxWidth: 400,
       widget: ListInputPage(
         title: title,

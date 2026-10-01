@@ -1113,7 +1113,7 @@ func TestCompareForNamesOneComparatorPerStrategy(t *testing.T) {
 		{rcxStrategySaver, false},
 		{"", false},
 	} {
-		if holds := rcxCompareFor(tc.strategy)(sticky, quick) < 0; holds != tc.holds {
+		if holds := rcxCompareFor(rcxPolicy{Strategy: tc.strategy})(sticky, quick) < 0; holds != tc.holds {
 			t.Errorf("%q: holds incumbent = %v, want %v", tc.strategy, holds, tc.holds)
 		}
 	}

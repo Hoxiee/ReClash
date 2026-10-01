@@ -35,7 +35,16 @@ func startOdometerHeartbeat() {
 				// phone until wake loses no coverage; read the channel first so the wake is unmissable.
 				wake := odometerScreenWakeCh()
 				if screenOff() {
+					// Stop the ticker, not just skip its tick: a live ticker keeps
+					// the Go runtime waking the thread every tick to drop a tick
+					// nobody reads, which defeats deep sleep all night.
+					ticker.Stop()
+					select {
+					case <-ticker.C:
+					default:
+					}
 					<-wake
+					ticker.Reset(odoTickInterval)
 					continue
 				}
 				select {

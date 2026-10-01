@@ -268,12 +268,18 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
     final enabled = ref.watch(
       appSettingProvider.select((state) => state.smartRoutingDiagnostics),
     );
-    return CommonScaffold(
-      title: appLocalizations.smartRoutingLog,
-      floatBody: true,
-      actions: enabled ? _buildActions(context) : const [],
-      body: AppBarClearance(
-        child: enabled ? _buildLog(context) : _buildOff(context),
+    final labelOverrides = ref.watch(
+      smartRoutingSettingProvider.select((state) => state.labelOverrides),
+    );
+    return RoutingVocabularyScope(
+      overrides: labelOverrides,
+      child: CommonScaffold(
+        title: appLocalizations.smartRoutingLog,
+        floatBody: true,
+        actions: enabled ? _buildActions(context) : const [],
+        body: AppBarClearance(
+          child: enabled ? _buildLog(context) : _buildOff(context),
+        ),
       ),
     );
   }
@@ -695,13 +701,15 @@ class _CandidateRow extends StatelessWidget {
 
   final RcxCandidateReport candidate;
 
-  String _headline(AppLocalizations l10n) {
+  String _headline(AppLocalizations l10n, Map<String, String> overrides) {
     final parts = <String>['#${candidate.order}', candidate.node];
     if (candidate.country.isNotEmpty) {
       parts.add('[${candidate.country}]');
     }
-    parts.add(routingBlockLabel(l10n, candidate));
-    parts.add(routingEvidenceLabel(l10n, candidate.evidence));
+    parts.add(routingBlockLabel(l10n, candidate, overrides: overrides));
+    parts.add(
+      routingEvidenceLabel(l10n, candidate.evidence, overrides: overrides),
+    );
     if (candidate.latencyMs > 0) {
       parts.add('${candidate.latencyMs}ms');
     }
@@ -748,7 +756,7 @@ class _CandidateRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _headline(appLocalizations),
+            _headline(appLocalizations, RoutingVocabularyScope.of(context)),
             style: context.textTheme.labelMedium
                 ?.copyWith(
                   color: colorScheme.onSurface,

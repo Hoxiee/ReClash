@@ -48,7 +48,7 @@ class SmartRoutingCard extends ConsumerWidget {
       label: appLocalizations.smartRouting,
       action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
-          showExtend(context, builder: (_) => const RoutingOverviewView()),
+          showExtend(context, builder: (_) => const RoutingLiveView()),
       child: FadeThroughBox(
         child: Row(
           key: ValueKey(view.text),

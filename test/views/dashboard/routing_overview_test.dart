@@ -4,8 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_overview_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
 
 import '../../helpers/glyph_finders.dart';
@@ -119,27 +119,21 @@ Future<void> _pump(
       child: TestApp(
         includeNavigatorKey: false,
         setTheme: false,
-        child: RoutingOverviewView(reportReader: () async => report),
+        child: RoutingLiveView(reportReader: () async => report),
       ),
     ),
   );
   await tester.pumpAndSettle();
 }
 
-Future<void> _openDetails(WidgetTester tester) async {
-  await tester.tap(find.text('Details'));
-  await tester.pumpAndSettle();
-}
+// The live view is one flowing scroll now, not three tabs; the former tab-open
+// helpers are no-ops so the existing steps read the same, and both former
+// per-tab scrollables resolve to the single list.
+Future<void> _openDetails(WidgetTester tester) async {}
 
-Future<void> _openRanking(WidgetTester tester) async {
-  await tester.tap(find.text('Ranking'));
-  await tester.pumpAndSettle();
-}
+Future<void> _openRanking(WidgetTester tester) async {}
 
-final _rankingScroll = find.descendant(
-  of: find.byType(RoutingRankingTab),
-  matching: find.byType(Scrollable),
-);
+final _rankingScroll = find.byType(Scrollable).last;
 
 Future<void> _toggleTechnical(WidgetTester tester) async {
   await tester.tap(find.byGlyph(AppGlyphs.more));
@@ -157,10 +151,7 @@ Future<void> _reveal(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
-final _detailsScroll = find.descendant(
-  of: find.byType(RoutingDetailsTab),
-  matching: find.byType(Scrollable),
-);
+final _detailsScroll = find.byType(Scrollable).last;
 
 void main() {
   testWidgets('an engine that is off explains itself instead of showing rows', (
@@ -210,7 +201,7 @@ void main() {
           child: TestApp(
             includeNavigatorKey: false,
             setTheme: false,
-            child: RoutingOverviewView(reportReader: () async => _report),
+            child: RoutingLiveView(reportReader: () async => _report),
           ),
         ),
       ),
@@ -246,8 +237,14 @@ void main() {
 
   testWidgets('the network format names the facts behind it', (tester) async {
     await _pump(tester, enabled: true, report: _report);
+    final network = find.byType(RoutingNetworkCard);
+    await tester.scrollUntilVisible(network, 200, scrollable: _detailsScroll);
+    await tester.pumpAndSettle();
 
-    expect(find.text('Restricted'), findsOne);
+    expect(
+      find.descendant(of: network, matching: find.text('Restricted')),
+      findsOne,
+    );
     expect(
       find.text('Only local services answer, foreign ones do not'),
       findsOne,
@@ -484,14 +481,18 @@ void main() {
     tester,
   ) async {
     await _pump(tester, enabled: true, report: _report);
-    await _openRanking(tester);
+    final ladder = find.byType(RoutingLadderCard);
+    await tester.scrollUntilVisible(ladder, 200, scrollable: _rankingScroll);
+    await tester.pumpAndSettle();
 
-    expect(find.text('Everyday'), findsOne);
-    expect(find.text('Allowed to compete'), findsOne);
-    expect(find.text('Fit for this network'), findsOne);
-    expect(find.text('Stable tiebreak'), findsOne);
-    expect(find.text('Reaches the open internet'), findsOne);
-    expect(find.text('Does not fit'), findsOne);
+    Finder inLadder(String label) =>
+        find.descendant(of: ladder, matching: find.text(label));
+    expect(inLadder('Everyday'), findsOne);
+    expect(inLadder('Allowed to compete'), findsOne);
+    expect(inLadder('Fit for this network'), findsOne);
+    expect(inLadder('Stable tiebreak'), findsOne);
+    expect(inLadder('Reaches the open internet'), findsOne);
+    expect(inLadder('Does not fit'), findsOne);
   });
 
   testWidgets('lowest latency never ranks by a terrain fit it ignores', (
@@ -504,11 +505,15 @@ void main() {
         status: _report.status.copyWith(strategy: 'lowest-latency'),
       ),
     );
-    await _openRanking(tester);
+    final ladder = find.byType(RoutingLadderCard);
+    await tester.scrollUntilVisible(ladder, 200, scrollable: _rankingScroll);
+    await tester.pumpAndSettle();
 
-    expect(find.text('Fast'), findsOne);
-    expect(find.text('Fit for this network'), findsNothing);
-    expect(find.text('Has carried traffic'), findsOne);
+    Finder inLadder(String label) =>
+        find.descendant(of: ladder, matching: find.text(label));
+    expect(inLadder('Fast'), findsOne);
+    expect(inLadder('Fit for this network'), findsNothing);
+    expect(inLadder('Has carried traffic'), findsOne);
   });
 
   testWidgets('a rival names the line it lost on and both readings of it', (
@@ -564,7 +569,11 @@ void main() {
           ],
         ),
       );
-      await _openRanking(tester);
+      await tester.scrollUntilVisible(
+        find.text('Ranks higher at: Verdict'),
+        200,
+        scrollable: _rankingScroll,
+      );
 
       expect(find.text('Ranks higher at: Verdict'), findsOne);
     },
@@ -578,7 +587,11 @@ void main() {
       enabled: true,
       report: _report.copyWith(candidates: [_report.candidates.first]),
     );
-    await _openRanking(tester);
+    await tester.scrollUntilVisible(
+      find.text('No other servers to compare with'),
+      200,
+      scrollable: _rankingScroll,
+    );
 
     expect(find.text('No other servers to compare with'), findsOne);
   });

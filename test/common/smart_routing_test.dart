@@ -473,5 +473,53 @@ void main() {
       expect(reset.avoidCountries, const ['FR']);
       expect(reset.matchesSeedGroup(RoutingFacetGroup.censorship), isTrue);
     });
+
+    test('an untouched ladder, triggers and vocabulary read as the seed', () {
+      expect(russia.matchesSeedGroup(RoutingFacetGroup.ladder), isTrue);
+      expect(russia.matchesSeedGroup(RoutingFacetGroup.triggers), isTrue);
+      expect(russia.matchesSeedGroup(RoutingFacetGroup.vocabulary), isTrue);
+    });
+
+    test('resetting the ladder clears it back to the engine default', () {
+      final tuned = russia.copyWith(ladder: routingDefaultLadderSpecs());
+      expect(tuned.matchesSeedGroup(RoutingFacetGroup.ladder), isFalse);
+      final reset = tuned.resetSeedGroup(RoutingFacetGroup.ladder);
+      expect(reset.ladder, isEmpty);
+      expect(reset.matchesSeedGroup(RoutingFacetGroup.ladder), isTrue);
+    });
+
+    test('resetting triggers zeroes only the switch knobs', () {
+      final tuned = russia.copyWith(
+        switchImproveMs: 25,
+        switchImprovePct: 10,
+        latencyStepMs: 40,
+        dwellSeconds: 999,
+      );
+      expect(tuned.matchesSeedGroup(RoutingFacetGroup.triggers), isFalse);
+      final reset = tuned.resetSeedGroup(RoutingFacetGroup.triggers);
+      expect(reset.switchImproveMs, 0);
+      expect(reset.switchImprovePct, 0);
+      expect(reset.latencyStepMs, 0);
+      expect(reset.dwellSeconds, 999);
+    });
+
+    test('resetting the vocabulary drops every label override', () {
+      final tuned = russia.copyWith(
+        labelOverrides: const {'verdict:preferred': 'Best'},
+      );
+      expect(tuned.matchesSeedGroup(RoutingFacetGroup.vocabulary), isFalse);
+      final reset = tuned.resetSeedGroup(RoutingFacetGroup.vocabulary);
+      expect(reset.labelOverrides, isEmpty);
+    });
+
+    test('a strategy reseeds the ladder and triggers to unset', () {
+      final tuned = russia.copyWith(
+        ladder: routingDefaultLadderSpecs(),
+        switchImproveMs: 25,
+      );
+      final seeded = tuned.applyStrategy(SmartRoutingStrategy.stable);
+      expect(seeded.ladder, isEmpty);
+      expect(seeded.switchImproveMs, 0);
+    });
   });
 }

@@ -1,341 +1,519 @@
 part of 'smart_routing.dart';
 
-/// The expert knobs live one level down so the main screen stays a short list
-/// of the choices most users make. Everything here is still preset-seeded and
-/// editable; the engine reads the same provider whether the page is open or not.
-class _AdvancedRoutingPage extends ConsumerWidget {
-  const _AdvancedRoutingPage();
-
-  void _update(WidgetRef ref, SmartRoutingProps Function(SmartRoutingProps) f) {
-    ref.read(smartRoutingSettingProvider.notifier).update(f);
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final props = ref.watch(smartRoutingSettingProvider);
-    return CommonScaffold(
-      title: appLocalizations.advancedConfig,
-      floatBody: true,
-      body: SettingsListView(
-        children: [
-          SettingSection(
-            top: 16,
-            title: appLocalizations.smartRoutingPacing,
-            subTitle: appLocalizations.smartRoutingPacingDesc,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.pacing,
-            ),
-            items: [
-              _pacingItem(
-                ref,
-                title: appLocalizations.smartRoutingDwell,
-                desc: appLocalizations.smartRoutingDwellDesc,
-                options: _dwellChoices,
-                value: props.dwellSeconds,
-                textBuilder: appLocalizations.smartRoutingSeconds,
-                write: (state, value) => state.copyWith(dwellSeconds: value),
-              ),
-              _pacingItem(
-                ref,
-                title: appLocalizations.smartRoutingWave,
-                desc: appLocalizations.smartRoutingWaveDesc,
-                options: _waveChoices,
-                value: props.waveWidth,
-                textBuilder: appLocalizations.smartRoutingWaveNodes,
-                write: (state, value) => state.copyWith(waveWidth: value),
-              ),
-              _pacingItem(
-                ref,
-                title: appLocalizations.smartRoutingCeiling,
-                desc: appLocalizations.smartRoutingCeilingDesc,
-                options: _ceilingChoices,
-                value: props.absCeilingMs,
-                textBuilder: appLocalizations.smartRoutingMillis,
-                write: (state, value) => state.copyWith(absCeilingMs: value),
-              ),
-              _pacingItem(
-                ref,
-                title: appLocalizations.smartRoutingDegradeConfirm,
-                desc: appLocalizations.smartRoutingDegradeConfirmDesc,
-                options: _degradeChoices,
-                value: props.degradeConfirmSeconds,
-                textBuilder: appLocalizations.smartRoutingSeconds,
-                write: (state, value) =>
-                    state.copyWith(degradeConfirmSeconds: value),
-              ),
-              _pacingItem(
-                ref,
-                title: appLocalizations.smartRoutingProofTtl,
-                desc: appLocalizations.smartRoutingProofTtlDesc,
-                options: _proofTtlChoices,
-                value: props.proofTtlMinutes,
-                textBuilder: appLocalizations.smartRoutingMinutes,
-                write: (state, value) => state.copyWith(proofTtlMinutes: value),
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingProbes,
-            subTitle: appLocalizations.smartRoutingRegionNote,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.probes,
-            ),
-            items: [
-              _StringListItem(
-                title: appLocalizations.smartRoutingCanariesForeign,
-                desc: appLocalizations.smartRoutingCanariesForeignDesc,
-                value: props.canaryForeign,
-                write: (state, value) => state.copyWith(canaryForeign: value),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingCanariesDomestic,
-                desc: appLocalizations.smartRoutingCanariesDomesticDesc,
-                value: props.canaryDomestic,
-                write: (state, value) => state.copyWith(canaryDomestic: value),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingCensorSni,
-                desc: appLocalizations.smartRoutingCensorSniDesc,
-                value: props.censorSNI,
-                write: (state, value) => state.copyWith(censorSNI: value),
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingCountryPolicy,
-            subTitle: appLocalizations.smartRoutingCountryPolicyDesc,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.censorship,
-            ),
-            items: [
-              _CountryListItem(
-                title: appLocalizations.smartRoutingCensor,
-                desc: appLocalizations.smartRoutingCensorDesc,
-                kind: _CountryKind.censor,
-              ),
-              _CountryListItem(
-                title: appLocalizations.smartRoutingAvoidCountries,
-                desc: appLocalizations.smartRoutingAvoidCountriesDesc,
-                kind: _CountryKind.avoid,
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingEgress,
-            subTitle: appLocalizations.smartRoutingEgressDesc,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.egress,
-            ),
-            items: [
-              _StringListItem(
-                title: appLocalizations.smartRoutingEgressEchoes,
-                desc: appLocalizations.smartRoutingEgressEchoesDesc,
-                value: props.egressEchoes,
-                write: (state, value) => state.copyWith(egressEchoes: value),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingCountryEchoes,
-                desc: appLocalizations.smartRoutingCountryEchoesDesc,
-                value: props.countryEchoes,
-                write: (state, value) => state.copyWith(countryEchoes: value),
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingHeuristics,
-            subTitle: appLocalizations.smartRoutingHeuristicsDesc,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.heuristics,
-            ),
-            items: [
-              _StringListItem(
-                title: appLocalizations.smartRoutingNameHints,
-                desc: appLocalizations.smartRoutingNameHintsDesc,
-                value: props.nameHints,
-                write: (state, value) => state.copyWith(nameHints: value),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingBreakerPatterns,
-                desc: appLocalizations.smartRoutingBreakerPatternsDesc,
-                value: props.breakerPatterns,
-                write: (state, value) => state.copyWith(breakerPatterns: value),
-              ),
-              _RulesItem(rules: props.nodeRules),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingMarkers,
-            subTitle: appLocalizations.smartRoutingMarkersDesc,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.markers,
-            ),
-            items: [
-              _MarkersItem(
-                title: appLocalizations.smartRoutingMarkersOpen,
-                desc: appLocalizations.smartRoutingMarkersOpenDesc,
-                markers: props.openMarkers,
-                kind: _MarkerKind.open,
-              ),
-              _MarkersItem(
-                title: appLocalizations.smartRoutingMarkersDomestic,
-                desc: appLocalizations.smartRoutingMarkersDomesticDesc,
-                markers: props.domesticMarkers,
-                kind: _MarkerKind.domestic,
-              ),
-              _MarkersItem(
-                title: appLocalizations.smartRoutingMarkersLocal,
-                desc: appLocalizations.smartRoutingMarkersLocalDesc,
-                markers: props.localMarkers,
-                kind: _MarkerKind.local,
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingRanking,
-            actions: _resetActions(
-              context,
-              ref,
-              props,
-              RoutingFacetGroup.bands,
-            ),
-            items: [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.sort),
-                title: Text(
-                  [
-                    appLocalizations.smartRoutingKeyVerdict,
-                    appLocalizations.smartRoutingKeyMisfit,
-                    appLocalizations.smartRoutingKeyEvidence,
-                    appLocalizations.smartRoutingKeyBand,
-                  ].join(' → '),
-                ),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingLatencyBands,
-                desc: appLocalizations.smartRoutingLatencyBandsDesc,
-                itemMaxLength: 6,
-                itemValidator: (value) {
-                  final edge = int.tryParse(value);
-                  return edge == null || edge <= 0
-                      ? appLocalizations.smartRoutingBandInvalid
-                      : null;
-                },
-                value: props.latencyBands
-                    .map((edge) => edge.toString())
-                    .toList(),
-                write: (state, value) => state.copyWith(
-                  latencyBands: value
-                      .map(int.tryParse)
-                      .whereType<int>()
-                      .where((edge) => edge > 0)
-                      .toList(),
-                ),
-              ),
-            ],
-          ),
-          SettingSection(
-            title: appLocalizations.smartRoutingBackup,
-            bottom: 24,
-            items: [
-              DecorationListItem(
-                minVerticalPadding: 8,
-                leading: const GlyphIcon(AppGlyphs.share),
-                title: Text(appLocalizations.smartRoutingExport),
-                subtitle: Text(appLocalizations.smartRoutingExportDesc),
-                onPressed: () => _handleExport(context, props),
-              ),
-              DecorationListItem(
-                minVerticalPadding: 8,
-                leading: const GlyphIcon(AppGlyphs.document),
-                title: Text(appLocalizations.smartRoutingImport),
-                subtitle: Text(appLocalizations.smartRoutingImportDesc),
-                onPressed: () => _handleImport(context, ref),
-              ),
-            ],
-          ),
-          const SettingBottomInset(),
-        ],
+/// Cadence: how fast the engine looks and how far it lets latency slide before
+/// it acts. Strategy-seeded and editable, these fill the studio's Pace page, one
+/// stage of the decision pipeline between the switch triggers and the signals
+/// the engine reads.
+List<Widget> _pacingSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingPacing,
+      subTitle: appLocalizations.smartRoutingPacingDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.pacing,
       ),
-    );
-  }
-
-  Widget _pacingItem(
-    WidgetRef ref, {
-    required String title,
-    required String desc,
-    required List<int> options,
-    required int value,
-    required String Function(int) textBuilder,
-    required SmartRoutingProps Function(SmartRoutingProps, int) write,
-  }) {
-    return DecorationListItem.options(
-      title: Text(title),
-      subtitle: Text(desc),
-      dialogTitle: title,
-      options: options.contains(value) ? options : [value, ...options],
-      value: value,
-      textBuilder: (option) => textBuilder(option as int),
-      onChanged: (option) {
-        if (option == null) return;
-        _update(ref, (state) => write(state, option as int));
-      },
-    );
-  }
-
-  List<Widget>? _resetActions(
-    BuildContext context,
-    WidgetRef ref,
-    SmartRoutingProps props,
-    RoutingFacetGroup group,
-  ) {
-    if (props.matchesSeedGroup(group)) {
-      return null;
-    }
-    return [
-      CommonMinFilledButtonTheme(
-        child: FilledButton.tonal(
-          onPressed: () => _handleSectionReset(context, ref, group),
-          child: Text(context.appLocalizations.reset),
+      items: [
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.clock,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingDwell,
+          desc: appLocalizations.smartRoutingDwellDesc,
+          options: _dwellChoices,
+          value: props.dwellSeconds,
+          textBuilder: appLocalizations.smartRoutingSeconds,
+          write: (state, value) => state.copyWith(dwellSeconds: value),
         ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.radar,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingWave,
+          desc: appLocalizations.smartRoutingWaveDesc,
+          options: _waveChoices,
+          value: props.waveWidth,
+          textBuilder: appLocalizations.smartRoutingWaveNodes,
+          write: (state, value) => state.copyWith(waveWidth: value),
+        ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.speed,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCeiling,
+          desc: appLocalizations.smartRoutingCeilingDesc,
+          options: _ceilingChoices,
+          value: props.absCeilingMs,
+          textBuilder: appLocalizations.smartRoutingMillis,
+          write: (state, value) => state.copyWith(absCeilingMs: value),
+        ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.hourglass,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingDegradeConfirm,
+          desc: appLocalizations.smartRoutingDegradeConfirmDesc,
+          options: _degradeChoices,
+          value: props.degradeConfirmSeconds,
+          textBuilder: appLocalizations.smartRoutingSeconds,
+          write: (state, value) => state.copyWith(degradeConfirmSeconds: value),
+        ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.history,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingProofTtl,
+          desc: appLocalizations.smartRoutingProofTtlDesc,
+          options: _proofTtlChoices,
+          value: props.proofTtlMinutes,
+          textBuilder: appLocalizations.smartRoutingMinutes,
+          write: (state, value) => state.copyWith(proofTtlMinutes: value),
+        ),
+      ],
+    ),
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingRanking,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.bands,
       ),
-    ];
-  }
+      items: [
+        _StringListItem(
+          glyph: AppGlyphs.chart,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingLatencyBands,
+          desc: appLocalizations.smartRoutingLatencyBandsDesc,
+          itemMaxLength: 6,
+          itemValidator: (value) {
+            final edge = int.tryParse(value);
+            return edge == null || edge <= 0
+                ? appLocalizations.smartRoutingBandInvalid
+                : null;
+          },
+          value: props.latencyBands.map((edge) => edge.toString()).toList(),
+          write: (state, value) => state.copyWith(
+            latencyBands: value
+                .map(int.tryParse)
+                .whereType<int>()
+                .where((edge) => edge > 0)
+                .toList(),
+          ),
+        ),
+      ],
+    ),
+  ];
+}
 
-  Future<void> _handleSectionReset(
-    BuildContext context,
-    WidgetRef ref,
-    RoutingFacetGroup group,
-  ) async {
-    final appLocalizations = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      dangerous: true,
-      title: appLocalizations.reset,
-      message: TextSpan(text: appLocalizations.resetTip),
-    );
-    if (confirmed != true) {
-      return;
-    }
-    _update(ref, (state) => state.resetSeedGroup(group));
+/// Signals: everything the engine measures a node against, each measured input
+/// on its own focused page so no single screen stacks every list. Together they
+/// are the pipeline stage for what the engine senses before it ranks.
+List<Widget> _signalsSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingSignals,
+      subTitle: appLocalizations.smartRoutingSignalsDesc,
+      items: [
+        _routingStageRow(
+          context,
+          glyph: AppGlyphs.radar,
+          title: appLocalizations.smartRoutingProbes,
+          subtitle: appLocalizations.smartRoutingRegionNote,
+          builder: _probesSlivers,
+        ),
+        _routingStageRow(
+          context,
+          glyph: AppGlyphs.networkCheck,
+          title: appLocalizations.smartRoutingMarkers,
+          subtitle: appLocalizations.smartRoutingMarkersDesc,
+          builder: _markersSlivers,
+        ),
+        _routingStageRow(
+          context,
+          glyph: AppGlyphs.globeSearch,
+          title: appLocalizations.smartRoutingCountryPolicy,
+          subtitle: appLocalizations.smartRoutingCountryPolicyDesc,
+          builder: _countryPolicySlivers,
+        ),
+        _routingStageRow(
+          context,
+          glyph: AppGlyphs.locate,
+          title: appLocalizations.smartRoutingEgress,
+          subtitle: appLocalizations.smartRoutingEgressDesc,
+          builder: _egressSlivers,
+        ),
+        _routingStageRow(
+          context,
+          glyph: AppGlyphs.rules,
+          title: appLocalizations.smartRoutingHeuristics,
+          subtitle: appLocalizations.smartRoutingHeuristicsDesc,
+          builder: _heuristicsSlivers,
+        ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _probesSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingProbes,
+      subTitle: appLocalizations.smartRoutingRegionNote,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.probes,
+      ),
+      items: [
+        _StringListItem(
+          glyph: AppGlyphs.globeSearch,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCanariesForeign,
+          desc: appLocalizations.smartRoutingCanariesForeignDesc,
+          value: props.canaryForeign,
+          write: (state, value) => state.copyWith(canaryForeign: value),
+        ),
+        _StringListItem(
+          glyph: AppGlyphs.router,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCanariesDomestic,
+          desc: appLocalizations.smartRoutingCanariesDomesticDesc,
+          value: props.canaryDomestic,
+          write: (state, value) => state.copyWith(canaryDomestic: value),
+        ),
+        _StringListItem(
+          glyph: AppGlyphs.shield,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCensorSni,
+          desc: appLocalizations.smartRoutingCensorSniDesc,
+          value: props.censorSNI,
+          write: (state, value) => state.copyWith(censorSNI: value),
+        ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _markersSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingMarkers,
+      subTitle: appLocalizations.smartRoutingMarkersDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.markers,
+      ),
+      items: [
+        _MarkersItem(
+          glyph: AppGlyphs.globeSearch,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingMarkersOpen,
+          desc: appLocalizations.smartRoutingMarkersOpenDesc,
+          markers: props.openMarkers,
+          kind: _MarkerKind.open,
+        ),
+        _MarkersItem(
+          glyph: AppGlyphs.router,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingMarkersDomestic,
+          desc: appLocalizations.smartRoutingMarkersDomesticDesc,
+          markers: props.domesticMarkers,
+          kind: _MarkerKind.domestic,
+        ),
+        _MarkersItem(
+          glyph: AppGlyphs.pin,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingMarkersLocal,
+          desc: appLocalizations.smartRoutingMarkersLocalDesc,
+          markers: props.localMarkers,
+          kind: _MarkerKind.local,
+        ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _countryPolicySlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingCountryPolicy,
+      subTitle: appLocalizations.smartRoutingCountryPolicyDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.censorship,
+      ),
+      items: [
+        _CountryListItem(
+          glyph: AppGlyphs.shield,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCensor,
+          desc: appLocalizations.smartRoutingCensorDesc,
+          kind: _CountryKind.censor,
+        ),
+        _CountryListItem(
+          glyph: AppGlyphs.block,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingAvoidCountries,
+          desc: appLocalizations.smartRoutingAvoidCountriesDesc,
+          kind: _CountryKind.avoid,
+        ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _egressSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingEgress,
+      subTitle: appLocalizations.smartRoutingEgressDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.egress,
+      ),
+      items: [
+        _StringListItem(
+          glyph: AppGlyphs.locate,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingEgressEchoes,
+          desc: appLocalizations.smartRoutingEgressEchoesDesc,
+          value: props.egressEchoes,
+          write: (state, value) => state.copyWith(egressEchoes: value),
+        ),
+        _StringListItem(
+          glyph: AppGlyphs.flag,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingCountryEchoes,
+          desc: appLocalizations.smartRoutingCountryEchoesDesc,
+          value: props.countryEchoes,
+          write: (state, value) => state.copyWith(countryEchoes: value),
+        ),
+      ],
+    ),
+  ];
+}
+
+List<Widget> _heuristicsSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingHeuristics,
+      subTitle: appLocalizations.smartRoutingHeuristicsDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.heuristics,
+      ),
+      items: [
+        _StringListItem(
+          glyph: AppGlyphs.textShort,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingNameHints,
+          desc: appLocalizations.smartRoutingNameHintsDesc,
+          value: props.nameHints,
+          write: (state, value) => state.copyWith(nameHints: value),
+        ),
+        _StringListItem(
+          glyph: AppGlyphs.key,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingBreakerPatterns,
+          desc: appLocalizations.smartRoutingBreakerPatternsDesc,
+          value: props.breakerPatterns,
+          write: (state, value) => state.copyWith(breakerPatterns: value),
+        ),
+        _RulesItem(rules: props.nodeRules),
+      ],
+    ),
+  ];
+}
+
+/// A tonal Reset shown only when [group] has diverged from its seed, wired to
+/// the shared confirm dialog. Reused across the studio's facets — the inline
+/// ladder and each settings page — so every one resets the same way.
+List<Widget>? routingFacetResetActions(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+  RoutingFacetGroup group,
+) {
+  if (props.matchesSeedGroup(group)) {
+    return null;
   }
+  return [
+    CommonMinFilledButtonTheme(
+      child: FilledButton.tonal(
+        onPressed: () => routingHandleFacetReset(context, ref, group),
+        child: Text(context.appLocalizations.reset),
+      ),
+    ),
+  ];
+}
+
+Future<void> routingHandleFacetReset(
+  BuildContext context,
+  WidgetRef ref,
+  RoutingFacetGroup group,
+) async {
+  final appLocalizations = context.appLocalizations;
+  final confirmed = await dialogs.showMessage(
+    dangerous: true,
+    title: appLocalizations.reset,
+    message: TextSpan(text: appLocalizations.resetTip),
+  );
+  if (confirmed != true) {
+    return;
+  }
+  ref
+      .read(smartRoutingSettingProvider.notifier)
+      .update((state) => state.resetSeedGroup(group));
+}
+
+/// Hysteresis for switching: how much a challenger must beat the incumbent
+/// before the engine moves, and the equality band the latency rung ignores.
+/// Every value at zero hands the choice back to the strategy pacing. Fills the
+/// studio's Switch-triggers page, since triggers gate the comparison the ladder
+/// ran.
+List<Widget> _triggersSlivers(
+  BuildContext context,
+  WidgetRef ref,
+  SmartRoutingProps props,
+) {
+  final appLocalizations = context.appLocalizations;
+  return [
+    SettingSection.sliver(
+      search: const SettingSearch(),
+      title: appLocalizations.smartRoutingTriggers,
+      subTitle: appLocalizations.smartRoutingTriggersDesc,
+      actions: routingFacetResetActions(
+        context,
+        ref,
+        props,
+        RoutingFacetGroup.triggers,
+      ),
+      items: [
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.trendDown,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingSwitchImproveMs,
+          desc: appLocalizations.smartRoutingSwitchImproveMsDesc,
+          options: _switchImproveMsChoices,
+          value: props.switchImproveMs,
+          textBuilder: (value) => value == 0
+              ? appLocalizations.smartRoutingTriggerAuto
+              : appLocalizations.smartRoutingMillis(value),
+          write: (state, value) => state.copyWith(switchImproveMs: value),
+        ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.balance,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingSwitchImprovePct,
+          desc: appLocalizations.smartRoutingSwitchImprovePctDesc,
+          options: _switchImprovePctChoices,
+          value: props.switchImprovePct,
+          textBuilder: (value) => value == 0
+              ? appLocalizations.smartRoutingTriggerAuto
+              : appLocalizations.smartRoutingPercent(value),
+          write: (state, value) => state.copyWith(switchImprovePct: value),
+        ),
+        _pacingItem(
+          ref,
+          glyph: AppGlyphs.filter,
+          search: const SettingSearch(),
+          title: appLocalizations.smartRoutingLatencyStep,
+          desc: appLocalizations.smartRoutingLatencyStepDesc,
+          options: _latencyStepChoices,
+          value: props.latencyStepMs,
+          textBuilder: (value) => value == 0
+              ? appLocalizations.smartRoutingTriggerAuto
+              : appLocalizations.smartRoutingMillis(value),
+          write: (state, value) => state.copyWith(latencyStepMs: value),
+        ),
+      ],
+    ),
+  ];
+}
+
+Widget _pacingItem(
+  WidgetRef ref, {
+  required Glyph glyph,
+  required String title,
+  required String desc,
+  required List<int> options,
+  required int value,
+  required String Function(int) textBuilder,
+  required SmartRoutingProps Function(SmartRoutingProps, int) write,
+  SettingSearch? search,
+}) {
+  return DecorationListItem.options(
+    leading: GlyphIcon(glyph),
+    title: Text(title),
+    subtitle: Text(desc),
+    dialogTitle: title,
+    options: options.contains(value) ? options : [value, ...options],
+    value: value,
+    textBuilder: (option) => textBuilder(option as int),
+    onChanged: (option) {
+      if (option == null) return;
+      ref
+          .read(smartRoutingSettingProvider.notifier)
+          .update((state) => write(state, option as int));
+    },
+  );
 }
 
 Future<void> _handleExport(
@@ -410,25 +588,31 @@ void _writeCountries(WidgetRef ref, _CountryKind kind, List<String> next) {
 
 class _CountryListItem extends ConsumerWidget {
   const _CountryListItem({
+    required this.glyph,
     required this.title,
     required this.desc,
     required this.kind,
+    this.search,
   });
 
+  final Glyph glyph;
   final String title;
   final String desc;
   final _CountryKind kind;
+  final SettingSearch? search;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = _countriesOf(ref.watch(smartRoutingSettingProvider), kind);
     return DecorationListItem.open(
+      leading: GlyphIcon(glyph),
       title: Text(title),
       subtitle: Text(
         value.isEmpty ? desc : value.map(_countryLabel).join(', '),
       ),
       blur: false,
       forceFull: false,
+      preferSheet: true,
       maxWidth: 400,
       widget: _CountryListPage(title: title, desc: desc, kind: kind),
     );

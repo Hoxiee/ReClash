@@ -6,47 +6,6 @@ import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-/// The other half: the route it took to a decision, the measurements it took on
-/// the way, and — under the technical toggle — the raw state the core reasons
-/// in, so a reader who distrusts the overview can check every claim it made.
-class RoutingDetailsTab extends StatelessWidget {
-  const RoutingDetailsTab({
-    super.key,
-    required this.report,
-    required this.technical,
-  });
-
-  final RcxReport report;
-  final bool technical;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return CustomScrollView(
-      slivers: [
-        const SliverPadding(padding: EdgeInsets.only(top: 8)),
-        routingHeader(appLocalizations.smartRoutingSectionRound),
-        routingSliver(RoutingRoundCard(report: report, technical: technical)),
-        routingHeader(appLocalizations.smartRoutingSectionNetwork),
-        routingSliver(
-          RoutingEvidenceCard(report: report, technical: technical),
-        ),
-        routingHeader(appLocalizations.smartRoutingSectionReliability),
-        routingSliver(
-          RoutingReliabilityCard(report: report, technical: technical),
-        ),
-        routingHeader(appLocalizations.smartRoutingSectionHistory),
-        routingSliver(RoutingHistoryCard(report: report)),
-        if (technical) ...[
-          routingHeader(appLocalizations.smartRoutingSectionEngine),
-          routingSliver(RoutingEngineCard(report: report)),
-        ],
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-      ],
-    );
-  }
-}
-
 @immutable
 class RoutingStepData {
   const RoutingStepData({
@@ -99,6 +58,7 @@ class RoutingRoundCard extends StatelessWidget {
 
   List<RoutingStepData> _steps(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final overrides = RoutingVocabularyScope.of(context);
     final colorScheme = context.colorScheme;
     final status = report.status;
     final counts = routingCountsOf(report);
@@ -147,12 +107,20 @@ class RoutingRoundCard extends StatelessWidget {
         icon: failed ? AppGlyphs.error : AppGlyphs.verified,
         tone: failed ? colorScheme.error : colorScheme.primary,
         title: appLocalizations.smartRoutingStepDecision,
-        body: routingReasonLabel(appLocalizations, status.reason),
+        body: routingReasonLabel(
+          appLocalizations,
+          status.reason,
+          overrides: overrides,
+        ),
         chips: [
           if (status.node.isNotEmpty) MetaChip(label: status.node),
           if (chosen != null)
             MetaChip(
-              label: routingVerdictLabel(appLocalizations, chosen.verdict),
+              label: routingVerdictLabel(
+                appLocalizations,
+                chosen.verdict,
+                overrides: overrides,
+              ),
             ),
         ],
         childLabel: appLocalizations.smartRoutingAllServers,
@@ -179,7 +147,11 @@ class RoutingRankOrder extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final rows = [
       for (final rung in routingLadder(strategy))
-        routingRungLabel(appLocalizations, rung),
+        routingRungLabel(
+          appLocalizations,
+          rung,
+          overrides: RoutingVocabularyScope.of(context),
+        ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +560,11 @@ class RoutingSwitchRow extends StatelessWidget {
                 ),
                 Text(
                   [
-                    routingReasonLabel(appLocalizations, entry.reason),
+                    routingReasonLabel(
+                      appLocalizations,
+                      entry.reason,
+                      overrides: RoutingVocabularyScope.of(context),
+                    ),
                     if (entry.at > 0)
                       appLocalizations.smartRoutingSwitchedAgo(
                         heroDurationWords(

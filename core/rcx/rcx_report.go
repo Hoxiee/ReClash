@@ -119,6 +119,7 @@ type rcxReport struct {
 	History    []rcxSwitchReport    `json:"history"`
 	Metrics    rcxMetricsReport     `json:"metrics"`
 	Bands      []int                `json:"bands"`
+	Ladder     []rcxRungSpec        `json:"ladder"`
 	ProbesLeft int                  `json:"probesLeft"`
 	ProbeCap   int                  `json:"probeCap"`
 	Manual     bool                 `json:"manual"`
@@ -182,6 +183,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		History:    append([]rcxSwitchReport(nil), e.history...),
 		Metrics:    e.metricsReport(now),
 		Bands:      e.cfg.latencyBands(),
+		Ladder:     rcxLadderForStrategy(input.Policy.ladderOrDefault(), input.Policy.Strategy),
 		ProbesLeft: e.budget.Remaining(now),
 		ProbeCap:   rcxProbeBudgetCap,
 		Manual:     input.Pin != "",

@@ -269,6 +269,7 @@ class _ServiceRoutePage extends ConsumerWidget {
           if (policy.enabled)
             SettingSection(
               top: 16,
+              search: const SettingSearch(),
               title: appLocalizations.smartRoutingServiceStatus,
               items: [
                 DecorationListItem(
@@ -289,9 +290,11 @@ class _ServiceRoutePage extends ConsumerWidget {
             ),
           SettingSection(
             top: policy.enabled ? 0 : 16,
+            search: const SettingSearch(),
             title: appLocalizations.smartRoutingServiceRoute,
             items: [
               DecorationListItem.toggle(
+                search: const SettingSearch(),
                 title: Text(appLocalizations.smartRoutingServiceEnabled),
                 subtitle: Text(appLocalizations.smartRoutingServiceEnabledDesc),
                 value: policy.enabled,
@@ -301,6 +304,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                 ),
               ),
               DecorationListItem.options(
+                search: const SettingSearch(),
                 title: Text(appLocalizations.smartRoutingServiceFallback),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,9 +337,11 @@ class _ServiceRoutePage extends ConsumerWidget {
             ],
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.smartRoutingServiceSources,
             items: [
               DecorationListItem(
+                search: const SettingSearch(),
                 title: Text(appLocalizations.smartRoutingServiceProviderSource),
                 subtitle: Text(
                   appLocalizations.smartRoutingServiceProviderCandidates(
@@ -346,11 +352,13 @@ class _ServiceRoutePage extends ConsumerWidget {
             ],
           ),
           SettingSection(
+            search: const SettingSearch(),
             title: appLocalizations.smartRoutingServiceManual,
             bottom: 24,
             items: manualSelectors.isEmpty
                 ? [
                     DecorationListItem(
+                      search: const SettingSearch(),
                       title: Text(
                         appLocalizations.smartRoutingServiceManualEmpty,
                       ),

@@ -5,8 +5,6 @@ import 'package:reclash/core/controller.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/appearance/appearance.dart';
-import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_diag.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
@@ -23,19 +21,18 @@ export 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.d
 
 /// Every line on both tabs comes from the key the core actually ranked by, so
 /// the page cannot tell a different story than the routing it explains.
-class RoutingOverviewView extends ConsumerStatefulWidget {
-  const RoutingOverviewView({super.key, this.reportReader});
+class RoutingLiveView extends ConsumerStatefulWidget {
+  const RoutingLiveView({super.key, this.reportReader});
 
   @visibleForTesting
   final Future<RcxReport?> Function()? reportReader;
 
   @override
-  ConsumerState<RoutingOverviewView> createState() =>
-      _RoutingOverviewViewState();
+  ConsumerState<RoutingLiveView> createState() => _RoutingLiveViewState();
 }
 
-class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
-    with WidgetsBindingObserver, ActivePollingMixin<RoutingOverviewView> {
+class _RoutingLiveViewState extends ConsumerState<RoutingLiveView>
+    with WidgetsBindingObserver, ActivePollingMixin<RoutingLiveView> {
   RcxReport? _report;
   bool _technical = false;
 
@@ -61,10 +58,6 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     restartPolling();
   }
 
-  void _handleSettings() {
-    showExtend(context, builder: (context) => const SmartRoutingView());
-  }
-
   void _handleLog() {
     showExtend(context, builder: (context) => const RoutingDiagView());
   }
@@ -81,85 +74,127 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     );
     final report = _report;
     final running = ref.watch(isStartProvider);
-    return CommonScaffold(
-      title: appLocalizations.smartRoutingOverview,
-      floatBody: true,
-      actions: [
-        IconButton(
-          tooltip: appLocalizations.settings,
-          onPressed: _handleSettings,
-          icon: const GlyphIcon(AppGlyphs.sliders),
-        ),
-        CommonPopupBox(
-          popupBuilder: (_) => CommonPopupMenu(
-            items: [
-              CommonPopupMenuItem(
-                glyph: _technical
-                    ? AppGlyphs.checkCircle
-                    : AppGlyphs.checkboxBlank,
-                label: appLocalizations.smartRoutingTechnical,
-                onPressed: () => setState(() => _technical = !_technical),
-              ),
-              CommonPopupMenuItem(
-                glyph: AppGlyphs.history,
-                label: appLocalizations.smartRoutingLog,
-                onPressed: _handleLog,
-              ),
-              CommonPopupMenuItem(
-                glyph: AppGlyphs.export,
-                label: appLocalizations.smartRoutingLogExport,
-                onPressed: _handleExportLog,
-              ),
-            ],
-          ),
-          targetBuilder: (open) => IconButton(
-            tooltip: appLocalizations.smartRoutingMore,
-            onPressed: () => open(),
-            icon: const GlyphIcon(AppGlyphs.more),
-          ),
-        ),
-      ],
-      body: AppBarClearance(
-        child: switch ((enabled, report)) {
-          (false, _) => _notice(
-            icon: AppGlyphs.pause,
-            text: appLocalizations.smartRoutingOffHint,
-          ),
-          (true, null) => _notice(
-            icon: running ? AppGlyphs.sync : AppGlyphs.hourglass,
-            text: running
-                ? appLocalizations.smartRoutingSearching
-                : appLocalizations.smartRoutingWaitingTunnel,
-          ),
-          (true, final RcxReport report) => DefaultTabController(
-            length: 3,
-            child: Column(
-              children: [
-                SettingsTabs(
-                  labels: [
-                    appLocalizations.smartRoutingTabOverview,
-                    appLocalizations.smartRoutingTabDetails,
-                    appLocalizations.smartRoutingTabRanking,
-                  ],
+    final labelOverrides = ref.watch(
+      smartRoutingSettingProvider.select((state) => state.labelOverrides),
+    );
+    return RoutingVocabularyScope(
+      overrides: labelOverrides,
+      child: CommonScaffold(
+        title: appLocalizations.smartRoutingOverview,
+        floatBody: true,
+        actions: [
+          CommonPopupBox(
+            popupBuilder: (_) => CommonPopupMenu(
+              items: [
+                CommonPopupMenuItem(
+                  glyph: _technical
+                      ? AppGlyphs.checkCircle
+                      : AppGlyphs.checkboxBlank,
+                  label: appLocalizations.smartRoutingTechnical,
+                  onPressed: () => setState(() => _technical = !_technical),
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      RoutingOverviewTab(
-                        report: report,
-                        technical: _technical,
-                        onDeepScan: _handleDeepScan,
-                      ),
-                      RoutingDetailsTab(report: report, technical: _technical),
-                      RoutingRankingTab(report: report),
-                    ],
-                  ),
+                CommonPopupMenuItem(
+                  glyph: AppGlyphs.history,
+                  label: appLocalizations.smartRoutingLog,
+                  onPressed: _handleLog,
+                ),
+                CommonPopupMenuItem(
+                  glyph: AppGlyphs.export,
+                  label: appLocalizations.smartRoutingLogExport,
+                  onPressed: _handleExportLog,
                 ),
               ],
             ),
+            targetBuilder: (open) => IconButton(
+              tooltip: appLocalizations.smartRoutingMore,
+              onPressed: () => open(),
+              icon: const GlyphIcon(AppGlyphs.more),
+            ),
           ),
-        },
+        ],
+        body: AppBarClearance(
+          child: switch ((enabled, report)) {
+            (false, _) => _notice(
+              icon: AppGlyphs.pause,
+              text: appLocalizations.smartRoutingOffHint,
+            ),
+            (true, null) => _notice(
+              icon: running ? AppGlyphs.sync : AppGlyphs.hourglass,
+              text: running
+                  ? appLocalizations.smartRoutingSearching
+                  : appLocalizations.smartRoutingWaitingTunnel,
+            ),
+            (true, final RcxReport report) => _liveBody(context, report),
+          },
+        ),
       ),
+    );
+  }
+
+  /// One flowing story instead of three tabs: what the engine chose, why it beat
+  /// the rest rung by rung, the network it is on, the routes services got, how
+  /// much of the park is alive, and — under the technical toggle — the raw round
+  /// and engine state. The transparency the tabs buried now leads the scroll.
+  Widget _liveBody(BuildContext context, RcxReport report) {
+    final appLocalizations = context.appLocalizations;
+    final rows = report.candidates;
+    final chosenIndex = rows.indexWhere((row) => row.current);
+    final pickedIndex = chosenIndex >= 0
+        ? chosenIndex
+        : rows.isEmpty
+        ? -1
+        : 0;
+    final chosen = pickedIndex < 0 ? null : rows[pickedIndex];
+    final rivals = [
+      for (var at = 0; at < rows.length; at++)
+        if (at != pickedIndex) rows[at],
+    ];
+    return CustomScrollView(
+      slivers: [
+        const SliverPadding(padding: EdgeInsets.only(top: 8)),
+        routingSliver(
+          RoutingVerdictCard(report: report, technical: _technical),
+        ),
+        routingHeader(appLocalizations.smartRoutingSectionLadder),
+        routingSliver(RoutingLadderCard(report: report, chosen: chosen)),
+        routingHeader(appLocalizations.smartRoutingSectionRivals),
+        if (chosen == null || rivals.isEmpty)
+          routingSliver(
+            RoutingNotice(
+              icon: AppGlyphs.swap,
+              text: appLocalizations.smartRoutingNoRivals,
+            ),
+          )
+        else
+          routingSliver(
+            RoutingWhyCard(report: report, chosen: chosen, rivals: rivals),
+          ),
+        routingHeader(appLocalizations.smartRoutingSectionRound),
+        routingSliver(RoutingRoundCard(report: report, technical: _technical)),
+        routingHeader(appLocalizations.smartRoutingSectionNetwork),
+        routingSliver(RoutingNetworkCard(report: report)),
+        routingSliver(
+          RoutingEvidenceCard(report: report, technical: _technical),
+        ),
+        routingHeader(appLocalizations.smartRoutingServiceRoutes),
+        routingSliver(RoutingLanesCard(report: report)),
+        routingHeader(appLocalizations.smartRoutingSectionHealth),
+        routingSliver(RoutingHealthCard(report: report)),
+        routingSliver(
+          RoutingScanCard(report: report, onDeepScan: _handleDeepScan),
+        ),
+        routingHeader(appLocalizations.smartRoutingSectionReliability),
+        routingSliver(
+          RoutingReliabilityCard(report: report, technical: _technical),
+        ),
+        routingHeader(appLocalizations.smartRoutingSectionHistory),
+        routingSliver(RoutingHistoryCard(report: report)),
+        if (_technical) ...[
+          routingHeader(appLocalizations.smartRoutingSectionEngine),
+          routingSliver(RoutingEngineCard(report: report)),
+        ],
+        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+      ],
     );
   }
 

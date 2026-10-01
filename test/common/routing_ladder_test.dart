@@ -1,53 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 
-const _decide = 'core/rcx/rcx_decide.go';
-
-const _rungOfField = {
-  'verdict': RoutingRung.verdict,
-  'misfit': RoutingRung.misfit,
-  'evidence': RoutingRung.evidence,
-  'latencyMs': RoutingRung.latency,
-  'recurrence': RoutingRung.recurrence,
-  'degraded': RoutingRung.degraded,
-  'unproven': RoutingRung.unproven,
-  'homeRisk': RoutingRung.homeRisk,
-  'challenger': RoutingRung.incumbent,
-  'order': RoutingRung.tiebreak,
-};
-
-List<RoutingRung> _goLadder(
-  String source,
-  String function, [
-  Set<String> visited = const {},
-]) {
-  if (visited.contains(function)) {
-    fail('Comparator delegation cycle at $function');
-  }
-  final match = RegExp(
-    'func $function\\(a, b rcxKey\\) int \\{.*?\\n\\}',
-    dotAll: true,
-  ).firstMatch(source);
-  expect(match, isNotNull, reason: '$function is gone from $_decide');
-  final body = match!.group(0)!;
-  final delegate = RegExp(r'return (rcxCompare\w*)\(a, b\);?').firstMatch(body);
-  if (delegate != null) {
-    final ignored = {
-      for (final field in RegExp(r'a\.(\w+), b\.\1 = 0, 0').allMatches(body))
-        _rungOfField[field.group(1)]!,
-    };
-    return _goLadder(source, delegate.group(1)!, {
-      ...visited,
-      function,
-    }).where((rung) => !ignored.contains(rung)).toList();
-  }
-  final fields = RegExp(r'a\.(\w+) != b\.\1').allMatches(body);
-  expect(fields, isNotEmpty, reason: '$function has no recognized comparisons');
-  return [for (final field in fields) _rungOfField[field.group(1)]!];
-}
+const _goldenLadder = 'core/rcx/testdata/default_ladder.json';
 
 const _base = RcxCandidateReport(
   node: 'base',
@@ -57,36 +15,29 @@ const _base = RcxCandidateReport(
 );
 
 void main() {
-  late String source;
+  test('the Dart default ladder is the committed golden order', () {
+    final golden = jsonDecode(File(_goldenLadder).readAsStringSync()) as List;
+    final tokens = [for (final rung in golden) (rung as Map)['id'] as String];
+    expect(
+      tokens,
+      routingDefaultRungTokens,
+      reason: 'Dart default drifted from $_goldenLadder',
+    );
+    expect(routingDefaultLadder(), [
+      RoutingRung.admission,
+      for (final token in tokens) RoutingRung.values.byName(token),
+    ]);
+  });
 
-  setUpAll(() => source = File(_decide).readAsStringSync());
-
-  test('every ladder is the one the core compares by', () {
-    const comparators = {
-      'balanced': 'rcxCompare',
-      'lowest-latency': 'rcxCompareLatency',
-      'stable': 'rcxCompareStable',
-      'saver': 'rcxCompareStable',
-    };
-    for (final entry in comparators.entries) {
-      expect(routingLadder(entry.key), [
-        RoutingRung.admission,
-        ..._goLadder(source, entry.value),
-      ], reason: entry.key);
-    }
+  test('lowest-latency drops the misfit rung, others keep the full ladder', () {
+    expect(routingLadder('lowest-latency'), [
+      for (final rung in routingDefaultLadder())
+        if (rung != RoutingRung.misfit) rung,
+    ]);
     expect(routingLadder(''), routingLadder('balanced'));
+    expect(routingLadder('balanced'), routingDefaultLadder());
   });
 
-  test('the core dispatches the same comparator this page reads', () {
-    final dispatch = RegExp(
-      r'func rcxCompareFor\(strategy string\).*?\n\}',
-      dotAll: true,
-    ).firstMatch(source);
-    expect(dispatch, isNotNull, reason: 'rcxCompareFor is gone from $_decide');
-    for (final name in ['rcxCompareLatency', 'rcxCompareStable']) {
-      expect(dispatch!.group(0), contains(name));
-    }
-  });
 
   test('confirmed quality ranking can improve an active stable incumbent', () {
     final incumbent = _base.copyWith(current: true, evidence: 'live');
@@ -113,13 +64,6 @@ void main() {
   });
 
   test('a gate outranks every comparison the core would have made', () {
-    expect(
-      RegExp(
-        r'a\.Block == rcxBlockNone\) != \(b\.Block == rcxBlockNone',
-      ).hasMatch(source),
-      isTrue,
-      reason: 'rcxRank no longer sorts blocked candidates last',
-    );
     final blocked = _base.copyWith(verdict: 'preferred', block: 'cooling');
     final duel = routingDuel(
       blocked,

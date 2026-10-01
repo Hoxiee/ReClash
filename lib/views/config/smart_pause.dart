@@ -319,6 +319,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     required String title,
     required String desc,
     required Widget action,
+    SettingSearch? search,
   }) {
     return DecorationListItem(
       minVerticalPadding: 0,
@@ -348,6 +349,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     );
     final disabled = ref.watch(batteryOptimizationDisableProvider);
     return _buildPrerequisiteItem(
+      search: const SettingSearch(gate: SettingGate.android),
       title: appLocalizations.ignoreBatteryOptimization,
       desc: appLocalizations.batteryOptimizationDesc,
       action: Stack(
@@ -382,6 +384,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       ),
     );
     return _buildPrerequisiteItem(
+      search: const SettingSearch(),
       title: appLocalizations.locationPermission,
       desc: appLocalizations.locationPermissionDesc,
       action: _buildAuthorizeButton(
@@ -408,6 +411,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       items: [
         DecorationListItem.toggle(
           contentPadding: _togglePadding,
+          search: const SettingSearch(),
           title: Text(appLocalizations.smartPause),
           subtitle: Text(appLocalizations.smartPauseDesc),
           value: vpnSetting.smartPauseEnabled,
@@ -417,6 +421,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
           FadeSlideEnterBox(
             child: DecorationListItem.toggle(
               contentPadding: _togglePadding,
+              search: const SettingSearch(),
               title: Text(appLocalizations.smartPauseCloseConnections),
               subtitle: Text(appLocalizations.closeConnectionsDesc),
               value: vpnSetting.smartPauseCloseConnections,
@@ -431,6 +436,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
           FadeSlideEnterBox(
             child: DecorationListItem.toggle(
               contentPadding: _togglePadding,
+              search: const SettingSearch(),
               title: Text(appLocalizations.smartPauseStrict),
               subtitle: Text(appLocalizations.smartPauseStrictDesc),
               value: vpnSetting.smartPauseStrict,
@@ -445,6 +451,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
           FadeSlideEnterBox(
             child: DecorationListItem.toggle(
               contentPadding: _togglePadding,
+              search: const SettingSearch(),
               title: Text(appLocalizations.smartPauseFullStop),
               subtitle: Text(appLocalizations.smartPauseFullStopDesc),
               value: vpnSetting.smartPauseFullStop,
@@ -555,6 +562,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     final appLocalizations = context.appLocalizations;
     final hasSelection = ref.watch(itemsProvider(key)).isNotEmpty;
     return ListHeader(
+      search: const SettingSearch(),
       title: appLocalizations.trustedNetworks,
       subTitle: appLocalizations.trustedNetworksDesc,
       actions: [

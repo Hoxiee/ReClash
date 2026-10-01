@@ -229,6 +229,10 @@ class SmartRoutingPacing {
     required this.absCeilingMs,
     required this.degradeConfirmSeconds,
     required this.proofTtlMinutes,
+    this.ladder = const [],
+    this.switchImproveMs = 0,
+    this.switchImprovePct = 0,
+    this.latencyStepMs = 0,
   });
 
   final int dwellSeconds;
@@ -237,6 +241,14 @@ class SmartRoutingPacing {
   final int absCeilingMs;
   final int degradeConfirmSeconds;
   final int proofTtlMinutes;
+
+  /// Ladder and triggers are strategy-flavored but their shipped seed is
+  /// "unset": empty/zero defers to the engine, and lowest-latency drops misfit
+  /// through the strategy transform, not a distinct seeded ladder.
+  final List<RcxRungSpec> ladder;
+  final int switchImproveMs;
+  final int switchImprovePct;
+  final int latencyStepMs;
 }
 
 extension SmartRoutingStrategyWire on SmartRoutingStrategy {
@@ -292,6 +304,9 @@ enum RoutingFacetGroup {
   egress,
   heuristics,
   markers,
+  ladder,
+  triggers,
+  vocabulary,
 }
 
 extension SmartRoutingPropsRcx on SmartRoutingProps {
@@ -360,6 +375,10 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     absCeilingMs: value.pacing.absCeilingMs,
     degradeConfirmSeconds: value.pacing.degradeConfirmSeconds,
     proofTtlMinutes: value.pacing.proofTtlMinutes,
+    ladder: value.pacing.ladder,
+    switchImproveMs: value.pacing.switchImproveMs,
+    switchImprovePct: value.pacing.switchImprovePct,
+    latencyStepMs: value.pacing.latencyStepMs,
   );
 
   /// Empty bands mean "unset, let the engine use its default", not a hand-tuned
@@ -424,6 +443,14 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
         domesticMarkers: seed.domesticMarkers,
         localMarkers: seed.localMarkers,
       ),
+      // Reset here clears to the "unset" seed rather than rewriting.
+      RoutingFacetGroup.ladder => copyWith(ladder: pace.ladder),
+      RoutingFacetGroup.triggers => copyWith(
+        switchImproveMs: pace.switchImproveMs,
+        switchImprovePct: pace.switchImprovePct,
+        latencyStepMs: pace.latencyStepMs,
+      ),
+      RoutingFacetGroup.vocabulary => copyWith(labelOverrides: const {}),
     };
   }
 
@@ -446,6 +473,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     nodeRules: nodeRules,
     avoidCountries: avoidCountries,
     latencyBands: latencyBands,
+    ladder: ladder,
     allowDomesticLastResort: allowDomesticLastResort,
     requireUdp: requireUdp,
     respectPick: respectPick,
@@ -454,6 +482,9 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     absCeilingMs: absCeilingMs,
     degradeConfirmSeconds: degradeConfirmSeconds,
     proofTtlMinutes: proofTtlMinutes,
+    switchImproveMs: switchImproveMs,
+    switchImprovePct: switchImprovePct,
+    latencyStepMs: latencyStepMs,
     lanes: _effectiveRcxLanes(profile),
   );
 

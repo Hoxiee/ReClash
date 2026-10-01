@@ -213,7 +213,7 @@ func (e *rcxEngine) warmPool(candidates []rcxCandidate, now time.Time) map[strin
 		Policy: e.cfg.policy(), Now: now,
 	}
 	input.Policy.Censoring = rcxEffectiveCensoring(input)
-	compare := rcxCompareFor(input.Policy.Strategy)
+	compare := rcxCompareFor(input.Policy)
 	type rankedNode struct {
 		name string
 		key  rcxKey

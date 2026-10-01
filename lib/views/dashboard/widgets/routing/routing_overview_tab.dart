@@ -6,41 +6,39 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-/// The friendly half: what you are on, what the network is, which services have
-/// a route, how much of the park is alive. Every measurement that produced an
-/// answer here lives in the details tab, so this one never has to argue.
-class RoutingOverviewTab extends StatelessWidget {
-  const RoutingOverviewTab({
+/// The decision, promoted to the headline: the chosen server against its
+/// closest rivals, each naming the first rung it lost on. The full ladder and
+/// every rival stay one tab away; this is the "why" a glance should already give.
+class RoutingWhyCard extends StatelessWidget {
+  const RoutingWhyCard({
     super.key,
     required this.report,
-    required this.technical,
-    required this.onDeepScan,
+    required this.chosen,
+    required this.rivals,
   });
 
   final RcxReport report;
-  final bool technical;
-  final VoidCallback onDeepScan;
+  final RcxCandidateReport chosen;
+  final List<RcxCandidateReport> rivals;
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return CustomScrollView(
-      slivers: [
-        const SliverPadding(padding: EdgeInsets.only(top: 8)),
-        routingSliver(RoutingVerdictCard(report: report, technical: technical)),
-        routingHeader(appLocalizations.smartRoutingSectionNetwork),
-        routingSliver(RoutingNetworkCard(report: report)),
-        routingHeader(appLocalizations.smartRoutingServiceRoutes),
-        routingSliver(RoutingLanesCard(report: report)),
-        routingHeader(appLocalizations.smartRoutingSectionHealth),
-        routingSliver(RoutingHealthCard(report: report)),
-        routingSliver(RoutingScanCard(report: report, onDeepScan: onDeepScan)),
-        routingHeader(appLocalizations.smartRoutingSectionReliability),
-        routingSliver(RoutingStabilityCard(report: report)),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
-      ],
+    return RoutingCard(
+      child: Column(
+        children: [
+          for (var at = 0; at < rivals.length; at++) ...[
+            if (at > 0) const RoutingHairline(),
+            RoutingDuelRow(
+              report: report,
+              chosen: chosen,
+              candidate: rivals[at],
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -58,6 +56,7 @@ class RoutingVerdictCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final overrides = RoutingVocabularyScope.of(context);
     final colorScheme = context.colorScheme;
     final status = report.status;
     final chosen = routingChosenOf(report);
@@ -105,7 +104,11 @@ class RoutingVerdictCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      routingReasonLabel(appLocalizations, status.reason),
+                      routingReasonLabel(
+                        appLocalizations,
+                        status.reason,
+                        overrides: overrides,
+                      ),
                       style: context.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         height: 1.35,
@@ -126,12 +129,17 @@ class RoutingVerdictCard extends StatelessWidget {
               runSpacing: 6,
               children: [
                 MetaChip(
-                  label: routingVerdictLabel(appLocalizations, chosen.verdict),
+                  label: routingVerdictLabel(
+                    appLocalizations,
+                    chosen.verdict,
+                    overrides: overrides,
+                  ),
                 ),
                 MetaChip(
                   label: routingEvidenceLabel(
                     appLocalizations,
                     chosen.evidence,
+                    overrides: overrides,
                   ),
                 ),
                 if (chosen.region.isNotEmpty) MetaChip(label: chosen.region),
@@ -614,63 +622,6 @@ class RoutingScanCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Three numbers that answer "has this been holding up". The full ledger the
-/// engine keeps sits in the details tab; here only the headline survives.
-class RoutingStabilityCard extends StatelessWidget {
-  const RoutingStabilityCard({super.key, required this.report});
-
-  final RcxReport report;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final metrics = report.metrics;
-    return RoutingCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: RoutingTile(
-                  value: '${metrics.availability}%',
-                  label: appLocalizations.smartRoutingAvailability,
-                  valueColor: metrics.availability >= 99
-                      ? context.colorScheme.primary
-                      : null,
-                ),
-              ),
-              Expanded(
-                child: RoutingTile(
-                  value: '${metrics.incidents}',
-                  label: appLocalizations.smartRoutingIncidents,
-                ),
-              ),
-              Expanded(
-                child: RoutingTile(
-                  value: '${metrics.standbyHits}',
-                  label: appLocalizations.smartRoutingStandbyHits,
-                ),
-              ),
-            ],
-          ),
-          const RoutingHairline(),
-          Text(
-            appLocalizations.smartRoutingMeasuredOver(
-              routingMetricPeriod(context, metrics.enabledMillis),
-            ),
-            style: context.textTheme.labelSmall?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
           ),
         ],
       ),

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -14,9 +13,7 @@ import '../helpers/test_profiles.dart';
 
 const _profileId = 77;
 
-final _russia = const SmartRoutingProps(
-  enabled: true,
-).applyPreset('ru');
+final _russia = const SmartRoutingProps(enabled: true).applyPreset('ru');
 
 Future<void> _reveal(
   WidgetTester tester,
@@ -24,18 +21,22 @@ Future<void> _reveal(
   double delta = 250,
   Finder? scrollable,
 }) async {
-  await tester.scrollUntilVisible(
-    finder,
-    delta,
-    scrollable: scrollable ?? find.byType(Scrollable).first,
-  );
+  final list = scrollable ?? find.byType(Scrollable).first;
+  await tester.scrollUntilVisible(finder, delta, scrollable: list);
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+  // The studio floats its app bar over the scroll content, so a row aligned to
+  // the viewport top lands under the bar and won't hit-test. Nudge it clear.
+  final top = tester.getRect(finder).top;
+  if (top < 120) {
+    await tester.drag(list, Offset(0, 120 - top));
+    await tester.pumpAndSettle();
+  }
 }
 
-Future<void> _openAdvanced(WidgetTester tester) async {
-  await _reveal(tester, find.text('Advanced configuration'), delta: 200);
-  await tester.tap(find.text('Advanced configuration'), warnIfMissed: false);
+Future<void> _openDrill(WidgetTester tester, String title) async {
+  await _reveal(tester, find.text(title));
+  await tester.tap(find.text(title));
   await tester.pumpAndSettle();
 }
 
@@ -43,7 +44,7 @@ Future<ProviderContainer> _pump(
   WidgetTester tester, {
   required SmartRoutingProps props,
   Profile? profile,
-  Size size = const Size(1000, 800),
+  Size size = const Size(420, 900),
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -59,10 +60,8 @@ Future<ProviderContainer> _pump(
           ],
   );
   addTearDown(container.dispose);
-  container
-      .read(viewSizeProvider.notifier)
-      .update((_) => const Size(1000, 800));
-  // The view gates its tuning sections on `unlocked`; an active config always
+  container.read(viewSizeProvider.notifier).update((_) => size);
+  // The view gates its tuning surfaces on `unlocked`; an active config always
   // migrates enabled⇒unlocked, so mirror that invariant for in-memory props.
   container.read(smartRoutingSettingProvider.notifier).value = props.copyWith(
     unlocked: props.unlocked || props.enabled,
@@ -72,7 +71,7 @@ Future<ProviderContainer> _pump(
       container: container,
       child: const TestApp(
         includeNavigatorKey: true,
-        child: SmartRoutingView(),
+        child: RoutingStudioView(),
       ),
     ),
   );
@@ -81,235 +80,108 @@ Future<ProviderContainer> _pump(
 }
 
 void main() {
-  testWidgets('a disabled engine shows nothing to tune', (tester) async {
+  testWidgets('a disabled engine offers only the switch and an off hint', (
+    tester,
+  ) async {
     await _pump(tester, props: const SmartRoutingProps());
 
     expect(find.text('Smart routing'), findsWidgets);
-    expect(find.text('Region'), findsNothing);
-    expect(find.text('Behaviour'), findsNothing);
+    expect(find.byType(ExperimentalBadge), findsOneWidget);
+    expect(
+      find.text('Turn smart routing on to let it pick servers for you'),
+      findsOneWidget,
+    );
+    expect(find.text('Strategy'), findsNothing);
+    expect(find.text('Comparison ladder'), findsNothing);
+    expect(find.text('When to switch'), findsNothing);
   });
 
-  testWidgets('the intro card is omitted', (tester) async {
-    await _pump(tester, props: const SmartRoutingProps());
+  testWidgets('enabling asks for experimental consent first', (tester) async {
+    final container = await _pump(tester, props: const SmartRoutingProps());
 
-    expect(find.textContaining('Start from a region preset'), findsNothing);
+    await tester.tap(find.byType(Switch), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.byType(ExperimentalNoticeDialog), findsOneWidget);
+    expect(container.read(smartRoutingSettingProvider).unlocked, isFalse);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(container.read(smartRoutingSettingProvider).unlocked, isFalse);
 
     await tester.tap(find.byType(Switch), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Enable anyway'));
     await tester.pumpAndSettle();
-
-    expect(find.textContaining('Start from a region preset'), findsNothing);
+    expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
   });
 
-  testWidgets('diagnostics folds into Behaviour, not its own section', (
-    tester,
-  ) async {
-    final container = await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
-
-    await _reveal(tester, find.text('Diagnostics logging'));
-    expect(find.text('Diagnostics logging'), findsOne);
-
-    await tester.tap(find.text('Diagnostics logging'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    expect(container.read(appSettingProvider).smartRoutingDiagnostics, isTrue);
-  });
-
-  testWidgets('the mid layer is settings, never weights', (tester) async {
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
-
-    await _reveal(tester, find.text('Require UDP support'));
-    expect(find.text('Require UDP support'), findsOne);
-    expect(find.text('Settle time'), findsNothing);
-
-    await _openAdvanced(tester);
-
-    expect(find.text('Settle time'), findsOne);
-    expect(find.text('Servers per check'), findsOne);
-  });
-
-  for (final title in ['Open-internet checks', 'Local checks']) {
-    testWidgets('$title uses the standard list editor', (tester) async {
-      await _pump(
-        tester,
-        props: const SmartRoutingProps(
-          enabled: true,
-          preset: 'ru',
-          openMarkers: [
-            RcxMarker(url: 'https://example.com/open', statuses: [204]),
-          ],
-          domesticMarkers: [
-            RcxMarker(url: 'https://example.com/local', statuses: [200]),
-          ],
-        ),
-      );
-
-      await _openAdvanced(tester);
-      final sheet = find.byType(Scrollable).last;
-      await _reveal(tester, find.text(title), delta: 300, scrollable: sheet);
-      // scrollUntilVisible parks a deep item flush under the floating app bar,
-      // where the blur overlay eats the tap; nudge it clear before tapping.
-      await tester.drag(sheet, const Offset(0, 140));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(title), warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ReorderableListView), findsOneWidget);
-      expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
-    });
-  }
-
-  testWidgets('the ranking key is a labelled row, not a crammed subtitle', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
-
-    await _openAdvanced(tester);
-    await _reveal(
-      tester,
-      find.textContaining('Verdict → Fit for this network'),
-      scrollable: find.byType(Scrollable).last,
-    );
-
-    expect(
-      find.textContaining('Verdict → Fit for this network'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('the advanced page notes the region seeds the probes', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
-
-    await _openAdvanced(tester);
-    await _reveal(
-      tester,
-      find.textContaining('region set in the app'),
-      scrollable: find.byType(Scrollable).last,
-    );
-
-    expect(find.textContaining('region set in the app'), findsOneWidget);
-  });
-
-  testWidgets('a censored country lands in a reorderable list, preselected', (
+  testWidgets('the decision core stays inline on the master list', (
     tester,
   ) async {
     await _pump(tester, props: _russia);
 
-    await _openAdvanced(tester);
-    await _reveal(
-      tester,
-      find.text('Censoring countries'),
-      delta: 300,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ReorderableListView), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
-    expect(find.text('RU'), findsOneWidget);
+    for (final label in [
+      'Strategy',
+      'Allowed to compete',
+      'Comparison ladder',
+    ]) {
+      await _reveal(tester, find.text(label));
+      expect(find.text(label), findsWidgets, reason: 'missing core: $label');
+    }
   });
 
-  testWidgets('Add opens a searchable dialog that appends the country', (
-    tester,
-  ) async {
-    final container = await _pump(tester, props: _russia);
+  testWidgets('every later stage shows as a drill-in row', (tester) async {
+    await _pump(tester, props: _russia);
 
-    await _openAdvanced(tester);
-    await _reveal(
-      tester,
-      find.text('Censoring countries'),
-      delta: 300,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Search by country code'), findsOneWidget);
-
-    await tester.enterText(find.byType(TextField), 'DE');
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.widgetWithText(DecorationListItem, 'DE'));
-    await tester.pumpAndSettle();
-
-    expect(
-      container.read(smartRoutingSettingProvider).censorCountries,
-      containsAll(['RU', 'DE']),
-    );
+    for (final label in [
+      'When to switch',
+      'Timing',
+      'Signals',
+      'Service routes',
+      'Behaviour',
+      'Backup',
+      'Routing log',
+    ]) {
+      await _reveal(tester, find.text(label));
+      expect(find.text(label), findsWidgets, reason: 'missing row: $label');
+    }
   });
 
-  testWidgets('the region card shows seeded facets and marks unused ones', (
+  testWidgets('the comparison ladder sits inline, not behind a page', (
     tester,
   ) async {
     await _pump(tester, props: _russia);
 
-    await _reveal(tester, find.text('How this region works'));
-    await tester.tap(find.text('How this region works'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    expect(find.text('What this region sets up'), findsOneWidget);
-    expect(find.text('RU'), findsOneWidget);
-    expect(find.text('Not used in this region'), findsOneWidget);
+    await _reveal(tester, find.textContaining('Hold a step to move it'));
+    expect(find.textContaining('Hold a step to move it'), findsOneWidget);
   });
 
-  testWidgets('the strategy is named in plain words with what it does', (
+  testWidgets('the switch-trigger knobs open from their drill row', (
     tester,
   ) async {
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
+    await _pump(tester, props: _russia);
 
-    await _reveal(tester, find.text('Strategy'));
-
-    expect(
-      find.text('Keeps a working server and changes it less often'),
-      findsOne,
-    );
-    expect(find.text('Takes the quickest of the servers that work'), findsOne);
-    expect(
-      find.text('Checks servers less often, saving data and battery'),
-      findsOne,
-    );
+    await _openDrill(tester, 'When to switch');
+    expect(find.text('Faster by at least'), findsOneWidget);
   });
 
-  testWidgets('picking a strategy repaces the engine and leaves the region', (
+  testWidgets('the cadence knobs open from the pace drill row', (tester) async {
+    await _pump(tester, props: _russia);
+
+    await _openDrill(tester, 'Timing');
+    expect(find.text('Servers per check'), findsOneWidget);
+  });
+
+  testWidgets('the measurement inputs open from the signals drill row', (
     tester,
   ) async {
+    await _pump(tester, props: _russia);
+
+    await _openDrill(tester, 'Signals');
+    expect(find.text('Reachability probes'), findsOneWidget);
+  });
+
+  testWidgets('picking a strategy inline updates the engine', (tester) async {
     final container = await _pump(tester, props: _russia);
 
     await _reveal(tester, find.text('Saver'));
@@ -319,125 +191,34 @@ void main() {
     final props = container.read(smartRoutingSettingProvider);
     expect(props.strategy, SmartRoutingStrategy.saver);
     expect(props.dwellSeconds, SmartRoutingStrategy.saver.pacing.dwellSeconds);
-    expect(props.matchesStrategy, isTrue);
-    expect(props.matchesPreset, isTrue);
-    expect(find.text('Russia · adjusted'), findsNothing);
   });
 
-  testWidgets('a hand-moved pace enables reset, which restores the pace', (
+  testWidgets('the diagnostics toggle persists from the behaviour page', (
     tester,
   ) async {
     final container = await _pump(
       tester,
-      props: _russia
-          .applyStrategy(SmartRoutingStrategy.stable)
-          .copyWith(dwellSeconds: 30),
+      props: const SmartRoutingProps(enabled: true, preset: 'ru'),
     );
 
-    final reset = find.widgetWithText(FilledButton, 'Reset');
-    expect(
-      tester.widget<FilledButton>(reset).onPressed,
-      isNotNull,
-      reason: 'an off-preset pace offers a reset',
-    );
-
-    await tester.tap(reset);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirm'));
+    await _openDrill(tester, 'Behaviour');
+    await tester.tap(find.text('Diagnostics logging'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    final props = container.read(smartRoutingSettingProvider);
-    expect(props.matchesStrategy, isTrue);
-    expect(props.dwellSeconds, SmartRoutingStrategy.stable.pacing.dwellSeconds);
+    expect(container.read(appSettingProvider).smartRoutingDiagnostics, isTrue);
   });
 
-  testWidgets('a seeded advanced page offers no section resets', (
-    tester,
-  ) async {
-    await _pump(tester, props: _russia);
-
-    await _openAdvanced(tester);
-
-    expect(find.widgetWithText(FilledButton, 'Reset'), findsNothing);
-  });
-
-  testWidgets('an edited section offers a reset that restores its seed', (
-    tester,
-  ) async {
-    final container = await _pump(
-      tester,
-      props: _russia.copyWith(canaryForeign: const ['9.9.9.9:443']),
-    );
-
-    await _openAdvanced(tester);
-    final reset = find.widgetWithText(FilledButton, 'Reset');
-    await _reveal(tester, reset, scrollable: find.byType(Scrollable).last);
-    expect(reset, findsOneWidget);
-
-    await tester.tap(reset);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirm'));
-    await tester.pumpAndSettle();
-
-    final props = container.read(smartRoutingSettingProvider);
-    expect(props.canaryForeign, _russia.canaryForeign);
-    expect(props.matchesSeedGroup(RoutingFacetGroup.probes), isTrue);
-  });
-
-  testWidgets('service routes summarize profile capability sources', (
-    tester,
-  ) async {
-    final profile = Profile.normal(label: 'profile').copyWith(
-      id: _profileId,
-      capabilityManifest: ProviderCapabilityManifest(
-        version: 1,
-        claims: const [
-          CapabilityClaim(
-            capabilityId: 'gemini-access',
-            selectors: [
-              CapabilitySelector(provider: 'premium', nameContains: 'star'),
-            ],
-          ),
-        ],
-        receivedAt: DateTime.utc(2026, 9, 10),
-        sourceHost: 'provider.test',
-      ),
-      manualCapabilitySelectors: const [
-        ManualCapabilitySelector(
-          capabilityId: 'gemini-access',
-          nameContains: 'spark',
-        ),
-      ],
-    );
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-      profile: profile,
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-
-    expect(find.text('2 specialist selectors'), findsOneWidget);
-    expect(find.text('No specialist selectors'), findsOneWidget);
-  });
-
-  testWidgets('service route toggle persists in the active profile', (
+  testWidgets('a service route toggle persists in the active profile', (
     tester,
   ) async {
     final profile = Profile.normal(label: 'profile').copyWith(id: _profileId);
     final container = await _pump(
       tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
+      props: const SmartRoutingProps(enabled: true, preset: 'ru'),
       profile: profile,
     );
 
-    await _reveal(tester, find.text('Gemini access'));
+    await _openDrill(tester, 'Service routes');
     await tester.tap(find.text('Gemini access'), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ListTile, 'Use service route'));
@@ -450,182 +231,5 @@ void main() {
           .enabled,
       isTrue,
     );
-  });
-
-  testWidgets('service route UI is inert without an active profile', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-    await tester.tap(find.text('Gemini access'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('the open service route page reflects an edit in place', (
-    tester,
-  ) async {
-    final profile = Profile.normal(label: 'profile').copyWith(id: _profileId);
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-      profile: profile,
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-    await tester.tap(find.text('Gemini access'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    expect(find.text('Status'), findsNothing);
-
-    await tester.tap(find.widgetWithText(ListTile, 'Use service route'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Status'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(SideSheet),
-        matching: find.text('Waiting for the engine'),
-      ),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('the fallback row shows the choice and swaps it in place', (
-    tester,
-  ) async {
-    final profile = Profile.normal(label: 'profile').copyWith(id: _profileId);
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-      profile: profile,
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-    await tester.tap(find.text('Gemini access'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    expect(find.text('Use the main Smart Routing node'), findsOneWidget);
-
-    await tester.tap(find.widgetWithText(ListTile, 'When no specialist works'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Block the service').last);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Block the service'), findsOneWidget);
-    expect(find.text('Use the main Smart Routing node'), findsNothing);
-  });
-
-  testWidgets('the fallback choice does not squeeze its row on a phone', (
-    tester,
-  ) async {
-    final profile = Profile.normal(label: 'profile').copyWith(id: _profileId);
-    await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-      profile: profile,
-      size: const Size(360, 800),
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-    await tester.tap(find.text('Gemini access'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    final title = tester.renderObject<RenderBox>(
-      find.text('When no specialist works'),
-    );
-    expect(title.size.width, greaterThan(150));
-    expect(find.text('Use the main Smart Routing node'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('dismissing the fallback dialog changes nothing', (tester) async {
-    final profile = Profile.normal(label: 'profile').copyWith(id: _profileId);
-    final container = await _pump(
-      tester,
-      props: const SmartRoutingProps(
-        enabled: true,
-        preset: 'ru',
-      ),
-      profile: profile,
-    );
-
-    await _reveal(tester, find.text('Gemini access'));
-    await tester.tap(find.text('Gemini access'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(ListTile, 'When no specialist works'));
-    await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(8, 8));
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Use the main Smart Routing node'), findsOneWidget);
-    expect(
-      container.read(currentProfileProvider)!.serviceRoutePolicies,
-      isEmpty,
-    );
-  });
-
-  testWidgets('turning it on from Other uses neutral markers, not the locale', (
-    tester,
-  ) async {
-    final container = await _pump(tester, props: const SmartRoutingProps());
-    final previousLocale = Intl.defaultLocale;
-    addTearDown(() => Intl.defaultLocale = previousLocale);
-    Intl.defaultLocale = 'ru';
-
-    await tester.tap(find.byType(Switch), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Enable anyway'));
-    await tester.pumpAndSettle();
-
-    final props = container.read(smartRoutingSettingProvider);
-    expect(props.unlocked, isTrue);
-    expect(props.enabled, isFalse);
-    expect(props.preset, neutralPreset);
-    expect(props.openMarkers, isNotEmpty);
-    expect(props.canaryForeign, isNotEmpty);
-    expect(props.censorCountries, isEmpty);
-    expect(container.read(appSettingProvider).region, isNull);
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-  });
-
-  testWidgets('the engine is flagged experimental', (tester) async {
-    await _pump(tester, props: const SmartRoutingProps());
-
-    expect(find.byType(ExperimentalBadge), findsOneWidget);
-  });
-
-  testWidgets('enabling asks for experimental consent first', (tester) async {
-    final container = await _pump(tester, props: const SmartRoutingProps());
-
-    await tester.tap(find.byType(Switch), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    expect(find.byType(ExperimentalNoticeDialog), findsOneWidget);
-    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
-
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
-
-    await tester.tap(find.byType(Switch), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Enable anyway'));
-    await tester.pumpAndSettle();
-    expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
   });
 }

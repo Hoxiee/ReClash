@@ -374,12 +374,48 @@ type rcxCandidate struct {
 
 type rcxPolicy struct {
 	LatencyBands      []int
+	Ladder            []rcxRungSpec
 	Strategy          string
 	RequireUDP        bool
 	AllowDomesticLast bool
 	Censoring         bool
 	DwellSeconds      int
 	AbsCeilingMs      int
+	SwitchImproveMs   int
+	SwitchImprovePct  int
+	LatencyStepMs     int
+}
+
+func (p rcxPolicy) ladderOrDefault() []rcxRungSpec {
+	if len(p.Ladder) == 0 {
+		return rcxDefaultLadder()
+	}
+	return p.Ladder
+}
+
+// latencyStep is the rounding/near-tie granularity for latency comparisons; a
+// zero (older host, unset config) falls back to the shipped 30ms.
+func (p rcxPolicy) latencyStep() int {
+	if p.LatencyStepMs > 0 {
+		return p.LatencyStepMs
+	}
+	return rcxLatencyStep
+}
+
+// switchThresholds is how much faster a challenger must be to trigger a latency
+// switch. Explicit config wins; otherwise the strategy sets the shipped defaults.
+func (p rcxPolicy) switchThresholds() (absolute, percent int) {
+	absolute, percent = 30, 20
+	if p.Strategy == rcxStrategyStable || p.Strategy == rcxStrategySaver {
+		absolute, percent = 50, 30
+	}
+	if p.SwitchImproveMs > 0 {
+		absolute = p.SwitchImproveMs
+	}
+	if p.SwitchImprovePct > 0 {
+		percent = p.SwitchImprovePct
+	}
+	return absolute, percent
 }
 
 type rcxDecisionInput struct {
@@ -456,10 +492,6 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 	if evidence == rcxEvidenceFreshProbe {
 		evidence = rcxEvidenceLiveTraffic
 	}
-	recurrence := c.Recurrence
-	if recurrence < 2 {
-		recurrence = 0
-	}
 	latencyMs := rcxRankingLatency(c, in.Policy)
 	if latencyMs <= 0 {
 		latencyMs = int(^uint(0) >> 1)
@@ -471,7 +503,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 	return rcxKey{
 		verdict:    rcxCandidateVerdict(c, in.Terrain),
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
-		recurrence: recurrence,
+		recurrence: c.Recurrence,
 		degraded:   c.Degraded,
 		unproven:   c.Facts.Transit != rcxProofProven,
 		evidence:   evidence,
@@ -501,7 +533,6 @@ func rcxDiscoveryLatency(c rcxCandidate) int {
 const (
 	rcxUnmeasuredLatencyBase = 1 << 20
 	rcxLatencyStep           = 30
-	rcxHostOnlyPenaltyMs     = rcxLatencyStep / 2
 )
 
 func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
@@ -516,13 +547,14 @@ func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
 	if host <= 0 {
 		return 0
 	}
+	step := policy.latencyStep()
 	// Only a node with proven egress competes on its 30ms-rounded entry ping; entry
 	// transit alone no longer crowns the fast band, so a dead exit behind a live
 	// entry sinks beneath every measured node instead of winning on host-ping.
 	if rcxProvenEgressEver(c.Facts) {
-		return host/rcxLatencyStep*rcxLatencyStep + rcxHostOnlyPenaltyMs
+		return host/step*step + step/2
 	}
-	return rcxUnmeasuredLatencyBase + host/rcxLatencyStep
+	return rcxUnmeasuredLatencyBase + host/step
 }
 
 // True when the node has ever demonstrated a working exit, not merely moved entry
@@ -598,21 +630,18 @@ func rcxEscapesSlowIncumbent(policy rcxPolicy, incumbent, best rcxCandidate) boo
 	return ceiling > 0 && inc > ceiling && fast > 0 && fast <= ceiling
 }
 
-func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
+func rcxLatencyImproves(p rcxPolicy, incumbent, challenger int) bool {
 	if incumbent <= 0 || challenger <= 0 || challenger >= incumbent {
 		return false
 	}
-	absolute, percent := 30, 20
-	if strategy == rcxStrategyStable || strategy == rcxStrategySaver {
-		absolute, percent = 50, 30
-	}
+	absolute, percent := p.switchThresholds()
 	gain := incumbent - challenger
 	required := incumbent/100*percent + (incumbent%100*percent+99)/100
 	return gain >= absolute && gain >= required
 }
 
 // Fail-closed: an unknown incumbent median counts as a trade-down (the old guard allowed it).
-func rcxTradesDown(incumbent, best rcxCandidate) bool {
+func rcxTradesDown(p rcxPolicy, incumbent, best rcxCandidate) bool {
 	inc, alt := incumbent.MedianMs, best.MedianMs
 	if inc <= 0 {
 		return true
@@ -620,7 +649,7 @@ func rcxTradesDown(incumbent, best rcxCandidate) bool {
 	if alt <= 0 {
 		return false
 	}
-	return alt > inc+rcxLatencyStep
+	return alt > inc+p.latencyStep()
 }
 
 // A working incumbent yields for latency only when itself slow — past the absolute
@@ -668,7 +697,7 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	var incumbent rcxCandidate
 	var incumbentCand rcxCandidate
 	pinEligible := false
-	compare := rcxCompareFor(in.Policy.Strategy)
+	compare := rcxCompareFor(in.Policy)
 	for i := range in.Candidates {
 		c := &in.Candidates[i]
 		if c.Name == in.Incumbent {
@@ -765,18 +794,21 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	reason := rcxReasonHold
-	reliabilityGain := bestKey.recurrence < incumbentKey.recurrence ||
-		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded
+	// Raw recurrence now lives in the key, so this switch trigger applies its own floor.
+	incRecurrence := rcxRecurrenceFloored(incumbentKey.recurrence, rcxRecurrenceFloorDefault)
+	bestRecurrence := rcxRecurrenceFloored(bestKey.recurrence, rcxRecurrenceFloorDefault)
+	reliabilityGain := bestRecurrence < incRecurrence ||
+		bestRecurrence == incRecurrence && incumbentKey.degraded && !bestKey.degraded
 	// Escape a degraded incumbent only when trapped — unmeasured egress or stalled payload.
 	degradedEscape := incumbentKey.degraded && !bestKey.degraded &&
 		(incumbent.MedianMs <= 0 || incumbent.Stalled)
-	if reliabilityGain && incumbentReaches && !degradedEscape && rcxTradesDown(incumbent, *best) {
+	if reliabilityGain && incumbentReaches && !degradedEscape && rcxTradesDown(in.Policy, incumbent, *best) {
 		reliabilityGain = false
 	}
 	if reliabilityGain {
 		reason = rcxReasonReliabilityGain
 	} else if rcxIncumbentTooSlow(in.Policy, incumbent) &&
-		rcxLatencyImproves(in.Policy.Strategy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
+		rcxLatencyImproves(in.Policy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
 		reason = rcxReasonLatencyGain
 	}
 	if reason != rcxReasonHold {
@@ -808,14 +840,13 @@ func rcxCompareStable(a, b rcxKey) int {
 	return rcxCompare(a, b)
 }
 
-func rcxCompareFor(strategy string) func(a, b rcxKey) int {
-	switch strategy {
-	case rcxStrategyLatency:
-		return rcxCompareLatency
-	case rcxStrategyStable, rcxStrategySaver:
-		return rcxCompareStable
+// rcxCompareFor builds the active comparator from policy: the configured ladder
+// (default when unset) flavored by the strategy.
+func rcxCompareFor(p rcxPolicy) func(a, b rcxKey) int {
+	ladder := rcxLadderForStrategy(p.ladderOrDefault(), p.Strategy)
+	return func(a, b rcxKey) int {
+		return rcxCompareWith(a, b, ladder)
 	}
-	return rcxCompare
 }
 
 type rcxBlock string
@@ -878,7 +909,7 @@ type rcxRanked struct {
 // The decision's own key and order: a second ordering would drift from it.
 func rcxRank(in rcxDecisionInput) []rcxRanked {
 	in.Policy.Censoring = rcxEffectiveCensoring(in)
-	compare := rcxCompareFor(in.Policy.Strategy)
+	compare := rcxCompareFor(in.Policy)
 	ranked := make([]rcxRanked, 0, len(in.Candidates))
 	for _, c := range in.Candidates {
 		ranked = append(ranked, rcxRanked{
