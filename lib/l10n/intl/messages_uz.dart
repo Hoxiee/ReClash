@@ -887,6 +887,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("Profil yaratish"),
     "createProfileFromUrlTip": m9,
     "creationTime": MessageLookupByLibrary.simpleMessage("Yaratilgan vaqt"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — DPI chetlab oʻtish vositasi",
+    ),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — ilova shu mijoz asosida qurilgan",
     ),
@@ -982,7 +985,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m13,
     "deleteTip": m14,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Koʻp platformali mihomo mijoz: yangilangan boshqaruv paneli, aqlli marshrutlash va obunalarni qulay boshqarish. Ochiq kod, reklama yoʻq, telemetriya yoʻq.",
+      "mihomo yadrosi va FlClash loyihasi asosida qurilgan koʻp platformali mijoz. Ochiq kod, reklama yoʻq, telemetriya yoʻq.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Manzil"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Manzil GeoIP"),

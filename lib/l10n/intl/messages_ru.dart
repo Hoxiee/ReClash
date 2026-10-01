@@ -854,6 +854,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("Создать профиль"),
     "createProfileFromUrlTip": m9,
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — инструмент обхода DPI",
+    ),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — клиент, на котором всё построено",
     ),
@@ -945,7 +948,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m13,
     "deleteTip": m14,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Кроссплатформенный клиент mihomo: переработанный дашборд, умная маршрутизация и полноценная поддержка подписок. Открытый исходный код, без рекламы и телеметрии.",
+      "Кроссплатформенный клиент на базе ядра mihomo и проекта FlClash. Открытый код, без рекламы и телеметрии.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Назначение"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(

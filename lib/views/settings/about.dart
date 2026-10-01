@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:material_ui/material_ui.dart';
@@ -81,6 +80,12 @@ class AboutView extends ConsumerWidget {
         name: 'MetaCubeX',
         role: appLocalizations.creditMihomo,
         link: 'https://github.com/MetaCubeX/mihomo',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/hufrea.jpg',
+        name: 'hufrea',
+        role: appLocalizations.creditByeDpi,
+        link: 'https://github.com/hufrea/byedpi',
       ),
     ];
     return BaseScaffold(
@@ -175,6 +180,12 @@ class AboutView extends ConsumerWidget {
   }
 }
 
+// ReClash mark gradient stops, mirrored from reclash-mark-color.svg so the
+// wordmark stays in step with the SVG beside it.
+const _brandViolet = Color(0xFF8E73FF);
+const _brandBlue = Color(0xFF4786FF);
+const _brandCyan = Color(0xFF43C8F4);
+
 class _IdentityCard extends ConsumerStatefulWidget {
   const _IdentityCard({required this.onCheckUpdate});
 
@@ -185,9 +196,6 @@ class _IdentityCard extends ConsumerStatefulWidget {
 }
 
 class _IdentityCardState extends ConsumerState<_IdentityCard> {
-  static const _logoSize = 88.0;
-  static const _logoInset = 14.0;
-
   int _tapCount = 0;
   DateTime? _lastTapAt;
 
@@ -223,59 +231,38 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
     final colorScheme = context.colorScheme;
     final version = globalState.packageInfo.version;
     final platform = SupportPlatform.currentPlatform.name;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.xl,
-      padding: AppInsets.xl,
-      onPressed: _handleTap,
-      onLongPress: () {
-        Clipboard.setData(
-          ClipboardData(
-            text:
-                '$appName $version '
-                '(${globalState.packageInfo.buildNumber}) · $platform',
-          ),
-        );
-        context.showNotifier(appLocalizations.copySuccess);
-      },
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _handleTap,
       child: Column(
-        spacing: 16,
+        spacing: 20,
         children: [
           _DeveloperModeDetector(
             onEnterDeveloperMode: _enableDeveloperMode,
-            child: DecoratedBox(
-              decoration: ShapeDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                shape: AppShape.all(AppCorner.fit(_logoSize)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(_logoInset),
-                child: Image.asset(
-                  'assets/images/icon.png',
-                  width: _logoSize - _logoInset * 2,
-                  height: _logoSize - _logoInset * 2,
-                ),
-              ),
+            child: SvgPicture.asset(
+              'assets/images/marks/reclash-mark-color.svg',
+              height: 136,
             ),
           ),
           Column(
-            spacing: 8,
+            spacing: 12,
             children: [
-              Text(
-                appName,
-                textAlign: TextAlign.center,
-                style: textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              _Wordmark(text: appName, style: textTheme.headlineMedium),
               Wrap(
-                spacing: 6,
-                runSpacing: 6,
+                spacing: 8,
+                runSpacing: 8,
                 alignment: WrapAlignment.center,
                 children: [
-                  MetaChip(label: 'v$version'),
-                  MetaChip(label: platform),
+                  _Pill(
+                    label: 'v$version',
+                    color: colorScheme.primaryContainer,
+                    foregroundColor: colorScheme.onPrimaryContainer,
+                  ),
+                  _Pill(
+                    label: platform,
+                    color: colorScheme.surfaceContainerHighest,
+                    foregroundColor: colorScheme.onSurfaceVariant,
+                  ),
                 ],
               ),
             ],
@@ -298,14 +285,62 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
             icon: const GlyphIcon(AppGlyphs.sync, size: 20, fill: 1),
             label: Text(appLocalizations.checkUpdate),
           ),
-          Text(
-            appLocalizations.copyDiagnostics,
-            textAlign: TextAlign.center,
-            style: textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant.opacity60,
-            ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({
+    required this.label,
+    required this.color,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(color: color, shape: AppShape.full),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        child: Text(
+          label,
+          style: context.textTheme.labelMedium?.copyWith(
+            color: foregroundColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Wordmark extends StatelessWidget {
+  const _Wordmark({required this.text, required this.style});
+
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [_brandViolet, _brandBlue, _brandCyan],
+      ).createShader(bounds),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: style?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.5,
+        ),
       ),
     );
   }

@@ -636,6 +636,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("创建配置"),
     "createProfileFromUrlTip": m9,
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("ByeDPI — DPI 绕过工具"),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — 本应用的基础客户端",
     ),
@@ -705,7 +706,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m13,
     "deleteTip": m14,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "多平台 mihomo 客户端：重构的仪表盘、更聪明的分流以及完善的订阅支持。开源，无广告，无遥测。",
+      "基于 mihomo 内核和 FlClash 项目构建的多平台客户端。开源，无广告，无遥测。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("目标地址"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("目标地理定位"),

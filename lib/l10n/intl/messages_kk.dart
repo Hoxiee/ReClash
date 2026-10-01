@@ -860,6 +860,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("Профиль жасау"),
     "createProfileFromUrlTip": m9,
     "creationTime": MessageLookupByLibrary.simpleMessage("Жасалу уақыты"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — DPI айналып өту құралы",
+    ),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — осы қолданбаның негізі",
     ),
@@ -955,7 +958,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m13,
     "deleteTip": m14,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Бірнеше платформада жұмыс істейтін mihomo клиенті: қайта жасалған бақылау тақтасы, ақылды бағыттау және жазылыстарға толық қолдау. Ашық код, жарнама да, телеметрия да жоқ.",
+      "mihomo ядросы мен FlClash жобасына негізделген көп платформалы клиент. Ашық код, жарнамасыз, телеметриясыз.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Нысан"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Нысан GeoIP"),

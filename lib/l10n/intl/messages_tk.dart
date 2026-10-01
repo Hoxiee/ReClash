@@ -863,6 +863,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("Profil döret"),
     "createProfileFromUrlTip": m9,
     "creationTime": MessageLookupByLibrary.simpleMessage("Döredilen wagt"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — DPI böwüsme guraly",
+    ),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — bu programmanyň binýady",
     ),
@@ -956,7 +959,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m13,
     "deleteTip": m14,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "Köp platformaly mihomo klienti: täzeden gurlan panel, has akylly marşrutlama we birinji derejeli abuna goldawy. Açyk kod, reklama ýok, telemetriýa ýok.",
+      "mihomo ýadrosy we FlClash taslamasy esasynda gurlan köp platformaly klient. Açyk kod, reklamasyz, telemetriýasyz.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Nyşan"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Nyşanyň GeoIP-i"),

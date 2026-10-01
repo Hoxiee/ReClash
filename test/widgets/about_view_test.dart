@@ -37,6 +37,11 @@ void main() {
     final l10n = await pumpAbout(tester);
     final scrollable = find.byType(Scrollable).first;
 
+    await tester.scrollUntilVisible(
+      find.text(l10n.madeBy),
+      200,
+      scrollable: scrollable,
+    );
     expect(find.text(l10n.madeBy), findsOneWidget);
     expect(find.text('Hoxiee'), findsOneWidget);
     expect(find.text(l10n.roleAuthor), findsOneWidget);

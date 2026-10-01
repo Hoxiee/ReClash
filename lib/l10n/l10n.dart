@@ -1628,6 +1628,16 @@ class AppLocalizations {
     );
   }
 
+  /// `ByeDPI — the DPI-bypass tool`
+  String get creditByeDpi {
+    return Intl.message(
+      'ByeDPI — the DPI-bypass tool',
+      name: 'creditByeDpi',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `License`
   String get license {
     return Intl.message('License', name: 'license', desc: '', args: []);
@@ -1683,10 +1693,10 @@ class AppLocalizations {
     return Intl.message('Fade', name: 'fade', desc: '', args: []);
   }
 
-  /// `A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.`
+  /// `A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads, no telemetry.`
   String get desc {
     return Intl.message(
-      'A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.',
+      'A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads, no telemetry.',
       name: 'desc',
       desc: '',
       args: [],
