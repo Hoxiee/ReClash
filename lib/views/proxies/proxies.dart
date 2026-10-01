@@ -51,18 +51,25 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     );
   }
 
-  List<IconButtonData> _buildIconActions() {
-    if (!_isTab) {
-      return const [];
-    }
+  List<IconButtonData> _buildIconActions(bool smartRoutingPinned) {
+    final appLocalizations = context.appLocalizations;
     return [
-      IconButtonData(
-        glyph: AppGlyphs.locate,
-        onPressed: () {
-          _proxiesTabKey.currentState?.scrollToGroupSelected();
-        },
-        tooltip: context.appLocalizations.scrollToSelected,
-      ),
+      if (smartRoutingPinned)
+        IconButtonData(
+          glyph: AppGlyphs.autoMode,
+          tooltip: appLocalizations.smartRoutingBackToAuto,
+          onPressed: () {
+            ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
+          },
+        ),
+      if (_isTab)
+        IconButtonData(
+          glyph: AppGlyphs.locate,
+          onPressed: () {
+            _proxiesTabKey.currentState?.scrollToGroupSelected();
+          },
+          tooltip: appLocalizations.scrollToSelected,
+        ),
     ];
   }
 
@@ -149,32 +156,16 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       floatBody: true,
       resizeToAvoidBottomInset: false,
       primaryAction: _buildPrimaryAction(),
-      iconActions: _buildIconActions(),
+      pinPrimaryAction: true,
+      pinPrimaryActionTrailing: true,
+      iconActions: _buildIconActions(smartRoutingPinned),
       menuItems: _buildMenuItems(context),
-      actions: smartRoutingPinned ? const [_ResumeSmartRoutingButton()] : null,
       title: context.appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
         ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
         ProxiesType.list => const ProxiesListView(),
       },
-    );
-  }
-}
-
-class _ResumeSmartRoutingButton extends ConsumerWidget {
-  const _ResumeSmartRoutingButton();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return FadeScaleBox(
-      child: IconButton(
-        tooltip: context.appLocalizations.smartRoutingBackToAuto,
-        onPressed: () {
-          ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
-        },
-        icon: const GlyphIcon(AppGlyphs.autoMode),
-      ),
     );
   }
 }

@@ -424,13 +424,14 @@ class _URLFormDialogState extends State<URLFormDialog>
             Row(
               spacing: 8,
               children: [
-                IconButton.filledTonal(
-                  tooltip: _isMore
-                      ? appLocalizations.showLess
-                      : appLocalizations.showMore,
-                  onPressed: _pending ? null : _handleMore,
-                  icon: CommonExpandIcon(expand: _isMore),
-                ),
+                if (kEnableSubscriptionConverter)
+                  IconButton.filledTonal(
+                    tooltip: _isMore
+                        ? appLocalizations.showLess
+                        : appLocalizations.showMore,
+                    onPressed: _pending ? null : _handleMore,
+                    icon: CommonExpandIcon(expand: _isMore),
+                  ),
                 IconButton.filledTonal(
                   tooltip: appLocalizations.pasteFromClipboard,
                   onPressed: _pending ? null : _handlePaste,

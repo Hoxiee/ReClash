@@ -192,6 +192,7 @@ class _AppearanceColorSectionsState
                 children: [
                   InfoHeader(
                     info: Info(
+                      search: const SettingSearch(),
                       label: appLocalizations.themeColor,
                       glyph: AppGlyphs.palette,
                     ),
@@ -251,6 +252,7 @@ class _AppearanceColorSectionsState
             items: [
               DecorationListItem(
                 leading: const GlyphIcon(AppGlyphs.contrast),
+                search: const SettingSearch(),
                 title: Text(appLocalizations.findingPorcelain),
                 subtitle: Text(appLocalizations.porcelainThemeDesc),
                 trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
@@ -303,6 +305,8 @@ class _PrimaryColorGrid extends StatelessWidget {
     required this.onAdd,
   });
 
+  static const double _size = 56;
+
   final List<int?> colors;
   final int? selectedColor;
   final int? removableColor;
@@ -313,29 +317,21 @@ class _PrimaryColorGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (_, constraints) {
-        final columns = max((constraints.maxWidth / 96).ceil(), 3);
-        final itemWidth = (constraints.maxWidth - (columns - 1) * 16) / columns;
-        return Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: [
-            for (final color in colors)
-              _PrimaryColorTile(
-                color: color,
-                width: itemWidth,
-                isSelected: color == selectedColor,
-                isRemovable: removableColor != null && removableColor == color,
-                onSelect: () => onSelect(color),
-                onRequestRemove: () => onRequestRemove(color),
-                onDelete: onDelete,
-              ),
-            if (removableColor == null)
-              _AddPrimaryColorTile(width: itemWidth, onPressed: onAdd),
-          ],
-        );
-      },
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        for (final color in colors)
+          _PrimaryColorTile(
+            color: color,
+            isSelected: color == selectedColor,
+            isRemovable: removableColor != null && removableColor == color,
+            onSelect: () => onSelect(color),
+            onRequestRemove: () => onRequestRemove(color),
+            onDelete: onDelete,
+          ),
+        if (removableColor == null) _AddPrimaryColorTile(onPressed: onAdd),
+      ],
     );
   }
 }
@@ -343,7 +339,6 @@ class _PrimaryColorGrid extends StatelessWidget {
 class _PrimaryColorTile extends StatelessWidget {
   const _PrimaryColorTile({
     required this.color,
-    required this.width,
     required this.isSelected,
     required this.isRemovable,
     required this.onSelect,
@@ -352,7 +347,6 @@ class _PrimaryColorTile extends StatelessWidget {
   });
 
   final int? color;
-  final double width;
   final bool isSelected;
   final bool isRemovable;
   final VoidCallback onSelect;
@@ -361,13 +355,10 @@ class _PrimaryColorTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.none,
-      width: width,
-      height: width,
+    return SizedBox.square(
+      dimension: _PrimaryColorGrid._size,
       child: Stack(
         alignment: Alignment.center,
-        clipBehavior: Clip.none,
         children: [
           EffectGestureDetector(
             onLongPress: onRequestRemove,
@@ -392,14 +383,11 @@ class _PrimaryColorTile extends StatelessWidget {
             ),
           ),
           if (isRemovable)
-            Container(
-              color: Colors.white.opacity0,
-              padding: AppInsets.sm,
+            Positioned.fill(
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.delete,
                 onPressed: onDelete,
-                padding: AppInsets.md,
-                iconSize: 30,
+                iconSize: 20,
                 icon: GlyphIcon(
                   color: context.colorScheme.primary,
                   AppGlyphs.delete,
@@ -413,21 +401,18 @@ class _PrimaryColorTile extends StatelessWidget {
 }
 
 class _AddPrimaryColorTile extends StatelessWidget {
-  const _AddPrimaryColorTile({required this.width, required this.onPressed});
+  const _AddPrimaryColorTile({required this.onPressed});
 
-  final double width;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: width,
-      padding: AppInsets.xs,
+    return SizedBox.square(
+      dimension: _PrimaryColorGrid._size,
       child: IconButton.filledTonal(
         tooltip: context.appLocalizations.add,
         onPressed: onPressed,
-        iconSize: 32,
+        iconSize: 24,
         icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.add),
       ),
     );
@@ -620,6 +605,7 @@ class _AppearanceIconSectionState extends ConsumerState<AppearanceIconSection> {
       appSettingProvider.select((state) => state.iconVariant),
     );
     return SettingSection.sliver(
+      search: const SettingSearch(gate: SettingGate.android),
       title: appLocalizations.appearanceIcon,
       glyph: AppGlyphs.iconTile,
       items: [

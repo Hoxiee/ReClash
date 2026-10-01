@@ -203,7 +203,7 @@ class Bootstrap {
     if (globalState.isAttach == true) {
       return;
     }
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && kEnableDeviceCompanion) {
       registerCompanionGateProbe();
       registerCompanionBridge();
     }

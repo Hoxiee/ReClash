@@ -69,6 +69,8 @@ mixin CoreInterface {
 
   Future<bool> setUiActive(bool active);
 
+  Future<bool> setScreenOff(bool off);
+
   Future<List<ExternalProvider>> getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(String externalProviderName);
@@ -636,6 +638,15 @@ abstract class CoreHandlerInterface with CoreInterface {
     return await _invokeMethod<bool>(
           method: CoreMethod.setUiActive,
           arguments: active,
+        ) ??
+        false;
+  }
+
+  @override
+  Future<bool> setScreenOff(bool off) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.screenOff,
+          arguments: off,
         ) ??
         false;
   }

@@ -1106,10 +1106,8 @@ void main() {
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pump();
 
-    final opacity = tester.widget<Opacity>(
-      find.ancestor(of: find.byType(PageView), matching: find.byType(Opacity)),
-    );
-    expect(opacity.opacity, 1);
+    final pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.controller!.page, 1);
     expect(find.text('page:tools'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -1125,7 +1123,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         appSettingProvider.overrideWithBuild(
-          (_, _) => const AppSettingProps(isAnimateToPage: false),
+          (_, _) => const AppSettingProps(tabAnimation: TabAnimation.off),
         ),
         navigationItemsStateProvider.overrideWithValue(
           NavigationItemsState(
@@ -1160,10 +1158,8 @@ void main() {
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pump();
 
-    final opacity = tester.widget<Opacity>(
-      find.ancestor(of: find.byType(PageView), matching: find.byType(Opacity)),
-    );
-    expect(opacity.opacity, 1);
+    final pageView = tester.widget<PageView>(find.byType(PageView));
+    expect(pageView.controller!.page, 1);
     expect(find.text('page:tools'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

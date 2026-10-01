@@ -54,6 +54,7 @@ List<String> wallpaperLibraryOf(Map? configMap) {
 abstract class WallpaperProps with _$WallpaperProps {
   const factory WallpaperProps({
     @Default(false) bool enabled,
+    @Default(false) bool providerPriority,
     String? fileName,
     @Default(<String>[]) List<String> library,
     @Default(WallpaperFit.cover) WallpaperFit fit,
@@ -88,6 +89,7 @@ abstract class WallpaperProps with _$WallpaperProps {
     );
     return WallpaperProps(
       enabled: validFile && json['enabled'] == true,
+      providerPriority: json['providerPriority'] == true,
       fileName: validFile ? fileName as String : null,
       library: library,
       fit: WallpaperFit.values.firstWhere(

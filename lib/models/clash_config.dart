@@ -162,6 +162,19 @@ abstract class Proxy with _$Proxy {
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
 }
 
+extension ProxyExt on Proxy {
+  // [lowerQuery] is already lower-cased by the caller. A group also matches on
+  // its selected node so searching a node name surfaces the group holding it.
+  bool matchesQuery(String lowerQuery) {
+    if (lowerQuery.isEmpty) {
+      return true;
+    }
+    return name.toLowerCase().contains(lowerQuery) ||
+        type.toLowerCase().contains(lowerQuery) ||
+        (now?.toLowerCase().contains(lowerQuery) ?? false);
+  }
+}
+
 @freezed
 abstract class CustomOverwriteDate with _$CustomOverwriteDate {
   const factory CustomOverwriteDate({

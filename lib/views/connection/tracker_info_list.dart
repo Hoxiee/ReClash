@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
@@ -15,6 +16,10 @@ class TrackerInfoListController extends ValueNotifier<TrackerInfosState> {
 
   void setUseRegex(bool useRegex) {
     value = value.copyWith(useRegex: useRegex);
+  }
+
+  void setSortType(ConnectionSortType sortType) {
+    value = value.copyWith(sortType: sortType);
   }
 
   void updateKeywords(List<String> keywords) {

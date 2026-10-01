@@ -144,6 +144,7 @@ class _OverwriteNestedSheetState<T>
           width: sheetProvider.type == SheetType.sideSheet ? 400 : null,
           height: double.infinity,
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               Positioned.fill(
                 child: GestureDetector(

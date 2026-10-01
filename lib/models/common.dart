@@ -216,13 +216,14 @@ abstract class TrackerInfosState with _$TrackerInfosState {
     @Default('') String query,
     @Default(false) bool useRegex,
     @Default(true) bool autoScrollToEnd,
+    @Default(ConnectionSortType.traffic) ConnectionSortType sortType,
   }) = _TrackerInfosState;
 }
 
 extension TrackerInfosStateExt on TrackerInfosState {
   List<TrackerInfo> get list {
     final matcher = SearchMatcher(query.trim(), useRegex: useRegex);
-    return trackerInfos.where((trackerInfo) {
+    final filtered = trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
       final metadata = trackerInfo.metadata;
@@ -237,6 +238,54 @@ extension TrackerInfosStateExt on TrackerInfosState {
             chains.join(' '),
           ]);
     }).toList();
+    filtered.sort(_compareBySort);
+    return filtered;
+  }
+
+  // A stable order keeps rows from swapping between polls: every comparator
+  // falls back to start time then id so equal keys never reshuffle.
+  int _compareBySort(TrackerInfo a, TrackerInfo b) {
+    final primary = switch (sortType) {
+      ConnectionSortType.traffic => (b.upload + b.download).compareTo(
+        a.upload + a.download,
+      ),
+      ConnectionSortType.time => b.start.compareTo(a.start),
+      ConnectionSortType.upload => (b.uploadSpeed ?? 0).compareTo(
+        a.uploadSpeed ?? 0,
+      ),
+      ConnectionSortType.download => (b.downloadSpeed ?? 0).compareTo(
+        a.downloadSpeed ?? 0,
+      ),
+      ConnectionSortType.host => a.title.toLowerCase().compareTo(
+        b.title.toLowerCase(),
+      ),
+    };
+    if (primary != 0) {
+      return primary;
+    }
+    final start = b.start.compareTo(a.start);
+    return start != 0 ? start : a.id.compareTo(b.id);
+  }
+
+  ({int connections, int upload, int download, int uploadSpeed, int downloadSpeed})
+  get totals {
+    var upload = 0;
+    var download = 0;
+    var uploadSpeed = 0;
+    var downloadSpeed = 0;
+    for (final info in trackerInfos) {
+      upload += info.upload;
+      download += info.download;
+      uploadSpeed += info.uploadSpeed ?? 0;
+      downloadSpeed += info.downloadSpeed ?? 0;
+    }
+    return (
+      connections: trackerInfos.length,
+      upload: upload,
+      download: download,
+      uploadSpeed: uploadSpeed,
+      downloadSpeed: downloadSpeed,
+    );
   }
 }
 

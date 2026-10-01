@@ -161,6 +161,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     ref.read(routeTrackerProvider.notifier).setVisible(false);
     ref.read(setupActionProvider.notifier).setVisible(false);
     unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(false));
+    _syncCoreScreenOff(true);
     super.onWindowMinimize();
   }
 
@@ -171,8 +172,30 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     ref.read(routeTrackerProvider.notifier).setVisible(true);
     ref.read(setupActionProvider.notifier).setVisible(true);
     unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(true));
+    _syncCoreScreenOff(false);
     super.onWindowRestore();
     _scheduleWindowGeometryCapture();
+  }
+
+  // Desktop has no OS screen-off signal, so a minimized window is the only cue
+  // that no one is watching: park the core's RCX reach and watchdog like a
+  // screen-off would, without suspending the data plane. The tunnel keeps
+  // routing; only the engine's probing quiets until the window returns.
+  void _syncCoreScreenOff(bool off) {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    unawaited(
+      ref.read(coreHandlerProvider).setScreenOff(off).catchError((
+        Object error,
+      ) {
+        commonPrint.log(
+          'Core screen-off sync failed: $error',
+          logLevel: LogLevel.warning,
+        );
+        return false;
+      }),
+    );
   }
 
   @override

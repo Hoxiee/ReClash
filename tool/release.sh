@@ -135,6 +135,11 @@ fi
 echo "push      : $([[ $do_push == 1 ]] && echo yes || echo 'no (printed at the end)')"
 echo
 
+echo "--- client User-Agent freshness ---"
+dart run tool/update_client_uas.dart ||
+  echo "hint: 'dart run tool/update_client_uas.dart --write' refreshes stale client User-Agents."
+echo
+
 if ((dry_run)); then
   echo "dry run: nothing was changed."
   exit 0

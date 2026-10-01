@@ -5201,9 +5201,288 @@ as List<RcxLaneSelector>,
 
 
 /// @nodoc
+mixin _$RcxRungSpec {
+
+@JsonKey(name: 'id') String get id;@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'rf') int get recurrenceFloor;@JsonKey(name: 'lt') int get latencyToleranceMs;
+/// Create a copy of RcxRungSpec
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxRungSpecCopyWith<RcxRungSpec> get copyWith => _$RcxRungSpecCopyWithImpl<RcxRungSpec>(this as RcxRungSpec, _$identity);
+
+  /// Serializes this RcxRungSpec to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxRungSpec;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxRungSpec&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.recurrenceFloor, _this.recurrenceFloor) || other.recurrenceFloor == _this.recurrenceFloor)&&(identical(other.latencyToleranceMs, _this.latencyToleranceMs) || other.latencyToleranceMs == _this.latencyToleranceMs));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxRungSpec;
+  return Object.hash(runtimeType,_this.id,_this.enabled,_this.recurrenceFloor,_this.latencyToleranceMs);
+}
+
+@override
+String toString() {
+  final _this = this as RcxRungSpec;
+  return 'RcxRungSpec(id: ${_this.id}, enabled: ${_this.enabled}, recurrenceFloor: ${_this.recurrenceFloor}, latencyToleranceMs: ${_this.latencyToleranceMs})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxRungSpecCopyWith<$Res>  {
+  factory $RcxRungSpecCopyWith(RcxRungSpec value, $Res Function(RcxRungSpec) _then) = _$RcxRungSpecCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'id') String id,@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'rf') int recurrenceFloor,@JsonKey(name: 'lt') int latencyToleranceMs
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxRungSpecCopyWithImpl<$Res>
+    implements $RcxRungSpecCopyWith<$Res> {
+  _$RcxRungSpecCopyWithImpl(this._self, this._then);
+
+  final RcxRungSpec _self;
+  final $Res Function(RcxRungSpec) _then;
+
+/// Create a copy of RcxRungSpec
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? enabled = null,Object? recurrenceFloor = null,Object? latencyToleranceMs = null,}) {
+  return _then(RcxRungSpec(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,recurrenceFloor: null == recurrenceFloor ? _self.recurrenceFloor : recurrenceFloor // ignore: cast_nullable_to_non_nullable
+as int,latencyToleranceMs: null == latencyToleranceMs ? _self.latencyToleranceMs : latencyToleranceMs // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxRungSpec].
+extension RcxRungSpecPatterns on RcxRungSpec {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxRungSpec value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxRungSpec() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxRungSpec value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxRungSpec():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxRungSpec value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxRungSpec() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String id, @JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'rf')  int recurrenceFloor, @JsonKey(name: 'lt')  int latencyToleranceMs)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxRungSpec() when $default != null:
+return $default(_that.id,_that.enabled,_that.recurrenceFloor,_that.latencyToleranceMs);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String id, @JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'rf')  int recurrenceFloor, @JsonKey(name: 'lt')  int latencyToleranceMs)  $default,) {final _that = this;
+switch (_that) {
+case _RcxRungSpec():
+return $default(_that.id,_that.enabled,_that.recurrenceFloor,_that.latencyToleranceMs);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id')  String id, @JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'rf')  int recurrenceFloor, @JsonKey(name: 'lt')  int latencyToleranceMs)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxRungSpec() when $default != null:
+return $default(_that.id,_that.enabled,_that.recurrenceFloor,_that.latencyToleranceMs);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxRungSpec implements RcxRungSpec {
+  const _RcxRungSpec({@JsonKey(name: 'id') required this.id, @JsonKey(name: 'on') this.enabled = true, @JsonKey(name: 'rf') this.recurrenceFloor = 0, @JsonKey(name: 'lt') this.latencyToleranceMs = 0});
+  factory _RcxRungSpec.fromJson(Map<String, dynamic> json) => _$RcxRungSpecFromJson(json);
+
+@override@JsonKey(name: 'id') final  String id;
+@override@JsonKey(name: 'on') final  bool enabled;
+@override@JsonKey(name: 'rf') final  int recurrenceFloor;
+@override@JsonKey(name: 'lt') final  int latencyToleranceMs;
+
+/// Create a copy of RcxRungSpec
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxRungSpecCopyWith<_RcxRungSpec> get copyWith => __$RcxRungSpecCopyWithImpl<_RcxRungSpec>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxRungSpecToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxRungSpec&&(identical(other.id, id) || other.id == id)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.recurrenceFloor, recurrenceFloor) || other.recurrenceFloor == recurrenceFloor)&&(identical(other.latencyToleranceMs, latencyToleranceMs) || other.latencyToleranceMs == latencyToleranceMs));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,enabled,recurrenceFloor,latencyToleranceMs);
+}
+
+@override
+String toString() {
+    return 'RcxRungSpec(id: $id, enabled: $enabled, recurrenceFloor: $recurrenceFloor, latencyToleranceMs: $latencyToleranceMs)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxRungSpecCopyWith<$Res> implements $RcxRungSpecCopyWith<$Res> {
+  factory _$RcxRungSpecCopyWith(_RcxRungSpec value, $Res Function(_RcxRungSpec) _then) = __$RcxRungSpecCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'id') String id,@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'rf') int recurrenceFloor,@JsonKey(name: 'lt') int latencyToleranceMs
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxRungSpecCopyWithImpl<$Res>
+    implements _$RcxRungSpecCopyWith<$Res> {
+  __$RcxRungSpecCopyWithImpl(this._self, this._then);
+
+  final _RcxRungSpec _self;
+  final $Res Function(_RcxRungSpec) _then;
+
+/// Create a copy of RcxRungSpec
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? enabled = null,Object? recurrenceFloor = null,Object? latencyToleranceMs = null,}) {
+  return _then(_RcxRungSpec(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,recurrenceFloor: null == recurrenceFloor ? _self.recurrenceFloor : recurrenceFloor // ignore: cast_nullable_to_non_nullable
+as int,latencyToleranceMs: null == latencyToleranceMs ? _self.latencyToleranceMs : latencyToleranceMs // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RcxConfigParams {
 
-@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'st') String get strategy;@JsonKey(name: 'dv') int get defaultsVersion;@JsonKey(name: 'cc') List<String> get censorCountries;@JsonKey(name: 'cf') List<String> get canaryForeign;@JsonKey(name: 'cd') List<String> get canaryDomestic;@JsonKey(name: 'cs') List<String> get censorSNI;@JsonKey(name: 'om') List<RcxMarker> get openMarkers;@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers;@JsonKey(name: 'lm') List<RcxMarker> get localMarkers;@JsonKey(name: 'nh') List<String> get nameHints;@JsonKey(name: 'ee') List<String> get egressEchoes;@JsonKey(name: 'ce') List<String> get countryEchoes;@JsonKey(name: 'bp') List<String> get breakerPatterns;@JsonKey(name: 'nr') List<RcxNodeRule> get nodeRules;@JsonKey(name: 'ac') List<String> get avoidCountries;@JsonKey(name: 'lb') List<int> get latencyBands;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'udp') bool get requireUdp;@JsonKey(name: 'rpk') bool get respectPick;@JsonKey(name: 'dwl') int get dwellSeconds;@JsonKey(name: 'ww') int get waveWidth;@JsonKey(name: 'acm') int get absCeilingMs;@JsonKey(name: 'dgc') int get degradeConfirmSeconds;@JsonKey(name: 'pttl') int get proofTtlMinutes;@JsonKey(name: 'ln') List<RcxLaneConfig> get lanes;
+@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'st') String get strategy;@JsonKey(name: 'dv') int get defaultsVersion;@JsonKey(name: 'cc') List<String> get censorCountries;@JsonKey(name: 'cf') List<String> get canaryForeign;@JsonKey(name: 'cd') List<String> get canaryDomestic;@JsonKey(name: 'cs') List<String> get censorSNI;@JsonKey(name: 'om') List<RcxMarker> get openMarkers;@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers;@JsonKey(name: 'lm') List<RcxMarker> get localMarkers;@JsonKey(name: 'nh') List<String> get nameHints;@JsonKey(name: 'ee') List<String> get egressEchoes;@JsonKey(name: 'ce') List<String> get countryEchoes;@JsonKey(name: 'bp') List<String> get breakerPatterns;@JsonKey(name: 'nr') List<RcxNodeRule> get nodeRules;@JsonKey(name: 'ac') List<String> get avoidCountries;@JsonKey(name: 'lb') List<int> get latencyBands;@JsonKey(name: 'lad') List<RcxRungSpec> get ladder;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'udp') bool get requireUdp;@JsonKey(name: 'rpk') bool get respectPick;@JsonKey(name: 'dwl') int get dwellSeconds;@JsonKey(name: 'ww') int get waveWidth;@JsonKey(name: 'acm') int get absCeilingMs;@JsonKey(name: 'dgc') int get degradeConfirmSeconds;@JsonKey(name: 'pttl') int get proofTtlMinutes;@JsonKey(name: 'sim') int get switchImproveMs;@JsonKey(name: 'sip') int get switchImprovePct;@JsonKey(name: 'lst') int get latencyStepMs;@JsonKey(name: 'ln') List<RcxLaneConfig> get lanes;
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5217,20 +5496,20 @@ $RcxConfigParamsCopyWith<RcxConfigParams> get copyWith => _$RcxConfigParamsCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as RcxConfigParams;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.defaultsVersion, _this.defaultsVersion) || other.defaultsVersion == _this.defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.censorSNI, _this.censorSNI)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _this.localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _this.nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _this.countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _this.nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _this.avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _this.latencyBands)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth)&&(identical(other.absCeilingMs, _this.absCeilingMs) || other.absCeilingMs == _this.absCeilingMs)&&(identical(other.degradeConfirmSeconds, _this.degradeConfirmSeconds) || other.degradeConfirmSeconds == _this.degradeConfirmSeconds)&&(identical(other.proofTtlMinutes, _this.proofTtlMinutes) || other.proofTtlMinutes == _this.proofTtlMinutes)&&const DeepCollectionEquality().equals(other.lanes, _this.lanes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.defaultsVersion, _this.defaultsVersion) || other.defaultsVersion == _this.defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.censorSNI, _this.censorSNI)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _this.localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _this.nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _this.countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _this.nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _this.avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _this.latencyBands)&&const DeepCollectionEquality().equals(other.ladder, _this.ladder)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth)&&(identical(other.absCeilingMs, _this.absCeilingMs) || other.absCeilingMs == _this.absCeilingMs)&&(identical(other.degradeConfirmSeconds, _this.degradeConfirmSeconds) || other.degradeConfirmSeconds == _this.degradeConfirmSeconds)&&(identical(other.proofTtlMinutes, _this.proofTtlMinutes) || other.proofTtlMinutes == _this.proofTtlMinutes)&&(identical(other.switchImproveMs, _this.switchImproveMs) || other.switchImproveMs == _this.switchImproveMs)&&(identical(other.switchImprovePct, _this.switchImprovePct) || other.switchImprovePct == _this.switchImprovePct)&&(identical(other.latencyStepMs, _this.latencyStepMs) || other.latencyStepMs == _this.latencyStepMs)&&const DeepCollectionEquality().equals(other.lanes, _this.lanes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxConfigParams;
-  return Object.hashAll([runtimeType,_this.enabled,_this.preset,_this.strategy,_this.defaultsVersion,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.censorSNI),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.localMarkers),const DeepCollectionEquality().hash(_this.nameHints),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.countryEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),const DeepCollectionEquality().hash(_this.nodeRules),const DeepCollectionEquality().hash(_this.avoidCountries),const DeepCollectionEquality().hash(_this.latencyBands),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth,_this.absCeilingMs,_this.degradeConfirmSeconds,_this.proofTtlMinutes,const DeepCollectionEquality().hash(_this.lanes)]);
+  return Object.hashAll([runtimeType,_this.enabled,_this.preset,_this.strategy,_this.defaultsVersion,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.censorSNI),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.localMarkers),const DeepCollectionEquality().hash(_this.nameHints),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.countryEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),const DeepCollectionEquality().hash(_this.nodeRules),const DeepCollectionEquality().hash(_this.avoidCountries),const DeepCollectionEquality().hash(_this.latencyBands),const DeepCollectionEquality().hash(_this.ladder),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth,_this.absCeilingMs,_this.degradeConfirmSeconds,_this.proofTtlMinutes,_this.switchImproveMs,_this.switchImprovePct,_this.latencyStepMs,const DeepCollectionEquality().hash(_this.lanes)]);
 }
 
 @override
 String toString() {
   final _this = this as RcxConfigParams;
-  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, defaultsVersion: ${_this.defaultsVersion}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, censorSNI: ${_this.censorSNI}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, localMarkers: ${_this.localMarkers}, nameHints: ${_this.nameHints}, egressEchoes: ${_this.egressEchoes}, countryEchoes: ${_this.countryEchoes}, breakerPatterns: ${_this.breakerPatterns}, nodeRules: ${_this.nodeRules}, avoidCountries: ${_this.avoidCountries}, latencyBands: ${_this.latencyBands}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth}, absCeilingMs: ${_this.absCeilingMs}, degradeConfirmSeconds: ${_this.degradeConfirmSeconds}, proofTtlMinutes: ${_this.proofTtlMinutes}, lanes: ${_this.lanes})';
+  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, defaultsVersion: ${_this.defaultsVersion}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, censorSNI: ${_this.censorSNI}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, localMarkers: ${_this.localMarkers}, nameHints: ${_this.nameHints}, egressEchoes: ${_this.egressEchoes}, countryEchoes: ${_this.countryEchoes}, breakerPatterns: ${_this.breakerPatterns}, nodeRules: ${_this.nodeRules}, avoidCountries: ${_this.avoidCountries}, latencyBands: ${_this.latencyBands}, ladder: ${_this.ladder}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth}, absCeilingMs: ${_this.absCeilingMs}, degradeConfirmSeconds: ${_this.degradeConfirmSeconds}, proofTtlMinutes: ${_this.proofTtlMinutes}, switchImproveMs: ${_this.switchImproveMs}, switchImprovePct: ${_this.switchImprovePct}, latencyStepMs: ${_this.latencyStepMs}, lanes: ${_this.lanes})';
 }
 
 
@@ -5241,7 +5520,7 @@ abstract mixin class $RcxConfigParamsCopyWith<$Res>  {
   factory $RcxConfigParamsCopyWith(RcxConfigParams value, $Res Function(RcxConfigParams) _then) = _$RcxConfigParamsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'cs') List<String> censorSNI,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'ce') List<String> countryEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'nr') List<RcxNodeRule> nodeRules,@JsonKey(name: 'ac') List<String> avoidCountries,@JsonKey(name: 'lb') List<int> latencyBands,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'acm') int absCeilingMs,@JsonKey(name: 'dgc') int degradeConfirmSeconds,@JsonKey(name: 'pttl') int proofTtlMinutes,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'cs') List<String> censorSNI,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'ce') List<String> countryEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'nr') List<RcxNodeRule> nodeRules,@JsonKey(name: 'ac') List<String> avoidCountries,@JsonKey(name: 'lb') List<int> latencyBands,@JsonKey(name: 'lad') List<RcxRungSpec> ladder,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'acm') int absCeilingMs,@JsonKey(name: 'dgc') int degradeConfirmSeconds,@JsonKey(name: 'pttl') int proofTtlMinutes,@JsonKey(name: 'sim') int switchImproveMs,@JsonKey(name: 'sip') int switchImprovePct,@JsonKey(name: 'lst') int latencyStepMs,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
 });
 
 
@@ -5258,7 +5537,7 @@ class _$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? censorSNI = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? absCeilingMs = null,Object? degradeConfirmSeconds = null,Object? proofTtlMinutes = null,Object? lanes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? censorSNI = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? ladder = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? absCeilingMs = null,Object? degradeConfirmSeconds = null,Object? proofTtlMinutes = null,Object? switchImproveMs = null,Object? switchImprovePct = null,Object? latencyStepMs = null,Object? lanes = null,}) {
   return _then(RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -5278,7 +5557,8 @@ as List<String>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns
 as List<String>,nodeRules: null == nodeRules ? _self.nodeRules : nodeRules // ignore: cast_nullable_to_non_nullable
 as List<RcxNodeRule>,avoidCountries: null == avoidCountries ? _self.avoidCountries : avoidCountries // ignore: cast_nullable_to_non_nullable
 as List<String>,latencyBands: null == latencyBands ? _self.latencyBands : latencyBands // ignore: cast_nullable_to_non_nullable
-as List<int>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as List<int>,ladder: null == ladder ? _self.ladder : ladder // ignore: cast_nullable_to_non_nullable
+as List<RcxRungSpec>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
 as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
@@ -5286,6 +5566,9 @@ as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cas
 as int,absCeilingMs: null == absCeilingMs ? _self.absCeilingMs : absCeilingMs // ignore: cast_nullable_to_non_nullable
 as int,degradeConfirmSeconds: null == degradeConfirmSeconds ? _self.degradeConfirmSeconds : degradeConfirmSeconds // ignore: cast_nullable_to_non_nullable
 as int,proofTtlMinutes: null == proofTtlMinutes ? _self.proofTtlMinutes : proofTtlMinutes // ignore: cast_nullable_to_non_nullable
+as int,switchImproveMs: null == switchImproveMs ? _self.switchImproveMs : switchImproveMs // ignore: cast_nullable_to_non_nullable
+as int,switchImprovePct: null == switchImprovePct ? _self.switchImprovePct : switchImprovePct // ignore: cast_nullable_to_non_nullable
+as int,latencyStepMs: null == latencyStepMs ? _self.latencyStepMs : latencyStepMs // ignore: cast_nullable_to_non_nullable
 as int,lanes: null == lanes ? _self.lanes : lanes // ignore: cast_nullable_to_non_nullable
 as List<RcxLaneConfig>,
   ));
@@ -5372,10 +5655,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'lad')  List<RcxRungSpec> ladder, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'sim')  int switchImproveMs, @JsonKey(name: 'sip')  int switchImprovePct, @JsonKey(name: 'lst')  int latencyStepMs, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.ladder,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.switchImproveMs,_that.switchImprovePct,_that.latencyStepMs,_that.lanes);case _:
   return orElse();
 
 }
@@ -5393,10 +5676,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'lad')  List<RcxRungSpec> ladder, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'sim')  int switchImproveMs, @JsonKey(name: 'sip')  int switchImprovePct, @JsonKey(name: 'lst')  int latencyStepMs, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams():
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.ladder,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.switchImproveMs,_that.switchImprovePct,_that.latencyStepMs,_that.lanes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5413,10 +5696,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'ce')  List<String> countryEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules, @JsonKey(name: 'ac')  List<String> avoidCountries, @JsonKey(name: 'lb')  List<int> latencyBands, @JsonKey(name: 'lad')  List<RcxRungSpec> ladder, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'acm')  int absCeilingMs, @JsonKey(name: 'dgc')  int degradeConfirmSeconds, @JsonKey(name: 'pttl')  int proofTtlMinutes, @JsonKey(name: 'sim')  int switchImproveMs, @JsonKey(name: 'sip')  int switchImprovePct, @JsonKey(name: 'lst')  int latencyStepMs, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.censorSNI,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.ladder,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.absCeilingMs,_that.degradeConfirmSeconds,_that.proofTtlMinutes,_that.switchImproveMs,_that.switchImprovePct,_that.latencyStepMs,_that.lanes);case _:
   return null;
 
 }
@@ -5428,7 +5711,7 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 @JsonSerializable()
 
 class _RcxConfigParams implements RcxConfigParams {
-  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'st') required this.strategy, @JsonKey(name: 'dv') required this.defaultsVersion, @JsonKey(name: 'cc') required  List<String> censorCountries, @JsonKey(name: 'cf') required  List<String> canaryForeign, @JsonKey(name: 'cd') required  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI = const [], @JsonKey(name: 'om') required  List<RcxMarker> openMarkers, @JsonKey(name: 'dm') required  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers = const [], @JsonKey(name: 'nh')  List<String> nameHints = const [], @JsonKey(name: 'ee')  List<String> egressEchoes = const [], @JsonKey(name: 'ce')  List<String> countryEchoes = const [], @JsonKey(name: 'bp') required  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules = const [], @JsonKey(name: 'ac')  List<String> avoidCountries = const [], @JsonKey(name: 'lb')  List<int> latencyBands = const [], @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'udp') required this.requireUdp, @JsonKey(name: 'rpk') required this.respectPick, @JsonKey(name: 'dwl') required this.dwellSeconds, @JsonKey(name: 'ww') required this.waveWidth, @JsonKey(name: 'acm') this.absCeilingMs = 300, @JsonKey(name: 'dgc') this.degradeConfirmSeconds = 60, @JsonKey(name: 'pttl') this.proofTtlMinutes = 30, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes = const []}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_censorSNI = censorSNI,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_localMarkers = localMarkers,_nameHints = nameHints,_egressEchoes = egressEchoes,_countryEchoes = countryEchoes,_breakerPatterns = breakerPatterns,_nodeRules = nodeRules,_avoidCountries = avoidCountries,_latencyBands = latencyBands,_lanes = lanes;
+  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'st') required this.strategy, @JsonKey(name: 'dv') required this.defaultsVersion, @JsonKey(name: 'cc') required  List<String> censorCountries, @JsonKey(name: 'cf') required  List<String> canaryForeign, @JsonKey(name: 'cd') required  List<String> canaryDomestic, @JsonKey(name: 'cs')  List<String> censorSNI = const [], @JsonKey(name: 'om') required  List<RcxMarker> openMarkers, @JsonKey(name: 'dm') required  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers = const [], @JsonKey(name: 'nh')  List<String> nameHints = const [], @JsonKey(name: 'ee')  List<String> egressEchoes = const [], @JsonKey(name: 'ce')  List<String> countryEchoes = const [], @JsonKey(name: 'bp') required  List<String> breakerPatterns, @JsonKey(name: 'nr')  List<RcxNodeRule> nodeRules = const [], @JsonKey(name: 'ac')  List<String> avoidCountries = const [], @JsonKey(name: 'lb')  List<int> latencyBands = const [], @JsonKey(name: 'lad')  List<RcxRungSpec> ladder = const [], @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'udp') required this.requireUdp, @JsonKey(name: 'rpk') required this.respectPick, @JsonKey(name: 'dwl') required this.dwellSeconds, @JsonKey(name: 'ww') required this.waveWidth, @JsonKey(name: 'acm') this.absCeilingMs = 300, @JsonKey(name: 'dgc') this.degradeConfirmSeconds = 60, @JsonKey(name: 'pttl') this.proofTtlMinutes = 30, @JsonKey(name: 'sim') this.switchImproveMs = 0, @JsonKey(name: 'sip') this.switchImprovePct = 0, @JsonKey(name: 'lst') this.latencyStepMs = 0, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes = const []}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_censorSNI = censorSNI,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_localMarkers = localMarkers,_nameHints = nameHints,_egressEchoes = egressEchoes,_countryEchoes = countryEchoes,_breakerPatterns = breakerPatterns,_nodeRules = nodeRules,_avoidCountries = avoidCountries,_latencyBands = latencyBands,_ladder = ladder,_lanes = lanes;
   factory _RcxConfigParams.fromJson(Map<String, dynamic> json) => _$RcxConfigParamsFromJson(json);
 
 @override@JsonKey(name: 'on') final  bool enabled;
@@ -5533,6 +5816,13 @@ class _RcxConfigParams implements RcxConfigParams {
   return EqualUnmodifiableListView(_latencyBands);
 }
 
+ final  List<RcxRungSpec> _ladder;
+@override@JsonKey(name: 'lad') List<RcxRungSpec> get ladder {
+  if (_ladder is EqualUnmodifiableListView) return _ladder;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_ladder);
+}
+
 @override@JsonKey(name: 'dlr') final  bool allowDomesticLastResort;
 @override@JsonKey(name: 'udp') final  bool requireUdp;
 @override@JsonKey(name: 'rpk') final  bool respectPick;
@@ -5541,6 +5831,9 @@ class _RcxConfigParams implements RcxConfigParams {
 @override@JsonKey(name: 'acm') final  int absCeilingMs;
 @override@JsonKey(name: 'dgc') final  int degradeConfirmSeconds;
 @override@JsonKey(name: 'pttl') final  int proofTtlMinutes;
+@override@JsonKey(name: 'sim') final  int switchImproveMs;
+@override@JsonKey(name: 'sip') final  int switchImprovePct;
+@override@JsonKey(name: 'lst') final  int latencyStepMs;
  final  List<RcxLaneConfig> _lanes;
 @override@JsonKey(name: 'ln') List<RcxLaneConfig> get lanes {
   if (_lanes is EqualUnmodifiableListView) return _lanes;
@@ -5562,18 +5855,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.defaultsVersion, defaultsVersion) || other.defaultsVersion == defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.censorSNI, _censorSNI)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _latencyBands)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth)&&(identical(other.absCeilingMs, absCeilingMs) || other.absCeilingMs == absCeilingMs)&&(identical(other.degradeConfirmSeconds, degradeConfirmSeconds) || other.degradeConfirmSeconds == degradeConfirmSeconds)&&(identical(other.proofTtlMinutes, proofTtlMinutes) || other.proofTtlMinutes == proofTtlMinutes)&&const DeepCollectionEquality().equals(other.lanes, _lanes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.defaultsVersion, defaultsVersion) || other.defaultsVersion == defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.censorSNI, _censorSNI)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _latencyBands)&&const DeepCollectionEquality().equals(other.ladder, _ladder)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth)&&(identical(other.absCeilingMs, absCeilingMs) || other.absCeilingMs == absCeilingMs)&&(identical(other.degradeConfirmSeconds, degradeConfirmSeconds) || other.degradeConfirmSeconds == degradeConfirmSeconds)&&(identical(other.proofTtlMinutes, proofTtlMinutes) || other.proofTtlMinutes == proofTtlMinutes)&&(identical(other.switchImproveMs, switchImproveMs) || other.switchImproveMs == switchImproveMs)&&(identical(other.switchImprovePct, switchImprovePct) || other.switchImprovePct == switchImprovePct)&&(identical(other.latencyStepMs, latencyStepMs) || other.latencyStepMs == latencyStepMs)&&const DeepCollectionEquality().equals(other.lanes, _lanes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,enabled,preset,strategy,defaultsVersion,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_censorSNI),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_localMarkers),const DeepCollectionEquality().hash(_nameHints),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_countryEchoes),const DeepCollectionEquality().hash(_breakerPatterns),const DeepCollectionEquality().hash(_nodeRules),const DeepCollectionEquality().hash(_avoidCountries),const DeepCollectionEquality().hash(_latencyBands),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth,absCeilingMs,degradeConfirmSeconds,proofTtlMinutes,const DeepCollectionEquality().hash(_lanes)]);
+    return Object.hashAll([runtimeType,enabled,preset,strategy,defaultsVersion,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_censorSNI),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_localMarkers),const DeepCollectionEquality().hash(_nameHints),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_countryEchoes),const DeepCollectionEquality().hash(_breakerPatterns),const DeepCollectionEquality().hash(_nodeRules),const DeepCollectionEquality().hash(_avoidCountries),const DeepCollectionEquality().hash(_latencyBands),const DeepCollectionEquality().hash(_ladder),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth,absCeilingMs,degradeConfirmSeconds,proofTtlMinutes,switchImproveMs,switchImprovePct,latencyStepMs,const DeepCollectionEquality().hash(_lanes)]);
 }
 
 @override
 String toString() {
-    return 'RcxConfigParams(enabled: $enabled, preset: $preset, strategy: $strategy, defaultsVersion: $defaultsVersion, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, censorSNI: $censorSNI, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, localMarkers: $localMarkers, nameHints: $nameHints, egressEchoes: $egressEchoes, countryEchoes: $countryEchoes, breakerPatterns: $breakerPatterns, nodeRules: $nodeRules, avoidCountries: $avoidCountries, latencyBands: $latencyBands, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth, absCeilingMs: $absCeilingMs, degradeConfirmSeconds: $degradeConfirmSeconds, proofTtlMinutes: $proofTtlMinutes, lanes: $lanes)';
+    return 'RcxConfigParams(enabled: $enabled, preset: $preset, strategy: $strategy, defaultsVersion: $defaultsVersion, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, censorSNI: $censorSNI, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, localMarkers: $localMarkers, nameHints: $nameHints, egressEchoes: $egressEchoes, countryEchoes: $countryEchoes, breakerPatterns: $breakerPatterns, nodeRules: $nodeRules, avoidCountries: $avoidCountries, latencyBands: $latencyBands, ladder: $ladder, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth, absCeilingMs: $absCeilingMs, degradeConfirmSeconds: $degradeConfirmSeconds, proofTtlMinutes: $proofTtlMinutes, switchImproveMs: $switchImproveMs, switchImprovePct: $switchImprovePct, latencyStepMs: $latencyStepMs, lanes: $lanes)';
 }
 
 
@@ -5584,7 +5877,7 @@ abstract mixin class _$RcxConfigParamsCopyWith<$Res> implements $RcxConfigParams
   factory _$RcxConfigParamsCopyWith(_RcxConfigParams value, $Res Function(_RcxConfigParams) _then) = __$RcxConfigParamsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'cs') List<String> censorSNI,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'ce') List<String> countryEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'nr') List<RcxNodeRule> nodeRules,@JsonKey(name: 'ac') List<String> avoidCountries,@JsonKey(name: 'lb') List<int> latencyBands,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'acm') int absCeilingMs,@JsonKey(name: 'dgc') int degradeConfirmSeconds,@JsonKey(name: 'pttl') int proofTtlMinutes,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'cs') List<String> censorSNI,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'ce') List<String> countryEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'nr') List<RcxNodeRule> nodeRules,@JsonKey(name: 'ac') List<String> avoidCountries,@JsonKey(name: 'lb') List<int> latencyBands,@JsonKey(name: 'lad') List<RcxRungSpec> ladder,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'acm') int absCeilingMs,@JsonKey(name: 'dgc') int degradeConfirmSeconds,@JsonKey(name: 'pttl') int proofTtlMinutes,@JsonKey(name: 'sim') int switchImproveMs,@JsonKey(name: 'sip') int switchImprovePct,@JsonKey(name: 'lst') int latencyStepMs,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
 });
 
 
@@ -5601,7 +5894,7 @@ class __$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? censorSNI = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? absCeilingMs = null,Object? degradeConfirmSeconds = null,Object? proofTtlMinutes = null,Object? lanes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? censorSNI = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? ladder = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? absCeilingMs = null,Object? degradeConfirmSeconds = null,Object? proofTtlMinutes = null,Object? switchImproveMs = null,Object? switchImprovePct = null,Object? latencyStepMs = null,Object? lanes = null,}) {
   return _then(_RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -5621,7 +5914,8 @@ as List<String>,breakerPatterns: null == breakerPatterns ? _self._breakerPattern
 as List<String>,nodeRules: null == nodeRules ? _self._nodeRules : nodeRules // ignore: cast_nullable_to_non_nullable
 as List<RcxNodeRule>,avoidCountries: null == avoidCountries ? _self._avoidCountries : avoidCountries // ignore: cast_nullable_to_non_nullable
 as List<String>,latencyBands: null == latencyBands ? _self._latencyBands : latencyBands // ignore: cast_nullable_to_non_nullable
-as List<int>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as List<int>,ladder: null == ladder ? _self._ladder : ladder // ignore: cast_nullable_to_non_nullable
+as List<RcxRungSpec>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
 as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
@@ -5629,6 +5923,9 @@ as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cas
 as int,absCeilingMs: null == absCeilingMs ? _self.absCeilingMs : absCeilingMs // ignore: cast_nullable_to_non_nullable
 as int,degradeConfirmSeconds: null == degradeConfirmSeconds ? _self.degradeConfirmSeconds : degradeConfirmSeconds // ignore: cast_nullable_to_non_nullable
 as int,proofTtlMinutes: null == proofTtlMinutes ? _self.proofTtlMinutes : proofTtlMinutes // ignore: cast_nullable_to_non_nullable
+as int,switchImproveMs: null == switchImproveMs ? _self.switchImproveMs : switchImproveMs // ignore: cast_nullable_to_non_nullable
+as int,switchImprovePct: null == switchImprovePct ? _self.switchImprovePct : switchImprovePct // ignore: cast_nullable_to_non_nullable
+as int,latencyStepMs: null == latencyStepMs ? _self.latencyStepMs : latencyStepMs // ignore: cast_nullable_to_non_nullable
 as int,lanes: null == lanes ? _self._lanes : lanes // ignore: cast_nullable_to_non_nullable
 as List<RcxLaneConfig>,
   ));
@@ -8335,7 +8632,7 @@ as int,
 /// @nodoc
 mixin _$RcxReport {
 
- RcxStatus get status; RcxLinkReport get link; List<RcxCanaryReport> get canaries; List<RcxCandidateReport> get candidates; List<RcxSwitchReport> get history; RcxMetricsReport get metrics; List<int> get bands; int get probesLeft; int get probeCap; bool get manual; RcxDiscoveryReport get discovery; int get at;
+ RcxStatus get status; RcxLinkReport get link; List<RcxCanaryReport> get canaries; List<RcxCandidateReport> get candidates; List<RcxSwitchReport> get history; RcxMetricsReport get metrics; List<int> get bands; List<RcxRungSpec> get ladder; int get probesLeft; int get probeCap; bool get manual; RcxDiscoveryReport get discovery; int get at;
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -8349,20 +8646,20 @@ $RcxReportCopyWith<RcxReport> get copyWith => _$RcxReportCopyWithImpl<RcxReport>
 @override
 bool operator ==(Object other) {
   final _this = this as RcxReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxReport&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.link, _this.link) || other.link == _this.link)&&const DeepCollectionEquality().equals(other.canaries, _this.canaries)&&const DeepCollectionEquality().equals(other.candidates, _this.candidates)&&const DeepCollectionEquality().equals(other.history, _this.history)&&(identical(other.metrics, _this.metrics) || other.metrics == _this.metrics)&&const DeepCollectionEquality().equals(other.bands, _this.bands)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.probeCap, _this.probeCap) || other.probeCap == _this.probeCap)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.discovery, _this.discovery) || other.discovery == _this.discovery)&&(identical(other.at, _this.at) || other.at == _this.at));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxReport&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.link, _this.link) || other.link == _this.link)&&const DeepCollectionEquality().equals(other.canaries, _this.canaries)&&const DeepCollectionEquality().equals(other.candidates, _this.candidates)&&const DeepCollectionEquality().equals(other.history, _this.history)&&(identical(other.metrics, _this.metrics) || other.metrics == _this.metrics)&&const DeepCollectionEquality().equals(other.bands, _this.bands)&&const DeepCollectionEquality().equals(other.ladder, _this.ladder)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.probeCap, _this.probeCap) || other.probeCap == _this.probeCap)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.discovery, _this.discovery) || other.discovery == _this.discovery)&&(identical(other.at, _this.at) || other.at == _this.at));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxReport;
-  return Object.hash(runtimeType,_this.status,_this.link,const DeepCollectionEquality().hash(_this.canaries),const DeepCollectionEquality().hash(_this.candidates),const DeepCollectionEquality().hash(_this.history),_this.metrics,const DeepCollectionEquality().hash(_this.bands),_this.probesLeft,_this.probeCap,_this.manual,_this.discovery,_this.at);
+  return Object.hash(runtimeType,_this.status,_this.link,const DeepCollectionEquality().hash(_this.canaries),const DeepCollectionEquality().hash(_this.candidates),const DeepCollectionEquality().hash(_this.history),_this.metrics,const DeepCollectionEquality().hash(_this.bands),const DeepCollectionEquality().hash(_this.ladder),_this.probesLeft,_this.probeCap,_this.manual,_this.discovery,_this.at);
 }
 
 @override
 String toString() {
   final _this = this as RcxReport;
-  return 'RcxReport(status: ${_this.status}, link: ${_this.link}, canaries: ${_this.canaries}, candidates: ${_this.candidates}, history: ${_this.history}, metrics: ${_this.metrics}, bands: ${_this.bands}, probesLeft: ${_this.probesLeft}, probeCap: ${_this.probeCap}, manual: ${_this.manual}, discovery: ${_this.discovery}, at: ${_this.at})';
+  return 'RcxReport(status: ${_this.status}, link: ${_this.link}, canaries: ${_this.canaries}, candidates: ${_this.candidates}, history: ${_this.history}, metrics: ${_this.metrics}, bands: ${_this.bands}, ladder: ${_this.ladder}, probesLeft: ${_this.probesLeft}, probeCap: ${_this.probeCap}, manual: ${_this.manual}, discovery: ${_this.discovery}, at: ${_this.at})';
 }
 
 
@@ -8373,7 +8670,7 @@ abstract mixin class $RcxReportCopyWith<$Res>  {
   factory $RcxReportCopyWith(RcxReport value, $Res Function(RcxReport) _then) = _$RcxReportCopyWithImpl;
 @useResult
 $Res call({
- RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, int probesLeft, int probeCap, bool manual, RcxDiscoveryReport discovery, int at
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, List<RcxRungSpec> ladder, int probesLeft, int probeCap, bool manual, RcxDiscoveryReport discovery, int at
 });
 
 
@@ -8390,7 +8687,7 @@ class _$RcxReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? discovery = null,Object? at = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? ladder = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? discovery = null,Object? at = null,}) {
   return _then(RcxReport(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
@@ -8399,7 +8696,8 @@ as List<RcxCanaryReport>,candidates: null == candidates ? _self.candidates : can
 as List<RcxCandidateReport>,history: null == history ? _self.history : history // ignore: cast_nullable_to_non_nullable
 as List<RcxSwitchReport>,metrics: null == metrics ? _self.metrics : metrics // ignore: cast_nullable_to_non_nullable
 as RcxMetricsReport,bands: null == bands ? _self.bands : bands // ignore: cast_nullable_to_non_nullable
-as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as List<int>,ladder: null == ladder ? _self.ladder : ladder // ignore: cast_nullable_to_non_nullable
+as List<RcxRungSpec>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
 as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
 as int,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as bool,discovery: null == discovery ? _self.discovery : discovery // ignore: cast_nullable_to_non_nullable
@@ -8525,10 +8823,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  List<RcxRungSpec> ladder,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxReport() when $default != null:
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.ladder,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
   return orElse();
 
 }
@@ -8546,10 +8844,10 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  List<RcxRungSpec> ladder,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)  $default,) {final _that = this;
 switch (_that) {
 case _RcxReport():
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.ladder,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -8566,10 +8864,10 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  List<RcxRungSpec> ladder,  int probesLeft,  int probeCap,  bool manual,  RcxDiscoveryReport discovery,  int at)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxReport() when $default != null:
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.ladder,_that.probesLeft,_that.probeCap,_that.manual,_that.discovery,_that.at);case _:
   return null;
 
 }
@@ -8581,7 +8879,7 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 @JsonSerializable()
 
 class _RcxReport implements RcxReport {
-  const _RcxReport({this.status = const RcxStatus(), this.link = const RcxLinkReport(),  List<RcxCanaryReport> canaries = const [],  List<RcxCandidateReport> candidates = const [],  List<RcxSwitchReport> history = const [], this.metrics = const RcxMetricsReport(),  List<int> bands = const [], this.probesLeft = 0, this.probeCap = 0, this.manual = false, this.discovery = const RcxDiscoveryReport(), this.at = 0}): _canaries = canaries,_candidates = candidates,_history = history,_bands = bands;
+  const _RcxReport({this.status = const RcxStatus(), this.link = const RcxLinkReport(),  List<RcxCanaryReport> canaries = const [],  List<RcxCandidateReport> candidates = const [],  List<RcxSwitchReport> history = const [], this.metrics = const RcxMetricsReport(),  List<int> bands = const [],  List<RcxRungSpec> ladder = const [], this.probesLeft = 0, this.probeCap = 0, this.manual = false, this.discovery = const RcxDiscoveryReport(), this.at = 0}): _canaries = canaries,_candidates = candidates,_history = history,_bands = bands,_ladder = ladder;
   factory _RcxReport.fromJson(Map<String, dynamic> json) => _$RcxReportFromJson(json);
 
 @override@JsonKey() final  RcxStatus status;
@@ -8615,6 +8913,13 @@ class _RcxReport implements RcxReport {
   return EqualUnmodifiableListView(_bands);
 }
 
+ final  List<RcxRungSpec> _ladder;
+@override@JsonKey() List<RcxRungSpec> get ladder {
+  if (_ladder is EqualUnmodifiableListView) return _ladder;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_ladder);
+}
+
 @override@JsonKey() final  int probesLeft;
 @override@JsonKey() final  int probeCap;
 @override@JsonKey() final  bool manual;
@@ -8634,18 +8939,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxReport&&(identical(other.status, status) || other.status == status)&&(identical(other.link, link) || other.link == link)&&const DeepCollectionEquality().equals(other.canaries, _canaries)&&const DeepCollectionEquality().equals(other.candidates, _candidates)&&const DeepCollectionEquality().equals(other.history, _history)&&(identical(other.metrics, metrics) || other.metrics == metrics)&&const DeepCollectionEquality().equals(other.bands, _bands)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.probeCap, probeCap) || other.probeCap == probeCap)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.discovery, discovery) || other.discovery == discovery)&&(identical(other.at, at) || other.at == at));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxReport&&(identical(other.status, status) || other.status == status)&&(identical(other.link, link) || other.link == link)&&const DeepCollectionEquality().equals(other.canaries, _canaries)&&const DeepCollectionEquality().equals(other.candidates, _candidates)&&const DeepCollectionEquality().equals(other.history, _history)&&(identical(other.metrics, metrics) || other.metrics == metrics)&&const DeepCollectionEquality().equals(other.bands, _bands)&&const DeepCollectionEquality().equals(other.ladder, _ladder)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.probeCap, probeCap) || other.probeCap == probeCap)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.discovery, discovery) || other.discovery == discovery)&&(identical(other.at, at) || other.at == at));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,status,link,const DeepCollectionEquality().hash(_canaries),const DeepCollectionEquality().hash(_candidates),const DeepCollectionEquality().hash(_history),metrics,const DeepCollectionEquality().hash(_bands),probesLeft,probeCap,manual,discovery,at);
+    return Object.hash(runtimeType,status,link,const DeepCollectionEquality().hash(_canaries),const DeepCollectionEquality().hash(_candidates),const DeepCollectionEquality().hash(_history),metrics,const DeepCollectionEquality().hash(_bands),const DeepCollectionEquality().hash(_ladder),probesLeft,probeCap,manual,discovery,at);
 }
 
 @override
 String toString() {
-    return 'RcxReport(status: $status, link: $link, canaries: $canaries, candidates: $candidates, history: $history, metrics: $metrics, bands: $bands, probesLeft: $probesLeft, probeCap: $probeCap, manual: $manual, discovery: $discovery, at: $at)';
+    return 'RcxReport(status: $status, link: $link, canaries: $canaries, candidates: $candidates, history: $history, metrics: $metrics, bands: $bands, ladder: $ladder, probesLeft: $probesLeft, probeCap: $probeCap, manual: $manual, discovery: $discovery, at: $at)';
 }
 
 
@@ -8656,7 +8961,7 @@ abstract mixin class _$RcxReportCopyWith<$Res> implements $RcxReportCopyWith<$Re
   factory _$RcxReportCopyWith(_RcxReport value, $Res Function(_RcxReport) _then) = __$RcxReportCopyWithImpl;
 @override @useResult
 $Res call({
- RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, int probesLeft, int probeCap, bool manual, RcxDiscoveryReport discovery, int at
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, List<RcxRungSpec> ladder, int probesLeft, int probeCap, bool manual, RcxDiscoveryReport discovery, int at
 });
 
 
@@ -8673,7 +8978,7 @@ class __$RcxReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? discovery = null,Object? at = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? ladder = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? discovery = null,Object? at = null,}) {
   return _then(_RcxReport(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
@@ -8682,7 +8987,8 @@ as List<RcxCanaryReport>,candidates: null == candidates ? _self._candidates : ca
 as List<RcxCandidateReport>,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
 as List<RcxSwitchReport>,metrics: null == metrics ? _self.metrics : metrics // ignore: cast_nullable_to_non_nullable
 as RcxMetricsReport,bands: null == bands ? _self._bands : bands // ignore: cast_nullable_to_non_nullable
-as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as List<int>,ladder: null == ladder ? _self._ladder : ladder // ignore: cast_nullable_to_non_nullable
+as List<RcxRungSpec>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
 as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
 as int,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as bool,discovery: null == discovery ? _self.discovery : discovery // ignore: cast_nullable_to_non_nullable

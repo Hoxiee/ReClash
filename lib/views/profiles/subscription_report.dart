@@ -13,15 +13,132 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-Future<void> showSubscriptionReportSheet(
+/// Pushes the report over the subscription sheet when already inside a nested
+/// sheet, otherwise raises a nested sheet rooted at the report.
+Future<void> openSubscriptionReportSheet(
   BuildContext context, {
   String? reportUrl,
-}) {
-  return showSheet(
-    context: context,
-    props: const SheetProps(isScrollControlled: true),
-    builder: (_) => SubscriptionReportSheet(reportUrl: reportUrl),
+}) async {
+  final page = PagedSheetRoute(
+    builder: (_) => SubscriptionReportView(reportUrl: reportUrl),
   );
+  if (SheetProvider.of(context)?.nestedNavigatorPop != null) {
+    await pushPagedSheet(context, page);
+    return;
+  }
+  await showSheet<void>(
+    context: context,
+    props: nestedPagedSheetProps,
+    builder: (_) => NestedPagedSheet(
+      builder: (_) => SubscriptionReportView(reportUrl: reportUrl),
+    ),
+  );
+}
+
+/// Builds the report after the sheet opens, so the page can push over the
+/// subscription sheet with a back button while the core export still runs.
+class SubscriptionReportView extends ConsumerStatefulWidget {
+  const SubscriptionReportView({super.key, this.reportUrl});
+
+  final String? reportUrl;
+
+  @override
+  ConsumerState<SubscriptionReportView> createState() =>
+      _SubscriptionReportViewState();
+}
+
+class _SubscriptionReportViewState
+    extends ConsumerState<SubscriptionReportView> {
+  SubscriptionReport? _report;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    if (!mounted) return;
+    setState(() {
+      _error = null;
+    });
+    try {
+      final report = await ref
+          .read(profilesActionProvider.notifier)
+          .buildSubscriptionReport();
+      if (!mounted) return;
+      setState(() {
+        _report = report;
+      });
+    } catch (error, stackTrace) {
+      commonPrint.log(
+        'subscription report ===> ${compactError(error)}, $stackTrace',
+        logLevel: LogLevel.warning,
+      );
+      if (!mounted) return;
+      setState(() {
+        _error = error;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget content;
+    final report = _report;
+    if (report != null) {
+      content = SubscriptionReportSheet(
+        report: report,
+        reportUrl: widget.reportUrl,
+      );
+    } else {
+      final error = _error;
+      content = AdaptiveSheetScaffold(
+        title: context.appLocalizations.subscriptionReport,
+        body: error == null
+            ? const _ReportLoading()
+            : _ReportError(error: error, onRetry: _load),
+      );
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: ref.sheetHeight(context, 0.7)),
+      child: content,
+    );
+  }
+}
+
+class _ReportLoading extends StatelessWidget {
+  const _ReportLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 64),
+      child: Center(child: CommonCircleLoading()),
+    );
+  }
+}
+
+class _ReportError extends StatelessWidget {
+  const _ReportError({required this.error, required this.onRetry});
+
+  final Object error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return NullStatus(
+      label: userFacingErrorMessage(error, appLocalizations),
+      illustration: NullStatusIllustration.error,
+      action: FilledButton.icon(
+        onPressed: onRetry,
+        icon: const GlyphIcon(AppGlyphs.refresh),
+        label: Text(appLocalizations.reload),
+      ),
+    );
+  }
 }
 
 enum _FaultTone { caution, bad, neutral }
@@ -54,8 +171,13 @@ String _bodyOf(AppLocalizations l10n, SubscriptionFault fault) =>
     };
 
 class SubscriptionReportSheet extends ConsumerStatefulWidget {
-  const SubscriptionReportSheet({super.key, this.reportUrl});
+  const SubscriptionReportSheet({
+    super.key,
+    required this.report,
+    this.reportUrl,
+  });
 
+  final SubscriptionReport report;
   final String? reportUrl;
 
   @override
@@ -65,26 +187,7 @@ class SubscriptionReportSheet extends ConsumerStatefulWidget {
 
 class _SubscriptionReportSheetState
     extends ConsumerState<SubscriptionReportSheet> {
-  SubscriptionReport? _report;
-  Object? _error;
   bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_load());
-  }
-
-  Future<void> _load() async {
-    try {
-      final report = await ref
-          .read(profilesActionProvider.notifier)
-          .buildSubscriptionReport();
-      if (mounted) setState(() => _report = report);
-    } catch (error) {
-      if (mounted) setState(() => _error = error);
-    }
-  }
 
   Future<void> _copy(String text) async {
     final message = context.appLocalizations.subscriptionReportCopied;
@@ -159,7 +262,7 @@ class _SubscriptionReportSheetState
 
   @override
   Widget build(BuildContext context) {
-    final report = _report;
+    final report = widget.report;
     return AdaptiveSheetScaffold(
       title: context.appLocalizations.subscriptionReport,
       body: Padding(
@@ -170,48 +273,11 @@ class _SubscriptionReportSheetState
           16,
           16 + BottomInsetScope.of(context),
         ),
-        child: _buildBody(context, report),
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context, SubscriptionReport? report) {
-    final appLocalizations = context.appLocalizations;
-    if (_error != null) {
-      return Center(
-        child: Text(userFacingErrorMessage(_error!, appLocalizations)),
-      );
-    }
-    if (report == null) {
-      return _Loading(label: appLocalizations.subscriptionReportGenerating);
-    }
-    return _ReportBody(
-      report: report,
-      onCopyLink: () => _copyLink(report),
-      exportItems: _exportMenu(report),
-    );
-  }
-}
-
-class _Loading extends StatelessWidget {
-  const _Loading({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    // A content-hugging sheet lays this out under a loose Flexible; a max
-    // Column would balloon it to full height, then snap shut once the report
-    // loads. Hug the loader so the sheet enters at a stable size.
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CommonCircleLoading(),
-          const SizedBox(height: AppSpacing.lg),
-          Text(label, style: context.textTheme.bodyMedium),
-        ],
+        child: _ReportBody(
+          report: report,
+          onCopyLink: () => _copyLink(report),
+          exportItems: _exportMenu(report),
+        ),
       ),
     );
   }

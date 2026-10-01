@@ -267,7 +267,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool closeConnections,
     @Default(true) bool newDashboard,
     @Default(defaultTestUrl) String testUrl,
-    @Default(true) bool isAnimateToPage,
+    @Default(TabAnimation.slide)
+    @JsonKey(readValue: _readTabAnimation)
+    TabAnimation tabAnimation,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
     @Default(false) bool sidebarExpanded,
@@ -335,6 +337,15 @@ Object? _readUserAgents(Map<dynamic, dynamic> json, String key) {
     return null;
   }
   return [...defaultUserAgents, custom];
+}
+
+// The on/off toggle becomes a mode; a disabled toggle maps to the off mode,
+// anything else falls through to the slide default.
+Object? _readTabAnimation(Map<dynamic, dynamic> json, String key) {
+  if (json[key] != null) {
+    return json[key];
+  }
+  return json['isAnimateToPage'] == false ? TabAnimation.off.name : null;
 }
 
 Map<String, Object?> _notificationSettingsSafeJson(
@@ -470,6 +481,7 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default([]) List<RcxNodeRule> nodeRules,
     @Default([]) List<String> avoidCountries,
     @Default([]) List<int> latencyBands,
+    @Default([]) List<RcxRungSpec> ladder,
     @Default(true) bool allowDomesticLastResort,
     @Default(false) bool requireUdp,
     @Default(true) bool respectPick,
@@ -478,6 +490,12 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default(300) int absCeilingMs,
     @Default(60) int degradeConfirmSeconds,
     @Default(30) int proofTtlMinutes,
+    @Default(0) int switchImproveMs,
+    @Default(0) int switchImprovePct,
+    @Default(0) int latencyStepMs,
+    // UI-only renamings of routing vocabulary, keyed "<vocab>:<token>". Never
+    // pushed to the core; the engine keeps ranking by tokens, not these labels.
+    @Default(<String, String>{}) Map<String, String> labelOverrides,
   }) = _SmartRoutingProps;
 
   factory SmartRoutingProps.fromJson(Map<String, Object?>? json) => json == null

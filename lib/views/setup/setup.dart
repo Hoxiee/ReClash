@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
@@ -104,7 +105,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     _controller.jumpToPage(index);
     FocusManager.instance.primaryFocus?.unfocus();
     if (context.disableAnimations ||
-        !ref.read(appSettingProvider).isAnimateToPage) {
+        ref.read(appSettingProvider).tabAnimation == TabAnimation.off) {
       _switchController.value = 1;
       return;
     }

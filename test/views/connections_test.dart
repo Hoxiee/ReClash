@@ -6,11 +6,12 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/connections.dart';
-import 'package:reclash/widgets/feedback/null_status.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -172,6 +173,45 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
 
     verifyNever(core.getConnections);
+  });
+
+  testWidgets('groups search with more and closes from the menu', (
+    tester,
+  ) async {
+    when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);
+    when(core.closeConnections).thenAnswer((_) async => true);
+
+    await pumpConnections(tester);
+
+    expect(find.byGlyph(AppGlyphs.clearAll), findsNothing);
+
+    final searchGroup = find.ancestor(
+      of: find.byGlyph(AppGlyphs.search),
+      matching: find.byType(TonalButtonGroup),
+    );
+    final moreGroup = find.ancestor(
+      of: find.byGlyph(AppGlyphs.more),
+      matching: find.byType(TonalButtonGroup),
+    );
+    expect(searchGroup, findsOneWidget);
+    expect(moreGroup, findsOneWidget);
+    expect(searchGroup.evaluate().single, same(moreGroup.evaluate().single));
+
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(AppLocalizations.current.closeConnections),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text(AppLocalizations.current.closeConnections));
+    await tester.pumpAndSettle();
+
+    verify(core.closeConnections).called(1);
+    expect(tester.takeException(), isNull);
+
+    await teardownView(tester);
   });
 
   testWidgets('renders the regex toggle in the search bar', (tester) async {

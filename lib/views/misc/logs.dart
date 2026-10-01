@@ -90,12 +90,15 @@ class _LogsViewState extends ConsumerState<LogsView> {
           onClear: _listController.clearFilters,
         ),
       ),
-      IconButton(
+    ];
+  }
+
+  List<IconButtonData> _buildIconActions() {
+    return [
+      IconButtonData(
+        glyph: AppGlyphs.export,
         tooltip: context.appLocalizations.exportLogs,
-        onPressed: () {
-          _handleExport();
-        },
-        icon: const GlyphIcon(AppGlyphs.save),
+        onPressed: _handleExport,
       ),
     ];
   }
@@ -135,6 +138,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       actions: _buildActions(),
+      iconActions: _buildIconActions(),
       floatBody: true,
       onKeywordsUpdate: _listController.updateKeywords,
       searchState: AppBarSearchState(

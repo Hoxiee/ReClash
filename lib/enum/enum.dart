@@ -359,6 +359,8 @@ enum ProxiesIconStyle { none, standard, icon }
 
 enum ProxiesStyleField { type, sortType, layout, iconStyle, cardType }
 
+enum ConnectionSortType { traffic, time, upload, download, host }
+
 enum FontFamily {
   twEmoji('Twemoji'),
   jetBrainsMono('JetBrainsMono'),
@@ -781,3 +783,6 @@ enum NtpOverrideKey {
 
   final String path;
 }
+
+/// How the main navigation animates a tab switch; [off] jumps with no motion.
+enum TabAnimation { slide, fade, off }

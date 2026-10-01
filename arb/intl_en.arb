@@ -48,9 +48,9 @@
   "toolsSelectPanePlaceholder": "Select a setting to view it here.",
   "toolsOverview": "Overview",
   "toolsCategoryDiagnostics": "Diagnostics",
-  "toolsCategoryPersonalization": "Personalization",
   "toolsCategoryConfiguration": "Configuration",
-  "toolsCategorySystem": "System",
+  "toolsCategoryApplication": "App settings",
+  "toolsCategoryInfo": "Info and debug",
   "toolsSearchHint": "Search tools",
   "toolsNoResults": "Nothing matches your search",
   "toolsSearchResultsCount": "{count, plural, =0{No results} =1{1 result} other{{count} results}}",
@@ -71,6 +71,7 @@
   "otherContributors": "Other contributors",
   "outboundMode": "Outbound mode",
   "networkDetection": "Network detection",
+  "traffic": "Traffic",
   "upload": "Upload",
   "download": "Download",
   "usedTraffic": "Used traffic",
@@ -208,6 +209,8 @@
   "sourceCode": "Source code",
   "copyDiagnostics": "Copy version info",
   "tabAnimation": "Tab animation",
+  "slide": "Slide",
+  "fade": "Fade",
   "desc": "A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.",
   "startVpn": "Starting VPN...",
   "pauseVpn": "Pausing VPN...",
@@ -381,6 +384,8 @@
   "sort": "Sort",
   "columns": "Columns",
   "proxyGroup": "Proxy group",
+  "proxyNode": "Proxy node",
+  "lastUpdated": "Last updated",
   "go": "Go",
   "externalLink": "External link",
   "autoCloseConnections": "Auto close connections",
@@ -555,6 +560,10 @@
     }
   },
   "hotkeyManagementDesc": "Control the app with the keyboard",
+  "hotkeyRestoreDefaults": "Restore defaults",
+  "hotkeyClearAll": "Clear all",
+  "hotkeyRestoreDefaultsTip": "Replace all combinations with the defaults?",
+  "hotkeyClearAllTip": "Remove all hotkey combinations?",
   "pressKeyboard": "Please press a key",
   "inputCorrectHotkey": "Please enter a valid hotkey",
   "hotkeyConflict": "Hotkey conflict",
@@ -1088,10 +1097,11 @@
     }
   },
   "smartRoutingBehaviour": "Behaviour",
+  "smartRoutingBehaviourDesc": "How the engine acts around a manual pick and diagnostics",
   "smartRoutingProbing": "Probing",
   "smartRoutingRequireUdp": "Require UDP support",
   "smartRoutingRequireUdpDesc": "Skip servers that cannot carry calls and games",
-  "smartRoutingDwell": "Settle time",
+  "smartRoutingDwell": "Hold time",
   "smartRoutingDwellDesc": "How long a working server is kept before a faster one wins",
   "smartRoutingSeconds": "{seconds} s",
   "@smartRoutingSeconds": {
@@ -1101,7 +1111,7 @@
       }
     }
   },
-  "smartRoutingCeiling": "Latency ceiling",
+  "smartRoutingCeiling": "Delay limit",
   "smartRoutingCeilingDesc": "Leave a working server when its latency passes this limit",
   "smartRoutingMillis": "{ms} ms",
   "@smartRoutingMillis": {
@@ -1417,7 +1427,7 @@
   "smartRoutingAvoidCountriesDesc": "Never route through a server measured egressing in these countries, even as a last resort",
   "smartRoutingCountryEchoes": "Country lookup services",
   "smartRoutingCountryEchoesDesc": "Endpoints that report a server's real exit country when verifying a suspicious node",
-  "smartRoutingLatencyBands": "Latency ladder",
+  "smartRoutingLatencyBands": "Speed tiers",
   "smartRoutingLatencyBandsDesc": "Millisecond edges that group servers into speed tiers; empty uses the strategy default",
   "smartRoutingRules": "Server rules",
   "smartRoutingRulesDesc": "Ignore, hold back, or prefer servers by name, provider, or measured country",
@@ -1452,25 +1462,88 @@
   "smartRoutingBlockIgnored": "Ignored by a rule",
   "smartRoutingBlockAvoidExit": "Exits through an avoided country",
   "smartRoutingProbes": "Reachability probes",
+  "smartRoutingDecisionEngine": "Decision engine",
+  "smartRoutingSignals": "Signals",
+  "smartRoutingSignalsDesc": "What the engine measures each node against",
   "smartRoutingRegionNote": "Seeded from the region set in the app; edit them only if your network needs it",
   "smartRoutingCountryPolicy": "Country policy",
   "smartRoutingCountryPolicyDesc": "Which countries count as censored, and which to avoid as exits",
-  "smartRoutingEgress": "Egress verification",
+  "smartRoutingEgress": "Exit verification",
   "smartRoutingEgressDesc": "Services that reveal where a fronted server truly exits",
-  "smartRoutingHeuristics": "Node heuristics",
+  "smartRoutingHeuristics": "Name rules",
   "smartRoutingHeuristicsDesc": "Name hints and rules that steer how servers are chosen",
   "smartRoutingBandInvalid": "Enter a positive number of milliseconds",
+  "smartRoutingVocabulary": "Vocabulary",
+  "smartRoutingVocabularyDesc": "Rename the words the studio uses for reasons, gates and steps. Renaming stays on this device and never changes how the engine ranks servers.",
+  "smartRoutingVocabReasonGroup": "Switch reasons",
+  "smartRoutingVocabVerdictGroup": "Verdicts",
+  "smartRoutingVocabEvidenceGroup": "Evidence",
+  "smartRoutingVocabBlockGroup": "Gates",
+  "smartRoutingVocabOriginGroup": "Origin",
+  "smartRoutingVocabRungGroup": "Comparison steps",
+  "smartRoutingVocabRename": "Rename label",
+  "smartRoutingVocabDefault": "Default: {label}",
+  "@smartRoutingVocabDefault": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingVocabEmpty": "A label cannot be empty",
+  "smartRoutingVocabDuplicate": "Another entry already reads this way",
   "smartRoutingRanking": "Ranking",
   "smartRoutingRankingDesc": "The latency ladder groups servers into speed tiers; a measured server always outranks an unmeasured one",
+  "smartRoutingLadderEditor": "Comparison ladder",
+  "smartRoutingLadderEditorDesc": "Reorder the comparison, switch steps off, and tune their thresholds. Each step's direction stays fixed by the engine.",
+  "smartRoutingLadderReorderHint": "Hold a step to move it. The first step where two servers differ is the one that decides between them.",
+  "smartRoutingLadderChangedDefault": "Changed from the {strategy} default",
+  "@smartRoutingLadderChangedDefault": {
+    "placeholders": {
+      "strategy": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingRungOff": "Off",
+  "smartRoutingRecurrenceFloor": "Recurrence floor",
+  "smartRoutingRecurrenceFloorDesc": "Failures below this many episodes do not weigh against a server yet",
+  "smartRoutingLatencyTolerance": "Latency tolerance",
+  "smartRoutingLatencyToleranceDesc": "Speed within this many milliseconds counts as a tie, so the next step decides",
+  "smartRoutingEpisodes": "{count} episodes",
+  "@smartRoutingEpisodes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingPercent": "{value}%",
+  "@smartRoutingPercent": {
+    "placeholders": {
+      "value": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingTriggers": "When to switch",
+  "smartRoutingTriggersDesc": "How much better a rival must be before the engine leaves a server that already works",
+  "smartRoutingSwitchImproveMs": "Faster by at least",
+  "smartRoutingSwitchImproveMsDesc": "A rival must beat the server in use by this many milliseconds to win on speed",
+  "smartRoutingSwitchImprovePct": "Faster by at least (percent)",
+  "smartRoutingSwitchImprovePctDesc": "A rival must also beat the server in use by this share to win on speed",
+  "smartRoutingLatencyStep": "Ignore tiny differences",
+  "smartRoutingLatencyStepDesc": "Latencies are rounded to this step before comparing, so tiny differences do not flip the ranking",
+  "smartRoutingTriggerAuto": "Strategy default",
   "smartRoutingAxisStability": "Stability",
   "smartRoutingAxisSpeed": "Speed",
   "smartRoutingAxisData": "Data saving",
   "smartRoutingStrategyPace": "Sets the pace",
-  "smartRoutingPacing": "Pace",
+  "smartRoutingPacing": "Timing",
   "smartRoutingPacingDesc": "How fast the engine reacts and how long checks stay trusted",
-  "smartRoutingDegradeConfirm": "Throttle confirm time",
+  "smartRoutingDegradeConfirm": "Wait before dropping",
   "smartRoutingDegradeConfirmDesc": "How long a server must keep failing traffic before it is dropped",
-  "smartRoutingProofTtl": "Proof lifetime",
+  "smartRoutingProofTtl": "Trust duration",
   "smartRoutingProofTtlDesc": "How long a passed check keeps a server proven before a recheck",
   "smartRoutingMinutes": "{minutes} min",
   "@smartRoutingMinutes": {
@@ -1482,11 +1555,12 @@
   },
   "smartRoutingNameHints": "Home-country name hints",
   "smartRoutingNameHintsDesc": "Name fragments that hint a server sits in the home country",
-  "smartRoutingEgressEchoes": "Egress echo services",
+  "smartRoutingEgressEchoes": "Exit echo services",
   "smartRoutingEgressEchoesDesc": "Endpoints that answer with the caller's address, to reveal where a fronted server truly exits",
   "smartRoutingMarkersLocal": "Home-only checks",
   "smartRoutingMarkersLocalDesc": "Confirm a server answers only from the home country before it is branded local",
   "smartRoutingBackup": "Backup",
+  "smartRoutingBackupDesc": "Save the whole setup to a file or restore it",
   "smartRoutingExport": "Export configuration",
   "smartRoutingExportDesc": "Save the whole smart routing setup to a file",
   "smartRoutingImport": "Import configuration",
@@ -1497,6 +1571,7 @@
   "smartRoutingFieldReset": "Reset to strategy default",
   "smartRoutingEmpty": "Nothing measured yet",
   "smartRoutingServiceRoutes": "Service routes",
+  "smartRoutingServiceRoutesDesc": "Give chosen apps their own path through the engine",
   "smartRoutingServiceYouTube": "YouTube without ads",
   "smartRoutingServiceGemini": "Gemini access",
   "smartRoutingServiceNoCandidates": "No specialist selectors",
@@ -1654,6 +1729,8 @@
   "wallpaperChoose": "Choose image",
   "wallpaperRemove": "Remove image",
   "wallpaperEnabled": "Use custom background",
+  "wallpaperProviderPriority": "Prefer provider background",
+  "wallpaperProviderPriorityDesc": "Your background is shown only on profiles without a provider background.",
   "wallpaperFit": "Image fit",
   "wallpaperFitCover": "Fill",
   "wallpaperFitContain": "Fit",
@@ -2122,6 +2199,30 @@
   "doctorPathUnknown": "Not checked",
   "doctorPathNotApplicable": "Not required",
   "doctorPathConsequence": "Not checked after an earlier problem",
+  "doctorPathSummaryHealthy": "Traffic clears every station on the path.",
+  "doctorPathSummaryExamining": "Checking the stations one by one.",
+  "doctorPathSummaryStale": "This is the last run — start a fresh check to trace the live path.",
+  "doctorPathSummaryIdle": "Run a check to trace the path.",
+  "doctorPathSummaryUnsupported": "Path tracing isn't available on this build.",
+  "doctorPathSummaryBreak": "Break at {station} — everything past it went dark.",
+  "@doctorPathSummaryBreak": {
+    "placeholders": {
+      "station": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorPathDescAppOk": "requests leave the device",
+  "doctorPathDescIngressOk": "traffic is captured and protected",
+  "doctorPathDescRouteOk": "rules picked a node",
+  "doctorPathDescInternetOk": "the node abroad answers",
+  "doctorPathDescResponseOk": "data came back intact",
+  "doctorPathDescAppFail": "requests aren't leaving the device",
+  "doctorPathDescIngressFail": "traffic capture is off",
+  "doctorPathDescRouteFail": "the route never reached a node",
+  "doctorPathDescInternetFail": "the node isn't answering",
+  "doctorPathDescResponseFail": "the reply never came back",
+  "doctorPathDescConsequence": "skipped — the break is upstream",
   "doctorTechnicalDetails": "Technical details",
   "doctorWhatToTry": "What to try",
   "doctorRemedyStartVpn": "Start VPN",
@@ -2538,6 +2639,36 @@
   "companionEnterUrl": "Enter a URL",
   "doctorWaterfall": "Latency waterfall",
   "doctorWaterfallDesc": "Each bar is a probe on the connection path, placed by when it started and how long it took.",
+  "doctorWaterfallHintBreak": "Break at the {layer} layer. Layers after it never ran.",
+  "@doctorWaterfallHintBreak": {
+    "placeholders": {
+      "layer": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorWaterfallHintSlow": "Slowest layer is {layer} at {duration}. The full path stayed within a normal range.",
+  "@doctorWaterfallHintSlow": {
+    "placeholders": {
+      "layer": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorWaterfallHintClear": "Every probed layer answered.",
+  "doctorFlushDnsUnavailable": "DNS flush applies only to a DNS-layer break.",
+  "doctorRawEvidenceCount": "{count} records",
+  "@doctorRawEvidenceCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "doctorRawEvidence": "Raw evidence",
   "doctorRun": "Run a check",
   "doctorCapabilities": "Diagnostic coverage",
   "doctorCapabilityPassiveWitness": "Passive witness",

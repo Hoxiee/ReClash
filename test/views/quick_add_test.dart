@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
@@ -8,6 +8,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/rules.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
+import 'package:reclash/views/profiles/overwrite/rule_preset.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -98,5 +99,29 @@ void main() {
       rules.added.single.map((rule) => rule.rawValue),
       RulePreset.russiaDirect.rawRules,
     );
+  });
+
+  testWidgets('preset list starts flush under the sheet toolbar', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [appRegionProvider.overrideWithValue('RU')],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(body: RulePresetSheet(onAdd: (_) {})),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The scaffold already pads the body by the toolbar height; any top
+    // padding here doubles the gap above the first preset.
+    final listView = tester.widget<ListView>(find.byType(ListView));
+    expect((listView.padding! as EdgeInsets).top, 0);
+    expect(tester.takeException(), isNull);
   });
 }

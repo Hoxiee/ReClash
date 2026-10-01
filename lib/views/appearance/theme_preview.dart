@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 class PreviewChoice<T> {
@@ -296,6 +297,58 @@ class MiniSplitScreen extends StatelessWidget {
         ClipPath(clipper: _DiagonalClipper(), child: dark),
       ],
     );
+  }
+}
+
+/// A tab switch frozen mid-flight, drawn so each mode reads at a glance: slide
+/// tracks two pages across, fade dissolves one into the other, off shows one.
+class MiniSwitchScreen extends StatelessWidget {
+  const MiniSwitchScreen({
+    super.key,
+    required this.colorScheme,
+    required this.tabAnimation,
+  });
+
+  static const double _progress = 0.55;
+
+  final ColorScheme colorScheme;
+  final TabAnimation tabAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    final outgoing = MiniScreen(colorScheme: colorScheme, hero: true);
+    final incoming = MiniScreen(colorScheme: colorScheme);
+    switch (tabAnimation) {
+      case TabAnimation.off:
+        return incoming;
+      case TabAnimation.fade:
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Opacity(opacity: 1 - _progress, child: outgoing),
+            Opacity(opacity: _progress, child: incoming),
+          ],
+        );
+      case TabAnimation.slide:
+        return LayoutBuilder(
+          builder: (_, constraints) {
+            final width = constraints.maxWidth;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Transform.translate(
+                  offset: Offset(-width * _progress, 0),
+                  child: outgoing,
+                ),
+                Transform.translate(
+                  offset: Offset(width * (1 - _progress), 0),
+                  child: incoming,
+                ),
+              ],
+            );
+          },
+        );
+    }
   }
 }
 

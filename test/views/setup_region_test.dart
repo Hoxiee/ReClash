@@ -208,7 +208,7 @@ void main() {
     );
     await tester.tap(find.text('Preset'));
     await tester.pumpAndSettle();
-    expect(find.byType(SmartRoutingView), findsNothing);
+    expect(find.byType(RoutingStudioView), findsNothing);
     expect(find.text('Saver'), findsOneWidget);
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
     expect(container.read(desyncSettingProvider).enabled, isFalse);

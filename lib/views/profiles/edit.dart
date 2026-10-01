@@ -330,11 +330,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ),
         if (_autoUpdate)
           _AutoUpdateIntervalField(controller: _autoUpdateDurationController),
-        _ClientCompatibilityItem(
-          selected: _clientCompatibility,
-          onChanged: _setClientCompatibility,
-          customUserAgentController: _customUserAgentController,
-        ),
+        if (kEnableSubscriptionConverter)
+          _ClientCompatibilityItem(
+            selected: _clientCompatibility,
+            onChanged: _setClientCompatibility,
+            customUserAgentController: _customUserAgentController,
+          ),
       ],
       _ProfileFileItem(
         fileInfoNotifier: _fileInfoNotifier,

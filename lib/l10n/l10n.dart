@@ -445,16 +445,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Personalization`
-  String get toolsCategoryPersonalization {
-    return Intl.message(
-      'Personalization',
-      name: 'toolsCategoryPersonalization',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Configuration`
   String get toolsCategoryConfiguration {
     return Intl.message(
@@ -465,11 +455,21 @@ class AppLocalizations {
     );
   }
 
-  /// `System`
-  String get toolsCategorySystem {
+  /// `App settings`
+  String get toolsCategoryApplication {
     return Intl.message(
-      'System',
-      name: 'toolsCategorySystem',
+      'App settings',
+      name: 'toolsCategoryApplication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Info and debug`
+  String get toolsCategoryInfo {
+    return Intl.message(
+      'Info and debug',
+      name: 'toolsCategoryInfo',
       desc: '',
       args: [],
     );
@@ -596,6 +596,11 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Traffic`
+  String get traffic {
+    return Intl.message('Traffic', name: 'traffic', desc: '', args: []);
   }
 
   /// `Upload`
@@ -1666,6 +1671,16 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Slide`
+  String get slide {
+    return Intl.message('Slide', name: 'slide', desc: '', args: []);
+  }
+
+  /// `Fade`
+  String get fade {
+    return Intl.message('Fade', name: 'fade', desc: '', args: []);
   }
 
   /// `A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.`
@@ -3163,6 +3178,21 @@ class AppLocalizations {
     return Intl.message('Proxy group', name: 'proxyGroup', desc: '', args: []);
   }
 
+  /// `Proxy node`
+  String get proxyNode {
+    return Intl.message('Proxy node', name: 'proxyNode', desc: '', args: []);
+  }
+
+  /// `Last updated`
+  String get lastUpdated {
+    return Intl.message(
+      'Last updated',
+      name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Go`
   String get go {
     return Intl.message('Go', name: 'go', desc: '', args: []);
@@ -4472,6 +4502,46 @@ class AppLocalizations {
     return Intl.message(
       'Control the app with the keyboard',
       name: 'hotkeyManagementDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore defaults`
+  String get hotkeyRestoreDefaults {
+    return Intl.message(
+      'Restore defaults',
+      name: 'hotkeyRestoreDefaults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear all`
+  String get hotkeyClearAll {
+    return Intl.message(
+      'Clear all',
+      name: 'hotkeyClearAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace all combinations with the defaults?`
+  String get hotkeyRestoreDefaultsTip {
+    return Intl.message(
+      'Replace all combinations with the defaults?',
+      name: 'hotkeyRestoreDefaultsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove all hotkey combinations?`
+  String get hotkeyClearAllTip {
+    return Intl.message(
+      'Remove all hotkey combinations?',
+      name: 'hotkeyClearAllTip',
       desc: '',
       args: [],
     );
@@ -8892,6 +8962,16 @@ class AppLocalizations {
     );
   }
 
+  /// `How the engine acts around a manual pick and diagnostics`
+  String get smartRoutingBehaviourDesc {
+    return Intl.message(
+      'How the engine acts around a manual pick and diagnostics',
+      name: 'smartRoutingBehaviourDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Probing`
   String get smartRoutingProbing {
     return Intl.message(
@@ -8922,10 +9002,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Settle time`
+  /// `Hold time`
   String get smartRoutingDwell {
     return Intl.message(
-      'Settle time',
+      'Hold time',
       name: 'smartRoutingDwell',
       desc: '',
       args: [],
@@ -8952,10 +9032,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Latency ceiling`
+  /// `Delay limit`
   String get smartRoutingCeiling {
     return Intl.message(
-      'Latency ceiling',
+      'Delay limit',
       name: 'smartRoutingCeiling',
       desc: '',
       args: [],
@@ -11087,10 +11167,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Latency ladder`
+  /// `Speed tiers`
   String get smartRoutingLatencyBands {
     return Intl.message(
-      'Latency ladder',
+      'Speed tiers',
       name: 'smartRoutingLatencyBands',
       desc: '',
       args: [],
@@ -11437,6 +11517,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Decision engine`
+  String get smartRoutingDecisionEngine {
+    return Intl.message(
+      'Decision engine',
+      name: 'smartRoutingDecisionEngine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Signals`
+  String get smartRoutingSignals {
+    return Intl.message(
+      'Signals',
+      name: 'smartRoutingSignals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What the engine measures each node against`
+  String get smartRoutingSignalsDesc {
+    return Intl.message(
+      'What the engine measures each node against',
+      name: 'smartRoutingSignalsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Seeded from the region set in the app; edit them only if your network needs it`
   String get smartRoutingRegionNote {
     return Intl.message(
@@ -11467,10 +11577,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Egress verification`
+  /// `Exit verification`
   String get smartRoutingEgress {
     return Intl.message(
-      'Egress verification',
+      'Exit verification',
       name: 'smartRoutingEgress',
       desc: '',
       args: [],
@@ -11487,10 +11597,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Node heuristics`
+  /// `Name rules`
   String get smartRoutingHeuristics {
     return Intl.message(
-      'Node heuristics',
+      'Name rules',
       name: 'smartRoutingHeuristics',
       desc: '',
       args: [],
@@ -11517,6 +11627,126 @@ class AppLocalizations {
     );
   }
 
+  /// `Vocabulary`
+  String get smartRoutingVocabulary {
+    return Intl.message(
+      'Vocabulary',
+      name: 'smartRoutingVocabulary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename the words the studio uses for reasons, gates and steps. Renaming stays on this device and never changes how the engine ranks servers.`
+  String get smartRoutingVocabularyDesc {
+    return Intl.message(
+      'Rename the words the studio uses for reasons, gates and steps. Renaming stays on this device and never changes how the engine ranks servers.',
+      name: 'smartRoutingVocabularyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch reasons`
+  String get smartRoutingVocabReasonGroup {
+    return Intl.message(
+      'Switch reasons',
+      name: 'smartRoutingVocabReasonGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verdicts`
+  String get smartRoutingVocabVerdictGroup {
+    return Intl.message(
+      'Verdicts',
+      name: 'smartRoutingVocabVerdictGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Evidence`
+  String get smartRoutingVocabEvidenceGroup {
+    return Intl.message(
+      'Evidence',
+      name: 'smartRoutingVocabEvidenceGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gates`
+  String get smartRoutingVocabBlockGroup {
+    return Intl.message(
+      'Gates',
+      name: 'smartRoutingVocabBlockGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Origin`
+  String get smartRoutingVocabOriginGroup {
+    return Intl.message(
+      'Origin',
+      name: 'smartRoutingVocabOriginGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comparison steps`
+  String get smartRoutingVocabRungGroup {
+    return Intl.message(
+      'Comparison steps',
+      name: 'smartRoutingVocabRungGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename label`
+  String get smartRoutingVocabRename {
+    return Intl.message(
+      'Rename label',
+      name: 'smartRoutingVocabRename',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Default: {label}`
+  String smartRoutingVocabDefault(String label) {
+    return Intl.message(
+      'Default: $label',
+      name: 'smartRoutingVocabDefault',
+      desc: '',
+      args: [label],
+    );
+  }
+
+  /// `A label cannot be empty`
+  String get smartRoutingVocabEmpty {
+    return Intl.message(
+      'A label cannot be empty',
+      name: 'smartRoutingVocabEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Another entry already reads this way`
+  String get smartRoutingVocabDuplicate {
+    return Intl.message(
+      'Another entry already reads this way',
+      name: 'smartRoutingVocabDuplicate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ranking`
   String get smartRoutingRanking {
     return Intl.message(
@@ -11532,6 +11762,201 @@ class AppLocalizations {
     return Intl.message(
       'The latency ladder groups servers into speed tiers; a measured server always outranks an unmeasured one',
       name: 'smartRoutingRankingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comparison ladder`
+  String get smartRoutingLadderEditor {
+    return Intl.message(
+      'Comparison ladder',
+      name: 'smartRoutingLadderEditor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reorder the comparison, switch steps off, and tune their thresholds. Each step's direction stays fixed by the engine.`
+  String get smartRoutingLadderEditorDesc {
+    return Intl.message(
+      'Reorder the comparison, switch steps off, and tune their thresholds. Each step\'s direction stays fixed by the engine.',
+      name: 'smartRoutingLadderEditorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hold a step to move it. The first step where two servers differ is the one that decides between them.`
+  String get smartRoutingLadderReorderHint {
+    return Intl.message(
+      'Hold a step to move it. The first step where two servers differ is the one that decides between them.',
+      name: 'smartRoutingLadderReorderHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changed from the {strategy} default`
+  String smartRoutingLadderChangedDefault(String strategy) {
+    return Intl.message(
+      'Changed from the $strategy default',
+      name: 'smartRoutingLadderChangedDefault',
+      desc: '',
+      args: [strategy],
+    );
+  }
+
+  /// `Off`
+  String get smartRoutingRungOff {
+    return Intl.message('Off', name: 'smartRoutingRungOff', desc: '', args: []);
+  }
+
+  /// `Recurrence floor`
+  String get smartRoutingRecurrenceFloor {
+    return Intl.message(
+      'Recurrence floor',
+      name: 'smartRoutingRecurrenceFloor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failures below this many episodes do not weigh against a server yet`
+  String get smartRoutingRecurrenceFloorDesc {
+    return Intl.message(
+      'Failures below this many episodes do not weigh against a server yet',
+      name: 'smartRoutingRecurrenceFloorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency tolerance`
+  String get smartRoutingLatencyTolerance {
+    return Intl.message(
+      'Latency tolerance',
+      name: 'smartRoutingLatencyTolerance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Speed within this many milliseconds counts as a tie, so the next step decides`
+  String get smartRoutingLatencyToleranceDesc {
+    return Intl.message(
+      'Speed within this many milliseconds counts as a tie, so the next step decides',
+      name: 'smartRoutingLatencyToleranceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} episodes`
+  String smartRoutingEpisodes(num count) {
+    return Intl.message(
+      '$count episodes',
+      name: 'smartRoutingEpisodes',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{value}%`
+  String smartRoutingPercent(num value) {
+    return Intl.message(
+      '$value%',
+      name: 'smartRoutingPercent',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `When to switch`
+  String get smartRoutingTriggers {
+    return Intl.message(
+      'When to switch',
+      name: 'smartRoutingTriggers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How much better a rival must be before the engine leaves a server that already works`
+  String get smartRoutingTriggersDesc {
+    return Intl.message(
+      'How much better a rival must be before the engine leaves a server that already works',
+      name: 'smartRoutingTriggersDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Faster by at least`
+  String get smartRoutingSwitchImproveMs {
+    return Intl.message(
+      'Faster by at least',
+      name: 'smartRoutingSwitchImproveMs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A rival must beat the server in use by this many milliseconds to win on speed`
+  String get smartRoutingSwitchImproveMsDesc {
+    return Intl.message(
+      'A rival must beat the server in use by this many milliseconds to win on speed',
+      name: 'smartRoutingSwitchImproveMsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Faster by at least (percent)`
+  String get smartRoutingSwitchImprovePct {
+    return Intl.message(
+      'Faster by at least (percent)',
+      name: 'smartRoutingSwitchImprovePct',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A rival must also beat the server in use by this share to win on speed`
+  String get smartRoutingSwitchImprovePctDesc {
+    return Intl.message(
+      'A rival must also beat the server in use by this share to win on speed',
+      name: 'smartRoutingSwitchImprovePctDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore tiny differences`
+  String get smartRoutingLatencyStep {
+    return Intl.message(
+      'Ignore tiny differences',
+      name: 'smartRoutingLatencyStep',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latencies are rounded to this step before comparing, so tiny differences do not flip the ranking`
+  String get smartRoutingLatencyStepDesc {
+    return Intl.message(
+      'Latencies are rounded to this step before comparing, so tiny differences do not flip the ranking',
+      name: 'smartRoutingLatencyStepDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategy default`
+  String get smartRoutingTriggerAuto {
+    return Intl.message(
+      'Strategy default',
+      name: 'smartRoutingTriggerAuto',
       desc: '',
       args: [],
     );
@@ -11577,9 +12002,14 @@ class AppLocalizations {
     );
   }
 
-  /// `Pace`
+  /// `Timing`
   String get smartRoutingPacing {
-    return Intl.message('Pace', name: 'smartRoutingPacing', desc: '', args: []);
+    return Intl.message(
+      'Timing',
+      name: 'smartRoutingPacing',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `How fast the engine reacts and how long checks stay trusted`
@@ -11592,10 +12022,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Throttle confirm time`
+  /// `Wait before dropping`
   String get smartRoutingDegradeConfirm {
     return Intl.message(
-      'Throttle confirm time',
+      'Wait before dropping',
       name: 'smartRoutingDegradeConfirm',
       desc: '',
       args: [],
@@ -11612,10 +12042,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Proof lifetime`
+  /// `Trust duration`
   String get smartRoutingProofTtl {
     return Intl.message(
-      'Proof lifetime',
+      'Trust duration',
       name: 'smartRoutingProofTtl',
       desc: '',
       args: [],
@@ -11662,10 +12092,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Egress echo services`
+  /// `Exit echo services`
   String get smartRoutingEgressEchoes {
     return Intl.message(
-      'Egress echo services',
+      'Exit echo services',
       name: 'smartRoutingEgressEchoes',
       desc: '',
       args: [],
@@ -11707,6 +12137,16 @@ class AppLocalizations {
     return Intl.message(
       'Backup',
       name: 'smartRoutingBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save the whole setup to a file or restore it`
+  String get smartRoutingBackupDesc {
+    return Intl.message(
+      'Save the whole setup to a file or restore it',
+      name: 'smartRoutingBackupDesc',
       desc: '',
       args: [],
     );
@@ -11807,6 +12247,16 @@ class AppLocalizations {
     return Intl.message(
       'Service routes',
       name: 'smartRoutingServiceRoutes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Give chosen apps their own path through the engine`
+  String get smartRoutingServiceRoutesDesc {
+    return Intl.message(
+      'Give chosen apps their own path through the engine',
+      name: 'smartRoutingServiceRoutesDesc',
       desc: '',
       args: [],
     );
@@ -12232,6 +12682,26 @@ class AppLocalizations {
     return Intl.message(
       'Use custom background',
       name: 'wallpaperEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prefer provider background`
+  String get wallpaperProviderPriority {
+    return Intl.message(
+      'Prefer provider background',
+      name: 'wallpaperProviderPriority',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your background is shown only on profiles without a provider background.`
+  String get wallpaperProviderPriorityDesc {
+    return Intl.message(
+      'Your background is shown only on profiles without a provider background.',
+      name: 'wallpaperProviderPriorityDesc',
       desc: '',
       args: [],
     );
@@ -15228,6 +15698,176 @@ class AppLocalizations {
     );
   }
 
+  /// `Traffic clears every station on the path.`
+  String get doctorPathSummaryHealthy {
+    return Intl.message(
+      'Traffic clears every station on the path.',
+      name: 'doctorPathSummaryHealthy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the stations one by one.`
+  String get doctorPathSummaryExamining {
+    return Intl.message(
+      'Checking the stations one by one.',
+      name: 'doctorPathSummaryExamining',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is the last run — start a fresh check to trace the live path.`
+  String get doctorPathSummaryStale {
+    return Intl.message(
+      'This is the last run — start a fresh check to trace the live path.',
+      name: 'doctorPathSummaryStale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run a check to trace the path.`
+  String get doctorPathSummaryIdle {
+    return Intl.message(
+      'Run a check to trace the path.',
+      name: 'doctorPathSummaryIdle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Path tracing isn't available on this build.`
+  String get doctorPathSummaryUnsupported {
+    return Intl.message(
+      'Path tracing isn\'t available on this build.',
+      name: 'doctorPathSummaryUnsupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Break at {station} — everything past it went dark.`
+  String doctorPathSummaryBreak(String station) {
+    return Intl.message(
+      'Break at $station — everything past it went dark.',
+      name: 'doctorPathSummaryBreak',
+      desc: '',
+      args: [station],
+    );
+  }
+
+  /// `requests leave the device`
+  String get doctorPathDescAppOk {
+    return Intl.message(
+      'requests leave the device',
+      name: 'doctorPathDescAppOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `traffic is captured and protected`
+  String get doctorPathDescIngressOk {
+    return Intl.message(
+      'traffic is captured and protected',
+      name: 'doctorPathDescIngressOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `rules picked a node`
+  String get doctorPathDescRouteOk {
+    return Intl.message(
+      'rules picked a node',
+      name: 'doctorPathDescRouteOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `the node abroad answers`
+  String get doctorPathDescInternetOk {
+    return Intl.message(
+      'the node abroad answers',
+      name: 'doctorPathDescInternetOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `data came back intact`
+  String get doctorPathDescResponseOk {
+    return Intl.message(
+      'data came back intact',
+      name: 'doctorPathDescResponseOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `requests aren't leaving the device`
+  String get doctorPathDescAppFail {
+    return Intl.message(
+      'requests aren\'t leaving the device',
+      name: 'doctorPathDescAppFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `traffic capture is off`
+  String get doctorPathDescIngressFail {
+    return Intl.message(
+      'traffic capture is off',
+      name: 'doctorPathDescIngressFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `the route never reached a node`
+  String get doctorPathDescRouteFail {
+    return Intl.message(
+      'the route never reached a node',
+      name: 'doctorPathDescRouteFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `the node isn't answering`
+  String get doctorPathDescInternetFail {
+    return Intl.message(
+      'the node isn\'t answering',
+      name: 'doctorPathDescInternetFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `the reply never came back`
+  String get doctorPathDescResponseFail {
+    return Intl.message(
+      'the reply never came back',
+      name: 'doctorPathDescResponseFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `skipped — the break is upstream`
+  String get doctorPathDescConsequence {
+    return Intl.message(
+      'skipped — the break is upstream',
+      name: 'doctorPathDescConsequence',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Technical details`
   String get doctorTechnicalDetails {
     return Intl.message(
@@ -17828,6 +18468,66 @@ class AppLocalizations {
     return Intl.message(
       'Each bar is a probe on the connection path, placed by when it started and how long it took.',
       name: 'doctorWaterfallDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Break at the {layer} layer. Layers after it never ran.`
+  String doctorWaterfallHintBreak(String layer) {
+    return Intl.message(
+      'Break at the $layer layer. Layers after it never ran.',
+      name: 'doctorWaterfallHintBreak',
+      desc: '',
+      args: [layer],
+    );
+  }
+
+  /// `Slowest layer is {layer} at {duration}. The full path stayed within a normal range.`
+  String doctorWaterfallHintSlow(String layer, String duration) {
+    return Intl.message(
+      'Slowest layer is $layer at $duration. The full path stayed within a normal range.',
+      name: 'doctorWaterfallHintSlow',
+      desc: '',
+      args: [layer, duration],
+    );
+  }
+
+  /// `Every probed layer answered.`
+  String get doctorWaterfallHintClear {
+    return Intl.message(
+      'Every probed layer answered.',
+      name: 'doctorWaterfallHintClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS flush applies only to a DNS-layer break.`
+  String get doctorFlushDnsUnavailable {
+    return Intl.message(
+      'DNS flush applies only to a DNS-layer break.',
+      name: 'doctorFlushDnsUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} records`
+  String doctorRawEvidenceCount(num count) {
+    return Intl.message(
+      '$count records',
+      name: 'doctorRawEvidenceCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Raw evidence`
+  String get doctorRawEvidence {
+    return Intl.message(
+      'Raw evidence',
+      name: 'doctorRawEvidence',
       desc: '',
       args: [],
     );

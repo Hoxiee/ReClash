@@ -78,6 +78,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
             ),
             const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
             SettingSection.sliver(
+              search: const SettingSearch(),
               title: l10n.wallpaperTitle,
               subTitle: l10n.wallpaperDescription,
               glyph: AppGlyphs.wallpaper,
@@ -88,18 +89,31 @@ class AppearanceBackgroundTab extends ConsumerWidget {
                 items: [
                   DecorationListItem.toggle(
                     leading: const GlyphIcon(AppGlyphs.wallpaper),
+                    search: const SettingSearch(),
                     title: Text(l10n.wallpaperEnabled),
                     value: settings.enabled,
                     onChanged: (value) =>
                         update((s) => s.copyWith(enabled: value)),
                   ),
+                  if (settings.enabled)
+                    DecorationListItem.toggle(
+                      leading: const GlyphIcon(AppGlyphs.wallpaper),
+                      search: const SettingSearch(),
+                      title: Text(l10n.wallpaperProviderPriority),
+                      subtitle: Text(l10n.wallpaperProviderPriorityDesc),
+                      value: settings.providerPriority,
+                      onChanged: (value) =>
+                          update((s) => s.copyWith(providerPriority: value)),
+                    ),
                 ],
               ),
               SettingSection.sliver(
+                search: const SettingSearch(),
                 title: l10n.wallpaperLayout,
                 glyph: AppGlyphs.customize,
                 items: [
                   DecorationListItem.options(
+                    search: const SettingSearch(),
                     title: Text(l10n.wallpaperFit),
                     subtitle: Text(fitLabel(settings.fit)),
                     dialogTitle: l10n.wallpaperFit,
@@ -134,6 +148,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
                 ],
               ),
               SettingSection.sliver(
+                search: const SettingSearch(),
                 title: l10n.wallpaperEffects,
                 glyph: AppGlyphs.blur,
                 items: [
@@ -161,6 +176,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
               ),
             ],
             SettingSection.sliver(
+              search: const SettingSearch(),
               title: l10n.wallpaperReadability,
               glyph: AppGlyphs.eye,
               items: [
@@ -184,6 +200,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
                 ),
                 DecorationListItem(
                   leading: const GlyphIcon(AppGlyphs.restore),
+                  search: const SettingSearch(),
                   title: Text(l10n.wallpaperReset),
                   onPressed: () => update(
                     (s) => WallpaperProps(

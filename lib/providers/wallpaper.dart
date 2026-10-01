@@ -12,6 +12,7 @@ import 'package:reclash/common/util/exception.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/state.dart';
 
 final wallpaperStoreProvider = Provider<WallpaperStore>(
   (_) => WallpaperStore(
@@ -33,6 +34,20 @@ final wallpaperImageProvider = FutureProvider<MemoryImage?>((ref) async {
   );
   if (fileName == null) return null;
   return ref.watch(wallpaperThumbnailProvider(fileName).future);
+});
+
+final effectiveWallpaperImageProvider = Provider<MemoryImage?>((ref) {
+  final wallpaper = ref.watch(
+    themeSettingProvider.select((value) => value.wallpaper),
+  );
+  if (!wallpaper.enabled) return null;
+  final image = ref.watch(wallpaperImageProvider).asData?.value;
+  if (image == null) return null;
+  if (wallpaper.providerPriority &&
+      ref.watch(panelBackgroundProvider) != null) {
+    return null;
+  }
+  return image;
 });
 
 final wallpaperThumbnailProvider = FutureProvider.family<MemoryImage?, String>((

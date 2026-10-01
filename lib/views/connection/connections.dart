@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -74,15 +75,44 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     return withSpeeds;
   }
 
-  List<IconButtonData> _buildActions() {
+  String _sortLabel(ConnectionSortType type) {
+    final appLocalizations = context.appLocalizations;
+    return switch (type) {
+      ConnectionSortType.traffic => appLocalizations.traffic,
+      ConnectionSortType.time => appLocalizations.time,
+      ConnectionSortType.upload => appLocalizations.upload,
+      ConnectionSortType.download => appLocalizations.download,
+      ConnectionSortType.host => appLocalizations.host,
+    };
+  }
+
+  void _handleSort(ConnectionSortType type) {
+    _listController.setSortType(type);
+    setState(() {});
+  }
+
+  List<CommonPopupMenuItem> _buildMenuItems() {
+    final current = _listController.value.sortType;
     return [
-      IconButtonData(
+      CommonPopupMenuItem(
+        label: context.appLocalizations.closeConnections,
         glyph: AppGlyphs.clearAll,
-        tooltip: context.appLocalizations.closeConnections,
         onPressed: () async {
           unawaited(_core.closeConnections());
           await _refreshConnections();
         },
+      ),
+      CommonPopupMenuItem(
+        label: context.appLocalizations.sort,
+        glyph: AppGlyphs.sort,
+        subItems: [
+          for (final type in ConnectionSortType.values)
+            CommonPopupMenuItem(
+              label: _sortLabel(type),
+              glyph: current == type ? AppGlyphs.check : null,
+              onPressed: () => _handleSort(type),
+            ),
+        ],
       ),
     ];
   }
@@ -127,19 +157,8 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
 
   void _applyConnections(List<TrackerInfo> trackerInfos) {
     // The core snapshot iterates a Go map, so its order is random per poll;
-    // sort by total traffic to keep the list stable between refreshes.
-    final sorted = _withSpeeds(trackerInfos)
-      ..sort((a, b) {
-        final traffic = (b.upload + b.download).compareTo(
-          a.upload + a.download,
-        );
-        if (traffic != 0) {
-          return traffic;
-        }
-        final start = b.start.compareTo(a.start);
-        return start != 0 ? start : a.id.compareTo(b.id);
-      });
-    _listController.setTrackerInfos(sorted);
+    // the controller's list getter sorts by the chosen key for a stable order.
+    _listController.setTrackerInfos(_withSpeeds(trackerInfos));
   }
 
   Future<void> _handleBlockConnection(String id) async {
@@ -171,35 +190,143 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         },
         useRegex: _listController.value.useRegex,
       ),
-      iconActions: _buildActions(),
+      menuItems: _buildMenuItems(),
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
           final connections = state.list;
-          return NullStatusSwitcher(
-            isEmpty: connections.isEmpty,
-            nullStatus: NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.connections),
-              illustration: NullStatusIllustration.connections,
-            ),
-            child: TrackerInfoAnimatedList(
-              controller: _scrollController,
-              padding: EdgeInsets.only(
-                top: context.appBarInset,
-                bottom: 16 + BottomInsetScope.of(context),
+          final topInset = context.appBarInset;
+          return Column(
+            children: [
+              if (connections.isNotEmpty)
+                _SummaryBar(totals: state.totals, topInset: topInset),
+              Expanded(
+                child: NullStatusSwitcher(
+                  isEmpty: connections.isEmpty,
+                  nullStatus: NullStatus(
+                    label: appLocalizations.nullTip(
+                      appLocalizations.connections,
+                    ),
+                    illustration: NullStatusIllustration.connections,
+                  ),
+                  child: TrackerInfoAnimatedList(
+                    controller: _scrollController,
+                    padding: EdgeInsets.only(
+                      top: connections.isNotEmpty ? 8 : topInset,
+                      bottom: 16 + BottomInsetScope.of(context),
+                    ),
+                    trackerInfos: connections,
+                    detailTitle: appLocalizations.details(
+                      appLocalizations.connection,
+                    ),
+                    trailingBuilder: (trackerInfo) => _BlockConnectionButton(
+                      onPressed: () {
+                        _handleBlockConnection(trackerInfo.id);
+                      },
+                    ),
+                  ),
+                ),
               ),
-              trackerInfos: connections,
-              detailTitle: appLocalizations.details(
-                appLocalizations.connection,
-              ),
-              trailingBuilder: (trackerInfo) => _BlockConnectionButton(
-                onPressed: () {
-                  _handleBlockConnection(trackerInfo.id);
-                },
-              ),
-            ),
+            ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _SummaryBar extends StatelessWidget {
+  const _SummaryBar({required this.totals, required this.topInset});
+
+  final ({
+    int connections,
+    int upload,
+    int download,
+    int uploadSpeed,
+    int downloadSpeed,
+  })
+  totals;
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, topInset + 4, 16, 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: ShapeDecoration(
+          color: colorScheme.surfaceContainerLow,
+          shape: AppShape.lg,
+        ),
+        child: Row(
+          children: [
+            _SummaryCell(
+              glyph: AppGlyphs.connections,
+              label: appLocalizations.connections,
+              value: '${totals.connections}',
+            ),
+            _SummaryCell(
+              glyph: AppGlyphs.trendDown,
+              label: '${totals.downloadSpeed.traffic.show}/s',
+              value: totals.download.traffic.show,
+            ),
+            _SummaryCell(
+              glyph: AppGlyphs.trendUp,
+              label: '${totals.uploadSpeed.traffic.show}/s',
+              value: totals.upload.traffic.show,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryCell extends StatelessWidget {
+  const _SummaryCell({
+    required this.glyph,
+    required this.label,
+    required this.value,
+  });
+
+  final Glyph glyph;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Expanded(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GlyphIcon(glyph, size: 18, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -9,6 +9,7 @@ part of '../wallpaper.dart';
 _WallpaperProps _$WallpaperPropsFromJson(Map<String, dynamic> json) =>
     _WallpaperProps(
       enabled: json['enabled'] as bool? ?? false,
+      providerPriority: json['providerPriority'] as bool? ?? false,
       fileName: json['fileName'] as String?,
       library:
           (json['library'] as List<dynamic>?)
@@ -32,6 +33,7 @@ _WallpaperProps _$WallpaperPropsFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$WallpaperPropsToJson(_WallpaperProps instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
+      'providerPriority': instance.providerPriority,
       'fileName': instance.fileName,
       'library': instance.library,
       'fit': _$WallpaperFitEnumMap[instance.fit]!,

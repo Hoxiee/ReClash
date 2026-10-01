@@ -173,7 +173,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('subscription menu item opens the usage dialog', (tester) async {
+  testWidgets('subscription menu item opens the subscription sheet', (
+    tester,
+  ) async {
     await pumpProfiles(tester, profiles: [urlProfile('url')]);
 
     final profileItem = find.ancestor(
@@ -190,8 +192,36 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.subscriptionInfo));
     await tester.pumpAndSettle();
 
-    expect(find.byType(CommonDialog), findsOneWidget);
-    expect(find.byType(SubscriptionInfoDetailView), findsOneWidget);
-    expect(find.text(currentAppLocalizations.subscriptionInfo), findsOneWidget);
+    expect(find.byType(CommonDialog), findsNothing);
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+    expect(find.text(currentAppLocalizations.profile), findsOneWidget);
+    expect(find.text(currentAppLocalizations.announce), findsNothing);
+  });
+
+  testWidgets('subscription sheet from profiles menu shows announcements', (
+    tester,
+  ) async {
+    final profile = urlProfile(
+      'url',
+    ).copyWith(panelMeta: PanelMeta(announce: 'Maintenance tonight'));
+    await pumpProfiles(tester, profiles: [profile]);
+
+    final profileItem = find.ancestor(
+      of: find.text('url'),
+      matching: find.byType(ListItem),
+    );
+    await tester.tap(
+      find.descendant(of: profileItem, matching: find.byGlyph(AppGlyphs.more)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(currentAppLocalizations.more).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(currentAppLocalizations.subscriptionInfo));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+    expect(find.text(currentAppLocalizations.announce), findsOneWidget);
+    expect(find.text('Maintenance tonight'), findsOneWidget);
   });
 }

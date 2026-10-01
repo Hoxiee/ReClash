@@ -98,7 +98,12 @@ _AppSettingProps _$AppSettingPropsFromJson(
   closeConnections: json['closeConnections'] as bool? ?? true,
   newDashboard: json['newDashboard'] as bool? ?? true,
   testUrl: json['testUrl'] as String? ?? defaultTestUrl,
-  isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
+  tabAnimation:
+      $enumDecodeNullable(
+        _$TabAnimationEnumMap,
+        _readTabAnimation(json, 'tabAnimation'),
+      ) ??
+      TabAnimation.slide,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   showLabel: json['showLabel'] as bool? ?? false,
   sidebarExpanded: json['sidebarExpanded'] as bool? ?? false,
@@ -157,7 +162,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'closeConnections': instance.closeConnections,
       'newDashboard': instance.newDashboard,
       'testUrl': instance.testUrl,
-      'isAnimateToPage': instance.isAnimateToPage,
+      'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'autoCheckUpdate': instance.autoCheckUpdate,
       'showLabel': instance.showLabel,
       'sidebarExpanded': instance.sidebarExpanded,
@@ -184,6 +189,12 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'serviceAutoCheckAll': instance.serviceAutoCheckAll,
       'hideIp': instance.hideIp,
     };
+
+const _$TabAnimationEnumMap = {
+  TabAnimation.slide: 'slide',
+  TabAnimation.fade: 'fade',
+  TabAnimation.off: 'off',
+};
 
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',
@@ -391,6 +402,11 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
           ?.map((e) => (e as num).toInt())
           .toList() ??
       const [],
+  ladder:
+      (json['ladder'] as List<dynamic>?)
+          ?.map((e) => RcxRungSpec.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
   requireUdp: json['requireUdp'] as bool? ?? false,
   respectPick: json['respectPick'] as bool? ?? true,
@@ -399,6 +415,14 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
   absCeilingMs: (json['absCeilingMs'] as num?)?.toInt() ?? 300,
   degradeConfirmSeconds: (json['degradeConfirmSeconds'] as num?)?.toInt() ?? 60,
   proofTtlMinutes: (json['proofTtlMinutes'] as num?)?.toInt() ?? 30,
+  switchImproveMs: (json['switchImproveMs'] as num?)?.toInt() ?? 0,
+  switchImprovePct: (json['switchImprovePct'] as num?)?.toInt() ?? 0,
+  latencyStepMs: (json['latencyStepMs'] as num?)?.toInt() ?? 0,
+  labelOverrides:
+      (json['labelOverrides'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      const <String, String>{},
 );
 
 Map<String, dynamic> _$SmartRoutingPropsToJson(
@@ -422,6 +446,7 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'nodeRules': instance.nodeRules.map((e) => e.toJson()).toList(),
   'avoidCountries': instance.avoidCountries,
   'latencyBands': instance.latencyBands,
+  'ladder': instance.ladder.map((e) => e.toJson()).toList(),
   'allowDomesticLastResort': instance.allowDomesticLastResort,
   'requireUdp': instance.requireUdp,
   'respectPick': instance.respectPick,
@@ -430,6 +455,10 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'absCeilingMs': instance.absCeilingMs,
   'degradeConfirmSeconds': instance.degradeConfirmSeconds,
   'proofTtlMinutes': instance.proofTtlMinutes,
+  'switchImproveMs': instance.switchImproveMs,
+  'switchImprovePct': instance.switchImprovePct,
+  'latencyStepMs': instance.latencyStepMs,
+  'labelOverrides': instance.labelOverrides,
 };
 
 const _$SmartRoutingStrategyEnumMap = {

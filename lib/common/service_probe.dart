@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:reclash/common/regional/regional.dart';
 import 'package:reclash/core/controller.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
 const serviceProbeTimeout = Duration(seconds: 10);
@@ -104,7 +103,7 @@ const _serviceRussia = [
 ];
 
 const _regionalServiceTargets = RegionalDefaults<List<ServiceTarget>>({
-  AppRegion.china: [
+  'CN': [
     ServiceTarget.google,
     ServiceTarget.github,
     ServiceTarget.youtube,
@@ -118,13 +117,12 @@ const _regionalServiceTargets = RegionalDefaults<List<ServiceTarget>>({
     ServiceTarget.tiktok,
     ServiceTarget.bilibili,
   ],
-  AppRegion.russia: _serviceRussia,
-  AppRegion.iran: _serviceWithoutBilibili,
-  AppRegion.other: _serviceWithoutBilibili,
+  'RU': _serviceRussia,
+  'IR': _serviceWithoutBilibili,
 }, _serviceWithoutBilibili);
 
-List<ServiceTarget> serviceTargetsForRegion(AppRegion region) =>
-    _regionalServiceTargets.forRegion(region);
+List<ServiceTarget> serviceTargetsForRegion(String? code) =>
+    _regionalServiceTargets.forRegion(code);
 
 /// Applies the user's [order] on top of the region's [allowed] catalog: it
 /// reorders and, together with a disabled filter, prunes — it never re-adds a

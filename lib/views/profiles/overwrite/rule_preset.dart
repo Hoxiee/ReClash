@@ -130,9 +130,10 @@ class _RulePresetSheetState extends ConsumerState<RulePresetSheet> {
       body: SizedBox(
         height: ref.sheetHeight(context, 0.6),
         child: ListView.builder(
+          // The scaffold already reserves the toolbar height above the body.
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
-          ).copyWith(top: context.contentTopPadding, bottom: 20),
+          ).copyWith(bottom: 20),
           itemCount: presets.length,
           itemBuilder: (context, index) {
             final preset = presets[index];

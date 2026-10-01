@@ -75,6 +75,7 @@ class AppearanceThemeTab extends ConsumerWidget {
           items: [
             DecorationListItem.toggle(
               leading: const GlyphIcon(AppGlyphs.clock),
+              search: const SettingSearch(),
               title: Text(appLocalizations.schedule),
               subtitle: Text(
                 appLocalizations.scheduleDesc(theme.darkAt, theme.lightAt),
@@ -94,6 +95,7 @@ class AppearanceThemeTab extends ConsumerWidget {
             if (theme.scheduledTheme) ...[
               DecorationListItem(
                 leading: const GlyphIcon(AppGlyphs.moon),
+                search: const SettingSearch(),
                 title: Text(appLocalizations.darkAt),
                 trailing: Text(
                   theme.darkAt,
@@ -105,6 +107,7 @@ class AppearanceThemeTab extends ConsumerWidget {
               ),
               DecorationListItem(
                 leading: const GlyphIcon(AppGlyphs.sun),
+                search: const SettingSearch(),
                 title: Text(appLocalizations.lightAt),
                 trailing: Text(
                   theme.lightAt,
@@ -126,6 +129,7 @@ class AppearanceThemeTab extends ConsumerWidget {
                     : '',
                 child: const GlyphIcon(AppGlyphs.contrast),
               ),
+              search: const SettingSearch(),
               title: appLocalizations.contrast,
               valueLabel: _percent(contrast),
               min: -1,
@@ -175,6 +179,7 @@ class _LayoutChoice extends ConsumerWidget {
           children: [
             InfoHeader(
               info: Info(
+                search: const SettingSearch(),
                 label: appLocalizations.dashboardStyle,
                 glyph: AppGlyphs.dashboard,
               ),
@@ -298,7 +303,11 @@ class _ThemeModeChoice extends ConsumerWidget {
     return SliverToBoxAdapter(
       child: FadeSlideEnterBox(
         child: PreviewChoiceGroup<ThemeMode?>(
-          info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
+          info: Info(
+            search: const SettingSearch(),
+            label: appLocalizations.themeMode,
+            glyph: AppGlyphs.sun,
+          ),
           value: scheduled ? null : themeMode,
           choices: [
             PreviewChoice(
@@ -357,6 +366,7 @@ class _PureBlackChoice extends ConsumerWidget {
       child: FadeSlideEnterBox(
         child: PreviewChoiceGroup<bool>(
           info: Info(
+            search: const SettingSearch(),
             label: appLocalizations.pureBlackMode,
             glyph: AppGlyphs.pureBlack,
           ),
@@ -422,6 +432,7 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
           children: [
             InfoHeader(
               info: Info(
+                search: const SettingSearch(),
                 label: appLocalizations.textScale,
                 glyph: AppGlyphs.textSize,
               ),

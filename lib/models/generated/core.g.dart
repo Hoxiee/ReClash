@@ -379,6 +379,21 @@ Map<String, dynamic> _$RcxLaneConfigToJson(_RcxLaneConfig instance) =>
       'sel': instance.selectors,
     };
 
+_RcxRungSpec _$RcxRungSpecFromJson(Map<String, dynamic> json) => _RcxRungSpec(
+  id: json['id'] as String,
+  enabled: json['on'] as bool? ?? true,
+  recurrenceFloor: (json['rf'] as num?)?.toInt() ?? 0,
+  latencyToleranceMs: (json['lt'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$RcxRungSpecToJson(_RcxRungSpec instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'on': instance.enabled,
+      'rf': instance.recurrenceFloor,
+      'lt': instance.latencyToleranceMs,
+    };
+
 _RcxConfigParams _$RcxConfigParamsFromJson(
   Map<String, dynamic> json,
 ) => _RcxConfigParams(
@@ -430,6 +445,11 @@ _RcxConfigParams _$RcxConfigParamsFromJson(
   latencyBands:
       (json['lb'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
       const [],
+  ladder:
+      (json['lad'] as List<dynamic>?)
+          ?.map((e) => RcxRungSpec.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   allowDomesticLastResort: json['dlr'] as bool,
   requireUdp: json['udp'] as bool,
   respectPick: json['rpk'] as bool,
@@ -438,6 +458,9 @@ _RcxConfigParams _$RcxConfigParamsFromJson(
   absCeilingMs: (json['acm'] as num?)?.toInt() ?? 300,
   degradeConfirmSeconds: (json['dgc'] as num?)?.toInt() ?? 60,
   proofTtlMinutes: (json['pttl'] as num?)?.toInt() ?? 30,
+  switchImproveMs: (json['sim'] as num?)?.toInt() ?? 0,
+  switchImprovePct: (json['sip'] as num?)?.toInt() ?? 0,
+  latencyStepMs: (json['lst'] as num?)?.toInt() ?? 0,
   lanes:
       (json['ln'] as List<dynamic>?)
           ?.map((e) => RcxLaneConfig.fromJson(e as Map<String, dynamic>))
@@ -465,6 +488,7 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'nr': instance.nodeRules,
       'ac': instance.avoidCountries,
       'lb': instance.latencyBands,
+      'lad': instance.ladder,
       'dlr': instance.allowDomesticLastResort,
       'udp': instance.requireUdp,
       'rpk': instance.respectPick,
@@ -473,6 +497,9 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'acm': instance.absCeilingMs,
       'dgc': instance.degradeConfirmSeconds,
       'pttl': instance.proofTtlMinutes,
+      'sim': instance.switchImproveMs,
+      'sip': instance.switchImprovePct,
+      'lst': instance.latencyStepMs,
       'ln': instance.lanes,
     };
 
@@ -771,6 +798,11 @@ _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
           ?.map((e) => (e as num).toInt())
           .toList() ??
       const [],
+  ladder:
+      (json['ladder'] as List<dynamic>?)
+          ?.map((e) => RcxRungSpec.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
   probeCap: (json['probeCap'] as num?)?.toInt() ?? 0,
   manual: json['manual'] as bool? ?? false,
@@ -789,6 +821,7 @@ Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
       'history': instance.history,
       'metrics': instance.metrics,
       'bands': instance.bands,
+      'ladder': instance.ladder,
       'probesLeft': instance.probesLeft,
       'probeCap': instance.probeCap,
       'manual': instance.manual,

@@ -1,28 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/subscription_report.dart';
 
 import '../helpers/test_app.dart';
-
-class _StubAction extends ProfilesAction {
-  _StubAction(this.report, {this.gate});
-
-  final SubscriptionReport report;
-  final Future<void>? gate;
-
-  @override
-  Future<SubscriptionReport> buildSubscriptionReport() async {
-    if (gate != null) await gate;
-    return report;
-  }
-}
 
 SubscriptionReport _report(SubscriptionFault fault) => SubscriptionReport(
   verdict: SubscriptionVerdict(fault: fault),
@@ -43,7 +27,6 @@ void main() {
   Future<ProviderContainer> pump(
     WidgetTester tester,
     SubscriptionFault fault, {
-    Future<void>? gate,
     String? reportUrl,
   }) async {
     const size = Size(900, 1600);
@@ -52,13 +35,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final container = ProviderContainer(
-      overrides: [
-        profilesActionProvider.overrideWith(
-          () => _StubAction(_report(fault), gate: gate),
-        ),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(viewSizeProvider.notifier).update((_) => size);
@@ -67,11 +44,16 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          child: Scaffold(body: SubscriptionReportSheet(reportUrl: reportUrl)),
+          child: Scaffold(
+            body: SubscriptionReportSheet(
+              report: _report(fault),
+              reportUrl: reportUrl,
+            ),
+          ),
         ),
       ),
     );
-    if (gate == null) await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
     return container;
   }
 
@@ -122,17 +104,8 @@ void main() {
     expect(find.text('The problem looks like the provider'), findsNothing);
   });
 
-  testWidgets('lands focus on the primary action after a slow load', (
-    tester,
-  ) async {
-    final gate = Completer<void>();
-    await pump(tester, SubscriptionFault.server, gate: gate.future);
-    // Plain pumps run the focus settle while only the never-settling spinner is up.
-    await tester.pump();
-    await tester.pump();
-    gate.complete();
-    await tester.pumpAndSettle();
-
+  testWidgets('lands focus on the primary action', (tester) async {
+    await pump(tester, SubscriptionFault.server);
     final context = FocusManager.instance.primaryFocus?.context;
     final button = context?.findAncestorWidgetOfExactType<FilledButton>();
     expect(button?.onPressed, isNotNull);

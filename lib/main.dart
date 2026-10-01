@@ -41,8 +41,10 @@ void main(List<String> args) {
         );
       } catch (error, stackTrace) {
         runApp(
-          MaterialApp(
-            home: InitErrorScreen(error: error, stack: stackTrace),
+          buildInitErrorApp(
+            error: error,
+            stack: stackTrace,
+            relaunchArgs: args,
           ),
         );
         unawaited(window?.showInitFailure());

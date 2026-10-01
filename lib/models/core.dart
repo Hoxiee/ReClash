@@ -259,6 +259,19 @@ abstract class RcxLaneConfig with _$RcxLaneConfig {
 }
 
 @freezed
+abstract class RcxRungSpec with _$RcxRungSpec {
+  const factory RcxRungSpec({
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'on') @Default(true) bool enabled,
+    @JsonKey(name: 'rf') @Default(0) int recurrenceFloor,
+    @JsonKey(name: 'lt') @Default(0) int latencyToleranceMs,
+  }) = _RcxRungSpec;
+
+  factory RcxRungSpec.fromJson(Map<String, Object?> json) =>
+      _$RcxRungSpecFromJson(json);
+}
+
+@freezed
 abstract class RcxConfigParams with _$RcxConfigParams {
   const factory RcxConfigParams({
     @JsonKey(name: 'on') required bool enabled,
@@ -279,6 +292,7 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'nr') @Default([]) List<RcxNodeRule> nodeRules,
     @JsonKey(name: 'ac') @Default([]) List<String> avoidCountries,
     @JsonKey(name: 'lb') @Default([]) List<int> latencyBands,
+    @JsonKey(name: 'lad') @Default([]) List<RcxRungSpec> ladder,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
     @JsonKey(name: 'udp') required bool requireUdp,
     @JsonKey(name: 'rpk') required bool respectPick,
@@ -287,6 +301,9 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'acm') @Default(300) int absCeilingMs,
     @JsonKey(name: 'dgc') @Default(60) int degradeConfirmSeconds,
     @JsonKey(name: 'pttl') @Default(30) int proofTtlMinutes,
+    @JsonKey(name: 'sim') @Default(0) int switchImproveMs,
+    @JsonKey(name: 'sip') @Default(0) int switchImprovePct,
+    @JsonKey(name: 'lst') @Default(0) int latencyStepMs,
     @JsonKey(name: 'ln') @Default([]) List<RcxLaneConfig> lanes,
   }) = _RcxConfigParams;
 
@@ -482,6 +499,7 @@ abstract class RcxReport with _$RcxReport {
     @Default([]) List<RcxSwitchReport> history,
     @Default(RcxMetricsReport()) RcxMetricsReport metrics,
     @Default([]) List<int> bands,
+    @Default([]) List<RcxRungSpec> ladder,
     @Default(0) int probesLeft,
     @Default(0) int probeCap,
     @Default(false) bool manual,

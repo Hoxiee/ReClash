@@ -315,7 +315,7 @@ class ProfilesAction extends _$ProfilesAction {
     final routing = ref.read(smartRoutingSettingProvider);
     final desync = ref.read(effectiveDesyncSettingProvider);
     return [
-      'route=${routing.preset.name}',
+      'route=${routing.preset}',
       if (desync.enabled) 'desync=on' else 'desync=off',
     ];
   }

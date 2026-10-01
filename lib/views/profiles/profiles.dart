@@ -10,6 +10,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_sheet.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite.dart';
 import 'package:reclash/widgets/theme/profile_patina.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -17,7 +18,6 @@ import 'package:reclash/widgets/widgets.dart';
 import 'add.dart';
 import 'edit.dart';
 import 'preview.dart';
-import 'subscription_report.dart';
 
 class ProfilesView extends ConsumerStatefulWidget {
   const ProfilesView({super.key});
@@ -233,7 +233,7 @@ class ProfileItem extends ConsumerWidget {
   }
 
   void _handleShowSubscriptionInfo(BuildContext context) {
-    showSubscriptionInfoDialog(context, profile.subscriptionInfo!);
+    unawaited(showSubscriptionSheet(context, profile: profile));
   }
 
   Future updateProfile(WidgetRef ref) async {
@@ -246,10 +246,7 @@ class ProfileItem extends ConsumerWidget {
   }
 
   void _handleShowEditExtendPage(BuildContext context) {
-    showExtend(
-      context,
-      builder: (_) => EditProfileView(profile: profile),
-    );
+    showExtend(context, builder: (_) => EditProfileView(profile: profile));
   }
 
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
@@ -318,25 +315,6 @@ class ProfileItem extends ConsumerWidget {
     BaseNavigator.push(context, OverwriteView(profileId: id));
   }
 
-  Future<void> _handleShowSubscriptionReport(BuildContext context) async {
-    final appLocalizations = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      context: context,
-      title: appLocalizations.subscriptionReport,
-      confirmText: appLocalizations.show,
-      message: TextSpan(text: appLocalizations.subscriptionReportConfirm),
-    );
-    if (confirmed != true || !context.mounted) return;
-    // Let the confirm dialog finish fading before the sheet rises, so its
-    // centered card does not linger over the sheet's entrance.
-    await Future<void>.delayed(context.motionDuration(Dialogs.dismissDuration));
-    if (!context.mounted) return;
-    await showSubscriptionReportSheet(
-      context,
-      reportUrl: profile.panelMeta?.reportUrl,
-    );
-  }
-
   List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
@@ -396,14 +374,6 @@ class ProfileItem extends ConsumerWidget {
             ),
           if (isUrl)
             CommonPopupMenuItem(
-              glyph: AppGlyphs.openExternal,
-              label: appLocalizations.openInBrowser,
-              onPressed: () {
-                dialogs.openUrl(profile.url);
-              },
-            ),
-          if (isUrl)
-            CommonPopupMenuItem(
               glyph: AppGlyphs.copy,
               label: appLocalizations.copyLink,
               onPressed: () {
@@ -417,14 +387,6 @@ class ProfileItem extends ConsumerWidget {
               _handleExportFile(context);
             },
           ),
-          if (isUrl)
-            CommonPopupMenuItem(
-              glyph: AppGlyphs.document,
-              label: appLocalizations.subscriptionReport,
-              onPressed: () {
-                unawaited(_handleShowSubscriptionReport(context));
-              },
-            ),
         ],
       ),
       CommonPopupMenuItem(
@@ -732,11 +694,7 @@ class _ReorderableProfilesSheetState
             count: profiles.length,
             delayedDrag: true,
             icon: AppGlyphs.dragHandle,
-            onReorder: (oldIndex, newIndex) {
-              setState(() {
-                profiles = profiles.copyAndReorder(oldIndex, newIndex);
-              });
-            },
+            onReorder: _handleReorder,
           ),
           title: Text(profile.realLabel),
         ),
@@ -744,8 +702,10 @@ class _ReorderableProfilesSheetState
     );
   }
 
-  void _handleSave() {
-    Navigator.of(context).pop();
+  void _handleReorder(int oldIndex, int newIndex) {
+    setState(() {
+      profiles = profiles.copyAndReorder(oldIndex, newIndex);
+    });
     ref.read(profilesProvider.notifier).reorder(profiles);
   }
 
@@ -754,13 +714,6 @@ class _ReorderableProfilesSheetState
     final appLocalizations = context.appLocalizations;
     return AdaptiveSheetScaffold(
       sheetTransparentToolBar: true,
-      actions: [
-        IconButtonData(
-          glyph: AppGlyphs.check,
-          onPressed: _handleSave,
-          tooltip: context.appLocalizations.save,
-        ),
-      ],
       body: Padding(
         padding: const EdgeInsets.only(bottom: 32),
         child: ReorderableListView.builder(
@@ -771,11 +724,7 @@ class _ReorderableProfilesSheetState
           proxyDecorator: (child, index, animation) {
             return commonProxyDecorator(_buildItem(index), index, animation);
           },
-          onReorderItem: (oldIndex, newIndex) {
-            setState(() {
-              profiles = profiles.copyAndReorder(oldIndex, newIndex);
-            });
-          },
+          onReorderItem: _handleReorder,
           itemBuilder: (_, index) {
             return _buildItem(index);
           },

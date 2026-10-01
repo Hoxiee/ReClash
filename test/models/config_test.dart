@@ -110,7 +110,7 @@ void main() {
       expect(restored.autoRun, false);
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
-      expect(restored.isAnimateToPage, true);
+      expect(restored.tabAnimation, TabAnimation.slide);
       expect(restored.autoCheckUpdate, true);
       expect(restored.showLabel, false);
       expect(restored.setupStep, 0);
