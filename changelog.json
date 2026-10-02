@@ -4,12 +4,257 @@
     {
       "version": "0.1.0-pre.1",
       "tag": "v0.1.0-pre.1",
-      "date": "2026-09-18",
+      "date": "2026-10-02",
       "prerelease": true,
       "groups": [
         {
           "type": "feat",
           "entries": [
+            {
+              "id": "558919c",
+              "scope": "core",
+              "text": "Add build info and runtime config viewer"
+            },
+            {
+              "id": "63535d4",
+              "scope": "dashboard",
+              "text": "Add the announcement morph panel to hero split details"
+            },
+            {
+              "id": "4b171b4",
+              "scope": "tools",
+              "text": "Add a core detail pane with applied config and traffic"
+            },
+            {
+              "id": "4457261",
+              "scope": "tools",
+              "text": "Surface the smart routing studio"
+            },
+            {
+              "id": "40f32d9",
+              "scope": "services",
+              "text": "Group service checks by category with regional defaults"
+            },
+            {
+              "id": "f6ca987",
+              "scope": "about",
+              "text": "Rebrand identity card with SVG wordmark, credit ByeDPI"
+            },
+            {
+              "id": "dac9dab",
+              "scope": "config",
+              "text": "Present list and map editors as sheets"
+            },
+            {
+              "id": "9f56b8b",
+              "scope": "ui",
+              "text": "Make settings search author-declared and refresh widgets"
+            },
+            {
+              "id": "20a730f",
+              "scope": "dashboard",
+              "text": "Rework hero deck and connection-path doctor"
+            },
+            {
+              "id": "7942e30",
+              "scope": "rcx",
+              "text": "Advance routing engine with a ladder editor"
+            },
+            {
+              "id": "633b4a7",
+              "scope": "tools",
+              "text": "Index desktop tools for search and refresh client UAs"
+            },
+            {
+              "id": "3397eae",
+              "scope": "doctor",
+              "text": "Add a connection-path dashboard widget and console"
+            },
+            {
+              "id": "f3f3ae7",
+              "scope": "rcx",
+              "text": "Drive censoring posture from measured terrain and harden autonomy"
+            },
+            {
+              "id": "ba928a8",
+              "scope": "tools",
+              "text": "Reach region, backup, and developer settings from search"
+            },
+            {
+              "id": "95e5562",
+              "scope": "tools",
+              "text": "Rebuild desktop tools with deep search and frecency recents"
+            },
+            {
+              "id": "cc975ec",
+              "scope": "appearance",
+              "text": "Polish tabs with unified rhythm and entrance motion"
+            },
+            {
+              "id": "a1fddfd",
+              "scope": "subscription",
+              "text": "Panel-tunable reminder thresholds and URL actions"
+            },
+            {
+              "id": "d7a0ac7",
+              "scope": "settings",
+              "text": "Confirm disabling device identity where the region needs it"
+            },
+            {
+              "id": "c9c9906",
+              "scope": "sheets",
+              "text": "Float the desktop side sheet as an inset raised card"
+            },
+            {
+              "id": "2c3fe75",
+              "scope": "tools",
+              "text": "Turn the desktop tools screen into a list-detail pane"
+            },
+            {
+              "id": "594abdd",
+              "scope": "desktop",
+              "text": "Show connection status in the window title bar"
+            },
+            {
+              "id": "0a1f6ac",
+              "scope": "subscription",
+              "text": "Distinguish an invalid config from a dead link"
+            },
+            {
+              "id": "698019c",
+              "scope": "hero",
+              "text": "Blend the orb into its idle pose instead of cutting the loops"
+            },
+            {
+              "id": "95fcf08",
+              "scope": "overwrite",
+              "text": "Render node and rule target labels with EmojiText"
+            },
+            {
+              "id": "4c2453e",
+              "scope": "appearance",
+              "text": "Redraw dashboard-style preview mockups"
+            },
+            {
+              "id": "836fb8a",
+              "scope": "smart-pause",
+              "text": "Smart Pause full-stop mode shuts the VPN down completely on trusted networks"
+            },
+            {
+              "id": "2bed38a",
+              "scope": "dashboard",
+              "text": "Configurable service auto-checks"
+            },
+            {
+              "id": "6f93f45",
+              "scope": "backup",
+              "text": "Guarded clear-data danger zone in Backup and restore"
+            },
+            {
+              "id": "af1936e",
+              "scope": "smart-pause",
+              "text": "Smart Pause now matches IPv6 networks, offers a strict SSID-plus-subnet mode, and names the matched rule"
+            },
+            {
+              "id": "17ae948",
+              "scope": "tool",
+              "text": "Export the provider standard from the model files"
+            },
+            {
+              "id": "c9b574d",
+              "scope": "nav",
+              "text": "Rework the desktop rail with a frosted collapsible layout"
+            },
+            {
+              "id": "64c8eed",
+              "scope": "dashboard",
+              "text": "Adapt the hero subscription strip into the classic card"
+            },
+            {
+              "id": "9ed78ee",
+              "scope": "appearance",
+              "text": "Reflect real layout and wallpaper in theme preview"
+            },
+            {
+              "id": "f4e5f4b",
+              "scope": "profiles",
+              "text": "Restyle the client-format picker with app-native pills"
+            },
+            {
+              "id": "0868a2a",
+              "scope": "companion",
+              "text": "Translate control-panel strings for all shipped locales"
+            },
+            {
+              "id": "567476d",
+              "scope": "companion",
+              "text": "Rework the device control panel"
+            },
+            {
+              "id": "9b0c748",
+              "scope": "companion",
+              "text": "Remote control panel for phone and TV peers"
+            },
+            {
+              "id": "2484abd",
+              "scope": "appearance",
+              "text": "Restyle theme tab with live preview and pictogram controls"
+            },
+            {
+              "id": "33d62f4",
+              "scope": "tabs",
+              "text": "Flow the thumb across segments as a liquid bridge"
+            },
+            {
+              "id": "243c78e",
+              "scope": "motion",
+              "text": "Reveal skeleton content with a blur dissolve"
+            },
+            {
+              "id": "8e86322",
+              "scope": "motion",
+              "text": "Stretch the segmented thumb as it travels"
+            },
+            {
+              "id": "db832c3",
+              "scope": "motion",
+              "text": "Roll the live speed digits like the traffic odometer"
+            },
+            {
+              "id": "e0957e2",
+              "scope": "setup",
+              "text": "hide the ByeDPI-only wizard wording where ByeDPI is unavailable"
+            },
+            {
+              "id": "57b6277",
+              "scope": "nav",
+              "text": "move Tools to the sidebar foot and remove the About rail entry"
+            },
+            {
+              "id": "34bbfbb",
+              "scope": "rules",
+              "text": "Add region-aware quick-add rule presets"
+            },
+            {
+              "id": "8a257ea",
+              "scope": "motion",
+              "text": "Swap the tools detail fade-through and drop the mobile side-slide"
+            },
+            {
+              "id": "69905db",
+              "scope": "motion",
+              "text": "Pop the primary FAB on the morph spring"
+            },
+            {
+              "id": "062425b",
+              "scope": "motion",
+              "text": "Carry the spring feel into page-switch and empty states"
+            },
+            {
+              "id": "7598663",
+              "scope": "motion",
+              "text": "Unify routes, dialogs and open-items under the spring feel"
+            },
             {
               "id": "fad4b47",
               "scope": "ui",
@@ -549,6 +794,99 @@
           "type": "fix",
           "entries": [
             {
+              "id": "19a585a",
+              "text": "Reliable Windows installation and TUN; unified tooltips and connection lists"
+            },
+            {
+              "id": "d92ecb7",
+              "scope": "rcx",
+              "text": "Prevent false failovers and prefer faster standbys"
+            },
+            {
+              "id": "d8f3895",
+              "text": "Restore request order and subscription announcements"
+            },
+            {
+              "id": "48f8abb",
+              "scope": "tools",
+              "text": "Reset drilled panes and routes on layout breakpoint change"
+            },
+            {
+              "id": "15bd2ca",
+              "scope": "ui",
+              "text": "Move DNS/NTP add to appbar, fix doctor refresh and connections sheet"
+            },
+            {
+              "id": "78bfb4a",
+              "scope": "hero",
+              "text": "Anchor the hold cinematic to its overlay, not the window"
+            },
+            {
+              "id": "702b059",
+              "scope": "profiles",
+              "text": "Skip the auto-update tick while the screen is off"
+            },
+            {
+              "id": "3c6fa37",
+              "scope": "battery",
+              "text": "Gate screen-off work on a reliable display signal"
+            },
+            {
+              "id": "5ce6613",
+              "scope": "appearance",
+              "text": "Match the hero theme preview to the real dashboard"
+            },
+            {
+              "id": "787f6aa",
+              "scope": "dashboard",
+              "text": "Collapse the empty split board to one centred card"
+            },
+            {
+              "id": "9d775c7",
+              "scope": "focus",
+              "text": "Gate Material focus overlay by :focus-visible"
+            },
+            {
+              "id": "e96f146",
+              "scope": "appearance",
+              "text": "Match the hero theme preview to the real dashboard"
+            },
+            {
+              "id": "ba9bbbe",
+              "scope": "rcx",
+              "text": "Ride the median on the scaled proof TTL"
+            },
+            {
+              "id": "17bfd2e",
+              "scope": "companion",
+              "text": "Keep LAN reachability across sleep, restart, and address change"
+            },
+            {
+              "id": "85d7536",
+              "scope": "rcx",
+              "text": "Hold a proven live incumbent through reactive marker misses"
+            },
+            {
+              "id": "d17b28e",
+              "scope": "core",
+              "text": "Keep the data plane live through doze suspend"
+            },
+            {
+              "id": "0872c12",
+              "scope": "windows",
+              "text": "install into the ReClash folder and add Russian and Korean setup languages"
+            },
+            {
+              "id": "fa32f47",
+              "scope": "core",
+              "text": "stop the setup wizard erroring \"config is not applied\" on a fresh install"
+            },
+            {
+              "id": "c9fb07d",
+              "scope": "dashboard",
+              "text": "Give the hero orb the action-chip elastic press"
+            },
+            {
               "id": "1977170",
               "scope": "dashboard",
               "text": "Grow the connection and memory sheets as their content scrolls"
@@ -838,6 +1176,40 @@
         {
           "type": "perf",
           "entries": [
+            {
+              "id": "43d73f8",
+              "scope": "route",
+              "text": "Skip the poll when no group auto-switches"
+            },
+            {
+              "id": "daadc9c",
+              "scope": "battery",
+              "text": "Fold ambient motion and thin foreground polling"
+            },
+            {
+              "id": "f588394",
+              "text": "Hoist a regexp, batch the log drain, and memoize the access sort"
+            },
+            {
+              "id": "c8cb81b",
+              "scope": "core",
+              "text": "Slow route polling to 2s and skip cloning unchanged ticks"
+            },
+            {
+              "id": "955e015",
+              "scope": "lifecycle",
+              "text": "Pause runtime, doctor, and hero timers while minimized"
+            },
+            {
+              "id": "ddc7306",
+              "scope": "rcx",
+              "text": "Cut idle-wave cpu and allocations in the routing engine"
+            },
+            {
+              "id": "92fab62",
+              "scope": "motion",
+              "text": "Snap the page switch faster with a morph pop"
+            },
             {
               "id": "8918051",
               "scope": "core",
