@@ -41,6 +41,9 @@ on:
       - '.github/PULL_REQUEST_TEMPLATE.md'
       - 'snapshots/**'
       - 'LICENSE'
+  # Manual artifact builds for testing: same matrix as a tag, but the publish
+  # job stays gated on tags, so nothing is released.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -397,7 +400,7 @@ jobs:
         run: flutter build ${{ matrix.platform }} --debug
 
   build:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: [ dart, plugins, go-core, android, rust, windows-native ]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -537,7 +540,8 @@ jobs:
           if-no-files-found: error
           overwrite: true
           # Retain packages while the Windows check awaits release approval.
-          retention-days: 1
+          # Manual builds are for testing on other machines, so keep them longer.
+          retention-days: ${{ github.event_name == 'workflow_dispatch' && 7 || 1 }}
 
   validate-linux-packages:
     name: Validate Linux pacman packages
@@ -643,6 +647,7 @@ jobs:
 
   upload:
     name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
     environment: release
     permissions:
       contents: write
