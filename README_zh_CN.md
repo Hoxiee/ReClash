@@ -41,16 +41,9 @@ ReClash 是面向 Android、Windows、macOS 和 Linux 的跨平台应用。添�
 
 ## 截图
 
-<table>
-  <tr>
-    <td><img src="snapshots/desktop.gif" alt="ReClash 桌面端"></td>
-    <td><img src="snapshots/mobile.gif" alt="ReClash 移动端"></td>
-  </tr>
-  <tr>
-    <td align="center">桌面端</td>
-    <td align="center">移动端</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="snapshots/app.png" alt="ReClash 桌面端和移动端">
+</p>
 
 ## 安装
 

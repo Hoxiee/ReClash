@@ -41,16 +41,9 @@ ReClash — кроссплатформенное приложение для And
 
 ## Скриншоты
 
-<table>
-  <tr>
-    <td><img src="snapshots/desktop.gif" alt="ReClash на компьютере"></td>
-    <td><img src="snapshots/mobile.gif" alt="ReClash на телефоне"></td>
-  </tr>
-  <tr>
-    <td align="center">Компьютер</td>
-    <td align="center">Телефон</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="snapshots/app.png" alt="ReClash на компьютере и телефоне">
+</p>
 
 ## Установка
 

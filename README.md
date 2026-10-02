@@ -41,16 +41,9 @@ Downloads, a guided setup for new users, and the provider toolkit are on the pro
 
 ## Screenshots
 
-<table>
-  <tr>
-    <td><img src="snapshots/desktop.gif" alt="ReClash on desktop"></td>
-    <td><img src="snapshots/mobile.gif" alt="ReClash on mobile"></td>
-  </tr>
-  <tr>
-    <td align="center">Desktop</td>
-    <td align="center">Mobile</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="snapshots/app.png" alt="ReClash on desktop and mobile">
+</p>
 
 ## Install
 
