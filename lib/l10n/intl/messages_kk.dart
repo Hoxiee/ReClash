@@ -840,14 +840,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Сілтемені көшіру"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Көшірілді"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Архитектура"),
     "coreBlockedByPolicyTip": m7,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows Smart App Control ReClashCore.exe файлын қолтаңбасы жоқ болғандықтан блоктады. Windows қауіпсіздігі → «Қолданбалар мен браузерді бақылау» → Smart App Control баптауларына өтіп, «Өшірулі» опциясын таңдаңыз да, ReClash-ті қайта іске қосыңыз. Smart App Control-ті қайта қосу үшін Windows-ты қайта орнату керек.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage(
+      "Жинақтау жалаушалары",
+    ),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage("Жиналған уақыты"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage("Ядро файлы"),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ядро туралы ақпаратты алу мүмкін болмады",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Іске қосу тәсілі"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Helper арқылы процесс",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Кірістірілген кітапхана",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage("Бөлек процесс"),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Орындалу конфигурациясын ашу",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Платформа"),
     "coreRunning": MessageLookupByLibrary.simpleMessage("Жұмыс істеп тұр"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Орындалу конфигурациясы",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Баптаулар мен скрипттерден кейінгі қорытынды конфигурация. Тек оқуға арналған.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Орындалу конфигурациясын оқу мүмкін болмады",
+    ),
     "coreStarting": MessageLookupByLibrary.simpleMessage("Іске қосылуда…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Ядро күйі"),
     "coreStopped": MessageLookupByLibrary.simpleMessage("Тоқтатылған"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Деректер каталогы",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Өңір"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Құлау анықталды"),
     "crashDetectedTip": m8,

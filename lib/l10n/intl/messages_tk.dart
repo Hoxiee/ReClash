@@ -841,14 +841,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("URL-i göçürip al"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Göçürildi"),
     "core": MessageLookupByLibrary.simpleMessage("Çekirdek"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Arhitektura"),
     "coreBlockedByPolicyTip": m7,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows-yň Smart App Control-y ReClashCore.exe gol çekilmedikligi sebäpli ony bogýar. Windows Howpsuzlygy → Programmalar we brauzer gözegçiligi → Smart App Control sazlamalaryna giriň, «Öçürilen» görnüşini saýlaň, soňra ReClash-y täzeden açyň. Windows-y täzeden gurmadan Smart App Control-y gaýtadan işledip bolmaýar.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage("Ýygnama baýdaklary"),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage("Ýygnalan wagty"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage("Ýadro faýly"),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ýadro maglumatlaryny okap bolmady",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Işlediş usuly"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Helper arkaly proses",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Prosesiň içindäki kitaphana",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage("Aýratyn proses"),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Iş wagty konfigurasiýasyny açmak",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Platforma"),
     "coreRunning": MessageLookupByLibrary.simpleMessage("Işleýär"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Iş wagty konfigurasiýasy",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalar we skriptler ulanylandan soňky jemleýji konfigurasiýa. Diňe okamak üçin.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Iş wagty konfigurasiýasyny okap bolmady",
+    ),
     "coreStarting": MessageLookupByLibrary.simpleMessage("Işe başlaýar…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Çekirdegiň ýagdaýy"),
     "coreStopped": MessageLookupByLibrary.simpleMessage("Saklandy"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Maglumat katalogy",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Sebit"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Dargamak anyklandy"),
     "crashDetectedTip": m8,

@@ -820,14 +820,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copied successfully"),
     "core": MessageLookupByLibrary.simpleMessage("Core"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Architecture"),
     "coreBlockedByPolicyTip": m7,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows Smart App Control blocked ReClashCore.exe because it is not signed. Open Windows Security → App & browser control → Smart App Control settings, choose Off, then start ReClash again. Smart App Control cannot be turned back on without reinstalling Windows.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage("Build flags"),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage("Build time"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage("Core binary"),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Could not read core information",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Execution mode"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Process via Helper",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "In-process library",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage("Separate process"),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Open runtime configuration",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Platform"),
     "coreRunning": MessageLookupByLibrary.simpleMessage("Running"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Runtime configuration",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Generated configuration after settings and scripts. Read-only.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not read the runtime configuration",
+    ),
     "coreStarting": MessageLookupByLibrary.simpleMessage("Starting…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "coreStopped": MessageLookupByLibrary.simpleMessage("Stopped"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Data directory",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Region"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Crash detected"),
     "crashDetectedTip": m8,

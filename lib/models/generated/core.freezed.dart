@@ -8348,6 +8348,303 @@ as String,
 
 
 /// @nodoc
+mixin _$CoreInfo {
+
+ String get version; String get goVersion; String get platform; String get architecture; DateTime? get buildTime; List<String> get tags; String get workingDirectory; String get executablePath;
+/// Create a copy of CoreInfo
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CoreInfoCopyWith<CoreInfo> get copyWith => _$CoreInfoCopyWithImpl<CoreInfo>(this as CoreInfo, _$identity);
+
+  /// Serializes this CoreInfo to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CoreInfo;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreInfo&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.goVersion, _this.goVersion) || other.goVersion == _this.goVersion)&&(identical(other.platform, _this.platform) || other.platform == _this.platform)&&(identical(other.architecture, _this.architecture) || other.architecture == _this.architecture)&&(identical(other.buildTime, _this.buildTime) || other.buildTime == _this.buildTime)&&const DeepCollectionEquality().equals(other.tags, _this.tags)&&(identical(other.workingDirectory, _this.workingDirectory) || other.workingDirectory == _this.workingDirectory)&&(identical(other.executablePath, _this.executablePath) || other.executablePath == _this.executablePath));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as CoreInfo;
+  return Object.hash(runtimeType,_this.version,_this.goVersion,_this.platform,_this.architecture,_this.buildTime,const DeepCollectionEquality().hash(_this.tags),_this.workingDirectory,_this.executablePath);
+}
+
+@override
+String toString() {
+  final _this = this as CoreInfo;
+  return 'CoreInfo(version: ${_this.version}, goVersion: ${_this.goVersion}, platform: ${_this.platform}, architecture: ${_this.architecture}, buildTime: ${_this.buildTime}, tags: ${_this.tags}, workingDirectory: ${_this.workingDirectory}, executablePath: ${_this.executablePath})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CoreInfoCopyWith<$Res>  {
+  factory $CoreInfoCopyWith(CoreInfo value, $Res Function(CoreInfo) _then) = _$CoreInfoCopyWithImpl;
+@useResult
+$Res call({
+ String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
+});
+
+
+
+
+}
+/// @nodoc
+class _$CoreInfoCopyWithImpl<$Res>
+    implements $CoreInfoCopyWith<$Res> {
+  _$CoreInfoCopyWithImpl(this._self, this._then);
+
+  final CoreInfo _self;
+  final $Res Function(CoreInfo) _then;
+
+/// Create a copy of CoreInfo
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
+  return _then(CoreInfo(
+version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as String,goVersion: null == goVersion ? _self.goVersion : goVersion // ignore: cast_nullable_to_non_nullable
+as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
+as String,architecture: null == architecture ? _self.architecture : architecture // ignore: cast_nullable_to_non_nullable
+as String,buildTime: freezed == buildTime ? _self.buildTime : buildTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,tags: null == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
+as List<String>,workingDirectory: null == workingDirectory ? _self.workingDirectory : workingDirectory // ignore: cast_nullable_to_non_nullable
+as String,executablePath: null == executablePath ? _self.executablePath : executablePath // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CoreInfo].
+extension CoreInfoPatterns on CoreInfo {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CoreInfo value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CoreInfo() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CoreInfo value)  $default,){
+final _that = this;
+switch (_that) {
+case _CoreInfo():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CoreInfo value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CoreInfo() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CoreInfo() when $default != null:
+return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)  $default,) {final _that = this;
+switch (_that) {
+case _CoreInfo():
+return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,) {final _that = this;
+switch (_that) {
+case _CoreInfo() when $default != null:
+return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CoreInfo implements CoreInfo {
+  const _CoreInfo({this.version = '', this.goVersion = '', this.platform = '', this.architecture = '', this.buildTime,  List<String> tags = const [], this.workingDirectory = '', this.executablePath = ''}): _tags = tags;
+  factory _CoreInfo.fromJson(Map<String, dynamic> json) => _$CoreInfoFromJson(json);
+
+@override@JsonKey() final  String version;
+@override@JsonKey() final  String goVersion;
+@override@JsonKey() final  String platform;
+@override@JsonKey() final  String architecture;
+@override final  DateTime? buildTime;
+ final  List<String> _tags;
+@override@JsonKey() List<String> get tags {
+  if (_tags is EqualUnmodifiableListView) return _tags;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_tags);
+}
+
+@override@JsonKey() final  String workingDirectory;
+@override@JsonKey() final  String executablePath;
+
+/// Create a copy of CoreInfo
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CoreInfoCopyWith<_CoreInfo> get copyWith => __$CoreInfoCopyWithImpl<_CoreInfo>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CoreInfoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreInfo&&(identical(other.version, version) || other.version == version)&&(identical(other.goVersion, goVersion) || other.goVersion == goVersion)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.architecture, architecture) || other.architecture == architecture)&&(identical(other.buildTime, buildTime) || other.buildTime == buildTime)&&const DeepCollectionEquality().equals(other.tags, _tags)&&(identical(other.workingDirectory, workingDirectory) || other.workingDirectory == workingDirectory)&&(identical(other.executablePath, executablePath) || other.executablePath == executablePath));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,version,goVersion,platform,architecture,buildTime,const DeepCollectionEquality().hash(_tags),workingDirectory,executablePath);
+}
+
+@override
+String toString() {
+    return 'CoreInfo(version: $version, goVersion: $goVersion, platform: $platform, architecture: $architecture, buildTime: $buildTime, tags: $tags, workingDirectory: $workingDirectory, executablePath: $executablePath)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CoreInfoCopyWith<$Res> implements $CoreInfoCopyWith<$Res> {
+  factory _$CoreInfoCopyWith(_CoreInfo value, $Res Function(_CoreInfo) _then) = __$CoreInfoCopyWithImpl;
+@override @useResult
+$Res call({
+ String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
+});
+
+
+
+
+}
+/// @nodoc
+class __$CoreInfoCopyWithImpl<$Res>
+    implements _$CoreInfoCopyWith<$Res> {
+  __$CoreInfoCopyWithImpl(this._self, this._then);
+
+  final _CoreInfo _self;
+  final $Res Function(_CoreInfo) _then;
+
+/// Create a copy of CoreInfo
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
+  return _then(_CoreInfo(
+version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as String,goVersion: null == goVersion ? _self.goVersion : goVersion // ignore: cast_nullable_to_non_nullable
+as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
+as String,architecture: null == architecture ? _self.architecture : architecture // ignore: cast_nullable_to_non_nullable
+as String,buildTime: freezed == buildTime ? _self.buildTime : buildTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,tags: null == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
+as List<String>,workingDirectory: null == workingDirectory ? _self.workingDirectory : workingDirectory // ignore: cast_nullable_to_non_nullable
+as String,executablePath: null == executablePath ? _self.executablePath : executablePath // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$CoreMemoryStats {
 
  int get rss; int get heapInuse; int get heapIdle; int get stackInuse; int get runtimeOther;

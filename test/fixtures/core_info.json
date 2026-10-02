@@ -1,0 +1,12 @@
+{
+  "version": "1.19.31-2-gf77b7475",
+  "goVersion": "go1.27.0",
+  "platform": "linux",
+  "architecture": "amd64",
+  "buildTime": "2026-10-02T08:05:06.123Z",
+  "tags": [
+    "with_gvisor"
+  ],
+  "workingDirectory": "/core-data",
+  "executablePath": "/core/ReClashCore"
+}

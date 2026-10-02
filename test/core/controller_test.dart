@@ -108,6 +108,15 @@ void main() {
     });
   });
 
+  test('core info delegates to the scoped handler', () async {
+    final scoped = CoreController.scoped(mock);
+    const info = CoreInfo(version: '1.19.31', goVersion: 'go1.27.0');
+    when(() => mock.getCoreInfo()).thenAnswer((_) async => info);
+
+    expect(await scoped.getCoreInfo(), same(info));
+    verify(() => mock.getCoreInfo()).called(1);
+  });
+
   group('config methods', () {
     test('validateConfig delegates to interface', () async {
       when(() => mock.validateConfig('/path')).thenAnswer((_) async => 'ok');

@@ -69,6 +69,11 @@ class GoBuilder {
     return '$configuredFlags -X github.com/metacubex/mihomo/constant.Version=$version';
   }
 
+  static String timestampedLdflags(String flags, DateTime time) {
+    final stamp = time.toUtc().toIso8601String();
+    return '$flags -X github.com/metacubex/mihomo/constant.BuildTime=$stamp';
+  }
+
   Future<BuildExecution> build(Target target, {bool force = false}) async {
     final ldflags = coreLdflags(_corePath, config.goLdflags);
     final outDir = target.isLib
@@ -89,7 +94,11 @@ class GoBuilder {
       notice: notice,
       build: () async {
         final env = _buildEnvironment(target);
-        final args = _buildArguments(target, ldflags, outFile: outFile);
+        final args = _buildArguments(
+          target,
+          timestampedLdflags(ldflags, DateTime.now()),
+          outFile: outFile,
+        );
 
         _log.info(kDoubleSeparator);
         _log.info(

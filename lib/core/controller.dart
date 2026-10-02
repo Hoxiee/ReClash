@@ -102,6 +102,8 @@ class CoreController {
     return _interface.getVersion();
   }
 
+  Future<CoreInfo?> getCoreInfo() => _interface.getCoreInfo();
+
   Future<String> validateConfig(String path) async {
     final res = await _interface.validateConfig(path);
     return res;
@@ -335,6 +337,10 @@ class CoreController {
 
   Future<Map<String, dynamic>> getAppliedConfig() async {
     return _readConfig(await appPath.configFilePath);
+  }
+
+  Future<String> getAppliedConfigContent() async {
+    return File(await appPath.configFilePath).readAsString();
   }
 
   Future<Map<String, dynamic>> _readConfig(String path) async {

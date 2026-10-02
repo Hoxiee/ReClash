@@ -120,6 +120,7 @@ const (
 	initClashMethod                  CoreMethod = "initClash"
 	getIsInitMethod                  CoreMethod = "getIsInit"
 	getVersionMethod                 CoreMethod = "getVersion"
+	getCoreInfoMethod                CoreMethod = "getCoreInfo"
 	forceGcMethod                    CoreMethod = "forceGc"
 	shutdownMethod                   CoreMethod = "shutdown"
 	validateConfigMethod             CoreMethod = "validateConfig"

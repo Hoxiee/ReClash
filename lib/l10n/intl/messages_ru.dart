@@ -834,14 +834,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Копировать ссылку"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Скопировано"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Архитектура"),
     "coreBlockedByPolicyTip": m7,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Smart App Control в Windows заблокировал неподписанный ReClashCore.exe. Откройте Безопасность Windows → Управление приложениями и браузером → Параметры Smart App Control, выберите «Выкл.» и снова запустите ReClash. Повторно включить Smart App Control без переустановки Windows нельзя.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage("Флаги сборки"),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage("Время сборки"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage("Файл ядра"),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Не удалось получить сведения о ядре",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Способ запуска"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Процесс через Helper",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Встроенная библиотека",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage(
+      "Отдельный процесс",
+    ),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Открыть runtime-конфиг",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Платформа"),
     "coreRunning": MessageLookupByLibrary.simpleMessage("Работает"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage("Runtime-конфиг"),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Итоговая конфигурация после настроек и скриптов. Только просмотр.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось прочитать runtime-конфиг",
+    ),
     "coreStarting": MessageLookupByLibrary.simpleMessage("Запускается…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Статус ядра"),
     "coreStopped": MessageLookupByLibrary.simpleMessage("Остановлено"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Каталог данных",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Регион"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Обнаружен сбой"),
     "crashDetectedTip": m8,

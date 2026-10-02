@@ -180,6 +180,9 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	getVersionMethod: withoutArguments(func(response MethodResponse) {
 		response.success(constant.Version)
 	}),
+	getCoreInfoMethod: withoutArguments(func(response MethodResponse) {
+		response.success(handleGetCoreInfo())
+	}),
 	forceGcMethod: withoutArguments(func(response MethodResponse) {
 		handleForceGC()
 		response.success(true)

@@ -867,14 +867,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Havolani nusxalash"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Nusxa olindi"),
     "core": MessageLookupByLibrary.simpleMessage("Yadro"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Arxitektura"),
     "coreBlockedByPolicyTip": m7,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows Smart App Control ReClashCore.exe dasturini imzo yoʻqligi sababli blokladi. Windows Security → App & browser control → Smart App Control sozlamalariga oʻting, Off ni tanlang va ReClashni qayta ishga tushiring. Smart App Controlni Windowsni qayta oʻrnatmasdan qayta yoqib boʻlmaydi.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage("Yigʻish bayroqlari"),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage("Yigʻilgan vaqt"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage("Yadro fayli"),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Yadro maʼlumotlarini olib boʻlmadi",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage(
+      "Ishga tushirish usuli",
+    ),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Helper orqali jarayon",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Jarayon ichidagi kutubxona",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage("Alohida jarayon"),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Ishlash konfiguratsiyasini ochish",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Platforma"),
     "coreRunning": MessageLookupByLibrary.simpleMessage("Ishlamoqda"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Ishlash konfiguratsiyasi",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Sozlamalar va skriptlardan keyingi yakuniy konfiguratsiya. Faqat oʻqish uchun.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Ishlash konfiguratsiyasini oʻqib boʻlmadi",
+    ),
     "coreStarting": MessageLookupByLibrary.simpleMessage("Ishga tushmoqda…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Yadro holati"),
     "coreStopped": MessageLookupByLibrary.simpleMessage("Toʻxtatilgan"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Maʼlumotlar katalogi",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Mintaqa"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Qulash aniqlandi"),
     "crashDetectedTip": m8,

@@ -84,6 +84,9 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         },
         'body': '',
       },
+      CoreMethod.getCoreInfo => jsonDecode(
+        File('test/fixtures/core_info.json').readAsStringSync(),
+      ),
       CoreMethod.getMemoryStats => {'rss': 2048},
       CoreMethod.doctorSnapshot ||
       CoreMethod.doctorStart ||
@@ -336,6 +339,26 @@ void main() {
     ]);
 
     expect(events.map((event) => event.data), ['provider-a', 'provider-b']);
+  });
+
+  test('core info preserves the shared build metadata contract', () async {
+    final handler = _RecordingCoreHandler();
+    final info = await handler.getCoreInfo();
+
+    expect(info?.version, '1.19.31-2-gf77b7475');
+    expect(info?.goVersion, 'go1.27.0');
+    expect(info?.platform, 'linux');
+    expect(info?.architecture, 'amd64');
+    expect(info?.tags, ['with_gvisor']);
+    expect(info?.workingDirectory, '/core-data');
+    expect(info?.executablePath, '/core/ReClashCore');
+    expect(info?.buildTime, DateTime.utc(2026, 10, 2, 8, 5, 6, 123));
+    expect(handler.calls, containsPair(CoreMethod.getCoreInfo, null));
+    expect(
+      CoreInfo.fromJson(jsonDecode(jsonEncode(info)) as Map<String, dynamic>),
+      info,
+    );
+    expect(CoreInfo.fromJson(const {}).buildTime, isNull);
   });
 
   test('core interface converts structured method results', () async {

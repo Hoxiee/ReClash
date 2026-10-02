@@ -1,14 +1,15 @@
-import 'dart:convert';
+import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/state.dart';
+import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 const coreToolsPaneId = 'core';
@@ -147,79 +148,112 @@ class CoreDetailView extends ConsumerStatefulWidget {
 }
 
 class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
-  String? _versionText;
-  String? _configText;
-  bool _configLoading = false;
+  CoreInfo? _info;
+  bool _loading = false;
+  bool _failed = false;
+  int _generation = 0;
 
   @override
   void initState() {
     super.initState();
     ref.listenManual(coreStatusProvider, (previous, next) {
-      if (next == CoreStatus.connected && previous != next) {
-        _refresh();
-      }
+      if (previous != next) unawaited(_refresh());
     }, fireImmediately: true);
   }
 
   Future<void> _refresh() async {
-    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
-      return;
-    }
-    setState(() => _configLoading = true);
-    final version = await _readVersion();
-    final config = await _readConfig();
-    if (!mounted) return;
+    final generation = ++_generation;
+    final connected = ref.read(coreStatusProvider) == CoreStatus.connected;
     setState(() {
-      _versionText = version;
-      _configText = config;
-      _configLoading = false;
+      _info = null;
+      _loading = connected;
+      _failed = false;
     });
-  }
-
-  Future<String?> _readVersion() async {
+    if (!connected) return;
     try {
-      return await ref
+      final info = await ref
           .read(coreHandlerProvider)
-          .getVersion()
-          .timeout(const Duration(seconds: 2));
-    } catch (_) {
-      return null;
+          .getCoreInfo()
+          .timeout(const Duration(seconds: 3));
+      if (!mounted || generation != _generation) return;
+      setState(() {
+        _info = info;
+        _failed = info == null || info.workingDirectory.isEmpty;
+      });
+    } catch (error) {
+      if (!mounted || generation != _generation) return;
+      commonPrint.log(
+        'read core info error: $error',
+        logLevel: LogLevel.warning,
+      );
+      setState(() => _failed = true);
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _loading = false);
+      }
     }
   }
 
-  Future<String?> _readConfig() async {
-    try {
-      final config = await ref.read(coreHandlerProvider).getAppliedConfig();
-      return const JsonEncoder.withIndent('  ').convert(config);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  void _resetTraffic() {
-    ref.read(coreHandlerProvider).resetTraffic();
-    ref.read(totalTrafficProvider.notifier).value = const Traffic();
-  }
-
-  Future<void> _copyConfig() async {
-    final text = _configText;
-    if (text == null) return;
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) return;
-    context.showNotifier(context.appLocalizations.copySuccess);
+  List<Widget> _infoRows(CoreInfo info) {
+    final l10n = context.appLocalizations;
+    final launchMode = info.platform == 'android'
+        ? l10n.coreModeLibrary
+        : switch (ref.read(coreHandlerProvider).processOwner) {
+            CoreProcessOwner.direct => l10n.coreModeProcess,
+            CoreProcessOwner.helper => l10n.coreModeHelper,
+            null => l10n.unknown,
+          };
+    final buildTime = info.buildTime?.toUtc();
+    final locale = Localizations.localeOf(context).toString();
+    final dateFormat = DateFormat.localeExists(locale)
+        ? DateFormat.yMd(locale).add_Hms()
+        : DateFormat('yyyy-MM-dd HH:mm:ss', 'en');
+    final buildTimeText = buildTime == null
+        ? l10n.unknown
+        : '${dateFormat.format(buildTime)} UTC';
+    final fields = [
+      ('Go', info.goVersion),
+      (l10n.corePlatform, info.platform),
+      (l10n.coreArchitecture, info.architecture),
+      (
+        l10n.coreBuildTags,
+        info.tags.isEmpty ? l10n.none : info.tags.join(', '),
+      ),
+      (l10n.coreLaunchMode, launchMode),
+      (l10n.coreWorkingDirectory, info.workingDirectory),
+      if (info.platform != 'android')
+        (l10n.coreExecutable, info.executablePath),
+    ];
+    return [
+      DetailRow.text(title: 'mihomo', value: info.version),
+      DetailRow(
+        title: l10n.coreBuildTime,
+        value: Text(buildTimeText),
+        copyText: buildTime?.toIso8601String(),
+      ),
+      for (final (title, value) in fields)
+        DetailRow(
+          title: title,
+          value: Text(
+            value.isEmpty ? l10n.unknown : value,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          copyText: value.isEmpty ? null : value,
+        ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     final status = ref.watch(coreStatusProvider);
-    final total = ref.watch(totalTrafficProvider);
+    final info = _info;
     final statusText = switch (status) {
       CoreStatus.connected => l10n.coreRunning,
       CoreStatus.connecting => l10n.coreStarting,
       CoreStatus.disconnected => l10n.coreStopped,
     };
-    final appVersion = 'v${globalState.packageInfo.version}';
     return CommonScaffold(
       title: l10n.core,
       floatBody: true,
@@ -227,89 +261,102 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
         padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           SettingSection(
-            top: 16,
+            top: AppSpacing.lg,
             title: l10n.core,
             items: [
-              DetailRow(
-                title: 'mihomo',
-                value: Text(_versionText ?? '-'),
-                copyText: _versionText,
-              ),
-              DetailRow.text(title: 'ReClash', value: appVersion),
               DetailRow(title: l10n.status, value: Text(statusText)),
+              if (_loading)
+                DecorationListItem(
+                  leading: const CommonCircleLoading(),
+                  title: Text(l10n.loading),
+                ),
+              if (_failed)
+                DecorationListItem(
+                  title: Text(l10n.coreInfoUnavailable),
+                  trailing: IconButton(
+                    tooltip: l10n.reload,
+                    onPressed: _refresh,
+                    icon: const GlyphIcon(AppGlyphs.refresh),
+                  ),
+                ),
+              if (info != null) ..._infoRows(info),
             ],
           ),
           SettingSection(
-            title: l10n.traffic,
-            actions: [
-              IconButton(
-                tooltip: l10n.reset,
-                onPressed: _resetTraffic,
-                icon: const GlyphIcon(AppGlyphs.reset),
-              ),
-            ],
             items: [
-              DetailRow(title: l10n.upload, value: Text(total.up.traffic.show)),
-              DetailRow(
-                title: l10n.download,
-                value: Text(total.down.traffic.show),
+              DecorationListItem.open(
+                leading: const GlyphIcon(AppGlyphs.code),
+                title: Text(l10n.coreOpenRuntimeConfig),
+                subtitle: Text(l10n.coreRuntimeConfigDescription),
+                widget: const _CoreRuntimeConfigView(),
               ),
             ],
-          ),
-          SettingSection(
-            title: l10n.appliedConfig,
-            actions: [
-              IconButton(
-                tooltip: l10n.copy,
-                onPressed: _configText == null ? null : _copyConfig,
-                icon: const GlyphIcon(AppGlyphs.copy),
-              ),
-            ],
-            items: [_buildConfigCard(context)],
           ),
           const SettingBottomInset(),
         ],
       ),
     );
   }
+}
 
-  Widget _buildConfigCard(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final text = _configText;
-    final Widget child;
-    if (_configLoading) {
-      child = const Center(child: CircularProgressIndicator());
-    } else if (text == null) {
-      child = Text(
-        l10n.coreStopped,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.onSurfaceVariant,
-        ),
+class _CoreRuntimeConfigView extends ConsumerStatefulWidget {
+  const _CoreRuntimeConfigView();
+
+  @override
+  ConsumerState<_CoreRuntimeConfigView> createState() =>
+      _CoreRuntimeConfigViewState();
+}
+
+class _CoreRuntimeConfigViewState
+    extends ConsumerState<_CoreRuntimeConfigView> {
+  String? _content;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_load());
+    });
+  }
+
+  Future<void> _load() async {
+    setState(() => _failed = false);
+    await whenRouteSettled(context);
+    if (!mounted) return;
+    try {
+      final content = await ref
+          .read(coreHandlerProvider)
+          .getAppliedConfigContent();
+      if (!mounted) return;
+      setState(() => _content = content);
+    } catch (error) {
+      if (!mounted) return;
+      commonPrint.log(
+        'read runtime config error: $error',
+        logLevel: LogLevel.warning,
       );
-    } else {
-      child = ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 360),
-        child: SingleChildScrollView(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SelectableText(
-              text,
-              style: context.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-            ),
+      setState(() => _failed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    if (_failed) {
+      return CommonScaffold(
+        title: l10n.coreRuntimeConfig,
+        body: NullStatus(
+          label: l10n.coreRuntimeConfigReadFailed,
+          illustration: NullStatusIllustration.error,
+          action: FilledButton.icon(
+            onPressed: _load,
+            icon: const GlyphIcon(AppGlyphs.refresh),
+            label: Text(l10n.reload),
           ),
         ),
       );
     }
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: CommonCard(
-        type: CommonCardType.filled,
-        radius: AppCorner.xl,
-        child: Padding(padding: AppInsets.lg, child: child),
-      ),
-    );
+    return EditorPage(title: l10n.coreRuntimeConfig, content: _content);
   }
 }

@@ -27,6 +27,8 @@ mixin CoreInterface {
 
   Future<String> getVersion();
 
+  Future<CoreInfo?> getCoreInfo();
+
   Future<bool> forceGc();
 
   Future<String> validateConfig(String path);
@@ -210,6 +212,14 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<String> getVersion() async {
     return _invokeMessage(method: CoreMethod.getVersion);
+  }
+
+  @override
+  Future<CoreInfo?> getCoreInfo() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getCoreInfo,
+    );
+    return data == null ? null : CoreInfo.fromJson(data);
   }
 
   @override

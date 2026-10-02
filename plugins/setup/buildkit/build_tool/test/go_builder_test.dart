@@ -1,9 +1,20 @@
 import 'dart:io';
 
+import 'package:build_tool/src/build_cache.dart';
 import 'package:build_tool/src/error.dart';
 import 'package:build_tool/src/go_builder.dart';
+import 'package:build_tool/src/options.dart';
+import 'package:build_tool/src/target.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+
+bool _hasGo() {
+  try {
+    return Process.runSync('go', ['version']).exitCode == 0;
+  } on ProcessException {
+    return false;
+  }
+}
 
 void main() {
   late Directory directory;
@@ -48,6 +59,101 @@ void main() {
       '-w -s ${versionFlag}1.19.30',
     );
   });
+
+  test('adds a UTC build timestamp without changing the version flags', () {
+    const flags = '-w -s ${versionFlag}1.19.31-2-gf77b7475';
+    expect(
+      GoBuilder.timestampedLdflags(
+        flags,
+        DateTime.parse('2026-10-02T11:05:06.123+03:00'),
+      ),
+      '$flags -X github.com/metacubex/mihomo/constant.BuildTime='
+      '2026-10-02T08:05:06.123Z',
+    );
+  });
+
+  test(
+    'embeds build metadata and retains its timestamp on a cache hit',
+    () async {
+      File(p.join(corePath, 'go.mod')).writeAsStringSync('''
+module core-fixture
+
+go 1.20
+
+require github.com/metacubex/mihomo v0.0.0
+replace github.com/metacubex/mihomo => ./mihomo
+''');
+      File(p.join(mihomoPath, 'go.mod')).writeAsStringSync('''
+module github.com/metacubex/mihomo
+
+go 1.20
+''');
+      Directory(p.join(mihomoPath, 'constant')).createSync();
+      File(p.join(mihomoPath, 'constant', 'version.go')).writeAsStringSync('''
+package constant
+
+var Version = "unknown"
+var BuildTime = "unknown time"
+''');
+      File(p.join(corePath, 'main.go')).writeAsStringSync('''
+package main
+
+import (
+    "fmt"
+    "github.com/metacubex/mihomo/constant"
+)
+
+func main() {
+    fmt.Println(constant.Version)
+    fmt.Println(constant.BuildTime)
+}
+''');
+      git(['add', '.']);
+      git(['commit', '-m', 'build metadata fixture']);
+      git(['tag', 'v1.19.31']);
+      final host = Process.runSync('go', [
+        'env',
+        'GOHOSTOS',
+        'GOHOSTARCH',
+      ], workingDirectory: corePath);
+      expect(host.exitCode, 0, reason: '${host.stderr}');
+      final hostParts = (host.stdout as String).trim().split(RegExp(r'\s+'));
+      final target = Target(goos: hostParts[0], goarch: hostParts[1]);
+      final builder = GoBuilder(
+        rootDir: directory.path,
+        config: BuildConfig.load(rootDir: directory.path),
+        cache: BuildCache(rootDir: directory.path),
+        notice: BuildNotice(),
+      );
+      List<String> metadata(String executable) {
+        final result = Process.runSync(executable, []);
+        expect(result.exitCode, 0, reason: '${result.stderr}');
+        return (result.stdout as String).trim().split(RegExp(r'\s+'));
+      }
+
+      final before = DateTime.now().toUtc();
+      final first = await builder.build(target);
+      final embedded = metadata(first.primaryOutput);
+      final stamp = DateTime.parse(embedded.last);
+      expect(first.rebuilt, isTrue);
+      expect(embedded.first, '1.19.31');
+      expect(stamp.isUtc, isTrue);
+      expect(stamp.isBefore(before), isFalse);
+      expect(stamp.isAfter(DateTime.now().toUtc()), isFalse);
+      final firstBytes = File(first.primaryOutput).readAsBytesSync();
+
+      final cached = await builder.build(target);
+      expect(cached.rebuilt, isFalse);
+      expect(metadata(cached.primaryOutput), embedded);
+      expect(File(cached.primaryOutput).readAsBytesSync(), firstBytes);
+
+      final rebuilt = await builder.build(target, force: true);
+      expect(rebuilt.rebuilt, isTrue);
+      expect(metadata(rebuilt.primaryOutput).last, isNot(embedded.last));
+    },
+    skip: _hasGo() ? false : 'Go SDK is required for the build smoke test',
+    timeout: const Timeout(Duration(minutes: 2)),
+  );
 
   test('identifies fork commits beyond the release tag', () {
     git(['tag', 'v1.19.30']);

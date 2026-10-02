@@ -29,24 +29,31 @@ class DetailRow extends StatelessWidget {
       onPressed: copyText == null ? null : () => _copy(context, copyText),
       title: value == null
           ? Text(title)
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              spacing: 20,
-              children: [
-                Text(title),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: DefaultTextStyle.merge(
-                      textAlign: TextAlign.end,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
+          : LayoutBuilder(
+              builder: (context, constraints) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                spacing: AppSpacing.xl,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth / 2,
+                    ),
+                    child: Text(title),
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: DefaultTextStyle.merge(
+                        textAlign: TextAlign.end,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                        child: value,
                       ),
-                      child: value,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
     );
   }

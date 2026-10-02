@@ -750,6 +750,32 @@ Map<String, dynamic> _$RcxDiscoveryReportToJson(_RcxDiscoveryReport instance) =>
       'state': instance.state,
     };
 
+_CoreInfo _$CoreInfoFromJson(Map<String, dynamic> json) => _CoreInfo(
+  version: json['version'] as String? ?? '',
+  goVersion: json['goVersion'] as String? ?? '',
+  platform: json['platform'] as String? ?? '',
+  architecture: json['architecture'] as String? ?? '',
+  buildTime: json['buildTime'] == null
+      ? null
+      : DateTime.parse(json['buildTime'] as String),
+  tags:
+      (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  workingDirectory: json['workingDirectory'] as String? ?? '',
+  executablePath: json['executablePath'] as String? ?? '',
+);
+
+Map<String, dynamic> _$CoreInfoToJson(_CoreInfo instance) => <String, dynamic>{
+  'version': instance.version,
+  'goVersion': instance.goVersion,
+  'platform': instance.platform,
+  'architecture': instance.architecture,
+  'buildTime': instance.buildTime?.toIso8601String(),
+  'tags': instance.tags,
+  'workingDirectory': instance.workingDirectory,
+  'executablePath': instance.executablePath,
+};
+
 _CoreMemoryStats _$CoreMemoryStatsFromJson(Map<String, dynamic> json) =>
     _CoreMemoryStats(
       rss: (json['rss'] as num?)?.toInt() ?? 0,
