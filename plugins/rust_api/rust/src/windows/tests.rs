@@ -247,10 +247,13 @@ fn last_job_handle_kills_child_without_a_terminate_process_handle() {
     .unwrap();
     let job = create_job().unwrap();
     check(unsafe { AssignProcessToJobObject(job.as_raw_handle(), child.as_raw_handle()) }).unwrap();
+    assert!(child.try_wait().unwrap().is_none());
     drop(job);
     assert_eq!(
         unsafe { WaitForSingleObject(observer.as_raw_handle(), 5000) },
         WAIT_OBJECT_0
     );
-    assert!(!child.wait().unwrap().success());
+    // The 5s wait against the 30s sleep already proves the kill; the
+    // job-close exit code reads as success on CI, so it cannot prove it.
+    child.wait().unwrap();
 }

@@ -10,7 +10,10 @@ void main() {
     test(
       'Windows package hook validates the completed bundle before makers',
       () {
-        final hook = setup.createWindowsPackageHook('/project with spaces', 'arm64');
+        final hook = setup.createWindowsPackageHook(
+          '/project with spaces',
+          'arm64',
+        );
         expect(
           hook,
           contains("'/project with spaces/tool/windows_package.dart'"),
@@ -25,7 +28,12 @@ void main() {
       final root = Directory.systemTemp.createTempSync('windows-output-test-');
       addTearDown(() => root.deleteSync(recursive: true));
       expect(
-        () => setup.validateWindowsArtifacts(root.path, 'amd64', 'exe,zip', '1.0.0'),
+        () => setup.validateWindowsArtifacts(
+          root.path,
+          'amd64',
+          'exe,zip',
+          '1.0.0',
+        ),
         throwsStateError,
       );
     });
