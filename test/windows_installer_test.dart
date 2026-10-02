@@ -96,7 +96,11 @@ void main() {
       final artifacts = uploads.singleWhere(
         (step) => step['uses'] == 'actions/upload-artifact@v4',
       );
-      expect(artifacts['with']['retention-days'], 1);
+      expect(
+        artifacts['with']['retention-days'].toString(),
+        contains('|| 1'),
+        reason: 'build artifacts expire after a day unless manually dispatched',
+      );
     },
   );
 

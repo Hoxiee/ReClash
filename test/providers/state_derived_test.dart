@@ -593,6 +593,15 @@ void main() {
   test('shared state carries nested notification settings', () async {
     await AppLocalizations.load(const Locale('en'));
     container.listen(sharedStateProvider, (_, _) {});
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              visibility: NotificationVisibility.detailed,
+            ),
+          ),
+        );
     expect(
       container.read(sharedStateProvider).notificationSettings.showStopAction,
       true,
@@ -614,6 +623,15 @@ void main() {
   test('shared state strips detail down to the protection line', () async {
     await AppLocalizations.load(const Locale('en'));
     container.listen(sharedStateProvider, (_, _) {});
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              visibility: NotificationVisibility.detailed,
+            ),
+          ),
+        );
     expect(
       container.read(sharedStateProvider).notificationSettings.components,
       isNotEmpty,
