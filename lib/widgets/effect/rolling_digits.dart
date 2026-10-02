@@ -16,7 +16,12 @@ class RollingDigits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseStyle = style ?? context.textTheme.bodySmall;
-    final text = Text(value, key: ValueKey(value), style: baseStyle, maxLines: 1);
+    final text = Text(
+      value,
+      key: ValueKey(value),
+      style: baseStyle,
+      maxLines: 1,
+    );
     if (!rolling || context.disableAnimations) {
       return text;
     }

@@ -1122,7 +1122,7 @@ class _ServiceManageItem extends StatelessWidget {
               index: index,
               child: Container(
                 color: Colors.transparent,
-                padding: const EdgeInsets.all(12),
+                padding: AppInsets.md,
                 child: const GlyphIcon(AppGlyphs.dragHandle),
               ),
             ),

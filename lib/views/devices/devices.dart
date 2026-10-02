@@ -69,7 +69,10 @@ class _DevicesViewState extends ConsumerState<DevicesView>
   Future<void> _openPanel(CompanionTargetSummary target) async {
     await BaseNavigator.push<void>(
       context,
-      CompanionControlPanel(deviceId: target.deviceId, title: target.clientName),
+      CompanionControlPanel(
+        deviceId: target.deviceId,
+        title: target.clientName,
+      ),
     );
     restartPolling();
   }
@@ -204,7 +207,10 @@ class _DevicesViewState extends ConsumerState<DevicesView>
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (_, index) => children[index],
     );
-    return CommonScaffold(title: l.devices, body: CompanionPage(child: list));
+    return CommonScaffold(
+      title: l.devices,
+      body: CompanionPage(child: list),
+    );
   }
 }
 

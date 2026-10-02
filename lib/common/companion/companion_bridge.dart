@@ -86,7 +86,14 @@ int _stateRevision(
   String? groupName,
   String? nodeName,
   UiOutboundMode mode,
-) => Object.hash(running, profile?.id, profile?.label, groupName, nodeName, mode);
+) => Object.hash(
+  running,
+  profile?.id,
+  profile?.label,
+  groupName,
+  nodeName,
+  mode,
+);
 
 List<Map<String, dynamic>> _readProfiles(ProviderContainer container) {
   final profiles = container.read(profilesProvider);
@@ -117,7 +124,10 @@ List<Map<String, dynamic>> _readGroups(ProviderContainer container) {
                   'name': proxy.name,
                   'type': proxy.type,
                   'delayMs': container.read(
-                    delayProvider(proxyName: proxy.name, testUrl: group.testUrl),
+                    delayProvider(
+                      proxyName: proxy.name,
+                      testUrl: group.testUrl,
+                    ),
                   ),
                 },
               )
@@ -185,7 +195,9 @@ Future<Map<String, dynamic>> _runCommand(
           container.read(currentProfileIdProvider.notifier).value = existing.id;
           if (name != null && name.isNotEmpty && name != existing.label) {
             // userLabel keeps the rename from being overwritten by the subscription label on refresh.
-            container.read(profilesProvider.notifier).updateProfile(
+            container
+                .read(profilesProvider.notifier)
+                .updateProfile(
                   existing.id,
                   (profile) => profile.copyWith(label: name, userLabel: true),
                 );

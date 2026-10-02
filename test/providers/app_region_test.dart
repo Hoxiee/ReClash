@@ -224,10 +224,7 @@ void main() {
     );
     expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
-    expect(
-      container.read(smartRoutingSettingProvider).preset,
-      'ru',
-    );
+    expect(container.read(smartRoutingSettingProvider).preset, 'ru');
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
   });
 
@@ -315,10 +312,7 @@ void main() {
     // No listener: reproduces bootstrap, where mutating auto-dispose providers
     // lost these facets before the fix baked them into the overrides.
     await Future<void>.delayed(Duration.zero);
-    expect(
-      container.read(patchClashConfigProvider).dns,
-      dnsForRegion('RU'),
-    );
+    expect(container.read(patchClashConfigProvider).dns, dnsForRegion('RU'));
     expect(
       container.read(networkSettingProvider).bypassDomain,
       bypassForRegion('RU'),

@@ -130,7 +130,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<bool> focusUntil(WidgetTester tester, LogicalKeyboardKey key, bool Function(String?) done) async {
+  Future<bool> focusUntil(
+    WidgetTester tester,
+    LogicalKeyboardKey key,
+    bool Function(String?) done,
+  ) async {
     for (var i = 0; i < 14; i++) {
       if (done(focusedText())) return true;
       await tester.sendKeyEvent(key);

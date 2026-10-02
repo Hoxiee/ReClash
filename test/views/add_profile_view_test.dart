@@ -385,6 +385,10 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
+    expect(
+      find.byTooltip(currentAppLocalizations.showMore),
+      kEnableSubscriptionConverter ? findsOneWidget : findsNothing,
+    );
 
     await tester.enterText(
       find.byType(TextField).first,
@@ -413,8 +417,10 @@ void main() {
                 onPressed: () async {
                   await showDialog<Profile>(
                     context: context,
-                    builder: (_) =>
-                        URLFormDialog(onSubmit: (_) async => _imported),
+                    builder: (_) => URLFormDialog(
+                      showClientPresets: true,
+                      onSubmit: (_) async => _imported,
+                    ),
                   );
                 },
                 child: const Text('open'),
@@ -461,6 +467,7 @@ void main() {
                   await showDialog<Profile>(
                     context: context,
                     builder: (_) => URLFormDialog(
+                      showClientPresets: true,
                       onSubmit: (value) async {
                         popped = value;
                         return _imported;

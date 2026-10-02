@@ -67,7 +67,8 @@ class ThemeManager extends ConsumerWidget {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScaleFactor),
-        disableAnimations: MediaQuery.of(context).disableAnimations ||
+        disableAnimations:
+            MediaQuery.of(context).disableAnimations ||
             reduceMotion ||
             powerSave,
         padding: padding.copyWith(

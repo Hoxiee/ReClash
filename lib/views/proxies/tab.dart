@@ -461,7 +461,10 @@ class _DelayTestButtonState extends State<DelayTestButton>
     try {
       await widget.onClick();
     } catch (error, stackTrace) {
-      commonPrint.log('healthcheck ===> $error, $stackTrace', logLevel: LogLevel.warning);
+      commonPrint.log(
+        'healthcheck ===> $error, $stackTrace',
+        logLevel: LogLevel.warning,
+      );
     } finally {
       _running = false;
       if (mounted) {

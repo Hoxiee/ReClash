@@ -187,18 +187,16 @@ class _ReceiverHeroCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              AppMedallion(
-                icon: AppGlyphs.tethering,
-                tone: tone,
-                size: 52,
-              ),
+              AppMedallion(icon: AppGlyphs.tethering, tone: tone, size: 52),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Text(
                   l.companionEnableReceiver,
                   style: context.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: running ? colorScheme.primary : colorScheme.onSurface,
+                    color: running
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -526,8 +524,9 @@ class _QrBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: ShapeDecoration(
             shape: AppShape.all(AppCorner.full),
-            color: (low ? colorScheme.error : colorScheme.primary)
-                .withValues(alpha: 0.12),
+            color: (low ? colorScheme.error : colorScheme.primary).withValues(
+              alpha: 0.12,
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

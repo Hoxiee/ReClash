@@ -27,7 +27,7 @@ void main() {
                     moves.add((oldIndex, newIndex)),
               ),
             ),
-            onReorder: (_, _) {},
+            onReorderItem: (_, _) {},
           ),
         ),
       ),

@@ -9,6 +9,17 @@ import 'package:reclash/widgets/widgets.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
+Future<void> _scrollTo(WidgetTester tester, String label) async {
+  final target = find.text(label);
+  await tester.scrollUntilVisible(
+    target,
+    300,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await Scrollable.ensureVisible(tester.element(target), alignment: 0.5);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('Tools hides findings until the first reveal', (tester) async {
     tester.view.physicalSize = const Size(800, 800);
@@ -26,6 +37,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await _scrollTo(tester, 'Disclaimer');
 
     expect(find.text('Findings'), findsNothing);
   });
@@ -52,13 +64,14 @@ void main() {
       ),
     );
     await tester.pump();
+    await _scrollTo(tester, 'Findings');
     final section = tester.widget<SettingSection>(
       find.ancestor(
         of: find.text('Findings'),
         matching: find.byType(SettingSection),
       ),
     );
-    expect(section.title, 'Other');
+    expect(section.title, 'Info and debug');
     final item = tester.widget<DecorationListItem>(
       find.ancestor(
         of: find.text('Findings'),
@@ -105,6 +118,7 @@ void main() {
       ),
     );
     await tester.pump();
+    await _scrollTo(tester, 'Findings');
     await tester.tap(find.text('Findings'));
     await tester.pumpAndSettle();
 

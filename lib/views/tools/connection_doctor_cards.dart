@@ -156,7 +156,11 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
 
   // Inside a desktop two-pane tool the remedy drills into the same detail pane;
   // a standalone Doctor (sheet or mobile) has no pane and pushes a full route.
-  void _openConfig(Widget view, {required String paneId, required String title}) {
+  void _openConfig(
+    Widget view, {
+    required String paneId,
+    required String title,
+  }) {
     final pane = SettingsPaneScope.of(context);
     if (pane != null && pane.active && pane.pushes) {
       pane.onSelect(
@@ -205,9 +209,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: _DoctorSmoothResize(
-              child: _DoctorStepsCard(answer: answer),
-            ),
+            child: _DoctorSmoothResize(child: _DoctorStepsCard(answer: answer)),
           ),
           if (snapshot.supported)
             _DoctorTechnicalSection(

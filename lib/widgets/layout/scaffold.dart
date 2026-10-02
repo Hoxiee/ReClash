@@ -483,7 +483,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
           child: AppBarActionButton(data: primaryAction),
         ),
       for (final action in legacyActions) ElasticPress(child: action),
-      if (fold.overflow.isNotEmpty && !searchWithOverflow && !actionWithOverflow)
+      if (fold.overflow.isNotEmpty &&
+          !searchWithOverflow &&
+          !actionWithOverflow)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
       if (popAsSuffix)
         ElasticPress(

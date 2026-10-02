@@ -282,7 +282,9 @@ class DecorationListItem extends StatelessWidget {
         // A sheet-preferring row ignores a pushing pane and slides in as a side
         // sheet instead, so a list editor overlays the current pane rather than
         // replacing it one level deeper.
-        if (paneScope != null && paneScope.active && !openDelegate.preferSheet) {
+        if (paneScope != null &&
+            paneScope.active &&
+            !openDelegate.preferSheet) {
           if (paneScope.pushes) {
             final id = paneId ?? 'push:${identityHashCode(child)}';
             return _wrapFocus(

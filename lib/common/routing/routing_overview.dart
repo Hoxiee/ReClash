@@ -124,7 +124,8 @@ const routingDefaultRungTokens = [
 
 List<RoutingRung> routingDefaultLadder() => [
   RoutingRung.admission,
-  for (final token in routingDefaultRungTokens) RoutingRung.values.byName(token),
+  for (final token in routingDefaultRungTokens)
+    RoutingRung.values.byName(token),
 ];
 
 List<RoutingRung> routingLadder(String strategy) {
@@ -224,7 +225,9 @@ int routingRungValue(
   RoutingRung.misfit => _routingMisfit(terrain, candidate.breaker),
   RoutingRung.evidence => _routingEvidenceRank(candidate.evidence),
   RoutingRung.recurrence =>
-    candidate.recurrence < thresholds.recurrenceFloor ? 0 : candidate.recurrence,
+    candidate.recurrence < thresholds.recurrenceFloor
+        ? 0
+        : candidate.recurrence,
   RoutingRung.degraded => candidate.degraded ? 1 : 0,
   RoutingRung.homeRisk => candidate.homeRisk,
   RoutingRung.latency =>

@@ -60,8 +60,7 @@ class _AnnounceState extends ConsumerState<Announce> {
     // Grow within the neighbouring card column when one marks itself, so the
     // desktop split fills its own stack instead of the whole screen.
     final boundaryBox =
-        AnnounceMorphBoundary.boxOf(context)?.currentContext
-                ?.findRenderObject()
+        AnnounceMorphBoundary.boxOf(context)?.currentContext?.findRenderObject()
             as RenderBox?;
     final bounds = boundaryBox != null && boundaryBox.hasSize
         ? boundaryBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
@@ -403,7 +402,10 @@ class _AnnounceMorph extends StatelessWidget {
           ? max(sourceRect.bottom, limitBottom)
           : min(max(sourceRect.bottom, bounds!.bottom), limitBottom),
     );
-    final morph = CurvedAnimation(parent: animation, curve: AppSpringCurves.morph);
+    final morph = CurvedAnimation(
+      parent: animation,
+      curve: AppSpringCurves.morph,
+    );
     final rectTween = RectTween(begin: sourceRect, end: target);
     final radiusTween = Tween<double>(begin: sourceRadius, end: AppCorner.xxl);
     // The morph spring overshoots past 1, so hold fades on the linear track to
@@ -424,9 +426,7 @@ class _AnnounceMorph extends StatelessWidget {
               child: Material(
                 color: color,
                 clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(radius),
-                ),
+                shape: AppShape.all(radius),
                 child: _AnnouncePanel(
                   text: text,
                   url: url,
@@ -601,7 +601,7 @@ class _PanelAction extends StatelessWidget {
         onTap: onPressed,
         radius: 22,
         child: Padding(
-          padding: const EdgeInsets.all(4),
+          padding: AppInsets.xs,
           child: GlyphIcon(
             glyph,
             size: 20,

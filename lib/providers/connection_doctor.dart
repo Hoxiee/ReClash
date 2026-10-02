@@ -56,7 +56,8 @@ class ConnectionDoctor extends _$ConnectionDoctor {
 
   // A minimized desktop window has no live connection to examine: its lifecycle
   // stays resumed, so the window manager toggles this to sleep active probes.
-  Future<DoctorSnapshot> setVisible(bool visible) => _setUpdatesEnabled(visible);
+  Future<DoctorSnapshot> setVisible(bool visible) =>
+      _setUpdatesEnabled(visible);
 
   Future<DoctorSnapshot> _setUpdatesEnabled(bool enabled) {
     final resumed = !_updatesEnabled && enabled;

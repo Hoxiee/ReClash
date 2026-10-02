@@ -78,22 +78,25 @@ void main() {
       verify(() => core.doctorSnapshot()).called(1);
     });
 
-    test('defers Android status refresh when screen off for $lifecycle', () async {
-      final core = _MockCoreHandler();
-      when(() => core.doctorSnapshot()).thenAnswer(
-        (_) async => const DoctorSnapshot(revision: 4, supported: true),
-      );
-      final notifier = buildContainer(
-        core,
-      ).read(connectionDoctorProvider.notifier);
-      await notifier.updateActivity(
-        lifecycleState: lifecycle,
-        isAndroid: true,
-        screenOff: true,
-      );
-      await notifier.refreshFromStatus(minimumRevision: 4);
-      verifyNever(() => core.doctorSnapshot());
-    });
+    test(
+      'defers Android status refresh when screen off for $lifecycle',
+      () async {
+        final core = _MockCoreHandler();
+        when(() => core.doctorSnapshot()).thenAnswer(
+          (_) async => const DoctorSnapshot(revision: 4, supported: true),
+        );
+        final notifier = buildContainer(
+          core,
+        ).read(connectionDoctorProvider.notifier);
+        await notifier.updateActivity(
+          lifecycleState: lifecycle,
+          isAndroid: true,
+          screenOff: true,
+        );
+        await notifier.refreshFromStatus(minimumRevision: 4);
+        verifyNever(() => core.doctorSnapshot());
+      },
+    );
   }
 
   test('desktop status refresh continues while hidden', () async {

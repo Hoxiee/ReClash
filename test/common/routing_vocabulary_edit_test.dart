@@ -55,20 +55,23 @@ void main() {
     );
   });
 
-  test('shipped defaults are one-to-one within every core-facing vocabulary', () {
-    for (final vocab in routingVocabularies) {
-      if (!routingVocabEnforcesUniqueness(vocab)) {
-        continue;
+  test(
+    'shipped defaults are one-to-one within every core-facing vocabulary',
+    () {
+      for (final vocab in routingVocabularies) {
+        if (!routingVocabEnforcesUniqueness(vocab)) {
+          continue;
+        }
+        final labels = [
+          for (final token in routingVocabTokens(vocab))
+            routingVocabDefaultLabel(l10n, vocab, token),
+        ];
+        expect(
+          labels.toSet().length,
+          labels.length,
+          reason: '$vocab default labels must stay distinct',
+        );
       }
-      final labels = [
-        for (final token in routingVocabTokens(vocab))
-          routingVocabDefaultLabel(l10n, vocab, token),
-      ];
-      expect(
-        labels.toSet().length,
-        labels.length,
-        reason: '$vocab default labels must stay distinct',
-      );
-    }
-  });
+    },
+  );
 }

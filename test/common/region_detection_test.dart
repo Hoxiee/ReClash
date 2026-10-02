@@ -25,23 +25,14 @@ void main() {
   });
 
   test('the serving network settles a region when the SIM is absent', () {
-    expect(
-      detectRegion(const RegionSignals(networkCountry: 'ir'), null),
-      'IR',
-    );
+    expect(detectRegion(const RegionSignals(networkCountry: 'ir'), null), 'IR');
   });
 
   test(
     'the locale is the last resort when no native signal names a region',
     () {
-      expect(
-        detectRegion(const RegionSignals(), const Locale('zh')),
-        'CN',
-      );
-      expect(
-        detectRegion(const RegionSignals(), const Locale('fa')),
-        'IR',
-      );
+      expect(detectRegion(const RegionSignals(), const Locale('zh')), 'CN');
+      expect(detectRegion(const RegionSignals(), const Locale('fa')), 'IR');
     },
   );
 
@@ -72,9 +63,6 @@ void main() {
   });
 
   test('signal casing and whitespace do not defeat detection', () {
-    expect(
-      detectRegion(const RegionSignals(simCountry: ' Ru '), null),
-      'RU',
-    );
+    expect(detectRegion(const RegionSignals(simCountry: ' Ru '), null), 'RU');
   });
 }

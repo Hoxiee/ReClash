@@ -976,7 +976,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
   });
 }
 
-const _happUserAgent = 'Happ/3.26.1';
+const _happUserAgent = 'Happ/4.4.1';
 
 String _capabilityHeader(List<Map<String, Object?>> claims) {
   final payload = base64Url

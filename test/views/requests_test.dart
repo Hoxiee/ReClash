@@ -107,6 +107,27 @@ void main() {
     await teardownView(tester);
   });
 
+  testWidgets('history keeps arrival order regardless of traffic', (
+    tester,
+  ) async {
+    seedRequests([
+      _tracker(id: 'a', host: 'older.test').copyWith(download: 10),
+      _tracker(id: 'b', host: 'middle.test').copyWith(download: 1),
+      _tracker(id: 'c', host: 'newer.test').copyWith(download: 100),
+    ]);
+    await pumpRequests(tester);
+
+    final older = tester.getTopLeft(find.textContaining('older.test').first).dy;
+    final middle = tester
+        .getTopLeft(find.textContaining('middle.test').first)
+        .dy;
+    final newer = tester.getTopLeft(find.textContaining('newer.test').first).dy;
+    expect(newer, lessThan(middle));
+    expect(middle, lessThan(older));
+
+    await teardownView(tester);
+  });
+
   testWidgets('a request arriving after mount reaches the list', (
     tester,
   ) async {

@@ -200,10 +200,7 @@ void main() {
     }
     // The catalog is region-independent: every service can be enabled from the
     // manage sheet in any region.
-    expect(
-      catalogInUserOrder(const []),
-      containsAll(ServiceTarget.values),
-    );
+    expect(catalogInUserOrder(const []), containsAll(ServiceTarget.values));
   });
 
   test('the catalog never interleaves categories', () {

@@ -42,13 +42,14 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
   Timer? _landingTimer;
 
   void _initCinematic() {
-    _charge = AnimationController(
-      vsync: this,
-      duration: _novaCharge,
-      reverseDuration: const Duration(milliseconds: 260),
-    )
-      ..addStatusListener(_handleCharge)
-      ..addStatusListener(_handleCinematicSettle);
+    _charge =
+        AnimationController(
+            vsync: this,
+            duration: _novaCharge,
+            reverseDuration: const Duration(milliseconds: 260),
+          )
+          ..addStatusListener(_handleCharge)
+          ..addStatusListener(_handleCinematicSettle);
     _nova = AnimationController(vsync: this, duration: _novaDuration)
       ..addStatusListener(_handleCinematicSettle);
     _collapse =
@@ -64,12 +65,10 @@ mixin _HeroCinematic on ConsumerState<HeroOrb>, TickerProvider {
               _hideCinematic();
             }
           });
-    _singularity = AnimationController(
-      vsync: this,
-      duration: _singularityDuration,
-    )
-      ..addListener(_driveImpact)
-      ..addStatusListener(_handleCinematicSettle);
+    _singularity =
+        AnimationController(vsync: this, duration: _singularityDuration)
+          ..addListener(_driveImpact)
+          ..addStatusListener(_handleCinematicSettle);
     _regrow = AnimationController(
       vsync: this,
       value: 1,

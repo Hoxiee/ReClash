@@ -52,11 +52,7 @@ Future<ProviderContainer> _pump(
 
 void main() {
   testWidgets('settings confirm HWID disable in Russia', (tester) async {
-    final container = await _pump(
-      tester,
-      region: 'RU',
-      sendIdentity: true,
-    );
+    final container = await _pump(tester, region: 'RU', sendIdentity: true);
 
     await tester.tap(find.text('Send HWID'));
     await tester.pumpAndSettle();
@@ -69,11 +65,7 @@ void main() {
   });
 
   testWidgets('settings skip HWID confirm outside Russia', (tester) async {
-    final container = await _pump(
-      tester,
-      region: 'IR',
-      sendIdentity: true,
-    );
+    final container = await _pump(tester, region: 'IR', sendIdentity: true);
 
     await tester.tap(find.text('Send HWID'));
     await tester.pumpAndSettle();

@@ -335,8 +335,13 @@ class URLFormDialogResult {
 }
 
 class URLFormDialog extends StatefulWidget {
-  const URLFormDialog({super.key, required this.onSubmit});
+  const URLFormDialog({
+    super.key,
+    required this.onSubmit,
+    this.showClientPresets = kEnableSubscriptionConverter,
+  });
 
+  final bool showClientPresets;
   final Future<ProfileImportResult> Function(URLFormDialogResult value)
   onSubmit;
 
@@ -424,7 +429,7 @@ class _URLFormDialogState extends State<URLFormDialog>
             Row(
               spacing: 8,
               children: [
-                if (kEnableSubscriptionConverter)
+                if (widget.showClientPresets)
                   IconButton.filledTonal(
                     tooltip: _isMore
                         ? appLocalizations.showLess

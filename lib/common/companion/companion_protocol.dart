@@ -100,7 +100,8 @@ bool _isPrivateIpv4(String host) {
   }
   final a = octets[0];
   final b = octets[1];
-  final isPrivate = a == 10 ||
+  final isPrivate =
+      a == 10 ||
       (a == 172 && b >= 16 && b <= 31) ||
       (a == 192 && b == 168) ||
       (a == 169 && b == 254);

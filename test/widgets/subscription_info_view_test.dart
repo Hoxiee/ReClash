@@ -205,9 +205,10 @@ void main() {
     expect(find.text(appLocalizations.trafficUsage), findsOneWidget);
     expect(find.text(appLocalizations.usedTraffic), findsOneWidget);
     expect(find.text(appLocalizations.totalTraffic), findsOneWidget);
+    expect(find.text(appLocalizations.remainingTraffic), findsOneWidget);
     expect(find.text(appLocalizations.expireTime), findsOneWidget);
     expect(find.text('3KB'), findsOneWidget);
     expect(find.text('1GB'), findsOneWidget);
-    expect(find.byType(DecorationListItem), findsNWidgets(3));
+    expect(find.byType(DecorationListItem), findsNWidgets(4));
   });
 }

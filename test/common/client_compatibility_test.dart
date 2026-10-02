@@ -152,7 +152,7 @@ void main() {
         SubscriptionClient.happ,
         deviceDetails: details(),
       );
-      expect(headers['User-Agent'], 'Happ/3.26.1');
+      expect(headers['User-Agent'], 'Happ/4.4.1');
       expect(headers, isNot(contains('x-hwid')));
       expect(headers, isNot(contains('x-device-os')));
       expect(headers, isNot(contains('x-ver-os')));
@@ -219,7 +219,7 @@ void main() {
         deviceDetails: details(),
         sendDeviceHeaders: true,
       );
-      expect(headers['User-Agent'], 'Happ/3.26.1');
+      expect(headers['User-Agent'], 'Happ/4.4.1');
       expect(headers['x-hwid'], 'HWID1234');
       expect(headers['x-device-os'], 'Android');
       expect(headers['x-ver-os'], '16');

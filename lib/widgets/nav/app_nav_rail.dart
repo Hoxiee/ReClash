@@ -75,10 +75,7 @@ class AppNavRail extends ConsumerWidget {
                 progress: progress,
               ),
             ),
-            _RailToggle(
-              progress: progress,
-              onToggle: onToggle,
-            ),
+            _RailToggle(progress: progress, onToggle: onToggle),
           ],
         ),
       ),
@@ -134,7 +131,9 @@ final _railPressSpring = SpringDescription.withDurationAndBounce(
 class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
   late final NavSpring _hover = NavSpring(
     this,
-    widget.selectedIndex.clamp(0, math.max(0, widget.items.length - 1)).toDouble(),
+    widget.selectedIndex
+        .clamp(0, math.max(0, widget.items.length - 1))
+        .toDouble(),
   );
   late final NavSpring _hoverShow = NavSpring(this, 0);
   Listenable get _hoverMotion => Listenable.merge([_hover, _hoverShow]);
@@ -262,7 +261,9 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
                           final emphasis = [
                             for (var i = 0; i < items.length; i++)
                               show *
-                                  math.max(0, 1 - (hoverAt - i).abs()).toDouble(),
+                                  math
+                                      .max(0, 1 - (hoverAt - i).abs())
+                                      .toDouble(),
                           ];
                           return _SlotLayer(
                             items: items,
@@ -724,10 +725,7 @@ class _SelectionIndicatorState extends State<_SelectionIndicator>
 /// The collapse/expand control at the foot of the rail. Its glyph morphs with
 /// [progress] so the sidebar mark folds open as the rail widens.
 class _RailToggle extends StatelessWidget {
-  const _RailToggle({
-    required this.progress,
-    this.onToggle,
-  });
+  const _RailToggle({required this.progress, this.onToggle});
 
   final double progress;
   final VoidCallback? onToggle;

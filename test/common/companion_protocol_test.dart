@@ -64,7 +64,8 @@ void main() {
     });
 
     test('a companion pairing link is not a profile import link', () {
-      final valid = (fixtures['valid'] as Map<String, dynamic>)['raw'] as String;
+      final valid =
+          (fixtures['valid'] as Map<String, dynamic>)['raw'] as String;
       expect(isCompanionPairingLink(valid), isTrue);
       expect(valid.isProfileImportLink, isFalse);
     });
@@ -79,7 +80,8 @@ void main() {
 
   test('parsed payload never leaks the secret or pin in toString', () {
     final valid = (fixtures['valid'] as Map<String, dynamic>)['raw'] as String;
-    final payload = (parseCompanionPairingQr(valid) as CompanionQrPaired).payload;
+    final payload =
+        (parseCompanionPairingQr(valid) as CompanionQrPaired).payload;
     final text = payload.toString();
     expect(text, contains('<redacted>'));
     expect(text, isNot(contains(payload.pairingSecret)));

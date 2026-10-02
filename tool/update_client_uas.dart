@@ -76,7 +76,9 @@ final entries = <UaEntry>[
   const UaEntry(
     key: 'incy',
     constName: '_incyVersion',
-    source: Manual('INCY has no public release feed; this const is version-only'),
+    source: Manual(
+      'INCY has no public release feed; this const is version-only',
+    ),
   ),
 ];
 
@@ -234,9 +236,7 @@ void _printTable(List<_Row> rows) {
 }
 
 void _printManualReminder(List<_Row> rows) {
-  final manual = rows
-      .where((row) => row.status == _Status.manual)
-      .toList();
+  final manual = rows.where((row) => row.status == _Status.manual).toList();
   if (manual.isEmpty) return;
   stdout.writeln('\nCheck these by hand (no release feed):');
   for (final row in manual) {

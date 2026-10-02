@@ -19,12 +19,7 @@ const _relicIds = <String>[
   'meridian',
   'porcelain',
 ];
-const _momentIds = <String>[
-  'oscilloscope',
-  'singularity',
-  'pi',
-  'turn',
-];
+const _momentIds = <String>['oscilloscope', 'singularity', 'pi', 'turn'];
 
 const _dayMillis = 24 * 60 * 60 * 1000;
 

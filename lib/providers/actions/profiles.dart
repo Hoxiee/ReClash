@@ -404,7 +404,9 @@ class ProfilesAction extends _$ProfilesAction {
 
   // Companion path: imports without touching the loading provider or any dialog, so the retained
   // engine converges with no Activity. Returns the profile on success, null on cancel/failure.
-  Future<Profile?> importProfileHeadless(ProfileLinkImportRequest request) async {
+  Future<Profile?> importProfileHeadless(
+    ProfileLinkImportRequest request,
+  ) async {
     final imported = await performProfileImport(request);
     return imported?.profile;
   }

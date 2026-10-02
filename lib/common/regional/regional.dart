@@ -1,12 +1,7 @@
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/util/provider_reader.dart';
 
-enum RegionalFacetId {
-  clashDns,
-  desync,
-  packageMatcher,
-  deviceIdentity,
-}
+enum RegionalFacetId { clashDns, desync, packageMatcher, deviceIdentity }
 
 Set<RegionalFacetId> regionCapabilities(String? code) =>
     capabilitiesForCode(code);
@@ -20,8 +15,7 @@ class RegionalDefaults<T> {
   final Map<String, T> _table;
   final T _fallback;
 
-  T forRegion(String? code) =>
-      _table[normalizedRegionCode(code)] ?? _fallback;
+  T forRegion(String? code) => _table[normalizedRegionCode(code)] ?? _fallback;
 
   bool isShipped(T value) => _fallback == value || _table.containsValue(value);
 }

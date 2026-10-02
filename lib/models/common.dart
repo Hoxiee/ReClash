@@ -221,9 +221,11 @@ abstract class TrackerInfosState with _$TrackerInfosState {
 }
 
 extension TrackerInfosStateExt on TrackerInfosState {
-  List<TrackerInfo> get list {
+  List<TrackerInfo> get list => filteredList..sort(_compareBySort);
+
+  List<TrackerInfo> get filteredList {
     final matcher = SearchMatcher(query.trim(), useRegex: useRegex);
-    final filtered = trackerInfos.where((trackerInfo) {
+    return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
       final metadata = trackerInfo.metadata;
@@ -238,8 +240,6 @@ extension TrackerInfosStateExt on TrackerInfosState {
             chains.join(' '),
           ]);
     }).toList();
-    filtered.sort(_compareBySort);
-    return filtered;
   }
 
   // A stable order keeps rows from swapping between polls: every comparator
@@ -267,7 +267,13 @@ extension TrackerInfosStateExt on TrackerInfosState {
     return start != 0 ? start : a.id.compareTo(b.id);
   }
 
-  ({int connections, int upload, int download, int uploadSpeed, int downloadSpeed})
+  ({
+    int connections,
+    int upload,
+    int download,
+    int uploadSpeed,
+    int downloadSpeed,
+  })
   get totals {
     var upload = 0;
     var download = 0;

@@ -90,7 +90,8 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   void _onIdleTick() {
     _idleTimer = null;
     if (!mounted) return;
-    final remaining = _idleTimeout - DateTime.now().difference(_lastInteractionAt);
+    final remaining =
+        _idleTimeout - DateTime.now().difference(_lastInteractionAt);
     if (remaining <= Duration.zero) {
       ref.read(uiIdleProvider.notifier).value = true;
     } else {

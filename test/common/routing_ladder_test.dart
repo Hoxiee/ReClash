@@ -38,7 +38,6 @@ void main() {
     expect(routingLadder('balanced'), routingDefaultLadder());
   });
 
-
   test('confirmed quality ranking can improve an active stable incumbent', () {
     final incumbent = _base.copyWith(current: true, evidence: 'live');
     final faster = _base.copyWith(latencyMs: 69, confirmed: true);

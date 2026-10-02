@@ -236,12 +236,13 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       value: 1,
       duration: const Duration(milliseconds: 900),
     );
-    _stillness = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 760),
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.completed) _freezeAmbientLoops();
-    });
+    _stillness =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 760),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) _freezeAmbientLoops();
+        });
     _onset = AnimationController(
       vsync: this,
       value: 1,
@@ -945,9 +946,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                             final pulse =
                                 (0.5 -
                                     0.5 *
-                                        math.cos(
-                                          2 * math.pi * _breatheValue,
-                                        )) *
+                                        math.cos(2 * math.pi * _breatheValue)) *
                                 (1 - still);
                             return CustomPaint(
                               size: Size.square(size),

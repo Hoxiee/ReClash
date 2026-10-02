@@ -109,14 +109,13 @@ class CompanionPairingStatus {
   final String? confirmationCode;
   final int? expiresInMs;
 
-  static CompanionPairingPhase phaseFromWire(String value) =>
-      switch (value) {
-        'approved' => CompanionPairingPhase.approved,
-        'rejected' => CompanionPairingPhase.rejected,
-        'expired' => CompanionPairingPhase.expired,
-        'cancelled' => CompanionPairingPhase.cancelled,
-        _ => CompanionPairingPhase.pending,
-      };
+  static CompanionPairingPhase phaseFromWire(String value) => switch (value) {
+    'approved' => CompanionPairingPhase.approved,
+    'rejected' => CompanionPairingPhase.rejected,
+    'expired' => CompanionPairingPhase.expired,
+    'cancelled' => CompanionPairingPhase.cancelled,
+    _ => CompanionPairingPhase.pending,
+  };
 }
 
 @immutable

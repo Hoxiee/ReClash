@@ -15,16 +15,12 @@ import 'package:reclash/widgets/widgets.dart';
 
 const _statSpacing = 8.0;
 
-Future<void> showSubscriptionSheet(
-  BuildContext context, {
-  Profile? profile,
-}) {
+Future<void> showSubscriptionSheet(BuildContext context, {Profile? profile}) {
   return showSheet<void>(
     context: context,
     props: nestedPagedSheetProps,
-    builder: (_) => NestedPagedSheet(
-      builder: (_) => _SubscriptionSheet(profile: profile),
-    ),
+    builder: (_) =>
+        NestedPagedSheet(builder: (_) => _SubscriptionSheet(profile: profile)),
   );
 }
 
@@ -182,11 +178,7 @@ class _SubscriptionSheetState extends ConsumerState<_SubscriptionSheet> {
             onPressed: () => unawaited(dialogs.openUrl(supportUrl)),
           ),
       ],
-      body: _Body(
-        profile: profile,
-        counts: _counts,
-        failed: _failed,
-      ),
+      body: _Body(profile: profile, counts: _counts, failed: _failed),
     );
   }
 }
@@ -211,6 +203,7 @@ class _Body extends ConsumerWidget {
       null => null,
     };
     final info = profile.subscriptionInfo;
+    final announce = profile.panelMeta?.announce?.trim();
     return ListView(
       shrinkWrap: true,
       // The scaffold already reserves the toolbar height above the body.
@@ -228,6 +221,13 @@ class _Body extends ConsumerWidget {
                 title: SubscriptionInfoView(subscriptionInfo: info),
               ),
             ],
+          ),
+        ],
+        if (announce != null && announce.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.lg),
+          generateSectionV3(
+            title: l10n.announce,
+            items: [DecorationListItem(title: Text(announce))],
           ),
         ],
         const SizedBox(height: AppSpacing.lg),

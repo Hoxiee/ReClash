@@ -94,7 +94,9 @@ GroupsState filterGroupsState(Ref ref, String query) {
   final groups = currentGroups.value
       .map((group) {
         return group.copyWith(
-          all: group.all.where((proxy) => proxy.matchesQuery(lowQuery)).toList(),
+          all: group.all
+              .where((proxy) => proxy.matchesQuery(lowQuery))
+              .toList(),
         );
       })
       .where((group) => group.all.isNotEmpty)

@@ -1030,7 +1030,7 @@ void main() {
           await tester.pump(const Duration(seconds: 2));
           final trafficCount = commonAction.updateTrafficCount;
           final runTime = container.read(runTimeProvider);
-          expect(trafficCount, 3);
+          expect(trafficCount, 2);
 
           action.updateRuntimeActivity(
             lifecycleState: lifecycleState,
@@ -1057,7 +1057,7 @@ void main() {
             isAndroid: true,
           );
           await tester.pump(const Duration(seconds: 2));
-          expect(commonAction.updateTrafficCount, trafficCount + 3);
+          expect(commonAction.updateTrafficCount, trafficCount + 2);
           expect(action.transitions, [true]);
           await action.setRunning(false);
         });
@@ -1099,7 +1099,7 @@ void main() {
           );
           final trafficCount = commonAction.updateTrafficCount;
           await tester.pump(const Duration(seconds: 2));
-          expect(commonAction.updateTrafficCount, trafficCount + 2);
+          expect(commonAction.updateTrafficCount, trafficCount + 1);
         }
         await action.setRunning(false);
       });
@@ -1134,8 +1134,21 @@ void main() {
           );
           final trafficCount = commonAction.updateTrafficCount;
           await tester.pump(const Duration(seconds: 2));
-          expect(commonAction.updateTrafficCount, trafficCount + 2);
+          expect(commonAction.updateTrafficCount, trafficCount + 1);
         }
+        await action.setRunning(false);
+      });
+
+      testWidgets('samples traffic every other runtime tick', (tester) async {
+        createContainer();
+        await action.setRunning(true);
+        expect(commonAction.updateTrafficCount, 1);
+
+        await tester.pump(const Duration(seconds: 1));
+        expect(commonAction.updateTrafficCount, 1);
+        await tester.pump(const Duration(seconds: 1));
+        expect(commonAction.updateTrafficCount, 2);
+
         await action.setRunning(false);
       });
 
@@ -1176,7 +1189,9 @@ void main() {
 
         final startFuture = action.setRunning(true);
         final initialRunTime = container.read(runTimeProvider)!;
-        await Future<void>.delayed(const Duration(milliseconds: 1100));
+        final trafficUpdate = Completer<void>();
+        commonAction.nextTrafficUpdate = trafficUpdate;
+        await trafficUpdate.future.timeout(const Duration(seconds: 5));
 
         expect(container.read(runTimeProvider), greaterThan(initialRunTime));
         expect(commonAction.updateTrafficCount, greaterThanOrEqualTo(2));
@@ -1982,9 +1997,12 @@ class _InitializingSetupAction extends _RaceSetupAction {
 
 class _RaceCommonAction extends CommonAction {
   int updateTrafficCount = 0;
+  Completer<void>? nextTrafficUpdate;
 
   @override
   Future<void> updateTraffic() async {
     updateTrafficCount++;
+    nextTrafficUpdate?.complete();
+    nextTrafficUpdate = null;
   }
 }

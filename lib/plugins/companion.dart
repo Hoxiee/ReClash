@@ -13,8 +13,9 @@ class CompanionReceiver {
 
   static final CompanionReceiver instance = CompanionReceiver._();
 
-  final MethodChannel _channel =
-      const MethodChannel('$packageName/companion_receiver');
+  final MethodChannel _channel = const MethodChannel(
+    '$packageName/companion_receiver',
+  );
 
   Future<CompanionReceiverEndpoint> enable() async {
     final result = await _channel.invokeMapMethod<String, dynamic>('enable');
@@ -31,8 +32,9 @@ class CompanionReceiver {
       await _channel.invokeMethod<bool>('isRunning') ?? false;
 
   Future<CompanionQrOffer?> openPairingWindow() async {
-    final result =
-        await _channel.invokeMapMethod<String, dynamic>('openPairingWindow');
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'openPairingWindow',
+    );
     if (result == null) return null;
     return CompanionQrOffer(
       deviceId: result['deviceId'] as String,
@@ -48,8 +50,9 @@ class CompanionReceiver {
       _channel.invokeMethod('cancelPairingWindow');
 
   Future<CompanionPendingPhone?> pendingPairing() async {
-    final result =
-        await _channel.invokeMapMethod<String, dynamic>('pendingPairing');
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'pendingPairing',
+    );
     if (result == null) return null;
     return CompanionPendingPhone(
       clientId: result['clientId'] as String,
@@ -64,8 +67,9 @@ class CompanionReceiver {
   Future<void> rejectPending() => _channel.invokeMethod('rejectPending');
 
   Future<List<CompanionTrustedPhone>> trustedClients() async {
-    final result =
-        await _channel.invokeListMethod<Map<dynamic, dynamic>>('trustedClients');
+    final result = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
+      'trustedClients',
+    );
     return (result ?? [])
         .map(
           (e) => CompanionTrustedPhone(
@@ -79,7 +83,9 @@ class CompanionReceiver {
   }
 
   Future<bool> revokeClient(String clientId) async =>
-      await _channel.invokeMethod<bool>('revokeClient', {'clientId': clientId}) ??
+      await _channel.invokeMethod<bool>('revokeClient', {
+        'clientId': clientId,
+      }) ??
       false;
 
   Future<void> resetIdentity() => _channel.invokeMethod('resetIdentity');
@@ -90,8 +96,9 @@ class CompanionClient {
 
   static final CompanionClient instance = CompanionClient._();
 
-  final MethodChannel _channel =
-      const MethodChannel('$packageName/companion_client');
+  final MethodChannel _channel = const MethodChannel(
+    '$packageName/companion_client',
+  );
 
   Future<CompanionPairOutcome> pair(String raw, {String? clientName}) async {
     final result = await _channel.invokeMapMethod<String, dynamic>('pair', {
@@ -102,8 +109,10 @@ class CompanionClient {
   }
 
   Future<String> pollPairing(String deviceId) async {
-    final result = await _channel
-        .invokeMapMethod<String, dynamic>('pollPairing', {'deviceId': deviceId});
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'pollPairing',
+      {'deviceId': deviceId},
+    );
     if (result?['ok'] == true) {
       return result!['phase'] as String? ?? 'pending';
     }
@@ -120,9 +129,10 @@ class CompanionClient {
 
   // Keeps the failure code so the caller can classify reachability (I20).
   Future<CompanionReadResult> readStateResult(String deviceId) async {
-    final result = await _channel.invokeMapMethod<String, dynamic>('readState', {
-      'deviceId': deviceId,
-    });
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'readState',
+      {'deviceId': deviceId},
+    );
     if (result?['ok'] != true) {
       return CompanionReadResult(code: result?['code'] as String?);
     }
@@ -187,7 +197,10 @@ class CompanionClient {
     );
   }
 
-  Future<Map<String, dynamic>?> _readData(String method, String deviceId) async {
+  Future<Map<String, dynamic>?> _readData(
+    String method,
+    String deviceId,
+  ) async {
     final result = await _channel.invokeMapMethod<String, dynamic>(method, {
       'deviceId': deviceId,
     });
@@ -196,8 +209,9 @@ class CompanionClient {
   }
 
   Future<List<CompanionTargetSummary>> targets() async {
-    final result =
-        await _channel.invokeListMethod<Map<dynamic, dynamic>>('targets');
+    final result = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
+      'targets',
+    );
     return (result ?? [])
         .map(
           (e) => CompanionTargetSummary(

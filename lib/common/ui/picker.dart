@@ -48,9 +48,7 @@ class Picker {
     return uri;
   }
 
-  Future<String?> pickerConfigQRCode({
-    bool companionPairing = false,
-  }) async {
+  Future<String?> pickerConfigQRCode({bool companionPairing = false}) async {
     final xFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (xFile == null) {
       return null;
@@ -62,7 +60,8 @@ class Picker {
         formats: [BarcodeFormat.qrCode],
       );
       final result = capture?.barcodes.firstOrNull?.rawValue;
-      final valid = result != null &&
+      final valid =
+          result != null &&
           (companionPairing
               ? isCompanionPairingLink(result)
               : result.isProfileImportLink);

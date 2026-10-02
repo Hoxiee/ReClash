@@ -299,10 +299,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 40));
       final width = tester.getSize(find.byType(AppNavRail)).width;
       expect(width, lessThanOrEqualTo(NavRailMetrics.expandedWidth + 0.01));
-      expect(
-        width,
-        greaterThanOrEqualTo(NavRailMetrics.compactWidth - 0.01),
-      );
+      expect(width, greaterThanOrEqualTo(NavRailMetrics.compactWidth - 0.01));
     }
     await tester.pumpAndSettle();
   });
@@ -335,10 +332,7 @@ void main() {
             child: Scaffold(
               body: Align(
                 alignment: Alignment.topLeft,
-                child: SizedBox(
-                  height: 500,
-                  child: AppNavRail(expanded: true),
-                ),
+                child: SizedBox(height: 500, child: AppNavRail(expanded: true)),
               ),
             ),
           ),

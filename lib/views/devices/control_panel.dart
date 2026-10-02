@@ -359,7 +359,9 @@ class _HeroStatusCard extends StatelessWidget {
                   running ? l.companionStatusOn : l.companionStatusOff,
                   style: context.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: running ? colorScheme.primary : colorScheme.onSurface,
+                    color: running
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
@@ -524,7 +526,11 @@ class _NodeCard extends StatelessWidget {
           if (emoji != null)
             Text(emoji, style: const TextStyle(fontSize: 26))
           else
-            AppMedallion(icon: AppGlyphs.dns, tone: colorScheme.primary, size: 40),
+            AppMedallion(
+              icon: AppGlyphs.dns,
+              tone: colorScheme.primary,
+              size: 40,
+            ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -968,8 +974,9 @@ class _SubscriptionSourceDialog extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                onTap: () =>
-                    Navigator.of(context).pop((profile: profile, manual: false)),
+                onTap: () => Navigator.of(
+                  context,
+                ).pop((profile: profile, manual: false)),
               ),
             const Divider(height: AppSpacing.sm),
             ListItem(
@@ -1087,7 +1094,8 @@ class _NodeOption extends StatelessWidget {
         ),
       );
     } else {
-      final color = colorScheme.delayColor(delay) ?? colorScheme.onSurfaceVariant;
+      final color =
+          colorScheme.delayColor(delay) ?? colorScheme.onSurfaceVariant;
       delayWidget = AppTag(
         '$delay ms',
         mono: true,

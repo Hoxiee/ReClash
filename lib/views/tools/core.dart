@@ -249,10 +249,7 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
               ),
             ],
             items: [
-              DetailRow(
-                title: l10n.upload,
-                value: Text(total.up.traffic.show),
-              ),
+              DetailRow(title: l10n.upload, value: Text(total.up.traffic.show)),
               DetailRow(
                 title: l10n.download,
                 value: Text(total.down.traffic.show),

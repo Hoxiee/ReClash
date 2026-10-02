@@ -71,7 +71,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
-          final requests = state.list;
+          final requests = state.filteredList;
           return NullStatusSwitcher(
             isEmpty: requests.isEmpty,
             nullStatus: NullStatus(

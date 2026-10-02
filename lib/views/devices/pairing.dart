@@ -50,7 +50,10 @@ class _CompanionPairingViewState extends State<CompanionPairingView> {
       _deviceId = outcome.deviceId;
       _confirmationCode = outcome.confirmationCode;
     });
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) => unawaited(_poll()));
+    _timer = Timer.periodic(
+      const Duration(seconds: 2),
+      (_) => unawaited(_poll()),
+    );
   }
 
   Future<void> _poll() async {
@@ -103,11 +106,10 @@ class _CompanionPairingViewState extends State<CompanionPairingView> {
             spacing: AppSpacing.xl,
             children: [
               switch (_stage) {
-                _Stage.submitting || _Stage.waiting =>
-                  const SizedBox.square(
-                    dimension: 64,
-                    child: CommonCircleLoading(),
-                  ),
+                _Stage.submitting || _Stage.waiting => const SizedBox.square(
+                  dimension: 64,
+                  child: CommonCircleLoading(),
+                ),
                 _Stage.approved => AppMedallion(
                   icon: AppGlyphs.checkCircle,
                   tone: colorScheme.primary,
@@ -140,7 +142,8 @@ class _CompanionPairingViewState extends State<CompanionPairingView> {
               },
               if (_stage == _Stage.approved || _stage == _Stage.failed)
                 FilledButton(
-                  onPressed: () => Navigator.of(context).pop(_stage == _Stage.approved),
+                  onPressed: () =>
+                      Navigator.of(context).pop(_stage == _Stage.approved),
                   child: Text(l.confirm),
                 ),
             ],

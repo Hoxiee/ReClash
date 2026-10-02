@@ -146,7 +146,9 @@ String doctorPathSummary(
   if (!hasData) return appLocalizations.doctorPathSummaryIdle;
   if (!snapshot.isFresh) return appLocalizations.doctorPathSummaryStale;
   for (final stage in stages) {
-    if (stage.culprit) return appLocalizations.doctorPathSummaryBreak(stage.label);
+    if (stage.culprit) {
+      return appLocalizations.doctorPathSummaryBreak(stage.label);
+    }
   }
   return appLocalizations.doctorPathSummaryHealthy;
 }
@@ -173,7 +175,10 @@ Glyph doctorPathIngressIcon(DoctorPathKind pathKind) => switch (pathKind) {
 
 typedef DoctorPathVisual = ({Color foreground, Color background, Glyph? icon});
 
-DoctorPathVisual doctorPathVisual(BuildContext context, DoctorStageState state) {
+DoctorPathVisual doctorPathVisual(
+  BuildContext context,
+  DoctorStageState state,
+) {
   final colors = context.colorScheme;
   final success = colors.success;
   final successBackground = Color.alphaBlend(

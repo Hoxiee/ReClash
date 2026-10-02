@@ -93,33 +93,34 @@ void main() {
     expect(find.text('Reset findings?'), findsNothing);
   });
 
-  testWidgets('season preview overlays the real motif and resets to automatic', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1100, 1600);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    globalState.container = container;
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: FindingPreviewView()),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final localizations = currentAppLocalizations;
+  testWidgets(
+    'season preview overlays the real motif and resets to automatic',
+    (tester) async {
+      tester.view.physicalSize = const Size(1100, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      globalState.container = container;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: FindingPreviewView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final localizations = currentAppLocalizations;
 
-    await tester.tap(find.text(localizations.developerSeasonNewYear));
-    await tester.pumpAndSettle();
-    expect(container.read(visibleSeasonProvider), SeasonalMotif.newYear);
-    expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
+      await tester.tap(find.text(localizations.developerSeasonNewYear));
+      await tester.pumpAndSettle();
+      expect(container.read(visibleSeasonProvider), SeasonalMotif.newYear);
+      expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
 
-    await tester.tap(find.text(localizations.developerPreviewAutomatic));
-    await tester.pumpAndSettle();
-    expect(container.read(findingPreviewProvider).season, isNull);
-    expect(tester.takeException(), isNull);
-  });
+      await tester.tap(find.text(localizations.developerPreviewAutomatic));
+      await tester.pumpAndSettle();
+      expect(container.read(findingPreviewProvider).season, isNull);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

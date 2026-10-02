@@ -664,7 +664,8 @@ void main() {
     expect(find.text('Confirmed'), findsWidgets);
 
     final rawEvidence = find.text('Raw evidence');
-    await tester.scrollUntilVisible(rawEvidence, 200);
+    await Scrollable.ensureVisible(tester.element(rawEvidence), alignment: 0.5);
+    await tester.pumpAndSettle();
     await tester.tap(rawEvidence);
     await tester.pumpAndSettle();
 
@@ -765,7 +766,10 @@ void main() {
     // Deep is now a mode segment on the console, run by the shared button.
     await tester.tap(find.text('Deep'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Run a check'));
+    final runCheck = find.widgetWithText(FilledButton, 'Run a check');
+    await Scrollable.ensureVisible(tester.element(runCheck), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(runCheck);
     await tester.pumpAndSettle();
 
     final starts = verify(

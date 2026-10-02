@@ -216,22 +216,25 @@ void main() {
     expect(store.shown.single.message, 'Your subscription expires in 6 days');
   });
 
-  test('traffic crossing the default 90% fires once with the top band', () async {
-    final store = _NoticeStore();
-    final reminder = _reminder(store);
-    final profile = _profile(
-      until: const Duration(days: 40),
-      total: 100,
-      used: 95,
-    );
+  test(
+    'traffic crossing the default 90% fires once with the top band',
+    () async {
+      final store = _NoticeStore();
+      final reminder = _reminder(store);
+      final profile = _profile(
+        until: const Duration(days: 40),
+        total: 100,
+        used: 95,
+      );
 
-    await reminder.check(profile);
-    await reminder.check(profile);
+      await reminder.check(profile);
+      await reminder.check(profile);
 
-    expect(store.shown, hasLength(1));
-    expect(store.shown.single.message, 'You have used 95% of your traffic');
-    expect(store.writes, 1);
-  });
+      expect(store.shown, hasLength(1));
+      expect(store.shown.single.message, 'You have used 95% of your traffic');
+      expect(store.writes, 1);
+    },
+  );
 
   test('a panel sets its own traffic bands and top-up label', () async {
     final store = _NoticeStore();
@@ -256,9 +259,9 @@ void main() {
   test('traffic below every band stays quiet', () async {
     final store = _NoticeStore();
 
-    await _reminder(store).check(
-      _profile(until: const Duration(days: 40), total: 100, used: 10),
-    );
+    await _reminder(
+      store,
+    ).check(_profile(until: const Duration(days: 40), total: 100, used: 10));
 
     expect(store.shown, isEmpty);
     expect(store.writes, 0);
@@ -285,9 +288,9 @@ void main() {
   test('unlimited plans never fire a traffic reminder', () async {
     final store = _NoticeStore();
 
-    await _reminder(store).check(
-      _profile(until: const Duration(days: 40), total: 0, used: 5000),
-    );
+    await _reminder(
+      store,
+    ).check(_profile(until: const Duration(days: 40), total: 0, used: 5000));
 
     expect(store.shown, isEmpty);
   });

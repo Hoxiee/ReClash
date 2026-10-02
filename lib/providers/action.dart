@@ -3,8 +3,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart' show CancelToken, DioException, DioExceptionType;
-import 'package:flutter/services.dart'
-    show Clipboard, ClipboardData;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' show basename, join;

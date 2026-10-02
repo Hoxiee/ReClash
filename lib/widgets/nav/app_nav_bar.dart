@@ -77,7 +77,6 @@ final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
 
-
 // A soft, wide drop in the manner of iOS rather than a Material elevation.
 List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
   final strength = colorScheme.brightness == Brightness.dark ? 3.0 : 1.0;

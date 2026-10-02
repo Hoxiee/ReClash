@@ -98,6 +98,20 @@ void main() {
       expect(state.list.length, 1);
     });
 
+    test('filtering preserves arrival order without sorting by traffic', () {
+      final first = tracker('first').copyWith(download: 1);
+      final second = tracker('second').copyWith(download: 100);
+      final excluded = tracker('excluded', metadata: meta(host: 'other.test'));
+      final state = TrackerInfosState(
+        trackerInfos: [first, excluded, second],
+        query: 'example',
+      );
+
+      expect(state.filteredList, [first, second]);
+      expect(state.list, [second, first]);
+      expect(state.trackerInfos, [first, excluded, second]);
+    });
+
     test('filters by keyword matching chain name', () {
       final state = TrackerInfosState(
         trackerInfos: [

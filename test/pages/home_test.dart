@@ -410,11 +410,7 @@ void main() {
       expect(find.byType(ApplicationSettingView), findsOneWidget);
 
       final logItem = find.text('Logcat');
-      await tester.scrollUntilVisible(
-        logItem,
-        500,
-        scrollable: toolsList,
-      );
+      await tester.scrollUntilVisible(logItem, 500, scrollable: toolsList);
       await tester.tap(logItem);
       await tester.pumpAndSettle();
 

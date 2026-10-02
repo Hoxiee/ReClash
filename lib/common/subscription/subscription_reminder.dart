@@ -149,12 +149,15 @@ class SubscriptionReminder {
     final localizations = currentAppLocalizations;
     final panelMeta = profile.panelMeta;
     final topUpUrl = panelMeta?.buyTrafficUrl;
-    final actionUrl = topUpUrl ?? panelMeta?.buyPlanUrl ?? panelMeta?.supportUrl;
+    final actionUrl =
+        topUpUrl ?? panelMeta?.buyPlanUrl ?? panelMeta?.supportUrl;
     return NoticeRequest(
       channelName: localizations.subscriptionNoticeChannel,
       notificationKey: 'subscription-traffic:${profile.id}',
       title: sanitizeNoticeText(_displayName(profile)),
-      message: sanitizeNoticeText(localizations.subscriptionTrafficLow(percent)),
+      message: sanitizeNoticeText(
+        localizations.subscriptionTrafficLow(percent),
+      ),
       actionLabel: actionUrl == null
           ? null
           : topUpUrl != null

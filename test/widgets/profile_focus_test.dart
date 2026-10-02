@@ -144,7 +144,7 @@ void main() {
   ) async {
     final profile = urlProfile(
       'url',
-    ).copyWith(panelMeta: PanelMeta(announce: 'Maintenance tonight'));
+    ).copyWith(panelMeta: const PanelMeta(announce: 'Maintenance tonight'));
     await pumpProfiles(tester, profiles: [profile]);
 
     final profileItem = find.ancestor(

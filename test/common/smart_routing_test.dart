@@ -61,9 +61,7 @@ void main() {
         expect(enabled.openMarkers, custom.openMarkers);
         expect(enabled.canaryForeign, isNotEmpty);
         expect(custom.withEnabled(false), custom);
-        const emptyCountry = SmartRoutingProps(
-          preset: 'ru',
-        );
+        const emptyCountry = SmartRoutingProps(preset: 'ru');
         expect(emptyCountry.withEnabled(true).openMarkers, isEmpty);
       },
     );
@@ -79,9 +77,9 @@ void main() {
     });
 
     test('neutral preset is operable without a country classification', () {
-      final other = const SmartRoutingProps(enabled: true)
-          .applyPreset('ru')
-          .applyPreset(neutralPreset);
+      final other = const SmartRoutingProps(
+        enabled: true,
+      ).applyPreset('ru').applyPreset(neutralPreset);
       expect(other.rcxParams.enabled, isTrue);
       expect(other.rcxParams.openMarkers, isNotEmpty);
       expect(other.censorCountries, isEmpty);
@@ -213,9 +211,9 @@ void main() {
     });
 
     test('a canary the user corrects is what the core receives', () {
-      final corrected = const SmartRoutingProps(enabled: true)
-          .applyPreset('ru')
-          .copyWith(canaryForeign: ['8.8.8.8:443']);
+      final corrected = const SmartRoutingProps(
+        enabled: true,
+      ).applyPreset('ru').copyWith(canaryForeign: ['8.8.8.8:443']);
 
       expect(corrected.matchesPreset, isFalse);
       expect(corrected.rcxParams.canaryForeign, ['8.8.8.8:443']);
@@ -435,9 +433,7 @@ void main() {
   });
 
   group('a section reset touches only the facets it owns', () {
-    final russia = const SmartRoutingProps().applyPreset(
-      'ru',
-    );
+    final russia = const SmartRoutingProps().applyPreset('ru');
 
     test('resetting Pace leaves the Ranking bands, and the reverse', () {
       final tuned = russia.copyWith(
