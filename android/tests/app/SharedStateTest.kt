@@ -136,7 +136,7 @@ class SharedStateTest {
         assertTrue(defaults.notificationSettings.showPauseAction)
         assertTrue(defaults.notificationSettings.showStopAction)
         assertTrue(defaults.notificationSettings.hideSensitiveOnLockScreen)
-        assertEquals("detailed", defaults.notificationSettings.visibility)
+        assertEquals("minimal", defaults.notificationSettings.visibility)
         assertTrue(defaults.notificationSettings.subscriptionReminders)
         assertEquals(false, defaults.autoRun)
         assertNull(defaults.vpnOptions)
@@ -157,7 +157,7 @@ class SharedStateTest {
         assertTrue(state.notificationSettings.showPauseAction)
         assertTrue(state.notificationSettings.showStopAction)
         assertTrue(state.notificationSettings.hideSensitiveOnLockScreen)
-        assertEquals("detailed", state.notificationSettings.visibility)
+        assertEquals("minimal", state.notificationSettings.visibility)
         assertTrue(state.notificationSettings.subscriptionReminders)
     }
 

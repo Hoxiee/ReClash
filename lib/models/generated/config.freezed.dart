@@ -499,7 +499,7 @@ return $default(_that.components,_that.visibility,_that.showPauseAction,_that.sh
 @JsonSerializable()
 
 class _NotificationSettings implements NotificationSettings {
-  const _NotificationSettings({@JsonKey(fromJson: notificationComponentsSafeFromJson)  List<NotificationComponent> components = defaultNotificationComponents, this.visibility = NotificationVisibility.detailed, this.showPauseAction = true, this.showStopAction = true, this.hideSensitiveOnLockScreen = true, this.subscriptionReminders = true}): _components = components;
+  const _NotificationSettings({@JsonKey(fromJson: notificationComponentsSafeFromJson)  List<NotificationComponent> components = defaultNotificationComponents, this.visibility = NotificationVisibility.minimal, this.showPauseAction = true, this.showStopAction = true, this.hideSensitiveOnLockScreen = true, this.subscriptionReminders = true}): _components = components;
   factory _NotificationSettings.fromJson(Map<String, dynamic> json) => _$NotificationSettingsFromJson(json);
 
  final  List<NotificationComponent> _components;

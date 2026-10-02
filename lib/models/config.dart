@@ -70,22 +70,15 @@ Map<String, Object?> migrateNotificationSettingsJson(
     ..remove('doctorPriority')
     ..remove('showSessionTraffic')
     ..remove('hideIdleSpeed');
-  final legacyEnabled = migrated.remove('enabled');
-  final legacyDetailed = migrated.remove('detailed');
-  // Android forces a notification while the service runs, so a true "off" level
-  // was a promise the platform never kept; the retired level folds into minimal,
-  // and turning it off entirely now lives behind a system-settings deep link.
-  if (migrated['visibility'] == 'off') {
-    migrated['visibility'] = NotificationVisibility.minimal.name;
-  }
+  migrated
+    ..remove('enabled')
+    ..remove('detailed');
+  // Stored settings that never named a level predate the choice entirely, so
+  // they take the current default; an explicit stored value is left untouched.
   if (!NotificationVisibility.values.any(
     (item) => item.name == migrated['visibility'],
   )) {
-    migrated['visibility'] = switch ((legacyEnabled, legacyDetailed)) {
-      (false, _) => NotificationVisibility.minimal.name,
-      (_, false) => NotificationVisibility.minimal.name,
-      _ => NotificationVisibility.detailed.name,
-    };
+    migrated['visibility'] = NotificationVisibility.minimal.name;
   }
   for (final field in const [
     'showPauseAction',
@@ -222,7 +215,7 @@ abstract class NotificationSettings with _$NotificationSettings {
     @JsonKey(fromJson: notificationComponentsSafeFromJson)
     @Default(defaultNotificationComponents)
     List<NotificationComponent> components,
-    @Default(NotificationVisibility.detailed) NotificationVisibility visibility,
+    @Default(NotificationVisibility.minimal) NotificationVisibility visibility,
     @Default(true) bool showPauseAction,
     @Default(true) bool showStopAction,
     @Default(true) bool hideSensitiveOnLockScreen,

@@ -45,15 +45,6 @@ void main() {
     container.read(viewSizeProvider.notifier).value = size;
   }
 
-  Finder inert(Finder of) {
-    return find.ancestor(
-      of: of,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is SliverIgnorePointer && widget.ignoring,
-      ),
-    );
-  }
-
   Future<void> pumpView(
     WidgetTester tester, {
     bool isAndroid = true,
@@ -140,6 +131,10 @@ void main() {
     tester,
   ) async {
     await pumpView(tester);
+    await tester.tap(find.text('Notification level'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Detailed').last);
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Action buttons'), 500);
     await tester.ensureVisible(find.text('Action buttons'));
     await tester.pumpAndSettle();
@@ -165,25 +160,24 @@ void main() {
     );
   });
 
-  testWidgets('level option strips the notification down to the status', (
+  testWidgets('level option defaults to minimal and expands on demand', (
     tester,
   ) async {
     await pumpView(tester);
     expect(
       container.read(appSettingProvider).notificationSettings.visibility,
-      NotificationVisibility.detailed,
+      NotificationVisibility.minimal,
     );
 
     await tester.tap(find.text('Notification level'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Minimal').last);
+    await tester.tap(find.text('Detailed').last);
     await tester.pumpAndSettle();
     final settings = container.read(appSettingProvider).notificationSettings;
-    expect(settings.visibility, NotificationVisibility.minimal);
-    expect(settings.projected.components, isEmpty);
-    expect(settings.projected.showPauseAction, false);
-    expect(settings.projected.showStopAction, false);
-    expect(inert(find.text('Action buttons')), findsOneWidget);
+    expect(settings.visibility, NotificationVisibility.detailed);
+    expect(settings.projected.components, isNotEmpty);
+    expect(settings.projected.showPauseAction, true);
+    expect(settings.projected.showStopAction, true);
   });
 
   testWidgets('a disabled service channel reads as the off state', (

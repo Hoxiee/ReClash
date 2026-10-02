@@ -53,7 +53,7 @@ _NotificationSettings _$NotificationSettingsFromJson(
         _$NotificationVisibilityEnumMap,
         json['visibility'],
       ) ??
-      NotificationVisibility.detailed,
+      NotificationVisibility.minimal,
   showPauseAction: json['showPauseAction'] as bool? ?? true,
   showStopAction: json['showStopAction'] as bool? ?? true,
   hideSensitiveOnLockScreen: json['hideSensitiveOnLockScreen'] as bool? ?? true,

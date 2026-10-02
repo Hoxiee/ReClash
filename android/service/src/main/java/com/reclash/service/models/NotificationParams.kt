@@ -36,5 +36,5 @@ data class NotificationParams(
     val showPauseAction: Boolean = true,
     val showStopAction: Boolean = true,
     val hideSensitiveOnLockScreen: Boolean = true,
-    val visibility: String = "detailed",
+    val visibility: String = "minimal",
 )
