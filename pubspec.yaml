@@ -1,7 +1,7 @@
 name: reclash
 description: A cross-platform mihomo client with a Material You interface and advanced subscription workflows.
 publish_to: 'none'
-version: 0.1.0-pre.1+2026100201
+version: 0.1.0-pre.1+2026100202
 environment:
   sdk: '>=3.10.0 <4.0.0'
 
