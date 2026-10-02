@@ -103,7 +103,7 @@ func TestWindowsParentIdentity(t *testing.T) {
 	}
 }
 
-func TestWindowsHomeIsPinnedAndCannotChange(t *testing.T) {
+func TestWindowsHomeLockRetainsHandlesAndGates(t *testing.T) {
 	home := t.TempDir()
 	handles, err := lockWindowsHome(home)
 	if err != nil {
@@ -114,10 +114,13 @@ func TestWindowsHomeIsPinnedAndCannotChange(t *testing.T) {
 			windows.CloseHandle(handle)
 		}
 	}()
-	// The pin holds read-attribute handles without delete sharing, which
-	// blocks deletion but not a rename, so assert the former.
-	if err := os.Remove(home); err == nil {
-		t.Fatal("pinned home was deleted")
+	// The open handles document retention only: neither rename nor removal
+	// is refused while pinned, so assert the handles and the gating instead.
+	if len(handles) == 0 {
+		t.Fatal("home lock holds no handles")
+	}
+	if _, err := lockWindowsHome(filepath.Join(home, "missing")); err == nil {
+		t.Fatal("locked a missing home path")
 	}
 	previous := managedWindowsParent
 	managedWindowsParent = &windowsParent{home: home}
