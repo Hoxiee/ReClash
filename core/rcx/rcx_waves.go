@@ -22,6 +22,7 @@ const (
 	rcxWaveDiscover
 	rcxWaveQuality
 	rcxWaveLocate
+	rcxWaveConfirm
 )
 
 // A trickle is a rate, so it hangs off the tick: one tick reconsiders often.
@@ -224,15 +225,15 @@ func (e *rcxEngine) memoryFirstWave(
 		freshGreen[node.Name] = green[node.Name] && !candidate.HostAt.IsZero() &&
 			now.Sub(candidate.HostAt) <= time.Duration(rcxFreshWindowSeconds)*time.Second
 		tier := 4
-		_, remembered := memoryRank[node.Name]
+		rank, remembered := memoryRank[node.Name]
 		switch {
 		case candidate.HostDead || candidate.Facts.Transit == rcxProofDisproven ||
 			(!candidate.CoolUntil.IsZero() && now.Before(candidate.CoolUntil)) ||
 			e.ledger.FailStreak(node.Key, e.envKey) > 0:
 			tier = 5
-		case remembered:
+		case remembered && rank < 2:
 			tier = 0
-		case candidate.Facts.OpenWorld == rcxProofProven || candidate.Facts.Domestic == rcxProofProven ||
+		case remembered || candidate.Facts.OpenWorld == rcxProofProven || candidate.Facts.Domestic == rcxProofProven ||
 			candidate.Facts.Transit == rcxProofProven || candidate.Evidence != rcxEvidenceNone ||
 			e.ledger.PreviouslyGood(node.Key, e.envKey):
 			tier = 1
@@ -244,17 +245,12 @@ func (e *rcxEngine) memoryFirstWave(
 		grouped[tier] = append(grouped[tier], node)
 	}
 
+	policy := e.cfg.policy()
 	for tier := range grouped {
 		sort.SliceStable(grouped[tier], func(i, j int) bool {
 			a, b := grouped[tier][i].Name, grouped[tier][j].Name
 			if tier == 0 && memoryRank[a] != memoryRank[b] {
 				return memoryRank[a] < memoryRank[b]
-			}
-			if freshGreen[a] != freshGreen[b] {
-				return freshGreen[a]
-			}
-			if green[a] != green[b] {
-				return green[a]
 			}
 			ca, cb := candidates[a], candidates[b]
 			if tier < 4 {
@@ -262,11 +258,28 @@ func (e *rcxEngine) memoryFirstWave(
 					return ca.Recurrence < cb.Recurrence
 				}
 				aMs, bMs := rcxDiscoveryLatency(ca), rcxDiscoveryLatency(cb)
-				if aMs > 0 && bMs > 0 && aMs != bMs {
+				if tier == 1 {
+					aMs, bMs = rcxRankingLatency(ca, policy), rcxRankingLatency(cb, policy)
+				}
+				if (aMs > 0) != (bMs > 0) {
+					return aMs > 0
+				}
+				if aMs != bMs {
 					return aMs < bMs
 				}
 			}
-			return false
+			if freshGreen[a] != freshGreen[b] {
+				return freshGreen[a]
+			}
+			if green[a] != green[b] {
+				return green[a]
+			}
+			aRank, aRemembered := memoryRank[a]
+			bRank, bRemembered := memoryRank[b]
+			if aRemembered != bRemembered {
+				return aRemembered
+			}
+			return aRemembered && aRank < bRank
 		})
 	}
 
@@ -428,7 +441,7 @@ func (e *rcxEngine) startProbeWave(wave []rcxProbeNode, kind rcxWaveKind, lane s
 		window = rcxHandoffWave
 		prober.concurrency = rcxHandoffParallel
 		prober.timeout = rcxHandoffTimeout
-	} else if kind == rcxWaveRescue || kind == rcxWaveIncident {
+	} else if kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveConfirm {
 		window = rcxRescueWave
 		prober.concurrency = rcxSweepParallel
 		prober.timeout = rcxSweepTimeout
@@ -462,6 +475,17 @@ func (e *rcxEngine) probeTargets(
 	terrain rcxTerrain,
 	kind rcxWaveKind,
 ) []rcxProbeTarget {
+	if kind == rcxWaveConfirm {
+		markers := e.activeMarkers(rcxRoleOpen, e.runtime.Now())
+		if len(markers) == 0 {
+			return nil
+		}
+		targets := make([]rcxProbeTarget, 0, len(wave))
+		for _, node := range wave {
+			targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: markers})
+		}
+		return targets
+	}
 	if kind == rcxWaveQuality {
 		for _, marker := range e.activeMarkers(rcxRoleOpen, e.runtime.Now()) {
 			if rcxMarkerID(rcxRoleOpen, marker) == e.quality.Marker {

@@ -3,6 +3,7 @@ package rcx
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/tunnel/statistic"
@@ -34,6 +35,7 @@ type rcxRuntime interface {
 }
 
 type rcxEngine struct {
+	networkGen     atomic.Uint32
 	manualPick     rcxManualPick
 	discovery      map[string]*rcxDiscoveryState
 	discoverySpent []time.Time
@@ -137,6 +139,7 @@ type rcxEngine struct {
 	pendingGrant        bool
 	pinWaveAt           time.Time
 	hostLinked          bool
+	hostCheck           rcxHostCheck
 	wantPick            string
 	downFrozen          map[string]time.Time
 	throttled           map[string]time.Time
@@ -385,11 +388,13 @@ func (e *rcxEngine) SetEnabledForTest(enabled bool) {
 	e.enabled = enabled
 	e.mu.Unlock()
 }
-func (e *rcxEngine) NoteHarvestedProbe(url, node string, delayMs int) {
-	if !e.Enabled() || url != e.runtime.TestURL() {
+func (e *rcxEngine) NetworkGeneration() uint32 { return e.networkGen.Load() }
+
+func (e *rcxEngine) NoteHarvestedProbe(url, node string, delayMs int, generation uint32) {
+	if !e.Enabled() || url != e.runtime.TestURL() || generation != e.NetworkGeneration() {
 		return
 	}
-	e.send(rcxEvent{Kind: rcxEventHarvested, Node: node, DelayMs: delayMs})
+	e.send(rcxEvent{Kind: rcxEventHarvested, Node: node, DelayMs: delayMs, Gen: generation})
 }
 
 // The host's changeProxy already wrote the selector: the engine only pins.

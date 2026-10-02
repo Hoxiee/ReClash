@@ -514,7 +514,7 @@ func handleTestDelay(params *TestDelayParams) *Delay {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	delay, err := proxy.URLTest(ctx, url, anyDelayTestStatus)
+	delay, err := rcxHostProbes.test(ctx, proxy, url)
 	if err != nil {
 		return delayData
 	}
@@ -934,7 +934,6 @@ func handleSetupConfig(params *SetupParams) string {
 
 func init() {
 	adapter.UrlTestHook = func(url string, name string, delay uint16) {
-		rcxEngineInstance.NoteHarvestedProbe(url, name, int(delay))
 		if !shouldPublishDelay(delay) {
 			return
 		}

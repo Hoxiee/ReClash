@@ -168,16 +168,9 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 // home-WiFi green survives half an hour of freshness and would otherwise hoist a
 // node the new network cannot reach to the front of every ranking and wave.
 func (e *rcxEngine) freshHost(member rcxMember) rcxMember {
-	if member.HostDead {
-		now := e.runtime.Now()
-		proof := e.ledger.ProbeGoodAt(member.key(), e.envKey)
-		// A url-test miss renews HostAt, so flooring the traffic check at HostAt would
-		// mask payload that moved seconds earlier; a node still carrying live traffic on
-		// this link is working whatever the probe says and keeps its host standing.
-		if e.trafficSince(member.key(), e.envSince, now) ||
-			(!proof.IsZero() && proof.After(member.HostAt) && !proof.Before(e.envSince) && now.Sub(proof) <= e.ledger.ProofTTL()) {
-			member.HostDead = false
-		}
+	if member.HostDead && (e.trafficSince(member.key(), e.envSince, e.runtime.Now()) ||
+		e.hostMissSuperseded(member) || e.holdsHostMiss(member)) {
+		member.HostDead = false
 	}
 	if e.envSince.IsZero() || member.HostAt.IsZero() || !member.HostAt.Before(e.envSince) {
 		return member

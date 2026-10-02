@@ -149,6 +149,7 @@ func (rcxCoreRuntime) Members() []rcx.Member {
 	nodes := lister.Proxies()
 	identities := rcxRouteKeys(nodes)
 	url := currentTestURL()
+	rcxHostProbes.retain(nodes, url)
 	members := make([]rcx.Member, 0, len(nodes))
 	for _, node := range nodes {
 		if !rcxRoutableNode(node) {
@@ -179,23 +180,8 @@ func (rcxCoreRuntime) Members() []rcx.Member {
 	return members
 }
 
-// The delay test the user runs by hand already covers the whole park, which no
-// probe budget can. A missing entry is silence, not a verdict: mihomo folds
-// every test URL into one global alive flag, so only a record here condemns.
 func rcxHostDelayInfo(node constant.Proxy, url string) (int, bool, time.Time) {
-	state, recorded := node.ExtraDelayHistories()[url]
-	if !node.AliveForTestUrl(url) {
-		return 0, recorded, rcxLastDelayAt(state.History)
-	}
-	delay, dead := rcxHostDelayValue(node.LastDelayForTestUrl(url))
-	return delay, dead, rcxLastDelayAt(state.History)
-}
-
-func rcxLastDelayAt(history []constant.DelayHistory) time.Time {
-	if len(history) == 0 {
-		return time.Time{}
-	}
-	return history[len(history)-1].Time
+	return rcxHostProbes.info(node, url)
 }
 
 func rcxHostDelayValue(delay uint16) (int, bool) {
@@ -683,9 +669,12 @@ func (rcxCoreRuntime) Sweep(ctx context.Context, nodes []string) {
 		safeGoDetached("rcx host probe", func() {
 			defer probes.Done()
 			defer releaseDelayTestSlot()
-			probeCtx, cancel := context.WithTimeout(ctx, rcxHostProbeDial)
+			if ctx.Err() != nil {
+				return
+			}
+			probeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), rcxHostProbeDial)
 			defer cancel()
-			_, _ = node.URLTest(probeCtx, url, anyDelayTestStatus)
+			_, _ = rcxHostProbes.test(probeCtx, node, url)
 		})
 	}
 	done := make(chan struct{})

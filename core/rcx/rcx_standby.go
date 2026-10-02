@@ -11,11 +11,15 @@ func (e *rcxEngine) rebuildStandbys(ranked []rcxRanked) {
 	e.snapshot.Standbys[e.envKey] = e.pickStandbys(ranked, e.incumbent, nil)
 }
 
-// pickStandbys walks the ranked rows twice — first demanding provider/transport
-// diversity, then filling the remaining slots — and returns up to
-// rcxStandbyCount member keys that are proven open and in transit, skipping the
-// incumbent and any last-resort pick. extra rejects rows a caller does not
-// want; lanes keep only skeleton members.
+func rcxStandbyQuality(key rcxKey) rcxKey {
+	if key.latencyMs != int(^uint(0)>>1) {
+		key.latencyMs = 0
+	}
+	key.order = 0
+	key.challenger = false
+	return key
+}
+
 func (e *rcxEngine) pickStandbys(ranked []rcxRanked, incumbent string, extra func(rcxCandidate) bool) []string {
 	members := e.runtime.Members()
 	byName := make(map[string]rcxMember, len(members))
@@ -24,40 +28,48 @@ func (e *rcxEngine) pickStandbys(ranked []rcxRanked, incumbent string, extra fun
 	}
 	selected := make([]string, 0, rcxStandbyCount)
 	seen := map[string]struct{}{}
-	for _, diverse := range []bool{true, false} {
-		for _, row := range ranked {
-			candidate := row.Candidate
-			if candidate.Name == incumbent || row.Block != rcxBlockNone ||
-				row.Key.verdict == rcxVerdictLastResort ||
-				candidate.Facts.OpenWorld != rcxProofProven ||
-				candidate.Facts.Transit != rcxProofProven {
-				continue
-			}
-			if extra != nil && !extra(candidate) {
-				continue
-			}
-			member, ok := byName[candidate.Name]
-			if !ok {
-				continue
-			}
-			bucket := member.Provider + "|" + member.Transport
-			if _, duplicate := seen[bucket]; duplicate && diverse {
-				continue
-			}
-			key := member.key()
-			already := false
-			for _, selectedKey := range selected {
-				already = already || selectedKey == key
-			}
-			if already {
-				continue
-			}
-			selected = append(selected, key)
-			seen[bucket] = struct{}{}
-			if len(selected) == rcxStandbyCount {
-				return selected
+	for start := 0; start < len(ranked); {
+		quality := rcxStandbyQuality(ranked[start].Key)
+		end := start + 1
+		for end < len(ranked) && rcxStandbyQuality(ranked[end].Key) == quality {
+			end++
+		}
+		for _, diverse := range []bool{true, false} {
+			for _, row := range ranked[start:end] {
+				candidate := row.Candidate
+				if candidate.Name == incumbent || row.Block != rcxBlockNone ||
+					row.Key.verdict == rcxVerdictLastResort ||
+					candidate.Facts.OpenWorld != rcxProofProven ||
+					candidate.Facts.Transit != rcxProofProven {
+					continue
+				}
+				if extra != nil && !extra(candidate) {
+					continue
+				}
+				member, ok := byName[candidate.Name]
+				if !ok {
+					continue
+				}
+				bucket := member.Provider + "|" + member.Transport
+				if _, duplicate := seen[bucket]; duplicate && diverse {
+					continue
+				}
+				key := member.key()
+				already := false
+				for _, selectedKey := range selected {
+					already = already || selectedKey == key
+				}
+				if already {
+					continue
+				}
+				selected = append(selected, key)
+				seen[bucket] = struct{}{}
+				if len(selected) == rcxStandbyCount {
+					return selected
+				}
 			}
 		}
+		start = end
 	}
 	return selected
 }
@@ -85,27 +97,11 @@ func (e *rcxEngine) selectWakeStandby(now time.Time) string {
 		Terrain: e.terrainCurrent(), Incumbent: e.incumbent, Candidates: candidates,
 		Policy: e.cfg.policy(), Now: now,
 	}
-	remembered := map[string]int{}
-	for index, name := range e.standbyNames() {
-		remembered[name] = index
+	standbys := e.pickStandbys(rcxRank(input), e.incumbent, nil)
+	if len(standbys) == 0 {
+		return ""
 	}
-	best := ""
-	bestDelay := 0
-	bestOrder := len(remembered)
-	for _, candidate := range candidates {
-		order, ok := remembered[candidate.Name]
-		if !ok || !rcxEligible(candidate, input) || candidate.Facts.OpenWorld != rcxProofProven ||
-			candidate.Facts.Transit != rcxProofProven {
-			continue
-		}
-		delay := rcxDiscoveryLatency(candidate)
-		if best == "" || (delay > 0 && (bestDelay <= 0 || delay < bestDelay)) || delay == bestDelay && order < bestOrder {
-			best = candidate.Name
-			bestDelay = delay
-			bestOrder = order
-		}
-	}
-	return best
+	return e.nameOf(standbys[0])
 }
 
 func (e *rcxEngine) rebuildLaneStandbys(lane *rcxLaneState, ranked []rcxRanked) {

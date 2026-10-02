@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
 
@@ -140,15 +142,6 @@ func TestHostDelayValueRefusesAnAnswerFasterThanAnyRemote(t *testing.T) {
 	}
 }
 
-func TestLastDelayAtReturnsTheNewestRecord(t *testing.T) {
-	first := time.Unix(10, 0)
-	last := time.Unix(20, 0)
-	history := []constant.DelayHistory{{Time: first, Delay: 90}, {Time: last, Delay: 120}}
-	if got := rcxLastDelayAt(history); !got.Equal(last) {
-		t.Errorf("last delay = %v, want %v", got, last)
-	}
-}
-
 func TestHostDelayTreatsAForeignFailureAsSilence(t *testing.T) {
 	node := namedProxy("node")
 	foreign := rcxClosedServerURL(t)
@@ -168,7 +161,10 @@ func TestHostDelayCondemnsOnlyUnderItsOwnURL(t *testing.T) {
 	ours := rcxClosedServerURL(t)
 	foreign := rcxLiveServerURL(t)
 
-	if _, err := node.URLTest(context.Background(), ours, nil); err == nil {
+	previous := currentTestURL()
+	setTestURL(ours)
+	t.Cleanup(func() { setTestURL(previous) })
+	if _, err := rcxHostProbes.test(context.Background(), node, ours); err == nil {
 		t.Fatal("the setup needs the node to fail under our own URL")
 	}
 	if _, dead, _ := rcxHostDelayInfo(node, ours); !dead {
@@ -180,6 +176,235 @@ func TestHostDelayCondemnsOnlyUnderItsOwnURL(t *testing.T) {
 	}
 	if _, dead, _ := rcxHostDelayInfo(node, ours); !dead {
 		t.Error("a foreign success masked the failed record under our URL")
+	}
+}
+
+type rcxHostProbeAdapter struct {
+	constant.ProxyAdapter
+	started chan context.Context
+	release <-chan struct{}
+}
+
+func (p rcxHostProbeAdapter) DialContext(ctx context.Context, metadata *constant.Metadata) (constant.Conn, error) {
+	p.started <- ctx
+	select {
+	case <-p.release:
+		return p.ProxyAdapter.DialContext(ctx, metadata)
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+type rcxSweepContext struct {
+	context.Context
+	onDone func()
+}
+
+func (c rcxSweepContext) Done() <-chan struct{} {
+	c.onDone()
+	return c.Context.Done()
+}
+
+func rcxHoldDelayTestSlots(t *testing.T, count int) func() {
+	t.Helper()
+	held := 0
+	release := sync.OnceFunc(func() {
+		for held > 0 {
+			releaseDelayTestSlot()
+			held--
+		}
+	})
+	t.Cleanup(release)
+	ctx, cancel := context.WithTimeout(context.Background(), rcxHostProbeDial+time.Second)
+	defer cancel()
+	for held < count {
+		if !acquireDelayTestSlot(ctx) {
+			t.Fatalf("acquired %d of %d delay-test slots", held, count)
+		}
+		held++
+	}
+	return release
+}
+
+func rcxInstallSweepProxies(t *testing.T, nodes ...*adapter.Proxy) {
+	t.Helper()
+	previous := currentTestURL()
+	setTestURL(rcxLiveServerURL(t))
+	proxies := make(map[string]constant.Proxy, len(nodes))
+	for _, node := range nodes {
+		proxies[node.Name()] = node
+	}
+	tunnel.UpdateProxies(proxies, nil)
+	t.Cleanup(func() {
+		rcxHoldDelayTestSlots(t, cap(delayTestSlots))()
+		settleMessageBatcher()
+		setTestURL(previous)
+		tunnel.UpdateProxies(nil, nil)
+	})
+}
+
+func rcxAwaitHostSweep(t *testing.T, done <-chan struct{}) {
+	t.Helper()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("host sweep did not return after admission closed")
+	}
+}
+
+func rcxRunHostSweep(t *testing.T, ctx context.Context, cancel context.CancelFunc, nodes ...string) <-chan struct{} {
+	t.Helper()
+	done := make(chan struct{})
+	go func() {
+		(rcxCoreRuntime{}).Sweep(ctx, nodes)
+		close(done)
+	}()
+	t.Cleanup(func() {
+		cancel()
+		rcxAwaitHostSweep(t, done)
+	})
+	return done
+}
+
+func rcxAwaitHostProbe(t *testing.T, started <-chan context.Context) context.Context {
+	t.Helper()
+	select {
+	case ctx := <-started:
+		return ctx
+	case <-time.After(time.Second):
+		t.Fatal("admitted host probe did not start")
+		return nil
+	}
+}
+
+func TestCoreRuntimeSweepKeepsTheAdmittedProbeBudget(t *testing.T) {
+	for _, stop := range []string{"deadline", "cancel"} {
+		t.Run(stop, func(t *testing.T) {
+			started := make(chan context.Context, 1)
+			queued := make(chan context.Context, 1)
+			release := make(chan struct{})
+			node := adapter.NewProxy(rcxHostProbeAdapter{
+				ProxyAdapter: namedProxy("node").Adapter(), started: started, release: release,
+			})
+			waiting := adapter.NewProxy(rcxHostProbeAdapter{
+				ProxyAdapter: namedProxy("waiting").Adapter(), started: queued, release: release,
+			})
+			rcxInstallSweepProxies(t, node, waiting)
+			rcxHoldDelayTestSlots(t, cap(delayTestSlots)-1)
+			releaseQueue := rcxHoldDelayTestSlots(t, 1)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			admission := make(chan struct{})
+			observed := rcxSweepContext{
+				Context: ctx, onDone: sync.OnceFunc(func() { close(admission) }),
+			}
+			done := rcxRunHostSweep(t, observed, cancel, "node", "waiting")
+			releaseProbe := sync.OnceFunc(func() { close(release) })
+			t.Cleanup(releaseProbe)
+
+			select {
+			case <-admission:
+			case <-ctx.Done():
+				t.Fatal("host sweep never reached the full semaphore")
+			}
+			time.Sleep(100 * time.Millisecond)
+			admittedAfter := time.Now()
+			releaseQueue()
+			probeCtx := rcxAwaitHostProbe(t, started)
+			deadline, bounded := probeCtx.Deadline()
+			if !bounded || deadline.Before(admittedAfter.Add(rcxHostProbeDial)) || deadline.After(time.Now().Add(rcxHostProbeDial)) {
+				t.Errorf("probe deadline = %v, bounded = %v: want a full, independent %v budget", deadline, bounded, rcxHostProbeDial)
+			}
+			if stop == "cancel" {
+				cancel()
+			}
+			<-ctx.Done()
+			rcxAwaitHostSweep(t, done)
+			if err := probeCtx.Err(); err != nil {
+				t.Errorf("started probe inherited admission cancellation: %v", err)
+			}
+			releaseProbe()
+			rcxHoldDelayTestSlots(t, 1)()
+			if _, dead, at := rcxHostDelayInfo(node, currentTestURL()); dead || at.IsZero() {
+				t.Errorf("dead = %v, measured at = %v: the admitted probe must record its successful answer", dead, at)
+			}
+			if len(queued) != 0 || len(waiting.ExtraDelayHistories()) != 0 {
+				t.Fatal("the queued node was tested after admission closed")
+			}
+		})
+	}
+}
+
+func TestCoreRuntimeSweepSkipsCanceledAdmission(t *testing.T) {
+	tests := []struct {
+		name    string
+		context func() (context.Context, context.CancelFunc)
+	}{
+		{
+			name: "already canceled",
+			context: func() (context.Context, context.CancelFunc) {
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+				return ctx, cancel
+			},
+		},
+		{
+			name: "already expired",
+			context: func() (context.Context, context.CancelFunc) {
+				return context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
+			},
+		},
+		{
+			name: "cancel races available slot",
+			context: func() (context.Context, context.CancelFunc) {
+				ctx, cancel := context.WithCancel(context.Background())
+				return rcxSweepContext{Context: ctx, onDone: sync.OnceFunc(cancel)}, cancel
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			started := make(chan context.Context, 32)
+			release := make(chan struct{})
+			close(release)
+			node := adapter.NewProxy(rcxHostProbeAdapter{
+				ProxyAdapter: namedProxy("node").Adapter(), started: started, release: release,
+			})
+			rcxInstallSweepProxies(t, node)
+			for attempt := 0; attempt < cap(started); attempt++ {
+				ctx, cancel := test.context()
+				(rcxCoreRuntime{}).Sweep(ctx, []string{"node"})
+				cancel()
+			}
+			rcxHoldDelayTestSlots(t, cap(delayTestSlots))()
+			if len(started) != 0 || len(node.ExtraDelayHistories()) != 0 {
+				t.Fatalf("started probes = %d, histories = %v: canceled admission must not reach URLTest", len(started), node.ExtraDelayHistories())
+			}
+		})
+	}
+}
+
+func TestCoreRuntimeSweepBoundsStartedProbes(t *testing.T) {
+	started := make(chan context.Context, 1)
+	node := adapter.NewProxy(rcxHostProbeAdapter{
+		ProxyAdapter: namedProxy("node").Adapter(), started: started,
+	})
+	rcxInstallSweepProxies(t, node)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := rcxRunHostSweep(t, ctx, cancel, "node")
+	probeCtx := rcxAwaitHostProbe(t, started)
+	cancel()
+	rcxAwaitHostSweep(t, done)
+	select {
+	case <-probeCtx.Done():
+	case <-time.After(rcxHostProbeDial + time.Second):
+		t.Fatal("started host probe outlived its own timeout")
+	}
+	if err := probeCtx.Err(); err != context.DeadlineExceeded {
+		t.Errorf("probe error = %v, want its own deadline rather than admission cancellation", err)
+	}
+	rcxHoldDelayTestSlots(t, cap(delayTestSlots))()
+	if _, dead, at := rcxHostDelayInfo(node, currentTestURL()); !dead || at.IsZero() {
+		t.Errorf("dead = %v, measured at = %v: exhausting the full probe budget must remain a failed measurement", dead, at)
 	}
 }
 

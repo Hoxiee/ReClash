@@ -178,6 +178,7 @@ func (e *rcxEngine) reconsider() {
 	if e.incumbent == "" {
 		e.incumbent = e.runtime.Selected()
 	}
+	e.prepareHostCheck(members, now)
 	e.reconsiderLanes(members, now)
 
 	terrain := e.terrainCurrent()
@@ -266,6 +267,8 @@ func (e *rcxEngine) reconsider() {
 	} else if e.pendingGrant && !e.probing && !e.screenOff && !e.suspended {
 		e.pendingGrant = false
 		e.startProbe(candidates, members, rcxWaveGrant)
+	} else if e.confirmHostMiss(members, now) {
+		decision.Reason = rcxReasonMeasuring
 	} else if e.needsProbe(decision, candidates) {
 		kind := rcxWaveRoutine
 		if decision.Reason == rcxReasonStranded || decision.Reason == rcxReasonNoCandidate {

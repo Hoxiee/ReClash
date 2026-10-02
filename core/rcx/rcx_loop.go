@@ -215,6 +215,9 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.reconsider()
 		e.persist(true)
 	case rcxEventHarvested:
+		if event.Gen != e.NetworkGeneration() {
+			break
+		}
 		now := e.runtime.Now()
 		negative := event.DelayMs <= 0
 		e.ensureIdentity()

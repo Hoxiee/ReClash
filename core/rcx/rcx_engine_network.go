@@ -36,6 +36,7 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 
 	changed := primary != e.envKey
 	if changed {
+		e.networkGen.Add(1)
 		e.rollbackEscrow()
 		e.resetRescue()
 		e.supersedeWake()
@@ -300,7 +301,7 @@ func (e *rcxEngine) applyScreenOff(off bool) {
 		return
 	}
 	e.screenOff = off
-	if off && e.improvementWave() {
+	if off && (e.improvementWave() || e.probeKind == rcxWaveConfirm) {
 		e.supersedeProbe()
 	}
 	if !off {

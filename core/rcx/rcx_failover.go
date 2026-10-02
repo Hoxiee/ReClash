@@ -60,7 +60,8 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		applied := false
 		for _, attempt := range attempts {
 			attemptNegative := attempt.Outcome == rcxProbeFail || attempt.Outcome == rcxProbeStatusMismatch
-			if attemptNegative && !e.chargesNegative(now) {
+			if attempt.Outcome == rcxProbeOverloaded ||
+				(attemptNegative && (result.Outcome == rcxProbeOverloaded || !e.chargesNegative(now))) {
 				continue
 			}
 			wasGood := e.ledger.PreviouslyGood(key, e.envKey)
@@ -73,6 +74,9 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		if applied {
 			e.ledger.RecomputeRole(key, e.envKey, result.Role, e.markerIDs(result.Role, now), now)
 		}
+	}
+	if result.Role == rcxRoleOpen {
+		e.settleHostCheck(result, now)
 	}
 	if result.Outcome == rcxProbeOK && result.Role == rcxRoleOpen && result.Fingerprint != "" {
 		e.ledger.NoteQualitySample(key, e.envKey, result.Fingerprint, e.qualityEpoch(), result.DelayMs, now)
@@ -119,7 +123,8 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 // Only a wave the incumbent's own trouble provoked may refute it (§1.9); a
 // periodic probe or the core's health check leaves a fresh proof standing.
 func rcxReactiveWave(kind rcxWaveKind) bool {
-	return kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveHandoff || kind == rcxWaveGrant
+	return kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveHandoff ||
+		kind == rcxWaveGrant || kind == rcxWaveConfirm
 }
 
 // A single missed marker is a 12s freeze, not a refutation: any node that lately
@@ -282,6 +287,14 @@ func (e *rcxEngine) watchIncumbent() {
 		return
 	}
 	e.sampleTraffic()
+	if e.hostCheck.pending {
+		members := e.runtime.Members()
+		now := e.runtime.Now()
+		e.prepareHostCheck(members, now)
+		if e.confirmHostMiss(members, now) {
+			return
+		}
+	}
 	if e.suspected(e.runtime.Now()) && e.improvementWave() {
 		e.supersedeProbe()
 	}

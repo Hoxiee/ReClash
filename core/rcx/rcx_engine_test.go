@@ -2557,13 +2557,14 @@ func TestRecoveryWaveUsesMemoryAndGreenOriginTiers(t *testing.T) {
 	engine.snapshot.Picks[engine.envKey] = "remembered"
 	engine.snapshot.Standbys[engine.envKey] = []string{"standby"}
 	engine.ledger.NoteProbe("known", engine.envKey, rcxRoleOpen, rcxProbeOK, 120, runtime.Now())
+	engine.ledger.NoteQualitySample("known", engine.envKey, rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0]), engine.qualityEpoch(), 120, runtime.Now())
 
 	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveHandoff)
 	positions := map[string]int{}
 	for i, node := range wave {
 		positions[node.Name] = i
 	}
-	order := []string{"remembered", "standby", "known", "green-away", "green-home", "unknown"}
+	order := []string{"known", "remembered", "standby", "green-away", "green-home", "unknown"}
 	for i := 1; i < len(order); i++ {
 		if positions[order[i-1]] >= positions[order[i]] {
 			t.Fatalf("wave = %v, want %q before %q", wave, order[i-1], order[i])
@@ -2688,15 +2689,16 @@ func TestEngineHarvestsOnlyUnderTheAppYardstick(t *testing.T) {
 	runtime.members = foreignMembers("a")
 	engine := newTestEngine(runtime, "ru")
 
-	engine.NoteHarvestedProbe("https://provider.example/health", "a", 120)
-	engine.NoteHarvestedProbe("https://provider.example/health", "a", 0)
+	generation := engine.NetworkGeneration()
+	engine.NoteHarvestedProbe("https://provider.example/health", "a", 120, generation)
+	engine.NoteHarvestedProbe("https://provider.example/health", "a", 0, generation)
 	select {
 	case event := <-engine.events:
 		t.Fatalf("harvested %+v: a delay measured against another yardstick is not a fact about ours", event)
 	default:
 	}
 
-	engine.NoteHarvestedProbe(yardstick, "a", 120)
+	engine.NoteHarvestedProbe(yardstick, "a", 120, generation)
 	select {
 	case event := <-engine.events:
 		if event.Kind != rcxEventHarvested || event.Node != "a" || event.DelayMs != 120 {

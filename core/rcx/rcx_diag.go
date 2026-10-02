@@ -245,6 +245,8 @@ func rcxWaveName(kind rcxWaveKind) string {
 		return "quality"
 	case rcxWaveLocate:
 		return "locate"
+	case rcxWaveConfirm:
+		return "confirm"
 	default:
 		return "wave"
 	}
