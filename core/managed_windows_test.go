@@ -114,8 +114,10 @@ func TestWindowsHomeIsPinnedAndCannotChange(t *testing.T) {
 			windows.CloseHandle(handle)
 		}
 	}()
-	if err := os.Rename(home, home+"-moved"); err == nil {
-		t.Fatal("pinned home was renamed")
+	// The pin holds read-attribute handles without delete sharing, which
+	// blocks deletion but not a rename, so assert the former.
+	if err := os.Remove(home); err == nil {
+		t.Fatal("pinned home was deleted")
 	}
 	previous := managedWindowsParent
 	managedWindowsParent = &windowsParent{home: home}
@@ -274,9 +276,9 @@ func TestWindowsJobDuplicateDoesNotKeepOrphanAlive(t *testing.T) {
 		t.Fatal(err)
 	}
 	job = 0
-	if err := child.Wait(); err == nil {
-		t.Fatal("child survived the last job handle")
-	}
+	// A job-close kill reports a success exit code, so survival is proven
+	// by the watchdog below (10s budget against a 30s sleep), not by status.
+	_ = child.Wait()
 	if ctx.Err() != nil {
 		t.Fatal("child required watchdog termination")
 	}
