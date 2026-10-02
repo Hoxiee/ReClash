@@ -7,61 +7,28 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-enum _Routing { direct, proxy, reject, unknown }
-
-class _RoutingStyle {
-  final Color background;
-  final Color foreground;
-  final Glyph icon;
-
-  const _RoutingStyle(this.background, this.foreground, this.icon);
+String _ruleText(TrackerInfo trackerInfo) {
+  final rule = trackerInfo.rule;
+  final rulePayload = trackerInfo.rulePayload;
+  if (rulePayload.isNotEmpty) {
+    return '$rule($rulePayload)';
+  }
+  return rule;
 }
 
-_Routing _routingOf(List<String> chains) {
-  if (chains.isEmpty) {
-    return _Routing.unknown;
+String _endpointText(String ip, String port) {
+  if (ip.isEmpty) {
+    return '';
   }
-  final upper = chains.map((chain) => chain.toUpperCase());
-  if (upper.any(
-    (chain) =>
-        chain.startsWith('REJECT') || chain == 'BLACKHOLE' || chain == 'PASS',
-  )) {
-    return _Routing.reject;
+  if (port.isNotEmpty) {
+    return '$ip:$port';
   }
-  if (upper.contains('DIRECT')) {
-    return _Routing.direct;
-  }
-  return _Routing.proxy;
-}
-
-_RoutingStyle _routingStyle(BuildContext context, _Routing routing) {
-  final colorScheme = context.colorScheme;
-  return switch (routing) {
-    _Routing.proxy => _RoutingStyle(
-      colorScheme.primaryContainer,
-      colorScheme.onPrimaryContainer,
-      AppGlyphs.vpn,
-    ),
-    _Routing.direct => _RoutingStyle(
-      colorScheme.tertiaryContainer,
-      colorScheme.onTertiaryContainer,
-      AppGlyphs.openExternal,
-    ),
-    _Routing.reject => _RoutingStyle(
-      colorScheme.errorContainer,
-      colorScheme.onErrorContainer,
-      AppGlyphs.block,
-    ),
-    _Routing.unknown => _RoutingStyle(
-      colorScheme.surfaceContainerHighest,
-      colorScheme.onSurfaceVariant,
-      AppGlyphs.help,
-    ),
-  };
+  return ip;
 }
 
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
+  final bool isLive;
   final Function(String)? onClickKeyword;
   final Widget? trailing;
   final String detailTitle;
@@ -69,29 +36,11 @@ class TrackerInfoItem extends ConsumerWidget {
   const TrackerInfoItem({
     super.key,
     required this.trackerInfo,
+    this.isLive = false,
     this.onClickKeyword,
     this.trailing,
     required this.detailTitle,
   });
-
-  String get _host {
-    final host = trackerInfo.title;
-    return host.isEmpty ? trackerInfo.desc : host;
-  }
-
-  String get _networkTag {
-    final network = trackerInfo.metadata.network.toUpperCase();
-    final port = trackerInfo.metadata.destinationPort;
-    if (network.isEmpty) {
-      return port.isEmpty ? '' : ':$port';
-    }
-    return port.isEmpty ? network : '$network:$port';
-  }
-
-  String get _outboundLabel {
-    final chains = trackerInfo.chains;
-    return chains.isEmpty ? '' : chains.first;
-  }
 
   void _openDetail(BuildContext context) {
     showExtend(
@@ -106,98 +55,8 @@ class TrackerInfoItem extends ConsumerWidget {
     );
   }
 
-  String get _countryCode {
-    for (final code in trackerInfo.metadata.destinationGeoIP) {
-      final trimmed = code.trim();
-      final upper = trimmed.toUpperCase();
-      if (trimmed.isEmpty || upper == 'PRIVATE' || upper == 'LAN') {
-        continue;
-      }
-      return upper.length > 3 ? upper.substring(0, 3) : upper;
-    }
-    return '';
-  }
-
-  Widget _routingAvatar(_RoutingStyle style) {
-    return Container(
-      width: 44,
-      height: 44,
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(color: style.background, shape: AppShape.md),
-      child: GlyphIcon(style.icon, size: 22, color: style.foreground),
-    );
-  }
-
-  Widget _buildLeading(
-    BuildContext context,
-    bool showAppIcon,
-    _RoutingStyle style,
-  ) {
-    final Widget avatar;
-    if (showAppIcon) {
-      final process = trackerInfo.metadata.process;
-      final Widget iconChild = system.isAndroid
-          ? PackageIcon(
-              packageName: process,
-              size: 44,
-              placeholder: _routingAvatar(style),
-            )
-          : ProcessIcon(
-              processPath: trackerInfo.metadata.processPath,
-              process: process,
-              size: 44,
-              placeholder: _routingAvatar(style),
-            );
-      avatar = GestureDetector(
-        onTap: () {
-          if (process.isEmpty) return;
-          onClickKeyword?.call(process);
-        },
-        child: Container(
-          width: 44,
-          height: 44,
-          clipBehavior: Clip.antiAlias,
-          decoration: ShapeDecoration(
-            color: context.colorScheme.surfaceContainerHighest,
-            shape: AppShape.md.copyWith(
-              side: BorderSide(color: style.background, width: 2),
-            ),
-          ),
-          child: iconChild,
-        ),
-      );
-    } else {
-      avatar = _routingAvatar(style);
-    }
-    final code = _countryCode;
-    if (code.isEmpty) {
-      return avatar;
-    }
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        avatar,
-        Positioned(
-          right: -4,
-          bottom: -4,
-          child: AppTag(
-            code,
-            mono: true,
-            foreground: context.colorScheme.onSurface,
-            background: context.colorScheme.surfaceContainerHighest,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
-            shape: AppShape.full,
-            side: BorderSide(color: context.colorScheme.surface, width: 2),
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
-  Widget build(BuildContext context, ref) {
-    final colorScheme = context.colorScheme;
+  Widget build(BuildContext context, WidgetRef ref) {
     final showAppIcon = ref.watch(
       patchClashConfigProvider.select(
         (state) =>
@@ -205,203 +64,158 @@ class TrackerInfoItem extends ConsumerWidget {
             (system.isAndroid || system.isDesktop),
       ),
     );
-    final style = _routingStyle(context, _routingOf(trackerInfo.chains));
-    final outbound = _outboundLabel;
-    final networkTag = _networkTag;
-    final rule = trackerInfo.rule;
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () => _openDetail(context),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 14,
-            children: [
-              _buildLeading(context, showAppIcon, style),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      _host,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (networkTag.isNotEmpty || rule.isNotEmpty)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 8,
-                        children: [
-                          if (networkTag.isNotEmpty)
-                            AppTag(networkTag, mono: true),
-                          if (rule.isNotEmpty)
-                            Flexible(
-                              child: Text(
-                                rule,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    if (outbound.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: _RoutingPill(
-                          label: outbound,
-                          style: style,
-                          onPressed: () => onClickKeyword?.call(outbound),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              _TrafficPanel(trackerInfo: trackerInfo),
-              ?trailing,
-            ],
-          ),
-        ),
-      ),
+    return RecordListItem(
+      onTap: () => _openDetail(context),
+      header: _buildHeader(context),
+      body: _buildBody(showAppIcon: showAppIcon),
     );
   }
-}
 
-class _TrafficPanel extends StatelessWidget {
-  final TrackerInfo trackerInfo;
-
-  const _TrafficPanel({required this.trackerInfo});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final downSpeed = trackerInfo.downloadSpeed ?? 0;
-    final upSpeed = trackerInfo.uploadSpeed ?? 0;
-    final downLive = downSpeed > 0;
-    final upLive = upSpeed > 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      spacing: 4,
+  Widget _buildBody({required bool showAppIcon}) {
+    final metadata = trackerInfo.metadata;
+    final process = metadata.process;
+    final body = _TrackerInfoBody(
+      trackerInfo: trackerInfo,
+      onClickKeyword: onClickKeyword,
+    );
+    final hasProcess =
+        process.isNotEmpty ||
+        (system.isDesktop && metadata.processPath.isNotEmpty);
+    if (!showAppIcon || !hasProcess) {
+      return body;
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: AppSpacing.md,
       children: [
-        Text(
-          trackerInfo.start.getLastUpdateTimeDesc(context),
-          style: context.textTheme.labelSmall?.copyWith(
-            color: colorScheme.outline,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: process.isEmpty ? null : () => onClickKeyword?.call(process),
+          child: system.isAndroid
+              ? PackageIcon(packageName: process, size: 40)
+              : ProcessIcon(
+                  processPath: metadata.processPath,
+                  process: process,
+                  size: 40,
+                  placeholder: const SizedBox.square(dimension: 40),
+                ),
+        ),
+        Expanded(child: body),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final network = Text(
+      trackerInfo.metadata.network.toUpperCase(),
+      style: const TextStyle(fontWeight: FontWeight.w500),
+    );
+    if (!isLive) {
+      return RecordHeader(
+        trailing: trailing,
+        children: [RecordTimestamp(trackerInfo.start.showFull), network],
+      );
+    }
+    final color = context.colorScheme.onSurfaceVariant;
+    WidgetSpan arrow(Glyph glyph) => WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: GlyphIcon(glyph, size: 12, color: color),
+    );
+    return RecordHeader(
+      trailing: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: AppSpacing.xs,
+        runSpacing: AppSpacing.xs,
+        children: [
+          Text.rich(
+            TextSpan(
+              children: [
+                arrow(AppGlyphs.arrowUp),
+                TextSpan(
+                  text: ' ${(trackerInfo.uploadSpeed ?? 0).traffic.show}/s   ',
+                ),
+                arrow(AppGlyphs.arrowDown),
+                TextSpan(
+                  text: ' ${(trackerInfo.downloadSpeed ?? 0).traffic.show}/s',
+                ),
+              ],
+            ),
           ),
-        ),
-        _SpeedLine(
-          icon: AppGlyphs.arrowDown,
-          accent: colorScheme.primary,
-          live: downLive,
-          value: downLive
-              ? '${downSpeed.traffic.show}/s'
-              : trackerInfo.download.traffic.show,
-        ),
-        _SpeedLine(
-          icon: AppGlyphs.arrowUp,
-          accent: colorScheme.tertiary,
-          live: upLive,
-          value: upLive
-              ? '${upSpeed.traffic.show}/s'
-              : trackerInfo.upload.traffic.show,
-        ),
+          ?trailing,
+        ],
+      ),
+      children: [
+        Text(trackerInfo.start.getLastUpdateTimeDesc(context)),
+        network,
       ],
     );
   }
 }
 
-class _SpeedLine extends StatelessWidget {
-  final Glyph icon;
-  final Color accent;
-  final bool live;
-  final String value;
+class _TrackerInfoBody extends StatelessWidget {
+  final TrackerInfo trackerInfo;
+  final Function(String)? onClickKeyword;
 
-  const _SpeedLine({
-    required this.icon,
-    required this.accent,
-    required this.live,
-    required this.value,
-  });
+  const _TrackerInfoBody({required this.trackerInfo, this.onClickKeyword});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final color = live ? accent : colorScheme.onSurfaceVariant;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: live ? accent.opacity12 : Colors.transparent,
-        shape: AppShape.full,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 4,
-          children: [
-            GlyphIcon(icon, size: 12, color: color),
-            Text(
-              value,
-              style: context.textTheme.labelSmall?.toJetBrainsMono.copyWith(
-                color: color,
-                fontWeight: live ? FontWeight.w600 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RoutingPill extends StatelessWidget {
-  final String label;
-  final _RoutingStyle style;
-  final VoidCallback? onPressed;
-
-  const _RoutingPill({
-    required this.label,
-    required this.style,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: style.background,
-      shape: AppShape.full,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 3, 10, 3),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 4,
+    final styles = RecordTextStyles.of(context);
+    final metadata = trackerInfo.metadata;
+    final rule = _ruleText(trackerInfo);
+    final source = [
+      trackerInfo.progressText,
+      _endpointText(metadata.sourceIP, metadata.sourcePort),
+    ].where((text) => text.isNotEmpty).join('  ·  ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: AppSpacing.xs,
+      children: [
+        Text.rich(
+          TextSpan(
             children: [
-              GlyphIcon(style.icon, size: 13, color: style.foreground),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.labelMedium?.copyWith(
-                  color: style.foreground,
-                  fontWeight: FontWeight.w600,
+              TextSpan(
+                text: _endpointText(
+                  trackerInfo.title,
+                  metadata.destinationPort,
                 ),
+                style: styles.primary?.copyWith(fontWeight: FontWeight.w500),
               ),
+              if (metadata.host.isNotEmpty && metadata.destinationIP.isNotEmpty)
+                TextSpan(
+                  text: '  ${metadata.destinationIP}',
+                  style: styles.muted,
+                ),
             ],
           ),
         ),
-      ),
+        Wrap(
+          spacing: 6,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (rule.isNotEmpty) Text(rule, style: styles.secondary),
+            for (final (index, chain) in trackerInfo.chains.reversed.indexed)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  if (index > 0 || rule.isNotEmpty) const RecordArrow(),
+                  Flexible(
+                    child: AppTag.compact(
+                      chain,
+                      background: colorScheme.secondaryContainer,
+                      foreground: colorScheme.onSecondaryContainer,
+                      onTap: () => onClickKeyword?.call(chain),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        if (source.isNotEmpty) Text(source, style: styles.muted),
+      ],
     );
   }
 }
@@ -411,15 +225,6 @@ class TrackerInfoDetailView extends StatelessWidget {
 
   const TrackerInfoDetailView({super.key, required this.trackerInfo});
 
-  String _getRuleText() {
-    final rule = trackerInfo.rule;
-    final rulePayload = trackerInfo.rulePayload;
-    if (rulePayload.isNotEmpty) {
-      return '$rule($rulePayload)';
-    }
-    return rule;
-  }
-
   String _getProcessText() {
     final process = trackerInfo.metadata.process;
     final uid = trackerInfo.metadata.uid;
@@ -427,16 +232,6 @@ class TrackerInfoDetailView extends StatelessWidget {
       return '$process($uid)';
     }
     return process;
-  }
-
-  String _getEndpointText(String ip, String port) {
-    if (ip.isEmpty) {
-      return '';
-    }
-    if (port.isNotEmpty) {
-      return '$ip:$port';
-    }
-    return ip;
   }
 
   Widget _buildChains(BuildContext context) {
@@ -484,7 +279,7 @@ class TrackerInfoDetailView extends StatelessWidget {
             (appLocalizations.creationTime, trackerInfo.start.showFull),
             (appLocalizations.networkType, metadata.network),
             (appLocalizations.process, _getProcessText()),
-            (appLocalizations.rule, _getRuleText()),
+            (appLocalizations.rule, _ruleText(trackerInfo)),
             (appLocalizations.upload, trackerInfo.upload.traffic.show),
             (appLocalizations.download, trackerInfo.download.traffic.show),
           ]),
@@ -495,14 +290,11 @@ class TrackerInfoDetailView extends StatelessWidget {
             (appLocalizations.host, metadata.host),
             (
               appLocalizations.source,
-              _getEndpointText(metadata.sourceIP, metadata.sourcePort),
+              _endpointText(metadata.sourceIP, metadata.sourcePort),
             ),
             (
               appLocalizations.destination,
-              _getEndpointText(
-                metadata.destinationIP,
-                metadata.destinationPort,
-              ),
+              _endpointText(metadata.destinationIP, metadata.destinationPort),
             ),
             (
               appLocalizations.destinationGeoIP,

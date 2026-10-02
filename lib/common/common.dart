@@ -71,6 +71,7 @@ export 'ui/screen_shake.dart';
 export 'ui/scroll.dart';
 export 'ui/shape.dart';
 export 'ui/spacing.dart';
+export 'ui/tooltip.dart';
 export 'util/compute.dart';
 export 'util/constant.dart';
 export 'util/context.dart';

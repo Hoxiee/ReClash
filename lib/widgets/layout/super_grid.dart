@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/widgets/feedback/activate_box.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/layout/grid.dart';
 import 'package:reclash/widgets/layout/motion_grid.dart';
 import 'package:reclash/widgets/nav/app_nav_bar.dart';
@@ -599,7 +600,7 @@ class _DeletableContainer extends StatelessWidget {
                   padding: AppInsets.xs,
                   onPressed: onDelete,
                   icon: const GlyphIcon(AppGlyphs.close, fill: 1),
-                ),
+                ).withAppTooltip(),
               ),
             ),
           ),

@@ -9,6 +9,11 @@ import 'method.dart';
 mixin CoreInterface {
   CoreProcessOwner? get processOwner => null;
 
+  Future<bool> requireTunElevation(
+    bool required, {
+    bool allowPrompt = false,
+  }) async => false;
+
   Future<CoreLifecycleResult> start();
 
   Future<CoreLifecycleResult> restart();

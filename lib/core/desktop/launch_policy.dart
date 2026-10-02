@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 /// CreateProcess reports these when a policy, not the file, refused the image:
@@ -47,6 +48,7 @@ int? launchOsError(Object? error) {
     DesktopCoreFailure(:final cause) => launchOsError(cause),
     ProcessException(:final errorCode) => errorCode == 0 ? null : errorCode,
     HelperException(code: 'processLaunchFailed') => _helperOsError(error),
+    WindowsLaunchException(:final detail) => _messageOsError(detail),
     _ => null,
   };
 }
@@ -60,6 +62,10 @@ int? _helperOsError(HelperException error) {
   if (details is Map && details['osError'] is int) {
     return details['osError'] as int;
   }
-  final match = RegExp(r'os error (\d+)').firstMatch(error.message);
+  return _messageOsError(error.message);
+}
+
+int? _messageOsError(String message) {
+  final match = RegExp(r'os error (\d+)').firstMatch(message);
   return match == null ? null : int.tryParse(match.group(1)!);
 }

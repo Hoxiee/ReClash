@@ -15,6 +15,7 @@ import 'package:reclash/widgets/base/text.dart';
 import 'package:reclash/widgets/effect/fade_box.dart';
 import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:reclash/widgets/feedback/loading.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/input/input.dart';
 import 'package:reclash/widgets/input/setting.dart';
 import 'package:reclash/widgets/input/setting_search.dart';
@@ -706,7 +707,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
                       onPressed: () {
                         _obscureController.value = !obscure;
                       },
-                    ),
+                    ).withAppTooltip(),
                     labelText: appLocalizations.password,
                   ),
                   validator: (String? value) {

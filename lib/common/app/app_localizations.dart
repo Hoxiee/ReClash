@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/subscription/incy_links.dart';
 import 'package:reclash/common/util/exception.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
+import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -113,9 +115,32 @@ String incyLinkErrorMessage(
   AppLocalizations appLocalizations,
 ) => appLocalizations.profileImportUnsupportedLink;
 
+String? windowsLaunchFailureMessage(Object error, AppLocalizations l10n) {
+  if (error is DesktopCoreFailure) {
+    if (error.code == 'launch_pending') return l10n.windowsElevationPending;
+    if (error.code == 'authorization_timeout') {
+      return l10n.windowsElevationTimeout;
+    }
+    if (error.owner == CoreProcessOwner.windowsElevated &&
+        error.cause is! WindowsLaunchException) {
+      return l10n.windowsElevationFailed;
+    }
+    final cause = error.cause;
+    return cause == null ? null : windowsLaunchFailureMessage(cause, l10n);
+  }
+  if (error is! WindowsLaunchException) return null;
+  if (error.cancelled) return l10n.windowsElevationCancelled;
+  if (error.pending) return l10n.windowsElevationPending;
+  if (error.detail.contains('windows_authorization_required')) {
+    return l10n.windowsElevationRequired;
+  }
+  return l10n.windowsElevationFailed;
+}
+
 String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
   return networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
+      windowsLaunchFailureMessage(error, appLocalizations) ??
       switch (error) {
         ConfigInvalidException() =>
           appLocalizations.subscriptionConfigInvalidTip,

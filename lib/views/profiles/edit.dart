@@ -574,7 +574,7 @@ class _ProfileFileItem extends StatelessWidget {
                             tooltip: appLocalizations.more,
                             onPressed: open,
                             icon: const GlyphIcon(AppGlyphs.more),
-                          );
+                          ).withAppTooltip();
                         },
                       ),
                     ),

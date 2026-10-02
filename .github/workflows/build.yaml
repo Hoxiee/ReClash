@@ -274,23 +274,67 @@ jobs:
           cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
           cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
 
-  windows-helper-test:
-    name: Windows helper test
-    runs-on: windows-2022
+  windows-native:
+    name: Windows native (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: amd64
+            msvc: x64
+          - os: windows-11-arm
+            arch: arm64
+            msvc: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc }}
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: services/helper
+          workspaces: |
+            services/helper
+            plugins/rust_api/rust
 
-      - name: Check format
-        run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
+      - name: Test Windows launch, pipe identity and job ownership
+        shell: pwsh
+        run: |
+          cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path services/helper/Cargo.toml --features windows-service
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Run Windows service tests
-        run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
+      - name: Test Windows Core bootstrap
+        working-directory: core
+        shell: pwsh
+        env:
+          CGO_ENABLED: 0
+          RECLASH_REQUIRE_WINDOWS_BOOTSTRAP: '1'
+        run: |
+          go test -v -count=1 -timeout=5m .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          go vet .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   desktop:
     name: Desktop ${{ matrix.platform }}
@@ -354,7 +398,7 @@ jobs:
 
   build:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: [ dart, plugins, go-core, android, rust, windows-helper-test ]
+    needs: [ dart, plugins, go-core, android, rust, windows-native ]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -492,8 +536,7 @@ jobs:
           path: ./dist
           if-no-files-found: error
           overwrite: true
-          # Only this run consumes these; the release assets are the permanent
-          # copy, so expire fast instead of billing storage for 90 days.
+          # Retain packages while the Windows check awaits release approval.
           retention-days: 1
 
   validate-linux-packages:
@@ -541,11 +584,69 @@ jobs:
                 || { echo "::error::Dependencies missing after install."; exit 1; }
             '
 
+  validate-windows-packages:
+    name: Validate Windows packages (${{ matrix.arch }})
+    needs: [ build ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: amd64
+          - os: windows-11-arm
+            arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-windows-${{ matrix.arch }}
+          path: ./dist/
+
+      - name: Validate, install and launch the package
+        shell: pwsh
+        env:
+          REQUIRE_SIGNED: ${{ vars.WINDOWS_SIGNING_REQUIRED }}
+        run: |
+          if ($env:REQUIRE_SIGNED -notin @($null, '', 'false', 'true')) {
+            throw 'WINDOWS_SIGNING_REQUIRED must be empty, false or true'
+          }
+          $zips = @(Get-ChildItem dist -Filter '*-windows-${{ matrix.arch }}.zip')
+          $setups = @(Get-ChildItem dist -Filter '*-windows-${{ matrix.arch }}-setup.exe')
+          if ($zips.Count -ne 1 -or $setups.Count -ne 1) {
+            throw 'Expected exactly one ZIP and one installer for this architecture'
+          }
+          & ./tool/check_windows_package.ps1 -ZipPath $zips[0].FullName `
+            -SetupPath $setups[0].FullName -Arch '${{ matrix.arch }}' `
+            -RequireSigned:($env:REQUIRE_SIGNED -eq 'true') -AllowInstall
+
+      - name: Upload Windows package diagnostics
+        if: always() && env.WINDOWS_PACKAGE_LOGS != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package-logs-${{ matrix.arch }}
+          path: ${{ env.WINDOWS_PACKAGE_LOGS }}
+          if-no-files-found: warn
+          retention-days: 7
+
   upload:
     name: Publish release
+    environment: release
     permissions:
       contents: write
-    needs: [ build, validate-linux-packages ]
+    needs: [ build, validate-linux-packages, validate-windows-packages ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

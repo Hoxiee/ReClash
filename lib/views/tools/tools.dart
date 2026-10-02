@@ -1395,7 +1395,7 @@ class _ToolsBreadcrumbState extends State<_ToolsBreadcrumb> {
           tooltip: context.appLocalizations.back,
           onPressed: widget.onBack,
           icon: const GlyphIcon(AppGlyphs.arrowBack),
-        ),
+        ).withAppTooltip(),
         Expanded(
           child: SingleChildScrollView(
             controller: _controller,

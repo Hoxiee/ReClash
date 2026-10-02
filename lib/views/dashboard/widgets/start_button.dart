@@ -203,7 +203,7 @@ class _StartButtonState extends ConsumerState<StartButton>
           tooltip: isStart ? appLocalizations.stop : appLocalizations.start,
           onPressed: handleSwitchStart,
           child: _buildPlayPauseIcon(isStart),
-        ),
+        ).withAppTooltip(),
       );
     }
     final showPauseButton =
@@ -292,7 +292,7 @@ class _StartButtonState extends ConsumerState<StartButton>
                   ),
                 ],
               ),
-            ),
+            ).withAppTooltip(),
           ),
         ],
       ),
@@ -315,7 +315,7 @@ class _PauseFab extends ConsumerWidget {
         tooltip: paused ? appLocalizations.resume : appLocalizations.pause,
         onPressed: () => ref.read(commonActionProvider.notifier).togglePaused(),
         child: GlyphIcon(paused ? AppGlyphs.play : AppGlyphs.pause),
-      ),
+      ).withAppTooltip(),
     );
   }
 }

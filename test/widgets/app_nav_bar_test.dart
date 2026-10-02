@@ -7,6 +7,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/nav/app_nav_bar.dart';
 
 import '../helpers/test_app.dart';
@@ -284,7 +285,7 @@ void main() {
 
     final tooltips = find.descendant(
       of: find.byType(FloatingNavigationBar),
-      matching: find.byType(Tooltip),
+      matching: find.byType(AppTooltip),
     );
 
     var labels = await pumpLabels('Dashboard');
@@ -296,7 +297,7 @@ void main() {
 
     labels = await pumpLabels('Configuration');
     expect(labels.first.style!.fontSize, closeTo(9, 0.001));
-    expect(tester.widget<Tooltip>(tooltips).message, 'Configuration');
+    expect(tester.widget<AppTooltip>(tooltips).message, 'Configuration');
   });
 
   testWidgets('the trailing slot renders docked, the bar itself does not', (

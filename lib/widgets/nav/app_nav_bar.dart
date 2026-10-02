@@ -11,6 +11,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/nav/nav_motion.dart';
 
 const double _barHeight = 64;
@@ -1173,7 +1174,7 @@ class _FloatingBarItemState extends State<_FloatingBarItem>
             ),
           ),
           child: widget.labelOverflows
-              ? Tooltip(message: widget.destination.label, child: content)
+              ? AppTooltip(message: widget.destination.label, child: content)
               : content,
         ),
       ),

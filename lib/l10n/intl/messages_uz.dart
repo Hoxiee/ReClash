@@ -2031,9 +2031,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -4994,6 +4995,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "Yadro hali paneldan javob bermayapti",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Oq roʻyxat rejimi"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Administrator huquqlari berilmadi. TUN ishga tushmadi.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "Tarmoq komponentini administrator huquqlari bilan ishga tushirib boʻlmadi. Qayta ulanishga urinib koʻring. Muammo takrorlansa, ReClash ilovasini toʻliq oʻrnatuvchi yordamida qayta oʻrnating.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Tarmoq komponentini ishga tushirish uchun Windows administrator huquqlarini soʻraydi. ReClash ilovasining oʻzi administrator huquqlarisiz ishlashda davom etadi.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "Oldingi Windows ruxsat soʻrovi hali yopilmoqda. Qayta urinishdan oldin uni yoping.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "Administrator huquqlari yana kerak. TUNʼni qayta ishga tushirish uchun «Ulanish» tugmasini bosing.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows ruxsat soʻrovini kutish vaqti tugadi. Uni yoping va qayta ulanishga urinib koʻring.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN uchun ruxsat berilsinmi?",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Tizimga yozish"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Olingan vaqtni tizim soatiga sinxronlash",

@@ -10,8 +10,10 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/net/system_dns.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/linux_helper.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
+import 'package:rust_api/rust_api.dart' as native;
 
 typedef ProcessRunner =
     Future<ProcessResult> Function(String executable, List<String> arguments);
@@ -85,6 +87,13 @@ class System {
   bool get hasHelperService => isLinux && hasSystemd();
 
   Future<bool> checkIsAdmin() async {
+    if (isWindows) {
+      try {
+        return await native.windowsIsElevated();
+      } catch (error) {
+        throw WindowsLaunchException('windows_elevation_query_failed: $error');
+      }
+    }
     if (hasHelperService) {
       return await helperReadiness() == HelperReadiness.ready;
     }

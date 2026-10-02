@@ -1980,9 +1980,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -4869,6 +4870,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ядро әлі бақылау тақтасын қызмет етпей тұр",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ақ тізім режимі"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Әкімші құқықтары берілмеді. TUN іске қосылмады.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "Желілік құрамдасты әкімші құқықтарымен іске қосу мүмкін болмады. Қайта қосылып көріңіз. Мәселе қайталанса, толық орнатқыш арқылы ReClash қолданбасын қайта орнатыңыз.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Желілік құрамдасты іске қосу үшін Windows әкімші құқықтарын сұрайды. ReClash өзі әкімші құқықтарынсыз жұмысын жалғастырады.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "Алдыңғы Windows рұқсат сұрауы әлі жабылып жатыр. Қайталап көруден бұрын оны жабыңыз.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "Әкімші құқықтары қайта қажет. TUN жүйесін қайта іске қосу үшін «Қосылу» түймесін басыңыз.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows рұқсат сұрауын күту уақыты аяқталды. Оны жауып, қайта қосылып көріңіз.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN қолжетімділігіне рұқсат бересіз бе?",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Жүйеге жазу"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Алынған уақытты жүйелік сағатпен синхрондау",

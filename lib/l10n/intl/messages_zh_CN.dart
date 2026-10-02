@@ -3463,6 +3463,25 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage("内核尚未提供面板"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "未授予管理员权限，TUN 未启动。",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "无法以管理员权限启动网络组件。请重试连接；如果问题仍然存在，请使用完整安装程序重新安装 ReClash。",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Windows 将请求管理员权限以启动网络组件。ReClash 本身将继续以普通权限运行。",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "上一次 Windows 权限请求仍在关闭中。请先关闭该请求，再重试。",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "需要重新授予管理员权限。请点击连接以重新启动 TUN。",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows 权限请求已超时。请关闭该请求，然后重试连接。",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage("允许访问 TUN？"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("写入系统"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage("将获取到的时间同步到系统时钟"),
     "yearsAgo": m130,

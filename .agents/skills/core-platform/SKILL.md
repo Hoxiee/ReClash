@@ -1,6 +1,6 @@
 ---
 name: core-platform
-description: Use when changing ReClash Core integration, lifecycle/process ownership, Go event delivery, Android services, desktop IPC, platform managers, VPN/TUN, or Windows Helper flow.
+description: Use when changing ReClash Core integration, lifecycle/process ownership, Go event delivery, Android services, desktop IPC, platform managers, VPN/TUN, or Windows UAC flow.
 ---
 
 # Core And Platform
@@ -18,8 +18,9 @@ hooks, system proxy, tray, VPN, TUN, or platform-specific desktop/mobile behavio
    - Android start/stop intent: `ServiceState`; binding/process-time bookkeeping: `ServiceController`.
    - Desktop composition: `lib/core/service.dart`; lifecycle/process ownership: `lib/core/desktop/lifecycle.dart`.
    - Desktop IPC/RPC: `lib/core/desktop/transport.dart` and `lib/core/desktop/rpc_client.dart`.
-   - Desktop launch ownership: `lib/core/desktop/launcher.dart`; Windows Helper HTTP contract:
-     `lib/core/desktop/helper_client.dart` and `services/helper/`.
+   - Desktop launch ownership: `lib/core/desktop/launcher.dart`; Windows UAC attempts:
+     `lib/core/desktop/windows_launcher.dart`, `plugins/rust_api/rust/src/windows/`, `core/managed_windows.go`.
+   - Helper HTTP contract: `lib/core/desktop/helper_client.dart`; the legacy Windows service is not shipped.
    - Flutter orchestration: `lib/providers/actions/core.dart` and `system.dart`; UI/event observation: `lib/manager/`.
 2. Trace every entry path into that owner, including UI/provider calls, Quick Settings, notification actions, Always-on VPN,
    revoke callbacks, application exit, and crash/disconnect recovery. Lifecycle callbacks are not implicit user intent.
@@ -37,7 +38,8 @@ hooks, system proxy, tray, VPN, TUN, or platform-specific desktop/mobile behavio
    - Cross-language envelopes/events: `test/core/protocol_contract_test.dart` and `CGO_ENABLED=0 go test .`.
    - Provider/exit convergence: `test/providers/action_test.dart` and `test/providers/system_action_test.dart`.
    - Android Kotlin: compile each touched Gradle module with JDK 17.
-   - Windows Helper: Cargo format/tests; run the `windows-service` feature on Windows.
+   - Windows: Rust managed-launch/pipe/job tests and Go bootstrap tests on x64/ARM64; legacy Helper tests keep the
+     `windows-service` feature compiling but do not authorize shipping it.
 8. Explicitly state host gaps. Always-on VPN, VPN permission, system revoke, named-pipe peer identity, and Windows Service
    Control Manager behavior need their real platform even when portable tests pass.
 
@@ -47,8 +49,10 @@ Read `.agents/architecture.md` for the current core modes, manager stack, build 
 
 ## Pitfalls
 
-- Keep the Windows Helper protocol and Core SHA256 validation identical across
-  Flutter build modes; the Helper owns executable integrity checks.
+- Windows UAC launches only the fixed, hash-checked Core and keeps native ticket/job ownership until confirmed cleanup.
+  Consent is one-shot, never proof of elevation. Cross-account UAC must authenticate the original GUI without impersonation.
+- The legacy Windows Helper is unshipped and disabled: its unauthenticated loopback API must not become a UAC fallback.
+  Its retained protocol tests obey these session/integrity constraints:
 - Protocol version 6 uses a 32-character lowercase-hex session ID. `/start` must return the submitted session and PID;
   `/stop` must never terminate a different session; Dart must verify the connected named-pipe peer PID.
 - `/start` must release the previously managed Core before it verifies, so no `/start` outcome leaves a Helper-managed

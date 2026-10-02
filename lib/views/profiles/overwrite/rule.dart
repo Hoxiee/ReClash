@@ -84,7 +84,7 @@ class RuleItem extends StatelessWidget {
           size: 16.ap,
           color: context.colorScheme.error,
         ),
-      ),
+      ).withAppTooltip(),
     );
   }
 

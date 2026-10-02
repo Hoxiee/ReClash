@@ -66,7 +66,7 @@ class OverwriteDismissItem extends ConsumerWidget {
                 onPressed: onRemove,
                 icon: const GlyphIcon(AppGlyphs.remove, size: 18),
                 padding: EdgeInsets.zero,
-              ),
+              ).withAppTooltip(),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,

@@ -522,7 +522,7 @@ class _OutboundIpLine extends StatelessWidget {
       ],
     );
     if (ip == null) return line;
-    return Tooltip(
+    return AppTooltip(
       message: context.appLocalizations.outboundIp,
       child: InkWell(
         onTap: () => showIpQualitySheet(context, ip: ip.ip),
@@ -1194,7 +1194,7 @@ class _ServiceRow extends StatelessWidget {
             tooltip: l.serviceCheck,
             onPressed: loading ? null : onCheck,
             icon: const GlyphIcon(AppGlyphs.refresh),
-          ),
+          ).withAppTooltip(),
         ],
       ),
     );
@@ -1237,7 +1237,7 @@ class _ServiceRowTrailing extends StatelessWidget {
       ],
     );
     if (checkedAt == null) return column;
-    return Tooltip(
+    return AppTooltip(
       message: context.appLocalizations.serviceCheckedAt(checkedAt.showFull),
       child: column,
     );

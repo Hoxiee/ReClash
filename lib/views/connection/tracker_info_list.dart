@@ -86,6 +86,7 @@ class TrackerInfoList extends StatelessWidget {
         context,
         trackerInfos[index],
         detailTitle: detailTitle,
+        isLive: false,
         trailingBuilder: trailingBuilder,
       ),
     );
@@ -122,6 +123,7 @@ class TrackerInfoAnimatedList extends StatelessWidget {
         context,
         trackerInfo,
         detailTitle: detailTitle,
+        isLive: true,
         trailingBuilder: trailingBuilder,
       ),
     );
@@ -132,11 +134,13 @@ Widget _buildTrackerInfoItem(
   BuildContext context,
   TrackerInfo trackerInfo, {
   required String detailTitle,
+  required bool isLive,
   required Widget? Function(TrackerInfo trackerInfo)? trailingBuilder,
 }) {
   return TrackerInfoItem(
     key: Key(trackerInfo.id),
     trackerInfo: trackerInfo,
+    isLive: isLive,
     onClickKeyword: (value) {
       context.commonScaffoldState?.addKeyword(value);
     },

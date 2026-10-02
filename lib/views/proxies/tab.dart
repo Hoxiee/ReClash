@@ -121,7 +121,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
           icon: isMobileView
               ? const GlyphIcon(AppGlyphs.chevronDown)
               : const GlyphIcon(AppGlyphs.chevronForward),
-        );
+        ).withAppTooltip();
       },
     );
   }

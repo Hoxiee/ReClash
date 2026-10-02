@@ -63,6 +63,14 @@ Download the package for your platform from [Releases](https://github.com/Hoxiee
 | macOS | DMG: Apple silicon, Intel |
 | Linux | AppImage: x64; DEB, RPM and pacman: x64, ARM64 |
 
+### Windows
+
+- Requires Windows 10 or 11. Choose **x64** for most Intel/AMD PCs or **ARM64** for Windows on ARM; check **Settings → System → About → System type** if unsure.
+- Use the **installer** unless you specifically need a ZIP. The Microsoft Visual C++ runtime is included; a separate `vc_redist` download is not required.
+- Install normally, then open ReClash from its shortcut. TUN/VPN requests administrator permission for the network component, not the whole interface. Declining that request leaves TUN off; click Connect to try again. System-proxy mode does not need this elevation.
+- For the ZIP, extract **all files** into a writable folder before opening `ReClash.exe`. Create a `config` folder beside it before the first launch to keep settings in that folder; otherwise ReClash uses your Windows user profile.
+- Current Windows builds are **unsigned**. Windows may show an unknown-publisher warning or block execution under security policies. Download only from the Releases page above.
+
 Each release includes `SHA256SUMS`. On Linux or macOS, place it beside the downloaded package and run:
 
 ```bash

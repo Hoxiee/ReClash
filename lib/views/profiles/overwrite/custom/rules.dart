@@ -367,7 +367,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                       size: 16.ap,
                       color: foregroundColor,
                     ),
-                  ),
+                  ).withAppTooltip(),
                 ),
               Flexible(
                 flex: 1,

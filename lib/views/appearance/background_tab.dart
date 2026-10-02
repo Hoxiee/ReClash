@@ -376,7 +376,7 @@ class _WallpaperTile extends ConsumerWidget {
             tooltip: context.appLocalizations.wallpaperRemove,
             onPressed: onRemove,
             icon: const GlyphIcon(AppGlyphs.close),
-          ),
+          ).withAppTooltip(),
         ),
       ],
     );

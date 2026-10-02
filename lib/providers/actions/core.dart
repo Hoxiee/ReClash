@@ -21,6 +21,9 @@ class CoreAction extends _$CoreAction {
     if (!isInit) {
       final res = await _core.init(version);
       commonPrint.log('init result: $res');
+      if (!res && _core.processOwner == CoreProcessOwner.windowsElevated) {
+        throw const WindowsLaunchException('windows_core_init_failed');
+      }
     } else {
       await ref.read(proxiesActionProvider.notifier).updateGroups();
     }
@@ -92,7 +95,10 @@ class CoreAction extends _$CoreAction {
       await _applyLifecycleResult(result);
     } catch (error) {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-      dialogs.showNotifier(error.toString(), level: MessageLevel.error);
+      dialogs.showNotifier(
+        userFacingErrorMessage(error, currentAppLocalizations),
+        level: MessageLevel.error,
+      );
     }
   }
 
@@ -106,9 +112,6 @@ class CoreAction extends _$CoreAction {
     return _core.restart();
   }
 
-  // Nothing in lib/ calls CoreController.stop(); only close() (app exit)
-  // supersedes a start/restart. statusFirst lets onCrash catch a crash
-  // during initCore itself (it early-returns unless status is connected).
   Future<bool> _applyLifecycleResult(
     CoreLifecycleResult result, {
     bool statusFirst = false,

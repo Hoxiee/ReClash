@@ -17,6 +17,7 @@ import 'package:reclash/common/subscription/subscription_reminder.dart';
 import 'package:reclash/common/subscription/subscription_retry.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/setup_apply_coordinator.dart';

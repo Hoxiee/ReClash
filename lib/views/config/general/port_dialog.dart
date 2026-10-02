@@ -227,7 +227,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
                   : context.appLocalizations.showMore,
               onPressed: _handleMore,
               icon: CommonExpandIcon(expand: _isMore),
-            ),
+            ).withAppTooltip(),
             Row(
               children: [
                 TextButton(

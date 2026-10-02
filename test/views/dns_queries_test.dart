@@ -7,8 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/dns_queries.dart';
-import 'package:reclash/widgets/base/scroll.dart';
-import 'package:reclash/widgets/feedback/null_status.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -107,6 +106,104 @@ void main() {
 
     await teardownView(tester);
   });
+
+  testWidgets('records show timestamps, answers, result tags and upstreams', (
+    tester,
+  ) async {
+    seedQueries([
+      _query(domain: 'alpha.test'),
+      _query(
+        domain: 'cached.test',
+        initiator: DnsQueryInitiator.other,
+        cached: true,
+        delay: 0,
+      ),
+      _query(
+        domain: 'missing.test',
+        type: 'AAAA',
+        initiator: null,
+        answers: const [],
+        rcode: 'NXDOMAIN',
+      ),
+      _query(
+        domain: 'timeout.test',
+        initiator: null,
+        answers: const [],
+        rcode: '',
+        error: 'i/o timeout',
+      ),
+    ]);
+
+    await pumpQueries(tester);
+
+    expect(find.text(DateTime.utc(2026).showFull), findsNWidgets(4));
+    expect(find.text('12 ms'), findsNWidgets(3));
+    expect(find.text('0 ms'), findsOneWidget);
+    expect(find.text('93.184.216.34'), findsNWidgets(2));
+    expect(find.text('https://1.1.1.1/dns-query'), findsNWidgets(4));
+    expect(find.text(DnsQueryInitiator.app.label), findsOneWidget);
+    expect(find.text(DnsQueryInitiator.other.label), findsOneWidget);
+    expect(find.text(currentAppLocalizations.cache), findsOneWidget);
+    expect(find.text('NXDOMAIN'), findsOneWidget);
+    expect(
+      tester.getCenter(find.text(DnsQueryInitiator.app.label)).dy,
+      greaterThan(tester.getCenter(find.text('alpha.test')).dy),
+    );
+    final error = tester.widget<Text>(find.text('i/o timeout'));
+    final colorScheme = Theme.of(
+      tester.element(find.text('i/o timeout')),
+    ).colorScheme;
+    expect(error.style?.color, colorScheme.error);
+    expect(error.maxLines, 2);
+    expect(
+      tester
+          .widgetList<RecordListItem>(find.byType(RecordListItem))
+          .where((item) => item.isError),
+      hasLength(2),
+    );
+    final errorTile = tester.widget<ListTile>(
+      find.descendant(
+        of: find.widgetWithText(DnsQueryItem, 'timeout.test'),
+        matching: find.byType(ListTile),
+      ),
+    );
+    expect(
+      errorTile.tileColor,
+      colorScheme.errorContainer.withValues(alpha: 0.2),
+    );
+    expect(tester.takeException(), isNull);
+
+    await teardownView(tester);
+  });
+
+  for (final keyword in ['AAAA', 'NXDOMAIN', 'Cache']) {
+    testWidgets(
+      'tapping the $keyword tag filters queries without opening details',
+      (tester) async {
+        seedQueries([
+          _query(domain: 'alpha.test'),
+          _query(
+            domain: 'beta.test',
+            type: 'AAAA',
+            cached: true,
+            answers: const [],
+            rcode: 'NXDOMAIN',
+          ),
+        ]);
+
+        await pumpQueries(tester);
+        await tester.tap(find.widgetWithText(AppTag, keyword));
+        await tester.pumpAndSettle();
+
+        expect(find.text('alpha.test'), findsNothing);
+        expect(find.text('beta.test'), findsOneWidget);
+        expect(find.byType(DnsQueryDetailView), findsNothing);
+        expect(tester.takeException(), isNull);
+
+        await teardownView(tester);
+      },
+    );
+  }
 
   testWidgets('a query arriving after mount reaches the list', (tester) async {
     seedQueries([_query(domain: 'alpha.test')]);

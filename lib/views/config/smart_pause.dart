@@ -230,7 +230,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
               text: Text(network, maxLines: 2, overflow: TextOverflow.ellipsis),
             ),
             trailing: smartPauseIsBroadRule(network)
-                ? Tooltip(
+                ? AppTooltip(
                     message: context.appLocalizations.broadNetworkWarn,
                     child: GlyphIcon(
                       AppGlyphs.warning,
@@ -573,7 +573,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            ).withAppTooltip(),
           ),
         const SizedBox(width: AppSpacing.xxs),
         CommonMinFilledButtonTheme(

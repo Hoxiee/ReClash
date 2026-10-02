@@ -267,7 +267,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                         tooltip: appLocalizations.cancel,
                         onPressed: cancelToken.cancel,
                         icon: const GlyphIcon(AppGlyphs.close),
-                      )
+                      ).withAppTooltip()
                     : null,
                 onPressed: _busy ? null : () => unawaited(_handleOpen()),
               ),

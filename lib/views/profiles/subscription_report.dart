@@ -329,7 +329,7 @@ class _ReportBody extends StatelessWidget {
                   onPressed: () =>
                       open(offset: Offset(0, context.isMobileView ? 0 : 20)),
                   icon: const GlyphIcon(AppGlyphs.more),
-                ),
+                ).withAppTooltip(),
                 popupBuilder: (_) => CommonPopupMenu(items: exportItems),
               ),
             ],

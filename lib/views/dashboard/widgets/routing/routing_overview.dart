@@ -110,7 +110,7 @@ class _RoutingLiveViewState extends ConsumerState<RoutingLiveView>
               tooltip: appLocalizations.smartRoutingMore,
               onPressed: () => open(),
               icon: const GlyphIcon(AppGlyphs.more),
-            ),
+            ).withAppTooltip(),
           ),
         ],
         body: AppBarClearance(

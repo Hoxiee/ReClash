@@ -1985,9 +1985,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -4864,6 +4865,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "Panel heniz elýeterli däl",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Administrator hukuklary berilmedi. TUN işledilmedi.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "Tor komponentini administrator hukuklary bilen işletmek başartmady. Täzeden birikmäge synanyşyň. Mesele gaýtalansa, doly gurnaýjy arkaly ReClash programmasyny täzeden guruň.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Tor komponentini işletmek üçin Windows administrator hukuklaryny sorar. ReClash programmasynyň özi administrator hukuklary bolmazdan işlemegini dowam etdirer.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "Öňki Windows rugsat haýyşy heniz ýapylýar. Täzeden synanyşmazdan öň ony ýapyň.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "Administrator hukuklary ýene gerek. TUN-y täzeden işletmek üçin «Birikmek» düwmesine basyň.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows rugsat haýyşy üçin garaşmak wagty gutardy. Ony ýapyň we täzeden birikmäge synanyşyň.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN-a girmäge rugsat berilsinmi?",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Ulgama ýazmak"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Alnan wagty ulgam sagadyna sinhronlaşdyrmak",

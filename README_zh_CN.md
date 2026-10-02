@@ -63,6 +63,14 @@ ReClash 是面向 Android、Windows、macOS 和 Linux 的跨平台应用。添�
 | macOS | DMG：Apple 芯片、Intel |
 | Linux | AppImage：x64；DEB、RPM：x64、ARM64 |
 
+### Windows
+
+- 需要 Windows 10 或 11。大多数 Intel/AMD 电脑请选择 **x64**，Windows on ARM 设备请选择 **ARM64**；可在**设置 → 系统 → 系统信息 → 系统类型**中确认。
+- 推荐使用**安装程序**。软件包已包含 Microsoft Visual C++ 运行库，无需另行下载 `vc_redist`。
+- 正常安装后，通过快捷方式打开 ReClash。TUN/VPN 只为网络组件请求管理员权限，界面本身不需要以管理员身份运行。拒绝授权后 TUN 不会启动；点击连接可重试。系统代理模式不需要此权限提升。
+- 使用 ZIP 时，请先将**全部文件**解压到可写目录，再运行 `ReClash.exe`。若要将设置保存在程序目录中，请在首次启动前创建同级 `config` 文件夹；否则设置保存在当前 Windows 用户配置文件中。
+- 当前 Windows 构建**尚未签名**。Windows 可能提示发布者未知，或根据安全策略阻止运行。请仅从上方的 Releases 页面下载。
+
 每个版本都附带 `SHA256SUMS`。在 Linux 或 macOS 上，将它与下载的软件包放在同一目录并运行：
 
 ```bash

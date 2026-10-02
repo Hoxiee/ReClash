@@ -22,7 +22,7 @@ class InfoMessageButton extends StatelessWidget {
           size: 20.ap,
           color: context.colorScheme.error,
         ),
-      ),
+      ).withAppTooltip(),
     );
   }
 }

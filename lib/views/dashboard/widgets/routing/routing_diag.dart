@@ -308,12 +308,12 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
                   tooltip: appLocalizations.smartRoutingLogFilter,
                   onPressed: () => open(),
                   icon: icon,
-                )
+                ).withAppTooltip()
               : IconButton(
                   tooltip: appLocalizations.smartRoutingLogFilter,
                   onPressed: () => open(),
                   icon: icon,
-                );
+                ).withAppTooltip();
         },
       ),
       IconButton(
@@ -321,7 +321,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
         isSelected: _autoScroll,
         onPressed: _toggleAutoScroll,
         icon: const GlyphIcon(AppGlyphs.arrowDown),
-      ),
+      ).withAppTooltip(),
       IconButton(
         tooltip: appLocalizations.smartRoutingLogClear,
         onPressed: _rows.isEmpty
@@ -332,12 +332,12 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
                 _rebuildVisible();
               }),
         icon: const GlyphIcon(AppGlyphs.delete),
-      ),
+      ).withAppTooltip(),
       IconButton(
         tooltip: appLocalizations.smartRoutingLogExport,
         onPressed: _handleExport,
         icon: const GlyphIcon(AppGlyphs.save),
-      ),
+      ).withAppTooltip(),
     ];
   }
 

@@ -373,7 +373,7 @@ and are out of scope.
 An `IconButton` whose icon is an icon needs a `tooltip`. It is the button's only accessible name — without it TalkBack and
 VoiceOver announce nothing and the desktop build shows no hover hint. `test/lint/icon_button_tooltip_test.dart` enforces
 it and skips exactly two shapes: an `icon:` holding a `Text`, which is already a visible label, and
-`views/dashboard/widgets/core_status_button.dart`, which takes its label from an enclosing `Tooltip` (a second test fails
+`views/dashboard/widgets/core_status_button.dart`, which takes its label from an enclosing `AppTooltip` (a second test fails
 if that wrapper disappears). Reuse an existing string before adding one; a label that depends on state goes on the button
 inside the `ValueListenableBuilder`, not outside it, or the tooltip cannot follow the icon. A row of window buttons hidden
 behind `system.isMacOS` is unreachable from a macOS test host, so extract it — `WindowHeaderActions` is the pattern.

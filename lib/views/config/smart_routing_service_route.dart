@@ -382,7 +382,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                                 .toList(),
                           ),
                           icon: const GlyphIcon(AppGlyphs.delete),
-                        ),
+                        ).withAppTooltip(),
                         onPressed: () => _editManual(ref, selector),
                       ),
                   ],

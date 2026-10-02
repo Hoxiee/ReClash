@@ -229,7 +229,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            ).withAppTooltip(),
           selectedScriptIds.isNotEmpty
               ? FilledButton(
                   onPressed: _handleSelectAll,

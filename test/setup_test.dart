@@ -7,6 +7,29 @@ import '../setup.dart' as setup;
 
 void main() {
   group('setup.dart', () {
+    test(
+      'Windows package hook validates the completed bundle before makers',
+      () {
+        final hook = setup.createWindowsPackageHook('/project with spaces', 'arm64');
+        expect(
+          hook,
+          contains("'/project with spaces/tool/windows_package.dart'"),
+        );
+        expect(hook, contains('--arch arm64 --from-environment'));
+        final setupSource = File('setup.dart').readAsStringSync();
+        expect(setupSource, contains(r'--hook-pre=${createWindowsPackageHook'));
+      },
+    );
+
+    test('Windows artifact validation rejects missing expected output', () {
+      final root = Directory.systemTemp.createTempSync('windows-output-test-');
+      addTearDown(() => root.deleteSync(recursive: true));
+      expect(
+        () => setup.validateWindowsArtifacts(root.path, 'amd64', 'exe,zip', '1.0.0'),
+        throwsStateError,
+      );
+    });
+
     test('parses -v as verbose mode', () {
       final results = setup.createSetupArgParser().parse(['android', '-v']);
 

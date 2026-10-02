@@ -98,7 +98,7 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
               tooltip: appLocalizations.delete,
               onPressed: _deleteSelected,
               icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            ).withAppTooltip(),
           selection.isNotEmpty
               ? FilledButton(
                   onPressed: _toggleSelectAll,
@@ -446,7 +446,7 @@ class _RulesPage extends ConsumerWidget {
                     tooltip: l10n.delete,
                     onPressed: () => _remove(ref, index),
                     icon: const GlyphIcon(AppGlyphs.delete),
-                  ),
+                  ).withAppTooltip(),
                 );
               },
             ),

@@ -1976,9 +1976,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -4886,6 +4887,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
+    ),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Права администратора не предоставлены. TUN не запущен.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось запустить сетевой компонент с правами администратора. Попробуйте подключиться снова. Если ошибка повторяется, переустановите ReClash с помощью полного установщика.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Windows запросит права администратора для запуска сетевого компонента. Сам ReClash продолжит работать без прав администратора.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "Предыдущий запрос прав Windows ещё завершается. Закройте его перед повторной попыткой.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "Снова нужны права администратора. Нажмите «Подключить», чтобы перезапустить TUN.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Время ожидания запроса прав Windows истекло. Закройте его и попробуйте подключиться снова.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "Разрешить доступ к TUN?",
     ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage(
       "Записывать в систему",

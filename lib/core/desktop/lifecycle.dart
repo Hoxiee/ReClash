@@ -74,15 +74,13 @@ final class _SessionDisconnect {
 final class _TransportConnectionWaiter {
   final Completer<void> _settled = Completer<void>();
   late final StreamSubscription<DesktopTransportEvent> _subscription;
-  late final Timer _timer;
+  Timer? _timer;
+  bool _cancelled = false;
   TransportConnected? _connection;
   Object? _error;
   StackTrace? _stackTrace;
 
-  _TransportConnectionWaiter(
-    Stream<DesktopTransportEvent> events,
-    Duration timeout,
-  ) {
+  _TransportConnectionWaiter(Stream<DesktopTransportEvent> events) {
     _subscription = events.listen(
       (event) {
         switch (event) {
@@ -109,7 +107,11 @@ final class _TransportConnectionWaiter {
         }
       },
     );
-    _timer = Timer(timeout, () {
+  }
+
+  void startDeadline(Duration timeout) {
+    if (_cancelled) return;
+    _timer ??= Timer(timeout, () {
       if (!_settled.isCompleted) {
         _error = TimeoutException(
           'Core transport connection timed out',
@@ -131,7 +133,8 @@ final class _TransportConnectionWaiter {
   }
 
   Future<void> cancel() async {
-    _timer.cancel();
+    _cancelled = true;
+    _timer?.cancel();
     await _subscription.cancel();
   }
 }
@@ -162,6 +165,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   Future<void>? _unexpectedDisconnectOperation;
   Future<void> Function(bool Function() isCurrent)? _recoveryHandler;
   CoreProcessLease? _unconfirmedLease;
+  CoreLaunchAttempt? _unconfirmedAttempt;
   Future<CoreLifecycleResult>? _closeResult;
   int _revision = 0;
   int _recoveryEpoch = 0;
@@ -337,6 +341,28 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   }
 
   Future<_LifecycleAchievement> _reconcile(_LifecycleIntent intent) async {
+    final attempt = _unconfirmedAttempt;
+    if (attempt != null) {
+      try {
+        attempt.cancel();
+      } catch (_) {
+        if (!_terminalRequested) rethrow;
+      }
+      final lease = attempt.lease;
+      if (lease != null) {
+        _unconfirmedLease = lease;
+      }
+      if (attempt.isSettled || lease != null) {
+        _unconfirmedAttempt = null;
+      } else if (_wantsRunning) {
+        throw _failure(
+          code: 'launch_pending',
+          phase: DesktopCorePhase.starting,
+          revision: intent.revision,
+          cause: StateError('Windows authorization is still closing'),
+        );
+      }
+    }
     final unconfirmedLease = _unconfirmedLease;
     if (unconfirmedLease != null) {
       await _stopUnconfirmedLease(
@@ -428,10 +454,23 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     final sessionId = sessionIdFactory();
     _publish(DesktopCoreStarting(revision: revision, sessionId: sessionId));
     CoreProcessLease? lease;
+    CoreLaunchAttempt? attempt;
     var leaseReleased = false;
     _TransportConnectionWaiter? connectionWaiter;
 
     Future<void> releaseLease() async {
+      if (!leaseReleased && attempt != null) {
+        _unconfirmedAttempt = attempt;
+        try {
+          attempt.cancel();
+        } finally {
+          lease ??= attempt.lease;
+          if (attempt.isSettled || lease != null) {
+            _unconfirmedAttempt = null;
+          }
+          if (lease != null) _unconfirmedLease = lease;
+        }
+      }
       final ownedLease = lease;
       if (ownedLease == null || leaseReleased) {
         return;
@@ -448,21 +487,32 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       if (!_wantsRunning) {
         return false;
       }
-      connectionWaiter = _TransportConnectionWaiter(
-        _transport.events,
-        timeouts.connection,
-      );
-      lease = await launcher.start(
-        sessionId: sessionId,
-        address: _transport.address,
-      );
-      if (lease.sessionId != sessionId) {
+      connectionWaiter = _TransportConnectionWaiter(_transport.events);
+      if (launcher is CancellableCoreProcessLauncher) {
+        attempt = launcher.begin(
+          sessionId: sessionId,
+          address: _transport.address,
+        );
+        lease = await _waitForLaunchWhileWanted(attempt, connectionWaiter);
+        if (lease == null) {
+          await releaseLease();
+          return false;
+        }
+      } else {
+        lease = await launcher.start(
+          sessionId: sessionId,
+          address: _transport.address,
+        );
+        connectionWaiter.startDeadline(timeouts.connection);
+      }
+      final startedLease = lease!;
+      if (startedLease.sessionId != sessionId) {
         await releaseLease();
         throw _failure(
           code: 'session_mismatch',
           phase: DesktopCorePhase.starting,
           revision: revision,
-          lease: lease,
+          lease: startedLease,
         );
       }
       if (!_wantsRunning) {
@@ -476,22 +526,22 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
         await releaseLease();
         return false;
       }
-      if (verifyPeerPid && connected.pid != lease.pid) {
+      if (verifyPeerPid && connected.pid != startedLease.pid) {
         await releaseLease();
         throw _failure(
           code: 'peer_pid_mismatch',
           phase: DesktopCorePhase.starting,
           revision: revision,
-          lease: lease,
+          lease: startedLease,
           connectionGeneration: connected.generation,
           cause: StateError(
-            'Expected Core PID ${lease.pid}, connected ${connected.pid}',
+            'Expected Core PID ${startedLease.pid}, connected ${connected.pid}',
           ),
         );
       }
       final session = DesktopCoreSession(
         sessionId: sessionId,
-        lease: lease,
+        lease: startedLease,
         connectionGeneration: connected.generation,
       );
       _session = session;
@@ -516,11 +566,72 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
         code: 'start_failed',
         phase: DesktopCorePhase.starting,
         revision: revision,
+        lease: lease,
         cause: error,
         stackTrace: stackTrace,
       );
     } finally {
       await connectionWaiter?.cancel();
+    }
+  }
+
+  Future<CoreProcessLease?> _waitForLaunchWhileWanted(
+    CoreLaunchAttempt attempt,
+    _TransportConnectionWaiter waiter,
+  ) async {
+    final failure = Completer<CoreProcessLease>();
+    void fail(Object error, StackTrace stack) {
+      if (!failure.isCompleted) failure.completeError(error, stack);
+    }
+
+    final timer = Timer(timeouts.authorization, () {
+      fail(
+        _failure(
+          code: 'authorization_timeout',
+          phase: DesktopCorePhase.starting,
+          revision: _desired.revision,
+          cause: TimeoutException(
+            'Windows authorization timed out',
+            timeouts.authorization,
+          ),
+        ),
+        StackTrace.current,
+      );
+    });
+    Timer? bootstrapTimer;
+    var waiting = true;
+    unawaited(
+      attempt.spawned.then((_) {
+        if (!waiting) return;
+        timer.cancel();
+        waiter.startDeadline(timeouts.connection);
+        bootstrapTimer = Timer(timeouts.connection, () {
+          fail(
+            TimeoutException(
+              'Windows Core bootstrap timed out',
+              timeouts.connection,
+            ),
+            StackTrace.current,
+          );
+        });
+      }, onError: fail),
+    );
+    unawaited(waiter.future.then((_) {}, onError: fail));
+    final launched = Future.any([attempt.result, failure.future]);
+    try {
+      while (_wantsRunning) {
+        final changed = _intentChanged.future;
+        final result = await Future.any<Object?>([
+          launched,
+          changed.then<Object?>((_) => null),
+        ]);
+        if (result is CoreProcessLease) return result;
+      }
+      return null;
+    } finally {
+      waiting = false;
+      timer.cancel();
+      bootstrapTimer?.cancel();
     }
   }
 

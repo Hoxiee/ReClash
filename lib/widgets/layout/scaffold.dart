@@ -5,6 +5,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/base/pop_scope.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 import '../base/inherited.dart';
 import '../feedback/loading.dart';
@@ -291,14 +292,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         tooltip: context.appLocalizations.close,
         onPressed: _popAppBarLayer,
         icon: const GlyphIcon(AppGlyphs.close),
-      );
+      ).withAppTooltip();
     }
     if (_isSearch) {
       return IconButton(
         tooltip: context.appLocalizations.back,
         onPressed: _popAppBarLayer,
         icon: const GlyphIcon(AppGlyphs.arrowBack),
-      );
+      ).withAppTooltip();
     }
     if (pop != null) {
       return pop.asSuffix
@@ -313,7 +314,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               }
               backAction();
             },
-          )
+          ).withAppTooltip(context.appLocalizations.back)
         : _autoLeadingButton();
   }
 
@@ -325,8 +326,8 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       return null;
     }
     return route is PageRoute && route.fullscreenDialog
-        ? const CloseButton()
-        : const BackButton();
+        ? (const CloseButton()).withAppTooltip(context.appLocalizations.close)
+        : (const BackButton()).withAppTooltip(context.appLocalizations.back);
   }
 
   Widget _buildTitle(AppBarSearchState? startState) {
@@ -1142,7 +1143,7 @@ class _OverflowMenuButton extends StatelessWidget {
         tooltip: context.appLocalizations.more,
         onPressed: () => open(offset: Offset(0, context.isMobileView ? 0 : 20)),
         icon: const GlyphIcon(AppGlyphs.more),
-      ),
+      ).withAppTooltip(),
       popupBuilder: (_) => CommonPopupMenu(items: items),
     );
   }
@@ -1168,7 +1169,7 @@ class AppBarActionButton extends StatelessWidget {
               ),
             )
           : GlyphIcon(data.glyph),
-    );
+    ).withAppTooltip();
   }
 }
 
@@ -1298,7 +1299,7 @@ class _RegexToggleButton extends StatelessWidget {
         AppGlyphs.code,
         color: active ? colorScheme.primary : null,
       ),
-    );
+    ).withAppTooltip();
   }
 }
 

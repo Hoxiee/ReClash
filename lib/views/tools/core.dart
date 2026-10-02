@@ -131,7 +131,7 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
                       ? null
                       : _restart,
                   icon: const GlyphIcon(AppGlyphs.reset),
-                )
+                ).withAppTooltip()
               : null,
           widget: const CoreDetailView(),
         ),
@@ -201,6 +201,7 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
         : switch (ref.read(coreHandlerProvider).processOwner) {
             CoreProcessOwner.direct => l10n.coreModeProcess,
             CoreProcessOwner.helper => l10n.coreModeHelper,
+            CoreProcessOwner.windowsElevated => '${l10n.coreModeProcess} (UAC)',
             null => l10n.unknown,
           };
     final buildTime = info.buildTime?.toUtc();
@@ -277,7 +278,7 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                     tooltip: l10n.reload,
                     onPressed: _refresh,
                     icon: const GlyphIcon(AppGlyphs.refresh),
-                  ),
+                  ).withAppTooltip(),
                 ),
               if (info != null) ..._infoRows(info),
             ],

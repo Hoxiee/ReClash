@@ -8,11 +8,12 @@ import (
 )
 
 func main() {
-	args := os.Args
-	if len(args) <= 1 {
-		fmt.Fprintln(os.Stderr, "Arguments error")
+	address, cleanup, err := prepareDesktopStartup(os.Args)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	defer cleanup()
 	if err := refuseElevatedStartup(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -22,5 +23,5 @@ func main() {
 		os.Exit(1)
 	}
 	go exitOnTermination()
-	startServer(args[1])
+	startServer(address)
 }

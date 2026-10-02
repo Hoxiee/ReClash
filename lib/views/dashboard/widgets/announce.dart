@@ -10,6 +10,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
@@ -595,7 +596,7 @@ class _PanelAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return AppTooltip(
       message: tooltip,
       child: InkResponse(
         onTap: onPressed,

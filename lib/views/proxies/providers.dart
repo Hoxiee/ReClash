@@ -260,7 +260,7 @@ class ProviderItem extends ConsumerWidget {
                       child: CommonCircleLoading(),
                     )
                   : const GlyphIcon(AppGlyphs.more),
-            );
+            ).withAppTooltip();
           },
         ),
       ),

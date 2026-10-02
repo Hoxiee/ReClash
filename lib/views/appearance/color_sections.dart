@@ -226,7 +226,7 @@ class _AppearanceColorSectionsState
                             visualDensity: VisualDensity.standard,
                             onPressed: _handleReset,
                             icon: const GlyphIcon(AppGlyphs.reset, fill: 1),
-                          ),
+                          ).withAppTooltip(),
                         ),
                     ],
                   ),
@@ -392,7 +392,7 @@ class _PrimaryColorTile extends StatelessWidget {
                   color: context.colorScheme.primary,
                   AppGlyphs.delete,
                 ),
-              ),
+              ).withAppTooltip(),
             ),
         ],
       ),
@@ -414,7 +414,7 @@ class _AddPrimaryColorTile extends StatelessWidget {
         onPressed: onPressed,
         iconSize: 24,
         icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.add),
-      ),
+      ).withAppTooltip(),
     );
   }
 }

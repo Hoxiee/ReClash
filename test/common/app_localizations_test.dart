@@ -7,6 +7,7 @@ import 'package:reclash/common/util/exception.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/l10n/l10n.dart';
 
@@ -147,6 +148,67 @@ void main() {
       expect(
         incyLinkErrorMessage(error, appLocalizations),
         appLocalizations.profileImportUnsupportedLink,
+      );
+    });
+  });
+
+  group('Windows launch failures', () {
+    test('maps cancellation, pending consent and retry instructions', () {
+      for (final entry in {
+        'windows_launch_cancelled': appLocalizations.windowsElevationCancelled,
+        'windows_launch_pending': appLocalizations.windowsElevationPending,
+        'windows_authorization_required':
+            appLocalizations.windowsElevationRequired,
+        'Windows Core manifest mismatch':
+            appLocalizations.windowsElevationFailed,
+      }.entries) {
+        expect(
+          userFacingErrorMessage(
+            WindowsLaunchException(entry.key),
+            appLocalizations,
+          ),
+          entry.value,
+        );
+      }
+    });
+
+    test('maps lifecycle timeouts without exposing native diagnostics', () {
+      for (final entry in {
+        'launch_pending': appLocalizations.windowsElevationPending,
+        'authorization_timeout': appLocalizations.windowsElevationTimeout,
+        'start_failed': appLocalizations.windowsElevationFailed,
+      }.entries) {
+        expect(
+          userFacingErrorMessage(
+            DesktopCoreFailure(
+              code: entry.key,
+              phase: DesktopCorePhase.starting,
+              revision: 1,
+              owner: CoreProcessOwner.windowsElevated,
+            ),
+            appLocalizations,
+          ),
+          entry.value,
+        );
+      }
+    });
+
+    test('preserves a policy error through the native launch wrapper', () {
+      final previous = smartAppControlStateReader;
+      addTearDown(() => smartAppControlStateReader = previous);
+      smartAppControlStateReader = () => SmartAppControlState.off;
+      expect(
+        userFacingErrorMessage(
+          const DesktopCoreFailure(
+            code: 'start_failed',
+            phase: DesktopCorePhase.starting,
+            revision: 1,
+            owner: CoreProcessOwner.windowsElevated,
+            cause: WindowsLaunchException('blocked (os error 577)'),
+          ),
+          appLocalizations,
+        ),
+        appLocalizations.coreBlockedByPolicyTip(577),
       );
     });
   });

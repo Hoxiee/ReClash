@@ -10,6 +10,7 @@ import 'package:reclash/widgets/base/inherited.dart';
 import 'package:reclash/widgets/base/pop_scope.dart';
 import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/layout/scaffold.dart';
 
 import '../effect/effect.dart';

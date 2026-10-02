@@ -281,7 +281,7 @@ class _EditorSaveAction extends StatelessWidget {
                 ? () => onSave(context, titleController.text, controller.text)
                 : null,
             icon: const GlyphIcon(AppGlyphs.save),
-          );
+          ).withAppTooltip();
         },
       ),
     );
@@ -320,7 +320,7 @@ class _EditorMenuAction extends ConsumerWidget {
                 open(offset: Offset(0, isMobile ? 0 : 20));
               },
               icon: const GlyphIcon(AppGlyphs.more),
-            );
+            ).withAppTooltip();
           },
           popupBuilder: (_) => CommonPopupMenu(
             items: [
@@ -566,7 +566,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
                   tooltip: context.appLocalizations.close,
                   onPressed: controller.close,
                   icon: const GlyphIcon(AppGlyphs.close, size: 16),
-                ),
+                ).withAppTooltip(),
               ],
             ),
           ),
@@ -686,7 +686,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       icon: GlyphIcon(icon, size: 16),
-    );
+    ).withAppTooltip();
   }
 }
 

@@ -262,7 +262,7 @@ class _UpdateAction extends ConsumerWidget {
               tooltip: context.appLocalizations.update,
               onPressed: () => _handleUpdate(ref),
               icon: const GlyphIcon(AppGlyphs.sync),
-            ),
+            ).withAppTooltip(),
     );
   }
 }

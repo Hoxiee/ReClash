@@ -304,7 +304,7 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
                         icon: const GlyphIcon(AppGlyphs.info),
                         tooltip: appLocalizations.desyncTestFailedTitle,
                         onPressed: () => _showFailed(outcome),
-                      ),
+                      ).withAppTooltip(),
                 onPressed: _running || widget.preview
                     ? null
                     : () => _applyOutcome(outcome),

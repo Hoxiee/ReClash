@@ -187,7 +187,7 @@ class _UsageBar extends StatelessWidget {
     if (info == null) {
       return bar;
     }
-    return Tooltip(
+    return AppTooltip(
       message:
           '${used.traffic.show} / ${info.total.traffic.show}'
           ' (${(progress * 100).round()}%)',

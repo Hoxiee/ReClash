@@ -93,13 +93,13 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            ).withAppTooltip(),
           if (selectedRules.isEmpty)
             IconButton.filledTonal(
               tooltip: appLocalizations.quickAdd,
               onPressed: _handleQuickAdd,
               icon: const GlyphIcon(AppGlyphs.bolt),
-            ),
+            ).withAppTooltip(),
           selectedRules.isNotEmpty
               ? FilledButton(
                   onPressed: _handleSelectAll,

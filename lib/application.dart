@@ -362,14 +362,14 @@ class ApplicationState extends ConsumerState<Application> {
             useMaterial3: true,
             pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(brightness: Brightness.light),
-          ).withAppShapes,
+          ).withAppShapes.withAppTooltips,
           darkTheme: ThemeData(
             useMaterial3: true,
             pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(
               brightness: Brightness.dark,
             ).toPureBlack(themeProps.pureBlack),
-          ).withAppShapes,
+          ).withAppShapes.withAppTooltips,
           home: child!,
         );
       },

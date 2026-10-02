@@ -374,13 +374,13 @@ class ListEditingController extends ChangeNotifier {
           tooltip: context.appLocalizations.delete,
           onPressed: delete,
           icon: const GlyphIcon(AppGlyphs.delete),
-        )
+        ).withAppTooltip()
       else if (!stringListEquality.equals(_items, _originItems))
         IconButton(
           tooltip: context.appLocalizations.reset,
           onPressed: () => reset(context),
           icon: const GlyphIcon(AppGlyphs.reset),
-        ),
+        ).withAppTooltip(),
       if (_selection.isNotEmpty)
         FilledButton(
           onPressed: selectAll,
@@ -588,7 +588,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
-            )
+            ).withAppTooltip()
           else if (!stringAndStringMapEntryListEquality.equals(
             _items,
             _originItems,
@@ -597,7 +597,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
               tooltip: context.appLocalizations.reset,
               onPressed: _handleReset,
               icon: const GlyphIcon(AppGlyphs.reset),
-            ),
+            ).withAppTooltip(),
           if (selectedItems.isNotEmpty)
             FilledButton(
               onPressed: _handleSelectAll,

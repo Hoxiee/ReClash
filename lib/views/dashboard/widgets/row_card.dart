@@ -268,7 +268,7 @@ class OverflowTooltipText extends StatelessWidget {
         if (!isOverflow) {
           return label;
         }
-        return Tooltip(
+        return AppTooltip(
           triggerMode: TooltipTriggerMode.longPress,
           preferBelow: false,
           message: text,

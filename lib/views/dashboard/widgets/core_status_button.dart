@@ -89,7 +89,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
   Widget build(BuildContext context) {
     final coreStatus = _holdTimer != null ? CoreStatus.connecting : _status;
     final appLocalizations = context.appLocalizations;
-    return Tooltip(
+    return AppTooltip(
       message: appLocalizations.coreStatus,
       child: FadeScaleBox(
         alignment: Alignment.centerRight,

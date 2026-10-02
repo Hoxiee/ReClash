@@ -149,6 +149,7 @@ table is the answer; picking wrong is what spawns the duplicates the audit keeps
 | A small tag that *carries a colour meaning*: level, tone, region, flag | `AppTag` (`lib/widgets/base/tag.dart`) — pass `foreground`/`background`; chrome is fixed (`AppShape.sm`, 6/2, bold `labelSmall`), with optional `side`/`mono`/`uppercase`/`onTap` | a bespoke private `_XxxTag`/`_XxxBadge`, or `MetaChip` recoloured |
 | A status glyph inside a tinted rounded square, optionally busy | `AppMedallion` (`lib/widgets/base/medallion.dart`) — `icon` + `tone` + `size`; `busy: true` swaps in a spinner | a bespoke tinted-square badge (a solid-fill avatar or a progress ring is a different family, not this) |
 | Swap one child for another with a fade | the `Fade*Box` family (`lib/widgets/effect/fade_box.dart`; usually `FadeThroughBox`) | a bare `AnimatedSwitcher` |
+| Tooltip | `AppTooltip` (`lib/widgets/feedback/tooltip.dart`); `IconButton(...).withAppTooltip()` / `FloatingActionButton(...).withAppTooltip()` | `Tooltip` |
 | An inline spinner | `CommonCircleLoading` | a raw `CircularProgressIndicator` |
 | A latency color | `context.colorScheme.delayColor(delay)` | branching on delay thresholds |
 

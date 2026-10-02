@@ -2497,5 +2497,12 @@
   "doctorHealAttempts": "Repair attempts",
   "doctorNoHealAttempts": "No repair attempts yet",
   "doctorGenerationDrift": "Network or configuration changed since this check ran; its evidence may no longer hold.",
-  "doctorActionUnavailable": "Not available right now"
+  "doctorActionUnavailable": "Not available right now",
+  "windowsElevationTitle": "TUN-a girmäge rugsat berilsinmi?",
+  "windowsElevationMessage": "Tor komponentini işletmek üçin Windows administrator hukuklaryny sorar. ReClash programmasynyň özi administrator hukuklary bolmazdan işlemegini dowam etdirer.",
+  "windowsElevationCancelled": "Administrator hukuklary berilmedi. TUN işledilmedi.",
+  "windowsElevationFailed": "Tor komponentini administrator hukuklary bilen işletmek başartmady. Täzeden birikmäge synanyşyň. Mesele gaýtalansa, doly gurnaýjy arkaly ReClash programmasyny täzeden guruň.",
+  "windowsElevationPending": "Öňki Windows rugsat haýyşy heniz ýapylýar. Täzeden synanyşmazdan öň ony ýapyň.",
+  "windowsElevationRequired": "Administrator hukuklary ýene gerek. TUN-y täzeden işletmek üçin «Birikmek» düwmesine basyň.",
+  "windowsElevationTimeout": "Windows rugsat haýyşy üçin garaşmak wagty gutardy. Ony ýapyň we täzeden birikmäge synanyşyň."
 }

@@ -102,8 +102,8 @@ flutter test test/widgets/core_status_button_test.dart
 
 What those suites own:
 
-- `test/core/desktop/`: replaceable IPC transport, RPC request correlation/failure, direct/Helper process leases, and
-  latest-intent desktop lifecycle convergence.
+- `test/core/desktop/`: replaceable IPC transport, RPC request correlation/failure, direct/Helper/UAC process leases,
+  pending launch cancellation and latest-intent desktop lifecycle convergence.
 - `test/core/service_test.dart`: `CoreService` composition and terminal close behavior.
 - `test/core/protocol_contract_test.dart`: shared Dart/Go method and event-envelope compatibility, including event batches.
 - `test/providers/action_test.dart`: Core start/restart orchestration and overlapping restart requests.
@@ -121,7 +121,16 @@ CGO_ENABLED=0 go test .
 CGO_ENABLED=0 go vet .
 ```
 
-The Windows Helper's loopback/session protocol tests are host-independent by default. Windows CI additionally enables its
+Windows x64 and ARM64 CI execute the Rust managed-launch/pipe/job tests and Go Windows bootstrap tests natively.
+CI sets `RECLASH_REQUIRE_WINDOWS_BOOTSTRAP=1`, so a non-elevated test host fails instead of skipping bootstrap ownership checks.
+The same Rust crate's host-independent tests also run on Linux:
+
+```bash
+cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
+cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
+```
+
+The unshipped legacy Windows Helper retains its loopback/session protocol tests. Windows CI additionally compiles its
 service implementation:
 
 ```bash
@@ -197,10 +206,15 @@ in `CHANGELOG.md`, and are never regenerated.
 skipped and moves on instead of reporting drift that does not exist. Checking mere tag existence is what made every such
 branch fail on an unrelated release.
 
-Prerelease tags (`v0.8.96-pre.N`) skip the release commit, and CI renders their notes with `build --unreleased` for the
-Telegram post. They publish no GitHub release, so the update dialog never sees them. `build --unreleased` reads the
-version from `pubspec.yaml` rather than the tag, so the patch has to be bumped before the first `-pre.N` of a cycle:
-while `v<pubspec version>` is still tagged it refuses to collect anything and the release job fails.
+Prerelease tags (`vX.Y.Z-pre.N`) publish a GitHub prerelease with packages and checksums; CI renders their notes with
+`build --unreleased`. The release script commits the version/build-number bump but does not rewrite the stable changelog.
+It selects the next prerelease number from existing tags and keeps `pubspec.yaml` consistent with the new tag.
+
+The publish job uses the protected GitHub environment `release`. Configure a required reviewer there: an environment
+name in YAML alone does not require approval. Build artifacts remain available for one day; complete the Windows
+installer, UAC/TUN and cleanup check and approve the deployment in Actions before they expire. Approval publishes those
+same artifacts without rebuilding; do not approve a run whose Windows check failed. The Telegram announcement follows
+publication when its credentials are configured.
 
 ## Verify
 
@@ -223,8 +237,9 @@ for tags.
 Root analysis excludes `plugins/**`, and root tests do not discover nested
 plugin packages, so CI also validates local Flutter packages, the setup build
 tool, the Go wrapper, and Rust components from their own package directories. A
-separate Windows runner compiles and tests the helper's `windows-service`
-feature before release builds can start.
+Windows x64/ARM64 matrix runs native managed-launch and Go bootstrap tests, plus the legacy helper's `windows-service`
+feature, before release builds can start. Windows package validation then installs and checks each architecture before
+publishing; its logs are retained as separate artifacts.
 
 `bash tool/check_plugins.sh` is that plugin gate, and CI runs the same script.
 It discovers every `plugins/*/pubspec.yaml`, analyzes each package, and runs

@@ -569,7 +569,7 @@ class _GroupActions extends StatelessWidget {
             style: _shrinkWrap,
             iconSize: 19,
             icon: const GlyphIcon(AppGlyphs.target),
-          ),
+          ).withAppTooltip(),
           const SizedBox(width: AppSpacing.xxs),
           IconButton(
             tooltip: context.appLocalizations.delayTest,
@@ -579,7 +579,7 @@ class _GroupActions extends StatelessWidget {
             onPressed: onDelayTest,
             style: _shrinkWrap,
             icon: const GlyphIcon(AppGlyphs.networkCheck),
-          ),
+          ).withAppTooltip(),
           const SizedBox(width: 6),
         ] else ...[
           Text(groupType, style: context.textTheme.labelMedium?.toLight),
@@ -595,7 +595,7 @@ class _GroupActions extends StatelessWidget {
           style: _shrinkWrap,
           onPressed: onToggle,
           icon: CommonExpandIcon(expand: isExpand),
-        ),
+        ).withAppTooltip(),
       ],
     );
   }

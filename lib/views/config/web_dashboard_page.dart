@@ -127,12 +127,12 @@ class _WebDashboardPageState extends State<WebDashboardPage> {
             tooltip: appLocalizations.reload,
             onPressed: () => unawaited(_handleReload()),
             icon: const GlyphIcon(AppGlyphs.refresh),
-          ),
+          ).withAppTooltip(),
           IconButton(
             tooltip: appLocalizations.openInBrowser,
             onPressed: () => unawaited(_handleBrowser()),
             icon: const GlyphIcon(AppGlyphs.openExternal),
-          ),
+          ).withAppTooltip(),
         ],
         body: AppBarClearance(
           child: error != null

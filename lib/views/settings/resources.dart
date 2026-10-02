@@ -304,7 +304,7 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
                                 child: CommonCircleLoading(),
                               )
                             : const GlyphIcon(AppGlyphs.more),
-                      );
+                      ).withAppTooltip();
                     },
                   ),
                 ),

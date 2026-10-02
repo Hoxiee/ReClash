@@ -259,7 +259,7 @@ class _IncludeAllCard extends StatelessWidget {
                   AppGlyphs.info,
                   color: context.colorScheme.onSurfaceVariant,
                 ),
-              ),
+              ).withAppTooltip(),
             ),
           ],
         ),

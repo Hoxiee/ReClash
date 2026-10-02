@@ -31,16 +31,29 @@ pub fn cleanup_socket(path: &str) -> io::Result<()> {
 
 /// Linux carries an `fchmod` on the unbound socket over to the file `bind`
 /// creates; other Unixes reject it and keep the chmod after `bind`.
-pub fn restrict_listener_mode(options: ListenerOptions<'_>) -> ListenerOptions<'_> {
+pub fn restrict_listener_mode(options: ListenerOptions<'_>) -> io::Result<ListenerOptions<'_>> {
     #[cfg(target_os = "linux")]
     {
         use interprocess::os::unix::local_socket::ListenerOptionsExt as _;
 
-        options.mode(0o600)
+        Ok(options.mode(0o600))
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(windows)]
     {
-        options
+        use crate::windows::security;
+        use interprocess::os::windows::{
+            local_socket::ListenerOptionsExt as _,
+            security_descriptor::{AsSecurityDescriptorExt, BorrowedSecurityDescriptor},
+        };
+        let sid = security::own_sid()?;
+        let descriptor =
+            security::security_descriptor(&format!("D:P(A;;FA;;;{sid})(A;;0x12019b;;;BA)"))?;
+        let borrowed = unsafe { BorrowedSecurityDescriptor::from_ptr(descriptor.0) };
+        Ok(options.security_descriptor(borrowed.to_owned_sd()?))
+    }
+    #[cfg(not(any(target_os = "linux", windows)))]
+    {
+        Ok(options)
     }
 }
 
@@ -85,7 +98,30 @@ fn is_permitted_uid(peer_uid: libc::uid_t, own_uid: libc::uid_t) -> bool {
 }
 
 #[cfg(windows)]
-pub fn authorize_peer(_stream: &Stream) -> io::Result<()> {
+pub fn authorize_peer(stream: &Stream) -> io::Result<()> {
+    use crate::windows::{authorize_rpc_peer, security};
+    use interprocess::local_socket::traits::StreamCommon as _;
+    use windows_sys::Win32::System::Threading::*;
+    let pid = stream
+        .peer_creds()?
+        .pid()
+        .and_then(|pid| u32::try_from(pid).ok())
+        .filter(|pid| *pid != 0)
+        .ok_or_else(|| io::Error::other("Windows peer PID unavailable"))?;
+    authorize_rpc_peer(pid)?;
+    if security::process_session(pid)? != security::process_session(std::process::id())? {
+        return Err(io::Error::other("Windows IPC terminal session mismatch"));
+    }
+    if crate::windows::is_managed_peer(pid) {
+        return Ok(());
+    }
+    let process =
+        security::owned(unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) })?;
+    let token = security::process_token(process.as_raw_handle())?;
+    let sid = security::token_sid(token.as_raw_handle())?;
+    if sid != security::own_sid()? {
+        return Err(io::Error::other("Windows IPC user mismatch"));
+    }
     Ok(())
 }
 
@@ -166,6 +202,7 @@ mod tests {
         let path = std::env::temp_dir().join(format!("reclash-peer-{}.sock", std::process::id()));
         let name = path.clone().to_fs_name::<GenericFilePath>().unwrap();
         let listener = super::restrict_listener_mode(ListenerOptions::new().name(name))
+            .unwrap()
             .create_sync()
             .unwrap();
         let peer = std::thread::spawn(move || {

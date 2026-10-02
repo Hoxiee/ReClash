@@ -155,7 +155,7 @@ class _MiniPathNode extends StatelessWidget {
   Widget build(BuildContext context) {
     final visual = doctorPathVisual(context, stage.state);
     final diameter = stage.culprit ? 22.0 : 18.0;
-    return Tooltip(
+    return AppTooltip(
       message: '${stage.label} · ${doctorPathStateLabel(context, stage.state)}',
       child: Opacity(
         opacity: stage.dimmed ? 0.5 : 1.0,

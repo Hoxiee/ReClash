@@ -42,6 +42,9 @@ class CoreController {
 
   CoreProcessOwner? get processOwner => _interface.processOwner;
 
+  Future<bool> requireTunElevation(bool required, {bool allowPrompt = false}) =>
+      _interface.requireTunElevation(required, allowPrompt: allowPrompt);
+
   Future<CoreLifecycleResult> start() => _interface.start();
 
   Future<CoreLifecycleResult> restart() => _interface.restart();

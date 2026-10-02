@@ -2694,5 +2694,12 @@
   "doctorHealAttempts": "Repair attempts",
   "doctorNoHealAttempts": "No repair attempts yet",
   "doctorGenerationDrift": "Network or configuration changed since this check ran; its evidence may no longer hold.",
-  "doctorActionUnavailable": "Not available right now"
+  "doctorActionUnavailable": "Not available right now",
+  "windowsElevationTitle": "Allow TUN access?",
+  "windowsElevationMessage": "Windows will ask for administrator permission to start the network component. ReClash itself keeps running without administrator privileges.",
+  "windowsElevationCancelled": "Administrator permission was not granted. TUN was not started.",
+  "windowsElevationFailed": "The network component could not start with administrator privileges. Try connecting again; if the problem persists, reinstall ReClash using the complete installer.",
+  "windowsElevationPending": "A previous Windows permission request is still closing. Dismiss it before trying again.",
+  "windowsElevationRequired": "Administrator permission is needed again. Press Connect to restart TUN.",
+  "windowsElevationTimeout": "The Windows permission request timed out. Dismiss it and try connecting again."
 }

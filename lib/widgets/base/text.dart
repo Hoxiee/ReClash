@@ -1,6 +1,7 @@
 import 'package:emoji_regex/emoji_regex.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 import '../../state.dart';
 
@@ -19,7 +20,7 @@ class TooltipText extends StatelessWidget {
           maxWidth: maxWidth,
         );
         if (isOverflow) {
-          return Tooltip(
+          return AppTooltip(
             triggerMode: TooltipTriggerMode.longPress,
             preferBelow: false,
             message: text.data,

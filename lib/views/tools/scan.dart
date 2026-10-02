@@ -10,6 +10,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 enum ScanMode { profileImport, companionPairing }
 
@@ -348,7 +349,7 @@ class _OverlayButton extends StatelessWidget {
           disabledBackgroundColor: Colors.black.opacity30,
           disabledForegroundColor: Colors.white.opacity38,
         ),
-      ),
+      ).withAppTooltip(),
     );
   }
 }

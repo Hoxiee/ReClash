@@ -3,6 +3,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 /// Below this many items a sheet is short enough to scan without a search.
 const sheetSearchMinItemCount = 10;
@@ -64,7 +65,7 @@ class _SearchFieldState extends State<SearchField> {
                     tooltip: appLocalizations.clearSearch,
                     onPressed: _handleClear,
                     icon: const GlyphIcon(AppGlyphs.close, size: 20),
-                  ),
+                  ).withAppTooltip(),
           ),
         );
       },

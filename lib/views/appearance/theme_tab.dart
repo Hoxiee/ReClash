@@ -123,7 +123,7 @@ class AppearanceThemeTab extends ConsumerWidget {
         SettingSection.sliver(
           items: [
             SettingSliderItem(
-              leading: Tooltip(
+              leading: AppTooltip(
                 message: theme.pureBlack
                     ? appLocalizations.contrastAmoledHint
                     : '',
@@ -451,7 +451,7 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
                       onPressed: () =>
                           _update((state) => state.copyWith(scale: 1)),
                       icon: const GlyphIcon(AppGlyphs.reset, fill: 1),
-                    ),
+                    ).withAppTooltip(),
                   ),
               ],
             ),

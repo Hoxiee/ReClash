@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 import '../layout/popup.dart';
 
@@ -91,7 +92,7 @@ class ReorderMenuHandle extends StatelessWidget {
                 )
               : null,
           icon: GlyphIcon(icon, color: handleColor),
-        );
+        ).withAppTooltip();
         return delayedDrag
             ? ReorderableDelayedDragStartListener(index: index, child: handle)
             : ReorderableDragStartListener(index: index, child: handle);

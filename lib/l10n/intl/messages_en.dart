@@ -1920,9 +1920,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -4699,6 +4700,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "The core is not serving the dashboard yet",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Administrator permission was not granted. TUN was not started.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "The network component could not start with administrator privileges. Try connecting again; if the problem persists, reinstall ReClash using the complete installer.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "Windows will ask for administrator permission to start the network component. ReClash itself keeps running without administrator privileges.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "A previous Windows permission request is still closing. Dismiss it before trying again.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "Administrator permission is needed again. Press Connect to restart TUN.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "The Windows permission request timed out. Dismiss it and try connecting again.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "Allow TUN access?",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Write to system"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Sync the resolved time to the system clock",

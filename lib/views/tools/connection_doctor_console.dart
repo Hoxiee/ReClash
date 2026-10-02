@@ -833,7 +833,7 @@ class _DoctorEvidenceRow extends StatelessWidget {
           ),
           if (fact.consequence) ...[
             const SizedBox(width: AppSpacing.sm),
-            Tooltip(
+            AppTooltip(
               message: appLocalizations.doctorEvidenceConsequence,
               child: GlyphIcon(
                 AppGlyphs.subItem,

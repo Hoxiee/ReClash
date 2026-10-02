@@ -344,7 +344,7 @@ class _BlockConnectionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return AppTooltip(
       message: context.appLocalizations.blockConnection,
       child: Semantics(
         button: true,

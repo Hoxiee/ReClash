@@ -57,9 +57,9 @@ class ProxyCard extends ConsumerWidget {
                             iconSize: globalState.measure.labelSmallHeight,
                             padding: EdgeInsets.zero,
                             onPressed: () => _handleTestCurrentDelay(ref),
-                          ),
+                          ).withAppTooltip(),
                   )
-                : Tooltip(
+                : AppTooltip(
                     message: context.appLocalizations.delayTest,
                     child: InkWell(
                       onTap: () => _handleTestCurrentDelay(ref),

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-enum CoreProcessOwner { direct, helper }
+enum CoreProcessOwner { direct, helper, windowsElevated }
 
 enum CoreLifecycleOutcome { applied, coalesced, superseded }
 
@@ -23,11 +23,13 @@ final class DesktopCoreTimeouts {
   final Duration ready;
   final Duration connection;
   final Duration disconnection;
+  final Duration authorization;
 
   const DesktopCoreTimeouts({
     this.ready = const Duration(seconds: 10),
     this.connection = const Duration(seconds: 10),
     this.disconnection = const Duration(seconds: 10),
+    this.authorization = const Duration(seconds: 120),
   });
 }
 

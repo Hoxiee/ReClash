@@ -13,6 +13,7 @@ import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:window/window.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);
@@ -577,18 +578,18 @@ class WindowHeaderActions extends StatelessWidget {
                 ),
                 onPressed: onPin,
                 icon: GlyphIcon(AppGlyphs.pin, fill: state.isPinned ? 1 : 0),
-              ),
+              ).withAppTooltip(),
             ),
             IconButton(
               tooltip: appLocalizations.minimize,
               onPressed: onMinimize,
               icon: const CaptionIcon(CaptionGlyph.minimize),
-            ),
+            ).withAppTooltip(),
             IconButton(
               tooltip: maximizeTooltip,
               onPressed: onMaximize,
               icon: CaptionIcon(maximizeGlyph),
-            ),
+            ).withAppTooltip(),
             IconButton(
               tooltip: appLocalizations.close,
               style: ButtonStyle(
@@ -612,7 +613,7 @@ class WindowHeaderActions extends StatelessWidget {
               ),
               onPressed: onClose,
               icon: const CaptionIcon(CaptionGlyph.close),
-            ),
+            ).withAppTooltip(),
           ],
         );
       },

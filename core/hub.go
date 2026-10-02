@@ -44,6 +44,9 @@ var (
 const coreMemoryLimit = 96 * 1024 * 1024
 
 func handleInitClash(params *InitParams) bool {
+	if !permittedCoreHome(params.HomeDir) {
+		return false
+	}
 	debug.SetGCPercent(50)
 	debug.SetMemoryLimit(coreMemoryLimit)
 	func() {

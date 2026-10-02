@@ -88,11 +88,12 @@ install(FILES "EnableLoopback.exe" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
 # these the app cannot start at all.
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
 include(InstallRequiredSystemLibraries)
-if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
-  install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-    COMPONENT Runtime)
+if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  message(FATAL_ERROR "MSVC runtime libraries were not found; the Windows bundle cannot run on a clean machine.")
 endif()
+install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
 
 if(PLUGIN_BUNDLED_LIBRARIES)
   install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"

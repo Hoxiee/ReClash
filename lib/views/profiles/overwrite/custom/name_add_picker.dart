@@ -102,7 +102,7 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
                 tooltip: context.appLocalizations.add,
                 onPressed: onAdd,
                 icon: const GlyphIcon(AppGlyphs.add, size: 18),
-              ),
+              ).withAppTooltip(),
             ),
           ),
         ),

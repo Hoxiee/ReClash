@@ -157,7 +157,7 @@ class _HotKeyBarActions extends ConsumerWidget {
             next: defaultHotKeyActions,
           ),
           icon: const GlyphIcon(AppGlyphs.restore),
-        ),
+        ).withAppTooltip(),
         IconButton(
           tooltip: appLocalizations.hotkeyClearAll,
           onPressed: isEmpty
@@ -169,7 +169,7 @@ class _HotKeyBarActions extends ConsumerWidget {
                   next: const [],
                 ),
           icon: const GlyphIcon(AppGlyphs.clearAll),
-        ),
+        ).withAppTooltip(),
       ],
     );
   }
@@ -260,7 +260,7 @@ class _HotKeyItem extends ConsumerWidget {
       title: Text(action.label, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: failure == null
           ? null
-          : Tooltip(
+          : AppTooltip(
               message: failure,
               child: Text(
                 appLocalizations.hotkeyUnavailable,
@@ -290,7 +290,7 @@ class _HotKeyItem extends ConsumerWidget {
                     _saveBinding(ref, HotKeyAction(action: action));
                   },
                   icon: const GlyphIcon(AppGlyphs.close, size: 20),
-                ),
+                ).withAppTooltip(),
               ],
             ),
       onPressed: () {

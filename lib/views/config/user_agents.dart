@@ -275,7 +275,7 @@ class _UserAgentItemMenu extends StatelessWidget {
             open();
           },
           icon: const GlyphIcon(AppGlyphs.more),
-        );
+        ).withAppTooltip();
       },
     );
   }

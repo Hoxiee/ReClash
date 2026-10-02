@@ -91,7 +91,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               _showAddWidgetsModal();
             },
             icon: const GlyphIcon(AppGlyphs.addCircle),
-          ),
+          ).withAppTooltip(),
         ),
       FadeRotationScaleBox(
         child: isEdit
@@ -103,7 +103,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   key: ValueKey('save-icon'),
                 ),
                 onPressed: _handleExitEdit,
-              )
+              ).withAppTooltip()
             : IconButton(
                 tooltip: context.appLocalizations.edit,
                 key: const ValueKey(false),
@@ -112,7 +112,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   key: ValueKey('edit-icon'),
                 ),
                 onPressed: _handleEnterEdit,
-              ),
+              ).withAppTooltip(),
       ),
     ];
   }
@@ -361,7 +361,7 @@ class _AddedContainer extends StatelessWidget {
                 padding: AppInsets.xxs,
                 onPressed: () => _handleAdd(context),
                 icon: const GlyphIcon(AppGlyphs.add),
-              ),
+              ).withAppTooltip(),
             ),
           ),
         ),

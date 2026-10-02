@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -206,47 +205,6 @@ class DnsQueryList extends StatelessWidget {
   }
 }
 
-enum _DnsStatus { resolved, cached, failed }
-
-class _DnsStyle {
-  final Color background;
-  final Color foreground;
-  final Glyph icon;
-
-  const _DnsStyle(this.background, this.foreground, this.icon);
-}
-
-_DnsStatus _statusOf(DnsQuery dnsQuery) {
-  if (dnsQuery.isFailed) {
-    return _DnsStatus.failed;
-  }
-  if (dnsQuery.cached) {
-    return _DnsStatus.cached;
-  }
-  return _DnsStatus.resolved;
-}
-
-_DnsStyle _dnsStyle(BuildContext context, _DnsStatus status) {
-  final colorScheme = context.colorScheme;
-  return switch (status) {
-    _DnsStatus.resolved => _DnsStyle(
-      colorScheme.primaryContainer,
-      colorScheme.onPrimaryContainer,
-      AppGlyphs.dns,
-    ),
-    _DnsStatus.cached => _DnsStyle(
-      colorScheme.tertiaryContainer,
-      colorScheme.onTertiaryContainer,
-      AppGlyphs.bolt,
-    ),
-    _DnsStatus.failed => _DnsStyle(
-      colorScheme.errorContainer,
-      colorScheme.onErrorContainer,
-      AppGlyphs.error,
-    ),
-  };
-}
-
 class DnsQueryItem extends StatelessWidget {
   final DnsQuery dnsQuery;
   final String detailTitle;
@@ -272,118 +230,65 @@ class DnsQueryItem extends StatelessWidget {
     );
   }
 
-  String get _summary {
-    if (dnsQuery.error.isNotEmpty) {
-      return dnsQuery.error;
-    }
-    if (dnsQuery.answers.isNotEmpty) {
-      return dnsQuery.answers.join(', ');
-    }
-    return dnsQuery.rcode.isEmpty ? '' : dnsQuery.rcode;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final appLocalizations = context.appLocalizations;
-    final style = _dnsStyle(context, _statusOf(dnsQuery));
-    final summary = _summary;
-    final initiator = dnsQuery.initiator;
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () => _openDetail(context),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 14,
+    final styles = RecordTextStyles.of(context);
+    final summary = dnsQuery.error.isNotEmpty
+        ? dnsQuery.error
+        : dnsQuery.answers.join(', ');
+    return RecordListItem(
+      isError: dnsQuery.isFailed,
+      onTap: () => _openDetail(context),
+      header: RecordHeader(
+        trailing: Text('${dnsQuery.delay} ms'),
+        children: [
+          RecordTimestamp(dnsQuery.time.showFull),
+          if (dnsQuery.type.isNotEmpty)
+            AppTag.compact(
+              dnsQuery.type,
+              onTap: () => onClickKeyword?.call(dnsQuery.type),
+            ),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: AppSpacing.xs,
+        children: [
+          Text(
+            dnsQuery.domain,
+            style: styles.primary?.copyWith(fontWeight: FontWeight.w500),
+          ),
+          if (summary.isNotEmpty)
+            Text(
+              summary,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: styles.secondary?.copyWith(
+                color: dnsQuery.isFailed ? colorScheme.error : null,
+              ),
+            ),
+          Wrap(
+            spacing: 6,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                alignment: Alignment.center,
-                decoration: ShapeDecoration(
-                  color: style.background,
-                  shape: AppShape.md,
+              for (final tag in dnsQuery.resultTags)
+                AppTag.compact(
+                  tag,
+                  background: dnsQuery.hasFailureRcode && tag == dnsQuery.rcode
+                      ? colorScheme.errorContainer
+                      : null,
+                  foreground: dnsQuery.hasFailureRcode && tag == dnsQuery.rcode
+                      ? colorScheme.onErrorContainer
+                      : null,
+                  onTap: () => onClickKeyword?.call(tag),
                 ),
-                child: GlyphIcon(style.icon, size: 22, color: style.foreground),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      dnsQuery.domain,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if (dnsQuery.type.isNotEmpty)
-                          CommonChip(
-                            label: dnsQuery.type,
-                            onPressed: () =>
-                                onClickKeyword?.call(dnsQuery.type),
-                          ),
-                        if (initiator != null) MetaChip(label: initiator.label),
-                        if (dnsQuery.cached)
-                          MetaChip(label: appLocalizations.cache),
-                        if (dnsQuery.hasFailureRcode)
-                          AppTag(
-                            dnsQuery.rcode,
-                            background: colorScheme.errorContainer,
-                            foreground: colorScheme.onErrorContainer,
-                          ),
-                      ],
-                    ),
-                    if (summary.isNotEmpty)
-                      Text(
-                        summary,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: dnsQuery.isFailed
-                              ? colorScheme.error
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4,
-                children: [
-                  Text(
-                    dnsQuery.time.getLastUpdateTimeDesc(context),
-                    style: context.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.outline,
-                    ),
-                  ),
-                  if (dnsQuery.delay > 0)
-                    Text(
-                      '${dnsQuery.delay} ms',
-                      style: context.textTheme.labelSmall?.toJetBrainsMono
-                          .copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                ],
-              ),
+              if (dnsQuery.upstream.isNotEmpty)
+                Text(dnsQuery.upstream, style: styles.muted),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

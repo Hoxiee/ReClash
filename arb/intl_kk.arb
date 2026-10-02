@@ -2497,5 +2497,12 @@
   "doctorHealAttempts": "Repair attempts",
   "doctorNoHealAttempts": "No repair attempts yet",
   "doctorGenerationDrift": "Network or configuration changed since this check ran; its evidence may no longer hold.",
-  "doctorActionUnavailable": "Not available right now"
+  "doctorActionUnavailable": "Not available right now",
+  "windowsElevationTitle": "TUN қолжетімділігіне рұқсат бересіз бе?",
+  "windowsElevationMessage": "Желілік құрамдасты іске қосу үшін Windows әкімші құқықтарын сұрайды. ReClash өзі әкімші құқықтарынсыз жұмысын жалғастырады.",
+  "windowsElevationCancelled": "Әкімші құқықтары берілмеді. TUN іске қосылмады.",
+  "windowsElevationFailed": "Желілік құрамдасты әкімші құқықтарымен іске қосу мүмкін болмады. Қайта қосылып көріңіз. Мәселе қайталанса, толық орнатқыш арқылы ReClash қолданбасын қайта орнатыңыз.",
+  "windowsElevationPending": "Алдыңғы Windows рұқсат сұрауы әлі жабылып жатыр. Қайталап көруден бұрын оны жабыңыз.",
+  "windowsElevationRequired": "Әкімші құқықтары қайта қажет. TUN жүйесін қайта іске қосу үшін «Қосылу» түймесін басыңыз.",
+  "windowsElevationTimeout": "Windows рұқсат сұрауын күту уақыты аяқталды. Оны жауып, қайта қосылып көріңіз."
 }

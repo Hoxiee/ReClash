@@ -498,7 +498,7 @@ class _RemoveButton extends ConsumerWidget {
               ),
           icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
           padding: EdgeInsets.zero,
-        ),
+        ).withAppTooltip(),
       ),
     );
   }

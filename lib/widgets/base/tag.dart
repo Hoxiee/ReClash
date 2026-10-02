@@ -17,7 +17,22 @@ class AppTag extends StatelessWidget {
     this.fontWeight = FontWeight.w600,
     this.onTap,
     this.maxLines = 1,
-  });
+  }) : _compact = false;
+
+  const AppTag.compact(
+    this.label, {
+    super.key,
+    this.foreground,
+    this.background,
+    this.onTap,
+  }) : side = null,
+       shape = null,
+       mono = false,
+       uppercase = false,
+       letterSpacing = 0.5,
+       fontWeight = FontWeight.w500,
+       maxLines = 1,
+       _compact = true;
 
   final String label;
   final Color? foreground;
@@ -30,8 +45,13 @@ class AppTag extends StatelessWidget {
   final FontWeight fontWeight;
   final VoidCallback? onTap;
   final int maxLines;
+  final bool _compact;
 
   static const _padding = EdgeInsets.symmetric(horizontal: 6, vertical: 2);
+  static const _compactPadding = EdgeInsets.symmetric(
+    horizontal: 6,
+    vertical: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +65,15 @@ class AppTag extends StatelessWidget {
     if (side != null) {
       shapeBorder = shapeBorder.copyWith(side: side);
     }
-    var textStyle = context.textTheme.labelSmall?.copyWith(
+    final baseStyle = _compact
+        ? context.textTheme.labelMedium
+        : context.textTheme.labelSmall;
+    var textStyle = baseStyle?.copyWith(
       color: foreground ?? colorScheme.onSurfaceVariant,
-      fontWeight: fontWeight,
-      letterSpacing: letterSpacing,
+      fontWeight: _compact ? null : fontWeight,
+      letterSpacing: _compact ? null : letterSpacing,
     );
+    final padding = _compact ? _compactPadding : _padding;
     if (mono) {
       textStyle = textStyle?.toJetBrainsMono;
     }
@@ -66,13 +90,13 @@ class AppTag extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: Padding(padding: _padding, child: text),
+          child: Padding(padding: padding, child: text),
         ),
       );
     }
     return DecoratedBox(
       decoration: ShapeDecoration(color: fill, shape: shapeBorder),
-      child: Padding(padding: _padding, child: text),
+      child: Padding(padding: padding, child: text),
     );
   }
 }

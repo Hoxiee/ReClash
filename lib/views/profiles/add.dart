@@ -290,7 +290,7 @@ class _RawProfileDialogState extends State<RawProfileDialog>
           tooltip: appLocalizations.pasteFromClipboard,
           onPressed: _pending ? null : _handlePaste,
           icon: const GlyphIcon(AppGlyphs.paste),
-        ),
+        ).withAppTooltip(),
         TextButton(
           onPressed: _pending ? null : _handleSubmit,
           child: _pending
@@ -436,12 +436,12 @@ class _URLFormDialogState extends State<URLFormDialog>
                         : appLocalizations.showMore,
                     onPressed: _pending ? null : _handleMore,
                     icon: CommonExpandIcon(expand: _isMore),
-                  ),
+                  ).withAppTooltip(),
                 IconButton.filledTonal(
                   tooltip: appLocalizations.pasteFromClipboard,
                   onPressed: _pending ? null : _handlePaste,
                   icon: const GlyphIcon(AppGlyphs.paste),
-                ),
+                ).withAppTooltip(),
               ],
             ),
             TextButton(

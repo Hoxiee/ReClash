@@ -18088,8 +18088,7 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc:
-          'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18149,8 +18148,7 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc:
-          'Countdown showing how many seconds remain before the pairing code expires.',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }
@@ -18845,6 +18843,76 @@ class AppLocalizations {
     return Intl.message(
       'Not available right now',
       name: 'doctorActionUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow TUN access?`
+  String get windowsElevationTitle {
+    return Intl.message(
+      'Allow TUN access?',
+      name: 'windowsElevationTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Windows will ask for administrator permission to start the network component. ReClash itself keeps running without administrator privileges.`
+  String get windowsElevationMessage {
+    return Intl.message(
+      'Windows will ask for administrator permission to start the network component. ReClash itself keeps running without administrator privileges.',
+      name: 'windowsElevationMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Administrator permission was not granted. TUN was not started.`
+  String get windowsElevationCancelled {
+    return Intl.message(
+      'Administrator permission was not granted. TUN was not started.',
+      name: 'windowsElevationCancelled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network component could not start with administrator privileges. Try connecting again; if the problem persists, reinstall ReClash using the complete installer.`
+  String get windowsElevationFailed {
+    return Intl.message(
+      'The network component could not start with administrator privileges. Try connecting again; if the problem persists, reinstall ReClash using the complete installer.',
+      name: 'windowsElevationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A previous Windows permission request is still closing. Dismiss it before trying again.`
+  String get windowsElevationPending {
+    return Intl.message(
+      'A previous Windows permission request is still closing. Dismiss it before trying again.',
+      name: 'windowsElevationPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Administrator permission is needed again. Press Connect to restart TUN.`
+  String get windowsElevationRequired {
+    return Intl.message(
+      'Administrator permission is needed again. Press Connect to restart TUN.',
+      name: 'windowsElevationRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Windows permission request timed out. Dismiss it and try connecting again.`
+  String get windowsElevationTimeout {
+    return Intl.message(
+      'The Windows permission request timed out. Dismiss it and try connecting again.',
+      name: 'windowsElevationTimeout',
       desc: '',
       args: [],
     );

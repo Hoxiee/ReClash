@@ -272,7 +272,7 @@ class _PauseChip extends ConsumerWidget {
     final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
     final paused = ref.watch(pausedProvider);
-    return Tooltip(
+    return AppTooltip(
       message: paused ? appLocalizations.resume : appLocalizations.pause,
       child: HeroSurface(
         radius: heroPillRadius,
@@ -326,7 +326,7 @@ class _ModeChip extends ConsumerWidget {
         ? connectionModeIcon(dashboardMode)
         : _modeIcon(outboundMode);
     return CommonPopupBox(
-      targetBuilder: (open) => Tooltip(
+      targetBuilder: (open) => AppTooltip(
         message: label,
         child: HeroSurface(
           radius: heroPillRadius,

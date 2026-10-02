@@ -3925,6 +3925,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "코어가 아직 대시보드를 제공하고 있지 않습니다",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("화이트리스트 모드"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "관리자 권한이 부여되지 않았습니다. TUN이 시작되지 않았습니다.",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "네트워크 구성 요소를 관리자 권한으로 시작하지 못했습니다. 다시 연결해 보세요. 문제가 계속되면 전체 설치 프로그램으로 ReClash를 다시 설치하세요.",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "네트워크 구성 요소를 시작하기 위해 Windows에서 관리자 권한을 요청합니다. ReClash 자체는 관리자 권한 없이 계속 실행됩니다.",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "이전 Windows 권한 요청이 아직 종료 중입니다. 해당 요청을 닫은 후 다시 시도하세요.",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "관리자 권한이 다시 필요합니다. 연결 버튼을 눌러 TUN을 다시 시작하세요.",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows 권한 요청 시간이 초과되었습니다. 해당 요청을 닫고 다시 연결해 보세요.",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN 접근을 허용할까요?",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("시스템에 기록"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "확인된 시간을 시스템 시계에 동기화합니다",

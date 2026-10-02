@@ -29,6 +29,7 @@ class SetupAction extends _$SetupAction {
   Future<bool?>? _authorizationAttempt;
   int? _authorizationAttemptRevision;
   Future<bool>? _authorizationRestart;
+  Future<bool>? _windowsLaunchCancellation;
   int _authorizationRevision = 0;
   bool _authorizationPromptAllowed = false;
   bool _disposed = false;
@@ -39,6 +40,14 @@ class SetupAction extends _$SetupAction {
   void beginTunAuthorization({bool allowPrompt = true}) {
     _authorizationRevision++;
     _authorizationPromptAllowed = allowPrompt;
+    if (usesWindowsElevation) {
+      if (allowPrompt) {
+        _windowsLaunchCancellation = null;
+      } else {
+        _windowsLaunchCancellation ??= _core.requireTunElevation(false);
+        _windowsLaunchCancellation!.ignore();
+      }
+    }
   }
 
   bool _authorizationIsCurrent(int revision) =>
@@ -237,6 +246,7 @@ class SetupAction extends _$SetupAction {
         (requiresHelperSession &&
             ref.read(patchClashConfigProvider).tun.enable)) {
       var applied = false;
+      String? windowsLaunchError;
       try {
         applied = await applyProfile(
           force: true,
@@ -244,6 +254,14 @@ class SetupAction extends _$SetupAction {
         );
       } catch (error) {
         applied = false;
+        if (usesWindowsElevation &&
+            windowsLaunchFailureMessage(error, currentAppLocalizations) !=
+                null) {
+          windowsLaunchError = userFacingErrorMessage(
+            error,
+            currentAppLocalizations,
+          );
+        }
         if (error is ConfigInvalidException && _isCurrent(request)) {
           ref
               .read(runRequestStateProvider.notifier)
@@ -251,6 +269,9 @@ class SetupAction extends _$SetupAction {
         }
       }
       if (!applied && _isCurrent(request)) {
+        if (windowsLaunchError != null) {
+          showTunAuthorizationError(windowsLaunchError);
+        }
         await globalState.safeRun(() => setRunning(false));
       }
       return applied;
@@ -294,6 +315,16 @@ class SetupAction extends _$SetupAction {
       // it, so the already-running service is left paused.
       if (request.running && system.isAndroid && ref.read(pausedProvider)) {
         return;
+      }
+      if (usesWindowsElevation && !request.running) {
+        final cancellation = _windowsLaunchCancellation;
+        _windowsLaunchCancellation = null;
+        final listenerAbsent = await cancellation == true;
+        if (!_isCurrent(request)) return;
+        if (listenerAbsent) {
+          ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+          return;
+        }
       }
       _signalOdometerIntent(request.running);
       final applied = await setCoreRunning(request.running);
@@ -593,13 +624,20 @@ class SetupAction extends _$SetupAction {
   bool get supportsTunElevation => !system.isMacOS;
 
   @protected
-  bool get requiresHelperSession => system.isLinux;
+  bool get usesWindowsElevation => system.isWindows;
 
   @protected
-  bool get helperSessionActive => _core.processOwner == CoreProcessOwner.helper;
+  bool get requiresHelperSession => system.isLinux || usesWindowsElevation;
 
   @protected
-  bool get rechecksTunAuthorization => system.isLinux;
+  bool get helperSessionActive =>
+      _core.processOwner ==
+      (usesWindowsElevation
+          ? CoreProcessOwner.windowsElevated
+          : CoreProcessOwner.helper);
+
+  @protected
+  bool get rechecksTunAuthorization => system.isLinux || usesWindowsElevation;
 
   bool _getEffectiveTunEnable(bool enableTun) {
     if (safeModeBuild) {
@@ -615,6 +653,10 @@ class SetupAction extends _$SetupAction {
 
   @protected
   Future<AuthorizeCode> authorizeCore() async {
+    if (usesWindowsElevation) {
+      await _core.requireTunElevation(true, allowPrompt: true);
+      return AuthorizeCode.success;
+    }
     if (!requiresHelperSession) return system.authorizeCore();
     final result = await Linux().registerWithResult();
     _linuxInstallResult = result;
@@ -626,6 +668,9 @@ class SetupAction extends _$SetupAction {
   }
 
   @protected
+  Future<bool> checkGuiElevation() => system.checkIsAdmin();
+
+  @protected
   Future<bool> confirmTunAuthorization() async {
     await windowPort?.show();
     await WidgetsBinding.instance.endOfFrame;
@@ -633,9 +678,13 @@ class SetupAction extends _$SetupAction {
     if (context == null || !context.mounted || _disposed) return false;
     return await dialogs.showMessage(
           context: context,
-          title: currentAppLocalizations.helperAuthorizationTitle,
+          title: usesWindowsElevation
+              ? currentAppLocalizations.windowsElevationTitle
+              : currentAppLocalizations.helperAuthorizationTitle,
           message: TextSpan(
-            text: currentAppLocalizations.helperAuthorizationMessage,
+            text: usesWindowsElevation
+                ? currentAppLocalizations.windowsElevationMessage
+                : currentAppLocalizations.helperAuthorizationMessage,
           ),
           confirmText: currentAppLocalizations.helperAuthorizationContinue,
           cancelText: currentAppLocalizations.helperAuthorizationLater,
@@ -650,6 +699,10 @@ class SetupAction extends _$SetupAction {
 
   @protected
   Future<bool> checkCoreAuthorization() async {
+    if (usesWindowsElevation) {
+      if (helperSessionActive) await _core.requireTunElevation(true);
+      return helperSessionActive;
+    }
     if (!requiresHelperSession) return system.checkIsAdmin();
     if (!system.hasSystemd()) {
       _authorizationProblem = currentAppLocalizations.helperSystemdUnavailable;
@@ -665,6 +718,11 @@ class SetupAction extends _$SetupAction {
   @visibleForTesting
   Future<bool?> requestAdmin(bool enableTun) async {
     if (safeModeBuild) return true;
+    if (usesWindowsElevation && !enableTun) {
+      await _core.requireTunElevation(false);
+      return _core.processOwner == CoreProcessOwner.direct ||
+          (helperSessionActive && await checkGuiElevation());
+    }
     if (!requiresHelperSession) return _requestAdmin(enableTun, null);
     if (!enableTun) return true;
     final revision = _authorizationRevision;
@@ -757,7 +815,9 @@ class SetupAction extends _$SetupAction {
 
     switch (code) {
       case AuthorizeCode.success:
-        authorizationNotifier.value = TunAuthorizationState.authorized;
+        if (!usesWindowsElevation) {
+          authorizationNotifier.value = TunAuthorizationState.authorized;
+        }
         return false;
       case AuthorizeCode.none:
         authorizationNotifier.value = TunAuthorizationState.authorized;
@@ -794,6 +854,15 @@ class SetupAction extends _$SetupAction {
     FutureOr Function()? onUpdated,
   }) async {
     final revision = _authorizationRevision;
+    if (usesWindowsElevation && _core.processOwner == null) {
+      final ready = await requestAdmin(
+        ref.read(patchClashConfigProvider).tun.enable,
+      );
+      if (!_authorizationIsCurrent(revision) || ready == null) {
+        return _SetupTaskResult.aborted;
+      }
+      if (!ready) return _SetupTaskResult.handoffToCoreRestart;
+    }
     var profile = ref.read(currentProfileProvider) ?? recoverMissingProfile();
     // A refresh failure is surfaced by safeRun; setup keeps the old profile.
     final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
@@ -825,6 +894,12 @@ class SetupAction extends _$SetupAction {
     }
     final patchConfig = ref.read(patchClashConfigProvider);
     final effectiveTunEnable = _getEffectiveTunEnable(patchConfig.tun.enable);
+    if (usesWindowsElevation &&
+        patchConfig.tun.enable &&
+        !effectiveTunEnable &&
+        !safeModeBuild) {
+      throw const WindowsLaunchException('windows_tun_not_authorized');
+    }
     final realPatchConfig = patchConfig.copyWith.tun(
       enable: effectiveTunEnable,
     );

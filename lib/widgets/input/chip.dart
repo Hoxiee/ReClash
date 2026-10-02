@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 class CommonChip extends StatelessWidget {
   final String label;
@@ -43,7 +44,7 @@ class CommonChip extends StatelessWidget {
             ),
           ),
           if (onDeleted != null)
-            Tooltip(
+            AppTooltip(
               message: context.appLocalizations.delete,
               child: InkWell(
                 customBorder: AppShape.circle,

@@ -18,6 +18,7 @@ SetupIconFile={{SETUP_ICON_FILE}}
 SetupMutex=ReClashSetupMutex
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
+MinVersion=10.0
 UninstallDisplayName={{DISPLAY_NAME}}
 UninstallDisplayIcon={app}\{{EXECUTABLE_NAME}}
 ; x64 setup stays x64compatible so it also installs under ARM64 emulation;
@@ -179,4 +180,4 @@ Name: "{autoprograms}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\{{DISPLAY_NAME}}"; Filename: "{app}\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: runasoriginaluser nowait postinstall skipifsilent

@@ -3968,6 +3968,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "コアがまだダッシュボードを配信していません",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
+    "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
+      "管理者権限が付与されませんでした。TUN は起動していません。",
+    ),
+    "windowsElevationFailed": MessageLookupByLibrary.simpleMessage(
+      "ネットワークコンポーネントを管理者権限で起動できませんでした。接続をやり直してください。問題が続く場合は、完全なインストーラーで ReClash を再インストールしてください。",
+    ),
+    "windowsElevationMessage": MessageLookupByLibrary.simpleMessage(
+      "ネットワークコンポーネントの起動に必要な管理者権限を Windows が要求します。ReClash 自体は管理者権限なしで動作を続けます。",
+    ),
+    "windowsElevationPending": MessageLookupByLibrary.simpleMessage(
+      "前の Windows 権限要求がまだ終了していません。要求を閉じてからやり直してください。",
+    ),
+    "windowsElevationRequired": MessageLookupByLibrary.simpleMessage(
+      "管理者権限が再び必要です。接続ボタンを押して TUN を再起動してください。",
+    ),
+    "windowsElevationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Windows の権限要求がタイムアウトしました。要求を閉じてから接続をやり直してください。",
+    ),
+    "windowsElevationTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN へのアクセスを許可しますか？",
+    ),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("システムに書き込む"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "取得した時刻をシステムクロックに同期します",

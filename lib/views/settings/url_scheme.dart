@@ -163,7 +163,7 @@ class _CommandItem extends StatelessWidget {
         tooltip: appLocalizations.copy,
         icon: const GlyphIcon(AppGlyphs.copy, size: 20),
         onPressed: () => onCopy(command.link),
-      ),
+      ).withAppTooltip(),
     );
   }
 }

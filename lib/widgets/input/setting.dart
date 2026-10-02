@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 import '../base/card.dart';
 import '../base/focus.dart';
@@ -294,7 +295,7 @@ class SettingSliderItem extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     iconSize: 18,
                     icon: const GlyphIcon(AppGlyphs.replay),
-                  ),
+                  ).withAppTooltip(),
                 ),
               ),
             ),

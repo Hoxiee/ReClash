@@ -27,8 +27,9 @@ Desktop core mode:
   applies a three-minute default method timeout, unwraps `CoreMethodResponse`, and fails all pending calls when transport
   disconnects or closes.
 - `lib/core/desktop/lifecycle.dart` serializes process intents and owns the authoritative desktop state machine.
-- `lib/core/desktop/launcher.dart` abstracts direct child-process and Windows Helper ownership through idempotent process
-  leases. `lib/core/desktop/helper_client.dart` is the typed loopback HTTP client for the privileged Helper.
+- `lib/core/desktop/launcher.dart` abstracts direct child-process and Helper ownership through idempotent process leases.
+  `lib/core/desktop/windows_launcher.dart` adds cancellable, UAC-managed Windows launches; Linux uses the capability-backed
+  Helper through `lib/core/desktop/helper_client.dart`.
 
 `lib/core/controller.dart` (`CoreController`) selects the implementation based on platform. `lib/core/interface.dart` defines the shared `CoreHandlerInterface`.
 
@@ -100,7 +101,7 @@ caller, and uses a three-second watchdog as an emergency application-exit path. 
   that won from one satisfied or replaced by a newer compatible intent.
 - Startup opens or replaces the IPC transport, resolves a launcher, generates a 128-bit lowercase hexadecimal session ID,
   launches Core, and waits for the matching connection. Windows additionally verifies that the named-pipe peer PID equals
-  the process PID returned by the Helper lease.
+  the process PID in the launch lease; the native managed bootstrap authenticates both processes before admitting RPC.
 - Each running session retains its process owner, lease, PID, session ID, and transport connection generation. Stop waits
   for both process-exit confirmation and the matching disconnect generation; a missing disconnect replaces the transport
   before later starts.
@@ -110,8 +111,37 @@ caller, and uses a three-second watchdog as an emergency application-exit path. 
 - An unexpected disconnect or transport failure while running is converted to `DesktopCoreFailure`, the owned process is
   cleaned up, and `CoreService` emits a Core crash event for the normal UI recovery path.
 
-Direct launch is used on macOS/Linux and as the Windows fallback when the privileged Helper is not ready. When the Helper
-is ready on Windows, the Helper owns the Core child and Dart owns it through a session-scoped lease.
+macOS uses direct launch. Linux selects its capability-backed Helper when ready and otherwise uses direct launch for
+local proxy operation. Windows uses direct launch for an ordinary GUI's proxy-only session and `windowsElevated` ownership
+when TUN requires privileges or the GUI is already elevated. A requested TUN without a privileged session or working
+listener is a startup failure, never a successful proxy-only fallback.
+
+### Windows Managed Launch
+
+`CoreService.requireTunElevation` changes the next session's requirements; providers do not spawn Core. Explicit consent
+permits one UAC attempt and is not proof of authorization. Only an active managed Core authorizes TUN. Silent startup and
+automatic recovery do not reuse consent to open another UAC prompt.
+
+- `windows_launcher.dart` prepares a native ticket synchronously before asynchronous launch. `CoreLaunchAttempt` exposes
+  actual spawn, lease readiness and cleanup completion. The lifecycle subscribes to IPC before launch, allows 120 seconds
+  for UAC, and starts the ten-second bootstrap/connection budget at actual spawn. Stop revokes a pending attempt without
+  waiting for the user to dismiss UAC; another launch is blocked until native ownership is settled.
+- `plugins/rust_api/rust/src/windows/` owns the ticket, exact process handle and unnamed kill-on-close Job Object. It
+  locks and hashes the fixed sibling `ReClashCore.exe` before `ShellExecuteExW/runas`. Neither a general command nor an
+  arbitrary executable path is accepted. The manifest hash detects mismatch, not a fully replaced bundle's authenticity.
+- The bootstrap pipe has an explicit DACL at creation, first-instance protection and remote-client rejection. Windows
+  supplies peer PID/session; the handshake also checks process creation identity. Core verifies the original GUI's SID
+  and executable. GUI verifies an elevated identification-only token, allowing a different administrator account's SID.
+- Temporary process/token DACL grants let that administrator query the original GUI and duplicate its job handle. They
+  are restored after handoff or cancellation. Core joins the job and immediately closes its duplicate; the GUI retains
+  the final handle. `JOINED` followed by `COMMIT` gates ordinary RPC and TUN. Cancel revokes the ticket before job shutdown;
+  terminating an empty job is not proof that a delayed UAC launch cannot appear.
+- `core/managed_windows.go` installs a ten-second watchdog before bootstrap, rejects unmanaged elevated startup and checks
+  the GUI again on the RPC pipe. Unconfirmed exit keeps the attempt/lease owned and blocks replacement. A dead GUI ends
+  the managed Core through the job or bootstrap watchdog, without requiring the GUI to hold `PROCESS_TERMINATE`.
+- Core uses the original GUI's supplied data directory, with the root and ancestors held against replacement. This is not
+  a filesystem sandbox for descendant paths or profile/controller operations: Core still executes those with its elevated
+  token. Cross-account handoff and actual UAC/TUN behavior require real Windows validation.
 
 ### Android Service Lifecycle
 
@@ -490,8 +520,9 @@ Platform outputs remain explicit:
 
 - Android builds the Go core as `c-shared`, then copies `libclash.so` and generated headers into the `:core` Android module.
 - macOS and Linux build a standalone `ReClashCore` process used by the desktop socket integration.
-- Windows builds `ReClashCore.exe`, the Rust `ReClashHelperService.exe` privileged helper, and a
-  `manifest.json` containing only `coreSha256`.
+- Windows builds `ReClashCore.exe` and a `manifest.json` containing `coreSha256`. The build tool also compiles the legacy
+  Rust Helper, but `plugins/setup/windows/CMakeLists.txt` excludes it from the application bundle and package checks reject
+  it. Managed elevation is supplied by `rust_api.dll`, not a Windows service.
 
 The hooks follow rust_api/Cargokit's phony-output scheduling pattern, but setup uses its own cache because it builds both a
 Go core and, on Windows, a separate Rust helper. Per-target records live under `.dart_tool/setup_build_cache/v1/`:
@@ -510,37 +541,27 @@ Go core and, on Windows, a separate Rust helper. Per-target records live under `
 This differs from `rust_api`: rust_api is a runtime Flutter Rust Bridge integration whose Cargokit hooks produce its native
 FFI library, while setup is only the build and packaging bridge for FlClash's external core artifacts.
 
-Windows helper integrity/version check:
+### Windows Package Validation
 
-- The build tool constructs the Core first, calculates its SHA256, and always
-  builds the Rust Helper with release hardening and that expected hash.
-- Flutter reads the Core SHA256 from the bundled `manifest.json` and sends it with `/ping`. Debug, Profile, and Release
-  builds use the same Helper protocol and may use TUN through the same flow.
-- `/ping` is loopback-only and requires no request token. The Helper compares the requested SHA256 with its embedded value
-  and checks that the fixed `ReClashCore.exe` beside it exists; `/start` performs the actual Core SHA256 verification before
-  every launch. The response includes the running Helper path and protocol header; Dart checks both against the current
-  installation. The launcher selects the Helper only when `/ping` reports ready; any other readiness (missing manifest,
-  unavailable Helper, or a Helper built for a different Core) falls back to the direct Core without requesting elevation.
-  If `/start` reports a pre-spawn failure — `coreVerificationFailed` (the on-disk Core no longer matches the SHA the
-  Helper and manifest agree on) or `processLaunchFailed` (the Core process could not be spawned) — the launcher degrades
-  to the direct Core rather than failing the launch. `/start` releases the previously managed Core before it verifies,
-  so the Helper owns no Core when either code is reported and the direct retry cannot race a Helper-managed Core.
-  A mismatched Helper is reinstalled through the explicit TUN authorization flow, not at startup.
-- TUN is not a required run condition. A direct Core runs unelevated and cannot bring up TUN, so any degrade to the
-  direct Core — an unready Helper at resolve time, or a pre-spawn `/start` failure — silently drops TUN and keeps the
-  Core running. Degrading is preferred over failing the launch: an unverified Core carries no privilege the direct
-  launch path did not already have. `manifestMissing` is the one readiness that is surfaced to the user, because it
-  means the installation itself is incomplete.
-- Flutter creates a 128-bit lowercase-hex session ID and uses it as the random named-pipe suffix. `/start` receives only
-  that address and session ID, validates the fixed `ReClashCore_<session>` namespace, starts the fixed Core beside the
-  Helper, and returns the same session ID plus the spawned PID. Flutter verifies both the session and named-pipe peer PID.
-- `/stop` requires the same session ID. A missing process returns `notRunning`; a different owner returns
-  `sessionMismatch` without terminating that process. Session IDs are ownership tokens for lifecycle safety, not a claim
-  that the loopback HTTP endpoints are authenticated.
-- Never take `MANAGED_CORE` or `LOGS` with `lock().unwrap()`. The Helper is a long-lived service running as SYSTEM, so a
-  single panic while a lock is held would poison it and turn every later request into another panic — the service stays
-  dead until Windows restarts it. `lock_surviving_poison` recovers the guard through `PoisonError::into_inner` instead.
-  `hub.rs` uses it at every lock site, tests included, and two tests in that file pin the behaviour.
+Windows CMake requires app-local MSVC runtime files and fails if none are found. The Inno template requires Windows 10,
+uses `publisher_name`, and launches post-install with `runasoriginaluser`; it cannot undo elevation if Setup itself was
+started elevated. Silent setup skips that first launch.
+
+`setup.dart` runs `tool/windows_package.dart` on staging through the distributor's pre-package hook and again on the
+finished ZIP. `tool/src/` validates reachable PE imports/delay imports/exports, architecture, required assets, safe ZIP
+paths, absence of the legacy Helper and the Core manifest hash. It resolves app-local runtime dependencies from the bundle,
+not the build host's PATH. An unreachable auxiliary DLL or the standalone x86 `EnableLoopback.exe` is not treated as a
+startup dependency.
+
+`tool/check_windows_package.ps1` verifies Authenticode status, installs into an isolated directory, compares installed
+payload hashes with the ZIP and waits for a GUI window plus successful Core init RPC. Killing only the GUI then requires
+Core exit; failed cleanup retains the installation. CI preserves installer/application logs. Hosted-runner smoke does not
+prove a clean OS, standard-user UAC, cross-account credentials or TUN operation.
+
+Unsigned builds are accepted only when signing is not required; an invalid existing signature always fails the Windows
+check. `WINDOWS_SIGNING_REQUIRED=true` makes release validation reject unsigned binaries. Signing order is payload first,
+then `--finalize-manifest` after signing Core, packaging, setup signature, final signature checks and `SHA256SUMS` last.
+`--finalize-manifest` only updates the hash; neither it nor the PE certificate-directory check establishes trust.
 
 Build configuration defaults live in `build_tool/lib/src/options.dart` and can be overridden via a root `build_config.yaml`.
 
@@ -548,7 +569,7 @@ Architecture detection is automatic. The `--description` flag passed to `flutter
 
 ## Local Plugins
 
-- `setup`: build-time harness for Go core artifacts and the Windows Rust helper; no runtime Dart API.
+- `setup`: build-time harness for Go core and Helper artifacts; no runtime Dart API.
 - `proxy`: system proxy configuration.
 - `rust_api`: runtime Flutter Rust Bridge FFI plugin built through Cargokit. See below.
 - `tray`: system tray for Linux, macOS and Windows. Written for FlClash; replaced the `tray_manager` fork.
@@ -565,6 +586,7 @@ Architecture detection is automatic. The `--description` flag passed to `flutter
   bounded send queue), `platform` (socket cleanup, Windows peer credentials and the non-blocking pipe reader), and
   `server` (lifecycle, accept loop, and the `RUNNING`/`STATE` globals).
 - `script/` runs profile override scripts on QuickJS through `rquickjs`.
+- `windows/` owns managed Core elevation, bootstrap authentication, temporary access grants and Job Object lifetime.
 
 What a platform does not use, it does not compile. `interprocess` is declared under
 `cfg(not(target_os = "android"))`, and `ipc/mod.rs` swaps in `ipc/unsupported.rs` there, because Android loads the Core
@@ -592,40 +614,9 @@ returns the JSON the script produced. Nothing about the script runs in Dart.
   nullish coalescing, `Object.fromEntries`, named capture groups and lookbehind in one pass. Keep it first-party and
   free of external URLs — vendoring somebody's published script here carries their attribution and their links.
 
-## Rust Helper Service
+## Legacy Windows Helper
 
-`services/helper/` is a Windows-only privileged helper for starting the core as admin and managing TUN. It is built with:
-
-```bash
-make core-windows
-```
-
-The build tool always compiles the Helper in Rust release mode after calculating
-the SHA256 of the Core produced for the active Flutter configuration.
-
-The helper owns its Windows Service Control Manager lifecycle through two elevated commands:
-
-- `ReClashHelperService.exe install` stops and removes any stale registration, creates the auto-start service for the
-  current executable path, starts it, and waits for the running state.
-- `ReClashHelperService.exe uninstall` stops the service, waits for shutdown, removes its registration, and is also used
-  by the Windows package uninstaller.
-
-The Dart layer only launches the helper's `install` command through `ShellExecuteW`; it does not compose `sc.exe`,
-`taskkill`, or `cmd.exe` command lines.
-
-In every Flutter build mode `/start` opens the fixed Core executable beside the Helper without write/delete sharing,
-validates it against the SHA256 embedded only in the Helper, and keeps that handle open through process creation.
-`/ping` only compares the requested `coreSha256` with the Helper's embedded value and checks the fixed Core path exists;
-it never hashes the Core. Protocol version 6 uses 32-character lowercase-hex session ownership:
-
-- `GET /ping?coreSha256=...` returns the current Helper executable path with `x-reclash-helper-protocol` when the
-  requested SHA matches.
-- `POST /start` rejects unknown JSON fields, validates `{address, sessionId}`, then releases any previously managed Core
-  before verifying the Core — so every outcome, including a rejected one, leaves the Helper owning no Core — and returns
-  `{sessionId, pid}`.
-- `POST /stop` validates `{sessionId}` and only stops the matching managed Core. A session mismatch is HTTP 409.
-- `GET /logs` exposes the bounded recent Helper/Core stderr buffer with `no-store` caching.
-
-All endpoints bind only to `127.0.0.1:47890` and do not use request-token authentication. Lifecycle safety comes from the
-fixed executable/hash, strict pipe namespace, session-scoped stop contract, and Dart-side peer-PID verification. When the
-Helper service itself shuts down, it unconditionally stops the Core process it owns.
+`services/helper/` retains the legacy Windows service implementation and protocol tests. It is not shipped or selected on
+Windows: its loopback HTTP endpoints lack caller authentication, and session IDs/hash checks do not fix that boundary.
+Do not re-enable it as a fallback for failed UAC. The installer removes stale service registrations and the old executable;
+this cleanup must not remove user data. Linux's separate capability-backed Helper is still used through systemd.

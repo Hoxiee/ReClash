@@ -694,7 +694,7 @@ class _CountryListPageState extends ConsumerState<_CountryListPage> {
               tooltip: appLocalizations.delete,
               onPressed: _deleteSelected,
               icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            ).withAppTooltip(),
           selection.isNotEmpty
               ? FilledButton(
                   onPressed: _toggleSelectAll,

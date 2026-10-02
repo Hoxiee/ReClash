@@ -396,7 +396,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                     icon: const GlyphIcon(AppGlyphs.delete),
                     tooltip: appLocalizations.delete,
                     onPressed: () => _handleDelete(context, ref, strategy),
-                  ),
+                  ).withAppTooltip(),
                   onPressed: () => _update(
                     ref,
                     (state) => state.copyWith(strategyArgs: strategy.args),

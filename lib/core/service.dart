@@ -12,6 +12,7 @@ import 'desktop/lifecycle.dart';
 import 'desktop/model.dart';
 import 'desktop/rpc_client.dart';
 import 'desktop/transport.dart';
+import 'desktop/windows_launcher.dart';
 import 'event.dart';
 import 'interface.dart';
 import 'method.dart';
@@ -21,6 +22,7 @@ class CoreService extends CoreHandlerInterface {
 
   final DesktopCoreLifecycleController _lifecycle;
   final CoreRpcChannel _rpcClient;
+  final WindowsLauncherResolver? _windowsLauncher;
   late final StreamSubscription<DesktopCoreFailure> _crashSubscription;
   Future<CoreLifecycleResult>? _closeOperation;
 
@@ -36,20 +38,29 @@ class CoreService extends CoreHandlerInterface {
   factory CoreService._create() {
     final address = system.isWindows ? windowsPipeName : unixSocketPath;
     final directLauncher = DirectCoreLauncher();
+    final windowsLauncher = system.isWindows
+        ? WindowsLauncherResolver(
+            direct: directLauncher,
+            elevated: WindowsCoreLauncher(),
+          )
+        : null;
 
     final lifecycle = DesktopCoreLifecycle(
       transportFactory: () => IPCCoreTransport(address: address),
-      launcherResolver: HelperLauncherResolver(
-        hasHelper: system.hasHelperService,
-        directLauncher: directLauncher,
-        helperLauncher: HelperLauncher(helperClient),
-        helperReady: () => helperClient.readiness(),
-      ),
+      launcherResolver:
+          windowsLauncher ??
+          HelperLauncherResolver(
+            hasHelper: system.hasHelperService,
+            directLauncher: directLauncher,
+            helperLauncher: HelperLauncher(helperClient),
+            helperReady: () => helperClient.readiness(),
+          ),
       verifyPeerPid: system.isWindows || system.isLinux,
     );
     return CoreService._(
       lifecycle: lifecycle,
       rpcClient: CoreRpcClient(lifecycle.transport),
+      windowsLauncher: windowsLauncher,
     );
   }
 
@@ -57,13 +68,20 @@ class CoreService extends CoreHandlerInterface {
   CoreService.forTesting({
     required DesktopCoreLifecycleController lifecycle,
     required CoreRpcChannel rpcClient,
-  }) : this._(lifecycle: lifecycle, rpcClient: rpcClient);
+    WindowsLauncherResolver? windowsLauncher,
+  }) : this._(
+         lifecycle: lifecycle,
+         rpcClient: rpcClient,
+         windowsLauncher: windowsLauncher,
+       );
 
   CoreService._({
     required DesktopCoreLifecycleController lifecycle,
     required CoreRpcChannel rpcClient,
+    WindowsLauncherResolver? windowsLauncher,
   }) : _lifecycle = lifecycle,
-       _rpcClient = rpcClient {
+       _rpcClient = rpcClient,
+       _windowsLauncher = windowsLauncher {
     _lifecycle.setRecoveryHandler(_recover);
     _crashSubscription = _lifecycle.crashEvents.listen((failure) {
       coreEventManager.sendEvent(
@@ -97,6 +115,27 @@ class CoreService extends CoreHandlerInterface {
     DesktopCoreRunning(:final session) => session.owner,
     _ => null,
   };
+
+  @override
+  Future<bool> requireTunElevation(
+    bool required, {
+    bool allowPrompt = false,
+  }) async {
+    final launcher = _windowsLauncher;
+    if (launcher == null) return false;
+    final wasRequired = launcher.elevationRequired;
+    launcher.elevationRequired = required;
+    if (!required) launcher.promptAllowed = false;
+    if (required && allowPrompt) launcher.promptAllowed = true;
+    if (!required &&
+        ((wasRequired && _lifecycle.state is DesktopCoreStarting) ||
+            _lifecycle.state is DesktopCoreFailed)) {
+      await _lifecycle.stop();
+    }
+    return !required &&
+        (_lifecycle.state is DesktopCoreIdle ||
+            _lifecycle.state is DesktopCoreClosed);
+  }
 
   @override
   Future<CoreLifecycleResult> start() => _lifecycle.start();

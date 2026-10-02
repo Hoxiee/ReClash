@@ -134,7 +134,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
           : appLocalizations.selectAll,
       onPressed: onPressed,
       icon: GlyphIcon(isSelectedAll ? AppGlyphs.deselect : AppGlyphs.selectAll),
-    );
+    ).withAppTooltip();
   }
 
   Widget _buildSmartSelectButton() {
@@ -143,7 +143,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       tooltip: context.appLocalizations.intelligentSelected,
       onPressed: _intelligentSelected,
       icon: const GlyphIcon(AppGlyphs.sparkle),
-    );
+    ).withAppTooltip();
   }
 
   Future<void> _intelligentSelected() async {
@@ -304,7 +304,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
               open(offset: const Offset(0, 0));
             },
             icon: const GlyphIcon(AppGlyphs.more),
-          );
+          ).withAppTooltip();
         },
         popupBuilder: (_) => CommonPopupMenu(
           items: [
@@ -458,7 +458,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
             '${appLocalizations.sort}: ${_getSortLabel(accessControl.sort)}',
         onPressed: () => open(offset: Offset.zero),
         icon: GlyphIcon(_getSortIcon(accessControl.sort)),
-      ),
+      ).withAppTooltip(),
       popupBuilder: (_) => CommonPopupMenu(
         items: [
           for (final type in AccessSortType.values)
@@ -493,7 +493,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       },
       icon: const GlyphIcon(AppGlyphs.android),
       selectedIcon: const GlyphIcon(AppGlyphs.android),
-    );
+    ).withAppTooltip();
   }
 
   Widget _buildOfflineToggle(AccessControlProps accessControl) {
@@ -512,7 +512,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       },
       icon: const GlyphIcon(AppGlyphs.wifiOff),
       selectedIcon: const GlyphIcon(AppGlyphs.wifiOff),
-    );
+    ).withAppTooltip();
   }
 
   Widget _buildCountPill(int count) {

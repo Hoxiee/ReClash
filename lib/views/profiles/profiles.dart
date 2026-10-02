@@ -463,7 +463,7 @@ class ProfileItem extends ConsumerWidget {
                                 open();
                               },
                               icon: const GlyphIcon(AppGlyphs.more),
-                            );
+                            ).withAppTooltip();
                           },
                         ),
                 );

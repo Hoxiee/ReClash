@@ -2497,5 +2497,12 @@
   "doctorHealAttempts": "Repair attempts",
   "doctorNoHealAttempts": "No repair attempts yet",
   "doctorGenerationDrift": "Network or configuration changed since this check ran; its evidence may no longer hold.",
-  "doctorActionUnavailable": "Not available right now"
+  "doctorActionUnavailable": "Not available right now",
+  "windowsElevationTitle": "TUN uchun ruxsat berilsinmi?",
+  "windowsElevationMessage": "Tarmoq komponentini ishga tushirish uchun Windows administrator huquqlarini soʻraydi. ReClash ilovasining oʻzi administrator huquqlarisiz ishlashda davom etadi.",
+  "windowsElevationCancelled": "Administrator huquqlari berilmadi. TUN ishga tushmadi.",
+  "windowsElevationFailed": "Tarmoq komponentini administrator huquqlari bilan ishga tushirib boʻlmadi. Qayta ulanishga urinib koʻring. Muammo takrorlansa, ReClash ilovasini toʻliq oʻrnatuvchi yordamida qayta oʻrnating.",
+  "windowsElevationPending": "Oldingi Windows ruxsat soʻrovi hali yopilmoqda. Qayta urinishdan oldin uni yoping.",
+  "windowsElevationRequired": "Administrator huquqlari yana kerak. TUNʼni qayta ishga tushirish uchun «Ulanish» tugmasini bosing.",
+  "windowsElevationTimeout": "Windows ruxsat soʻrovini kutish vaqti tugadi. Uni yoping va qayta ulanishga urinib koʻring."
 }

@@ -121,7 +121,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
                             _handleDelete();
                           },
                           icon: const GlyphIcon(AppGlyphs.delete),
-                        ),
+                        ).withAppTooltip(),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                     ],
@@ -131,7 +131,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
                           tooltip: appLocalizations.quickAdd,
                           onPressed: _handleQuickAdd,
                           icon: const GlyphIcon(AppGlyphs.bolt),
-                        ),
+                        ).withAppTooltip(),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                     ],

@@ -122,7 +122,7 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
     };
 
     let options = platform::restrict_listener_mode(ListenerOptions::new().name(fs_name));
-    let listener = match options.create_sync() {
+    let listener = match options.and_then(|options| options.create_sync()) {
         Ok(listener) => listener,
         Err(e) => {
             report_error(&sink, format!("bind error: {e}"));

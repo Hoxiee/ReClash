@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-/// The one button that carries its label on an enclosing [Tooltip] instead of
+/// The one button that carries its label on an enclosing `AppTooltip` instead of
 /// its own `tooltip:`. Nesting a second tooltip inside would fight it.
 const _wrappedInTooltip = 'lib/views/dashboard/widgets/core_status_button.dart';
 
@@ -63,16 +63,51 @@ void main() {
     expect(unlabelled, isEmpty, reason: unlabelled.join('\n'));
   });
 
-  test('the exempted button still gets its label from an enclosing Tooltip', () {
-    final source = File(_wrappedInTooltip).readAsStringSync();
-
-    expect(
-      source,
-      contains('Tooltip('),
-      reason:
-          '$_wrappedInTooltip is exempted from the tooltip rule because an '
-          'enclosing Tooltip labels it. That wrapper is gone; either restore it '
-          'or give the button its own tooltip and drop the exemption.',
+  test('labelled buttons use the shared tooltip behavior', () {
+    final offenders = <String>[];
+    final buttons = RegExp(
+      r'\b(?:IconButton(?:\.(?:filled|filledTonal|outlined))?'
+      r'|FloatingActionButton(?:\.(?:small|large|extended))?)\(',
     );
+    for (final file in _dartFilesIn('lib')) {
+      final source = file.readAsStringSync();
+      for (final match in buttons.allMatches(source)) {
+        final arguments = _arguments(source, match.end);
+        if (!RegExp(r'\btooltip\s*:').hasMatch(arguments)) continue;
+        final tail = source.substring(match.end + arguments.length + 1);
+        if (tail.trimLeft().startsWith('.withAppTooltip()')) continue;
+        offenders.add(
+          '${file.path} — finish labelled buttons with .withAppTooltip().',
+        );
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
+
+  test('standalone hints use AppTooltip rather than raw Material Tooltip', () {
+    final offenders = <String>[];
+    for (final file in _dartFilesIn('lib')) {
+      if (file.path.startsWith('lib/l10n/')) continue;
+      if (RegExp(r'\bTooltip\s*\(').hasMatch(file.readAsStringSync())) {
+        offenders.add(file.path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test(
+    'the exempted button still gets its label from an enclosing AppTooltip',
+    () {
+      final source = File(_wrappedInTooltip).readAsStringSync();
+
+      expect(
+        source,
+        contains('AppTooltip('),
+        reason:
+            '$_wrappedInTooltip is exempted from the tooltip rule because an '
+            'enclosing AppTooltip labels it. That wrapper is gone; either restore it '
+            'or give the button its own tooltip and drop the exemption.',
+      );
+    },
+  );
 }

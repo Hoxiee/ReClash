@@ -371,7 +371,7 @@ class _DeviceCard extends StatelessWidget {
           icon: const GlyphIcon(AppGlyphs.more),
           tooltip: l.edit,
           onPressed: onMenu,
-        ),
+        ).withAppTooltip(),
       ],
     );
   }

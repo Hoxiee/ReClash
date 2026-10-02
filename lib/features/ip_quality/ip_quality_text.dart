@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/ip_quality.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 
 import 'ip_quality_sheet.dart';
 import 'labels.dart';
@@ -48,7 +49,7 @@ class _IpQualityTextState extends ConsumerState<IpQualityText> {
     if (widget.openDetails && !_isHovered) {
       style = style?.copyWith(color: style.color?.opacity80);
     }
-    final text = Tooltip(
+    final text = AppTooltip(
       preferBelow: false,
       message: shownIp,
       child: Text(

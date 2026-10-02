@@ -143,7 +143,7 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
             tooltip: appLocalizations.delete,
             onPressed: _handleDelete,
             icon: const GlyphIcon(AppGlyphs.delete),
-          ),
+          ).withAppTooltip(),
         widget.selectionEnabled && selected.isNotEmpty
             ? FilledButton(
                 onPressed: _handleSelectAll,

@@ -2364,5 +2364,12 @@
   "doctorHealAttempts": "Repair attempts",
   "doctorNoHealAttempts": "No repair attempts yet",
   "doctorGenerationDrift": "Network or configuration changed since this check ran; its evidence may no longer hold.",
-  "doctorActionUnavailable": "Not available right now"
+  "doctorActionUnavailable": "Not available right now",
+  "windowsElevationTitle": "允许访问 TUN？",
+  "windowsElevationMessage": "Windows 将请求管理员权限以启动网络组件。ReClash 本身将继续以普通权限运行。",
+  "windowsElevationCancelled": "未授予管理员权限，TUN 未启动。",
+  "windowsElevationFailed": "无法以管理员权限启动网络组件。请重试连接；如果问题仍然存在，请使用完整安装程序重新安装 ReClash。",
+  "windowsElevationPending": "上一次 Windows 权限请求仍在关闭中。请先关闭该请求，再重试。",
+  "windowsElevationRequired": "需要重新授予管理员权限。请点击连接以重新启动 TUN。",
+  "windowsElevationTimeout": "Windows 权限请求已超时。请关闭该请求，然后重试连接。"
 }

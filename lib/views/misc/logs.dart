@@ -284,8 +284,12 @@ class _LogFilterButton extends StatelessWidget {
                 tooltip: tooltip,
                 onPressed: () => open(),
                 icon: icon,
-              )
-            : IconButton(tooltip: tooltip, onPressed: () => open(), icon: icon);
+              ).withAppTooltip()
+            : IconButton(
+                tooltip: tooltip,
+                onPressed: () => open(),
+                icon: icon,
+              ).withAppTooltip();
       },
     );
   }

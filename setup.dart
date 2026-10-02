@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import 'tool/src/release_version.dart';
+import 'tool/src/windows_bundle.dart';
 
 const _appImageToolRelease = '12';
 const _appImageToolSha256 = <String, String>{
@@ -245,6 +246,8 @@ Future<int> _package(
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)
         '--flutter-build-args=${flutterBuildArgs.join(',')}',
+      if (platform == 'windows')
+        '--hook-pre=${createWindowsPackageHook(rootDir, arch)}',
       ...descriptionArgs,
     ],
     includeParentEnvironment: true,
@@ -269,7 +272,45 @@ Future<int> _package(
       targets.split(',').contains('pacman')) {
     await renamePacmanArtifacts(rootDir);
   }
+  if (exitCode == 0 && platform == 'windows') {
+    validateWindowsArtifacts(rootDir, arch, targets, version.name);
+  }
   return exitCode;
+}
+
+String createWindowsPackageHook(String rootDir, String arch) {
+  String quote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
+  return '${quote(Platform.resolvedExecutable)} '
+      '${quote(p.join(rootDir, 'tool', 'windows_package.dart'))} '
+      '--arch $arch --from-environment';
+}
+
+void validateWindowsArtifacts(
+  String rootDir,
+  String arch,
+  String targets,
+  String version,
+) {
+  for (final target in targets.split(',')) {
+    final suffix = switch (target) {
+      'exe' => '-setup.exe',
+      'zip' => '.zip',
+      _ => null,
+    };
+    if (suffix == null) continue;
+    final file = File(
+      p.join(rootDir, 'dist', 'ReClash-$version-windows-$arch$suffix'),
+    );
+    if (!file.existsSync() || file.lengthSync() == 0) {
+      throw StateError('Missing Windows package: ${file.path}');
+    }
+    if (target == 'zip') {
+      final report = WindowsBundle.zip(
+        file,
+      ).validate(machine: windowsMachine(arch));
+      stdout.writeln('Final Windows ZIP verified: $report');
+    }
+  }
 }
 
 /// Renames the maker's `.pacman` output to the manifest's `.pkg.tar.xz`.
