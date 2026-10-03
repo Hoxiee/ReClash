@@ -14,6 +14,7 @@ List<Group> displayServerGroups(Mode mode, List<Group> groups) =>
 String? selectCurrentServerGroupHint({
   required Mode mode,
   required List<Group> groups,
+  bool smartRoutingEnabled = false,
   String? componentGroup,
   String? profileGroup,
 }) {
@@ -23,6 +24,13 @@ String? selectCurrentServerGroupHint({
       explicitGroup.isNotEmpty &&
       displayGroups.getGroup(explicitGroup) != null) {
     return explicitGroup;
+  }
+
+  if (mode == Mode.global) {
+    return displayGroups.getGroup(GroupName.GLOBAL.name)?.name;
+  }
+  if (smartRoutingEnabled && displayGroups.getGroup(rcxNodeGroupName) != null) {
+    return rcxNodeGroupName;
   }
 
   final preferredGroup = profileGroup?.trim();
@@ -64,6 +72,9 @@ String? activeServerGroup(Ref ref) {
   return selectCurrentServerGroupHint(
     mode: mode,
     groups: groups,
+    smartRoutingEnabled: ref.watch(
+      smartRoutingSettingProvider.select((state) => state.enabled),
+    ),
     componentGroup: componentGroup,
     profileGroup: profileGroup,
   );

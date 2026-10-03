@@ -45,6 +45,8 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
   networkOfflineText: json['networkOfflineText'] as String? ?? 'Offline',
   networkUnknownText: json['networkUnknownText'] as String? ?? 'Unknown',
   activeText: json['activeText'] as String? ?? 'Protection active',
+  neutralActiveText:
+      json['neutralActiveText'] as String? ?? 'Protection active',
   activeServerGroup: json['activeServerGroup'] as String?,
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool,
   notificationSettings: json['notificationSettings'] == null
@@ -86,6 +88,7 @@ Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
       'networkOfflineText': instance.networkOfflineText,
       'networkUnknownText': instance.networkUnknownText,
       'activeText': instance.activeText,
+      'neutralActiveText': instance.neutralActiveText,
       'activeServerGroup': instance.activeServerGroup,
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'notificationSettings': instance.notificationSettings,

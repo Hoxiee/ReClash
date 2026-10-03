@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/state.dart';
 
 const _maxNoticeTitleLength = 80;
 
@@ -73,18 +75,27 @@ class SystemNotice {
     notice.title,
   ];
 
+  @visibleForTesting
+  Future<bool> showAndroid(NoticeRequest notice, App bridge) {
+    final settings = globalState.container
+        .read(appSettingProvider)
+        .notificationSettings;
+    return bridge.showNotice(
+      channelName: notice.channelName,
+      notificationKey: notice.notificationKey,
+      title: notice.title,
+      message: notice.message,
+      hideSensitiveOnLockScreen: settings.hideSensitiveOnLockScreen,
+      publicMessage: currentAppLocalizations.subscriptionNoticeChannel,
+      actionLabel: notice.actionLabel,
+      actionUrl: notice.actionUrl,
+    );
+  }
+
   Future<bool> show(NoticeRequest notice) async {
     try {
       if (system.isAndroid) {
-        return await app?.showNotice(
-              channelName: notice.channelName,
-              notificationKey: notice.notificationKey,
-              title: notice.title,
-              message: notice.message,
-              actionLabel: notice.actionLabel,
-              actionUrl: notice.actionUrl,
-            ) ??
-            false;
+        return await showAndroid(notice, app!);
       }
       if (system.isLinux) {
         return await _runSender('notify-send', linuxArguments(notice));

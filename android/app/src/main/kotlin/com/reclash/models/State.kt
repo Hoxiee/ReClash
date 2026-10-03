@@ -50,6 +50,7 @@ data class SharedState(
     val networkOfflineText: String = "Offline",
     val networkUnknownText: String = "Unknown",
     val activeText: String = "Protection active",
+    val neutralActiveText: String = "Protection active",
     val activeServerGroup: String? = null,
     val onlyStatisticsProxy: Boolean = false,
     val notificationSettings: NotificationSettings = NotificationSettings(),

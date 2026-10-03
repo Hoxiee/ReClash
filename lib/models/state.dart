@@ -345,6 +345,7 @@ abstract class SharedState with _$SharedState {
     @Default('Offline') String networkOfflineText,
     @Default('Unknown') String networkUnknownText,
     @Default('Protection active') String activeText,
+    @Default('Protection active') String neutralActiveText,
     String? activeServerGroup,
     required bool onlyStatisticsProxy,
     @Default(defaultNotificationSettings)

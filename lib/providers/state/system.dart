@@ -244,6 +244,7 @@ SharedState sharedState(Ref ref) {
     networkOfflineText: currentAppLocalizations.notificationNetworkOffline,
     networkUnknownText: currentAppLocalizations.notificationNetworkUnknown,
     activeText: activeText ?? currentAppLocalizations.heroProtected,
+    neutralActiveText: currentAppLocalizations.heroProtected,
     activeServerGroup: ref.watch(activeServerGroupProvider),
     crashlytics: crashlytics,
     pureBlackTheme: pureBlackTheme,

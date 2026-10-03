@@ -293,6 +293,8 @@ class App {
     required String notificationKey,
     required String title,
     required String message,
+    required bool hideSensitiveOnLockScreen,
+    required String publicMessage,
     String? actionLabel,
     String? actionUrl,
   }) async {
@@ -302,6 +304,8 @@ class App {
             'notificationKey': notificationKey,
             'title': title,
             'message': message,
+            'hideSensitiveOnLockScreen': hideSensitiveOnLockScreen,
+            'publicMessage': publicMessage,
             'actionLabel': actionLabel,
             'actionUrl': actionUrl,
           }) ??

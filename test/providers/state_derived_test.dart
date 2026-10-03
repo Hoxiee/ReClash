@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -577,6 +578,18 @@ void main() {
       final l10n = AppLocalizations.current;
       expect(sharedState.activeServerGroup, 'Preferred');
       expect(sharedState.activeText, 'Protected by provider');
+      expect(sharedState.neutralActiveText, l10n.heroProtected);
+      final payload =
+          jsonDecode(jsonEncode(sharedState.toJson())) as Map<String, dynamic>;
+      expect(
+        SharedState.fromJson(payload).neutralActiveText,
+        l10n.heroProtected,
+      );
+      payload.remove('neutralActiveText');
+      expect(
+        SharedState.fromJson(payload).neutralActiveText,
+        'Protection active',
+      );
       expect(sharedState.networkStateText, l10n.notificationNetworkState);
       expect(sharedState.currentServerText, l10n.notificationCurrentServer);
       expect(sharedState.networkNormalText, l10n.notificationNetworkNormal);

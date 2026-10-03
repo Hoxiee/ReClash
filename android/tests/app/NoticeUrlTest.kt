@@ -1,5 +1,6 @@
 package com.reclash
 
+import androidx.core.app.NotificationCompat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
@@ -16,6 +17,22 @@ class NoticeUrlTest {
         assertEquals(subscriptionNoticeId(profile), subscriptionNoticeId(profile))
         assertNotEquals(subscriptionNoticeId("subscription:personal"), subscriptionNoticeId(profile))
         assertTrue(subscriptionNoticeId(profile) >= 2_000)
+    }
+
+    @Test
+    fun `reminder privacy publishes only the neutral text when enabled`() {
+        val privacy = noticePrivacy(true, "Subscription reminders")
+
+        assertEquals(NotificationCompat.VISIBILITY_PRIVATE, privacy.visibility)
+        assertEquals("Subscription reminders", privacy.publicMessage)
+    }
+
+    @Test
+    fun `disabling reminder privacy clears the public version`() {
+        val privacy = noticePrivacy(false, "Subscription reminders")
+
+        assertEquals(NotificationCompat.VISIBILITY_PUBLIC, privacy.visibility)
+        assertNull(privacy.publicMessage)
     }
 
     @Test

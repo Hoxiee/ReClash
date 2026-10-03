@@ -258,6 +258,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                     notificationKey = call.argument<String>("notificationKey").orEmpty(),
                     title = call.argument<String>("title").orEmpty(),
                     message = call.argument<String>("message").orEmpty(),
+                    hideSensitiveOnLockScreen = call.argument<Boolean>("hideSensitiveOnLockScreen") ?: true,
+                    publicMessage = call.argument<String>("publicMessage").orEmpty(),
                     actionLabel = call.argument<String>("actionLabel"),
                     actionUrl = call.argument<String>("actionUrl"),
                 )

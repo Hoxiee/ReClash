@@ -234,6 +234,11 @@ class _NotificationSettingsViewState
                 (state) => state.copyWith(hideSensitiveOnLockScreen: value),
               ),
             ),
+            _settingsLink(
+              icon: AppGlyphs.settings,
+              title: l.setupPermissionOpenSettings,
+              onPressed: () => _openSettings(null),
+            ),
           ],
         ),
         SettingSection.sliver(
@@ -265,13 +270,13 @@ class _NotificationSettingsViewState
   DecorationListItem _settingsLink({
     required Glyph icon,
     required String title,
-    required String subtitle,
+    String? subtitle,
     required VoidCallback onPressed,
   }) {
     return DecorationListItem(
       leading: GlyphIcon(icon),
       title: Text(title),
-      subtitle: Text(subtitle),
+      subtitle: subtitle == null ? null : Text(subtitle),
       trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
       onPressed: onPressed,
     );

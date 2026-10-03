@@ -64,6 +64,7 @@ class SharedStateTest {
                 "subscriptionReminders": false
               },
               "activeText": "Protected",
+              "neutralActiveText": "Protection enabled",
               "vpnOptions": {
                 "enable": true,
                 "port": 7890,
@@ -95,6 +96,8 @@ class SharedStateTest {
         assertEquals(false, state.crashlytics)
         assertEquals(true, state.onlyStatisticsProxy)
         assertEquals("Protected", state.activeText)
+        assertEquals("Protection enabled", state.neutralActiveText)
+        assertEquals(state, gson.fromJson(gson.toJson(state), SharedState::class.java))
         assertEquals("traffic", state.notificationSettings.contentMode)
         assertEquals(
             listOf("currentServer", "speed"),
@@ -129,6 +132,11 @@ class SharedStateTest {
         assertEquals(false, defaults.crashlytics)
         assertEquals(false, defaults.onlyStatisticsProxy)
         assertEquals("Protection active", defaults.activeText)
+        assertEquals("Protection active", defaults.neutralActiveText)
+        assertEquals(
+            "Protection active",
+            gson.fromJson("""{"activeText":"Private provider"}""", SharedState::class.java).neutralActiveText,
+        )
         assertEquals("adaptive", defaults.notificationSettings.contentMode)
         assertEquals("problems", defaults.notificationSettings.doctorPriority)
         assertTrue(defaults.notificationSettings.showSessionTraffic)

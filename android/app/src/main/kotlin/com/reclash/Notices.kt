@@ -30,11 +30,22 @@ internal fun openableUrl(url: String?): String? {
     return scheme + value.substring(scheme.length)
 }
 
+internal data class NoticePrivacy(val visibility: Int, val publicMessage: String?)
+
+internal fun noticePrivacy(hideSensitiveOnLockScreen: Boolean, publicMessage: String): NoticePrivacy =
+    if (hideSensitiveOnLockScreen) {
+        NoticePrivacy(NotificationCompat.VISIBILITY_PRIVATE, publicMessage)
+    } else {
+        NoticePrivacy(NotificationCompat.VISIBILITY_PUBLIC, null)
+    }
+
 internal fun Context.showNotice(
     channelName: String,
     notificationKey: String,
     title: String,
     message: String,
+    hideSensitiveOnLockScreen: Boolean,
+    publicMessage: String,
     actionLabel: String?,
     actionUrl: String?,
 ): Boolean {
@@ -42,8 +53,19 @@ internal fun Context.showNotice(
     if (!manager.areNotificationsEnabled()) return false
     ensureSubscriptionChannel(channelName)
     if (!isChannelEnabled(SUBSCRIPTION_NOTICE_CHANNEL)) return false
+    val privacy = noticePrivacy(hideSensitiveOnLockScreen, publicMessage)
+    val publicVersion = privacy.publicMessage?.let { text ->
+        NotificationCompat.Builder(this, SUBSCRIPTION_NOTICE_CHANNEL)
+            .setSmallIcon(ServiceR.drawable.ic_service)
+            .setContentTitle("ReClash")
+            .setContentText(text)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+    }
     val builder = NotificationCompat.Builder(this, SUBSCRIPTION_NOTICE_CHANNEL)
         .setSmallIcon(ServiceR.drawable.ic_service)
+        .setVisibility(privacy.visibility)
+        .setPublicVersion(publicVersion)
         .setContentTitle(title)
         .setContentText(message)
         .setStyle(NotificationCompat.BigTextStyle().bigText(message))

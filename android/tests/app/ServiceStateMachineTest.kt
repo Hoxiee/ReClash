@@ -229,7 +229,8 @@ class ServiceStateMachineTest {
                 doctorObservingText = "Наблюдение",
                 sessionTrafficText = "Трафик сеанса",
                 activeText = "Защита включена",
-                activeServerGroup = "GLOBAL",
+                neutralActiveText = "Защита активна",
+                activeServerGroup = "  GLOBAL  ",
                 notificationSettings = NotificationSettings(
                     components = listOf(
                         NotificationComponent(type = "networkState", group = "ignored"),
@@ -240,7 +241,7 @@ class ServiceStateMachineTest {
                         ),
                         NotificationComponent(
                             type = "currentServer",
-                            group = "Proxy",
+                            group = "  Proxy  ",
                         ),
                         NotificationComponent(type = "speed", hideWhenIdle = false),
                         NotificationComponent(type = "networkState"),
@@ -274,6 +275,7 @@ class ServiceStateMachineTest {
         assertEquals("Наблюдение", params.doctorObservingText)
         assertEquals("Трафик сеанса", params.sessionTrafficText)
         assertEquals("Защита включена", params.activeText)
+        assertEquals("Защита активна", params.neutralActiveText)
         assertEquals("GLOBAL", params.activeServerGroup)
         assertEquals(
             listOf("networkState", "connectionDoctor", "currentServer", "speed"),

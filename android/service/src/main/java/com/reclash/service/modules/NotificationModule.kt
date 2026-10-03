@@ -58,28 +58,84 @@ internal fun NotificationParams.extended(
     activeServer: String? = null,
     activeServerResolver: (() -> String?)? = null,
 ): ExtendedNotificationParams {
+    val detailed = visibility == "detailed"
     return ExtendedNotificationParams(
-        title = title,
+        title = if (detailed) title else "ReClash",
         stopText = stopText,
         pauseText = pauseText,
         resumeText = resumeText,
         paused = paused,
-        showPauseAction = showPauseAction,
-        showStopAction = showStopAction,
+        showPauseAction = detailed && showPauseAction,
+        showStopAction = detailed && showStopAction,
         hideSensitiveOnLockScreen = hideSensitiveOnLockScreen,
-        publicContentText = activeText,
-        contentText = if (paused) {
-            pausedText
-        } else {
-            content(routing, doctor, activeServer ?: activeServerResolver?.invoke())
+        publicContentText = if (paused) pausedText else neutralActiveText,
+        contentText = when {
+            paused -> pausedText
+            !detailed -> neutralActiveText
+            else -> content(routing, doctor, activeServer ?: activeServerResolver?.invoke())
         },
     )
 }
 
-// Every other component is redrawn by its own event; only live counters need a
-// clock, and only while somebody can read them.
-internal val NotificationParams.needsTicker: Boolean
-    get() = components.any { it.type == "speed" || it.type == "sessionTraffic" }
+internal val NotificationParams.updateIntervalMillis: Long?
+    get() = when {
+        visibility != "detailed" -> null
+        components.any { it.type == "speed" || it.type == "sessionTraffic" } -> 1_000L
+        components.any { it.type == "currentServer" } && !activeServerGroup.isNullOrBlank() -> 2_000L
+        else -> null
+    }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun notificationTicks(
+    params: Flow<NotificationParams>,
+    pause: Flow<PauseState>,
+    screenOn: Flow<Boolean>,
+): Flow<Unit> = combine(
+    params.map { it.updateIntervalMillis },
+    pause.map { it.paused },
+    screenOn,
+) { interval, paused, visible -> interval.takeIf { visible && !paused } }
+    .distinctUntilChanged()
+    .flatMapLatest { interval ->
+        if (interval == null) {
+            flowOf(Unit)
+        } else {
+            flow {
+                while (true) {
+                    emit(Unit)
+                    delay(interval)
+                }
+            }
+        }
+    }
+
+internal fun notificationUpdates(
+    params: Flow<NotificationParams>,
+    pause: Flow<PauseState>,
+    routing: Flow<SmartRoutingStatus>,
+    doctor: Flow<DoctorStatus>,
+    screenOn: Flow<Boolean>,
+    resolveServer: (String) -> String?,
+): Flow<ExtendedNotificationParams> = combine(
+    notificationTicks(params, pause, screenOn),
+    params,
+    pause,
+    routing,
+    doctor,
+) { _, current, pauseState, routingStatus, doctorStatus ->
+    current.extended(
+        paused = pauseState.paused,
+        routing = routingStatus,
+        doctor = doctorStatus,
+        activeServerResolver = { current.resolveActiveServer(resolveServer) },
+    )
+}.distinctUntilChanged()
+
+internal fun NotificationParams.resolveActiveServer(resolveServer: (String) -> String?): String? {
+    if (components.none { it.type == "currentServer" }) return null
+    val group = activeServerGroup?.trim()?.takeIf(String::isNotBlank) ?: return null
+    return runCatching { resolveServer(group) }.getOrNull()
+}
 
 internal fun NotificationParams.projectContent(
     routing: SmartRoutingStatus,
@@ -197,46 +253,16 @@ internal class NotificationModule(
     override fun start() {
         update(currentParams())
         scope.launch {
-            combine(
-                ticker(),
-                ServiceConfig.notificationParams,
-                ServiceConfig.pauseState,
-                ServiceConfig.smartRoutingStatus,
-                ServiceConfig.doctorStatus,
-            ) { values ->
-                val params = values[1] as NotificationParams
-                params.extended(
-                    paused = (values[2] as PauseState).paused,
-                    routing = values[3] as SmartRoutingStatus,
-                    doctor = values[4] as DoctorStatus,
-                    activeServerResolver = { params.resolveActiveServer() },
-                )
-            }.distinctUntilChanged()
-                .collect(::update)
+            notificationUpdates(
+                params = ServiceConfig.notificationParams,
+                pause = ServiceConfig.pauseState,
+                routing = ServiceConfig.smartRoutingStatus,
+                doctor = ServiceConfig.doctorStatus,
+                screenOn = screenState.state.map { it.screenOn },
+                resolveServer = { Core.getActiveServerState(it) },
+            ).collect(::update)
         }
     }
-
-    // Gated on ScreenState's default-display verdict, not raw isInteractive: an
-    // always-on display or an OEM lock screen reads as interactive, and keying the
-    // per-second rebuild off that leaked the ticker while the panel was dark.
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun ticker(): Flow<Unit> = combine(
-        ServiceConfig.notificationParams.map { it.needsTicker }.distinctUntilChanged(),
-        screenState.state.map { it.screenOn }.distinctUntilChanged(),
-    ) { needed, screenOn -> needed && screenOn }
-        .distinctUntilChanged()
-        .flatMapLatest { live ->
-            if (live) {
-                flow {
-                    while (true) {
-                        emit(Unit)
-                        delay(1_000)
-                    }
-                }
-            } else {
-                flowOf(Unit)
-            }
-        }
 
     private fun currentParams(): ExtendedNotificationParams {
         val params = ServiceConfig.notificationParams.value
@@ -244,14 +270,10 @@ internal class NotificationModule(
             paused = ServiceConfig.pauseState.value.paused,
             routing = ServiceConfig.smartRoutingStatus.value,
             doctor = ServiceConfig.doctorStatus.value,
-            activeServerResolver = { params.resolveActiveServer() },
+            activeServerResolver = {
+                params.resolveActiveServer { Core.getActiveServerState(it) }
+            },
         )
-    }
-
-    private fun NotificationParams.resolveActiveServer(): String? {
-        val component = components.firstOrNull { it.type == "currentServer" } ?: return null
-        val group = component.group ?: activeServerGroup ?: return null
-        return runCatching { Core.getActiveServerState(group) }.getOrNull()
     }
 
     private val builder: NotificationCompat.Builder by lazy {

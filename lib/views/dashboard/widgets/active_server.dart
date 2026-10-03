@@ -24,6 +24,7 @@ final activeServerProvider = Provider<ActiveServerInfo>((ref) {
       final groupHint = selectCurrentServerGroupHint(
         mode: mode,
         groups: state,
+        smartRoutingEnabled: smartRouting,
         profileGroup: serverInfoHeader,
       );
       return _selectServerInfo(displayGroups, groupHint);
@@ -102,28 +103,11 @@ _SelectedServer _selectServerInfo(
   List<Group> groups,
   String? serverInfoHeader,
 ) {
-  var serverName = '';
-  String? testUrl;
-  Group? activeGroup;
-  if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-    final group = groups.getGroup(serverInfoHeader.trim());
-    if (group != null) {
-      activeGroup = group;
-      serverName = _resolveToDisplayName(groups, group.name);
-      testUrl = group.testUrl;
-    }
-  }
-  if (serverName.isEmpty) {
-    for (final group in groups) {
-      final now = group.realNow;
-      if (now.isNotEmpty && now != 'DIRECT' && now != 'REJECT') {
-        activeGroup = group;
-        serverName = _resolveToDisplayName(groups, group.name);
-        testUrl = group.testUrl;
-        break;
-      }
-    }
-  }
+  final activeGroup = groups.getGroup(serverInfoHeader ?? '');
+  final serverName = activeGroup == null
+      ? ''
+      : _resolveToDisplayName(groups, activeGroup.name);
+  final testUrl = activeGroup?.testUrl;
   final activeCode = flagToCountryCode(serverName)?.toUpperCase();
   final groupCodes = activeGroup == null
       ? const <String>[]

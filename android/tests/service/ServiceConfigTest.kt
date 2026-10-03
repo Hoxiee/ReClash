@@ -6,7 +6,7 @@ import com.reclash.service.models.NotificationComponent
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.parseActiveServer
 import com.reclash.service.modules.extended
-import com.reclash.service.modules.needsTicker
+import com.reclash.service.modules.updateIntervalMillis
 import com.reclash.service.modules.projectContent
 import com.reclash.service.models.VpnOptions
 import kotlinx.coroutines.test.runTest
@@ -207,6 +207,7 @@ class ServiceConfigTest {
     fun `notification carries real content and a sanitized public version for lock-screen redaction`() {
         val params = NotificationParams(
             title = "Private profile",
+            visibility = "detailed",
             showPauseAction = true,
             showStopAction = true,
             components = listOf(NotificationComponent(type = "smartRouting")),
@@ -229,6 +230,7 @@ class ServiceConfigTest {
     fun `privacy and paused overrides do not resolve current server`() {
         var resolverCalls = 0
         val params = NotificationParams(
+            visibility = "detailed",
             components = listOf(NotificationComponent(type = "currentServer", group = "GLOBAL")),
         )
         val resolver = {
@@ -250,6 +252,7 @@ class ServiceConfigTest {
     fun `notification projection shows the paused text and keeps actions while paused`() {
         val params = NotificationParams(
             title = "Visible profile",
+            visibility = "detailed",
             showPauseAction = true,
             showStopAction = true,
         )
@@ -267,28 +270,31 @@ class ServiceConfigTest {
     }
 
     @Test
-    fun `only live counters ask the notification for a ticker`() {
-        assertEquals(false, NotificationParams().needsTicker)
+    fun `only visible live components ask the notification for a ticker`() {
+        assertEquals(null, NotificationParams().updateIntervalMillis)
         assertEquals(
-            false,
+            null,
             NotificationParams(
+                visibility = "detailed",
                 components = listOf(NotificationComponent(type = "networkState")),
-            ).needsTicker,
+            ).updateIntervalMillis,
         )
         assertEquals(
-            true,
+            1_000L,
             NotificationParams(
+                visibility = "detailed",
                 components = listOf(
                     NotificationComponent(type = "networkState"),
                     NotificationComponent(type = "speed"),
                 ),
-            ).needsTicker,
+            ).updateIntervalMillis,
         )
         assertEquals(
-            true,
+            1_000L,
             NotificationParams(
+                visibility = "detailed",
                 components = listOf(NotificationComponent(type = "sessionTraffic")),
-            ).needsTicker,
+            ).updateIntervalMillis,
         )
     }
 

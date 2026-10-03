@@ -217,6 +217,36 @@ void main() {
     expect(opened, ['ReClash']);
   });
 
+  testWidgets(
+    'privacy changes apply at minimal level and link to Android settings',
+    (tester) async {
+      final opened = <String?>[];
+      await pumpView(
+        tester,
+        openSettings: ({String? channelId}) async {
+          opened.add(channelId);
+          return true;
+        },
+      );
+      final privacy = find.text('Hide sensitive details on lock screen');
+      await tester.scrollUntilVisible(privacy, 400);
+      await tester.tap(privacy);
+      await tester.pumpAndSettle();
+      expect(
+        container
+            .read(appSettingProvider)
+            .notificationSettings
+            .hideSensitiveOnLockScreen,
+        isFalse,
+      );
+
+      await tester.scrollUntilVisible(find.text('Open settings'), 400);
+      await tester.tap(find.text('Open settings'));
+      await tester.pumpAndSettle();
+      expect(opened, [null]);
+    },
+  );
+
   List<NotificationComponentType> readTypes() => container
       .read(appSettingProvider)
       .notificationSettings

@@ -479,7 +479,8 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             networkOfflineText = state.networkOfflineText,
             networkUnknownText = state.networkUnknownText,
             activeText = state.activeText,
-            activeServerGroup = state.activeServerGroup,
+            neutralActiveText = state.neutralActiveText,
+            activeServerGroup = state.activeServerGroup?.trim()?.takeIf(String::isNotBlank),
             components = notificationComponents(state.notificationSettings),
             showPauseAction = state.notificationSettings.showPauseAction,
             showStopAction = state.notificationSettings.showStopAction,
@@ -522,7 +523,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             )
             "currentServer" -> NotificationComponent(
                 type = type,
-                group = group?.takeIf(String::isNotBlank),
+                group = group?.trim()?.takeIf(String::isNotBlank),
             )
             else -> NotificationComponent(type = type)
         }

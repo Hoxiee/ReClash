@@ -31,6 +31,7 @@ data class NotificationParams(
     val networkOfflineText: String = "Offline",
     val networkUnknownText: String = "Unknown",
     val activeText: String = "Protection active",
+    val neutralActiveText: String = "Protection active",
     val activeServerGroup: String? = null,
     val components: List<NotificationComponent> = emptyList(),
     val showPauseAction: Boolean = true,

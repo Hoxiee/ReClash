@@ -1074,7 +1074,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'40b6cbc4868b93c488ff4d72c6f58020c77f5520';
+String _$sharedStateHash() => r'cb22bd558539ec8bfa88b83527f244fc6f39b133';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1680,7 +1680,7 @@ final class ActiveServerGroupProvider
   }
 }
 
-String _$activeServerGroupHash() => r'8b83d5348a9a1ab29569c7d1e042d2f733edca20';
+String _$activeServerGroupHash() => r'f4d9e8f7cff50149ca5a8ce02329fcb83c7d0a17';
 
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();
