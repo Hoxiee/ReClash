@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,7 +159,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           .validateConfigWithData(data);
       return message;
     }, silence: false);
-    if (message?.isNotEmpty == true) {
+    if (message == null) {
+      return;
+    }
+    if (message.isNotEmpty) {
       unawaited(
         dialogs.showMessage(
           title: currentAppLocalizations.tip,
@@ -230,43 +232,43 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   }
 
   Future<void> _editProfileFile() async {
-    if (_rawText == null) {
-      final profilePath = await appPath.getProfilePath(
-        widget.profile.id.toString(),
-      );
-      final file = File(profilePath);
-      if (await file.exists()) {
-        _rawText = await file.readAsString();
-      }
-    }
-    if (!mounted) return;
     final title = widget.profile.label.takeFirstValid([
       widget.profile.id.toString(),
     ]);
+    late final String raw;
     final editorPage = EditorPage(
       title: title,
-      content: _rawText!,
-      onSave: (context, _, content) {
-        _handleSaveEdit(context, content);
+      load: () async {
+        final cached = _rawText;
+        if (cached != null) {
+          return raw = cached;
+        }
+        final path = await appPath.getProfilePath(widget.profile.id.toString());
+        return raw = await readTextFileTask(path) ?? '';
       },
+      onSave: (context, _, content) => _handleSaveEdit(context, content),
       onPop: (context, _, content) async {
-        if (content == _rawText) {
+        if (content == raw) {
           return true;
         }
         final res = await dialogs.showMessage(
           title: title,
           message: TextSpan(text: context.appLocalizations.hasCacheChange),
         );
-        if (res == true && context.mounted) {
-          unawaited(_handleSaveEdit(context, content));
-        } else {
+        if (res == null) {
+          return false;
+        }
+        if (!res) {
           return true;
+        }
+        if (context.mounted) {
+          await _handleSaveEdit(context, content);
         }
         return false;
       },
     );
     final data = await BaseNavigator.push<String>(context, editorPage);
-    if (data == null) {
+    if (data == null || !mounted) {
       return;
     }
     _rawText = data;

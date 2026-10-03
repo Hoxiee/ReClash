@@ -49,6 +49,7 @@ class _PreviewProfileViewState extends ConsumerState<PreviewProfileView> {
           key: const Key('content'),
           title: title,
           content: content,
+          readOnly: true,
         );
       },
     );

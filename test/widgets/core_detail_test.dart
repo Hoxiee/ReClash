@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:re_editor/re_editor.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/enum/enum.dart';
@@ -231,7 +230,7 @@ void main() {
     expect(editor.content, yaml);
     expect(editor.onSave, isNull);
     expect(editor.titleEditable, isFalse);
-    expect(tester.widget<CodeEditor>(find.byType(CodeEditor)).readOnly, isTrue);
+    expect(editor.readOnly, isTrue);
     verify(() => core.getAppliedConfigContent()).called(1);
     expect(tester.takeException(), isNull);
   });

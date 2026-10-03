@@ -97,16 +97,14 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   }
 
   Future<void> _handleEditorSave(
-    BuildContext _,
+    BuildContext editorContext,
     String title,
     String content, {
     Script? script,
   }) async {
     final appLocalizations = context.appLocalizations;
-    Script newScript =
-        (script?.copyWith(label: title) ?? Script.create(label: title));
-    newScript = await newScript.save(content);
-    if (newScript.label.isEmpty) {
+    var label = title.trim();
+    if (label.isEmpty) {
       final res = await dialogs.showCommonDialog<String>(
         child: InputDialog(
           title: appLocalizations.save,
@@ -114,63 +112,71 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           hintText: appLocalizations.pleaseEnterScriptName,
           inputFormatters: TextInputLimits.limit(TextInputLimits.name),
           validator: (value) {
-            if (value == null || value.isEmpty) {
+            final name = value?.trim() ?? '';
+            if (name.isEmpty) {
               return appLocalizations.emptyTip(appLocalizations.name);
             }
-            if (value != script?.label) {
-              final isExits = ref.read(scriptsProvider.notifier).isExits(value);
-              if (isExits) {
-                return appLocalizations.existsTip(appLocalizations.name);
-              }
+            if (name != script?.label &&
+                ref.read(scriptsProvider.notifier).isExits(name)) {
+              return appLocalizations.existsTip(appLocalizations.name);
             }
             return null;
           },
         ),
       );
-      if (res == null || res.isEmpty) {
+      if (res == null || res.trim().isEmpty || !mounted) {
         return;
       }
-      newScript = newScript.copyWith(label: res);
+      label = res.trim();
     }
-    if (newScript.label != script?.label) {
-      final isExits = ref
-          .read(scriptsProvider.notifier)
-          .isExits(newScript.label);
-      if (isExits) {
-        unawaited(
-          dialogs.showMessage(
-            message: TextSpan(
-              text: appLocalizations.existsTip(appLocalizations.name),
-            ),
+    if (!editorContext.mounted) {
+      return;
+    }
+    if (label != script?.label &&
+        ref.read(scriptsProvider.notifier).isExits(label)) {
+      unawaited(
+        dialogs.showMessage(
+          message: TextSpan(
+            text: appLocalizations.existsTip(appLocalizations.name),
           ),
-        );
-        return;
-      }
+        ),
+      );
+      return;
+    }
+    final newScript = await (script?.copyWith(label: label) ??
+            Script.create(label: label))
+        .save(content);
+    if (!mounted) {
+      return;
     }
     ref.read(scriptsProvider.notifier).put(newScript);
-    if (mounted) {
-      Navigator.of(context).pop();
+    if (editorContext.mounted) {
+      Navigator.of(editorContext).pop();
     }
   }
 
   Future<bool> _handleEditorPop(
-    BuildContext _,
+    BuildContext editorContext,
     String title,
     String content,
     String raw, {
     Script? script,
   }) async {
     final appLocalizations = context.appLocalizations;
-    if (content == raw) {
+    if (content == raw && title == (script?.label ?? '')) {
       return true;
     }
     final res = await dialogs.showMessage(
       message: TextSpan(text: appLocalizations.saveChanges),
     );
-    if (res == true && mounted) {
-      unawaited(_handleEditorSave(context, title, content, script: script));
-    } else {
+    if (res == null) {
+      return false;
+    }
+    if (!res) {
       return true;
+    }
+    if (mounted && editorContext.mounted) {
+      await _handleEditorSave(editorContext, title, content, script: script);
     }
     return false;
   }
@@ -178,7 +184,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   void _handleToEditor([int? id]) async {
     final script = await ref.read(scriptProvider(id).future);
     final title = script?.label ?? '';
-    final raw = (await script?.content) ?? scriptTemplate;
+    late final String raw;
     if (!mounted) {
       return;
     }
@@ -189,9 +195,8 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           titleEditable: true,
           title: title,
           supportRemoteDownload: true,
-          onSave: (context, title, content) {
-            _handleEditorSave(context, title, content, script: script);
-          },
+          onSave: (context, title, content) =>
+              _handleEditorSave(context, title, content, script: script),
           onPop: (context, title, content) {
             return _handleEditorPop(
               context,
@@ -201,8 +206,10 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
               script: script,
             );
           },
-          languages: const [Language.javaScript],
-          content: raw,
+          language: Language.javaScript,
+          load: () async => raw = script == null
+              ? scriptTemplate
+              : await readTextFileTask(await script.path) ?? scriptTemplate,
         ),
       ),
     );

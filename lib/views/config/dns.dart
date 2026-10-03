@@ -111,6 +111,8 @@ class DnsView extends ConsumerWidget {
       EditorPage(
         title: 'DNS',
         content: raw,
+        readOnly: false,
+        schema: EditorSchema.dns,
         onPop: (context, title, content) =>
             _handleQuickEditPop(ref, content, raw),
       ),

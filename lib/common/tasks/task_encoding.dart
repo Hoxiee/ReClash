@@ -32,6 +32,18 @@ Future<String> _encodeMD5<T>(String content) async {
   return content.toMd5();
 }
 
+Future<String?> readTextFileTask(String path) {
+  return compute(_readTextFile, path);
+}
+
+String? _readTextFile(String path) {
+  final file = File(path);
+  if (!file.existsSync()) {
+    return null;
+  }
+  return utf8.decode(file.readAsBytesSync());
+}
+
 Future<String> encodeLogsTask(List<Log> data) async {
   return compute<List<Log>, String>(_encodeLogsTask, data);
 }

@@ -147,6 +147,10 @@ _AppSettingProps _$AppSettingPropsFromJson(
   serviceAutoCheckActive: json['serviceAutoCheckActive'] as bool? ?? true,
   serviceAutoCheckAll: json['serviceAutoCheckAll'] as bool? ?? false,
   hideIp: json['hideIp'] as bool? ?? false,
+  editorLineWrap: json['editorLineWrap'] as bool? ?? false,
+  editorFontSize:
+      $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
+      EditorFontSize.standard,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -192,6 +196,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'serviceAutoCheckActive': instance.serviceAutoCheckActive,
       'serviceAutoCheckAll': instance.serviceAutoCheckAll,
       'hideIp': instance.hideIp,
+      'editorLineWrap': instance.editorLineWrap,
+      'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
     };
 
 const _$TabAnimationEnumMap = {
@@ -203,6 +209,12 @@ const _$TabAnimationEnumMap = {
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',
   RestoreStrategy.override: 'override',
+};
+
+const _$EditorFontSizeEnumMap = {
+  EditorFontSize.standard: 'standard',
+  EditorFontSize.large: 'large',
+  EditorFontSize.extraLarge: 'extraLarge',
 };
 
 const _$DashboardWidgetEnumMap = {

@@ -57,12 +57,14 @@ class CommonScrollBar extends StatelessWidget {
 class FloatingScrollbar extends StatefulWidget {
   final ScrollController controller;
   final String Function(double fraction) hintBuilder;
+  final bool thumbVisibility;
   final Widget child;
 
   const FloatingScrollbar({
     super.key,
     required this.controller,
     required this.hintBuilder,
+    this.thumbVisibility = false,
     required this.child,
   });
 
@@ -201,6 +203,7 @@ class _FloatingScrollbarState extends State<FloatingScrollbar> {
             children: [
               CommonScrollBar(
                 controller: widget.controller,
+                thumbVisibility: widget.thumbVisibility,
                 // This bar owns the only scrollbar; suppress the ambient one
                 // the sheet/desktop behavior draws on the same controller,
                 // which showed up as a second thumb beside it.

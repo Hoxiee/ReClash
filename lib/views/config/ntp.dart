@@ -88,6 +88,8 @@ class NtpView extends ConsumerWidget {
       EditorPage(
         title: 'NTP',
         content: raw,
+        readOnly: false,
+        schema: EditorSchema.ntp,
         onPop: (context, title, content) =>
             _handleQuickEditPop(ref, content, raw),
       ),

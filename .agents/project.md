@@ -105,11 +105,6 @@ set after a Flutter SDK bump raises `test_api`, not before.
 `intl` is intentionally unbounded (`any`) and `material_color_utilities` is
 resolved by the SDK; neither is a bound this repository sets.
 
-`isolate_contactor` is discontinued and `isolate_manager` is several majors
-behind. Both arrive through `re_editor`, which pins `isolate_manager: ^4.1.5+1`
-and is already at its own latest release. Nothing in this repository can advance
-them.
-
 `CorePalette` is deprecated in `material_color_utilities` in favour of
 `DynamicScheme`/`CorePalettes`, but `dynamic_color` 1.9.0 — its newest release —
 still exposes only `DynamicColorPlugin.getCorePalette()`, which returns the

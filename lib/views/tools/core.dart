@@ -358,6 +358,10 @@ class _CoreRuntimeConfigViewState
         ),
       );
     }
-    return EditorPage(title: l10n.coreRuntimeConfig, content: _content);
+    return EditorPage(
+      title: l10n.coreRuntimeConfig,
+      content: _content,
+      readOnly: true,
+    );
   }
 }

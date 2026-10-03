@@ -290,6 +290,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool serviceAutoCheckActive,
     @Default(false) bool serviceAutoCheckAll,
     @Default(false) bool hideIp,
+    @Default(false) bool editorLineWrap,
+    @Default(EditorFontSize.standard) EditorFontSize editorFontSize,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

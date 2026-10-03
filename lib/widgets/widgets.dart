@@ -34,6 +34,8 @@ export 'input/reorder_menu.dart';
 export 'input/search_field.dart';
 export 'input/setting.dart';
 export 'input/setting_search.dart';
+export 'input/text_loupe.dart';
+export 'layout/caret_popup.dart';
 export 'layout/float_layout.dart';
 export 'layout/grid.dart';
 export 'layout/motion_grid.dart';

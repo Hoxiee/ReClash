@@ -1,3 +1,4 @@
+pub mod editor;
 pub mod init;
 pub mod ipc;
 pub mod script;

@@ -145,6 +145,8 @@ void main() {
         setupStep: 3,
         testUrl: 'https://custom.test',
         userAgents: ['CustomUA/1.0'],
+        editorLineWrap: true,
+        editorFontSize: EditorFontSize.large,
       );
       final restored = roundTrip(
         () => props.toJson(),
@@ -172,6 +174,8 @@ void main() {
       expect(restored.setupStep, 3);
       expect(restored.testUrl, 'https://custom.test');
       expect(restored.userAgents, ['CustomUA/1.0']);
+      expect(restored.editorLineWrap, true);
+      expect(restored.editorFontSize, EditorFontSize.large);
     });
 
     test('safeFromJson returns default on null', () {

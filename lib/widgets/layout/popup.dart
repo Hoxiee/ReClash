@@ -19,6 +19,8 @@ const _screenMargin = 16.0;
 
 const _anchorOverlap = 8.0;
 
+const _avoidGap = 8.0;
+
 const _cardInset = 8.0;
 
 const _popupEnterDuration = Duration(milliseconds: 550);
@@ -81,6 +83,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     this.sourceColor = Colors.transparent,
     this.sourceImage,
     this.modal = true,
+    this.avoid,
     this.transitionDuration = _popupEnterDuration,
     this.reverseTransitionDuration = _popupExitDuration,
   }) : super(requestFocus: modal ? null : false);
@@ -103,6 +106,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
 
   /// Off, focus stays on the page and touches outside pass through to it.
   final bool modal;
+  final Rect? avoid;
 
   @override
   final String? barrierLabel;
@@ -206,6 +210,7 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
               anchor: anchor.shift(anchorShift),
               safeInsets: safeInsets,
               placement: placement,
+              avoid: avoid,
             ),
             child: _PopupMorph(
               anchor: anchor,
@@ -552,9 +557,13 @@ class _PopupAnchorTrackerState extends State<_PopupAnchorTracker> {
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.of(context).padding;
+    final mediaQuery = MediaQuery.of(context);
     final anchor = _anchor ??= widget.anchorOf() ?? Rect.zero;
-    return widget.builder(anchor, padding, widget.child);
+    return widget.builder(
+      anchor,
+      mediaQuery.padding + mediaQuery.viewInsets,
+      widget.child,
+    );
   }
 }
 
@@ -563,11 +572,13 @@ class _PopupLayoutDelegate extends SingleChildLayoutDelegate {
     required this.anchor,
     required this.safeInsets,
     required this.placement,
+    this.avoid,
   });
 
   final Rect anchor;
   final EdgeInsets safeInsets;
   final PopupPlacement placement;
+  final Rect? avoid;
 
   EdgeInsets get _insets => safeInsets + const EdgeInsets.all(_screenMargin);
 
@@ -595,7 +606,10 @@ class _PopupLayoutDelegate extends SingleChildLayoutDelegate {
         anchor.right - childSize.width,
         anchor.top - _anchorOverlap,
       ),
-      PopupPlacement.belowPoint => (anchor.left, anchor.bottom),
+      PopupPlacement.belowPoint => (
+        anchor.left,
+        _yBelowPoint(childSize.height, insets.top, maxY),
+      ),
     };
     return Offset(
       x.clamp(insets.left, math.max(insets.left, maxX)),
@@ -603,11 +617,30 @@ class _PopupLayoutDelegate extends SingleChildLayoutDelegate {
     );
   }
 
+  double _yBelowPoint(double height, double minY, double maxY) {
+    final avoid = this.avoid;
+    if (avoid != null) {
+      final above = avoid.top - _avoidGap - height;
+      if (above >= minY) {
+        return above;
+      }
+      final below = avoid.bottom + _avoidGap;
+      if (below <= maxY) {
+        return below;
+      }
+    }
+    if (anchor.bottom > maxY && anchor.top - height >= minY) {
+      return anchor.top - height;
+    }
+    return anchor.bottom;
+  }
+
   @override
   bool shouldRelayout(_PopupLayoutDelegate oldDelegate) {
     return oldDelegate.anchor != anchor ||
         oldDelegate.safeInsets != safeInsets ||
-        oldDelegate.placement != placement;
+        oldDelegate.placement != placement ||
+        oldDelegate.avoid != avoid;
   }
 }
 
@@ -777,6 +810,7 @@ class CommonPopupMenuItem {
     this.glyph,
     this.onPressed,
     this.danger = false,
+    this.checked,
     this.subItems = const [],
   });
 
@@ -785,6 +819,7 @@ class CommonPopupMenuItem {
   final Glyph? glyph;
   final VoidCallback? onPressed;
   final bool danger;
+  final bool? checked;
   final List<CommonPopupMenuItem> subItems;
 }
 
@@ -1047,6 +1082,12 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
       if (arrowTurns != null) {
         arrow = RotationTransition(turns: arrowTurns, child: arrow);
       }
+    } else if (item.checked == true) {
+      arrow = GlyphIcon(
+        AppGlyphs.check,
+        size: _submenuArrowSize,
+        color: foregroundColor,
+      );
     }
     final child = InkWell(
       focusNode: focusNode,
@@ -1086,7 +1127,12 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
         ),
       ),
     );
-    return Semantics(button: true, enabled: enabled, child: child);
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      checked: item.checked,
+      child: child,
+    );
   }
 
   Widget _buildItem(

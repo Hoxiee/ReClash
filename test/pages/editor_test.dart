@@ -1,11 +1,12 @@
+import 'package:code_forge/code_forge.dart' show CodeForge;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:re_editor/re_editor.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/views/config/editor.dart';
 
+import '../helpers/editor_native.dart';
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -15,6 +16,7 @@ final _viewSizeOverride = viewSizeProvider.overrideWithBuild(
 );
 
 void main() {
+  setUpAll(initEditorNative);
   testWidgets('import from URL shows a translated network error message', (
     tester,
   ) async {
@@ -35,11 +37,14 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byGlyph(AppGlyphs.more));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
     await tester.tap(find.text('External fetch'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
     await tester.tap(find.text('Import from URL'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
 
     await tester.enterText(
       find.byType(TextFormField),
@@ -78,8 +83,12 @@ void main() {
       ),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
 
-    await tester.tap(find.byType(CodeEditor));
+    await tester.tap(find.byType(CodeForge));
+    await tester.pump();
+    // A pop only runs onPop when the document is dirty; one delta makes it so.
+    await typeInEditor(tester, ' world');
     await tester.pump();
 
     await tester.binding.handlePopRoute();
@@ -91,7 +100,10 @@ void main() {
     expect(pops, 1);
 
     FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    // Let the caret blink timer cancel after the editor loses focus so it is
+    // not still pending when the tree is torn down.
+    await tester.pump(const Duration(seconds: 1));
   });
 }
 

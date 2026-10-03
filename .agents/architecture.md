@@ -572,6 +572,10 @@ Architecture detection is automatic. The `--description` flag passed to `flutter
 - `setup`: build-time harness for Go core and Helper artifacts; no runtime Dart API.
 - `proxy`: system proxy configuration.
 - `rust_api`: runtime Flutter Rust Bridge FFI plugin built through Cargokit. See below.
+- `code_forge`: the FlClash config editor, vendored under `plugins/code_forge` (derived from the published `code_forge`
+  package). Its SDK floor stays at upstream `>=3.13.2` for the `private-named-parameters` feature; it is a separate
+  package with its own language version, so the repository's own `>=3.10.0` floor is unaffected. The editor's rope
+  backend lives in `rust_api` (`src/editor/`); it replaced `re_editor`.
 - `tray`: system tray for Linux, macOS and Windows. Written for FlClash; replaced the `tray_manager` fork.
 - `wifi_ssid`: Wi-Fi SSID detection.
 - `flutter_distributor`: app packaging/distribution.
@@ -586,6 +590,9 @@ Architecture detection is automatic. The `--description` flag passed to `flutter
   bounded send queue), `platform` (socket cleanup, Windows peer credentials and the non-blocking pipe reader), and
   `server` (lifecycle, accept loop, and the `RUNNING`/`STATE` globals).
 - `script/` runs profile override scripts on QuickJS through `rquickjs`.
+- `editor/` is the editor's rope backend for `code_forge`: a `ropey`-based buffer behind a `RopeBridge` opaque with
+  `#[frb(sync)]` buffer methods, plus async fold/guide/word computation. Offsets cross the bridge as scalar
+  (codepoint) indices and are converted to UTF-16 on the Dart side.
 - `windows/` owns managed Core elevation, bootstrap authentication, temporary access grants and Job Object lifetime.
 
 What a platform does not use, it does not compile. `interprocess` is declared under
