@@ -8,6 +8,7 @@ import 'package:reclash/core/interface.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/connections.dart';
@@ -52,26 +53,25 @@ void main() {
   late MockCoreHandlerInterface core;
   late ProviderContainer container;
 
-  setUpAll(() {
-    core = MockCoreHandlerInterface();
-    CoreController.resetInstance();
-    CoreController.test(core);
-  });
-
-  tearDownAll(CoreController.resetInstance);
-
   setUp(() {
-    reset(core);
+    core = MockCoreHandlerInterface();
     container = ProviderContainer(
-      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+      overrides: [
+        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        profilesProvider.overrideWith(TestProfiles.new),
+      ],
     );
     globalState.container = container;
   });
 
   tearDown(() => container.dispose());
 
-  Future<void> pumpConnections(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1400, 1000);
+  Future<void> pumpConnections(
+    WidgetTester tester, {
+    SheetType? sheetType,
+    Size size = const Size(1400, 1000),
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -79,7 +79,14 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: ConnectionsView()),
+        child: TestApp(
+          child: sheetType == null
+              ? const ConnectionsView()
+              : SheetProvider(
+                  type: sheetType,
+                  child: const Material(child: ConnectionsView()),
+                ),
+        ),
       ),
     );
     await tester.pump();
@@ -175,44 +182,154 @@ void main() {
     verifyNever(core.getConnections);
   });
 
-  testWidgets('groups search with more and closes from the menu', (
-    tester,
-  ) async {
-    when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);
-    when(core.closeConnections).thenAnswer((_) async => true);
+  for (final width in [390.0, 1400.0]) {
+    testWidgets('groups search with close and keeps sort separate at $width', (
+      tester,
+    ) async {
+      when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);
+      when(core.closeConnections).thenAnswer((_) async => true);
 
-    await pumpConnections(tester);
+      await pumpConnections(tester, size: Size(width, 1000));
 
-    expect(find.byGlyph(AppGlyphs.clearAll), findsNothing);
+      final search = find.byGlyph(AppGlyphs.search);
+      final close = find.byGlyph(AppGlyphs.clearAll);
+      final sort = find.byGlyph(AppGlyphs.sort);
+      final searchGroup = find.ancestor(
+        of: search,
+        matching: find.byType(TonalButtonGroup),
+      );
+      final closeGroup = find.ancestor(
+        of: close,
+        matching: find.byType(TonalButtonGroup),
+      );
+      expect(searchGroup, findsOneWidget);
+      expect(closeGroup, findsOneWidget);
+      expect(searchGroup.evaluate().single, same(closeGroup.evaluate().single));
+      expect(sort, findsOneWidget);
+      expect(
+        find.ancestor(of: sort, matching: find.byType(TonalButtonGroup)),
+        findsNothing,
+      );
+      expect(find.byGlyph(AppGlyphs.more), findsNothing);
+      expect(tester.getCenter(search).dx, lessThan(tester.getCenter(close).dx));
+      expect(tester.getCenter(close).dx, lessThan(tester.getCenter(sort).dx));
 
-    final searchGroup = find.ancestor(
-      of: find.byGlyph(AppGlyphs.search),
-      matching: find.byType(TonalButtonGroup),
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+
+      verify(core.closeConnections).called(1);
+      expect(tester.takeException(), isNull);
+
+      await teardownView(tester);
+    });
+  }
+
+  for (final sheetType in [SheetType.bottomSheet, SheetType.sideSheet]) {
+    testWidgets(
+      'keeps search with more and menu actions in ${sheetType.name}',
+      (tester) async {
+        when(
+          core.getConnections,
+        ).thenAnswer((_) async => const <TrackerInfo>[]);
+        when(core.closeConnections).thenAnswer((_) async => true);
+
+        await pumpConnections(
+          tester,
+          sheetType: sheetType,
+          size: Size(sheetType == SheetType.bottomSheet ? 390 : 600, 1000),
+        );
+
+        expect(find.byGlyph(AppGlyphs.clearAll), findsNothing);
+        expect(find.byGlyph(AppGlyphs.sort), findsNothing);
+
+        final searchGroup = find.ancestor(
+          of: find.byGlyph(AppGlyphs.search),
+          matching: find.byType(TonalButtonGroup),
+        );
+        final moreGroup = find.ancestor(
+          of: find.byGlyph(AppGlyphs.more),
+          matching: find.byType(TonalButtonGroup),
+        );
+        expect(searchGroup, findsOneWidget);
+        expect(moreGroup, findsOneWidget);
+        expect(
+          searchGroup.evaluate().single,
+          same(moreGroup.evaluate().single),
+        );
+
+        await tester.tap(find.byGlyph(AppGlyphs.more));
+        await tester.pumpAndSettle();
+
+        final appLocalizations = AppLocalizations.current;
+        final menu = tester.widget<CommonPopupMenu>(
+          find.byType(CommonPopupMenu),
+        );
+        expect(menu.items.map((item) => item.label), [
+          appLocalizations.closeConnections,
+          appLocalizations.sort,
+        ]);
+
+        await tester.tap(find.text(appLocalizations.closeConnections));
+        await tester.pumpAndSettle();
+
+        verify(core.closeConnections).called(1);
+        expect(tester.takeException(), isNull);
+
+        await teardownView(tester);
+      },
     );
-    final moreGroup = find.ancestor(
-      of: find.byGlyph(AppGlyphs.more),
-      matching: find.byType(TonalButtonGroup),
+  }
+
+  for (final sheetType in [null, SheetType.bottomSheet, SheetType.sideSheet]) {
+    testWidgets(
+      'sorts and marks the chosen order in ${sheetType?.name ?? 'tab'}',
+      (tester) async {
+        when(core.getConnections).thenAnswer(
+          (_) async => [
+            _tracker(id: 'a', host: 'alpha.test', download: 100),
+            _tracker(id: 'b', host: 'beta.test', download: 300),
+          ],
+        );
+
+        await pumpConnections(tester, sheetType: sheetType);
+
+        Future<void> openSortMenu() async {
+          if (sheetType != null) {
+            await tester.tap(find.byGlyph(AppGlyphs.more));
+            await tester.pumpAndSettle();
+          }
+          await tester.tap(find.byGlyph(AppGlyphs.sort));
+          await tester.pumpAndSettle();
+        }
+
+        double topOf(String host) =>
+            tester.getTopLeft(find.textContaining(host).first).dy;
+        expect(topOf('beta.test'), lessThan(topOf('alpha.test')));
+
+        await openSortMenu();
+        final appLocalizations = AppLocalizations.current;
+        await tester.tap(find.text(appLocalizations.host));
+        await tester.pumpAndSettle();
+
+        expect(topOf('alpha.test'), lessThan(topOf('beta.test')));
+
+        await openSortMenu();
+        final menu = tester.widget<CommonPopupMenu>(
+          find.byType(CommonPopupMenu),
+        );
+        final sortItems = sheetType == null
+            ? menu.items
+            : menu.items.last.subItems;
+        expect(
+          sortItems.singleWhere((item) => item.glyph == AppGlyphs.check).label,
+          appLocalizations.host,
+        );
+        expect(tester.takeException(), isNull);
+
+        await teardownView(tester);
+      },
     );
-    expect(searchGroup, findsOneWidget);
-    expect(moreGroup, findsOneWidget);
-    expect(searchGroup.evaluate().single, same(moreGroup.evaluate().single));
-
-    await tester.tap(find.byGlyph(AppGlyphs.more));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text(AppLocalizations.current.closeConnections),
-      findsOneWidget,
-    );
-
-    await tester.tap(find.text(AppLocalizations.current.closeConnections));
-    await tester.pumpAndSettle();
-
-    verify(core.closeConnections).called(1);
-    expect(tester.takeException(), isNull);
-
-    await teardownView(tester);
-  });
+  }
 
   testWidgets('renders the regex toggle in the search bar', (tester) async {
     when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);

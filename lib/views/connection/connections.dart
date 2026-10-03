@@ -91,28 +91,34 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     setState(() {});
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems() {
+  Future<void> _handleCloseConnections() async {
+    unawaited(_core.closeConnections());
+    await _refreshConnections();
+  }
+
+  List<CommonPopupMenuItem> _buildSortItems() {
     final current = _listController.value.sortType;
+    return [
+      for (final type in ConnectionSortType.values)
+        CommonPopupMenuItem(
+          label: _sortLabel(type),
+          glyph: current == type ? AppGlyphs.check : null,
+          onPressed: () => _handleSort(type),
+        ),
+    ];
+  }
+
+  List<CommonPopupMenuItem> _buildMenuItems() {
     return [
       CommonPopupMenuItem(
         label: context.appLocalizations.closeConnections,
         glyph: AppGlyphs.clearAll,
-        onPressed: () async {
-          unawaited(_core.closeConnections());
-          await _refreshConnections();
-        },
+        onPressed: _handleCloseConnections,
       ),
       CommonPopupMenuItem(
         label: context.appLocalizations.sort,
         glyph: AppGlyphs.sort,
-        subItems: [
-          for (final type in ConnectionSortType.values)
-            CommonPopupMenuItem(
-              label: _sortLabel(type),
-              glyph: current == type ? AppGlyphs.check : null,
-              onPressed: () => _handleSort(type),
-            ),
-        ],
+        subItems: _buildSortItems(),
       ),
     ];
   }
@@ -178,6 +184,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final isInSheet = context.isInSheet;
     return CommonScaffold(
       title: appLocalizations.connections,
       floatBody: true,
@@ -190,7 +197,27 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         },
         useRegex: _listController.value.useRegex,
       ),
-      menuItems: _buildMenuItems(),
+      iconActions: [
+        if (!isInSheet)
+          IconButtonData(
+            glyph: AppGlyphs.clearAll,
+            tooltip: appLocalizations.closeConnections,
+            onPressed: _handleCloseConnections,
+          ),
+      ],
+      actions: [
+        if (!isInSheet)
+          CommonPopupBox(
+            targetBuilder: (open) => IconButton(
+              tooltip: appLocalizations.sort,
+              onPressed: () =>
+                  open(offset: Offset(0, context.isMobileView ? 0 : 20)),
+              icon: const GlyphIcon(AppGlyphs.sort),
+            ).withAppTooltip(),
+            popupBuilder: (_) => CommonPopupMenu(items: _buildSortItems()),
+          ),
+      ],
+      menuItems: isInSheet ? _buildMenuItems() : const [],
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
