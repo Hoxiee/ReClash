@@ -215,6 +215,21 @@ class _HeroNovaPainter extends CustomPainter {
       (lighten > 0 ? color.lighten(lighten) : color).withValues(alpha: alpha),
   ];
 
+  void _drawGradientCircle(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
+    final bounds = Rect.fromCircle(center: center, radius: radius);
+    // Two arcs avoid the oval fast path and its Impeller SDF textures.
+    final path = Path()
+      ..arcTo(bounds, 0, math.pi, true)
+      ..arcTo(bounds, math.pi, math.pi, false)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
@@ -238,7 +253,8 @@ class _HeroNovaPainter extends CustomPainter {
         ? local / 0.2
         : math.pow(1 - (local - 0.2) / 0.8, 2.4).toDouble();
     final radius = coreRadius * (0.7 + 2.6 * local);
-    canvas.drawCircle(
+    _drawGradientCircle(
+      canvas,
       center,
       radius,
       Paint()
@@ -273,7 +289,8 @@ class _HeroNovaPainter extends CustomPainter {
       final rotation = GradientRotation(eased * 2 * math.pi + i);
       final band = (26 + 54 * (1 - eased)) * scale;
 
-      canvas.drawCircle(
+      _drawGradientCircle(
+        canvas,
         center,
         math.max(radius - band / 2, 0.1),
         Paint()
@@ -285,7 +302,8 @@ class _HeroNovaPainter extends CustomPainter {
           ).createShader(rect),
       );
 
-      canvas.drawCircle(
+      _drawGradientCircle(
+        canvas,
         center,
         radius,
         Paint()
@@ -347,7 +365,8 @@ class _HeroNovaPainter extends CustomPainter {
     if (local <= 0 || local >= 1) return;
     final eased = Curves.easeOutQuart.transform(local);
     final radius = lerpDouble(coreRadius, reach * 1.12, eased)!;
-    canvas.drawCircle(
+    _drawGradientCircle(
+      canvas,
       center,
       radius,
       Paint()
@@ -434,7 +453,8 @@ class _HeroNovaPainter extends CustomPainter {
     final fade = math.pow(1 - local, 1.5).toDouble();
     final radius = lerpDouble(coreRadius * 0.9, ringRadius * 1.62, eased)!;
     final rect = Rect.fromCircle(center: center, radius: radius);
-    canvas.drawCircle(
+    _drawGradientCircle(
+      canvas,
       center,
       radius,
       Paint()
@@ -488,7 +508,8 @@ class _HeroNovaPainter extends CustomPainter {
     if (local <= 0 || local >= 1) return;
     final fade = math.sin(math.pi * local);
     final rect = Rect.fromCircle(center: center, radius: ringRadius);
-    canvas.drawCircle(
+    _drawGradientCircle(
+      canvas,
       center,
       ringRadius,
       Paint()

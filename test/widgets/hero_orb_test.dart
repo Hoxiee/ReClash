@@ -518,6 +518,57 @@ void main() {
     expect(result.action.runningToggles, 1);
   });
 
+  testWidgets('nova gradients stay on circular paths through the blast', (
+    tester,
+  ) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2400));
+    await _pumpUntil(tester, find.byKey(HeroOrb.novaKey));
+
+    for (final step in [616, 840, 924]) {
+      await tester.pump(Duration(milliseconds: step));
+      final finder = find.byKey(HeroOrb.novaKey);
+      final paint = tester.widget<CustomPaint>(finder);
+      final canvas = TestRecordingCanvas();
+      paint.painter!.paint(canvas, tester.getSize(finder));
+      final calls = canvas.invocations.map((record) => record.invocation);
+      final gradientCircles = calls.where((call) {
+        if (call.memberName != #drawCircle) return false;
+        final paint = call.positionalArguments[2] as Paint;
+        return paint.shader != null && paint.blendMode == BlendMode.srcOver;
+      });
+      expect(gradientCircles, isEmpty);
+
+      final paths = calls.where((call) => call.memberName == #drawPath);
+      expect(paths, isNotEmpty);
+      for (final call in paths) {
+        final path = call.positionalArguments[0] as Path;
+        final bounds = path.getBounds();
+        final metric = path.computeMetrics().single;
+        expect(metric.isClosed, isTrue);
+        expect(bounds.width, closeTo(bounds.height, 0.001));
+        for (var sample = 0; sample < 8; sample++) {
+          final point = metric
+              .getTangentForOffset(metric.length * (sample + 0.5) / 8)!
+              .position;
+          expect(
+            (point - bounds.center).distance,
+            closeTo(bounds.width / 2, 0.5),
+          );
+        }
+      }
+    }
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.byKey(HeroOrb.novaKey), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a desktop release never toggles the tunnel', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.linux;
     try {
