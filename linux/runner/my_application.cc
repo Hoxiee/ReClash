@@ -8,11 +8,13 @@
 #include <window/window_plugin.h>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "hotkey_channel.h"
 
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
   gboolean had_window_before_emit;
+  HotkeyChannel* hotkeys;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
@@ -73,6 +75,10 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_realize(GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+  self->hotkeys = new HotkeyChannel(
+      GTK_APPLICATION(application),
+      fl_engine_get_binary_messenger(fl_view_get_engine(view)),
+      gtk_widget_get_display(GTK_WIDGET(view)));
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
@@ -95,6 +101,7 @@ static void my_application_before_emit(GApplication* application, GVariant* plat
   MyApplication* self = MY_APPLICATION(application);
   self->had_window_before_emit =
       gtk_application_get_windows(GTK_APPLICATION(application)) != nullptr;
+  if (self->hotkeys) self->hotkeys->reset_invocation();
   G_APPLICATION_CLASS(my_application_parent_class)->before_emit(application, platform_data);
 }
 
@@ -103,33 +110,17 @@ static void my_application_before_emit(GApplication* application, GVariant* plat
 // raised here, while the launcher's activation token is still current.
 static void my_application_after_emit(GApplication* application, GVariant* platform_data) {
   MyApplication* self = MY_APPLICATION(application);
-  if (self->had_window_before_emit) {
+  if (self->had_window_before_emit &&
+      !(self->hotkeys && self->hotkeys->was_invoked())) {
     window_plugin_activate();
   }
   G_APPLICATION_CLASS(my_application_parent_class)->after_emit(application, platform_data);
 }
 
-// Implements GApplication::startup.
-static void my_application_startup(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application startup.
-
-  G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
-}
-
-// Implements GApplication::shutdown.
-static void my_application_shutdown(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application shutdown.
-
-  G_APPLICATION_CLASS(my_application_parent_class)->shutdown(application);
-}
-
-// Implements GObject::dispose.
 static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
+  delete self->hotkeys;
+  self->hotkeys = nullptr;
   g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
@@ -139,8 +130,6 @@ static void my_application_class_init(MyApplicationClass* klass) {
   G_APPLICATION_CLASS(klass)->command_line = my_application_command_line;
   G_APPLICATION_CLASS(klass)->before_emit = my_application_before_emit;
   G_APPLICATION_CLASS(klass)->after_emit = my_application_after_emit;
-  G_APPLICATION_CLASS(klass)->startup = my_application_startup;
-  G_APPLICATION_CLASS(klass)->shutdown = my_application_shutdown;
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 

@@ -721,8 +721,14 @@ class LocationPermissions extends _$LocationPermissions
   }
 }
 
-/// True while the recorder dialog is open; the manager drops all registrations
-/// so the OS hands the recorder a bound combination instead of running it.
+@Riverpod(keepAlive: true)
+class HotKeyPlatform extends _$HotKeyPlatform with AutoDisposeNotifierMixin {
+  @override
+  HotkeyPlatformState build() {
+    return const HotkeyPlatformState();
+  }
+}
+
 @Riverpod(keepAlive: true)
 class HotKeyRecording extends _$HotKeyRecording with AutoDisposeNotifierMixin {
   @override

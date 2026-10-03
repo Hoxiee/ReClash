@@ -13,6 +13,8 @@ export 'config/protocol.dart';
 export 'config/singbox_config.dart';
 export 'config/xray_config.dart';
 export 'config/yaml.dart';
+export 'desktop/hotkey_export.dart';
+export 'desktop/hotkeys.dart';
 export 'desktop/navigator.dart';
 export 'desktop/process_icon.dart';
 export 'desktop/system.dart';

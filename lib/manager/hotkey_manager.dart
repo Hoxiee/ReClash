@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
+import 'package:uni_platform/uni_platform.dart';
 
 extension KeyboardModifierExt on KeyboardModifier {
   HotKeyModifier toHotKeyModifier() {
@@ -27,15 +29,21 @@ extension KeyboardModifierExt on KeyboardModifier {
 }
 
 class HotKeyManager extends ConsumerStatefulWidget {
+  final Future<Directory> Function()? exportDirectory;
   final Widget child;
 
-  const HotKeyManager({super.key, required this.child});
+  const HotKeyManager({super.key, this.exportDirectory, required this.child});
 
   @override
   ConsumerState<HotKeyManager> createState() => _HotKeyManagerState();
 }
 
 class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
+  Future<void> _updates = Future<void>.value();
+  LinuxHotkeys? _linuxHotkeys;
+  Future<HotkeyPlatformState>? _platform;
+  bool _registered = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,13 +59,57 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     });
   }
 
-  void _scheduleUpdate() {
-    _updating = (_updating ?? Future<void>.value())
-        .then((_) => _applyHotKeys())
-        .then((_) {}, onError: (_) {});
+  void _enqueue(Future<void> Function() operation) {
+    _updates = _updates
+        .then((_) => operation())
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            commonPrint.log('Hotkey update failed: $error');
+          },
+        );
+  }
+
+  void _scheduleUpdate() => _enqueue(_applyHotKeys);
+
+  Future<HotkeyPlatformState> _initializePlatform() async {
+    if (!system.isLinux) return const HotkeyPlatformState();
+    _linuxHotkeys = LinuxHotkeys(
+      onAction: (action) => unawaited(_handleHotKeyAction(action)),
+    );
+    try {
+      return await _linuxHotkeys!.initialize();
+    } catch (error) {
+      if (mounted) {
+        commonPrint.log('Desktop hotkey commands unavailable: $error');
+      }
+      return const HotkeyPlatformState(systemSupported: false);
+    }
+  }
+
+  Future<void> _unregisterAll() async {
+    try {
+      await hotKeyManager.unregisterAll();
+    } on MissingPluginException {
+      return;
+    }
+  }
+
+  @override
+  void dispose() {
+    _linuxHotkeys?.stopListening();
+    _enqueue(() async {
+      try {
+        if (_registered) await _unregisterAll();
+      } finally {
+        await _linuxHotkeys?.dispose();
+      }
+    });
+    super.dispose();
   }
 
   Future<void> _handleHotKeyAction(HotAction action) async {
+    if (!mounted || ref.read(hotKeyRecordingProvider)) return;
     final commonAction = ref.read(commonActionProvider.notifier);
     final systemAction = ref.read(systemActionProvider.notifier);
     final setupAction = ref.read(setupActionProvider.notifier);
@@ -97,49 +149,116 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     }
   }
 
-  Future<void>? _updating;
-
-  /// While the recorder is open nothing stays registered, so the OS lets the
-  /// recorder capture a combination that is otherwise bound.
   Future<void> _applyHotKeys() async {
-    if (!mounted) {
-      return;
+    if (!mounted) return;
+    final platform = await (_platform ??= _initializePlatform());
+    if (!mounted) return;
+    ref.read(hotKeyPlatformProvider.notifier).value = platform;
+    if (_registered ||
+        (platform.systemSupported &&
+            ref.read(hotKeyActionsProvider).isNotEmpty)) {
+      await _unregisterAll();
+      _registered = false;
     }
-    await hotKeyManager.unregisterAll();
-    if (ref.read(hotKeyRecordingProvider)) {
-      if (mounted) {
-        ref.read(hotKeyFailuresProvider.notifier).value = const {};
-      }
-      return;
+    if (!mounted) return;
+    final recording = ref.read(hotKeyRecordingProvider);
+    if (platform.applicationId != null) {
+      await _linuxHotkeys!.setEnabled(!recording);
     }
+    if (!mounted) return;
+    final bindings = ref.read(hotKeyActionsProvider);
     final failures = <HotAction, String>{};
-    final handles = ref
-        .read(hotKeyActionsProvider)
-        .where((hotKeyAction) {
-          return hotKeyAction.key != null && hotKeyAction.modifiers.isNotEmpty;
-        })
-        .map<Future<void>>((hotKeyAction) async {
-          final hotKey = HotKey(
-            key: PhysicalKeyboardKey(hotKeyAction.key!),
-            modifiers: hotKeyAction.modifiers
-                .map((item) => item.toHotKeyModifier())
-                .toList(),
+    if (platform.systemSupported && !recording) {
+      for (final binding in bindings) {
+        if (binding.key == null || binding.modifiers.isEmpty) continue;
+        try {
+          _registered = true;
+          await hotKeyManager.register(
+            HotKey(
+              key: PhysicalKeyboardKey(binding.key!),
+              modifiers: binding.modifiers
+                  .map((item) => item.toHotKeyModifier())
+                  .toList(),
+            ),
+            keyDownHandler: (_) =>
+                unawaited(_handleHotKeyAction(binding.action)),
           );
-          try {
-            await hotKeyManager.register(
-              hotKey,
-              keyDownHandler: (_) {
-                _handleHotKeyAction(hotKeyAction.action);
-              },
-            );
-          } catch (error) {
-            failures[hotKeyAction.action] = '$error';
-          }
-        });
-    await Future.wait(handles);
-    if (mounted) {
-      ref.read(hotKeyFailuresProvider.notifier).value = failures;
+        } catch (error) {
+          failures[binding.action] = '$error';
+        }
+        if (!mounted) return;
+      }
     }
+    ref.read(hotKeyFailuresProvider.notifier).value = failures;
+    if (platform.applicationId == null) return;
+    try {
+      final keys = bindings.map((item) => item.key).nonNulls.toSet().toList();
+      final names = await _linuxHotkeys!.keyNames([
+        for (final key in keys) PhysicalKeyboardKey(key).keyCode ?? 0,
+      ]);
+      final keyNames = <int, String>{
+        for (var i = 0; i < keys.length; i++)
+          if (names[i] != null) keys[i]: names[i]!,
+      };
+      final exports = {
+        for (final format in HotkeyExportFormat.values)
+          format: exportHotkeys(
+            format: format,
+            applicationId: platform.applicationId!,
+            bindings: recording ? const [] : bindings,
+            keyNames: keyNames,
+          ),
+      };
+      final directory =
+          await (widget.exportDirectory?.call() ??
+              appPath.dataDir.future.then(
+                (dir) => Directory('${dir.path}/hotkeys'),
+              ));
+      if (!mounted) return;
+      await writeHotkeyExports(directory, exports);
+      if (!mounted) return;
+      ref.read(hotKeyPlatformProvider.notifier).value = HotkeyPlatformState(
+        systemSupported: platform.systemSupported,
+        applicationId: platform.applicationId,
+        exportDirectory: directory.path,
+        exports: exports,
+      );
+    } catch (error) {
+      commonPrint.log('Desktop hotkey export failed: $error');
+    }
+  }
+
+  Widget _buildLocalShortcuts(Widget child) {
+    final platform = ref.watch(hotKeyPlatformProvider);
+    final recording = ref.watch(hotKeyRecordingProvider);
+    final bindings = ref.watch(hotKeyActionsProvider);
+    if (platform.systemSupported || recording) return child;
+    return Shortcuts(
+      shortcuts: {
+        for (final binding in bindings)
+          if (isValidHotKey(binding.modifiers, binding.key))
+            PhysicalHotkeyActivator(binding.key!, binding.modifiers):
+                _HotActionIntent(binding.action),
+        for (final binding in bindings)
+          if (isValidHotKey(binding.modifiers, binding.key))
+            PhysicalHotkeyActivator(
+              binding.key!,
+              binding.modifiers,
+              repeatOnly: true,
+            ): const DoNothingIntent(),
+      },
+      child: Actions(
+        actions: {
+          _HotActionIntent: CallbackAction<_HotActionIntent>(
+            onInvoke: (intent) {
+              unawaited(_handleHotKeyAction(intent.action));
+              return null;
+            },
+          ),
+        },
+        child: child,
+      ),
+    );
   }
 
   Shortcuts _buildCloseShortcuts(Widget child) {
@@ -219,6 +338,12 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildCloseShortcuts(widget.child);
+    return _buildCloseShortcuts(_buildLocalShortcuts(widget.child));
   }
+}
+
+class _HotActionIntent extends Intent {
+  const _HotActionIntent(this.action);
+
+  final HotAction action;
 }

@@ -141,6 +141,39 @@ bool isModifierKey(PhysicalKeyboardKey key) {
   );
 }
 
+class PhysicalHotkeyActivator implements ShortcutActivator {
+  const PhysicalHotkeyActivator(
+    this.key,
+    this.modifiers, {
+    this.repeatOnly = false,
+  });
+
+  final int key;
+  final Set<KeyboardModifier> modifiers;
+  final bool repeatOnly;
+
+  @override
+  Iterable<LogicalKeyboardKey>? get triggers => null;
+
+  @override
+  String debugDescribeKeys() => ShortcutLabels.host().text(modifiers, key);
+
+  @override
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    final matchesType = repeatOnly ? event is KeyRepeatEvent : event is KeyDownEvent;
+    if (!matchesType || event.physicalKey.usbHidUsage != key) {
+      return false;
+    }
+    for (final modifier in KeyboardModifier.values) {
+      final pressed = modifier.physicalKeys.any(
+        state.physicalKeysPressed.contains,
+      );
+      if (pressed != modifiers.contains(modifier)) return false;
+    }
+    return true;
+  }
+}
+
 final class ShortcutLabels {
   const ShortcutLabels({required this.isMacOS, required this.isWindows});
 

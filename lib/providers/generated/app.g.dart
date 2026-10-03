@@ -2751,18 +2751,63 @@ abstract class _$LocationPermissions extends $Notifier<WifiSsidPermission> {
   }
 }
 
-/// True while the recorder dialog is open; the manager drops all registrations
-/// so the OS hands the recorder a bound combination instead of running it.
+@ProviderFor(HotKeyPlatform)
+final hotKeyPlatformProvider = HotKeyPlatformProvider._();
+
+final class HotKeyPlatformProvider
+    extends $NotifierProvider<HotKeyPlatform, HotkeyPlatformState> {
+  HotKeyPlatformProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hotKeyPlatformProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hotKeyPlatformHash();
+
+  @$internal
+  @override
+  HotKeyPlatform create() => HotKeyPlatform();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HotkeyPlatformState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HotkeyPlatformState>(value),
+    );
+  }
+}
+
+String _$hotKeyPlatformHash() => r'53ac623567e49a8c0890875c338838e9233cda88';
+
+abstract class _$HotKeyPlatform extends $Notifier<HotkeyPlatformState> {
+  HotkeyPlatformState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<HotkeyPlatformState, HotkeyPlatformState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<HotkeyPlatformState, HotkeyPlatformState>,
+              HotkeyPlatformState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
 
 @ProviderFor(HotKeyRecording)
 final hotKeyRecordingProvider = HotKeyRecordingProvider._();
 
-/// True while the recorder dialog is open; the manager drops all registrations
-/// so the OS hands the recorder a bound combination instead of running it.
 final class HotKeyRecordingProvider
     extends $NotifierProvider<HotKeyRecording, bool> {
-  /// True while the recorder dialog is open; the manager drops all registrations
-  /// so the OS hands the recorder a bound combination instead of running it.
   HotKeyRecordingProvider._()
     : super(
         from: null,
@@ -2791,9 +2836,6 @@ final class HotKeyRecordingProvider
 }
 
 String _$hotKeyRecordingHash() => r'8cbbdb394fcc10ae564e4e91696668cc8a327507';
-
-/// True while the recorder dialog is open; the manager drops all registrations
-/// so the OS hands the recorder a bound combination instead of running it.
 
 abstract class _$HotKeyRecording extends $Notifier<bool> {
   bool build();

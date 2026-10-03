@@ -9,6 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/hotkey.dart';
+import 'package:reclash/views/settings/hotkey_desktop.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -49,6 +50,74 @@ Future<void> _pumpView(WidgetTester tester, ProviderContainer container) async {
 }
 
 void main() {
+  testWidgets('Wayland explains local scope and offers desktop commands', (
+    tester,
+  ) async {
+    final container = _containerFor(tester);
+    container
+        .read(hotKeyPlatformProvider.notifier)
+        .value = const HotkeyPlatformState(
+      systemSupported: false,
+      applicationId: 'com.reclash',
+    );
+    await _pumpView(tester, container);
+    expect(find.text(currentAppLocalizations.hotkeyLocalDesc), findsOneWidget);
+    expect(find.text(currentAppLocalizations.hotkeyDesc), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text(currentAppLocalizations.hotkeyDesktopCommands),
+      500,
+    );
+    expect(
+      find.text(currentAppLocalizations.hotkeyDesktopCommands),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'desktop commands use the running application ID and show all compositor formats',
+    (tester) async {
+      final container = _containerFor(tester);
+      container
+          .read(hotKeyPlatformProvider.notifier)
+          .value = const HotkeyPlatformState(
+        systemSupported: false,
+        applicationId: 'com.reclash.dev',
+        exportDirectory: '/tmp/reclash/hotkeys',
+        exports: {
+          HotkeyExportFormat.niri: HotkeyExport(
+            text: '',
+            unsupported: [HotAction.start],
+          ),
+        },
+      );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: HotkeyDesktopView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text('gapplication action com.reclash.dev toggle'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('gapplication action com.reclash.dev quit'),
+        findsOneWidget,
+      );
+      expect(find.text('Sway'), findsOneWidget);
+      expect(find.text('Hyprland'), findsOneWidget);
+      expect(find.text('niri'), findsOneWidget);
+      expect(
+        find.text(
+          currentAppLocalizations.hotkeyExportSkipped(HotAction.start.label),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('shows the empty state for unbound actions', (tester) async {
     final container = _containerFor(tester);
     await _pumpView(tester, container);

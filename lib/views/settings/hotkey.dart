@@ -9,6 +9,8 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'hotkey_desktop.dart';
+
 Glyph _glyphOf(HotAction action) {
   return switch (action) {
     HotAction.view => AppGlyphs.eye,
@@ -109,10 +111,6 @@ HotKeyAction _defaultBinding(HotAction action, PhysicalKeyboardKey key) {
   );
 }
 
-// Ctrl+Alt chords are the least-reserved primary combination across Windows,
-// Linux and macOS; any the OS still owns simply fail to register and surface as
-// "not registered" rather than doing harm. Destructive actions (exit) and the
-// three narrow mode locks stay unbound so a restore never binds something risky.
 final defaultHotKeyActions = <HotKeyAction>[
   _defaultBinding(HotAction.view, PhysicalKeyboardKey.keyV),
   _defaultBinding(HotAction.start, PhysicalKeyboardKey.keyS),
@@ -175,11 +173,11 @@ class _HotKeyBarActions extends ConsumerWidget {
   }
 }
 
-class HotKeyView extends StatelessWidget {
+class HotKeyView extends ConsumerWidget {
   const HotKeyView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final labels = ShortcutLabels.host();
     return BaseScaffold(
@@ -199,6 +197,17 @@ class HotKeyView extends StatelessWidget {
                   _HotKeyItem(action: action, labels: labels),
               ],
             ),
+          if (ref.watch(hotKeyPlatformProvider).applicationId != null)
+            SettingSection(
+              items: [
+                DecorationListItem.open(
+                  leading: const GlyphIcon(AppGlyphs.code),
+                  title: Text(appLocalizations.hotkeyDesktopCommands),
+                  widget: const HotkeyDesktopView(),
+                  paneId: 'hotkeyDesktop',
+                ),
+              ],
+            ),
           const SettingBottomInset(),
         ],
       ),
@@ -206,11 +215,11 @@ class HotKeyView extends StatelessWidget {
   }
 }
 
-class _HotKeyIntro extends StatelessWidget {
+class _HotKeyIntro extends ConsumerWidget {
   const _HotKeyIntro();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -227,7 +236,9 @@ class _HotKeyIntro extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              context.appLocalizations.hotkeyDesc,
+              ref.watch(hotKeyPlatformProvider).systemSupported
+                  ? context.appLocalizations.hotkeyDesc
+                  : context.appLocalizations.hotkeyLocalDesc,
               style: context.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSecondaryContainer,
               ),

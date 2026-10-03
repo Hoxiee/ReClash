@@ -55,6 +55,56 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `Editor unavailable`
+  String get editorUnavailable {
+    return Intl.message(
+      'Editor unavailable',
+      name: 'editorUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't copy to the clipboard. The selection may be too large`
+  String get clipboardWriteFailed {
+    return Intl.message(
+      'Couldn\'t copy to the clipboard. The selection may be too large',
+      name: 'clipboardWriteFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Word wrap`
+  String get lineWrap {
+    return Intl.message('Word wrap', name: 'lineWrap', desc: '', args: []);
+  }
+
+  /// `Size`
+  String get fontSize {
+    return Intl.message('Size', name: 'fontSize', desc: '', args: []);
+  }
+
+  /// `Large`
+  String get large {
+    return Intl.message('Large', name: 'large', desc: '', args: []);
+  }
+
+  /// `Extra large`
+  String get extraLarge {
+    return Intl.message('Extra large', name: 'extraLarge', desc: '', args: []);
+  }
+
+  /// `Replace`
+  String get replace {
+    return Intl.message('Replace', name: 'replace', desc: '', args: []);
+  }
+
+  /// `Replace all`
+  String get replaceAll {
+    return Intl.message('Replace all', name: 'replaceAll', desc: '', args: []);
+  }
+
   /// `Quick add`
   String get quickAdd {
     return Intl.message('Quick add', name: 'quickAdd', desc: '', args: []);
@@ -2578,10 +2628,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Hide profile, routing and diagnostic details while the device is locked`
+  /// `Uses Android's lock-screen privacy settings for service notifications and reminders. Details remain visible while unlocked.`
   String get notificationHideSensitiveDesc {
     return Intl.message(
-      'Hide profile, routing and diagnostic details while the device is locked',
+      'Uses Android\'s lock-screen privacy settings for service notifications and reminders. Details remain visible while unlocked.',
       name: 'notificationHideSensitiveDesc',
       desc: '',
       args: [],
@@ -4467,6 +4517,76 @@ class AppLocalizations {
     return Intl.message(
       'Global hotkeys work even while the window is hidden. Tap an action to record its key combination.',
       name: 'hotkeyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.`
+  String get hotkeyLocalDesc {
+    return Intl.message(
+      'These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.',
+      name: 'hotkeyLocalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Desktop shortcuts`
+  String get hotkeyDesktopCommands {
+    return Intl.message(
+      'Desktop shortcuts',
+      name: 'hotkeyDesktopCommands',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Assign a command to a custom shortcut in your desktop settings. ReClash must be running, but its window can stay hidden. Manage these global bindings in your desktop settings.`
+  String get hotkeyDesktopCommandsDesc {
+    return Intl.message(
+      'Assign a command to a custom shortcut in your desktop settings. ReClash must be running, but its window can stay hidden. Manage these global bindings in your desktop settings.',
+      name: 'hotkeyDesktopCommandsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compositor configuration`
+  String get hotkeyCompositorConfig {
+    return Intl.message(
+      'Compositor configuration',
+      name: 'hotkeyCompositorConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alternatively, add an include line to your compositor configuration. These files follow the combinations set in ReClash and temporarily clear them during recording. Your desktop configuration is never modified automatically; resolve any conflicting bindings there.`
+  String get hotkeyCompositorConfigDesc {
+    return Intl.message(
+      'Alternatively, add an include line to your compositor configuration. These files follow the combinations set in ReClash and temporarily clear them during recording. Your desktop configuration is never modified automatically; resolve any conflicting bindings there.',
+      name: 'hotkeyCompositorConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not exported: {actions}`
+  String hotkeyExportSkipped(Object actions) {
+    return Intl.message(
+      'Not exported: $actions',
+      name: 'hotkeyExportSkipped',
+      desc: '',
+      args: [actions],
+    );
+  }
+
+  /// `Compositor configuration files are unavailable. You can still use the desktop commands above.`
+  String get hotkeyExportUnavailable {
+    return Intl.message(
+      'Compositor configuration files are unavailable. You can still use the desktop commands above.',
+      name: 'hotkeyExportUnavailable',
       desc: '',
       args: [],
     );
