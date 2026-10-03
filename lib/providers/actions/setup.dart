@@ -186,15 +186,17 @@ class SetupAction extends _$SetupAction {
       return;
     }
     commonPrint.log('init status');
-    if (requiresHelperSession) {
-      beginTunAuthorization(
-        allowPrompt: !ref.read(appSettingProvider).silentLaunch,
-      );
-    }
     if (system.isAndroid) {
       await _updateStartTime();
     }
-    final shouldRun = _isRunning || ref.read(appSettingProvider).autoRun;
+    final appSetting = ref.read(appSettingProvider);
+    final shouldRun = _isRunning || appSetting.autoRun;
+    if (requiresHelperSession) {
+      beginTunAuthorization(
+        allowPrompt:
+            !appSetting.silentLaunch && (!usesWindowsElevation || shouldRun),
+      );
+    }
     if (shouldRun) {
       await setRunning(true, initialize: true);
     } else {
@@ -678,13 +680,9 @@ class SetupAction extends _$SetupAction {
     if (context == null || !context.mounted || _disposed) return false;
     return await dialogs.showMessage(
           context: context,
-          title: usesWindowsElevation
-              ? currentAppLocalizations.windowsElevationTitle
-              : currentAppLocalizations.helperAuthorizationTitle,
+          title: currentAppLocalizations.helperAuthorizationTitle,
           message: TextSpan(
-            text: usesWindowsElevation
-                ? currentAppLocalizations.windowsElevationMessage
-                : currentAppLocalizations.helperAuthorizationMessage,
+            text: currentAppLocalizations.helperAuthorizationMessage,
           ),
           confirmText: currentAppLocalizations.helperAuthorizationContinue,
           cancelText: currentAppLocalizations.helperAuthorizationLater,
@@ -787,8 +785,10 @@ class SetupAction extends _$SetupAction {
         showTunAuthorizationError(problem);
         return null;
       }
-      final confirmed = await confirmTunAuthorization();
-      if (!confirmed || !_authorizationIsCurrent(revision)) return null;
+      if (!usesWindowsElevation) {
+        final confirmed = await confirmTunAuthorization();
+        if (!confirmed || !_authorizationIsCurrent(revision)) return null;
+      }
     }
     _linuxInstallResult = null;
     final code = await authorizeCore();

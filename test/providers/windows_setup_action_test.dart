@@ -25,10 +25,9 @@ class _Core extends Mock implements CoreHandlerInterface {}
 
 class _WindowsSetup extends SetupAction {
   bool guiElevated = false;
-  bool consent = true;
   int confirmations = 0;
-  Completer<bool>? consentGate;
-  final confirmationStarted = Completer<void>();
+  Completer<bool>? authorizationGate;
+  final authorizationStarted = Completer<void>();
   final messages = <String>[];
 
   @override
@@ -41,10 +40,16 @@ class _WindowsSetup extends SetupAction {
   Future<bool> checkGuiElevation() async => guiElevated;
 
   @override
+  Future<bool> checkCoreAuthorization() async {
+    if (!authorizationStarted.isCompleted) authorizationStarted.complete();
+    final gate = authorizationGate;
+    return gate != null ? gate.future : super.checkCoreAuthorization();
+  }
+
+  @override
   Future<bool> confirmTunAuthorization() async {
     confirmations++;
-    if (!confirmationStarted.isCompleted) confirmationStarted.complete();
-    return await consentGate?.future ?? consent;
+    return true;
   }
 
   @override
@@ -126,6 +131,7 @@ void main() {
   }
 
   setUp(() {
+    globalState.needInitStatus = true;
     owner = CoreProcessOwner.direct;
     listenerAbsent = true;
     core = _Core();
@@ -152,11 +158,11 @@ void main() {
   });
 
   test(
-    'consent requests a managed restart but does not authorize TUN',
+    'explicit connect requests UAC directly but does not authorize TUN',
     () async {
       action.beginTunAuthorization();
       expect(await action.requestAdmin(true), isFalse);
-      expect(action.confirmations, 1);
+      expect(action.confirmations, 0);
       expect(
         container.read(authorizedTunEnableProvider),
         TunAuthorizationState.unauthorized,
@@ -184,45 +190,85 @@ void main() {
     verifyNever(() => core.requireTunElevation(true, allowPrompt: true));
   });
 
-  test('simultaneous requests share one consent dialog', () async {
-    action.consentGate = Completer<bool>();
-    action.beginTunAuthorization();
-    final first = action.requestAdmin(true);
-    final second = action.requestAdmin(true);
-    await action.confirmationStarted.future;
-    expect(action.confirmations, 1);
-    action.consentGate!.complete(true);
-    expect(await first, isFalse);
-    expect(await second, isFalse);
-    verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
-  });
+  for (final autoRun in [false, true]) {
+    for (final silentLaunch in [false, true]) {
+      test(
+        'startup with autoRun=$autoRun and silentLaunch=$silentLaunch',
+        () async {
+          container.read(initProvider.notifier).value = false;
+          container.read(appSettingProvider.notifier).value = AppSettingProps(
+            autoRun: autoRun,
+            silentLaunch: silentLaunch,
+            sendDeviceIdentity: false,
+          );
+          when(
+            () => core.restart(),
+          ).thenThrow(const WindowsLaunchException('windows_launch_cancelled'));
 
-  test('Stop invalidates consent before it can grant a launch', () async {
-    action.consentGate = Completer<bool>();
+          await action.initStatus();
+
+          expect(action.confirmations, 0);
+          expect(container.read(runTimeProvider), isNull);
+          verifyNever(() => core.startListener());
+          if (autoRun && !silentLaunch) {
+            verify(
+              () => core.requireTunElevation(true, allowPrompt: true),
+            ).called(1);
+            verify(() => core.restart()).called(1);
+            expect(action.messages, [
+              currentAppLocalizations.windowsElevationCancelled,
+            ]);
+          } else {
+            verifyNever(
+              () => core.requireTunElevation(true, allowPrompt: true),
+            );
+            verifyNever(() => core.restart());
+            expect(action.messages, isEmpty);
+          }
+        },
+      );
+    }
+  }
+
+  test(
+    'simultaneous requests share one UAC attempt without a dialog',
+    () async {
+      action.authorizationGate = Completer<bool>();
+      action.beginTunAuthorization();
+      final first = action.requestAdmin(true);
+      final second = action.requestAdmin(true);
+      await action.authorizationStarted.future;
+      action.authorizationGate!.complete(false);
+      expect(await first, isFalse);
+      expect(await second, isFalse);
+      expect(action.confirmations, 0);
+      verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
+    },
+  );
+
+  test('Stop invalidates authorization before it can grant a launch', () async {
+    action.authorizationGate = Completer<bool>();
     action.beginTunAuthorization();
     final pending = action.requestAdmin(true);
-    await action.confirmationStarted.future;
+    await action.authorizationStarted.future;
     await action.setRunning(false);
-    action.consentGate!.complete(true);
+    action.authorizationGate!.complete(false);
     expect(await pending, isNull);
+    expect(action.confirmations, 0);
     verifyNever(() => core.requireTunElevation(true, allowPrompt: true));
     verifyNever(() => core.stopListener());
   });
 
-  test(
-    'a declined consent requires a new explicit connection attempt',
-    () async {
-      action.consent = false;
-      action.beginTunAuthorization();
-      expect(await action.requestAdmin(true), isNull);
-      expect(await action.requestAdmin(true), isNull);
-      expect(action.confirmations, 1);
-      action.consent = true;
-      action.beginTunAuthorization();
-      expect(await action.requestAdmin(true), isFalse);
-      expect(action.confirmations, 2);
-    },
-  );
+  test('each explicit connection attempt grants UAC only once', () async {
+    action.beginTunAuthorization();
+    expect(await action.requestAdmin(true), isFalse);
+    expect(await action.requestAdmin(true), isNull);
+    verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
+    action.beginTunAuthorization();
+    expect(await action.requestAdmin(true), isFalse);
+    expect(action.confirmations, 0);
+    verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
+  });
 
   test('TUN-off restarts an elevated Core for an ordinary GUI', () async {
     owner = CoreProcessOwner.windowsElevated;
@@ -302,24 +348,27 @@ void main() {
     verify(() => core.startListener()).called(1);
   });
 
-  test('an absent Core hands consent to the real restart path', () async {
-    owner = null;
-    when(
-      () => core.restart(),
-    ).thenThrow(const WindowsLaunchException('windows_launch_cancelled'));
-    action.beginTunAuthorization();
-    expect(await action.setRunning(true), isFalse);
-    expect(action.confirmations, 1);
-    expect(action.messages, [
-      currentAppLocalizations.windowsElevationCancelled,
-    ]);
-    verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
-    verify(() => core.restart()).called(1);
-    verifyNever(() => core.setupConfig(any()));
-    verifyNever(() => core.startListener());
-    expect(container.read(coreStatusProvider), CoreStatus.disconnected);
-    expect(container.read(runTimeProvider), isNull);
-  });
+  test(
+    'an absent Core hands the UAC request to the real restart path',
+    () async {
+      owner = null;
+      when(
+        () => core.restart(),
+      ).thenThrow(const WindowsLaunchException('windows_launch_cancelled'));
+      action.beginTunAuthorization();
+      expect(await action.setRunning(true), isFalse);
+      expect(action.confirmations, 0);
+      expect(action.messages, [
+        currentAppLocalizations.windowsElevationCancelled,
+      ]);
+      verify(() => core.requireTunElevation(true, allowPrompt: true)).called(1);
+      verify(() => core.restart()).called(1);
+      verifyNever(() => core.setupConfig(any()));
+      verifyNever(() => core.startListener());
+      expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+      expect(container.read(runTimeProvider), isNull);
+    },
+  );
 
   test('failed elevated init is surfaced through the real handoff', () async {
     container.dispose();
