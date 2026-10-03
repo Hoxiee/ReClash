@@ -11,6 +11,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/feedback/tooltip.dart';
+import 'package:reclash/widgets/input/button.dart';
 
 final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
@@ -408,7 +409,7 @@ class _AnnounceMorph extends StatelessWidget {
       curve: AppSpringCurves.morph,
     );
     final rectTween = RectTween(begin: sourceRect, end: target);
-    final radiusTween = Tween<double>(begin: sourceRadius, end: AppCorner.xxl);
+    final shape = AppShape.all(sourceRadius);
     // The morph spring overshoots past 1, so hold fades on the linear track to
     // keep opacity inside [0, 1].
     final actionsOpacity = animation.drive(
@@ -419,7 +420,6 @@ class _AnnounceMorph extends StatelessWidget {
       animation: animation,
       builder: (context, _) {
         final rect = rectTween.evaluate(morph) ?? sourceRect;
-        final radius = max(0.0, radiusTween.evaluate(morph));
         return Stack(
           children: [
             Positioned.fromRect(
@@ -427,7 +427,7 @@ class _AnnounceMorph extends StatelessWidget {
               child: Material(
                 color: color,
                 clipBehavior: Clip.antiAlias,
-                shape: AppShape.all(radius),
+                shape: shape,
                 child: _AnnouncePanel(
                   text: text,
                   url: url,
@@ -500,23 +500,22 @@ class _AnnouncePanel extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
+                    const SizedBox(width: AppSpacing.md),
                     FadeTransition(
                       opacity: actionsOpacity,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      child: TonalButtonGroup(
                         children: [
                           if (hasUrl)
-                            _PanelAction(
-                              glyph: AppGlyphs.openExternal,
+                            IconButton(
                               tooltip: appLocalizations.openInBrowser,
                               onPressed: () => dialogs.openUrl(url!),
-                            ),
-                          _PanelAction(
-                            glyph: AppGlyphs.close,
+                              icon: const GlyphIcon(AppGlyphs.openExternal),
+                            ).withAppTooltip(),
+                          IconButton(
                             tooltip: appLocalizations.close,
                             onPressed: () => Navigator.of(context).maybePop(),
-                          ),
+                            icon: const GlyphIcon(AppGlyphs.close),
+                          ).withAppTooltip(),
                         ],
                       ),
                     ),
@@ -581,35 +580,4 @@ class _AnnounceMorphScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_AnnounceMorphScope oldWidget) =>
       boundaryKey != oldWidget.boundaryKey;
-}
-
-class _PanelAction extends StatelessWidget {
-  const _PanelAction({
-    required this.glyph,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final Glyph glyph;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppTooltip(
-      message: tooltip,
-      child: InkResponse(
-        onTap: onPressed,
-        radius: 22,
-        child: Padding(
-          padding: AppInsets.xs,
-          child: GlyphIcon(
-            glyph,
-            size: 20,
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
 }

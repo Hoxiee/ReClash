@@ -158,30 +158,56 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     _invalidateWindowGeometryCapture();
     ref.read(storeActionProvider.notifier).savePreferencesDebounce();
     commonPrint.log('minimize');
-    render?.pause();
-    ref.read(routeTrackerProvider.notifier).setVisible(false);
-    ref.read(setupActionProvider.notifier).setVisible(false);
-    unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(false));
-    _syncCoreScreenOff(true);
+    _enterBackground();
     super.onWindowMinimize();
   }
 
   @override
   void onWindowRestore() {
     commonPrint.log('restore');
+    _leaveBackground();
+    super.onWindowRestore();
+    _scheduleWindowGeometryCapture();
+  }
+
+  @override
+  void onWindowHide() {
+    _invalidateWindowGeometryCapture();
+    commonPrint.log('hide');
+    _enterBackground();
+    super.onWindowHide();
+  }
+
+  @override
+  void onWindowShow() {
+    commonPrint.log('show');
+    _leaveBackground();
+    super.onWindowShow();
+  }
+
+  // Hiding to the tray and minimizing both leave no one watching, so they park
+  // the same background consumers; show/restore resume them symmetrically.
+  void _enterBackground() {
+    render?.pause();
+    ref.read(routeTrackerProvider.notifier).setVisible(false);
+    ref.read(setupActionProvider.notifier).setVisible(false);
+    unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(false));
+    _syncCoreScreenOff(true);
+  }
+
+  void _leaveBackground() {
     render?.resume();
     ref.read(routeTrackerProvider.notifier).setVisible(true);
     ref.read(setupActionProvider.notifier).setVisible(true);
     unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(true));
     _syncCoreScreenOff(false);
-    super.onWindowRestore();
-    _scheduleWindowGeometryCapture();
   }
 
-  // Desktop has no OS screen-off signal, so a minimized window is the only cue
-  // that no one is watching: park the core's RCX reach and watchdog like a
-  // screen-off would, without suspending the data plane. The tunnel keeps
-  // routing; only the engine's probing quiets until the window returns.
+  // Desktop has no OS screen-off signal, so a window hidden to the tray or
+  // minimized is the only cue that no one is watching: park the core's RCX
+  // reach and watchdog like a screen-off would, without suspending the data
+  // plane. The tunnel keeps routing; only the engine's probing quiets until
+  // the window returns.
   void _syncCoreScreenOff(bool off) {
     if (ref.read(coreStatusProvider) != CoreStatus.connected) {
       return;

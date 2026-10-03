@@ -28,6 +28,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final Widget body;
   final Color? backgroundColor;
   final String? title;
+  final Widget? titleWidget;
   final bool isLoading;
   final List<Widget>? actions;
   final bool? centerTitle;
@@ -66,6 +67,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
     required this.body,
     this.backgroundColor,
     this.title,
+    this.titleWidget,
     this.actions,
     this.centerTitle,
     this.editState,
@@ -331,16 +333,17 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   }
 
   Widget _buildTitle(AppBarSearchState? startState) {
-    final appLocalizations = context.appLocalizations;
-    return _isSearch
-        ? _buildSearchField(startState)
-        : Text(
-            !_isEdit
-                ? widget.title!
-                : appLocalizations.selectedCountTitle(
-                    '${_appBarState.value.editState?.editCount ?? 0}',
-                  ),
-          );
+    if (_isSearch) {
+      return _buildSearchField(startState);
+    }
+    if (_isEdit) {
+      return Text(
+        context.appLocalizations.selectedCountTitle(
+          '${_appBarState.value.editState?.editCount ?? 0}',
+        ),
+      );
+    }
+    return widget.titleWidget ?? Text(widget.title!);
   }
 
   /// The searching title: a filled pill that reveals out of the search button,
@@ -652,7 +655,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.appBar != null || widget.title != null);
+    assert(
+      widget.appBar != null || widget.title != null || widget.titleWidget != null,
+    );
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
     final backAction = widget.backAction ?? backActionProvider?.backAction;
     final form = _SheetForm.of(context, hasActions: _hasActions);

@@ -210,6 +210,19 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('hiding to the tray and showing survive like minimize', (
+    tester,
+  ) async {
+    final listener = await pumpWindowManager(tester);
+
+    listener.onWindowHide();
+    listener.onWindowShow();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('an activate request shows the window through the port', (
     tester,
   ) async {

@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/change_server_button.dart';
@@ -103,7 +105,9 @@ void main() {
       expect(tester.takeException(), null);
     });
 
-    testWidgets('opens the full announcement on tap', (tester) async {
+    testWidgets('opens and closes the full announcement without a header URL', (
+      tester,
+    ) async {
       const text = 'Maintenance at 3am https://example.com/status';
       setProfile(_profile(panelMeta: const PanelMeta(announce: text)));
       await pumpWidget(tester, const Announce());
@@ -112,8 +116,108 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.byType(TonalButtonGroup), findsOneWidget);
+      expect(find.byGlyph(AppGlyphs.openExternal), findsNothing);
       expect(find.text(text), findsNWidgets(2));
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TonalButtonGroup), findsNothing);
+      expect(find.text(text), findsOneWidget);
     });
+
+    testWidgets('groups standard link and close buttons in a narrow panel', (
+      tester,
+    ) async {
+      const text = 'Maintenance at 3am';
+      const url = 'https://example.com/status';
+      setProfile(
+        _profile(
+          panelMeta: const PanelMeta(announce: text, announceUrl: url),
+        ),
+      );
+      await pumpWidget(tester, const SizedBox(width: 320, child: Announce()));
+      final labels = tester.element(find.byType(Announce)).appLocalizations;
+
+      await tester.tap(find.byType(Announce));
+      await tester.pumpAndSettle();
+
+      final group = find.byType(TonalButtonGroup);
+      expect(group, findsOneWidget);
+      expect(
+        find.descendant(of: group, matching: find.byType(IconButton)),
+        findsNWidgets(2),
+      );
+      final open = find.widgetWithGlyph(IconButton, AppGlyphs.openExternal);
+      final close = find.widgetWithGlyph(IconButton, AppGlyphs.close);
+      final buttonSize = TonalButtonSize.bar.button;
+      expect(tester.getSize(open), Size.square(buttonSize));
+      expect(tester.getSize(close), Size.square(buttonSize));
+      expect(
+        tester.getCenter(close) - tester.getCenter(open),
+        Offset(buttonSize, 0),
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byTooltip(labels.openInBrowser));
+      await tester.pumpAndSettle();
+
+      expect(find.text(labels.externalLink), findsOneWidget);
+      expect(find.text(url), findsOneWidget);
+      await tester.tap(find.text(labels.cancel));
+      await tester.pumpAndSettle();
+      expect(group, findsOneWidget);
+
+      await tester.tap(find.byTooltip(labels.close));
+      await tester.pumpAndSettle();
+      expect(group, findsNothing);
+      expect(find.text(text), findsOneWidget);
+    });
+
+    for (final unitHeight in [80.0, 120.0]) {
+      testWidgets('keeps the dashboard radius at unit height $unitHeight', (
+        tester,
+      ) async {
+        setProfile(
+          _profile(panelMeta: const PanelMeta(announce: 'Maintenance at 3am')),
+        );
+        await pumpWidget(
+          tester,
+          DashboardWidgetMetrics(
+            unitHeight: unitHeight,
+            child: const SizedBox(width: 360, child: Announce()),
+          ),
+        );
+        final card = tester.widget<CommonCard>(
+          find.descendant(
+            of: find.byType(Announce),
+            matching: find.byType(CommonCard),
+          ),
+        );
+
+        await tester.tap(find.byType(Announce));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        final panel = find
+            .ancestor(
+              of: find.byType(SelectionArea),
+              matching: find.byType(Material),
+            )
+            .first;
+        expect(
+          tester.widget<Material>(panel).shape,
+          AppShape.all(card.radius!),
+        );
+
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<Material>(panel).shape,
+          AppShape.all(card.radius!),
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 
   group('MetaInfo', () {
@@ -209,7 +313,10 @@ void main() {
       expect(tester.takeException(), null);
     });
 
-    testWidgets('opens the subscription sheet on tap', (tester) async {
+    testWidgets('opens compact subscription details without announcements', (
+      tester,
+    ) async {
+      const announcement = 'Maintenance at 3am';
       setProfile(
         _profile(
           subscriptionInfo: const SubscriptionInfo(
@@ -217,16 +324,58 @@ void main() {
             total: 100,
             expire: 1893456000,
           ),
+          panelMeta: const PanelMeta(
+            announce: announcement,
+            buyPlanUrl: 'https://example.com/renew',
+            buyTrafficUrl: 'https://example.com/traffic',
+            webPageUrl: 'https://example.com/account',
+          ),
         ),
       );
       await pumpWidget(tester, const MetaInfo());
+      final labels = tester.element(find.byType(MetaInfo)).appLocalizations;
 
       await tester.tap(find.byType(MetaInfo));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
-      expect(find.text('Subscription info'), findsOneWidget);
-      expect(find.text('Subscription report'), findsOneWidget);
+      final sheet = find.byType(AdaptiveSheetScaffold);
+      expect(sheet, findsOneWidget);
+      expect(find.text(announcement), findsNothing);
+      final headers = find.descendant(
+        of: sheet,
+        matching: find.byType(ListHeader),
+      );
+      expect(
+        tester.widgetList<ListHeader>(headers).map((header) => header.title),
+        [labels.subscriptionInfo, labels.profile, labels.serviceInfo],
+      );
+      for (final title in [
+        labels.renewSubscription,
+        labels.topUpTraffic,
+        labels.personalCabinet,
+        labels.subscriptionReport,
+      ]) {
+        expect(find.text(title), findsOneWidget);
+      }
+
+      final subscriptionRow = find.ancestor(
+        of: find.byType(SubscriptionInfoView),
+        matching: find.byType(DecorationListItem),
+      );
+      expect(
+        tester.getRect(headers.at(1)).top,
+        closeTo(tester.getRect(subscriptionRow).bottom, 0.01),
+      );
+      expect(
+        tester.getRect(headers.at(2)).top,
+        closeTo(
+          tester
+              .getRect(find.widgetWithText(DetailRow, labels.overrideMode))
+              .bottom,
+          0.01,
+        ),
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('opens even when the panel sent no subscription data', (
@@ -239,6 +388,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+      expect(find.text('Subscription info'), findsNothing);
+      expect(find.widgetWithText(ListHeader, 'Service'), findsOneWidget);
       expect(find.text('Subscription report'), findsOneWidget);
     });
 

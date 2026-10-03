@@ -212,8 +212,32 @@ class Dialogs {
     if (res != true) {
       return;
     }
-    unawaited(launchUrl(Uri.parse(url)));
+    final uri = Uri.parse(url);
+    unawaited(
+      launchUrl(
+        uri,
+        mode: _prefersExternalApp(uri)
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      ),
+    );
   }
+}
+
+/// Non-web schemes (tg, tonsite, custom) and Telegram's web wrappers must reach
+/// the installed app: a Telegram Mini App only receives signed launch data when
+/// opened by the Telegram client, so an in-app WebView would strand it. Plain
+/// http(s) keeps the platform default (in-app tab on mobile).
+bool _prefersExternalApp(Uri uri) {
+  final scheme = uri.scheme.toLowerCase();
+  if (scheme != 'http' && scheme != 'https') {
+    return true;
+  }
+  return const {
+    't.me',
+    'telegram.me',
+    'telegram.dog',
+  }.contains(uri.host.toLowerCase());
 }
 
 class _UpdatingMessageItem extends StatelessWidget {

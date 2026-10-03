@@ -203,7 +203,6 @@ class _Body extends ConsumerWidget {
       null => null,
     };
     final info = profile.subscriptionInfo;
-    final announce = profile.panelMeta?.announce?.trim();
     return ListView(
       shrinkWrap: true,
       // The scaffold already reserves the toolbar height above the body.
@@ -212,8 +211,7 @@ class _Body extends ConsumerWidget {
       ).copyWith(bottom: 20 + BottomInsetScope.of(context)),
       children: [
         _StatsGrid(stats: stats, failed: failed),
-        if (info != null && info.hasFacts) ...[
-          const SizedBox(height: AppSpacing.lg),
+        if (info != null && info.hasFacts)
           generateSectionV3(
             title: l10n.subscriptionInfo,
             items: [
@@ -222,15 +220,6 @@ class _Body extends ConsumerWidget {
               ),
             ],
           ),
-        ],
-        if (announce != null && announce.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.lg),
-          generateSectionV3(
-            title: l10n.announce,
-            items: [DecorationListItem(title: Text(announce))],
-          ),
-        ],
-        const SizedBox(height: AppSpacing.lg),
         generateSectionV3(
           title: l10n.profile,
           items: [
@@ -244,8 +233,7 @@ class _Body extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
-        generateSectionV3(items: _actions(context)),
+        generateSectionV3(title: l10n.serviceInfo, items: _actions(context)),
       ],
     );
   }
