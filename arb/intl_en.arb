@@ -526,6 +526,7 @@
   "serviceInfo": "Service",
   "changeServer": "Change server",
   "noAnnouncements": "No announcements",
+  "announceReadMore": "Read more",
   "perpetualSubscription": "Perpetual subscription",
   "remainingTraffic": "Remaining",
   "daysLeft": "{count, plural, =1{1 day left} other{{count} days left}}",

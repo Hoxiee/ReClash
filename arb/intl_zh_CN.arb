@@ -501,6 +501,7 @@
   "serviceInfo": "服务",
   "changeServer": "更换服务器",
   "noAnnouncements": "暂无公告",
+  "announceReadMore": "展开",
   "perpetualSubscription": "永久订阅",
   "remainingTraffic": "剩余",
   "daysLeft": "{count} 天",

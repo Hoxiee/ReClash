@@ -473,6 +473,7 @@
   "serviceInfo": "Сервис",
   "changeServer": "Серверді ауыстыру",
   "noAnnouncements": "Хабарландырулар жоқ",
+  "announceReadMore": "Толығырақ",
   "perpetualSubscription": "Мәңгілік жазылыс",
   "remainingTraffic": "Қалғаны",
   "daysLeft": "{count, plural, =1{1 күн қалды} other{{count} күн қалды}}",

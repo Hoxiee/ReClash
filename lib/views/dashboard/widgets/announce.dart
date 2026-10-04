@@ -171,7 +171,7 @@ class _AnnounceCollapsed extends StatelessWidget {
         final displayText = hasAnnouncement
             ? text!
             : context.appLocalizations.noAnnouncements;
-        // A clipped half line reads as a rendering fault, so whole ones only.
+        // Fill every available line; the fade below carries the clipped tail.
         final maxLines = max(1, constraints.maxHeight ~/ lineHeight);
         final clipped =
             hasAnnouncement &&
@@ -186,7 +186,9 @@ class _AnnounceCollapsed extends StatelessWidget {
           ),
         );
         if (!clipped) return content;
-        final fade = (lineHeight / constraints.maxHeight).clamp(0.0, 0.5);
+        // The clipped line dissolves into the fade instead of a hard cut, and a
+        // labelled pill spells out the tap-to-read affordance.
+        final fade = (lineHeight * 1.3 / constraints.maxHeight).clamp(0.3, 0.6);
         return Stack(
           children: [
             Positioned.fill(
@@ -202,14 +204,24 @@ class _AnnounceCollapsed extends StatelessWidget {
                     Colors.transparent,
                   ],
                 ).createShader(rect),
-                child: content,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: AnnounceText(
+                    text: displayText,
+                    maxLines: maxLines,
+                    style: style,
+                  ),
+                ),
               ),
             ),
-            const Positioned(
-              left: 0,
+            Positioned(
               right: 0,
               bottom: 0,
-              child: IgnorePointer(child: Center(child: _MoreHint())),
+              child: IgnorePointer(
+                child: _MoreHint(
+                  label: context.appLocalizations.announceReadMore,
+                ),
+              ),
             ),
           ],
         );
@@ -218,23 +230,41 @@ class _AnnounceCollapsed extends StatelessWidget {
   }
 }
 
-/// A pill parked over the fade so the cut-off is unmistakable, not just a soft
-/// gradient a reader might miss.
+/// A labelled pill parked over the fade so the cut-off is unmistakable: the
+/// text names the action and the chevron points the way to open it.
 class _MoreHint extends StatelessWidget {
-  const _MoreHint();
+  const _MoreHint({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+    final scheme = context.colorScheme;
+    return DecoratedBox(
       decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerHigh,
+        color: scheme.secondaryContainer,
         shape: AppShape.full,
       ),
-      child: GlyphIcon(
-        AppGlyphs.chevronDown,
-        size: 16,
-        color: context.colorScheme.onSurfaceVariant,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 2, 6, 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: context.textTheme.labelSmall?.copyWith(
+                color: scheme.onSecondaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 2),
+            GlyphIcon(
+              AppGlyphs.chevronDown,
+              size: 16,
+              color: scheme.onSecondaryContainer,
+            ),
+          ],
+        ),
       ),
     );
   }

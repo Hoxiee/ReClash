@@ -473,6 +473,7 @@
   "serviceInfo": "Xizmat",
   "changeServer": "Serverni almashtirish",
   "noAnnouncements": "E’lonlar yoʻq",
+  "announceReadMore": "Davomi",
   "perpetualSubscription": "Abadiy obuna",
   "remainingTraffic": "Qolgan",
   "daysLeft": "{count, plural, =1{1 kun qoldi} other{{count} kun qoldi}}",

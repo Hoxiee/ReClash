@@ -350,6 +350,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("允许通过局域网访问代理"),
     "animations": MessageLookupByLibrary.simpleMessage("动画"),
     "announce": MessageLookupByLibrary.simpleMessage("公告"),
+    "announceReadMore": MessageLookupByLibrary.simpleMessage("展开"),
     "answers": MessageLookupByLibrary.simpleMessage("应答"),
     "app": MessageLookupByLibrary.simpleMessage("应用"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("应用访问控制"),

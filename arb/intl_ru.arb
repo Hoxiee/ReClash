@@ -519,6 +519,7 @@
   "serviceInfo": "Сервис",
   "changeServer": "Сменить сервер",
   "noAnnouncements": "Нет анонсов",
+  "announceReadMore": "Читать",
   "perpetualSubscription": "Бессрочная подписка",
   "remainingTraffic": "Осталось",
   "daysLeft": "{count, plural, one{{count} день} few{{count} дня} many{{count} дней} other{{count} дней}}",

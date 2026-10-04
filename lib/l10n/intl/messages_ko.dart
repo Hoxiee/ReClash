@@ -374,6 +374,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("LAN에서 프록시 접근을 허용합니다"),
     "animations": MessageLookupByLibrary.simpleMessage("애니메이션"),
     "announce": MessageLookupByLibrary.simpleMessage("공지사항"),
+    "announceReadMore": MessageLookupByLibrary.simpleMessage("더 보기"),
     "answers": MessageLookupByLibrary.simpleMessage("응답"),
     "app": MessageLookupByLibrary.simpleMessage("앱"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("앱 액세스 제어"),

@@ -501,6 +501,7 @@
   "serviceInfo": "サービス",
   "changeServer": "サーバーを変更",
   "noAnnouncements": "お知らせはありません",
+  "announceReadMore": "もっと見る",
   "perpetualSubscription": "無期限サブスクリプション",
   "remainingTraffic": "残り",
   "daysLeft": "{count} 日",

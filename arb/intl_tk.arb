@@ -473,6 +473,7 @@
   "serviceInfo": "Hyzmat",
   "changeServer": "Serweri çalyş",
   "noAnnouncements": "Bildirişler ýok",
+  "announceReadMore": "Dowamy",
   "perpetualSubscription": "Möhletsiz abuna",
   "remainingTraffic": "Galan",
   "daysLeft": "{count, plural, =1{1 gün galdy} other{{count} gün galdy}}",

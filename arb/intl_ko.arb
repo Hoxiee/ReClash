@@ -473,6 +473,7 @@
   "serviceInfo": "서비스",
   "changeServer": "서버 변경",
   "noAnnouncements": "공지사항 없음",
+  "announceReadMore": "더 보기",
   "perpetualSubscription": "무기한 구독",
   "remainingTraffic": "남은 트래픽",
   "daysLeft": "{count, plural, =1{1일 남음} other{{count}일 남음}}",

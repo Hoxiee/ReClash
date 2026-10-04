@@ -359,6 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("LAN経由でのプロキシ利用を許可します"),
     "animations": MessageLookupByLibrary.simpleMessage("アニメーション"),
     "announce": MessageLookupByLibrary.simpleMessage("お知らせ"),
+    "announceReadMore": MessageLookupByLibrary.simpleMessage("もっと見る"),
     "answers": MessageLookupByLibrary.simpleMessage("応答"),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),

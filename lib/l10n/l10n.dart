@@ -4358,6 +4358,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Read more`
+  String get announceReadMore {
+    return Intl.message(
+      'Read more',
+      name: 'announceReadMore',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Perpetual subscription`
   String get perpetualSubscription {
     return Intl.message(
