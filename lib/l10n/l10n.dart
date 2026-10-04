@@ -928,6 +928,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Prerelease updates`
+  String get prereleaseUpdates {
+    return Intl.message(
+      'Prerelease updates',
+      name: 'prereleaseUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Offer prerelease builds, not only stable releases`
+  String get prereleaseUpdatesDesc {
+    return Intl.message(
+      'Offer prerelease builds, not only stable releases',
+      name: 'prereleaseUpdatesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verify TLS certificates`
   String get checkCertificate {
     return Intl.message(
@@ -18233,8 +18253,7 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc:
-          'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18294,8 +18313,7 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc:
-          'Countdown showing how many seconds remain before the pairing code expires.',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }

@@ -2012,9 +2012,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -2714,6 +2715,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH үшін HTTP/3-ті артық көру",
+    ),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage(
+      "Алдын ала шығарылым жаңартулары",
+    ),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "Тек тұрақты шығарылымдарды емес, алдын ала шығарылымдарды да ұсыну",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Алғышарттар"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Пернені басыңыз"),

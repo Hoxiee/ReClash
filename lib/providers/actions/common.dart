@@ -112,7 +112,9 @@ class CommonAction extends _$CommonAction {
       return false;
     }
     await preferences.saveLastUpdateCheckAt(now.millisecondsSinceEpoch);
-    final res = await request.checkForUpdate();
+    final res = await request.checkForUpdate(
+      acceptPrereleases: ref.read(appSettingProvider).acceptPrereleaseUpdates,
+    );
     await checkUpdateResultHandle(data: res);
     return res != null;
   }

@@ -1939,6 +1939,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "portTip": m67,
     "predictiveBack": MessageLookupByLibrary.simpleMessage("预测式返回"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("优先使用DOH的http/3"),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage("预发布更新"),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "提供预发布版本，而不仅是稳定版",
+    ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下按键"),
     "preview": MessageLookupByLibrary.simpleMessage("预览"),

@@ -110,6 +110,8 @@
   "logcatDesc": "Oʻchirilsa, loglar boʻlimi yashirinadi",
   "autoCheckUpdate": "Yangilanishlarni avtomatik tekshirish",
   "autoCheckUpdateDesc": "Ilova ishga tushganda yangilanishlar avtomatik tekshiriladi",
+  "prereleaseUpdates": "Reliz oldi yangilanishlari",
+  "prereleaseUpdatesDesc": "Faqat barqaror relizlarni emas, reliz oldi qurilmalarini ham taklif qilish",
   "checkCertificate": "TLS sertifikatlarini tekshirish",
   "checkCertificateDesc": "Ishonchsiz sertifikatlar rad etiladi. Oʻchirilsa, obuna va zaxiralar «oʻrtadagi odam» hujumlariga ochiq qoladi",
   "accessControl": "Kirish nazorati",

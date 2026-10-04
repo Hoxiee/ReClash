@@ -171,6 +171,14 @@ class _ApplicationGeneralTab extends StatelessWidget {
       ),
       _appSettingToggle(
         search: const SettingSearch(),
+        title: (l) => l.prereleaseUpdates,
+        subtitle: (l) => l.prereleaseUpdatesDesc,
+        select: (state) => state.acceptPrereleaseUpdates,
+        update: (state, value) =>
+            state.copyWith(acceptPrereleaseUpdates: value),
+      ),
+      _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.checkCertificate,
         subtitle: (l) => l.checkCertificateDesc,
         select: (state) => state.checkCertificate,

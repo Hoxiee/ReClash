@@ -264,6 +264,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readTabAnimation)
     TabAnimation tabAnimation,
     @Default(true) bool autoCheckUpdate,
+    @Default(false) bool acceptPrereleaseUpdates,
     @Default(false) bool showLabel,
     @Default(false) bool sidebarExpanded,
     @Default(false) bool disclaimerAccepted,

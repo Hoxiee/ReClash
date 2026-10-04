@@ -272,6 +272,12 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       gate: 'always',
     ),
     DeepSettingSpec(
+      title: l.prereleaseUpdates,
+      paneId: 'application',
+      category: 'application',
+      gate: 'always',
+    ),
+    DeepSettingSpec(
       title: l.checkCertificate,
       paneId: 'application',
       category: 'application',

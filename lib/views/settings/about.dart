@@ -31,8 +31,11 @@ class AboutView extends ConsumerWidget {
 
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     final commonAction = ref.read(commonActionProvider.notifier);
+    final acceptPrereleases = ref
+        .read(appSettingProvider)
+        .acceptPrereleaseUpdates;
     final data = await globalState.safeRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
+      () => request.checkForUpdate(acceptPrereleases: acceptPrereleases),
       title: context.appLocalizations.checkUpdate,
     );
     unawaited(commonAction.checkUpdateResultHandle(data: data, isUser: true));

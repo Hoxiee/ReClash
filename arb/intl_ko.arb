@@ -110,6 +110,8 @@
   "logcatDesc": "끄면 로그 메뉴가 표시되지 않습니다",
   "autoCheckUpdate": "업데이트 자동 확인",
   "autoCheckUpdateDesc": "앱 시작 시 자동으로 업데이트를 확인합니다",
+  "prereleaseUpdates": "프리릴리스 업데이트",
+  "prereleaseUpdatesDesc": "안정 릴리스뿐 아니라 프리릴리스 빌드도 제공합니다",
   "checkCertificate": "TLS 인증서 확인",
   "checkCertificateDesc": "신뢰할 수 없는 인증서를 거부합니다. 끄면 구독과 백업이 중간자 공격에 노출됩니다.",
   "accessControl": "액세스 제어",

@@ -188,21 +188,28 @@ class Request {
     }
   }
 
-  Future<Map<String, dynamic>?> checkForUpdate() async {
+  /// Lists releases instead of hitting `releases/latest`, which hides every
+  /// prerelease and 404s on a repo that has only ever shipped them. The channel
+  /// policy lives in [selectUpdateRelease]; [acceptPrereleases] lets a stable
+  /// build opt into prerelease upgrades.
+  Future<Map<String, dynamic>?> checkForUpdate({
+    required bool acceptPrereleases,
+  }) async {
     try {
       final response = await dio.get(
-        'https://api.github.com/repos/$repository/releases/latest',
+        'https://api.github.com/repos/$repository/releases',
+        queryParameters: const {'per_page': 50},
         options: Options(responseType: ResponseType.json),
       );
       if (response.statusCode != 200) return null;
-      final data = response.data as Map<String, dynamic>;
-      final hasUpdate = isNewerAppRelease(
-        remoteVersion: data['tag_name'] as String,
+      final releases = (response.data as List)
+          .whereType<Map<String, dynamic>>()
+          .toList();
+      return selectUpdateRelease(
+        releases,
         installedVersion: globalState.packageInfo.version,
-        body: data['body'] as String?,
+        acceptPrereleases: acceptPrereleases,
       );
-      if (!hasUpdate) return null;
-      return data;
     } catch (error) {
       commonPrint.log('checkForUpdate failed', logLevel: LogLevel.warning);
       return null;

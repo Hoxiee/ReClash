@@ -119,6 +119,8 @@
   "logcatDesc": "Disabling hides the log entry point",
   "autoCheckUpdate": "Auto check for updates",
   "autoCheckUpdateDesc": "Check for updates automatically when the app starts",
+  "prereleaseUpdates": "Prerelease updates",
+  "prereleaseUpdatesDesc": "Offer prerelease builds, not only stable releases",
   "checkCertificate": "Verify TLS certificates",
   "checkCertificateDesc": "Reject untrusted certificates. Turning this off exposes subscriptions and backups to man-in-the-middle attacks",
   "accessControl": "Access control",

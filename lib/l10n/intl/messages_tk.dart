@@ -2017,9 +2017,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -2705,6 +2706,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "predictiveBack": MessageLookupByLibrary.simpleMessage("Çaklaýjy yza"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH üçin HTTP/3-i ileri tutmak",
+    ),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage(
+      "Deslapky çykaryş täzelenmeleri",
+    ),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "Diňe durnukly çykaryşlary däl, deslapky çykaryşlary hem teklip etmek",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Öň şertler"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(

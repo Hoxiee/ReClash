@@ -2008,9 +2008,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2712,6 +2713,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Предпочитать HTTP/3 для DoH",
+    ),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage(
+      "Предрелизные обновления",
+    ),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "Предлагать пре-сборки, а не только стабильные релизы",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Требования"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Нажмите клавишу"),

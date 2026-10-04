@@ -2228,6 +2228,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "portTip": m67,
     "predictiveBack": MessageLookupByLibrary.simpleMessage("予測型戻る"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DoHでHTTP/3を優先します"),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage("プレリリース更新"),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "安定版だけでなくプレリリース版も提供します",
+    ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーを押してください"),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),

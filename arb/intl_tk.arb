@@ -110,6 +110,8 @@
   "logcatDesc": "Öçürilse, hasaba alyşyň giriş nokady gizlenýär",
   "autoCheckUpdate": "Täzelenmeleri awtomatiki barlamak",
   "autoCheckUpdateDesc": "Programma açylanda täzelenmeler awtomatiki barlanýar",
+  "prereleaseUpdates": "Deslapky çykaryş täzelenmeleri",
+  "prereleaseUpdatesDesc": "Diňe durnukly çykaryşlary däl, deslapky çykaryşlary hem teklip etmek",
   "checkCertificate": "TLS şaýatnamalaryny barlamak",
   "checkCertificateDesc": "Ynançsyz şaýatnamalary ret edýär. Öçürilse, abunalar we ätiýaçlyk nusgalary aradaky adam hüjümlerine duçar bolýar",
   "accessControl": "Elýetmäge gözegçilik",

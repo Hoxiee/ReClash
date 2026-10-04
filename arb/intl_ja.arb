@@ -110,6 +110,8 @@
   "logcatDesc": "無効にするとログの入り口が非表示になります",
   "autoCheckUpdate": "更新の自動チェック",
   "autoCheckUpdateDesc": "アプリ起動時に更新を自動的にチェックします",
+  "prereleaseUpdates": "プレリリース更新",
+  "prereleaseUpdatesDesc": "安定版だけでなくプレリリース版も提供します",
   "checkCertificate": "TLS証明書を検証",
   "checkCertificateDesc": "信頼できない証明書を拒否します。無効にすると、サブスクリプションやバックアップが中間者攻撃にさらされます",
   "accessControl": "アクセス制御",

@@ -62,4 +62,105 @@ void main() {
       contains(releaseEpochMarker),
     );
   });
+
+  group('selectUpdateRelease', () {
+    Map<String, dynamic> release(
+      String tag, {
+      bool prerelease = false,
+      bool draft = false,
+      String? body = releaseEpochMarker,
+    }) => {
+      'tag_name': tag,
+      'prerelease': prerelease,
+      'draft': draft,
+      'body': body,
+    };
+
+    String? pick(
+      List<Map<String, dynamic>> releases, {
+      required String installed,
+      bool acceptPrereleases = false,
+    }) =>
+        selectUpdateRelease(
+              releases,
+              installedVersion: installed,
+              acceptPrereleases: acceptPrereleases,
+            )?['tag_name']
+            as String?;
+
+    test('picks the highest eligible version regardless of list order', () {
+      final result = pick([
+        release('v0.1.1'),
+        release('v0.3.0'),
+        release('v0.2.0'),
+      ], installed: '0.1.0');
+      expect(result, 'v0.3.0');
+    });
+
+    test('a prerelease build steps onto the finished stable release', () {
+      final result = pick([
+        release('v0.1.0-pre.3', prerelease: true),
+        release('v0.1.0'),
+      ], installed: '0.1.0-pre.2');
+      expect(result, 'v0.1.0');
+    });
+
+    test(
+      'a prerelease build takes a newer prerelease when it is the newest',
+      () {
+        final result = pick([
+          release('v0.1.0-pre.3', prerelease: true),
+        ], installed: '0.1.0-pre.2');
+        expect(result, 'v0.1.0-pre.3');
+      },
+    );
+
+    test('a stable build ignores prereleases by default', () {
+      final result = pick([
+        release('v0.2.0-pre.1', prerelease: true),
+      ], installed: '0.1.0');
+      expect(result, isNull);
+    });
+
+    test('a stable build takes a prerelease once the user opts in', () {
+      final result = pick(
+        [release('v0.2.0-pre.1', prerelease: true)],
+        installed: '0.1.0',
+        acceptPrereleases: true,
+      );
+      expect(result, 'v0.2.0-pre.1');
+    });
+
+    test('a stable build always takes a newer stable release', () {
+      final result = pick([release('v0.2.0')], installed: '0.1.0');
+      expect(result, 'v0.2.0');
+    });
+
+    test('honors GitHub prerelease flag on a stable-looking tag', () {
+      expect(
+        pick([release('v0.2.0', prerelease: true)], installed: '0.1.0'),
+        isNull,
+      );
+      expect(
+        pick(
+          [release('v0.2.0', prerelease: true)],
+          installed: '0.1.0',
+          acceptPrereleases: true,
+        ),
+        'v0.2.0',
+      );
+    });
+
+    test('skips drafts, missing epoch markers, and non-newer versions', () {
+      expect(
+        pick([release('v0.2.0', draft: true)], installed: '0.1.0'),
+        isNull,
+      );
+      expect(
+        pick([release('v0.2.0', body: 'no marker')], installed: '0.1.0'),
+        isNull,
+      );
+      expect(pick([release('v0.1.0')], installed: '0.1.0'), isNull);
+    });
+  });
 }

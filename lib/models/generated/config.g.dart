@@ -105,6 +105,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       ) ??
       TabAnimation.slide,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
+  acceptPrereleaseUpdates: json['acceptPrereleaseUpdates'] as bool? ?? false,
   showLabel: json['showLabel'] as bool? ?? false,
   sidebarExpanded: json['sidebarExpanded'] as bool? ?? false,
   disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
@@ -172,6 +173,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'testUrl': instance.testUrl,
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'autoCheckUpdate': instance.autoCheckUpdate,
+      'acceptPrereleaseUpdates': instance.acceptPrereleaseUpdates,
       'showLabel': instance.showLabel,
       'sidebarExpanded': instance.sidebarExpanded,
       'disclaimerAccepted': instance.disclaimerAccepted,

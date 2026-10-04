@@ -2205,6 +2205,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH에 HTTP/3를 우선 사용합니다",
     ),
+    "prereleaseUpdates": MessageLookupByLibrary.simpleMessage("프리릴리스 업데이트"),
+    "prereleaseUpdatesDesc": MessageLookupByLibrary.simpleMessage(
+      "안정 릴리스뿐 아니라 프리릴리스 빌드도 제공합니다",
+    ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("필수 조건"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("키를 눌러 주세요"),
     "preview": MessageLookupByLibrary.simpleMessage("미리 보기"),

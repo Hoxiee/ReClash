@@ -110,6 +110,8 @@
   "logcatDesc": "禁用将会隐藏日志入口",
   "autoCheckUpdate": "自动检查更新",
   "autoCheckUpdateDesc": "应用启动时自动检查更新",
+  "prereleaseUpdates": "预发布更新",
+  "prereleaseUpdatesDesc": "提供预发布版本，而不仅是稳定版",
   "checkCertificate": "校验 TLS 证书",
   "checkCertificateDesc": "拒绝不受信任的证书。关闭后订阅和备份将暴露于中间人攻击",
   "accessControl": "访问控制",
