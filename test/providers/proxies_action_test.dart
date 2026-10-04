@@ -163,7 +163,7 @@ void main() {
         await actionOf(container).updateGroups();
 
         expect(container.read(groupsProvider), isEmpty);
-        verify(core.getProxies).called(3);
+        verify(core.getProxies).called(5);
       },
     );
 

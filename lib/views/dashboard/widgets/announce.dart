@@ -294,7 +294,7 @@ class _MoreHint extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(width: 2),
+            const SizedBox(width: AppSpacing.xxs),
             GlyphIcon(
               AppGlyphs.chevronDown,
               size: 16,

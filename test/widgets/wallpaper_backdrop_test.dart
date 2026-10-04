@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/widgets/theme/wallpaper.dart';
 
@@ -58,9 +58,7 @@ void main() {
     var inits = 0;
     final notifier = ValueNotifier<ImageProvider?>(null);
     addTearDown(notifier.dispose);
-    await tester.pumpWidget(
-      host(notifier, _InitProbe(onInit: () => inits++)),
-    );
+    await tester.pumpWidget(host(notifier, _InitProbe(onInit: () => inits++)));
     expect(inits, 1);
 
     notifier.value = imageA;
@@ -103,7 +101,9 @@ void main() {
     expect(actives.last, isFalse, reason: 'drops once the fade-out completes');
   });
 
-  testWidgets('crossfades between two wallpapers without a gap', (tester) async {
+  testWidgets('crossfades between two wallpapers without a gap', (
+    tester,
+  ) async {
     final notifier = ValueNotifier<ImageProvider?>(imageA);
     addTearDown(notifier.dispose);
     await tester.pumpWidget(host(notifier, const SizedBox()));

@@ -1085,7 +1085,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
               constraints: const BoxConstraints(maxWidth: 360),
               child: _buildFindInput(context),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
           ],
           Text(result, style: context.textTheme.bodyMedium),
           Expanded(
@@ -1110,13 +1110,13 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
                     tooltip: context.appLocalizations.replace,
                     isSelected: _showReplace,
                   ),
-                const SizedBox(width: 2),
+                const SizedBox(width: AppSpacing.xxs),
                 ElasticButton(
                   child: IconButton.filledTonal(
                     tooltip: context.appLocalizations.close,
                     onPressed: controller.hide,
                     icon: const GlyphIcon(AppGlyphs.close, size: 16, fill: 1),
-                  ),
+                  ).withAppTooltip(),
                 ),
               ],
             ),
@@ -1131,9 +1131,12 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           bar,
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _buildFindInput(context),
-          if (_showReplace) ...[const SizedBox(height: 12), replaceInput],
+          if (_showReplace) ...[
+            const SizedBox(height: AppSpacing.md),
+            replaceInput,
+          ],
         ],
       );
     }
@@ -1145,7 +1148,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         bar,
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Align(
           alignment: Alignment.centerLeft,
           child: ConstrainedBox(
@@ -1267,9 +1270,13 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
             data: const IconThemeData(fill: 1),
             child: icon,
           ),
-        ),
+        ).withAppTooltip(),
       );
     }
-    return IconButton(tooltip: tooltip, onPressed: onPressed, icon: icon);
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: icon,
+    ).withAppTooltip();
   }
 }

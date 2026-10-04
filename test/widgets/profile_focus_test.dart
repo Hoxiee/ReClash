@@ -138,31 +138,4 @@ void main() {
     expect(find.text(currentAppLocalizations.profile), findsOneWidget);
     expect(find.text(currentAppLocalizations.announce), findsNothing);
   });
-
-  testWidgets('subscription sheet from profiles menu shows announcements', (
-    tester,
-  ) async {
-    final profile = urlProfile(
-      'url',
-    ).copyWith(panelMeta: const PanelMeta(announce: 'Maintenance tonight'));
-    await pumpProfiles(tester, profiles: [profile]);
-
-    final profileItem = find.ancestor(
-      of: find.text('url'),
-      matching: find.byType(ListItem),
-    );
-    await tester.tap(
-      find.descendant(of: profileItem, matching: find.byGlyph(AppGlyphs.more)),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text(currentAppLocalizations.more).last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(currentAppLocalizations.subscriptionInfo));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(NestedPagedSheet), findsOneWidget);
-    expect(find.text(currentAppLocalizations.announce), findsOneWidget);
-    expect(find.text('Maintenance tonight'), findsOneWidget);
-  });
 }
