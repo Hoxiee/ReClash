@@ -9,6 +9,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/nav/nav_motion.dart';
 import 'package:reclash/widgets/nav/nav_slots.dart';
 
@@ -256,7 +257,8 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
                         if (prevGroup != null && group != prevGroup) {
                           y += NavRailMetrics.groupGap;
                           dividers.add(y);
-                          y += NavRailMetrics.hairline + NavRailMetrics.groupGap;
+                          y +=
+                              NavRailMetrics.hairline + NavRailMetrics.groupGap;
                         }
                         prevGroup = group;
                       }
@@ -721,44 +723,52 @@ class _RailSlotState extends State<_RailSlot> with TickerProviderStateMixin {
       return Padding(padding: padding, child: content);
     }
     final shape = _itemShape;
+    // The label rides out from under the icon as the rail opens, so a tooltip
+    // only earns its keep while the rail is folded and the slot shows no text.
+    final tooltip = widget.progress < 0.5 ? widget.label : null;
     return Semantics(
       selected: widget.selected,
       child: Padding(
         padding: padding,
-        child: Material(
-          color: widget.selected ? colors.selectedFill : Colors.transparent,
-          shape: shape,
-          child: Stack(
-            children: [
-              // Keyboard and D-pad focus has to read as its own state: the
-              // selected fill only ever marks the current page.
-              if (_focused &&
-                  !widget.selected &&
-                  FocusHighlightVisibility.visible.value)
-                Positioned.fill(
-                  child: DecoratedBox(
-                    key: AppNavRail.focusRingKey,
-                    decoration: ShapeDecoration(
-                      shape: shape.copyWith(
-                        side: BorderSide(color: colors.focusRing, width: 2),
+        child: AppTooltip(
+          message: tooltip,
+          preferBelow: false,
+          hoverDelayScale: 2,
+          child: Material(
+            color: widget.selected ? colors.selectedFill : Colors.transparent,
+            shape: shape,
+            child: Stack(
+              children: [
+                // Keyboard and D-pad focus has to read as its own state: the
+                // selected fill only ever marks the current page.
+                if (_focused &&
+                    !widget.selected &&
+                    FocusHighlightVisibility.visible.value)
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      key: AppNavRail.focusRingKey,
+                      decoration: ShapeDecoration(
+                        shape: shape.copyWith(
+                          side: BorderSide(color: colors.focusRing, width: 2),
+                        ),
                       ),
                     ),
                   ),
+                Positioned.fill(
+                  child: InkWell(
+                    onTap: onToPage,
+                    onHighlightChanged: _setPressed,
+                    onFocusChange: (value) => setState(() => _focused = value),
+                    focusNode: _focusNode,
+                    customBorder: shape,
+                    mouseCursor: SystemMouseCursors.basic,
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: colors.overlay,
+                    child: content,
+                  ),
                 ),
-              Positioned.fill(
-                child: InkWell(
-                  onTap: onToPage,
-                  onHighlightChanged: _setPressed,
-                  onFocusChange: (value) => setState(() => _focused = value),
-                  focusNode: _focusNode,
-                  customBorder: shape,
-                  mouseCursor: SystemMouseCursors.basic,
-                  splashFactory: NoSplash.splashFactory,
-                  overlayColor: colors.overlay,
-                  child: content,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -12,12 +12,17 @@ class AppTooltip extends StatefulWidget {
     required this.message,
     this.preferBelow = false,
     this.triggerMode = TooltipTriggerMode.longPress,
+    this.hoverDelayScale = 1,
     required this.child,
   });
 
   final String? message;
   final bool preferBelow;
   final TooltipTriggerMode triggerMode;
+
+  /// Scales the hover delay for this tooltip only, leaving the shared
+  /// [AppTooltipTiming] untouched. 2 waits twice as long before showing.
+  final double hoverDelayScale;
   final Widget child;
 
   @override
@@ -85,7 +90,10 @@ class _AppTooltipState extends State<AppTooltip>
     if (_session.pending == this || _session.active == this) return;
     if (!_session.claim(this)) return;
     _entry.reset();
-    _wait = Timer(keyboard ? AppTooltipTiming.wait : _session.hoverDelay, () {
+    final hoverDelay = widget.hoverDelayScale == 1
+        ? _session.hoverDelay
+        : _session.hoverDelay * widget.hoverDelayScale;
+    _wait = Timer(keyboard ? AppTooltipTiming.wait : hoverDelay, () {
       _wait = null;
       if (_enabled && (_hovered || _keyboardFocused)) _show();
     });
