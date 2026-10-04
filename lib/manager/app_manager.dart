@@ -370,40 +370,6 @@ class AppSidebarContainer extends ConsumerWidget {
 
   const AppSidebarContainer({super.key, required this.child});
 
-  Widget _buildBackground({
-    required BuildContext context,
-    required bool active,
-    required Widget child,
-  }) {
-    final colorScheme = context.colorScheme;
-    final panel = Material(
-      // Card opacity keeps the rail near-solid; a wallpaper wants it frosted, so
-      // drop to a glass alpha and let the backdrop blur carry the image through.
-      color: active
-          ? colorScheme.surfaceContainer.withValues(alpha: 0.5)
-          : colorScheme.surfaceContainer,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            right: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-            ),
-          ),
-        ),
-        child: child,
-      ),
-    );
-    if (!active) {
-      return panel;
-    }
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: panel,
-      ),
-    );
-  }
-
   void _handleToPage(WidgetRef ref, PageLabel pageLabel) {
     final focusNode = FocusManager.instance.primaryFocus;
     final preserveNavigationFocus =
@@ -502,8 +468,7 @@ class AppSidebarContainer extends ConsumerWidget {
           children: [
             AnimatedVisibility.sidebar(
               visible: !isMobileView,
-              child: _buildBackground(
-                context: context,
+              child: _RailBackground(
                 active: active,
                 child: SafeArea(
                   child: Column(
@@ -547,6 +512,56 @@ class AppSidebarContainer extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The frosted glass only exists while a wallpaper shows through, so toggling
+/// it used to reparent the whole rail between a bare panel and one wrapped in a
+/// backdrop blur, rebuilding every rail item. A stable [GlobalKey] on the panel
+/// moves that subtree across the two layouts instead of recreating it.
+class _RailBackground extends StatefulWidget {
+  const _RailBackground({required this.active, required this.child});
+
+  final bool active;
+  final Widget child;
+
+  @override
+  State<_RailBackground> createState() => _RailBackgroundState();
+}
+
+class _RailBackgroundState extends State<_RailBackground> {
+  final GlobalKey _panelKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final panel = Material(
+      key: _panelKey,
+      // Card opacity keeps the rail near-solid; a wallpaper wants it frosted, so
+      // drop to a glass alpha and let the backdrop blur carry the image through.
+      color: widget.active
+          ? colorScheme.surfaceContainer.withValues(alpha: 0.5)
+          : colorScheme.surfaceContainer,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            right: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        child: widget.child,
+      ),
+    );
+    if (!widget.active) {
+      return panel;
+    }
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: panel,
       ),
     );
   }
