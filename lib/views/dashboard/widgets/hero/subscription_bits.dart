@@ -52,10 +52,15 @@ class SubscriptionBar extends StatelessWidget {
     super.key,
     required this.progress,
     required this.color,
+    this.unlimited = false,
   });
 
   final double progress;
   final Color color;
+
+  /// An unlimited plan has no quota to fill, so the bar reads as a diagonal
+  /// hatch across the whole track rather than a measured fill.
+  final bool unlimited;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +80,7 @@ class SubscriptionBar extends StatelessWidget {
             progress: value,
             trackColor: trackColor,
             gradient: gradient,
+            hatchColor: unlimited ? color : null,
           ),
         ),
       ),
@@ -87,11 +93,13 @@ class _SubscriptionBarPainter extends CustomPainter {
     required this.progress,
     required this.trackColor,
     required this.gradient,
+    this.hatchColor,
   });
 
   final double progress;
   final Color trackColor;
   final Gradient gradient;
+  final Color? hatchColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -104,6 +112,11 @@ class _SubscriptionBarPainter extends CustomPainter {
       ),
       paint,
     );
+    final hatchColor = this.hatchColor;
+    if (hatchColor != null) {
+      _paintHatch(canvas, size, hatchColor);
+      return;
+    }
     if (progress <= 0) return;
     final fillPaint = Paint()..shader = gradient.createShader(rect);
     canvas.drawRSuperellipse(
@@ -115,9 +128,33 @@ class _SubscriptionBarPainter extends CustomPainter {
     );
   }
 
+  void _paintHatch(Canvas canvas, Size size, Color color) {
+    const step = 9.0;
+    final stroke = Paint()
+      ..color = color.withValues(alpha: 0.5)
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(
+        Offset.zero & size,
+        const Radius.circular(heroInlayRadius),
+      ),
+    );
+    for (var x = -size.height; x < size.width + size.height; x += step) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        stroke,
+      );
+    }
+    canvas.restore();
+  }
+
   @override
   bool shouldRepaint(_SubscriptionBarPainter old) =>
       old.progress != progress ||
       old.trackColor != trackColor ||
-      old.gradient != gradient;
+      old.gradient != gradient ||
+      old.hatchColor != hatchColor;
 }

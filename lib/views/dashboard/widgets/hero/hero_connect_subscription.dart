@@ -157,13 +157,12 @@ class _SubscriptionStrip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          if (!unlimited) ...[
-            const SizedBox(height: AppSpacing.md),
-            SubscriptionBar(
-              progress: progress <= 0 ? 0.0 : progress,
-              color: barColor,
-            ),
-          ],
+          const SizedBox(height: AppSpacing.md),
+          SubscriptionBar(
+            progress: progress <= 0 ? 0.0 : progress,
+            color: barColor,
+            unlimited: unlimited,
+          ),
           if (offers.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             Row(
