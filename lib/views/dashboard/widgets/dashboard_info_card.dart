@@ -14,11 +14,16 @@ class DashboardInfoCard extends StatelessWidget {
     this.leading,
     this.action,
     this.onPressed,
+    this.fill = false,
   });
 
   /// A null height lets the card size to its content instead of the fixed
   /// deck row, so a full announcement can grow the tile in a scroll.
   final double? height;
+
+  /// Fills the height the parent hands down instead of taking [height], for a
+  /// tile that an elastic column stretches to absorb its slack.
+  final bool fill;
   final Glyph icon;
   final String label;
   final Widget child;
@@ -32,7 +37,7 @@ class DashboardInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: height,
+      height: fill ? null : height,
       child: RepaintBoundary(
         child: CommonCard(
           radius: DashboardWidgetMetrics.radiusOf(context),
@@ -68,7 +73,7 @@ class DashboardInfoCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                if (height != null) Expanded(child: child) else child,
+                if (fill || height != null) Expanded(child: child) else child,
               ],
             ),
           ),

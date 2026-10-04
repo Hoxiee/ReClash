@@ -53,11 +53,7 @@ class ProviderStatusCards extends StatelessWidget {
               children: [
                 Announce(expanded: expanded),
                 SizedBox(height: gap),
-                const ServiceStatusCard(),
-                SizedBox(height: gap),
-                const _StatPair(left: MemoryInfo(), right: DnsQueriesCard()),
-                SizedBox(height: gap),
-                const _StatPair(left: ConnectionsCard(), right: RequestsCard()),
+                ...providerStatusTail(gap),
               ],
             ),
           ),
@@ -66,6 +62,16 @@ class ProviderStatusCards extends StatelessWidget {
     );
   }
 }
+
+/// The status cards shown after the announcement, shared by the pager page
+/// and the desktop split's elastic column so both carry the same deck.
+List<Widget> providerStatusTail(double gap) => [
+  const ServiceStatusCard(),
+  SizedBox(height: gap),
+  const _StatPair(left: MemoryInfo(), right: DnsQueriesCard()),
+  SizedBox(height: gap),
+  const _StatPair(left: ConnectionsCard(), right: RequestsCard()),
+];
 
 class _ProviderStatus extends StatelessWidget {
   const _ProviderStatus();

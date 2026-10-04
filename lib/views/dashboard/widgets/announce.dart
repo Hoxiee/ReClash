@@ -34,12 +34,17 @@ bool _exceedsLines(
 }
 
 class Announce extends ConsumerStatefulWidget {
-  const Announce({super.key, this.expanded = false});
+  const Announce({super.key, this.expanded = false, this.fill = false});
 
   /// When set, the tile grows to show the whole announcement instead of
   /// clipping it to the deck row. The pager's dedicated page opts in; the
   /// desktop split stays collapsed beside the orb.
   final bool expanded;
+
+  /// When set, the collapsed tile fills the height its parent hands down
+  /// instead of the fixed deck row, so the desktop split's elastic column can
+  /// stretch it to match the orb column. Ignored once [expanded] grows it full.
+  final bool fill;
 
   @override
   ConsumerState<Announce> createState() => _AnnounceState();
@@ -104,9 +109,13 @@ class _AnnounceState extends ConsumerState<Announce> {
     final hasUrl = url != null && url.isNotEmpty;
     final hasAnnouncement = text != null && text.isNotEmpty;
     final showFull = expanded && hasAnnouncement;
+    final fill = !showFull && widget.fill;
     return DashboardInfoCard(
       key: _cardKey,
-      height: showFull ? null : DashboardWidgetMetrics.heightOf(context, 2),
+      height: showFull || fill
+          ? null
+          : DashboardWidgetMetrics.heightOf(context, 2),
+      fill: fill,
       icon: AppGlyphs.announce,
       label: context.appLocalizations.announce,
       action: showFull && hasUrl

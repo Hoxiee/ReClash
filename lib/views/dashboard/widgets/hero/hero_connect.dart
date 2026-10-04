@@ -14,11 +14,13 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/connection_mode.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_centered_scroll_view.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
+import 'package:reclash/views/dashboard/widgets/hero/details_elastic_flow.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_elastic_flow.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_layout.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
@@ -380,33 +382,86 @@ class HeroSplitDetails extends ConsumerWidget {
       heroRing: parsePanelHeroRing(profile?.panelMeta?.heroRing),
     );
     final accent = status.isAlert ? palette.accent : null;
-    return _DetailsScroll(
+    final server = _ServerPanel(
+      displayName: activeServer.displayName,
+      nameCountryCode: activeServer.countryCode,
+      delay: activeServer.delay,
+      status: status,
+      accent: accent,
+      otherCodes: activeServer.otherCodes,
+      otherLocations: activeServer.otherLocations,
+      smartRouting: activeServer.smartRouting,
+    );
+    // No profile means no deck below the server panel, so there is no slack to
+    // absorb; fall back to the centred scroll with the lone panel.
+    if (profile == null) {
+      return _DetailsScroll(
+        controller: scrollController,
+        bottomInset: bottomInset,
+        children: (metrics) => [AnnounceMorphBoundary(child: server)],
+      );
+    }
+    return _DetailsFill(
       controller: scrollController,
       bottomInset: bottomInset,
-      children: (metrics) => [
-        AnnounceMorphBoundary(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ServerPanel(
-                displayName: activeServer.displayName,
-                nameCountryCode: activeServer.countryCode,
-                delay: activeServer.delay,
-                status: status,
-                accent: accent,
-                otherCodes: activeServer.otherCodes,
-                otherLocations: activeServer.otherLocations,
-                smartRouting: activeServer.smartRouting,
+      server: server,
+    );
+  }
+}
+
+/// The right column as an elastic flow: the announcement tile grows to fill
+/// whatever the server panel and the status deck leave over, so the card column
+/// matches the orb column's height instead of centring short of it. When the
+/// deck alone outgrows the viewport the flow scrolls instead.
+class _DetailsFill extends StatelessWidget {
+  const _DetailsFill({
+    required this.controller,
+    required this.bottomInset,
+    required this.server,
+  });
+
+  final ScrollController? controller;
+  final double bottomInset;
+  final Widget server;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final metrics = HeroMetrics.of(
+          box,
+          MediaQuery.textScalerOf(context),
+          split: true,
+        );
+        final top = metrics.gapEdge;
+        final bottom = metrics.gapCard + bottomInset;
+        final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
+        final width = box.hasBoundedWidth ? box.maxWidth : 0.0;
+        return SingleChildScrollView(
+          controller: controller,
+          primary: false,
+          padding: EdgeInsets.only(top: top, bottom: bottom),
+          child: DashboardWidgetMetrics(
+            unitHeight: dashboardUnitHeight(width),
+            child: Builder(
+              builder: (context) => AnnounceMorphBoundary(
+                child: DetailsElasticFlow(
+                  viewportHeight: math.max(0, height - top - bottom),
+                  flexIndex: 2,
+                  flexMin: DashboardWidgetMetrics.heightOf(context, 2),
+                  children: [
+                    server,
+                    SizedBox(height: metrics.gapCard),
+                    const Announce(fill: true),
+                    SizedBox(height: metrics.gapCard),
+                    ...providerStatusTail(metrics.gapCard),
+                  ],
+                ),
               ),
-              if (profile != null) ...[
-                SizedBox(height: metrics.gapCard),
-                ProviderStatusCards(gap: metrics.gapCard),
-              ],
-            ],
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
