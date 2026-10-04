@@ -732,7 +732,7 @@ class _RailSlotState extends State<_RailSlot> with TickerProviderStateMixin {
         padding: padding,
         child: AppTooltip(
           message: tooltip,
-          preferBelow: false,
+          placement: AppTooltipPlacement.right,
           hoverDelayScale: 2,
           child: Material(
             color: widget.selected ? colors.selectedFill : Colors.transparent,

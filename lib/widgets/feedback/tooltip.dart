@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 
+/// Which edge of its target an [AppTooltip] anchors to.
+enum AppTooltipPlacement { auto, above, below, left, right }
+
 class AppTooltip extends StatefulWidget {
   const AppTooltip({
     super.key,
@@ -13,6 +16,7 @@ class AppTooltip extends StatefulWidget {
     this.preferBelow = false,
     this.triggerMode = TooltipTriggerMode.longPress,
     this.hoverDelayScale = 1,
+    this.placement = AppTooltipPlacement.auto,
     required this.child,
   });
 
@@ -23,6 +27,11 @@ class AppTooltip extends StatefulWidget {
   /// Scales the hover delay for this tooltip only, leaving the shared
   /// [AppTooltipTiming] untouched. 2 waits twice as long before showing.
   final double hoverDelayScale;
+
+  /// Which edge of the target the tooltip anchors to. [AppTooltipPlacement.auto]
+  /// keeps the default above/below behaviour and honours [preferBelow]; every
+  /// placement flips to the opposite edge when the chosen one has no room.
+  final AppTooltipPlacement placement;
   final Widget child;
 
   @override
@@ -190,14 +199,51 @@ class _AppTooltipState extends State<AppTooltip>
     );
   }
 
-  Offset _position(TooltipPositionContext context) => positionDependentBox(
-    size: context.overlaySize,
-    childSize: context.tooltipSize,
-    target: context.target,
-    verticalOffset: context.targetSize.height / 2,
-    preferBelow: widget.preferBelow,
-    margin: AppSpacing.sm,
-  );
+  Offset _position(TooltipPositionContext context) {
+    switch (widget.placement) {
+      case AppTooltipPlacement.left:
+        return _beside(context, toRight: false);
+      case AppTooltipPlacement.right:
+        return _beside(context, toRight: true);
+      case AppTooltipPlacement.auto:
+      case AppTooltipPlacement.above:
+      case AppTooltipPlacement.below:
+        return positionDependentBox(
+          size: context.overlaySize,
+          childSize: context.tooltipSize,
+          target: context.target,
+          verticalOffset: context.targetSize.height / 2,
+          preferBelow: switch (widget.placement) {
+            AppTooltipPlacement.below => true,
+            AppTooltipPlacement.above => false,
+            _ => widget.preferBelow,
+          },
+          margin: AppSpacing.sm,
+        );
+    }
+  }
+
+  Offset _beside(TooltipPositionContext context, {required bool toRight}) {
+    final overlay = context.overlaySize;
+    final tooltip = context.tooltipSize;
+    final target = context.target;
+    const margin = AppSpacing.sm;
+    final gap = context.targetSize.width / 2 + margin;
+    final rightX = target.dx + gap;
+    final leftX = target.dx - gap - tooltip.width;
+    final fitsRight = rightX + tooltip.width <= overlay.width - margin;
+    final fitsLeft = leftX >= margin;
+    // Flip to the opposite edge only when the preferred one cannot seat it.
+    var x = toRight ? rightX : leftX;
+    if (toRight && !fitsRight && fitsLeft) x = leftX;
+    if (!toRight && !fitsLeft && fitsRight) x = rightX;
+    final maxX = math.max(margin, overlay.width - tooltip.width - margin);
+    final maxY = math.max(margin, overlay.height - tooltip.height - margin);
+    return Offset(
+      x.clamp(margin, maxX),
+      (target.dy - tooltip.height / 2).clamp(margin, maxY),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
