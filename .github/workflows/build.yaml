@@ -631,6 +631,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          # Flutter ships no pinned-version Windows arm64 SDK, so the arm64
+          # runner must fetch the x64 toolchain and run it under emulation.
+          architecture: x64
           cache: true
 
       - name: Install dependencies
