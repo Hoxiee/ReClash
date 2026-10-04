@@ -25,8 +25,7 @@ class ConnectionPath extends ConsumerWidget {
       icon: AppGlyphs.route,
       label: appLocalizations.doctorPathTitle,
       action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
-      onPressed: () =>
-          showExtend(context, builder: (_) => const ConnectionDoctorView()),
+      onPressed: () => openConnectionDoctor(context, ref),
       child: FadeThroughBox(
         child: KeyedSubtree(
           key: ValueKey(_signature(snapshot)),

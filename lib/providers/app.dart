@@ -247,6 +247,27 @@ class CurrentPageLabel extends _$CurrentPageLabel
   }
 }
 
+/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
+/// into one of its panes: the card sets the target and switches the page, the
+/// Tools view consumes it on its next build and clears it so a return trip to
+/// Tools does not reopen the pane on its own.
+@Riverpod(keepAlive: true)
+class ToolsPaneRequest extends _$ToolsPaneRequest
+    with AutoDisposeNotifierMixin {
+  @override
+  ToolsPaneTarget? build() {
+    return null;
+  }
+
+  void request(ToolsPaneTarget target) {
+    state = target;
+  }
+
+  void clear() {
+    state = null;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class SortNum extends _$SortNum with AutoDisposeNotifierMixin {
   @override

@@ -266,7 +266,7 @@ class HeroServiceRow extends ConsumerWidget {
       onTap: switch (heroServiceTargetOf(line)) {
         HeroServiceTarget.none => null,
         HeroServiceTarget.doctor => () {
-          showExtend(context, builder: (_) => const ConnectionDoctorView());
+          openConnectionDoctor(context, ref);
         },
         HeroServiceTarget.routing => () {
           showExtend(context, builder: (_) => const RoutingLiveView());

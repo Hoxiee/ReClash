@@ -323,6 +323,19 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     });
   }
 
+  // Resolves a handed-off target to its root pane and seeds the stack, so the
+  // tool's own open rows (the Doctor's "advanced") then drill inside the pane.
+  void _openRequestedPane(ToolsPaneTarget target) {
+    final selection = switch (target) {
+      ToolsPaneTarget.doctor => SettingsPaneSelection(
+        id: toolsDoctorPaneId,
+        detail: const ConnectionDoctorView(),
+        title: Text(context.appLocalizations.connectionDoctor),
+      ),
+    };
+    _selectRootPane(selection);
+  }
+
   void _selectRootPane(SettingsPaneSelection selection) {
     _recordRecent(selection.id);
     final sameRoot =
@@ -896,6 +909,22 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         ref.watch(
           viewSizeProvider.select((size) => size.shortestSide > maxMobileWidth),
         );
+
+    // A dashboard card can hand off a pane to open here; the two-pane layout is
+    // the only place the stack is shown, so defer and drop the request on any
+    // narrower view rather than seed a stack nothing renders.
+    final paneRequest = ref.watch(toolsPaneRequestProvider);
+    if (paneRequest != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        ref.read(toolsPaneRequestProvider.notifier).clear();
+        if (splitTools) {
+          _openRequestedPane(paneRequest);
+        }
+      });
+    }
 
     final query = _query.trim();
     final searching = query.isNotEmpty;

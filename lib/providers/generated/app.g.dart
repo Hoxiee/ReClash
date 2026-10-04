@@ -1053,6 +1053,76 @@ abstract class _$CurrentPageLabel extends $Notifier<PageLabel> {
   }
 }
 
+/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
+/// into one of its panes: the card sets the target and switches the page, the
+/// Tools view consumes it on its next build and clears it so a return trip to
+/// Tools does not reopen the pane on its own.
+
+@ProviderFor(ToolsPaneRequest)
+final toolsPaneRequestProvider = ToolsPaneRequestProvider._();
+
+/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
+/// into one of its panes: the card sets the target and switches the page, the
+/// Tools view consumes it on its next build and clears it so a return trip to
+/// Tools does not reopen the pane on its own.
+final class ToolsPaneRequestProvider
+    extends $NotifierProvider<ToolsPaneRequest, ToolsPaneTarget?> {
+  /// A one-shot handoff for a dashboard card that wants the Tools tab to drill
+  /// into one of its panes: the card sets the target and switches the page, the
+  /// Tools view consumes it on its next build and clears it so a return trip to
+  /// Tools does not reopen the pane on its own.
+  ToolsPaneRequestProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'toolsPaneRequestProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$toolsPaneRequestHash();
+
+  @$internal
+  @override
+  ToolsPaneRequest create() => ToolsPaneRequest();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ToolsPaneTarget? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ToolsPaneTarget?>(value),
+    );
+  }
+}
+
+String _$toolsPaneRequestHash() => r'4b04e2e0b490bc19f45ddd04cdda67d019453f86';
+
+/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
+/// into one of its panes: the card sets the target and switches the page, the
+/// Tools view consumes it on its next build and clears it so a return trip to
+/// Tools does not reopen the pane on its own.
+
+abstract class _$ToolsPaneRequest extends $Notifier<ToolsPaneTarget?> {
+  ToolsPaneTarget? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<ToolsPaneTarget?, ToolsPaneTarget?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ToolsPaneTarget?, ToolsPaneTarget?>,
+              ToolsPaneTarget?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(SortNum)
 final sortNumProvider = SortNumProvider._();
 

@@ -1001,6 +1001,32 @@ void main() {
     expect(find.byType(ConnectionDoctorView), findsNothing);
   });
 
+  testWidgets('Tools desktop opens the Doctor pane on a handed-off request', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    expect(find.byType(ConnectionDoctorView), findsNothing);
+
+    container
+        .read(toolsPaneRequestProvider.notifier)
+        .request(ToolsPaneTarget.doctor);
+    await tester.pumpAndSettle();
+
+    // The pane opens the Doctor and the one-shot request is spent, so a plain
+    // return trip to Tools would not reopen it.
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+    expect(container.read(toolsPaneRequestProvider), isNull);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Tools desktop drives pane selection from the keyboard', (
     tester,
   ) async {
@@ -1281,12 +1307,42 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dashboard card opens the shared Doctor screen', (tester) async {
+  testWidgets('dashboard card hands the Doctor to the Tools tab on desktop', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const Scaffold(body: view.NetworkDetection()),
+      overrides: [
+        networkDetectionProvider.overrideWithValue(
+          const NetworkDetectionState(isLoading: false, ipInfo: null),
+        ),
+      ],
+    );
+
+    await tester.tap(find.text('Network detection'));
+    await tester.pumpAndSettle();
+
+    // No stray sheet: the two-pane desktop drives the Tools tab to the Doctor
+    // pane so its drill-ins stay in that stack.
+    expect(find.byType(ConnectionDoctorView), findsNothing);
+    expect(container.read(toolsPaneRequestProvider), ToolsPaneTarget.doctor);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('dashboard card opens the Doctor sheet on a phone', (
+    tester,
+  ) async {
     final core = _MockCoreHandler();
     await _pumpDoctor(
       tester,
       core,
       _snapshot(),
+      size: const Size(390, 840),
       child: const Scaffold(body: view.NetworkDetection()),
       overrides: [
         networkDetectionProvider.overrideWithValue(

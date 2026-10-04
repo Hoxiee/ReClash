@@ -510,6 +510,10 @@ enum PageLabel {
   dns,
 }
 
+/// A tool pane the Tools tab can be asked to open from elsewhere (a dashboard
+/// card), so the drill-in lands in the two-pane stack instead of a stray sheet.
+enum ToolsPaneTarget { doctor }
+
 /// The engine only distinguishes app-originated lookups from the rest; the
 /// finer FlClash split needs `component/resolver` wiring we did not vendor.
 enum DnsQueryInitiator { app, other }
