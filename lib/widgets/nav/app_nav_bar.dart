@@ -938,14 +938,16 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
                       )!;
                     }
 
-                    final ltr =
-                        Directionality.of(context) == TextDirection.ltr;
+                    final ltr = Directionality.of(context) == TextDirection.ltr;
                     return Stack(
                       clipBehavior: Clip.none,
                       children: [
                         // The slots are all positioned; a sized box gives the
                         // stack a width so the pill is not clipped to its padding.
-                        SizedBox(width: innerWidth, height: constraints.maxHeight),
+                        SizedBox(
+                          width: innerWidth,
+                          height: constraints.maxHeight,
+                        ),
                         if (liveCount > 0)
                           AnimatedBuilder(
                             animation: _motion,
@@ -1038,8 +1040,11 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     if (destination == null) {
       return const SizedBox.shrink();
     }
-    final labelWidth = _measureLabel(context, destination.label, labelStyleBase)
-        .width;
+    final labelWidth = _measureLabel(
+      context,
+      destination.label,
+      labelStyleBase,
+    ).width;
     final item = _FloatingBarItem(
       key: ValueKey(slot.key),
       destination: destination,

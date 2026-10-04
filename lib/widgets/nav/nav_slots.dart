@@ -66,8 +66,8 @@ class NavSlots<T> extends ChangeNotifier {
     _slots
       ..clear()
       ..addAll([
-        for (final key in keys) NavSlot<T>(key, NavSpring(_vsync, 1))
-          ..weight.addListener(_onTick),
+        for (final key in keys)
+          NavSlot<T>(key, NavSpring(_vsync, 1))..weight.addListener(_onTick),
       ]);
   }
 

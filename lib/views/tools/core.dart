@@ -244,13 +244,19 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
       _field('Go', info.goVersion),
       _field(l10n.corePlatform, info.platform),
       _field(l10n.coreArchitecture, info.architecture),
-      _field(l10n.coreBuildTags, info.tags.isEmpty ? l10n.none : info.tags.join(', ')),
+      _field(
+        l10n.coreBuildTags,
+        info.tags.isEmpty ? l10n.none : info.tags.join(', '),
+      ),
       _field(l10n.coreLaunchMode, launchMode),
     ];
   }
 
   List<Widget> _locationRows(CoreInfo info) => [
-    _field(context.appLocalizations.coreWorkingDirectory, info.workingDirectory),
+    _field(
+      context.appLocalizations.coreWorkingDirectory,
+      info.workingDirectory,
+    ),
     if (info.platform != 'android')
       _field(context.appLocalizations.coreExecutable, info.executablePath),
   ];

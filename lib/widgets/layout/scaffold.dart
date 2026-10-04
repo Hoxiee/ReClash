@@ -656,7 +656,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   @override
   Widget build(BuildContext context) {
     assert(
-      widget.appBar != null || widget.title != null || widget.titleWidget != null,
+      widget.appBar != null ||
+          widget.title != null ||
+          widget.titleWidget != null,
     );
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
     final backAction = widget.backAction ?? backActionProvider?.backAction;

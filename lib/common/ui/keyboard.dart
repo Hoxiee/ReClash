@@ -160,7 +160,9 @@ class PhysicalHotkeyActivator implements ShortcutActivator {
 
   @override
   bool accepts(KeyEvent event, HardwareKeyboard state) {
-    final matchesType = repeatOnly ? event is KeyRepeatEvent : event is KeyDownEvent;
+    final matchesType = repeatOnly
+        ? event is KeyRepeatEvent
+        : event is KeyDownEvent;
     if (!matchesType || event.physicalKey.usbHidUsage != key) {
       return false;
     }

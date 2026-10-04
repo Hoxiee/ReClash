@@ -143,9 +143,9 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
       );
       return;
     }
-    final newScript = await (script?.copyWith(label: label) ??
-            Script.create(label: label))
-        .save(content);
+    final newScript =
+        await (script?.copyWith(label: label) ?? Script.create(label: label))
+            .save(content);
     if (!mounted) {
       return;
     }
