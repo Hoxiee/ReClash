@@ -15,7 +15,7 @@ func newPassiveDialActor(t *testing.T, now *time.Time) *doctorActor {
 
 func dialFailed() doctorEvidence {
 	return doctorEvidence{
-		Kind: doctorEvidenceOuterDial, Layer: doctorLayerDial,
+		Kind: doctorEvidenceOuterDial, Layer: doctorLayerDial, Network: "tcp",
 		Outcome: doctorOutcomeFailed, Confidence: doctorConfirmed, Code: "outerDialTimeout",
 	}
 }
@@ -100,5 +100,18 @@ func TestPassiveDialVerdictIgnoredOffVpnPaths(t *testing.T) {
 	}
 	if snapshot := actor.Snapshot(); snapshot.Health == doctorBroken || snapshot.Health == doctorDegraded {
 		t.Fatalf("direct path must not take a dial verdict, got %q", snapshot.Health)
+	}
+}
+
+func TestPassiveDialVerdictIgnoresUDPFailures(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	actor := newPassiveDialActor(t, &now)
+	udpFailed := dialFailed()
+	udpFailed.Network = "udp"
+	for i := 0; i < doctorPassiveDialBrokenRun+2; i++ {
+		feedPassive(actor, &now, udpFailed)
+	}
+	if snapshot := actor.Snapshot(); snapshot.Health == doctorBroken || snapshot.Health == doctorDegraded {
+		t.Fatalf("a run of UDP dial failures must not condemn the link, got %q", snapshot.Health)
 	}
 }

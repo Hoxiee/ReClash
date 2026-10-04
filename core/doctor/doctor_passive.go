@@ -83,8 +83,11 @@ func (actor *doctorActor) applyPassiveDialVerdict(evidence doctorEvidence) {
 	}
 }
 
+// Only TCP dials condemn the link. QUIC/UDP dials fail benignly whenever a node
+// or route carries TCP only; the app falls back to TCP and traffic flows, so a
+// run of UDP failures must never read as a broken connection.
 func passiveDialFailed(evidence doctorEvidence) bool {
-	return evidence.Layer == doctorLayerDial &&
+	return evidence.Layer == doctorLayerDial && evidence.Network == "tcp" &&
 		evidence.Outcome == doctorOutcomeFailed && evidence.Confidence == doctorConfirmed
 }
 

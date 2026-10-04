@@ -375,6 +375,24 @@ void main() {
     });
   }
 
+  testWidgets('an empty announcement still fills and matches the columns', (
+    tester,
+  ) async {
+    final profile = _profile();
+    await pumpBoard(
+      tester,
+      size: const Size(1280, 800),
+      profile: profile.copyWith(
+        panelMeta: const PanelMeta(
+          serviceName: 'Example VPN',
+          supportUrl: 'https://example.com/support',
+        ),
+      ),
+    );
+    expect(find.text('No announcements'), findsOneWidget);
+    expectMatchingColumns(tester);
+  });
+
   testWidgets('announcement follows changes in the left content', (
     tester,
   ) async {

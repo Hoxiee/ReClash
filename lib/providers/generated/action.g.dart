@@ -350,7 +350,7 @@ final class ProxiesActionProvider
   }
 }
 
-String _$proxiesActionHash() => r'33f7ee69f38f1c6ae7e248f9cf37d8533f0f4091';
+String _$proxiesActionHash() => r'547529d82557a5abc6f946ac7ff778649e103b2c';
 
 abstract class _$ProxiesAction extends $Notifier<void> {
   void build();

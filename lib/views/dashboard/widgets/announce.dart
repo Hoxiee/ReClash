@@ -159,23 +159,23 @@ class _AnnounceCollapsed extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!hasAnnouncement) return const _AnnounceEmpty();
+    final displayText = text!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final style = context.textTheme.bodyMedium?.copyWith(
-          color: hasAnnouncement
-              ? context.colorScheme.onSurface
-              : context.colorScheme.onSurfaceVariant,
+          color: context.colorScheme.onSurface,
           height: _lineSpacing,
         );
         final lineHeight = (style?.fontSize ?? 14) * _lineSpacing;
-        final displayText = hasAnnouncement
-            ? text!
-            : context.appLocalizations.noAnnouncements;
         // Fill every available line; the fade below carries the clipped tail.
         final maxLines = max(1, constraints.maxHeight ~/ lineHeight);
-        final clipped =
-            hasAnnouncement &&
-            _exceedsLines(displayText, style, constraints.maxWidth, maxLines);
+        final clipped = _exceedsLines(
+          displayText,
+          style,
+          constraints.maxWidth,
+          maxLines,
+        );
         final content = Align(
           alignment: Alignment.topLeft,
           child: AnnounceText(
@@ -224,6 +224,43 @@ class _AnnounceCollapsed extends StatelessWidget {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// The empty slot: on a stretched split tile a centred glyph and label read as
+/// a composed "no news" state rather than a lone line stranded at the top; a
+/// short deck row has room only for the line, so the glyph is dropped there.
+class _AnnounceEmpty extends StatelessWidget {
+  const _AnnounceEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colorScheme.onSurfaceVariant;
+    final label = Text(
+      context.appLocalizations.noAnnouncements,
+      textAlign: TextAlign.center,
+      style: context.textTheme.bodySmall?.copyWith(color: color),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxHeight < 72) {
+          return Center(child: label);
+        }
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Opacity(
+                opacity: 0.5,
+                child: GlyphIcon(AppGlyphs.announce, size: 32, color: color),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              label,
+            ],
+          ),
         );
       },
     );

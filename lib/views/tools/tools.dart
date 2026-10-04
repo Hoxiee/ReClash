@@ -887,6 +887,15 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         .watch(moreToolsSelectorStateProvider)
         .navigationItems;
     final viewMode = ref.watch(viewModeProvider);
+    // A large phone in landscape clears the desktop width but keeps a phone's
+    // short side, so the width-only view mode alone would split the page and
+    // strand the reader on the empty detail pane. Gate the two-pane on a
+    // genuine tablet/desktop viewport (short side past the phone breakpoint).
+    final splitTools =
+        viewMode == ViewMode.desktop &&
+        ref.watch(
+          viewSizeProvider.select((size) => size.shortestSide > maxMobileWidth),
+        );
 
     final query = _query.trim();
     final searching = query.isNotEmpty;
@@ -899,7 +908,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         : const <_ToolSearchEntry>[];
     _matches = matches;
 
-    if (viewMode == ViewMode.desktop) {
+    if (splitTools) {
       final categories = _getDesktopCategories(
         navigationItems,
         developerBuild,

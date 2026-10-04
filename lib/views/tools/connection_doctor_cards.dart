@@ -155,7 +155,9 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
   }
 
   // Inside a desktop two-pane tool the remedy drills into the same detail pane;
-  // a standalone Doctor (sheet or mobile) has no pane and pushes a full route.
+  // a standalone Doctor (sheet or mobile) has no pane, so it defers to
+  // [showExtend] like every other open row: a side sheet on desktop, a full
+  // page on mobile, never a full-window route stacked over the Doctor sheet.
   void _openConfig(
     Widget view, {
     required String paneId,
@@ -168,7 +170,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
       );
       return;
     }
-    BaseNavigator.push(context, view);
+    unawaited(showExtend(context, builder: (_) => view));
   }
 
   @override
