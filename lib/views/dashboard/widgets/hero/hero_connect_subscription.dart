@@ -96,6 +96,11 @@ class _SubscriptionStrip extends StatelessWidget {
                         color: daysColor,
                         label:
                             '${context.appLocalizations.remaining} ${heroTimeLeftWords(remaining!)}',
+                      )
+                    else
+                      SubscriptionPill(
+                        color: colorScheme.onSurfaceVariant,
+                        label: appLocalizations.infiniteTime,
                       ),
                   ],
                 ),
@@ -118,11 +123,20 @@ class _SubscriptionStrip extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           if (unlimited)
-            Text(
-              used.traffic.show,
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: used.traffic.show, style: valueStyle),
+                  TextSpan(
+                    text: ' / ∞',
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: valueStyle,
             )
           else
             Text.rich(

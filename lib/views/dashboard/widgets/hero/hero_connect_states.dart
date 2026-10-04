@@ -153,55 +153,6 @@ class _EmptyHero extends ConsumerWidget {
   }
 }
 
-class _NoticeOpenCard extends StatelessWidget {
-  const _NoticeOpenCard({required this.text, this.onTap});
-
-  final String text;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return HeroSurface(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      onPressed: onTap,
-      child: Row(
-        children: [
-          GlyphIcon(AppGlyphs.announce, size: 20, color: colorScheme.primary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.appLocalizations.announce,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                EmojiText(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          GlyphIcon(
-            AppGlyphs.chevronForward,
-            size: 20,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// The split board turns update and support off: the right column already
 /// carries them on the provider actions card.
 class _HeroActionRow extends ConsumerWidget {
