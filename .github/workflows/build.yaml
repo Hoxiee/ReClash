@@ -104,6 +104,16 @@ jobs:
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         run: dart run tool/changelog.dart verify
 
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: plugins/rust_api/rust
+
+      # editor_test loads the rust_api rope backend; build it so the native
+      # library lands in target/debug for the test helper to open.
+      - name: Build editor native library
+        run: cargo build --manifest-path plugins/rust_api/rust/Cargo.toml
+
       - name: Run tests
         run: flutter test --reporter expanded --coverage
 
