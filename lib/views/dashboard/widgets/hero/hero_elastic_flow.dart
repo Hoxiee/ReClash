@@ -19,6 +19,7 @@ class HeroElasticFlow extends MultiChildRenderObjectWidget {
     required this.viewportHeight,
     required this.headMin,
     required this.headMax,
+    this.shrinkWrap = false,
     required Widget head,
     required List<Widget> tail,
   }) : super(children: [head, ...tail]);
@@ -26,6 +27,7 @@ class HeroElasticFlow extends MultiChildRenderObjectWidget {
   final double viewportHeight;
   final double headMin;
   final double headMax;
+  final bool shrinkWrap;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
@@ -33,6 +35,7 @@ class HeroElasticFlow extends MultiChildRenderObjectWidget {
         viewportHeight: viewportHeight,
         headMin: headMin,
         headMax: headMax,
+        shrinkWrap: shrinkWrap,
       );
 
   @override
@@ -43,7 +46,8 @@ class HeroElasticFlow extends MultiChildRenderObjectWidget {
     renderObject
       ..viewportHeight = viewportHeight
       ..headMin = headMin
-      ..headMax = headMax;
+      ..headMax = headMax
+      ..shrinkWrap = shrinkWrap;
   }
 }
 
@@ -55,13 +59,23 @@ class RenderHeroElasticFlow extends RenderBox
     required double viewportHeight,
     required double headMin,
     required double headMax,
+    bool shrinkWrap = false,
   }) : _viewportHeight = viewportHeight,
        _headMin = headMin,
-       _headMax = headMax;
+       _headMax = headMax,
+       _shrinkWrap = shrinkWrap;
 
   double _viewportHeight;
   double _headMin;
   double _headMax;
+  bool _shrinkWrap;
+
+  bool get shrinkWrap => _shrinkWrap;
+  set shrinkWrap(bool value) {
+    if (_shrinkWrap == value) return;
+    _shrinkWrap = value;
+    markNeedsLayout();
+  }
 
   double get viewportHeight => _viewportHeight;
   set viewportHeight(double value) {
@@ -111,8 +125,9 @@ class RenderHeroElasticFlow extends RenderBox
       min: headMin,
       max: headMax,
     );
+    final content = headSize + tailHeight;
     return constraints.constrain(
-      Size(width, math.max(viewportHeight, headSize + tailHeight)),
+      Size(width, shrinkWrap ? content : math.max(viewportHeight, content)),
     );
   }
 
@@ -147,7 +162,7 @@ class RenderHeroElasticFlow extends RenderBox
     );
 
     final content = head.size.height + tailHeight;
-    final height = math.max(viewportHeight, content);
+    final height = shrinkWrap ? content : math.max(viewportHeight, content);
     size = constraints.constrain(Size(width, height));
 
     // The board centres as a whole: centring the orb alone would push the

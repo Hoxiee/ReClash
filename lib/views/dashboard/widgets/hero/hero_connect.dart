@@ -51,11 +51,13 @@ class HeroConnect extends ConsumerStatefulWidget {
     super.key,
     this.scrollController,
     this.mode = HeroLayoutMode.column,
+    this.splitViewportHeight,
     this.onRequestAfterTailFocus,
   });
 
   final ScrollController? scrollController;
   final HeroLayoutMode mode;
+  final double? splitViewportHeight;
   final VoidCallback? onRequestAfterTailFocus;
 
   @override
@@ -206,9 +208,11 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       final palette = byedpiHeroPaletteOf(context, status);
       return _HeroCrossFade(
         slot: 'hero-board',
+        expand: widget.splitViewportHeight == null,
         child: _HeroBoard(
           controller: widget.scrollController,
           split: split,
+          splitViewportHeight: widget.splitViewportHeight,
           head: _OrbSlot(
             isReady: isReady,
             status: status,
@@ -269,9 +273,11 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
 
     return _HeroCrossFade(
       slot: 'hero-board',
+      expand: widget.splitViewportHeight == null,
       child: _HeroBoard(
         controller: widget.scrollController,
         split: split,
+        splitViewportHeight: widget.splitViewportHeight,
         head: _OrbSlot(
           isReady: isReady,
           status: status,
@@ -300,37 +306,23 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
               gap: metrics.gapCard,
             ),
           _HeroReveal(
-            child: sub != null && sub.hasFacts
-                ? Column(
-                    key: const ValueKey('hero-sub'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _SubscriptionStrip(
-                        key: const ValueKey('hero-subscription-strip'),
-                        sub: sub,
-                        serviceName: subscriptionName,
-                        buyPlanUrl: buyPlanUrl,
-                        buyTrafficUrl: buyTrafficUrl,
-                        hasAnnounce:
-                            !split && announce != null && announce.isNotEmpty,
-                        onTap: _handleShowSubscription,
-                      ),
-                      SizedBox(height: metrics.gapCard),
-                    ],
-                  )
-                : !split && announce != null && announce.isNotEmpty
-                ? Column(
-                    key: const ValueKey('hero-notice'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _NoticeOpenCard(
-                        text: announce,
-                        onTap: _handleShowSubscription,
-                      ),
-                      SizedBox(height: metrics.gapCard),
-                    ],
-                  )
-                : const SizedBox.shrink(key: ValueKey('hero-tail-empty')),
+            child: Column(
+              key: const ValueKey('hero-sub'),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _SubscriptionStrip(
+                  key: const ValueKey('hero-subscription-strip'),
+                  sub: sub ?? const SubscriptionInfo(),
+                  serviceName: subscriptionName,
+                  buyPlanUrl: buyPlanUrl,
+                  buyTrafficUrl: buyTrafficUrl,
+                  hasAnnounce:
+                      !split && announce != null && announce.isNotEmpty,
+                  onTap: _handleShowSubscription,
+                ),
+                SizedBox(height: metrics.gapCard),
+              ],
+            ),
           ),
           _TailEdgeFocus(
             onDown: widget.onRequestAfterTailFocus,
@@ -353,9 +345,14 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
 /// The right column of the two-column board: what the pager would otherwise
 /// hide behind its second page, in one scroll.
 class HeroSplitDetails extends ConsumerWidget {
-  const HeroSplitDetails({super.key, this.scrollController});
+  const HeroSplitDetails({
+    super.key,
+    this.scrollController,
+    this.splitViewportHeight,
+  });
 
   final ScrollController? scrollController;
+  final double? splitViewportHeight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -392,8 +389,6 @@ class HeroSplitDetails extends ConsumerWidget {
       otherLocations: activeServer.otherLocations,
       smartRouting: activeServer.smartRouting,
     );
-    // No profile means no deck below the server panel, so there is no slack to
-    // absorb; fall back to the centred scroll with the lone panel.
     if (profile == null) {
       return _DetailsScroll(
         controller: scrollController,
@@ -404,24 +399,23 @@ class HeroSplitDetails extends ConsumerWidget {
     return _DetailsFill(
       controller: scrollController,
       bottomInset: bottomInset,
+      splitViewportHeight: splitViewportHeight,
       server: server,
     );
   }
 }
 
-/// The right column as an elastic flow: the announcement tile grows to fill
-/// whatever the server panel and the status deck leave over, so the card column
-/// matches the orb column's height instead of centring short of it. When the
-/// deck alone outgrows the viewport the flow scrolls instead.
 class _DetailsFill extends StatelessWidget {
   const _DetailsFill({
     required this.controller,
     required this.bottomInset,
+    required this.splitViewportHeight,
     required this.server,
   });
 
   final ScrollController? controller;
   final double bottomInset;
+  final double? splitViewportHeight;
   final Widget server;
 
   @override
@@ -429,12 +423,13 @@ class _DetailsFill extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final metrics = HeroMetrics.of(
-          box,
+          box.copyWith(minHeight: 0, maxHeight: splitViewportHeight),
           MediaQuery.textScalerOf(context),
           split: true,
         );
-        final top = metrics.gapEdge;
-        final bottom = metrics.gapCard + bottomInset;
+        final matched = splitViewportHeight != null;
+        final top = matched ? 0.0 : metrics.gapEdge;
+        final bottom = matched ? 0.0 : metrics.gapCard + bottomInset;
         final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
         final width = box.hasBoundedWidth ? box.maxWidth : 0.0;
         return SingleChildScrollView(
@@ -448,7 +443,7 @@ class _DetailsFill extends StatelessWidget {
                 child: DetailsElasticFlow(
                   viewportHeight: math.max(0, height - top - bottom),
                   flexIndex: 2,
-                  flexMin: DashboardWidgetMetrics.heightOf(context, 2),
+                  flexMin: DashboardWidgetMetrics.heightOf(context, 1),
                   children: [
                     server,
                     SizedBox(height: metrics.gapCard),
@@ -544,12 +539,14 @@ class _HeroBoard extends StatelessWidget {
   const _HeroBoard({
     required this.controller,
     required this.split,
+    this.splitViewportHeight,
     required this.head,
     required this.tail,
   });
 
   final ScrollController? controller;
   final bool split;
+  final double? splitViewportHeight;
   final Widget head;
   final List<Widget> Function(HeroMetrics metrics) tail;
 
@@ -562,25 +559,29 @@ class _HeroBoard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final metrics = HeroMetrics.of(
-          box,
+          box.copyWith(minHeight: 0, maxHeight: splitViewportHeight),
           MediaQuery.textScalerOf(context),
           split: split,
           portrait: portrait,
         );
         final top = metrics.gapEdge;
         final bottom = metrics.gapCard + bottomInset;
-        final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
+        final height =
+            splitViewportHeight ?? (box.hasBoundedHeight ? box.maxHeight : 0.0);
+        final flow = HeroElasticFlow(
+          viewportHeight: math.max(0, height - top - bottom),
+          headMin: metrics.orbMin,
+          headMax: metrics.orbMax,
+          shrinkWrap: splitViewportHeight != null,
+          head: head,
+          tail: tail(metrics),
+        );
+        if (splitViewportHeight != null) return flow;
         final scroll = SingleChildScrollView(
           controller: controller,
           primary: false,
           padding: EdgeInsets.only(top: top, bottom: bottom),
-          child: HeroElasticFlow(
-            viewportHeight: math.max(0, height - top - bottom),
-            headMin: metrics.orbMin,
-            headMax: metrics.orbMax,
-            head: head,
-            tail: tail(metrics),
-          ),
+          child: flow,
         );
         final scrollController = controller;
         if (scrollController == null) return scroll;
@@ -613,9 +614,14 @@ class _Logo extends StatelessWidget {
 /// live profile, so a profile blinking away during a switch reads as a fade
 /// rather than the entire layout snapping to a different tree.
 class _HeroCrossFade extends StatelessWidget {
-  const _HeroCrossFade({required this.slot, required this.child});
+  const _HeroCrossFade({
+    required this.slot,
+    this.expand = true,
+    required this.child,
+  });
 
   final String slot;
+  final bool expand;
   final Widget child;
 
   @override
@@ -628,7 +634,7 @@ class _HeroCrossFade extends StatelessWidget {
           FadeTransition(opacity: animation, child: child),
       layoutBuilder: (currentChild, previousChildren) => Stack(
         alignment: Alignment.center,
-        fit: StackFit.expand,
+        fit: expand ? StackFit.expand : StackFit.loose,
         children: <Widget>[...previousChildren, ?currentChild],
       ),
       child: KeyedSubtree(key: ValueKey(slot), child: child),

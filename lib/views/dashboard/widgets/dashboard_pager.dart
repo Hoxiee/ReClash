@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -448,6 +449,11 @@ class _SplitBoard extends ConsumerWidget {
             ),
             child: collapsed
                 ? HeroConnect(scrollController: heroScrollController)
+                : !byedpiMode
+                ? _MatchedSplitBoard(
+                    heroScrollController: heroScrollController,
+                    detailsScrollController: detailsScrollController,
+                  )
                 : Row(
                     key: const ValueKey('dashboard-split-board'),
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -471,6 +477,71 @@ class _SplitBoard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MatchedSplitBoard extends StatelessWidget {
+  const _MatchedSplitBoard({
+    required this.heroScrollController,
+    required this.detailsScrollController,
+  });
+
+  final ScrollController heroScrollController;
+  final ScrollController detailsScrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final metrics = HeroMetrics.of(
+          box,
+          MediaQuery.textScalerOf(context),
+          split: true,
+        );
+        final top = metrics.gapEdge;
+        final bottom = metrics.gapCard;
+        final detailsWidth = (box.maxWidth - heroSplitGap) * 6 / 11;
+        return FocusedScrollView(
+          controller: heroScrollController,
+          child: SingleChildScrollView(
+            controller: heroScrollController,
+            primary: false,
+            padding: EdgeInsets.only(top: top, bottom: bottom),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: math.max(0, box.maxHeight - top - bottom),
+              ),
+              child: Align(
+                child: Stack(
+                  key: const ValueKey('dashboard-split-board'),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: detailsWidth + heroSplitGap,
+                      ),
+                      child: HeroConnect(
+                        mode: HeroLayoutMode.splitLeft,
+                        splitViewportHeight: box.maxHeight,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: 0,
+                      width: detailsWidth,
+                      child: HeroSplitDetails(
+                        scrollController: detailsScrollController,
+                        splitViewportHeight: box.maxHeight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

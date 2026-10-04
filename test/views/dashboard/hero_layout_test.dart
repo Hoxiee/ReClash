@@ -331,6 +331,89 @@ void main() {
     }
   });
 
+  Rect leftContentRect(WidgetTester tester) {
+    final flow = tester.renderObject<RenderHeroElasticFlow>(
+      find.byType(HeroElasticFlow),
+    );
+    final head = flow.firstChild!;
+    final tail = flow.lastChild!;
+    return Rect.fromPoints(
+      head.localToGlobal(Offset.zero),
+      tail.localToGlobal(Offset(tail.size.width, tail.size.height)),
+    );
+  }
+
+  void expectMatchingColumns(WidgetTester tester) {
+    final left = leftContentRect(tester);
+    final split = find.byType(HeroSplitDetails);
+    final top = tester
+        .getRect(find.descendant(of: split, matching: find.byType(HeroSurface)))
+        .top;
+    final bottom = tester
+        .getRect(
+          find.descendant(of: split, matching: find.byType(RequestsCard)),
+        )
+        .bottom;
+    final announcement = tester.getSize(find.byType(Announce)).height;
+    expect(
+      top,
+      closeTo(left.top, 0.5),
+      reason: 'left=$left, right=$top..$bottom, announcement=$announcement',
+    );
+    expect(bottom, closeTo(left.bottom, 0.5));
+    expect(tester.takeException(), isNull);
+  }
+
+  for (final size in const [
+    Size(1280, 800),
+    Size(1600, 900),
+    Size(1280, 2400),
+  ]) {
+    testWidgets('detail cards match the left content at $size', (tester) async {
+      await pumpBoard(tester, size: size, profile: _profile());
+      expectMatchingColumns(tester);
+    });
+  }
+
+  testWidgets('announcement follows changes in the left content', (
+    tester,
+  ) async {
+    final profile = _profile();
+    final container = await pumpBoard(
+      tester,
+      size: const Size(1600, 900),
+      profile: profile,
+    );
+    final initialHeight = tester.getSize(find.byType(Announce)).height;
+    final initialLeftHeight = leftContentRect(tester).height;
+    final profiles = container.read(profilesProvider.notifier) as TestProfiles;
+    profiles.replace([
+      profile.copyWith(
+        panelMeta: profile.panelMeta!.copyWith(
+          buyPlanUrl: 'https://example.com/renew',
+          buyTrafficUrl: 'https://example.com/traffic',
+        ),
+        subscriptionInfo: profile.subscriptionInfo!.copyWith(download: 74),
+      ),
+    ]);
+    await _pumpBoard(tester);
+    expectMatchingColumns(tester);
+    final leftGrowth = leftContentRect(tester).height - initialLeftHeight;
+    expect(leftGrowth, greaterThan(0));
+    expect(
+      tester.getSize(find.byType(Announce)).height - initialHeight,
+      closeTo(leftGrowth, 0.5),
+    );
+
+    profiles.replace([profile]);
+    await _pumpBoard(tester);
+    expectMatchingColumns(tester);
+    expect(
+      tester.getSize(find.byType(Announce)).height,
+      closeTo(initialHeight, 0.5),
+    );
+  });
+
   testWidgets('the detail column centres content that fits its height', (
     tester,
   ) async {
