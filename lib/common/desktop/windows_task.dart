@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
+import 'package:win32_registry/win32_registry.dart';
 
 import '../storage/path.dart';
 import '../util/string.dart';
@@ -155,5 +157,112 @@ class WindowsTaskScheduler {
 
   static String _quoteArguments(List<String> arguments) {
     return arguments.map((arg) => arg.contains(' ') ? '"$arg"' : arg).join(' ');
+  }
+}
+
+const _runKeyPath = r'Software\Microsoft\Windows\CurrentVersion\Run';
+const _startupApprovedPath =
+    r'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run';
+
+/// The HKCU Run command and its StartupApproved flag an autostart entry needs,
+/// abstracted so the enable/disable sequencing is testable off Windows.
+abstract class WindowsRunKeyStore {
+  String? readCommand(String name);
+  void writeCommand(String name, String value);
+  void removeCommand(String name);
+  Uint8List? readApproval(String name);
+  void writeApproval(String name, Uint8List value);
+  void removeApproval(String name);
+}
+
+class RegistryRunKeyStore implements WindowsRunKeyStore {
+  const RegistryRunKeyStore();
+
+  R? _read<R>(String path, R? Function(RegistryKey key) action) {
+    RegistryKey? key;
+    try {
+      key = CURRENT_USER.open(
+        path,
+        config: const RegistryOpenConfig(access: RegistryAccess.all),
+      );
+      return action(key);
+    } catch (_) {
+      return null;
+    } finally {
+      key?.close();
+    }
+  }
+
+  void _mutate(String path, void Function(RegistryKey key) action) {
+    _read<void>(path, (key) {
+      action(key);
+    });
+  }
+
+  @override
+  String? readCommand(String name) =>
+      _read(_runKeyPath, (key) => key.getString(name));
+
+  @override
+  void writeCommand(String name, String value) => _mutate(
+    _runKeyPath,
+    (key) => key.setValue(name, RegistryValue.string(value)),
+  );
+
+  @override
+  void removeCommand(String name) => _mutate(_runKeyPath, (key) {
+    if (key.getValue(name) != null) {
+      key.removeValue(name);
+    }
+  });
+
+  @override
+  Uint8List? readApproval(String name) =>
+      _read(_startupApprovedPath, (key) => key.getBinary(name));
+
+  @override
+  void writeApproval(String name, Uint8List value) => _mutate(
+    _startupApprovedPath,
+    (key) => key.setValue(name, RegistryValue.binary(value)),
+  );
+
+  @override
+  void removeApproval(String name) => _mutate(_startupApprovedPath, (key) {
+    if (key.getValue(name) != null) {
+      key.removeValue(name);
+    }
+  });
+}
+
+/// Owns the HKCU Run autostart entry so the path is quoted, unlike the upstream
+/// package. The scheduled task and this key are mutually exclusive, so
+/// [disable] clears both the command and its StartupApproved flag.
+class WindowsRunKey {
+  WindowsRunKey({WindowsRunKeyStore store = const RegistryRunKeyStore()})
+    : _store = store;
+
+  final WindowsRunKeyStore _store;
+
+  @visibleForTesting
+  static String commandFor(String executablePath) => '"$executablePath"';
+
+  bool isEnabled(String name, String executablePath) {
+    if (_store.readCommand(name) != commandFor(executablePath)) {
+      return false;
+    }
+    // StartupApproved's first byte is odd when Task Manager disabled the entry;
+    // an absent value means approved.
+    final approval = _store.readApproval(name);
+    return approval == null || approval.isEmpty || approval[0].isEven;
+  }
+
+  void enable(String name, String executablePath) {
+    _store.writeCommand(name, commandFor(executablePath));
+    _store.writeApproval(name, Uint8List(12)..[0] = 2);
+  }
+
+  void disable(String name) {
+    _store.removeCommand(name);
+    _store.removeApproval(name);
   }
 }

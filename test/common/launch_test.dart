@@ -126,57 +126,44 @@ void main() {
   });
 
   group('linux autostart entry', () {
-    test('desktop path mirrors the upstream package location', () {
+    test('desktop path honors XDG_CONFIG_HOME', () {
+      expect(
+        linuxAutostartDesktopPath(const {
+          'HOME': '/home/test',
+          'XDG_CONFIG_HOME': '/home/test/.myconfig',
+        }),
+        '/home/test/.myconfig/autostart/ReClash.desktop',
+      );
+    });
+
+    test('desktop path falls back to HOME/.config', () {
       expect(
         linuxAutostartDesktopPath(const {'HOME': '/home/test'}),
         '/home/test/.config/autostart/ReClash.desktop',
       );
     });
 
-    test('plain Exec counts as current', () {
-      expect(
-        isLinuxAutostartExecCurrent(
-          fileContents: '[Desktop Entry]\nExec=/opt/reclash/reclash\n',
-          expectedAppPath: '/opt/reclash/reclash',
-        ),
-        isTrue,
-      );
+    test('desktop path is empty without a base dir', () {
+      expect(linuxAutostartDesktopPath(const {}), isEmpty);
     });
 
-    test('quoted Exec with arguments counts as current', () {
-      expect(
-        isLinuxAutostartExecCurrent(
-          fileContents:
-              '[Desktop Entry]\nExec="/opt/my apps/reclash" --hidden\n',
-          expectedAppPath: '/opt/my apps/reclash',
-        ),
-        isTrue,
+    test('entry quotes the Exec path', () {
+      final entry = buildLinuxAutostartEntry(
+        appPath: '/home/My Apps/ReClash.AppImage',
       );
+      expect(entry, contains('Exec="/home/My Apps/ReClash.AppImage"'));
+      expect(entry, contains('X-GNOME-Autostart-enabled=true'));
     });
 
-    test('stale mount Exec counts as outdated', () {
+    test('Exec escaping mirrors the url-handler rules', () {
       expect(
-        isLinuxAutostartExecCurrent(
-          fileContents:
-              '[Desktop Entry]\nExec=/tmp/.mount_ABC123/usr/bin/ReClash\n',
-          expectedAppPath: '/home/test/Applications/ReClash.AppImage',
-        ),
-        isFalse,
-      );
-    });
-
-    test('missing Exec counts as outdated', () {
-      expect(
-        isLinuxAutostartExecCurrent(
-          fileContents: '[Desktop Entry]\nName=ReClash\n',
-          expectedAppPath: '/opt/reclash/reclash',
-        ),
-        isFalse,
+        quoteLinuxExecArgument(r'/a b/$x`y"z\w%v'),
+        r'/a b/\$x\`y\"z\\w%%v',
       );
     });
   });
 
-  group('isLinuxAutostartExecStale', () {
+  group('linux autostart filesystem', () {
     late Directory home;
 
     setUp(() {
@@ -191,42 +178,47 @@ void main() {
 
     Map<String, String> env() => {'HOME': home.path};
 
-    void writeDesktop(String contents) {
-      final file = File(linuxAutostartDesktopPath(env()));
-      file.parent.createSync(recursive: true);
-      file.writeAsStringSync(contents);
-    }
-
-    test('missing entry is not stale', () {
+    test('enabled reflects the file presence', () {
+      expect(linuxAutostartEnabled(env()), isFalse);
       expect(
-        isLinuxAutostartExecStale(
-          expectedAppPath: '/opt/reclash/reclash',
-          environment: env(),
-        ),
-        isFalse,
-      );
-    });
-
-    test('matching entry is not stale', () {
-      writeDesktop('[Desktop Entry]\nExec=/opt/reclash/reclash\n');
-      expect(
-        isLinuxAutostartExecStale(
-          expectedAppPath: '/opt/reclash/reclash',
-          environment: env(),
-        ),
-        isFalse,
-      );
-    });
-
-    test('entry from an old mount is stale', () {
-      writeDesktop('[Desktop Entry]\nExec=/tmp/.mount_OLD/usr/bin/ReClash\n');
-      expect(
-        isLinuxAutostartExecStale(
-          expectedAppPath: '/home/test/Applications/ReClash.AppImage',
-          environment: env(),
-        ),
+        writeLinuxAutostartEntry(appPath: '/opt/reclash', environment: env()),
         isTrue,
       );
+      expect(linuxAutostartEnabled(env()), isTrue);
+    });
+
+    test('write produces the canonical entry', () {
+      writeLinuxAutostartEntry(appPath: '/opt/reclash', environment: env());
+      final contents = File(
+        linuxAutostartDesktopPath(env()),
+      ).readAsStringSync();
+      expect(contents, buildLinuxAutostartEntry(appPath: '/opt/reclash'));
+    });
+
+    test('write rewrites a stale mount path', () {
+      final file = File(linuxAutostartDesktopPath(env()));
+      file.parent.createSync(recursive: true);
+      file.writeAsStringSync(
+        buildLinuxAutostartEntry(appPath: '/tmp/.mount_OLD/usr/bin/ReClash'),
+      );
+      writeLinuxAutostartEntry(
+        appPath: '/home/test/Applications/ReClash.AppImage',
+        environment: env(),
+      );
+      expect(
+        file.readAsStringSync(),
+        contains('Exec="/home/test/Applications/ReClash.AppImage"'),
+      );
+    });
+
+    test('remove deletes the entry', () {
+      writeLinuxAutostartEntry(appPath: '/opt/reclash', environment: env());
+      expect(removeLinuxAutostartEntry(env()), isTrue);
+      expect(linuxAutostartEnabled(env()), isFalse);
+    });
+
+    test('remove on a missing entry still succeeds', () {
+      expect(removeLinuxAutostartEntry(env()), isTrue);
     });
   });
 }

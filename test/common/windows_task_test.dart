@@ -1,10 +1,34 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/desktop/windows_task.dart';
 
 ProcessResult _result(int exitCode, String stdout) =>
     ProcessResult(0, exitCode, stdout, '');
+
+class _FakeRunKeyStore implements WindowsRunKeyStore {
+  final Map<String, String> commands = {};
+  final Map<String, Uint8List> approvals = {};
+
+  @override
+  String? readCommand(String name) => commands[name];
+
+  @override
+  void writeCommand(String name, String value) => commands[name] = value;
+
+  @override
+  void removeCommand(String name) => commands.remove(name);
+
+  @override
+  Uint8List? readApproval(String name) => approvals[name];
+
+  @override
+  void writeApproval(String name, Uint8List value) => approvals[name] = value;
+
+  @override
+  void removeApproval(String name) => approvals.remove(name);
+}
 
 void main() {
   group('resolveLaunchMechanism', () {
@@ -178,6 +202,61 @@ void main() {
         environment: const {},
       );
       expect(await scheduler.isRegistered('ReClash'), isTrue);
+    });
+  });
+
+  group('WindowsRunKey', () {
+    late _FakeRunKeyStore store;
+    late WindowsRunKey runKey;
+
+    setUp(() {
+      store = _FakeRunKeyStore();
+      runKey = WindowsRunKey(store: store);
+    });
+
+    test('enable writes a quoted command and an approved flag', () {
+      runKey.enable('ReClash', r'C:\Program Files\ReClash\reclash.exe');
+      expect(
+        store.commands['ReClash'],
+        r'"C:\Program Files\ReClash\reclash.exe"',
+      );
+      final approval = store.approvals['ReClash']!;
+      expect(approval, hasLength(12));
+      expect(approval[0].isEven, isTrue);
+    });
+
+    test('a freshly enabled entry reads back as enabled', () {
+      const path = r'C:\Users\John Smith\reclash.exe';
+      runKey.enable('ReClash', path);
+      expect(runKey.isEnabled('ReClash', path), isTrue);
+    });
+
+    test('a legacy unquoted command is not current', () {
+      const path = r'C:\Program Files\ReClash\reclash.exe';
+      store.commands['ReClash'] = path;
+      expect(runKey.isEnabled('ReClash', path), isFalse);
+    });
+
+    test('an odd approval byte counts as disabled', () {
+      const path = r'C:\reclash.exe';
+      runKey.enable('ReClash', path);
+      store.approvals['ReClash'] = Uint8List(12)..[0] = 3;
+      expect(runKey.isEnabled('ReClash', path), isFalse);
+    });
+
+    test('a missing approval still counts as enabled', () {
+      const path = r'C:\reclash.exe';
+      store.commands['ReClash'] = WindowsRunKey.commandFor(path);
+      expect(runKey.isEnabled('ReClash', path), isTrue);
+    });
+
+    test('disable clears both the command and the approval', () {
+      const path = r'C:\reclash.exe';
+      runKey.enable('ReClash', path);
+      runKey.disable('ReClash');
+      expect(store.commands, isEmpty);
+      expect(store.approvals, isEmpty);
+      expect(runKey.isEnabled('ReClash', path), isFalse);
     });
   });
 }

@@ -44,6 +44,9 @@ class AutoLaunch {
   static WindowsTaskScheduler taskScheduler = WindowsTaskScheduler();
 
   @visibleForTesting
+  static WindowsRunKey windowsRunKey = WindowsRunKey();
+
+  @visibleForTesting
   static bool Function() readHighPriority = _readHighPriorityFromState;
 
   static bool _readHighPriorityFromState() {
@@ -83,34 +86,47 @@ class AutoLaunch {
     return taskScheduler.unregister(appName);
   }
 
-  Future<void> _repairLinuxAutostartIfStale() async {
-    if (isLinuxAutostartExecStale(
-      expectedAppPath: resolveLaunchAppPath(),
-      environment: Platform.environment,
-    )) {
-      await enable();
-    }
-  }
-
   Future<void> updateStatus(bool isAutoLaunch) async {
     if (kDebugMode) {
       return;
-    }
-    if (system.isLinux && isAutoLaunch) {
-      await _repairLinuxAutostartIfStale();
     }
     final target = resolveLaunchMechanism(
       isWindows: system.isWindows,
       autoLaunch: isAutoLaunch,
       highPriority: readHighPriority(),
     );
+    final wantsRunKey = target == AutoLaunchMechanism.runKey;
+    // Windows owns both autostart mechanisms: the scheduled task and a quoted
+    // Run-key entry, which the upstream package leaves unquoted.
     if (system.isWindows) {
       final wantsTask = target == AutoLaunchMechanism.scheduledTask;
       if (await isHighPriorityEnable != wantsTask) {
         await (wantsTask ? enableHighPriority() : disableHighPriority());
       }
+      final path = resolveLaunchAppPath();
+      if (windowsRunKey.isEnabled(appName, path) != wantsRunKey) {
+        if (wantsRunKey) {
+          windowsRunKey.enable(appName, path);
+        } else {
+          windowsRunKey.disable(appName);
+        }
+      }
+      return;
     }
-    final wantsRunKey = target == AutoLaunchMechanism.runKey;
+    // Linux owns its XDG autostart entry so the Exec is quoted and the path
+    // tracks $APPIMAGE on every launch; the upstream package only handles
+    // macOS.
+    if (system.isLinux) {
+      if (wantsRunKey) {
+        writeLinuxAutostartEntry(
+          appPath: resolveLaunchAppPath(),
+          environment: Platform.environment,
+        );
+      } else {
+        removeLinuxAutostartEntry(Platform.environment);
+      }
+      return;
+    }
     if (await isEnable != wantsRunKey) {
       if (wantsRunKey) {
         unawaited(enable());
@@ -125,49 +141,101 @@ final autoLaunch = system.isDesktop && !safeModeBuild ? AutoLaunch() : null;
 
 @visibleForTesting
 String linuxAutostartDesktopPath(Map<String, String> environment) {
-  return '${environment['HOME'] ?? ''}/.config/autostart/$appName.desktop';
+  final base = linuxAutostartConfigBase(environment);
+  if (base.isEmpty) {
+    return '';
+  }
+  return '$base/autostart/$appName.desktop';
+}
+
+/// `$XDG_CONFIG_HOME`, falling back to `$HOME/.config` per the XDG base-dir
+/// spec; empty when neither is set so callers can skip the write.
+@visibleForTesting
+String linuxAutostartConfigBase(Map<String, String> environment) {
+  final configHome = environment['XDG_CONFIG_HOME']?.trim() ?? '';
+  if (configHome.isNotEmpty) {
+    return configHome;
+  }
+  final home = environment['HOME']?.trim() ?? '';
+  return home.isEmpty ? '' : '$home/.config';
 }
 
 @visibleForTesting
-bool isLinuxAutostartExecCurrent({
-  required String fileContents,
-  required String expectedAppPath,
-}) {
-  final execLines = fileContents
-      .split('\n')
-      .map((line) => line.trim())
-      .where((line) => line.startsWith('Exec='));
-  if (execLines.isEmpty) {
-    return false;
-  }
-  final value = execLines.first.substring('Exec='.length).trim();
-  if (value == expectedAppPath) {
-    return true;
-  }
-  if (value.startsWith('"')) {
-    final end = value.indexOf('"', 1);
-    return end != -1 && value.substring(1, end) == expectedAppPath;
-  }
-  return value.split(RegExp(r'\s+')).first == expectedAppPath;
+String buildLinuxAutostartEntry({required String appPath}) {
+  return [
+    '[Desktop Entry]',
+    'Type=Application',
+    'Version=1.0',
+    'Name=$appName',
+    'Comment=$appName autostart',
+    'Exec="${quoteLinuxExecArgument(appPath)}"',
+    'Terminal=false',
+    'StartupNotify=false',
+    // GNOME treats a missing key as enabled; set it so re-enabling from the
+    // app overrides a prior opt-out in gnome-session.
+    'X-GNOME-Autostart-enabled=true',
+    '',
+  ].join('\n');
+}
+
+/// Escapes the reserved characters a double-quoted Exec value may carry, the
+/// same way the url-handler entry does, so paths with spaces survive.
+@visibleForTesting
+String quoteLinuxExecArgument(String value) {
+  return value
+      .replaceAll(r'\', r'\\')
+      .replaceAll('"', r'\"')
+      .replaceAll(r'$', r'\$')
+      .replaceAll('`', r'\`')
+      .replaceAll('%', '%%');
 }
 
 @visibleForTesting
-bool isLinuxAutostartExecStale({
-  required String expectedAppPath,
+bool linuxAutostartEnabled(Map<String, String> environment) {
+  final path = linuxAutostartDesktopPath(environment);
+  return path.isNotEmpty && File(path).existsSync();
+}
+
+/// Writes the canonical entry, skipping the write when the file already matches
+/// so a stale mount path or an older format is repaired without churn.
+@visibleForTesting
+bool writeLinuxAutostartEntry({
+  required String appPath,
   required Map<String, String> environment,
 }) {
-  final file = File(linuxAutostartDesktopPath(environment));
-  if (!file.existsSync()) {
+  final path = linuxAutostartDesktopPath(environment);
+  if (path.isEmpty) {
     return false;
   }
-  String contents;
+  final file = File(path);
+  final desired = buildLinuxAutostartEntry(appPath: appPath);
   try {
-    contents = file.readAsStringSync();
+    if (file.existsSync() && file.readAsStringSync() == desired) {
+      return true;
+    }
+    if (!file.parent.existsSync()) {
+      file.parent.createSync(recursive: true);
+    }
+    file.writeAsStringSync(desired);
+    return true;
   } catch (_) {
     return false;
   }
-  return !isLinuxAutostartExecCurrent(
-    fileContents: contents,
-    expectedAppPath: expectedAppPath,
-  );
+}
+
+@visibleForTesting
+bool removeLinuxAutostartEntry(Map<String, String> environment) {
+  final path = linuxAutostartDesktopPath(environment);
+  if (path.isEmpty) {
+    return true;
+  }
+  final file = File(path);
+  try {
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
