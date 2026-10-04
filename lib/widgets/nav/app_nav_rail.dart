@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +10,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/nav/nav_motion.dart';
+import 'package:reclash/widgets/nav/nav_slots.dart';
 
 final _itemShape = AppShape.all(NavRailMetrics.itemCorner);
 
@@ -107,11 +108,6 @@ class _RailBody extends StatefulWidget {
     PageLabel.tools => 3,
   };
 
-  static double _extentOf(int count, int boundaries, double slotHeight) =>
-      NavRailMetrics.padding.vertical +
-      count * slotHeight +
-      boundaries * NavRailMetrics.dividerExtent;
-
   @override
   State<_RailBody> createState() => _RailBodyState();
 }
@@ -127,6 +123,11 @@ final _railPressSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 300),
   bounce: 0.24,
 );
+// A slot's share of the rail's height as it enters or leaves. Bounce-free so
+// an overshoot never drives the height below zero.
+final _railSlotSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 420),
+);
 
 class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
   late final NavSpring _hover = NavSpring(
@@ -136,9 +137,37 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
         .toDouble(),
   );
   late final NavSpring _hoverShow = NavSpring(this, 0);
-  Listenable get _hoverMotion => Listenable.merge([_hover, _hoverShow]);
+
+  late final NavSlots<Object> _slots = NavSlots<Object>(
+    vsync: this,
+    spring: _railSlotSpring,
+  );
+
+  /// The last-seen item for every label, so a leaving slot keeps something to
+  /// paint while it collapses after it has left [widget.items].
+  final Map<Object, NavigationItem> _itemsByLabel = {};
 
   bool get _reduceMotion => context.disableAnimations;
+
+  @override
+  void initState() {
+    super.initState();
+    _cacheItems();
+    _slots.seed([for (final item in widget.items) item.label]);
+  }
+
+  @override
+  void didUpdateWidget(covariant _RailBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _cacheItems();
+    _slots.sync([for (final item in widget.items) item.label]);
+  }
+
+  void _cacheItems() {
+    for (final item in widget.items) {
+      _itemsByLabel[item.label] = item;
+    }
+  }
 
   void _spring(NavSpring spring, double target, SpringDescription description) {
     if (_reduceMotion) {
@@ -173,6 +202,7 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _slots.dispose();
     _hover.dispose();
     _hoverShow.dispose();
     super.dispose();
@@ -184,6 +214,7 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
     if (items.isEmpty) {
       return const SizedBox.shrink();
     }
+    _slots.reduceMotion = _reduceMotion;
     final colorScheme = context.colorScheme;
     final colors = _RailColors(colorScheme);
     // The slot is a compact square when folded and grows taller to seat a label
@@ -193,12 +224,9 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
       NavRailMetrics.expandedSlotHeight,
       widget.progress,
     )!;
-    final boundaries = <int>[
-      for (var i = 1; i < items.length; i++)
-        if (_RailBody._groupOf(items[i].label) !=
-            _RailBody._groupOf(items[i - 1].label))
-          i,
-    ];
+    final selectedLabel = widget.selectedIndex >= 0
+        ? items[widget.selectedIndex.clamp(0, items.length - 1)].label
+        : null;
 
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
@@ -207,96 +235,129 @@ class _RailBodyState extends State<_RailBody> with TickerProviderStateMixin {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final extent = _RailBody._extentOf(
-                  items.length,
-                  boundaries.length,
-                  slotHeight,
-                );
-                final tops = <double>[];
-                final dividers = <double>[];
-                var y = NavRailMetrics.padding.top;
-                for (var i = 0; i < items.length; i++) {
-                  if (boundaries.contains(i)) {
-                    y += NavRailMetrics.groupGap;
-                    dividers.add(y);
-                    y += NavRailMetrics.hairline + NavRailMetrics.groupGap;
-                  }
-                  tops.add(y);
-                  y += slotHeight;
-                }
-                final centers = [for (final top in tops) top + slotHeight / 2];
+                // Slot heights ride the entry/exit springs, so the geometry is
+                // recomputed every frame of a membership change.
+                return AnimatedBuilder(
+                  animation: Listenable.merge([_slots, _hover, _hoverShow]),
+                  builder: (context, _) {
+                    final merged = _slots.slots;
+                    final tops = <double>[];
+                    final heights = <double>[];
+                    final dividers = <double>[];
+                    final liveCenters = <double>[];
+                    final liveIndexByLabel = <Object, int>{};
+                    int? prevGroup;
+                    var y = NavRailMetrics.padding.top;
+                    for (final slot in merged) {
+                      final factor = slot.weight.value.clamp(0.0, 1.0);
+                      final height = slotHeight * factor;
+                      if (!slot.leaving) {
+                        final group = _RailBody._groupOf(slot.key as PageLabel);
+                        if (prevGroup != null && group != prevGroup) {
+                          y += NavRailMetrics.groupGap;
+                          dividers.add(y);
+                          y += NavRailMetrics.hairline + NavRailMetrics.groupGap;
+                        }
+                        prevGroup = group;
+                      }
+                      tops.add(y);
+                      heights.add(height);
+                      if (!slot.leaving) {
+                        liveIndexByLabel[slot.key] = liveCenters.length;
+                        liveCenters.add(y + height / 2);
+                      }
+                      y += height;
+                    }
+                    final extent = y + NavRailMetrics.padding.bottom;
 
-                final body = MouseRegion(
-                  onHover: (event) => _onHover(event.localPosition.dy, centers),
-                  onExit: (_) => _onExit(),
-                  child: Stack(
-                    children: [
-                      for (final dividerY in dividers)
-                        Positioned(
-                          top: dividerY,
-                          left: NavRailMetrics.pillInsetX + 4,
-                          right: NavRailMetrics.pillInsetX + 4,
-                          height: NavRailMetrics.hairline,
-                          child: ColoredBox(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.6,
-                            ),
+                    final show = _hoverShow.value;
+                    final hoverAt = _hover.value;
+                    final renders = <_RailRender>[
+                      for (var i = 0; i < merged.length; i++)
+                        if (_itemsByLabel[merged[i].key] != null)
+                          _RailRender(
+                            label: merged[i].key,
+                            item: _itemsByLabel[merged[i].key]!,
+                            top: tops[i],
+                            height: heights[i],
+                            reveal: merged[i].weight.value.clamp(0.0, 1.0),
+                            leaving: merged[i].leaving,
+                            selected:
+                                !merged[i].leaving &&
+                                merged[i].key == selectedLabel,
+                            hover: merged[i].leaving
+                                ? 0.0
+                                : show *
+                                      math
+                                          .max(
+                                            0,
+                                            1 -
+                                                (hoverAt -
+                                                        liveIndexByLabel[merged[i]
+                                                            .key]!)
+                                                    .abs(),
+                                          )
+                                          .toDouble(),
                           ),
-                        ),
-                      AnimatedBuilder(
-                        animation: _hoverMotion,
-                        builder: (context, _) => _HoverGhost(
-                          centers: centers,
-                          position: _hover.value,
-                          slotHeight: slotHeight,
-                          opacity: _hoverShow.value,
-                          color: colors.hoverGhost,
-                        ),
-                      ),
-                      AnimatedBuilder(
-                        animation: _hoverMotion,
-                        builder: (context, _) {
-                          final show = _hoverShow.value;
-                          final hoverAt = _hover.value;
-                          final emphasis = [
-                            for (var i = 0; i < items.length; i++)
-                              show *
-                                  math
-                                      .max(0, 1 - (hoverAt - i).abs())
-                                      .toDouble(),
-                          ];
-                          return _SlotLayer(
-                            items: items,
-                            tops: tops,
+                    ];
+
+                    final body = MouseRegion(
+                      onHover: (event) =>
+                          _onHover(event.localPosition.dy, liveCenters),
+                      onExit: (_) => _onExit(),
+                      child: Stack(
+                        children: [
+                          for (final dividerY in dividers)
+                            Positioned(
+                              top: dividerY,
+                              left: NavRailMetrics.pillInsetX + 4,
+                              right: NavRailMetrics.pillInsetX + 4,
+                              height: NavRailMetrics.hairline,
+                              child: ColoredBox(
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                          _HoverGhost(
+                            centers: liveCenters,
+                            position: _hover.value,
                             slotHeight: slotHeight,
-                            selectedIndex: widget.selectedIndex,
+                            opacity: _hoverShow.value,
+                            color: colors.hoverGhost,
+                          ),
+                          _SlotLayer(
+                            renders: renders,
+                            slotHeight: slotHeight,
                             colors: colors,
                             onToPage: widget.onToPage,
-                            hover: emphasis,
                             progress: widget.progress,
-                          );
-                        },
+                          ),
+                          if (selectedLabel != null && liveCenters.isNotEmpty)
+                            _SelectionIndicator(
+                              key: AppNavRail.highlightKey,
+                              color: colors.indicator,
+                              index: widget.selectedIndex.clamp(
+                                0,
+                                liveCenters.length - 1,
+                              ),
+                              centers: liveCenters,
+                            ),
+                        ],
                       ),
-                      if (widget.selectedIndex >= 0)
-                        _SelectionIndicator(
-                          key: AppNavRail.highlightKey,
-                          color: colors.indicator,
-                          index: widget.selectedIndex,
-                          centers: centers,
-                        ),
-                    ],
-                  ),
-                );
+                    );
 
-                if (extent <= constraints.maxHeight) {
-                  return body;
-                }
-                // Directional focus traversal reveals the focused slot on its own.
-                return ScrollConfiguration(
-                  behavior: const HiddenBarScrollBehavior(),
-                  child: SingleChildScrollView(
-                    child: SizedBox(height: extent, child: body),
-                  ),
+                    if (extent <= constraints.maxHeight) {
+                      return body;
+                    }
+                    // Directional focus traversal reveals the focused slot on its own.
+                    return ScrollConfiguration(
+                      behavior: const HiddenBarScrollBehavior(),
+                      child: SingleChildScrollView(
+                        child: SizedBox(height: extent, child: body),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -375,46 +436,71 @@ class _HoverGhost extends StatelessWidget {
   }
 }
 
+/// One slot's resolved placement for a frame: where it sits, how tall it is
+/// right now, and how far through its entry/exit it is.
+class _RailRender {
+  const _RailRender({
+    required this.label,
+    required this.item,
+    required this.top,
+    required this.height,
+    required this.reveal,
+    required this.leaving,
+    required this.selected,
+    required this.hover,
+  });
+
+  final Object label;
+  final NavigationItem item;
+  final double top;
+  final double height;
+  final double reveal;
+  final bool leaving;
+  final bool selected;
+  final double hover;
+}
+
 class _SlotLayer extends StatelessWidget {
   const _SlotLayer({
-    required this.items,
-    required this.tops,
+    required this.renders,
     required this.slotHeight,
-    required this.selectedIndex,
     required this.colors,
     required this.onToPage,
-    required this.hover,
     required this.progress,
   });
 
-  final List<NavigationItem> items;
-  final List<double> tops;
+  final List<_RailRender> renders;
   final double slotHeight;
-  final int selectedIndex;
   final _RailColors colors;
   final void Function(PageLabel label) onToPage;
-  final List<double> hover;
   final double progress;
 
   @override
   Widget build(BuildContext context) => Stack(
     children: [
-      for (var i = 0; i < items.length; i++)
+      for (var i = 0; i < renders.length; i++)
         Positioned(
-          top: tops[i],
+          top: renders[i].top,
           left: 0,
           right: 0,
-          height: slotHeight,
+          height: renders[i].height,
           child: FocusTraversalOrder(
             order: NumericFocusOrder(i.toDouble()),
-            child: _RailSlot(
-              glyph: items[i].glyph,
-              label: items[i].label.label,
-              colors: colors,
-              selected: i == selectedIndex,
-              hover: hover[i],
-              progress: progress,
-              onToPage: () => onToPage(items[i].label),
+            child: _RailSlotBox(
+              reveal: renders[i].reveal,
+              maxHeight: slotHeight,
+              child: _RailSlot(
+                key: ValueKey(renders[i].label),
+                glyph: renders[i].item.glyph,
+                label: renders[i].item.label.label,
+                colors: colors,
+                selected: renders[i].selected,
+                hover: renders[i].hover,
+                progress: progress,
+                onToPage: renders[i].leaving
+                    ? null
+                    : () => onToPage(renders[i].item.label),
+              ),
             ),
           ),
         ),
@@ -422,8 +508,50 @@ class _SlotLayer extends StatelessWidget {
   );
 }
 
+/// Holds a slot to its current height while it enters or leaves, dissolving
+/// (fade, scale, blur) the icon rather than squashing it.
+class _RailSlotBox extends StatelessWidget {
+  const _RailSlotBox({
+    required this.reveal,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  final double reveal;
+  final double maxHeight;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reveal >= 0.999) {
+      return child;
+    }
+    final scale = lerpDouble(0.7, 1, reveal)!;
+    final blur = 6 * (1 - reveal);
+    return ClipRect(
+      child: OverflowBox(
+        minHeight: 0,
+        maxHeight: maxHeight,
+        alignment: Alignment.center,
+        child: Opacity(
+          opacity: reveal.clamp(0.0, 1.0),
+          child: Transform.scale(
+            scale: scale,
+            child: ImageFiltered(
+              enabled: blur > 0.05,
+              imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _RailSlot extends StatefulWidget {
   const _RailSlot({
+    super.key,
     required this.glyph,
     required this.label,
     required this.colors,

@@ -74,7 +74,8 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> updateGroups() async {
     try {
       commonPrint.log('updateGroups');
-      ref.read(groupsProvider.notifier).value = await retry(
+      final isStart = ref.read(isStartProvider);
+      final List<Group> groups = await retry(
         task: () async {
           final sortType = ref.read(
             effectiveProxiesStyleProvider.select((state) => state.sortType),
@@ -98,11 +99,20 @@ class ProxiesAction extends _$ProxiesAction {
               'updateGroups error: $error',
               logLevel: coreFailureLogLevel(error),
             );
-            return [];
+            return <Group>[];
           }
         },
         retryIf: (res) => res.isEmpty,
+        maxAttempts: 5,
+        delay: const Duration(milliseconds: 300),
       );
+      // A running core only reports no groups between reloads or before it has
+      // settled; dropping the live set then would blink the proxies tab out and
+      // strand a correct profile. Hold the last groups until a real set lands.
+      if (groups.isEmpty && isStart && ref.read(groupsProvider).isNotEmpty) {
+        return;
+      }
+      ref.read(groupsProvider.notifier).value = groups;
     } catch (error) {
       // The Core failure path already runs inside the retry task above; a
       // throw here only means ref.read hit a disposed container or the

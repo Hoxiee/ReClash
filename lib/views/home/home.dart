@@ -224,6 +224,29 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant _HomePageView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A tab appearing or leaving shifts the indices of the pages after it. The
+    // page view rebuilds this frame but the controller keeps its old pixel
+    // offset, which now points at a neighbour, so the active page would flash
+    // past to it until the post-frame reconcile lands. Re-pin the controller
+    // to the active page's new index here, before this frame paints.
+    if (oldWidget.navigationItems.length == widget.navigationItems.length) {
+      return;
+    }
+    if (!_pageController.hasClients) {
+      return;
+    }
+    final index = _pageIndex;
+    if (index == -1) {
+      return;
+    }
+    if (_order == null && _pageController.page?.round() != index) {
+      _pageController.jumpToPage(index);
+    }
+  }
+
   int get _pageIndex {
     final pageLabel = ref.read(currentPageLabelProvider);
     return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
@@ -293,6 +316,15 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         ref
             .read(currentPageLabelProvider.notifier)
             .toPage(widget.navigationItems.first.label);
+        return;
+      }
+      // A tab appearing or leaving elsewhere shifts indices but leaves the
+      // active page where it sits; jumping the controller then only forces a
+      // needless relayout flash, so sync it only when the active page moved.
+      final current = _pageController.hasClients
+          ? _pageController.page?.round()
+          : null;
+      if (current == index) {
         return;
       }
       _toPage(pageLabel, true);

@@ -262,6 +262,7 @@ void main() {
                   destinations: [
                     for (final text in ['Home', 'Apps', 'Logs', label])
                       NavBarDestination(
+                        id: text,
                         glyph: AppGlyphs.dashboard,
                         label: text,
                       ),

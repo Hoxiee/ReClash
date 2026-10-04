@@ -13,6 +13,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/feedback/tooltip.dart';
 import 'package:reclash/widgets/nav/nav_motion.dart';
+import 'package:reclash/widgets/nav/nav_slots.dart';
 
 const double _barHeight = 64;
 const double _barPadding = 4;
@@ -78,6 +79,12 @@ final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
 
+// A destination's share of the bar as it enters or leaves. No bounce: an
+// overshoot would drive the slot's width below zero.
+final _slotWeightSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 420),
+);
+
 // A soft, wide drop in the manner of iOS rather than a Material elevation.
 List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
   final strength = colorScheme.brightness == Brightness.dark ? 3.0 : 1.0;
@@ -112,8 +119,15 @@ List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
 }
 
 class NavBarDestination {
-  const NavBarDestination({required this.glyph, required this.label});
+  const NavBarDestination({
+    required this.id,
+    required this.glyph,
+    required this.label,
+  });
 
+  /// A stable identity that outlives label text, so a slot keeps animating
+  /// across a locale change instead of leaving and re-entering.
+  final Object id;
   final Glyph glyph;
   final String label;
 }
@@ -184,22 +198,18 @@ class AppNavBar extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: items.length * _maxItemExtent + _barPadding * 2,
-                  ),
-                  child: FloatingNavigationBar(
-                    lensKey: highlightKey,
-                    selectedIndex: index < 0 ? 0 : index,
-                    onSelected: handleSelected,
-                    destinations: [
-                      for (final item in items)
-                        NavBarDestination(
-                          glyph: item.glyph,
-                          label: item.label.label,
-                        ),
-                    ],
-                  ),
+                child: FloatingNavigationBar(
+                  lensKey: highlightKey,
+                  selectedIndex: index < 0 ? 0 : index,
+                  onSelected: handleSelected,
+                  destinations: [
+                    for (final item in items)
+                      NavBarDestination(
+                        id: item.label,
+                        glyph: item.glyph,
+                        label: item.label.label,
+                      ),
+                  ],
                 ),
               ),
               _DockTrailing(height: height, child: trailing),
@@ -615,6 +625,28 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   Offset? _cursor;
   final ValueNotifier<double?> _hoverAt = ValueNotifier(null);
 
+  late final NavSlots<Object> _slots = NavSlots<Object>(
+    vsync: this,
+    spring: _slotWeightSpring,
+  );
+
+  /// The last-seen destination for every id, so a leaving slot keeps something
+  /// to paint while it collapses after its destination has left the widget.
+  final Map<Object, NavBarDestination> _destinations = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _cacheDestinations();
+    _slots.seed([for (final d in widget.destinations) d.id]);
+  }
+
+  void _cacheDestinations() {
+    for (final destination in widget.destinations) {
+      _destinations[destination.id] = destination;
+    }
+  }
+
   int get _lastIndex => math.max(0, widget.destinations.length - 1);
 
   int get _selectedIndex => widget.selectedIndex.clamp(0, _lastIndex);
@@ -623,6 +655,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reduceMotion = context.disableAnimations;
+    _slots.reduceMotion = _reduceMotion;
   }
 
   void _settle(NavSpring spring, double target, SpringDescription description) {
@@ -636,6 +669,8 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   @override
   void didUpdateWidget(covariant FloatingNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _cacheDestinations();
+    _slots.sync([for (final d in widget.destinations) d.id]);
     if (_pressedIndex == null && _lens.target != _selectedIndex) {
       _settle(_lens, _selectedIndex.toDouble(), _settleSpring);
     }
@@ -643,6 +678,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   @override
   void dispose() {
+    _slots.dispose();
     _lens.dispose();
     _lift.dispose();
     _hover.dispose();
@@ -749,6 +785,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
       return;
     }
     final index = _indexAt(_positionAt(localPosition));
+    // ignore: avoid_print
     _pressedIndex = index;
     _pressX = localPosition.dx;
     _dragging = false;
@@ -801,6 +838,9 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     }
   }
 
+  double _totalWeight() =>
+      _slots.slots.fold(0.0, (sum, slot) => sum + slot.weight.value);
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
@@ -846,62 +886,113 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
               // it out, and that repaint would otherwise reach the whole dock.
               child: RepaintBoundary(
                 child: LayoutBuilder(
+                  // The width cap animates with the slot weights, so the cap's
+                  // changing constraint re-runs this builder every frame of a
+                  // slot transition and the geometry below follows.
                   builder: (context, constraints) {
-                    final extent =
-                        constraints.maxWidth /
-                        math.max(1, widget.destinations.length);
-                    final room = extent - _labelInset * 2;
+                    final slots = _slots.slots;
+                    final innerWidth = constraints.maxWidth;
+                    final total = _totalWeight();
+                    final unit = total <= 0 ? 0.0 : innerWidth / total;
+
+                    final starts = <double>[];
+                    final widths = <double>[];
+                    final liveIndexOf = <int>[];
+                    final liveCenters = <double>[];
+                    final liveWidths = <double>[];
+                    var x = 0.0;
+                    for (final slot in slots) {
+                      final w = slot.weight.value * unit;
+                      starts.add(x);
+                      widths.add(w);
+                      if (slot.leaving) {
+                        liveIndexOf.add(liveCenters.length);
+                      } else {
+                        liveIndexOf.add(liveCenters.length);
+                        liveCenters.add(x + w / 2);
+                        liveWidths.add(w);
+                      }
+                      x += w;
+                    }
+                    final liveCount = liveCenters.length;
+
+                    final avgExtent = liveCount == 0
+                        ? innerWidth
+                        : innerWidth / liveCount;
+                    final room = avgExtent - _labelInset * 2;
                     final labelScale = widest <= room
                         ? 1.0
                         : math.max(room / widest, _minLabelSize / _labelSize);
+
+                    double sampleAt(List<double> values, double pos) {
+                      if (values.isEmpty) {
+                        return 0;
+                      }
+                      final last = values.length - 1;
+                      final low = pos.floor().clamp(0, last);
+                      final high = pos.ceil().clamp(0, last);
+                      return lerpDouble(
+                        values[low],
+                        values[high],
+                        (pos - low).clamp(0.0, 1.0),
+                      )!;
+                    }
+
+                    final ltr =
+                        Directionality.of(context) == TextDirection.ltr;
                     return Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        if (widget.destinations.isNotEmpty)
+                        // The slots are all positioned; a sized box gives the
+                        // stack a width so the pill is not clipped to its padding.
+                        SizedBox(width: innerWidth, height: constraints.maxHeight),
+                        if (liveCount > 0)
                           AnimatedBuilder(
                             animation: _motion,
                             builder: (_, _) => _Lens(
                               lensKey: widget.lensKey,
-                              position: _lens.value,
+                              center: sampleAt(liveCenters, _lens.value),
+                              extent: sampleAt(liveWidths, _lens.value),
                               velocity: _lens.velocity,
-                              extent: extent,
                               height: constraints.maxHeight,
                               lift: _lift.value,
                             ),
                           ),
-                        if (widget.destinations.isNotEmpty)
+                        if (liveCount > 0)
                           AnimatedBuilder(
                             animation: _hoverMotion,
                             builder: (_, _) => _HoverHighlight(
-                              position: _hover.value,
-                              extent: extent,
+                              center: sampleAt(liveCenters, _hover.value),
+                              extent: sampleAt(liveWidths, _hover.value),
                               opacity: _hoverShow.value,
                             ),
                           ),
-                        Row(
-                          children: [
-                            for (final (index, destination)
-                                in widget.destinations.indexed)
-                              Expanded(
-                                child: _FloatingBarItem(
-                                  destination: destination,
-                                  selected: index == _selectedIndex,
-                                  index: index,
-                                  lens: _lens,
-                                  hoverAt: _hoverAt,
-                                  extent: extent,
-                                  lift: _lift,
-                                  labelStyle: labelStyle?.copyWith(
-                                    fontSize: _labelSize * labelScale,
-                                  ),
-                                  labelHeight: lineHeight,
-                                  labelOverflows:
-                                      labels[index].width * labelScale > room,
-                                  onActivate: () => widget.onSelected(index),
+                        // Plain Positioned, not PositionedDirectional: the lens
+                        // is the dock's only PositionedDirectional and a widget
+                        // test keys off that.
+                        for (var i = 0; i < slots.length; i++)
+                          Positioned(
+                            left: ltr ? starts[i] : null,
+                            right: ltr ? null : starts[i],
+                            top: 0,
+                            bottom: 0,
+                            width: widths[i],
+                            child: _SlotBox(
+                              reveal: slots[i].weight.value,
+                              child: _buildItem(
+                                slot: slots[i],
+                                liveIndex: liveIndexOf[i],
+                                extent: widths[i],
+                                labelStyle: labelStyle?.copyWith(
+                                  fontSize: _labelSize * labelScale,
                                 ),
+                                labelHeight: lineHeight,
+                                labelScale: labelScale,
+                                room: room,
+                                labelStyleBase: labelStyle,
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
                       ],
                     );
                   },
@@ -912,6 +1003,16 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         ),
       ),
     );
+    final capped = AnimatedBuilder(
+      animation: _slots,
+      builder: (_, child) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: _totalWeight() * _maxItemExtent + _barPadding * 2,
+        ),
+        child: child,
+      ),
+      child: bar,
+    );
     return AnimatedBuilder(
       animation: _barMotion,
       builder: (_, child) => _PressTransform(
@@ -919,7 +1020,77 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         pull: Offset(_stretch.value, 0),
         child: child,
       ),
-      child: bar,
+      child: capped,
+    );
+  }
+
+  Widget _buildItem({
+    required NavSlot<Object> slot,
+    required int liveIndex,
+    required double extent,
+    required TextStyle? labelStyle,
+    required TextStyle? labelStyleBase,
+    required double labelHeight,
+    required double labelScale,
+    required double room,
+  }) {
+    final destination = _destinations[slot.key];
+    if (destination == null) {
+      return const SizedBox.shrink();
+    }
+    final labelWidth = _measureLabel(context, destination.label, labelStyleBase)
+        .width;
+    final item = _FloatingBarItem(
+      key: ValueKey(slot.key),
+      destination: destination,
+      selected: !slot.leaving && liveIndex == _selectedIndex,
+      index: liveIndex,
+      lens: _lens,
+      hoverAt: _hoverAt,
+      extent: extent,
+      lift: _lift,
+      labelStyle: labelStyle,
+      labelHeight: labelHeight,
+      labelOverflows: labelWidth * labelScale > room,
+      onActivate: slot.leaving ? () {} : () => widget.onSelected(liveIndex),
+    );
+    return slot.leaving ? IgnorePointer(child: item) : item;
+  }
+}
+
+/// Holds a destination to a slot's current share of the bar, clipping and
+/// dissolving it (fade, scale, blur) while it grows in or collapses out so
+/// neighbours slide rather than jump.
+class _SlotBox extends StatelessWidget {
+  const _SlotBox({required this.reveal, required this.child});
+
+  final double reveal;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reveal >= 0.999) {
+      return child;
+    }
+    final scale = lerpDouble(_slotEnterScale, 1, reveal)!;
+    final blur = _slotBlur * (1 - reveal);
+    return ClipRect(
+      child: OverflowBox(
+        minWidth: 0,
+        maxWidth: _maxItemExtent,
+        alignment: Alignment.center,
+        child: Opacity(
+          opacity: reveal.clamp(0.0, 1.0),
+          child: Transform.scale(
+            scale: scale,
+            child: ImageFiltered(
+              enabled: blur > 0.05,
+              imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -929,12 +1100,12 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 /// under it follows the cursor half as far.
 class _HoverHighlight extends StatelessWidget {
   const _HoverHighlight({
-    required this.position,
+    required this.center,
     required this.extent,
     required this.opacity,
   });
 
-  final double position;
+  final double center;
   final double extent;
   final double opacity;
 
@@ -946,7 +1117,7 @@ class _HoverHighlight extends StatelessWidget {
     }
     return Positioned.directional(
       textDirection: Directionality.of(context),
-      start: position * extent,
+      start: center - extent / 2,
       top: 0,
       bottom: 0,
       width: extent,
@@ -963,7 +1134,7 @@ class _HoverHighlight extends StatelessWidget {
 class _Lens extends StatelessWidget {
   const _Lens({
     required this.lensKey,
-    required this.position,
+    required this.center,
     required this.velocity,
     required this.extent,
     required this.height,
@@ -971,7 +1142,7 @@ class _Lens extends StatelessWidget {
   });
 
   final Key? lensKey;
-  final double position;
+  final double center;
   final double velocity;
   final double extent;
   final double height;
@@ -987,7 +1158,7 @@ class _Lens extends StatelessWidget {
     final lensHeight = (height + growth) * (1 - stretch / 2);
     return PositionedDirectional(
       key: lensKey,
-      start: (position + 0.5) * extent - width / 2,
+      start: center - width / 2,
       top: (height - lensHeight) / 2,
       width: width,
       height: lensHeight,
@@ -1008,6 +1179,7 @@ class _Lens extends StatelessWidget {
 
 class _FloatingBarItem extends StatefulWidget {
   const _FloatingBarItem({
+    super.key,
     required this.destination,
     required this.selected,
     required this.index,
