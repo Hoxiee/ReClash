@@ -658,6 +658,8 @@
   "coreStarting": "Іске қосылуда…",
   "coreStopped": "Тоқтатылған",
   "coreBuildTime": "Жиналған уақыты",
+  "coreEnvironment": "Орта",
+  "coreLocation": "Орналасуы",
   "corePlatform": "Платформа",
   "coreArchitecture": "Архитектура",
   "coreBuildTags": "Жинақтау жалаушалары",

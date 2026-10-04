@@ -729,6 +729,8 @@
   "coreStarting": "Запускается…",
   "coreStopped": "Остановлено",
   "coreBuildTime": "Время сборки",
+  "coreEnvironment": "Среда",
+  "coreLocation": "Расположение",
   "corePlatform": "Платформа",
   "coreArchitecture": "Архитектура",
   "coreBuildTags": "Флаги сборки",

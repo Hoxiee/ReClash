@@ -847,11 +847,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("Флаги сборки"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("Время сборки"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Среда"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("Файл ядра"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "Не удалось получить сведения о ядре",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Способ запуска"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Расположение"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Процесс через Helper",
     ),

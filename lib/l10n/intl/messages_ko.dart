@@ -714,11 +714,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("빌드 플래그"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("빌드 시간"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("환경"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("코어 실행 파일"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "코어 정보를 읽을 수 없습니다",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("실행 방식"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("위치"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage("Helper를 통한 프로세스"),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage("프로세스 내 라이브러리"),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("별도 프로세스"),

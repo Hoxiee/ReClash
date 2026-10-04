@@ -751,6 +751,8 @@ Map<String, dynamic> _$RcxDiscoveryReportToJson(_RcxDiscoveryReport instance) =>
     };
 
 _CoreInfo _$CoreInfoFromJson(Map<String, dynamic> json) => _CoreInfo(
+  rcxVersion: json['rcxVersion'] as String? ?? '',
+  rcxCommit: json['rcxCommit'] as String? ?? '',
   version: json['version'] as String? ?? '',
   goVersion: json['goVersion'] as String? ?? '',
   platform: json['platform'] as String? ?? '',
@@ -766,6 +768,8 @@ _CoreInfo _$CoreInfoFromJson(Map<String, dynamic> json) => _CoreInfo(
 );
 
 Map<String, dynamic> _$CoreInfoToJson(_CoreInfo instance) => <String, dynamic>{
+  'rcxVersion': instance.rcxVersion,
+  'rcxCommit': instance.rcxCommit,
   'version': instance.version,
   'goVersion': instance.goVersion,
   'platform': instance.platform,

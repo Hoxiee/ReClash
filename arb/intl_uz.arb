@@ -658,6 +658,8 @@
   "coreStarting": "Ishga tushmoqda…",
   "coreStopped": "Toʻxtatilgan",
   "coreBuildTime": "Yigʻilgan vaqt",
+  "coreEnvironment": "Muhit",
+  "coreLocation": "Joylashuv",
   "corePlatform": "Platforma",
   "coreArchitecture": "Arxitektura",
   "coreBuildTags": "Yigʻish bayroqlari",

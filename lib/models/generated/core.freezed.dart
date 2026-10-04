@@ -8350,7 +8350,7 @@ as String,
 /// @nodoc
 mixin _$CoreInfo {
 
- String get version; String get goVersion; String get platform; String get architecture; DateTime? get buildTime; List<String> get tags; String get workingDirectory; String get executablePath;
+ String get rcxVersion; String get rcxCommit; String get version; String get goVersion; String get platform; String get architecture; DateTime? get buildTime; List<String> get tags; String get workingDirectory; String get executablePath;
 /// Create a copy of CoreInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -8364,20 +8364,20 @@ $CoreInfoCopyWith<CoreInfo> get copyWith => _$CoreInfoCopyWithImpl<CoreInfo>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as CoreInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreInfo&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.goVersion, _this.goVersion) || other.goVersion == _this.goVersion)&&(identical(other.platform, _this.platform) || other.platform == _this.platform)&&(identical(other.architecture, _this.architecture) || other.architecture == _this.architecture)&&(identical(other.buildTime, _this.buildTime) || other.buildTime == _this.buildTime)&&const DeepCollectionEquality().equals(other.tags, _this.tags)&&(identical(other.workingDirectory, _this.workingDirectory) || other.workingDirectory == _this.workingDirectory)&&(identical(other.executablePath, _this.executablePath) || other.executablePath == _this.executablePath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreInfo&&(identical(other.rcxVersion, _this.rcxVersion) || other.rcxVersion == _this.rcxVersion)&&(identical(other.rcxCommit, _this.rcxCommit) || other.rcxCommit == _this.rcxCommit)&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.goVersion, _this.goVersion) || other.goVersion == _this.goVersion)&&(identical(other.platform, _this.platform) || other.platform == _this.platform)&&(identical(other.architecture, _this.architecture) || other.architecture == _this.architecture)&&(identical(other.buildTime, _this.buildTime) || other.buildTime == _this.buildTime)&&const DeepCollectionEquality().equals(other.tags, _this.tags)&&(identical(other.workingDirectory, _this.workingDirectory) || other.workingDirectory == _this.workingDirectory)&&(identical(other.executablePath, _this.executablePath) || other.executablePath == _this.executablePath));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CoreInfo;
-  return Object.hash(runtimeType,_this.version,_this.goVersion,_this.platform,_this.architecture,_this.buildTime,const DeepCollectionEquality().hash(_this.tags),_this.workingDirectory,_this.executablePath);
+  return Object.hash(runtimeType,_this.rcxVersion,_this.rcxCommit,_this.version,_this.goVersion,_this.platform,_this.architecture,_this.buildTime,const DeepCollectionEquality().hash(_this.tags),_this.workingDirectory,_this.executablePath);
 }
 
 @override
 String toString() {
   final _this = this as CoreInfo;
-  return 'CoreInfo(version: ${_this.version}, goVersion: ${_this.goVersion}, platform: ${_this.platform}, architecture: ${_this.architecture}, buildTime: ${_this.buildTime}, tags: ${_this.tags}, workingDirectory: ${_this.workingDirectory}, executablePath: ${_this.executablePath})';
+  return 'CoreInfo(rcxVersion: ${_this.rcxVersion}, rcxCommit: ${_this.rcxCommit}, version: ${_this.version}, goVersion: ${_this.goVersion}, platform: ${_this.platform}, architecture: ${_this.architecture}, buildTime: ${_this.buildTime}, tags: ${_this.tags}, workingDirectory: ${_this.workingDirectory}, executablePath: ${_this.executablePath})';
 }
 
 
@@ -8388,7 +8388,7 @@ abstract mixin class $CoreInfoCopyWith<$Res>  {
   factory $CoreInfoCopyWith(CoreInfo value, $Res Function(CoreInfo) _then) = _$CoreInfoCopyWithImpl;
 @useResult
 $Res call({
- String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
+ String rcxVersion, String rcxCommit, String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
 });
 
 
@@ -8405,9 +8405,11 @@ class _$CoreInfoCopyWithImpl<$Res>
 
 /// Create a copy of CoreInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? rcxVersion = null,Object? rcxCommit = null,Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
   return _then(CoreInfo(
-version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+rcxVersion: null == rcxVersion ? _self.rcxVersion : rcxVersion // ignore: cast_nullable_to_non_nullable
+as String,rcxCommit: null == rcxCommit ? _self.rcxCommit : rcxCommit // ignore: cast_nullable_to_non_nullable
+as String,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as String,goVersion: null == goVersion ? _self.goVersion : goVersion // ignore: cast_nullable_to_non_nullable
 as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
 as String,architecture: null == architecture ? _self.architecture : architecture // ignore: cast_nullable_to_non_nullable
@@ -8500,10 +8502,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String rcxVersion,  String rcxCommit,  String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CoreInfo() when $default != null:
-return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+return $default(_that.rcxVersion,_that.rcxCommit,_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
   return orElse();
 
 }
@@ -8521,10 +8523,10 @@ return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String rcxVersion,  String rcxCommit,  String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)  $default,) {final _that = this;
 switch (_that) {
 case _CoreInfo():
-return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+return $default(_that.rcxVersion,_that.rcxCommit,_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -8541,10 +8543,10 @@ return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String rcxVersion,  String rcxCommit,  String version,  String goVersion,  String platform,  String architecture,  DateTime? buildTime,  List<String> tags,  String workingDirectory,  String executablePath)?  $default,) {final _that = this;
 switch (_that) {
 case _CoreInfo() when $default != null:
-return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
+return $default(_that.rcxVersion,_that.rcxCommit,_that.version,_that.goVersion,_that.platform,_that.architecture,_that.buildTime,_that.tags,_that.workingDirectory,_that.executablePath);case _:
   return null;
 
 }
@@ -8556,9 +8558,11 @@ return $default(_that.version,_that.goVersion,_that.platform,_that.architecture,
 @JsonSerializable()
 
 class _CoreInfo implements CoreInfo {
-  const _CoreInfo({this.version = '', this.goVersion = '', this.platform = '', this.architecture = '', this.buildTime,  List<String> tags = const [], this.workingDirectory = '', this.executablePath = ''}): _tags = tags;
+  const _CoreInfo({this.rcxVersion = '', this.rcxCommit = '', this.version = '', this.goVersion = '', this.platform = '', this.architecture = '', this.buildTime,  List<String> tags = const [], this.workingDirectory = '', this.executablePath = ''}): _tags = tags;
   factory _CoreInfo.fromJson(Map<String, dynamic> json) => _$CoreInfoFromJson(json);
 
+@override@JsonKey() final  String rcxVersion;
+@override@JsonKey() final  String rcxCommit;
 @override@JsonKey() final  String version;
 @override@JsonKey() final  String goVersion;
 @override@JsonKey() final  String platform;
@@ -8587,18 +8591,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreInfo&&(identical(other.version, version) || other.version == version)&&(identical(other.goVersion, goVersion) || other.goVersion == goVersion)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.architecture, architecture) || other.architecture == architecture)&&(identical(other.buildTime, buildTime) || other.buildTime == buildTime)&&const DeepCollectionEquality().equals(other.tags, _tags)&&(identical(other.workingDirectory, workingDirectory) || other.workingDirectory == workingDirectory)&&(identical(other.executablePath, executablePath) || other.executablePath == executablePath));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreInfo&&(identical(other.rcxVersion, rcxVersion) || other.rcxVersion == rcxVersion)&&(identical(other.rcxCommit, rcxCommit) || other.rcxCommit == rcxCommit)&&(identical(other.version, version) || other.version == version)&&(identical(other.goVersion, goVersion) || other.goVersion == goVersion)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.architecture, architecture) || other.architecture == architecture)&&(identical(other.buildTime, buildTime) || other.buildTime == buildTime)&&const DeepCollectionEquality().equals(other.tags, _tags)&&(identical(other.workingDirectory, workingDirectory) || other.workingDirectory == workingDirectory)&&(identical(other.executablePath, executablePath) || other.executablePath == executablePath));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,version,goVersion,platform,architecture,buildTime,const DeepCollectionEquality().hash(_tags),workingDirectory,executablePath);
+    return Object.hash(runtimeType,rcxVersion,rcxCommit,version,goVersion,platform,architecture,buildTime,const DeepCollectionEquality().hash(_tags),workingDirectory,executablePath);
 }
 
 @override
 String toString() {
-    return 'CoreInfo(version: $version, goVersion: $goVersion, platform: $platform, architecture: $architecture, buildTime: $buildTime, tags: $tags, workingDirectory: $workingDirectory, executablePath: $executablePath)';
+    return 'CoreInfo(rcxVersion: $rcxVersion, rcxCommit: $rcxCommit, version: $version, goVersion: $goVersion, platform: $platform, architecture: $architecture, buildTime: $buildTime, tags: $tags, workingDirectory: $workingDirectory, executablePath: $executablePath)';
 }
 
 
@@ -8609,7 +8613,7 @@ abstract mixin class _$CoreInfoCopyWith<$Res> implements $CoreInfoCopyWith<$Res>
   factory _$CoreInfoCopyWith(_CoreInfo value, $Res Function(_CoreInfo) _then) = __$CoreInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
+ String rcxVersion, String rcxCommit, String version, String goVersion, String platform, String architecture, DateTime? buildTime, List<String> tags, String workingDirectory, String executablePath
 });
 
 
@@ -8626,9 +8630,11 @@ class __$CoreInfoCopyWithImpl<$Res>
 
 /// Create a copy of CoreInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? rcxVersion = null,Object? rcxCommit = null,Object? version = null,Object? goVersion = null,Object? platform = null,Object? architecture = null,Object? buildTime = freezed,Object? tags = null,Object? workingDirectory = null,Object? executablePath = null,}) {
   return _then(_CoreInfo(
-version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+rcxVersion: null == rcxVersion ? _self.rcxVersion : rcxVersion // ignore: cast_nullable_to_non_nullable
+as String,rcxCommit: null == rcxCommit ? _self.rcxCommit : rcxCommit // ignore: cast_nullable_to_non_nullable
+as String,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as String,goVersion: null == goVersion ? _self.goVersion : goVersion // ignore: cast_nullable_to_non_nullable
 as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
 as String,architecture: null == architecture ? _self.architecture : architecture // ignore: cast_nullable_to_non_nullable

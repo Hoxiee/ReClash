@@ -703,11 +703,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("ビルドフラグ"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("ビルド日時"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("環境"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("コア実行ファイル"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "コア情報を取得できませんでした",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("実行方式"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("場所"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage("Helper 経由のプロセス"),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage("プロセス内ライブラリ"),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("独立したプロセス"),

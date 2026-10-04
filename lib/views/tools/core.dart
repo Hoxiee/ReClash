@@ -194,7 +194,43 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
     }
   }
 
-  List<Widget> _infoRows(CoreInfo info) {
+  DetailRow _field(String title, String value) => DetailRow(
+    title: title,
+    value: Text(
+      value.isEmpty ? context.appLocalizations.unknown : value,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+    ),
+    copyText: value.isEmpty ? null : value,
+  );
+
+  List<Widget> _identityRows(CoreInfo info) {
+    final l10n = context.appLocalizations;
+    final engine = info.rcxVersion.isEmpty
+        ? l10n.unknown
+        : info.rcxCommit.isEmpty
+        ? info.rcxVersion
+        : '${info.rcxVersion} (${info.rcxCommit})';
+    final buildTime = info.buildTime?.toUtc();
+    final locale = Localizations.localeOf(context).toString();
+    final dateFormat = DateFormat.localeExists(locale)
+        ? DateFormat.yMd(locale).add_Hms()
+        : DateFormat('yyyy-MM-dd HH:mm:ss', 'en');
+    final buildTimeText = buildTime == null
+        ? l10n.unknown
+        : '${dateFormat.format(buildTime)} UTC';
+    return [
+      DetailRow.text(title: 'ReClashCore', value: engine),
+      DetailRow.text(title: 'mihomo', value: info.version),
+      DetailRow(
+        title: l10n.coreBuildTime,
+        value: Text(buildTimeText),
+        copyText: buildTime?.toIso8601String(),
+      ),
+    ];
+  }
+
+  List<Widget> _environmentRows(CoreInfo info) {
     final l10n = context.appLocalizations;
     final launchMode = info.platform == 'android'
         ? l10n.coreModeLibrary
@@ -204,46 +240,20 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
             CoreProcessOwner.windowsElevated => '${l10n.coreModeProcess} (UAC)',
             null => l10n.unknown,
           };
-    final buildTime = info.buildTime?.toUtc();
-    final locale = Localizations.localeOf(context).toString();
-    final dateFormat = DateFormat.localeExists(locale)
-        ? DateFormat.yMd(locale).add_Hms()
-        : DateFormat('yyyy-MM-dd HH:mm:ss', 'en');
-    final buildTimeText = buildTime == null
-        ? l10n.unknown
-        : '${dateFormat.format(buildTime)} UTC';
-    final fields = [
-      ('Go', info.goVersion),
-      (l10n.corePlatform, info.platform),
-      (l10n.coreArchitecture, info.architecture),
-      (
-        l10n.coreBuildTags,
-        info.tags.isEmpty ? l10n.none : info.tags.join(', '),
-      ),
-      (l10n.coreLaunchMode, launchMode),
-      (l10n.coreWorkingDirectory, info.workingDirectory),
-      if (info.platform != 'android')
-        (l10n.coreExecutable, info.executablePath),
-    ];
     return [
-      DetailRow.text(title: 'mihomo', value: info.version),
-      DetailRow(
-        title: l10n.coreBuildTime,
-        value: Text(buildTimeText),
-        copyText: buildTime?.toIso8601String(),
-      ),
-      for (final (title, value) in fields)
-        DetailRow(
-          title: title,
-          value: Text(
-            value.isEmpty ? l10n.unknown : value,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          copyText: value.isEmpty ? null : value,
-        ),
+      _field('Go', info.goVersion),
+      _field(l10n.corePlatform, info.platform),
+      _field(l10n.coreArchitecture, info.architecture),
+      _field(l10n.coreBuildTags, info.tags.isEmpty ? l10n.none : info.tags.join(', ')),
+      _field(l10n.coreLaunchMode, launchMode),
     ];
   }
+
+  List<Widget> _locationRows(CoreInfo info) => [
+    _field(context.appLocalizations.coreWorkingDirectory, info.workingDirectory),
+    if (info.platform != 'android')
+      _field(context.appLocalizations.coreExecutable, info.executablePath),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +273,6 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
         children: [
           SettingSection(
             top: AppSpacing.lg,
-            title: l10n.core,
             items: [
               DetailRow(title: l10n.status, value: Text(statusText)),
               if (_loading)
@@ -280,9 +289,19 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                     icon: const GlyphIcon(AppGlyphs.refresh),
                   ).withAppTooltip(),
                 ),
-              if (info != null) ..._infoRows(info),
+              if (info != null) ..._identityRows(info),
             ],
           ),
+          if (info != null)
+            SettingSection(
+              title: l10n.coreEnvironment,
+              items: _environmentRows(info),
+            ),
+          if (info != null)
+            SettingSection(
+              title: l10n.coreLocation,
+              items: _locationRows(info),
+            ),
           SettingSection(
             items: [
               DecorationListItem.open(

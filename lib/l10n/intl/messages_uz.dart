@@ -880,6 +880,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("Yigʻish bayroqlari"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("Yigʻilgan vaqt"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Muhit"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("Yadro fayli"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "Yadro maʼlumotlarini olib boʻlmadi",
@@ -887,6 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage(
       "Ishga tushirish usuli",
     ),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Joylashuv"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper orqali jarayon",
     ),

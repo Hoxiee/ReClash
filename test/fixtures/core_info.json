@@ -1,4 +1,6 @@
 {
+  "rcxVersion": "0.1.0",
+  "rcxCommit": "gf77b7475",
   "version": "1.19.31-2-gf77b7475",
   "goVersion": "go1.27.0",
   "platform": "linux",

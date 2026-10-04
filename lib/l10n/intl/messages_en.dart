@@ -833,11 +833,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("Build flags"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("Build time"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Environment"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("Core binary"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "Could not read core information",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Execution mode"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Location"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Process via Helper",
     ),

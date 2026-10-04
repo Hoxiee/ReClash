@@ -686,6 +686,8 @@
   "coreStarting": "启动中…",
   "coreStopped": "已停止",
   "coreBuildTime": "构建时间",
+  "coreEnvironment": "环境",
+  "coreLocation": "位置",
   "corePlatform": "平台",
   "coreArchitecture": "架构",
   "coreBuildTags": "构建标志",

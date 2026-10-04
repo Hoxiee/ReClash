@@ -10,6 +10,8 @@ import (
 )
 
 type CoreInfo struct {
+	RcxVersion       string     `json:"rcxVersion"`
+	RcxCommit        string     `json:"rcxCommit"`
 	Version          string     `json:"version"`
 	GoVersion        string     `json:"goVersion"`
 	Platform         string     `json:"platform"`
@@ -22,6 +24,8 @@ type CoreInfo struct {
 
 func handleGetCoreInfo() CoreInfo {
 	info := CoreInfo{
+		RcxVersion:   CoreVersion,
+		RcxCommit:    CoreCommit,
 		Version:      constant.Version,
 		GoVersion:    runtime.Version(),
 		Platform:     runtime.GOOS,

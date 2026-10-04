@@ -658,6 +658,8 @@
   "coreStarting": "Işe başlaýar…",
   "coreStopped": "Saklandy",
   "coreBuildTime": "Ýygnalan wagty",
+  "coreEnvironment": "Gurşaw",
+  "coreLocation": "Ýerleşiş",
   "corePlatform": "Platforma",
   "coreArchitecture": "Arhitektura",
   "coreBuildTags": "Ýygnama baýdaklary",

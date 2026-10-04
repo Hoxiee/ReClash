@@ -757,6 +757,8 @@
   "coreStarting": "Starting…",
   "coreStopped": "Stopped",
   "coreBuildTime": "Build time",
+  "coreEnvironment": "Environment",
+  "coreLocation": "Location",
   "corePlatform": "Platform",
   "coreArchitecture": "Architecture",
   "coreBuildTags": "Build flags",

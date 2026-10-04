@@ -26,6 +26,8 @@ void main() {
 
   setUp(() {
     info = CoreInfo(
+      rcxVersion: '0.1.0',
+      rcxCommit: 'v0.1.0-pre.1-3-gf77b7475',
       version: '1.19.31-2-gf77b7475-dirty',
       goVersion: 'go1.27.0',
       platform: 'linux',
@@ -79,9 +81,14 @@ void main() {
   testWidgets('shows the running core passport, not traffic or inline config', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1200, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await pumpDetail(tester);
 
     for (final value in [
+      '0.1.0 (v0.1.0-pre.1-3-gf77b7475)',
       info.version,
       info.goVersion,
       info.platform,
@@ -164,6 +171,10 @@ void main() {
   testWidgets('uninitialized metadata stays readable and can be refreshed', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1200, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final initialized = info;
     info = info.copyWith(workingDirectory: '');
     await pumpDetail(tester);

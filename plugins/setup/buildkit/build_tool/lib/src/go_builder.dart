@@ -74,6 +74,34 @@ class GoBuilder {
     return '$flags -X github.com/metacubex/mihomo/constant.BuildTime=$stamp';
   }
 
+  // ReClashCore identity: the engine semver is baked into the Go sources, while
+  // the build id is this flag. git describe runs in the repository root rather
+  // than the mihomo submodule, so it tracks the engine build, not the upstream
+  // tag. A missing or unreadable repo yields "dev", matching the Go default.
+  static String committedLdflags(String flags, String rootDir) {
+    final commit = _repoDescribe(rootDir);
+    return '$flags -X main.CoreCommit=$commit';
+  }
+
+  static String _repoDescribe(String rootDir) {
+    try {
+      final result = runCommand('git', [
+        'describe',
+        '--tags',
+        '--always',
+        '--abbrev=8',
+        '--dirty',
+      ], workingDirectory: rootDir);
+      final describe = (result.stdout as String).trim();
+      if (RegExp(r'^[0-9A-Za-z][0-9A-Za-z.+-]*$').hasMatch(describe)) {
+        return describe;
+      }
+    } on Object {
+      // Fall through to the Go default below.
+    }
+    return 'dev';
+  }
+
   Future<BuildExecution> build(Target target, {bool force = false}) async {
     final ldflags = coreLdflags(_corePath, config.goLdflags);
     final outDir = target.isLib
@@ -96,7 +124,10 @@ class GoBuilder {
         final env = _buildEnvironment(target);
         final args = _buildArguments(
           target,
-          timestampedLdflags(ldflags, DateTime.now()),
+          committedLdflags(
+            timestampedLdflags(ldflags, DateTime.now()),
+            rootDir,
+          ),
           outFile: outFile,
         );
 

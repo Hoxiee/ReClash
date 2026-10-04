@@ -686,6 +686,8 @@
   "coreStarting": "起動中…",
   "coreStopped": "停止中",
   "coreBuildTime": "ビルド日時",
+  "coreEnvironment": "環境",
+  "coreLocation": "場所",
   "corePlatform": "プラットフォーム",
   "coreArchitecture": "アーキテクチャ",
   "coreBuildTags": "ビルドフラグ",

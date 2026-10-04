@@ -855,11 +855,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жинақтау жалаушалары",
     ),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("Жиналған уақыты"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Орта"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("Ядро файлы"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "Ядро туралы ақпаратты алу мүмкін болмады",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Іске қосу тәсілі"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Орналасуы"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper арқылы процесс",
     ),

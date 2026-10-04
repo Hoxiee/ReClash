@@ -658,6 +658,8 @@
   "coreStarting": "시작 중…",
   "coreStopped": "중지됨",
   "coreBuildTime": "빌드 시간",
+  "coreEnvironment": "환경",
+  "coreLocation": "위치",
   "corePlatform": "플랫폼",
   "coreArchitecture": "아키텍처",
   "coreBuildTags": "빌드 플래그",

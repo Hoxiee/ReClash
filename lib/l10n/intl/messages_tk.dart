@@ -854,11 +854,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreBuildTags": MessageLookupByLibrary.simpleMessage("Ýygnama baýdaklary"),
     "coreBuildTime": MessageLookupByLibrary.simpleMessage("Ýygnalan wagty"),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Gurşaw"),
     "coreExecutable": MessageLookupByLibrary.simpleMessage("Ýadro faýly"),
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
       "Ýadro maglumatlaryny okap bolmady",
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Işlediş usuly"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Ýerleşiş"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper arkaly proses",
     ),

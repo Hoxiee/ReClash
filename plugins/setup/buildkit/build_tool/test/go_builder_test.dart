@@ -72,6 +72,31 @@ void main() {
     );
   });
 
+  test('stamps the repository describe into the engine build id', () {
+    final repo = Directory.systemTemp.createTempSync('rcx-repo-');
+    addTearDown(() => repo.deleteSync(recursive: true));
+    git(['init'], path: repo.path);
+    File(p.join(repo.path, 'readme')).writeAsStringSync('rcx');
+    git(['add', '.'], path: repo.path);
+    git(['commit', '-m', 'initial'], path: repo.path);
+    git(['tag', 'v0.1.0-pre.1'], path: repo.path);
+
+    expect(
+      GoBuilder.committedLdflags('-s', repo.path),
+      '-s -X main.CoreCommit=v0.1.0-pre.1',
+    );
+  });
+
+  test('falls back to dev when the repository has no Git metadata', () {
+    final plain = Directory.systemTemp.createTempSync('rcx-plain-');
+    addTearDown(() => plain.deleteSync(recursive: true));
+
+    expect(
+      GoBuilder.committedLdflags('-s', plain.path),
+      '-s -X main.CoreCommit=dev',
+    );
+  });
+
   test(
     'embeds build metadata and retains its timestamp on a cache hit',
     () async {

@@ -474,6 +474,8 @@ abstract class RcxDiscoveryReport with _$RcxDiscoveryReport {
 @freezed
 abstract class CoreInfo with _$CoreInfo {
   const factory CoreInfo({
+    @Default('') String rcxVersion,
+    @Default('') String rcxCommit,
     @Default('') String version,
     @Default('') String goVersion,
     @Default('') String platform,

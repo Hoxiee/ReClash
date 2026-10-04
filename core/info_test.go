@@ -17,6 +17,9 @@ func TestCoreInfoUsesRunningBinaryMetadata(t *testing.T) {
 	if info.Version != constant.Version || info.GoVersion != runtime.Version() {
 		t.Fatalf("unexpected versions: %+v", info)
 	}
+	if info.RcxVersion != CoreVersion || info.RcxCommit != CoreCommit {
+		t.Fatalf("engine identity must come from build metadata: %+v", info)
+	}
 	if info.Platform != runtime.GOOS || info.Architecture != runtime.GOARCH {
 		t.Fatalf("unexpected target: %+v", info)
 	}
@@ -58,6 +61,9 @@ func TestCoreInfoSharedWireFixture(t *testing.T) {
 	}
 	if info.BuildTime == nil || info.Version != "1.19.31-2-gf77b7475" {
 		t.Fatalf("incomplete metadata: %+v", info)
+	}
+	if info.RcxVersion != "0.1.0" || info.RcxCommit != "gf77b7475" {
+		t.Fatalf("engine identity must survive the wire: %+v", info)
 	}
 	encoded, err := (MethodResponse{ID: "core-info", Result: info}).JSON()
 	if err != nil {

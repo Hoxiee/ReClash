@@ -6067,6 +6067,21 @@ class AppLocalizations {
     );
   }
 
+  /// `Environment`
+  String get coreEnvironment {
+    return Intl.message(
+      'Environment',
+      name: 'coreEnvironment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get coreLocation {
+    return Intl.message('Location', name: 'coreLocation', desc: '', args: []);
+  }
+
   /// `Platform`
   String get corePlatform {
     return Intl.message('Platform', name: 'corePlatform', desc: '', args: []);
@@ -18218,8 +18233,7 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc:
-          'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18279,8 +18293,7 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc:
-          'Countdown showing how many seconds remain before the pairing code expires.',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }
