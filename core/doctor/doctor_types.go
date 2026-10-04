@@ -10,6 +10,10 @@ const (
 	doctorEvidenceFreshFor     = 90 * time.Second
 	doctorPassivePublishPeriod = 250 * time.Millisecond
 	doctorMaxProbeCount        = 8
+	// Consecutive passive outer-dial failures that tip the witness into a
+	// degraded, then broken, verdict without any synthetic probe.
+	doctorPassiveDialDegradedRun = 2
+	doctorPassiveDialBrokenRun   = 4
 )
 
 var doctorExamTimeout = 20 * time.Second

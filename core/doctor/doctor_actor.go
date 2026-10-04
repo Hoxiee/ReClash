@@ -107,6 +107,7 @@ type doctorActor struct {
 	healInProgress         bool
 	healExamID             string
 	pendingPlatform        *doctorEvidence
+	passiveDialFailures    int
 }
 
 func newDoctorActor(runtime doctorRuntime, publish func(doctorStatusProjection)) *doctorActor {
