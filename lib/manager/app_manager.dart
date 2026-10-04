@@ -491,6 +491,9 @@ class AppSidebarContainer extends ConsumerWidget {
     // One wallpaper spans the whole shell so the rail shares the content's
     // continuous backdrop instead of standing as an opaque cut-out beside it.
     return AppWallpaper(
+      // The base matches the inactive shell fill so a wallpaper crossfade never
+      // flashes through to a bare surface.
+      baseColor: context.colorScheme.surfaceContainer,
       // The painted wallpaper sits behind this builder, so a solid fill here
       // would hide it; tint only when there is no wallpaper to show through.
       builder: (context, active) => Container(
