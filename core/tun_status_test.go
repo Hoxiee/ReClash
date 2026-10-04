@@ -13,12 +13,13 @@ import (
 
 func preserveTunTestState(t *testing.T) {
 	t.Helper()
-	running, requested, up, paused := isRunning.Load(), tunRequested.Load(), tunUp.Load(), tunPaused.Load()
+	running, requested, up, paused, settled := isRunning.Load(), tunRequested.Load(), tunUp.Load(), tunPaused.Load(), tunSettled.Load()
 	t.Cleanup(func() {
 		isRunning.Store(running)
 		tunRequested.Store(requested)
 		tunUp.Store(up)
 		tunPaused.Store(paused)
+		tunSettled.Store(settled)
 	})
 }
 
@@ -284,5 +285,27 @@ func TestDoctorPreservesRequestedTunWhenCaptureFailed(t *testing.T) {
 	updateListeners(cfg)
 	if tunRequested.Load() {
 		t.Fatal("disabled config retained TUN request")
+	}
+}
+
+func TestDoctorWarmupReportsUnknownUntilTunSettles(t *testing.T) {
+	preserveTunTestState(t)
+	tunSettled.Store(true)
+	tunRequested.Store(false)
+	isRunning.Store(false)
+	cfg := &config.Config{General: &config.General{}}
+	cfg.General.Tun = LC.Tun{Enable: true}
+	updateListeners(cfg)
+	if tunSettled.Load() {
+		t.Fatal("fresh TUN request did not reopen the warm-up window")
+	}
+	isRunning.Store(true)
+	tunUp.Store(false)
+	if got := (coreDoctorRuntime{}).DoctorPathContext(); got.PathKind != doctorPathTun || got.CaptureState != doctorCaptureUnknown {
+		t.Fatalf("warm-up path = %+v", got)
+	}
+	tunSettled.Store(true)
+	if got := (coreDoctorRuntime{}).DoctorPathContext(); got.CaptureState != doctorCaptureInactive {
+		t.Fatalf("settled path = %+v", got)
 	}
 }

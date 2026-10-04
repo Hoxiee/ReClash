@@ -63,6 +63,7 @@ var (
 	uiActive     atomic.Bool
 	tunUp        atomic.Bool
 	tunRequested atomic.Bool
+	tunSettled   atomic.Bool
 	tunPaused    atomic.Bool
 	sdkVersion   atomic.Int32
 	testURL      atomic.Pointer[string]
@@ -143,7 +144,10 @@ func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
 }
 
 func updateListeners(cfg *config.Config) {
-	tunRequested.Store(!features.Android && cfg != nil && cfg.General.Tun.Enable)
+	tunReq := !features.Android && cfg != nil && cfg.General.Tun.Enable
+	if tunRequested.Swap(tunReq) != tunReq && tunReq {
+		tunSettled.Store(false)
+	}
 	if cfg == nil || !isRunning.Load() {
 		return
 	}
@@ -193,6 +197,11 @@ func syncTunUp() {
 		return
 	}
 	setTunUp(isRunning.Load() && listener.GetTunConf().Enable)
+	// setTunUp bumps only when tunUp flips; a settle that leaves TUN down
+	// still has to wake the witness so it leaves the warm-up readout.
+	if !tunSettled.Swap(true) {
+		doctorBumpGeneration(doctorTunGeneration)
+	}
 }
 
 var (

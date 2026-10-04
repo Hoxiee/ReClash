@@ -175,6 +175,12 @@ func (runtime coreDoctorRuntime) DoctorPathContext() doctorPathContext {
 		return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureActive}
 	}
 	if tunRequested.Load() {
+		// Bringing the listener up blocks (on Linux, waiting out the old TUN
+		// name); until that attempt settles the witness has not seen capture
+		// fail, so report unknown rather than a confident outage.
+		if isRunning.Load() && !tunSettled.Load() {
+			return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureUnknown}
+		}
 		return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureInactive}
 	}
 	ports := listener.GetPorts()
