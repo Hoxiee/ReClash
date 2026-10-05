@@ -341,7 +341,10 @@ class ApplicationState extends ConsumerState<Application> {
             );
             return ValueListenableBuilder<Offset>(
               valueListenable: screenImpactOffset,
-              child: content,
+              // The impact transform only repositions and scales; a boundary
+              // here lets it reapply over the app's retained layer instead of
+              // repainting the whole tree every frame of the shake.
+              child: RepaintBoundary(child: content),
               builder: (context, offset, child) {
                 final short = MediaQuery.sizeOf(context).shortestSide;
                 final overscan =

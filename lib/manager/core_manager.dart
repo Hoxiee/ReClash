@@ -27,6 +27,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     with CoreEventListener {
   CoreController get _core => ref.read(coreHandlerProvider);
 
+  late final _CoreFeedBatch _feed = _CoreFeedBatch(_flushFeed);
+
   void _scheduleFullSetup() {
     unawaited(ref.read(setupActionProvider.notifier).scheduleFullSetup());
   }
@@ -171,7 +173,29 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     coreEventManager.removeListener(this);
     throttler.cancel(FunctionTag.coreErrorNotifier);
     debouncer.cancel(FunctionTag.updateDelay);
+    _feed.cancel();
     super.dispose();
+  }
+
+  void _flushFeed(_CoreFeedBatch batch) {
+    if (!mounted) {
+      return;
+    }
+    if (batch.requests.isNotEmpty) {
+      ref.read(requestsProvider.notifier).addRequests(batch.requests);
+      ref
+          .read(requestCountProvider.notifier)
+          .update((count) => count + batch.requests.length);
+    }
+    if (batch.dnsQueries.isNotEmpty) {
+      ref.read(dnsQueriesProvider.notifier).addDnsQueries(batch.dnsQueries);
+      ref
+          .read(dnsQueryCountProvider.notifier)
+          .update((count) => count + batch.dnsQueries.length);
+    }
+    if (batch.logs.isNotEmpty) {
+      ref.read(logsProvider.notifier).addAll(batch.logs);
+    }
   }
 
   @override
@@ -187,7 +211,6 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void onLog(Log log) {
     fileLogger.log('[CORE ${log.logLevel.name.toUpperCase()}] ${log.payload}');
-    ref.read(logsProvider.notifier).add(log);
     if (log.logLevel == LogLevel.error) {
       throttler.call(
         FunctionTag.coreErrorNotifier,
@@ -196,20 +219,19 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         fire: true,
       );
     }
+    _feed.addLog(log);
     super.onLog(log);
   }
 
   @override
-  void onRequest(TrackerInfo trackerInfo) async {
-    ref.read(requestsProvider.notifier).addRequest(trackerInfo);
-    ref.read(requestCountProvider.notifier).update((count) => count + 1);
+  void onRequest(TrackerInfo trackerInfo) {
+    _feed.addRequest(trackerInfo);
     super.onRequest(trackerInfo);
   }
 
   @override
   void onDnsQuery(DnsQuery dnsQuery) {
-    ref.read(dnsQueriesProvider.notifier).addDnsQuery(dnsQuery);
-    ref.read(dnsQueryCountProvider.notifier).update((count) => count + 1);
+    _feed.addDnsQuery(dnsQuery);
     super.onDnsQuery(dnsQuery);
   }
 
@@ -288,5 +310,61 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   void onScreenChanged(bool screenOff) {
     ref.read(screenOffProvider.notifier).value = screenOff;
     super.onScreenChanged(screenOff);
+  }
+}
+
+/// Coalesces the three high-frequency core feeds (requests, DNS queries and
+/// logs) so a burst of events costs one provider write per feed per frame
+/// instead of one per event. Side effects that must stay per-event (the file
+/// logger, the error notifier) run before the item reaches the batch.
+class _CoreFeedBatch {
+  _CoreFeedBatch(this._flush);
+
+  final void Function(_CoreFeedBatch batch) _flush;
+  final List<TrackerInfo> requests = [];
+  final List<DnsQuery> dnsQueries = [];
+  final List<Log> logs = [];
+  int? _callbackId;
+
+  bool get _isEmpty =>
+      requests.isEmpty && dnsQueries.isEmpty && logs.isEmpty;
+
+  void addRequest(TrackerInfo value) {
+    requests.add(value);
+    _schedule();
+  }
+
+  void addDnsQuery(DnsQuery value) {
+    dnsQueries.add(value);
+    _schedule();
+  }
+
+  void addLog(Log value) {
+    logs.add(value);
+    _schedule();
+  }
+
+  void cancel() {
+    final id = _callbackId;
+    if (id != null) {
+      WidgetsBinding.instance.cancelFrameCallbackWithId(id);
+      _callbackId = null;
+    }
+  }
+
+  void _schedule() {
+    if (_callbackId != null) {
+      return;
+    }
+    _callbackId = WidgetsBinding.instance.scheduleFrameCallback((_) {
+      _callbackId = null;
+      if (_isEmpty) {
+        return;
+      }
+      _flush(this);
+      requests.clear();
+      dnsQueries.clear();
+      logs.clear();
+    });
   }
 }

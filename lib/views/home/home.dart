@@ -412,7 +412,9 @@ class _TabTransition extends StatelessWidget {
             child: Opacity(opacity: opacity, child: child),
           );
         },
-        child: child,
+        // Cache the page raster so only the translation and opacity recomposite
+        // each transition frame instead of repainting the whole subtree.
+        child: RepaintBoundary(child: child),
       ),
     );
   }

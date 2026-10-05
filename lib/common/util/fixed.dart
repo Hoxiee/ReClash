@@ -32,6 +32,14 @@ class FixedList<T> {
     return FixedList._(maxLength, _list, _revision + 1);
   }
 
+  FixedList<T> appendAll(Iterable<T> items) {
+    _list
+      ..addAll(items)
+      ..truncate(maxLength);
+    _snapshot = null;
+    return FixedList._(maxLength, _list, _revision + 1);
+  }
+
   List<T> get list => _snapshot ??= List.unmodifiable(_list);
 
   int get length => _list.length;

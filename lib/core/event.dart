@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -51,78 +49,7 @@ abstract mixin class CoreEventListener {
 }
 
 class CoreEventManager {
-  final _controller = StreamController<CoreEvent>();
-
-  CoreEventManager._() {
-    _controller.stream.listen((event) {
-      for (final CoreEventListener listener in List.of(_listeners)) {
-        try {
-          switch (event.type) {
-            case CoreEventType.log:
-              listener.onLog(
-                Log.fromJson(event.data).copyWith(source: LogSource.core),
-              );
-              break;
-            case CoreEventType.delay:
-              listener.onDelay(Delay.fromJson(event.data));
-              break;
-            case CoreEventType.request:
-              listener.onRequest(TrackerInfo.fromJson(event.data));
-              break;
-            case CoreEventType.dns:
-              listener.onDnsQuery(
-                DnsQuery.fromJson(Map<String, Object?>.from(event.data as Map)),
-              );
-              break;
-            case CoreEventType.loaded:
-              listener.onLoaded(event.data);
-              break;
-            case CoreEventType.crash:
-              listener.onCrash(event.data);
-              break;
-            case CoreEventType.rcxStatus:
-              listener.onRcxStatus(
-                RcxStatus.fromJson(
-                  Map<String, Object?>.from(event.data as Map),
-                ),
-              );
-              break;
-            case CoreEventType.doctorStatus:
-              listener.onDoctorStatus(
-                DoctorStatus.fromJson(
-                  Map<String, Object?>.from(event.data as Map),
-                ),
-              );
-              break;
-            case CoreEventType.routeChanged:
-              listener.onRouteChanged(
-                RouteSnapshot.fromJson(
-                  Map<String, Object?>.from(event.data as Map),
-                ),
-              );
-              break;
-            case CoreEventType.screenChanged:
-              listener.onScreenChanged(event.data as bool);
-              break;
-            case CoreEventType.geoUpdate:
-              final data = event.data as Map<String, dynamic>;
-              listener.onGeoUpdate(
-                data['type'] as String,
-                data['updating'] as bool,
-                data['skipped'] as bool? ?? false,
-                data['error'] as String?,
-              );
-              break;
-          }
-        } catch (error) {
-          commonPrint.log(
-            'Unable to dispatch Core event ${event.type.name}: $error',
-            logLevel: LogLevel.error,
-          );
-        }
-      }
-    });
-  }
+  CoreEventManager._();
 
   static final CoreEventManager instance = CoreEventManager._();
 
@@ -134,7 +61,59 @@ class CoreEventManager {
   }
 
   void sendEvent(CoreEvent event) {
-    _controller.add(event);
+    for (final CoreEventListener listener in List.of(_listeners)) {
+      try {
+        _dispatch(listener, event);
+      } catch (error) {
+        commonPrint.log(
+          'Unable to dispatch Core event ${event.type.name}: $error',
+          logLevel: LogLevel.error,
+        );
+      }
+    }
+  }
+
+  void _dispatch(CoreEventListener listener, CoreEvent event) {
+    switch (event.type) {
+      case CoreEventType.log:
+        listener.onLog(
+          Log.fromJson(event.data).copyWith(source: LogSource.core),
+        );
+      case CoreEventType.delay:
+        listener.onDelay(Delay.fromJson(event.data));
+      case CoreEventType.request:
+        listener.onRequest(TrackerInfo.fromJson(event.data));
+      case CoreEventType.dns:
+        listener.onDnsQuery(
+          DnsQuery.fromJson(Map<String, Object?>.from(event.data as Map)),
+        );
+      case CoreEventType.loaded:
+        listener.onLoaded(event.data);
+      case CoreEventType.crash:
+        listener.onCrash(event.data);
+      case CoreEventType.rcxStatus:
+        listener.onRcxStatus(
+          RcxStatus.fromJson(Map<String, Object?>.from(event.data as Map)),
+        );
+      case CoreEventType.doctorStatus:
+        listener.onDoctorStatus(
+          DoctorStatus.fromJson(Map<String, Object?>.from(event.data as Map)),
+        );
+      case CoreEventType.routeChanged:
+        listener.onRouteChanged(
+          RouteSnapshot.fromJson(Map<String, Object?>.from(event.data as Map)),
+        );
+      case CoreEventType.screenChanged:
+        listener.onScreenChanged(event.data as bool);
+      case CoreEventType.geoUpdate:
+        final data = event.data as Map<String, dynamic>;
+        listener.onGeoUpdate(
+          data['type'] as String,
+          data['updating'] as bool,
+          data['skipped'] as bool? ?? false,
+          data['error'] as String?,
+        );
+    }
   }
 
   void addListener(CoreEventListener listener) {

@@ -78,34 +78,9 @@ class _FloatingScrollbarState extends State<FloatingScrollbar> {
   Timer? _hideTimer;
 
   @override
-  void initState() {
-    super.initState();
-    // Scroll notifications only fire on scroll activity; lazy lists also
-    // refine maxScrollExtent during layout, which moves the thumb without
-    // any notification. The position listener covers both.
-    widget.controller.addListener(_syncPosition);
-  }
-
-  @override
-  void didUpdateWidget(FloatingScrollbar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_syncPosition);
-      widget.controller.addListener(_syncPosition);
-    }
-  }
-
-  @override
   void dispose() {
     _hideTimer?.cancel();
-    widget.controller.removeListener(_syncPosition);
     super.dispose();
-  }
-
-  void _syncPosition() {
-    if (_shown && mounted) {
-      setState(() {});
-    }
   }
 
   // Deferred so transient ScrollEndNotifications mid-gesture do not blink
@@ -176,29 +151,6 @@ class _FloatingScrollbarState extends State<FloatingScrollbar> {
       onNotification: _handleScrollNotification,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          String? label;
-          var top = 0.0;
-          if (_shown && widget.controller.hasClients) {
-            final metrics = widget.controller.position;
-            if (metrics.maxScrollExtent > metrics.minScrollExtent) {
-              final scrollableExtent =
-                  metrics.maxScrollExtent - metrics.minScrollExtent;
-              final fraction =
-                  ((metrics.pixels - metrics.minScrollExtent) /
-                          scrollableExtent)
-                      .clamp(0.0, 1.0);
-              // Continuous clamp: the pill stays clear of the FAB zone at any height.
-              final half = _pillHeight / 2;
-              final limit = (constraints.maxHeight - bottomInset - _fabZoneGap)
-                  .clamp(0.0, double.infinity);
-              top = _thumbCenter(
-                metrics,
-                constraints.maxHeight,
-                MediaQuery.paddingOf(context),
-              ).clamp(half, max(half, limit - half));
-              label = widget.hintBuilder(fraction);
-            }
-          }
           return Stack(
             children: [
               CommonScrollBar(
@@ -212,21 +164,67 @@ class _FloatingScrollbarState extends State<FloatingScrollbar> {
                   child: widget.child,
                 ),
               ),
-              if (label != null)
-                Positioned(
-                  right: 12,
-                  top: top,
-                  child: FractionalTranslation(
-                    translation: const Offset(0, -0.5),
-                    child: IgnorePointer(
-                      child: _MeasureSize(
-                        onChanged: (size) {
-                          if (mounted && size.height != _pillHeight) {
-                            setState(() => _pillHeight = size.height);
-                          }
-                        },
-                        child: _ScrollbarHintPill(label: label),
-                      ),
+              // Only the pill tracks the position. Listening to the controller
+              // (a Listenable) keeps every scroll frame off the surrounding
+              // Stack/LayoutBuilder; lazy lists that refine maxScrollExtent
+              // during layout notify it the same way a scroll would.
+              if (_shown)
+                Positioned.fill(
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: widget.controller,
+                      builder: (context, _) {
+                        if (!widget.controller.hasClients) {
+                          return const SizedBox.shrink();
+                        }
+                        final metrics = widget.controller.position;
+                        if (metrics.maxScrollExtent <=
+                            metrics.minScrollExtent) {
+                          return const SizedBox.shrink();
+                        }
+                        final scrollableExtent =
+                            metrics.maxScrollExtent - metrics.minScrollExtent;
+                        final fraction =
+                            ((metrics.pixels - metrics.minScrollExtent) /
+                                    scrollableExtent)
+                                .clamp(0.0, 1.0);
+                        // Continuous clamp: the pill stays clear of the FAB zone at any height.
+                        final half = _pillHeight / 2;
+                        final limit =
+                            (constraints.maxHeight - bottomInset - _fabZoneGap)
+                                .clamp(0.0, double.infinity);
+                        final double top = _thumbCenter(
+                          metrics,
+                          constraints.maxHeight,
+                          MediaQuery.paddingOf(context),
+                        ).clamp(half, max(half, limit - half)).toDouble();
+                        return Stack(
+                          children: [
+                            Positioned(
+                              right: 12,
+                              top: top,
+                              child: FractionalTranslation(
+                                translation: const Offset(0, -0.5),
+                                child: IgnorePointer(
+                                  child: _MeasureSize(
+                                    onChanged: (size) {
+                                      if (mounted &&
+                                          size.height != _pillHeight) {
+                                        setState(
+                                          () => _pillHeight = size.height,
+                                        );
+                                      }
+                                    },
+                                    child: _ScrollbarHintPill(
+                                      label: widget.hintBuilder(fraction),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

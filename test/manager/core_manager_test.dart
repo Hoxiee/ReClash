@@ -327,6 +327,30 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('a burst of core feed events coalesces into one frame write', (
+    tester,
+  ) async {
+    final coreInterface = _coreInterface();
+    final container = await _pumpCoreManager(tester, coreInterface);
+    final before = container.read(logsProvider).revision;
+
+    for (final payload in ['one', 'two', 'three']) {
+      coreEventManager.sendEvent(
+        CoreEvent(
+          type: CoreEventType.log,
+          data: {'LogLevel': 'info', 'Payload': payload},
+        ),
+      );
+    }
+    await tester.pump();
+
+    final logs = container.read(logsProvider);
+    expect(logs.list.map((log) => log.payload), ['one', 'two', 'three']);
+    expect(logs.revision, before + 1);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('geo events are forwarded to the geo resource action', (
     tester,
   ) async {

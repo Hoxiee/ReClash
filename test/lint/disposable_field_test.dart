@@ -16,11 +16,7 @@ const _disposableTypes = {
 
 /// Fields the analyzer would flag that are deliberately never released, keyed by
 /// `<path>#<field>`. Everything here has to outlive the process, not a widget.
-const _allowed = {
-  // `CoreEventManager` is a private-constructor singleton that fans core events
-  // out for the whole run; closing its controller would end event delivery.
-  'lib/core/event.dart#_controller',
-};
+const _allowed = <String>{};
 
 final _declaration = RegExp(
   r'^\s+(?:late\s+)?final\s+(?:[A-Za-z][\w<>,\s?]*\s+)?(_?[A-Za-z]\w*)\s*=\s*'

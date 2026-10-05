@@ -40,6 +40,13 @@ class Logs extends _$Logs with AutoDisposeNotifierMixin {
     this.value = state.append(value);
   }
 
+  void addAll(List<Log> values) {
+    if (values.isEmpty || !ref.mounted) {
+      return;
+    }
+    value = state.appendAll(values);
+  }
+
   Future<bool> exportLogs() async {
     final logString = await encodeLogsTask(value.list);
     final tempFilePath = await appPath.tempFilePath;
@@ -64,6 +71,13 @@ class Requests extends _$Requests with AutoDisposeNotifierMixin {
     }
     this.value = state.append(value);
   }
+
+  void addRequests(List<TrackerInfo> values) {
+    if (values.isEmpty || !ref.mounted) {
+      return;
+    }
+    value = state.appendAll(values);
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -78,6 +92,13 @@ class DnsQueries extends _$DnsQueries with AutoDisposeNotifierMixin {
       return;
     }
     this.value = state.append(value);
+  }
+
+  void addDnsQueries(List<DnsQuery> values) {
+    if (values.isEmpty || !ref.mounted) {
+      return;
+    }
+    value = state.appendAll(values);
   }
 }
 

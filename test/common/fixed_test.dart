@@ -83,6 +83,21 @@ void main() {
       }
       expect(list.list, [3, 4]);
     });
+
+    test('appendAll adds a batch in one generation and honours maxLength', () {
+      final first = FixedList(3, list: [1]);
+      final second = first.appendAll([2, 3, 4, 5]);
+      expect(second.list, [3, 4, 5]);
+      expect(second.revision, first.revision + 1);
+      expect(first == second, isFalse);
+    });
+
+    test('appendAll with an empty batch still advances the generation', () {
+      final first = FixedList(3, list: [1, 2]);
+      final second = first.appendAll(const []);
+      expect(second.list, [1, 2]);
+      expect(second.revision, first.revision + 1);
+    });
   });
 
   group('retainTrimmedHead', () {
