@@ -14,8 +14,14 @@ RcxStatus statusOf({
   String reason = 'hold',
   bool searching = false,
   String terrain = 'normal',
+  RcxLinkReport? link,
 }) {
-  return RcxStatus(reason: reason, searching: searching, terrain: terrain);
+  return RcxStatus(
+    reason: reason,
+    searching: searching,
+    terrain: terrain,
+    link: link,
+  );
 }
 
 DoctorSnapshot doctorOf({
@@ -179,6 +185,29 @@ void main() {
       expect(
         lineOf(HeroStatus.secured, routingStatus: statusOf(terrain: 'unknown')),
         HeroServiceLine.routingOn,
+      );
+    });
+
+    test('a whitelist with foreign reachability is not a limited network', () {
+      expect(
+        lineOf(
+          HeroStatus.secured,
+          routingStatus: statusOf(
+            terrain: 'whitelist',
+            link: const RcxLinkReport(foreign: 'ok', sni: 'fail'),
+          ),
+        ),
+        HeroServiceLine.routingOn,
+      );
+      expect(
+        lineOf(
+          HeroStatus.secured,
+          routingStatus: statusOf(
+            terrain: 'whitelist',
+            link: const RcxLinkReport(foreign: 'fail', domestic: 'ok'),
+          ),
+        ),
+        HeroServiceLine.routingRestricted,
       );
     });
 

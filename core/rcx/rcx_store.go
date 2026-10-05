@@ -125,6 +125,27 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 		snapshot.Quarantines = nil
 		snapshot.Dirty = true
 	}
+	// The version of the shipped preset data is the lever that drops learned
+	// facts when that data changes: proofs a poisoned node earned under the old
+	// marker set must not fight the corrected one. A zero version predates the
+	// lever entirely and is the stalest of all. Per-environment state goes
+	// whole (proofs, markers, samples, cool-downs); global keeps only what no
+	// marker set teaches (origin country, ever-good), and the disk is rewritten.
+	if previousDV := snapshot.Config.DefaultsVersion; previousDV != rcxDefaultsVersion {
+		snapshot.Envs = nil
+		snapshot.Quarantines = nil
+		snapshot.Regimes = nil
+		for _, state := range snapshot.Global {
+			if state == nil {
+				continue
+			}
+			state.Exit, state.ExitCountry, state.ExitAt = rcxOriginUnknown, "", time.Time{}
+			state.HomeEgress = false
+			state.Trust, state.TrustConf, state.TrustAt = rcxTrustUnknown, rcxConfNone, time.Time{}
+			state.OpenedUnder = ""
+		}
+		snapshot.Dirty = true
+	}
 	snapshot.Version = rcxStoreVersion
 	snapshot.Config.DefaultsVersion = rcxDefaultsVersion
 	snapshot.Config = snapshot.Config.normalized()

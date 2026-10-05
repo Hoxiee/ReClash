@@ -230,4 +230,82 @@ void main() {
       );
     }
   });
+
+  test('the duel ranks by the engine latency, not the displayed one', () {
+    // A measured 500ms node beats a host-only 50ms pretender: the engine
+    // reports rankMs=-1 for the unmeasured row instead of its raw ping.
+    const measured = RcxCandidateReport(
+      node: 'measured',
+      verdict: 'viable',
+      evidence: 'fresh',
+      latencyMs: 500,
+      rankMs: 500,
+    );
+    const pretender = RcxCandidateReport(
+      node: 'pretender',
+      verdict: 'viable',
+      evidence: 'none',
+      latencyMs: 50,
+      rankMs: -1,
+    );
+    final duel = routingDuel(
+      measured,
+      pretender,
+      terrain: 'normal',
+      strategy: 'balanced',
+    );
+    expect(duel.rung, RoutingRung.latency);
+    expect(duel.won, isTrue);
+  });
+
+  test('the duel still answers for cores predating rankMs', () {
+    const faster = RcxCandidateReport(
+      node: 'faster',
+      verdict: 'viable',
+      evidence: 'fresh',
+      latencyMs: 69,
+    );
+    const slower = RcxCandidateReport(
+      node: 'slower',
+      verdict: 'viable',
+      evidence: 'fresh',
+      latencyMs: 249,
+    );
+    final duel = routingDuel(
+      faster,
+      slower,
+      terrain: 'normal',
+      strategy: 'balanced',
+    );
+    expect(duel.rung, RoutingRung.latency);
+    expect(duel.won, isTrue);
+  });
+
+  test('prefer breaks the tiebreak without leaking a boosted order', () {
+    const plain = RcxCandidateReport(
+      node: 'plain',
+      verdict: 'viable',
+      evidence: 'fresh',
+      latencyMs: 100,
+      rankMs: 100,
+      order: 1,
+    );
+    const starred = RcxCandidateReport(
+      node: 'starred',
+      verdict: 'viable',
+      evidence: 'fresh',
+      latencyMs: 100,
+      rankMs: 100,
+      order: 2,
+      prefer: true,
+    );
+    final duel = routingDuel(
+      starred,
+      plain,
+      terrain: 'normal',
+      strategy: 'balanced',
+    );
+    expect(duel.rung, RoutingRung.tiebreak);
+    expect(duel.won, isTrue);
+  });
 }

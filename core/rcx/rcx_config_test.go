@@ -277,3 +277,70 @@ func TestPolicyCarriesLadderAndTriggers(t *testing.T) {
 		t.Fatalf("policy ladder = %+v, want default", p.Ladder)
 	}
 }
+
+func TestLatencyBandsDefaultToTheStrategy(t *testing.T) {
+	for _, tc := range []struct {
+		strategy string
+		want     []int
+	}{
+		{rcxStrategyBalanced, []int{80, 120, 180, 320}},
+		{rcxStrategyStable, []int{120, 200, 320, 550}},
+		{rcxStrategyLatency, []int{65, 90, 130, 220}},
+		{rcxStrategySaver, []int{150, 260, 420, 750}},
+		{"invented", []int{80, 120, 180, 320}},
+	} {
+		config := rcxDefaultConfig()
+		config.Strategy = tc.strategy
+		if got := config.latencyBands(); !equalInts(got, tc.want) {
+			t.Errorf("strategy %q bands = %v, want %v", tc.strategy, got, tc.want)
+		}
+	}
+}
+
+func equalInts(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func TestNormalizedClampsRunawayKnobs(t *testing.T) {
+	config := rcxDefaultConfig()
+	config.DwellSeconds = 1_000_000
+	config.WaveWidth = 1_000_000
+	config.ProofTTLMinutes = 1_000_000
+	config.AbsCeilingMs = 1_000_000
+	config.DegradeConfirmSeconds = 1_000_000
+	config.ThrottleFloorKBps = 1_000_000
+	got := config.normalized()
+	if got.DwellSeconds != 3600 || got.WaveWidth != 64 || got.ProofTTLMinutes != 1440 ||
+		got.AbsCeilingMs != 5000 || got.DegradeConfirmSeconds != 3600 || got.ThrottleFloorKBps != 1024 {
+		t.Errorf("normalized = %+v, want clamped knobs", got)
+	}
+}
+
+func TestBreakerMatchesTokensNotSubstrings(t *testing.T) {
+	config := rcxDefaultConfig()
+	config.BreakerPatterns = []string{"lte", "обход"}
+	for _, tc := range []struct {
+		node string
+		want bool
+	}{
+		{"Provider LTE-1", true},
+		{"4g-lte", true},
+		{"Volte premium", false},
+		{"bolted-door", false},
+		{"Обход блокировок", true},
+		{"обходы региона", true},
+		{"ordinary node", false},
+	} {
+		if got := config.breaker(tc.node); got != tc.want {
+			t.Errorf("breaker(%q) = %v, want %v", tc.node, got, tc.want)
+		}
+	}
+}

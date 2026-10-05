@@ -39,6 +39,10 @@ type rcxStatus struct {
 	Eligible   int             `json:"eligible"`
 	SwitchedAt int64           `json:"switchedAt"`
 	Lanes      []rcxLaneStatus `json:"lanes,omitempty"`
+	// Canary outcomes ride the pushed status too: the hero line tells a
+	// DPI-filtered network (foreign up, censored SNI cut) from a truly
+	// limited one (foreign down) without opening the full report.
+	Link rcxLinkReport `json:"link"`
 }
 
 type rcxCandidateReport struct {
@@ -53,8 +57,11 @@ type rcxCandidateReport struct {
 	HostMs     int    `json:"hostDelay"`
 	Band       int    `json:"band"`
 	LatencyMs  int    `json:"latencyMs"`
+	RankMs     int    `json:"rankMs"`
 	Unproven   bool   `json:"unproven"`
 	Order      int    `json:"order"`
+	Prefer     bool   `json:"prefer"`
+	RuleCapped bool   `json:"ruleCapped"`
 	Degraded   bool   `json:"degraded"`
 	HomeRisk   int    `json:"homeRisk"`
 	Recurrence int    `json:"recurrence"`
@@ -166,9 +173,6 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Eligible:   eligible,
 		SwitchedAt: rcxMillis(e.switchedAt),
 		Lanes:      e.laneStatuses(),
-	}
-	report := rcxReport{
-		Status: status,
 		Link: rcxLinkReport{
 			Transport: e.transport,
 			Validated: e.validated,
@@ -179,6 +183,10 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 			SNI:       rcxOutcomeName(e.reachS),
 			Since:     rcxMillis(e.terrain.since),
 		},
+	}
+	report := rcxReport{
+		Status:     status,
+		Link:       status.Link,
 		Canaries:   append([]rcxCanaryReport(nil), e.canaries...),
 		History:    append([]rcxSwitchReport(nil), e.history...),
 		Metrics:    e.metricsReport(now),
@@ -218,20 +226,34 @@ func (e *rcxEngine) candidateReports(
 			cool = int(candidate.CoolUntil.Sub(now) / time.Second)
 		}
 		trust, conf := e.ledger.Trust(e.key(candidate.Name))
+		// The verdict the rank actually used: user rules can cap it down to
+		// last-resort, and the duel must explain that verdict, not the raw one.
+		verdict := rcxCandidateVerdict(candidate, input.Terrain)
+		// The latency the rank actually used, so the duel never inverts the
+		// order again. Anything at or above the unmeasured penalty base is not
+		// a latency at all: it maps to -1 (unknown) on the wire, never to a raw
+		// host ping that reads "fastest" for a node ranked last.
+		rankMs := row.Key.latencyMs
+		if rankMs >= rcxUnmeasuredLatencyBase {
+			rankMs = -1
+		}
 		rows = append(rows, rcxCandidateReport{
 			Node:       candidate.Name,
-			Country:    e.ledger.Country(e.key(candidate.Name)),
+			Country:    e.ledger.DisplayCountry(e.key(candidate.Name)),
 			Exit:       e.freshExitCountry(e.key(candidate.Name), now),
 			Origin:     candidate.Facts.Origin.String(),
-			Verdict:    rcxAdmit(input.Terrain, candidate.Facts).String(),
+			Verdict:    verdict.String(),
 			Evidence:   candidate.Evidence.String(),
 			Block:      string(row.Block),
 			MedianMs:   candidate.MedianMs,
 			HostMs:     candidate.HostMs,
 			Band:       int(row.Key.latBucket),
 			LatencyMs:  rcxDiscoveryLatency(candidate),
+			RankMs:     rankMs,
 			Unproven:   row.Key.unproven,
-			Order:      row.Key.order,
+			Order:      candidate.Order,
+			Prefer:     candidate.Prefer,
+			RuleCapped: candidate.RuleLastResort && verdict == rcxVerdictLastResort,
 			Breaker:    candidate.Facts.Breaker,
 			Degraded:   candidate.Degraded,
 			HomeRisk:   int(row.Key.homeRisk),

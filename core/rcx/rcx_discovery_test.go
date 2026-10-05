@@ -271,3 +271,33 @@ func TestQualityConfirmationNeedsSeparatedRounds(t *testing.T) {
 		t.Fatalf("rounds=%d", engine.quality.Rounds)
 	}
 }
+
+func TestDiscoveryProbesCloserPingedNodesFirst(t *testing.T) {
+	runtime := newFakeRuntime()
+	members := foreignMembers("far", "near", "mid", "unpinged-a", "unpinged-b")
+	members[0].HostMs = 480 // far
+	members[1].HostMs = 40  // near
+	members[2].HostMs = 120 // mid
+	members[2].HostDead = true
+	runtime.members = members
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "near"
+
+	got := engine.discoveryNodes(runtime.members, 8)
+	var names []string
+	for _, node := range got {
+		names = append(names, node.Name)
+	}
+
+	// Live pings sort closest-first, so "near" leads "far"; the dead-host "mid"
+	// and the unpinged pair fall back to subscription order behind them.
+	want := []string{"near", "far", "mid", "unpinged-a", "unpinged-b"}
+	if len(names) != len(want) {
+		t.Fatalf("order=%v, want %v", names, want)
+	}
+	for i := range want {
+		if names[i] != want[i] {
+			t.Fatalf("order=%v, want %v", names, want)
+		}
+	}
+}

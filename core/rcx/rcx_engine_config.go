@@ -36,11 +36,9 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 			e.lastReachAt = time.Time{}
 		}
 	}
-	// A toggle must not refill the probe budget, or it becomes a way to farm one.
-	if config.Preset != e.cfg.Preset {
-		e.budget = newRcxProbeBudget(rcxProbeBudgetCap, rcxProbeBudgetWin)
-	}
-	// Enabling starts from measurements: one full wave rides outside the cap.
+	// Enabling starts from measurements: the grant wave rides outside the cap,
+	// so a fresh preset is measurable without refilling the hourly budget (which
+	// would let preset flips farm probes past it).
 	if config.operable() && (!e.cfg.operable() || config.Strategy != e.cfg.Strategy) {
 		e.pendingGrant = true
 	}

@@ -1,6 +1,7 @@
 package rcx
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -313,10 +314,12 @@ func TestDecideIgnoresDwellForAVerdictGain(t *testing.T) {
 
 func TestDecideMakesALatencyGainWaitOutDwell(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
+	// Inside the effective ceiling a band crossing still waits out dwell:
+	// 400 sits in band [300,600], 100 in [0,150], yet the young incumbent holds.
 	slow := rcxNode("nl-1", foreignProven())
-	slow.MedianMs = 900
+	slow.MedianMs = 400
 	fast := rcxNode("de-1", foreignProven())
-	fast.MedianMs = 90
+	fast.MedianMs = 100
 	fast.QualityConfirmed = true
 
 	input := rcxDecisionInput{
@@ -334,6 +337,29 @@ func TestDecideMakesALatencyGainWaitOutDwell(t *testing.T) {
 	input.Now = now.Add(2 * time.Minute)
 	if got := rcxDecideAt(input); !got.Switch || got.Reason != rcxReasonLatencyGain {
 		t.Errorf("decision = %+v, want a latency-gain switch once dwell elapsed", got)
+	}
+}
+
+func TestDecideEscapesPastTheEffectiveCeilingWithoutDwell(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	// The effective ceiling is min(abs 500, slowest band 1200): a 900ms
+	// incumbent is past it, so a fast challenger wins at once even while young.
+	slow := rcxNode("nl-1", foreignProven())
+	slow.MedianMs = 900
+	fast := rcxNode("de-1", foreignProven())
+	fast.MedianMs = 90
+	fast.QualityConfirmed = true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "nl-1",
+		IncumbentSince: now,
+		Candidates:     []rcxCandidate{slow, fast},
+		Now:            now.Add(10 * time.Second),
+	})
+
+	if !got.Switch || got.Reason != rcxReasonLatencyGain {
+		t.Errorf("decision = %+v, want an immediate escape past the effective ceiling", got)
 	}
 }
 
@@ -993,21 +1019,25 @@ func TestUpgradeReturnsFromASlowProvenIncumbentToAFastRival(t *testing.T) {
 	}
 }
 
-func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
+func TestLatencyBucketBucketsTheRankingLatencyHonestly(t *testing.T) {
+	// The reported band must match the rank: a node the rank buries last
+	// (unmeasured host-only, censored-unproven, never-seen) reports the slowest
+	// band instead of parading a raw 60ms host ping as "fastest".
+	maxInt := int(^uint(0) >> 1)
 	tests := []struct {
-		name string
-		node rcxCandidate
-		want uint8
+		name   string
+		rankMs int
+		want   uint8
 	}{
-		{name: "own median wins", node: rcxCandidate{MedianMs: 100, HostMs: 900}, want: 0},
-		{name: "host delay orders the never-probed", node: rcxCandidate{HostMs: 60}, want: 0},
-		{name: "a slow host delay is still an order", node: rcxCandidate{HostMs: 700}, want: 3},
-		{name: "the host found it dead", node: rcxCandidate{HostDead: true}, want: 4},
-		{name: "nobody measured anything", node: rcxCandidate{}, want: 2},
+		{name: "measured fast", rankMs: 100, want: 0},
+		{name: "measured slow", rankMs: 700, want: 3},
+		{name: "host-only without egress sinks", rankMs: rcxUnmeasuredLatencyBase + 2, want: 4},
+		{name: "censored unproven sinks", rankMs: maxInt, want: 4},
+		{name: "nobody measured anything sinks", rankMs: 0, want: 4},
 	}
 
 	for _, tc := range tests {
-		if got := rcxLatencyBucket(tc.node, rcxTestBands); got != tc.want {
+		if got := rcxLatencyBucket(tc.rankMs, rcxTestBands); got != tc.want {
 			t.Errorf("%s: bucket = %d, want %d", tc.name, got, tc.want)
 		}
 	}
@@ -1147,6 +1177,28 @@ func TestDecideDoesNotRushAVerdictGainForAStillOpenIncumbent(t *testing.T) {
 	})
 	if got.Switch {
 		t.Fatalf("decision = %+v, want no rush: a still-open incumbent that only lost tier waits out dwell", got)
+	}
+}
+
+func TestDecideDislodgesAStillOpenIncumbentOnVerdictPastDwell(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	// Same tier gap as the no-rush case, but past the dwell: the Viable incumbent
+	// still reaches, yet a proven Preferred sibling must dislodge it instead of
+	// the engine latching the weaker node forever.
+	breaker := rcxNode("br-1", foreignProven())
+	breaker.Facts.Breaker = true
+	rival := rcxNode("de-1", foreignProven())
+	rival.QualityConfirmed = true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "br-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{breaker, rival},
+		Now:            now,
+	})
+	if !got.Switch || got.To != "de-1" || got.Reason != rcxReasonVerdictGain {
+		t.Fatalf("decision = %+v, want a verdict-gain switch to de-1 once the dwell is spent", got)
 	}
 }
 
@@ -1383,5 +1435,313 @@ func TestDiscoveryLatencyIgnoresADeadHostPing(t *testing.T) {
 		if got := rcxDiscoveryLatency(tc.cand); got != tc.want {
 			t.Errorf("%s: rcxDiscoveryLatency = %d, want %d", tc.name, got, tc.want)
 		}
+	}
+}
+
+func TestBandGainFollowsTheStrategyBands(t *testing.T) {
+	// The latency ladder the user asked for: 200->60 crosses bands and wins,
+	// 70->60 stays inside one band and holds. Lowest-latency reacts to every
+	// fine edge, balanced only to its own coarse ones.
+	for _, tc := range []struct {
+		name     string
+		strategy string
+		bands    []int
+		inc      int
+		best     int
+		want     bool
+	}{
+		{"balanced crosses bands", rcxStrategyBalanced, []int{80, 120, 180, 320}, 200, 60, true},
+		{"balanced same band holds", rcxStrategyBalanced, []int{80, 120, 180, 320}, 70, 60, false},
+		{"balanced same slow band holds", rcxStrategyBalanced, []int{80, 120, 180, 320}, 200, 190, false},
+		{"lowest-latency fine edge wins", rcxStrategyLatency, []int{65, 90, 130, 220}, 70, 60, true},
+		{"lowest-latency same band holds", rcxStrategyLatency, []int{65, 90, 130, 220}, 60, 58, false},
+		{"no bands never gains", rcxStrategyBalanced, nil, 900, 60, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			policy := rcxTestPolicy()
+			policy.Strategy = tc.strategy
+			policy.LatencyBands = tc.bands
+			inc := rcxNode("inc", foreignProven())
+			inc.MedianMs = tc.inc
+			best := rcxNode("best", foreignProven())
+			best.MedianMs = tc.best
+			if got := rcxBandImproves(policy, inc, best); got != tc.want {
+				t.Errorf("rcxBandImproves = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestEffectiveCeilingTakesTheLowerOfAbsAndBands(t *testing.T) {
+	policy := rcxTestPolicy() // abs 500, bands [150,300,600,1200]
+	if got := rcxEffectiveCeiling(policy); got != 500 {
+		t.Errorf("effective ceiling = %d, want 500", got)
+	}
+	policy.AbsCeilingMs = 0
+	if got := rcxEffectiveCeiling(policy); got != 1200 {
+		t.Errorf("effective ceiling without abs = %d, want 1200", got)
+	}
+	policy.LatencyBands = nil
+	policy.AbsCeilingMs = 300
+	if got := rcxEffectiveCeiling(policy); got != 300 {
+		t.Errorf("effective ceiling without bands = %d, want 300", got)
+	}
+}
+
+func TestTradesDownUsesRankingLatencyAndForgivesUnknown(t *testing.T) {
+	policy := rcxTestPolicy()
+	// Gaining a first measurement is never trading down, even with no median.
+	unmeasured := rcxNode("inc", foreignProven())
+	unmeasured.MedianMs = 0
+	measured := rcxNode("best", foreignProven())
+	measured.MedianMs = 300
+	if rcxTradesDown(policy, unmeasured, measured) {
+		t.Error("an unmeasured incumbent must not count as trading down")
+	}
+	// Moving onto an unmeasured node while measured is trading down.
+	if !rcxTradesDown(policy, measured, unmeasured) {
+		t.Error("abandoning a measurement for nothing must count as trading down")
+	}
+	// A real regression past the step still counts.
+	slow := rcxNode("slow", foreignProven())
+	slow.MedianMs = 400
+	if !rcxTradesDown(policy, measured, slow) {
+		t.Error("a regression past the step must count as trading down")
+	}
+}
+
+// A slow incumbent yields inside the bands: 300 -> 65 crosses a band edge, so
+// the 90s dwell still applies but the hold must end there, not ride forever.
+func TestBandCrossingEscapesAThreeHundredMsIncumbentAfterDwell(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	colombia := rcxNode("colombia", foreignProven())
+	colombia.MedianMs = 300
+	sweden := rcxNode("sweden", foreignProven())
+	sweden.MedianMs = 65
+	sweden.QualityConfirmed = true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain: rcxTerrainNormal, Incumbent: "colombia",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{colombia, sweden},
+	})
+	if !got.Switch || got.Reason != rcxReasonLatencyGain {
+		t.Fatalf("past dwell: decision = %+v, want a band-crossing latency switch", got)
+	}
+
+	got = rcxDecideAt(rcxDecisionInput{
+		Terrain: rcxTerrainNormal, Incumbent: "colombia",
+		IncumbentSince: now,
+		Candidates:     []rcxCandidate{colombia, sweden},
+	})
+	if got.Switch || got.Reason != rcxReasonDwellHold {
+		t.Fatalf("inside dwell: decision = %+v, want a dwell hold", got)
+	}
+}
+
+// The full chain the user hit: a slow first pick on subscription order, fifty
+// faster nodes behind it. The engine must keep probing, learn a fast node, and
+// switch off the 300ms incumbent instead of confirming it works forever.
+func TestEngineEscapesASlowFirstPickAfterLearningAFasterNode(t *testing.T) {
+	runtime := newFakeRuntime()
+	names := make([]string, 0, 51)
+	names = append(names, "colombia")
+	for i := 0; i < 49; i++ {
+		names = append(names, fmt.Sprintf("node-%02d", i))
+	}
+	names = append(names, "sweden")
+	runtime.members = foreignMembers(names...)
+	for _, m := range runtime.members {
+		delay := 60
+		if m.Name == "colombia" {
+			delay = 300
+		}
+		runtime.results[m.Name] = rcxProbeResult{Outcome: rcxProbeOK, DelayMs: delay}
+	}
+	engine := newTestEngine(runtime, "ru")
+
+	// Cold start picks the first eligible row; nothing measured yet.
+	engine.reconsider()
+	if runtime.selected != "colombia" {
+		t.Fatalf("cold start picked %q, want the first row before any measurement", runtime.selected)
+	}
+
+	// Colombia's probe lands: it works, so it becomes Preferred and the incumbent.
+	engine.applyProbeResult(rcxEvent{Results: []rcxProbeResult{{Node: "colombia", Key: engine.key("colombia"), Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 300}}})
+	engine.finishProbe()
+	if engine.incumbent != "colombia" {
+		t.Fatalf("incumbent = %q after the first proof", engine.incumbent)
+	}
+
+	// Drive improvement waves: discovery measures the park, the quality check
+	// confirms the faster challenger, and the switch must fire within a handful
+	// of waves — never settle on the first pick.
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	for round := 0; round < 30 && engine.incumbent == "colombia"; round++ {
+		if !engine.startImprovement(true) || !engine.probing {
+			break
+		}
+		var targets []rcxProbeTarget
+		if engine.probeKind == rcxWaveQuality {
+			targets = engine.probeTargets([]rcxProbeNode{{Name: engine.incumbent, Key: engine.key(engine.incumbent)}, {Name: engine.quality.To, Key: engine.key(engine.quality.To)}}, engine.terrainCurrent(), engine.probeKind)
+		} else {
+			targets = engine.probeTargets(engine.discoveryNodes(runtime.members, 8), engine.terrainCurrent(), engine.probeKind)
+		}
+		for _, target := range targets {
+			res := runtime.results[target.Node]
+			engine.applyProbeResult(rcxEvent{Results: []rcxProbeResult{{Node: target.Node, Key: engine.key(target.Node), Role: target.Role, Fingerprint: marker, Outcome: res.Outcome, DelayMs: res.DelayMs}}})
+		}
+		engine.finishProbe()
+		engine.reconsider()
+		runtime.advance(61 * time.Second)
+	}
+
+	if engine.incumbent == "colombia" {
+		t.Fatalf("engine never left the 300ms incumbent; stuck on %q after 30 waves", engine.incumbent)
+	}
+	// The escape lands on one of the 60ms nodes, not another slow row.
+	if ms := engine.comparableMedian(engine.key(engine.incumbent), runtime.Now(), rcxScaledProofTTL(engine.ledger.ProofTTL(), len(runtime.members))); ms <= 0 || ms >= 300 {
+		t.Fatalf("escaped to %q with median %d, want a measured fast node", engine.incumbent, ms)
+	}
+}
+
+func TestSwitchRecurrenceFloorFollowsTheLadder(t *testing.T) {
+	if floor, ok := rcxRecurrenceFloorOf(rcxDefaultLadder()); floor != 2 || !ok {
+		t.Errorf("default ladder floor = %d,%v, want 2,true", floor, ok)
+	}
+	disabled := []rcxRungSpec{{ID: rcxRungVerdict, Enabled: true}, {ID: rcxRungLatency, Enabled: true}}
+	if _, ok := rcxRecurrenceFloorOf(disabled); ok {
+		t.Error("a ladder without the recurrence rung must not count recurrence in the switch")
+	}
+	custom := []rcxRungSpec{{ID: rcxRungRecurrence, Enabled: true, RecurrenceFloor: 5}}
+	if floor, ok := rcxRecurrenceFloorOf(custom); floor != 5 || !ok {
+		t.Errorf("custom ladder floor = %d,%v, want 5,true", floor, ok)
+	}
+}
+
+func TestSuspectHoldsPreferredUntilTheHeavyCheckAnswers(t *testing.T) {
+	// Cheap signals raised a flag (a Moscow name against a foreign mmdb) and
+	// the rate-limited echo services owe their answer: telegram alone must not
+	// promote. A measured exit clears this before ranking ever sees it.
+	proven := foreignProven()
+	for _, tc := range []struct {
+		name  string
+		trust rcxTrust
+		exit  rcxOrigin
+		want  rcxVerdict
+	}{
+		{"suspect, exit unmeasured", rcxTrustSuspect, rcxOriginUnknown, rcxVerdictLastResort},
+		{"suspect, domestic exit measured", rcxTrustSuspect, rcxOriginDomestic, rcxVerdictLastResort},
+		{"suspect, foreign exit measured clears it", rcxTrustSuspect, rcxOriginForeign, rcxVerdictPreferred},
+		{"no suspicion, measurement still wins", rcxTrustUnknown, rcxOriginUnknown, rcxVerdictPreferred},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			facts := proven
+			facts.Trust = tc.trust
+			facts.Exit = tc.exit
+			if got := rcxAdmit(rcxTerrainNormal, facts); got != tc.want {
+				t.Errorf("verdict = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+// The Colombia/Mexico symptom: a far, slow (past the ceiling) incumbent must be
+// escaped the instant a close proven node exists, without waiting out the dwell.
+func TestDecideEscapesAFarSlowIncumbentWithinDwell(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	colombia := rcxNode("co-1", foreignProven())
+	colombia.MedianMs = 700
+	berlin := rcxNode("de-1", foreignProven())
+	berlin.MedianMs = 60
+	berlin.QualityConfirmed = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "co-1",
+		IncumbentSince: now,
+		Candidates:     []rcxCandidate{colombia, berlin},
+		Now:            now,
+	})
+	if !got.Switch || got.To != "de-1" {
+		t.Fatalf("decision = %+v, want an escape to de-1 despite the fresh dwell", got)
+	}
+}
+
+// The flip side of the goal: two powerful nodes in the same fast band must not
+// thrash. A 10ms edge is under the switch threshold, so the incumbent holds even
+// once the dwell is spent.
+func TestDecideDoesNotFlapBetweenTwoFastNodes(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	incumbent := rcxNode("de-1", foreignProven())
+	incumbent.MedianMs = 70
+	incumbent.QualityConfirmed = true
+	rival := rcxNode("nl-1", foreignProven())
+	rival.MedianMs = 60
+	rival.QualityConfirmed = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "de-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{incumbent, rival},
+		Now:            now,
+	})
+	if got.Switch {
+		t.Fatalf("decision = %+v, want a hold: a 10ms edge inside one band is not worth dropping live conns", got)
+	}
+}
+
+// Safe jumps: a live, reaching session must not be flipped onto a fronted-home
+// egress even when a verdict gain ranks it first (the catastrophic country flip).
+func TestDecideHoldsLiveTrafficOffAHomeEgressVerdictFlip(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	incumbent := rcxNode("de-1", rcxFacts{
+		Origin:      rcxOriginForeign,
+		Transit:     rcxProofProven,
+		SupportsUDP: true,
+	})
+	incumbent.MedianMs = 160
+	incumbent.Evidence = rcxEvidenceLiveTraffic
+	incumbent.QualityConfirmed = true
+	home := rcxNode("ru-1", foreignProven())
+	home.MedianMs = 40
+	home.QualityConfirmed = true
+	home.Facts.HomeEgress = true
+	home.Facts.Exit = rcxOriginUnknown
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "de-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{incumbent, home},
+		Now:            now,
+	})
+	if got.Switch {
+		t.Fatalf("decision = %+v, want a hold: a live session stays off a home egress", got)
+	}
+}
+
+// The guard is target-scoped: a verdict escape onto a clean foreign node still
+// fires under live traffic, so a genuinely better route is not frozen.
+func TestDecideAllowsAVerdictEscapeOntoACleanForeignNode(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	incumbent := rcxNode("de-1", rcxFacts{
+		Origin:      rcxOriginForeign,
+		Transit:     rcxProofProven,
+		SupportsUDP: true,
+	})
+	incumbent.MedianMs = 160
+	incumbent.Evidence = rcxEvidenceLiveTraffic
+	incumbent.QualityConfirmed = true
+	rival := rcxNode("nl-1", foreignProven())
+	rival.MedianMs = 40
+	rival.QualityConfirmed = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "de-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{incumbent, rival},
+		Now:            now,
+	})
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want an escape onto the clean foreign node", got)
 	}
 }

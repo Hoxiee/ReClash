@@ -173,11 +173,10 @@ String routingRungValueLabel(
     candidate.eligible
         ? l10n.smartRoutingAdmittedYes
         : routingBlockLabel(l10n, candidate, overrides: overrides),
-  RoutingRung.verdict => routingVerdictLabel(
-    l10n,
-    candidate.verdict,
-    overrides: overrides,
-  ),
+  RoutingRung.verdict =>
+    candidate.ruleCapped
+        ? '${routingVerdictLabel(l10n, candidate.verdict, overrides: overrides)} ↓'
+        : routingVerdictLabel(l10n, candidate.verdict, overrides: overrides),
   RoutingRung.misfit =>
     routingRungValue(rung, candidate, terrain) == 0
         ? l10n.smartRoutingFitYes
@@ -203,7 +202,8 @@ String routingRungValueLabel(
     candidate.current
         ? l10n.smartRoutingIncumbentYes
         : l10n.smartRoutingIncumbentNo,
-  RoutingRung.tiebreak => '#${candidate.order}',
+  RoutingRung.tiebreak =>
+    candidate.prefer ? '#${candidate.order} ★' : '#${candidate.order}',
 };
 
 String routingStrategyLabel(AppLocalizations l10n, String strategy) =>
@@ -317,7 +317,7 @@ RoutingVocabEditError validateRoutingVocabEdit({
 }
 
 NetworkFormat routingFormatOf(RcxReport report) =>
-    networkFormatOf(report.status.terrain);
+    networkFormatOf(report.status.terrain, link: report.link);
 
 Color routingFormatAccent(BuildContext context, NetworkFormat format) {
   final colorScheme = context.colorScheme;

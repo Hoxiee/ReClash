@@ -141,6 +141,9 @@ type rcxFacts struct {
 	Trust       rcxTrust
 	// A measured domestic egress that survives an open proof and the Exit TTL.
 	HomeEgress bool
+	// The name filters place the node home-side: it competes last and shows
+	// the filter's country, however the databases geolocate its addresses.
+	NameHome bool
 }
 
 // Ranking, never filtering: an open network spends a specialist for nothing, but
@@ -199,6 +202,16 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 }
 
 func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
+	verdict := rcxAdmitTier(terrain, f)
+	// A filter-named home node competes last however fast it pings: the brand
+	// still rejects outright, but nothing promotes it above last resort.
+	if f.NameHome && verdict > rcxVerdictLastResort {
+		return rcxVerdictLastResort
+	}
+	return verdict
+}
+
+func rcxAdmitTier(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 	row, ok := rcxAdmissionTable[terrain]
 	if !ok {
 		return rcxVerdictReject
@@ -223,6 +236,11 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 	if f.OpenWorld == rcxProofProven {
 		if f.Breaker {
 			return row.breakerProven
+		}
+		// Suspicion caps a marker-only open at last-resort until the heavy echo
+		// check places the exit: a home node telegram-opens natively inside RU.
+		if f.Trust == rcxTrustSuspect && f.Exit == rcxOriginUnknown {
+			return rcxVerdictLastResort
 		}
 		return row.openWorldProven
 	}
@@ -269,6 +287,7 @@ type rcxKey struct {
 	order      int
 }
 
+// Test oracle for the plain ranking shape; production uses rcxCompareFor.
 func rcxCompare(a, b rcxKey) int {
 	if a.verdict != b.verdict {
 		if a.verdict > b.verdict {
@@ -333,6 +352,19 @@ func rcxCompare(a, b rcxKey) int {
 		return 1
 	}
 	return 0
+}
+
+// Buckets latency for ranking/gates: unmeasured is the slowest band, not mid-table.
+func rcxBandIndex(ms int, bands []int) int {
+	if ms <= 0 {
+		return len(bands)
+	}
+	for i, edge := range bands {
+		if ms <= edge {
+			return i
+		}
+	}
+	return len(bands)
 }
 
 func rcxLatBucket(medianMs int, bands []int) uint8 {
@@ -403,10 +435,13 @@ func (p rcxPolicy) latencyStep() int {
 }
 
 // switchThresholds is how much faster a challenger must be to trigger a latency
-// switch. Explicit config wins; otherwise the strategy sets the shipped defaults.
+// switch. Explicit config wins; else the strategy sets the shipped defaults.
 func (p rcxPolicy) switchThresholds() (absolute, percent int) {
 	absolute, percent = 30, 20
-	if p.Strategy == rcxStrategyStable || p.Strategy == rcxStrategySaver {
+	switch p.Strategy {
+	case rcxStrategyLatency:
+		absolute, percent = 15, 10
+	case rcxStrategyStable, rcxStrategySaver:
 		absolute, percent = 50, 30
 	}
 	if p.SwitchImproveMs > 0 {
@@ -509,7 +544,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		evidence:   evidence,
 		homeRisk:   rcxHomeRisk(in.Policy, c.Facts),
 		latencyMs:  latencyMs,
-		latBucket:  rcxLatencyBucket(c, in.Policy.LatencyBands),
+		latBucket:  rcxLatencyBucket(latencyMs, in.Policy.LatencyBands),
 		challenger: c.Name != in.Incumbent,
 		order:      order,
 	}
@@ -617,17 +652,43 @@ func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
 	return 1
 }
 
-// A latency ceiling like a URLTest's: an incumbent past the slowest band yields
-// to any node inside the bands without the comfort dwell. The switch still needs
-// QualityConfirmed downstream, so it stays fast-and-stable, not slow-and-"stable".
-func rcxEscapesSlowIncumbent(policy rcxPolicy, incumbent, best rcxCandidate) bool {
-	if len(policy.LatencyBands) == 0 {
+// A band crossing is a switch (200->60 yes, 70->60 no); edges are the strategy's.
+// An unmeasured incumbent yields to any measured challenger.
+func rcxBandImproves(p rcxPolicy, incumbent, best rcxCandidate) bool {
+	bands := p.LatencyBands
+	if len(bands) == 0 {
 		return false
 	}
-	ceiling := policy.LatencyBands[len(policy.LatencyBands)-1]
+	inc := rcxRankingLatency(incumbent, p)
+	alt := rcxRankingLatency(best, p)
+	if alt <= 0 {
+		return false
+	}
+	if inc <= 0 {
+		return true
+	}
+	return rcxBandIndex(alt, bands) < rcxBandIndex(inc, bands)
+}
+
+// The lower of the absolute ceiling and the slowest band.
+func rcxEffectiveCeiling(p rcxPolicy) int {
+	ceiling := p.AbsCeilingMs
+	if len(p.LatencyBands) > 0 {
+		last := p.LatencyBands[len(p.LatencyBands)-1]
+		if last > 0 && (ceiling <= 0 || last < ceiling) {
+			ceiling = last
+		}
+	}
+	return ceiling
+}
+
+// An incumbent at or past the slowest band yields to any node inside the bands
+// without the comfort dwell; QualityConfirmed downstream keeps it fast-and-stable.
+func rcxEscapesSlowIncumbent(policy rcxPolicy, incumbent, best rcxCandidate) bool {
+	ceiling := rcxEffectiveCeiling(policy)
 	inc := rcxDiscoveryLatency(incumbent)
 	fast := rcxDiscoveryLatency(best)
-	return ceiling > 0 && inc > ceiling && fast > 0 && fast <= ceiling
+	return ceiling > 0 && inc >= ceiling && fast > 0 && fast <= ceiling
 }
 
 func rcxLatencyImproves(p rcxPolicy, incumbent, challenger int) bool {
@@ -640,45 +701,23 @@ func rcxLatencyImproves(p rcxPolicy, incumbent, challenger int) bool {
 	return gain >= absolute && gain >= required
 }
 
-// Fail-closed: an unknown incumbent median counts as a trade-down (the old guard allowed it).
+// Fail-open on missing data, fail-closed on a real trade-down, compared on the
+// ranking latency the order uses (not raw medians that ignore host-ping).
 func rcxTradesDown(p rcxPolicy, incumbent, best rcxCandidate) bool {
-	inc, alt := incumbent.MedianMs, best.MedianMs
+	inc := rcxRankingLatency(incumbent, p)
+	alt := rcxRankingLatency(best, p)
 	if inc <= 0 {
-		return true
+		return false
 	}
 	if alt <= 0 {
-		return false
+		return true
 	}
 	return alt > inc+p.latencyStep()
 }
 
-// A working incumbent yields for latency only when itself slow — past the absolute
-// ceiling or the slowest band — so live traffic is never dropped chasing a few ms.
-func rcxIncumbentTooSlow(policy rcxPolicy, incumbent rcxCandidate) bool {
-	inc := rcxDiscoveryLatency(incumbent)
-	if inc <= 0 {
-		return false
-	}
-	if policy.AbsCeilingMs > 0 && inc > policy.AbsCeilingMs {
-		return true
-	}
-	if len(policy.LatencyBands) > 0 {
-		ceiling := policy.LatencyBands[len(policy.LatencyBands)-1]
-		if ceiling > 0 && inc > ceiling {
-			return true
-		}
-	}
-	return false
-}
-
-func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
-	if c.MedianMs > 0 {
-		return rcxLatBucket(c.MedianMs, bands)
-	}
-	if c.HostDead {
-		return uint8(len(bands))
-	}
-	return rcxLatBucket(c.HostMs, bands)
+// Buckets the ranking latency the order uses; unmeasured lands in the slowest band.
+func rcxLatencyBucket(rankMs int, bands []int) uint8 {
+	return uint8(rcxBandIndex(rankMs, bands))
 }
 
 // A confirmed whitelist terrain is itself a censorship signal that arms the full posture.
@@ -733,6 +772,25 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 
 	if in.Incumbent == "" {
 		to := best.Name
+		// With no measurements off a censored network, prefer the closest entry
+		// ping; under censorship order stands, as a small ping may be a fronted home.
+		if !in.Policy.Censoring {
+			withoutOrder := func(key rcxKey) rcxKey { key.order = 0; return key }
+			bestBare := withoutOrder(bestKey)
+			for i := range in.Candidates {
+				c := &in.Candidates[i]
+				if !rcxEligible(*c, in) || c.HostDead || c.HostMs <= 0 {
+					continue
+				}
+				if compare(withoutOrder(rcxKeyOf(*c, in)), bestBare) != 0 {
+					continue
+				}
+				if best.HostMs <= 0 || best.HostDead || c.HostMs < best.HostMs {
+					best = c
+					to = c.Name
+				}
+			}
+		}
 		if pinEligible {
 			to = in.Pin
 		}
@@ -794,22 +852,34 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	reason := rcxReasonHold
-	// Raw recurrence now lives in the key, so this switch trigger applies its own floor.
-	incRecurrence := rcxRecurrenceFloored(incumbentKey.recurrence, rcxRecurrenceFloorDefault)
-	bestRecurrence := rcxRecurrenceFloored(bestKey.recurrence, rcxRecurrenceFloorDefault)
-	reliabilityGain := bestRecurrence < incRecurrence ||
-		bestRecurrence == incRecurrence && incumbentKey.degraded && !bestKey.degraded
+	// Floor recurrence like the ranking rung, else rank and reason disagree.
+	recFloor, recCounts := rcxRecurrenceFloorOf(in.Policy.ladderOrDefault())
+	incRecurrence := rcxRecurrenceFloored(incumbentKey.recurrence, recFloor)
+	bestRecurrence := rcxRecurrenceFloored(bestKey.recurrence, recFloor)
+	reliabilityGain := recCounts && (bestRecurrence < incRecurrence ||
+		bestRecurrence == incRecurrence && incumbentKey.degraded && !bestKey.degraded)
 	// Escape a degraded incumbent only when trapped — unmeasured egress or stalled payload.
 	degradedEscape := incumbentKey.degraded && !bestKey.degraded &&
 		(incumbent.MedianMs <= 0 || incumbent.Stalled)
 	if reliabilityGain && incumbentReaches && !degradedEscape && rcxTradesDown(in.Policy, incumbent, *best) {
 		reliabilityGain = false
 	}
-	if reliabilityGain {
+	// Past the dwell, a better verdict dislodges even a still-open incumbent.
+	verdictGain := bestKey.verdict > incumbentKey.verdict
+	if verdictGain {
+		reason = rcxReasonVerdictGain
+	} else if reliabilityGain {
 		reason = rcxReasonReliabilityGain
-	} else if rcxIncumbentTooSlow(in.Policy, incumbent) &&
-		rcxLatencyImproves(in.Policy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
+	} else if rcxBandImproves(in.Policy, incumbent, *best) ||
+		best.MedianMs > 0 && rcxLatencyImproves(in.Policy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
+		// A measured gain past the thresholds switches inside one band too.
 		reason = rcxReasonLatencyGain
+	}
+	// A live, reaching session is never flipped onto a home or distrusted egress,
+	// whatever the gain (incl. a verdict escape); a clean foreign target still passes.
+	if reason != rcxReasonHold && incumbentReaches &&
+		incumbent.Evidence == rcxEvidenceLiveTraffic && rcxRiskyEgress(best.Facts) {
+		reason = rcxReasonHold
 	}
 	if reason != rcxReasonHold {
 		if !best.QualityConfirmed {
@@ -819,6 +889,12 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
+}
+
+// A target whose exit changes the apparent country or is distrusted.
+func rcxRiskyEgress(f rcxFacts) bool {
+	return f.HomeEgress || f.Exit == rcxOriginDomestic || f.NameHome ||
+		f.Trust == rcxTrustSuspect
 }
 
 func rcxOrderOf(seed uint64, key string) uint16 {

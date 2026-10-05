@@ -554,6 +554,9 @@ _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
           ?.map((e) => RcxLaneStatus.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  link: json['link'] == null
+      ? null
+      : RcxLinkReport.fromJson(json['link'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
@@ -576,6 +579,7 @@ Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
       'eligible': instance.eligible,
       'switchedAt': instance.switchedAt,
       'lanes': instance.lanes,
+      'link': instance.link,
     };
 
 _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
@@ -591,8 +595,11 @@ _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
       hostDelay: (json['hostDelay'] as num?)?.toInt() ?? 0,
       band: (json['band'] as num?)?.toInt() ?? 0,
       latencyMs: (json['latencyMs'] as num?)?.toInt() ?? 0,
+      rankMs: (json['rankMs'] as num?)?.toInt() ?? -1,
       unproven: json['unproven'] as bool? ?? false,
       order: (json['order'] as num?)?.toInt() ?? 0,
+      prefer: json['prefer'] as bool? ?? false,
+      ruleCapped: json['ruleCapped'] as bool? ?? false,
       degraded: json['degraded'] as bool? ?? false,
       homeRisk: (json['homeRisk'] as num?)?.toInt() ?? 0,
       recurrence: (json['recurrence'] as num?)?.toInt() ?? 0,
@@ -619,8 +626,11 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
       'hostDelay': instance.hostDelay,
       'band': instance.band,
       'latencyMs': instance.latencyMs,
+      'rankMs': instance.rankMs,
       'unproven': instance.unproven,
       'order': instance.order,
+      'prefer': instance.prefer,
+      'ruleCapped': instance.ruleCapped,
       'degraded': instance.degraded,
       'homeRisk': instance.homeRisk,
       'recurrence': instance.recurrence,

@@ -121,6 +121,9 @@ const (
 	rcxLinkFailQuorum = 2
 	// One full canary round plus the slack for its verdict to reach the loop.
 	rcxSwitchProbation = rcxCanaryRound + rcxCanaryTimeout
+	// A too-slow incumbent is escaped briskly: quality re-probes inside one
+	// wave window instead of waiting out the discovery minute.
+	rcxSlowEscapeReprobe = 20 * time.Second
 )
 
 func (e *rcxEngine) loop() {

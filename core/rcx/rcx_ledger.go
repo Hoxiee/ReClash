@@ -23,6 +23,10 @@ type rcxNodeGlobal struct {
 	Trust       rcxTrust      `json:"tr,omitempty"`
 	TrustConf   rcxConfidence `json:"tk,omitempty"`
 	TrustAt     time.Time     `json:"ta,omitempty"`
+	// A name-hint verdict that the node is home-side, with the filter's country
+	// code for display. Sticky: a wrong mmdb must not un-name a filtered node.
+	NameHome    bool   `json:"nh,omitempty"`
+	NameCountry string `json:"nc,omitempty"`
 }
 
 // Per (node x environment) on purpose: the dominant cause of a dial failure here
@@ -183,6 +187,40 @@ func (l *rcxLedger) Country(node string) string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.globalState(node).Country
+}
+
+// SetNameHome records a filter verdict once; the first code wins and no
+// measurement clears it, so a mis-geolocated mmdb cannot un-name the node.
+func (l *rcxLedger) SetNameHome(node, country string) {
+	if country == "" {
+		return
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	if state.NameHome {
+		return
+	}
+	state.NameHome = true
+	state.NameCountry = country
+}
+
+func (l *rcxLedger) NameHome(node string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.globalState(node).NameHome
+}
+
+// DisplayCountry prefers the filter's code over the mmdb one: a node the
+// filters name as home shows its real code, not the database's guess.
+func (l *rcxLedger) DisplayCountry(node string) string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	if state.NameHome && state.NameCountry != "" {
+		return state.NameCountry
+	}
+	return state.Country
 }
 
 func (l *rcxLedger) Origin(node string) rcxOrigin {
@@ -820,6 +858,7 @@ func (l *rcxLedger) Facts(
 		SupportsUDP: supportsUDP,
 		Trust:       global.Trust,
 		HomeEgress:  global.HomeEgress,
+		NameHome:    global.NameHome,
 	}
 	switch {
 	case !state.CoolUntil.IsZero() && now.Before(state.CoolUntil):

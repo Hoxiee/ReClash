@@ -5,7 +5,7 @@ import 'package:reclash/models/models.dart';
 /// Sent as the wire `dv`, but the core overwrites it with its own
 /// `rcxDefaultsVersion` (core/rcx_config.go), the real lever that drops learned
 /// facts when shipped preset data changes. Kept only for wire-shape stability.
-const smartRoutingDefaultsVersion = 4;
+const smartRoutingDefaultsVersion = 5;
 
 class SmartRoutingBundle {
   const SmartRoutingBundle({
@@ -53,10 +53,12 @@ const _egressEchoes = [
 // These answer with the exit's country directly, so they place a fronted node
 // more accurately than an mmdb lookup of the echoed IP. They carry request
 // limits, so the engine spends them only on verification probes, not the park.
+// The home-country service rides last: it must never be the first word on
+// whether an exit is abroad.
 const _countryEchoes = [
   'https://api.country.is/',
-  'https://api.ipgeo.ru/json/',
   'https://countries.dev/ip',
+  'https://api.ipgeo.ru/json/',
 ];
 
 // Canaries are IP literals: DNS often answers while transit is dead, so a
@@ -80,16 +82,20 @@ const _russia = SmartRoutingBundle(
   // so reaching either proves a node is abroad and a home-country dud cannot.
   // Two of them means one host going dark does not blind the engine. Telegram
   // stays first (404 counts: its root 404s while the host answers); Instagram is
-  // the fallback the probe tries only when Telegram fails.
+  // the fallback the probe tries only when Telegram fails. Instagram serves
+  // redirects and rate-limit pages, so 301/302 count like 200: the host
+  // answered, and only the payload status wobbled.
   openMarkers: [
     RcxMarker(url: 'https://api.telegram.org/', statuses: [200, 404]),
-    RcxMarker(url: 'https://www.instagram.com/', statuses: [200]),
+    RcxMarker(url: 'https://www.instagram.com/', statuses: [200, 301, 302]),
   ],
   domesticMarkers: [
     RcxMarker(url: 'https://ya.ru/', statuses: [200, 301, 302]),
   ],
   // localMarkers stay empty until a candidate is device-confirmed to answer only
   // from a Russian egress; an unverified one brands working foreign nodes.
+  // Hints match whole tokens (short ones exactly), so a bare 'ru' token names
+  // xx-ru nodes without catching surf or permask; rf, msk, ekb stay out.
   nameHints: [
     'росси',
     'russia',
@@ -98,6 +104,10 @@ const _russia = SmartRoutingBundle(
     'санкт',
     'петербург',
     'спб',
+    'рф',
+    'rus',
+    'ru',
+    'spb',
   ],
   egressEchoes: _egressEchoes,
   countryEchoes: _countryEchoes,
@@ -192,13 +202,15 @@ const _bundles = <String, SmartRoutingBundle>{
 /// without a shipped bundle falls back to it, so an unknown region still runs.
 const neutralPreset = 'off';
 
-/// The raw bundle a preset predefines. The neutral preset and any unshipped
-/// code carry an empty bundle; the operable neutral seed ([_neutral]) is what
+/// The raw bundle a preset predefines. The neutral preset carries an empty
+/// bundle; the operable neutral seed ([_neutral]) is what
 /// [SmartRoutingPropsRcx.applyPreset] and enablement lay down instead.
+/// An unshipped code falls back to that same neutral seed: an unknown region
+/// still runs instead of idling on an engine that can never become operable.
 SmartRoutingBundle bundleForPreset(String preset) {
   final code = preset.trim().toLowerCase();
   if (code.isEmpty || code == neutralPreset) return const SmartRoutingBundle();
-  return _bundles[code] ?? const SmartRoutingBundle();
+  return _bundles[code] ?? _neutral;
 }
 
 /// The preset wire an upper-case region code seeds, and its inverse. The two
@@ -349,6 +361,12 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     openMarkers: value && _presetIsNeutral && openMarkers.isEmpty
         ? _neutral.openMarkers
         : openMarkers,
+    egressEchoes: value && _presetIsNeutral && egressEchoes.isEmpty
+        ? _neutral.egressEchoes
+        : egressEchoes,
+    countryEchoes: value && _presetIsNeutral && countryEchoes.isEmpty
+        ? _neutral.countryEchoes
+        : countryEchoes,
   );
 
   /// Unlocking only opens Auto as a selectable mode; it never activates it.
@@ -363,6 +381,12 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     openMarkers: value && _presetIsNeutral && openMarkers.isEmpty
         ? _neutral.openMarkers
         : openMarkers,
+    egressEchoes: value && _presetIsNeutral && egressEchoes.isEmpty
+        ? _neutral.egressEchoes
+        : egressEchoes,
+    countryEchoes: value && _presetIsNeutral && countryEchoes.isEmpty
+        ? _neutral.countryEchoes
+        : countryEchoes,
   );
 
   bool get matchesPreset => this == applyPreset(preset);

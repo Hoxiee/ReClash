@@ -54,6 +54,22 @@ func TestCheapAssessStandsDownOffCensorship(t *testing.T) {
 	}
 }
 
+func TestCheapAssessMatchesHintsByTokenNotSubstring(t *testing.T) {
+	censorsRU := func(code string) bool { return code == "RU" }
+	hints := []string{"росси", "russia", "москва", "moscow", "рф", "rus", "spb"}
+
+	for _, name := range []string{"🇧🇪 Brussels BE", "BE-Brussels 01", "Belarus 01", "🇸🇪 Stockholm", "🇬🇧 London UK"} {
+		if v := rcxCheapAssess(rcxOriginForeign, "BE", name, hints, true, censorsRU); v.Trust == rcxTrustSuspect || v.NeedsHeavyCheck {
+			t.Errorf("%q = %+v, want no suspicion: rus is inside Brussels, not a token of it", name, v)
+		}
+	}
+	for _, name := range []string{"RUS-1", "🇷🇺 Moscow RUS", "Russia #2"} {
+		if v := rcxCheapAssess(rcxOriginForeign, "US", name, hints, true, censorsRU); v.Trust != rcxTrustSuspect || !v.NeedsHeavyCheck {
+			t.Errorf("%q = %+v, want suspect: a rus token still owes the heavy check", name, v)
+		}
+	}
+}
+
 func TestBrandedNodeIsRejectedHoweverFast(t *testing.T) {
 	facts := foreignProven()
 	facts.Trust = rcxTrustBranded
@@ -125,7 +141,7 @@ func TestSuspectNamedNodeBrandsOnOpenFailWithoutLocalMarker(t *testing.T) {
 	}
 }
 
-func TestSuspectOpeningTheWorldIsClearedNotBranded(t *testing.T) {
+func TestSuspectOpeningTheWorldKeepsOwingTheEcho(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("mislabelled")
 	engine := newTestEngine(runtime, "ru")
@@ -136,8 +152,20 @@ func TestSuspectOpeningTheWorldIsClearedNotBranded(t *testing.T) {
 	}
 	engine.finishLocate(now)
 
+	// Telegram answers natively inside RU, so the marker leg alone never
+	// clears suspicion: the rate-limited echo leg still owes its answer.
+	if trust, _ := engine.ledger.Trust(engine.key("mislabelled")); trust != rcxTrustSuspect {
+		t.Fatalf("trust = %v, want suspect: an open marker is not a measured exit", trust)
+	}
+
+	// Once the echo leg measures a foreign exit, the same open proof clears it.
+	engine.ledger.SetExit(engine.key("mislabelled"), "NL", rcxOriginForeign, now)
+	engine.probeResults = []rcxProbeResult{
+		{Node: "mislabelled", Key: engine.key("mislabelled"), Role: rcxRoleOpen, Outcome: rcxProbeOK},
+	}
+	engine.finishLocate(now)
 	if trust, _ := engine.ledger.Trust(engine.key("mislabelled")); trust != rcxTrusted {
-		t.Fatalf("trust = %v, want trusted: opening the world clears the RU-name suspicion", trust)
+		t.Fatalf("trust = %v, want trusted: a measured foreign exit clears the suspicion", trust)
 	}
 }
 

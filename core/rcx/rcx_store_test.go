@@ -33,7 +33,6 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 
 	snapshot := store.Load()
 	snapshot.Config.Strategy = "invented"
-	snapshot.Config.DefaultsVersion = 0
 	snapshot.Config.DwellSeconds = 0
 	fingerprints := snapshot.Fingerprints
 	snapshot.Picks["w:Home"] = "Amsterdam #3"
@@ -221,5 +220,52 @@ func TestStoreKeepsTheTieBreakSeedItHandedOut(t *testing.T) {
 	}
 	if got := testStore(storage).Load().Pins["w:Home"]; got != "endpoint-nl-1" {
 		t.Errorf("pin = %q, want it to survive the round trip", got)
+	}
+}
+
+func TestStoreDropsLearnedFactsWhenShippedDataChanges(t *testing.T) {
+	storage := newFakeStorage()
+	store := testStore(storage)
+	now := time.Unix(1_700_000_000, 0)
+
+	snapshot := store.Load()
+	snapshot.Config.DefaultsVersion = rcxDefaultsVersion - 1
+	snapshot.Global["poisoned"] = &rcxNodeGlobal{
+		Origin: rcxOriginForeign, Country: "NL", EverGood: true,
+		Exit: rcxOriginForeign, ExitCountry: "NL", ExitAt: now,
+		Trust: rcxTrusted, TrustConf: rcxConfMeasured, TrustAt: now,
+		OpenedUnder: "old-fingerprint",
+	}
+	snapshot.Envs["w:Home"] = map[string]*rcxNodeEnv{
+		"poisoned": {OpenWorld: rcxProofProven, OpenAt: now, LastGoodAt: now},
+	}
+	snapshot.Regimes["w:Home"] = rcxRegimeMemory{Terrain: rcxTerrainNormal, At: now}
+	snapshot.Quarantines["open:telegram"] = rcxMarkerQuarantine{Until: now.Add(10 * time.Minute)}
+	snapshot.Picks["w:Home"] = "poisoned"
+	store.Save(snapshot, now, true)
+
+	restored := testStore(storage).Load()
+
+	if !restored.Dirty {
+		t.Error("a defaults-version bump must mark the snapshot dirty so the disk is rewritten")
+	}
+	if len(restored.Envs) != 0 {
+		t.Errorf("env proofs survived a defaults bump: %v", restored.Envs)
+	}
+	if len(restored.Quarantines) != 0 || len(restored.Regimes) != 0 {
+		t.Error("quarantines/regimes survived a defaults bump")
+	}
+	kept := restored.Global["poisoned"]
+	if kept == nil {
+		t.Fatal("global origin reputation must survive a defaults bump")
+	}
+	if kept.Origin != rcxOriginForeign || kept.Country != "NL" || !kept.EverGood {
+		t.Errorf("marker-independent facts lost: %+v", kept)
+	}
+	if kept.Exit != rcxOriginUnknown || kept.Trust != rcxTrustUnknown || kept.HomeEgress || kept.OpenedUnder != "" {
+		t.Errorf("marker-taught facts survived a defaults bump: %+v", kept)
+	}
+	if got := restored.Picks["w:Home"]; got != "poisoned" {
+		t.Errorf("pick = %q, want endpoint identity (not marker-taught) preserved", got)
 	}
 }

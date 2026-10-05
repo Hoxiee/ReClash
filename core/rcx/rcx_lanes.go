@@ -20,10 +20,14 @@ type rcxLaneState struct {
 
 func rcxLaneMatches(config rcxLaneConfig, member rcxMember, groups map[string]map[string]struct{}) bool {
 	for _, selector := range config.Selectors {
-		if selector.Provider != "" && selector.Provider != member.Provider {
+		// Provider and name match case-insensitively, like node rules do: a
+		// "premium" selector must catch a "Premium" provider and an "LTE-1"
+		// node. Group identifiers stay exact; they are runtime keys, not prose.
+		if selector.Provider != "" && !strings.EqualFold(selector.Provider, member.Provider) {
 			continue
 		}
-		if selector.NameContains != "" && !strings.Contains(member.Name, selector.NameContains) {
+		if selector.NameContains != "" &&
+			!strings.Contains(strings.ToLower(member.Name), strings.ToLower(selector.NameContains)) {
 			continue
 		}
 		if selector.Group != "" {
@@ -120,7 +124,7 @@ func (e *rcxEngine) reconsiderLanes(members []rcxMember, now time.Time) {
 		}
 		decision := rcxDecide(input)
 		if decision.Reason == rcxReasonQualityConfirming {
-			e.queueQuality(decision.Detail)
+			e.queueQuality(decision.Detail, candidates, e.lanePolicy(config))
 		}
 		if decision.Switch && decision.To != lane.incumbent {
 			e.tryAutomaticLaneSelect(lane, decision.To, decision.Reason, now)

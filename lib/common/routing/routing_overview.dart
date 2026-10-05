@@ -2,13 +2,20 @@ import 'package:reclash/models/models.dart';
 
 enum NetworkFormat { unknown, open, restricted, portal, offline }
 
-NetworkFormat networkFormatOf(String terrain) => switch (terrain) {
-  'normal' => NetworkFormat.open,
-  'whitelist' => NetworkFormat.restricted,
-  'portal' => NetworkFormat.portal,
-  'offline' => NetworkFormat.offline,
-  _ => NetworkFormat.unknown,
-};
+NetworkFormat networkFormatOf(String terrain, {RcxLinkReport? link}) =>
+    switch (terrain) {
+      'normal' => NetworkFormat.open,
+      // A whitelist with foreign reachability is DPI filtering (a cut censored
+      // SNI on an otherwise open network), not a limited one: only a network
+      // where foreign itself is down reads as restricted.
+      'whitelist' =>
+        link != null && link.foreignReached
+            ? NetworkFormat.open
+            : NetworkFormat.restricted,
+      'portal' => NetworkFormat.portal,
+      'offline' => NetworkFormat.offline,
+      _ => NetworkFormat.unknown,
+    };
 
 extension RcxLinkReportFormat on RcxLinkReport {
   /// Reach outcomes carry `overloaded` for "never measured", so an unmeasured
@@ -219,25 +226,46 @@ int routingRungValue(
   RcxCandidateReport candidate,
   String terrain, [
   RoutingThresholds thresholds = _defaultThresholds,
-]) => switch (rung) {
-  RoutingRung.admission => candidate.eligible ? 0 : 1,
-  RoutingRung.verdict => _routingVerdictRank(candidate.verdict),
-  RoutingRung.misfit => _routingMisfit(terrain, candidate.breaker),
-  RoutingRung.evidence => _routingEvidenceRank(candidate.evidence),
-  RoutingRung.recurrence =>
-    candidate.recurrence < thresholds.recurrenceFloor
-        ? 0
-        : candidate.recurrence,
-  RoutingRung.degraded => candidate.degraded ? 1 : 0,
-  RoutingRung.homeRisk => candidate.homeRisk,
-  RoutingRung.latency =>
-    candidate.latencyMs > 0 ? candidate.latencyMs : 0x7fffffffffffffff,
-  RoutingRung.unproven => candidate.unproven ? 1 : 0,
-  RoutingRung.incumbent => candidate.current ? 0 : 1,
-  RoutingRung.tiebreak => candidate.order,
-};
+]) {
+  // The engine ranks by its own rankMs (rounded host pings, unmeasured
+  // penalties, MaxInt for censored-unproven) and reports it since the
+  // rank-honesty fix; latencyMs stays the human-readable measurement.
+  // Cores older than that report rankMs=-1 for every row: fall back to the
+  // measurement so the duel still answers instead of tying everything.
+  final rankMs = candidate.rankMs >= 0
+      ? candidate.rankMs
+      : (candidate.latencyMs > 0 ? candidate.latencyMs : 0x7fffffffffffffff);
+  return switch (rung) {
+    RoutingRung.admission => candidate.eligible ? 0 : 1,
+    RoutingRung.verdict => _routingVerdictRank(candidate.verdict),
+    RoutingRung.misfit => _routingMisfit(terrain, candidate.breaker),
+    RoutingRung.evidence => _routingEvidenceRank(candidate.evidence),
+    RoutingRung.recurrence =>
+      candidate.recurrence < thresholds.recurrenceFloor
+          ? 0
+          : candidate.recurrence,
+    RoutingRung.degraded => candidate.degraded ? 1 : 0,
+    RoutingRung.homeRisk => candidate.homeRisk,
+    RoutingRung.latency => rankMs,
+    RoutingRung.unproven => candidate.unproven ? 1 : 0,
+    RoutingRung.incumbent => candidate.current ? 0 : 1,
+    // Prefer only breaks the tiebreak in the engine (order - 1<<20):
+    // reproduce the boost so the duel agrees with the rank on prefer rows.
+    RoutingRung.tiebreak =>
+      candidate.prefer ? candidate.order - 1048576 : candidate.order,
+  };
+}
 
 typedef RoutingDuel = ({RoutingRung? rung, bool won});
+
+/// Duel-order latency for one side, aware of the other side: a measured
+/// rankMs always wins; an unmeasured row loses to a measured rival but still
+/// compares by its measurement against an equally field-less (old-core) rival.
+int _duelLatency(RcxCandidateReport c, RcxCandidateReport rival) {
+  if (c.rankMs >= 0) return c.rankMs;
+  if (rival.rankMs >= 0) return 0x7fffffffffffffff;
+  return c.latencyMs > 0 ? c.latencyMs : 0x7fffffffffffffff;
+}
 
 /// The first rung [candidate] and [rival] differ on; a null rung means none does.
 /// [ladder] is the core's echoed ladder ([RcxReport.ladder]); empty falls back
@@ -254,13 +282,24 @@ RoutingDuel routingDuel(
     final thresholds = ladder.isEmpty
         ? _defaultThresholds
         : _thresholdsFor(rung, ladder);
-    final mine = routingRungValue(rung, candidate, terrain, thresholds);
-    final theirs = routingRungValue(rung, rival, terrain, thresholds);
-    if (rung == RoutingRung.latency &&
-        thresholds.latencyToleranceMs > 0 &&
-        (mine - theirs).abs() <= thresholds.latencyToleranceMs) {
+    if (rung == RoutingRung.latency) {
+      // Rival-aware: a new core marks unmeasured rows rankMs=-1, which loses
+      // to any measured rival instead of parading a raw host ping. When both
+      // rows lack rankMs the core predates the field, so the duel falls back
+      // to the measurement rather than tying everything.
+      final mine = _duelLatency(candidate, rival);
+      final theirs = _duelLatency(rival, candidate);
+      if (thresholds.latencyToleranceMs > 0 &&
+          (mine - theirs).abs() <= thresholds.latencyToleranceMs) {
+        continue;
+      }
+      if (mine != theirs) {
+        return (rung: rung, won: mine < theirs);
+      }
       continue;
     }
+    final mine = routingRungValue(rung, candidate, terrain, thresholds);
+    final theirs = routingRungValue(rung, rival, terrain, thresholds);
     if (mine != theirs) {
       return (rung: rung, won: mine < theirs);
     }

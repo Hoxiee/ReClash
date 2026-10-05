@@ -19,7 +19,7 @@ func TestQualityLatencyThresholds(t *testing.T) {
 		{"absolute threshold", rcxStrategyBalanced, 100, 70, true},
 		{"below absolute", rcxStrategyBalanced, 100, 71, false},
 		{"relative threshold", rcxStrategyLatency, 200, 160, true},
-		{"below relative", rcxStrategyLatency, 200, 161, false},
+		{"below relative", rcxStrategyLatency, 200, 185, false},
 		{"stable escape", rcxStrategyStable, 249, 69, true},
 		{"stable absolute", rcxStrategyStable, 150, 100, true},
 		{"stable below absolute", rcxStrategyStable, 150, 101, false},
@@ -71,8 +71,9 @@ func TestQualityHoldsSubCeilingIncumbentButUpgradesPastCeiling(t *testing.T) {
 		to   int
 		want bool
 	}{
-		{"healthy holds", 140, 100, false},
-		{"laggy but sub-ceiling holds", 249, 69, false},
+		{"same-band significant gain upgrades", 140, 100, true},
+		{"same band noisy gain holds", 249, 200, false},
+		{"crossing a band upgrades", 249, 69, true},
 		{"past ceiling upgrades", 700, 50, true},
 		{"noise", 70, 65, false},
 	} {
@@ -99,12 +100,13 @@ func TestQualityReliabilityNeedsRepeatedFailureAndConfirmation(t *testing.T) {
 		degraded   bool
 		confirmed  bool
 		want       rcxReason
+		wantSwitch bool
 	}{
-		{"one episode", 1, false, true, rcxReasonHold},
-		{"recurrence unconfirmed", 2, false, false, rcxReasonQualityConfirming},
-		{"recurrence confirmed", 2, false, true, rcxReasonReliabilityGain},
-		{"degraded unconfirmed", 0, true, false, rcxReasonQualityConfirming},
-		{"degraded confirmed", 0, true, true, rcxReasonReliabilityGain},
+		{"one episode", 1, false, true, rcxReasonLatencyGain, true},
+		{"recurrence unconfirmed", 2, false, false, rcxReasonQualityConfirming, false},
+		{"recurrence confirmed", 2, false, true, rcxReasonReliabilityGain, true},
+		{"degraded unconfirmed", 0, true, false, rcxReasonQualityConfirming, false},
+		{"degraded confirmed", 0, true, true, rcxReasonReliabilityGain, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			current := rcxNode("current", foreignProven())
@@ -116,7 +118,7 @@ func TestQualityReliabilityNeedsRepeatedFailureAndConfirmation(t *testing.T) {
 				Candidates: []rcxCandidate{current, better},
 			}
 			got := rcxDecideAt(input)
-			if got.Reason != tc.want || got.Switch != (tc.want == rcxReasonReliabilityGain) {
+			if got.Reason != tc.want || got.Switch != tc.wantSwitch {
 				t.Fatalf("decision = %+v, want %s", got, tc.want)
 			}
 			if tc.want != rcxReasonReliabilityGain {

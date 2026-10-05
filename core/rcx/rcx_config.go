@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"golang.org/x/text/unicode/norm"
 )
@@ -33,7 +35,7 @@ type rcxLaneConfig struct {
 // The version of the shipped preset data. A bump makes the engine drop the
 // per-node facts it learned under the old set on the next start, so a corrected
 // marker set is not fought by proofs a poisoned node earned before it.
-const rcxDefaultsVersion = 4
+const rcxDefaultsVersion = 5
 
 type rcxConfigFingerprints struct {
 	Open      string `json:"o"`
@@ -232,6 +234,22 @@ func rcxDefaultLatencyBands() []int {
 	return []int{80, 120, 180, 320}
 }
 
+// An unset or broken band list must not silently run another strategy's ladder:
+// the default edges belong to the strategy on the wire, mirroring the shipped
+// Dart pacing, so stable/saver/lowest-latency keep their own ceilings.
+func rcxDefaultLatencyBandsFor(strategy string) []int {
+	switch strategy {
+	case rcxStrategyStable:
+		return []int{120, 200, 320, 550}
+	case rcxStrategyLatency:
+		return []int{65, 90, 130, 220}
+	case rcxStrategySaver:
+		return []int{150, 260, 420, 750}
+	default:
+		return rcxDefaultLatencyBands()
+	}
+}
+
 // A usable ladder is non-empty and strictly increasing; anything else (a truncated
 // or mis-edited payload) falls back to the shipped bands rather than mis-bucketing.
 func rcxValidLatencyBands(bands []int) bool {
@@ -252,7 +270,7 @@ func (c rcxConfig) latencyBands() []int {
 	if rcxValidLatencyBands(c.LatencyBands) {
 		return c.LatencyBands
 	}
-	return rcxDefaultLatencyBands()
+	return rcxDefaultLatencyBandsFor(c.Strategy)
 }
 
 // A usable ladder names only known rungs, repeats none, and still carries the two
@@ -317,24 +335,39 @@ func rcxDefaultConfig() rcxConfig {
 }
 
 // An older host or a truncated payload degrades to shipped values, not zero.
+// Upper bounds fence hand-edited runaways: a million-second dwell is an eternal
+// hold, a million-wide wave spends the hourly budget in one window, and a huge
+// proof TTL keeps corpses Preferred for years.
 func (c rcxConfig) normalized() rcxConfig {
 	if c.DwellSeconds <= 0 {
 		c.DwellSeconds = rcxDwellSeconds
+	} else if c.DwellSeconds > 3600 {
+		c.DwellSeconds = 3600
 	}
 	if c.WaveWidth <= 0 {
 		c.WaveWidth = rcxWaveWidth
+	} else if c.WaveWidth > 64 {
+		c.WaveWidth = 64
 	}
 	if c.ProofTTLMinutes <= 0 {
 		c.ProofTTLMinutes = rcxProofTTLMinutes
+	} else if c.ProofTTLMinutes > 1440 {
+		c.ProofTTLMinutes = 1440
 	}
 	if c.DegradeConfirmSeconds <= 0 {
 		c.DegradeConfirmSeconds = rcxDegradeConfirmSec
+	} else if c.DegradeConfirmSeconds > 3600 {
+		c.DegradeConfirmSeconds = 3600
 	}
 	if c.AbsCeilingMs <= 0 {
 		c.AbsCeilingMs = rcxAbsCeilingMs
+	} else if c.AbsCeilingMs > 5000 {
+		c.AbsCeilingMs = 5000
 	}
 	if c.ThrottleFloorKBps <= 0 {
 		c.ThrottleFloorKBps = rcxThrottleFloorKBps
+	} else if c.ThrottleFloorKBps > 1024 {
+		c.ThrottleFloorKBps = 1024
 	}
 	if !rcxKnownStrategy(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
@@ -476,12 +509,38 @@ func (c rcxConfig) policy() rcxPolicy {
 }
 
 // The provider's own naming is the only signal here: a specialist is a foreign
-// node like its siblings, so no measurement separates them.
+// node like its siblings, so no measurement separates them. Patterns match whole
+// name tokens (prefix), never raw substrings: "lte" must catch "lte-1" but not
+// "volte" or "bolted". A short needle (under 4 runes) demands the whole token:
+// "rus" names RUS-1 but not Ruse or Ruslan.
 func (c rcxConfig) breaker(node string) bool {
 	name := strings.ToLower(node)
 	for _, pattern := range c.BreakerPatterns {
 		needle := strings.ToLower(strings.TrimSpace(pattern))
-		if needle != "" && strings.Contains(name, needle) {
+		if needle != "" && rcxTokenContains(name, needle) {
+			return true
+		}
+	}
+	return false
+}
+
+func rcxTokenContains(name, needle string) bool {
+	if strings.IndexFunc(needle, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	}) >= 0 {
+		return strings.Contains(name, needle)
+	}
+	short := utf8.RuneCountInString(needle) < 4
+	for _, token := range strings.FieldsFunc(name, func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	}) {
+		if short {
+			if token == needle {
+				return true
+			}
+			continue
+		}
+		if strings.HasPrefix(token, needle) {
 			return true
 		}
 	}

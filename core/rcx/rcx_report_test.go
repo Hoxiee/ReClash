@@ -250,3 +250,102 @@ func TestDeepScanStaysQuietWhenThereIsNothingToScan(t *testing.T) {
 		t.Error("outside rule mode the engine owns nothing to measure")
 	}
 }
+
+func TestReportEchoesTheRankedVerdictAndLatency(t *testing.T) {
+	runtime := newFakeRuntime()
+	now := runtime.Now()
+	runtime.members = []rcxMember{
+		{Name: "star", Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 0},
+		{Name: "plain", Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 1},
+		{Name: "ghost", Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 2, HostMs: 50, HostAt: now},
+	}
+	engine := newTestEngine(runtime, "ru-home")
+	engine.cfg.NodeRules = []rcxNodeRule{
+		{Provider: "p", NameContains: "star", Action: rcxRuleLastResort},
+		{Provider: "p", NameContains: "plain", Action: rcxRulePrefer},
+	}
+	engine.ledger.NoteProbe("star", engine.envKey, rcxRoleOpen, rcxProbeOK, 120, now)
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	engine.ledger.NoteQualitySample("star", engine.envKey, marker, engine.qualityEpoch(), 120, now)
+	engine.reconsider()
+	report := engine.Report()
+
+	rows := map[string]rcxCandidateReport{}
+	for _, row := range report.Candidates {
+		rows[row.Node] = row
+	}
+	star := rows["star"]
+	if star.Verdict != "last-resort" || !star.RuleCapped {
+		t.Errorf("star = %+v, want the rule-capped last-resort verdict shown", star)
+	}
+	if star.RankMs != 120 {
+		t.Errorf("star rankMs = %d, want the measured 120", star.RankMs)
+	}
+	plain := rows["plain"]
+	if plain.Order != 1 || !plain.Prefer {
+		t.Errorf("plain = %+v, want the raw order with the prefer flag, not a boosted negative", plain)
+	}
+	ghost := rows["ghost"]
+	if ghost.RankMs != -1 {
+		t.Errorf("ghost rankMs = %d, want -1 for the unmeasured host-only node", ghost.RankMs)
+	}
+	if ghost.Band != len(report.Bands) {
+		t.Errorf("ghost band = %d, want the slowest band %d, not a fast one", ghost.Band, len(report.Bands))
+	}
+}
+
+func TestMoscowNamedNodeWithWrongGeoIPIsNotPreferred(t *testing.T) {
+	runtime := newFakeRuntime()
+	now := runtime.Now()
+	moscow := "🇷🇺Россия - Москва #3"
+	runtime.members = []rcxMember{
+		{Name: moscow, Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 0},
+		{Name: "nl-1", Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 1},
+	}
+	// Wrong entry-IP GeoIP: the Moscow node reads as Spain. The name filter
+	// still names the real code for display, while suspicion and the heavy
+	// echo check keep owning the verdict.
+	runtime.countries = map[string]string{moscow: "ES", "nl-1": "NL"}
+	engine := newTestEngine(runtime, "ru-home")
+	// Both open the world through telegram, which answers natively inside RU.
+	// No echo service has answered yet, so the heavy check owes its verdict.
+	engine.ledger.NoteProbe(moscow, engine.envKey, rcxRoleOpen, rcxProbeOK, 10, now)
+	engine.ledger.NoteProbe("nl-1", engine.envKey, rcxRoleOpen, rcxProbeOK, 60, now)
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	engine.ledger.NoteQualitySample(moscow, engine.envKey, marker, engine.qualityEpoch(), 10, now)
+	engine.ledger.NoteQualitySample("nl-1", engine.envKey, marker, engine.qualityEpoch(), 60, now)
+	engine.reconsider()
+	report := engine.Report()
+
+	if engine.incumbent != "nl-1" {
+		t.Fatalf("incumbent = %q, want nl-1: a Moscow node is not an escape however fast it pings", engine.incumbent)
+	}
+	rows := map[string]rcxCandidateReport{}
+	for _, row := range report.Candidates {
+		rows[row.Node] = row
+	}
+	if rows[moscow].Country != "RU" {
+		t.Errorf("moscow country = %q, want the filter RU tag, not the mmdb ES guess", rows[moscow].Country)
+	}
+	if rows[moscow].Verdict != "last-resort" || rows[moscow].Block == "" {
+		t.Errorf("moscow = %+v, want a blocked last-resort until the echo check answers", rows[moscow])
+	}
+	if trust, _ := engine.ledger.Trust(moscow); trust != rcxTrustSuspect {
+		t.Errorf("moscow trust = %v, want suspect: the name hint must stand", trust)
+	}
+	if !engine.wantsLocate(moscow, runtime.Now()) {
+		t.Error("moscow owes a heavy check: suspicion without an echo answer must keep re-verifying")
+	}
+
+	// Second phase: the user scenario. Moscow somehow became the incumbent
+	// (remembered pick, order tiebreak before any proof). It proves open via
+	// telegram and pings 10ms, so every challenger loses on latency — yet it
+	// must still be dislodged as incumbent-dead, not held forever.
+	runtime.advance(2 * time.Minute)
+	engine.incumbent = moscow
+	engine.since = time.Time{}
+	engine.reconsider()
+	if engine.incumbent != "nl-1" {
+		t.Fatalf("stuck incumbent = %q, want nl-1: a fast Moscow node must not hold traffic", engine.incumbent)
+	}
+}

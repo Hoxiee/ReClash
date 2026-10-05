@@ -351,6 +351,9 @@ abstract class RcxStatus with _$RcxStatus {
     @Default(0) int eligible,
     @Default(0) int switchedAt,
     @Default([]) List<RcxLaneStatus> lanes,
+    // Canary outcomes on the pushed status: a whitelist with foreign up is
+    // DPI filtering, not a limited network. Null on older cores.
+    RcxLinkReport? link,
   }) = _RcxStatus;
 
   factory RcxStatus.fromJson(Map<String, Object?> json) =>
@@ -373,8 +376,16 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default(0) int hostDelay,
     @Default(0) int band,
     @Default(0) int latencyMs,
+    // The latency the engine ranked with (band source for the duel); -1 means
+    // unmeasured. Missing on older cores, where the duel falls back to latencyMs.
+    @Default(-1) int rankMs,
     @Default(false) bool unproven,
     @Default(0) int order,
+    // Prefer only breaks the tiebreak: the raw order plus this flag reproduce
+    // the engine's boosted comparison without leaking negative orders.
+    @Default(false) bool prefer,
+    // True when a user rule capped the shown verdict down to last-resort.
+    @Default(false) bool ruleCapped,
     @Default(false) bool degraded,
     @Default(0) int homeRisk,
     @Default(0) int recurrence,

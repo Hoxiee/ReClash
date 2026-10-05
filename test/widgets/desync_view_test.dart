@@ -35,6 +35,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         desyncSettingProvider.overrideWith(() => _TestDesyncSetting(props)),
       ],

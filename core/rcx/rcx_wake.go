@@ -116,7 +116,7 @@ func (e *rcxEngine) wakeProbeCandidate(now time.Time) string {
 	}
 	members := e.runtime.Members()
 	eligible := make(map[string]bool, len(members))
-	first := ""
+	first, firstHealthy := "", ""
 	for _, member := range members {
 		if member.key() == e.key(e.incumbent) || (e.cfg.policy().RequireUDP && !member.SupportsUDP) {
 			continue
@@ -125,11 +125,22 @@ func (e *rcxEngine) wakeProbeCandidate(now time.Time) string {
 		if first == "" {
 			first = member.Name
 		}
+		// The health-filtered fallback: without proofs the old code tested the
+		// first subscriber row even when it was cooling, host-dead, or
+		// circuit-open, burning the wake on a node the screen gate then rejects.
+		if firstHealthy == "" && !member.HostDead &&
+			!e.ledger.CoolUntil(member.key(), e.envKey, now).After(now) &&
+			!e.providerCircuitOpenFor(member.Provider, member.Name, e.incumbent, now) {
+			firstHealthy = member.Name
+		}
 	}
 	for _, name := range e.standbyNames() {
 		if eligible[name] {
 			return name
 		}
+	}
+	if firstHealthy != "" {
+		return firstHealthy
 	}
 	return first
 }

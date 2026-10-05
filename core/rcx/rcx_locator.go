@@ -78,6 +78,9 @@ func rcxFlagCountry(name string) string {
 }
 
 // rcxNameSide reads the flag the label carries, then any strategy keyword it contains.
+// Hints match whole name tokens by prefix, never raw substrings: "rus" must
+// catch "RUS-1" but not "Brussels" or "Belarus", the same token rule breaker
+// patterns use.
 func rcxNameSide(name string, hints []string, censors func(string) bool) (string, rcxOrigin) {
 	if code := rcxFlagCountry(name); code != "" {
 		if censors(code) {
@@ -87,7 +90,7 @@ func rcxNameSide(name string, hints []string, censors func(string) bool) (string
 	}
 	lower := strings.ToLower(name)
 	for _, hint := range hints {
-		if hint != "" && strings.Contains(lower, hint) {
+		if hint != "" && rcxTokenContains(lower, strings.ToLower(hint)) {
 			return "", rcxOriginDomestic
 		}
 	}
@@ -122,13 +125,24 @@ func (e *rcxEngine) finishLocate(now time.Time) {
 		}
 		switch {
 		case leg.openOK:
-			e.ledger.SetTrust(key, rcxTrusted, rcxConfBehavioral, now)
+			// The marker leg alone never clears suspicion: telegram answers
+			// natively inside RU, so a suspect owes the echo leg's measured
+			// exit first. Until the echo answers the node keeps its Suspect
+			// and its heavy-check debt (wantsLocate stays true); a measured
+			// foreign exit promotes through SetExit instead.
+			if !suspect || e.freshExitCountry(key, now) != "" {
+				e.ledger.SetTrust(key, rcxTrusted, rcxConfBehavioral, now)
+			}
 		case leg.openFailed && (suspect || leg.localOK):
 			// A definite open FAIL brands a suspect node (or one a home-only marker answered); overloaded never brands.
 			e.ledger.SetTrust(key, rcxTrustBranded, rcxConfBehavioral, now)
 		}
 	}
 }
+
+// One locate wave verifies this many nodes: the per-node cost is an echo set,
+// and the wave window fits a handful, so the park verifies in batches.
+const rcxLocateBatch = 4
 
 func (e *rcxEngine) wantsLocate(name string, now time.Time) bool {
 	if name == "" || len(e.cfg.OpenMarkers) == 0 {
@@ -158,29 +172,51 @@ func (e *rcxEngine) startSuspectCheck() bool {
 	if e.incumbent != "" && e.wantsLocate(e.incumbent, now) {
 		return e.startLocate(e.incumbent, now)
 	}
+	batch := make([]string, 0, rcxLocateBatch)
 	for _, member := range e.runtime.Members() {
-		if member.Name != e.incumbent && e.wantsLocate(member.Name, now) {
-			return e.startLocate(member.Name, now)
+		if member.Name == e.incumbent || !e.wantsLocate(member.Name, now) {
+			continue
+		}
+		batch = append(batch, member.Name)
+		if len(batch) >= rcxLocateBatch {
+			break
 		}
 	}
-	return false
+	return e.startLocateBatch(batch, now)
 }
 
 func (e *rcxEngine) startLocate(name string, now time.Time) bool {
-	if e.probing {
+	return e.startLocateBatch([]string{name}, now)
+}
+
+// A locate wave carries several nodes: the per-node cost is one echo set, and
+// the wave window fits it, so the park verifies in handfuls, not one by one.
+func (e *rcxEngine) startLocateBatch(names []string, now time.Time) bool {
+	seen := map[string]struct{}{}
+	wave := make([]rcxProbeNode, 0, len(names))
+	for _, name := range names {
+		if name == "" {
+			continue
+		}
+		if _, dup := seen[name]; dup {
+			continue
+		}
+		seen[name] = struct{}{}
+		wave = append(wave, rcxProbeNode{Name: name, Key: e.key(name)})
+	}
+	if e.probing || len(wave) == 0 {
 		return false
 	}
-	node := rcxProbeNode{Name: name, Key: e.key(name)}
-	if e.budget.Remaining(now) < rcxProbeReserve+2 {
+	if e.budget.Remaining(now) < rcxProbeReserve+len(wave) {
 		return false
 	}
-	wave := e.afford([]rcxProbeNode{node}, rcxProbeReserve, now)
-	if len(wave) != 1 {
-		e.budget.Refund(len(wave))
-		e.paidWave = 0
+	wave = e.afford(wave, rcxProbeReserve, now)
+	if len(wave) == 0 {
 		return false
 	}
-	e.locateAt[node.Key] = now
+	for _, node := range wave {
+		e.locateAt[node.Key] = now
+	}
 	e.startProbeWave(wave, rcxWaveLocate, "")
 	return e.probing
 }

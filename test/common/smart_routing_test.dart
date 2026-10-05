@@ -357,6 +357,27 @@ void main() {
       expect(networkFormatOf(''), NetworkFormat.unknown);
     });
 
+    test('a whitelist with foreign reachability is filtering, not limited', () {
+      expect(
+        networkFormatOf(
+          'whitelist',
+          link: const RcxLinkReport(foreign: 'ok', sni: 'fail'),
+        ),
+        NetworkFormat.open,
+      );
+      expect(
+        networkFormatOf(
+          'whitelist',
+          link: const RcxLinkReport(foreign: 'fail', domestic: 'ok'),
+        ),
+        NetworkFormat.restricted,
+      );
+      expect(
+        networkFormatOf('whitelist', link: const RcxLinkReport()),
+        NetworkFormat.restricted,
+      );
+    });
+
     test('an unmeasured canary is not a failed one', () {
       const unmeasured = RcxLinkReport();
       expect(unmeasured.foreignMeasured, isFalse);
@@ -516,6 +537,23 @@ void main() {
       final seeded = tuned.applyStrategy(SmartRoutingStrategy.stable);
       expect(seeded.ladder, isEmpty);
       expect(seeded.switchImproveMs, 0);
+    });
+
+    test('an unshipped region still runs on the neutral seed', () {
+      final applied = const SmartRoutingProps().applyPreset('de');
+      expect(applied.preset, 'de');
+      expect(applied.canaryForeign, isNotEmpty);
+      expect(applied.openMarkers, isNotEmpty);
+      expect(applied.egressEchoes, isNotEmpty);
+      expect(applied.countryEchoes, isNotEmpty);
+      expect(applied.censorCountries, isEmpty);
+    });
+
+    test('enabling a fresh config seeds the echo lists too', () {
+      final enabled = const SmartRoutingProps().withEnabled(true);
+      expect(enabled.egressEchoes, isNotEmpty);
+      expect(enabled.countryEchoes, isNotEmpty);
+      expect(enabled.withEnabled(false).withEnabled(true), enabled);
     });
   });
 }

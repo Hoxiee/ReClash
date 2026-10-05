@@ -112,7 +112,12 @@ HeroServiceLine routingServiceLineOf({
   }
   return switch (routingStatus.terrain) {
     'portal' => HeroServiceLine.routingPortal,
-    'whitelist' => HeroServiceLine.routingRestricted,
+    // Foreign reachability splits the whitelist: a cut censored SNI on an
+    // otherwise open network is DPI filtering, not a limited network.
+    'whitelist' =>
+      routingStatus.link?.foreignReached == true
+          ? HeroServiceLine.routingOn
+          : HeroServiceLine.routingRestricted,
     _ => HeroServiceLine.routingOn,
   };
 }
@@ -266,7 +271,7 @@ class HeroServiceRow extends ConsumerWidget {
       onTap: switch (heroServiceTargetOf(line)) {
         HeroServiceTarget.none => null,
         HeroServiceTarget.doctor => () {
-          openConnectionDoctor(context, ref);
+          openConnectionDoctor(context, ref, asSheet: true);
         },
         HeroServiceTarget.routing => () {
           showExtend(context, builder: (_) => const RoutingLiveView());

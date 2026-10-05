@@ -230,7 +230,7 @@ func (e *rcxEngine) reconsider() {
 	}
 
 	if decision.Reason == rcxReasonQualityConfirming {
-		e.queueQuality(decision.Detail)
+		e.queueQuality(decision.Detail, candidates, e.cfg.policy())
 	}
 
 	if decision.Switch && e.holdsForLink(decision.Reason, now) {

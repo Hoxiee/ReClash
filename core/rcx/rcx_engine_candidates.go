@@ -31,6 +31,14 @@ func (m rcxMember) key() string {
 // censoring country still earns its verdict from behaviour.
 // The cheap pass only raises Suspect; a later measurement overrides it and never regresses.
 func (e *rcxEngine) assessTrust(name, key string, now time.Time) {
+	if len(e.cfg.CensorCountries) > 0 {
+		if code, side := rcxNameSide(name, e.cfg.NameHints, e.cfg.censors); side == rcxOriginDomestic {
+			if code == "" {
+				code = e.cfg.CensorCountries[0]
+			}
+			e.ledger.SetNameHome(key, code)
+		}
+	}
 	if trust, _ := e.ledger.Trust(key); trust != rcxTrustUnknown {
 		return
 	}

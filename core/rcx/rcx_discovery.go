@@ -12,6 +12,9 @@ const (
 	rcxDiscoveryRepeat   = 10 * time.Minute
 	rcxDiscoveryInterval = time.Minute
 	rcxDiscoveryReserve  = 40
+	// Discovery keeps learning while the incumbent stalls: incident waves own
+	// the suspect, so two unseen nodes per turn is enough to outpace starvation.
+	rcxSuspectedDiscoveryWidth = 2
 )
 
 type rcxDiscoveryState struct {
@@ -98,6 +101,7 @@ func (e *rcxEngine) discoveryNodes(members []rcxMember, limit int) []rcxProbeNod
 		}
 	}
 	pool := make([]rcxProbeNode, 0, limit)
+	host := make(map[string]rcxMember, len(members))
 	providers := map[string]bool{}
 	for _, m := range members {
 		key := m.key()
@@ -113,9 +117,27 @@ func (e *rcxEngine) discoveryNodes(members []rcxMember, limit int) []rcxProbeNod
 			}
 			providers[m.Provider] = true
 		}
+		if _, dup := host[key]; !dup {
+			host[key] = m
+		}
 		pool = append(pool, rcxProbeNode{Name: m.Name, Key: key, Provider: m.Provider, Transport: m.Transport, Type: m.Type, Port: m.Port})
 	}
 	pool = rcxUniqueProbeNodes(pool, e.incumbent)
+	// Probe the closer entries first: a live host ping is a cheap distance prior,
+	// so the fast band fills before far nodes monopolize the proven set. Unpinged
+	// nodes keep subscription order, preserving round-robin coverage.
+	sort.SliceStable(pool, func(i, j int) bool {
+		a, b := host[pool[i].Key], host[pool[j].Key]
+		aLive := a.HostMs > 0 && !a.HostDead
+		bLive := b.HostMs > 0 && !b.HostDead
+		if aLive != bLive {
+			return aLive
+		}
+		if aLive && a.HostMs != b.HostMs {
+			return a.HostMs < b.HostMs
+		}
+		return false
+	})
 	if len(pool) > limit {
 		pool = pool[:limit]
 	}
@@ -123,22 +145,42 @@ func (e *rcxEngine) discoveryNodes(members []rcxMember, limit int) []rcxProbeNod
 }
 
 func (e *rcxEngine) startImprovement(periodic bool) bool {
-	if !e.canImprove() || e.probing || e.incumbent == "" || e.suspected(e.runtime.Now()) {
+	if !e.canImprove() || e.probing || e.incumbent == "" {
 		return false
 	}
 	now := e.runtime.Now()
-	d := e.discoveryState()
-	if e.startQualityProbe() {
+	members := e.runtime.Members()
+	if e.suspected(now) {
+		// A stalling incumbent must not pause learning: incident waves own it,
+		// while a narrow discovery keeps measuring unseen nodes so a slow
+		// incumbent cannot starve its own replacement.
+		wave := e.discoveryNodes(members, rcxSuspectedDiscoveryWidth)
+		if len(wave) == 0 {
+			return false
+		}
+		wave = e.afford(wave, rcxProbeReserve, now)
+		if len(wave) == 0 {
+			return false
+		}
+		d := e.discoveryState()
+		for _, node := range wave {
+			d.Deferred[node.Key] = now.Add(rcxDiscoveryInterval)
+		}
+		e.laneBurst = 0
+		e.startProbeWave(wave, rcxWaveDiscover, "")
+		return true
+	}
+	if e.startQualityProbe(e.slowEscapeNeeded(members, now)) {
 		return true
 	}
 	if e.startSuspectCheck() {
 		return true
 	}
+	d := e.discoveryState()
 	warm := e.discoveryWarm(d, now)
 	if !warm && (!periodic || !d.LastPeriodic.IsZero() && now.Sub(d.LastPeriodic) < rcxDiscoveryInterval) {
 		return false
 	}
-	members := e.runtime.Members()
 	limit := 1
 	if warm {
 		limit = min(e.cfg.WaveWidth, rcxDiscoveryBatch, rcxDiscoveryLimit-d.Attempts)
@@ -163,6 +205,28 @@ func (e *rcxEngine) startImprovement(periodic bool) bool {
 	e.laneBurst = 0
 	e.startProbeWave(wave, rcxWaveDiscover, "")
 	return true
+}
+
+// A too-slow incumbent is escaped briskly: past the effective ceiling by median
+// or, unmeasured, by entry ping, its quality checks re-probe without the wait.
+func (e *rcxEngine) slowEscapeNeeded(members []rcxMember, now time.Time) bool {
+	if e.incumbent == "" {
+		return false
+	}
+	policy := e.cfg.policy()
+	ceiling := rcxEffectiveCeiling(policy)
+	if ceiling <= 0 {
+		return false
+	}
+	if median := e.comparableMedian(e.key(e.incumbent), now, rcxScaledProofTTL(e.ledger.ProofTTL(), len(members))); median > 0 {
+		return median >= ceiling
+	}
+	for _, member := range members {
+		if member.Name == e.incumbent {
+			return !member.HostDead && member.HostMs >= ceiling
+		}
+	}
+	return false
 }
 
 func (e *rcxEngine) markDiscoveryResult(result rcxProbeResult, now time.Time) {

@@ -147,6 +147,23 @@ func rcxRecurrenceFloored(recurrence, floor int) int {
 	return recurrence
 }
 
+// rcxRecurrenceFloorOf reads the floor the ranking actually uses, so the switch
+// trigger in rcxDecide floors recurrence identically. The second result reports
+// whether the recurrence rung participates at all: a disabled rung means the
+// rank never rewards reliability, so the switch must not either.
+func rcxRecurrenceFloorOf(ladder []rcxRungSpec) (int, bool) {
+	for _, spec := range ladder {
+		if spec.ID == rcxRungRecurrence && spec.Enabled {
+			floor := spec.RecurrenceFloor
+			if floor < 0 {
+				floor = 0
+			}
+			return floor, true
+		}
+	}
+	return rcxRecurrenceFloorDefault, false
+}
+
 func rcxRungCompareVerdict(a, b rcxKey, _ rcxRungSpec) int {
 	if a.verdict == b.verdict {
 		return 0

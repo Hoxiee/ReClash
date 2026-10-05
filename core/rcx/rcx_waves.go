@@ -171,21 +171,23 @@ func (e *rcxEngine) planWave(
 		}
 		return nil
 	}
+	e.paidWave = 0
+	e.paidWaveGen = e.probeGen
+	dispatched := wave
+	if kind == rcxWaveRoutine || kind == rcxWaveIncident || kind == rcxWaveHandoff {
+		dispatched = e.afford(wave, 0, now)
+	}
 	if reactive {
-		for _, node := range wave {
+		// Account only the dispatched set so afford-trimmed nodes retry next rescue.
+		for _, node := range dispatched {
 			e.rescueSeen[node.Name] = struct{}{}
 		}
-		e.rescueExhausted = len(wave) == len(pool)
+		e.rescueExhausted = len(dispatched) == len(pool)
 		if e.rescueExhausted {
 			e.rescueAt = now
 		}
 	}
-	e.paidWave = 0
-	e.paidWaveGen = e.probeGen
-	if kind == rcxWaveRoutine || kind == rcxWaveIncident || kind == rcxWaveHandoff {
-		return e.afford(wave, 0, now)
-	}
-	return wave
+	return dispatched
 }
 
 func (e *rcxEngine) memoryFirstWave(
@@ -358,12 +360,15 @@ func (e *rcxEngine) exitDue(key string, now time.Time) bool {
 }
 
 // Half the TTL: a proof expiring between two passes is the gap this closes.
+// The TTL is the same park-scaled one candidates rank with, not the base: a
+// 200-node park re-proving every base/2 burns ~34 extra probes an hour.
 func (e *rcxEngine) proofDue(node string, now time.Time) bool {
 	at := e.ledger.OpenAt(e.key(node), e.envKey)
 	if at.IsZero() {
 		return true
 	}
-	return now.Sub(at) >= e.ledger.ProofTTL()/2
+	ttl := rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))
+	return now.Sub(at) >= ttl/2
 }
 
 // A busy incumbent keeps OpenWorld=Proven from marker traffic while its measured
@@ -705,11 +710,34 @@ func (e *rcxEngine) reachAny(
 	return verdict
 }
 
+// The hero delay is what the user reads as "now": only measurements younger
+// than the (park-scaled) proof TTL qualify. A six-hour-old sample median is
+// history, not the present, so an idle incumbent reports unknown instead of a
+// stale number the rows no longer show.
 func (e *rcxEngine) delayOf(node string) int {
 	if node == "" {
 		return 0
 	}
-	return e.ledger.MedianMs(e.key(node), e.envKey, e.runtime.Now(), e.suspendAt, e.suspendTo)
+	now := e.runtime.Now()
+	if ms := e.comparableMedian(e.key(node), now, rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))); ms > 0 {
+		return ms
+	}
+	return e.freshHarvestedDelay(node, now)
+}
+
+func (e *rcxEngine) freshHarvestedDelay(node string, now time.Time) int {
+	ttl := rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))
+	best := 0
+	var bestAt time.Time
+	for _, sample := range e.ledger.Samples(e.key(node), e.envKey) {
+		if sample.DelayMs <= 0 || now.Sub(sample.At) > ttl {
+			continue
+		}
+		if sample.At.After(bestAt) {
+			best, bestAt = sample.DelayMs, sample.At
+		}
+	}
+	return best
 }
 
 func rcxMillis(at time.Time) int64 {
