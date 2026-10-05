@@ -16158,6 +16158,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Overview`
+  String get doctorTabOverview {
+    return Intl.message(
+      'Overview',
+      name: 'doctorTabOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Technical details`
   String get doctorTechnicalDetails {
     return Intl.message(

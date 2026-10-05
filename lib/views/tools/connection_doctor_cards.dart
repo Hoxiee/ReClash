@@ -90,7 +90,6 @@ mixin _DoctorActionsMixin<T extends ConsumerStatefulWidget>
 class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     with _DoctorActionsMixin {
   bool _initializing = true;
-  bool _technicalOpen = false;
   DoctorExamMode _mode = DoctorExamMode.standard;
 
   @override
@@ -190,45 +189,117 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
           onPressed: () => unawaited(_start(DoctorExamMode.standard)),
         ),
       ],
-      body: ListView(
-        padding: EdgeInsets.only(top: context.contentTopPadding),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: _DoctorSmoothResize(
-              child: _DoctorDiagnosisCard(
-                snapshot: snapshot,
-                answer: answer,
-                busy: _busy,
-                canStart: snapshot.action('startStandard')?.eligible == true,
-                canFlushDns: snapshot.action('flushDns')?.eligible == true,
-                canCancel: snapshot.action('cancel')?.eligible == true,
-                onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
-                onStart: () => unawaited(_start(DoctorExamMode.standard)),
-                onCancel: () => unawaited(_cancel()),
+      // The verdict leads on its own tab; the expert levers and raw evidence
+      // live behind the "Technical details" tab so the answer screen stays a
+      // single uncluttered glance. Builds without the Core diagnosis contract
+      // have no technical content, so they skip the tabs and show the lone
+      // unavailable verdict.
+      body: snapshot.supported
+          ? AppBarClearance(
+              child: DefaultTabController(
+                length: 2,
+                child: Column(
+                  children: [
+                    SettingsTabs(
+                      labels: [
+                        appLocalizations.doctorTabOverview,
+                        appLocalizations.doctorTechnicalDetails,
+                      ],
+                    ),
+                    Expanded(
+                      child: _DoctorTabView(
+                        children: [
+                          _overviewTab(snapshot, answer, inset: false),
+                          _technicalTab(snapshot),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: _DoctorSmoothResize(child: _DoctorStepsCard(answer: answer)),
-          ),
-          if (snapshot.supported)
-            _DoctorTechnicalSection(
-              snapshot: snapshot,
-              open: _technicalOpen,
-              onToggle: () => setState(() => _technicalOpen = !_technicalOpen),
-              mode: _mode,
-              busy: _busy,
-              onMode: (mode) => setState(() => _mode = mode),
-              onRun: () => unawaited(_start(_mode)),
-              onCancel: () => unawaited(_cancel()),
-              onFlushDns: () => unawaited(_flushDns()),
-              onExport: () => unawaited(_exportReport()),
-            ),
-          const SettingBottomInset(),
-        ],
+            )
+          : _overviewTab(snapshot, answer, inset: true),
+    );
+  }
+
+  Widget _overviewTab(
+    DoctorSnapshot snapshot,
+    DoctorAnswer answer, {
+    required bool inset,
+  }) {
+    return ListView(
+      key: const PageStorageKey('doctor-overview'),
+      padding: EdgeInsets.only(
+        top: inset ? context.contentTopPadding : AppSpacing.md,
       ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: _DoctorSmoothResize(
+            child: _DoctorDiagnosisCard(
+              snapshot: snapshot,
+              answer: answer,
+              busy: _busy,
+              canStart: snapshot.action('startStandard')?.eligible == true,
+              canFlushDns: snapshot.action('flushDns')?.eligible == true,
+              canCancel: snapshot.action('cancel')?.eligible == true,
+              onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
+              onCancel: () => unawaited(_cancel()),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: _DoctorSmoothResize(child: _DoctorStepsCard(answer: answer)),
+        ),
+        const SettingBottomInset(),
+      ],
+    );
+  }
+
+  Widget _technicalTab(DoctorSnapshot snapshot) {
+    final examining = snapshot.state == DoctorExamState.examining;
+    final flushAction = snapshot.action('flushDns');
+    final drift =
+        snapshot.isFresh && snapshot.startGenerations != snapshot.generations;
+    return ListView(
+      key: const PageStorageKey('doctor-technical'),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      children: [
+        if (drift)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: _DoctorDriftBanner(),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: _DoctorRunPanel(
+            mode: _mode,
+            busy: _busy,
+            examining: examining,
+            canStart: snapshot.action('startStandard')?.eligible == true,
+            canCancel: snapshot.action('cancel')?.eligible == true,
+            canFlushDns: flushAction?.eligible == true,
+            flushReasonCode: flushAction?.eligibilityReasonCode ?? '',
+            progress: snapshot.progress,
+            onMode: (mode) => setState(() => _mode = mode),
+            onRun: () => unawaited(_start(_mode)),
+            onCancel: () => unawaited(_cancel()),
+            onFlushDns: () => unawaited(_flushDns()),
+            onExport: () => unawaited(_exportReport()),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: _DoctorWaterfallCard(snapshot: snapshot),
+        ),
+        _DoctorCapabilitiesSection(snapshot: snapshot),
+        _DoctorDetails(snapshot: snapshot),
+        _DoctorHealSection(snapshot: snapshot),
+        _DoctorHistoryPanel(snapshot: snapshot),
+        _DoctorEvidenceDisclosure(snapshot: snapshot),
+        const SettingBottomInset(),
+      ],
     );
   }
 }
@@ -252,142 +323,53 @@ class _DoctorSmoothResize extends StatelessWidget {
   }
 }
 
-/// The expert levers and raw evidence, revealed in place instead of pushed onto
-/// a second screen. A tappable header slides the whole console open and shut so
-/// the verdict stays the lead while the detail is a glide away, never a jump to
-/// another route.
-class _DoctorTechnicalSection extends StatelessWidget {
-  const _DoctorTechnicalSection({
-    required this.snapshot,
-    required this.open,
-    required this.onToggle,
-    required this.mode,
-    required this.busy,
-    required this.onMode,
-    required this.onRun,
-    required this.onCancel,
-    required this.onFlushDns,
-    required this.onExport,
-  });
+/// Shows only the tab the [DefaultTabController] points at, cross-fading on a
+/// switch. A `TabBarView` would add its own paging scrollable and keep the
+/// inactive tab's list mounted; keeping a single scroll view here leaves the
+/// Doctor one lever per screen and one scroll target for its tests.
+class _DoctorTabView extends StatefulWidget {
+  const _DoctorTabView({required this.children});
 
-  final DoctorSnapshot snapshot;
-  final bool open;
-  final VoidCallback onToggle;
-  final DoctorExamMode mode;
-  final bool busy;
-  final ValueChanged<DoctorExamMode> onMode;
-  final VoidCallback onRun;
-  final VoidCallback onCancel;
-  final VoidCallback onFlushDns;
-  final VoidCallback onExport;
+  final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
-    final examining = snapshot.state == DoctorExamState.examining;
-    final flushAction = snapshot.action('flushDns');
-    final drift =
-        snapshot.isFresh && snapshot.startGenerations != snapshot.generations;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, AppSpacing.md, 16, 0),
-          child: _DoctorTechnicalHeader(open: open, onToggle: onToggle),
-        ),
-        AnimatedSize(
-          duration: context.motionDuration(commonDuration),
-          alignment: Alignment.topCenter,
-          curve: Curves.easeOutCubic,
-          child: open
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (drift)
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
-                        child: _DoctorDriftBanner(),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                      child: _DoctorRunPanel(
-                        mode: mode,
-                        busy: busy,
-                        examining: examining,
-                        canStart:
-                            snapshot.action('startStandard')?.eligible == true,
-                        canCancel: snapshot.action('cancel')?.eligible == true,
-                        canFlushDns: flushAction?.eligible == true,
-                        flushReasonCode:
-                            flushAction?.eligibilityReasonCode ?? '',
-                        progress: snapshot.progress,
-                        onMode: onMode,
-                        onRun: onRun,
-                        onCancel: onCancel,
-                        onFlushDns: onFlushDns,
-                        onExport: onExport,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: _DoctorWaterfallCard(snapshot: snapshot),
-                    ),
-                    _DoctorCapabilitiesSection(snapshot: snapshot),
-                    _DoctorDetails(snapshot: snapshot),
-                    _DoctorHealSection(snapshot: snapshot),
-                    _DoctorHistoryPanel(snapshot: snapshot),
-                    _DoctorEvidenceDisclosure(snapshot: snapshot),
-                  ],
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-      ],
-    );
-  }
+  State<_DoctorTabView> createState() => _DoctorTabViewState();
 }
 
-/// The tap target that opens the inline console: a sliders glyph, the "Technical
-/// details" label, and a chevron that rotates to point down when the section is
-/// open, so the control reads as an in-place disclosure rather than a link out.
-class _DoctorTechnicalHeader extends StatelessWidget {
-  const _DoctorTechnicalHeader({required this.open, required this.onToggle});
+class _DoctorTabViewState extends State<_DoctorTabView> {
+  TabController? _controller;
+  int _index = 0;
 
-  final bool open;
-  final VoidCallback onToggle;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = DefaultTabController.of(context);
+    if (controller == _controller) return;
+    _controller?.removeListener(_handleChange);
+    _controller = controller;
+    _index = controller.index;
+    controller.addListener(_handleChange);
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_handleChange);
+    super.dispose();
+  }
+
+  void _handleChange() {
+    final controller = _controller;
+    if (controller == null || !mounted || controller.index == _index) return;
+    setState(() => _index = controller.index);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final appLocalizations = context.appLocalizations;
-    return CommonCard(
-      radius: AppCorner.xl,
-      child: InkWell(
-        onTap: onToggle,
-        borderRadius: AppRadius.xl,
-        child: Padding(
-          padding: AppInsets.xl,
-          child: Row(
-            children: [
-              GlyphIcon(AppGlyphs.sliders, color: colors.primary),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  appLocalizations.doctorTechnicalDetails,
-                  style: context.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              AnimatedRotation(
-                turns: open ? 0.5 : 0,
-                duration: context.motionDuration(commonDuration),
-                child: GlyphIcon(
-                  AppGlyphs.chevronDown,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
+    return AnimatedSwitcher(
+      duration: context.motionDuration(commonDuration),
+      child: KeyedSubtree(
+        key: ValueKey(_index),
+        child: widget.children[_index],
       ),
     );
   }
@@ -430,7 +412,6 @@ class _DoctorDiagnosisCard extends StatelessWidget {
     required this.canFlushDns,
     required this.canCancel,
     required this.onRemedy,
-    required this.onStart,
     required this.onCancel,
   });
 
@@ -441,7 +422,6 @@ class _DoctorDiagnosisCard extends StatelessWidget {
   final bool canFlushDns;
   final bool canCancel;
   final ValueChanged<DoctorRemedy> onRemedy;
-  final VoidCallback onStart;
   final VoidCallback onCancel;
 
   bool _remedyActive(DoctorRemedy remedy) => switch (remedy) {
@@ -461,14 +441,7 @@ class _DoctorDiagnosisCard extends StatelessWidget {
         ? (progress.completed / progress.total).clamp(0.0, 1.0)
         : null;
     final remedies = answer.remedies.where(_remedyActive).toList();
-    final showStart =
-        !answer.storm &&
-        snapshot.supported &&
-        canStart &&
-        !examining &&
-        !remedies.contains(DoctorRemedy.recheck);
-    final showActions =
-        remedies.isNotEmpty || showStart || (examining && canCancel);
+    final showActions = remedies.isNotEmpty || (examining && canCancel);
     return CommonCard(
       radius: AppCorner.xl,
       accent: tone,
@@ -507,7 +480,6 @@ class _DoctorDiagnosisCard extends StatelessWidget {
                 context,
                 appLocalizations,
                 remedies: remedies,
-                showStart: showStart,
                 examining: examining,
               ),
             ],
@@ -567,7 +539,6 @@ class _DoctorDiagnosisCard extends StatelessWidget {
     BuildContext context,
     AppLocalizations appLocalizations, {
     required List<DoctorRemedy> remedies,
-    required bool showStart,
     required bool examining,
   }) {
     return Wrap(
@@ -579,12 +550,6 @@ class _DoctorDiagnosisCard extends StatelessWidget {
             remedy: entry.value,
             primary: entry.key == 0,
             onPressed: busy ? null : () => onRemedy(entry.value),
-          ),
-        if (showStart)
-          FilledButton.tonalIcon(
-            onPressed: busy ? null : onStart,
-            icon: const GlyphIcon(AppGlyphs.play),
-            label: Text(appLocalizations.doctorStandardExam),
           ),
         if (examining && canCancel)
           OutlinedButton.icon(

@@ -1160,6 +1160,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "网络或配置变化导致检查停止。",
     ),
     "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage("网络环境已变化"),
+    "doctorTabOverview": MessageLookupByLibrary.simpleMessage("概览"),
     "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage("技术详情"),
     "doctorUnsupportedDesc": MessageLookupByLibrary.simpleMessage(
       "此 Core 版本不支持连接诊断。",

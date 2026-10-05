@@ -1323,6 +1323,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ネットワークまたは設定の変更により確認を停止しました。",
     ),
     "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage("環境が変わりました"),
+    "doctorTabOverview": MessageLookupByLibrary.simpleMessage("概要"),
     "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage("技術的な詳細"),
     "doctorUnsupportedDesc": MessageLookupByLibrary.simpleMessage(
       "この Core は接続診断に対応していません。",

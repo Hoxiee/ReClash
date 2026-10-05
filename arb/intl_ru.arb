@@ -2012,6 +2012,7 @@
   "doctorPathDescInternetFail": "узел не отвечает",
   "doctorPathDescResponseFail": "ответ не вернулся",
   "doctorPathDescConsequence": "пропущено — обрыв выше",
+  "doctorTabOverview": "Обзор",
   "doctorTechnicalDetails": "Технические данные",
   "doctorWhatToTry": "Что попробовать",
   "doctorRemedyStartVpn": "Запустить VPN",

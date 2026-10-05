@@ -1310,6 +1310,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "네트워크 또는 설정 변경으로 검사가 중지되었습니다.",
     ),
     "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage("환경이 변경됨"),
+    "doctorTabOverview": MessageLookupByLibrary.simpleMessage("개요"),
     "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage("기술 세부 정보"),
     "doctorUnsupportedDesc": MessageLookupByLibrary.simpleMessage(
       "이 Core 버전은 연결 진단을 지원하지 않습니다.",

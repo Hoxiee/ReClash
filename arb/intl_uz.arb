@@ -2048,6 +2048,7 @@
   "doctorPathUnknown": "Tekshirilmagan",
   "doctorPathNotApplicable": "Talab qilinmaydi",
   "doctorPathConsequence": "Oldingi muammo sabab tekshirilmadi",
+  "doctorTabOverview": "Umumiy koʻrinish",
   "doctorTechnicalDetails": "Texnik tafsilotlar",
   "doctorWhatToTry": "Nima qilish mumkin",
   "doctorRemedyStartVpn": "VPN-ni ishga tushirish",

@@ -757,16 +757,19 @@ void main() {
     expect(find.text('Export report'), findsNothing);
     expect(find.text('Cancel check'), findsNothing);
 
-    await tester.tap(find.text('Run check'));
+    // The standard check now runs from the app-bar refresh action; the verdict
+    // card no longer carries its own start button.
+    await tester.tap(find.byTooltip('Refresh diagnosis'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Flush DNS cache'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
-    // Deep is now a mode segment on the console, run by the shared button.
+    // Deep is a mode segment on the console; the run button names the depth it
+    // will start once Deep is selected.
     await tester.tap(find.text('Deep'));
     await tester.pumpAndSettle();
-    final runCheck = find.widgetWithText(FilledButton, 'Run a check');
+    final runCheck = find.widgetWithText(FilledButton, 'Deep check');
     await Scrollable.ensureVisible(tester.element(runCheck), alignment: 0.5);
     await tester.pumpAndSettle();
     await tester.tap(runCheck);
@@ -890,7 +893,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Not available right now'), findsOneWidget);
     final runButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Run a check'),
+      find.widgetWithText(FilledButton, 'Run check'),
     );
     expect(runButton.onPressed, isNull);
   });

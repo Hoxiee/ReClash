@@ -2048,6 +2048,7 @@
   "doctorPathUnknown": "확인 안 됨",
   "doctorPathNotApplicable": "필요 없음",
   "doctorPathConsequence": "앞선 문제로 확인하지 않음",
+  "doctorTabOverview": "개요",
   "doctorTechnicalDetails": "기술 세부 정보",
   "doctorWhatToTry": "시도할 방법",
   "doctorRemedyStartVpn": "VPN 시작",

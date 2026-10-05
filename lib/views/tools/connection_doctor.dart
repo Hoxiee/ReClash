@@ -10,6 +10,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -24,8 +25,16 @@ part 'connection_doctor_labels.dart';
 /// pushed sheet as before; on the two-pane desktop it hands the pane to the
 /// Tools tab so the Doctor's own drill-ins (DNS, advanced) stay in that stack
 /// instead of stacking a stray side sheet outside it.
-void openConnectionDoctor(BuildContext context, WidgetRef ref) {
-  if (context.isMobileView) {
+///
+/// The hero status line passes [asSheet] to keep the Doctor an overlay over the
+/// dashboard instead of jumping into the Tools tab; its drill-ins still reach
+/// the settings views through [showExtend] as they do from any sheet.
+void openConnectionDoctor(
+  BuildContext context,
+  WidgetRef ref, {
+  bool asSheet = false,
+}) {
+  if (asSheet || context.isMobileView) {
     unawaited(
       showExtend(context, builder: (_) => const ConnectionDoctorView()),
     );

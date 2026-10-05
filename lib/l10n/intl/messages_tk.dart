@@ -1604,6 +1604,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage(
       "Environment changed",
     ),
+    "doctorTabOverview": MessageLookupByLibrary.simpleMessage("Umumy syn"),
     "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage(
       "Tehniki maglumatlar",
     ),

@@ -1945,6 +1945,7 @@
   "doctorPathUnknown": "未检查",
   "doctorPathNotApplicable": "不需要",
   "doctorPathConsequence": "因前序问题未检查",
+  "doctorTabOverview": "概览",
   "doctorTechnicalDetails": "技术详情",
   "doctorWhatToTry": "可以尝试",
   "doctorRemedyStartVpn": "启动 VPN",

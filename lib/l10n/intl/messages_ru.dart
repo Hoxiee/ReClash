@@ -1597,6 +1597,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage(
       "Среда изменилась",
     ),
+    "doctorTabOverview": MessageLookupByLibrary.simpleMessage("Обзор"),
     "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage(
       "Технические данные",
     ),

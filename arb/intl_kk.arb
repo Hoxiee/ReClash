@@ -2048,6 +2048,7 @@
   "doctorPathUnknown": "Тексерілмеді",
   "doctorPathNotApplicable": "Қажет емес",
   "doctorPathConsequence": "Алдыңғы мәселеден кейін тексерілмеді",
+  "doctorTabOverview": "Шолу",
   "doctorTechnicalDetails": "Техникалық мәліметтер",
   "doctorWhatToTry": "Не істеуге болады",
   "doctorRemedyStartVpn": "VPN-ді іске қосу",

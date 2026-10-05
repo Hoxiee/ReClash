@@ -1945,6 +1945,7 @@
   "doctorPathUnknown": "未確認",
   "doctorPathNotApplicable": "不要",
   "doctorPathConsequence": "前の問題により未確認",
+  "doctorTabOverview": "概要",
   "doctorTechnicalDetails": "技術的な詳細",
   "doctorWhatToTry": "試すこと",
   "doctorRemedyStartVpn": "VPN を起動",

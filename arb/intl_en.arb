@@ -2249,6 +2249,7 @@
   "doctorPathDescInternetFail": "the node isn't answering",
   "doctorPathDescResponseFail": "the reply never came back",
   "doctorPathDescConsequence": "skipped — the break is upstream",
+  "doctorTabOverview": "Overview",
   "doctorTechnicalDetails": "Technical details",
   "doctorWhatToTry": "What to try",
   "doctorRemedyStartVpn": "Start VPN",

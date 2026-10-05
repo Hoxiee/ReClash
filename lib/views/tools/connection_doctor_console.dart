@@ -84,9 +84,11 @@ class _DoctorPanel extends StatelessWidget {
   }
 }
 
-/// The levers: pick a depth, run or cancel, and reach the two manual tools. A
-/// disabled DNS flush explains itself in one line so a greyed button is never
-/// a dead end the reader has to guess at.
+/// The levers: pick a depth and run or cancel on one prominent button, with the
+/// two manual tools demoted to a quiet list beneath a seam so the panel reads as
+/// one primary action over its utilities instead of a stack of equal buttons. A
+/// disabled DNS flush explains itself in one line so a greyed row is never a
+/// dead end the reader has to guess at.
 class _DoctorRunPanel extends StatelessWidget {
   const _DoctorRunPanel({
     required this.mode,
@@ -136,6 +138,11 @@ class _DoctorRunPanel extends StatelessWidget {
     final runReason = examining || canStart
         ? null
         : appLocalizations.doctorActionUnavailable;
+    // The button names the depth it will run, so it never just echoes the
+    // panel title and the reader knows which check the tap starts.
+    final runLabel = mode == DoctorExamMode.deep
+        ? appLocalizations.doctorDeepExam
+        : appLocalizations.doctorStandardExam;
     return _DoctorPanel(
       title: appLocalizations.doctorRun,
       icon: AppGlyphs.healthMonitor,
@@ -187,7 +194,7 @@ class _DoctorRunPanel extends StatelessWidget {
                 : FilledButton.icon(
                     onPressed: busy || !canStart ? null : onRun,
                     icon: const GlyphIcon(AppGlyphs.play),
-                    label: Text(appLocalizations.doctorRun),
+                    label: Text(runLabel),
                   ),
           ),
           if (runReason != null) ...[
@@ -199,34 +206,86 @@ class _DoctorRunPanel extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: busy || !canFlushDns ? null : onFlushDns,
-              icon: const GlyphIcon(AppGlyphs.dns),
-              label: Text(appLocalizations.doctorFlushDns),
-            ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Divider(height: 1),
           ),
-          if (flushReason != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              flushReason,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
+          _DoctorToolRow(
+            icon: AppGlyphs.dns,
+            label: appLocalizations.doctorFlushDns,
+            reason: flushReason,
+            onTap: busy || !canFlushDns ? null : onFlushDns,
+          ),
+          _DoctorToolRow(
+            icon: AppGlyphs.export,
+            label: appLocalizations.doctorExportReport,
+            onTap: busy ? null : onExport,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A quiet, full-width manual tool inside the run panel: a tinted glyph, its
+/// label, and — when the tool is unavailable — a one-line reason, laid out as a
+/// tappable row so flush and export read as even utilities under the primary
+/// run button rather than more full-width buttons competing with it.
+class _DoctorToolRow extends StatelessWidget {
+  const _DoctorToolRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.reason,
+  });
+
+  final Glyph icon;
+  final String label;
+  final VoidCallback? onTap;
+  final String? reason;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final enabled = onTap != null;
+    final accent = enabled ? colors.primary : colors.onSurfaceVariant;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.lg,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.xs,
+        ),
+        child: Row(
+          children: [
+            GlyphIcon(icon, size: 20, color: accent),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: enabled ? null : colors.onSurfaceVariant,
+                    ),
+                  ),
+                  if (reason != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      reason!,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: busy ? null : onExport,
-              icon: const GlyphIcon(AppGlyphs.export),
-              label: Text(appLocalizations.doctorExportReport),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
