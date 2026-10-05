@@ -8,11 +8,9 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/core/core.dart';
-import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/core_manager.dart';
-import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
@@ -22,6 +20,7 @@ import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/feedback/status_manager.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_profiles.dart';
@@ -106,7 +105,7 @@ Future<ProviderContainer> _pumpCoreManager(
   final container = ProviderContainer(
     overrides: [
       coreHandlerProvider.overrideWithValue(
-        CoreController.scoped(coreInterface),
+        coreInterface,
       ),
       ...overrides,
     ],
@@ -210,7 +209,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(
-          CoreController.scoped(coreInterface),
+          coreInterface,
         ),
       ],
     );

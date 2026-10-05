@@ -5,13 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart'
-    hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+    hide captionGlyphSize;
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
+import 'package:reclash/views/window_header.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';

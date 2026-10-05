@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
@@ -71,7 +70,7 @@ void main() {
   ProviderContainer buildContainer({Profile? profile}) {
     final container = ProviderContainer(
       overrides: [
-        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        coreHandlerProvider.overrideWithValue(core),
         profilesProvider.overrideWith(() => TestProfiles([?profile])),
         currentProfileIdProvider.overrideWithBuild((_, _) => profile?.id),
       ],

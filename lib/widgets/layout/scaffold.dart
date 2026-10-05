@@ -93,7 +93,8 @@ class CommonScaffold extends ConsumerStatefulWidget {
   ConsumerState<CommonScaffold> createState() => CommonScaffoldState();
 }
 
-class CommonScaffoldState extends ConsumerState<CommonScaffold> {
+abstract class _CommonScaffoldStateBase
+    extends ConsumerState<CommonScaffold> {
   late final ValueNotifier<AppBarState> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isFabExtendedNotifier = ValueNotifier(true);
@@ -107,27 +108,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   ValueNotifier<Widget?>? _relaySink;
   Widget? _relayedActions;
 
-  bool get _isSearch {
-    return _appBarState.value.searchState?.query != null;
-  }
-
-  bool get _isEdit {
-    final editState = _appBarState.value.editState;
-    if (editState == null) {
-      return false;
-    }
-    return editState.editCount > 0;
-  }
-
-  bool get _hasActions {
-    return _appBarState.value.searchState != null ||
-        widget.primaryAction != null ||
-        widget.iconActions.isNotEmpty ||
-        widget.menuItems.isNotEmpty ||
-        widget.selectionActions.isNotEmpty ||
-        widget.actions?.isNotEmpty == true;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -135,38 +115,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       AppBarState(editState: widget.editState, searchState: widget.searchState),
     );
     _loadingNotifier.value = widget.isLoading;
-  }
-
-  Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
-    _appBarState.value = _appBarState.value.copyWith(
-      searchState: builder(_appBarState.value.searchState),
-    );
-  }
-
-  void handleToSearch() {
-    _updateSearchState((state) => state?.copyWith(query: ''));
-  }
-
-  Widget _buildSearchingAppBarTheme(Widget child) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    return Theme(
-      data: theme.copyWith(
-        appBarTheme: theme.appBarTheme.copyWith(
-          backgroundColor: colorScheme.surface,
-          iconTheme: theme.primaryIconTheme.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-          titleTextStyle: theme.textTheme.titleLarge,
-          toolbarTextStyle: theme.textTheme.bodyMedium,
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          hintStyle: theme.inputDecorationTheme.hintStyle,
-          border: InputBorder.none,
-        ),
-      ),
-      child: child,
-    );
   }
 
   @override
@@ -191,43 +139,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     }
   }
 
-  void _handleClearInput() {
-    _textController.text = '';
-    if (_appBarState.value.searchState != null) {
-      _appBarState.value.searchState!.onSearch('');
-    }
-  }
-
-  void _handleClear() {
-    if (_textController.text.isNotEmpty) {
-      _handleClearInput();
-      return;
-    }
-    _popAppBarLayer();
-  }
-
-  void handleExitSearching() {
-    if (!_isSearch) {
-      return;
-    }
-    _handleClearInput();
-    _updateSearchState((state) => state?.copyWith(query: null));
-  }
-
-  void _handleExitAppBarLayer() {
-    handleExitSearching();
-    if (_isEdit) {
-      _appBarState.value.editState?.onExit();
-    }
-  }
-
-  void _popAppBarLayer() {
-    if (!_isEdit && !_isSearch) {
-      return;
-    }
-    Navigator.of(context).pop();
-  }
-
   @override
   void dispose() {
     // Stop feeding a shared pane bar that outlives this scaffold, or it would
@@ -244,14 +155,92 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     _keywordsNotifier.dispose();
     super.dispose();
   }
+}
 
+/// The search/edit overlay the bar can enter: the state that flips the title
+/// into a field or a selection count, and the handlers that leave it again.
+mixin _AppBarLayerState on _CommonScaffoldStateBase {
+  bool get _isSearch {
+    return _appBarState.value.searchState?.query != null;
+  }
+  bool get _isEdit {
+    final editState = _appBarState.value.editState;
+    if (editState == null) {
+      return false;
+    }
+    return editState.editCount > 0;
+  }
+  Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
+    _appBarState.value = _appBarState.value.copyWith(
+      searchState: builder(_appBarState.value.searchState),
+    );
+  }
+  void handleToSearch() {
+    _updateSearchState((state) => state?.copyWith(query: ''));
+  }
+  Widget _buildSearchingAppBarTheme(Widget child) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    return Theme(
+      data: theme.copyWith(
+        appBarTheme: theme.appBarTheme.copyWith(
+          backgroundColor: colorScheme.surface,
+          iconTheme: theme.primaryIconTheme.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          titleTextStyle: theme.textTheme.titleLarge,
+          toolbarTextStyle: theme.textTheme.bodyMedium,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: theme.inputDecorationTheme.hintStyle,
+          border: InputBorder.none,
+        ),
+      ),
+      child: child,
+    );
+  }
+  void _handleClearInput() {
+    _textController.text = '';
+    if (_appBarState.value.searchState != null) {
+      _appBarState.value.searchState!.onSearch('');
+    }
+  }
+  void _handleClear() {
+    if (_textController.text.isNotEmpty) {
+      _handleClearInput();
+      return;
+    }
+    _popAppBarLayer();
+  }
+  void handleExitSearching() {
+    if (!_isSearch) {
+      return;
+    }
+    _handleClearInput();
+    _updateSearchState((state) => state?.copyWith(query: null));
+  }
+  void _handleExitAppBarLayer() {
+    handleExitSearching();
+    if (_isEdit) {
+      _appBarState.value.editState?.onExit();
+    }
+  }
+  void _popAppBarLayer() {
+    if (!_isEdit && !_isSearch) {
+      return;
+    }
+    Navigator.of(context).pop();
+  }
+}
+
+/// The dismissible keyword chips a view can push onto the bar.
+mixin _KeywordChipsState on _CommonScaffoldStateBase {
   void addKeyword(String keyword) {
     final isContains = _keywordsNotifier.value.contains(keyword);
     if (isContains) return;
     final keywords = List<String>.from(_keywordsNotifier.value)..add(keyword);
     _keywordsNotifier.value = keywords;
   }
-
   void _deleteKeyword(String keyword) {
     final isContains = _keywordsNotifier.value.contains(keyword);
     if (!isContains) return;
@@ -259,7 +248,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       ..remove(keyword);
     _keywordsNotifier.value = keywords;
   }
+}
 
+/// Builds the app bar itself: leading control, title, action cluster and the
+/// floating header wrap, plus the relay that feeds a chromeless pane bar.
+mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
   Widget _buildSheetPopButton(
     VoidCallback? backAction, {
     required bool useCloseIcon,
@@ -279,12 +272,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
             ),
     );
   }
-
   Widget? _buildLeading(VoidCallback? backAction, {required _SheetPop? pop}) {
     final button = _buildLeadingButton(backAction, pop: pop);
     return button == null ? null : Center(child: ElasticPress(child: button));
   }
-
   Widget? _buildLeadingButton(
     VoidCallback? backAction, {
     required _SheetPop? pop,
@@ -319,7 +310,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
           ).withAppTooltip(context.appLocalizations.back)
         : _autoLeadingButton();
   }
-
   /// Built by hand, not by `automaticallyImplyLeading`, so it can ride inside
   /// [ElasticPress].
   Widget? _autoLeadingButton() {
@@ -331,7 +321,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         ? (const CloseButton()).withAppTooltip(context.appLocalizations.close)
         : (const BackButton()).withAppTooltip(context.appLocalizations.back);
   }
-
   Widget _buildTitle(AppBarSearchState? startState) {
     if (_isSearch) {
       return _buildSearchField(startState);
@@ -345,7 +334,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     }
     return widget.titleWidget ?? Text(widget.title!);
   }
-
   /// The searching title: a filled pill that reveals out of the search button,
   /// its regex toggle moved into the action group beside the close button.
   Widget _buildSearchField(AppBarSearchState? startState) {
@@ -388,7 +376,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       ),
     );
   }
-
   List<Widget> _buildActions(
     IconButtonData? primaryAction,
     List<Widget> legacyActions,
@@ -500,7 +487,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         ),
     ], edge: AppBarActionEdge.container);
   }
-
   /// The searching action cluster: the regex toggle folds into one pill with
   /// the close button, so the extra controls read as a single grouped capsule.
   List<Widget> _buildSearchActions(AppBarSearchState? searchState) {
@@ -528,7 +514,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         ElasticPress(child: AppBarActionButton(data: data)),
     ], edge: AppBarActionEdge.container);
   }
-
   Widget _buildAppBarWrap(Widget child) {
     final appBar = TonalButtonTheme(
       child: _isSearch ? _buildSearchingAppBarTheme(child) : child,
@@ -538,7 +523,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     }
     return appBar;
   }
-
   Widget _buildFloatingHeader(Widget appBar) {
     final top = MediaQuery.paddingOf(context).top;
     return FloatingHeader(
@@ -548,7 +532,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       child: appBar,
     );
   }
-
   PreferredSizeWidget _buildAppBar(
     VoidCallback? backAction,
     _SheetForm form, {
@@ -614,7 +597,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       ),
     );
   }
-
   /// A chrome-suppressed pane keeps no app bar of its own, so its actions are
   /// built here and handed to the shared bar. The result stays reactive to
   /// edit/search/loading through the same [_appBarState] the real bar reads.
@@ -642,7 +624,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       },
     );
   }
-
   void _publishRelayActions(Widget actions, ValueNotifier<Widget?> sink) {
     _relaySink = sink;
     _relayedActions = actions;
@@ -651,6 +632,18 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         sink.value = actions;
       }
     });
+  }
+}
+
+class CommonScaffoldState extends _CommonScaffoldStateBase
+    with _AppBarLayerState, _KeywordChipsState, _AppBarBuilder {
+  bool get _hasActions {
+    return _appBarState.value.searchState != null ||
+        widget.primaryAction != null ||
+        widget.iconActions.isNotEmpty ||
+        widget.menuItems.isNotEmpty ||
+        widget.selectionActions.isNotEmpty ||
+        widget.actions?.isNotEmpty == true;
   }
 
   @override

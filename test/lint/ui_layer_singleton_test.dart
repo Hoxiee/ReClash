@@ -8,7 +8,7 @@ const _uiRoots = ['lib/views', 'lib/widgets'];
 const _forbidden = <String, String>{
   r'globalState\.container':
       'read providers through a WidgetRef, not the global container',
-  r'(?<![\w.])coreController\b':
+  r'(?<![\w.])coreHandlerInstance\b':
       'reach Core through coreHandlerProvider, not the global singleton',
 };
 

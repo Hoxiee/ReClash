@@ -21,7 +21,7 @@ class _DelayTestJob {
 
 @Riverpod(keepAlive: true)
 class ProxiesAction extends _$ProxiesAction {
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   final TaskPool _delayTestPool = TaskPool(maxConcurrentDelayTests);
 
@@ -249,9 +249,7 @@ class ProxiesAction extends _$ProxiesAction {
               .start(provider.updatingKey, scope: UpdatingScope.core)
         : null;
     try {
-      final message = await _core.updateExternalProvider(
-        providerName: provider.name,
-      );
+      final message = await _core.updateExternalProvider(provider.name);
       if (message.isNotEmpty) return message;
       ref
           .read(providersProvider.notifier)
@@ -373,7 +371,7 @@ class ProxiesAction extends _$ProxiesAction {
       return;
     }
     try {
-      final delay = await _core.getDelay(target.testUrl, target.proxyName);
+      final delay = await _core.asyncTestDelay(target.testUrl, target.proxyName);
       if (!job.cancelled) {
         setDelay(
           delay ??

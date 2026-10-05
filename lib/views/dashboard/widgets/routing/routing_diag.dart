@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -23,7 +23,7 @@ const _maxCatchUpPages = 64;
 
 Future<void> exportSmartRoutingLog(
   AppLocalizations l10n, {
-  required CoreController core,
+  required CoreHandlerInterface core,
   Future<RcxDiagBatch?> Function(int since)? reader,
 }) async {
   Future<RcxDiagBatch?> fetch(int since) => reader != null
@@ -110,7 +110,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
 
   static const _followThreshold = 48.0;
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   Duration get pollInterval => const Duration(seconds: 1);

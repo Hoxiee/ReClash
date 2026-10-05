@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/core/interface.dart';
@@ -79,13 +78,6 @@ class _FailingWindowsSetup extends _WindowsSetup {
   }
 }
 
-class _FailedInitController extends CoreController {
-  _FailedInitController(super.handler) : super.scoped();
-
-  @override
-  Future<bool> init(int version) async => false;
-}
-
 class _UnverifiedWindowsSetup extends _WindowsSetup {
   @override
   Future<bool?> requestAdmin(bool enableTun) async => true;
@@ -110,13 +102,13 @@ void main() {
     registerFallbackValue(const SetupParams(selectedMap: {}, testUrl: ''));
   });
 
-  void bind(_WindowsSetup setup, {CoreController? controller}) {
+  void bind(_WindowsSetup setup, {CoreHandlerInterface? handler}) {
     action = setup;
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
         coreHandlerProvider.overrideWithValue(
-          controller ?? CoreController.scoped(core),
+          handler ?? core,
         ),
         setupActionProvider.overrideWith(() => setup),
         commonActionProvider.overrideWith(_Common.new),
@@ -373,7 +365,8 @@ void main() {
   test('failed elevated init is surfaced through the real handoff', () async {
     container.dispose();
     owner = null;
-    bind(_WindowsSetup(), controller: _FailedInitController(core));
+    bind(_WindowsSetup(), handler: core);
+    when(() => core.initWithGeo(any())).thenAnswer((_) async => false);
     when(() => core.isInit).thenAnswer((_) async => false);
     when(() => core.restart()).thenAnswer((_) async {
       owner = CoreProcessOwner.windowsElevated;

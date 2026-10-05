@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -16,7 +16,7 @@ import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/test_app.dart';
 
-class _MockCore extends Mock implements CoreController {}
+class _MockCore extends Mock implements CoreHandlerInterface {}
 
 void main() {
   late _MockCore core;

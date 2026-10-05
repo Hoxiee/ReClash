@@ -20,3 +20,4 @@ export 'settings/resources.dart';
 export 'setup/setup.dart';
 export 'tools/scan.dart';
 export 'tools/tools.dart';
+export 'window_header.dart';

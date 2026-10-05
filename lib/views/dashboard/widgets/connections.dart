@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
-import 'package:reclash/core/method.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
@@ -25,7 +24,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard>
     with WidgetsBindingObserver, ActivePollingMixin<ConnectionsCard> {
   final _countNotifier = ValueNotifier(0);
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   Duration get pollInterval => const Duration(seconds: 2);

@@ -10,7 +10,7 @@ bool shouldRunAutoUpdateCheck(int lastCheckedAtMillis, DateTime now) {
 
 @Riverpod(keepAlive: true)
 class CommonAction extends _$CommonAction {
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
   bool _isUpdatingTraffic = false;
 
   @override

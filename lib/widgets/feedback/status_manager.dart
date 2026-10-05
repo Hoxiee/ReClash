@@ -510,7 +510,7 @@ class _MessageContent extends StatelessWidget {
       children: [
         if (icon != null) ...[
           GlyphIcon(icon, size: 20, color: level.iconColor(context)),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
         ],
         Flexible(
           child: Text(
@@ -523,7 +523,7 @@ class _MessageContent extends StatelessWidget {
           ),
         ),
         if (actionState != null) ...[
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           CommonMinFilledButtonTheme(
             child: FilledButton.tonal(
               onPressed: () {

@@ -4,17 +4,16 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/feedback/status_manager.dart';
 
 import '../helpers/glyph_finders.dart';
 
@@ -27,7 +26,7 @@ Future<ProviderContainer> _pumpGeoResourceAction(
   final container = ProviderContainer(
     overrides: [
       coreHandlerProvider.overrideWithValue(
-        CoreController.scoped(coreInterface),
+        coreInterface,
       ),
     ],
   );

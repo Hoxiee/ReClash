@@ -4,6 +4,8 @@ import 'package:reclash/application.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
+import 'package:reclash/views/window_header.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 const _leaf = SizedBox.shrink();
 

@@ -98,7 +98,7 @@ void main() {
         setupActionProvider.overrideWith(_RecordingSetupAction.new),
         connectionDoctorProvider.overrideWith(_RecordingDoctor.new),
         coreHandlerProvider.overrideWithValue(
-          CoreController.scoped(coreInterface),
+          coreInterface,
         ),
       ],
     );

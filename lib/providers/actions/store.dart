@@ -4,7 +4,7 @@ part of '../action.dart';
 class StoreAction extends _$StoreAction {
   final _preferencesScheduler = SerialTaskScheduler();
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   void build() {}

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
@@ -18,7 +18,7 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
-class _MockCore extends Mock implements CoreController {}
+class _MockCore extends Mock implements CoreHandlerInterface {}
 
 class _RestartAction extends CoreAction {
   int calls = 0;

@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
@@ -138,7 +138,7 @@ class DeviceIdentity {
 
   Future<String?> _readCoreVersion() async {
     try {
-      return await coreController.getVersion().timeout(_coreVersionTimeout);
+      return await coreHandlerInstance.getVersion().timeout(_coreVersionTimeout);
     } catch (error) {
       // The UA ships without the core segment until the core answers once.
       commonPrint.log(

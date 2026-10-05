@@ -2,7 +2,7 @@ part of '../action.dart';
 
 @Riverpod(keepAlive: true)
 class CoreAction extends _$CoreAction {
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   int _requestedRestartRevision = 0;
   Future<bool>? _restartOperation;
@@ -19,7 +19,7 @@ class CoreAction extends _$CoreAction {
 
     final version = ref.read(versionProvider);
     if (!isInit) {
-      final res = await _core.init(version);
+      final res = await _core.initWithGeo(version);
       commonPrint.log('init result: $res');
       if (!res && _core.processOwner == CoreProcessOwner.windowsElevated) {
         throw const WindowsLaunchException('windows_core_init_failed');
@@ -138,7 +138,7 @@ class CoreAction extends _$CoreAction {
   }
 
   Future<void> requestGc() async {
-    await _core.requestGc();
+    await _core.forceGc();
   }
 
   Future<void> crash() async {

@@ -5,12 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/core.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/proxies/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -45,13 +45,9 @@ void main() {
 
   setUpAll(() {
     core = _MockCoreHandlerInterface();
-    CoreController.resetInstance();
-    CoreController.test(core);
   });
 
   setUp(() => reset(core));
-
-  tearDownAll(CoreController.resetInstance);
 
   ProviderContainer containerFor(
     WidgetTester tester,
@@ -63,7 +59,9 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [coreHandlerProvider.overrideWithValue(core)],
+    );
     addTearDown(container.dispose);
     globalState.container = container;
     container.read(viewSizeProvider.notifier).update((_) => size);

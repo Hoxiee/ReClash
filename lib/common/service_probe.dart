@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:reclash/common/regional/regional.dart';
-import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/models/models.dart';
 
 const serviceProbeTimeout = Duration(seconds: 10);
@@ -260,7 +260,7 @@ class ServiceCheck {
 
 /// Runs the Core's service sweep; it owns concurrency and retries, so Dart only maps each item back to its target.
 Future<Map<ServiceTarget, ServiceCheck>> checkServices(
-  CoreController core, {
+  CoreHandlerInterface core, {
   String proxyName = '',
   List<ServiceTarget> targets = const [],
   Duration timeout = serviceProbeTimeout,
@@ -299,7 +299,7 @@ final Map<String, IpInfo Function(String)> outboundIpSources = {
 
 /// Raw so the route stamp survives; [parseOutboundIp] reads the address.
 Future<OutboundIpResult?> lookupOutboundIp(
-  CoreController core,
+  CoreHandlerInterface core,
   String proxyName, {
   Duration timeout = outboundIpTimeoutDuration,
 }) {

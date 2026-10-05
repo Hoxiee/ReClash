@@ -17,6 +17,7 @@ import 'package:reclash/manager/manager.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import 'views/views.dart';
 

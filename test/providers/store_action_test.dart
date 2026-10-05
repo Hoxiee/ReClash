@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/enum/enum.dart';
@@ -87,7 +86,7 @@ void main() {
   ProviderContainer buildContainer({List<Profile> profiles = const []}) {
     final container = ProviderContainer(
       overrides: [
-        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        coreHandlerProvider.overrideWithValue(core),
         systemActionProvider.overrideWith(_RecordingSystemAction.new),
         profilesProvider.overrideWith(() => _TestProfiles(profiles)),
       ],

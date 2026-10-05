@@ -7,7 +7,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -745,7 +744,7 @@ void main() {
             profilesProvider.overrideWith(() => TestProfiles([profile])),
             currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
             setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(SetupAction.new),
           ],
         );
@@ -792,7 +791,7 @@ void main() {
               (_, profileId) =>
                   nullProfileSetupState.copyWith(profileId: profileId),
             ),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(SetupAction.new),
           ],
         );
@@ -825,7 +824,7 @@ void main() {
           overrides: [
             currentProfileProvider.overrideWithValue(null),
             setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(SetupAction.new),
           ],
         );
@@ -853,7 +852,7 @@ void main() {
           overrides: [
             currentProfileProvider.overrideWithValue(null),
             setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(SetupAction.new),
           ],
         );
@@ -877,7 +876,7 @@ void main() {
           overrides: [
             currentProfileProvider.overrideWithValue(null),
             setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(
               _ListenerHandoffFailureSetupAction.new,
             ),
@@ -907,7 +906,7 @@ void main() {
           overrides: [
             currentProfileProvider.overrideWithValue(null),
             setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
-            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            coreHandlerProvider.overrideWithValue(core),
             setupActionProvider.overrideWith(_MessageFailureSetupAction.new),
           ],
         );

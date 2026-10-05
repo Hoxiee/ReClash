@@ -8,10 +8,8 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart'
     hide CaptionGlyph, CaptionIcon, captionGlyphSize;
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/theme_manager.dart';
-import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -19,6 +17,7 @@ import 'package:reclash/views/home/home.dart';
 import 'package:reclash/views/settings/application_setting.dart';
 import 'package:reclash/views/settings/navigation.dart';
 import 'package:reclash/views/tools/tools.dart';
+import 'package:reclash/views/window_header.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/glyph_finders.dart';

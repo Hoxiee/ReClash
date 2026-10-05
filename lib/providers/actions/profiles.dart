@@ -77,7 +77,7 @@ class ProfilesAction extends _$ProfilesAction {
   final _profileSchedulers = <int, SerialTaskScheduler>{};
   final _profileRevisions = <int, int>{};
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   void build() {}

@@ -16,7 +16,7 @@ class _RunRequest {
 
 @Riverpod(keepAlive: true)
 class SetupAction extends _$SetupAction {
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   Timer? _runtimeTimer;
   int _runtimeTick = 0;
@@ -552,7 +552,7 @@ class SetupAction extends _$SetupAction {
     );
     final configMap = profileId == null
         ? <String, dynamic>{}
-        : await _core.getConfig(profileId);
+        : await _core.getProfileConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
     final overrideNtp = ref.read(overrideNtpProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
@@ -932,7 +932,7 @@ class SetupAction extends _$SetupAction {
             await appPath.ensureProviderDirs(profileId);
           }
           if (!_authorizationIsCurrent(revision)) return;
-          final message = await _core.setupConfig(
+          final message = await _core.setupConfigWithPreload(
             params: _setupParams,
             preloadInvoke: preloadInvoke,
           );

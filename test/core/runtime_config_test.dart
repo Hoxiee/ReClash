@@ -2,27 +2,49 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
-import 'package:reclash/core/interface.dart';
+import 'package:reclash/core/core.dart';
 
-class _MockHandler extends Mock implements CoreHandlerInterface {}
+/// A concrete handler so the real [CoreHandlerActions.getAppliedConfigContent]
+/// runs; any core round-trip would hit [invokeMethod] and flip [touchedCore].
+class _FakeHandler extends CoreHandlerInterface {
+  bool touchedCore = false;
+
+  @override
+  Future<T?> invokeMethod<T>({
+    required CoreMethod method,
+    Object? arguments,
+    Duration? timeout,
+  }) async {
+    touchedCore = true;
+    throw StateError('unexpected core call: ${method.name}');
+  }
+
+  @override
+  Future<CoreLifecycleResult> start() => throw UnimplementedError();
+
+  @override
+  Future<CoreLifecycleResult> restart() => throw UnimplementedError();
+
+  @override
+  Future<CoreLifecycleResult> stop() => throw UnimplementedError();
+
+  @override
+  Future<CoreLifecycleResult> close() => throw UnimplementedError();
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory directory;
   late Completer<Directory> originalDataDir;
-  late CoreController controller;
-  late _MockHandler handler;
+  late _FakeHandler controller;
 
   setUp(() {
     directory = Directory.systemTemp.createTempSync('runtime-config-test-');
     originalDataDir = appPath.dataDir;
     appPath.dataDir = Completer<Directory>()..complete(directory);
-    handler = _MockHandler();
-    controller = CoreController.scoped(handler);
+    controller = _FakeHandler();
   });
 
   tearDown(() {
@@ -41,7 +63,7 @@ void main() {
 
       expect(await controller.getAppliedConfigContent(), yaml);
       expect(await file.readAsString(), yaml);
-      verifyZeroInteractions(handler);
+      expect(controller.touchedCore, isFalse);
     },
   );
 
@@ -50,6 +72,6 @@ void main() {
       controller.getAppliedConfigContent(),
       throwsA(isA<FileSystemException>()),
     );
-    verifyZeroInteractions(handler);
+    expect(controller.touchedCore, isFalse);
   });
 }

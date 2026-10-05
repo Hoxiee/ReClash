@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -567,7 +566,7 @@ ProviderContainer _containerWith(
   final container = ProviderContainer(
     overrides: [
       coreHandlerProvider.overrideWithValue(
-        CoreController.scoped(coreInterface),
+        coreInterface,
       ),
     ],
   );

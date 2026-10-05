@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 
 import 'desktop/model.dart';
+import 'handler_actions.dart';
 import 'method.dart';
 
 mixin CoreInterface {
@@ -148,7 +149,7 @@ mixin CoreInterface {
   FutureOr<bool> resetConnections();
 }
 
-abstract class CoreHandlerInterface with CoreInterface {
+abstract class CoreHandlerInterface with CoreInterface, CoreHandlerActions {
   Future<T?> _invokeMethod<T>({
     required CoreMethod method,
     Object? arguments,

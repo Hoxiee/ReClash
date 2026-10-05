@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -37,7 +37,7 @@ class _RoutingLiveViewState extends ConsumerState<RoutingLiveView>
   RcxReport? _report;
   bool _technical = false;
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   Duration get pollInterval => const Duration(seconds: 3);

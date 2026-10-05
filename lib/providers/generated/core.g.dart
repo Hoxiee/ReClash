@@ -13,8 +13,13 @@ part of '../core.dart';
 final coreHandlerProvider = CoreHandlerProvider._();
 
 final class CoreHandlerProvider
-    extends $FunctionalProvider<CoreController, CoreController, CoreController>
-    with $Provider<CoreController> {
+    extends
+        $FunctionalProvider<
+          CoreHandlerInterface,
+          CoreHandlerInterface,
+          CoreHandlerInterface
+        >
+    with $Provider<CoreHandlerInterface> {
   CoreHandlerProvider._()
     : super(
         from: null,
@@ -31,21 +36,22 @@ final class CoreHandlerProvider
 
   @$internal
   @override
-  $ProviderElement<CoreController> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<CoreHandlerInterface> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  CoreController create(Ref ref) {
+  CoreHandlerInterface create(Ref ref) {
     return coreHandler(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(CoreController value) {
+  Override overrideWithValue(CoreHandlerInterface value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<CoreController>(value),
+      providerOverride: $SyncValueProvider<CoreHandlerInterface>(value),
     );
   }
 }
 
-String _$coreHandlerHash() => r'b00cbd733d546e4edd1a0b9b98e9ace46da1eff2';
+String _$coreHandlerHash() => r'594b1e105a02bd2e415dca12b7b9448ff9141bfc';

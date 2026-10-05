@@ -5,7 +5,7 @@ class GeoResourceAction extends _$GeoResourceAction {
   final _manualUpdates = <GeoResource>{};
   final _operations = <GeoResource, int>{};
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   void build() {

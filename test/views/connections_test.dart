@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -57,7 +56,7 @@ void main() {
     core = MockCoreHandlerInterface();
     container = ProviderContainer(
       overrides: [
-        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        coreHandlerProvider.overrideWithValue(core),
         profilesProvider.overrideWith(TestProfiles.new),
       ],
     );

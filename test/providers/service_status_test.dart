@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/service_probe.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/core.dart';
@@ -49,7 +48,7 @@ void main() {
   void buildContainer({RouteState initial = route}) {
     container = ProviderContainer(
       overrides: [
-        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        coreHandlerProvider.overrideWithValue(core),
         routeTrackerProvider.overrideWith(() => _SeededRouteTracker(initial)),
       ],
     );

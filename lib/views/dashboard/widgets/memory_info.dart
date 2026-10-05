@@ -5,8 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
-import 'package:reclash/core/method.dart';
+import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -72,7 +71,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
     const MemorySnapshot(),
   );
 
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   @override
   Duration get pollInterval => const Duration(seconds: 2);
@@ -120,7 +119,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
 
   Future<int> _releaseMemory() async {
     final before = _memoryStateNotifier.value.total;
-    await _core.requestGc();
+    await _core.forceGc();
     final memory = await _readMemory();
     if (memory == null || !mounted) {
       return 0;

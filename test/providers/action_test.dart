@@ -9,7 +9,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
@@ -564,7 +563,7 @@ void main() {
           currentProfileIdProvider.overrideWithBuild((_, _) => null),
           profilesProvider.overrideWith(() => TestProfiles([original])),
           profilesActionProvider.overrideWith(() => action),
-          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreHandlerProvider.overrideWithValue(core),
         ],
       );
       addTearDown(container.dispose);
@@ -657,7 +656,7 @@ void main() {
       when(() => core.updateGeoData('MMDB')).thenAnswer((_) async => '');
       final container = ProviderContainer(
         overrides: [
-          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreHandlerProvider.overrideWithValue(core),
         ],
       );
       addTearDown(container.dispose);
@@ -675,7 +674,7 @@ void main() {
       ).thenThrow(StateError('disconnected'));
       final container = ProviderContainer(
         overrides: [
-          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreHandlerProvider.overrideWithValue(core),
         ],
       );
       addTearDown(container.dispose);
@@ -944,7 +943,7 @@ void main() {
       });
       final container = ProviderContainer(
         overrides: [
-          coreHandlerProvider.overrideWithValue(CoreController.scoped(handler)),
+          coreHandlerProvider.overrideWithValue(handler),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -973,7 +972,7 @@ void main() {
       });
       final container = ProviderContainer(
         overrides: [
-          coreHandlerProvider.overrideWithValue(CoreController.scoped(handler)),
+          coreHandlerProvider.overrideWithValue(handler),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -1033,7 +1032,7 @@ void main() {
         container = ProviderContainer(
           overrides: [
             coreHandlerProvider.overrideWithValue(
-              CoreController.scoped(coreInterface),
+              coreInterface,
             ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
@@ -1662,7 +1661,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           coreHandlerProvider.overrideWithValue(
-            CoreController.scoped(coreInterface),
+            coreInterface,
           ),
           setupActionProvider.overrideWith(() => action),
         ],

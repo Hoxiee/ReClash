@@ -2,7 +2,7 @@ part of '../action.dart';
 
 @Riverpod(keepAlive: true)
 class SystemAction extends _$SystemAction {
-  CoreController get _core => ref.read(coreHandlerProvider);
+  CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   SystemExitCoordinator? _exitCoordinator;
 
