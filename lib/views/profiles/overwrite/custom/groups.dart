@@ -620,10 +620,10 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
   }
 
   Future<void> _handleDelete(int profileId) async {
-    final res = await dialogs.showMessage(
-      message: TextSpan(text: context.appLocalizations.confirmDeleteProxyGroup),
+    final res = await dialogs.confirm(
+      context.appLocalizations.confirmDeleteProxyGroup,
     );
-    if (res == true && mounted) {
+    if (res && mounted) {
       final name = ref.read(proxyGroupProvider).name;
       ref.read(proxyGroupsProvider(profileId).notifier).del(name);
       context.safeNestedPop();

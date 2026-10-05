@@ -49,12 +49,12 @@ class NotificationComponentsEditor extends ConsumerWidget {
 
   Future<void> _handleReset(BuildContext context, WidgetRef ref) async {
     final l = context.appLocalizations;
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      l.resetTip,
       dangerous: true,
       title: l.reset,
-      message: TextSpan(text: l.resetTip),
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     _writeComponents(ref, defaultNotificationComponents);
@@ -201,7 +201,7 @@ class _ComponentItem extends ConsumerWidget {
             context,
             ref,
             component,
-            _RemoveButton(onPressed: () => _remove(ref)),
+            ConfigRemoveButton(onPressed: () => _remove(ref)),
             Text(_componentLabel(l, component.type)),
             subtitle,
             notice?.severe ?? false,
@@ -298,26 +298,6 @@ class _ComponentItem extends ConsumerWidget {
           invalid: invalid,
         );
     }
-  }
-}
-
-class _RemoveButton extends StatelessWidget {
-  const _RemoveButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return CommonMinIconButtonTheme(
-      child: ElasticButton(
-        child: IconButton.filledTonal(
-          tooltip: context.appLocalizations.remove,
-          onPressed: onPressed,
-          icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
-          padding: EdgeInsets.zero,
-        ).withAppTooltip(),
-      ),
-    );
   }
 }
 

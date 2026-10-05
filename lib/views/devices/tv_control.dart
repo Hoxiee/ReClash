@@ -12,6 +12,7 @@ import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'action_card.dart';
 import 'companion_ui.dart';
 
 // TV receiver settings: turn the LAN listener on, open a time-boxed pairing window with its QR,
@@ -81,24 +82,24 @@ class _TvControlViewState extends ConsumerState<TvControlView>
 
   Future<void> _revoke(CompanionTrustedPhone phone) async {
     final l = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      message: TextSpan(text: phone.clientName),
+    final confirmed = await dialogs.confirm(
+      phone.clientName,
       title: l.companionRevokePhone,
       dangerous: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await _receiver.revokeClient(phone.clientId);
     await _refresh();
   }
 
   Future<void> _resetIdentity() async {
     final l = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      message: TextSpan(text: l.companionResetIdentityDesc),
+    final confirmed = await dialogs.confirm(
+      l.companionResetIdentityDesc,
       title: l.companionResetIdentity,
       dangerous: true,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await _receiver.resetIdentity();
       await _refresh();
     }
@@ -123,7 +124,7 @@ class _TvControlViewState extends ConsumerState<TvControlView>
         onChanged: _busy ? null : (value) => unawaited(_toggle(value)),
       ),
       if (_running)
-        _ActionCard(
+        ActionCard(
           icon: AppGlyphs.qrCode,
           title: l.companionAddPhone,
           subtitle: l.companionScanTvQr,
@@ -139,7 +140,7 @@ class _TvControlViewState extends ConsumerState<TvControlView>
             onRevoke: () => unawaited(_revoke(phone)),
           ),
       if (_running)
-        _ActionCard(
+        ActionCard(
           icon: AppGlyphs.reset,
           title: l.companionResetIdentity,
           subtitle: l.companionResetIdentityDesc,
@@ -323,64 +324,6 @@ class _TrustedPhoneCard extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    this.tone,
-  });
-
-  final Glyph icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final Color? tone;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final accent = tone ?? colorScheme.primary;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.xl,
-      padding: AppInsets.lg,
-      onPressed: onTap,
-      child: Row(
-        children: [
-          AppMedallion(icon: icon, tone: accent),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  subtitle,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          GlyphIcon(
-            AppGlyphs.chevronForward,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _PairingWindowDialog extends StatefulWidget {
   const _PairingWindowDialog({required this.receiver, required this.offer});

@@ -13,8 +13,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
-import 'package:reclash/state.dart';
-import 'package:reclash/views/dashboard/widget_metrics.dart';
+import 'package:reclash/views/dashboard/widgets/dashboard_value_card.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 @immutable
@@ -146,65 +145,38 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return SizedBox(
-      height: DashboardWidgetMetrics.heightOf(context, 1),
-      child: RepaintBoundary(
-        child: CommonCard(
-          radius: DashboardWidgetMetrics.radiusOf(context),
-          infoPadding: DashboardWidgetMetrics.paddingOf(
-            context,
-          ).copyWith(bottom: 0),
-          info: Info(
-            glyph: AppGlyphs.memory,
-            label: appLocalizations.memoryInfo,
-          ),
-          onPressed: _showDetail,
-          child: Container(
-            padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height:
-                      globalState.measure.bodyMediumHeight *
-                          DashboardWidgetMetrics.textScaleOf(context) +
-                      2,
-                  child: ValueListenableBuilder(
-                    valueListenable: _memoryStateNotifier,
-                    builder: (_, memory, _) {
-                      final traffic = memory.total.traffic;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          // Half-width cells (compact grid, provider pair) can
-                          // be narrower than a large RSS reading; ellipsize the
-                          // figure instead of overflowing.
-                          Flexible(
-                            child: Text(
-                              traffic.value,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textTheme.bodyMedium?.toLight
-                                  .adjustSize(1),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(
-                            traffic.unit,
-                            style: context.textTheme.bodyMedium?.toLight
-                                .adjustSize(1),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+    return DashboardValueCard(
+      label: appLocalizations.memoryInfo,
+      glyph: AppGlyphs.memory,
+      onPressed: _showDetail,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      addRepaintBoundary: true,
+      child: ValueListenableBuilder(
+        valueListenable: _memoryStateNotifier,
+        builder: (_, memory, _) {
+          final traffic = memory.total.traffic;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // Half-width cells (compact grid, provider pair) can be narrower
+              // than a large RSS reading; ellipsize the figure instead of
+              // overflowing.
+              Flexible(
+                child: Text(
+                  traffic.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium?.toLight.adjustSize(1),
                 ),
-              ],
-            ),
-          ),
-        ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                traffic.unit,
+                style: context.textTheme.bodyMedium?.toLight.adjustSize(1),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -183,12 +183,12 @@ class _RoutingStudioViewState extends ConsumerState<RoutingStudioView> {
 
   Future<void> _handleReseedStrategy(BuildContext context) async {
     final appLocalizations = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
+    final confirmed = await dialogs.confirm(
+      appLocalizations.resetTip,
       dangerous: true,
       title: appLocalizations.reset,
-      message: TextSpan(text: appLocalizations.resetTip),
     );
-    if (confirmed != true) {
+    if (!confirmed) {
       return;
     }
     _update((state) => state.applyStrategy(state.strategy));

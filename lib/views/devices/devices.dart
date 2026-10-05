@@ -11,6 +11,7 @@ import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/views/tools/scan.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'action_card.dart';
 import 'companion_ui.dart';
 import 'control_panel.dart';
 import 'pairing.dart';
@@ -93,12 +94,12 @@ class _DevicesViewState extends ConsumerState<DevicesView>
 
   Future<void> _forget(CompanionTargetSummary target) async {
     final l = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      message: TextSpan(text: target.clientName),
+    final confirmed = await dialogs.confirm(
+      target.clientName,
       title: l.companionForgetDevice,
       dangerous: true,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await _client.forget(target.deviceId);
       restartPolling();
     }
@@ -170,13 +171,13 @@ class _DevicesViewState extends ConsumerState<DevicesView>
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final receiver = _ActionCard(
+    final receiver = ActionCard(
       icon: AppGlyphs.tethering,
       title: l.companionAddPhone,
       subtitle: l.companionEnableReceiver,
       onTap: () => unawaited(_openReceiver()),
     );
-    final addTv = _ActionCard(
+    final addTv = ActionCard(
       icon: AppGlyphs.add,
       title: l.companionAddTelevision,
       subtitle: l.companionScanTvQr,
@@ -234,61 +235,6 @@ class _GroupLabel extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final Glyph icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.xl,
-      padding: AppInsets.lg,
-      onPressed: onTap,
-      child: Row(
-        children: [
-          AppMedallion(icon: icon, tone: colorScheme.primary),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  subtitle,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          GlyphIcon(
-            AppGlyphs.chevronForward,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _DeviceCard extends StatelessWidget {
   const _DeviceCard({

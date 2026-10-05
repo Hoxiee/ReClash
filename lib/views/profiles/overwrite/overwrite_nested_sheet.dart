@@ -74,10 +74,10 @@ class _OverwriteNestedSheetState<T>
     try {
       final state = _nestedNavigatorKey.currentState;
       if (state != null && state.canPop()) {
-        final res = await dialogs.showMessage(
-          message: TextSpan(text: context.appLocalizations.confirmExitWindow),
+        final res = await dialogs.confirm(
+          context.appLocalizations.confirmExitWindow,
         );
-        if (res != true) {
+        if (!res) {
           return;
         }
       }
@@ -96,13 +96,13 @@ class _OverwriteNestedSheetState<T>
       Navigator.of(context).pop();
       return;
     }
-    final res = await dialogs.showMessage(
-      message: TextSpan(text: context.appLocalizations.dataChangedSave),
+    final res = await dialogs.confirm(
+      context.appLocalizations.dataChangedSave,
     );
     if (!mounted) {
       return;
     }
-    if (res != true) {
+    if (!res) {
       Navigator.of(context).pop();
       return;
     }

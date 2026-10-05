@@ -55,10 +55,10 @@ class DeveloperView extends ConsumerWidget {
             minVerticalPadding: 12,
             onTap: () async {
               final coreAction = ref.read(coreActionProvider.notifier);
-              final res = await dialogs.showMessage(
-                message: TextSpan(text: appLocalizations.confirmForceCrashCore),
+              final res = await dialogs.confirm(
+                appLocalizations.confirmForceCrashCore,
               );
-              if (res != true) {
+              if (!res) {
                 return;
               }
               unawaited(coreAction.crash());
@@ -69,10 +69,10 @@ class DeveloperView extends ConsumerWidget {
           title: Text(appLocalizations.clearData),
           onPressed: () async {
             final storeAction = ref.read(storeActionProvider.notifier);
-            final res = await dialogs.showMessage(
-              message: TextSpan(text: appLocalizations.confirmClearAllData),
+            final res = await dialogs.confirm(
+              appLocalizations.confirmClearAllData,
             );
-            if (res != true) {
+            if (!res) {
               return;
             }
             await storeAction.handleClear();

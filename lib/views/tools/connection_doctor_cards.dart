@@ -57,13 +57,13 @@ mixin _DoctorActionsMixin<T extends ConsumerStatefulWidget>
 
   Future<void> _exportReport() async {
     final appLocalizations = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
+    final confirmed = await dialogs.confirm(
+      appLocalizations.doctorExportConfirm,
       context: context,
       title: appLocalizations.doctorExportReport,
       confirmText: appLocalizations.doctorExportReport,
-      message: TextSpan(text: appLocalizations.doctorExportConfirm),
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     await _runAction('exportRedacted', () async {
       final report = await ref
           .read(connectionDoctorProvider.notifier)

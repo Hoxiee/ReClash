@@ -34,12 +34,12 @@ class RoutingLadderEditorSliver extends ConsumerWidget {
 
   Future<void> _reset(BuildContext context, WidgetRef ref) async {
     final l10n = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
+    final confirmed = await dialogs.confirm(
+      l10n.resetTip,
       dangerous: true,
       title: l10n.reset,
-      message: TextSpan(text: l10n.resetTip),
     );
-    if (confirmed != true) {
+    if (!confirmed) {
       return;
     }
     ref

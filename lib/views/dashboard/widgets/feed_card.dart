@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/state.dart';
-import 'package:reclash/views/dashboard/widget_metrics.dart';
+import 'package:reclash/views/dashboard/widgets/dashboard_value_card.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 /// A card for one of the live feeds: a label, its glyph and a single figure
@@ -26,32 +25,11 @@ class FeedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: DashboardWidgetMetrics.heightOf(context, 1),
-      child: CommonCard(
-        radius: DashboardWidgetMetrics.radiusOf(context),
-        infoPadding: DashboardWidgetMetrics.paddingOf(
-          context,
-        ).copyWith(bottom: 0),
-        info: Info(label: label, glyph: glyph),
-        onPressed: onPressed,
-        child: Container(
-          padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              SizedBox(
-                height:
-                    globalState.measure.bodyMediumHeight *
-                        DashboardWidgetMetrics.textScaleOf(context) +
-                    2,
-                child: child,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return DashboardValueCard(
+      label: label,
+      glyph: glyph,
+      onPressed: onPressed,
+      child: child,
     );
   }
 }

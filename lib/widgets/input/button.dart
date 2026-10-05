@@ -4,7 +4,9 @@ import 'package:reclash/icons/icons.dart';
 
 import '../base/builder.dart';
 import '../base/card.dart';
+import '../feedback/tooltip.dart';
 import '../nav/app_nav_bar.dart';
+import '../theme/theme.dart';
 
 class CommonFloatingActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -57,6 +59,28 @@ class CommonFloatingActionButton extends StatelessWidget {
             label: effectiveLabel,
           );
         },
+      ),
+    );
+  }
+}
+
+/// The filled-tonal remove control shared by config and settings list rows;
+/// the row supplies only the action its press performs.
+class ConfigRemoveButton extends StatelessWidget {
+  const ConfigRemoveButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonMinIconButtonTheme(
+      child: ElasticButton(
+        child: IconButton.filledTonal(
+          tooltip: context.appLocalizations.remove,
+          onPressed: onPressed,
+          icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
+          padding: EdgeInsets.zero,
+        ).withAppTooltip(),
       ),
     );
   }

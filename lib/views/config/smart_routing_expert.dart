@@ -408,12 +408,12 @@ Future<void> routingHandleFacetReset(
   RoutingFacetGroup group,
 ) async {
   final appLocalizations = context.appLocalizations;
-  final confirmed = await dialogs.showMessage(
+  final confirmed = await dialogs.confirm(
+    appLocalizations.resetTip,
     dangerous: true,
     title: appLocalizations.reset,
-    message: TextSpan(text: appLocalizations.resetTip),
   );
-  if (confirmed != true) {
+  if (!confirmed) {
     return;
   }
   ref
@@ -551,12 +551,12 @@ Future<void> _handleImport(BuildContext context, WidgetRef ref) async {
     );
     return;
   }
-  final confirmed = await dialogs.showMessage(
+  final confirmed = await dialogs.confirm(
+    appLocalizations.smartRoutingImportDesc,
     dangerous: true,
     title: appLocalizations.smartRoutingImport,
-    message: TextSpan(text: appLocalizations.smartRoutingImportDesc),
   );
-  if (confirmed != true) {
+  if (!confirmed) {
     return;
   }
   ref.read(smartRoutingSettingProvider.notifier).value = imported;

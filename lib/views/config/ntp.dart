@@ -117,25 +117,21 @@ class NtpView extends ConsumerWidget {
           );
       return true;
     } catch (error) {
-      final res = await dialogs.showMessage(
-        message: TextSpan(
-          text:
-              '${compactError(error)}\n\n'
-              '${currentAppLocalizations.discardChanges}',
-        ),
+      return dialogs.confirm(
+        '${compactError(error)}\n\n'
+        '${currentAppLocalizations.discardChanges}',
       );
-      return res == true;
     }
   }
 
   Future<void> _handleReset(BuildContext context, WidgetRef ref) async {
     final appLocalizations = context.appLocalizations;
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      appLocalizations.resetTip,
       dangerous: true,
       title: appLocalizations.reset,
-      message: TextSpan(text: appLocalizations.resetTip),
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     ref
@@ -367,22 +363,14 @@ class _RemoveButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return CommonMinIconButtonTheme(
-      child: ElasticButton(
-        child: IconButton.filledTonal(
-          tooltip: context.appLocalizations.remove,
-          onPressed: () => ref
-              .read(patchClashConfigProvider.notifier)
-              .update(
-                (state) => state.copyWith(
-                  ntpOverrideKeys: {...state.ntpOverrideKeys}
-                    ..remove(overrideKey),
-                ),
-              ),
-          icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
-          padding: EdgeInsets.zero,
-        ).withAppTooltip(),
-      ),
+    return ConfigRemoveButton(
+      onPressed: () => ref
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              ntpOverrideKeys: {...state.ntpOverrideKeys}..remove(overrideKey),
+            ),
+          ),
     );
   }
 }

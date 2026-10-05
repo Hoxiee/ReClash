@@ -76,12 +76,12 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       case LocationPermissionFollowUp.showDeniedMessage:
         break;
     }
-    final needGo = await dialogs.showMessage(
+    final needGo = await dialogs.confirm(
+      appLocalizations.locationPermissionDeniedMessage,
       title: appLocalizations.locationPermissionRequired,
-      message: TextSpan(text: appLocalizations.locationPermissionDeniedMessage),
       confirmText: appLocalizations.go,
     );
-    if (needGo != true) {
+    if (!needGo) {
       return;
     }
     unawaited(app?.openAppSettings());

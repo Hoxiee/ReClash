@@ -81,13 +81,11 @@ class _AccessViewState extends ConsumerState<AccessView> {
       return;
     }
     if (!granted) {
-      final res = await dialogs.showMessage(
-        message: TextSpan(
-          text: appLocalizations.installedAppsPermissionDeniedMessage,
-        ),
+      final res = await dialogs.confirm(
+        appLocalizations.installedAppsPermissionDeniedMessage,
         confirmText: appLocalizations.settings,
       );
-      if (res == true) {
+      if (res) {
         await app?.openAppSettings();
       }
       return;
@@ -191,11 +189,11 @@ class _AccessViewState extends ConsumerState<AccessView> {
 
   Future<void> _handleBack() async {
     final appLocalizations = context.appLocalizations;
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      appLocalizations.saveChanges,
       title: appLocalizations.tip,
-      message: TextSpan(text: appLocalizations.saveChanges),
     );
-    if (res == true) {
+    if (res) {
       _handleSave();
     }
     if (mounted) {

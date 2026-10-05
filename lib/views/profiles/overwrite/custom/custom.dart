@@ -12,10 +12,10 @@ class CustomContent extends ConsumerWidget {
   const CustomContent({super.key});
 
   void _handleUseDefault(WidgetRef ref, int profileId) async {
-    final res = await dialogs.showMessage(
-      message: TextSpan(text: currentAppLocalizations.confirmOverwriteTip),
+    final res = await dialogs.confirm(
+      currentAppLocalizations.confirmOverwriteTip,
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     final clashConfig = await ref.read(clashConfigProvider(profileId).future);

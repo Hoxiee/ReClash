@@ -44,6 +44,32 @@ class Dialogs {
     );
   }
 
+  /// A plain-text confirmation: wraps the message in a span and collapses the
+  /// nullable `bool?` to a decided `bool`, so call-sites drop the `TextSpan`
+  /// wrapper and the `== true` dance.
+  Future<bool> confirm(
+    String message, {
+    BuildContext? context,
+    String? title,
+    String? confirmText,
+    String? cancelText,
+    bool cancelable = true,
+    bool? dismissible,
+    bool dangerous = false,
+  }) async {
+    final result = await showMessage(
+      message: TextSpan(text: message),
+      context: context,
+      title: title,
+      confirmText: confirmText,
+      cancelText: cancelText,
+      cancelable: cancelable,
+      dismissible: dismissible,
+      dangerous: dangerous,
+    );
+    return result == true;
+  }
+
   Future<bool?> showMessage({
     required InlineSpan message,
     BuildContext? context,

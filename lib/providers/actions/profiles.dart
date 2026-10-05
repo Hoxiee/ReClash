@@ -339,18 +339,16 @@ class ProfilesAction extends _$ProfilesAction {
   }) async {
     if (panelMeta == null) return;
     if (panelMeta.hwidMaxDevicesReached) {
-      final confirmed = await dialogs.showMessage(
+      final confirmed = await dialogs.confirm(
+        panelMeta.announce.takeFirstValid([
+          currentAppLocalizations.deviceLimitReachedTip,
+        ]),
         title: currentAppLocalizations.deviceLimitReached,
-        message: TextSpan(
-          text: panelMeta.announce.takeFirstValid([
-            currentAppLocalizations.deviceLimitReachedTip,
-          ]),
-        ),
         confirmText: panelMeta.supportUrl != null
             ? currentAppLocalizations.support
             : null,
       );
-      if (confirmed == true && panelMeta.supportUrl != null) {
+      if (confirmed && panelMeta.supportUrl != null) {
         await dialogs.openUrl(panelMeta.supportUrl!);
       }
     } else if (onImport && panelMeta.hwidNotSupported) {
@@ -591,14 +589,11 @@ class ProfilesAction extends _$ProfilesAction {
       fetchProtected: transport.download,
       allowed: allowed,
       confirm: () async =>
-          await dialogs.showMessage(
+          dialogs.confirm(
+            currentAppLocalizations.subscriptionDirectRetryMessage,
             title: currentAppLocalizations.subscriptionDirectRetryTitle,
-            message: TextSpan(
-              text: currentAppLocalizations.subscriptionDirectRetryMessage,
-            ),
             confirmText: currentAppLocalizations.subscriptionDirectRetryConfirm,
-          ) ==
-          true,
+          ),
     ).fetch;
   }
 
@@ -658,15 +653,13 @@ class ProfilesAction extends _$ProfilesAction {
     if (tokens == null || tokens.isEmpty) return false;
     final requested = _panelSettings(tokens);
     if (requested.isEmpty) return false;
-    final confirmed = await dialogs.showMessage(
-      title: currentAppLocalizations.panelSettingsConfirmTitle,
-      message: TextSpan(
-        text: currentAppLocalizations.panelSettingsConfirmMessage(
-          requested.join('\n'),
-        ),
+    final confirmed = await dialogs.confirm(
+      currentAppLocalizations.panelSettingsConfirmMessage(
+        requested.join('\n'),
       ),
+      title: currentAppLocalizations.panelSettingsConfirmTitle,
     );
-    if (confirmed != true) return false;
+    if (!confirmed) return false;
     _applyPanelSettingsDefaults(tokens);
     return true;
   }

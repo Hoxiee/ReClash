@@ -129,11 +129,11 @@ class _HotKeyBarActions extends ConsumerWidget {
     required String message,
     required List<HotKeyAction> next,
   }) async {
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      message,
       dangerous: true,
-      message: TextSpan(text: message),
     );
-    if (res == true && context.mounted) {
+    if (res && context.mounted) {
       _setActions(ref, next);
     }
   }

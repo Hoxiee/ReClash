@@ -317,10 +317,10 @@ class ListEditingController extends ChangeNotifier {
   }
 
   Future<void> reset(BuildContext context) async {
-    final res = await dialogs.showMessage(
-      message: TextSpan(text: context.appLocalizations.resetPageChangesTip),
+    final res = await dialogs.confirm(
+      context.appLocalizations.resetPageChangesTip,
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     _update(_originItems);
@@ -516,10 +516,10 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
   }
 
   Future<void> _handleReset() async {
-    final res = await dialogs.showMessage(
-      message: TextSpan(text: context.appLocalizations.resetPageChangesTip),
+    final res = await dialogs.confirm(
+      context.appLocalizations.resetPageChangesTip,
     );
-    if (!mounted || res != true) {
+    if (!mounted || !res) {
       return;
     }
     _items = _originItems;

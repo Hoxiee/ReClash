@@ -339,11 +339,11 @@ class Bootstrap {
   Future<bool> _handleFailedPreference() async {
     if (await preferences.isInit) return true;
     await _showMandatoryUi();
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      currentAppLocalizations.cacheCorrupt,
       title: currentAppLocalizations.tip,
-      message: TextSpan(text: currentAppLocalizations.cacheCorrupt),
     );
-    if (res == true) {
+    if (res) {
       final file = File(await appPath.sharedPreferencesPath);
       await file.safeDelete();
     }

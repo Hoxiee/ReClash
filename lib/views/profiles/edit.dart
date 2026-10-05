@@ -102,11 +102,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     if (_fileData != null) {
       if (profile.type == ProfileType.url && _autoUpdate) {
         final appLocalizations = context.appLocalizations;
-        final res = await dialogs.showMessage(
+        final res = await dialogs.confirm(
+          appLocalizations.profileHasUpdate,
           title: appLocalizations.tip,
-          message: TextSpan(text: appLocalizations.profileHasUpdate),
         );
-        if (res == true) {
+        if (res) {
           profile = profile.copyWith(autoUpdate: false);
         }
       }
@@ -294,11 +294,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
 
   Future<void> _handleBack() async {
     final appLocalizations = context.appLocalizations;
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      appLocalizations.fileIsUpdate,
       title: appLocalizations.tip,
-      message: TextSpan(text: appLocalizations.fileIsUpdate),
     );
-    if (res == true) {
+    if (res) {
       unawaited(_handleConfirm());
     } else {
       if (mounted) {

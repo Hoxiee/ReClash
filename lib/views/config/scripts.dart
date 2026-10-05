@@ -24,13 +24,11 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
 
   Future<void> _handleDelete() async {
     final appLocalizations = context.appLocalizations;
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      appLocalizations.deleteMultipTip(appLocalizations.script),
       title: appLocalizations.tip,
-      message: TextSpan(
-        text: appLocalizations.deleteMultipTip(appLocalizations.script),
-      ),
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     final selectedScriptIds = ref.read(itemsProvider(_key)).cast<int>();

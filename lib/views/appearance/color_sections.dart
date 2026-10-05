@@ -63,11 +63,11 @@ class _AppearanceColorSectionsState
   }
 
   Future<void> _handleReset() async {
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      context.appLocalizations.resetTip,
       dangerous: true,
-      message: TextSpan(text: context.appLocalizations.resetTip),
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     _update(
@@ -85,13 +85,11 @@ class _AppearanceColorSectionsState
     if (removable == null) {
       return;
     }
-    final res = await dialogs.showMessage(
+    final res = await dialogs.confirm(
+      appLocalizations.deleteTip(appLocalizations.colorSchemes),
       dangerous: true,
-      message: TextSpan(
-        text: appLocalizations.deleteTip(appLocalizations.colorSchemes),
-      ),
     );
-    if (res != true) {
+    if (!res) {
       return;
     }
     _update((state) {
