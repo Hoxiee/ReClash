@@ -205,23 +205,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         _reconcilePage();
       }
     });
-    // A tool opened as a full-screen route or side sheet lives on a navigator
-    // chosen by the view width, so a breakpoint crossing strands it over a
-    // layout that no longer matches. Dismiss transient routes on the change.
-    ref.listenManual(viewModeProvider, (prev, next) {
-      if (prev == next) {
-        return;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        Navigator.of(
-          context,
-          rootNavigator: true,
-        ).popUntil((route) => route.isFirst);
-      });
-    });
+    // A breakpoint crossing never force-closes an open surface: dialogs, sheets
+    // and pushed tools all read the view mode and re-lay out in place, so a
+    // desktop window resized across the phone width keeps the user's work and
+    // their place instead of popping routes that may hold unsaved input.
   }
 
   @override

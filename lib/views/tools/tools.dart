@@ -127,8 +127,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         if (!mounted) {
           return;
         }
-        // Clear only this page's nested side sheet; the root navigator (the
-        // mobile full-screen route) is the home shell's to reset.
+        // Clear only this page's nested side sheet; a full-screen tool opened
+        // on the root navigator is left alone so a resize never closes it.
         if (next != ViewMode.mobile) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }

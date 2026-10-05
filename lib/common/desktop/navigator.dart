@@ -38,10 +38,15 @@ const _mobileRouteDuration = Duration(milliseconds: 300);
 const _mobileRouteReverseDuration = Duration(milliseconds: 240);
 
 class BaseNavigator {
-  static Future<T?> push<T>(BuildContext context, Widget child) async {
+  static Future<T?> push<T>(
+    BuildContext context,
+    Widget child, {
+    RouteSettings? settings,
+  }) async {
     if (!context.isMobileView) {
       return Navigator.of(context).push<T>(
         CommonDesktopRoute(
+          settings: settings,
           builder: (context) => child,
           transitionDuration: context.motionDuration(_desktopRouteDuration),
           reverseTransitionDuration: context.motionDuration(
@@ -52,6 +57,7 @@ class BaseNavigator {
     }
     return Navigator.of(context).push<T>(
       CommonRoute(
+        settings: settings,
         builder: (context) => child,
         transitionDuration: context.motionDuration(_mobileRouteDuration),
         reverseTransitionDuration: context.motionDuration(
@@ -70,6 +76,7 @@ const commonSharedXPageTransitions = SharedAxisPageTransitionsBuilder(
 class CommonDesktopRoute<T> extends PageRoute<T> {
   CommonDesktopRoute({
     required this.builder,
+    super.settings,
     this.transitionDuration = _desktopRouteDuration,
     this.reverseTransitionDuration = _desktopRouteDuration,
   });
@@ -118,6 +125,7 @@ class CommonDesktopRoute<T> extends PageRoute<T> {
 class CommonRoute<T> extends PageRoute<T> {
   CommonRoute({
     required this.builder,
+    super.settings,
     this.transitionDuration = _mobileRouteDuration,
     this.reverseTransitionDuration = _mobileRouteReverseDuration,
   });

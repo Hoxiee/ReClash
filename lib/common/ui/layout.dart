@@ -32,9 +32,13 @@ bool showsWindowHeader({
   return !(isMacOS && (version <= 10 || !isMobileView));
 }
 
-ViewMode getViewMode(double viewWidth) {
-  if (viewWidth <= maxMobileWidth) return ViewMode.mobile;
-  if (viewWidth <= maxLaptopWidth) return ViewMode.laptop;
+ViewMode getViewMode(Size viewSize) {
+  // A phone keeps its short side across rotation, so deciding the mobile shell
+  // on the shortest side keeps a landscape phone on the bottom bar instead of
+  // flipping to the rail and tearing down the page tree, the wizard, and any
+  // open tool. Width still separates laptop from desktop for content density.
+  if (viewSize.shortestSide <= maxMobileWidth) return ViewMode.mobile;
+  if (viewSize.width <= maxLaptopWidth) return ViewMode.laptop;
   return ViewMode.desktop;
 }
 

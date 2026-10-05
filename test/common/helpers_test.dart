@@ -136,15 +136,19 @@ void main() {
 
   group('getViewMode', () {
     test('mobile for small width', () {
-      expect(getViewMode(400).name, 'mobile');
+      expect(getViewMode(const Size(400, 800)).name, 'mobile');
     });
 
     test('laptop for medium width', () {
-      expect(getViewMode(700).name, 'laptop');
+      expect(getViewMode(const Size(700, 700)).name, 'laptop');
     });
 
     test('desktop for large width', () {
-      expect(getViewMode(1000).name, 'desktop');
+      expect(getViewMode(const Size(1000, 800)).name, 'desktop');
+    });
+
+    test('mobile when the short side stays a phone in landscape', () {
+      expect(getViewMode(const Size(900, 400)).name, 'mobile');
     });
   });
 

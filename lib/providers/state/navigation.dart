@@ -22,11 +22,10 @@ NavigationItemsState navigationItemsState(Ref ref) {
 
 @riverpod
 NavigationItemsState currentNavigationItemsState(Ref ref) {
-  final viewWidth = ref.watch(viewWidthProvider);
   final navigationItemsState = ref.watch(navigationItemsStateProvider);
-  final navigationItemMode = switch (viewWidth <= maxMobileWidth) {
-    true => NavigationItemMode.mobile,
-    false => NavigationItemMode.desktop,
+  final navigationItemMode = switch (ref.watch(viewModeProvider)) {
+    ViewMode.mobile => NavigationItemMode.mobile,
+    _ => NavigationItemMode.desktop,
   };
   return NavigationItemsState(
     value: navigationItemsState.value

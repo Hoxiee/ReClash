@@ -25,10 +25,15 @@ class SetupWizard extends ConsumerStatefulWidget {
 
   bool get revisit => mode == SetupWizardMode.revisit;
 
+  /// Names the route so a breakpoint crossing that resets stranded tools spares
+  /// the wizard, which owns the whole screen at any width.
+  static const routeName = 'setup-wizard';
+
   static Future<void> show(BuildContext context, {bool revisit = false}) =>
       BaseNavigator.push<void>(
         context,
         revisit ? const SetupWizard.revisit() : const SetupWizard(),
+        settings: const RouteSettings(name: routeName),
       );
 
   @override

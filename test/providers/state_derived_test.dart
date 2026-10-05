@@ -79,6 +79,20 @@ void main() {
       isNot(contains(PageLabel.connections)),
     );
 
+    // Rotating a phone keeps its short side, so the mobile tab set must not
+    // change when the width alone crosses the breakpoint in landscape.
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(900, 400));
+    expect(container.read(viewModeProvider), ViewMode.mobile);
+    expect(
+      container
+          .read(currentNavigationItemsStateProvider)
+          .value
+          .map((item) => item.label),
+      mobile.map((item) => item.label),
+    );
+
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(1200, 800));

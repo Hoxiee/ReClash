@@ -191,6 +191,68 @@ void main() {
   );
 
   testWidgets(
+    'a pushed route with unsaved input survives crossing the breakpoint',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final container = ProviderContainer(
+        overrides: [
+          navigationItemsStateProvider.overrideWithValue(
+            NavigationItemsState(
+              value: [
+                NavigationItem(
+                  glyph: AppGlyphs.dashboard,
+                  label: PageLabel.dashboard,
+                  builder: (_) => const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      globalState.container = container;
+      container.read(viewSizeProvider.notifier).value = const Size(1200, 800);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+        ),
+      );
+      await tester.pump();
+
+      Navigator.of(
+        tester.element(find.byType(HomePage)),
+        rootNavigator: true,
+      ).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              const Material(child: TextField(key: Key('resize-input'))),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('resize-input')), 'draft');
+      await tester.pump();
+      expect(find.text('draft'), findsOneWidget);
+
+      for (var width = 1180.0; width >= 380; width -= 20) {
+        tester.view.physicalSize = Size(width, 800);
+        container.read(viewSizeProvider.notifier).value = Size(width, 800);
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(tester.takeException(), isNull, reason: 'width: $width');
+      }
+      await tester.pump(const Duration(milliseconds: 301));
+
+      expect(find.byKey(const Key('resize-input')), findsOneWidget);
+      expect(find.text('draft'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'list content stays valid while resizing through the breakpoint',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
