@@ -273,7 +273,7 @@ class _DoctorToolRow extends StatelessWidget {
                     ),
                   ),
                   if (reason != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       reason!,
                       style: context.textTheme.bodySmall?.copyWith(
