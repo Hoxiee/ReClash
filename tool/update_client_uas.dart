@@ -70,7 +70,7 @@ final entries = <UaEntry>[
   ),
   const UaEntry(
     key: 'happ',
-    constName: '_happUa',
+    constName: 'happUserAgent',
     source: Manual('Happ ships no public release feed; check happ.su'),
   ),
   const UaEntry(

@@ -8,10 +8,13 @@ import 'package:reclash/enum/enum.dart';
 // actually served sing-box JSON.
 const legacyClashUserAgent = 'ClashForAndroid/2.5.12';
 const metaClashUserAgent = 'ClashMetaForAndroid/2.11.7.Meta';
-const _happUa = 'Happ/4.6.0';
 const _incyVersion = '3.3.1';
 const _v2rayngUa = 'v2rayNG/1.9.24';
 const _singboxUa = 'Karing/1.0.0';
+
+// Public so probe-order tests match on what the lib actually sends instead of
+// duplicating the version and rotting on the next manual bump.
+const happUserAgent = 'Happ/4.6.0';
 
 bool isNativeSubscriptionClient(SubscriptionClient client) => switch (client) {
   SubscriptionClient.auto ||
@@ -64,7 +67,7 @@ Map<String, String> buildSubscriptionHeaders(
     case SubscriptionClient.clash:
       headers['User-Agent'] = legacyClashUserAgent;
     case SubscriptionClient.happ:
-      headers['User-Agent'] = _happUa;
+      headers['User-Agent'] = happUserAgent;
     case SubscriptionClient.incy:
       headers['User-Agent'] = 'INCY/$_incyVersion/${deviceDetails.os}';
       headers['x-client'] = 'INCY';

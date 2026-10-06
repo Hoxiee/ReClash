@@ -473,6 +473,7 @@ void main() {
 
       final logItem = find.text('Logcat');
       await tester.scrollUntilVisible(logItem, 500, scrollable: toolsList);
+      await tester.pumpAndSettle();
       await tester.tap(logItem);
       await tester.pumpAndSettle();
 

@@ -23,10 +23,9 @@ NavigationItemsState navigationItemsState(Ref ref) {
 @riverpod
 NavigationItemsState currentNavigationItemsState(Ref ref) {
   final navigationItemsState = ref.watch(navigationItemsStateProvider);
-  // The surface, not the view mode, decides the strip: a landscape phone on a
-  // rail gets the full desktop set so requests, connections, DNS, and logs ride
-  // the rail instead of hiding inside Tools.
-  final navigationItemMode = ref.watch(isBarSurfaceProvider)
+  final compactBar =
+      ref.watch(isBarSurfaceProvider) && ref.watch(isMobileViewProvider);
+  final navigationItemMode = compactBar
       ? NavigationItemMode.mobile
       : NavigationItemMode.desktop;
   return NavigationItemsState(
@@ -65,30 +64,21 @@ DashboardState dashboardState(Ref ref) {
 
 @riverpod
 MoreToolsSelectorState moreToolsSelectorState(Ref ref) {
-  final isBar = ref.watch(isBarSurfaceProvider);
-  final navigationItems = ref
-      .watch(
-        navigationItemsStateProvider.select((state) {
-          return SelectValue(
-            state.value.where((element) {
-              final isMore = element.modes.contains(NavigationItemMode.more);
-              final isDesktop = element.modes.contains(
-                NavigationItemMode.desktop,
-              );
-              if (isMore && !isDesktop) return true;
-              // A rail hosts these items itself, so Tools only lists them while
-              // the bar is up and they have nowhere else to live.
-              if (!isBar || !isMore) {
-                return false;
-              }
-              return true;
-            }).toList(),
-          );
-        }),
+  final stripLabels = {
+    for (final item in ref.watch(currentNavigationItemsStateProvider).value)
+      item.label,
+  };
+  final items = ref
+      .watch(navigationItemsStateProvider)
+      .value
+      .where(
+        (element) =>
+            element.modes.contains(NavigationItemMode.more) &&
+            !stripLabels.contains(element.label),
       )
-      .value;
+      .toList();
 
-  return MoreToolsSelectorState(navigationItems: navigationItems);
+  return MoreToolsSelectorState(navigationItems: items);
 }
 
 @riverpod

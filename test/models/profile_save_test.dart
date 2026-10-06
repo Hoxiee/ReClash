@@ -303,7 +303,7 @@ void main() {
           userAgents.add(headers!['User-Agent']!);
           return _response(
             url,
-            headers['User-Agent'] == _happUserAgent
+            headers['User-Agent'] == happUserAgent
                 ? 'proxies:\n'
                       '  - {name: node, type: socks5, server: node.example, '
                       'port: 1080}'
@@ -318,7 +318,7 @@ void main() {
         'ReClash/v1.0.0',
         metaClashUserAgent,
         legacyClashUserAgent,
-        _happUserAgent,
+        happUserAgent,
       ]);
       expect(updated.lastWorkingClient, SubscriptionClient.happ);
       expect(
@@ -975,8 +975,6 @@ AllowedIPs = 0.0.0.0/0, ::/0
     });
   });
 }
-
-const _happUserAgent = 'Happ/4.4.1';
 
 String _capabilityHeader(List<Map<String, Object?>> claims) {
   final payload = base64Url

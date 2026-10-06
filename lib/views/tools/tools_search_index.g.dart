@@ -260,6 +260,12 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       gate: 'always',
     ),
     DeepSettingSpec(
+      title: l.privacyMode,
+      paneId: 'application',
+      category: 'application',
+      gate: 'always',
+    ),
+    DeepSettingSpec(
       title: l.preventDuplicateProfiles,
       paneId: 'application',
       category: 'application',

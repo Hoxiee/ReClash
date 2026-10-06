@@ -1777,7 +1777,7 @@ final class CurrentNavigationItemsStateProvider
 }
 
 String _$currentNavigationItemsStateHash() =>
-    r'96a9b3a5fccad5bf3b646feaebee587059089f5a';
+    r'1360eedff97fbe380799d524591e54c474d0dcc0';
 
 @ProviderFor(navigationState)
 final navigationStateProvider = NavigationStateProvider._();
@@ -1908,7 +1908,7 @@ final class MoreToolsSelectorStateProvider
 }
 
 String _$moreToolsSelectorStateHash() =>
-    r'39d748f87d88b525d71cbf1bf7964c71b3f7b57a';
+    r'1bc95847fd69654a3b3bc44a34400e91ad1e5705';
 
 @ProviderFor(isCurrentPage)
 final isCurrentPageProvider = IsCurrentPageFamily._();

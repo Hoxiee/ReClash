@@ -163,6 +163,42 @@ void main() {
     expect(barTools, contains(PageLabel.connections));
   });
 
+  test('a wide bar carries the observability tabs instead of Tools', () {
+    final wideBarBox = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        navSurfaceProvider.overrideWithValue(NavSurface.bar),
+      ],
+    );
+    addTearDown(wideBarBox.dispose);
+    wideBarBox
+        .read(appSettingProvider.notifier)
+        .update((s) => s.copyWith(openLogs: true));
+    wideBarBox
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(800, 1280));
+
+    final wideBarTabs = wideBarBox
+        .read(currentNavigationItemsStateProvider)
+        .value
+        .map((item) => item.label);
+    expect(
+      wideBarTabs,
+      containsAll([
+        PageLabel.requests,
+        PageLabel.connections,
+        PageLabel.dns,
+        PageLabel.logs,
+      ]),
+    );
+    final wideBarTools = wideBarBox
+        .read(moreToolsSelectorStateProvider)
+        .navigationItems
+        .map((item) => item.label);
+    expect(wideBarTools, isNot(contains(PageLabel.connections)));
+    expect(wideBarTools, contains(PageLabel.resources));
+  });
+
   test('layout and page state providers compose their dependencies', () {
     final profile = Profile.normal(label: 'Primary');
     _profiles(container).replace([profile]);
