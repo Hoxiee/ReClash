@@ -110,6 +110,21 @@ String subscriptionClientLabel(
   SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
 };
 
+String subscriptionClientHint(
+  SubscriptionClient client,
+  AppLocalizations appLocalizations,
+) => switch (client) {
+  SubscriptionClient.auto => appLocalizations.subscriptionClientAutoHint,
+  SubscriptionClient.clashMeta ||
+  SubscriptionClient.clash => appLocalizations.subscriptionClientNativeHint,
+  SubscriptionClient.happ => appLocalizations.subscriptionClientHappHint,
+  SubscriptionClient.incy => appLocalizations.subscriptionClientIncyHint,
+  SubscriptionClient.singbox => appLocalizations.subscriptionClientSingboxHint,
+  SubscriptionClient.v2rayng =>
+    appLocalizations.subscriptionClientV2rayngHint,
+  SubscriptionClient.custom => appLocalizations.subscriptionClientCustomHint,
+};
+
 String incyLinkErrorMessage(
   IncyLinkException _,
   AppLocalizations appLocalizations,

@@ -301,26 +301,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Жоғары тұрған жол: ${step}";
 
-  static String m123(host) => "Провайдер ${host} мекенжайына көшкен";
+  static String m124(host) => "Провайдер ${host} мекенжайына көшкен";
 
-  static String m124(count) =>
+  static String m125(count) =>
       "${Intl.plural(count, one: 'Жазылыс мерзімі ертең аяқталады', other: 'Жазылыс мерзімі ${count} күннен кейін аяқталады')}";
 
-  static String m125(value) => "Провайдер ${value} ұсынады";
+  static String m126(value) => "Провайдер ${value} ұсынады";
 
-  static String m126(percent) => "Трафиктің ${percent}% жұмсалды";
+  static String m127(percent) => "Трафиктің ${percent}% жұмсалды";
 
-  static String m127(count) =>
+  static String m128(count) =>
       "${Intl.plural(count, zero: 'Нәтиже жоқ', one: '1 нәтиже', other: '${count} нәтиже')}";
 
-  static String m128(total) => "${total} ішінен бос";
+  static String m129(total) => "${total} ішінен бос";
 
-  static String m129(label) => "${label} URL болуы керек";
-
-  static String m130(count) =>
-      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+  static String m130(label) => "${label} URL болуы керек";
 
   static String m131(count) =>
+      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+
+  static String m132(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -4516,12 +4516,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданба жазылысты осы клиенттің пішімінде сұрайды",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "Тәжірибелік",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "Басқа клиенттермен үйлесімділік — тәжірибелік мүмкіндік: провайдер таңдалған клиент пішімін береді, ReClash оны түрлендіреді.",
-    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
@@ -4548,11 +4542,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPN-ді айналып өтіп қайталау керек пе?",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі аяқталды",
     ),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі бүгін аяқталады",
     ),
@@ -4604,7 +4598,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Жазылыс ескертулері",
     ),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("Жазылым есебі"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "Тек анонимдендірілген диагностика — жазылым URL мекенжайы, түйіндердің нақты атаулары мен мекенжайларынсыз. Ақау себебін анықтауға көмектесу үшін оны провайдеріңізбен бөлісіңіз.",
@@ -4636,7 +4630,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Жаңарту ақаулары",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Жазылымда қалыпты түйін мекенжайлары табылмады. Панель уақытша бос конфигурация қайтарған болуы мүмкін. Серверлерге қосылу тексерілмеді.",
     ),
@@ -4707,7 +4701,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsNoResults": MessageLookupByLibrary.simpleMessage("Ештеңе табылмады"),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("Шолу"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("Құралдарды іздеу"),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Оны осы жерде көру үшін параметрді таңдаңыз.",
     ),
@@ -4717,7 +4711,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Жалпы трафик"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash әртүрлі елдердің адамдары пайдалана алатындай сіздің тіліңізде сөйлейді. Қандай да бір сөз тіркесі көзге оғаш көрінсе — жазыңыз, түзетеміз.",
@@ -4813,7 +4807,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Тоқтатылған болса қосады, істеп тұрса ажыратады",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -4863,7 +4857,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Суреттің мөлдір еместігі",
     ),
@@ -4942,7 +4936,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Алынған уақытты жүйелік сағатпен синхрондау",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };
 }

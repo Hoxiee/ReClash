@@ -308,26 +308,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Yuqoriroq turgan qator: ${step}";
 
-  static String m123(host) => "Provayder ${host} manziliga koʻchdi";
+  static String m124(host) => "Provayder ${host} manziliga koʻchdi";
 
-  static String m124(count) =>
+  static String m125(count) =>
       "${Intl.plural(count, one: 'Obunangiz muddati ertaga tugaydi', other: 'Obunangiz muddati ${count} kundan soʻng tugaydi')}";
 
-  static String m125(value) => "Provayder tavsiya qiladi: ${value}";
+  static String m126(value) => "Provayder tavsiya qiladi: ${value}";
 
-  static String m126(percent) => "Trafikning ${percent}% ishlatildi";
+  static String m127(percent) => "Trafikning ${percent}% ishlatildi";
 
-  static String m127(count) =>
+  static String m128(count) =>
       "${Intl.plural(count, zero: 'Natija yoʻq', one: '1 natija', other: '${count} natija')}";
 
-  static String m128(total) => "${total} ichidan boʻsh";
+  static String m129(total) => "${total} ichidan boʻsh";
 
-  static String m129(label) => "${label} URL boʻlishi kerak";
-
-  static String m130(count) =>
-      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+  static String m130(label) => "${label} URL boʻlishi kerak";
 
   static String m131(count) =>
+      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+
+  static String m132(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -4623,12 +4623,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova obunani aynan shu mijoz formatida soʻraydi",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "Tajriba",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "Boshqa klientlar bilan moslik tajriba imkoniyatidir: provayder tanlangan klient formatini yuboradi, ReClash uni o‘giradi.",
-    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
@@ -4655,11 +4649,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPNni chetlab qayta urinish kerakmi?",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Obunangiz muddati tugagan",
     ),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Obunangiz muddati bugun tugaydi",
     ),
@@ -4711,7 +4705,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Obuna eslatmalari",
     ),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Obuna hisoboti",
     ),
@@ -4745,7 +4739,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Yangilanish nosozliklari",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Obunada odatiy tugun manzillari topilmadi. Panel vaqtinchalik bo‘sh konfiguratsiya qaytargan bo‘lishi mumkin. Serverlarga ulanish tekshirilmadi.",
     ),
@@ -4824,7 +4818,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage(
       "Vositalarni qidirish",
     ),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Bu yerda ko‘rish uchun sozlamani tanlang.",
     ),
@@ -4834,7 +4828,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jami trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafik"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
@@ -4936,7 +4930,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Oʻchiq boʻlsa ulaydi, yoniq boʻlsa uzadi",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -4990,7 +4984,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -5071,7 +5065,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Olingan vaqtni tizim soatiga sinxronlash",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",
     ),

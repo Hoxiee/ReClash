@@ -332,12 +332,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ),
         if (_autoUpdate)
           _AutoUpdateIntervalField(controller: _autoUpdateDurationController),
-        if (kEnableSubscriptionConverter)
-          _ClientCompatibilityItem(
-            selected: _clientCompatibility,
-            onChanged: _setClientCompatibility,
-            customUserAgentController: _customUserAgentController,
-          ),
+        _ClientCompatibilityItem(
+          selected: _clientCompatibility,
+          onChanged: _setClientCompatibility,
+          customUserAgentController: _customUserAgentController,
+          resolvedClient: widget.profile.lastWorkingClient,
+        ),
       ],
       _ProfileFileItem(
         fileInfoNotifier: _fileInfoNotifier,
@@ -486,11 +486,13 @@ class _ClientCompatibilityItem extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     required this.customUserAgentController,
+    this.resolvedClient,
   });
 
   final SubscriptionClient selected;
   final ValueChanged<SubscriptionClient> onChanged;
   final TextEditingController customUserAgentController;
+  final SubscriptionClient? resolvedClient;
 
   @override
   Widget build(BuildContext context) {
@@ -500,6 +502,7 @@ class _ClientCompatibilityItem extends StatelessWidget {
         selected: selected,
         onChanged: onChanged,
         customUserAgentController: customUserAgentController,
+        resolvedClient: resolvedClient,
       ),
     );
   }

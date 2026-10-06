@@ -299,26 +299,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Ranks higher at: ${step}";
 
-  static String m123(host) => "The provider moved to ${host}";
+  static String m123(client) => "Auto settled on ${client}";
 
-  static String m124(count) =>
+  static String m124(host) => "The provider moved to ${host}";
+
+  static String m125(count) =>
       "${Intl.plural(count, one: 'Your subscription expires tomorrow', other: 'Your subscription expires in ${count} days')}";
 
-  static String m125(value) => "The provider suggests ${value}";
+  static String m126(value) => "The provider suggests ${value}";
 
-  static String m126(percent) => "You have used ${percent}% of your traffic";
+  static String m127(percent) => "You have used ${percent}% of your traffic";
 
-  static String m127(count) =>
+  static String m128(count) =>
       "${Intl.plural(count, zero: 'No results', one: '1 result', other: '${count} results')}";
 
-  static String m128(total) => "free of ${total}";
+  static String m129(total) => "free of ${total}";
 
-  static String m129(label) => "${label} must be a URL";
-
-  static String m130(count) =>
-      "You can keep up to ${count} backgrounds. Remove one to add another.";
+  static String m130(label) => "${label} must be a URL";
 
   static String m131(count) =>
+      "You can keep up to ${count} backgrounds. Remove one to add another.";
+
+  static String m132(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -4356,30 +4358,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Subscription"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Auto"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "Requests as ReClash and detects the format, falling back through the presets below.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("Compatibility"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Custom"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "Sends the User-Agent you set below, for a panel that keys off a specific client.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "The app requests the subscription in this client\'s format",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "Experimental",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "Client compatibility is experimental: the provider serves another client\'s format, which ReClash converts.",
-    ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Compatibility presets make ReClash impersonate another app so the panel serves that client\'s format, which ReClash then converts. Use one only when a normal request does not return nodes.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Impersonates the Happ app for panels that only serve its format.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "Impersonates the INCY app for panels tailored to it.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
       "Client format",
     ),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "Native formats",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "A Clash-family format ReClash reads directly.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Pin"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "Impersonates a sing-box client; the panel answers with sing-box JSON.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "Impersonates v2rayNG; the panel answers with a base64 node list.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "This subscription\'s configuration is invalid and cannot be used. Contact your provider\'s support.",
@@ -4396,11 +4424,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "Retry outside the VPN?",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Your subscription expires today",
     ),
@@ -4452,7 +4480,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Subscription reminders",
     ),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Subscription report",
     ),
@@ -4484,7 +4512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Update failures",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.",
     ),
@@ -4549,7 +4577,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("Overview"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("Search tools"),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Select a setting to view it here.",
     ),
@@ -4559,7 +4587,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -4653,7 +4681,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Connect if stopped, disconnect if running",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -4703,7 +4731,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose a valid PNG, JPEG or WebP image.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("Orb opacity"),
     "wallpaperProviderPriority": MessageLookupByLibrary.simpleMessage(
@@ -4772,7 +4800,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Sync the resolved time to the system clock",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

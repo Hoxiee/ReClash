@@ -274,24 +274,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "上位の行: ${step}";
 
-  static String m123(host) => "プロバイダーは ${host} に移転しました";
+  static String m123(client) => "自動は ${client} を選びました";
 
-  static String m124(count) => "サブスクリプションは ${count} 日後に期限切れになります";
+  static String m124(host) => "プロバイダーは ${host} に移転しました";
 
-  static String m125(value) => "プロバイダーの推奨は ${value} です";
+  static String m125(count) => "サブスクリプションは ${count} 日後に期限切れになります";
 
-  static String m126(percent) => "データ通信量の ${percent}% を使用しました";
+  static String m126(value) => "プロバイダーの推奨は ${value} です";
 
-  static String m127(count) =>
+  static String m127(percent) => "データ通信量の ${percent}% を使用しました";
+
+  static String m128(count) =>
       "${Intl.plural(count, zero: '結果なし', one: '1 件', other: '${count} 件')}";
 
-  static String m128(total) => "残り（${total} 中）";
+  static String m129(total) => "残り（${total} 中）";
 
-  static String m129(label) => "${label}はURLである必要があります";
+  static String m130(label) => "${label}はURLである必要があります";
 
-  static String m130(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+  static String m131(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
 
-  static String m131(count) => "${count} 年前";
+  static String m132(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -3668,28 +3670,54 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("送信"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("サブスクリプション"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("自動"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash として要求し形式を自動判別し、必要なら下のプリセットを順に試します。",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("互換モード"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("カスタム"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "特定のクライアントに依存するパネル向けに、下で設定した User-Agent を送信します。",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "このクライアントの形式で購読を取得します",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "実験的",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "他のクライアントとの互換性は実験的です。プロバイダーが選択したクライアントの形式を返し、ReClash が変換します。",
-    ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "互換プリセットは ReClash を別のアプリとして偽装させ、パネルにそのクライアントの形式を返させてから ReClash が変換します。通常のリクエストでノードが返らない場合にのみ使用してください。",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Happ アプリを偽装し、その形式のみを返すパネル向けです。",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "INCY アプリを偽装し、それ向けに調整されたパネル向けです。",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage("クライアント形式"),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "ネイティブ形式",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash が直接読み込める Clash 系の形式です。",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("固定"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "sing-box クライアントを偽装します。パネルは sing-box JSON で応答します。",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG を偽装します。パネルは base64 のノード一覧で応答します。",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションの設定は無効で使用できません。プロバイダーのサポートにお問い合わせください。",
@@ -3706,11 +3734,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPN を経由せずに再試行しますか？",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションの有効期限が切れました",
     ),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションは本日期限切れになります",
     ),
@@ -3760,7 +3788,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのリマインダー",
     ),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("サブスクリプションレポート"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "匿名化された診断情報のみです。サブスクリプションの URL、実際のノード名、アドレスは含まれません。原因の特定に役立つよう、プロバイダーに共有してください。",
@@ -3788,7 +3816,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新の失敗",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションに通常のノードアドレスが見つかりません。パネルが仮の設定を返した可能性があります。サーバーへの接続はテストしていません。",
     ),
@@ -3839,7 +3867,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsNoResults": MessageLookupByLibrary.simpleMessage("一致する項目がありません"),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("概要"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("ツールを検索"),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "設定を選択すると、ここに表示されます。",
     ),
@@ -3849,7 +3877,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("合計トラフィック"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("トラフィック"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -3927,7 +3955,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "停止中なら接続、実行中なら切断します",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("使用済みトラフィック"),
@@ -3967,7 +3995,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("オーブの不透明度"),
     "wallpaperProviderPriority": MessageLookupByLibrary.simpleMessage(
@@ -4034,7 +4062,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "取得した時刻をシステムクロックに同期します",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

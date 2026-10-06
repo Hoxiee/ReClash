@@ -338,7 +338,7 @@ class URLFormDialog extends StatefulWidget {
   const URLFormDialog({
     super.key,
     required this.onSubmit,
-    this.showClientPresets = kEnableSubscriptionConverter,
+    this.showClientPresets = true,
   });
 
   final bool showClientPresets;

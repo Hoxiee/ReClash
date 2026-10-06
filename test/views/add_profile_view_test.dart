@@ -387,7 +387,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.byTooltip(currentAppLocalizations.showMore),
-      kEnableSubscriptionConverter ? findsOneWidget : findsNothing,
+      findsOneWidget,
     );
 
     await tester.enterText(
@@ -497,6 +497,12 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.subscriptionClientHapp));
     await tester.pumpAndSettle();
 
+    // A compatibility preset is experimental; one consent gates the switch.
+    await tester.tap(
+      find.text(currentAppLocalizations.experimentalEnable),
+    );
+    await tester.pumpAndSettle();
+
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text(currentAppLocalizations.submit), findsOne);
 
@@ -505,6 +511,68 @@ void main() {
 
     expect(find.byType(URLFormDialog), findsNothing);
     expect(popped?.client, SubscriptionClient.happ);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('URL import dialog reverts a declined compatibility preset', (
+    tester,
+  ) async {
+    final container = _containerFor(tester);
+    URLFormDialogResult? popped;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  await showDialog<Profile>(
+                    context: context,
+                    builder: (_) => URLFormDialog(
+                      showClientPresets: true,
+                      onSubmit: (value) async {
+                        popped = value;
+                        return _imported;
+                      },
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(currentAppLocalizations.showMore));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextField).first,
+      'https://example.com/profile',
+    );
+    await tester.tap(find.text(currentAppLocalizations.subscriptionClientHapp));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(currentAppLocalizations.cancel));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(currentAppLocalizations.submit));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(URLFormDialog), findsNothing);
+    expect(
+      popped?.client,
+      SubscriptionClient.auto,
+      reason: 'declining the notice keeps the native preset',
+    );
     expect(tester.takeException(), null);
   });
 

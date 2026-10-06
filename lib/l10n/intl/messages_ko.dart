@@ -284,26 +284,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "더 높은 줄: ${step}";
 
-  static String m123(host) => "제공자가 ${host}(으)로 이동했습니다";
+  static String m124(host) => "제공자가 ${host}(으)로 이동했습니다";
 
-  static String m124(count) =>
+  static String m125(count) =>
       "${Intl.plural(count, one: '구독이 내일 만료됩니다', other: '구독이 ${count}일 후에 만료됩니다')}";
 
-  static String m125(value) => "제공자 권장값: ${value}";
+  static String m126(value) => "제공자 권장값: ${value}";
 
-  static String m126(percent) => "트래픽의 ${percent}%를 사용했습니다";
+  static String m127(percent) => "트래픽의 ${percent}%를 사용했습니다";
 
-  static String m127(count) =>
+  static String m128(count) =>
       "${Intl.plural(count, zero: '결과 없음', one: '결과 1개', other: '결과 ${count}개')}";
 
-  static String m128(total) => "전체 ${total} 중 사용 가능";
+  static String m129(total) => "전체 ${total} 중 사용 가능";
 
-  static String m129(label) => "${label}은(는) URL이어야 합니다";
-
-  static String m130(count) =>
-      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
+  static String m130(label) => "${label}은(는) URL이어야 합니다";
 
   static String m131(count) =>
+      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
+
+  static String m132(count) =>
       "${Intl.plural(count, one: '1년 전', other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -3639,12 +3639,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "구독을 요청할 때 이 클라이언트 형식을 사용합니다",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "실험적",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "다른 클라이언트와의 호환성은 실험적 기능입니다. 제공자가 선택한 클라이언트 형식을 보내고 ReClash가 변환합니다.",
-    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage("클라이언트 형식"),
@@ -3669,9 +3663,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPN을 우회하여 다시 시도할까요?",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("구독이 만료됐습니다"),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "구독이 오늘 만료됩니다",
     ),
@@ -3719,7 +3713,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 구독에는 트래픽 한도나 만료일 정보가 없습니다",
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("구독 알림"),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("구독 보고서"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "익명화된 진단 정보만 포함됩니다 — 구독 URL, 실제 노드 이름이나 주소는 없습니다. 원인을 찾는 데 도움이 되도록 공급자와 공유하세요.",
@@ -3747,7 +3741,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "업데이트 실패",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "이 구독에서 일반적인 노드 주소를 찾지 못했습니다. 패널이 임시 구성을 반환했을 수 있습니다. 서버 연결은 테스트하지 않았습니다.",
     ),
@@ -3796,7 +3790,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsNoResults": MessageLookupByLibrary.simpleMessage("검색 결과가 없습니다"),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("개요"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("도구 검색"),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "여기에서 보려면 설정을 선택하세요.",
     ),
@@ -3806,7 +3800,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("전체 트래픽"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -3886,7 +3880,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "중지 상태면 연결하고, 실행 중이면 연결을 해제합니다",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("호스트 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 호스트 사용"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("사용 트래픽"),
@@ -3926,7 +3920,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("오브 불투명도"),
     "wallpaperProviderPriority": MessageLookupByLibrary.simpleMessage(
@@ -3991,7 +3985,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "확인된 시간을 시스템 시계에 동기화합니다",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어(간체)"),
   };
 }

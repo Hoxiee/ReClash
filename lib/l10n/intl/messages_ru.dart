@@ -299,26 +299,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Стоит выше на строке: ${step}";
 
-  static String m123(host) => "Провайдер переехал на ${host}";
+  static String m123(client) => "Авто выбрало ${client}";
 
-  static String m124(count) =>
+  static String m124(host) => "Провайдер переехал на ${host}";
+
+  static String m125(count) =>
       "${Intl.plural(count, one: 'Подписка истекает через ${count} день', few: 'Подписка истекает через ${count} дня', many: 'Подписка истекает через ${count} дней', other: 'Подписка истекает через ${count} дней')}";
 
-  static String m125(value) => "Провайдер предлагает ${value}";
+  static String m126(value) => "Провайдер предлагает ${value}";
 
-  static String m126(percent) => "Израсходовано ${percent}% трафика";
+  static String m127(percent) => "Израсходовано ${percent}% трафика";
 
-  static String m127(count) =>
+  static String m128(count) =>
       "${Intl.plural(count, zero: 'Ничего не найдено', one: '1 результат', few: '${count} результата', many: '${count} результатов', other: '${count} результата')}";
 
-  static String m128(total) => "свободно из ${total}";
+  static String m129(total) => "свободно из ${total}";
 
-  static String m129(label) => "Значение «${label}» должно быть URL";
-
-  static String m130(count) =>
-      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+  static String m130(label) => "Значение «${label}» должно быть URL";
 
   static String m131(count) =>
+      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+
+  static String m132(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -4520,30 +4522,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Подписка"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "Запрашивает как ReClash и определяет формат сам, перебирая пресеты ниже.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("Совместимость"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Свой"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "Отправляет User-Agent, заданный ниже, для панели, завязанной на конкретный клиент.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Приложение запросит подписку в формате этого клиента",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "Экспериментально",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "Совместимость с другими клиентами экспериментальна: провайдер отдаёт формат выбранного клиента, и ReClash его преобразует.",
-    ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Пресеты совместимости заставляют ReClash представляться другим приложением, чтобы панель отдала формат того клиента, который ReClash затем преобразует. Используйте только если обычный запрос не возвращает узлы.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Представляется приложением Happ для панелей, отдающих только его формат.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "Представляется приложением INCY для панелей, заточенных под него.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
       "Формат подписки",
     ),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "Родные форматы",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "Формат семейства Clash, который ReClash читает напрямую.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Закрепить"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "Представляется клиентом sing-box; панель отвечает JSON sing-box.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "Представляется v2rayNG; панель отвечает списком узлов в base64.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "Конфигурация этой подписки некорректна и не может быть применена. Обратитесь в поддержку провайдера.",
@@ -4560,11 +4588,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "Повторить вне VPN?",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Подписка истекла",
     ),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Подписка истекает сегодня",
     ),
@@ -4614,7 +4642,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Напоминания о подписке",
     ),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Отчёт по подписке",
     ),
@@ -4648,7 +4676,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Сбои обновления",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "В подписке не найдено обычных адресов узлов. Возможно, панель вернула заглушку. Подключение к серверам не проверялось.",
     ),
@@ -4721,7 +4749,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage(
       "Поиск инструментов",
     ),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Выберите настройку, чтобы посмотреть её здесь.",
     ),
@@ -4731,7 +4759,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Всего"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -4823,7 +4851,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Подключить, если остановлено; отключить, если работает",
     ),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -4879,7 +4907,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -4962,7 +4990,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Синхронизировать полученное время с системными часами",
     ),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };
 }

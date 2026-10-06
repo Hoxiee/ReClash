@@ -415,16 +415,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Experimental`
-  String get subscriptionClientExperimentalLabel {
-    return Intl.message(
-      'Experimental',
-      name: 'subscriptionClientExperimentalLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Rule`
   String get rule {
     return Intl.message('Rule', name: 'rule', desc: '', args: []);
@@ -1253,16 +1243,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Client compatibility is experimental: the provider serves another client's format, which ReClash converts.`
-  String get subscriptionClientExperimentalTip {
-    return Intl.message(
-      'Client compatibility is experimental: the provider serves another client\'s format, which ReClash converts.',
-      name: 'subscriptionClientExperimentalTip',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Auto`
   String get subscriptionClientAuto {
     return Intl.message(
@@ -1338,6 +1318,126 @@ class AppLocalizations {
     return Intl.message(
       'Custom',
       name: 'subscriptionClientCustom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Native formats`
+  String get subscriptionClientNativeGroup {
+    return Intl.message(
+      'Native formats',
+      name: 'subscriptionClientNativeGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compatibility`
+  String get subscriptionClientCompatibilityGroup {
+    return Intl.message(
+      'Compatibility',
+      name: 'subscriptionClientCompatibilityGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compatibility presets make ReClash impersonate another app so the panel serves that client's format, which ReClash then converts. Use one only when a normal request does not return nodes.`
+  String get subscriptionClientExperimentalNotice {
+    return Intl.message(
+      'Compatibility presets make ReClash impersonate another app so the panel serves that client\'s format, which ReClash then converts. Use one only when a normal request does not return nodes.',
+      name: 'subscriptionClientExperimentalNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Requests as ReClash and detects the format, falling back through the presets below.`
+  String get subscriptionClientAutoHint {
+    return Intl.message(
+      'Requests as ReClash and detects the format, falling back through the presets below.',
+      name: 'subscriptionClientAutoHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A Clash-family format ReClash reads directly.`
+  String get subscriptionClientNativeHint {
+    return Intl.message(
+      'A Clash-family format ReClash reads directly.',
+      name: 'subscriptionClientNativeHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Impersonates the Happ app for panels that only serve its format.`
+  String get subscriptionClientHappHint {
+    return Intl.message(
+      'Impersonates the Happ app for panels that only serve its format.',
+      name: 'subscriptionClientHappHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Impersonates the INCY app for panels tailored to it.`
+  String get subscriptionClientIncyHint {
+    return Intl.message(
+      'Impersonates the INCY app for panels tailored to it.',
+      name: 'subscriptionClientIncyHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Impersonates a sing-box client; the panel answers with sing-box JSON.`
+  String get subscriptionClientSingboxHint {
+    return Intl.message(
+      'Impersonates a sing-box client; the panel answers with sing-box JSON.',
+      name: 'subscriptionClientSingboxHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Impersonates v2rayNG; the panel answers with a base64 node list.`
+  String get subscriptionClientV2rayngHint {
+    return Intl.message(
+      'Impersonates v2rayNG; the panel answers with a base64 node list.',
+      name: 'subscriptionClientV2rayngHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sends the User-Agent you set below, for a panel that keys off a specific client.`
+  String get subscriptionClientCustomHint {
+    return Intl.message(
+      'Sends the User-Agent you set below, for a panel that keys off a specific client.',
+      name: 'subscriptionClientCustomHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto settled on {client}`
+  String subscriptionClientResolvedTo(Object client) {
+    return Intl.message(
+      'Auto settled on $client',
+      name: 'subscriptionClientResolvedTo',
+      desc: '',
+      args: [client],
+    );
+  }
+
+  /// `Pin`
+  String get subscriptionClientPin {
+    return Intl.message(
+      'Pin',
+      name: 'subscriptionClientPin',
       desc: '',
       args: [],
     );

@@ -273,24 +273,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "排名更高于：${step}";
 
-  static String m123(host) => "提供方已迁移至 ${host}";
+  static String m123(client) => "自动选择了 ${client}";
 
-  static String m124(count) => "订阅将在 ${count} 天后到期";
+  static String m124(host) => "提供方已迁移至 ${host}";
 
-  static String m125(value) => "提供方建议 ${value}";
+  static String m125(count) => "订阅将在 ${count} 天后到期";
 
-  static String m126(percent) => "已使用 ${percent}% 的流量";
+  static String m126(value) => "提供方建议 ${value}";
 
-  static String m127(count) =>
+  static String m127(percent) => "已使用 ${percent}% 的流量";
+
+  static String m128(count) =>
       "${Intl.plural(count, zero: '无结果', one: '1 条结果', other: '${count} 条结果')}";
 
-  static String m128(total) => "剩余（共 ${total}）";
+  static String m129(total) => "剩余（共 ${total}）";
 
-  static String m129(label) => "${label}必须为URL";
+  static String m130(label) => "${label}必须为URL";
 
-  static String m130(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+  static String m131(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
 
-  static String m131(count) => "${count} 年前";
+  static String m132(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -3201,28 +3203,54 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("订阅"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("自动"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "以 ReClash 身份请求并自动识别格式，必要时按下方预设逐一回退。",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("兼容模式"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("自定义"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "发送下方设置的 User-Agent，用于依赖特定客户端的面板。",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "应用会以此客户端的格式获取订阅",
     ),
-    "subscriptionClientExperimentalLabel": MessageLookupByLibrary.simpleMessage(
-      "实验性",
-    ),
-    "subscriptionClientExperimentalTip": MessageLookupByLibrary.simpleMessage(
-      "客户端兼容性为实验性功能：提供方下发所选客户端的格式，由 ReClash 转换。",
-    ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "兼容预设会让 ReClash 伪装成其他应用，使面板下发该客户端的格式，再由 ReClash 转换。仅在常规请求无法返回节点时使用。",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "伪装为 Happ 应用，用于只下发其格式的面板。",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "伪装为 INCY 应用，用于为其定制的面板。",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage("客户端格式"),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "原生格式",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash 可直接读取的 Clash 系列格式。",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("固定"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "伪装为 sing-box 客户端；面板以 sing-box JSON 响应。",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "伪装为 v2rayNG；面板以 base64 节点列表响应。",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "此订阅的配置无效，无法使用。请联系你的服务商客服。",
@@ -3239,9 +3267,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "绕过 VPN 重试？",
     ),
-    "subscriptionDomainMoved": m123,
+    "subscriptionDomainMoved": m124,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("订阅已过期"),
-    "subscriptionExpiresInDays": m124,
+    "subscriptionExpiresInDays": m125,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage("订阅今天到期"),
     "subscriptionFaultClient": MessageLookupByLibrary.simpleMessage("问题出在本设备"),
     "subscriptionFaultClientDesc": MessageLookupByLibrary.simpleMessage(
@@ -3281,7 +3309,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "此订阅未提供流量额度或到期时间",
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("订阅提醒"),
-    "subscriptionProviderInterval": m125,
+    "subscriptionProviderInterval": m126,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("订阅报告"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "仅包含匿名化的诊断信息，不含订阅 URL、真实节点名称或地址。将其分享给你的提供商，以帮助定位故障。",
@@ -3307,7 +3335,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新失败",
     ),
-    "subscriptionTrafficLow": m126,
+    "subscriptionTrafficLow": m127,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "订阅中未找到常规节点地址。面板可能返回了占位配置。尚未测试服务器连接。",
     ),
@@ -3354,7 +3382,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsNoResults": MessageLookupByLibrary.simpleMessage("没有匹配的结果"),
     "toolsOverview": MessageLookupByLibrary.simpleMessage("概览"),
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage("搜索工具"),
-    "toolsSearchResultsCount": m127,
+    "toolsSearchResultsCount": m128,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "选择一项设置以在此查看。",
     ),
@@ -3364,7 +3392,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("总流量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "traffic": MessageLookupByLibrary.simpleMessage("流量"),
-    "trafficFreeOfTotal": m128,
+    "trafficFreeOfTotal": m129,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
@@ -3426,7 +3454,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("配置文件"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切换"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage("停止时连接，运行时断开"),
-    "urlTip": m129,
+    "urlTip": m130,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -3464,7 +3492,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请选择有效的 PNG、JPEG 或 WebP 图片。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
-    "wallpaperLibraryFull": m130,
+    "wallpaperLibraryFull": m131,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
     "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("宝珠不透明度"),
     "wallpaperProviderPriority": MessageLookupByLibrary.simpleMessage(
@@ -3523,7 +3551,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "windowsElevationTitle": MessageLookupByLibrary.simpleMessage("允许访问 TUN？"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("写入系统"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage("将获取到的时间同步到系统时钟"),
-    "yearsAgo": m131,
+    "yearsAgo": m132,
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }
