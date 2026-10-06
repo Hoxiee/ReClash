@@ -97,6 +97,7 @@ func (e *rcxEngine) lanePolicy(config rcxLaneConfig) rcxPolicy {
 	policy := e.cfg.policy()
 	if config.Strategy != "" {
 		policy.Strategy = config.Strategy
+		policy.LatencyBands = e.cfg.latencyBandsFor(config.Strategy)
 	}
 	return policy
 }

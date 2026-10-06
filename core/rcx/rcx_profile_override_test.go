@@ -227,13 +227,65 @@ func TestProfileStateReportsFate(t *testing.T) {
 	}{
 		{"absent", "", rcxProfileState{}},
 		{"valid", "schema: 1\nprobe:\n  concurrency: 3\n  staggerMs: 50\n", rcxProfileState{Present: true, Valid: true, Schema: 1}},
-		{"future-schema", "schema: 99\n", rcxProfileState{Present: true, Valid: false, Schema: 99}},
-		{"garbage", "this: is: not: valid: yaml\n", rcxProfileState{Present: true, Valid: false, Schema: 0}},
+		{"future-schema", "schema: 99\n", rcxProfileState{Present: true, Schema: 99, Reason: rcxProfileReasonSchema}},
+		{"garbage", "this: is: not: valid: yaml\n", rcxProfileState{Present: true, Reason: rcxProfileReasonInvalid}},
 	}
 	for _, tc := range cases {
 		got := profileConfig(t, tc.yaml).profileState
 		if got != tc.want {
 			t.Fatalf("%s: profile state = %+v, want %+v", tc.name, got, tc.want)
 		}
+	}
+}
+
+func TestProfileDefinedStrategyIsSelectable(t *testing.T) {
+	yaml := "schema: 1\nstrategies:\n  aggressive:\n    bands: [40, 70, 110, 180]\n    switchAbsMs: 10\n    switchPct: 5\n"
+	c := rcxConfig{Strategy: "aggressive", ProfileYAML: yaml}.normalized()
+	if c.Strategy != "aggressive" {
+		t.Fatalf("Strategy reset to %q, want aggressive", c.Strategy)
+	}
+	p := c.policy()
+	if abs, pct := p.switchThresholds(); abs != 10 || pct != 5 {
+		t.Fatalf("switch = %d/%d, want 10/5", abs, pct)
+	}
+	if !reflect.DeepEqual(p.LatencyBands, []int{40, 70, 110, 180}) {
+		t.Fatalf("bands = %v, want [40 70 110 180]", p.LatencyBands)
+	}
+	found := false
+	for _, n := range c.strategyNames() {
+		if n == "aggressive" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("strategyNames %v missing the profile strategy", c.strategyNames())
+	}
+}
+
+func TestUnknownStrategyStillResets(t *testing.T) {
+	c := rcxConfig{Strategy: "nonexistent"}.normalized()
+	if c.Strategy != rcxStrategyBalanced {
+		t.Fatalf("unknown strategy = %q, want balanced", c.Strategy)
+	}
+}
+
+func TestLatencyBandsFollowStrategy(t *testing.T) {
+	c := rcxConfig{Strategy: rcxStrategyBalanced}.normalized()
+	if !reflect.DeepEqual(c.latencyBandsFor(rcxStrategyLatency), rcxDefaultLatencyBandsFor(rcxStrategyLatency)) {
+		t.Fatal("latencyBandsFor did not resolve the lowest-latency edges")
+	}
+	if reflect.DeepEqual(c.latencyBandsFor(rcxStrategyLatency), c.latencyBandsFor(rcxStrategyStable)) {
+		t.Fatal("two strategies resolved to the same bands")
+	}
+}
+
+func TestLanePolicyMovesBandsWithStrategy(t *testing.T) {
+	engine := newTestEngine(newFakeRuntime(), "ru")
+	p := engine.lanePolicy(rcxLaneConfig{Strategy: rcxStrategyLatency})
+	if p.Strategy != rcxStrategyLatency {
+		t.Fatalf("lane strategy = %q, want lowest-latency", p.Strategy)
+	}
+	if !reflect.DeepEqual(p.LatencyBands, engine.cfg.latencyBandsFor(rcxStrategyLatency)) {
+		t.Fatalf("lane bands %v did not follow the lane strategy", p.LatencyBands)
 	}
 }

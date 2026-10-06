@@ -305,10 +305,16 @@ func rcxValidLatencyBands(bands []int) bool {
 }
 
 func (c rcxConfig) latencyBands() []int {
+	return c.latencyBandsFor(c.Strategy)
+}
+
+// latencyBandsFor resolves the bands for a given strategy: an explicit config list
+// wins for every strategy, else the strategy's own edges from the table in force.
+func (c rcxConfig) latencyBandsFor(strategy string) []int {
 	if rcxValidLatencyBands(c.LatencyBands) {
 		return c.LatencyBands
 	}
-	bands := rcxStrategyProfileFrom(c.resolvedStrategies(), c.Strategy).LatencyBands
+	bands := rcxStrategyProfileFrom(c.resolvedStrategies(), strategy).LatencyBands
 	out := make([]int, len(bands))
 	copy(out, bands)
 	return out
@@ -357,6 +363,38 @@ func (c rcxConfig) ladder() []rcxRungSpec {
 
 // A strategy the host does not know must rank by the shipped order rather than
 // by a zero key, so an unnamed one degrades to balanced instead of to nothing.
+// strategyKnown accepts the shipped names plus any the carried profile defines, so
+// a config can select a profile-distributed strategy, not only retune the built-ins.
+func (c rcxConfig) strategyKnown(name string) bool {
+	if rcxKnownStrategy(name) {
+		return true
+	}
+	_, ok := c.strategyProfiles[name]
+	return ok
+}
+
+// strategyNames lists every selectable strategy — the shipped names plus any the
+// profile defines — sorted, so a host picker can offer profile-distributed ones.
+func (c rcxConfig) strategyNames() []string {
+	seen := map[string]struct{}{}
+	names := make([]string, 0, 4+len(c.strategyProfiles))
+	add := func(n string) {
+		if _, ok := seen[n]; ok {
+			return
+		}
+		seen[n] = struct{}{}
+		names = append(names, n)
+	}
+	for _, n := range []string{rcxStrategyBalanced, rcxStrategyLatency, rcxStrategyStable, rcxStrategySaver} {
+		add(n)
+	}
+	for n := range c.strategyProfiles {
+		add(n)
+	}
+	sort.Strings(names)
+	return names
+}
+
 func rcxKnownStrategy(name string) bool {
 	switch name {
 	case rcxStrategyBalanced, rcxStrategyLatency, rcxStrategyStable, rcxStrategySaver:
@@ -417,7 +455,8 @@ func (c rcxConfig) normalized() rcxConfig {
 	} else if c.ThrottleFloorKBps > 1024 {
 		c.ThrottleFloorKBps = 1024
 	}
-	if !rcxKnownStrategy(c.Strategy) {
+	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = c.profileSections()
+	if !c.strategyKnown(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
 	}
 	if c.SwitchImproveMs < 0 {
@@ -434,17 +473,24 @@ func (c rcxConfig) normalized() rcxConfig {
 	} else {
 		c.Ladder = nil
 	}
-	c.Lanes = rcxNormalizeLanes(c.Lanes)
-	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = c.profileSections()
+	c.Lanes = rcxNormalizeLanes(c.Lanes, c.strategyKnown)
 	return c
 }
+
+// Why a carried profile did not take effect, so the host can tell the user whether
+// to fix syntax or ship a build that knows the declared schema.
+const (
+	rcxProfileReasonInvalid = "invalid"
+	rcxProfileReasonSchema  = "schema"
+)
 
 // rcxProfileState is the observable fate of a carried profile, so the host can show
 // it applied or silently fell back rather than guessing from behavior.
 type rcxProfileState struct {
-	Present bool `json:"present"`
-	Valid   bool `json:"valid"`
-	Schema  int  `json:"schema"`
+	Present bool   `json:"present"`
+	Valid   bool   `json:"valid"`
+	Schema  int    `json:"schema"`
+	Reason  string `json:"reason,omitempty"`
 }
 
 // profileSections parses the carried profile once: a missing one keeps shipped
@@ -456,10 +502,12 @@ func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProf
 	state := rcxProfileState{Present: true}
 	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
 	if err != nil {
+		state.Reason = rcxProfileReasonInvalid
 		return nil, nil, rcxDefaultProbeSection(), state
 	}
 	state.Schema = parsed.Schema
 	if parsed.Schema != rcxProfileSchema {
+		state.Reason = rcxProfileReasonSchema
 		return nil, nil, rcxDefaultProbeSection(), state
 	}
 	state.Valid = true
@@ -491,7 +539,7 @@ func rcxNormalizeLadder(ladder []rcxRungSpec) []rcxRungSpec {
 	return out
 }
 
-func rcxNormalizeLanes(lanes []rcxLaneConfig) []rcxLaneConfig {
+func rcxNormalizeLanes(lanes []rcxLaneConfig, strategyKnown func(string) bool) []rcxLaneConfig {
 	normalized := make([]rcxLaneConfig, 0, len(lanes))
 	seenIDs := make(map[string]struct{}, len(lanes))
 	seenGroups := make(map[string]struct{}, len(lanes))
@@ -522,7 +570,7 @@ func rcxNormalizeLanes(lanes []rcxLaneConfig) []rcxLaneConfig {
 		default:
 			lane.Role = rcxLaneRoleAny
 		}
-		if !rcxKnownStrategy(strings.TrimSpace(lane.Strategy)) {
+		if !strategyKnown(strings.TrimSpace(lane.Strategy)) {
 			lane.Strategy = ""
 		} else {
 			lane.Strategy = strings.TrimSpace(lane.Strategy)
