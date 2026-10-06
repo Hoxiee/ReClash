@@ -33,7 +33,7 @@ class HomePage extends ConsumerWidget {
                 final navigationItems = ref
                     .watch(currentNavigationItemsStateProvider)
                     .value;
-                final isMobile = ref.watch(isMobileViewProvider);
+                final isBar = ref.watch(isBarSurfaceProvider);
                 return _HomePageView(
                   navigationItems: navigationItems,
                   pageBuilder: (_, index) {
@@ -41,7 +41,7 @@ class HomePage extends ConsumerWidget {
                     return _NavigationPage(
                       key: ValueKey(navigationItem.label),
                       item: navigationItem,
-                      isMobile: isMobile,
+                      isBar: isBar,
                       view: navigationItem.builder(context),
                     );
                   },
@@ -66,8 +66,7 @@ class _HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(navigationStateProvider);
-    final isMobile = state.viewMode == ViewMode.mobile;
+    final isBar = ref.watch(isBarSurfaceProvider);
     // The dock owns the start control on a phone; the hero orb owns it on the
     // new dashboard, so the trailing button only rides the classic layout.
     final onClassicDashboard = !ref.watch(newDashboardEnabledProvider);
@@ -78,12 +77,12 @@ class _HomeShell extends ConsumerWidget {
             (state) => state.enabled && state.onlyDpi,
           ),
         );
-    final showStart = isMobile && onClassicDashboard && hasStartControl;
+    final showStart = isBar && onClassicDashboard && hasStartControl;
     // The hoisted wallpaper paints one backdrop for the whole content region;
     // a solid shell surface here would cover it, so go transparent when active.
     final wallpaperActive = ref.watch(effectiveWallpaperImageProvider) != null;
-    // The bar is only collapsed in desktop view, never unmounted: one tree
-    // shape across view modes.
+    // The bar is only collapsed in rail mode, never unmounted: one tree
+    // shape across surfaces.
     return Material(
       color: wallpaperActive ? Colors.transparent : context.colorScheme.surface,
       child: Stack(
@@ -93,12 +92,12 @@ class _HomeShell extends ConsumerWidget {
               policy: PageTraversalPolicy(),
               child: MediaQuery.removePadding(
                 removeTop: false,
-                removeBottom: isMobile,
-                removeLeft: isMobile,
-                removeRight: isMobile,
+                removeBottom: isBar,
+                removeLeft: isBar,
+                removeRight: isBar,
                 context: context,
                 child: BottomInsetScope(
-                  inset: isMobile ? AppNavBar.insetOf(context) : 0,
+                  inset: isBar ? AppNavBar.insetOf(context) : 0,
                   child: child,
                 ),
               ),
@@ -109,7 +108,7 @@ class _HomeShell extends ConsumerWidget {
             right: 0,
             bottom: 0,
             child: AnimatedVisibility.bottomNavigation(
-              visible: isMobile,
+              visible: isBar,
               child: MediaQuery.removePadding(
                 removeTop: true,
                 removeBottom: false,
@@ -133,23 +132,23 @@ class _NavigationPage extends StatelessWidget {
   const _NavigationPage({
     super.key,
     required this.item,
-    required this.isMobile,
+    required this.isBar,
     required this.view,
   });
 
   final NavigationItem item;
-  final bool isMobile;
+  final bool isBar;
   final Widget view;
 
   @override
   Widget build(BuildContext context) {
     final scopedView = PageFocusScope(
-      child: DockedPageScope(docked: isMobile, child: view),
+      child: DockedPageScope(docked: isBar, child: view),
     );
     final keptView = KeepScope(
       key: ValueKey(item.label),
       keep: item.keep,
-      child: isMobile
+      child: isBar
           ? scopedView
           : Navigator(
               key: ValueKey('${item.label.name}_navigator'),
@@ -201,7 +200,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
       }
     });
     ref.listenManual(currentNavigationItemsStateProvider, (prev, next) {
-      if (prev?.value.length != next.value.length) {
+      if (!_sameOrder(prev?.value, next.value)) {
         _reconcilePage();
       }
     });
@@ -214,14 +213,14 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   @override
   void didUpdateWidget(covariant _HomePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // A tab appearing or leaving shifts the indices of the pages after it. The
-    // page view rebuilds this frame but the controller keeps its old pixel
-    // offset, which now points at a neighbour, so the active page would flash
-    // past to it until the post-frame reconcile lands. Re-pin the controller
-    // to the active page's new index here, before this frame paints.
-    if (oldWidget.navigationItems.length == widget.navigationItems.length) {
+    // Keyed on order not count, so an equal-length swap re-pins too.
+    if (_sameOrder(oldWidget.navigationItems, widget.navigationItems)) {
       return;
     }
+    // Abandon any in-flight slide permutation before this frame builds: it is
+    // sized to the old list, so indexing it against the new length desyncs
+    // findChildIndexCallback and drops the active page's element (blank page).
+    _order = null;
     if (!_pageController.hasClients) {
       return;
     }
@@ -229,7 +228,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     if (index == -1) {
       return;
     }
-    if (_order == null && _pageController.page?.round() != index) {
+    if (_pageController.page?.round() != index) {
       _pageController.jumpToPage(index);
     }
   }
@@ -237,6 +236,18 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   int get _pageIndex {
     final pageLabel = ref.read(currentPageLabelProvider);
     return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
+  }
+
+  bool _sameOrder(List<NavigationItem>? a, List<NavigationItem> b) {
+    if (a == null || a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < b.length; i++) {
+      if (a[i].label != b[i].label) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> _toPage(
@@ -334,6 +345,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         (state) => state.tabAnimation == TabAnimation.fade,
       ),
     );
+    final order = _order?.length == itemCount ? _order : null;
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
@@ -348,10 +360,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
         if (index == -1) {
           return null;
         }
-        return _order?.indexOf(index) ?? index;
+        return order?.indexOf(index) ?? index;
       },
       itemBuilder: (context, index) {
-        final page = widget.pageBuilder(context, _order?[index] ?? index);
+        final page = widget.pageBuilder(context, order?[index] ?? index);
         return _FadeTabPage(
           key: page.key,
           controller: _pageController,

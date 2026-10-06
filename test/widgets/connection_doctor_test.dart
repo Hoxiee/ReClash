@@ -12,7 +12,9 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/nav_path.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/tools_pane.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/ntp.dart';
@@ -79,6 +81,16 @@ DoctorSnapshot _snapshot({
     actions: actions,
     incidents: incidents,
   );
+}
+
+Future<void> _resize(
+  WidgetTester tester,
+  ProviderContainer container,
+  Size size,
+) async {
+  tester.view.physicalSize = size;
+  container.read(viewSizeProvider.notifier).update((_) => size);
+  await tester.pumpAndSettle();
 }
 
 Future<ProviderContainer> _pumpDoctor(
@@ -978,6 +990,80 @@ void main() {
     expect(find.text('Watching real traffic'), findsWidgets);
   });
 
+  testWidgets('Tools desktop path survives a resize across the breakpoint', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.tap(find.text('Connection Doctor'));
+    await tester.pumpAndSettle();
+    final drilled = container
+        .read(navPathProvider(PageLabel.tools))
+        .map((entry) => entry.id)
+        .toList();
+    expect(drilled, isNotEmpty);
+
+    // Shrink to a phone and back. The path is kept-alive data, so the resize
+    // must re-render it, not drop it the way the old widget-held stack did.
+    await _resize(tester, container, const Size(400, 800));
+    await _resize(tester, container, const Size(1200, 900));
+
+    expect(
+      container
+          .read(navPathProvider(PageLabel.tools))
+          .map((e) => e.id)
+          .toList(),
+      drilled,
+    );
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+  });
+
+  testWidgets('Tools keeps the drilled tool when the panel collapses', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.tap(find.text('Connection Doctor'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+
+    // Collapsing the two-pane layout must render the same path full-screen,
+    // not fall back to the tool list.
+    await _resize(tester, container, const Size(400, 800));
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+  });
+
+  testWidgets('Tools mobile opens a tool through the path', (tester) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(400, 800),
+    );
+
+    await tester.tap(find.text('Connection Doctor'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+    expect(container.read(navPathProvider(PageLabel.tools)), isNotEmpty);
+  });
+
   testWidgets('Tools desktop selects a pane inline instead of a sheet', (
     tester,
   ) async {
@@ -1018,9 +1104,9 @@ void main() {
 
     expect(find.byType(ConnectionDoctorView), findsNothing);
 
-    container
-        .read(toolsPaneRequestProvider.notifier)
-        .request(ToolsPaneTarget.doctor);
+    container.read(toolsPaneRequestProvider.notifier).request([
+      doctorRootPane(tester.element(find.byType(ToolsView))),
+    ]);
     await tester.pumpAndSettle();
 
     // The pane opens the Doctor and the one-shot request is spent, so a plain
@@ -1332,7 +1418,40 @@ void main() {
     // No stray sheet: the two-pane desktop drives the Tools tab to the Doctor
     // pane so its drill-ins stay in that stack.
     expect(find.byType(ConnectionDoctorView), findsNothing);
-    expect(container.read(toolsPaneRequestProvider), ToolsPaneTarget.doctor);
+    final request = container.read(toolsPaneRequestProvider);
+    expect(request?.single.id, toolsDoctorPaneId);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Doctor sheet drill-in hands DNS to the Tools tab on desktop', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(
+        state: DoctorExamState.complete,
+        health: DoctorHealth.broken,
+        confidence: DoctorConfidence.confirmed,
+        scope: DoctorScope.app,
+        layer: DoctorLayer.dns,
+      ),
+      size: const Size(1200, 900),
+    );
+
+    // The standalone Doctor (an overlay sheet on desktop) has no host pane, so
+    // a drill-in hands off to the Tools tab as a [doctor, dns] stack with a
+    // back-path, never a second stray side sheet.
+    await tester.tap(find.text('DNS settings'));
+    await tester.pumpAndSettle();
+
+    final request = container.read(toolsPaneRequestProvider);
+    expect(request?.map((selection) => selection.id).toList(), [
+      toolsDoctorPaneId,
+      'dns',
+    ]);
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
     expect(tester.takeException(), isNull);
   });

@@ -37,8 +37,6 @@ import 'core.dart';
 import 'findings.dart';
 import 'tools_search_index.g.dart';
 
-const toolsDoctorPaneId = 'doctor';
-
 const _toolsListPaneWidth = 360.0;
 
 /// Caps a tool body so settings rows read as a column instead of stretching
@@ -54,25 +52,6 @@ class ToolsView extends ConsumerStatefulWidget {
   ConsumerState<ToolsView> createState() => _ToolViewState();
 }
 
-/// One level of the desktop detail column. Picking a tool from the left pane
-/// seeds the stack; opening a screen inside a tool pushes another level, so the
-/// column drills in place with a back affordance instead of floating a sheet.
-class _PaneEntry {
-  const _PaneEntry({
-    required this.id,
-    required this.detail,
-    this.title,
-    this.focusTarget,
-    this.focusNonce = 0,
-  });
-
-  final String id;
-  final Widget detail;
-  final Widget? title;
-  final String? focusTarget;
-  final int focusNonce;
-}
-
 /// One tool's recency-and-frequency record, the input to the "last used" order.
 class _RecentStat {
   const _RecentStat({required this.count, required this.lastAt});
@@ -82,8 +61,10 @@ class _RecentStat {
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
-  final List<_PaneEntry> _paneStack = [];
-  int _focusSeq = 0;
+  // The drilled path is kept-alive provider data, so a resize re-renders it.
+  static const _tab = PageLabel.tools;
+  NavPath get _path => ref.read(navPathProvider(_tab).notifier);
+  List<NavPaneEntry> get _paneStack => ref.read(navPathProvider(_tab));
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   String _query = '';
@@ -117,8 +98,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     super.initState();
     _searchFocus.addListener(_onSearchFocusChanged);
     _loadRecents();
-    // Crossing a layout breakpoint swaps the two-pane shell for the list and
-    // changes how rows open; drop the drilled pane and any stale overlay.
+    // On the way to desktop, close a stray legacy side sheet left over the
+    // two-pane layout; the path itself is kept-alive data and re-renders.
     ref.listenManual(viewModeProvider, (prev, next) {
       if (prev == next) {
         return;
@@ -127,19 +108,23 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         if (!mounted) {
           return;
         }
-        // Clear only this page's nested side sheet; a full-screen tool opened
-        // on the root navigator is left alone so a resize never closes it.
         if (next != ViewMode.mobile) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
-        if (_paneStack.isEmpty && _detailActions.value == null) {
-          return;
-        }
-        setState(() {
-          _paneStack.clear();
-          _detailActions.value = null;
-        });
+        _detailActions.value = null;
       });
+    });
+    // A pane change invalidates the actions the old detail relayed to the bar.
+    ref.listenManual(navPathProvider(_tab), (prev, next) {
+      final changed =
+          prev?.length != next.length ||
+          (prev != null &&
+              prev.isNotEmpty &&
+              next.isNotEmpty &&
+              prev.last.id != next.last.id);
+      if (changed) {
+        _detailActions.value = null;
+      }
     });
   }
 
@@ -323,86 +308,42 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     });
   }
 
-  // Resolves a handed-off target to its root pane and seeds the stack, so the
-  // tool's own open rows (the Doctor's "advanced") then drill inside the pane.
-  void _openRequestedPane(ToolsPaneTarget target) {
-    final selection = switch (target) {
-      ToolsPaneTarget.doctor => SettingsPaneSelection(
-        id: toolsDoctorPaneId,
-        detail: const ConnectionDoctorView(),
-        title: Text(context.appLocalizations.connectionDoctor),
-      ),
-    };
-    _selectRootPane(selection);
+  // Seeds a handed-off pane stack: the first entry is the root, the rest push
+  // on top, so a caller can land the reader a few steps deep with a back-path.
+  void _openRequestedPane(List<SettingsPaneSelection> stack) {
+    if (stack.isEmpty) {
+      return;
+    }
+    _selectRootPane(stack.first);
+    for (final selection in stack.skip(1)) {
+      _pushPane(selection);
+    }
   }
 
   void _selectRootPane(SettingsPaneSelection selection) {
     _recordRecent(selection.id);
-    final sameRoot =
-        _paneStack.length == 1 && _paneStack.first.id == selection.id;
-    if (sameRoot && selection.focusTarget == null) {
-      return;
-    }
-    // Re-selecting the same pane keeps the detail element, which never
-    // republishes its relayed actions; only a real pane change resets them.
-    if (!sameRoot) {
-      _detailActions.value = null;
-    }
-    setState(() {
-      _paneStack
-        ..clear()
-        ..add(
-          _PaneEntry(
-            id: selection.id,
-            detail: selection.detail,
-            title: selection.title,
-            focusTarget: selection.focusTarget,
-            focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
-          ),
-        );
-    });
+    _path.selectRoot(selection);
   }
 
   void _pushPane(SettingsPaneSelection selection) {
-    final sameTop = _paneStack.isNotEmpty && _paneStack.last.id == selection.id;
-    if (sameTop && selection.focusTarget == null) {
-      return;
-    }
-    if (!sameTop) {
-      _detailActions.value = null;
-    }
-    setState(() {
-      final entry = _PaneEntry(
-        id: selection.id,
-        detail: selection.detail,
-        title: selection.title,
-        focusTarget: selection.focusTarget,
-        focusNonce: selection.focusTarget == null ? 0 : ++_focusSeq,
-      );
-      // Re-targeting the current pane replaces it in place so the detail
-      // element survives with its relayed actions; a new pane is pushed.
-      if (sameTop) {
-        _paneStack[_paneStack.length - 1] = entry;
-      } else {
-        _paneStack.add(entry);
-      }
-    });
+    _path.push(selection);
   }
 
   void _popPane() {
-    if (_paneStack.length <= 1) {
-      return;
-    }
-    _detailActions.value = null;
-    setState(_paneStack.removeLast);
+    _path.pop();
   }
 
   void _popToDepth(int depth) {
-    if (depth < 1 || depth >= _paneStack.length) {
-      return;
+    _path.popToDepth(depth);
+  }
+
+  // Narrow back steps one level, or clears the last one back to the tool list.
+  void _narrowBack() {
+    if (_paneStack.length > 1) {
+      _popPane();
+    } else {
+      _path.clear();
     }
-    _detailActions.value = null;
-    setState(() => _paneStack.removeRange(depth, _paneStack.length));
   }
 
   Widget _buildMobileNavigationMenu(List<NavigationItem> navigationItems) {
@@ -890,6 +831,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final stack = ref.watch(navPathProvider(_tab));
     final locale = ref.watch(
       appSettingProvider.select((state) => state.locale),
     );
@@ -910,9 +852,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           viewSizeProvider.select((size) => size.shortestSide > maxMobileWidth),
         );
 
-    // A dashboard card can hand off a pane to open here; the two-pane layout is
-    // the only place the stack is shown, so defer and drop the request on any
-    // narrower view rather than seed a stack nothing renders.
+    // A dashboard card can hand off a path here; both layouts render it now.
     final paneRequest = ref.watch(toolsPaneRequestProvider);
     if (paneRequest != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -920,9 +860,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           return;
         }
         ref.read(toolsPaneRequestProvider.notifier).clear();
-        if (splitTools) {
-          _openRequestedPane(paneRequest);
-        }
+        _openRequestedPane(paneRequest);
       });
     }
 
@@ -1005,6 +943,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       );
     }
 
+    // Single-column layout renders the same path full-screen, so a collapse of
+    // the two-pane view keeps the reader on the drilled tool, not the list.
+    if (stack.isNotEmpty) {
+      return _buildNarrowPath();
+    }
+
     final items = <Widget>[
       _buildSearchField(),
       if (searching) ...[
@@ -1031,7 +975,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           title: appLocalizations.tools,
           floatBody: true,
           body: SettingsPaneScope(
-            active: false,
+            active: true,
             selectedId: null,
             onSelect: _selectRootPane,
             child: ListView.builder(
@@ -1214,6 +1158,44 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     );
   }
 
+  // The single-column renderer of the path: the top level as a full-screen
+  // page drawing its own chrome, back wired to [_narrowBack]. Back is gated on
+  // page activity so a backgrounded tab in the pager does not swallow the
+  // gesture meant for the visible one.
+  Widget _buildNarrowPath() {
+    final entry = _paneStack.last;
+    final active = PageActivityScope.isActiveOf(context);
+    return PopScope(
+      canPop: !active,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _narrowBack();
+        }
+      },
+      child: KeyedSubtree(
+        key: ValueKey('narrow:${_paneStack.length}:${entry.id}'),
+        child: CommonScaffoldBackActionProvider(
+          backAction: _narrowBack,
+          child: SettingsPaneScope(
+            active: true,
+            pushes: true,
+            selectedId: null,
+            onSelect: _pushPane,
+            child: SheetProvider(
+              type: SheetType.page,
+              nestedNavigatorPop: ([_]) => _narrowBack(),
+              child: SettingFocusScope(
+                target: entry.focusTarget,
+                nonce: entry.focusNonce,
+                child: entry.detail,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDetailPane(
     List<NavigationItem> navigationItems,
     bool enableDeveloperMode,
@@ -1230,10 +1212,6 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     } else {
       content = KeyedSubtree(
         key: ValueKey('${_paneStack.length}:${entry.id}'),
-        // Cap the tool body's width so rows and controls do not stretch across
-        // a wide window; the list column is already fixed, this keeps the pair
-        // balanced. Top-centered so a short tool sits under the bar, not
-        // floating mid-pane.
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -1333,7 +1311,7 @@ class _ToolsBreadcrumb extends StatefulWidget {
     required this.onCrumb,
   });
 
-  final List<_PaneEntry> entries;
+  final List<NavPaneEntry> entries;
   final VoidCallback onBack;
   final ValueChanged<int> onCrumb;
 

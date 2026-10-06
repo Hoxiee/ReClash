@@ -21,14 +21,28 @@ part 'connection_doctor_cards.dart';
 part 'connection_doctor_console.dart';
 part 'connection_doctor_labels.dart';
 
+/// Identifies the Doctor's own pane in the Tools two-pane stack, so a handoff
+/// seeds the same root the Tools list opens.
+const toolsDoctorPaneId = 'doctor';
+
+/// The Doctor as the root entry of a Tools pane stack, so a handoff can seed it
+/// and push drill-ins on top with a back-path to the diagnosis.
+SettingsPaneSelection doctorRootPane(BuildContext context) {
+  return SettingsPaneSelection(
+    id: toolsDoctorPaneId,
+    detail: const ConnectionDoctorView(),
+    title: Text(context.appLocalizations.connectionDoctor),
+  );
+}
+
 /// Opens the Connection Doctor from a dashboard card. On a phone it rides a
 /// pushed sheet as before; on the two-pane desktop it hands the pane to the
 /// Tools tab so the Doctor's own drill-ins (DNS, advanced) stay in that stack
 /// instead of stacking a stray side sheet outside it.
 ///
 /// The hero status line passes [asSheet] to keep the Doctor an overlay over the
-/// dashboard instead of jumping into the Tools tab; its drill-ins still reach
-/// the settings views through [showExtend] as they do from any sheet.
+/// dashboard instead of jumping into the Tools tab; its drill-ins still hand
+/// off to the Tools tab from there, so a desktop never stacks a second sheet.
 void openConnectionDoctor(
   BuildContext context,
   WidgetRef ref, {
@@ -40,7 +54,9 @@ void openConnectionDoctor(
     );
     return;
   }
-  ref.read(toolsPaneRequestProvider.notifier).request(ToolsPaneTarget.doctor);
+  ref.read(toolsPaneRequestProvider.notifier).request([
+    doctorRootPane(context),
+  ]);
   ref
       .read(currentPageLabelProvider.notifier)
       .toPage(PageLabel.tools, returnable: true);

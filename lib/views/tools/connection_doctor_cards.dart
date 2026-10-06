@@ -133,12 +133,20 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
       case DoctorRemedy.openProfiles:
         _leaveTo(PageLabel.profiles);
       case DoctorRemedy.openDns:
-        _openConfig(const DnsView(), paneId: 'dns', title: 'DNS');
+        _openConfig(
+          const SettingsPaneSelection(
+            id: 'dns',
+            detail: DnsView(),
+            title: Text('DNS'),
+          ),
+        );
       case DoctorRemedy.openAdvanced:
         _openConfig(
-          const AdvancedConfigView(),
-          paneId: 'advanced',
-          title: context.appLocalizations.advancedConfig,
+          SettingsPaneSelection(
+            id: 'advanced',
+            detail: const AdvancedConfigView(),
+            title: Text(context.appLocalizations.advancedConfig),
+          ),
         );
       case DoctorRemedy.exportReport:
         await _exportReport();
@@ -153,23 +161,28 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     ref.read(currentPageLabelProvider.notifier).toPage(page, returnable: true);
   }
 
-  // Inside a desktop two-pane tool the remedy drills into the same detail pane;
-  // a standalone Doctor (sheet or mobile) has no pane, so it defers to
-  // [showExtend] like every other open row: a side sheet on desktop, a full
-  // page on mobile, never a full-window route stacked over the Doctor sheet.
-  void _openConfig(
-    Widget view, {
-    required String paneId,
-    required String title,
-  }) {
+  // A pushing host pane drills in place. The Doctor opened as a desktop overlay
+  // sheet has none, so it closes and hands the drill-in to the Tools tab for a
+  // real path with a back-step; a phone keeps the full-page push.
+  void _openConfig(SettingsPaneSelection drill) {
     final pane = SettingsPaneScope.of(context);
     if (pane != null && pane.active && pane.pushes) {
-      pane.onSelect(
-        SettingsPaneSelection(id: paneId, detail: view, title: Text(title)),
-      );
+      pane.onSelect(drill);
       return;
     }
-    unawaited(showExtend(context, builder: (_) => view));
+    if (!context.isMobileView) {
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) navigator.pop();
+      ref.read(toolsPaneRequestProvider.notifier).request([
+        doctorRootPane(context),
+        drill,
+      ]);
+      ref
+          .read(currentPageLabelProvider.notifier)
+          .toPage(PageLabel.tools, returnable: true);
+      return;
+    }
+    unawaited(showExtend(context, builder: (_) => drill.detail));
   }
 
   @override

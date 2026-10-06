@@ -368,6 +368,12 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       gate: 'always',
     ),
     DeepSettingSpec(
+      title: l.navSurface,
+      paneId: 'appearance',
+      category: 'application',
+      gate: 'always',
+    ),
+    DeepSettingSpec(
       title: l.tabAnimation,
       paneId: 'appearance',
       category: 'application',
