@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"net/http"
 	"net/netip"
 	"net/url"
 	"os"
@@ -407,23 +408,38 @@ func (runtime coreDoctorRuntime) probeApplication(ctx context.Context, target st
 		}
 		return errDoctorStatusMismatch
 	}
-	proxy := lookupProxy(globalProxyName)
-	if proxy == nil {
+	return doctorRouteProbe(ctx, target)
+}
+
+// doctorRouteProbe fetches the test URL through the live tunnel so the marker
+// reflects the user's actual routing. URLTest on GLOBAL dials its selected
+// member directly and bypasses rules, so a dead subscription still looks
+// healthy when GLOBAL happens to point at DIRECT; a routed request fails here
+// exactly as a real app connection would.
+func doctorRouteProbe(ctx context.Context, target string) error {
+	if lookupProxy(globalProxyName) == nil {
 		return errDoctorNoActiveProxy
 	}
-	statuses := doctorExpectedStatuses(target)
-	if statuses == nil {
-		_, err := proxy.URLTest(ctx, target, anyDelayTestStatus)
-		return err
+	result := runProbe(ctx, probeRequest{
+		method:  http.MethodGet,
+		url:     target,
+		timeout: doctorProbeTimeout,
+		maxBody: doctorProbeByteBudget,
+		headers: map[string]string{"User-Agent": browserUserAgent},
+	})
+	if result == nil {
+		return context.DeadlineExceeded
 	}
-	_, err := proxy.URLTest(ctx, target, statuses)
-	if err != nil {
-		return err
+	if result.Error == probeErrorTimeout {
+		return context.DeadlineExceeded
 	}
-	if proxy.AliveForTestUrl(target) {
-		return nil
+	if result.Error != "" {
+		return errors.New(result.Message)
 	}
-	return errDoctorStatusMismatch
+	if statuses := doctorExpectedStatuses(target); statuses != nil && !statuses.Check(uint16(result.StatusCode)) {
+		return errDoctorStatusMismatch
+	}
+	return nil
 }
 
 func doctorExpectedStatuses(target string) utils.IntRanges[uint16] {
