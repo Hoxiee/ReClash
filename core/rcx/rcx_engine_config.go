@@ -49,8 +49,13 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 	e.ledger.SetFingerprints(next.Open, next.Domestic)
 	now := e.runtime.Now()
 	e.accountMetrics(now)
+	profileYAML, err := config.effectiveProfile().marshalYAML()
+	if err != nil {
+		profileYAML = rcxDefaultProfileYAML
+	}
 	e.mu.Lock()
 	e.openHosts = rcxMarkerHosts(config.OpenMarkers)
+	e.exportProfile = profileYAML
 	e.mu.Unlock()
 	e.refreshEffectiveEnabled()
 	if !config.operable() {

@@ -66,6 +66,7 @@ type rcxEngine struct {
 	enabled       bool
 	status        rcxStatus
 	report        rcxReport
+	exportProfile []byte
 	reportRanked  []rcxRanked
 	reportInput   rcxDecisionInput
 	reportVersion uint64
@@ -309,6 +310,19 @@ func (e *rcxEngine) Report() rcxReport {
 		}
 		e.mu.Unlock()
 	}
+}
+
+// ExportProfile returns the decision profile the engine is currently running as
+// YAML, the counterpart to the profile a config may import. The bytes are rebuilt
+// on each config apply and copied out so a caller cannot mutate engine state.
+func (e *rcxEngine) ExportProfile() []byte {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	source := e.exportProfile
+	if len(source) == 0 {
+		source = rcxDefaultProfileYAML
+	}
+	return append([]byte(nil), source...)
 }
 
 func (e *rcxEngine) Start() {

@@ -66,6 +66,24 @@ func (p rcxDecisionProfile) marshalYAML() ([]byte, error) {
 	return yaml.Marshal(p)
 }
 
+// effectiveProfile is the decision profile the engine is actually running after
+// override resolution: the config's ladder, strategy table, admission rules, and
+// probe cadence. It is the export counterpart to the ProfileYAML import, and for a
+// config carrying no profile it equals the shipped default.
+func (c rcxConfig) effectiveProfile() rcxDecisionProfile {
+	admission := c.admitRules
+	if len(admission) == 0 {
+		admission = rcxDefaultAdmitRules()
+	}
+	return rcxDecisionProfile{
+		Schema:     rcxProfileSchema,
+		Ladder:     c.ladder(),
+		Strategies: c.resolvedStrategies(),
+		Admission:  admission,
+		Probe:      c.probe(),
+	}
+}
+
 func rcxDecisionProfileFromYAML(data []byte) (rcxDecisionProfile, error) {
 	var p rcxDecisionProfile
 	err := yaml.Unmarshal(data, &p)

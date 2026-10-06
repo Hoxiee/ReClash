@@ -174,3 +174,47 @@ func TestProbeSectionOutOfRangeFallsBack(t *testing.T) {
 		}
 	}
 }
+
+func TestEffectiveProfileOfDefaultIsShipped(t *testing.T) {
+	got := rcxDefaultConfig().normalized().effectiveProfile()
+	if !reflect.DeepEqual(got, rcxDefaultDecisionProfile()) {
+		t.Fatalf("default effective profile drifted:\n got: %+v\nwant: %+v", got, rcxDefaultDecisionProfile())
+	}
+}
+
+func TestEffectiveProfileReflectsOverride(t *testing.T) {
+	yaml := "schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 100\nadmission:\n  - verdict: reject\n"
+	eff := profileConfig(t, yaml).effectiveProfile()
+	if eff.Probe != (rcxProbeSection{Concurrency: 5, StaggerMs: 100}) {
+		t.Fatalf("effective probe = %+v, want {5 100}", eff.Probe)
+	}
+	if len(eff.Admission) != 1 {
+		t.Fatalf("effective admission = %d rules, want 1 override rule", len(eff.Admission))
+	}
+	data, err := eff.marshalYAML()
+	if err != nil {
+		t.Fatalf("marshal effective: %v", err)
+	}
+	back, err := rcxDecisionProfileFromYAML(data)
+	if err != nil {
+		t.Fatalf("reparse effective: %v", err)
+	}
+	if !reflect.DeepEqual(back, eff) {
+		t.Fatal("effective profile does not round-trip")
+	}
+}
+
+func TestEngineExportProfileRoundTrips(t *testing.T) {
+	engine := newTestEngine(newFakeRuntime(), "ru")
+	data := engine.ExportProfile()
+	if len(data) == 0 {
+		t.Fatal("ExportProfile returned nothing")
+	}
+	if _, err := rcxDecisionProfileFromYAML(data); err != nil {
+		t.Fatalf("exported profile does not parse: %v", err)
+	}
+	data[0] = 'X'
+	if engine.ExportProfile()[0] == 'X' {
+		t.Fatal("ExportProfile handed out a mutable reference to engine state")
+	}
+}
