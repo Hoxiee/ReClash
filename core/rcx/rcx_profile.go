@@ -1,11 +1,20 @@
 package rcx
 
 import (
+	_ "embed"
 	"fmt"
 	"strings"
 
 	yaml "go.yaml.in/yaml/v3"
 )
+
+// rcxDefaultProfileYAML is the shipped built-in decision profile as YAML, embedded
+// into the binary. It is the artifact export emits and the UI/community catalog
+// seed from; a bijection test locks it to the Go-literal defaults it mirrors, so
+// the human-readable face and the compile-safe source can never silently diverge.
+//
+//go:embed rcx_profile_default.yaml
+var rcxDefaultProfileYAML []byte
 
 // rcxDecisionProfile is the shipped decision data expressed as one serializable,
 // human-editable document: the ranking ladder, the per-strategy flavors, and the

@@ -2,8 +2,6 @@ package rcx
 
 import (
 	"bytes"
-	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -13,13 +11,20 @@ func TestDefaultProfileMatchesGoldenFixture(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal default profile: %v", err)
 	}
-	path := filepath.Join("testdata", "default_profile.yaml")
-	want, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("read golden: %v", err)
+	if !bytes.Equal(bytes.TrimSpace(got), bytes.TrimSpace(rcxDefaultProfileYAML)) {
+		t.Fatalf("default profile drifted from the embedded YAML:\n got:\n%s\nwant:\n%s", got, rcxDefaultProfileYAML)
 	}
-	if !bytes.Equal(bytes.TrimSpace(got), bytes.TrimSpace(want)) {
-		t.Fatalf("default profile drifted from %s:\n got:\n%s\nwant:\n%s", path, got, want)
+}
+
+// The embedded YAML must parse back to the live Go defaults, so the shipped artifact
+// and the compile-safe source are a bijection rather than two copies that can drift.
+func TestEmbeddedProfileParsesToLiveDefaults(t *testing.T) {
+	got, err := rcxDecisionProfileFromYAML(rcxDefaultProfileYAML)
+	if err != nil {
+		t.Fatalf("parse embedded profile: %v", err)
+	}
+	if !reflect.DeepEqual(got, rcxDefaultDecisionProfile()) {
+		t.Fatalf("embedded YAML does not parse to the live defaults:\n got: %+v\nwant: %+v", got, rcxDefaultDecisionProfile())
 	}
 }
 
