@@ -230,24 +230,43 @@ const (
 	rcxFreshWindowSeconds = 1800
 )
 
+// rcxStrategyProfile is the shipped flavor of one ranking strategy as data: the
+// rungs its ladder drops, its latency band edges, and the switch thresholds that
+// were once three scattered per-strategy switches.
+type rcxStrategyProfile struct {
+	DropRungs    []rcxRungID
+	LatencyBands []int
+	SwitchAbsMs  int
+	SwitchPct    int
+}
+
+var rcxStrategyProfiles = map[string]rcxStrategyProfile{
+	rcxStrategyBalanced: {LatencyBands: []int{80, 120, 180, 320}, SwitchAbsMs: 30, SwitchPct: 20},
+	rcxStrategyStable:   {LatencyBands: []int{120, 200, 320, 550}, SwitchAbsMs: 50, SwitchPct: 30},
+	rcxStrategyLatency:  {DropRungs: []rcxRungID{rcxRungMisfit}, LatencyBands: []int{65, 90, 130, 220}, SwitchAbsMs: 15, SwitchPct: 10},
+	rcxStrategySaver:    {LatencyBands: []int{150, 260, 420, 750}, SwitchAbsMs: 50, SwitchPct: 30},
+}
+
+// An unknown name degrades to balanced, never a zero record.
+func rcxStrategyProfileFor(strategy string) rcxStrategyProfile {
+	if profile, ok := rcxStrategyProfiles[strategy]; ok {
+		return profile
+	}
+	return rcxStrategyProfiles[rcxStrategyBalanced]
+}
+
 func rcxDefaultLatencyBands() []int {
-	return []int{80, 120, 180, 320}
+	return rcxDefaultLatencyBandsFor(rcxStrategyBalanced)
 }
 
 // An unset or broken band list must not silently run another strategy's ladder:
 // the default edges belong to the strategy on the wire, mirroring the shipped
 // Dart pacing, so stable/saver/lowest-latency keep their own ceilings.
 func rcxDefaultLatencyBandsFor(strategy string) []int {
-	switch strategy {
-	case rcxStrategyStable:
-		return []int{120, 200, 320, 550}
-	case rcxStrategyLatency:
-		return []int{65, 90, 130, 220}
-	case rcxStrategySaver:
-		return []int{150, 260, 420, 750}
-	default:
-		return rcxDefaultLatencyBands()
-	}
+	bands := rcxStrategyProfileFor(strategy).LatencyBands
+	out := make([]int, len(bands))
+	copy(out, bands)
+	return out
 }
 
 // A usable ladder is non-empty and strictly increasing; anything else (a truncated

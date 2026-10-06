@@ -435,15 +435,10 @@ func (p rcxPolicy) latencyStep() int {
 }
 
 // switchThresholds is how much faster a challenger must be to trigger a latency
-// switch. Explicit config wins; else the strategy sets the shipped defaults.
+// switch. Explicit config wins; else the strategy profile sets the shipped default.
 func (p rcxPolicy) switchThresholds() (absolute, percent int) {
-	absolute, percent = 30, 20
-	switch p.Strategy {
-	case rcxStrategyLatency:
-		absolute, percent = 15, 10
-	case rcxStrategyStable, rcxStrategySaver:
-		absolute, percent = 50, 30
-	}
+	profile := rcxStrategyProfileFor(p.Strategy)
+	absolute, percent = profile.SwitchAbsMs, profile.SwitchPct
 	if p.SwitchImproveMs > 0 {
 		absolute = p.SwitchImproveMs
 	}

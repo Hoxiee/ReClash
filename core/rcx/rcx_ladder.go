@@ -272,16 +272,21 @@ func rcxCompareWith(a, b rcxKey, ladder []rcxRungSpec) int {
 	return 0
 }
 
-// rcxLadderForStrategy applies the strategy flavor: lowest-latency drops the misfit
-// rung (the specialist bias only a whitelist wants), matching rcxCompareLatency;
-// every other strategy runs the ladder as configured.
+// rcxLadderForStrategy applies the strategy flavor: a strategy's profile names the
+// rungs its ranking drops (lowest-latency drops misfit, matching rcxCompareLatency);
+// a strategy that drops nothing runs the ladder as configured.
 func rcxLadderForStrategy(ladder []rcxRungSpec, strategy string) []rcxRungSpec {
-	if strategy != rcxStrategyLatency {
+	drop := rcxStrategyProfileFor(strategy).DropRungs
+	if len(drop) == 0 {
 		return ladder
+	}
+	dropped := make(map[rcxRungID]struct{}, len(drop))
+	for _, id := range drop {
+		dropped[id] = struct{}{}
 	}
 	out := make([]rcxRungSpec, 0, len(ladder))
 	for _, spec := range ladder {
-		if spec.ID == rcxRungMisfit {
+		if _, skip := dropped[spec.ID]; skip {
 			continue
 		}
 		out = append(out, spec)
