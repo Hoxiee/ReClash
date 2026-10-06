@@ -229,6 +229,24 @@ fn install_bundle(owner: u32) -> Result<PathBuf> {
     result
 }
 
+// Every reinstall stages a new content-hashed bundle; once systemd runs the new
+// unit, siblings under the root-owned owner_dir are stale. lstat skips symlinks.
+fn prune_bundles(owner_dir: &Path, keep: &Path) {
+    let keep = keep.file_name();
+    let Ok(entries) = fs::read_dir(owner_dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        if Some(entry.file_name().as_os_str()) == keep {
+            continue;
+        }
+        let path = entry.path();
+        if fs::symlink_metadata(&path).is_ok_and(|info| info.is_dir()) {
+            let _ = fs::remove_dir_all(&path);
+        }
+    }
+}
+
 fn unit_contents(executable: &Path, owner: u32, group: u32) -> String {
     format!("{UNIT_MARKER}\n# OwnerUID={owner}\n[Unit]\nDescription=ReClash Linux network helper\nAfter=network.target\n\n[Service]\nType=notify\nNotifyAccess=main\nTimeoutStartSec=15\nUser={owner}\nGroup={group}\nExecStart={}\nRuntimeDirectory=reclash-helper-{owner}\nRuntimeDirectoryMode=0700\nUMask=0077\nAmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW\nCapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW\nNoNewPrivileges=yes\nProtectSystem=full\nRestrictSUIDSGID=yes\nKillMode=control-group\nTimeoutStopSec=8\nRestart=on-failure\nRestartSec=2\n\n[Install]\nWantedBy=multi-user.target\n", executable.display())
 }
@@ -347,6 +365,10 @@ fn install() -> Result<()> {
         })();
         return Err(error.context(format!("installation failed; rollback: {rollback:?}")));
     }
+    prune_bundles(
+        &Path::new(INSTALL_ROOT).join(owner.to_string()),
+        executable.parent().context("missing bundle directory")?,
+    );
     Ok(())
 }
 
@@ -522,6 +544,27 @@ mod tests {
         assert!(unit.contains("KillMode=control-group\n"));
         assert!(!unit.contains("PrivateNetwork="));
         assert!(!unit.contains("/tmp/.mount"));
+    }
+
+    #[test]
+    fn prune_keeps_only_the_active_bundle() {
+        let dir = sandbox();
+        let keep = dir.join("keep");
+        let stale = dir.join("stale");
+        let staging = dir.join(".install-123");
+        for bundle in [&keep, &stale, &staging] {
+            fs::create_dir(bundle).unwrap();
+            fs::write(bundle.join(HELPER_NAME), b"x").unwrap();
+        }
+        fs::write(dir.join(".1000.lock"), b"").unwrap();
+        symlink(&keep, dir.join("link")).unwrap();
+        prune_bundles(&dir, &keep);
+        assert!(keep.is_dir());
+        assert!(!stale.exists());
+        assert!(!staging.exists());
+        assert!(dir.join(".1000.lock").is_file());
+        assert!(keep.join(HELPER_NAME).is_file());
+        fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]
