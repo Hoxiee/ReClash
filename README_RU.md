@@ -72,6 +72,41 @@ sha256sum -c SHA256SUMS --ignore-missing
 
 В Windows вычислите хеш командой `Get-FileHash <файл> -Algorithm SHA256` и сравните его с соответствующей строкой в `SHA256SUMS`. Предварительные сборки могут быть нестабильными и не поддерживаются как отдельная ветка релизов.
 
+### NixOS
+
+ReClash поставляется флейком. Добавьте его в inputs и подключите overlay:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    reclash.url = "github:Hoxiee/ReClash?submodules=1";
+  };
+
+  outputs = { self, nixpkgs, reclash, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        {
+          nixpkgs.overlays = [ reclash.overlays.default ];
+          environment.systemPackages = [ pkgs.reclash ];
+          # TUN/VPN ставит привилегированный helper при первом запуске через
+          # polkit, поэтому оставьте pkexec доступным (включён в большинстве
+          # десктопных конфигураций).
+          security.polkit.enable = true;
+        }
+      ];
+    };
+  };
+}
+```
+
+Либо запустите без установки: `nix run "github:Hoxiee/ReClash?submodules=1"`.
+
+`?submodules=1` обязателен: ядро собирается из сабмодуля `core/mihomo`, который флейк иначе не выкачивает.
+
+Во флейке закреплены три хеша (`vendorHash` для Go-ядра и `gitHashes.*` для двух Git-зависимостей `pubspec`). После обновления зависимостей их обновляют так: ставят устаревший хеш в `pkgs.lib.fakeHash`, запускают `nix build` и копируют из ошибки значение `got:` обратно в `flake.nix`.
+
 ## Начало работы
 
 1. Добавьте URL подписки или импортируйте локальный профиль. Автоматический режим совместимости умеет пробовать подходящие форматы, если сервер меняет ответ в зависимости от `User-Agent`.

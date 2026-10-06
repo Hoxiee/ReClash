@@ -82,3 +82,8 @@ devtools_options.yaml
 
 # Local working directory
 /project/
+
+# Nix
+/result
+/result-*
+.direnv/

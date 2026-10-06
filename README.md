@@ -72,6 +72,40 @@ sha256sum -c SHA256SUMS --ignore-missing
 
 On Windows, calculate the package hash with `Get-FileHash <file> -Algorithm SHA256` and compare it with the matching line in `SHA256SUMS`. Pre-release builds may be unstable and are not maintained as a separate support line.
 
+### NixOS
+
+ReClash ships a flake. Add it to your inputs and apply the overlay:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    reclash.url = "github:Hoxiee/ReClash?submodules=1";
+  };
+
+  outputs = { self, nixpkgs, reclash, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        {
+          nixpkgs.overlays = [ reclash.overlays.default ];
+          environment.systemPackages = [ pkgs.reclash ];
+          # TUN/VPN installs a privileged helper on first use via polkit, so
+          # keep pkexec available (default on most desktop configurations).
+          security.polkit.enable = true;
+        }
+      ];
+    };
+  };
+}
+```
+
+Or run it without installing: `nix run "github:Hoxiee/ReClash?submodules=1"`.
+
+The `?submodules=1` is required: the core is built from the `core/mihomo` submodule, which flake refs do not fetch otherwise.
+
+The flake pins three hashes (`vendorHash` for the Go core, `gitHashes.*` for the two Git `pubspec` dependencies). After bumping dependencies they are refreshed by setting the stale one to `pkgs.lib.fakeHash`, running `nix build`, and copying the reported `got:` value back into `flake.nix`.
+
 ## Getting started
 
 1. Add a subscription URL or import a local profile. Automatic compatibility mode can try alternative subscription formats when a server varies its response by `User-Agent`.

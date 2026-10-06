@@ -72,6 +72,40 @@ sha256sum -c SHA256SUMS --ignore-missing
 
 在 Windows 上，使用 `Get-FileHash <文件> -Algorithm SHA256` 计算哈希，并与 `SHA256SUMS` 中对应的记录比较。预发布版本可能不稳定，也不会作为单独的维护分支获得支持。
 
+### NixOS
+
+ReClash 提供 flake。将其加入 inputs 并应用 overlay：
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    reclash.url = "github:Hoxiee/ReClash?submodules=1";
+  };
+
+  outputs = { self, nixpkgs, reclash, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        {
+          nixpkgs.overlays = [ reclash.overlays.default ];
+          environment.systemPackages = [ pkgs.reclash ];
+          # TUN/VPN 首次启用时通过 polkit 安装特权 helper，
+          # 因此需保持 pkexec 可用（多数桌面配置默认启用）。
+          security.polkit.enable = true;
+        }
+      ];
+    };
+  };
+}
+```
+
+或无需安装直接运行：`nix run "github:Hoxiee/ReClash?submodules=1"`。
+
+`?submodules=1` 是必需的：核心由 `core/mihomo` 子模块构建，flake 引用默认不会拉取它。
+
+flake 固定了三个哈希（Go 核心的 `vendorHash`，以及两个 Git `pubspec` 依赖的 `gitHashes.*`）。升级依赖后，将过期的哈希设为 `pkgs.lib.fakeHash`，运行 `nix build`，再把报错中的 `got:` 值复制回 `flake.nix`。
+
 ## 开始使用
 
 1. 添加订阅 URL 或导入本地配置。若服务器根据 `User-Agent` 返回不同格式，自动兼容模式可以依次尝试适用格式。
