@@ -212,57 +212,7 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 }
 
 func rcxAdmitTier(terrain rcxTerrain, f rcxFacts) rcxVerdict {
-	row, ok := rcxAdmissionTable[terrain]
-	if !ok {
-		return rcxVerdictReject
-	}
-	if f.Transit == rcxProofDisproven {
-		return rcxVerdictReject
-	}
-	// A measured censored-side exit is a durable fact about the node, not a stale
-	// probe, so a branded node is dropped outright however fast it pings.
-	if f.Trust == rcxTrustBranded {
-		return rcxVerdictReject
-	}
-	if f.OpenWorld == rcxProofDisproven && f.Domestic != rcxProofProven {
-		return rcxVerdictReject
-	}
-	if f.Exit == rcxOriginDomestic {
-		if f.Domestic == rcxProofProven {
-			return row.domesticProven
-		}
-		return row.domesticPrior
-	}
-	if f.OpenWorld == rcxProofProven {
-		if f.Breaker {
-			return row.breakerProven
-		}
-		// Suspicion caps a marker-only open at last-resort until the heavy echo
-		// check places the exit: a home node telegram-opens natively inside RU.
-		if f.Trust == rcxTrustSuspect && f.Exit == rcxOriginUnknown {
-			return rcxVerdictLastResort
-		}
-		return row.openWorldProven
-	}
-	// An aged proof is not a dead one: a foreign node that already opened the
-	// censored world on this network keeps its tier until a probe disproves it, so
-	// latency decides between working foreign nodes, not proof-freshness roulette.
-	// Restricted to foreign origin so a fronted domestic node stays a mere prior.
-	// OpenLapsed excludes a node whose proof aged out of a disproof, not a success:
-	// it failed and must re-earn Preferred by a fresh probe, not latch back on a clock.
-	if f.OpenedOnce && f.OpenWorld != rcxProofDisproven && !f.OpenLapsed && f.Origin != rcxOriginDomestic {
-		if f.Breaker {
-			return row.breakerProven
-		}
-		return row.openWorldProven
-	}
-	if f.Domestic == rcxProofProven {
-		return row.domesticProven
-	}
-	if f.Exit == rcxOriginUnknown && f.Origin == rcxOriginDomestic && !f.OpenedOnce {
-		return row.domesticPrior
-	}
-	return row.foreignPrior
+	return rcxAdmitByRules(terrain, f, rcxAdmitRulesDefault)
 }
 
 func rcxAllowsLastResort(terrain rcxTerrain, presetAllows bool) bool {
