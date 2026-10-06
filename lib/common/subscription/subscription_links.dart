@@ -49,6 +49,16 @@ class ShareLinksResult implements ConvertedSubscription {
 
 bool _isLinkLine(String line) => _schemes.any(line.startsWith);
 
+/// The node scheme of a share link, excluding the specially-handled vpn/amnezia
+/// wrappers; null for subscription URLs and non-node lines.
+String? _nodeScheme(String line) {
+  for (final scheme in shareLinkSchemes) {
+    if (scheme == 'vpn' || scheme == 'amneziawg' || scheme == 'awg') continue;
+    if (line.startsWith('$scheme://')) return scheme;
+  }
+  return null;
+}
+
 bool isShareLinkInput(String input) {
   final trimmed = input.trim();
   if (trimmed.isEmpty) return false;
@@ -75,12 +85,12 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
 (List<Map<String, Object?>>, List<SkippedNode>) _scanShareLinks(String raw) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
-  final seen = <String>{'PROXY', 'DIRECT'};
+  final seen = {...reservedProxyNames};
 
   void addProxy(Map<String, Object?>? proxy) {
     if (proxy == null) return;
     var name = proxy['name']! as String;
-    if (name == 'PROXY' || name == 'DIRECT') name = '$name node';
+    if (reservedProxyNames.contains(name)) name = '$name node';
     // Duplicates would collapse into one entry in any group; number them.
     var suffix = 2;
     while (seen.contains(name)) {
@@ -111,7 +121,26 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           addProxy(_parseAmneziaWgLink(trimmed));
           continue;
         }
-        addProxy(_parseUri(trimmed));
+        final proxy = _parseUri(trimmed);
+        if (proxy != null) {
+          addProxy(proxy);
+          continue;
+        }
+        // A recognised scheme that fails to parse is a broken node, not noise:
+        // surface it so the skipped counter is honest.
+        final scheme = _nodeScheme(trimmed);
+        if (scheme != null) {
+          final hashIdx = trimmed.indexOf('#');
+          skipped.add(
+            SkippedNode(
+              name: hashIdx >= 0
+                  ? _decodeComponent(trimmed.substring(hashIdx + 1))
+                  : scheme,
+              kind: scheme,
+              reason: SkippedNodeReason.protocol,
+            ),
+          );
+        }
       } on _UnsupportedLink catch (error) {
         skipped.add(error.node);
       } catch (_) {
@@ -347,13 +376,13 @@ Map<String, Object?>? _parseVmess(String uri) {
     'port': port,
     'uuid': uuid,
     'alterId': int.tryParse(j['aid']?.toString() ?? '') ?? 0,
-    'cipher': j['scy']?.toString() ?? 'auto',
+    'cipher': sanitizeVmessCipher(j['scy']?.toString() ?? 'auto'),
     'udp': true,
   };
 
   // mihomo dials xhttp for vless only; elsewhere it degrades to TCP.
-  final network = j['net']?.toString() ?? 'tcp';
-  if (network == 'xhttp' || network == 'splithttp') {
+  final rawNet = j['net']?.toString() ?? 'tcp';
+  if (rawNet == 'xhttp' || rawNet == 'splithttp') {
     throw _UnsupportedLink(
       SkippedNode(
         name: name.isEmpty ? server : name,
@@ -362,14 +391,31 @@ Map<String, Object?>? _parseVmess(String uri) {
       ),
     );
   }
-  if (network != 'tcp') proxy['network'] = _mihomoNetwork(network);
-  _applyTransport(
-    proxy,
-    network: network,
-    host: j['host']?.toString() ?? '',
-    path: j['path']?.toString() ?? '',
-    serviceName: j['path']?.toString() ?? '',
-  );
+  final host = j['host']?.toString() ?? '';
+  final path = j['path']?.toString() ?? '';
+  final headerType = j['type']?.toString() ?? '';
+  // v2rayN: `net=http` is HTTP/2 (mihomo h2); fake-HTTP obfs is `net=tcp` with
+  // `type=http`, which mihomo spells as the `http` network.
+  if (rawNet == 'tcp' && headerType == 'http') {
+    proxy['network'] = 'http';
+    proxy['http-opts'] = {
+      if (path.isNotEmpty) 'path': [path],
+      if (host.isNotEmpty)
+        'headers': {
+          'Host': [host],
+        },
+    };
+  } else {
+    final network = rawNet == 'http' ? 'h2' : rawNet;
+    if (network != 'tcp') proxy['network'] = _mihomoNetwork(network);
+    _applyTransport(
+      proxy,
+      network: network,
+      host: host,
+      path: path,
+      serviceName: path,
+    );
+  }
 
   final tls = j['tls']?.toString();
   if (tls == 'tls' || tls == 'reality') {
@@ -413,9 +459,12 @@ Map<String, Object?>? _parseVless(String uri) {
     proxy['tls'] = true;
     proxy['servername'] = sni;
   }
-  if ((params['flow'] ?? '').isNotEmpty) proxy['flow'] = params['flow'];
+  final flow = sanitizeVlessFlow(params['flow'] ?? '');
+  if (flow != null) proxy['flow'] = flow;
   final encryption = params['encryption'] ?? '';
-  if (encryption.isNotEmpty && encryption != 'none') {
+  if (encryption.isNotEmpty &&
+      encryption != 'none' &&
+      isValidVlessEncryption(encryption)) {
     proxy['encryption'] = encryption;
   }
   _applyTlsExtras(
@@ -439,11 +488,15 @@ Map<String, Object?>? _parseVless(String uri) {
   } else if (transport != 'tcp') {
     proxy['network'] = _mihomoNetwork(transport);
   }
+  var path = params['path'] ?? '';
+  if (transport == 'ws' || transport == 'httpupgrade') {
+    path = _withTopLevelEarlyData(path, params['ed'] ?? '', params['eh'] ?? '');
+  }
   _applyTransport(
     proxy,
     network: transport,
     host: params['host'] ?? '',
-    path: params['path'] ?? '',
+    path: path,
     serviceName: params['serviceName'] ?? '',
   );
   return proxy;
@@ -608,8 +661,10 @@ Map<String, Object?>? _parseHysteria2(String uri) {
     'port': port,
     'password': auth,
   };
-  if (ports.isNotEmpty) {
-    proxy['ports'] = ports.replaceAll(' ', '');
+  final cleanPorts = ports.replaceAll(' ', '');
+  // A malformed mport takes the whole config down; drop it, keep the node.
+  if (cleanPorts.isNotEmpty && isValidPortHopping(cleanPorts)) {
+    proxy['ports'] = cleanPorts;
     final hopInterval = int.tryParse(params['hop-interval'] ?? '');
     // Below the core's 5s floor the value is clamped anyway; 0 means default.
     if (hopInterval != null && hopInterval >= 5) {
@@ -621,12 +676,13 @@ Map<String, Object?>? _parseHysteria2(String uri) {
   if (params['insecure'] == '1' || params['insecure'] == 'true') {
     proxy['skip-cert-verify'] = true;
   }
-  if ((params['obfs'] ?? '').isNotEmpty) {
-    proxy['obfs'] = params['obfs'];
-    final obfsPassword = params['obfs-password'];
-    if (obfsPassword != null && obfsPassword.isNotEmpty) {
-      proxy['obfs-password'] = obfsPassword;
-    }
+  // Core hard-fails on an unknown obfs type or a missing obfs password; drop
+  // the obfs keys rather than the node.
+  final obfs = params['obfs'] ?? '';
+  final obfsPassword = params['obfs-password'] ?? '';
+  if ((obfs == 'salamander' || obfs == 'gecko') && obfsPassword.isNotEmpty) {
+    proxy['obfs'] = obfs;
+    proxy['obfs-password'] = obfsPassword;
   }
   for (final field in ['up', 'down']) {
     final value = params[field];
@@ -870,6 +926,48 @@ _splitUserinfoUri(String uri) {
 String _mihomoNetwork(String network) =>
     network == 'httpupgrade' ? 'ws' : network;
 
+/// mihomo pre-registers these proxy and policy-group names; a node or group
+/// reusing one aborts the whole config load. `PROXY` is the select group every
+/// converter emits, so each scanner seeds its dedup set from here.
+const reservedProxyNames = <String>{
+  'PROXY',
+  'GLOBAL',
+  'DIRECT',
+  'REJECT',
+  'REJECT-DROP',
+  'COMPATIBLE',
+  'PASS',
+  'PASS-RULE',
+};
+
+const _vlessVisionFlow = 'xtls-rprx-vision';
+const _vmessCiphers = {'auto', 'aes-128-gcm', 'chacha20-poly1305', 'none'};
+final _portHopPattern = RegExp(r'^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$');
+
+String sanitizeVmessCipher(String cipher) {
+  final lower = cipher.toLowerCase();
+  return _vmessCiphers.contains(lower) ? lower : 'auto';
+}
+
+/// Core truncates `flow` to 16 chars then demands it equal vision; a longer,
+/// non-vision value aborts the config. Null means drop the key.
+String? sanitizeVlessFlow(String flow) {
+  if (flow.isEmpty) return null;
+  if (flow.length >= 16 && flow.substring(0, 16) != _vlessVisionFlow) {
+    return null;
+  }
+  return flow;
+}
+
+/// Core accepts only empty/`none` or a `mlkem768x25519plus.…` form of at least
+/// four dot-segments; anything else is a fatal encryption value.
+bool isValidVlessEncryption(String encryption) {
+  final parts = encryption.split('.');
+  return parts.length >= 4 && parts.first == 'mlkem768x25519plus';
+}
+
+bool isValidPortHopping(String ports) => _portHopPattern.hasMatch(ports);
+
 void _applyTransport(
   Map<String, Object?> proxy, {
   required String network,
@@ -905,6 +1003,18 @@ void _applyTransport(
         if (host.isNotEmpty) 'host': [host],
       };
   }
+}
+
+/// Some providers carry the ws 0-RTT hint as top-level `ed`/`eh` query params
+/// instead of in the path; fold them in so [_splitWsEarlyData] sees them.
+String _withTopLevelEarlyData(String path, String ed, String eh) {
+  if (ed.isEmpty && eh.isEmpty) return path;
+  if (path.contains('ed=') || path.contains('eh=')) return path;
+  final extra = [
+    if (ed.isNotEmpty) 'ed=$ed',
+    if (eh.isNotEmpty) 'eh=$eh',
+  ].join('&');
+  return path.contains('?') ? '$path&$extra' : '$path?$extra';
 }
 
 /// `eh` names the early-data header (default `Sec-WebSocket-Protocol`).

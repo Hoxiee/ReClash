@@ -135,7 +135,7 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
   }
 
   final proxies = <Map<String, Object?>>[];
-  final seen = <String>{'PROXY', 'DIRECT'};
+  final seen = {...reservedProxyNames};
   final tagNames = <String, String>{};
   for (final entry in groups.entries) {
     final (proxy, candidates) = entry.value;
@@ -643,8 +643,8 @@ Map<String, Object?>? _convertVless(
     'uuid': uuid,
     'udp': true,
   };
-  final flow = users['flow']?.toString() ?? '';
-  if (flow.isNotEmpty) proxy['flow'] = flow;
+  final flow = sanitizeVlessFlow(users['flow']?.toString() ?? '');
+  if (flow != null) proxy['flow'] = flow;
 
   _applyStreamSettings(proxy, outbound['streamSettings'], fallbackSni: server);
   return proxy;
@@ -675,7 +675,7 @@ Map<String, Object?>? _convertVmess(
     'port': port,
     'uuid': uuid,
     'alterId': _toInt(users['alterId']) ?? 0,
-    'cipher': users['security']?.toString() ?? 'auto',
+    'cipher': sanitizeVmessCipher(users['security']?.toString() ?? 'auto'),
     'udp': true,
   };
 

@@ -222,6 +222,13 @@ Endpoint = hex.example.com:51820
       expect(isWireguardConfInput(''), isFalse);
       expect(tryConvertWireguardConf('hello'), isNull);
     });
+
+    test('a reserved conf name is renamed', () {
+      final conf = _v1Conf.replaceFirst('# Name = awg-node', '# Name = PROXY');
+      final result = tryConvertWireguardConf(conf);
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['PROXY node']);
+    });
   });
 
   group('tryConvertShareLinks with amnezia links', () {

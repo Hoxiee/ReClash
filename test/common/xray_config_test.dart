@@ -1179,4 +1179,76 @@ void main() {
       expect(result!.config, isNot(contains('DIRECT_ONLY')));
     });
   });
+
+  group('pre-rollout hardening', () {
+    test('a reserved tag is renamed', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [_node('REJECT', 'r.example.com')],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['REJECT 2']);
+      expect(result.config, isNot(contains('name: "REJECT"')));
+    });
+
+    test('vmess cipher outside the enum degrades to auto', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'vm',
+              'protocol': 'vmess',
+              'settings': {
+                'vnext': [
+                  {
+                    'address': 'vm.example.com',
+                    'port': 443,
+                    'users': [
+                      {
+                        'id': '11223344-5566-7788-9900-aabbccddeeff',
+                        'security': 'zero',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('cipher: "auto"'));
+      expect(result.config, isNot(contains('zero')));
+    });
+
+    test('vless non-vision flow is dropped', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'v',
+              'protocol': 'vless',
+              'settings': {
+                'vnext': [
+                  {
+                    'address': 'v.example.com',
+                    'port': 443,
+                    'users': [
+                      {
+                        'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199',
+                        'flow': 'xtls-rprx-direct123',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('flow:')));
+    });
+  });
 }

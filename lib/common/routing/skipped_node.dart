@@ -3,7 +3,7 @@ library;
 import 'package:json_annotation/json_annotation.dart';
 
 enum SkippedNodeReason {
-  /// mihomo has no dialer for the protocol (ssr, naive…).
+  /// mihomo has no dialer for the protocol (naive, socks4…).
   protocol,
 
   /// The transport exists only for another protocol (xhttp on vmess/trojan).

@@ -697,7 +697,7 @@ void main() {
       );
     });
 
-    test('duplicate tags collapse by name', () {
+    test('duplicate tags are renamed, not dropped', () {
       final result = tryConvertSingboxConfig(
         _json({
           'outbounds': [
@@ -707,7 +707,7 @@ void main() {
         }),
       );
       expect(result, isNotNull);
-      expect(_proxiesNames(result!.config), ['dup']);
+      expect(_proxiesNames(result!.config), ['dup', 'dup 2']);
     });
 
     test('empty tag falls back to the server host', () {
@@ -743,6 +743,49 @@ void main() {
       expect(tryConvertSingboxConfig('{}'), isNull);
       expect(tryConvertSingboxConfig(''), isNull);
       expect(tryConvertSingboxConfig('vless://u@h:1'), isNull);
+    });
+  });
+
+  group('pre-rollout hardening', () {
+    test('a reserved tag is renamed', () {
+      final result = tryConvertSingboxConfig(
+        _json({
+          'outbounds': [
+            outbound('trojan', 'REJECT', extra: {'password': 'p'}),
+          ],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['REJECT node']);
+    });
+
+    test('vmess cipher outside the enum degrades to auto', () {
+      final result = tryConvertSingboxConfig(
+        _json({
+          'outbounds': [
+            outbound('vmess', 'v', extra: {'uuid': 'u', 'security': 'zero'}),
+          ],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('cipher: "auto"'));
+      expect(result.config, isNot(contains('zero')));
+    });
+
+    test('vless non-vision flow is dropped', () {
+      final result = tryConvertSingboxConfig(
+        _json({
+          'outbounds': [
+            outbound(
+              'vless',
+              'v',
+              extra: {'uuid': 'u', 'flow': 'xtls-rprx-direct123'},
+            ),
+          ],
+        }),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('flow:')));
     });
   });
 }

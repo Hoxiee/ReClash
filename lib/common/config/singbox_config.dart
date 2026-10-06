@@ -48,7 +48,7 @@ SingboxConfigResult? tryConvertSingboxConfig(String body) {
 
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
-  final seen = <String>{'PROXY', 'DIRECT'};
+  final seen = {...reservedProxyNames};
   for (final outbound in outbounds) {
     if (outbound is! Map<String, Object?>) continue;
     if (_serviceTypes.contains(outbound['type'])) continue;
@@ -61,8 +61,7 @@ SingboxConfigResult? tryConvertSingboxConfig(String body) {
     }
     if (proxy == null) continue;
     var name = proxy['name']! as String;
-    if (seen.contains(name) && name != 'PROXY' && name != 'DIRECT') continue;
-    if (name == 'PROXY' || name == 'DIRECT') name = '$name node';
+    if (reservedProxyNames.contains(name)) name = '$name node';
     final base = name;
     var suffix = 2;
     while (!seen.add(name)) {
@@ -131,7 +130,8 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
       proxy['type'] = 'vless';
       proxy['udp'] = true;
       _set(proxy, 'uuid', outbound['uuid']);
-      _set(proxy, 'flow', outbound['flow']);
+      final flow = sanitizeVlessFlow(outbound['flow']?.toString() ?? '');
+      if (flow != null) proxy['flow'] = flow;
       final packetEncoding = outbound['packet_encoding']?.toString() ?? '';
       if (packetEncoding == 'packetaddr' || packetEncoding == 'packet') {
         proxy['packet-encoding'] = 'packetaddr';
@@ -141,7 +141,9 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
       proxy['udp'] = true;
       _set(proxy, 'uuid', outbound['uuid']);
       proxy['alterId'] = _toInt(outbound['alter_id']) ?? 0;
-      proxy['cipher'] = outbound['security']?.toString() ?? 'auto';
+      proxy['cipher'] = sanitizeVmessCipher(
+        outbound['security']?.toString() ?? 'auto',
+      );
       final packetEncoding = outbound['packet_encoding']?.toString() ?? '';
       if (packetEncoding == 'packetaddr' || packetEncoding == 'packet') {
         proxy['packet-encoding'] = 'packetaddr';

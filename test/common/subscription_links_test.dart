@@ -410,13 +410,25 @@ void main() {
       expect(config, contains('path: "/vm"'));
     });
 
-    test('vless encryption param is passed through', () {
+    test('vless invalid encryption value is dropped', () {
       final result = tryConvertShareLinks(
         'vless://u@h.example.com:443?security=tls&sni=s.example.com'
         '&encryption=2022-blake3-aes-128-gcm#enc-node',
       );
       expect(result, isNotNull);
-      expect(result!.config, contains('encryption: "2022-blake3-aes-128-gcm"'));
+      expect(result!.config, isNot(contains('encryption')));
+    });
+
+    test('vless mlkem encryption value is kept', () {
+      final result = tryConvertShareLinks(
+        'vless://u@h.example.com:443?security=tls&sni=s.example.com'
+        '&encryption=mlkem768x25519plus.native.0rtt.abcd#enc-node',
+      );
+      expect(result, isNotNull);
+      expect(
+        result!.config,
+        contains('encryption: "mlkem768x25519plus.native.0rtt.abcd"'),
+      );
     });
 
     test('vless encryption=none is omitted', () {
@@ -863,6 +875,114 @@ void main() {
       );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['1.1.1.1']);
+    });
+  });
+
+  group('pre-rollout hardening', () {
+    String vmessLink(Map<String, Object?> fields) =>
+        'vmess://${base64.encode(utf8.encode(jsonEncode({'add': '1.2.3.4', 'port': 443, 'id': 'uuid-1', ...fields})))}';
+
+    test('reserved proxy names are renamed, config stays loadable', () {
+      final result = tryConvertShareLinks(
+        'trojan://pw@h.example.com:443#REJECT\n'
+        'trojan://pw@h2.example.com:443#PASS',
+      );
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['REJECT node', 'PASS node']);
+      expect(result.config, isNot(contains('name: "REJECT"')));
+    });
+
+    test('vmess cipher outside the enum degrades to auto', () {
+      final result = tryConvertShareLinks(
+        vmessLink({'ps': 'z', 'scy': 'zero'}),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('cipher: "auto"'));
+      expect(result.config, isNot(contains('zero')));
+    });
+
+    test('vmess net=http maps to the h2 network', () {
+      final result = tryConvertShareLinks(
+        vmessLink({'ps': 'h', 'net': 'http', 'host': 'a.example.com'}),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('network: "h2"'));
+    });
+
+    test('vmess net=tcp type=http is fake-HTTP obfs', () {
+      final result = tryConvertShareLinks(
+        vmessLink({
+          'ps': 'fh',
+          'net': 'tcp',
+          'type': 'http',
+          'host': 'a.example.com',
+          'path': '/go',
+        }),
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('network: "http"'));
+      expect(result.config, contains('http-opts'));
+    });
+
+    test('vless flow accepts vision and its 16-char-prefix variants', () {
+      final vision = tryConvertShareLinks(
+        'vless://u@h.example.com:443?flow=xtls-rprx-vision#v',
+      );
+      expect(vision!.config, contains('flow: "xtls-rprx-vision"'));
+      final udp = tryConvertShareLinks(
+        'vless://u@h.example.com:443?flow=xtls-rprx-vision-udp443#v',
+      );
+      expect(udp!.config, contains('flow: "xtls-rprx-vision-udp443"'));
+    });
+
+    test('vless non-vision flow is dropped', () {
+      final result = tryConvertShareLinks(
+        'vless://u@h.example.com:443?flow=xtls-rprx-direct123#v',
+      );
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('flow:')));
+    });
+
+    test('hysteria2 obfs needs a known type and a password', () {
+      final bad = tryConvertShareLinks(
+        'hysteria2://pw@h.example.com:443?obfs=salamander#x',
+      );
+      expect(bad, isNotNull);
+      expect(bad!.config, isNot(contains('obfs')));
+      final good = tryConvertShareLinks(
+        'hysteria2://pw@h.example.com:443?obfs=salamander&obfs-password=s#x',
+      );
+      expect(good!.config, contains('obfs: "salamander"'));
+      expect(good.config, contains('obfs-password: "s"'));
+    });
+
+    test('hysteria2 malformed mport is dropped, node kept', () {
+      final result = tryConvertShareLinks(
+        'hysteria2://pw@h.example.com:443?mport=not-a-port#x',
+      );
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('ports:')));
+      final valid = tryConvertShareLinks(
+        'hysteria2://pw@h.example.com:443?mport=443,4430-4440#x',
+      );
+      expect(valid!.config, contains('ports: "443,4430-4440"'));
+    });
+
+    test('ws top-level ed query folds into early data', () {
+      final result = tryConvertShareLinks(
+        'vless://u@h.example.com:443?type=ws&path=%2Fws&ed=2048#x',
+      );
+      expect(result, isNotNull);
+      expect(result!.config, contains('max-early-data: 2048'));
+    });
+
+    test('a recognised but broken link is counted as skipped', () {
+      final result = tryConvertShareLinks(
+        'trojan://ok@h.example.com:443#good\nvmess://not-base64-json',
+      );
+      expect(result, isNotNull);
+      expect(result!.skipped, hasLength(1));
+      expect(result.skipped.single.kind, 'vmess');
     });
   });
 }

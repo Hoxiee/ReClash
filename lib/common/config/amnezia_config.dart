@@ -36,6 +36,8 @@ ConvertedSubscription? tryConvertWireguardConf(String body) {
   }
   final proxy = _looksLikeConf(conf) ? parseAwgConf(conf) : null;
   if (proxy == null) return null;
+  final name = proxy['name']! as String;
+  if (reservedProxyNames.contains(name)) proxy['name'] = '$name node';
   return _WireguardConfResult(config: emitProxiesConfig([proxy]));
 }
 
