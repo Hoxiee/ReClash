@@ -284,6 +284,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "더 높은 줄: ${step}";
 
+  static String m123(client) => "자동으로 ${client} 선택됨";
+
   static String m124(host) => "제공자가 ${host}(으)로 이동했습니다";
 
   static String m125(count) =>
@@ -3631,22 +3633,54 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("확인"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("구독"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("자동"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash로 요청하고 형식을 자동으로 감지하며, 아래 프리셋을 차례로 시도합니다.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("호환성"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("사용자 지정"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "특정 클라이언트에 맞춘 패널을 위해 아래에 설정한 User-Agent를 보냅니다.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "구독을 요청할 때 이 클라이언트 형식을 사용합니다",
     ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "호환성 프리셋은 ReClash가 다른 앱인 것처럼 가장하여 패널이 해당 클라이언트의 형식을 제공하도록 하고, ReClash가 이를 변환합니다. 일반 요청이 노드를 반환하지 않을 때만 사용하세요.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "자체 형식만 제공하는 패널을 위해 Happ 앱으로 가장합니다.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "INCY에 맞춰진 패널을 위해 INCY 앱으로 가장합니다.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage("클라이언트 형식"),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "네이티브 형식",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 직접 읽는 Clash 계열 형식입니다.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("고정"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "sing-box 클라이언트로 가장하며, 패널은 sing-box JSON으로 응답합니다.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG로 가장하며, 패널은 base64 노드 목록으로 응답합니다.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "이 구독의 구성이 올바르지 않아 사용할 수 없습니다. 제공업체 지원팀에 문의하세요.",

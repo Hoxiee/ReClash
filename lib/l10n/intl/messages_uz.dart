@@ -308,6 +308,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Yuqoriroq turgan qator: ${step}";
 
+  static String m123(client) => "Avto ${client} tanladi";
+
   static String m124(host) => "Provayder ${host} manziliga koʻchdi";
 
   static String m125(count) =>
@@ -4615,24 +4617,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("Yuborish"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Obuna"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Avtomatik"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash sifatida so\'rov yuboradi va formatni o\'zi aniqlaydi, quyidagi presetlarni ketma-ket sinab ko\'radi.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("Moslik"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Maxsus"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "Muayyan klientga bog\'liq panel uchun quyida belgilagan User-Agent\'ni yuboradi.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova obunani aynan shu mijoz formatida soʻraydi",
     ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Moslik presetlari ReClash\'ni boshqa ilova sifatida ko\'rsatadi, shunda panel o\'sha klient formatini beradi, uni ReClash keyin o\'giradi. Faqat oddiy so\'rov tugunlarni qaytarmaganda foydalaning.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Faqat o\'z formatini beradigan panellar uchun Happ ilovasi sifatida ko\'rsatiladi.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "Unga moslashtirilgan panellar uchun INCY ilovasi sifatida ko\'rsatiladi.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
       "Mijoz formati",
     ),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "Mahalliy formatlar",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash to\'g\'ridan-to\'g\'ri o\'qiydigan Clash oilasidagi format.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Mahkamlash"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "sing-box klienti sifatida ko\'rsatiladi; panel sing-box JSON bilan javob beradi.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG sifatida ko\'rsatiladi; panel base64 tugunlar ro\'yxati bilan javob beradi.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "Ushbu obunaning konfiguratsiyasi yaroqsiz va ishlatib bo‘lmaydi. Provayder qo‘llab-quvvatlash xizmatiga murojaat qiling.",

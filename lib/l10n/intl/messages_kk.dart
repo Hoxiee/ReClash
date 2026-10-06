@@ -301,6 +301,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Жоғары тұрған жол: ${step}";
 
+  static String m123(client) => "Авто ${client} таңдады";
+
   static String m124(host) => "Провайдер ${host} мекенжайына көшкен";
 
   static String m125(count) =>
@@ -4508,24 +4510,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "submit": MessageLookupByLibrary.simpleMessage("Жіберу"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Жазылыс"),
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash ретінде сұрайды және форматты өзі анықтайды, төмендегі пресеттерді кезекпен қолданады.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("Үйлесімділік"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Қолмен"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "Белгілі бір клиентке байланысты панель үшін төменде көрсетілген User-Agent жібереді.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданба жазылысты осы клиенттің пішімінде сұрайды",
     ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Үйлесімділік пресеттері ReClash-ты басқа қосымша ретінде көрсетеді, сонда панель сол клиенттің форматын береді, оны ReClash кейін түрлендіреді. Әдеттегі сұрау түйіндерді қайтармаса ғана қолданыңыз.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Тек өз форматын беретін панельдер үшін Happ қосымшасы ретінде көрсетіледі.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "Оған бейімделген панельдер үшін INCY қосымшасы ретінде көрсетіледі.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
       "Клиент пішімі",
     ),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "Төл форматтар",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash тікелей оқитын Clash тобындағы формат.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Бекіту"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "sing-box клиенті ретінде көрсетіледі; панель sing-box JSON-мен жауап береді.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG ретінде көрсетіледі; панель base64 түйіндер тізімімен жауап береді.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "Бұл жазылымның конфигурациясы жарамсыз және қолданыла алмайды. Провайдердің қолдау қызметіне хабарласыңыз.",

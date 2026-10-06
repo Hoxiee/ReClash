@@ -302,6 +302,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m122(step) => "Ýokarda duran hatar: ${step}";
 
+  static String m123(client) => "Awto ${client} saýlady";
+
   static String m124(host) => "Üpjün ediji ${host} salgyna geçdi";
 
   static String m125(count) =>
@@ -4505,24 +4507,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage(
       "Awtomatiki",
     ),
+    "subscriptionClientAutoHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash hökmünde soraýar we formaty özi kesgitleýär, aşakdaky presetleri yzygiderli synanyşýar.",
+    ),
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
       "Clash Meta",
     ),
+    "subscriptionClientCompatibilityGroup":
+        MessageLookupByLibrary.simpleMessage("Utgaşyklyk"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Ýörite"),
+    "subscriptionClientCustomHint": MessageLookupByLibrary.simpleMessage(
+      "Belli bir kliente bagly panel üçin aşakda bellän User-Agent iberýär.",
+    ),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Programma abuna haýyşyny şu müşderiniň formatynda iberýär",
     ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Utgaşyklyk presetleri ReClash-y başga programma hökmünde görkezýär, şonda panel şol klientiň formatyny berýär, ony ReClash soňra öwürýär. Diňe adaty sorag düwünleri gaýtarmasa ulanyň.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
+      "Diňe öz formatyny berýän paneller üçin Happ programmasy hökmünde görkezýär.",
+    ),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientIncyHint": MessageLookupByLibrary.simpleMessage(
+      "Oňa görä sazlanan paneller üçin INCY programmasy hökmünde görkezýär.",
+    ),
     "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
       "Müşderi formaty",
     ),
+    "subscriptionClientNativeGroup": MessageLookupByLibrary.simpleMessage(
+      "Ýerli formatlar",
+    ),
+    "subscriptionClientNativeHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash gönüden okaýan Clash maşgalasyndan format.",
+    ),
+    "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Berkitmek"),
+    "subscriptionClientResolvedTo": m123,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
+    "subscriptionClientSingboxHint": MessageLookupByLibrary.simpleMessage(
+      "sing-box klienti hökmünde görkezýär; panel sing-box JSON bilen jogap berýär.",
+    ),
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
+    ),
+    "subscriptionClientV2rayngHint": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG hökmünde görkezýär; panel base64 düwün sanawy bilen jogap berýär.",
     ),
     "subscriptionConfigInvalidTip": MessageLookupByLibrary.simpleMessage(
       "Bu abunäniň konfigurasiýasy nädogry we ulanyp bolmaýar. Üpjünçiniň goldaw gullugyna ýüz tutuň.",
