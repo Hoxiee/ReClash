@@ -113,6 +113,56 @@ void main() {
     expect(container.read(navigationStateProvider).currentIndex, 0);
   });
 
+  test('an active rail carries the observability tabs out of Tools', () {
+    final railBox = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        navSurfaceProvider.overrideWithValue(NavSurface.rail),
+      ],
+    );
+    addTearDown(railBox.dispose);
+    railBox
+        .read(appSettingProvider.notifier)
+        .update((s) => s.copyWith(openLogs: true));
+
+    final railTabs = railBox
+        .read(currentNavigationItemsStateProvider)
+        .value
+        .map((item) => item.label);
+    expect(
+      railTabs,
+      containsAll([
+        PageLabel.requests,
+        PageLabel.connections,
+        PageLabel.dns,
+        PageLabel.logs,
+      ]),
+    );
+    final railTools = railBox
+        .read(moreToolsSelectorStateProvider)
+        .navigationItems
+        .map((item) => item.label);
+    expect(railTools, isNot(contains(PageLabel.connections)));
+
+    final barBox = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        navSurfaceProvider.overrideWithValue(NavSurface.bar),
+      ],
+    );
+    addTearDown(barBox.dispose);
+    final barTabs = barBox
+        .read(currentNavigationItemsStateProvider)
+        .value
+        .map((item) => item.label);
+    expect(barTabs, isNot(contains(PageLabel.connections)));
+    final barTools = barBox
+        .read(moreToolsSelectorStateProvider)
+        .navigationItems
+        .map((item) => item.label);
+    expect(barTools, contains(PageLabel.connections));
+  });
+
   test('layout and page state providers compose their dependencies', () {
     final profile = Profile.normal(label: 'Primary');
     _profiles(container).replace([profile]);

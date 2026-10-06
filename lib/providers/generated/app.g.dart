@@ -948,7 +948,7 @@ final class NavSurfaceProvider
   }
 }
 
-String _$navSurfaceHash() => r'072049b96266c307f3472c863d9d5c5641a6c2e7';
+String _$navSurfaceHash() => r'494a0b1c64c4ecb617caeb42667a9d098378df25';
 
 @ProviderFor(isBarSurface)
 final isBarSurfaceProvider = IsBarSurfaceProvider._();

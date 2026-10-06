@@ -23,10 +23,12 @@ NavigationItemsState navigationItemsState(Ref ref) {
 @riverpod
 NavigationItemsState currentNavigationItemsState(Ref ref) {
   final navigationItemsState = ref.watch(navigationItemsStateProvider);
-  final navigationItemMode = switch (ref.watch(viewModeProvider)) {
-    ViewMode.mobile => NavigationItemMode.mobile,
-    _ => NavigationItemMode.desktop,
-  };
+  // The surface, not the view mode, decides the strip: a landscape phone on a
+  // rail gets the full desktop set so requests, connections, DNS, and logs ride
+  // the rail instead of hiding inside Tools.
+  final navigationItemMode = ref.watch(isBarSurfaceProvider)
+      ? NavigationItemMode.mobile
+      : NavigationItemMode.desktop;
   return NavigationItemsState(
     value: navigationItemsState.value
         .where((element) => element.modes.contains(navigationItemMode))
@@ -63,7 +65,7 @@ DashboardState dashboardState(Ref ref) {
 
 @riverpod
 MoreToolsSelectorState moreToolsSelectorState(Ref ref) {
-  final viewMode = ref.watch(viewModeProvider);
+  final isBar = ref.watch(isBarSurfaceProvider);
   final navigationItems = ref
       .watch(
         navigationItemsStateProvider.select((state) {
@@ -74,7 +76,9 @@ MoreToolsSelectorState moreToolsSelectorState(Ref ref) {
                 NavigationItemMode.desktop,
               );
               if (isMore && !isDesktop) return true;
-              if (viewMode != ViewMode.mobile || !isMore) {
+              // A rail hosts these items itself, so Tools only lists them while
+              // the bar is up and they have nowhere else to live.
+              if (!isBar || !isMore) {
                 return false;
               }
               return true;

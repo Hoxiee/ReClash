@@ -217,7 +217,15 @@ NavSurface navSurface(Ref ref) {
     return setting;
   }
   if (ref.watch(viewModeProvider) == ViewMode.mobile) {
-    return NavSurface.bar;
+    // A phone keeps the bar upright but stands a rail in landscape: the long
+    // edge has the width the rail needs, and the short height is where the
+    // bottom bar would steal the most room. A narrow desktop window is not a
+    // phone, so it keeps the bar it had before.
+    if (system.isDesktop) {
+      return NavSurface.bar;
+    }
+    final size = ref.watch(viewSizeProvider);
+    return size.width > size.height ? NavSurface.rail : NavSurface.bar;
   }
   // A tablet is a touch OS on a canvas too large for the mobile view: give it
   // the bar by default so the wide screen keeps the full item strip within
