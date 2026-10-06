@@ -2361,6 +2361,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Mos keladigan domenlar uchun nameserver siyosatini belgilash",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("Navigatsiya"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("Avto"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("Pastki panel"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("Yon panel"),
     "network": MessageLookupByLibrary.simpleMessage("Tarmoq"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "Maxsus marshrutlar bo‘lmasa, mahalliy tarmoq VPNni chetlab o‘tadi. Uni qamrab olish uchun marshrutlarni aniq belgilang.",

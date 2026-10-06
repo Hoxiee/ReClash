@@ -1881,6 +1881,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "일치하는 도메인에 사용할 네임서버를 지정합니다",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("내비게이션"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("자동"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("하단 바"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("사이드 레일"),
     "network": MessageLookupByLibrary.simpleMessage("네트워크"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "사용자 지정 경로가 없으면 로컬 네트워크는 VPN을 우회합니다. VPN을 거치려면 경로를 명시적으로 설정하세요.",

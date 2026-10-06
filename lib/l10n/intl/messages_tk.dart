@@ -2303,6 +2303,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Gabat gelýän domenlere ulanyljak nameserveri kesgitlemek",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("Nawigasiýa"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("Awto"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("Aşaky panel"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("Gapdal panel"),
     "network": MessageLookupByLibrary.simpleMessage("Tor"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "Ýörite ugurlar bolmasa, ýerli tor VPN-den sowlup geçýär. Ony öz içine almak üçin ugurlary anyk belläň.",

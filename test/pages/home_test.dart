@@ -877,7 +877,7 @@ void main() {
   });
 
   testWidgets(
-    'desktop tabbing past page content does not scroll the PageView',
+    'desktop tabbing past page content does not switch the active page',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1;
@@ -937,7 +937,7 @@ void main() {
           )
           .first;
 
-      // Visit another page so its content stays alive in the PageView cache.
+      // Visit another page so it stays mounted while off-screen.
       await tester.tap(railIcon(AppGlyphs.profiles));
       await tester.pumpAndSettle();
       expect(container.read(currentPageLabelProvider), PageLabel.profiles);
@@ -963,7 +963,7 @@ void main() {
       expect(
         find.text('page:profiles').hitTestable(),
         findsNothing,
-        reason: 'focus traversal scrolled the PageView to another page',
+        reason: 'focus traversal switched the active page',
       );
       expect(tester.takeException(), isNull);
     },
@@ -1164,9 +1164,12 @@ void main() {
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pump();
 
-    final pageView = tester.widget<PageView>(find.byType(PageView));
-    expect(pageView.controller!.page, 1);
     expect(find.text('page:tools'), findsOneWidget);
+    expect(
+      find.text('page:dashboard'),
+      findsNothing,
+      reason: 'the switch is instant, so the old page never cross-fades in',
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -1216,9 +1219,12 @@ void main() {
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pump();
 
-    final pageView = tester.widget<PageView>(find.byType(PageView));
-    expect(pageView.controller!.page, 1);
     expect(find.text('page:tools'), findsOneWidget);
+    expect(
+      find.text('page:dashboard'),
+      findsNothing,
+      reason: 'the switch is instant, so the old page never cross-fades in',
+    );
     expect(tester.takeException(), isNull);
   });
 

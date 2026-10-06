@@ -136,7 +136,7 @@ class Window implements WindowPort {
       if (await desktopWindow.isVisible()) {
         return;
       }
-      await desktopWindow.setSize(const Size(680, 580));
+      await desktopWindow.setSize(const Size(1120, 680));
       await desktopWindow.center();
       await desktopWindow.show();
       await desktopWindow.focus();

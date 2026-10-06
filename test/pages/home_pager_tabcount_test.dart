@@ -109,11 +109,10 @@ final _reorderOverride = navigationItemsStateProvider.overrideWith((ref) {
   );
 });
 
-double _pageOffsetOf(WidgetTester tester, PageLabel label) {
-  final content = tester.getTopLeft(find.byKey(GlobalObjectKey(label)));
-  final viewport = tester.getTopLeft(find.byType(PageView));
-  return content.dx - viewport.dx;
-}
+// A page is on screen when its keyed content is mounted and not offstage; the
+// default skipOffstage finder already hides the idle (offstage) tabs.
+Finder _onScreen(PageLabel label) =>
+    find.text('content:${label.name}');
 
 Future<void> _pumpShell(WidgetTester tester, ProviderContainer container) async {
   await tester.pumpWidget(
@@ -171,8 +170,7 @@ void main() {
       1,
       reason: 'the active tools page must relocate, not rebuild from scratch',
     );
-    expect(_pageOffsetOf(tester, PageLabel.tools), 0);
-    expect(find.text('content:tools'), findsOneWidget);
+    expect(_onScreen(PageLabel.tools), findsOneWidget);
   });
 
   testWidgets('tools keeps content when a tab appears before it', (
@@ -192,14 +190,14 @@ void main() {
 
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pumpAndSettle();
-    expect(_pageOffsetOf(tester, PageLabel.tools), 0);
+    expect(_onScreen(PageLabel.tools), findsOneWidget);
 
     container.read(_proxies.notifier).set(true);
     await tester.pump();
     await tester.pump();
     expect(
-      _pageOffsetOf(tester, PageLabel.tools),
-      0,
+      _onScreen(PageLabel.tools),
+      findsOneWidget,
       reason: 'tools must stay on-screen after proxies appears',
     );
     expect(tester.takeException(), isNull);
@@ -231,8 +229,8 @@ void main() {
     container.read(_proxies.notifier).set(true);
     await tester.pumpAndSettle();
     expect(
-      _pageOffsetOf(tester, PageLabel.tools),
-      0,
+      _onScreen(PageLabel.tools),
+      findsOneWidget,
       reason: 'tools must stay on-screen after a late proxies tab on desktop',
     );
     expect(find.text('content:tools'), findsOneWidget);
@@ -256,15 +254,15 @@ void main() {
 
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pumpAndSettle();
-    expect(_pageOffsetOf(tester, PageLabel.tools), 0);
+    expect(_onScreen(PageLabel.tools), findsOneWidget);
 
     tester.view.physicalSize = const Size(400, 800);
     container.read(viewSizeProvider.notifier).value = const Size(400, 800);
     await tester.pump();
     await tester.pump();
     expect(
-      _pageOffsetOf(tester, PageLabel.tools),
-      0,
+      _onScreen(PageLabel.tools),
+      findsOneWidget,
       reason: 'tools must stay on-screen in portrait',
     );
 
@@ -273,8 +271,8 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(
-      _pageOffsetOf(tester, PageLabel.tools),
-      0,
+      _onScreen(PageLabel.tools),
+      findsOneWidget,
       reason: 'tools must reappear after returning to landscape',
     );
     expect(tester.takeException(), isNull);
@@ -297,14 +295,14 @@ void main() {
 
     container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
     await tester.pumpAndSettle();
-    expect(_pageOffsetOf(tester, PageLabel.tools), 0);
+    expect(_onScreen(PageLabel.tools), findsOneWidget);
 
     container.read(_variant.notifier).set(true);
     await tester.pump();
     await tester.pump();
     expect(
-      _pageOffsetOf(tester, PageLabel.tools),
-      0,
+      _onScreen(PageLabel.tools),
+      findsOneWidget,
       reason: 'tools must stay on-screen after an equal-length reorder',
     );
     expect(tester.takeException(), isNull);

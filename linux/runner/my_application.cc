@@ -55,7 +55,7 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "ReClash");
   }
 
-  gtk_window_set_default_size(window, 680, 580);
+  gtk_window_set_default_size(window, 1120, 680);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   // Flutter 3.47's Linux Impeller backend corrupts oversized animated layers.

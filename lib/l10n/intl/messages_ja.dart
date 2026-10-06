@@ -1894,6 +1894,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "ドメインごとのネームサーバーポリシーを指定します",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("ナビゲーション"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("自動"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("ボトムバー"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("サイドレール"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "カスタムルートがない場合、ローカルネットワークは VPN を経由しません。VPN を経由させるにはルートを明示的に設定してください。",

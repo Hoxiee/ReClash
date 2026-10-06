@@ -1651,6 +1651,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析域名"),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("域名服务器策略"),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage("指定对应域名服务器策略"),
+    "navSurface": MessageLookupByLibrary.simpleMessage("导航布局"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("自动"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("底部栏"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("侧边栏"),
     "network": MessageLookupByLibrary.simpleMessage("网络"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "未设置自定义路由时，局域网绕过 VPN。若要让其经过 VPN，请显式设置路由。",

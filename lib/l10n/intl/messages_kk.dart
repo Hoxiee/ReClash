@@ -2310,6 +2310,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Сәйкес домендер үшін DNS серверлерінің саясатын көрсетіңіз",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("Навигация"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("Төменгі панель"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("Бүйірлік панель"),
     "network": MessageLookupByLibrary.simpleMessage("Желі"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "Арнайы маршруттар болмаса, жергілікті желі VPN-ді айналып өтеді. Оны қамту үшін маршруттарды нақты көрсетіңіз.",
