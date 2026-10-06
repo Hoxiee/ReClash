@@ -194,5 +194,18 @@ void main() {
       expect(container.read(activeServerGroupProvider), 'Proxy');
       expect(container.read(activeServerProvider).name, 'B');
     });
+
+    test('privacy mode redacts the shown name but keeps the real node', () {
+      expect(container.read(activeServerProvider).displayName, 'A');
+
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(privacyMode: true));
+
+      final server = container.read(activeServerProvider);
+      expect(server.name, 'A');
+      expect(server.displayName, isNot('A'));
+      expect(server.displayName, isNotEmpty);
+    });
   });
 }

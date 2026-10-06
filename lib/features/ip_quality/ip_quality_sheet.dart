@@ -54,13 +54,19 @@ class _HideIpItem extends ConsumerWidget {
     final hideIp = ref.watch(
       appSettingProvider.select((state) => state.hideIp),
     );
+    final forced = ref.watch(
+      appSettingProvider.select((state) => state.privacyMode),
+    );
     void update(bool value) => ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(hideIp: value));
     return DecorationListItem(
       title: Text(context.appLocalizations.hideIp),
-      onPressed: () => update(!hideIp),
-      trailing: Switch(value: hideIp, onChanged: update),
+      onPressed: forced ? null : () => update(!hideIp),
+      trailing: Switch(
+        value: hideIp || forced,
+        onChanged: forced ? null : update,
+      ),
     );
   }
 }

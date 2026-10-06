@@ -157,6 +157,13 @@ class _ApplicationGeneralTab extends StatelessWidget {
     final otherItems = <Widget>[
       _appSettingToggle(
         search: const SettingSearch(),
+        title: (l) => l.privacyMode,
+        subtitle: (l) => l.privacyModeDesc,
+        select: (state) => state.privacyMode,
+        update: (state, value) => state.copyWith(privacyMode: value),
+      ),
+      _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.preventDuplicateProfiles,
         subtitle: (l) => l.preventDuplicateProfilesDesc,
         select: (state) => state.preventDuplicateProfiles,

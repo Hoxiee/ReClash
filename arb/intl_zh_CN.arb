@@ -403,6 +403,8 @@
   "autoCloseConnectionsDesc": "切换节点后自动关闭连接",
   "onlyStatisticsProxy": "仅统计代理",
   "onlyStatisticsProxyDesc": "开启后，将只统计代理流量",
+  "privacyMode": "隐私模式",
+  "privacyModeDesc": "在屏幕上隐藏公告、你的 IP 和节点名称",
   "preventDuplicateProfiles": "防止重复订阅",
   "preventDuplicateProfilesDesc": "拒绝已有配置使用的订阅链接",
   "pureBlackMode": "纯黑模式",

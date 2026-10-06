@@ -151,6 +151,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   serviceAutoCheckActive: json['serviceAutoCheckActive'] as bool? ?? true,
   serviceAutoCheckAll: json['serviceAutoCheckAll'] as bool? ?? false,
   hideIp: json['hideIp'] as bool? ?? false,
+  privacyMode: json['privacyMode'] as bool? ?? false,
   editorLineWrap: json['editorLineWrap'] as bool? ?? false,
   editorFontSize:
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
@@ -203,6 +204,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'serviceAutoCheckActive': instance.serviceAutoCheckActive,
       'serviceAutoCheckAll': instance.serviceAutoCheckAll,
       'hideIp': instance.hideIp,
+      'privacyMode': instance.privacyMode,
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
       'preventDuplicateProfiles': instance.preventDuplicateProfiles,

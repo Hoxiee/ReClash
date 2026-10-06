@@ -1959,6 +1959,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("预览"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("上一个匹配"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("隐私模式"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "在屏幕上隐藏公告、你的 IP 和节点名称",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("进程"),
     "profile": MessageLookupByLibrary.simpleMessage("配置"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

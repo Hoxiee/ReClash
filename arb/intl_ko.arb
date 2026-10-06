@@ -398,6 +398,8 @@
   "autoCloseConnectionsDesc": "노드를 전환한 후 연결을 자동으로 종료합니다",
   "onlyStatisticsProxy": "프록시 트래픽만 집계",
   "onlyStatisticsProxyDesc": "켜면 프록시 트래픽만 집계합니다",
+  "privacyMode": "비공개 모드",
+  "privacyModeDesc": "화면에서 공지, IP, 노드 이름을 숨깁니다",
   "preventDuplicateProfiles": "구독 중복 방지",
   "preventDuplicateProfilesDesc": "기존 프로필이 이미 사용하는 구독 링크를 거부합니다",
   "pureBlackMode": "퓨어 블랙 모드",

@@ -101,11 +101,14 @@ class _AnnounceState extends ConsumerState<Announce> {
   @override
   Widget build(BuildContext context) {
     final expanded = widget.expanded;
-    final panelMeta = ref.watch(
-      currentProfileProvider.select((state) => state?.panelMeta),
-    );
-    final text = panelMeta?.announce?.trim();
-    final url = panelMeta?.announceUrl?.trim();
+    final text = ref.watch(visibleAnnounceProvider);
+    final url = text == null
+        ? null
+        : ref.watch(
+            currentProfileProvider.select(
+              (state) => state?.panelMeta?.announceUrl?.trim(),
+            ),
+          );
     final hasUrl = url != null && url.isNotEmpty;
     final hasAnnouncement = text != null && text.isNotEmpty;
     final showFull = expanded && hasAnnouncement;

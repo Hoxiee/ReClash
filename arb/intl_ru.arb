@@ -411,6 +411,8 @@
   "autoCloseConnectionsDesc": "Автоматически закрывать соединения после смены узла",
   "onlyStatisticsProxy": "Учитывать только прокси-трафик",
   "onlyStatisticsProxyDesc": "Если включить, учитывается только трафик через прокси",
+  "privacyMode": "Приватный режим",
+  "privacyModeDesc": "Скрывает анонсы, ваш IP и имена узлов на экране",
   "preventDuplicateProfiles": "Запрет дубликатов подписок",
   "preventDuplicateProfilesDesc": "Отклонять ссылку подписки, которую уже использует существующий профиль",
   "pureBlackMode": "Истинно чёрный режим",

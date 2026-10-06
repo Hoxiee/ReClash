@@ -2650,6 +2650,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Previous match"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("Private mode"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Hides announcements, your IP, and node names on screen",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Process"),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

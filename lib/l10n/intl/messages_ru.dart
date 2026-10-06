@@ -2742,6 +2742,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "previousMatch": MessageLookupByLibrary.simpleMessage(
       "Предыдущее совпадение",
     ),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("Приватный режим"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Скрывает анонсы, ваш IP и имена узлов на экране",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Процесс"),
     "profile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

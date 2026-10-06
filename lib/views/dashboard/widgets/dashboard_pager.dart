@@ -279,11 +279,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
         (state) => state.enabled && state.onlyDpi,
       ),
     );
-    final hasAnnounce = ref.watch(
-      currentProfileProvider.select(
-        (state) => state?.panelMeta?.announce?.trim().isNotEmpty ?? false,
-      ),
-    );
+    final hasAnnounce = ref.watch(visibleAnnounceProvider) != null;
     return SeasonalDashboardOverlay(
       visible: _page == 0 && !_animating,
       child: ProviderEffectOverlay(

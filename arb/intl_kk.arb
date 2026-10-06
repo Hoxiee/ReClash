@@ -398,6 +398,8 @@
   "autoCloseConnectionsDesc": "Түйін ауыстырғаннан кейін қосылымдар автоматты жабылады",
   "onlyStatisticsProxy": "Тек прокси трафигін есептеу",
   "onlyStatisticsProxyDesc": "Қосулы кезде тек прокси трафигі есептеледі",
+  "privacyMode": "Жеке режим",
+  "privacyModeDesc": "Экранда хабарландыруларды, IP пен түйін аттарын жасырады",
   "preventDuplicateProfiles": "Жазылым қайталануын болдырмау",
   "preventDuplicateProfilesDesc": "Бұрыннан бар профиль қолданатын жазылым сілтемесін қабылдамау",
   "pureBlackMode": "Таза қара режим",

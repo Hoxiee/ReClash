@@ -90,6 +90,19 @@ void main() {
       expect(find.text('No announcements'), findsOneWidget);
     });
 
+    testWidgets('privacy mode hides an existing announcement', (tester) async {
+      setProfile(
+        _profile(panelMeta: const PanelMeta(announce: 'Maintenance at 3am')),
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(privacyMode: true));
+      await pumpWidget(tester, const Announce());
+
+      expect(find.text('Maintenance at 3am'), findsNothing);
+      expect(find.text('No announcements'), findsOneWidget);
+    });
+
     testWidgets('keeps long announcement text inside the card', (tester) async {
       setProfile(
         _profile(

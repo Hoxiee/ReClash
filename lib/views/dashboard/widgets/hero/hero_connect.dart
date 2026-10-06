@@ -246,7 +246,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
 
     final activeProfile = profile!;
     final panelMeta = activeProfile.panelMeta;
-    final announce = panelMeta?.announce?.trim();
+    final announce = ref.watch(visibleAnnounceProvider);
     final serviceName = panelMeta?.serviceName?.trim();
     final subscriptionName = serviceName == null || serviceName.isEmpty
         ? activeProfile.realLabel

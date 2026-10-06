@@ -35,7 +35,7 @@ class _IpQualityTextState extends ConsumerState<IpQualityText> {
     final ip = widget.ip;
     final quality = ref.watch(ipQualityProvider(ip)).value;
     final hideIp = ref.watch(
-      appSettingProvider.select((state) => state.hideIp),
+      appSettingProvider.select((state) => state.hideIp || state.privacyMode),
     );
     final shownIp = hideIp ? _mask : ip;
     final color = quality?.level.color(context);

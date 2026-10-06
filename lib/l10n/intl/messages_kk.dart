@@ -2742,6 +2742,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Алдын ала қарау"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Алдыңғы сәйкестік"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("Жеке режим"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Экранда хабарландыруларды, IP пен түйін аттарын жасырады",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Процесс"),
     "profile": MessageLookupByLibrary.simpleMessage("Профиль"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

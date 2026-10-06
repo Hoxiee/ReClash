@@ -4,6 +4,8 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 
+const _redactedName = '••••••';
+
 final activeServerProvider = Provider<ActiveServerInfo>((ref) {
   final mode = ref.watch(
     patchClashConfigProvider.select((state) => state.mode),
@@ -55,9 +57,20 @@ final activeServerProvider = Provider<ActiveServerInfo>((ref) {
   final otherLocations = engineDecided
       ? _enginePoolSize(routingStatus!)
       : selected.otherLocations;
+  // Privacy mode redacts the node name on screen but keeps the flag, so the
+  // card still reads as a located server. The real name stays in [name] for
+  // delay lookups and phase checks; only the shown [displayName] is masked.
+  final redact = ref.watch(
+    appSettingProvider.select((state) => state.privacyMode),
+  );
+  final displayName = serverName.isEmpty
+      ? ''
+      : redact
+      ? _redactedName
+      : stripLeadingEmoji(serverName);
   return ActiveServerInfo(
     name: serverName,
-    displayName: stripLeadingEmoji(serverName),
+    displayName: displayName,
     countryCode: flagToCountryCode(serverName),
     testUrl: testUrl,
     delay: delay,

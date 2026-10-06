@@ -31,6 +31,24 @@ ProviderHeroEffect providerHeroEffect(Ref ref) {
   return parsePanelHeroEffect(value);
 }
 
+/// The panel announcement as it should reach the UI: the trimmed text, or null
+/// when there is none or the privacy mode is redacting on-screen data. Every
+/// announcement surface (card, hero pill, pager badge) reads this so the mode
+/// hides the content and its mere presence together.
+@riverpod
+String? visibleAnnounce(Ref ref) {
+  final hidden = ref.watch(
+    appSettingProvider.select((state) => state.privacyMode),
+  );
+  if (hidden) return null;
+  final text = ref.watch(
+    currentProfileProvider.select(
+      (state) => state?.panelMeta?.announce?.trim(),
+    ),
+  );
+  return text == null || text.isEmpty ? null : text;
+}
+
 @riverpod
 Profile? profile(Ref ref, int? profileId) {
   return ref.watch(

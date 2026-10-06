@@ -2803,6 +2803,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Oldindan koʻrish"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Oldingi moslik"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("Maxfiy rejim"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Ekranda e\'lonlar, IP va tugun nomlarini yashiradi",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Jarayon"),
     "profile": MessageLookupByLibrary.simpleMessage("Profil"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

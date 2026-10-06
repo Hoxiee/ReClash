@@ -403,6 +403,8 @@
   "autoCloseConnectionsDesc": "ノードの切り替え後、接続を自動的に閉じます",
   "onlyStatisticsProxy": "プロキシのみ集計",
   "onlyStatisticsProxyDesc": "有効にすると、プロキシのトラフィックのみを集計します",
+  "privacyMode": "プライベートモード",
+  "privacyModeDesc": "画面上のお知らせ、IP、ノード名を隠します",
   "preventDuplicateProfiles": "サブスクリプションの重複を防ぐ",
   "preventDuplicateProfilesDesc": "既存のプロファイルが使用している購読リンクを拒否します",
   "pureBlackMode": "ピュアブラックモード",

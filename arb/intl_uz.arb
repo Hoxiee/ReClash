@@ -398,6 +398,8 @@
   "autoCloseConnectionsDesc": "Tugunlarni almashtirgandan soʻng ulanishlar avtomatik yopiladi",
   "onlyStatisticsProxy": "Faqat proksi trafikini hisoblash",
   "onlyStatisticsProxyDesc": "Yoqilganda faqat proksi trafigi hisobga olinadi",
+  "privacyMode": "Maxfiy rejim",
+  "privacyModeDesc": "Ekranda e'lonlar, IP va tugun nomlarini yashiradi",
   "preventDuplicateProfiles": "Obuna takrorlanishining oldini olish",
   "preventDuplicateProfilesDesc": "Mavjud profil ishlatayotgan obuna havolasini rad etish",
   "pureBlackMode": "Toʻliq qora rejim",

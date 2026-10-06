@@ -2224,6 +2224,61 @@ final class ProviderHeroEffectProvider
 String _$providerHeroEffectHash() =>
     r'ad26a3044c0e0ff8ed5f014dc8d6073c3f9e4ba1';
 
+/// The panel announcement as it should reach the UI: the trimmed text, or null
+/// when there is none or the privacy mode is redacting on-screen data. Every
+/// announcement surface (card, hero pill, pager badge) reads this so the mode
+/// hides the content and its mere presence together.
+
+@ProviderFor(visibleAnnounce)
+final visibleAnnounceProvider = VisibleAnnounceProvider._();
+
+/// The panel announcement as it should reach the UI: the trimmed text, or null
+/// when there is none or the privacy mode is redacting on-screen data. Every
+/// announcement surface (card, hero pill, pager badge) reads this so the mode
+/// hides the content and its mere presence together.
+
+final class VisibleAnnounceProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  /// The panel announcement as it should reach the UI: the trimmed text, or null
+  /// when there is none or the privacy mode is redacting on-screen data. Every
+  /// announcement surface (card, hero pill, pager badge) reads this so the mode
+  /// hides the content and its mere presence together.
+  VisibleAnnounceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'visibleAnnounceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$visibleAnnounceHash();
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    return visibleAnnounce(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$visibleAnnounceHash() => r'e7b1dbac8803e5d3a76b24be619f652cdccb12f0';
+
 @ProviderFor(profile)
 final profileProvider = ProfileFamily._();
 

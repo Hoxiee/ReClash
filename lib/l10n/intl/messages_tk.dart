@@ -2735,6 +2735,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Deslapky görnüş"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Öňki gabat gelme"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("Gizlin režim"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Ekranda bildirişleri, IP we düwün atlaryny gizleýär",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("Proses"),
     "profile": MessageLookupByLibrary.simpleMessage("Profil"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

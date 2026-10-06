@@ -3473,6 +3473,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Private mode`
+  String get privacyMode {
+    return Intl.message(
+      'Private mode',
+      name: 'privacyMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides announcements, your IP, and node names on screen`
+  String get privacyModeDesc {
+    return Intl.message(
+      'Hides announcements, your IP, and node names on screen',
+      name: 'privacyModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Prevent duplicate subscriptions`
   String get preventDuplicateProfiles {
     return Intl.message(

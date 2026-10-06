@@ -418,6 +418,8 @@
   "autoCloseConnectionsDesc": "Close connections automatically after switching nodes",
   "onlyStatisticsProxy": "Only count proxy traffic",
   "onlyStatisticsProxyDesc": "When enabled, only proxy traffic is counted",
+  "privacyMode": "Private mode",
+  "privacyModeDesc": "Hides announcements, your IP, and node names on screen",
   "preventDuplicateProfiles": "Prevent duplicate subscriptions",
   "preventDuplicateProfilesDesc": "Refuse a subscription link that an existing profile already uses",
   "pureBlackMode": "Pure black mode",

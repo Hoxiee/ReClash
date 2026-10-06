@@ -398,6 +398,8 @@
   "autoCloseConnectionsDesc": "Düwün çalyşandan soň baglanyşyklar awtomatik ýapylýar",
   "onlyStatisticsProxy": "Diňe proksi trafikini hasaba al",
   "onlyStatisticsProxyDesc": "Açyk bolanda diňe proksi trafigi hasaba alynýar",
+  "privacyMode": "Gizlin režim",
+  "privacyModeDesc": "Ekranda bildirişleri, IP we düwün atlaryny gizleýär",
   "preventDuplicateProfiles": "Abunalaryň gaýtalanmagynyň öňüni al",
   "preventDuplicateProfilesDesc": "Bar bolan profiliň ulanýan abuna salgysyny ret et",
   "pureBlackMode": "Doly gara usuly",

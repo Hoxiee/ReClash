@@ -2229,6 +2229,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("미리 보기"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("이전 일치 항목"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("비공개 모드"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "화면에서 공지, IP, 노드 이름을 숨깁니다",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("프로세스"),
     "profile": MessageLookupByLibrary.simpleMessage("프로필"),
     "profileAutoUpdateIntervalInvalidValidationDesc":

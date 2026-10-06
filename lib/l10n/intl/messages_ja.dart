@@ -2252,6 +2252,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("前の一致"),
+    "privacyMode": MessageLookupByLibrary.simpleMessage("プライベートモード"),
+    "privacyModeDesc": MessageLookupByLibrary.simpleMessage(
+      "画面上のお知らせ、IP、ノード名を隠します",
+    ),
     "process": MessageLookupByLibrary.simpleMessage("プロセス"),
     "profile": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "profileAutoUpdateIntervalInvalidValidationDesc":
