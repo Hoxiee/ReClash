@@ -39,6 +39,9 @@ func init() {
 	registerMethod(rcxReportMethod, withoutArguments(func(response MethodResponse) {
 		response.success(rcxEngineInstance.Report())
 	}))
+	registerMethod(rcxExportProfileMethod, withoutArguments(func(response MethodResponse) {
+		response.success(string(rcxEngineInstance.ExportProfile()))
+	}))
 	registerMethod(rcxDeepScanMethod, withoutArguments(func(response MethodResponse) {
 		rcxEngineInstance.DeepScan()
 		response.success(true)

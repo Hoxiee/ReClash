@@ -218,3 +218,22 @@ func TestEngineExportProfileRoundTrips(t *testing.T) {
 		t.Fatal("ExportProfile handed out a mutable reference to engine state")
 	}
 }
+
+func TestProfileStateReportsFate(t *testing.T) {
+	cases := []struct {
+		name string
+		yaml string
+		want rcxProfileState
+	}{
+		{"absent", "", rcxProfileState{}},
+		{"valid", "schema: 1\nprobe:\n  concurrency: 3\n  staggerMs: 50\n", rcxProfileState{Present: true, Valid: true, Schema: 1}},
+		{"future-schema", "schema: 99\n", rcxProfileState{Present: true, Valid: false, Schema: 99}},
+		{"garbage", "this: is: not: valid: yaml\n", rcxProfileState{Present: true, Valid: false, Schema: 0}},
+	}
+	for _, tc := range cases {
+		got := profileConfig(t, tc.yaml).profileState
+		if got != tc.want {
+			t.Fatalf("%s: profile state = %+v, want %+v", tc.name, got, tc.want)
+		}
+	}
+}

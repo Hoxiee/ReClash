@@ -127,6 +127,7 @@ type rcxReport struct {
 	Metrics    rcxMetricsReport     `json:"metrics"`
 	Bands      []int                `json:"bands"`
 	Ladder     []rcxRungSpec        `json:"ladder"`
+	Profile    rcxProfileState      `json:"profile"`
 	ProbesLeft int                  `json:"probesLeft"`
 	ProbeCap   int                  `json:"probeCap"`
 	Manual     bool                 `json:"manual"`
@@ -192,6 +193,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Metrics:    e.metricsReport(now),
 		Bands:      e.cfg.latencyBands(),
 		Ladder:     rcxDropRungs(input.Policy.ladderOrDefault(), input.Policy.strategyProfile().DropRungs),
+		Profile:    e.cfg.profileState,
 		ProbesLeft: e.budget.Remaining(now),
 		ProbeCap:   rcxProbeBudgetCap,
 		Manual:     input.Pin != "",

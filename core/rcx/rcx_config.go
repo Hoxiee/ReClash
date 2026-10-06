@@ -147,6 +147,7 @@ type rcxConfig struct {
 	admitRules       []rcxAdmitRule                `json:"-"`
 	strategyProfiles map[string]rcxStrategyProfile `json:"-"`
 	probePacing      rcxProbeSection               `json:"-"`
+	profileState     rcxProfileState               `json:"-"`
 }
 
 type rcxRuleAction string
@@ -434,20 +435,35 @@ func (c rcxConfig) normalized() rcxConfig {
 		c.Ladder = nil
 	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes)
-	c.admitRules, c.strategyProfiles, c.probePacing = c.profileSections()
+	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = c.profileSections()
 	return c
 }
 
-// profileSections parses the carried profile; a missing one keeps shipped defaults.
-func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile, rcxProbeSection) {
+// rcxProfileState is the observable fate of a carried profile, so the host can show
+// it applied or silently fell back rather than guessing from behavior.
+type rcxProfileState struct {
+	Present bool `json:"present"`
+	Valid   bool `json:"valid"`
+	Schema  int  `json:"schema"`
+}
+
+// profileSections parses the carried profile once: a missing one keeps shipped
+// defaults; a present one also reports whether it parsed under a known schema.
+func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile, rcxProbeSection, rcxProfileState) {
 	if strings.TrimSpace(c.ProfileYAML) == "" {
-		return nil, nil, rcxDefaultProbeSection()
+		return nil, nil, rcxDefaultProbeSection(), rcxProfileState{}
 	}
+	state := rcxProfileState{Present: true}
 	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
-	if err != nil || parsed.Schema != rcxProfileSchema {
-		return nil, nil, rcxDefaultProbeSection()
+	if err != nil {
+		return nil, nil, rcxDefaultProbeSection(), state
 	}
-	return parsed.Admission, parsed.Strategies, parsed.Probe.bounded()
+	state.Schema = parsed.Schema
+	if parsed.Schema != rcxProfileSchema {
+		return nil, nil, rcxDefaultProbeSection(), state
+	}
+	state.Valid = true
+	return parsed.Admission, parsed.Strategies, parsed.Probe.bounded(), state
 }
 
 // probe is the steady probe cadence; a zero value (resolution skipped) is the

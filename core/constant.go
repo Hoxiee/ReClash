@@ -163,6 +163,7 @@ const (
 	rcxStatusMethod                  CoreMethod = "rcxStatus"
 	rcxSetEnabledMethod              CoreMethod = "rcxSetEnabled"
 	rcxReportMethod                  CoreMethod = "rcxReport"
+	rcxExportProfileMethod           CoreMethod = "rcxExportProfile"
 	rcxDeepScanMethod                CoreMethod = "rcxDeepScan"
 	doctorSnapshotMethod             CoreMethod = "doctorSnapshot"
 	doctorStartMethod                CoreMethod = "doctorStart"
