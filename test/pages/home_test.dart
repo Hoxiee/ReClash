@@ -27,6 +27,7 @@ import '../helpers/test_app.dart';
 void main() {
   setUp(() {
     navigationPort = navigation;
+    globalState.backExitArmedAt = null;
     addTearDown(() => navigationPort = null);
   });
 
@@ -1284,10 +1285,131 @@ void main() {
     expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
     expect(closeCount, 0);
 
+    // The marker is spent, so the next back is a plain root back: it arms the
+    // exit confirmation first and only the one after it leaves the app.
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(closeCount, 0);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(closeCount, 1);
+  });
+
+  testWidgets('back returns to the dashboard from a secondary tab', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var closeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                glyph: AppGlyphs.dashboard,
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                glyph: AppGlyphs.sliders,
+                label: PageLabel.proxies,
+                builder: (_) => const Text('page:proxies'),
+              ),
+            ],
+          ),
+        ),
+        systemActionProvider.overrideWith(
+          () => _TestSystemAction(() => closeCount++),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    // A plain tab switch is no returnable detour, yet back still walks home
+    // rather than dropping the whole app the way it used to.
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+    await tester.pumpAndSettle();
+    expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(closeCount, 1, reason: 'the marker is spent, back leaves the app');
+    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    expect(closeCount, 0);
+  });
+
+  testWidgets('back on a drilled tab leaves the app alone', (tester) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var closeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                glyph: AppGlyphs.dashboard,
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                glyph: AppGlyphs.tools,
+                label: PageLabel.tools,
+                builder: (_) => const Text('page:tools'),
+              ),
+            ],
+          ),
+        ),
+        systemActionProvider.overrideWith(
+          () => _TestSystemAction(() => closeCount++),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    // The tab owns a drilled path, so its own pop entry handles back; the root
+    // must neither close the app nor jump away to the dashboard.
+    container
+        .read(navPathProvider(PageLabel.tools).notifier)
+        .selectRoot(
+          const SettingsPaneSelection(id: 'drilled', detail: Text('drilled')),
+        );
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(closeCount, 0);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
   });
 
   testWidgets('escape on the main screen never closes the app', (tester) async {

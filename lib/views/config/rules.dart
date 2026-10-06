@@ -76,15 +76,13 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     final rules = ref.watch(globalRulesProvider).value ?? [];
     final selectedRules = ref.watch(itemsProvider(_key));
     return CommonPopScope(
-      onPop: (_) {
+      onPop: (context) {
         if (selectedRules.isNotEmpty) {
           ref.read(itemsProvider(_key).notifier).value = {};
           return false;
         }
-        Navigator.of(context).pop();
-        return false;
+        return CommonScaffoldBackActionProvider.of(context)?.backAction == null;
       },
-
       child: BaseScaffold(
         title: appLocalizations.addedRules,
         actions: [

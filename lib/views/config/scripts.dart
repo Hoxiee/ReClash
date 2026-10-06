@@ -221,13 +221,12 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     final scripts = ref.watch(scriptsProvider).value ?? [];
     final selectedScriptIds = ref.watch(itemsProvider(_key));
     return CommonPopScope(
-      onPop: (_) {
+      onPop: (context) {
         if (selectedScriptIds.isNotEmpty) {
           ref.read(itemsProvider(_key).notifier).value = {};
           return false;
         }
-        Navigator.of(context).pop();
-        return false;
+        return CommonScaffoldBackActionProvider.of(context)?.backAction == null;
       },
       child: CommonScaffold(
         actions: [

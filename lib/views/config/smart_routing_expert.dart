@@ -678,12 +678,12 @@ class _CountryListPageState extends ConsumerState<_CountryListPage> {
     final selection = _selection;
     final appLocalizations = context.appLocalizations;
     return CommonPopScope(
-      onPop: (_) {
-        if (selection.isEmpty) {
-          return true;
+      onPop: (context) {
+        if (selection.isNotEmpty) {
+          setState(() => _selection = {});
+          return false;
         }
-        setState(() => _selection = {});
-        return false;
+        return CommonScaffoldBackActionProvider.of(context)?.backAction == null;
       },
       child: CommonScaffold(
         title: widget.title,

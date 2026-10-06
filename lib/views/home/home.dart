@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
+import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
@@ -11,6 +12,8 @@ import 'package:reclash/views/dashboard/widgets/start_button.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 typedef OnSelected = void Function(int index);
+
+const _exitConfirmWindow = Duration(seconds: 2);
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -425,6 +428,12 @@ class HomeBackScopeContainer extends ConsumerWidget {
     return CommonPopScope(
       onPop: (context) async {
         final pageLabel = ref.read(currentPageLabelProvider);
+        final notifier = ref.read(currentPageLabelProvider.notifier);
+        // A drilled tab handles its own back via its own pop entry, which fires
+        // alongside this root one; bail so the root does not also close the app.
+        if (ref.read(navPathProvider(pageLabel)).isNotEmpty) {
+          return false;
+        }
         final realContext =
             GlobalObjectKey(pageLabel).currentContext ?? context;
         final canPop = Navigator.canPop(realContext);
@@ -432,16 +441,35 @@ class HomeBackScopeContainer extends ConsumerWidget {
           Navigator.of(realContext).pop();
           return false;
         }
-        final notifier = ref.read(currentPageLabelProvider.notifier);
         final returnPage = notifier.takeReturnPage();
         if (returnPage != null) {
           notifier.toPage(returnPage);
           return false;
         }
+        // Back walks home before it leaves: only the dashboard closes the app.
+        if (pageLabel != PageLabel.dashboard) {
+          notifier.toPage(PageLabel.dashboard);
+          return false;
+        }
         // Escape walks back through the app but never closes it: with nothing
         // left to go back to it simply stops, unlike the system back button.
         if (globalState.escapeBackDepth == 0) {
-          await ref.read(systemActionProvider.notifier).handleClose();
+          // Confirm exit: the first back arms a window, the next one leaves.
+          final now = DateTime.now();
+          final armedAt = globalState.backExitArmedAt;
+          if (armedAt == null || now.difference(armedAt) > _exitConfirmWindow) {
+            globalState.backExitArmedAt = now;
+            await app?.tip(context.appLocalizations.pressBackAgainToExit);
+            return false;
+          }
+          globalState.backExitArmedAt = null;
+          // On Android leaving means backgrounding the task: finishing the
+          // activity while the VPN keeps the engine alive relaunches blank.
+          if (app != null) {
+            await app!.moveTaskToBack();
+          } else {
+            await ref.read(systemActionProvider.notifier).handleClose();
+          }
         }
         return false;
       },

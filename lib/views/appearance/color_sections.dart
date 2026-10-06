@@ -180,12 +180,18 @@ class _AppearanceColorSectionsState
         SliverToBoxAdapter(
           child: FadeSlideEnterBox(
             child: CommonPopScope(
-              onPop: (_) {
-                if (removable == null) {
-                  return true;
+              onPop: (context) {
+                if (removable != null) {
+                  _clearRemovable();
+                  return false;
                 }
-                _clearRemovable();
-                return false;
+                // A drilled pane steps back through its own entry, so popping
+                // here would unwind the shared home route; only a lone modal
+                // route needs this scope to close it.
+                return CommonScaffoldBackActionProvider.of(
+                      context,
+                    )?.backAction ==
+                    null;
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

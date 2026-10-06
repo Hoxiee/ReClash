@@ -9,6 +9,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/appearance/color_sections.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/widget_registry.dart';
 import 'package:reclash/views/misc/logs.dart';
@@ -16,6 +17,8 @@ import 'package:reclash/views/settings/access.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/glyph_finders.dart';
+import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 void main() {
   testWidgets('back layers are consumed from inner to outer', (tester) async {
@@ -424,6 +427,82 @@ void main() {
       DashboardWidget.trafficUsage,
       DashboardWidget.desyncStrategy,
     ]);
+  });
+
+  Future<void> pumpSection(
+    WidgetTester tester,
+    ProviderContainer container, {
+    required bool inPane,
+  }) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) {
+                        const content = CustomScrollView(
+                          slivers: [AppearanceColorSections()],
+                        );
+                        return inPane
+                            ? CommonScaffoldBackActionProvider(
+                                backAction: () {},
+                                child: content,
+                              )
+                            : content;
+                      },
+                    ),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('a drilled section defers back to its pane, not the route', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+
+    await pumpSection(tester, container, inPane: true);
+    expect(find.byType(AppearanceColorSections), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    // The pane owns the step back, so the inner scope must leave the host route
+    // standing instead of popping it and blanking the app.
+    expect(find.byType(AppearanceColorSections), findsOneWidget);
+  });
+
+  testWidgets('a lone modal section still pops itself on back', (tester) async {
+    final container = ProviderContainer(
+      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+
+    await pumpSection(tester, container, inPane: false);
+    expect(find.byType(AppearanceColorSections), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppearanceColorSections), findsNothing);
   });
 }
 

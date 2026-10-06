@@ -29,6 +29,10 @@ class GlobalState {
   /// resolves and the terminal back scopes skip their close when held.
   var escapeBackDepth = 0;
 
+  /// When the last system back armed the exit confirmation. A back on the root
+  /// screen asks once and only leaves if the next one lands inside the window.
+  DateTime? backExitArmedAt;
+
   bool get isPre => appEnv != 'stable';
 
   bool get canCrashCore => canCrashCoreFor(isDebug: kDebugMode, appEnv: appEnv);
