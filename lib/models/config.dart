@@ -260,7 +260,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool closeConnections,
     @Default(true) bool newDashboard,
     @Default(defaultTestUrl) String testUrl,
-    @Default(TabAnimation.slide)
+    @Default(TabAnimation.fade)
     @JsonKey(readValue: _readTabAnimation)
     TabAnimation tabAnimation,
     @Default(true) bool autoCheckUpdate,

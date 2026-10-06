@@ -103,7 +103,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
         _$TabAnimationEnumMap,
         _readTabAnimation(json, 'tabAnimation'),
       ) ??
-      TabAnimation.slide,
+      TabAnimation.fade,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   acceptPrereleaseUpdates: json['acceptPrereleaseUpdates'] as bool? ?? false,
   showLabel: json['showLabel'] as bool? ?? false,
