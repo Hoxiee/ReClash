@@ -3530,17 +3530,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage("垂直位置"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("网页面板"),
-    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "由内核自身提供的 zashboard",
-    ),
-    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "首次打开时下载 zashboard",
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage("由内核自身提供的网页面板"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("面板"),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage("首次打开时下载面板"),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("打开面板"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
       "面板打开期间外部控制器保持开启",
     ),
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage("内核尚未提供面板"),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "未授予管理员权限，TUN 未启动。",

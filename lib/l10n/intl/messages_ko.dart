@@ -3665,10 +3665,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "구독을 요청할 때 이 클라이언트 형식을 사용합니다",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "호환성 프리셋은 ReClash가 다른 앱인 것처럼 가장하여 패널이 해당 클라이언트의 형식을 제공하도록 하고, ReClash가 이를 변환합니다. 일반 요청이 노드를 반환하지 않을 때만 사용하세요.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "호환성 프리셋은 ReClash가 다른 앱인 것처럼 가장하여 패널이 해당 클라이언트의 형식을 제공하도록 하고, ReClash가 이를 변환합니다. 일반 요청이 노드를 반환하지 않을 때만 사용하세요.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "자체 형식만 제공하는 패널을 위해 Happ 앱으로 가장합니다.",
@@ -3997,10 +3996,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV 설정"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("웹 대시보드"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "코어에서 직접 제공하는 zashboard입니다",
+      "코어에서 직접 제공하는 웹 패널입니다",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("패널"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard는 처음 열 때 다운로드됩니다",
+      "패널은 처음 열 때 다운로드됩니다",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("대시보드 열기"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -4009,6 +4012,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "코어가 아직 대시보드를 제공하고 있지 않습니다",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("화이트리스트 모드"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "관리자 권한이 부여되지 않았습니다. TUN이 시작되지 않았습니다.",

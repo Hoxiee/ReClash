@@ -1955,10 +1955,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -4390,10 +4389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "The app requests the subscription in this client\'s format",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "Compatibility presets make ReClash impersonate another app so the panel serves that client\'s format, which ReClash then converts. Use one only when a normal request does not return nodes.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Compatibility presets make ReClash impersonate another app so the panel serves that client\'s format, which ReClash then converts. Use one only when a normal request does not return nodes.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Impersonates the Happ app for panels that only serve its format.",
@@ -4778,10 +4776,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Web dashboard"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "zashboard, served by the core itself",
+      "Web panel, served by the core itself",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard is downloaded on first open",
+      "The panel is downloaded on first open",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Open dashboard"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -4790,6 +4792,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "The core is not serving the dashboard yet",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "Administrator permission was not granted. TUN was not started.",

@@ -296,6 +296,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool editorLineWrap,
     @Default(EditorFontSize.standard) EditorFontSize editorFontSize,
     @Default(true) bool preventDuplicateProfiles,
+    @Default(WebDashboardFlavor.zashboard)
+    @JsonKey(unknownEnumValue: WebDashboardFlavor.zashboard)
+    WebDashboardFlavor webDashboardFlavor,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

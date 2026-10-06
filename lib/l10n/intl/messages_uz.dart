@@ -2068,10 +2068,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -4649,10 +4648,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova obunani aynan shu mijoz formatida soʻraydi",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "Moslik presetlari ReClash\'ni boshqa ilova sifatida ko\'rsatadi, shunda panel o\'sha klient formatini beradi, uni ReClash keyin o\'giradi. Faqat oddiy so\'rov tugunlarni qaytarmaganda foydalaning.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Moslik presetlari ReClash\'ni boshqa ilova sifatida ko\'rsatadi, shunda panel o\'sha klient formatini beradi, uni ReClash keyin o\'giradi. Faqat oddiy so\'rov tugunlarni qaytarmaganda foydalaning.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Faqat o\'z formatini beradigan panellar uchun Happ ilovasi sifatida ko\'rsatiladi.",
@@ -5077,10 +5075,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Veb boshqaruv paneli",
     ),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "yadro oʻzi taqdim etadigan zashboard",
+      "Veb-panel — uni yadroning oʻzi taqdim etadi",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard birinchi ochilishda yuklab olinadi",
+      "Panel birinchi ochilishda yuklab olinadi",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Panelni ochish"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -5089,6 +5091,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "Yadro hali paneldan javob bermayapti",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Oq roʻyxat rejimi"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "Administrator huquqlari berilmadi. TUN ishga tushmadi.",

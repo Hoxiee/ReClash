@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 
 class _FakePathProvider extends PathProviderPlatform {
   _FakePathProvider(this.root);
@@ -51,6 +52,18 @@ void main() {
     return path;
   }
 
+  String writeTarGz(Map<String, String> entries) {
+    final archive = Archive();
+    for (final entry in entries.entries) {
+      archive.add(ArchiveFile.string(entry.key, entry.value));
+    }
+    final path = join(root.path, 'archive${archiveIndex++}.tgz');
+    File(path).writeAsBytesSync(
+      const GZipEncoder().encode(TarEncoder().encodeBytes(archive)),
+    );
+    return path;
+  }
+
   String targetPath(String name) => join(root.path, 'unpack', name);
 
   group('webDashboardUri', () {
@@ -84,6 +97,42 @@ void main() {
 
       expect(params['hostname'], 'localhost');
       expect(params.containsKey('port'), isFalse);
+    });
+  });
+
+  group('webDashboardUri metacubexd', () {
+    test('hands the controller host and port to the page query', () {
+      final uri = webDashboardUri(
+        '127.0.0.1:9090',
+        flavor: WebDashboardFlavor.metacubexd,
+      );
+
+      expect(uri.scheme, 'http');
+      expect(uri.host, '127.0.0.1');
+      expect(uri.port, 9090);
+      expect(uri.path, '/$webDashboardDirName/');
+      expect(uri.fragment, isEmpty);
+      expect(uri.queryParameters, {'hostname': '127.0.0.1', 'port': '9090'});
+    });
+
+    test('carries the secret when one is configured', () {
+      final uri = webDashboardUri(
+        '127.0.0.1:9090',
+        secret: 's3cret',
+        flavor: WebDashboardFlavor.metacubexd,
+      );
+
+      expect(uri.queryParameters['secret'], 's3cret');
+    });
+
+    test('falls back to the default controller when none is configured', () {
+      expect(
+        webDashboardUri('', flavor: WebDashboardFlavor.metacubexd).toString(),
+        webDashboardUri(
+          '127.0.0.1:9090',
+          flavor: WebDashboardFlavor.metacubexd,
+        ).toString(),
+      );
     });
   });
 
@@ -160,6 +209,23 @@ void main() {
       expect(File(join(target, 'assets', 'app.css')).existsSync(), isTrue);
     });
 
+    test('unpacks a gzipped tarball with dot-prefixed entries', () async {
+      final target = targetPath('tgz');
+      final archivePath = writeTarGz({
+        './index.html': '<html>metacubexd</html>',
+        './_nuxt/app.js': 'app',
+      });
+
+      await unpackWebDashboard((archivePath: archivePath, targetPath: target));
+
+      expect(
+        File(join(target, webDashboardEntryName)).readAsStringSync(),
+        '<html>metacubexd</html>',
+      );
+      expect(File(join(target, '_nuxt', 'app.js')).existsSync(), isTrue);
+      expect(Directory('$target.new').existsSync(), isFalse);
+    });
+
     test('drops entries that sit outside the archive root', () async {
       final target = targetPath('extra');
       final archivePath = writeArchive({
@@ -197,28 +263,69 @@ void main() {
   });
 
   group('WebDashboard', () {
-    test('pins and verifies the downloaded release archive', () async {
-      expect(webDashboardUrl, contains('/releases/download/v3.26.0/'));
+    test('pins and verifies the downloaded release archives', () async {
+      expect(zashboardUrl, contains('/releases/download/v3.26.0/'));
+      expect(metacubexdUrl, contains('/releases/download/v1.273.1/'));
+      expect(webDashboardUrlOf(WebDashboardFlavor.zashboard), zashboardUrl);
+      expect(webDashboardUrlOf(WebDashboardFlavor.metacubexd), metacubexdUrl);
       final archive = File(writeArchive({'index.html': 'dashboard'}));
 
-      expect(await hasWebDashboardDigest(archive, webDashboardSha256), isFalse);
+      expect(await hasWebDashboardDigest(archive, zashboardSha256), isFalse);
+      expect(await hasWebDashboardDigest(archive, metacubexdSha256), isFalse);
     });
 
     test('reports and removes the dashboard in the core home dir', () async {
-      expect(await webDashboard.isInstalled, isFalse);
+      for (final flavor in WebDashboardFlavor.values) {
+        expect(await webDashboard.isInstalledFor(flavor), isFalse);
+      }
 
       final entry = File(
         join(webDashboardDirIn(root.path), webDashboardEntryName),
       )..createSync(recursive: true);
       entry.writeAsStringSync('installed');
 
+      // Installs predating the flavor marker only ever shipped zashboard.
+      expect(
+        await webDashboard.isInstalledFor(WebDashboardFlavor.zashboard),
+        isTrue,
+      );
+      expect(
+        await webDashboard.isInstalledFor(WebDashboardFlavor.metacubexd),
+        isFalse,
+      );
       expect(isWebDashboardInstalledIn(root.path), isTrue);
-      expect(await webDashboard.isInstalled, isTrue);
 
       await webDashboard.remove();
 
-      expect(await webDashboard.isInstalled, isFalse);
+      for (final flavor in WebDashboardFlavor.values) {
+        expect(await webDashboard.isInstalledFor(flavor), isFalse);
+      }
       expect(Directory(webDashboardDirIn(root.path)).existsSync(), isFalse);
+    });
+
+    test('tracks the installed flavor through its marker', () async {
+      final dir = webDashboardDirIn(root.path);
+      File(join(dir, webDashboardEntryName))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('installed');
+      File(
+        join(dir, webDashboardFlavorFileName),
+      ).writeAsStringSync(WebDashboardFlavor.metacubexd.name);
+
+      expect(
+        installedWebDashboardFlavorIn(root.path),
+        WebDashboardFlavor.metacubexd,
+      );
+      expect(
+        await webDashboard.isInstalledFor(WebDashboardFlavor.metacubexd),
+        isTrue,
+      );
+      expect(
+        await webDashboard.isInstalledFor(WebDashboardFlavor.zashboard),
+        isFalse,
+      );
+
+      await webDashboard.remove();
     });
   });
 

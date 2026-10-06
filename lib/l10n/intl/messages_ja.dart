@@ -3702,10 +3702,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "このクライアントの形式で購読を取得します",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "互換プリセットは ReClash を別のアプリとして偽装させ、パネルにそのクライアントの形式を返させてから ReClash が変換します。通常のリクエストでノードが返らない場合にのみ使用してください。",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "互換プリセットは ReClash を別のアプリとして偽装させ、パネルにそのクライアントの形式を返させてから ReClash が変換します。通常のリクエストでノードが返らない場合にのみ使用してください。",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Happ アプリを偽装し、その形式のみを返すパネル向けです。",
@@ -4040,10 +4039,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Web ダッシュボード"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "コア自身が配信する zashboard",
+      "コア自身が配信する Web パネル",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("パネル"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "初回起動時に zashboard をダウンロードします",
+      "初回起動時にパネルをダウンロードします",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("ダッシュボードを開く"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -4052,6 +4055,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "コアがまだダッシュボードを配信していません",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "管理者権限が付与されませんでした。TUN は起動していません。",

@@ -2011,10 +2011,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -4554,10 +4553,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Приложение запросит подписку в формате этого клиента",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "Пресеты совместимости заставляют ReClash представляться другим приложением, чтобы панель отдала формат того клиента, который ReClash затем преобразует. Используйте только если обычный запрос не возвращает узлы.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Пресеты совместимости заставляют ReClash представляться другим приложением, чтобы панель отдала формат того клиента, который ReClash затем преобразует. Используйте только если обычный запрос не возвращает узлы.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Представляется приложением Happ для панелей, отдающих только его формат.",
@@ -4964,10 +4962,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Веб-панель"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "zashboard — его отдаёт само ядро",
+      "Веб-панель — её отдаёт само ядро",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Панель"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard загрузится при первом открытии",
+      "Панель загрузится при первом открытии",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Открыть панель"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -4976,6 +4978,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "Ядро пока не отдаёт панель",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),

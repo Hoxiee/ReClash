@@ -423,6 +423,9 @@ enum FunctionTag {
 /// ByeDPI-only runs without a profile, so server tiles have nothing to say.
 enum DashboardMode { vpn, byedpi }
 
+/// Web panel served by the Core through `external-ui`.
+enum WebDashboardFlavor { zashboard, metacubexd }
+
 const _vpnOnly = [DashboardMode.vpn];
 const _byedpiOnly = [DashboardMode.byedpi];
 

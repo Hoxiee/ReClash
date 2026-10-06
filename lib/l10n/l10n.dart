@@ -13642,11 +13642,41 @@ class AppLocalizations {
     );
   }
 
-  /// `zashboard, served by the core itself`
+  /// `Web panel, served by the core itself`
   String get webDashboardDesc {
     return Intl.message(
-      'zashboard, served by the core itself',
+      'Web panel, served by the core itself',
       name: 'webDashboardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Panel`
+  String get webDashboardFlavor {
+    return Intl.message(
+      'Panel',
+      name: 'webDashboardFlavor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `zashboard`
+  String get webDashboardZashboard {
+    return Intl.message(
+      'zashboard',
+      name: 'webDashboardZashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MetaCubeXD`
+  String get webDashboardMetacubexd {
+    return Intl.message(
+      'MetaCubeXD',
+      name: 'webDashboardMetacubexd',
       desc: '',
       args: [],
     );
@@ -13672,10 +13702,10 @@ class AppLocalizations {
     );
   }
 
-  /// `zashboard is downloaded on first open`
+  /// `The panel is downloaded on first open`
   String get webDashboardInstallTip {
     return Intl.message(
-      'zashboard is downloaded on first open',
+      'The panel is downloaded on first open',
       name: 'webDashboardInstallTip',
       desc: '',
       args: [],
@@ -18458,7 +18488,8 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc:
+          'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18518,7 +18549,8 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
+      desc:
+          'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }

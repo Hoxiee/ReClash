@@ -63,7 +63,9 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
   bool get _busy => _cancelToken != null || _opening;
 
   Future<void> _refresh() async {
-    final installed = await webDashboard.isInstalled;
+    final installed = await webDashboard.isInstalledFor(
+      ref.read(appSettingProvider).webDashboardFlavor,
+    );
     if (!mounted) {
       return;
     }
@@ -93,6 +95,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
       _progress = null;
     });
     final error = await webDashboard.install(
+      flavor: ref.read(appSettingProvider).webDashboardFlavor,
       cancelToken: cancelToken,
       onProgress: (received, total) {
         if (!mounted) {
@@ -195,6 +198,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     final uri = webDashboardUri(
       config.externalController,
       secret: config.secret,
+      flavor: ref.read(appSettingProvider).webDashboardFlavor,
     );
     var readiness = await probeWebDashboard(uri);
     if (readiness == WebDashboardReadiness.unmounted) {
@@ -250,6 +254,28 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
           SettingSection(
             top: 16,
             items: [
+              ConfigOptionsItem<WebDashboardFlavor>(
+                leading: const GlyphIcon(AppGlyphs.layers),
+                title: (l) => l.webDashboardFlavor,
+                options: WebDashboardFlavor.values,
+                textBuilder: (flavor) => switch (flavor) {
+                  WebDashboardFlavor.zashboard =>
+                    appLocalizations.webDashboardZashboard,
+                  WebDashboardFlavor.metacubexd =>
+                    appLocalizations.webDashboardMetacubexd,
+                },
+                selector: appSettingProvider.select(
+                  (state) => state.webDashboardFlavor,
+                ),
+                onChanged: (ref, value) {
+                  ref
+                      .read(appSettingProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(webDashboardFlavor: value),
+                      );
+                  unawaited(_refresh());
+                },
+              ),
               DecorationListItem(
                 leading: GlyphIcon(
                   supportsInAppWebDashboard

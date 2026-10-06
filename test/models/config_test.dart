@@ -119,6 +119,7 @@ void main() {
       expect(restored.userAgents, defaultUserAgents);
       expect(restored.sendDeviceIdentity, false);
       expect(restored.testUrl, defaultTestUrl);
+      expect(restored.webDashboardFlavor, WebDashboardFlavor.zashboard);
     });
 
     test('custom values survive round-trip', () {
@@ -147,6 +148,7 @@ void main() {
         userAgents: ['CustomUA/1.0'],
         editorLineWrap: true,
         editorFontSize: EditorFontSize.large,
+        webDashboardFlavor: WebDashboardFlavor.metacubexd,
       );
       final restored = roundTrip(
         () => props.toJson(),
@@ -176,6 +178,14 @@ void main() {
       expect(restored.userAgents, ['CustomUA/1.0']);
       expect(restored.editorLineWrap, true);
       expect(restored.editorFontSize, EditorFontSize.large);
+      expect(restored.webDashboardFlavor, WebDashboardFlavor.metacubexd);
+    });
+
+    test('unknown dashboard flavor falls back to zashboard', () {
+      final result = AppSettingProps.safeFromJson({
+        'webDashboardFlavor': 'yacd',
+      });
+      expect(result.webDashboardFlavor, WebDashboardFlavor.zashboard);
     });
 
     test('safeFromJson returns default on null', () {

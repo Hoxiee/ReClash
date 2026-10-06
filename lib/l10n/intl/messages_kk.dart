@@ -2015,10 +2015,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -4542,10 +4541,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданба жазылысты осы клиенттің пішімінде сұрайды",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "Үйлесімділік пресеттері ReClash-ты басқа қосымша ретінде көрсетеді, сонда панель сол клиенттің форматын береді, оны ReClash кейін түрлендіреді. Әдеттегі сұрау түйіндерді қайтармаса ғана қолданыңыз.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Үйлесімділік пресеттері ReClash-ты басқа қосымша ретінде көрсетеді, сонда панель сол клиенттің форматын береді, оны ReClash кейін түрлендіреді. Әдеттегі сұрау түйіндерді қайтармаса ғана қолданыңыз.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Тек өз форматын беретін панельдер үшін Happ қосымшасы ретінде көрсетіледі.",
@@ -4946,10 +4944,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Веб-бақылау тақтасы"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "zashboard — ядроның өзі қызмет ететін бақылау тақтасы",
+      "Веб-бақылау тақтасы — ядроның өзі қызмет етеді",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Панель"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard алғаш рет ашылғанда жүктеледі",
+      "Панель алғаш рет ашылғанда жүктеледі",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage(
       "Бақылау тақтасын ашу",
@@ -4960,6 +4962,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "Ядро әлі бақылау тақтасын қызмет етпей тұр",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ақ тізім режимі"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "Әкімші құқықтары берілмеді. TUN іске қосылмады.",

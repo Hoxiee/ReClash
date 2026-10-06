@@ -157,6 +157,13 @@ _AppSettingProps _$AppSettingPropsFromJson(
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
       EditorFontSize.standard,
   preventDuplicateProfiles: json['preventDuplicateProfiles'] as bool? ?? true,
+  webDashboardFlavor:
+      $enumDecodeNullable(
+        _$WebDashboardFlavorEnumMap,
+        json['webDashboardFlavor'],
+        unknownValue: WebDashboardFlavor.zashboard,
+      ) ??
+      WebDashboardFlavor.zashboard,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -208,6 +215,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
       'preventDuplicateProfiles': instance.preventDuplicateProfiles,
+      'webDashboardFlavor':
+          _$WebDashboardFlavorEnumMap[instance.webDashboardFlavor]!,
     };
 
 const _$TabAnimationEnumMap = {
@@ -231,6 +240,11 @@ const _$EditorFontSizeEnumMap = {
   EditorFontSize.standard: 'standard',
   EditorFontSize.large: 'large',
   EditorFontSize.extraLarge: 'extraLarge',
+};
+
+const _$WebDashboardFlavorEnumMap = {
+  WebDashboardFlavor.zashboard: 'zashboard',
+  WebDashboardFlavor.metacubexd: 'metacubexd',
 };
 
 const _$DashboardWidgetEnumMap = {

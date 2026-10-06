@@ -2020,10 +2020,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -4539,10 +4538,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Programma abuna haýyşyny şu müşderiniň formatynda iberýär",
     ),
-    "subscriptionClientExperimentalNotice":
-        MessageLookupByLibrary.simpleMessage(
-          "Utgaşyklyk presetleri ReClash-y başga programma hökmünde görkezýär, şonda panel şol klientiň formatyny berýär, ony ReClash soňra öwürýär. Diňe adaty sorag düwünleri gaýtarmasa ulanyň.",
-        ),
+    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Utgaşyklyk presetleri ReClash-y başga programma hökmünde görkezýär, şonda panel şol klientiň formatyny berýär, ony ReClash soňra öwürýär. Diňe adaty sorag düwünleri gaýtarmasa ulanyň.",
+    ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Diňe öz formatyny berýän paneller üçin Happ programmasy hökmünde görkezýär.",
@@ -4943,10 +4941,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Web panel"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
-      "zashboard, çekirdegiň özi tarapyndan hyzmat edilýär",
+      "Web panel — ony çekirdegiň özi hödürleýär",
     ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
-      "zashboard ilkinji gezek açylanda göçürilip alynýar",
+      "Panel ilkinji gezek açylanda göçürilip alynýar",
+    ),
+    "webDashboardMetacubexd": MessageLookupByLibrary.simpleMessage(
+      "MetaCubeXD",
     ),
     "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Paneli aç"),
     "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
@@ -4955,6 +4957,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
       "Panel heniz elýeterli däl",
     ),
+    "webDashboardZashboard": MessageLookupByLibrary.simpleMessage("zashboard"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
     "windowsElevationCancelled": MessageLookupByLibrary.simpleMessage(
       "Administrator hukuklary berilmedi. TUN işledilmedi.",
