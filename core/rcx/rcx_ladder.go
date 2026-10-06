@@ -91,10 +91,10 @@ func (id *rcxRungID) UnmarshalJSON(data []byte) error {
 // its two tunable thresholds. Direction ("faster wins") is intrinsic to ID and is
 // never stored, so a mis-edited spec cannot invert a safety-critical ordering.
 type rcxRungSpec struct {
-	ID                 rcxRungID `json:"id"`
-	Enabled            bool      `json:"on"`
-	RecurrenceFloor    int       `json:"rf,omitempty"`
-	LatencyToleranceMs int       `json:"lt,omitempty"`
+	ID                 rcxRungID `json:"id" yaml:"rung"`
+	Enabled            bool      `json:"on" yaml:"enabled"`
+	RecurrenceFloor    int       `json:"rf,omitempty" yaml:"recurrenceFloor,omitempty"`
+	LatencyToleranceMs int       `json:"lt,omitempty" yaml:"latencyToleranceMs,omitempty"`
 }
 
 func rcxDefaultLadder() []rcxRungSpec {

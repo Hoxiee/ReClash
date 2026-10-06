@@ -1,0 +1,110 @@
+schema: 1
+ladder:
+    - rung: verdict
+      enabled: true
+    - rung: misfit
+      enabled: true
+    - rung: recurrence
+      enabled: true
+      recurrenceFloor: 2
+    - rung: degraded
+      enabled: true
+    - rung: homeRisk
+      enabled: true
+    - rung: latency
+      enabled: true
+    - rung: evidence
+      enabled: true
+    - rung: unproven
+      enabled: true
+    - rung: incumbent
+      enabled: true
+    - rung: tiebreak
+      enabled: true
+strategies:
+    balanced:
+        bands:
+            - 80
+            - 120
+            - 180
+            - 320
+        switchAbsMs: 30
+        switchPct: 20
+    lowest-latency:
+        drop:
+            - misfit
+        bands:
+            - 65
+            - 90
+            - 130
+            - 220
+        switchAbsMs: 15
+        switchPct: 10
+    saver:
+        bands:
+            - 150
+            - 260
+            - 420
+            - 750
+        switchAbsMs: 50
+        switchPct: 30
+    stable:
+        bands:
+            - 120
+            - 200
+            - 320
+            - 550
+        switchAbsMs: 50
+        switchPct: 30
+admission:
+    - when:
+        - transit is disproven
+      verdict: reject
+    - when:
+        - trust is branded
+      verdict: reject
+    - when:
+        - openWorld is disproven
+        - domestic isNot proven
+      verdict: reject
+    - when:
+        - exit is domestic
+        - domestic is proven
+      tier: domesticProven
+    - when:
+        - exit is domestic
+      tier: domesticPrior
+    - when:
+        - openWorld is proven
+        - breaker is true
+      tier: breakerProven
+    - when:
+        - openWorld is proven
+        - trust is suspect
+        - exit is unknown
+      verdict: last-resort
+    - when:
+        - openWorld is proven
+      tier: openWorldProven
+    - when:
+        - openedOnce is true
+        - openWorld isNot disproven
+        - openLapsed is false
+        - origin isNot domestic
+        - breaker is true
+      tier: breakerProven
+    - when:
+        - openedOnce is true
+        - openWorld isNot disproven
+        - openLapsed is false
+        - origin isNot domestic
+      tier: openWorldProven
+    - when:
+        - domestic is proven
+      tier: domesticProven
+    - when:
+        - exit is unknown
+        - origin is domestic
+        - openedOnce is false
+      tier: domesticPrior
+    - tier: foreignPrior

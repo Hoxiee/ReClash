@@ -234,10 +234,10 @@ const (
 // rungs its ladder drops, its latency band edges, and the switch thresholds that
 // were once three scattered per-strategy switches.
 type rcxStrategyProfile struct {
-	DropRungs    []rcxRungID
-	LatencyBands []int
-	SwitchAbsMs  int
-	SwitchPct    int
+	DropRungs    []rcxRungID `yaml:"drop,omitempty"`
+	LatencyBands []int       `yaml:"bands"`
+	SwitchAbsMs  int         `yaml:"switchAbsMs"`
+	SwitchPct    int         `yaml:"switchPct"`
 }
 
 var rcxStrategyProfiles = map[string]rcxStrategyProfile{
