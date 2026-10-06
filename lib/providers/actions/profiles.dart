@@ -588,12 +588,11 @@ class ProfilesAction extends _$ProfilesAction {
       fetchNormally: request.getFileResponseForUrl,
       fetchProtected: transport.download,
       allowed: allowed,
-      confirm: () async =>
-          dialogs.confirm(
-            currentAppLocalizations.subscriptionDirectRetryMessage,
-            title: currentAppLocalizations.subscriptionDirectRetryTitle,
-            confirmText: currentAppLocalizations.subscriptionDirectRetryConfirm,
-          ),
+      confirm: () async => dialogs.confirm(
+        currentAppLocalizations.subscriptionDirectRetryMessage,
+        title: currentAppLocalizations.subscriptionDirectRetryTitle,
+        confirmText: currentAppLocalizations.subscriptionDirectRetryConfirm,
+      ),
     ).fetch;
   }
 
@@ -654,9 +653,7 @@ class ProfilesAction extends _$ProfilesAction {
     final requested = _panelSettings(tokens);
     if (requested.isEmpty) return false;
     final confirmed = await dialogs.confirm(
-      currentAppLocalizations.panelSettingsConfirmMessage(
-        requested.join('\n'),
-      ),
+      currentAppLocalizations.panelSettingsConfirmMessage(requested.join('\n')),
       title: currentAppLocalizations.panelSettingsConfirmTitle,
     );
     if (!confirmed) return false;

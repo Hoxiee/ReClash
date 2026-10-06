@@ -107,9 +107,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
-        coreHandlerProvider.overrideWithValue(
-          handler ?? core,
-        ),
+        coreHandlerProvider.overrideWithValue(handler ?? core),
         setupActionProvider.overrideWith(() => setup),
         commonActionProvider.overrideWith(_Common.new),
       ],

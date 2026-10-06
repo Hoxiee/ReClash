@@ -75,8 +75,7 @@ String profileImportFailureMessage(
     appLocalizations.pleaseUploadValidQrcode,
   ProfileImportFailure.invalidConfig =>
     appLocalizations.profileImportInvalidConfig,
-  ProfileImportFailure.duplicate =>
-    appLocalizations.profileImportDuplicate,
+  ProfileImportFailure.duplicate => appLocalizations.profileImportDuplicate,
   ProfileImportFailure.fetchRejected => appLocalizations.networkException,
   ProfileImportFailure.fetchFailed => appLocalizations.unknownNetworkError,
   ProfileImportFailure.emptyResponse =>
@@ -122,8 +121,7 @@ String subscriptionClientHint(
   SubscriptionClient.happ => appLocalizations.subscriptionClientHappHint,
   SubscriptionClient.incy => appLocalizations.subscriptionClientIncyHint,
   SubscriptionClient.singbox => appLocalizations.subscriptionClientSingboxHint,
-  SubscriptionClient.v2rayng =>
-    appLocalizations.subscriptionClientV2rayngHint,
+  SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayngHint,
   SubscriptionClient.custom => appLocalizations.subscriptionClientCustomHint,
 };
 

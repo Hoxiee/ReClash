@@ -93,8 +93,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
   ConsumerState<CommonScaffold> createState() => CommonScaffoldState();
 }
 
-abstract class _CommonScaffoldStateBase
-    extends ConsumerState<CommonScaffold> {
+abstract class _CommonScaffoldStateBase extends ConsumerState<CommonScaffold> {
   late final ValueNotifier<AppBarState> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isFabExtendedNotifier = ValueNotifier(true);
@@ -163,6 +162,7 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
   bool get _isSearch {
     return _appBarState.value.searchState?.query != null;
   }
+
   bool get _isEdit {
     final editState = _appBarState.value.editState;
     if (editState == null) {
@@ -170,14 +170,17 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
     }
     return editState.editCount > 0;
   }
+
   Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
     _appBarState.value = _appBarState.value.copyWith(
       searchState: builder(_appBarState.value.searchState),
     );
   }
+
   void handleToSearch() {
     _updateSearchState((state) => state?.copyWith(query: ''));
   }
+
   Widget _buildSearchingAppBarTheme(Widget child) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -199,12 +202,14 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
       child: child,
     );
   }
+
   void _handleClearInput() {
     _textController.text = '';
     if (_appBarState.value.searchState != null) {
       _appBarState.value.searchState!.onSearch('');
     }
   }
+
   void _handleClear() {
     if (_textController.text.isNotEmpty) {
       _handleClearInput();
@@ -212,6 +217,7 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
     }
     _popAppBarLayer();
   }
+
   void handleExitSearching() {
     if (!_isSearch) {
       return;
@@ -219,12 +225,14 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
     _handleClearInput();
     _updateSearchState((state) => state?.copyWith(query: null));
   }
+
   void _handleExitAppBarLayer() {
     handleExitSearching();
     if (_isEdit) {
       _appBarState.value.editState?.onExit();
     }
   }
+
   void _popAppBarLayer() {
     if (!_isEdit && !_isSearch) {
       return;
@@ -241,6 +249,7 @@ mixin _KeywordChipsState on _CommonScaffoldStateBase {
     final keywords = List<String>.from(_keywordsNotifier.value)..add(keyword);
     _keywordsNotifier.value = keywords;
   }
+
   void _deleteKeyword(String keyword) {
     final isContains = _keywordsNotifier.value.contains(keyword);
     if (!isContains) return;
@@ -272,10 +281,12 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
             ),
     );
   }
+
   Widget? _buildLeading(VoidCallback? backAction, {required _SheetPop? pop}) {
     final button = _buildLeadingButton(backAction, pop: pop);
     return button == null ? null : Center(child: ElasticPress(child: button));
   }
+
   Widget? _buildLeadingButton(
     VoidCallback? backAction, {
     required _SheetPop? pop,
@@ -310,6 +321,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
           ).withAppTooltip(context.appLocalizations.back)
         : _autoLeadingButton();
   }
+
   /// Built by hand, not by `automaticallyImplyLeading`, so it can ride inside
   /// [ElasticPress].
   Widget? _autoLeadingButton() {
@@ -321,6 +333,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
         ? (const CloseButton()).withAppTooltip(context.appLocalizations.close)
         : (const BackButton()).withAppTooltip(context.appLocalizations.back);
   }
+
   Widget _buildTitle(AppBarSearchState? startState) {
     if (_isSearch) {
       return _buildSearchField(startState);
@@ -334,6 +347,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
     }
     return widget.titleWidget ?? Text(widget.title!);
   }
+
   /// The searching title: a filled pill that reveals out of the search button,
   /// its regex toggle moved into the action group beside the close button.
   Widget _buildSearchField(AppBarSearchState? startState) {
@@ -376,6 +390,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       ),
     );
   }
+
   List<Widget> _buildActions(
     IconButtonData? primaryAction,
     List<Widget> legacyActions,
@@ -487,6 +502,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
         ),
     ], edge: AppBarActionEdge.container);
   }
+
   /// The searching action cluster: the regex toggle folds into one pill with
   /// the close button, so the extra controls read as a single grouped capsule.
   List<Widget> _buildSearchActions(AppBarSearchState? searchState) {
@@ -514,6 +530,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
         ElasticPress(child: AppBarActionButton(data: data)),
     ], edge: AppBarActionEdge.container);
   }
+
   Widget _buildAppBarWrap(Widget child) {
     final appBar = TonalButtonTheme(
       child: _isSearch ? _buildSearchingAppBarTheme(child) : child,
@@ -523,6 +540,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
     }
     return appBar;
   }
+
   Widget _buildFloatingHeader(Widget appBar) {
     final top = MediaQuery.paddingOf(context).top;
     return FloatingHeader(
@@ -532,6 +550,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       child: appBar,
     );
   }
+
   PreferredSizeWidget _buildAppBar(
     VoidCallback? backAction,
     _SheetForm form, {
@@ -597,6 +616,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       ),
     );
   }
+
   /// A chrome-suppressed pane keeps no app bar of its own, so its actions are
   /// built here and handed to the shared bar. The result stays reactive to
   /// edit/search/loading through the same [_appBarState] the real bar reads.
@@ -624,6 +644,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       },
     );
   }
+
   void _publishRelayActions(Widget actions, ValueNotifier<Widget?> sink) {
     _relaySink = sink;
     _relayedActions = actions;

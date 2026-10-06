@@ -371,7 +371,10 @@ class ProxiesAction extends _$ProxiesAction {
       return;
     }
     try {
-      final delay = await _core.asyncTestDelay(target.testUrl, target.proxyName);
+      final delay = await _core.asyncTestDelay(
+        target.testUrl,
+        target.proxyName,
+      );
       if (!job.cancelled) {
         setDelay(
           delay ??

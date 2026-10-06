@@ -24,11 +24,7 @@ Future<ProviderContainer> _pumpGeoResourceAction(
   CoreHandlerInterface coreInterface,
 ) async {
   final container = ProviderContainer(
-    overrides: [
-      coreHandlerProvider.overrideWithValue(
-        coreInterface,
-      ),
-    ],
+    overrides: [coreHandlerProvider.overrideWithValue(coreInterface)],
   );
   addTearDown(container.dispose);
   await tester.pumpWidget(

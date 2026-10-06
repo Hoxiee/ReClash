@@ -23,7 +23,9 @@ class IntranetIP extends StatelessWidget {
                 ? TooltipText(
                     text: Text(
                       localIp.isNotEmpty ? localIp : appLocalizations.noNetwork,
-                      style: context.textTheme.bodyMedium?.toLight.adjustSize(1),
+                      style: context.textTheme.bodyMedium?.toLight.adjustSize(
+                        1,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

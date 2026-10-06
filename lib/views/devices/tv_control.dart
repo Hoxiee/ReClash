@@ -324,7 +324,6 @@ class _TrustedPhoneCard extends StatelessWidget {
   }
 }
 
-
 class _PairingWindowDialog extends StatefulWidget {
   const _PairingWindowDialog({required this.receiver, required this.offer});
 

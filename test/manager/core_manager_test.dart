@@ -104,9 +104,7 @@ Future<ProviderContainer> _pumpCoreManager(
   await tester.pump();
   final container = ProviderContainer(
     overrides: [
-      coreHandlerProvider.overrideWithValue(
-        coreInterface,
-      ),
+      coreHandlerProvider.overrideWithValue(coreInterface),
       ...overrides,
     ],
   );
@@ -207,11 +205,7 @@ void main() {
     final coreInterface = _MockCoreHandlerInterface();
     when(() => coreInterface.stopLog()).thenAnswer((_) {});
     final container = ProviderContainer(
-      overrides: [
-        coreHandlerProvider.overrideWithValue(
-          coreInterface,
-        ),
-      ],
+      overrides: [coreHandlerProvider.overrideWithValue(coreInterface)],
     );
     addTearDown(container.dispose);
     await tester.pumpWidget(

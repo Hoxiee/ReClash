@@ -81,10 +81,7 @@ class ClientPresetSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: context.textTheme.labelMedium?.toLighter,
-        ),
+        Text(title, style: context.textTheme.labelMedium?.toLighter),
         const SizedBox(height: AppSpacing.xs),
         Wrap(
           spacing: 8,

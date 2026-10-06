@@ -117,41 +117,33 @@ void main() {
       expect(await handler.setupConfigWithPreload(params: params), 'invalid');
     });
 
-    test(
-      'Linux applies configuration before starting listeners',
-      () async {
-        final configured = Completer<String>();
-        var starts = 0;
-        handler.onSetupConfig = (_) => configured.future;
-        final operation = handler.setupConfigWithPreload(
+    test('Linux applies configuration before starting listeners', () async {
+      final configured = Completer<String>();
+      var starts = 0;
+      handler.onSetupConfig = (_) => configured.future;
+      final operation = handler.setupConfigWithPreload(
+        params: params,
+        preloadInvoke: () async => starts++,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(starts, 0);
+      configured.complete('');
+      expect(await operation, '');
+      expect(starts, 1);
+    }, skip: !Platform.isLinux);
+
+    test('Linux skips listener startup when configuration fails', () async {
+      var starts = 0;
+      handler.onSetupConfig = (_) async => 'invalid';
+      expect(
+        await handler.setupConfigWithPreload(
           params: params,
           preloadInvoke: () async => starts++,
-        );
-        await Future<void>.delayed(Duration.zero);
-        expect(starts, 0);
-        configured.complete('');
-        expect(await operation, '');
-        expect(starts, 1);
-      },
-      skip: !Platform.isLinux,
-    );
-
-    test(
-      'Linux skips listener startup when configuration fails',
-      () async {
-        var starts = 0;
-        handler.onSetupConfig = (_) async => 'invalid';
-        expect(
-          await handler.setupConfigWithPreload(
-            params: params,
-            preloadInvoke: () async => starts++,
-          ),
-          'invalid',
-        );
-        expect(starts, 0);
-      },
-      skip: !Platform.isLinux,
-    );
+        ),
+        'invalid',
+      );
+      expect(starts, 0);
+    }, skip: !Platform.isLinux);
   });
 
   test('getAppliedConfig renames the core rule key to rules', () async {

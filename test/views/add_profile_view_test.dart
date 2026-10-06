@@ -385,10 +385,7 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    expect(
-      find.byTooltip(currentAppLocalizations.showMore),
-      findsOneWidget,
-    );
+    expect(find.byTooltip(currentAppLocalizations.showMore), findsOneWidget);
 
     await tester.enterText(
       find.byType(TextField).first,
@@ -498,9 +495,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // A compatibility preset is experimental; one consent gates the switch.
-    await tester.tap(
-      find.text(currentAppLocalizations.experimentalEnable),
-    );
+    await tester.tap(find.text(currentAppLocalizations.experimentalEnable));
     await tester.pumpAndSettle();
 
     expect(find.byType(TextField), findsOneWidget);

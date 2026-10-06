@@ -23,9 +23,7 @@ void main() {
 
   ProviderContainer buildContainer(_MockCoreHandler core) {
     final container = ProviderContainer(
-      overrides: [
-        coreHandlerProvider.overrideWithValue(core),
-      ],
+      overrides: [coreHandlerProvider.overrideWithValue(core)],
     );
     addTearDown(container.dispose);
     return container;

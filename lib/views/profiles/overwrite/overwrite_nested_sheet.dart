@@ -96,9 +96,7 @@ class _OverwriteNestedSheetState<T>
       Navigator.of(context).pop();
       return;
     }
-    final res = await dialogs.confirm(
-      context.appLocalizations.dataChangedSave,
-    );
+    final res = await dialogs.confirm(context.appLocalizations.dataChangedSave);
     if (!mounted) {
       return;
     }

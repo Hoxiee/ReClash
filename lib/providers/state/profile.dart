@@ -67,7 +67,9 @@ OverwriteType overwriteType(Ref ref, int? profileId) {
 
 @riverpod
 Future<ClashConfig> clashConfig(Ref ref, int profileId) async {
-  final configMap = await ref.read(coreHandlerProvider).getProfileConfig(profileId);
+  final configMap = await ref
+      .read(coreHandlerProvider)
+      .getProfileConfig(profileId);
   return clashConfigTask(configMap);
 }
 

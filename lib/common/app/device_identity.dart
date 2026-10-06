@@ -138,7 +138,9 @@ class DeviceIdentity {
 
   Future<String?> _readCoreVersion() async {
     try {
-      return await coreHandlerInstance.getVersion().timeout(_coreVersionTimeout);
+      return await coreHandlerInstance.getVersion().timeout(
+        _coreVersionTimeout,
+      );
     } catch (error) {
       // The UA ships without the core segment until the core answers once.
       commonPrint.log(

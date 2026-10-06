@@ -101,35 +101,37 @@ void main() {
   });
 
   group('ProfilesAction', () {
-    test('rejects a link import whose URL an existing profile already tracks',
-        () async {
-      final existing = Profile.normal(
-        label: 'Existing',
-        url: 'https://sub.example/clash',
-      );
-      final container = ProviderContainer(
-        overrides: [
-          currentProfileIdProvider.overrideWithBuild((_, _) => null),
-          profilesProvider.overrideWith(() => TestProfiles([existing])),
-        ],
-      );
-      addTearDown(container.dispose);
-      final action = container.read(profilesActionProvider.notifier);
+    test(
+      'rejects a link import whose URL an existing profile already tracks',
+      () async {
+        final existing = Profile.normal(
+          label: 'Existing',
+          url: 'https://sub.example/clash',
+        );
+        final container = ProviderContainer(
+          overrides: [
+            currentProfileIdProvider.overrideWithBuild((_, _) => null),
+            profilesProvider.overrideWith(() => TestProfiles([existing])),
+          ],
+        );
+        addTearDown(container.dispose);
+        final action = container.read(profilesActionProvider.notifier);
 
-      await expectLater(
-        action.prepareProfileImport(
-          const ProfileLinkImportRequest('https://sub.example/clash'),
-        ),
-        throwsA(isA<ProfileDuplicateException>()),
-      );
-      expect(
-        action.profileImportFailure(
-          const ProfileDuplicateException(),
-          const ProfileLinkImportRequest('https://sub.example/clash'),
-        ),
-        ProfileImportFailure.duplicate,
-      );
-    });
+        await expectLater(
+          action.prepareProfileImport(
+            const ProfileLinkImportRequest('https://sub.example/clash'),
+          ),
+          throwsA(isA<ProfileDuplicateException>()),
+        );
+        expect(
+          action.profileImportFailure(
+            const ProfileDuplicateException(),
+            const ProfileLinkImportRequest('https://sub.example/clash'),
+          ),
+          ProfileImportFailure.duplicate,
+        );
+      },
+    );
 
     test('keeps edited profile data when remote update fails', () async {
       final original = Profile.normal(label: 'old label', url: 'bad-url');
@@ -655,9 +657,7 @@ void main() {
       final core = _MockCoreHandlerInterface();
       when(() => core.updateGeoData('MMDB')).thenAnswer((_) async => '');
       final container = ProviderContainer(
-        overrides: [
-          coreHandlerProvider.overrideWithValue(core),
-        ],
+        overrides: [coreHandlerProvider.overrideWithValue(core)],
       );
       addTearDown(container.dispose);
       final action = container.read(geoResourceActionProvider.notifier);
@@ -673,9 +673,7 @@ void main() {
         () => core.updateGeoData('MMDB'),
       ).thenThrow(StateError('disconnected'));
       final container = ProviderContainer(
-        overrides: [
-          coreHandlerProvider.overrideWithValue(core),
-        ],
+        overrides: [coreHandlerProvider.overrideWithValue(core)],
       );
       addTearDown(container.dispose);
       final action = container.read(geoResourceActionProvider.notifier);
@@ -1031,9 +1029,7 @@ void main() {
         ).thenAnswer((_) async => true);
         container = ProviderContainer(
           overrides: [
-            coreHandlerProvider.overrideWithValue(
-              coreInterface,
-            ),
+            coreHandlerProvider.overrideWithValue(coreInterface),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
@@ -1660,9 +1656,7 @@ void main() {
         ..confirmationCompleter = confirmation;
       final container = ProviderContainer(
         overrides: [
-          coreHandlerProvider.overrideWithValue(
-            coreInterface,
-          ),
+          coreHandlerProvider.overrideWithValue(coreInterface),
           setupActionProvider.overrideWith(() => action),
         ],
       );

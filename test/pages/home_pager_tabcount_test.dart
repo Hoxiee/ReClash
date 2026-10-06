@@ -111,10 +111,12 @@ final _reorderOverride = navigationItemsStateProvider.overrideWith((ref) {
 
 // A page is on screen when its keyed content is mounted and not offstage; the
 // default skipOffstage finder already hides the idle (offstage) tabs.
-Finder _onScreen(PageLabel label) =>
-    find.text('content:${label.name}');
+Finder _onScreen(PageLabel label) => find.text('content:${label.name}');
 
-Future<void> _pumpShell(WidgetTester tester, ProviderContainer container) async {
+Future<void> _pumpShell(
+  WidgetTester tester,
+  ProviderContainer container,
+) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -151,9 +153,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(_builds[PageLabel.tools], 1);
 
-    container.read(currentPageLabelProvider.notifier).toPage(
-      PageLabel.dashboard,
-    );
+    container
+        .read(currentPageLabelProvider.notifier)
+        .toPage(PageLabel.dashboard);
     await tester.pumpAndSettle();
 
     // dashboard -> tools is a non-adjacent jump, so the slide permutation is

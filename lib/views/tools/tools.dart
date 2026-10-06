@@ -111,9 +111,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           return;
         }
         if (next != ViewMode.mobile) {
-          Navigator.of(context).popUntil(
-            (route) => route.settings.name != extendSheetRouteName,
-          );
+          Navigator.of(
+            context,
+          ).popUntil((route) => route.settings.name != extendSheetRouteName);
         }
         _detailActions.value = null;
       });

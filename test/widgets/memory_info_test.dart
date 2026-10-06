@@ -564,11 +564,7 @@ ProviderContainer _containerWith(
   CoreStatus status,
 ) {
   final container = ProviderContainer(
-    overrides: [
-      coreHandlerProvider.overrideWithValue(
-        coreInterface,
-      ),
-    ],
+    overrides: [coreHandlerProvider.overrideWithValue(coreInterface)],
   );
   container.read(coreStatusProvider.notifier).value = status;
   return container;

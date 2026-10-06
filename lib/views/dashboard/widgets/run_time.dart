@@ -19,9 +19,9 @@ class RunTimeCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               getTimeText(ref.watch(runTimeProvider)),
-              style: context.textTheme.bodyMedium?.toLight.adjustSize(1).copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: context.textTheme.bodyMedium?.toLight
+                  .adjustSize(1)
+                  .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

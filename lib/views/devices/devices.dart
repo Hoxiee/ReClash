@@ -235,7 +235,6 @@ class _GroupLabel extends StatelessWidget {
   }
 }
 
-
 class _DeviceCard extends StatelessWidget {
   const _DeviceCard({
     required this.target,

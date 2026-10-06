@@ -326,8 +326,7 @@ class _CoreFeedBatch {
   final List<Log> logs = [];
   int? _callbackId;
 
-  bool get _isEmpty =>
-      requests.isEmpty && dnsQueries.isEmpty && logs.isEmpty;
+  bool get _isEmpty => requests.isEmpty && dnsQueries.isEmpty && logs.isEmpty;
 
   void addRequest(TrackerInfo value) {
     requests.add(value);

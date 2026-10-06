@@ -115,10 +115,7 @@ Future<ProviderContainer> _pumpDoctor(
   when(() => core.doctorSnapshot()).thenAnswer((_) async => snapshot);
 
   final container = ProviderContainer(
-    overrides: [
-      coreHandlerProvider.overrideWithValue(core),
-      ...overrides,
-    ],
+    overrides: [coreHandlerProvider.overrideWithValue(core), ...overrides],
   );
   addTearDown(container.dispose);
   globalState.container = container;
@@ -167,7 +164,11 @@ void main() {
 
       await tester.tap(find.text('Technical details'));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.textContaining('75 ms').first, 200, scrollable: _doctorScroll('technical'));
+      await tester.scrollUntilVisible(
+        find.textContaining('75 ms').first,
+        200,
+        scrollable: _doctorScroll('technical'),
+      );
 
       expect(find.textContaining('75 ms'), findsWidgets);
       expect(find.textContaining('0 ms'), findsNothing);
@@ -209,7 +210,11 @@ void main() {
 
     expect(find.text('No usable evidence yet'), findsOneWidget);
     final noIncidents = find.text('No completed checks yet');
-    await tester.scrollUntilVisible(noIncidents, 200, scrollable: _doctorScroll('technical'));
+    await tester.scrollUntilVisible(
+      noIncidents,
+      200,
+      scrollable: _doctorScroll('technical'),
+    );
     expect(noIncidents, findsOneWidget);
     expect(find.text('Insufficient'), findsOneWidget);
     expect(find.text('Current'), findsOneWidget);
@@ -740,7 +745,11 @@ void main() {
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
     final outdated = find.text('Outdated');
-    await tester.scrollUntilVisible(outdated, 200, scrollable: _doctorScroll('technical'));
+    await tester.scrollUntilVisible(
+      outdated,
+      200,
+      scrollable: _doctorScroll('technical'),
+    );
     expect(outdated, findsOneWidget);
   });
 
@@ -818,7 +827,11 @@ void main() {
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
     final exportReport = find.text('Export report');
-    await tester.scrollUntilVisible(exportReport, 200, scrollable: _doctorScroll('technical'));
+    await tester.scrollUntilVisible(
+      exportReport,
+      200,
+      scrollable: _doctorScroll('technical'),
+    );
     await tester.tap(exportReport);
     await tester.pumpAndSettle();
 
@@ -871,7 +884,11 @@ void main() {
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
     final attempts = find.text('Repair attempts');
-    await tester.scrollUntilVisible(attempts, 200, scrollable: _doctorScroll('technical'));
+    await tester.scrollUntilVisible(
+      attempts,
+      200,
+      scrollable: _doctorScroll('technical'),
+    );
     expect(attempts, findsOneWidget);
     // The flush label also names the run panel's flush lever, so the audit row
     // shares it; its unique "ok" outcome proves the attempt was recorded.
@@ -888,7 +905,11 @@ void main() {
     await tester.tap(find.text('Technical details'));
     await tester.pumpAndSettle();
     final empty = find.text('No repair attempts yet');
-    await tester.scrollUntilVisible(empty, 200, scrollable: _doctorScroll('technical'));
+    await tester.scrollUntilVisible(
+      empty,
+      200,
+      scrollable: _doctorScroll('technical'),
+    );
     expect(empty, findsOneWidget);
   });
 
@@ -1041,11 +1062,11 @@ void main() {
       size: const Size(400, 800),
     );
 
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
+    final navigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
     navigator.push(
-      MaterialPageRoute<void>(
-        builder: (_) => const Text('unrelated-route'),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const Text('unrelated-route')),
     );
     await tester.pumpAndSettle();
     navigator.push(
@@ -1543,7 +1564,11 @@ void main() {
     // top of the screen even at extreme text size; scrollUntilVisible is a
     // safety net that must not surface an overflow while reaching it.
     final headline = find.text('Watching real traffic');
-    await tester.scrollUntilVisible(headline, 200, scrollable: _doctorScroll('overview'));
+    await tester.scrollUntilVisible(
+      headline,
+      200,
+      scrollable: _doctorScroll('overview'),
+    );
     expect(headline, findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -37,9 +37,7 @@ void main() {
 
   ProviderContainer buildContainer() {
     final container = ProviderContainer(
-      overrides: [
-        coreHandlerProvider.overrideWithValue(core),
-      ],
+      overrides: [coreHandlerProvider.overrideWithValue(core)],
     );
     addTearDown(container.dispose);
     return container;

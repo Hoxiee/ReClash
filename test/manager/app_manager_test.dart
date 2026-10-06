@@ -97,9 +97,7 @@ void main() {
       overrides: [
         setupActionProvider.overrideWith(_RecordingSetupAction.new),
         connectionDoctorProvider.overrideWith(_RecordingDoctor.new),
-        coreHandlerProvider.overrideWithValue(
-          coreInterface,
-        ),
+        coreHandlerProvider.overrideWithValue(coreInterface),
       ],
     );
     addTearDown(container.dispose);
