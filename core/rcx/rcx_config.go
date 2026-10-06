@@ -146,6 +146,7 @@ type rcxConfig struct {
 	ProfileYAML      string                        `json:"profile,omitempty"`
 	admitRules       []rcxAdmitRule                `json:"-"`
 	strategyProfiles map[string]rcxStrategyProfile `json:"-"`
+	probePacing      rcxProbeSection               `json:"-"`
 }
 
 type rcxRuleAction string
@@ -233,6 +234,9 @@ const (
 	rcxProbeStaggerMs     = 250
 	rcxLiveWindowSeconds  = 60
 	rcxFreshWindowSeconds = 1800
+
+	rcxProbeConcurrencyMax = 16
+	rcxProbeStaggerMsMax   = 5000
 )
 
 // rcxStrategyProfile is the shipped flavor of one ranking strategy as data: the
@@ -430,21 +434,29 @@ func (c rcxConfig) normalized() rcxConfig {
 		c.Ladder = nil
 	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes)
-	c.admitRules, c.strategyProfiles = c.profileSections()
+	c.admitRules, c.strategyProfiles, c.probePacing = c.profileSections()
 	return c
 }
 
-// profileSections parses the carried profile into the sections it overrides;
-// empty, unparsable, or an unknown schema leaves both nil to keep shipped defaults.
-func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile) {
+// profileSections parses the carried profile; a missing one keeps shipped defaults.
+func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile, rcxProbeSection) {
 	if strings.TrimSpace(c.ProfileYAML) == "" {
-		return nil, nil
+		return nil, nil, rcxDefaultProbeSection()
 	}
 	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
 	if err != nil || parsed.Schema != rcxProfileSchema {
-		return nil, nil
+		return nil, nil, rcxDefaultProbeSection()
 	}
-	return parsed.Admission, parsed.Strategies
+	return parsed.Admission, parsed.Strategies, parsed.Probe.bounded()
+}
+
+// probe is the steady probe cadence; a zero value (resolution skipped) is the
+// default, while a profile's explicit zero stagger survives via non-zero concurrency.
+func (c rcxConfig) probe() rcxProbeSection {
+	if c.probePacing == (rcxProbeSection{}) {
+		return rcxDefaultProbeSection()
+	}
+	return c.probePacing
 }
 
 // rcxNormalizeLadder clamps a valid ladder's per-rung thresholds so a negative

@@ -108,3 +108,6 @@ admission:
         - openedOnce is false
       tier: domesticPrior
     - tier: foreignPrior
+probe:
+    concurrency: 2
+    staggerMs: 250

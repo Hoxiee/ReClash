@@ -25,6 +25,31 @@ type rcxDecisionProfile struct {
 	Ladder     []rcxRungSpec                 `yaml:"ladder"`
 	Strategies map[string]rcxStrategyProfile `yaml:"strategies"`
 	Admission  []rcxAdmitRule                `yaml:"admission"`
+	Probe      rcxProbeSection               `yaml:"probe"`
+}
+
+// rcxProbeSection is the steady probe cadence as data: how many hosts a routine
+// wave dials at once and how far apart it staggers them. Handoff, rescue, and deep
+// waves keep their own safety-tuned parallelism; the probe budget and reserve stay
+// hardcoded. Out-of-range fields fall back to the shipped cadence via bounded().
+type rcxProbeSection struct {
+	Concurrency int `yaml:"concurrency"`
+	StaggerMs   int `yaml:"staggerMs"`
+}
+
+func rcxDefaultProbeSection() rcxProbeSection {
+	return rcxProbeSection{Concurrency: rcxProbeConcurrency, StaggerMs: rcxProbeStaggerMs}
+}
+
+func (s rcxProbeSection) bounded() rcxProbeSection {
+	def := rcxDefaultProbeSection()
+	if s.Concurrency < 1 || s.Concurrency > rcxProbeConcurrencyMax {
+		s.Concurrency = def.Concurrency
+	}
+	if s.StaggerMs < 0 || s.StaggerMs > rcxProbeStaggerMsMax {
+		s.StaggerMs = def.StaggerMs
+	}
+	return s
 }
 
 func rcxDefaultDecisionProfile() rcxDecisionProfile {
@@ -33,6 +58,7 @@ func rcxDefaultDecisionProfile() rcxDecisionProfile {
 		Ladder:     rcxDefaultLadder(),
 		Strategies: rcxStrategyProfiles,
 		Admission:  rcxDefaultAdmitRules(),
+		Probe:      rcxDefaultProbeSection(),
 	}
 }
 

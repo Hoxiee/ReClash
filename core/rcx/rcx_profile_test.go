@@ -66,6 +66,9 @@ func TestDefaultProfileIsLiveDefaults(t *testing.T) {
 	if !reflect.DeepEqual(p.Admission, rcxDefaultAdmitRules()) {
 		t.Fatal("profile admission is not rcxDefaultAdmitRules()")
 	}
+	if p.Probe != rcxDefaultProbeSection() {
+		t.Fatal("profile probe is not rcxDefaultProbeSection()")
+	}
 }
 
 func TestDecisionProfileRejectsUnknownTokens(t *testing.T) {

@@ -441,6 +441,9 @@ func (e *rcxEngine) startProbeWave(wave []rcxProbeNode, kind rcxWaveKind, lane s
 	gen := e.probeGen
 	configGen := e.configGen
 	prober := newRcxProber(e.runtime.Test, e.runtime.Locate)
+	pacing := e.cfg.probe()
+	prober.concurrency = pacing.Concurrency
+	prober.staggerMs = pacing.StaggerMs
 	window := rcxProbeWave
 	if kind == rcxWaveHandoff {
 		window = rcxHandoffWave

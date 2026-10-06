@@ -142,3 +142,35 @@ func TestProfileCannotRemoveSafetyFloor(t *testing.T) {
 		t.Fatalf("branded node admitted %v under promote-all, want reject", got)
 	}
 }
+
+func TestDefaultProbeCadenceIsShipped(t *testing.T) {
+	if got := rcxDefaultConfig().probe(); got != rcxDefaultProbeSection() {
+		t.Fatalf("default config probe = %+v, want shipped %+v", got, rcxDefaultProbeSection())
+	}
+}
+
+func TestProfileOverridesProbe(t *testing.T) {
+	yaml := "schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 100\n"
+	got := profileConfig(t, yaml).probe()
+	if got != (rcxProbeSection{Concurrency: 5, StaggerMs: 100}) {
+		t.Fatalf("probe override = %+v, want {5 100}", got)
+	}
+}
+
+func TestProbeSectionOutOfRangeFallsBack(t *testing.T) {
+	def := rcxDefaultProbeSection()
+	cases := []struct {
+		yaml string
+		want rcxProbeSection
+	}{
+		{"schema: 1\nprobe:\n  concurrency: 0\n  staggerMs: 100\n", rcxProbeSection{def.Concurrency, 100}},
+		{"schema: 1\nprobe:\n  concurrency: 999\n  staggerMs: 100\n", rcxProbeSection{def.Concurrency, 100}},
+		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: -1\n", rcxProbeSection{5, def.StaggerMs}},
+		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 999999\n", rcxProbeSection{5, def.StaggerMs}},
+	}
+	for _, tc := range cases {
+		if got := profileConfig(t, tc.yaml).probe(); got != tc.want {
+			t.Fatalf("%q: got %+v want %+v", tc.yaml, got, tc.want)
+		}
+	}
+}
