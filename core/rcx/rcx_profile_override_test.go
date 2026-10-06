@@ -401,3 +401,38 @@ func TestMeteredProbeVariantSwapsInAndResizesBudget(t *testing.T) {
 		t.Fatalf("metered budget = %d, want 60", got)
 	}
 }
+
+func TestTerrainDefaultsOnAndSectionDisables(t *testing.T) {
+	if profileConfig(t, "schema: 1\nadmission:\n  - verdict: reject\n").terrainDisabled {
+		t.Fatal("a profile without a terrain section must keep terrain on")
+	}
+	off := profileConfig(t, "schema: 1\nterrain:\n  enabled: false\n")
+	if !off.terrainDisabled {
+		t.Fatal("terrain: {enabled: false} must disable terrain")
+	}
+	if !containsString(off.profileState.Overrides, "terrain") {
+		t.Fatalf("overrides %v should list terrain", off.profileState.Overrides)
+	}
+	on := profileConfig(t, "schema: 1\nterrain:\n  enabled: true\n")
+	if on.terrainDisabled {
+		t.Fatal("terrain: {enabled: true} must keep terrain on")
+	}
+}
+
+func TestDisabledTerrainPinsNormalAndSkipsReach(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "")
+	config := testConfig("")
+	config.ProfileYAML = "schema: 1\nterrain:\n  enabled: false\n"
+	config.CanaryForeign = []string{"1.1.1.1:443"}
+	engine.applyConfigLocked(config)
+	engine.terrain.observe(rcxTerrainWhitelist, runtime.Now())
+
+	if got := engine.terrainCurrent(); got != rcxTerrainNormal {
+		t.Fatalf("disabled terrain = %v, want normal", got)
+	}
+	engine.startReach()
+	if engine.reaching || !engine.lastReachAt.IsZero() {
+		t.Fatal("disabled terrain must not start a reach round")
+	}
+}

@@ -585,7 +585,7 @@ func (e *rcxEngine) probeTargets(
 
 func (e *rcxEngine) startReach() {
 	if !e.Enabled() || e.reaching || e.screenOff || e.suspended ||
-		len(e.cfg.CanaryForeign) == 0 {
+		e.cfg.terrainDisabled || len(e.cfg.CanaryForeign) == 0 {
 		return
 	}
 	e.lastReachAt = e.runtime.Now()

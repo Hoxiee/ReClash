@@ -113,3 +113,5 @@ probe:
     staggerMs: 250
     budgetPerHour: 240
     reserve: 40
+terrain:
+    enabled: true

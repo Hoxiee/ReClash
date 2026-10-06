@@ -148,6 +148,7 @@ type rcxConfig struct {
 	strategyProfiles map[string]rcxStrategyProfile `json:"-"`
 	probePacing      rcxProbeSection               `json:"-"`
 	profileState     rcxProfileState               `json:"-"`
+	terrainDisabled  bool                          `json:"-"`
 }
 
 type rcxRuleAction string
@@ -458,6 +459,7 @@ func (c rcxConfig) normalized() rcxConfig {
 	}
 	resolved := c.resolveProfile()
 	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = resolved.admit, resolved.strategies, resolved.probe, resolved.state
+	c.terrainDisabled = resolved.terrainDisabled
 	if !c.strategyKnown(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
 	}
@@ -502,11 +504,12 @@ type rcxProfileState struct {
 // rcxResolvedProfile is the carried profile reduced to the sections the engine
 // overrides, each already fenced so a hand-edited document cannot corrupt ranking.
 type rcxResolvedProfile struct {
-	admit      []rcxAdmitRule
-	strategies map[string]rcxStrategyProfile
-	probe      rcxProbeSection
-	ladder     []rcxRungSpec
-	state      rcxProfileState
+	admit           []rcxAdmitRule
+	strategies      map[string]rcxStrategyProfile
+	probe           rcxProbeSection
+	ladder          []rcxRungSpec
+	state           rcxProfileState
+	terrainDisabled bool
 }
 
 // resolveProfile parses the carried profile once: a missing one keeps shipped
@@ -529,11 +532,12 @@ func (c rcxConfig) resolveProfile() rcxResolvedProfile {
 	state.Valid = true
 	state.Overrides = rcxProfileOverrides(parsed)
 	return rcxResolvedProfile{
-		admit:      parsed.Admission,
-		strategies: rcxBoundedStrategies(parsed.Strategies),
-		probe:      parsed.Probe.bounded(),
-		ladder:     parsed.Ladder,
-		state:      state,
+		admit:           parsed.Admission,
+		strategies:      rcxBoundedStrategies(parsed.Strategies),
+		probe:           parsed.Probe.bounded(),
+		ladder:          parsed.Ladder,
+		state:           state,
+		terrainDisabled: parsed.Terrain != nil && !parsed.Terrain.Enabled,
 	}
 }
 
@@ -555,6 +559,9 @@ func rcxProfileOverrides(p rcxDecisionProfile) []string {
 	}
 	if p.Probe != (rcxProbeSection{}) && p.Probe.bounded() != rcxDefaultProbeSection() {
 		out = append(out, "probe")
+	}
+	if p.Terrain != nil && !p.Terrain.Enabled {
+		out = append(out, "terrain")
 	}
 	if len(out) == 0 {
 		return nil

@@ -435,6 +435,10 @@ func (e *rcxEngine) trackReachStability(terrain rcxTerrain, measured bool) {
 
 // A stale terrain says nothing: unknown keeps the last-resort rows honest.
 func (e *rcxEngine) terrainCurrent() rcxTerrain {
+	// Terrain handling off: the open-world baseline, never whitelist or portal.
+	if e.cfg.terrainDisabled {
+		return rcxTerrainNormal
+	}
 	if e.lastReachAt.IsZero() {
 		return e.terrain.terrain
 	}

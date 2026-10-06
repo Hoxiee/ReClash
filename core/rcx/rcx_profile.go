@@ -26,6 +26,15 @@ type rcxDecisionProfile struct {
 	Strategies map[string]rcxStrategyProfile `yaml:"strategies"`
 	Admission  []rcxAdmitRule                `yaml:"admission"`
 	Probe      rcxProbeSection               `yaml:"probe"`
+	Terrain    *rcxTerrainSection            `yaml:"terrain,omitempty"`
+}
+
+// rcxTerrainSection makes terrain handling an explicit, optional block. Censorship
+// terrain detection matters in some regions and is a rudiment in fully open ones, so
+// a profile can switch it off outright rather than leaving it implied by whether any
+// canary happens to be configured. Absent section keeps it on (the shipped default).
+type rcxTerrainSection struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 // rcxProbeSection is the steady probe spend as data: wave parallelism, stagger, and
@@ -86,6 +95,7 @@ func rcxDefaultDecisionProfile() rcxDecisionProfile {
 		Strategies: rcxStrategyProfiles,
 		Admission:  rcxDefaultAdmitRules(),
 		Probe:      rcxDefaultProbeSection(),
+		Terrain:    &rcxTerrainSection{Enabled: true},
 	}
 }
 
@@ -108,6 +118,7 @@ func (c rcxConfig) effectiveProfile() rcxDecisionProfile {
 		Strategies: c.resolvedStrategies(),
 		Admission:  admission,
 		Probe:      c.probe(),
+		Terrain:    &rcxTerrainSection{Enabled: !c.terrainDisabled},
 	}
 }
 
