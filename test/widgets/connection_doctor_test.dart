@@ -1025,6 +1025,42 @@ void main() {
     expect(find.byType(ConnectionDoctorView), findsOneWidget);
   });
 
+  testWidgets('crossing to desktop drops only the extend sheet', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    final container = await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(400, 800),
+    );
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
+    navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => const Text('unrelated-route'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    navigator.push(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: extendSheetRouteName),
+        builder: (_) => const Text('extend-sheet'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('extend-sheet'), findsOneWidget);
+
+    // The breakpoint must dismiss the stray extend sheet without tearing off
+    // the unrelated route sitting below it.
+    await _resize(tester, container, const Size(1200, 900));
+
+    expect(find.text('extend-sheet'), findsNothing);
+    expect(find.text('unrelated-route'), findsOneWidget);
+  });
+
   testWidgets('Tools keeps the drilled tool when the panel collapses', (
     tester,
   ) async {

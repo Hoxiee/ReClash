@@ -50,6 +50,10 @@ class ExtendProps {
 
 enum SheetType { page, bottomSheet, sideSheet }
 
+/// Route name tagged onto [showExtend]'s full-page branch so a breakpoint
+/// crossing can dismiss a stray extend sheet without popping unrelated routes.
+const extendSheetRouteName = 'reclash.extendSheet';
+
 Future<T?> showSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -100,6 +104,7 @@ Future<T?> showExtend<T>(
     true => BaseNavigator.push(
       context,
       SheetProvider(type: SheetType.page, child: builder(context)),
+      settings: const RouteSettings(name: extendSheetRouteName),
     ),
     false => showModalSideSheet<T>(
       useSafeArea: props.useSafeArea,

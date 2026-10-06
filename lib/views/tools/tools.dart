@@ -98,8 +98,10 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     super.initState();
     _searchFocus.addListener(_onSearchFocusChanged);
     _loadRecents();
-    // On the way to desktop, close a stray legacy side sheet left over the
-    // two-pane layout; the path itself is kept-alive data and re-renders.
+    // On the way to desktop, close a stray legacy extend sheet left over the
+    // two-pane layout; the path itself is kept-alive data and re-renders. Only
+    // tagged extend sheets are popped, so an unrelated pushed route survives the
+    // breakpoint instead of being torn off with it.
     ref.listenManual(viewModeProvider, (prev, next) {
       if (prev == next) {
         return;
@@ -109,7 +111,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           return;
         }
         if (next != ViewMode.mobile) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).popUntil(
+            (route) => route.settings.name != extendSheetRouteName,
+          );
         }
         _detailActions.value = null;
       });
