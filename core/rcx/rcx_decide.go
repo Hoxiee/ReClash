@@ -202,13 +202,24 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 }
 
 func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
-	return rcxAdmitWith(terrain, f, rcxAdmitRulesDefault)
+	return rcxNameHomeCap(f, rcxAdmitByRules(terrain, f, rcxAdmitRulesDefault))
 }
 
-// rcxAdmitWith admits against the rules in force. The NameHome last-resort cap
-// holds across any rule set: a filter-named home node competes last however fast.
+// rcxAdmitWith clamps a profile's rules so an override may only tighten: the
+// verdict never exceeds the shipped one, which also keeps the safety floor.
 func rcxAdmitWith(terrain rcxTerrain, f rcxFacts, rules []rcxAdmitRule) rcxVerdict {
-	verdict := rcxAdmitByRules(terrain, f, rules)
+	def := rcxAdmit(terrain, f)
+	if len(rules) == 0 {
+		return def
+	}
+	if v := rcxNameHomeCap(f, rcxAdmitByRules(terrain, f, rules)); v < def {
+		return v
+	}
+	return def
+}
+
+// A filter-named home node competes last however fast it pings.
+func rcxNameHomeCap(f rcxFacts, verdict rcxVerdict) rcxVerdict {
 	if f.NameHome && verdict > rcxVerdictLastResort {
 		return rcxVerdictLastResort
 	}
@@ -377,13 +388,6 @@ func (p rcxPolicy) ladderOrDefault() []rcxRungSpec {
 	return p.Ladder
 }
 
-func (p rcxPolicy) admissionRules() []rcxAdmitRule {
-	if len(p.Admission) == 0 {
-		return rcxAdmitRulesDefault
-	}
-	return p.Admission
-}
-
 func (p rcxPolicy) strategyProfile() rcxStrategyProfile {
 	profiles := p.Strategies
 	if len(profiles) == 0 {
@@ -459,7 +463,7 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return false
 	}
-	verdict := rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules())
+	verdict := rcxCandidateVerdict(c, in.Terrain, in.Policy.Admission)
 	if verdict == rcxVerdictReject {
 		return false
 	}
@@ -498,7 +502,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		order -= rcxPreferOrderBoost
 	}
 	return rcxKey{
-		verdict:    rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules()),
+		verdict:    rcxCandidateVerdict(c, in.Terrain, in.Policy.Admission),
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
 		recurrence: c.Recurrence,
 		degraded:   c.Degraded,
@@ -924,7 +928,7 @@ func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return rcxBlockProviderCircuit
 	}
-	switch rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules()) {
+	switch rcxCandidateVerdict(c, in.Terrain, in.Policy.Admission) {
 	case rcxVerdictReject:
 		if _, ok := rcxAdmissionTable[in.Terrain]; !ok {
 			return rcxBlockTerrainUnfit

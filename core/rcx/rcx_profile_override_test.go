@@ -11,16 +11,15 @@ func profileConfig(t *testing.T, yaml string) rcxConfig {
 	return c.normalized()
 }
 
-// A would-be-Preferred node under the shipped rules; a tightening profile may
-// only reject it harder, never loosen a safety floor.
+// A would-be-Preferred node under the shipped rules.
 func preferredFacts() rcxFacts {
 	return rcxFacts{OpenWorld: rcxProofProven, Exit: rcxOriginForeign, Trust: rcxTrusted}
 }
 
 func TestEmptyProfileKeepsShippedDefaults(t *testing.T) {
 	p := rcxDefaultConfig().policy()
-	if !reflect.DeepEqual(p.admissionRules(), rcxAdmitRulesDefault) {
-		t.Fatal("empty profile did not keep the shipped admission rules")
+	if p.Admission != nil {
+		t.Fatal("empty profile should carry no admission override")
 	}
 	abs, pct := p.switchThresholds()
 	if abs != 30 || pct != 20 {
@@ -39,7 +38,7 @@ func TestDefaultProfileCarriedIsNoOp(t *testing.T) {
 		t.Fatalf("marshal default profile: %v", err)
 	}
 	p := profileConfig(t, string(data)).policy()
-	if !reflect.DeepEqual(p.admissionRules(), rcxDefaultAdmitRules()) {
+	if !reflect.DeepEqual(p.Admission, rcxDefaultAdmitRules()) {
 		t.Fatal("default profile changed admission rules")
 	}
 	abs, pct := p.switchThresholds()
@@ -48,15 +47,14 @@ func TestDefaultProfileCarriedIsNoOp(t *testing.T) {
 	}
 }
 
-func TestProfileOverridesAdmission(t *testing.T) {
+func TestProfileTightensAdmission(t *testing.T) {
 	facts := preferredFacts()
-	base := rcxDefaultConfig().policy()
-	if got := rcxAdmitWith(rcxTerrainNormal, facts, base.admissionRules()); got != rcxVerdictPreferred {
+	if got := rcxAdmitWith(rcxTerrainNormal, facts, nil); got != rcxVerdictPreferred {
 		t.Fatalf("default admits %v, want preferred", got)
 	}
 	rejectAll := "schema: 1\nadmission:\n  - verdict: reject\n"
-	p := profileConfig(t, rejectAll).policy()
-	if got := rcxAdmitWith(rcxTerrainNormal, facts, p.admissionRules()); got != rcxVerdictReject {
+	rules := profileConfig(t, rejectAll).policy().Admission
+	if got := rcxAdmitWith(rcxTerrainNormal, facts, rules); got != rcxVerdictReject {
 		t.Fatalf("reject-all profile admits %v, want reject", got)
 	}
 }
@@ -79,11 +77,68 @@ func TestUnknownSchemaAndGarbageFallBack(t *testing.T) {
 		"schema: 1\nadmission:\n  - when: [transit is nope]\n    verdict: reject\n",
 	} {
 		p := profileConfig(t, yaml).policy()
-		if !reflect.DeepEqual(p.admissionRules(), rcxAdmitRulesDefault) {
-			t.Fatalf("profile %q should fall back to shipped admission", yaml)
+		if p.Admission != nil {
+			t.Fatalf("profile %q should carry no admission override", yaml)
 		}
 		if abs, pct := p.switchThresholds(); abs != 30 || pct != 20 {
 			t.Fatalf("profile %q should keep shipped switch, got %d/%d", yaml, abs, pct)
 		}
+	}
+}
+
+// The B-layer monotonic clamp: a profile that tries to admit everything as
+// Preferred can loosen nothing — every verdict stays pinned to the shipped ceiling
+// over the whole fact space, which is also how the A-layer safety floor survives.
+func TestLooseningProfileIsClampedToDefault(t *testing.T) {
+	promoteAll := "schema: 1\nadmission:\n  - verdict: preferred\n"
+	rules := profileConfig(t, promoteAll).policy().Admission
+	if len(rules) == 0 {
+		t.Fatal("promote-all profile parsed to no rules")
+	}
+	proofs := []rcxProof{rcxProofUnknown, rcxProofProven, rcxProofDisproven}
+	origins := []rcxOrigin{rcxOriginUnknown, rcxOriginForeign, rcxOriginDomestic}
+	trusts := []rcxTrust{rcxTrustUnknown, rcxTrustSuspect, rcxTrusted, rcxTrustBranded}
+	bools := []bool{false, true}
+	terrains := []rcxTerrain{rcxTerrainUnknown, rcxTerrainNormal, rcxTerrainWhitelist, rcxTerrainPortal, rcxTerrainOffline}
+	for _, terrain := range terrains {
+		for _, origin := range origins {
+			for _, exit := range origins {
+				for _, openWorld := range proofs {
+					for _, domestic := range proofs {
+						for _, transit := range proofs {
+							for _, trust := range trusts {
+								for _, breaker := range bools {
+									for _, openedOnce := range bools {
+										for _, openLapsed := range bools {
+											for _, nameHome := range bools {
+												f := rcxFacts{
+													Origin: origin, Exit: exit, OpenedOnce: openedOnce,
+													OpenWorld: openWorld, OpenLapsed: openLapsed, Domestic: domestic,
+													Transit: transit, Breaker: breaker, Trust: trust, NameHome: nameHome,
+												}
+												if got, want := rcxAdmitWith(terrain, f, rules), rcxAdmit(terrain, f); got != want {
+													t.Fatalf("clamp %v %+v: got %v want %v", terrain, f, got, want)
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// A profile may omit a safety-floor reject, but the clamp reinstates it: a branded
+// node a promote-all profile would admit is still rejected.
+func TestProfileCannotRemoveSafetyFloor(t *testing.T) {
+	promoteAll := "schema: 1\nadmission:\n  - verdict: preferred\n"
+	rules := profileConfig(t, promoteAll).policy().Admission
+	branded := rcxFacts{Trust: rcxTrustBranded, OpenWorld: rcxProofProven, Exit: rcxOriginForeign}
+	if got := rcxAdmitWith(rcxTerrainWhitelist, branded, rules); got != rcxVerdictReject {
+		t.Fatalf("branded node admitted %v under promote-all, want reject", got)
 	}
 }

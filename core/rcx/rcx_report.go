@@ -228,7 +228,7 @@ func (e *rcxEngine) candidateReports(
 		trust, conf := e.ledger.Trust(e.key(candidate.Name))
 		// The verdict the rank actually used: user rules can cap it down to
 		// last-resort, and the duel must explain that verdict, not the raw one.
-		verdict := rcxCandidateVerdict(candidate, input.Terrain, input.Policy.admissionRules())
+		verdict := rcxCandidateVerdict(candidate, input.Terrain, input.Policy.Admission)
 		// The latency the rank actually used, so the duel never inverts the
 		// order again. Anything at or above the unmeasured penalty base is not
 		// a latency at all: it maps to -1 (unknown) on the wire, never to a raw
