@@ -151,9 +151,11 @@ func TestDefaultProbeCadenceIsShipped(t *testing.T) {
 
 func TestProfileOverridesProbe(t *testing.T) {
 	yaml := "schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 100\n"
+	def := rcxDefaultProbeSection()
 	got := profileConfig(t, yaml).probe()
-	if got != (rcxProbeSection{Concurrency: 5, StaggerMs: 100}) {
-		t.Fatalf("probe override = %+v, want {5 100}", got)
+	want := rcxProbeSection{Concurrency: 5, StaggerMs: 100, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}
+	if got != want {
+		t.Fatalf("probe override = %+v, want %+v", got, want)
 	}
 }
 
@@ -163,10 +165,10 @@ func TestProbeSectionOutOfRangeFallsBack(t *testing.T) {
 		yaml string
 		want rcxProbeSection
 	}{
-		{"schema: 1\nprobe:\n  concurrency: 0\n  staggerMs: 100\n", rcxProbeSection{def.Concurrency, 100}},
-		{"schema: 1\nprobe:\n  concurrency: 999\n  staggerMs: 100\n", rcxProbeSection{def.Concurrency, 100}},
-		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: -1\n", rcxProbeSection{5, def.StaggerMs}},
-		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 999999\n", rcxProbeSection{5, def.StaggerMs}},
+		{"schema: 1\nprobe:\n  concurrency: 0\n  staggerMs: 100\n", rcxProbeSection{Concurrency: def.Concurrency, StaggerMs: 100, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}},
+		{"schema: 1\nprobe:\n  concurrency: 999\n  staggerMs: 100\n", rcxProbeSection{Concurrency: def.Concurrency, StaggerMs: 100, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}},
+		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: -1\n", rcxProbeSection{Concurrency: 5, StaggerMs: def.StaggerMs, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}},
+		{"schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 999999\n", rcxProbeSection{Concurrency: 5, StaggerMs: def.StaggerMs, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}},
 	}
 	for _, tc := range cases {
 		if got := profileConfig(t, tc.yaml).probe(); got != tc.want {
@@ -184,9 +186,11 @@ func TestEffectiveProfileOfDefaultIsShipped(t *testing.T) {
 
 func TestEffectiveProfileReflectsOverride(t *testing.T) {
 	yaml := "schema: 1\nprobe:\n  concurrency: 5\n  staggerMs: 100\nadmission:\n  - verdict: reject\n"
+	def := rcxDefaultProbeSection()
 	eff := profileConfig(t, yaml).effectiveProfile()
-	if eff.Probe != (rcxProbeSection{Concurrency: 5, StaggerMs: 100}) {
-		t.Fatalf("effective probe = %+v, want {5 100}", eff.Probe)
+	wantProbe := rcxProbeSection{Concurrency: 5, StaggerMs: 100, BudgetPerHour: def.BudgetPerHour, Reserve: def.Reserve}
+	if eff.Probe != wantProbe {
+		t.Fatalf("effective probe = %+v, want %+v", eff.Probe, wantProbe)
 	}
 	if len(eff.Admission) != 1 {
 		t.Fatalf("effective admission = %d rules, want 1 override rule", len(eff.Admission))
@@ -334,5 +338,66 @@ func TestProfileOverridesAreListed(t *testing.T) {
 	st := profileConfig(t, yaml).profileState
 	if !reflect.DeepEqual(st.Overrides, []string{"ladder", "admission", "probe"}) {
 		t.Fatalf("overrides = %v, want [ladder admission probe]", st.Overrides)
+	}
+}
+
+func TestProbeBudgetAndReserveFloored(t *testing.T) {
+	def := rcxDefaultProbeSection()
+	cases := []struct {
+		name string
+		yaml string
+		want rcxProbeSection
+	}{
+		{
+			"budget below floor falls back",
+			"schema: 1\nprobe:\n  concurrency: 2\n  staggerMs: 250\n  budgetPerHour: 10\n  reserve: 40\n",
+			rcxProbeSection{Concurrency: 2, StaggerMs: 250, BudgetPerHour: def.BudgetPerHour, Reserve: 40},
+		},
+		{
+			"budget above ceil falls back",
+			"schema: 1\nprobe:\n  concurrency: 2\n  staggerMs: 250\n  budgetPerHour: 99999\n  reserve: 40\n",
+			rcxProbeSection{Concurrency: 2, StaggerMs: 250, BudgetPerHour: def.BudgetPerHour, Reserve: 40},
+		},
+		{
+			"reserve below floor is clamped up",
+			"schema: 1\nprobe:\n  concurrency: 2\n  staggerMs: 250\n  budgetPerHour: 240\n  reserve: 1\n",
+			rcxProbeSection{Concurrency: 2, StaggerMs: 250, BudgetPerHour: 240, Reserve: rcxProbeReserveFloor},
+		},
+		{
+			"reserve cannot exceed half the budget",
+			"schema: 1\nprobe:\n  concurrency: 2\n  staggerMs: 250\n  budgetPerHour: 100\n  reserve: 90\n",
+			rcxProbeSection{Concurrency: 2, StaggerMs: 250, BudgetPerHour: 100, Reserve: 50},
+		},
+	}
+	for _, tc := range cases {
+		if got := profileConfig(t, tc.yaml).probe(); got != tc.want {
+			t.Fatalf("%s: got %+v want %+v", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestMeteredProbeVariantSwapsInAndResizesBudget(t *testing.T) {
+	yaml := "schema: 1\nprobe:\n  concurrency: 4\n  staggerMs: 250\n  budgetPerHour: 240\n  reserve: 40\n" +
+		"  metered:\n    concurrency: 1\n    staggerMs: 1000\n    budgetPerHour: 60\n    reserve: 40\n"
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "")
+	config := testConfig("")
+	config.ProfileYAML = yaml
+	engine.applyConfigLocked(config)
+
+	if got := engine.budget.Remaining(runtime.Now()); got != 240 {
+		t.Fatalf("unmetered budget = %d, want 240", got)
+	}
+	if eff := engine.effectiveProbe(); eff.Concurrency != 4 {
+		t.Fatalf("unmetered concurrency = %d, want 4", eff.Concurrency)
+	}
+
+	engine.applyNetwork(rcxNetworkPayload{Transport: "cellular", Carrier: "TestCarrier", Metered: true, Validated: true})
+	eff := engine.effectiveProbe()
+	if eff.Concurrency != 1 || eff.BudgetPerHour != 60 || eff.Reserve != 30 {
+		t.Fatalf("metered probe = %+v, want {1 1000 60 30}", eff)
+	}
+	if got := engine.budget.Remaining(runtime.Now()); got != 60 {
+		t.Fatalf("metered budget = %d, want 60", got)
 	}
 }

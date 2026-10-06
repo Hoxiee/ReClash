@@ -28,17 +28,25 @@ type rcxDecisionProfile struct {
 	Probe      rcxProbeSection               `yaml:"probe"`
 }
 
-// rcxProbeSection is the steady probe cadence as data: how many hosts a routine
-// wave dials at once and how far apart it staggers them. Handoff, rescue, and deep
-// waves keep their own safety-tuned parallelism; the probe budget and reserve stay
-// hardcoded. Out-of-range fields fall back to the shipped cadence via bounded().
+// rcxProbeSection is the steady probe spend as data: wave parallelism, stagger, and
+// the share of the hourly budget a wave may burn. Metered is an optional tighter
+// variant swapped in on a data-capped link; budget and reserve are floored by
+// absolute constants so a profile lowers spend but never strips the recovery reserve.
 type rcxProbeSection struct {
-	Concurrency int `yaml:"concurrency"`
-	StaggerMs   int `yaml:"staggerMs"`
+	Concurrency   int              `yaml:"concurrency"`
+	StaggerMs     int              `yaml:"staggerMs"`
+	BudgetPerHour int              `yaml:"budgetPerHour"`
+	Reserve       int              `yaml:"reserve"`
+	Metered       *rcxProbeSection `yaml:"metered,omitempty"`
 }
 
 func rcxDefaultProbeSection() rcxProbeSection {
-	return rcxProbeSection{Concurrency: rcxProbeConcurrency, StaggerMs: rcxProbeStaggerMs}
+	return rcxProbeSection{
+		Concurrency:   rcxProbeConcurrency,
+		StaggerMs:     rcxProbeStaggerMs,
+		BudgetPerHour: rcxProbeBudgetCap,
+		Reserve:       rcxProbeReserve,
+	}
 }
 
 func (s rcxProbeSection) bounded() rcxProbeSection {
@@ -48,6 +56,25 @@ func (s rcxProbeSection) bounded() rcxProbeSection {
 	}
 	if s.StaggerMs < 0 || s.StaggerMs > rcxProbeStaggerMsMax {
 		s.StaggerMs = def.StaggerMs
+	}
+	if s.BudgetPerHour < rcxProbeBudgetFloor || s.BudgetPerHour > rcxProbeBudgetCeil {
+		s.BudgetPerHour = def.BudgetPerHour
+	}
+	// An unset reserve takes the shipped default; an explicit one is clamped to the
+	// floor and to half the budget.
+	if s.Reserve == 0 {
+		s.Reserve = def.Reserve
+	}
+	if s.Reserve < rcxProbeReserveFloor {
+		s.Reserve = rcxProbeReserveFloor
+	}
+	if s.Reserve > s.BudgetPerHour/2 {
+		s.Reserve = s.BudgetPerHour / 2
+	}
+	if s.Metered != nil {
+		m := s.Metered.bounded()
+		m.Metered = nil
+		s.Metered = &m
 	}
 	return s
 }

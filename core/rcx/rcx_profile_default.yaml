@@ -111,3 +111,5 @@ admission:
 probe:
     concurrency: 2
     staggerMs: 250
+    budgetPerHour: 240
+    reserve: 40

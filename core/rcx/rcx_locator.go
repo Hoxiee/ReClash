@@ -207,10 +207,10 @@ func (e *rcxEngine) startLocateBatch(names []string, now time.Time) bool {
 	if e.probing || len(wave) == 0 {
 		return false
 	}
-	if e.budget.Remaining(now) < rcxProbeReserve+len(wave) {
+	if e.budget.Remaining(now) < e.effectiveProbe().Reserve+len(wave) {
 		return false
 	}
-	wave = e.afford(wave, rcxProbeReserve, now)
+	wave = e.afford(wave, e.effectiveProbe().Reserve, now)
 	if len(wave) == 0 {
 		return false
 	}

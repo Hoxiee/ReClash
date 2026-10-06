@@ -158,7 +158,7 @@ func (e *rcxEngine) startImprovement(periodic bool) bool {
 		if len(wave) == 0 {
 			return false
 		}
-		wave = e.afford(wave, rcxProbeReserve, now)
+		wave = e.afford(wave, e.effectiveProbe().Reserve, now)
 		if len(wave) == 0 {
 			return false
 		}
@@ -190,7 +190,7 @@ func (e *rcxEngine) startImprovement(periodic bool) bool {
 		d.Reason = "covered"
 		return false
 	}
-	wave = e.afford(wave, rcxProbeReserve, now)
+	wave = e.afford(wave, e.effectiveProbe().Reserve, now)
 	if len(wave) == 0 {
 		d.Reason = "budget"
 		return false
@@ -259,7 +259,7 @@ func (e *rcxEngine) discoveryReport() rcxDiscoveryReport {
 	switch {
 	case !e.canImprove():
 		reason = "paused"
-	case e.budget.Remaining(now) <= rcxProbeReserve:
+	case e.budget.Remaining(now) <= e.effectiveProbe().Reserve:
 		reason = "budget"
 	case covered == len(keys):
 		reason = "covered"
@@ -343,7 +343,7 @@ func (e *rcxEngine) planMaintenance(candidates []rcxCandidate, members []rcxMemb
 	if len(pool) > rcxMaintainWidth {
 		pool = pool[:rcxMaintainWidth]
 	}
-	return e.afford(pool, rcxProbeReserve+e.discoveryProtected(now), now)
+	return e.afford(pool, e.effectiveProbe().Reserve+e.discoveryProtected(now), now)
 }
 
 func (e *rcxEngine) discoveryProtected(now time.Time) int {

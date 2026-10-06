@@ -30,6 +30,7 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 	primary, aliases := rcxEnvKeys(payload)
 	e.transport = payload.Transport
 	e.metered = payload.Metered
+	e.syncProbeBudget()
 	e.validated = payload.Validated
 	e.portal = payload.CaptivePortal
 	e.terrain.noteValidation(payload.Validated, e.runtime.Now())

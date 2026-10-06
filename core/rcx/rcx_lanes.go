@@ -313,7 +313,7 @@ func (e *rcxEngine) startLaneProbe(lane *rcxLaneState, members []rcxMember) bool
 	})
 	pool = rcxUniqueProbeNodes(pool, lane.incumbent)
 	wave := pool[:min(width, len(pool))]
-	wave = e.afford(wave, rcxProbeReserve+e.discoveryProtected(e.runtime.Now()), e.runtime.Now())
+	wave = e.afford(wave, e.effectiveProbe().Reserve+e.discoveryProtected(e.runtime.Now()), e.runtime.Now())
 	if len(wave) == 0 {
 		return false
 	}

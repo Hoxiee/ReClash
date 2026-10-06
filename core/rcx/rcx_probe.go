@@ -319,6 +319,13 @@ func newRcxProbeBudget(limit int, window time.Duration) *rcxProbeBudget {
 	return &rcxProbeBudget{limit: limit, window: window}
 }
 
+// Resize retunes the hourly cap in place. Lowering it below the stamps already in
+// the window simply yields no new grants until they age out (Remaining clamps at
+// zero), so a mid-window shrink on a metered link is safe.
+func (b *rcxProbeBudget) Resize(limit int) {
+	b.limit = limit
+}
+
 func (b *rcxProbeBudget) Take(want int, now time.Time) int {
 	b.prune(now)
 	if want <= 0 {

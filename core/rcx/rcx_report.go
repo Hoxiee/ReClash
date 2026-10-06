@@ -197,7 +197,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Profile:    e.cfg.profileState,
 		Strategies: e.cfg.strategyNames(),
 		ProbesLeft: e.budget.Remaining(now),
-		ProbeCap:   rcxProbeBudgetCap,
+		ProbeCap:   e.effectiveProbe().BudgetPerHour,
 		Manual:     input.Pin != "",
 		Discovery:  e.discoveryReport(),
 		At:         rcxMillis(now),

@@ -149,7 +149,7 @@ func (e *rcxEngine) planWave(
 		if len(pool) > rcxMaintainWidth {
 			pool = pool[:rcxMaintainWidth]
 		}
-		return e.afford(pool, rcxProbeReserve, now)
+		return e.afford(pool, e.effectiveProbe().Reserve, now)
 	}
 
 	width := e.cfg.WaveWidth
@@ -334,6 +334,23 @@ func (e *rcxEngine) recoveryWave() bool {
 	return e.probeKind == rcxWaveHandoff || e.probeKind == rcxWaveIncident || e.probeKind == rcxWaveRescue
 }
 
+// effectiveProbe is the probe spend in force right now: the configured steady
+// section, or its metered variant when the link is data-capped and the profile
+// ships one. It is the single source for cadence, budget, and reserve.
+func (e *rcxEngine) effectiveProbe() rcxProbeSection {
+	p := e.cfg.probe()
+	if e.metered && p.Metered != nil {
+		return *p.Metered
+	}
+	return p
+}
+
+// syncProbeBudget resizes the hourly cap to the spend in force, so a config apply
+// or a metered-link change takes effect without rebuilding the budget bucket.
+func (e *rcxEngine) syncProbeBudget() {
+	e.budget.Resize(e.effectiveProbe().BudgetPerHour)
+}
+
 // A trickle stops at a reserve, or it starves the waves that answer an event.
 func (e *rcxEngine) afford(wave []rcxProbeNode, reserve int, now time.Time) []rcxProbeNode {
 	e.paidWave = 0
@@ -441,7 +458,7 @@ func (e *rcxEngine) startProbeWave(wave []rcxProbeNode, kind rcxWaveKind, lane s
 	gen := e.probeGen
 	configGen := e.configGen
 	prober := newRcxProber(e.runtime.Test, e.runtime.Locate)
-	pacing := e.cfg.probe()
+	pacing := e.effectiveProbe()
 	prober.concurrency = pacing.Concurrency
 	prober.staggerMs = pacing.StaggerMs
 	window := rcxProbeWave

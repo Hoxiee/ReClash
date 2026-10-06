@@ -88,9 +88,15 @@ const (
 	rcxMaxProofTTL    = 6 * time.Hour
 	rcxProbeBudgetWin = time.Hour
 	rcxProbeReserve   = 40
-	rcxMaintainWidth  = 3
-	rcxWarmPoolCap    = 16
-	rcxHistoryDepth   = 12
+	// Absolute bounds a profile's probe spend is clamped to: the budget may be
+	// retuned within [floor..ceil] and the reserve raised, but neither can drop
+	// below the floor the event and rescue waves need to recover a link.
+	rcxProbeBudgetFloor  = 60
+	rcxProbeBudgetCeil   = 1200
+	rcxProbeReserveFloor = 20
+	rcxMaintainWidth     = 3
+	rcxWarmPoolCap       = 16
+	rcxHistoryDepth      = 12
 
 	rcxReachRefresh    = 5 * time.Minute
 	rcxReachUrgent     = 30 * time.Second
