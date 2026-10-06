@@ -226,13 +226,13 @@ func TestProfileStateReportsFate(t *testing.T) {
 		want rcxProfileState
 	}{
 		{"absent", "", rcxProfileState{}},
-		{"valid", "schema: 1\nprobe:\n  concurrency: 3\n  staggerMs: 50\n", rcxProfileState{Present: true, Valid: true, Schema: 1}},
+		{"valid", "schema: 1\nprobe:\n  concurrency: 3\n  staggerMs: 50\n", rcxProfileState{Present: true, Valid: true, Schema: 1, Overrides: []string{"probe"}}},
 		{"future-schema", "schema: 99\n", rcxProfileState{Present: true, Schema: 99, Reason: rcxProfileReasonSchema}},
 		{"garbage", "this: is: not: valid: yaml\n", rcxProfileState{Present: true, Reason: rcxProfileReasonInvalid}},
 	}
 	for _, tc := range cases {
 		got := profileConfig(t, tc.yaml).profileState
-		if got != tc.want {
+		if !reflect.DeepEqual(got, tc.want) {
 			t.Fatalf("%s: profile state = %+v, want %+v", tc.name, got, tc.want)
 		}
 	}
@@ -287,5 +287,52 @@ func TestLanePolicyMovesBandsWithStrategy(t *testing.T) {
 	}
 	if !reflect.DeepEqual(p.LatencyBands, engine.cfg.latencyBandsFor(rcxStrategyLatency)) {
 		t.Fatalf("lane bands %v did not follow the lane strategy", p.LatencyBands)
+	}
+}
+
+func TestProfileLadderIsAdopted(t *testing.T) {
+	yaml := "schema: 1\nladder:\n  - rung: verdict\n    enabled: true\n  - rung: latency\n    enabled: true\n"
+	c := rcxConfig{Strategy: rcxStrategyBalanced, ProfileYAML: yaml}.normalized()
+	got := c.ladder()
+	if len(got) != 2 || got[0].ID != rcxRungVerdict || got[1].ID != rcxRungLatency {
+		t.Fatalf("profile ladder not adopted: %+v", got)
+	}
+}
+
+func TestDirectLadderWinsOverProfileLadder(t *testing.T) {
+	yaml := "schema: 1\nladder:\n  - rung: verdict\n    enabled: true\n  - rung: latency\n    enabled: true\n"
+	direct := []rcxRungSpec{
+		{ID: rcxRungVerdict, Enabled: true},
+		{ID: rcxRungHomeRisk, Enabled: true},
+		{ID: rcxRungLatency, Enabled: true},
+	}
+	c := rcxConfig{Strategy: rcxStrategyBalanced, ProfileYAML: yaml, Ladder: direct}.normalized()
+	if len(c.ladder()) != 3 {
+		t.Fatalf("direct ladder should win over profile ladder, got %+v", c.ladder())
+	}
+}
+
+func TestProfileInvalidStrategyFieldsFenced(t *testing.T) {
+	yaml := "schema: 1\nstrategies:\n  stable:\n    bands: [300, 100]\n    switchAbsMs: 50\n    switchPct: 30\n  wild:\n    bands: [-5, 0]\n    switchAbsMs: -1\n    switchPct: 999\n"
+	c := rcxConfig{Strategy: "wild", ProfileYAML: yaml}.normalized()
+	stable := rcxStrategyProfileFrom(c.resolvedStrategies(), rcxStrategyStable)
+	if !reflect.DeepEqual(stable.LatencyBands, rcxStrategyProfiles[rcxStrategyStable].LatencyBands) {
+		t.Fatalf("stable bands not fenced to shipped: %v", stable.LatencyBands)
+	}
+	bal := rcxStrategyProfiles[rcxStrategyBalanced]
+	wild := rcxStrategyProfileFrom(c.resolvedStrategies(), "wild")
+	if !reflect.DeepEqual(wild.LatencyBands, bal.LatencyBands) {
+		t.Fatalf("new strategy bands not fenced to balanced: %v", wild.LatencyBands)
+	}
+	if wild.SwitchAbsMs != bal.SwitchAbsMs || wild.SwitchPct != bal.SwitchPct {
+		t.Fatalf("new strategy switch not fenced: %+v", wild)
+	}
+}
+
+func TestProfileOverridesAreListed(t *testing.T) {
+	yaml := "schema: 1\nladder:\n  - rung: verdict\n    enabled: true\n  - rung: latency\n    enabled: true\nadmission:\n  - verdict: reject\nprobe:\n  concurrency: 6\n  staggerMs: 20\n"
+	st := profileConfig(t, yaml).profileState
+	if !reflect.DeepEqual(st.Overrides, []string{"ladder", "admission", "probe"}) {
+		t.Fatalf("overrides = %v, want [ladder admission probe]", st.Overrides)
 	}
 }

@@ -238,6 +238,7 @@ const (
 
 	rcxProbeConcurrencyMax = 16
 	rcxProbeStaggerMsMax   = 5000
+	rcxSwitchAbsMsMax      = 5000
 )
 
 // rcxStrategyProfile is the shipped flavor of one ranking strategy as data: the
@@ -455,7 +456,8 @@ func (c rcxConfig) normalized() rcxConfig {
 	} else if c.ThrottleFloorKBps > 1024 {
 		c.ThrottleFloorKBps = 1024
 	}
-	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = c.profileSections()
+	resolved := c.resolveProfile()
+	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = resolved.admit, resolved.strategies, resolved.probe, resolved.state
 	if !c.strategyKnown(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
 	}
@@ -468,9 +470,12 @@ func (c rcxConfig) normalized() rcxConfig {
 	if c.LatencyStepMs < 0 {
 		c.LatencyStepMs = 0
 	}
-	if rcxValidLadder(c.Ladder) {
+	switch {
+	case rcxValidLadder(c.Ladder):
 		c.Ladder = rcxNormalizeLadder(c.Ladder)
-	} else {
+	case rcxValidLadder(resolved.ladder):
+		c.Ladder = rcxNormalizeLadder(resolved.ladder)
+	default:
 		c.Ladder = nil
 	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes, c.strategyKnown)
@@ -487,31 +492,98 @@ const (
 // rcxProfileState is the observable fate of a carried profile, so the host can show
 // it applied or silently fell back rather than guessing from behavior.
 type rcxProfileState struct {
-	Present bool   `json:"present"`
-	Valid   bool   `json:"valid"`
-	Schema  int    `json:"schema"`
-	Reason  string `json:"reason,omitempty"`
+	Present   bool     `json:"present"`
+	Valid     bool     `json:"valid"`
+	Schema    int      `json:"schema"`
+	Reason    string   `json:"reason,omitempty"`
+	Overrides []string `json:"overrides,omitempty"`
 }
 
-// profileSections parses the carried profile once: a missing one keeps shipped
+// rcxResolvedProfile is the carried profile reduced to the sections the engine
+// overrides, each already fenced so a hand-edited document cannot corrupt ranking.
+type rcxResolvedProfile struct {
+	admit      []rcxAdmitRule
+	strategies map[string]rcxStrategyProfile
+	probe      rcxProbeSection
+	ladder     []rcxRungSpec
+	state      rcxProfileState
+}
+
+// resolveProfile parses the carried profile once: a missing one keeps shipped
 // defaults; a present one also reports whether it parsed under a known schema.
-func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile, rcxProbeSection, rcxProfileState) {
+func (c rcxConfig) resolveProfile() rcxResolvedProfile {
 	if strings.TrimSpace(c.ProfileYAML) == "" {
-		return nil, nil, rcxDefaultProbeSection(), rcxProfileState{}
+		return rcxResolvedProfile{probe: rcxDefaultProbeSection()}
 	}
 	state := rcxProfileState{Present: true}
 	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
 	if err != nil {
 		state.Reason = rcxProfileReasonInvalid
-		return nil, nil, rcxDefaultProbeSection(), state
+		return rcxResolvedProfile{probe: rcxDefaultProbeSection(), state: state}
 	}
 	state.Schema = parsed.Schema
 	if parsed.Schema != rcxProfileSchema {
 		state.Reason = rcxProfileReasonSchema
-		return nil, nil, rcxDefaultProbeSection(), state
+		return rcxResolvedProfile{probe: rcxDefaultProbeSection(), state: state}
 	}
 	state.Valid = true
-	return parsed.Admission, parsed.Strategies, parsed.Probe.bounded(), state
+	state.Overrides = rcxProfileOverrides(parsed)
+	return rcxResolvedProfile{
+		admit:      parsed.Admission,
+		strategies: rcxBoundedStrategies(parsed.Strategies),
+		probe:      parsed.Probe.bounded(),
+		ladder:     parsed.Ladder,
+		state:      state,
+	}
+}
+
+// rcxBoundedStrategies fences each profile strategy so edited bands or switch
+// thresholds cannot misbucket latency: an invalid field falls back to the shipped
+// values for that name, or to balanced for a profile-introduced strategy.
+// rcxProfileOverrides names the sections a valid profile actually customizes, so a
+// host can badge what a distributed profile changes without diffing it itself.
+func rcxProfileOverrides(p rcxDecisionProfile) []string {
+	out := make([]string, 0, 4)
+	if rcxValidLadder(p.Ladder) {
+		out = append(out, "ladder")
+	}
+	if len(p.Strategies) > 0 {
+		out = append(out, "strategies")
+	}
+	if len(p.Admission) > 0 {
+		out = append(out, "admission")
+	}
+	if p.Probe != (rcxProbeSection{}) && p.Probe.bounded() != rcxDefaultProbeSection() {
+		out = append(out, "probe")
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func rcxBoundedStrategies(in map[string]rcxStrategyProfile) map[string]rcxStrategyProfile {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]rcxStrategyProfile, len(in))
+	for name, sp := range in {
+		fallback, ok := rcxStrategyProfiles[name]
+		if !ok {
+			fallback = rcxStrategyProfiles[rcxStrategyBalanced]
+		}
+		if !rcxValidLatencyBands(sp.LatencyBands) {
+			sp.LatencyBands = append([]int(nil), fallback.LatencyBands...)
+		}
+		if sp.SwitchAbsMs < 0 || sp.SwitchAbsMs > rcxSwitchAbsMsMax {
+			sp.SwitchAbsMs = fallback.SwitchAbsMs
+		}
+		if sp.SwitchPct < 0 || sp.SwitchPct > 100 {
+			sp.SwitchPct = fallback.SwitchPct
+		}
+		out[name] = sp
+	}
+	return out
 }
 
 // probe is the steady probe cadence; a zero value (resolution skipped) is the
