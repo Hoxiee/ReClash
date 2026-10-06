@@ -2730,7 +2730,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Тек тұрақты шығарылымдарды емес, алдын ала шығарылымдарды да ұсыну",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Алғышарттар"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Шығу үшін «артқа» қайта басыңыз",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Пернені басыңыз"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Жазылым қайталануын болдырмау",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Бұрыннан бар профиль қолданатын жазылым сілтемесін қабылдамау",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Алдын ала қарау"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Алдыңғы сәйкестік"),
     "process": MessageLookupByLibrary.simpleMessage("Процесс"),
@@ -2741,6 +2750,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("Автожаңарту аралығын енгізіңіз."),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Профиль өзгертілді. Автоматты жаңарту өшірілсін бе?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Бұл жазылым сілтемесі бар профиль қазірдің өзінде бар",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "Сервер бос профиль қайтарды",

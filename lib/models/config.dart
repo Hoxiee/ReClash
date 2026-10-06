@@ -294,6 +294,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool hideIp,
     @Default(false) bool editorLineWrap,
     @Default(EditorFontSize.standard) EditorFontSize editorFontSize,
+    @Default(true) bool preventDuplicateProfiles,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

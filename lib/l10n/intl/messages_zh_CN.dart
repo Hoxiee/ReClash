@@ -1951,7 +1951,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "提供预发布版本，而不仅是稳定版",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage("再次按返回退出"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下按键"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage("防止重复订阅"),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "拒绝已有配置使用的订阅链接",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("预览"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("上一个匹配"),
     "process": MessageLookupByLibrary.simpleMessage("进程"),
@@ -1962,6 +1967,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("请输入自动更新间隔时间"),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "配置文件已经修改,是否关闭自动更新 ",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "已存在使用该订阅链接的配置",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "服务器返回了空配置",

@@ -157,6 +157,14 @@ class _ApplicationGeneralTab extends StatelessWidget {
     final otherItems = <Widget>[
       _appSettingToggle(
         search: const SettingSearch(),
+        title: (l) => l.preventDuplicateProfiles,
+        subtitle: (l) => l.preventDuplicateProfilesDesc,
+        select: (state) => state.preventDuplicateProfiles,
+        update: (state, value) =>
+            state.copyWith(preventDuplicateProfiles: value),
+      ),
+      _appSettingToggle(
+        search: const SettingSearch(),
         title: (l) => l.onlyStatisticsProxy,
         subtitle: (l) => l.onlyStatisticsProxyDesc,
         select: (state) => state.onlyStatisticsProxy,

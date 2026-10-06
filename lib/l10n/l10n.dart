@@ -1708,6 +1708,16 @@ class AppLocalizations {
     return Intl.message('Exit', name: 'exit', desc: '', args: []);
   }
 
+  /// `Press back again to exit`
+  String get pressBackAgainToExit {
+    return Intl.message(
+      'Press back again to exit',
+      name: 'pressBackAgainToExit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `System proxy`
   String get systemProxy {
     return Intl.message(
@@ -3458,6 +3468,26 @@ class AppLocalizations {
     return Intl.message(
       'When enabled, only proxy traffic is counted',
       name: 'onlyStatisticsProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prevent duplicate subscriptions`
+  String get preventDuplicateProfiles {
+    return Intl.message(
+      'Prevent duplicate subscriptions',
+      name: 'preventDuplicateProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refuse a subscription link that an existing profile already uses`
+  String get preventDuplicateProfilesDesc {
+    return Intl.message(
+      'Refuse a subscription link that an existing profile already uses',
+      name: 'preventDuplicateProfilesDesc',
       desc: '',
       args: [],
     );
@@ -14878,6 +14908,16 @@ class AppLocalizations {
     return Intl.message(
       'The profile configuration is invalid',
       name: 'profileImportInvalidConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A profile with this subscription URL already exists`
+  String get profileImportDuplicate {
+    return Intl.message(
+      'A profile with this subscription URL already exists',
+      name: 'profileImportDuplicate',
       desc: '',
       args: [],
     );

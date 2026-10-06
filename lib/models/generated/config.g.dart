@@ -155,6 +155,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   editorFontSize:
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
       EditorFontSize.standard,
+  preventDuplicateProfiles: json['preventDuplicateProfiles'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -204,6 +205,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'hideIp': instance.hideIp,
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
+      'preventDuplicateProfiles': instance.preventDuplicateProfiles,
     };
 
 const _$TabAnimationEnumMap = {

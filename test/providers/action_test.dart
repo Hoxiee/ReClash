@@ -102,6 +102,36 @@ void main() {
   });
 
   group('ProfilesAction', () {
+    test('rejects a link import whose URL an existing profile already tracks',
+        () async {
+      final existing = Profile.normal(
+        label: 'Existing',
+        url: 'https://sub.example/clash',
+      );
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => null),
+          profilesProvider.overrideWith(() => TestProfiles([existing])),
+        ],
+      );
+      addTearDown(container.dispose);
+      final action = container.read(profilesActionProvider.notifier);
+
+      await expectLater(
+        action.prepareProfileImport(
+          const ProfileLinkImportRequest('https://sub.example/clash'),
+        ),
+        throwsA(isA<ProfileDuplicateException>()),
+      );
+      expect(
+        action.profileImportFailure(
+          const ProfileDuplicateException(),
+          const ProfileLinkImportRequest('https://sub.example/clash'),
+        ),
+        ProfileImportFailure.duplicate,
+      );
+    });
+
     test('keeps edited profile data when remote update fails', () async {
       final original = Profile.normal(label: 'old label', url: 'bad-url');
       final edited = original.copyWith(

@@ -2721,8 +2721,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "Diňe durnukly çykaryşlary däl, deslapky çykaryşlary hem teklip etmek",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Öň şertler"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Çykmak üçin «yza» ýene bir gezek basyň",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Bir klawişany basyň",
+    ),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Abunalaryň gaýtalanmagynyň öňüni al",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Bar bolan profiliň ulanýan abuna salgysyny ret et",
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Deslapky görnüş"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Öňki gabat gelme"),
@@ -2736,6 +2745,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Profil üýtgedildi. Awtomatiki täzelenmäni öçürmek isleýärsiňizmi?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Bu abuna URL-li profil eýýäm bar",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "Serwer boş profil gaýtardy",

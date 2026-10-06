@@ -2217,7 +2217,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "안정 릴리스뿐 아니라 프리릴리스 빌드도 제공합니다",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("필수 조건"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "뒤로를 한 번 더 누르면 종료됩니다",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("키를 눌러 주세요"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "구독 중복 방지",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "기존 프로필이 이미 사용하는 구독 링크를 거부합니다",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("미리 보기"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("이전 일치 항목"),
     "process": MessageLookupByLibrary.simpleMessage("프로세스"),
@@ -2228,6 +2237,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("자동 업데이트 간격을 입력하세요"),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "프로필이 수정됐습니다. 자동 업데이트를 끄시겠습니까?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "이 구독 URL의 프로필이 이미 있습니다",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "서버에서 빈 프로필을 반환했습니다",

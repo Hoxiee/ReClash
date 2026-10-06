@@ -2728,7 +2728,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Предлагать пре-сборки, а не только стабильные релизы",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Требования"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Нажмите «назад» ещё раз, чтобы выйти",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Нажмите клавишу"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Запрет дубликатов подписок",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Отклонять ссылку подписки, которую уже использует существующий профиль",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
     "previousMatch": MessageLookupByLibrary.simpleMessage(
       "Предыдущее совпадение",
@@ -2741,6 +2750,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("Введите интервал автообновления"),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Профиль изменён. Отключить автообновление?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Профиль с этим URL подписки уже добавлен",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "Сервер вернул пустой профиль",

@@ -31,6 +31,7 @@ enum ProfileImportFailure {
   invalidUrl,
   invalidQrCode,
   invalidConfig,
+  duplicate,
   fetchRejected,
   fetchFailed,
   emptyResponse,
@@ -43,6 +44,15 @@ final class ProfileImportUrlException implements Exception {
 
   @override
   String toString() => 'Invalid profile import URL';
+}
+
+/// A link import pointed at a subscription URL that an existing profile already
+/// tracks, so the import is refused instead of creating a duplicate.
+final class ProfileDuplicateException implements Exception {
+  const ProfileDuplicateException();
+
+  @override
+  String toString() => 'A profile with this subscription URL already exists';
 }
 
 final class ProfileValidationException implements Exception {

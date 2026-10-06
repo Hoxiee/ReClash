@@ -518,6 +518,9 @@ class ProfilesAction extends _$ProfilesAction {
     if (error is ProfileImportUrlException) {
       return ProfileImportFailure.invalidUrl;
     }
+    if (error is ProfileDuplicateException) {
+      return ProfileImportFailure.duplicate;
+    }
     if (error is ProfilePanelException) {
       return ProfileImportFailure.fetchRejected;
     }
@@ -607,6 +610,15 @@ class ProfilesAction extends _$ProfilesAction {
         (uri.scheme != 'http' && uri.scheme != 'https') ||
         uri.host.isEmpty) {
       throw const ProfileImportUrlException();
+    }
+    final normalizedUrl = request.url.trim();
+    final hasDuplicate =
+        ref.read(appSettingProvider).preventDuplicateProfiles &&
+        ref
+            .read(profilesProvider)
+            .any((profile) => profile.url.trim() == normalizedUrl);
+    if (hasDuplicate) {
+      throw const ProfileDuplicateException();
     }
     if (profilePointsToListener(
       request.url,

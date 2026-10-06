@@ -2240,7 +2240,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "安定版だけでなくプレリリース版も提供します",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "もう一度戻るで終了します",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーを押してください"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの重複を防ぐ",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "既存のプロファイルが使用している購読リンクを拒否します",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("前の一致"),
     "process": MessageLookupByLibrary.simpleMessage("プロセス"),
@@ -2251,6 +2260,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("自動更新間隔を入力してください"),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "プロファイルが変更されています。自動更新を無効にしますか？",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションURLのプロファイルは既に存在します",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "サーバーから空のプロファイルが返されました",

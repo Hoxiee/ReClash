@@ -2638,7 +2638,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Offer prerelease builds, not only stable releases",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Prerequisites"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Press back again to exit",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Please press a key"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Prevent duplicate subscriptions",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Refuse a subscription link that an existing profile already uses",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Previous match"),
     "process": MessageLookupByLibrary.simpleMessage("Process"),
@@ -2651,6 +2660,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "The profile has been modified. Turn off auto update?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "A profile with this subscription URL already exists",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "The server returned an empty profile",

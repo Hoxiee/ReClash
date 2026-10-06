@@ -2789,8 +2789,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "Faqat barqaror relizlarni emas, reliz oldi qurilmalarini ham taklif qilish",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Talablar"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Chiqish uchun «ortga»ni yana bir marta bosing",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Biror tugmani bosing",
+    ),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Obuna takrorlanishining oldini olish",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Mavjud profil ishlatayotgan obuna havolasini rad etish",
     ),
     "preview": MessageLookupByLibrary.simpleMessage("Oldindan koʻrish"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Oldingi moslik"),
@@ -2806,6 +2815,9 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Profil oʻzgartirildi. Avtomatik yangilash oʻchirilsinmi?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Bu obuna havolasiga ega profil allaqachon mavjud",
     ),
     "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
       "Server bo‘sh profil qaytardi",

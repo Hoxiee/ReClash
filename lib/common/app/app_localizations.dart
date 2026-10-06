@@ -75,6 +75,8 @@ String profileImportFailureMessage(
     appLocalizations.pleaseUploadValidQrcode,
   ProfileImportFailure.invalidConfig =>
     appLocalizations.profileImportInvalidConfig,
+  ProfileImportFailure.duplicate =>
+    appLocalizations.profileImportDuplicate,
   ProfileImportFailure.fetchRejected => appLocalizations.networkException,
   ProfileImportFailure.fetchFailed => appLocalizations.unknownNetworkError,
   ProfileImportFailure.emptyResponse =>
