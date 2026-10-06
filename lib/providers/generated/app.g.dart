@@ -867,7 +867,7 @@ final class ViewModeProvider
   }
 }
 
-String _$viewModeHash() => r'56f81d519e3835bddef4a3905182991169c17619';
+String _$viewModeHash() => r'87f21f785227b5698c464bcf87b4e859c84c0e39';
 
 @ProviderFor(isMobileView)
 final isMobileViewProvider = IsMobileViewProvider._();
@@ -908,6 +908,87 @@ final class IsMobileViewProvider extends $FunctionalProvider<bool, bool, bool>
 }
 
 String _$isMobileViewHash() => r'1d75bccb4f50ae206bf43b68df869a5d95e5ea5f';
+
+@ProviderFor(navSurface)
+final navSurfaceProvider = NavSurfaceProvider._();
+
+final class NavSurfaceProvider
+    extends $FunctionalProvider<NavSurface, NavSurface, NavSurface>
+    with $Provider<NavSurface> {
+  NavSurfaceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'navSurfaceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$navSurfaceHash();
+
+  @$internal
+  @override
+  $ProviderElement<NavSurface> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  NavSurface create(Ref ref) {
+    return navSurface(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NavSurface value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NavSurface>(value),
+    );
+  }
+}
+
+String _$navSurfaceHash() => r'072049b96266c307f3472c863d9d5c5641a6c2e7';
+
+@ProviderFor(isBarSurface)
+final isBarSurfaceProvider = IsBarSurfaceProvider._();
+
+final class IsBarSurfaceProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  IsBarSurfaceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isBarSurfaceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isBarSurfaceHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isBarSurface(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isBarSurfaceHash() => r'93f94c3940534f8053ea435ce34fdd5f06b0401c';
 
 @ProviderFor(viewHeight)
 final viewHeightProvider = ViewHeightProvider._();
@@ -1046,76 +1127,6 @@ abstract class _$CurrentPageLabel extends $Notifier<PageLabel> {
             as $ClassProviderElement<
               AnyNotifier<PageLabel, PageLabel>,
               PageLabel,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
-/// into one of its panes: the card sets the target and switches the page, the
-/// Tools view consumes it on its next build and clears it so a return trip to
-/// Tools does not reopen the pane on its own.
-
-@ProviderFor(ToolsPaneRequest)
-final toolsPaneRequestProvider = ToolsPaneRequestProvider._();
-
-/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
-/// into one of its panes: the card sets the target and switches the page, the
-/// Tools view consumes it on its next build and clears it so a return trip to
-/// Tools does not reopen the pane on its own.
-final class ToolsPaneRequestProvider
-    extends $NotifierProvider<ToolsPaneRequest, ToolsPaneTarget?> {
-  /// A one-shot handoff for a dashboard card that wants the Tools tab to drill
-  /// into one of its panes: the card sets the target and switches the page, the
-  /// Tools view consumes it on its next build and clears it so a return trip to
-  /// Tools does not reopen the pane on its own.
-  ToolsPaneRequestProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'toolsPaneRequestProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$toolsPaneRequestHash();
-
-  @$internal
-  @override
-  ToolsPaneRequest create() => ToolsPaneRequest();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ToolsPaneTarget? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ToolsPaneTarget?>(value),
-    );
-  }
-}
-
-String _$toolsPaneRequestHash() => r'4b04e2e0b490bc19f45ddd04cdda67d019453f86';
-
-/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
-/// into one of its panes: the card sets the target and switches the page, the
-/// Tools view consumes it on its next build and clears it so a return trip to
-/// Tools does not reopen the pane on its own.
-
-abstract class _$ToolsPaneRequest extends $Notifier<ToolsPaneTarget?> {
-  ToolsPaneTarget? build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<ToolsPaneTarget?, ToolsPaneTarget?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<ToolsPaneTarget?, ToolsPaneTarget?>,
-              ToolsPaneTarget?,
               Object?,
               Object?
             >;

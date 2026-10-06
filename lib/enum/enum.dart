@@ -157,6 +157,11 @@ enum SmartRoutingStrategy {
 
 enum ViewMode { mobile, laptop, desktop }
 
+/// Which navigation chrome the home shell wears. [auto] follows the device
+/// (bar on phones and tablets, side rail on desktop); [rail] and [bar] pin
+/// one surface regardless of view size.
+enum NavSurface { auto, rail, bar }
+
 enum LogLevel { debug, info, warning, error, silent }
 
 enum LogSource { app, core }
@@ -509,10 +514,6 @@ enum PageLabel {
   connections,
   dns,
 }
-
-/// A tool pane the Tools tab can be asked to open from elsewhere (a dashboard
-/// card), so the drill-in lands in the two-pane stack instead of a stray sheet.
-enum ToolsPaneTarget { doctor }
 
 /// The engine only distinguishes app-originated lookups from the rest; the
 /// finer FlClash split needs `component/resolver` wiring we did not vendor.

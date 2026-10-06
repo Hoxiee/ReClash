@@ -1763,6 +1763,41 @@ class AppLocalizations {
     return Intl.message('Fade', name: 'fade', desc: '', args: []);
   }
 
+  /// `Navigation surface`
+  String get navSurface {
+    return Intl.message(
+      'Navigation surface',
+      name: 'navSurface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto`
+  String get navSurfaceAuto {
+    return Intl.message('Auto', name: 'navSurfaceAuto', desc: '', args: []);
+  }
+
+  /// `Side rail`
+  String get navSurfaceRail {
+    return Intl.message(
+      'Side rail',
+      name: 'navSurfaceRail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bottom bar`
+  String get navSurfaceBar {
+    return Intl.message(
+      'Bottom bar',
+      name: 'navSurfaceBar',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads, no telemetry.`
   String get desc {
     return Intl.message(
@@ -18263,8 +18298,7 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc:
-          'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18324,8 +18358,7 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc:
-          'Countdown showing how many seconds remain before the pairing code expires.',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }

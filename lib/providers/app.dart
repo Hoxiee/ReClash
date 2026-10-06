@@ -8,8 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:riverpod/riverpod.dart' show ProviderListenableSelect;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
@@ -207,6 +209,28 @@ bool isMobileView(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+NavSurface navSurface(Ref ref) {
+  final setting = ref.watch(
+    appSettingProvider.select((state) => state.navSurface),
+  );
+  if (setting != NavSurface.auto) {
+    return setting;
+  }
+  if (ref.watch(viewModeProvider) == ViewMode.mobile) {
+    return NavSurface.bar;
+  }
+  // A tablet is a touch OS on a canvas too large for the mobile view: give it
+  // the bar by default so the wide screen keeps the full item strip within
+  // thumb reach, while a desktop-class window keeps the side rail.
+  return system.isDesktop ? NavSurface.rail : NavSurface.bar;
+}
+
+@Riverpod(keepAlive: true)
+bool isBarSurface(Ref ref) {
+  return ref.watch(navSurfaceProvider) == NavSurface.bar;
+}
+
+@Riverpod(keepAlive: true)
 double viewHeight(Ref ref) {
   return ref.watch(viewSizeProvider).height;
 }
@@ -244,27 +268,6 @@ class CurrentPageLabel extends _$CurrentPageLabel
 
   void toProfiles() {
     toPage(PageLabel.profiles);
-  }
-}
-
-/// A one-shot handoff for a dashboard card that wants the Tools tab to drill
-/// into one of its panes: the card sets the target and switches the page, the
-/// Tools view consumes it on its next build and clears it so a return trip to
-/// Tools does not reopen the pane on its own.
-@Riverpod(keepAlive: true)
-class ToolsPaneRequest extends _$ToolsPaneRequest
-    with AutoDisposeNotifierMixin {
-  @override
-  ToolsPaneTarget? build() {
-    return null;
-  }
-
-  void request(ToolsPaneTarget target) {
-    state = target;
-  }
-
-  void clear() {
-    state = null;
   }
 }
 

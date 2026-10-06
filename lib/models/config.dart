@@ -267,6 +267,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool acceptPrereleaseUpdates,
     @Default(false) bool showLabel,
     @Default(false) bool sidebarExpanded,
+    @Default(NavSurface.auto) NavSurface navSurface,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool setupCompleted,
     @Default(0) int setupStep,

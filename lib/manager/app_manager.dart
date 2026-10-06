@@ -450,7 +450,7 @@ class AppSidebarContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMobileView = ref.watch(isMobileViewProvider);
+    final showRail = ref.watch(navSurfaceProvider) == NavSurface.rail;
     final sidebarExpanded = ref.watch(
       appSettingProvider.select((state) => state.sidebarExpanded),
     );
@@ -467,7 +467,7 @@ class AppSidebarContainer extends ConsumerWidget {
         child: Row(
           children: [
             AnimatedVisibility.sidebar(
-              visible: !isMobileView,
+              visible: showRail,
               child: _RailBackground(
                 active: active,
                 child: SafeArea(

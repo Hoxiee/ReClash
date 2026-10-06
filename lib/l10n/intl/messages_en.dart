@@ -1953,9 +1953,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -2235,6 +2236,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Specify the nameserver policy for matching domains",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("Navigation surface"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("Auto"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("Bottom bar"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("Side rail"),
     "network": MessageLookupByLibrary.simpleMessage("Network"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "Without custom routes, the local network bypasses the VPN. Set explicit routes to capture it.",

@@ -108,6 +108,9 @@ _AppSettingProps _$AppSettingPropsFromJson(
   acceptPrereleaseUpdates: json['acceptPrereleaseUpdates'] as bool? ?? false,
   showLabel: json['showLabel'] as bool? ?? false,
   sidebarExpanded: json['sidebarExpanded'] as bool? ?? false,
+  navSurface:
+      $enumDecodeNullable(_$NavSurfaceEnumMap, json['navSurface']) ??
+      NavSurface.auto,
   disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
   setupCompleted: json['setupCompleted'] as bool? ?? false,
   setupStep: (json['setupStep'] as num?)?.toInt() ?? 0,
@@ -176,6 +179,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'acceptPrereleaseUpdates': instance.acceptPrereleaseUpdates,
       'showLabel': instance.showLabel,
       'sidebarExpanded': instance.sidebarExpanded,
+      'navSurface': _$NavSurfaceEnumMap[instance.navSurface]!,
       'disclaimerAccepted': instance.disclaimerAccepted,
       'setupCompleted': instance.setupCompleted,
       'setupStep': instance.setupStep,
@@ -206,6 +210,12 @@ const _$TabAnimationEnumMap = {
   TabAnimation.slide: 'slide',
   TabAnimation.fade: 'fade',
   TabAnimation.off: 'off',
+};
+
+const _$NavSurfaceEnumMap = {
+  NavSurface.auto: 'auto',
+  NavSurface.rail: 'rail',
+  NavSurface.bar: 'bar',
 };
 
 const _$RestoreStrategyEnumMap = {

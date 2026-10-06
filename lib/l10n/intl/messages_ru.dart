@@ -2009,9 +2009,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2305,6 +2306,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Задать политику DNS-серверов для доменов",
     ),
+    "navSurface": MessageLookupByLibrary.simpleMessage("Навигация"),
+    "navSurfaceAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "navSurfaceBar": MessageLookupByLibrary.simpleMessage("Нижняя панель"),
+    "navSurfaceRail": MessageLookupByLibrary.simpleMessage("Боковая рельса"),
     "network": MessageLookupByLibrary.simpleMessage("Сеть"),
     "networkDefaultLanBypass": MessageLookupByLibrary.simpleMessage(
       "Без собственных маршрутов локальная сеть обходит VPN. Для её захвата задайте маршруты явно.",

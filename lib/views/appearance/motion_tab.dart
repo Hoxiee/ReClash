@@ -19,6 +19,9 @@ class AppearanceMotionTab extends ConsumerWidget {
     final tabAnimation = ref.watch(
       appSettingProvider.select((state) => state.tabAnimation),
     );
+    final navSurface = ref.watch(
+      appSettingProvider.select((state) => state.navSurface),
+    );
     final reduceMotion = ref.watch(
       appSettingProvider.select((state) => state.reduceMotion),
     );
@@ -38,6 +41,38 @@ class AppearanceMotionTab extends ConsumerWidget {
     return SettingsScrollView(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
+        SliverToBoxAdapter(
+          child: FadeSlideEnterBox(
+            child: PreviewChoiceGroup<NavSurface>(
+              info: Info(
+                search: const SettingSearch(),
+                label: appLocalizations.navSurface,
+                glyph: AppGlyphs.dashboard,
+              ),
+              value: navSurface,
+              choices: [
+                PreviewChoice(
+                  value: NavSurface.auto,
+                  label: appLocalizations.navSurfaceAuto,
+                  pictogram: const NavSurfaceThumb(surface: NavSurface.auto),
+                ),
+                PreviewChoice(
+                  value: NavSurface.rail,
+                  label: appLocalizations.navSurfaceRail,
+                  pictogram: const NavSurfaceThumb(surface: NavSurface.rail),
+                ),
+                PreviewChoice(
+                  value: NavSurface.bar,
+                  label: appLocalizations.navSurfaceBar,
+                  pictogram: const NavSurfaceThumb(surface: NavSurface.bar),
+                ),
+              ],
+              onChanged: (value) => ref
+                  .read(appSettingProvider.notifier)
+                  .update((state) => state.copyWith(navSurface: value)),
+            ),
+          ),
+        ),
         SliverToBoxAdapter(
           child: FadeSlideEnterBox(
             child: PreviewChoiceGroup<TabAnimation>(

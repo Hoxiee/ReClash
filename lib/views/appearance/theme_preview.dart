@@ -965,3 +965,236 @@ class _SparklinePainter extends CustomPainter {
   bool shouldRepaint(_SparklinePainter oldDelegate) =>
       oldDelegate.color != color;
 }
+
+/// A tablet-shaped sketch for the navigation-surface chooser, drawn in the
+/// same language as [MiniScreen]. [NavSurface.rail] stands a destination rail
+/// down the left, [NavSurface.bar] floats a destination bar along the bottom,
+/// and [NavSurface.auto] shows both at once to read as "follows the device".
+class NavSurfaceThumb extends StatelessWidget {
+  const NavSurfaceThumb({super.key, required this.surface});
+
+  static const double _height = 30;
+  // A landscape canvas: a tablet reads as wider than tall.
+  static const Size _screenSize = Size(156, 104);
+
+  final NavSurface surface;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final shape = AppShape.sm.copyWith(
+      side: BorderSide(color: colorScheme.outlineVariant),
+    );
+    return SizedBox(
+      height: _height,
+      width: _height * _screenSize.width / _screenSize.height,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: ShapeDecoration(shape: shape),
+        child: ClipRSuperellipse(
+          borderRadius: AppRadius.sm,
+          child: FittedBox(
+            child: SizedBox(
+              width: _screenSize.width,
+              height: _screenSize.height,
+              child: _MiniNavScreen(surface: surface),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The home sketch reduced to its navigation chrome plus a hint of content, so
+/// the rail-versus-bar choice reads at a glance. [NavSurface.auto] carries both
+/// a rail and a bar to say the surface adapts to the device.
+class _MiniNavScreen extends StatelessWidget {
+  const _MiniNavScreen({required this.surface});
+
+  final NavSurface surface;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final showRail = surface != NavSurface.bar;
+    final showBar = surface != NavSurface.rail;
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final width = constraints.maxWidth;
+        final unit = width / 26;
+        final margin = unit * 1.5;
+        final railWidth = unit * 4.4;
+        final barHeight = unit * 3.2;
+        final gap = unit * 1.2;
+        final contentLeft = showRail ? margin + railWidth + gap : margin;
+        final contentBottom = showBar
+            ? margin + barHeight + unit * 0.6
+            : margin;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.alphaBlend(
+                  colorScheme.surfaceTint.withValues(alpha: 0.05),
+                  colorScheme.surface,
+                ),
+                colorScheme.surface,
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: contentLeft,
+                right: margin,
+                top: margin,
+                bottom: contentBottom,
+                child: _MiniNavContent(colorScheme: colorScheme, unit: unit),
+              ),
+              if (showRail)
+                Positioned(
+                  left: margin,
+                  top: margin,
+                  bottom: showBar ? margin + barHeight + unit * 0.6 : margin,
+                  width: railWidth,
+                  child: _MiniRail(colorScheme: colorScheme, unit: unit),
+                ),
+              if (showBar)
+                Positioned(
+                  left: showRail ? margin + railWidth + gap : margin,
+                  right: margin,
+                  bottom: margin,
+                  height: barHeight,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      color: colorScheme.surfaceContainerHigh,
+                      shape: AppShape.full,
+                    ),
+                    child: _MiniDestinations(
+                      colorScheme: colorScheme,
+                      unit: unit,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A vertical destination strip: one highlighted pill over a column of dots,
+/// the standing analog of [_MiniDestinations].
+class _MiniRail extends StatelessWidget {
+  const _MiniRail({required this.colorScheme, required this.unit});
+
+  final ColorScheme colorScheme;
+  final double unit;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        shape: AppShape.all(AppCorner.fit(unit * 4)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: unit * 1.4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              width: unit * 2.6,
+              height: unit * 1.7,
+              alignment: Alignment.center,
+              decoration: ShapeDecoration(
+                color: colorScheme.secondaryContainer,
+                shape: AppShape.full,
+              ),
+              child: _MiniDot(
+                color: colorScheme.onSecondaryContainer,
+                size: unit * 0.9,
+              ),
+            ),
+            for (var i = 0; i < 3; i++)
+              _MiniDot(color: colorScheme.onSurfaceVariant, size: unit * 0.9),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A light stand-in for a page: a header line beside a round avatar, then a
+/// pair of tinted content tiles.
+class _MiniNavContent extends StatelessWidget {
+  const _MiniNavContent({required this.colorScheme, required this.unit});
+
+  final ColorScheme colorScheme;
+  final double unit;
+
+  Widget _tile(Color accent) {
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colorScheme.surfaceContainer,
+        shape: AppShape.all(AppCorner.fit(unit * 6)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(unit * 0.9),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: unit * 2,
+              height: unit * 2,
+              decoration: ShapeDecoration(
+                color: accent,
+                shape: AppShape.all(AppCorner.fit(unit * 2)),
+              ),
+            ),
+            _MiniLine(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+              width: unit * 3.5,
+              height: unit * 0.7,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            _MiniLine(
+              color: colorScheme.onSurface.withValues(alpha: 0.78),
+              width: unit * 5,
+              height: unit * 1.1,
+            ),
+            const Spacer(),
+            _MiniDot(color: colorScheme.surfaceContainerHigh, size: unit * 1.8),
+          ],
+        ),
+        SizedBox(height: unit * 1.2),
+        Expanded(
+          child: Row(
+            spacing: unit,
+            children: [
+              Expanded(child: _tile(colorScheme.primaryContainer)),
+              Expanded(child: _tile(colorScheme.tertiaryContainer)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
