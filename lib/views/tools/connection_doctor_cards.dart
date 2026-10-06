@@ -220,7 +220,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
                       ],
                     ),
                     Expanded(
-                      child: _DoctorTabView(
+                      child: TabBarView(
                         children: [
                           _overviewTab(snapshot, answer, inset: false),
                           _technicalTab(snapshot),
@@ -332,58 +332,6 @@ class _DoctorSmoothResize extends StatelessWidget {
       alignment: Alignment.topCenter,
       curve: Curves.easeOutCubic,
       child: child,
-    );
-  }
-}
-
-/// Shows only the tab the [DefaultTabController] points at, cross-fading on a
-/// switch. A `TabBarView` would add its own paging scrollable and keep the
-/// inactive tab's list mounted; keeping a single scroll view here leaves the
-/// Doctor one lever per screen and one scroll target for its tests.
-class _DoctorTabView extends StatefulWidget {
-  const _DoctorTabView({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  State<_DoctorTabView> createState() => _DoctorTabViewState();
-}
-
-class _DoctorTabViewState extends State<_DoctorTabView> {
-  TabController? _controller;
-  int _index = 0;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final controller = DefaultTabController.of(context);
-    if (controller == _controller) return;
-    _controller?.removeListener(_handleChange);
-    _controller = controller;
-    _index = controller.index;
-    controller.addListener(_handleChange);
-  }
-
-  @override
-  void dispose() {
-    _controller?.removeListener(_handleChange);
-    super.dispose();
-  }
-
-  void _handleChange() {
-    final controller = _controller;
-    if (controller == null || !mounted || controller.index == _index) return;
-    setState(() => _index = controller.index);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: context.motionDuration(commonDuration),
-      child: KeyedSubtree(
-        key: ValueKey(_index),
-        child: widget.children[_index],
-      ),
     );
   }
 }
