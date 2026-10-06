@@ -141,6 +141,11 @@ type rcxConfig struct {
 	SwitchImproveMs         int             `json:"sim,omitempty"`
 	SwitchImprovePct        int             `json:"sip,omitempty"`
 	LatencyStepMs           int             `json:"lst,omitempty"`
+	// A YAML decision profile (the import/subscription seam) parsed once in
+	// normalized() into the cached fields below.
+	ProfileYAML      string                        `json:"profile,omitempty"`
+	admitRules       []rcxAdmitRule                `json:"-"`
+	strategyProfiles map[string]rcxStrategyProfile `json:"-"`
 }
 
 type rcxRuleAction string
@@ -249,7 +254,16 @@ var rcxStrategyProfiles = map[string]rcxStrategyProfile{
 
 // An unknown name degrades to balanced, never a zero record.
 func rcxStrategyProfileFor(strategy string) rcxStrategyProfile {
-	if profile, ok := rcxStrategyProfiles[strategy]; ok {
+	return rcxStrategyProfileFrom(rcxStrategyProfiles, strategy)
+}
+
+// rcxStrategyProfileFrom resolves a strategy against a profile set, degrading an
+// unknown name to balanced and never returning a zero record.
+func rcxStrategyProfileFrom(profiles map[string]rcxStrategyProfile, strategy string) rcxStrategyProfile {
+	if profile, ok := profiles[strategy]; ok {
+		return profile
+	}
+	if profile, ok := profiles[rcxStrategyBalanced]; ok {
 		return profile
 	}
 	return rcxStrategyProfiles[rcxStrategyBalanced]
@@ -289,7 +303,17 @@ func (c rcxConfig) latencyBands() []int {
 	if rcxValidLatencyBands(c.LatencyBands) {
 		return c.LatencyBands
 	}
-	return rcxDefaultLatencyBandsFor(c.Strategy)
+	bands := rcxStrategyProfileFrom(c.resolvedStrategies(), c.Strategy).LatencyBands
+	out := make([]int, len(bands))
+	copy(out, bands)
+	return out
+}
+
+func (c rcxConfig) resolvedStrategies() map[string]rcxStrategyProfile {
+	if len(c.strategyProfiles) > 0 {
+		return c.strategyProfiles
+	}
+	return rcxStrategyProfiles
 }
 
 // A usable ladder names only known rungs, repeats none, and still carries the two
@@ -406,7 +430,21 @@ func (c rcxConfig) normalized() rcxConfig {
 		c.Ladder = nil
 	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes)
+	c.admitRules, c.strategyProfiles = c.profileSections()
 	return c
+}
+
+// profileSections parses the carried profile into the sections it overrides;
+// empty, unparsable, or an unknown schema leaves both nil to keep shipped defaults.
+func (c rcxConfig) profileSections() ([]rcxAdmitRule, map[string]rcxStrategyProfile) {
+	if strings.TrimSpace(c.ProfileYAML) == "" {
+		return nil, nil
+	}
+	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
+	if err != nil || parsed.Schema != rcxProfileSchema {
+		return nil, nil
+	}
+	return parsed.Admission, parsed.Strategies
 }
 
 // rcxNormalizeLadder clamps a valid ladder's per-rung thresholds so a negative
@@ -516,6 +554,8 @@ func (c rcxConfig) policy() rcxPolicy {
 		LatencyBands:      c.latencyBands(),
 		Ladder:            c.ladder(),
 		Strategy:          c.Strategy,
+		Admission:         c.admitRules,
+		Strategies:        c.resolvedStrategies(),
 		RequireUDP:        c.RequireUDP,
 		AllowDomesticLast: c.AllowDomesticLastResort,
 		Censoring:         len(c.CensorCountries) > 0,

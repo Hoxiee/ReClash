@@ -202,17 +202,17 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 }
 
 func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
-	verdict := rcxAdmitTier(terrain, f)
-	// A filter-named home node competes last however fast it pings: the brand
-	// still rejects outright, but nothing promotes it above last resort.
+	return rcxAdmitWith(terrain, f, rcxAdmitRulesDefault)
+}
+
+// rcxAdmitWith admits against the rules in force. The NameHome last-resort cap
+// holds across any rule set: a filter-named home node competes last however fast.
+func rcxAdmitWith(terrain rcxTerrain, f rcxFacts, rules []rcxAdmitRule) rcxVerdict {
+	verdict := rcxAdmitByRules(terrain, f, rules)
 	if f.NameHome && verdict > rcxVerdictLastResort {
 		return rcxVerdictLastResort
 	}
 	return verdict
-}
-
-func rcxAdmitTier(terrain rcxTerrain, f rcxFacts) rcxVerdict {
-	return rcxAdmitByRules(terrain, f, rcxAdmitRulesDefault)
 }
 
 func rcxAllowsLastResort(terrain rcxTerrain, presetAllows bool) bool {
@@ -358,6 +358,8 @@ type rcxPolicy struct {
 	LatencyBands      []int
 	Ladder            []rcxRungSpec
 	Strategy          string
+	Admission         []rcxAdmitRule
+	Strategies        map[string]rcxStrategyProfile
 	RequireUDP        bool
 	AllowDomesticLast bool
 	Censoring         bool
@@ -375,6 +377,21 @@ func (p rcxPolicy) ladderOrDefault() []rcxRungSpec {
 	return p.Ladder
 }
 
+func (p rcxPolicy) admissionRules() []rcxAdmitRule {
+	if len(p.Admission) == 0 {
+		return rcxAdmitRulesDefault
+	}
+	return p.Admission
+}
+
+func (p rcxPolicy) strategyProfile() rcxStrategyProfile {
+	profiles := p.Strategies
+	if len(profiles) == 0 {
+		profiles = rcxStrategyProfiles
+	}
+	return rcxStrategyProfileFrom(profiles, p.Strategy)
+}
+
 // latencyStep is the rounding/near-tie granularity for latency comparisons; a
 // zero (older host, unset config) falls back to the shipped 30ms.
 func (p rcxPolicy) latencyStep() int {
@@ -387,7 +404,7 @@ func (p rcxPolicy) latencyStep() int {
 // switchThresholds is how much faster a challenger must be to trigger a latency
 // switch. Explicit config wins; else the strategy profile sets the shipped default.
 func (p rcxPolicy) switchThresholds() (absolute, percent int) {
-	profile := rcxStrategyProfileFor(p.Strategy)
+	profile := p.strategyProfile()
 	absolute, percent = profile.SwitchAbsMs, profile.SwitchPct
 	if p.SwitchImproveMs > 0 {
 		absolute = p.SwitchImproveMs
@@ -415,8 +432,8 @@ type rcxDecision struct {
 	Detail string
 }
 
-func rcxCandidateVerdict(c rcxCandidate, terrain rcxTerrain) rcxVerdict {
-	verdict := rcxAdmit(terrain, c.Facts)
+func rcxCandidateVerdict(c rcxCandidate, terrain rcxTerrain, rules []rcxAdmitRule) rcxVerdict {
+	verdict := rcxAdmitWith(terrain, c.Facts, rules)
 	if c.RuleLastResort && verdict > rcxVerdictLastResort {
 		return rcxVerdictLastResort
 	}
@@ -442,7 +459,7 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return false
 	}
-	verdict := rcxCandidateVerdict(c, in.Terrain)
+	verdict := rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules())
 	if verdict == rcxVerdictReject {
 		return false
 	}
@@ -481,7 +498,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		order -= rcxPreferOrderBoost
 	}
 	return rcxKey{
-		verdict:    rcxCandidateVerdict(c, in.Terrain),
+		verdict:    rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules()),
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
 		recurrence: c.Recurrence,
 		degraded:   c.Degraded,
@@ -864,7 +881,7 @@ func rcxCompareStable(a, b rcxKey) int {
 // rcxCompareFor builds the active comparator from policy: the configured ladder
 // (default when unset) flavored by the strategy.
 func rcxCompareFor(p rcxPolicy) func(a, b rcxKey) int {
-	ladder := rcxLadderForStrategy(p.ladderOrDefault(), p.Strategy)
+	ladder := rcxDropRungs(p.ladderOrDefault(), p.strategyProfile().DropRungs)
 	return func(a, b rcxKey) int {
 		return rcxCompareWith(a, b, ladder)
 	}
@@ -907,7 +924,7 @@ func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return rcxBlockProviderCircuit
 	}
-	switch rcxCandidateVerdict(c, in.Terrain) {
+	switch rcxCandidateVerdict(c, in.Terrain, in.Policy.admissionRules()) {
 	case rcxVerdictReject:
 		if _, ok := rcxAdmissionTable[in.Terrain]; !ok {
 			return rcxBlockTerrainUnfit

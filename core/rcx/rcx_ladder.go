@@ -276,7 +276,13 @@ func rcxCompareWith(a, b rcxKey, ladder []rcxRungSpec) int {
 // rungs its ranking drops (lowest-latency drops misfit, matching rcxCompareLatency);
 // a strategy that drops nothing runs the ladder as configured.
 func rcxLadderForStrategy(ladder []rcxRungSpec, strategy string) []rcxRungSpec {
-	drop := rcxStrategyProfileFor(strategy).DropRungs
+	return rcxDropRungs(ladder, rcxStrategyProfileFor(strategy).DropRungs)
+}
+
+// rcxDropRungs removes the named rungs from a ladder, preserving order. An empty
+// drop set returns the ladder unchanged, so a strategy that drops nothing ranks
+// by the ladder as configured.
+func rcxDropRungs(ladder []rcxRungSpec, drop []rcxRungID) []rcxRungSpec {
 	if len(drop) == 0 {
 		return ladder
 	}
