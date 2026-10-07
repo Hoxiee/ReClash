@@ -32,9 +32,6 @@ String webDashboardSha256Of(WebDashboardFlavor flavor) => switch (flavor) {
   WebDashboardFlavor.metacubexd => metacubexdSha256,
 };
 
-@visibleForTesting
-const webDashboardFlavorFileName = '.flavor';
-
 /// Relative on purpose: the Core resolves `external-ui` against its home dir.
 const webDashboardDirName = 'ui';
 
@@ -43,41 +40,45 @@ const webDashboardEntryName = 'index.html';
 String webDashboardDirIn(String homeDirPath) =>
     join(homeDirPath, webDashboardDirName);
 
-WebDashboardFlavor? installedWebDashboardFlavorIn(String homeDirPath) {
-  final marker = File(
-    join(webDashboardDirIn(homeDirPath), webDashboardFlavorFileName),
-  );
-  if (!marker.existsSync()) {
-    return null;
-  }
-  try {
-    final name = marker.readAsStringSync().trim();
-    for (final flavor in WebDashboardFlavor.values) {
-      if (flavor.name == name) {
-        return flavor;
-      }
-    }
-  } catch (_) {}
-  return null;
-}
+/// Each flavor keeps its own copy under `ui/`, so switching between them never
+/// overwrites nor re-downloads the other.
+String webDashboardFlavorDirIn(
+  String homeDirPath,
+  WebDashboardFlavor flavor,
+) => join(webDashboardDirIn(homeDirPath), flavor.name);
 
-bool isWebDashboardInstalledIn(
-  String homeDirPath, [
-  WebDashboardFlavor? flavor,
-]) {
-  final installed = File(
-    join(webDashboardDirIn(homeDirPath), webDashboardEntryName),
-  ).existsSync();
-  if (flavor == null) {
-    return installed;
+bool isWebDashboardInstalledIn(String homeDirPath, WebDashboardFlavor flavor) =>
+    File(
+      join(webDashboardFlavorDirIn(homeDirPath, flavor), webDashboardEntryName),
+    ).existsSync();
+
+/// The directory the Core should serve as `/ui/`, relative to its home, or an
+/// empty string when the selected flavor is not installed.
+String webDashboardServedDirName(
+  String homeDirPath,
+  WebDashboardFlavor flavor,
+) => isWebDashboardInstalledIn(homeDirPath, flavor)
+    ? join(webDashboardDirName, flavor.name)
+    : '';
+
+/// Pre-subdirectory installs dropped a single flavor straight into `ui/`, and
+/// that layout only ever shipped zashboard. Lift it into its own subdirectory
+/// so the two flavors can coexist.
+Future<void> migrateLegacyWebDashboardIn(String homeDirPath) async {
+  final uiDir = Directory(webDashboardDirIn(homeDirPath));
+  final legacyEntry = File(join(uiDir.path, webDashboardEntryName));
+  if (!legacyEntry.existsSync()) {
+    return;
   }
-  if (!installed) {
-    return false;
+  const flavor = WebDashboardFlavor.zashboard;
+  if (isWebDashboardInstalledIn(homeDirPath, flavor)) {
+    return;
   }
-  // Installs predating the flavor choice only ever shipped zashboard.
-  return (installedWebDashboardFlavorIn(homeDirPath) ??
-          WebDashboardFlavor.zashboard) ==
-      flavor;
+  final staging = Directory('${uiDir.path}.legacy');
+  await safeDeletePath(staging.path);
+  await uiDir.rename(staging.path);
+  await uiDir.create(recursive: true);
+  await staging.rename(webDashboardFlavorDirIn(homeDirPath, flavor));
 }
 
 Uri _webDashboardZashboardUri(
@@ -236,8 +237,10 @@ class WebDashboard {
     CancelToken? cancelToken,
   }) async {
     final homeDirPath = await appPath.homeDirPath;
+    await migrateLegacyWebDashboardIn(homeDirPath);
+    final targetPath = webDashboardFlavorDirIn(homeDirPath, flavor);
     final archivePath =
-        '${webDashboardDirIn(homeDirPath)}${flavor == WebDashboardFlavor.metacubexd ? '.tgz' : '.zip'}';
+        '${webDashboardDirIn(homeDirPath)}.${flavor.name}${flavor == WebDashboardFlavor.metacubexd ? '.tgz' : '.zip'}';
     final error = await request.downloadFile(
       webDashboardUrlOf(flavor),
       archivePath,
@@ -256,11 +259,8 @@ class WebDashboard {
       }
       await compute(unpackWebDashboard, (
         archivePath: archivePath,
-        targetPath: webDashboardDirIn(homeDirPath),
+        targetPath: targetPath,
       ));
-      await File(
-        join(webDashboardDirIn(homeDirPath), webDashboardFlavorFileName),
-      ).writeAsString(flavor.name);
       return null;
     } catch (error) {
       commonPrint.log(
@@ -273,8 +273,19 @@ class WebDashboard {
     }
   }
 
-  Future<void> remove() async {
-    await safeDeletePath(webDashboardDirIn(await appPath.homeDirPath));
+  /// Removes a single flavor, or the whole `ui/` tree when none is named.
+  Future<void> remove([WebDashboardFlavor? flavor]) async {
+    final homeDirPath = await appPath.homeDirPath;
+    if (flavor == null) {
+      await safeDeletePath(webDashboardDirIn(homeDirPath));
+      return;
+    }
+    await safeDeletePath(webDashboardFlavorDirIn(homeDirPath, flavor));
+    // The empty parent would otherwise linger as `external-ui` fodder.
+    final uiDir = Directory(webDashboardDirIn(homeDirPath));
+    if (uiDir.existsSync() && uiDir.listSync().isEmpty) {
+      await safeDeletePath(uiDir.path);
+    }
   }
 }
 

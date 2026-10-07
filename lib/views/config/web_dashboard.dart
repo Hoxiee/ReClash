@@ -63,7 +63,10 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
   bool get _busy => _cancelToken != null || _opening;
 
   Future<void> _refresh() async {
-    final installed = await webDashboard.isInstalledFor(
+    final homeDirPath = await appPath.homeDirPath;
+    await migrateLegacyWebDashboardIn(homeDirPath);
+    final installed = isWebDashboardInstalledIn(
+      homeDirPath,
       ref.read(appSettingProvider).webDashboardFlavor,
     );
     if (!mounted) {
@@ -145,7 +148,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     if (res != true) {
       return;
     }
-    await webDashboard.remove();
+    await webDashboard.remove(ref.read(appSettingProvider).webDashboardFlavor);
     await _refresh();
     await _apply();
   }
@@ -191,8 +194,9 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     }
   }
 
-  /// A dashboard the Core is not serving yet means the running config carries no
-  /// `external-ui`, and only a profile apply can put it there.
+  /// The Core serves whichever flavor the last apply wrote into `external-ui`,
+  /// so re-apply unconditionally: a flavor switch must take effect before the
+  /// page loads, and a config carrying no `external-ui` only gains one here.
   Future<Uri?> _serveUri() async {
     final config = ref.read(patchClashConfigProvider);
     final uri = webDashboardUri(
@@ -200,11 +204,8 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
       secret: config.secret,
       flavor: ref.read(appSettingProvider).webDashboardFlavor,
     );
-    var readiness = await probeWebDashboard(uri);
-    if (readiness == WebDashboardReadiness.unmounted) {
-      await _apply();
-      readiness = await probeWebDashboard(uri);
-    }
+    await _apply();
+    final readiness = await probeWebDashboard(uri);
     if (readiness == WebDashboardReadiness.serving) {
       return uri;
     }

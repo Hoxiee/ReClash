@@ -399,6 +399,8 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default([]) List<DesyncCategory> desyncCategories,
     @Default(true) bool desyncForceTcp,
     @Default(false) bool desyncOnly,
+    @Default(WebDashboardFlavor.zashboard)
+    WebDashboardFlavor webDashboardFlavor,
   }) = _MakeRealProfileState;
 }
 

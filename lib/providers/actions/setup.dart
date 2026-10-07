@@ -602,6 +602,9 @@ class SetupAction extends _$SetupAction {
         desyncCategories: desync.categories,
         desyncForceTcp: desync.forceTcp,
         desyncOnly: desync.featureEnabled && desync.onlyDpi,
+        webDashboardFlavor: ref.read(
+          appSettingProvider.select((state) => state.webDashboardFlavor),
+        ),
       ),
     );
     return res;

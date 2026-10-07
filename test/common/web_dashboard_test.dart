@@ -194,7 +194,10 @@ void main() {
       expect(File(join(target, 'assets', 'app.js')).existsSync(), isTrue);
       expect(Directory(join(target, 'dist')).existsSync(), isFalse);
       expect(Directory('$target.new').existsSync(), isFalse);
-      expect(isWebDashboardInstalledIn(dirname(target)), isFalse);
+      expect(
+        isWebDashboardInstalledIn(dirname(target), WebDashboardFlavor.zashboard),
+        isFalse,
+      );
     });
 
     test('keeps a flat archive as it is', () async {
@@ -274,26 +277,40 @@ void main() {
       expect(await hasWebDashboardDigest(archive, metacubexdSha256), isFalse);
     });
 
-    test('reports and removes the dashboard in the core home dir', () async {
+    test('reports and removes each flavor in its own subdirectory', () async {
       for (final flavor in WebDashboardFlavor.values) {
         expect(await webDashboard.isInstalledFor(flavor), isFalse);
       }
 
-      final entry = File(
-        join(webDashboardDirIn(root.path), webDashboardEntryName),
-      )..createSync(recursive: true);
-      entry.writeAsStringSync('installed');
+      for (final flavor in WebDashboardFlavor.values) {
+        File(
+          join(
+            webDashboardFlavorDirIn(root.path, flavor),
+            webDashboardEntryName,
+          ),
+        )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('installed');
+      }
 
-      // Installs predating the flavor marker only ever shipped zashboard.
+      for (final flavor in WebDashboardFlavor.values) {
+        expect(await webDashboard.isInstalledFor(flavor), isTrue);
+      }
+
+      // Removing one flavor leaves the other and its served path intact.
+      await webDashboard.remove(WebDashboardFlavor.zashboard);
       expect(
         await webDashboard.isInstalledFor(WebDashboardFlavor.zashboard),
-        isTrue,
+        isFalse,
       );
       expect(
         await webDashboard.isInstalledFor(WebDashboardFlavor.metacubexd),
-        isFalse,
+        isTrue,
       );
-      expect(isWebDashboardInstalledIn(root.path), isTrue);
+      expect(
+        webDashboardServedDirName(root.path, WebDashboardFlavor.metacubexd),
+        join(webDashboardDirName, WebDashboardFlavor.metacubexd.name),
+      );
 
       await webDashboard.remove();
 
@@ -303,26 +320,98 @@ void main() {
       expect(Directory(webDashboardDirIn(root.path)).existsSync(), isFalse);
     });
 
-    test('tracks the installed flavor through its marker', () async {
-      final dir = webDashboardDirIn(root.path);
-      File(join(dir, webDashboardEntryName))
+    test('removes the empty parent after its last flavor goes', () async {
+      File(
+        join(
+          webDashboardFlavorDirIn(root.path, WebDashboardFlavor.zashboard),
+          webDashboardEntryName,
+        ),
+      )
         ..createSync(recursive: true)
         ..writeAsStringSync('installed');
+
+      await webDashboard.remove(WebDashboardFlavor.zashboard);
+
+      expect(Directory(webDashboardDirIn(root.path)).existsSync(), isFalse);
+    });
+
+    test('serves no directory until the selected flavor is installed', () {
+      expect(
+        webDashboardServedDirName(root.path, WebDashboardFlavor.zashboard),
+        isEmpty,
+      );
+
       File(
-        join(dir, webDashboardFlavorFileName),
-      ).writeAsStringSync(WebDashboardFlavor.metacubexd.name);
+        join(
+          webDashboardFlavorDirIn(root.path, WebDashboardFlavor.zashboard),
+          webDashboardEntryName,
+        ),
+      )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('installed');
 
       expect(
-        installedWebDashboardFlavorIn(root.path),
-        WebDashboardFlavor.metacubexd,
+        webDashboardServedDirName(root.path, WebDashboardFlavor.zashboard),
+        join(webDashboardDirName, WebDashboardFlavor.zashboard.name),
       );
       expect(
-        await webDashboard.isInstalledFor(WebDashboardFlavor.metacubexd),
+        webDashboardServedDirName(root.path, WebDashboardFlavor.metacubexd),
+        isEmpty,
+      );
+
+      Directory(webDashboardDirIn(root.path)).deleteSync(recursive: true);
+    });
+
+    test('lifts a legacy flat install into the zashboard subdirectory', () async {
+      final uiDir = webDashboardDirIn(root.path);
+      File(join(uiDir, webDashboardEntryName))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('legacy');
+      File(join(uiDir, 'assets', 'app.js'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('app');
+
+      await migrateLegacyWebDashboardIn(root.path);
+
+      expect(
+        isWebDashboardInstalledIn(root.path, WebDashboardFlavor.zashboard),
         isTrue,
       );
+      final zashDir = webDashboardFlavorDirIn(
+        root.path,
+        WebDashboardFlavor.zashboard,
+      );
       expect(
-        await webDashboard.isInstalledFor(WebDashboardFlavor.zashboard),
-        isFalse,
+        File(join(zashDir, webDashboardEntryName)).readAsStringSync(),
+        'legacy',
+      );
+      expect(File(join(zashDir, 'assets', 'app.js')).existsSync(), isTrue);
+      expect(File(join(uiDir, webDashboardEntryName)).existsSync(), isFalse);
+      expect(Directory('$uiDir.legacy').existsSync(), isFalse);
+
+      await webDashboard.remove();
+    });
+
+    test('leaves a subdirectory install alone when migrating', () async {
+      File(
+        join(
+          webDashboardFlavorDirIn(root.path, WebDashboardFlavor.zashboard),
+          webDashboardEntryName,
+        ),
+      )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('fresh');
+
+      await migrateLegacyWebDashboardIn(root.path);
+
+      expect(
+        File(
+          join(
+            webDashboardFlavorDirIn(root.path, WebDashboardFlavor.zashboard),
+            webDashboardEntryName,
+          ),
+        ).readAsStringSync(),
+        'fresh',
       );
 
       await webDashboard.remove();

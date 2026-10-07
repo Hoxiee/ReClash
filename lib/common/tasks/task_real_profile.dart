@@ -120,9 +120,10 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   // An external-ui the Core cannot read makes it download one instead, and it
   // does that synchronously inside every config apply.
   final homeDirPath = dirname(profilesPath);
-  rawConfig['external-ui'] = isWebDashboardInstalledIn(homeDirPath)
-      ? webDashboardDirName
-      : '';
+  rawConfig['external-ui'] = webDashboardServedDirName(
+    homeDirPath,
+    data.webDashboardFlavor,
+  );
   switch (realPatchConfig.interfaceNameMode) {
     case InterfaceNameMode.clear:
       rawConfig['interface-name'] = '';
