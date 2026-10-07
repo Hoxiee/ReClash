@@ -311,6 +311,7 @@ class ProfileItem extends ConsumerWidget {
   List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
+    final hideUrl = profile.panelMeta?.hideUrl ?? false;
     final subscriptionInfo = profile.subscriptionInfo;
     final hasSubscriptionInfo =
         isUrl && subscriptionInfo != null && subscriptionInfo.hasFacts;
@@ -365,7 +366,7 @@ class ProfileItem extends ConsumerWidget {
                 _handleShowSubscriptionInfo(context);
               },
             ),
-          if (isUrl)
+          if (isUrl && !hideUrl)
             CommonPopupMenuItem(
               glyph: AppGlyphs.copy,
               label: appLocalizations.copyLink,

@@ -305,6 +305,326 @@ class AppLocalizations {
     return Intl.message('Other', name: 'appRegionOther', desc: '', args: []);
   }
 
+  /// `Let's set up your connection`
+  String get setupWelcomeTitle {
+    return Intl.message(
+      'Let\'s set up your connection',
+      name: 'setupWelcomeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Help me set up`
+  String get setupGuided {
+    return Intl.message(
+      'Help me set up',
+      name: 'setupGuided',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review the essentials with guidance, then check your connection.`
+  String get setupGuidedDesc {
+    return Intl.message(
+      'Review the essentials with guidance, then check your connection.',
+      name: 'setupGuidedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set up myself`
+  String get setupManual {
+    return Intl.message(
+      'Set up myself',
+      name: 'setupManual',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open sections in any order and choose the settings yourself.`
+  String get setupManualDesc {
+    return Intl.message(
+      'Open sections in any order and choose the settings yourself.',
+      name: 'setupManualDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I don't have a connection yet`
+  String get setupNoSource {
+    return Intl.message(
+      'I don\'t have a connection yet',
+      name: 'setupNoSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash is a client, not a server provider. Ask your provider or the person helping you for a link or configuration file.`
+  String get setupNoSourceDesc {
+    return Intl.message(
+      'ReClash is a client, not a server provider. Ask your provider or the person helping you for a link or configuration file.',
+      name: 'setupNoSourceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set up ByeDPI without a subscription`
+  String get setupTryWithoutProfile {
+    return Intl.message(
+      'Set up ByeDPI without a subscription',
+      name: 'setupTryWithoutProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Explore the app for now`
+  String get setupExplore {
+    return Intl.message(
+      'Explore the app for now',
+      name: 'setupExplore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review how your connection will work. Edits are saved as you make them; connecting is a separate action.`
+  String get setupPreferencesDesc {
+    return Intl.message(
+      'Review how your connection will work. Edits are saved as you make them; connecting is a separate action.',
+      name: 'setupPreferencesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current settings`
+  String get setupCurrentSettings {
+    return Intl.message(
+      'Current settings',
+      name: 'setupCurrentSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A local DPI bypass for selected services. It does not change your public IP or replace a VPN server. Other traffic connects directly; results depend on your network.`
+  String get setupByeDpiDesc {
+    return Intl.message(
+      'A local DPI bypass for selected services. It does not change your public IP or replace a VPN server. Other traffic connects directly; results depend on your network.',
+      name: 'setupByeDpiDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `From the profile`
+  String get setupFromProfile {
+    return Intl.message(
+      'From the profile',
+      name: 'setupFromProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apps in the configured list: {count}`
+  String setupAppExceptions(Object count) {
+    return Intl.message(
+      'Apps in the configured list: $count',
+      name: 'setupAppExceptions',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `No app exceptions`
+  String get setupAppsAll {
+    return Intl.message(
+      'No app exceptions',
+      name: 'setupAppsAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect device apps`
+  String get setupCoverageDevice {
+    return Intl.message(
+      'Connect device apps',
+      name: 'setupCoverageDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use the system proxy`
+  String get setupCoverageProxy {
+    return Intl.message(
+      'Use the system proxy',
+      name: 'setupCoverageProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local proxy only`
+  String get setupCoverageLocal {
+    return Intl.message(
+      'Local proxy only',
+      name: 'setupCoverageLocal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only apps that you configure to use the local proxy will connect through it.`
+  String get setupCoverageLocalDesc {
+    return Intl.message(
+      'Only apps that you configure to use the local proxy will connect through it.',
+      name: 'setupCoverageLocalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose how apps reach ReClash. Routing rules still decide which connections use a server.`
+  String get setupCoverageDesc {
+    return Intl.message(
+      'Choose how apps reach ReClash. Routing rules still decide which connections use a server.',
+      name: 'setupCoverageDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some apps ignore the system proxy. This mode does not cover all device traffic.`
+  String get setupProxyScope {
+    return Intl.message(
+      'Some apps ignore the system proxy. This mode does not cover all device traffic.',
+      name: 'setupProxyScope',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rules decide where traffic goes. Smart Routing can choose a server, but enabling access to Auto does not activate it.`
+  String get setupRoutingDesc {
+    return Intl.message(
+      'Rules decide where traffic goes. Smart Routing can choose a server, but enabling access to Auto does not activate it.',
+      name: 'setupRoutingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Starting the app, connecting automatically and connecting now are independent choices.`
+  String get setupBehaviorDesc {
+    return Intl.message(
+      'Starting the app, connecting automatically and connecting now are independent choices.',
+      name: 'setupBehaviorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect and check`
+  String get setupConnectNow {
+    return Intl.message(
+      'Connect and check',
+      name: 'setupConnectNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We'll start the selected connection and ask Connection Doctor to check its path. Required system prompts may appear.`
+  String get setupConnectNowDesc {
+    return Intl.message(
+      'We\'ll start the selected connection and ask Connection Doctor to check its path. Required system prompts may appear.',
+      name: 'setupConnectNowDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applying settings and waiting for the connection to start…`
+  String get setupCheckPreparing {
+    return Intl.message(
+      'Applying settings and waiting for the connection to start…',
+      name: 'setupCheckPreparing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This check covers the selected route, not every app or website.`
+  String get setupCheckScope {
+    return Intl.message(
+      'This check covers the selected route, not every app or website.',
+      name: 'setupCheckScope',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not confirm that the connection started. Check permissions and try again.`
+  String get setupCheckStartFailed {
+    return Intl.message(
+      'Could not confirm that the connection started. Check permissions and try again.',
+      name: 'setupCheckStartFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The check did not finish in time. You can retry or keep your settings and check later.`
+  String get setupCheckTimeout {
+    return Intl.message(
+      'The check did not finish in time. You can retry or keep your settings and check later.',
+      name: 'setupCheckTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save without connecting`
+  String get setupSaveWithoutConnecting {
+    return Intl.message(
+      'Save without connecting',
+      name: 'setupSaveWithoutConnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settings saved`
+  String get setupSavedTitle {
+    return Intl.message(
+      'Settings saved',
+      name: 'setupSavedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The connection has not been verified. You can check it now or later from Connection Doctor.`
+  String get setupSavedDesc {
+    return Intl.message(
+      'The connection has not been verified. You can check it now or later from Connection Doctor.',
+      name: 'setupSavedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Regional quick settings`
   String get setupRegionSettings {
     return Intl.message(
@@ -3428,6 +3748,36 @@ class AppLocalizations {
     return Intl.message(
       'External link',
       name: 'externalLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in Telegram`
+  String get openInTelegram {
+    return Intl.message(
+      'Open in Telegram',
+      name: 'openInTelegram',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link opens in the Telegram app.`
+  String get telegramLinkDesc {
+    return Intl.message(
+      'This link opens in the Telegram app.',
+      name: 'telegramLinkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hidden by your provider`
+  String get subscriptionUrlHidden {
+    return Intl.message(
+      'Hidden by your provider',
+      name: 'subscriptionUrlHidden',
       desc: '',
       args: [],
     );
@@ -10547,10 +10897,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Starts the VPN automatically after a valid profile is loaded`
+  /// `Starts the selected connection when ReClash opens. It does not connect now.`
   String get setupAutoRunDesc {
     return Intl.message(
-      'Starts the VPN automatically after a valid profile is loaded',
+      'Starts the selected connection when ReClash opens. It does not connect now.',
       name: 'setupAutoRunDesc',
       desc: '',
       args: [],
@@ -10610,6 +10960,26 @@ class AppLocalizations {
   /// `Next`
   String get setupNext {
     return Intl.message('Next', name: 'setupNext', desc: '', args: []);
+  }
+
+  /// `Update to the latest version first, or skip and continue setting up.`
+  String get setupUpdateDesc {
+    return Intl.message(
+      'Update to the latest version first, or skip and continue setting up.',
+      name: 'setupUpdateDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue to setup`
+  String get setupUpdateSkip {
+    return Intl.message(
+      'Continue to setup',
+      name: 'setupUpdateSkip',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Done`
@@ -17063,6 +17433,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Apply routing recommendation`
+  String get appRoutingConfirmTitle {
+    return Intl.message(
+      'Apply routing recommendation',
+      name: 'appRoutingConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your provider recommends routing local apps directly, outside the tunnel. Apply this now?`
+  String get appRoutingConfirmMessage {
+    return Intl.message(
+      'Your provider recommends routing local apps directly, outside the tunnel. Apply this now?',
+      name: 'appRoutingConfirmMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Hidden findings`
   String get milestoneDecorations {
     return Intl.message(
@@ -18488,8 +18878,7 @@ class AppLocalizations {
     return Intl.message(
       'Ready to pair on $host',
       name: 'companionReceiverRunning',
-      desc:
-          'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
       args: [host],
     );
   }
@@ -18549,8 +18938,7 @@ class AppLocalizations {
     return Intl.message(
       'Code expires in ${seconds}s',
       name: 'companionPairingExpires',
-      desc:
-          'Countdown showing how many seconds remain before the pairing code expires.',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
       args: [seconds],
     );
   }

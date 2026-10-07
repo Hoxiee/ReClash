@@ -16,7 +16,12 @@ const docIntro =
     'Header names are case-insensitive. When a ReClash header and one of its '
     'compatibility aliases are both present, the `reclash-*` value wins. Empty '
     'and unknown headers are ignored. If a response repeats the same header, '
-    'ReClash joins its values with commas before parsing it.';
+    'ReClash joins its values with commas before parsing it.\n\n'
+    'A provider that cannot set HTTP headers — static hosting such as nginx, '
+    'GitHub raw, or a Telegram-hosted file — may instead place any header as a '
+    'leading `#key: value` comment line in the subscription body (the body is '
+    'base64-decoded first when needed). A non-empty HTTP header for the same '
+    'key always overrides the body line.';
 
 const responsePreamble = '''
 HTTP/1.1 200 OK
@@ -194,6 +199,22 @@ const headerDocs = <String, Map<String, String>>{
     'value': 'Up to four comma-separated hostnames',
     'purpose': 'Supplies fallback hosts for transient fetch failures.',
     'example': 'ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com',
+  },
+  'hideUrl': {
+    'value': '`1`, `true`, or `yes`',
+    'purpose':
+        'Keeps the subscription URL off the device: the client drops the '
+        'copy-link action and locks the URL editor. Servers and all other UX '
+        'stay as usual; the stored URL still refreshes and is kept in backups.',
+    'example': 'ReClash-HideURL: 1',
+  },
+  'appRouting': {
+    'value': 'domestic',
+    'purpose':
+        'Recommends routing home-region apps outside the tunnel. The client '
+        'asks the user for confirmation, then uses its own domestic app list; '
+        'the provider cannot name packages. Android only.',
+    'example': 'ReClash-AppRouting: domestic',
   },
   'profileTitle': {
     'value': 'Profile name, plain UTF-8 or Base64',

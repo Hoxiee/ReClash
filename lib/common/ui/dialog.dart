@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -230,6 +231,10 @@ class Dialogs {
   }
 
   Future<void> openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri != null && _isTelegram(uri)) {
+      return _openTelegram(uri);
+    }
     final res = await showMessage(
       message: TextSpan(text: url),
       title: currentAppLocalizations.externalLink,
@@ -238,16 +243,100 @@ class Dialogs {
     if (res != true) {
       return;
     }
-    final uri = Uri.parse(url);
+    final parsed = uri ?? Uri.parse(url);
     unawaited(
       launchUrl(
-        uri,
-        mode: _prefersExternalApp(uri)
+        parsed,
+        mode: _prefersExternalApp(parsed)
             ? LaunchMode.externalApplication
             : LaunchMode.platformDefault,
       ),
     );
   }
+
+  /// Telegram links get their own confirmation: the handle reads back before
+  /// the jump, and the copy names the Telegram app the link hands off to
+  /// instead of the generic "external link".
+  Future<void> _openTelegram(Uri uri) async {
+    final handle = _telegramHandle(uri);
+    final res = await showCommonDialog<bool>(
+      child: Builder(
+        builder: (context) {
+          final appLocalizations = context.appLocalizations;
+          return CommonDialog(
+            title: appLocalizations.openInTelegram,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(appLocalizations.cancel),
+              ),
+              TextButton(
+                autofocus: true,
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(appLocalizations.urlSchemeOpen),
+              ),
+            ],
+            child: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GlyphIcon(
+                    AppGlyphs.telegram,
+                    size: 44,
+                    color: context.colorScheme.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  if (handle != null) ...[
+                    SelectableText(
+                      handle,
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
+                  Text(
+                    appLocalizations.telegramLinkDesc,
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    if (res != true) {
+      return;
+    }
+    unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
+  }
+}
+
+const _telegramHosts = {'t.me', 'telegram.me', 'telegram.dog'};
+
+bool _isTelegram(Uri uri) {
+  final scheme = uri.scheme.toLowerCase();
+  if (scheme == 'tg') return true;
+  return (scheme == 'http' || scheme == 'https') &&
+      _telegramHosts.contains(uri.host.toLowerCase());
+}
+
+/// `@name` for a public link; null for private invites (`t.me/+hash`,
+/// `joinchat`) and deep links that carry no readable username.
+String? _telegramHandle(Uri uri) {
+  if (uri.scheme.toLowerCase() == 'tg') {
+    final domain = uri.queryParameters['domain'];
+    return domain != null && domain.isNotEmpty ? '@$domain' : null;
+  }
+  final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+  if (segments.isEmpty) return null;
+  final first = segments.first;
+  if (first.startsWith('+') || first == 'joinchat') return null;
+  return '@$first';
 }
 
 /// Non-web schemes (tg, tonsite, custom) and Telegram's web wrappers must reach

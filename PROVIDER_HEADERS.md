@@ -6,6 +6,8 @@ ReClash can read account data and provider-specific metadata from the HTTP respo
 
 Header names are case-insensitive. When a ReClash header and one of its compatibility aliases are both present, the `reclash-*` value wins. Empty and unknown headers are ignored. If a response repeats the same header, ReClash joins its values with commas before parsing it.
 
+A provider that cannot set HTTP headers — static hosting such as nginx, GitHub raw, or a Telegram-hosted file — may instead place any header as a leading `#key: value` comment line in the subscription body (the body is base64-decoded first when needed). A non-empty HTTP header for the same key always overrides the body line.
+
 ## Response example
 
 ```http
@@ -37,6 +39,8 @@ ReClash-Custom: add
 ReClash-Settings: autorun,autoupdate
 ReClash-NewDomain: subscriptions.example.net
 ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
+ReClash-HideURL: 1
+ReClash-AppRouting: domestic
 ```
 
 `upload`, `download`, and `total` are byte counts. `expire` is a Unix timestamp in seconds.
@@ -72,6 +76,8 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 | `panelSettings` | `reclash-settings` | — | Comma-separated setting tokens | Supplies application defaults when the profile is first added. |
 | `newDomain` | `reclash-newdomain`, `flclashx-newdomain` | — | Hostname with optional port | Proposes a subscription-domain migration subject to fetch and configuration checks. |
 | `fallbackHosts` | `reclash-fallbackhosts` | — | Up to four comma-separated hostnames | Supplies fallback hosts for transient fetch failures. |
+| `hideUrl` | `reclash-hideurl`, `hide-url` | — | `1`, `true`, or `yes` | Keeps the subscription URL off the device: the client drops the copy-link action and locks the URL editor. Servers and all other UX stay as usual; the stored URL still refreshes and is kept in backups. |
+| `appRouting` | `reclash-approuting` | — | domestic | Recommends routing home-region apps outside the tunnel. The client asks the user for confirmation, then uses its own domestic app list; the provider cannot name packages. Android only. |
 | `profileTitle` | `profile-title` | — | Profile name, plain UTF-8 or Base64 | Names the imported profile unless the user has renamed it. Use `base64:` for non-ASCII text. |
 
 Parsed outside the converter, documented for completeness:

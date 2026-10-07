@@ -170,16 +170,63 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'fallbackHosts',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-hideurl', 'hide-url'],
+    canonicalKey: 'hideUrl',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-approuting'],
+    canonicalKey: 'appRouting',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['profile-title'],
     canonicalKey: 'profileTitle',
   ),
 ];
 
-Map<String, String> normalizePanelHeaders(Map<String, List<String>> headers) {
+// hwid verdicts are response-only, never read from a static body.
+final _bodyHeaderKeys = <String>{
+  for (final converter in _panelHeaderConverters)
+    for (final key in converter.sourceKeys)
+      if (!key.startsWith('x-hwid')) key,
+};
+
+/// Reads leading `#key: value` comment lines from an already-decoded
+/// subscription body, the fallback for static hosting (nginx, GitHub raw,
+/// Telegram files) that cannot set HTTP headers. Only recognized keys are kept,
+/// so inline node fragments and ordinary comments are ignored; first value wins.
+Map<String, List<String>> parsePanelBodyHeaders(String body) {
+  if (body.isEmpty || !body.contains('#')) return const {};
+  final result = <String, List<String>>{};
+  for (final rawLine in const LineSplitter().convert(body)) {
+    final line = rawLine.trim();
+    if (!line.startsWith('#')) continue;
+    final content = line.substring(1).trimLeft();
+    final colon = content.indexOf(':');
+    if (colon <= 0) continue;
+    final key = content.substring(0, colon).trim().toLowerCase();
+    if (!_bodyHeaderKeys.contains(key) || result.containsKey(key)) continue;
+    final value = content.substring(colon + 1).trim();
+    if (value.isEmpty) continue;
+    result[key] = [value];
+  }
+  return result;
+}
+
+/// [bodyFallback] carries `#`-comment headers; a non-empty HTTP header for the
+/// same wire key overrides it.
+Map<String, String> normalizePanelHeaders(
+  Map<String, List<String>> headers, {
+  Map<String, List<String>> bodyFallback = const {},
+}) {
   final raw = <String, String>{
-    for (final entry in headers.entries)
+    for (final entry in bodyFallback.entries)
       entry.key.toLowerCase(): entry.value.join(',').trim(),
   };
+  for (final entry in headers.entries) {
+    final value = entry.value.join(',').trim();
+    if (value.isEmpty) continue;
+    raw[entry.key.toLowerCase()] = value;
+  }
   if (raw.isEmpty) return const {};
   final result = <String, String>{};
   for (final converter in _panelHeaderConverters) {

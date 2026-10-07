@@ -217,119 +217,121 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(time) => "${time} da tekshirildi";
 
-  static String m82(count) => "${count} ta profil tayyor";
+  static String m82(count) => "Sozlangan ro‘yxatdagi ilovalar: ${count}";
 
-  static String m83(step, count) => "${count} qadamdan ${step}-qadam";
+  static String m83(count) => "${count} ta profil tayyor";
 
-  static String m84(name) => "Profil: ${name}";
+  static String m84(step, count) => "${count} qadamdan ${step}-qadam";
 
-  static String m85(value) => "Aqlli yo‘naltirish: ${value}";
+  static String m85(name) => "Profil: ${name}";
 
-  static String m86(rule, time) => "Moslik ${rule} • ${time}";
+  static String m86(value) => "Aqlli yo‘naltirish: ${value}";
 
-  static String m87(alive, total) =>
+  static String m87(rule, time) => "Moslik ${rule} • ${time}";
+
+  static String m88(alive, total) =>
       "Hozir ${total} ta serverdan ${alive} tasi ishlaydi";
 
-  static String m88(percent, duration) => "${duration} davomida ${percent}%";
+  static String m89(percent, duration) => "${duration} davomida ${percent}%";
 
-  static String m89(band) => "${band} diapazoni";
+  static String m90(band) => "${band} diapazoni";
 
-  static String m90(bands) => "Oraliqlar: ${bands}";
+  static String m91(bands) => "Oraliqlar: ${bands}";
 
-  static String m91(count) =>
+  static String m92(count) =>
       "${count} ta muvaffaqiyatsiz urinishdan keyin sovimoqda";
 
-  static String m92(answered, total) =>
+  static String m93(answered, total) =>
       "${total} tadan ${answered} tasi javob berdi";
 
-  static String m93(seconds) => "${seconds} s qoldi";
+  static String m94(seconds) => "${seconds} s qoldi";
 
-  static String m94(count) => "${count} epizod";
+  static String m95(count) => "${count} epizod";
 
-  static String m95(count) => "Ketma-ket ${count} marta ishlamadi";
+  static String m96(count) => "Ketma-ket ${count} marta ishlamadi";
 
-  static String m96(strategy) => "${strategy} standartidan oʻzgartirildi";
+  static String m97(strategy) => "${strategy} standartidan oʻzgartirildi";
 
-  static String m97(count) => "${count} ta yozuv yoʻqotildi";
+  static String m98(count) => "${count} ta yozuv yoʻqotildi";
 
-  static String m98(count) => "×${count}";
+  static String m99(count) => "×${count}";
 
-  static String m99(step) => "Yutqazgan qator: ${step}";
+  static String m100(step) => "Yutqazgan qator: ${step}";
 
-  static String m100(duration) => "${duration} davomida oʻlchangan";
+  static String m101(duration) => "${duration} davomida oʻlchangan";
 
-  static String m101(ms) => "${ms} ms";
+  static String m102(ms) => "${ms} ms";
 
-  static String m102(minutes) => "${minutes} daq";
+  static String m103(minutes) => "${minutes} daq";
 
-  static String m103(measured, total) =>
+  static String m104(measured, total) =>
       "${total} tadan ${measured} tasi oʻlchandi";
 
-  static String m104(value) => "${value}%";
+  static String m105(value) => "${value}%";
 
-  static String m105(preset) => "${preset} · oʻzgartirilgan";
+  static String m106(preset) => "${preset} · oʻzgartirilgan";
 
-  static String m106(left, cap) =>
+  static String m107(left, cap) =>
       "Bu soat uchun ${cap} ta tekshiruvdan ${left} tasi qoldi";
 
-  static String m107(value, against) => "${value} — ${against}";
+  static String m108(value, against) => "${value} — ${against}";
 
-  static String m108(seconds) => "${seconds} s";
+  static String m109(seconds) => "${seconds} s";
 
-  static String m109(eligible, total) =>
+  static String m110(eligible, total) =>
       "${total} tadan ${eligible} tasi yaroqli";
 
-  static String m110(count) => "Maxsus server belgilari: ${count}";
+  static String m111(count) => "Maxsus server belgilari: ${count}";
 
-  static String m111(provider) => "Provayder: ${provider}";
+  static String m112(provider) => "Provayder: ${provider}";
 
-  static String m112(count) => "Provayder bergan belgilar: ${count}";
+  static String m113(count) => "Provayder bergan belgilar: ${count}";
 
-  static String m113(eligible, total) =>
+  static String m114(eligible, total) =>
       "${total} serverdan ${eligible} tasi tayyor";
 
-  static String m114(label) =>
+  static String m115(label) =>
       "«${label}» UTF-8 boʻyicha 64 baytdan oshmasligi kerak";
 
-  static String m115(node) => "${node} orqali";
+  static String m116(node) => "${node} orqali";
 
-  static String m116(eligible, total, blocked) =>
+  static String m117(eligible, total, blocked) =>
       "${total} ta serverdan ${eligible} tasi oʻtdi, ${blocked} tasi ushlab turildi";
 
-  static String m117(strategy) => "${strategy} · oʻzgartirilgan";
+  static String m118(strategy) => "${strategy} · oʻzgartirilgan";
 
-  static String m118(from, to) => "${from} → ${to}";
+  static String m119(from, to) => "${from} → ${to}";
 
-  static String m119(time) => "${time} oldin almashtirildi";
+  static String m120(time) => "${time} oldin almashtirildi";
 
-  static String m120(label) => "Standart: ${label}";
+  static String m121(label) => "Standart: ${label}";
 
-  static String m121(count) => "${count} ta server";
+  static String m122(count) => "${count} ta server";
 
-  static String m122(step) => "Yuqoriroq turgan qator: ${step}";
+  static String m123(step) => "Yuqoriroq turgan qator: ${step}";
 
-  static String m123(client) => "Avto ${client} tanladi";
+  static String m124(client) => "Avto ${client} tanladi";
 
-  static String m124(host) => "Provayder ${host} manziliga koʻchdi";
+  static String m125(host) => "Provayder ${host} manziliga koʻchdi";
 
-  static String m125(count) =>
+  static String m126(count) =>
       "${Intl.plural(count, one: 'Obunangiz muddati ertaga tugaydi', other: 'Obunangiz muddati ${count} kundan soʻng tugaydi')}";
 
-  static String m126(value) => "Provayder tavsiya qiladi: ${value}";
+  static String m127(value) => "Provayder tavsiya qiladi: ${value}";
 
-  static String m127(percent) => "Trafikning ${percent}% ishlatildi";
+  static String m128(percent) => "Trafikning ${percent}% ishlatildi";
 
-  static String m128(count) =>
+  static String m129(count) =>
       "${Intl.plural(count, zero: 'Natija yoʻq', one: '1 natija', other: '${count} natija')}";
 
-  static String m129(total) => "${total} ichidan boʻsh";
+  static String m130(total) => "${total} ichidan boʻsh";
 
-  static String m130(label) => "${label} URL boʻlishi kerak";
-
-  static String m131(count) =>
-      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+  static String m131(label) => "${label} URL boʻlishi kerak";
 
   static String m132(count) =>
+      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+
+  static String m133(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -457,6 +459,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tarmoq hududini tanlang. Rossiya tanlansa, HWID yoqiladi; uni quyida o‘chirish mumkin. Aqlli yo‘naltirish alohida yoqiladi.",
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Boshqa"),
+    "appRoutingConfirmMessage": MessageLookupByLibrary.simpleMessage(
+      "Provayder mahalliy ilovalarni tunneldan tashqari to‘g‘ridan-to‘g‘ri yo‘naltirishni tavsiya qiladi. Hozir qo‘llansinmi?",
+    ),
+    "appRoutingConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Marshrutlash tavsiyasini qo‘llash",
+    ),
     "appearance": MessageLookupByLibrary.simpleMessage("Koʻrinish"),
     "appearanceBackground": MessageLookupByLibrary.simpleMessage("Fon"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
@@ -2068,9 +2076,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -2666,6 +2675,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Yoqilganda faqat proksi trafigi hisobga olinadi",
     ),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Brauzerda ochish"),
+    "openInTelegram": MessageLookupByLibrary.simpleMessage("Telegramda ochish"),
     "optional": MessageLookupByLibrary.simpleMessage("Ixtiyoriy"),
     "options": MessageLookupByLibrary.simpleMessage("Tanlovlar"),
     "other": MessageLookupByLibrary.simpleMessage("Boshqa"),
@@ -3319,16 +3329,44 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupAddAnotherProfile": MessageLookupByLibrary.simpleMessage(
       "Yana qo‘shish",
     ),
+    "setupAppExceptions": m82,
+    "setupAppsAll": MessageLookupByLibrary.simpleMessage(
+      "Alohida ilova istisnolari yo‘q",
+    ),
     "setupAutoRun": MessageLookupByLibrary.simpleMessage(
       "ReClash ochilganda ulanish",
     ),
     "setupAutoRunDesc": MessageLookupByLibrary.simpleMessage(
-      "Yaroqli profil yuklangach VPNni avtomatik ishga tushiradi",
+      "ReClash ochilganda tanlangan ulanishni boshlaydi. Hozirning o‘zida ulamaydi.",
     ),
     "setupAutoRunUnavailable": MessageLookupByLibrary.simpleMessage(
       "Avtomatik ulanish uchun profil qo‘shing",
     ),
     "setupBack": MessageLookupByLibrary.simpleMessage("Orqaga"),
+    "setupBehaviorDesc": MessageLookupByLibrary.simpleMessage(
+      "Ilovani ishga tushirish, avtomatik ulanish va hozir ulanish — mustaqil tanlovlar.",
+    ),
+    "setupByeDpiDesc": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan xizmatlar uchun DPI’ni mahalliy chetlab o‘tish. Tashqi IP’ni o‘zgartirmaydi va VPN serverini almashtirmaydi. Boshqa trafik bevosita o‘tadi; natija tarmog‘ingizga bog‘liq.",
+    ),
+    "setupCheckPreparing": MessageLookupByLibrary.simpleMessage(
+      "Sozlamalar qo‘llanmoqda va ulanish boshlanishi kutilmoqda…",
+    ),
+    "setupCheckScope": MessageLookupByLibrary.simpleMessage(
+      "Bu tekshiruv barcha ilova va saytlarni emas, tanlangan yo‘nalishni qamrab oladi.",
+    ),
+    "setupCheckStartFailed": MessageLookupByLibrary.simpleMessage(
+      "Ulanish boshlanganini tasdiqlab bo‘lmadi. Ruxsatlarni tekshirib, qayta urinib ko‘ring.",
+    ),
+    "setupCheckTimeout": MessageLookupByLibrary.simpleMessage(
+      "Tekshiruv vaqtida tugamadi. Qayta urinish yoki sozlamalarni saqlab, keyin tekshirish mumkin.",
+    ),
+    "setupConnectNow": MessageLookupByLibrary.simpleMessage(
+      "Ulanish va tekshirish",
+    ),
+    "setupConnectNowDesc": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan ulanishni boshlab, uning yo‘lini Connection Doctor orqali tekshiramiz. Tizim zarur ruxsatlarni so‘rashi mumkin.",
+    ),
     "setupContinueWithoutProfile": MessageLookupByLibrary.simpleMessage(
       "Profilsiz davom etish",
     ),
@@ -3339,6 +3377,24 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "VPN o‘chiq qoladi. Profilni keyin qo‘shish mumkin.",
         ),
+    "setupCoverageDesc": MessageLookupByLibrary.simpleMessage(
+      "Ilovalar ReClash’ga qanday murojaat qilishini tanlang. Qaysi ulanishlar server orqali o‘tishini qoidalar belgilaydi.",
+    ),
+    "setupCoverageDevice": MessageLookupByLibrary.simpleMessage(
+      "Qurilma ilovalarini ulash",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage(
+      "Faqat mahalliy proksi",
+    ),
+    "setupCoverageLocalDesc": MessageLookupByLibrary.simpleMessage(
+      "Faqat mahalliy proksi manzili alohida ko‘rsatilgan ilovalar u orqali ulanadi.",
+    ),
+    "setupCoverageProxy": MessageLookupByLibrary.simpleMessage(
+      "Tizim proksisini ishlatish",
+    ),
+    "setupCurrentSettings": MessageLookupByLibrary.simpleMessage(
+      "Joriy sozlamalar",
+    ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "Ixtiyoriy nosozlik hisobotlarini yuborish",
     ),
@@ -3353,8 +3409,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupDoneConnect": MessageLookupByLibrary.simpleMessage(
       "Tayyor va ulanish",
     ),
+    "setupExplore": MessageLookupByLibrary.simpleMessage(
+      "Hozircha ilovani ko‘rib chiqish",
+    ),
     "setupFinishTitle": MessageLookupByLibrary.simpleMessage(
       "Sozlamalarni tekshiring",
+    ),
+    "setupFromProfile": MessageLookupByLibrary.simpleMessage("Profildan"),
+    "setupGuided": MessageLookupByLibrary.simpleMessage(
+      "Yo‘l-yo‘riq bilan sozlash",
+    ),
+    "setupGuidedDesc": MessageLookupByLibrary.simpleMessage(
+      "Asosiy parametrlarni ko‘rib chiqib, ulanishni tekshiring.",
     ),
     "setupLanguageDesc": MessageLookupByLibrary.simpleMessage(
       "Uni keyinroq sozlamalarda o‘zgartirish mumkin",
@@ -3372,7 +3438,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupLegalTitle": MessageLookupByLibrary.simpleMessage(
       "Davom etishdan oldin",
     ),
+    "setupManual": MessageLookupByLibrary.simpleMessage("O‘zim sozlayman"),
+    "setupManualDesc": MessageLookupByLibrary.simpleMessage(
+      "Bo‘limlarni istalgan tartibda oching va parametrlarni o‘zingiz tanlang.",
+    ),
     "setupNext": MessageLookupByLibrary.simpleMessage("Keyingi"),
+    "setupNoSource": MessageLookupByLibrary.simpleMessage(
+      "Menda hali ulanish ma’lumotlari yo‘q",
+    ),
+    "setupNoSourceDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash — mijoz ilovasi, server yetkazib beruvchi emas. Provayder yoki yordam berayotgan odamdan havola yoxud konfiguratsiya faylini so‘rang.",
+    ),
     "setupPermissionBattery": MessageLookupByLibrary.simpleMessage(
       "Batareyani optimallashtirish",
     ),
@@ -3414,10 +3490,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tizim birinchi ulanishda so‘raydi",
     ),
     "setupPermissionsTitle": MessageLookupByLibrary.simpleMessage("Ruxsatlar"),
+    "setupPreferencesDesc": MessageLookupByLibrary.simpleMessage(
+      "Ulanish qanday ishlashini tekshiring. O‘zgarishlar darhol saqlanadi, ulanishni boshlash esa alohida amal.",
+    ),
     "setupProfileSourceNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash VPN xizmatini sotmaydi. Ishonchli provayder bergan havola, QR kod yoki konfiguratsiya faylidan foydalaning. Profil saqlashdan oldin tekshiriladi.",
     ),
-    "setupProfilesReady": m82,
+    "setupProfilesReady": m83,
+    "setupProxyScope": MessageLookupByLibrary.simpleMessage(
+      "Ayrim ilovalar tizim proksisini e’tiborsiz qoldiradi. Bu rejim qurilmaning barcha trafikini qamrab olmaydi.",
+    ),
     "setupRawConfig": MessageLookupByLibrary.simpleMessage(
       "Konfiguratsiya matni",
     ),
@@ -3456,8 +3538,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupRestoreDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash, FlClashX yoki FlClash nusxasidan sozlamalar va profillarni tiklash",
     ),
+    "setupRoutingDesc": MessageLookupByLibrary.simpleMessage(
+      "Qoidalar trafik yo‘nalishini belgilaydi. Aqlli yo‘naltirish server tanlashi mumkin, lekin Auto rejimiga ruxsat berish uni faollashtirmaydi.",
+    ),
+    "setupSaveWithoutConnecting": MessageLookupByLibrary.simpleMessage(
+      "Ulanmasdan saqlash",
+    ),
+    "setupSavedDesc": MessageLookupByLibrary.simpleMessage(
+      "Ulanish hali tasdiqlanmagan. Uni hozir yoki keyin Connection Doctor orqali tekshirishingiz mumkin.",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage(
+      "Sozlamalar saqlandi",
+    ),
     "setupSkip": MessageLookupByLibrary.simpleMessage("Profilsiz davom etish"),
-    "setupStepProgress": m83,
+    "setupStepProgress": m84,
     "setupSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
       "Profilda ulanish uchun kerakli serverlar va qoidalar bor. Uni provayderdan yoki zaxira nusxadan import qiling.",
     ),
@@ -3479,8 +3573,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
       "VPN profili yo‘q — VPN o‘chiq qoladi",
     ),
-    "setupSummaryProfile": m84,
-    "setupSummaryRouting": m85,
+    "setupSummaryProfile": m85,
+    "setupSummaryRouting": m86,
     "setupSummarySystemProxyOff": MessageLookupByLibrary.simpleMessage(
       "Tizim proksisi: o‘chiq",
     ),
@@ -3494,11 +3588,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
       "Administrator huquqisiz qo‘llab-quvvatlanadigan ilovalarni ReClash orqali yo‘naltiradi",
     ),
+    "setupTryWithoutProfile": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI’ni obunasiz sozlash",
+    ),
     "setupTunDesc": MessageLookupByLibrary.simpleMessage(
       "Qurilmaning barcha trafikini yo‘naltiradi; ulanishda tizim administrator huquqini so‘rashi mumkin",
     ),
+    "setupUpdateDesc": MessageLookupByLibrary.simpleMessage(
+      "Avval eng so‘nggi versiyaga yangilang yoki o‘tkazib yuborib, sozlashni davom ettiring.",
+    ),
+    "setupUpdateSkip": MessageLookupByLibrary.simpleMessage("Sozlashga o‘tish"),
     "setupWelcome": MessageLookupByLibrary.simpleMessage(
       "Bir necha tushunarli qadamdan so‘ng hammasi tayyor",
+    ),
+    "setupWelcomeTitle": MessageLookupByLibrary.simpleMessage(
+      "Ulanishingizni sozlaymiz",
     ),
     "show": MessageLookupByLibrary.simpleMessage("Koʻrsatish"),
     "showLabels": MessageLookupByLibrary.simpleMessage(
@@ -3529,7 +3633,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseFullStopDesc": MessageLookupByLibrary.simpleMessage(
       "Ishonchli tarmoqlarda pauza o‘rniga VPN’ni to‘liq to‘xtatish",
     ),
-    "smartPauseMatchedOn": m86,
+    "smartPauseMatchedOn": m87,
     "smartPauseStrict": MessageLookupByLibrary.simpleMessage(
       "SSID va quyi tarmoqni birga talab qilish",
     ),
@@ -3546,14 +3650,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAdmittedYes": MessageLookupByLibrary.simpleMessage(
       "Qo‘yilgan",
     ),
-    "smartRoutingAliveCount": m87,
+    "smartRoutingAliveCount": m88,
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "Barcha serverlar",
     ),
     "smartRoutingAvailability": MessageLookupByLibrary.simpleMessage(
       "Mavjudlik",
     ),
-    "smartRoutingAvailabilityValue": m88,
+    "smartRoutingAvailabilityValue": m89,
     "smartRoutingAverageFailover": MessageLookupByLibrary.simpleMessage(
       "Oʻrtacha almashish",
     ),
@@ -3583,8 +3687,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
       "Musbat millisekund sonini kiriting",
     ),
-    "smartRoutingBandLabel": m89,
-    "smartRoutingBands": m90,
+    "smartRoutingBandLabel": m90,
+    "smartRoutingBands": m91,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage(
       "Xatti-harakat",
     ),
@@ -3597,7 +3701,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
       "Qochiladigan davlat orqali chiqadi",
     ),
-    "smartRoutingBlockCooling": m91,
+    "smartRoutingBlockCooling": m92,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Bu yerda tekshiruvlardan oʻtmadi",
     ),
@@ -3631,7 +3735,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage(
       "Kanariya manzillari",
     ),
-    "smartRoutingCanariesAnswered": m92,
+    "smartRoutingCanariesAnswered": m93,
     "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
       "Mahalliy kanariyalar",
     ),
@@ -3674,7 +3778,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "Hozircha server tanlanmagan",
     ),
-    "smartRoutingCoolFor": m93,
+    "smartRoutingCoolFor": m94,
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Davlatni aniqlash xizmatlari",
     ),
@@ -3789,7 +3893,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEnvKey": MessageLookupByLibrary.simpleMessage(
       "Tarmoq xotirasi kaliti",
     ),
-    "smartRoutingEpisodes": m94,
+    "smartRoutingEpisodes": m95,
     "smartRoutingEvidenceDomesticFail": MessageLookupByLibrary.simpleMessage(
       "Hech bir mahalliy manzil javob bermadi",
     ),
@@ -3838,7 +3942,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingExported": MessageLookupByLibrary.simpleMessage(
       "Aqlli marshrutlash sozlamalari eksport qilindi",
     ),
-    "smartRoutingFails": m95,
+    "smartRoutingFails": m96,
     "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage(
       "Strategiya standart qiymatiga qaytarish",
     ),
@@ -3941,7 +4045,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Trafik o‘tkazgan",
     ),
     "smartRoutingKeyVerdict": MessageLookupByLibrary.simpleMessage("Hukm"),
-    "smartRoutingLadderChangedDefault": m96,
+    "smartRoutingLadderChangedDefault": m97,
     "smartRoutingLadderEditor": MessageLookupByLibrary.simpleMessage(
       "Taqqoslash zinapoyasi",
     ),
@@ -3993,7 +4097,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLogDesc": MessageLookupByLibrary.simpleMessage(
       "Mexanizm xatti-harakatining toʻliq qaydi",
     ),
-    "smartRoutingLogDropped": m97,
+    "smartRoutingLogDropped": m98,
     "smartRoutingLogEmpty": MessageLookupByLibrary.simpleMessage(
       "Marshrutlash faoliyati hali qayd etilmagan",
     ),
@@ -4018,12 +4122,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLogOffTitle": MessageLookupByLibrary.simpleMessage(
       "Diagnostika jurnali oʻchiq",
     ),
-    "smartRoutingLogRepeat": m98,
+    "smartRoutingLogRepeat": m99,
     "smartRoutingLogState": MessageLookupByLibrary.simpleMessage("Holat"),
     "smartRoutingLogWaiting": MessageLookupByLibrary.simpleMessage(
       "Mexanizm kutilmoqda…",
     ),
-    "smartRoutingLostAt": m99,
+    "smartRoutingLostAt": m100,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Qoʻlda tanlovni saqlash",
     ),
@@ -4079,12 +4183,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Bu statuslardan birini qaytarsa, server tasdiqlangan deb hisoblanadi",
     ),
-    "smartRoutingMeasuredOver": m100,
+    "smartRoutingMeasuredOver": m101,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage(
       "Trafik hisoblanadigan tarmoq",
     ),
-    "smartRoutingMillis": m101,
-    "smartRoutingMinutes": m102,
+    "smartRoutingMillis": m102,
+    "smartRoutingMinutes": m103,
     "smartRoutingMore": MessageLookupByLibrary.simpleMessage("Yana"),
     "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage(
       "Ichki mamlakat server nomi ishoralari",
@@ -4111,7 +4215,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("UDP yoʻq"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m103,
+    "smartRoutingNodesMeasured": m104,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "Umumiy maqsadli",
     ),
@@ -4128,7 +4232,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPacingDesc": MessageLookupByLibrary.simpleMessage(
       "Dvigatel reaksiya tezligi va tekshiruvlarga ishonch muddati",
     ),
-    "smartRoutingPercent": m104,
+    "smartRoutingPercent": m105,
     "smartRoutingPortal": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi tarmogʻiga kirish kerak",
     ),
@@ -4136,12 +4240,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tayyor sozlama",
     ),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Xitoy"),
-    "smartRoutingPresetEdited": m105,
+    "smartRoutingPresetEdited": m106,
     "smartRoutingPresetEgypt": MessageLookupByLibrary.simpleMessage("Misr"),
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Eron"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Boshqa"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Rossiya"),
-    "smartRoutingProbeBudget": m106,
+    "smartRoutingProbeBudget": m107,
     "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
       "Erishuvchanlik tekshiruvlari",
     ),
@@ -4315,11 +4419,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Serverlarni nomi, provayderi yoki oʻlchangan davlati boʻyicha eʼtiborsiz qoldirish, ushlab turish yoki afzal koʻrish",
     ),
     "smartRoutingRungOff": MessageLookupByLibrary.simpleMessage("Oʻchiq"),
-    "smartRoutingRungVersus": m107,
+    "smartRoutingRungVersus": m108,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Server tanlanmoqda…",
     ),
-    "smartRoutingSeconds": m108,
+    "smartRoutingSeconds": m109,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage(
       "Mexanizm",
     ),
@@ -4343,11 +4447,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("Qaror"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Serverlar"),
-    "smartRoutingServersCount": m109,
+    "smartRoutingServersCount": m110,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "Istalgan provayder",
     ),
-    "smartRoutingServiceCandidates": m110,
+    "smartRoutingServiceCandidates": m111,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "Xizmat yoʻnalishidan foydalanish",
     ),
@@ -4404,8 +4508,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "Yadro kutilmoqda",
     ),
-    "smartRoutingServiceProvider": m111,
-    "smartRoutingServiceProviderCandidates": m112,
+    "smartRoutingServiceProvider": m112,
+    "smartRoutingServiceProviderCandidates": m113,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "Provayderning aniq nomi; istalgan provayder uchun boʻsh qoldiring",
     ),
@@ -4415,7 +4519,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "Obuna manifesti",
     ),
-    "smartRoutingServiceReady": m113,
+    "smartRoutingServiceReady": m114,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage(
       "Yoʻnalish",
     ),
@@ -4432,8 +4536,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Belgilar manbalari",
     ),
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("Holat"),
-    "smartRoutingServiceTokenTooLong": m114,
-    "smartRoutingServiceVia": m115,
+    "smartRoutingServiceTokenTooLong": m115,
+    "smartRoutingServiceVia": m116,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "Reklamasiz YouTube",
     ),
@@ -4447,7 +4551,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Kimga ruxsat berilganini hal qildi",
     ),
-    "smartRoutingStepAdmitBody": m116,
+    "smartRoutingStepAdmitBody": m117,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Buni tanladi",
     ),
@@ -4467,7 +4571,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "Hamma narsaga mos — ishonchingiz komil boʻlmasa, shuni qoldiring",
     ),
-    "smartRoutingStrategyEdited": m117,
+    "smartRoutingStrategyEdited": m118,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Tezlik",
     ),
@@ -4502,11 +4606,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingSwitchImprovePctDesc": MessageLookupByLibrary.simpleMessage(
       "Raqib tezlikda yutish uchun ishlatilayotgan serverdan shu ulushda ham oldinda boʻlishi kerak",
     ),
-    "smartRoutingSwitchLine": m118,
+    "smartRoutingSwitchLine": m119,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage(
       "almashtirilgan",
     ),
-    "smartRoutingSwitchedAgo": m119,
+    "smartRoutingSwitchedAgo": m120,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage(
       "Tafsilotlar",
     ),
@@ -4547,7 +4651,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingVocabBlockGroup": MessageLookupByLibrary.simpleMessage(
       "Darvozalar",
     ),
-    "smartRoutingVocabDefault": m120,
+    "smartRoutingVocabDefault": m121,
     "smartRoutingVocabDuplicate": MessageLookupByLibrary.simpleMessage(
       "Boshqa yozuv allaqachon shunday oʻqiladi",
     ),
@@ -4588,12 +4692,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "Bir fon tekshiruvi nechta serverni oʻlchaydi",
     ),
-    "smartRoutingWaveNodes": m121,
+    "smartRoutingWaveNodes": m122,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Havola tekshiruvi",
     ),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Sabab"),
-    "smartRoutingWinsAt": m122,
+    "smartRoutingWinsAt": m123,
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "sort": MessageLookupByLibrary.simpleMessage("Tartiblash"),
     "source": MessageLookupByLibrary.simpleMessage("Manba"),
@@ -4648,9 +4752,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova obunani aynan shu mijoz formatida soʻraydi",
     ),
-    "subscriptionClientExperimentalNotice": MessageLookupByLibrary.simpleMessage(
-      "Moslik presetlari ReClash\'ni boshqa ilova sifatida ko\'rsatadi, shunda panel o\'sha klient formatini beradi, uni ReClash keyin o\'giradi. Faqat oddiy so\'rov tugunlarni qaytarmaganda foydalaning.",
-    ),
+    "subscriptionClientExperimentalNotice":
+        MessageLookupByLibrary.simpleMessage(
+          "Moslik presetlari ReClash\'ni boshqa ilova sifatida ko\'rsatadi, shunda panel o\'sha klient formatini beradi, uni ReClash keyin o\'giradi. Faqat oddiy so\'rov tugunlarni qaytarmaganda foydalaning.",
+        ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientHappHint": MessageLookupByLibrary.simpleMessage(
       "Faqat o\'z formatini beradigan panellar uchun Happ ilovasi sifatida ko\'rsatiladi.",
@@ -4669,7 +4774,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ReClash to\'g\'ridan-to\'g\'ri o\'qiydigan Clash oilasidagi format.",
     ),
     "subscriptionClientPin": MessageLookupByLibrary.simpleMessage("Mahkamlash"),
-    "subscriptionClientResolvedTo": m123,
+    "subscriptionClientResolvedTo": m124,
     "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
       "Sing-box",
     ),
@@ -4697,11 +4802,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPNni chetlab qayta urinish kerakmi?",
     ),
-    "subscriptionDomainMoved": m124,
+    "subscriptionDomainMoved": m125,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Obunangiz muddati tugagan",
     ),
-    "subscriptionExpiresInDays": m125,
+    "subscriptionExpiresInDays": m126,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Obunangiz muddati bugun tugaydi",
     ),
@@ -4753,7 +4858,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Obuna eslatmalari",
     ),
-    "subscriptionProviderInterval": m126,
+    "subscriptionProviderInterval": m127,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Obuna hisoboti",
     ),
@@ -4787,11 +4892,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Yangilanish nosozliklari",
     ),
-    "subscriptionTrafficLow": m127,
+    "subscriptionTrafficLow": m128,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Obunada odatiy tugun manzillari topilmadi. Panel vaqtinchalik bo‘sh konfiguratsiya qaytargan bo‘lishi mumkin. Serverlarga ulanish tekshirilmadi.",
     ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Yangilandi"),
+    "subscriptionUrlHidden": MessageLookupByLibrary.simpleMessage(
+      "Provayderingiz tomonidan yashirilgan",
+    ),
     "support": MessageLookupByLibrary.simpleMessage("Qoʻllab-quvvatlash"),
     "sync": MessageLookupByLibrary.simpleMessage("Sinxronlash"),
     "system": MessageLookupByLibrary.simpleMessage("Tizim"),
@@ -4820,6 +4928,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Bir vaqtda bir nechta TCP ulanishiga ruxsat berish",
+    ),
+    "telegramLinkDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu havola Telegram ilovasida ochiladi.",
     ),
     "testInterval": MessageLookupByLibrary.simpleMessage("Test oraligʻi"),
     "testUrl": MessageLookupByLibrary.simpleMessage("Sinov URL"),
@@ -4866,7 +4977,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsSearchHint": MessageLookupByLibrary.simpleMessage(
       "Vositalarni qidirish",
     ),
-    "toolsSearchResultsCount": m128,
+    "toolsSearchResultsCount": m129,
     "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
       "Bu yerda ko‘rish uchun sozlamani tanlang.",
     ),
@@ -4876,7 +4987,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jami trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafik"),
-    "trafficFreeOfTotal": m129,
+    "trafficFreeOfTotal": m130,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
@@ -4978,7 +5089,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Oʻchiq boʻlsa ulaydi, yoniq boʻlsa uzadi",
     ),
-    "urlTip": m130,
+    "urlTip": m131,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -5032,7 +5143,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperLibraryFull": m131,
+    "wallpaperLibraryFull": m132,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -5118,7 +5229,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Olingan vaqtni tizim soatiga sinxronlash",
     ),
-    "yearsAgo": m132,
+    "yearsAgo": m133,
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",
     ),

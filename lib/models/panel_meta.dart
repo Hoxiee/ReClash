@@ -7,6 +7,9 @@ part 'generated/panel_meta.g.dart';
 
 enum PanelWidgetsApplyMode { add, update }
 
+bool _isTruthy(String? value) =>
+    const {'1', 'true', 'yes'}.contains(value?.trim().toLowerCase());
+
 /// Descending, de-duplicated positive thresholds from a comma list; null when
 /// the header carries nothing usable so callers fall back to their defaults.
 List<int>? _parseIntList(String? raw, {required int max}) {
@@ -50,13 +53,18 @@ abstract class PanelMeta with _$PanelMeta {
     String? heroRing,
     String? heroEffect,
     String? activeText,
+    String? appRouting,
+    @Default(false) bool hideUrl,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
       _$PanelMetaFromJson(json);
 
-  factory PanelMeta.fromHeaders(Map<String, List<String>> headers) {
-    final map = normalizePanelHeaders(headers);
+  factory PanelMeta.fromHeaders(
+    Map<String, List<String>> headers, {
+    Map<String, List<String>> bodyFallback = const {},
+  }) {
+    final map = normalizePanelHeaders(headers, bodyFallback: bodyFallback);
     if (map.isEmpty) return const PanelMeta();
     final interval = int.tryParse(map['updateIntervalMinutes'] ?? '');
     final widgets = (map['panelWidgets'] ?? '')
@@ -105,6 +113,8 @@ abstract class PanelMeta with _$PanelMeta {
       heroRing: map['heroRing'],
       heroEffect: map['heroEffect'],
       activeText: map['activeText'],
+      appRouting: map['appRouting']?.trim().toLowerCase(),
+      hideUrl: _isTruthy(map['hideUrl']),
     );
   }
 }
@@ -138,5 +148,7 @@ extension PanelMetaExt on PanelMeta {
       heroRing != null ||
       heroEffect != null ||
       activeText != null ||
+      appRouting != null ||
+      hideUrl ||
       settings != null;
 }

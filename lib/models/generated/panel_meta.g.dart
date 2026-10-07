@@ -47,6 +47,8 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   heroRing: json['heroRing'] as String?,
   heroEffect: json['heroEffect'] as String?,
   activeText: json['activeText'] as String?,
+  appRouting: json['appRouting'] as String?,
+  hideUrl: json['hideUrl'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -79,6 +81,8 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'heroRing': instance.heroRing,
       'heroEffect': instance.heroEffect,
       'activeText': instance.activeText,
+      'appRouting': instance.appRouting,
+      'hideUrl': instance.hideUrl,
     };
 
 const _$PanelWidgetsApplyModeEnumMap = {

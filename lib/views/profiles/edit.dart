@@ -324,7 +324,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     final items = <Widget>[
       _ProfileNameField(controller: _labelController),
       if (widget.profile.type == ProfileType.url) ...[
-        _ProfileUrlField(controller: _urlController),
+        if (widget.profile.panelMeta?.hideUrl ?? false)
+          const _ProfileUrlLockedField()
+        else
+          _ProfileUrlField(controller: _urlController),
         ListItem.toggle(
           title: Text(appLocalizations.autoUpdate),
           value: _autoUpdate,
@@ -444,6 +447,22 @@ class _ProfileUrlField extends StatelessWidget {
           return null;
         },
       ),
+    );
+  }
+}
+
+/// A provider that sent `reclash-hideurl` keeps its subscription address off the
+/// device: the field reads as locked instead of exposing or editing the URL.
+class _ProfileUrlLockedField extends StatelessWidget {
+  const _ProfileUrlLockedField();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return ListItem(
+      leading: const GlyphIcon(AppGlyphs.lock),
+      title: Text(appLocalizations.url),
+      subtitle: Text(appLocalizations.subscriptionUrlHidden),
     );
   }
 }

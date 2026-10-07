@@ -232,6 +232,15 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('normalizes the app-routing recommendation', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-approuting': ['  Domestic  '],
+      });
+
+      expect(meta.appRouting, 'domestic');
+      expect(meta.hasContent, isTrue);
+    });
+
     test('flclashx compatibility spellings map to the same fields', () {
       final meta = PanelMeta.fromHeaders({
         'flclashx-servicename': ['Example VPN'],
@@ -333,6 +342,68 @@ void main() {
       expect(meta.newDomain, 'new.example.com');
       expect(meta.profileTitle, 'My Subscription');
       expect(meta.hasContent, isTrue);
+    });
+
+    test('parses hide-url truthy values and ignores the rest', () {
+      for (final value in ['1', 'true', 'YES']) {
+        expect(
+          PanelMeta.fromHeaders({
+            'reclash-hideurl': [value],
+          }).hideUrl,
+          isTrue,
+        );
+      }
+      expect(
+        PanelMeta.fromHeaders({
+          'hide-url': ['0'],
+        }).hideUrl,
+        isFalse,
+      );
+      expect(const PanelMeta().hideUrl, isFalse);
+    });
+  });
+
+  group('parsePanelBodyHeaders', () {
+    test('reads leading comment headers and skips unknown keys', () {
+      const body =
+          '#profile-title: Kiwi VPN\n'
+          '#support-url: https://t.me/kiwi\n'
+          '#random-note: ignored\n'
+          'vless://uuid@example.com:443#Node';
+
+      expect(parsePanelBodyHeaders(body), {
+        'profile-title': ['Kiwi VPN'],
+        'support-url': ['https://t.me/kiwi'],
+      });
+    });
+
+    test('an inline node fragment is not a header', () {
+      expect(
+        parsePanelBodyHeaders('vless://uuid@example.com:443#support-url: x'),
+        isEmpty,
+      );
+    });
+
+    test('http header overrides the body fallback for the same key', () {
+      final meta = PanelMeta.fromHeaders(
+        {
+          'profile-title': ['From Header'],
+        },
+        bodyFallback: parsePanelBodyHeaders(
+          '#profile-title: From Body\n#support-url: https://t.me/body',
+        ),
+      );
+
+      expect(meta.profileTitle, 'From Header');
+      expect(meta.supportUrl, 'https://t.me/body');
+    });
+
+    test('an empty http header does not erase the body fallback', () {
+      final meta = PanelMeta.fromHeaders({
+        'profile-title': [''],
+      }, bodyFallback: parsePanelBodyHeaders('#profile-title: From Body'));
+
+      expect(meta.profileTitle, 'From Body');
     });
   });
 }

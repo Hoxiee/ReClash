@@ -18,6 +18,15 @@ import 'profile.dart';
 
 final _profileCommitTails = <int, Future<void>>{};
 
+// A base64 blob hides its `#`-comment headers until decoded, the same decision
+// the share-link scanner makes before reading the node list.
+String _panelBodyText(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.contains('#')) return trimmed;
+  final decoded = tryBase64Decode(trimmed.replaceAll(RegExp(r'\s+'), ''));
+  return decoded != null && decoded.contains('#') ? decoded : '';
+}
+
 Future<T> _serializeProfileCommit<T>(
   int profileId,
   Future<T> Function() action,
@@ -447,7 +456,11 @@ extension ProfileExtension on Profile {
   }) async {
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
-    final panelMeta = PanelMeta.fromHeaders(response.headers.map);
+    final rawBody = utf8.decode(data, allowMalformed: true);
+    final panelMeta = PanelMeta.fromHeaders(
+      response.headers.map,
+      bodyFallback: parsePanelBodyHeaders(_panelBodyText(rawBody)),
+    );
     final capabilityHeader = parseCapabilityManifestHeader(
       response.headers.map,
     );
@@ -479,10 +492,7 @@ extension ProfileExtension on Profile {
     })
     validated;
     try {
-      validated = await _validatedConfig(
-        utf8.decode(data, allowMalformed: true),
-        validate: validate,
-      );
+      validated = await _validatedConfig(rawBody, validate: validate);
     } on ProfileValidationException {
       if (panelMeta.hwidMaxDevicesReached || panelMeta.hwidNotSupported) {
         throw ProfilePanelException(panelMeta);

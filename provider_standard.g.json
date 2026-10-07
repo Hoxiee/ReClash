@@ -260,6 +260,25 @@
       "purpose": "Supplies fallback hosts for transient fetch failures."
     },
     {
+      "canonical": "hideUrl",
+      "sourceKeys": [
+        "reclash-hideurl",
+        "hide-url"
+      ],
+      "transform": "none",
+      "value": "`1`, `true`, or `yes`",
+      "purpose": "Keeps the subscription URL off the device: the client drops the copy-link action and locks the URL editor. Servers and all other UX stay as usual; the stored URL still refreshes and is kept in backups."
+    },
+    {
+      "canonical": "appRouting",
+      "sourceKeys": [
+        "reclash-approuting"
+      ],
+      "transform": "none",
+      "value": "domestic",
+      "purpose": "Recommends routing home-region apps outside the tunnel. The client asks the user for confirmation, then uses its own domestic app list; the provider cannot name packages. Android only."
+    },
+    {
       "canonical": "profileTitle",
       "sourceKeys": [
         "profile-title"
