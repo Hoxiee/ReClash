@@ -504,6 +504,7 @@ class ProfilesAction extends _$ProfilesAction {
       await _rememberPreparedHosts(prepared, profile);
       applyPanelWidgetsFromMeta(profile.panelMeta);
       await confirmAndApplyPanelSettings(profile.panelMeta);
+      await confirmAndApplyAppRouting(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta, onImport: true));
     }
   }
@@ -658,6 +659,34 @@ class ProfilesAction extends _$ProfilesAction {
     );
     if (!confirmed) return false;
     _applyPanelSettingsDefaults(tokens);
+    return true;
+  }
+
+  // Provider only recommends the behavior; the bypass set comes from our own
+  // domestic matcher, never from provider-named packages. Android only.
+  @visibleForTesting
+  Future<bool> confirmAndApplyAppRouting(PanelMeta? meta) async {
+    if (meta?.appRouting != 'domestic' || app == null) return false;
+    final confirmed = await dialogs.confirm(
+      currentAppLocalizations.appRoutingConfirmMessage,
+      title: currentAppLocalizations.appRoutingConfirmTitle,
+    );
+    if (!confirmed) return false;
+    final domestic =
+        await app?.getDomesticPackageNames(ref.read(appRegionProvider)) ??
+        const <String>[];
+    if (domestic.isEmpty) return false;
+    ref
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            accessControlProps: state.accessControlProps.copyWith(
+              enable: true,
+              mode: AccessControlMode.rejectSelected,
+              rejectList: domestic,
+            ),
+          ),
+        );
     return true;
   }
 
