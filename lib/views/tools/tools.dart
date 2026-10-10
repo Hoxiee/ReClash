@@ -420,10 +420,14 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     bool hasFindings,
     String? locale,
   ) {
+    final tunStack = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.stack),
+    );
     final signature = Object.hash(
       locale,
       enableDeveloperMode,
       hasFindings,
+      tunStack,
       Object.hashAll(navigationItems.map((item) => item.label.name)),
     );
     if (signature != _indexSignature) {
@@ -659,6 +663,10 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         return !system.isDesktop;
       case 'windows':
         return system.isWindows;
+      case 'linuxOrWindows':
+        return system.isLinux || system.isWindows;
+      case 'mipsStack':
+        return ref.read(patchClashConfigProvider).tun.stack == TunStack.mips;
       case 'macos':
         return system.isMacOS;
       case 'linux':

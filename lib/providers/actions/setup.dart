@@ -571,7 +571,10 @@ class SetupAction extends _$SetupAction {
       rules.addAll(setupState.rules);
     }
     final realPatchConfig = patchConfig.copyWith(
-      tun: patchConfig.tun.getRealTun(routeMode),
+      tun: patchConfig.tun.getRealTun(
+        routeMode,
+        region: ref.read(appRegionProvider),
+      ),
     );
     Map<String, dynamic> rawConfig = configMap;
     if (scriptContent?.isNotEmpty == true) {
@@ -590,6 +593,7 @@ class SetupAction extends _$SetupAction {
         overrideNtp: overrideNtp,
         appendSystemDns: appendSystemDns,
         overrideNetwork: overrideNetwork,
+        tunOverride: setupState.tunOverride,
         addedRules: addedRules,
         defaultUA: defaultUA,
         smartRouting: smartRouting,

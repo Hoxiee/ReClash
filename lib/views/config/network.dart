@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -333,6 +336,140 @@ class RouteAddressItem extends ConsumerWidget {
   }
 }
 
+const _congestionControllers = [
+  defaultCongestionController,
+  'reno',
+  'bbr',
+  'bbr3',
+];
+
+String? _validateTunCidr(String value, AppLocalizations l) {
+  final parts = value.trim().split('/');
+  if (parts.length != 2 || parts.first.contains('%')) return l.invalidCidr;
+  final address = InternetAddress.tryParse(parts.first);
+  final prefix = int.tryParse(parts.last);
+  return address == null ||
+          prefix == null ||
+          prefix < 0 ||
+          prefix > address.rawAddress.length * 8
+      ? l.invalidCidr
+      : null;
+}
+
+class _TunMtuItem extends ConsumerWidget {
+  const _TunMtuItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final region = ref.watch(appRegionProvider);
+    final mtu = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.mtu),
+    );
+    final effectiveMtu = mtu ?? profileForCode(region).tunMtu;
+    final setMtu = _tunWriter<int?>(
+      (state, value) => state.copyWith.tun(mtu: value),
+    );
+    return DecorationListItem.input(
+      search: const SettingSearch(keywords: ['TUN', 'MTU']),
+      title: const Text('MTU'),
+      subtitle: Text(
+        mtu == null ? '$effectiveMtu · ${l.tunMtuAutomatic}' : '$effectiveMtu',
+      ),
+      trailing: mtu == null
+          ? null
+          : IconButton(
+              tooltip: l.reset,
+              icon: const Icon(Icons.restore),
+              onPressed: () => setMtu(ref, null),
+            ),
+      dialogTitle: 'MTU',
+      value: '$effectiveMtu',
+      maxLength: 5,
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        final number = int.tryParse(value?.trim() ?? '');
+        return number == null || number < minTunMtu || number > maxTunMtu
+            ? l.tunMtuInvalid
+            : null;
+      },
+      onChanged: (value) {
+        if (value == null) return;
+        setMtu(ref, int.parse(value.trim()));
+      },
+    );
+  }
+}
+
+List<Widget> tunOptionsItems({
+  required bool isLinux,
+  required bool isWindows,
+  required bool isMipsStack,
+}) => [
+  const _TunMtuItem(),
+  if (isMipsStack)
+    ConfigOptionsItem<String>(
+      search: const SettingSearch(gate: SettingGate.mipsStack),
+      title: (l) => l.congestionController,
+      options: _congestionControllers,
+      textBuilder: (value) => value,
+      selector: patchClashConfigProvider.select(
+        (state) => state.tun.congestionController,
+      ),
+      onChanged: _tunWriter(
+        (state, value) => state.copyWith.tun(congestionController: value),
+      ),
+    ),
+  if (isLinux || isWindows)
+    ConfigToggleItem(
+      search: const SettingSearch(gate: SettingGate.linuxOrWindows),
+      title: (l) => l.strictRoute,
+      subtitle: (l) => l.strictRouteDesc,
+      selector: patchClashConfigProvider.select(
+        (state) => state.tun.strictRoute,
+      ),
+      onChanged: _tunWriter(
+        (state, value) => state.copyWith.tun(strictRoute: value),
+      ),
+    ),
+  ConfigListInputItem(
+    search: const SettingSearch(keywords: ['TUN', 'CIDR']),
+    title: (l) => l.routeExcludeAddress,
+    subtitle: (l) => l.routeExcludeAddressDesc,
+    itemMaxLength: TextInputLimits.cidr,
+    itemValidator: _validateTunCidr,
+    selector: patchClashConfigProvider.select(
+      (state) => state.tun.routeExcludeAddress,
+    ),
+    onChanged: _tunWriter(
+      (state, value) => state.copyWith.tun(
+        routeExcludeAddress: [for (final address in value) address.trim()],
+      ),
+    ),
+  ),
+];
+
+class _TunSection extends ConsumerWidget {
+  const _TunSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isMipsStack = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => state.tun.stack == TunStack.mips,
+      ),
+    );
+    return SettingSection(
+      title: context.appLocalizations.tun,
+      items: tunOptionsItems(
+        isLinux: system.isLinux,
+        isWindows: system.isWindows,
+        isMipsStack: isMipsStack,
+      ),
+    );
+  }
+}
+
 List<Widget> networkOptionsItems({
   required bool isDesktop,
   required bool isMacOS,
@@ -418,6 +555,7 @@ class NetworkListView extends ConsumerWidget {
             enterDelay: const Duration(milliseconds: 50),
           ),
         ],
+        if (system.isAndroid || system.isDesktop) const _TunSection(),
         const SettingBottomInset(),
       ],
     );

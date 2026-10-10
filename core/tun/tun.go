@@ -23,7 +23,7 @@ import (
 // whether tunNew was reached; the options built below never enable the
 // tun features whose validation runs before tunNew, so New cannot fail
 // before taking ownership of dupFd.
-func Start(fd int, stack string, address, dns string) *sing_tun.Listener {
+func Start(fd int, stack string, address, dns string, opts Options, disableICMPForwarding bool) *sing_tun.Listener {
 	var prefix4 []netip.Prefix
 	var prefix6 []netip.Prefix
 	tunStack, ok := constant.StackTypeMapping[strings.ToLower(stack)]
@@ -72,16 +72,18 @@ func Start(fd int, stack string, address, dns string) *sing_tun.Listener {
 	defer func() { _ = syscall.Close(fd) }()
 
 	options := LC.Tun{
-		Enable:              true,
-		Device:              "ReClash",
-		Stack:               tunStack,
-		DNSHijack:           dnsHijack,
-		AutoRoute:           false,
-		AutoDetectInterface: false,
-		Inet4Address:        prefix4,
-		Inet6Address:        prefix6,
-		MTU:                 9000,
-		FileDescriptor:      dupFd,
+		Enable:                true,
+		Device:                "ReClash",
+		Stack:                 tunStack,
+		DNSHijack:             dnsHijack,
+		AutoRoute:             false,
+		AutoDetectInterface:   false,
+		Inet4Address:          prefix4,
+		Inet6Address:          prefix6,
+		MTU:                   opts.NormalizedMTU(),
+		CongestionController:  opts.CongestionController,
+		DisableICMPForwarding: disableICMPForwarding,
+		FileDescriptor:        dupFd,
 	}
 
 	listener, err := sing_tun.New(options, tunnel.Tunnel)

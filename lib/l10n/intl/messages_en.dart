@@ -800,6 +800,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "Confirming will overwrite existing data",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Congestion control",
+    ),
     "connected": MessageLookupByLibrary.simpleMessage("Connected"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("Connecting..."),
@@ -1170,6 +1173,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Proxy used to reach the NTP server",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "Disable ICMP forwarding",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "Prevent TUN from forwarding ICMP packets, including ping, for this profile",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
@@ -1627,6 +1636,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Hide the app from recent tasks while it is in the background",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage(
+      "Excluded interfaces",
+    ),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Keep traffic from these interfaces outside TUN. Linux only.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Exclude proxy filter",
     ),
@@ -1993,6 +2008,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "intranetIP": MessageLookupByLibrary.simpleMessage("Intranet IP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Invalid backup file",
+    ),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "Enter an IPv4 or IPv6 network with a prefix, such as 192.168.1.0/24 or fd00::/8",
     ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
@@ -2890,6 +2908,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route addresses"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the listened route addresses",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
+      "Excluded route addresses",
+    ),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Keep these networks outside TUN",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("Route mode"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -4466,6 +4490,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Stop"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Stopping VPN..."),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("Strict routing"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Helps prevent traffic such as DNS from bypassing TUN. May restrict other devices from reaching this device.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("Style"),
     "subRule": MessageLookupByLibrary.simpleMessage("Sub-rule"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("Sub-rule is empty"),
@@ -4739,6 +4767,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Only effective in administrator mode",
+    ),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage("Regional default"),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU must be an integer between 1280 and 65535",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn on"),

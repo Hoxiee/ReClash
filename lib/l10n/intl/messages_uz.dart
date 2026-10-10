@@ -847,6 +847,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "Tasdiqlansa, mavjud ma’lumotlar ustiga yoziladi",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Tarmoq tirbandligini boshqarish",
+    ),
     "connected": MessageLookupByLibrary.simpleMessage("Ulangan"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("Ulanmoqda…"),
@@ -1231,6 +1234,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP serveriga ulanish uchun ishlatiladigan proksi",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Toʻgʻridan-toʻgʻri"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "ICMP uzatishni oʻchirish",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "Ushbu profil uchun ping hamda boshqa ICMP paketlarini TUN orqali uzatmaslik",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPni oʻchirish"),
     "disabled": MessageLookupByLibrary.simpleMessage("Oʻchirilgan"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
@@ -1716,6 +1725,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Ilova fonda ishlaganda oxirgi ilovalar roʻyxatida koʻrinmaydi",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage(
+      "Chiqarilgan interfeyslar",
+    ),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu interfeyslardan keladigan trafik TUN orqali oʻtmaydi. Faqat Linux uchun.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Proksi istisno filtri",
     ),
@@ -2104,6 +2119,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "intranetIP": MessageLookupByLibrary.simpleMessage("Ichki tarmoq IP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Zaxira fayli yaroqsiz",
+    ),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "Prefiksli IPv4 yoki IPv6 tarmogʻini kiriting, masalan 192.168.1.0/24 yoki fd00::/8",
     ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
@@ -3067,6 +3085,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("Marshrut manzillari"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Tinglanadigan marshrut manzillarini sozlash",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
+      "Marshrutdan chiqarilgan manzillar",
+    ),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu tarmoqlar TUN orqali oʻtmaydi",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("Marshrut rejimi"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -4727,6 +4751,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Toʻxtatish"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPN oʻchirilmoqda…"),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("Qatʼiy marshrutlash"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS kabi trafikning TUN-ni chetlab oʻtishiga yoʻl qoʻymaslikka yordam beradi. Boshqa qurilmalarning ushbu qurilmaga kirishini cheklashi mumkin.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("Uslub"),
     "subRule": MessageLookupByLibrary.simpleMessage("Ichki qoida"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("Ichki qoida boʻsh"),
@@ -5018,6 +5046,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Faqat administrator rejimida ishlaydi",
+    ),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Hududning standart qiymati",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU 1280 dan 65535 gacha boʻlgan butun son boʻlishi kerak",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Oʻchirish"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Yoqish"),

@@ -8376,7 +8376,7 @@ as String?,
 /// @nodoc
 mixin _$VpnState {
 
- TunStack get stack; VpnProps get vpnProps;
+ TunStack get stack; VpnProps get vpnProps; int get mtu; String get congestionController; List<String> get routeAddress; List<String> get routeExcludeAddress; bool? get disableIcmpForwarding;
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -8388,20 +8388,20 @@ $VpnStateCopyWith<VpnState> get copyWith => _$VpnStateCopyWithImpl<VpnState>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as VpnState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnState&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress)&&(identical(other.disableIcmpForwarding, _this.disableIcmpForwarding) || other.disableIcmpForwarding == _this.disableIcmpForwarding));
 }
 
 
 @override
 int get hashCode {
   final _this = this as VpnState;
-  return Object.hash(runtimeType,_this.stack,_this.vpnProps);
+  return Object.hash(runtimeType,_this.stack,_this.vpnProps,_this.mtu,_this.congestionController,const DeepCollectionEquality().hash(_this.routeAddress),const DeepCollectionEquality().hash(_this.routeExcludeAddress),_this.disableIcmpForwarding);
 }
 
 @override
 String toString() {
   final _this = this as VpnState;
-  return 'VpnState(stack: ${_this.stack}, vpnProps: ${_this.vpnProps})';
+  return 'VpnState(stack: ${_this.stack}, vpnProps: ${_this.vpnProps}, mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, routeAddress: ${_this.routeAddress}, routeExcludeAddress: ${_this.routeExcludeAddress}, disableIcmpForwarding: ${_this.disableIcmpForwarding})';
 }
 
 
@@ -8412,7 +8412,7 @@ abstract mixin class $VpnStateCopyWith<$Res>  {
   factory $VpnStateCopyWith(VpnState value, $Res Function(VpnState) _then) = _$VpnStateCopyWithImpl;
 @useResult
 $Res call({
- TunStack stack, VpnProps vpnProps
+ TunStack stack, VpnProps vpnProps, int mtu, String congestionController, List<String> routeAddress, List<String> routeExcludeAddress, bool? disableIcmpForwarding
 });
 
 
@@ -8429,11 +8429,16 @@ class _$VpnStateCopyWithImpl<$Res>
 
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stack = null,Object? vpnProps = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stack = null,Object? vpnProps = null,Object? mtu = null,Object? congestionController = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? disableIcmpForwarding = freezed,}) {
   return _then(VpnState(
 stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as TunStack,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
-as VpnProps,
+as VpnProps,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
+as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
+as String,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self.routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,disableIcmpForwarding: freezed == disableIcmpForwarding ? _self.disableIcmpForwarding : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 /// Create a copy of VpnState
@@ -8527,10 +8532,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps,  int mtu,  String congestionController,  List<String> routeAddress,  List<String> routeExcludeAddress,  bool? disableIcmpForwarding)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VpnState() when $default != null:
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.vpnProps,_that.mtu,_that.congestionController,_that.routeAddress,_that.routeExcludeAddress,_that.disableIcmpForwarding);case _:
   return orElse();
 
 }
@@ -8548,10 +8553,10 @@ return $default(_that.stack,_that.vpnProps);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TunStack stack,  VpnProps vpnProps,  int mtu,  String congestionController,  List<String> routeAddress,  List<String> routeExcludeAddress,  bool? disableIcmpForwarding)  $default,) {final _that = this;
 switch (_that) {
 case _VpnState():
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.vpnProps,_that.mtu,_that.congestionController,_that.routeAddress,_that.routeExcludeAddress,_that.disableIcmpForwarding);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -8568,10 +8573,10 @@ return $default(_that.stack,_that.vpnProps);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TunStack stack,  VpnProps vpnProps)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TunStack stack,  VpnProps vpnProps,  int mtu,  String congestionController,  List<String> routeAddress,  List<String> routeExcludeAddress,  bool? disableIcmpForwarding)?  $default,) {final _that = this;
 switch (_that) {
 case _VpnState() when $default != null:
-return $default(_that.stack,_that.vpnProps);case _:
+return $default(_that.stack,_that.vpnProps,_that.mtu,_that.congestionController,_that.routeAddress,_that.routeExcludeAddress,_that.disableIcmpForwarding);case _:
   return null;
 
 }
@@ -8583,11 +8588,28 @@ return $default(_that.stack,_that.vpnProps);case _:
 
 
 class _VpnState implements VpnState {
-  const _VpnState({required this.stack, required this.vpnProps});
+  const _VpnState({required this.stack, required this.vpnProps, this.mtu = defaultTunMtu, this.congestionController = defaultCongestionController,  List<String> routeAddress = const [],  List<String> routeExcludeAddress = const [], this.disableIcmpForwarding}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress;
   
 
 @override final  TunStack stack;
 @override final  VpnProps vpnProps;
+@override@JsonKey() final  int mtu;
+@override@JsonKey() final  String congestionController;
+ final  List<String> _routeAddress;
+@override@JsonKey() List<String> get routeAddress {
+  if (_routeAddress is EqualUnmodifiableListView) return _routeAddress;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_routeAddress);
+}
+
+ final  List<String> _routeExcludeAddress;
+@override@JsonKey() List<String> get routeExcludeAddress {
+  if (_routeExcludeAddress is EqualUnmodifiableListView) return _routeExcludeAddress;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_routeExcludeAddress);
+}
+
+@override final  bool? disableIcmpForwarding;
 
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
@@ -8599,18 +8621,18 @@ _$VpnStateCopyWith<_VpnState> get copyWith => __$VpnStateCopyWithImpl<_VpnState>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnState&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress)&&(identical(other.disableIcmpForwarding, disableIcmpForwarding) || other.disableIcmpForwarding == disableIcmpForwarding));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stack,vpnProps);
+    return Object.hash(runtimeType,stack,vpnProps,mtu,congestionController,const DeepCollectionEquality().hash(_routeAddress),const DeepCollectionEquality().hash(_routeExcludeAddress),disableIcmpForwarding);
 }
 
 @override
 String toString() {
-    return 'VpnState(stack: $stack, vpnProps: $vpnProps)';
+    return 'VpnState(stack: $stack, vpnProps: $vpnProps, mtu: $mtu, congestionController: $congestionController, routeAddress: $routeAddress, routeExcludeAddress: $routeExcludeAddress, disableIcmpForwarding: $disableIcmpForwarding)';
 }
 
 
@@ -8621,7 +8643,7 @@ abstract mixin class _$VpnStateCopyWith<$Res> implements $VpnStateCopyWith<$Res>
   factory _$VpnStateCopyWith(_VpnState value, $Res Function(_VpnState) _then) = __$VpnStateCopyWithImpl;
 @override @useResult
 $Res call({
- TunStack stack, VpnProps vpnProps
+ TunStack stack, VpnProps vpnProps, int mtu, String congestionController, List<String> routeAddress, List<String> routeExcludeAddress, bool? disableIcmpForwarding
 });
 
 
@@ -8638,11 +8660,16 @@ class __$VpnStateCopyWithImpl<$Res>
 
 /// Create a copy of VpnState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stack = null,Object? vpnProps = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stack = null,Object? vpnProps = null,Object? mtu = null,Object? congestionController = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? disableIcmpForwarding = freezed,}) {
   return _then(_VpnState(
 stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as TunStack,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
-as VpnProps,
+as VpnProps,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
+as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
+as String,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self._routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,disableIcmpForwarding: freezed == disableIcmpForwarding ? _self.disableIcmpForwarding : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 
@@ -9402,7 +9429,7 @@ $ProxiesDataCopyWith<$Res> get proxiesData {
 /// @nodoc
 mixin _$MakeRealProfileState {
 
- String get profilesPath; int? get profileId; Map<String, dynamic> get rawConfig; PatchClashConfig get realPatchConfig; bool get overrideDns; bool get overrideNtp; bool get appendSystemDns; bool get overrideNetwork; List<ProxyGroup> get proxyGroups; List<Rule> get rules; List<Rule> get addedRules; String get defaultUA; bool get smartRouting; List<ServiceRoutePolicy> get serviceRoutePolicies; Map<String, List<String>> get serviceRules; List<String> get authentication; String? get matchTarget; bool get desync; int get desyncPort; List<DesyncCategory> get desyncCategories; bool get desyncForceTcp; bool get desyncOnly; WebDashboardFlavor get webDashboardFlavor;
+ String get profilesPath; int? get profileId; Map<String, dynamic> get rawConfig; PatchClashConfig get realPatchConfig; bool get overrideDns; bool get overrideNtp; bool get appendSystemDns; bool get overrideNetwork; ProfileTun? get tunOverride; List<ProxyGroup> get proxyGroups; List<Rule> get rules; List<Rule> get addedRules; String get defaultUA; bool get smartRouting; List<ServiceRoutePolicy> get serviceRoutePolicies; Map<String, List<String>> get serviceRules; List<String> get authentication; String? get matchTarget; bool get desync; int get desyncPort; List<DesyncCategory> get desyncCategories; bool get desyncForceTcp; bool get desyncOnly; WebDashboardFlavor get webDashboardFlavor;
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -9414,20 +9441,20 @@ $MakeRealProfileStateCopyWith<MakeRealProfileState> get copyWith => _$MakeRealPr
 @override
 bool operator ==(Object other) {
   final _this = this as MakeRealProfileState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, _this.profilesPath) || other.profilesPath == _this.profilesPath)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _this.rawConfig)&&(identical(other.realPatchConfig, _this.realPatchConfig) || other.realPatchConfig == _this.realPatchConfig)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.appendSystemDns, _this.appendSystemDns) || other.appendSystemDns == _this.appendSystemDns)&&(identical(other.overrideNetwork, _this.overrideNetwork) || other.overrideNetwork == _this.overrideNetwork)&&const DeepCollectionEquality().equals(other.proxyGroups, _this.proxyGroups)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&(identical(other.defaultUA, _this.defaultUA) || other.defaultUA == _this.defaultUA)&&(identical(other.smartRouting, _this.smartRouting) || other.smartRouting == _this.smartRouting)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _this.serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _this.serviceRules)&&const DeepCollectionEquality().equals(other.authentication, _this.authentication)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.desync, _this.desync) || other.desync == _this.desync)&&(identical(other.desyncPort, _this.desyncPort) || other.desyncPort == _this.desyncPort)&&const DeepCollectionEquality().equals(other.desyncCategories, _this.desyncCategories)&&(identical(other.desyncForceTcp, _this.desyncForceTcp) || other.desyncForceTcp == _this.desyncForceTcp)&&(identical(other.desyncOnly, _this.desyncOnly) || other.desyncOnly == _this.desyncOnly)&&(identical(other.webDashboardFlavor, _this.webDashboardFlavor) || other.webDashboardFlavor == _this.webDashboardFlavor));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeRealProfileState&&(identical(other.profilesPath, _this.profilesPath) || other.profilesPath == _this.profilesPath)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _this.rawConfig)&&(identical(other.realPatchConfig, _this.realPatchConfig) || other.realPatchConfig == _this.realPatchConfig)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.appendSystemDns, _this.appendSystemDns) || other.appendSystemDns == _this.appendSystemDns)&&(identical(other.overrideNetwork, _this.overrideNetwork) || other.overrideNetwork == _this.overrideNetwork)&&(identical(other.tunOverride, _this.tunOverride) || other.tunOverride == _this.tunOverride)&&const DeepCollectionEquality().equals(other.proxyGroups, _this.proxyGroups)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&(identical(other.defaultUA, _this.defaultUA) || other.defaultUA == _this.defaultUA)&&(identical(other.smartRouting, _this.smartRouting) || other.smartRouting == _this.smartRouting)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _this.serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _this.serviceRules)&&const DeepCollectionEquality().equals(other.authentication, _this.authentication)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget)&&(identical(other.desync, _this.desync) || other.desync == _this.desync)&&(identical(other.desyncPort, _this.desyncPort) || other.desyncPort == _this.desyncPort)&&const DeepCollectionEquality().equals(other.desyncCategories, _this.desyncCategories)&&(identical(other.desyncForceTcp, _this.desyncForceTcp) || other.desyncForceTcp == _this.desyncForceTcp)&&(identical(other.desyncOnly, _this.desyncOnly) || other.desyncOnly == _this.desyncOnly)&&(identical(other.webDashboardFlavor, _this.webDashboardFlavor) || other.webDashboardFlavor == _this.webDashboardFlavor));
 }
 
 
 @override
 int get hashCode {
   final _this = this as MakeRealProfileState;
-  return Object.hashAll([runtimeType,_this.profilesPath,_this.profileId,const DeepCollectionEquality().hash(_this.rawConfig),_this.realPatchConfig,_this.overrideDns,_this.overrideNtp,_this.appendSystemDns,_this.overrideNetwork,const DeepCollectionEquality().hash(_this.proxyGroups),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.addedRules),_this.defaultUA,_this.smartRouting,const DeepCollectionEquality().hash(_this.serviceRoutePolicies),const DeepCollectionEquality().hash(_this.serviceRules),const DeepCollectionEquality().hash(_this.authentication),_this.matchTarget,_this.desync,_this.desyncPort,const DeepCollectionEquality().hash(_this.desyncCategories),_this.desyncForceTcp,_this.desyncOnly,_this.webDashboardFlavor]);
+  return Object.hashAll([runtimeType,_this.profilesPath,_this.profileId,const DeepCollectionEquality().hash(_this.rawConfig),_this.realPatchConfig,_this.overrideDns,_this.overrideNtp,_this.appendSystemDns,_this.overrideNetwork,_this.tunOverride,const DeepCollectionEquality().hash(_this.proxyGroups),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.addedRules),_this.defaultUA,_this.smartRouting,const DeepCollectionEquality().hash(_this.serviceRoutePolicies),const DeepCollectionEquality().hash(_this.serviceRules),const DeepCollectionEquality().hash(_this.authentication),_this.matchTarget,_this.desync,_this.desyncPort,const DeepCollectionEquality().hash(_this.desyncCategories),_this.desyncForceTcp,_this.desyncOnly,_this.webDashboardFlavor]);
 }
 
 @override
 String toString() {
   final _this = this as MakeRealProfileState;
-  return 'MakeRealProfileState(profilesPath: ${_this.profilesPath}, profileId: ${_this.profileId}, rawConfig: ${_this.rawConfig}, realPatchConfig: ${_this.realPatchConfig}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, appendSystemDns: ${_this.appendSystemDns}, overrideNetwork: ${_this.overrideNetwork}, proxyGroups: ${_this.proxyGroups}, rules: ${_this.rules}, addedRules: ${_this.addedRules}, defaultUA: ${_this.defaultUA}, smartRouting: ${_this.smartRouting}, serviceRoutePolicies: ${_this.serviceRoutePolicies}, serviceRules: ${_this.serviceRules}, authentication: ${_this.authentication}, matchTarget: ${_this.matchTarget}, desync: ${_this.desync}, desyncPort: ${_this.desyncPort}, desyncCategories: ${_this.desyncCategories}, desyncForceTcp: ${_this.desyncForceTcp}, desyncOnly: ${_this.desyncOnly}, webDashboardFlavor: ${_this.webDashboardFlavor})';
+  return 'MakeRealProfileState(profilesPath: ${_this.profilesPath}, profileId: ${_this.profileId}, rawConfig: ${_this.rawConfig}, realPatchConfig: ${_this.realPatchConfig}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, appendSystemDns: ${_this.appendSystemDns}, overrideNetwork: ${_this.overrideNetwork}, tunOverride: ${_this.tunOverride}, proxyGroups: ${_this.proxyGroups}, rules: ${_this.rules}, addedRules: ${_this.addedRules}, defaultUA: ${_this.defaultUA}, smartRouting: ${_this.smartRouting}, serviceRoutePolicies: ${_this.serviceRoutePolicies}, serviceRules: ${_this.serviceRules}, authentication: ${_this.authentication}, matchTarget: ${_this.matchTarget}, desync: ${_this.desync}, desyncPort: ${_this.desyncPort}, desyncCategories: ${_this.desyncCategories}, desyncForceTcp: ${_this.desyncForceTcp}, desyncOnly: ${_this.desyncOnly}, webDashboardFlavor: ${_this.webDashboardFlavor})';
 }
 
 
@@ -9438,11 +9465,11 @@ abstract mixin class $MakeRealProfileStateCopyWith<$Res>  {
   factory $MakeRealProfileStateCopyWith(MakeRealProfileState value, $Res Function(MakeRealProfileState) _then) = _$MakeRealProfileStateCopyWithImpl;
 @useResult
 $Res call({
- String profilesPath, int? profileId, Map<String, dynamic> rawConfig, PatchClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, bool overrideNetwork, List<ProxyGroup> proxyGroups, List<Rule> rules, List<Rule> addedRules, String defaultUA, bool smartRouting, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, List<String> authentication, String? matchTarget, bool desync, int desyncPort, List<DesyncCategory> desyncCategories, bool desyncForceTcp, bool desyncOnly, WebDashboardFlavor webDashboardFlavor
+ String profilesPath, int? profileId, Map<String, dynamic> rawConfig, PatchClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, bool overrideNetwork, ProfileTun? tunOverride, List<ProxyGroup> proxyGroups, List<Rule> rules, List<Rule> addedRules, String defaultUA, bool smartRouting, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, List<String> authentication, String? matchTarget, bool desync, int desyncPort, List<DesyncCategory> desyncCategories, bool desyncForceTcp, bool desyncOnly, WebDashboardFlavor webDashboardFlavor
 });
 
 
-$PatchClashConfigCopyWith<$Res> get realPatchConfig;
+$PatchClashConfigCopyWith<$Res> get realPatchConfig;$ProfileTunCopyWith<$Res>? get tunOverride;
 
 }
 /// @nodoc
@@ -9455,7 +9482,7 @@ class _$MakeRealProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profilesPath = null,Object? profileId = freezed,Object? rawConfig = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? overrideNetwork = null,Object? proxyGroups = null,Object? rules = null,Object? addedRules = null,Object? defaultUA = null,Object? smartRouting = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? authentication = null,Object? matchTarget = freezed,Object? desync = null,Object? desyncPort = null,Object? desyncCategories = null,Object? desyncForceTcp = null,Object? desyncOnly = null,Object? webDashboardFlavor = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profilesPath = null,Object? profileId = freezed,Object? rawConfig = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? overrideNetwork = null,Object? tunOverride = freezed,Object? proxyGroups = null,Object? rules = null,Object? addedRules = null,Object? defaultUA = null,Object? smartRouting = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? authentication = null,Object? matchTarget = freezed,Object? desync = null,Object? desyncPort = null,Object? desyncCategories = null,Object? desyncForceTcp = null,Object? desyncOnly = null,Object? webDashboardFlavor = null,}) {
   return _then(MakeRealProfileState(
 profilesPath: null == profilesPath ? _self.profilesPath : profilesPath // ignore: cast_nullable_to_non_nullable
 as String,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -9465,7 +9492,8 @@ as PatchClashConfig,overrideDns: null == overrideDns ? _self.overrideDns : overr
 as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
 as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,overrideNetwork: null == overrideNetwork ? _self.overrideNetwork : overrideNetwork // ignore: cast_nullable_to_non_nullable
-as bool,proxyGroups: null == proxyGroups ? _self.proxyGroups : proxyGroups // ignore: cast_nullable_to_non_nullable
+as bool,tunOverride: freezed == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
+as ProfileTun?,proxyGroups: null == proxyGroups ? _self.proxyGroups : proxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,addedRules: null == addedRules ? _self.addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,defaultUA: null == defaultUA ? _self.defaultUA : defaultUA // ignore: cast_nullable_to_non_nullable
@@ -9491,6 +9519,18 @@ $PatchClashConfigCopyWith<$Res> get realPatchConfig {
   
   return $PatchClashConfigCopyWith<$Res>(_self.realPatchConfig, (value) {
     return _then(_self.copyWith(realPatchConfig: value));
+  });
+}/// Create a copy of MakeRealProfileState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProfileTunCopyWith<$Res>? get tunOverride {
+    if (_self.tunOverride == null) {
+    return null;
+  }
+
+  return $ProfileTunCopyWith<$Res>(_self.tunOverride!, (value) {
+    return _then(_self.copyWith(tunOverride: value));
   });
 }
 }
@@ -9574,10 +9614,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  ProfileTun? tunOverride,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState() when $default != null:
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.tunOverride,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
   return orElse();
 
 }
@@ -9595,10 +9635,10 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  ProfileTun? tunOverride,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)  $default,) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState():
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.tunOverride,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -9615,10 +9655,10 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String profilesPath,  int? profileId,  Map<String, dynamic> rawConfig,  PatchClashConfig realPatchConfig,  bool overrideDns,  bool overrideNtp,  bool appendSystemDns,  bool overrideNetwork,  ProfileTun? tunOverride,  List<ProxyGroup> proxyGroups,  List<Rule> rules,  List<Rule> addedRules,  String defaultUA,  bool smartRouting,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  List<String> authentication,  String? matchTarget,  bool desync,  int desyncPort,  List<DesyncCategory> desyncCategories,  bool desyncForceTcp,  bool desyncOnly,  WebDashboardFlavor webDashboardFlavor)?  $default,) {final _that = this;
 switch (_that) {
 case _MakeRealProfileState() when $default != null:
-return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
+return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPatchConfig,_that.overrideDns,_that.overrideNtp,_that.appendSystemDns,_that.overrideNetwork,_that.tunOverride,_that.proxyGroups,_that.rules,_that.addedRules,_that.defaultUA,_that.smartRouting,_that.serviceRoutePolicies,_that.serviceRules,_that.authentication,_that.matchTarget,_that.desync,_that.desyncPort,_that.desyncCategories,_that.desyncForceTcp,_that.desyncOnly,_that.webDashboardFlavor);case _:
   return null;
 
 }
@@ -9630,7 +9670,7 @@ return $default(_that.profilesPath,_that.profileId,_that.rawConfig,_that.realPat
 
 
 class _MakeRealProfileState implements MakeRealProfileState {
-  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required  Map<String, dynamic> rawConfig, required this.realPatchConfig, required this.overrideDns, this.overrideNtp = false, required this.appendSystemDns, this.overrideNetwork = false, required  List<ProxyGroup> proxyGroups, required  List<Rule> rules, required  List<Rule> addedRules, required this.defaultUA, this.smartRouting = false,  List<ServiceRoutePolicy> serviceRoutePolicies = const [],  Map<String, List<String>> serviceRules = const {},  List<String> authentication = const [], this.matchTarget, this.desync = false, this.desyncPort = defaultDesyncPort,  List<DesyncCategory> desyncCategories = const [], this.desyncForceTcp = true, this.desyncOnly = false, this.webDashboardFlavor = WebDashboardFlavor.zashboard}): _rawConfig = rawConfig,_proxyGroups = proxyGroups,_rules = rules,_addedRules = addedRules,_serviceRoutePolicies = serviceRoutePolicies,_serviceRules = serviceRules,_authentication = authentication,_desyncCategories = desyncCategories;
+  const _MakeRealProfileState({required this.profilesPath, required this.profileId, required  Map<String, dynamic> rawConfig, required this.realPatchConfig, required this.overrideDns, this.overrideNtp = false, required this.appendSystemDns, this.overrideNetwork = false, this.tunOverride, required  List<ProxyGroup> proxyGroups, required  List<Rule> rules, required  List<Rule> addedRules, required this.defaultUA, this.smartRouting = false,  List<ServiceRoutePolicy> serviceRoutePolicies = const [],  Map<String, List<String>> serviceRules = const {},  List<String> authentication = const [], this.matchTarget, this.desync = false, this.desyncPort = defaultDesyncPort,  List<DesyncCategory> desyncCategories = const [], this.desyncForceTcp = true, this.desyncOnly = false, this.webDashboardFlavor = WebDashboardFlavor.zashboard}): _rawConfig = rawConfig,_proxyGroups = proxyGroups,_rules = rules,_addedRules = addedRules,_serviceRoutePolicies = serviceRoutePolicies,_serviceRules = serviceRules,_authentication = authentication,_desyncCategories = desyncCategories;
   
 
 @override final  String profilesPath;
@@ -9647,6 +9687,7 @@ class _MakeRealProfileState implements MakeRealProfileState {
 @override@JsonKey() final  bool overrideNtp;
 @override final  bool appendSystemDns;
 @override@JsonKey() final  bool overrideNetwork;
+@override final  ProfileTun? tunOverride;
  final  List<ProxyGroup> _proxyGroups;
 @override List<ProxyGroup> get proxyGroups {
   if (_proxyGroups is EqualUnmodifiableListView) return _proxyGroups;
@@ -9715,18 +9756,18 @@ _$MakeRealProfileStateCopyWith<_MakeRealProfileState> get copyWith => __$MakeRea
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _rawConfig)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&(identical(other.overrideNetwork, overrideNetwork) || other.overrideNetwork == overrideNetwork)&&const DeepCollectionEquality().equals(other.proxyGroups, _proxyGroups)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.smartRouting, smartRouting) || other.smartRouting == smartRouting)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _serviceRules)&&const DeepCollectionEquality().equals(other.authentication, _authentication)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.desync, desync) || other.desync == desync)&&(identical(other.desyncPort, desyncPort) || other.desyncPort == desyncPort)&&const DeepCollectionEquality().equals(other.desyncCategories, _desyncCategories)&&(identical(other.desyncForceTcp, desyncForceTcp) || other.desyncForceTcp == desyncForceTcp)&&(identical(other.desyncOnly, desyncOnly) || other.desyncOnly == desyncOnly)&&(identical(other.webDashboardFlavor, webDashboardFlavor) || other.webDashboardFlavor == webDashboardFlavor));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MakeRealProfileState&&(identical(other.profilesPath, profilesPath) || other.profilesPath == profilesPath)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&const DeepCollectionEquality().equals(other.rawConfig, _rawConfig)&&(identical(other.realPatchConfig, realPatchConfig) || other.realPatchConfig == realPatchConfig)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.appendSystemDns, appendSystemDns) || other.appendSystemDns == appendSystemDns)&&(identical(other.overrideNetwork, overrideNetwork) || other.overrideNetwork == overrideNetwork)&&(identical(other.tunOverride, tunOverride) || other.tunOverride == tunOverride)&&const DeepCollectionEquality().equals(other.proxyGroups, _proxyGroups)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&(identical(other.defaultUA, defaultUA) || other.defaultUA == defaultUA)&&(identical(other.smartRouting, smartRouting) || other.smartRouting == smartRouting)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _serviceRules)&&const DeepCollectionEquality().equals(other.authentication, _authentication)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget)&&(identical(other.desync, desync) || other.desync == desync)&&(identical(other.desyncPort, desyncPort) || other.desyncPort == desyncPort)&&const DeepCollectionEquality().equals(other.desyncCategories, _desyncCategories)&&(identical(other.desyncForceTcp, desyncForceTcp) || other.desyncForceTcp == desyncForceTcp)&&(identical(other.desyncOnly, desyncOnly) || other.desyncOnly == desyncOnly)&&(identical(other.webDashboardFlavor, webDashboardFlavor) || other.webDashboardFlavor == webDashboardFlavor));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),realPatchConfig,overrideDns,overrideNtp,appendSystemDns,overrideNetwork,const DeepCollectionEquality().hash(_proxyGroups),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_addedRules),defaultUA,smartRouting,const DeepCollectionEquality().hash(_serviceRoutePolicies),const DeepCollectionEquality().hash(_serviceRules),const DeepCollectionEquality().hash(_authentication),matchTarget,desync,desyncPort,const DeepCollectionEquality().hash(_desyncCategories),desyncForceTcp,desyncOnly,webDashboardFlavor]);
+    return Object.hashAll([runtimeType,profilesPath,profileId,const DeepCollectionEquality().hash(_rawConfig),realPatchConfig,overrideDns,overrideNtp,appendSystemDns,overrideNetwork,tunOverride,const DeepCollectionEquality().hash(_proxyGroups),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_addedRules),defaultUA,smartRouting,const DeepCollectionEquality().hash(_serviceRoutePolicies),const DeepCollectionEquality().hash(_serviceRules),const DeepCollectionEquality().hash(_authentication),matchTarget,desync,desyncPort,const DeepCollectionEquality().hash(_desyncCategories),desyncForceTcp,desyncOnly,webDashboardFlavor]);
 }
 
 @override
 String toString() {
-    return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, overrideNtp: $overrideNtp, appendSystemDns: $appendSystemDns, overrideNetwork: $overrideNetwork, proxyGroups: $proxyGroups, rules: $rules, addedRules: $addedRules, defaultUA: $defaultUA, smartRouting: $smartRouting, serviceRoutePolicies: $serviceRoutePolicies, serviceRules: $serviceRules, authentication: $authentication, matchTarget: $matchTarget, desync: $desync, desyncPort: $desyncPort, desyncCategories: $desyncCategories, desyncForceTcp: $desyncForceTcp, desyncOnly: $desyncOnly, webDashboardFlavor: $webDashboardFlavor)';
+    return 'MakeRealProfileState(profilesPath: $profilesPath, profileId: $profileId, rawConfig: $rawConfig, realPatchConfig: $realPatchConfig, overrideDns: $overrideDns, overrideNtp: $overrideNtp, appendSystemDns: $appendSystemDns, overrideNetwork: $overrideNetwork, tunOverride: $tunOverride, proxyGroups: $proxyGroups, rules: $rules, addedRules: $addedRules, defaultUA: $defaultUA, smartRouting: $smartRouting, serviceRoutePolicies: $serviceRoutePolicies, serviceRules: $serviceRules, authentication: $authentication, matchTarget: $matchTarget, desync: $desync, desyncPort: $desyncPort, desyncCategories: $desyncCategories, desyncForceTcp: $desyncForceTcp, desyncOnly: $desyncOnly, webDashboardFlavor: $webDashboardFlavor)';
 }
 
 
@@ -9737,11 +9778,11 @@ abstract mixin class _$MakeRealProfileStateCopyWith<$Res> implements $MakeRealPr
   factory _$MakeRealProfileStateCopyWith(_MakeRealProfileState value, $Res Function(_MakeRealProfileState) _then) = __$MakeRealProfileStateCopyWithImpl;
 @override @useResult
 $Res call({
- String profilesPath, int? profileId, Map<String, dynamic> rawConfig, PatchClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, bool overrideNetwork, List<ProxyGroup> proxyGroups, List<Rule> rules, List<Rule> addedRules, String defaultUA, bool smartRouting, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, List<String> authentication, String? matchTarget, bool desync, int desyncPort, List<DesyncCategory> desyncCategories, bool desyncForceTcp, bool desyncOnly, WebDashboardFlavor webDashboardFlavor
+ String profilesPath, int? profileId, Map<String, dynamic> rawConfig, PatchClashConfig realPatchConfig, bool overrideDns, bool overrideNtp, bool appendSystemDns, bool overrideNetwork, ProfileTun? tunOverride, List<ProxyGroup> proxyGroups, List<Rule> rules, List<Rule> addedRules, String defaultUA, bool smartRouting, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, List<String> authentication, String? matchTarget, bool desync, int desyncPort, List<DesyncCategory> desyncCategories, bool desyncForceTcp, bool desyncOnly, WebDashboardFlavor webDashboardFlavor
 });
 
 
-@override $PatchClashConfigCopyWith<$Res> get realPatchConfig;
+@override $PatchClashConfigCopyWith<$Res> get realPatchConfig;@override $ProfileTunCopyWith<$Res>? get tunOverride;
 
 }
 /// @nodoc
@@ -9754,7 +9795,7 @@ class __$MakeRealProfileStateCopyWithImpl<$Res>
 
 /// Create a copy of MakeRealProfileState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profilesPath = null,Object? profileId = freezed,Object? rawConfig = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? overrideNetwork = null,Object? proxyGroups = null,Object? rules = null,Object? addedRules = null,Object? defaultUA = null,Object? smartRouting = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? authentication = null,Object? matchTarget = freezed,Object? desync = null,Object? desyncPort = null,Object? desyncCategories = null,Object? desyncForceTcp = null,Object? desyncOnly = null,Object? webDashboardFlavor = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profilesPath = null,Object? profileId = freezed,Object? rawConfig = null,Object? realPatchConfig = null,Object? overrideDns = null,Object? overrideNtp = null,Object? appendSystemDns = null,Object? overrideNetwork = null,Object? tunOverride = freezed,Object? proxyGroups = null,Object? rules = null,Object? addedRules = null,Object? defaultUA = null,Object? smartRouting = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? authentication = null,Object? matchTarget = freezed,Object? desync = null,Object? desyncPort = null,Object? desyncCategories = null,Object? desyncForceTcp = null,Object? desyncOnly = null,Object? webDashboardFlavor = null,}) {
   return _then(_MakeRealProfileState(
 profilesPath: null == profilesPath ? _self.profilesPath : profilesPath // ignore: cast_nullable_to_non_nullable
 as String,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -9764,7 +9805,8 @@ as PatchClashConfig,overrideDns: null == overrideDns ? _self.overrideDns : overr
 as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
 as bool,appendSystemDns: null == appendSystemDns ? _self.appendSystemDns : appendSystemDns // ignore: cast_nullable_to_non_nullable
 as bool,overrideNetwork: null == overrideNetwork ? _self.overrideNetwork : overrideNetwork // ignore: cast_nullable_to_non_nullable
-as bool,proxyGroups: null == proxyGroups ? _self._proxyGroups : proxyGroups // ignore: cast_nullable_to_non_nullable
+as bool,tunOverride: freezed == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
+as ProfileTun?,proxyGroups: null == proxyGroups ? _self._proxyGroups : proxyGroups // ignore: cast_nullable_to_non_nullable
 as List<ProxyGroup>,rules: null == rules ? _self._rules : rules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,addedRules: null == addedRules ? _self._addedRules : addedRules // ignore: cast_nullable_to_non_nullable
 as List<Rule>,defaultUA: null == defaultUA ? _self.defaultUA : defaultUA // ignore: cast_nullable_to_non_nullable
@@ -9791,6 +9833,18 @@ $PatchClashConfigCopyWith<$Res> get realPatchConfig {
   
   return $PatchClashConfigCopyWith<$Res>(_self.realPatchConfig, (value) {
     return _then(_self.copyWith(realPatchConfig: value));
+  });
+}/// Create a copy of MakeRealProfileState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProfileTunCopyWith<$Res>? get tunOverride {
+    if (_self.tunOverride == null) {
+    return null;
+  }
+
+  return $ProfileTunCopyWith<$Res>(_self.tunOverride!, (value) {
+    return _then(_self.copyWith(tunOverride: value));
   });
 }
 }
@@ -10115,7 +10169,7 @@ as List<ProxyGroup>,
 /// @nodoc
 mixin _$SetupState {
 
- int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get rules; List<ProxyGroup> get proxyGroups; List<Rule> get addedRules; Script? get script; bool get overrideDns; Dns get dns; List<ServiceRoutePolicy> get serviceRoutePolicies; Map<String, List<String>> get serviceRules; String? get matchTarget;
+ int? get profileId; int? get profileLastUpdateDate; OverwriteType get overwriteType; List<Rule> get rules; List<ProxyGroup> get proxyGroups; List<Rule> get addedRules; Script? get script; bool get overrideDns; Dns get dns; ProfileTun? get tunOverride; List<ServiceRoutePolicy> get serviceRoutePolicies; Map<String, List<String>> get serviceRules; String? get matchTarget;
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -10127,20 +10181,20 @@ $SetupStateCopyWith<SetupState> get copyWith => _$SetupStateCopyWithImpl<SetupSt
 @override
 bool operator ==(Object other) {
   final _this = this as SetupState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.proxyGroups, _this.proxyGroups)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _this.serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _this.serviceRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SetupState&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.profileLastUpdateDate, _this.profileLastUpdateDate) || other.profileLastUpdateDate == _this.profileLastUpdateDate)&&(identical(other.overwriteType, _this.overwriteType) || other.overwriteType == _this.overwriteType)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.proxyGroups, _this.proxyGroups)&&const DeepCollectionEquality().equals(other.addedRules, _this.addedRules)&&(identical(other.script, _this.script) || other.script == _this.script)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&(identical(other.tunOverride, _this.tunOverride) || other.tunOverride == _this.tunOverride)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _this.serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _this.serviceRules)&&(identical(other.matchTarget, _this.matchTarget) || other.matchTarget == _this.matchTarget));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SetupState;
-  return Object.hash(runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.proxyGroups),const DeepCollectionEquality().hash(_this.addedRules),_this.script,_this.overrideDns,_this.dns,const DeepCollectionEquality().hash(_this.serviceRoutePolicies),const DeepCollectionEquality().hash(_this.serviceRules),_this.matchTarget);
+  return Object.hash(runtimeType,_this.profileId,_this.profileLastUpdateDate,_this.overwriteType,const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.proxyGroups),const DeepCollectionEquality().hash(_this.addedRules),_this.script,_this.overrideDns,_this.dns,_this.tunOverride,const DeepCollectionEquality().hash(_this.serviceRoutePolicies),const DeepCollectionEquality().hash(_this.serviceRules),_this.matchTarget);
 }
 
 @override
 String toString() {
   final _this = this as SetupState;
-  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, rules: ${_this.rules}, proxyGroups: ${_this.proxyGroups}, addedRules: ${_this.addedRules}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, dns: ${_this.dns}, serviceRoutePolicies: ${_this.serviceRoutePolicies}, serviceRules: ${_this.serviceRules}, matchTarget: ${_this.matchTarget})';
+  return 'SetupState(profileId: ${_this.profileId}, profileLastUpdateDate: ${_this.profileLastUpdateDate}, overwriteType: ${_this.overwriteType}, rules: ${_this.rules}, proxyGroups: ${_this.proxyGroups}, addedRules: ${_this.addedRules}, script: ${_this.script}, overrideDns: ${_this.overrideDns}, dns: ${_this.dns}, tunOverride: ${_this.tunOverride}, serviceRoutePolicies: ${_this.serviceRoutePolicies}, serviceRules: ${_this.serviceRules}, matchTarget: ${_this.matchTarget})';
 }
 
 
@@ -10151,11 +10205,11 @@ abstract mixin class $SetupStateCopyWith<$Res>  {
   factory $SetupStateCopyWith(SetupState value, $Res Function(SetupState) _then) = _$SetupStateCopyWithImpl;
 @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> rules, List<ProxyGroup> proxyGroups, List<Rule> addedRules, Script? script, bool overrideDns, Dns dns, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, String? matchTarget
+ int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> rules, List<ProxyGroup> proxyGroups, List<Rule> addedRules, Script? script, bool overrideDns, Dns dns, ProfileTun? tunOverride, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, String? matchTarget
 });
 
 
-$ScriptCopyWith<$Res>? get script;$DnsCopyWith<$Res> get dns;
+$ScriptCopyWith<$Res>? get script;$DnsCopyWith<$Res> get dns;$ProfileTunCopyWith<$Res>? get tunOverride;
 
 }
 /// @nodoc
@@ -10168,7 +10222,7 @@ class _$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? rules = null,Object? proxyGroups = null,Object? addedRules = null,Object? script = freezed,Object? overrideDns = null,Object? dns = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? matchTarget = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? rules = null,Object? proxyGroups = null,Object? addedRules = null,Object? script = freezed,Object? overrideDns = null,Object? dns = null,Object? tunOverride = freezed,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? matchTarget = freezed,}) {
   return _then(SetupState(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
@@ -10179,7 +10233,8 @@ as List<ProxyGroup>,addedRules: null == addedRules ? _self.addedRules : addedRul
 as List<Rule>,script: freezed == script ? _self.script : script // ignore: cast_nullable_to_non_nullable
 as Script?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
 as bool,dns: null == dns ? _self.dns : dns // ignore: cast_nullable_to_non_nullable
-as Dns,serviceRoutePolicies: null == serviceRoutePolicies ? _self.serviceRoutePolicies : serviceRoutePolicies // ignore: cast_nullable_to_non_nullable
+as Dns,tunOverride: freezed == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
+as ProfileTun?,serviceRoutePolicies: null == serviceRoutePolicies ? _self.serviceRoutePolicies : serviceRoutePolicies // ignore: cast_nullable_to_non_nullable
 as List<ServiceRoutePolicy>,serviceRules: null == serviceRules ? _self.serviceRules : serviceRules // ignore: cast_nullable_to_non_nullable
 as Map<String, List<String>>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -10205,6 +10260,18 @@ $DnsCopyWith<$Res> get dns {
   
   return $DnsCopyWith<$Res>(_self.dns, (value) {
     return _then(_self.copyWith(dns: value));
+  });
+}/// Create a copy of SetupState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProfileTunCopyWith<$Res>? get tunOverride {
+    if (_self.tunOverride == null) {
+    return null;
+  }
+
+  return $ProfileTunCopyWith<$Res>(_self.tunOverride!, (value) {
+    return _then(_self.copyWith(tunOverride: value));
   });
 }
 }
@@ -10288,10 +10355,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  ProfileTun? tunOverride,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.tunOverride,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
   return orElse();
 
 }
@@ -10309,10 +10376,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  ProfileTun? tunOverride,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)  $default,) {final _that = this;
 switch (_that) {
 case _SetupState():
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.tunOverride,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -10329,10 +10396,10 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? profileId,  int? profileLastUpdateDate,  OverwriteType overwriteType,  List<Rule> rules,  List<ProxyGroup> proxyGroups,  List<Rule> addedRules,  Script? script,  bool overrideDns,  Dns dns,  ProfileTun? tunOverride,  List<ServiceRoutePolicy> serviceRoutePolicies,  Map<String, List<String>> serviceRules,  String? matchTarget)?  $default,) {final _that = this;
 switch (_that) {
 case _SetupState() when $default != null:
-return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
+return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,_that.rules,_that.proxyGroups,_that.addedRules,_that.script,_that.overrideDns,_that.dns,_that.tunOverride,_that.serviceRoutePolicies,_that.serviceRules,_that.matchTarget);case _:
   return null;
 
 }
@@ -10344,7 +10411,7 @@ return $default(_that.profileId,_that.profileLastUpdateDate,_that.overwriteType,
 
 
 class _SetupState implements SetupState {
-  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> rules, required  List<ProxyGroup> proxyGroups, required  List<Rule> addedRules, required this.script, required this.overrideDns, required this.dns,  List<ServiceRoutePolicy> serviceRoutePolicies = const [],  Map<String, List<String>> serviceRules = const {}, this.matchTarget}): _rules = rules,_proxyGroups = proxyGroups,_addedRules = addedRules,_serviceRoutePolicies = serviceRoutePolicies,_serviceRules = serviceRules;
+  const _SetupState({required this.profileId, required this.profileLastUpdateDate, required this.overwriteType, required  List<Rule> rules, required  List<ProxyGroup> proxyGroups, required  List<Rule> addedRules, required this.script, required this.overrideDns, required this.dns, this.tunOverride,  List<ServiceRoutePolicy> serviceRoutePolicies = const [],  Map<String, List<String>> serviceRules = const {}, this.matchTarget}): _rules = rules,_proxyGroups = proxyGroups,_addedRules = addedRules,_serviceRoutePolicies = serviceRoutePolicies,_serviceRules = serviceRules;
   
 
 @override final  int? profileId;
@@ -10374,6 +10441,7 @@ class _SetupState implements SetupState {
 @override final  Script? script;
 @override final  bool overrideDns;
 @override final  Dns dns;
+@override final  ProfileTun? tunOverride;
  final  List<ServiceRoutePolicy> _serviceRoutePolicies;
 @override@JsonKey() List<ServiceRoutePolicy> get serviceRoutePolicies {
   if (_serviceRoutePolicies is EqualUnmodifiableListView) return _serviceRoutePolicies;
@@ -10400,18 +10468,18 @@ _$SetupStateCopyWith<_SetupState> get copyWith => __$SetupStateCopyWithImpl<_Set
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.proxyGroups, _proxyGroups)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _serviceRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetupState&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.profileLastUpdateDate, profileLastUpdateDate) || other.profileLastUpdateDate == profileLastUpdateDate)&&(identical(other.overwriteType, overwriteType) || other.overwriteType == overwriteType)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.proxyGroups, _proxyGroups)&&const DeepCollectionEquality().equals(other.addedRules, _addedRules)&&(identical(other.script, script) || other.script == script)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.dns, dns) || other.dns == dns)&&(identical(other.tunOverride, tunOverride) || other.tunOverride == tunOverride)&&const DeepCollectionEquality().equals(other.serviceRoutePolicies, _serviceRoutePolicies)&&const DeepCollectionEquality().equals(other.serviceRules, _serviceRules)&&(identical(other.matchTarget, matchTarget) || other.matchTarget == matchTarget));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_proxyGroups),const DeepCollectionEquality().hash(_addedRules),script,overrideDns,dns,const DeepCollectionEquality().hash(_serviceRoutePolicies),const DeepCollectionEquality().hash(_serviceRules),matchTarget);
+    return Object.hash(runtimeType,profileId,profileLastUpdateDate,overwriteType,const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_proxyGroups),const DeepCollectionEquality().hash(_addedRules),script,overrideDns,dns,tunOverride,const DeepCollectionEquality().hash(_serviceRoutePolicies),const DeepCollectionEquality().hash(_serviceRules),matchTarget);
 }
 
 @override
 String toString() {
-    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, rules: $rules, proxyGroups: $proxyGroups, addedRules: $addedRules, script: $script, overrideDns: $overrideDns, dns: $dns, serviceRoutePolicies: $serviceRoutePolicies, serviceRules: $serviceRules, matchTarget: $matchTarget)';
+    return 'SetupState(profileId: $profileId, profileLastUpdateDate: $profileLastUpdateDate, overwriteType: $overwriteType, rules: $rules, proxyGroups: $proxyGroups, addedRules: $addedRules, script: $script, overrideDns: $overrideDns, dns: $dns, tunOverride: $tunOverride, serviceRoutePolicies: $serviceRoutePolicies, serviceRules: $serviceRules, matchTarget: $matchTarget)';
 }
 
 
@@ -10422,11 +10490,11 @@ abstract mixin class _$SetupStateCopyWith<$Res> implements $SetupStateCopyWith<$
   factory _$SetupStateCopyWith(_SetupState value, $Res Function(_SetupState) _then) = __$SetupStateCopyWithImpl;
 @override @useResult
 $Res call({
- int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> rules, List<ProxyGroup> proxyGroups, List<Rule> addedRules, Script? script, bool overrideDns, Dns dns, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, String? matchTarget
+ int? profileId, int? profileLastUpdateDate, OverwriteType overwriteType, List<Rule> rules, List<ProxyGroup> proxyGroups, List<Rule> addedRules, Script? script, bool overrideDns, Dns dns, ProfileTun? tunOverride, List<ServiceRoutePolicy> serviceRoutePolicies, Map<String, List<String>> serviceRules, String? matchTarget
 });
 
 
-@override $ScriptCopyWith<$Res>? get script;@override $DnsCopyWith<$Res> get dns;
+@override $ScriptCopyWith<$Res>? get script;@override $DnsCopyWith<$Res> get dns;@override $ProfileTunCopyWith<$Res>? get tunOverride;
 
 }
 /// @nodoc
@@ -10439,7 +10507,7 @@ class __$SetupStateCopyWithImpl<$Res>
 
 /// Create a copy of SetupState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? rules = null,Object? proxyGroups = null,Object? addedRules = null,Object? script = freezed,Object? overrideDns = null,Object? dns = null,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? matchTarget = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profileId = freezed,Object? profileLastUpdateDate = freezed,Object? overwriteType = null,Object? rules = null,Object? proxyGroups = null,Object? addedRules = null,Object? script = freezed,Object? overrideDns = null,Object? dns = null,Object? tunOverride = freezed,Object? serviceRoutePolicies = null,Object? serviceRules = null,Object? matchTarget = freezed,}) {
   return _then(_SetupState(
 profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
 as int?,profileLastUpdateDate: freezed == profileLastUpdateDate ? _self.profileLastUpdateDate : profileLastUpdateDate // ignore: cast_nullable_to_non_nullable
@@ -10450,7 +10518,8 @@ as List<ProxyGroup>,addedRules: null == addedRules ? _self._addedRules : addedRu
 as List<Rule>,script: freezed == script ? _self.script : script // ignore: cast_nullable_to_non_nullable
 as Script?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
 as bool,dns: null == dns ? _self.dns : dns // ignore: cast_nullable_to_non_nullable
-as Dns,serviceRoutePolicies: null == serviceRoutePolicies ? _self._serviceRoutePolicies : serviceRoutePolicies // ignore: cast_nullable_to_non_nullable
+as Dns,tunOverride: freezed == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
+as ProfileTun?,serviceRoutePolicies: null == serviceRoutePolicies ? _self._serviceRoutePolicies : serviceRoutePolicies // ignore: cast_nullable_to_non_nullable
 as List<ServiceRoutePolicy>,serviceRules: null == serviceRules ? _self._serviceRules : serviceRules // ignore: cast_nullable_to_non_nullable
 as Map<String, List<String>>,matchTarget: freezed == matchTarget ? _self.matchTarget : matchTarget // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -10477,6 +10546,18 @@ $DnsCopyWith<$Res> get dns {
   
   return $DnsCopyWith<$Res>(_self.dns, (value) {
     return _then(_self.copyWith(dns: value));
+  });
+}/// Create a copy of SetupState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ProfileTunCopyWith<$Res>? get tunOverride {
+    if (_self.tunOverride == null) {
+    return null;
+  }
+
+  return $ProfileTunCopyWith<$Res>(_self.tunOverride!, (value) {
+    return _then(_self.copyWith(tunOverride: value));
   });
 }
 }

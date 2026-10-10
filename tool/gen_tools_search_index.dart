@@ -109,7 +109,8 @@ String render(List<(OwnerSpec, SettingHit)> settings) {
       ..writeln("      gate: '$gate',");
     if (hit.keywords.isNotEmpty) {
       final literals = hit.keywords.map((k) => "'$k'").join(', ');
-      buffer.writeln('      keywords: const [$literals],');
+      final listConst = prefix.isEmpty ? 'const ' : '';
+      buffer.writeln('      keywords: $listConst[$literals],');
     }
     buffer.writeln('    ),');
   }

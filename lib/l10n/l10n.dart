@@ -1123,6 +1123,126 @@ class AppLocalizations {
     return Intl.message('TUN', name: 'tun', desc: '', args: []);
   }
 
+  /// `Regional default`
+  String get tunMtuAutomatic {
+    return Intl.message(
+      'Regional default',
+      name: 'tunMtuAutomatic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MTU must be an integer between 1280 and 65535`
+  String get tunMtuInvalid {
+    return Intl.message(
+      'MTU must be an integer between 1280 and 65535',
+      name: 'tunMtuInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Congestion control`
+  String get congestionController {
+    return Intl.message(
+      'Congestion control',
+      name: 'congestionController',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strict routing`
+  String get strictRoute {
+    return Intl.message(
+      'Strict routing',
+      name: 'strictRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Helps prevent traffic such as DNS from bypassing TUN. May restrict other devices from reaching this device.`
+  String get strictRouteDesc {
+    return Intl.message(
+      'Helps prevent traffic such as DNS from bypassing TUN. May restrict other devices from reaching this device.',
+      name: 'strictRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded route addresses`
+  String get routeExcludeAddress {
+    return Intl.message(
+      'Excluded route addresses',
+      name: 'routeExcludeAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep these networks outside TUN`
+  String get routeExcludeAddressDesc {
+    return Intl.message(
+      'Keep these networks outside TUN',
+      name: 'routeExcludeAddressDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter an IPv4 or IPv6 network with a prefix, such as 192.168.1.0/24 or fd00::/8`
+  String get invalidCidr {
+    return Intl.message(
+      'Enter an IPv4 or IPv6 network with a prefix, such as 192.168.1.0/24 or fd00::/8',
+      name: 'invalidCidr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable ICMP forwarding`
+  String get disableIcmpForwarding {
+    return Intl.message(
+      'Disable ICMP forwarding',
+      name: 'disableIcmpForwarding',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prevent TUN from forwarding ICMP packets, including ping, for this profile`
+  String get disableIcmpForwardingDesc {
+    return Intl.message(
+      'Prevent TUN from forwarding ICMP packets, including ping, for this profile',
+      name: 'disableIcmpForwardingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded interfaces`
+  String get excludeInterface {
+    return Intl.message(
+      'Excluded interfaces',
+      name: 'excludeInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep traffic from these interfaces outside TUN. Linux only.`
+  String get excludeInterfaceDesc {
+    return Intl.message(
+      'Keep traffic from these interfaces outside TUN. Linux only.',
+      name: 'excludeInterfaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Only effective in administrator mode`
   String get tunDesc {
     return Intl.message(

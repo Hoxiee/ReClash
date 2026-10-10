@@ -170,6 +170,13 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   }
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
+  rawConfig['tun']['mtu'] = realPatchConfig.tun.mtu ?? defaultTunMtu;
+  rawConfig['tun']['congestion-controller'] =
+      realPatchConfig.tun.congestionController;
+  rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
+  rawConfig['tun']['route-exclude-address'] =
+      realPatchConfig.tun.routeExcludeAddress;
+  rawConfig['tun'].addAll(data.tunOverride?.toJson() ?? const {});
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   rawConfig['geo-auto-update'] = realPatchConfig.geoAutoUpdate;
   rawConfig['geo-update-interval'] = realPatchConfig.geoUpdateInterval;

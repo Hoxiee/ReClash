@@ -20,6 +20,8 @@ enum SettingGate {
   desktop,
   mobile,
   windows,
+  linuxOrWindows,
+  mipsStack,
   macos,
   linux,
 }

@@ -182,6 +182,16 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  mtu: _mtuFromJson(json['mtu']),
+  congestionController: json['congestion-controller'] == null
+      ? defaultCongestionController
+      : _congestionControllerFromJson(json['congestion-controller']),
+  strictRoute: json['strict-route'] as bool? ?? false,
+  routeExcludeAddress:
+      (json['route-exclude-address'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
@@ -191,6 +201,10 @@ Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'stack': _$TunStackEnumMap[instance.stack]!,
   'dns-hijack': instance.dnsHijack,
   'route-address': instance.routeAddress,
+  'mtu': ?instance.mtu,
+  'congestion-controller': instance.congestionController,
+  'strict-route': instance.strictRoute,
+  'route-exclude-address': instance.routeExcludeAddress,
 };
 
 const _$TunStackEnumMap = {
@@ -199,6 +213,19 @@ const _$TunStackEnumMap = {
   TunStack.mixed: 'mixed',
   TunStack.mips: 'mips',
 };
+
+_ProfileTun _$ProfileTunFromJson(Map<String, dynamic> json) => _ProfileTun(
+  disableIcmpForwarding: json['disable-icmp-forwarding'] as bool?,
+  excludeInterface: (json['exclude-interface'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+);
+
+Map<String, dynamic> _$ProfileTunToJson(_ProfileTun instance) =>
+    <String, dynamic>{
+      'disable-icmp-forwarding': ?instance.disableIcmpForwarding,
+      'exclude-interface': ?instance.excludeInterface,
+    };
 
 _FallbackFilter _$FallbackFilterFromJson(
   Map<String, dynamic> json,

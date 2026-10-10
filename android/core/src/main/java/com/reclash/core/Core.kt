@@ -16,6 +16,7 @@ object Core {
         stack: String,
         address: String,
         dns: String,
+        options: String,
     ): Boolean
 
 
@@ -41,6 +42,7 @@ object Core {
         stack: String,
         address: String,
         dns: String,
+        options: String,
     ): Boolean {
         val doctorProbes = DoctorProbeRegistry()
         return startTun(
@@ -74,6 +76,7 @@ object Core {
             stack,
             address,
             dns,
+            options,
         )
     }
 

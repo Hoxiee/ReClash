@@ -91,8 +91,16 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
       .map((e) => e as String)
       .toList(),
   stack: json['stack'] as String,
+  mtu: (json['mtu'] as num?)?.toInt() ?? defaultTunMtu,
+  congestionController:
+      json['congestionController'] as String? ?? defaultCongestionController,
   routeAddress:
       (json['routeAddress'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  routeExcludeAddress:
+      (json['routeExcludeAddress'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList() ??
       const [],
@@ -131,7 +139,10 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'systemProxy': instance.systemProxy,
       'bypassDomain': instance.bypassDomain,
       'stack': instance.stack,
+      'mtu': instance.mtu,
+      'congestionController': instance.congestionController,
       'routeAddress': instance.routeAddress,
+      'routeExcludeAddress': instance.routeExcludeAddress,
       'smartPauseEnabled': instance.smartPauseEnabled,
       'smartPauseNetworks': instance.smartPauseNetworks,
       'smartPauseCloseConnections': instance.smartPauseCloseConnections,

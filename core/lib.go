@@ -43,10 +43,17 @@ type TunHandler struct {
 	closing      bool
 }
 
-func (th *TunHandler) start(fd int, stack, address, dns string) bool {
+func (th *TunHandler) start(fd int, stack, address, dns string, opts t.Options) bool {
 	th.probeCond = sync.NewCond(&th.mu)
 	configMu.Lock()
 	defer configMu.Unlock()
+
+	// ICMP forwarding stays a profile-owned knob: there is no Dart/JNI field for
+	// it, so the effective value is read from the config applied under configMu.
+	disableICMPForwarding := false
+	if currentConfig != nil && currentConfig.General != nil {
+		disableICMPForwarding = currentConfig.General.Tun.DisableICMPForwarding
+	}
 
 	th.mu.Lock()
 	th.initHook()
@@ -57,7 +64,7 @@ func (th *TunHandler) start(fd int, stack, address, dns string) bool {
 	// on this very goroutine — an RLock taken while this one holds the write
 	// lock deadlocks the start outright. Nothing is lost by dropping it: both
 	// hooks return early until th.listener is set, which is below.
-	tunListener := t.Start(fd, stack, address, dns)
+	tunListener := t.Start(fd, stack, address, dns, opts, disableICMPForwarding)
 
 	th.mu.Lock()
 	defer th.mu.Unlock()
@@ -273,7 +280,7 @@ func stopTunLocked() {
 	}
 }
 
-func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string) bool {
+func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns, options string) bool {
 	tunMu.Lock()
 	defer tunMu.Unlock()
 	stopTunLocked()
@@ -284,10 +291,14 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string)
 		logError("startTun was handed no tun descriptor")
 		return false
 	}
+	opts, err := t.ParseOptions(options)
+	if err != nil {
+		logError("startTun options ignored: %v", err)
+	}
 	tunHandler = &TunHandler{
 		callback: callback,
 	}
-	if tunHandler.start(fd, stack, address, dns) {
+	if tunHandler.start(fd, stack, address, dns, opts) {
 		setTunUp(true)
 		return true
 	}
@@ -349,8 +360,8 @@ func invokeMethod(callback unsafe.Pointer, paramsChar *C.char) {
 }
 
 //export startTUN
-func startTUN(callback unsafe.Pointer, fd C.int, stackChar, addressChar, dnsChar *C.char) bool {
-	started := handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar))
+func startTUN(callback unsafe.Pointer, fd C.int, stackChar, addressChar, dnsChar, optionsChar *C.char) bool {
+	started := handleStartTun(callback, int(fd), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar), takeCString(optionsChar))
 	if !started {
 		return false
 	}

@@ -650,7 +650,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'5ef71d333c5640d108319478859adce30a580fc5';
+String _$updateParamsHash() => r'4b8411666cb5d808358ce2a5ea8be13e9b59d760';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -773,7 +773,7 @@ final class VpnStateProvider
   }
 }
 
-String _$vpnStateHash() => r'128ddad03ce045ad1f8204e47aec3cb6cfa29f6e';
+String _$vpnStateHash() => r'68499093fb106b88ce53beb642c5e5908b709476';
 
 @ProviderFor(packageListSelectorState)
 final packageListSelectorStateProvider = PackageListSelectorStateProvider._();
@@ -1074,7 +1074,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'cb22bd558539ec8bfa88b83527f244fc6f39b133';
+String _$sharedStateHash() => r'18aded753b63055ef912acbfc3de691ca646e912';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -2562,7 +2562,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'f6eb48cbc04e8c1a4c6bc08748f90bf3190e61c4';
+String _$setupStateHash() => r'5e2ef8998dc8f6a60e6c5bad6c032dbd4cea06f5';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

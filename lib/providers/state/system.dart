@@ -2,6 +2,7 @@ part of '../state.dart';
 
 @riverpod
 UpdateParams updateParams(Ref ref) {
+  final region = ref.watch(appRegionProvider);
   final routeMode = ref.watch(
     networkSettingProvider.select((state) => state.routeMode),
   );
@@ -11,7 +12,7 @@ UpdateParams updateParams(Ref ref) {
   return ref.watch(
     patchClashConfigProvider.select(
       (state) => UpdateParams(
-        tun: state.tun.getRealTun(routeMode),
+        tun: state.tun.getRealTun(routeMode, region: region),
         authentication: authentication.credentials,
         allowLan: state.allowLan,
         findProcessMode: state.findProcessMode,
@@ -91,11 +92,28 @@ TrayTitleState trayTitleState(Ref ref) {
 
 @riverpod
 VpnState vpnState(Ref ref) {
+  final region = ref.watch(appRegionProvider);
   final vpnProps = ref.watch(vpnSettingProvider);
-  final stack = ref.watch(
-    patchClashConfigProvider.select((state) => state.tun.stack),
+  final tun = ref.watch(patchClashConfigProvider.select((state) => state.tun));
+  final routeMode = ref.watch(
+    networkSettingProvider.select((state) => state.routeMode),
   );
-  return VpnState(stack: stack, vpnProps: vpnProps);
+  final disableIcmpForwarding = ref.watch(
+    currentProfileProvider.select(
+      (profile) => profile?.tunOverride?.disableIcmpForwarding,
+    ),
+  );
+  return VpnState(
+    stack: tun.stack,
+    vpnProps: vpnProps,
+    mtu: tun.resolveMtu(region),
+    congestionController: tun.stack == TunStack.mips
+        ? tun.congestionController
+        : defaultCongestionController,
+    routeAddress: tun.resolveRouteAddress(routeMode),
+    routeExcludeAddress: tun.routeExcludeAddress,
+    disableIcmpForwarding: disableIcmpForwarding,
+  );
 }
 
 @riverpod
@@ -167,6 +185,7 @@ bool shouldPatchSystemDns(Ref ref) {
 @riverpod
 SharedState sharedState(Ref ref) {
   ref.watch(loadedLocaleProvider);
+  final region = ref.watch(appRegionProvider);
   final currentProfile = ref.watch(
     currentProfileProvider.select(
       (state) => CurrentProfileSelectorState(
@@ -205,8 +224,11 @@ SharedState sharedState(Ref ref) {
     patchClashConfigProvider.select(
       (state) => (
         stack: state.tun.stack.name,
+        mtu: state.tun.resolveMtu(region),
+        congestionController: state.tun.congestionController,
         mixedPort: state.mixedPort,
         routeAddress: state.tun.resolveRouteAddress(networkSetting.routeMode),
+        routeExcludeAddress: state.tun.routeExcludeAddress,
       ),
     ),
   );
@@ -256,6 +278,8 @@ SharedState sharedState(Ref ref) {
     vpnOptions: VpnOptions(
       enable: vpnSetting.enable && !safeModeBuild,
       stack: stack,
+      mtu: clashConfig.mtu,
+      congestionController: clashConfig.congestionController,
       // VpnService.setHttpProxy cannot carry credentials, so an authenticated
       // mixed port must not be declared as the system HTTP proxy; traffic
       // still flows through TUN.
@@ -270,6 +294,7 @@ SharedState sharedState(Ref ref) {
       allowBypass: vpnSetting.allowBypass,
       bypassDomain: networkSetting.bypassDomain,
       routeAddress: clashConfig.routeAddress,
+      routeExcludeAddress: clashConfig.routeExcludeAddress,
       smartPauseEnabled: vpnSetting.smartPauseEnabled,
       smartPauseNetworks: vpnSetting.smartPauseNetworks,
       smartPauseCloseConnections: vpnSetting.smartPauseCloseConnections,

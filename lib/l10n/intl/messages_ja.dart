@@ -680,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "確定すると既存のデータを上書きします",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage("輻輳制御"),
     "connected": MessageLookupByLibrary.simpleMessage("接続済み"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("接続中..."),
@@ -986,6 +987,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP サーバーへの接続に使用するプロキシ",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "ICMP 転送を無効にする",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルでは、ping を含む ICMP パケットを TUN で転送しません",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
     "disabled": MessageLookupByLibrary.simpleMessage("無効"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("変更を破棄しますか？"),
@@ -1389,6 +1396,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "バックグラウンド時に、最近のタスクからアプリを隠します",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage("除外するインターフェース"),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "これらのインターフェースからの通信を TUN の対象から除外します。Linux のみ。",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("除外ノードフィルター"),
     "excludeType": MessageLookupByLibrary.simpleMessage("除外タイプ"),
     "existsTip": m40,
@@ -1692,6 +1703,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "interval": MessageLookupByLibrary.simpleMessage("間隔"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("イントラネットIP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage("無効なバックアップファイル"),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "192.168.1.0/24 や fd00::/8 のように、プレフィックス付きの IPv4 または IPv6 ネットワークを入力してください",
+    ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
     "invalidProxyProvider": m56,
@@ -2460,6 +2474,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("ルートアドレス"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "リッスンするルートアドレスを設定します",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage("ルート除外アドレス"),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "これらのネットワークを TUN の対象から除外します",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("ルートモード"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -3760,6 +3778,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "statusDesc": MessageLookupByLibrary.simpleMessage("無効にすると、システムDNSを使用します"),
     "stop": MessageLookupByLibrary.simpleMessage("停止"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPNを停止しています..."),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("厳格なルーティング"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS などの通信が TUN を迂回するのを防ぎます。他のデバイスからこの端末へのアクセスが制限される場合があります。",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("スタイル"),
     "subRule": MessageLookupByLibrary.simpleMessage("サブルール"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("サブルールが空です"),
@@ -4006,6 +4028,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage("管理者モードでのみ有効"),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage("地域の既定値"),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU は 1280 から 65535 までの整数で指定してください",
+    ),
     "turnOff": MessageLookupByLibrary.simpleMessage("オフにする"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オンにする"),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),

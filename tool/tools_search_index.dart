@@ -49,6 +49,8 @@ const settingGates = <String>{
   'desktop',
   'mobile',
   'windows',
+  'linuxOrWindows',
+  'mipsStack',
   'macos',
   'linux',
 };

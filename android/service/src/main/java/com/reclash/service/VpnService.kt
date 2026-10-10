@@ -15,11 +15,17 @@ import com.reclash.common.AccessControlMode
 import com.reclash.common.GlobalState
 import com.reclash.common.R as CommonR
 import com.reclash.core.Core
+import com.reclash.service.models.AddressFamily
 import com.reclash.service.models.CIDR
 import com.reclash.service.models.VpnOptions
 import com.reclash.service.models.getIpv4RouteAddress
+import com.reclash.service.models.getIpv4RouteExcludeAddress
 import com.reclash.service.models.getIpv6RouteAddress
+import com.reclash.service.models.getIpv6RouteExcludeAddress
+import com.reclash.service.models.resolveFamilyRoutes
 import com.reclash.service.models.toCIDR
+import com.reclash.service.models.tunOptions
+import com.reclash.service.models.tunMtu
 import com.reclash.service.modules.ServiceModules
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -138,7 +144,7 @@ class VpnService : SystemVpnService(), ManagedService {
         val fd = with(Builder()) {
             addAddressAndRoutes(options)
             addDnsServers(options)
-            setMtu(MTU)
+            setMtu(options.tunMtu)
             configureAccessControl(options)
             setSession(getString(CommonR.string.app_name))
             setBlocking(false)
@@ -177,6 +183,7 @@ class VpnService : SystemVpnService(), ManagedService {
                         stack = options.stack,
                         address = options.tunAddress,
                         dns = options.tunDns,
+                        options = options.tunOptions(),
                     ),
                 ) { "Core rejected the tun file descriptor" }
             },
@@ -191,11 +198,6 @@ class VpnService : SystemVpnService(), ManagedService {
     private fun Builder.addAddressAndRoutes(options: VpnOptions) {
         val ipv4Address = IPV4_ADDRESS.toCIDR()
         addAddress(ipv4Address.address, ipv4Address.prefixLength)
-        addRoutes(
-            routes = options::getIpv4RouteAddress,
-            fallbackAddress = NET_ANY,
-            logTag = "addRoute4",
-        )
 
         if (options.ipv6) {
             try {
@@ -204,11 +206,56 @@ class VpnService : SystemVpnService(), ManagedService {
             } catch (_: Exception) {
                 GlobalState.log("IPv6 VPN address is not supported")
             }
+        }
+
+        if (options.routeExcludeAddress.isEmpty()) {
             addRoutes(
-                routes = options::getIpv6RouteAddress,
-                fallbackAddress = NET_ANY6,
+                routes = options::getIpv4RouteAddress,
+                fallbackAddress = NET_ANY,
+                logTag = "addRoute4",
+            )
+            if (options.ipv6) {
+                addRoutes(
+                    routes = options::getIpv6RouteAddress,
+                    fallbackAddress = NET_ANY6,
+                    logTag = "addRoute6",
+                )
+            }
+            return
+        }
+
+        addResolvedRoutes(
+            AddressFamily.V4,
+            base = options::getIpv4RouteAddress,
+            excluded = options::getIpv4RouteExcludeAddress,
+            logTag = "addRoute4",
+        )
+        if (options.ipv6) {
+            addResolvedRoutes(
+                AddressFamily.V6,
+                base = options::getIpv6RouteAddress,
+                excluded = options::getIpv6RouteExcludeAddress,
                 logTag = "addRoute6",
             )
+        }
+    }
+
+    // A malformed base or exclusion must not fall back to a default route: that
+    // would pull the ranges the user excluded back into the tunnel. Install no
+    // route for the family instead, and let a fully excluded family stay empty.
+    private fun Builder.addResolvedRoutes(
+        family: AddressFamily,
+        base: () -> List<CIDR>,
+        excluded: () -> List<CIDR>,
+        logTag: String,
+    ) {
+        val resolved = runCatching { resolveFamilyRoutes(base(), excluded(), family) }.getOrElse {
+            GlobalState.log("$logTag skipped malformed routes: ${it.message}")
+            return
+        }
+        resolved.forEach { route ->
+            Log.d(logTag, "address: ${route.address} prefixLength: ${route.prefixLength}")
+            addRoute(route.address, route.prefixLength)
         }
     }
 
@@ -349,7 +396,6 @@ class VpnService : SystemVpnService(), ManagedService {
         private const val NET_ANY = "0.0.0.0"
         private const val NET_ANY6 = "::"
         private const val LOCAL_HOST = "127.0.0.1"
-        private const val MTU = 9000
         private const val TEARDOWN_THREAD = "reclash-vpn-teardown"
         private const val TEARDOWN_JOIN_MILLIS = 1_500L
     }

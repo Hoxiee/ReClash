@@ -1,5 +1,6 @@
 package com.reclash.service.models
 
+import com.google.gson.Gson
 import com.reclash.common.AccessControlMode
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -23,6 +24,9 @@ data class VpnOptions(
     val bypassDomain: List<String>,
     val stack: String,
     val routeAddress: List<String>,
+    val mtu: Int = 0,
+    val congestionController: String? = null,
+    val routeExcludeAddress: List<String> = emptyList(),
     val smartPauseEnabled: Boolean = false,
     val smartPauseNetworks: List<String> = emptyList(),
     val smartPauseCloseConnections: Boolean = false,
@@ -49,6 +53,34 @@ fun VpnOptions.getIpv4RouteAddress(): List<CIDR> = routeAddress
 fun VpnOptions.getIpv6RouteAddress(): List<CIDR> = routeAddress
     .map(String::toCIDR)
     .filter { it.address is Inet6Address }
+
+fun VpnOptions.getIpv4RouteExcludeAddress(): List<CIDR> = routeExcludeAddress
+    .map(String::toCIDR)
+    .filter { it.address is Inet4Address }
+
+fun VpnOptions.getIpv6RouteExcludeAddress(): List<CIDR> = routeExcludeAddress
+    .map(String::toCIDR)
+    .filter { it.address is Inet6Address }
+
+private const val DEFAULT_MTU = 1500
+private const val MIN_MTU = 1280
+private const val MAX_MTU = 65535
+private const val DEFAULT_CONGESTION_CONTROLLER = "cubic"
+
+private val tunOptionsGson = Gson()
+
+val VpnOptions.tunMtu: Int
+    get() = if (mtu <= 0) DEFAULT_MTU else mtu.coerceIn(MIN_MTU, MAX_MTU)
+
+val VpnOptions.tunCongestionController: String
+    get() = congestionController?.takeIf { it.isNotBlank() } ?: DEFAULT_CONGESTION_CONTROLLER
+
+fun VpnOptions.tunOptions(): String = tunOptionsGson.toJson(
+    mapOf(
+        "mtu" to tunMtu,
+        "congestion-controller" to tunCongestionController,
+    ),
+)
 
 fun String.toCIDR(): CIDR {
     val parts = split("/")

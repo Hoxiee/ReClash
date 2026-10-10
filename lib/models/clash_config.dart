@@ -32,6 +32,10 @@ const defaultGeoXUrl = {
 
 const defaultMixedPort = 7890;
 const defaultKeepAliveInterval = 30;
+const defaultTunMtu = 1500;
+const minTunMtu = 1280;
+const maxTunMtu = 65535;
+const defaultCongestionController = 'cubic';
 
 const defaultBypassPrivateRouteAddress = [
   '1.0.0.0/8',
@@ -277,6 +281,17 @@ abstract class Tun with _$Tun {
     @Default(TunStack.mixed) TunStack stack,
     @JsonKey(name: 'dns-hijack') @Default(['any:53']) List<String> dnsHijack,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
+    @JsonKey(fromJson: _mtuFromJson, includeIfNull: false) int? mtu,
+    @JsonKey(
+      name: 'congestion-controller',
+      fromJson: _congestionControllerFromJson,
+    )
+    @Default(defaultCongestionController)
+    String congestionController,
+    @JsonKey(name: 'strict-route') @Default(false) bool strictRoute,
+    @JsonKey(name: 'route-exclude-address')
+    @Default([])
+    List<String> routeExcludeAddress,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
@@ -293,17 +308,48 @@ abstract class Tun with _$Tun {
   }
 }
 
+int? _mtuFromJson(Object? value) {
+  final mtu = switch (value) {
+    final int value => value,
+    final num value when value.isFinite => value.toInt(),
+    final String value => int.tryParse(value),
+    _ => null,
+  };
+  return mtu == null || mtu <= 0 ? null : mtu.clamp(minTunMtu, maxTunMtu);
+}
+
+String _congestionControllerFromJson(Object? value) =>
+    value is String && value.trim().isNotEmpty
+    ? value.trim()
+    : defaultCongestionController;
+
+@freezed
+abstract class ProfileTun with _$ProfileTun {
+  const factory ProfileTun({
+    @JsonKey(name: 'disable-icmp-forwarding', includeIfNull: false)
+    bool? disableIcmpForwarding,
+    @JsonKey(name: 'exclude-interface', includeIfNull: false)
+    List<String>? excludeInterface,
+  }) = _ProfileTun;
+
+  factory ProfileTun.fromJson(Map<String, Object?> json) =>
+      _$ProfileTunFromJson(json);
+}
+
 extension TunExt on Tun {
+  int resolveMtu(String? region) => mtu ?? profileForCode(region).tunMtu;
+
   List<String> resolveRouteAddress(RouteMode routeMode) =>
       routeMode == RouteMode.bypassPrivate || routeAddress.isEmpty
       ? defaultBypassPrivateRouteAddress
       : routeAddress;
 
-  Tun getRealTun(RouteMode routeMode) {
+  Tun getRealTun(RouteMode routeMode, {String? region}) {
     final mRouteAddress = resolveRouteAddress(routeMode);
+    final resolved = copyWith(mtu: resolveMtu(region));
     return switch (system.isDesktop) {
-      true => copyWith(autoRoute: true, routeAddress: []),
-      false => copyWith(
+      true => resolved.copyWith(autoRoute: true, routeAddress: []),
+      false => resolved.copyWith(
         autoRoute: mRouteAddress.isEmpty ? true : false,
         routeAddress: mRouteAddress,
       ),

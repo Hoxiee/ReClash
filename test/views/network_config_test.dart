@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/network.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -251,7 +253,121 @@ void main() {
       expect(find.byType(ListTile), findsOneWidget);
     });
   });
+
+  group('tun options items', () {
+    List<Type> types({
+      required bool isLinux,
+      required bool isWindows,
+      required bool isMipsStack,
+    }) => tunOptionsItems(
+      isLinux: isLinux,
+      isWindows: isWindows,
+      isMipsStack: isMipsStack,
+    ).map((item) => item.runtimeType).toList();
+
+    test('mtu and the exclude list are always present', () {
+      final items = tunOptionsItems(
+        isLinux: false,
+        isWindows: false,
+        isMipsStack: false,
+      );
+      expect(items.whereType<ConfigListInputItem>(), hasLength(1));
+      // The MTU row sits first so the regional default leads the section.
+      expect(items.first.runtimeType.toString(), '_TunMtuItem');
+    });
+
+    test('the congestion controller row appears only for the mips stack', () {
+      expect(
+        tunOptionsItems(
+          isLinux: false,
+          isWindows: false,
+          isMipsStack: false,
+        ).whereType<ConfigOptionsItem<String>>(),
+        isEmpty,
+      );
+      expect(
+        tunOptionsItems(
+          isLinux: false,
+          isWindows: false,
+          isMipsStack: true,
+        ).whereType<ConfigOptionsItem<String>>(),
+        hasLength(1),
+      );
+    });
+
+    test('strict route appears only on linux or windows', () {
+      expect(
+        tunOptionsItems(
+          isLinux: false,
+          isWindows: false,
+          isMipsStack: false,
+        ).whereType<ConfigToggleItem>(),
+        isEmpty,
+      );
+      for (final (isLinux, isWindows) in [(true, false), (false, true)]) {
+        expect(
+          tunOptionsItems(
+            isLinux: isLinux,
+            isWindows: isWindows,
+            isMipsStack: false,
+          ).whereType<ConfigToggleItem>(),
+          hasLength(1),
+          reason: 'linux=$isLinux windows=$isWindows',
+        );
+      }
+    });
+
+    test('hidden rows do not shift the leading mtu row', () {
+      expect(
+        types(isLinux: true, isWindows: true, isMipsStack: true).first
+            .toString(),
+        '_TunMtuItem',
+      );
+    });
+  });
+
+  group('tun mtu row', () {
+    testWidgets('shows the regional default while the mtu is automatic', (
+      tester,
+    ) async {
+      final region = container.read(appRegionProvider);
+      final mtuItem = tunOptionsItems(
+        isLinux: false,
+        isWindows: false,
+        isMipsStack: false,
+      ).first;
+
+      await pumpItem(tester, mtuItem);
+
+      expect(container.read(patchClashConfigProvider).tun.mtu, isNull);
+      expect(
+        find.text('${profileForCode(region).tunMtu} · ${_tunMtuAutomatic()}'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the reset control clears an explicit mtu', (tester) async {
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(mtu: 1400));
+      final mtuItem = tunOptionsItems(
+        isLinux: false,
+        isWindows: false,
+        isMipsStack: false,
+      ).first;
+
+      await pumpItem(tester, mtuItem);
+      expect(container.read(patchClashConfigProvider).tun.mtu, 1400);
+
+      await tester.tap(find.byIcon(Icons.restore));
+      await tester.pumpAndSettle();
+
+      expect(container.read(patchClashConfigProvider).tun.mtu, isNull);
+    });
+  });
 }
+
+String _tunMtuAutomatic() => 'Regional default';
 
 String _routeModeLabel(RouteMode mode) {
   return switch (mode) {

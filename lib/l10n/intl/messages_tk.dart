@@ -821,6 +821,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "Tassyklanyňyzda bar bolan maglumatlaryň üstünden ýazylýar.",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Trafik dyknyşygyny dolandyrmak",
+    ),
     "connected": MessageLookupByLibrary.simpleMessage("Bagly"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("Baglanylýar..."),
@@ -1207,6 +1210,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP serwerine birikmek üçin ulanylýan proksi",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Göni"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "ICMP geçirmegi öçürmek",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu profil üçin ping bilen birlikde ICMP paketlerini TUN arkaly geçirmezlik",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP-ni öçür"),
     "disabled": MessageLookupByLibrary.simpleMessage("Ýapyk"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
@@ -1682,6 +1691,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Programma fona geçende soňky tapsyryklardan gizlenýär",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage(
+      "Çykarylan interfeýsler",
+    ),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu interfeýslerden gelýän trafik TUN-dan geçmeýär. Diňe Linux üçin.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Proksi çykarma süzgüji",
     ),
@@ -2058,6 +2073,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "intranetIP": MessageLookupByLibrary.simpleMessage("Içki tor IP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Nädogry nusga faýly",
+    ),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "Prefiksli IPv4 ýa-da IPv6 toruny giriziň, mysal üçin 192.168.1.0/24 ýa-da fd00::/8",
     ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
@@ -2985,6 +3003,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("Marşrut salgylary"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Diňlenilýän marşrut salgylaryny sazlamak",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
+      "Ugurlamadan çykarylan salgylary",
+    ),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu torlar TUN-dan geçmeýär",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("Marşrut usuly"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -4613,6 +4637,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Bes et"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPN bes edilýär..."),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("Berk ugurlama"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS ýaly trafikiň TUN-dan sowlup geçmeginiň öňüni almaga kömek edýär. Beýleki enjamlaryň bu enjama girmegini çäklendirip biler.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("Stil"),
     "subRule": MessageLookupByLibrary.simpleMessage("Içki düzgün"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("Içki düzgün boş"),
@@ -4890,6 +4918,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Diňe administrator usulynda işleýär",
+    ),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Sebitiň deslapky bahasy",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU 1280 bilen 65535 aralygyndaky bitin san bolmaly",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Ýap"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Aç"),

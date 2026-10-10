@@ -38,12 +38,16 @@ type UpdateParams struct {
 }
 
 type tunSchema struct {
-	Enable       bool               `yaml:"enable" json:"enable"`
-	Device       *string            `yaml:"device" json:"device"`
-	Stack        *constant.TUNStack `yaml:"stack" json:"stack"`
-	DNSHijack    *[]string          `yaml:"dns-hijack" json:"dns-hijack"`
-	AutoRoute    *bool              `yaml:"auto-route" json:"auto-route"`
-	RouteAddress *[]netip.Prefix    `yaml:"route-address" json:"route-address,omitempty"`
+	Enable               bool               `yaml:"enable" json:"enable"`
+	Device               *string            `yaml:"device" json:"device"`
+	Stack                *constant.TUNStack `yaml:"stack" json:"stack"`
+	DNSHijack            *[]string          `yaml:"dns-hijack" json:"dns-hijack"`
+	AutoRoute            *bool              `yaml:"auto-route" json:"auto-route"`
+	RouteAddress         *[]netip.Prefix    `yaml:"route-address" json:"route-address,omitempty"`
+	MTU                  *uint32            `yaml:"mtu" json:"mtu,omitempty"`
+	CongestionController *string            `yaml:"congestion-controller" json:"congestion-controller,omitempty"`
+	StrictRoute          *bool              `yaml:"strict-route" json:"strict-route,omitempty"`
+	RouteExcludeAddress  *[]netip.Prefix    `yaml:"route-exclude-address" json:"route-exclude-address,omitempty"`
 }
 
 type SideLoadParams struct {

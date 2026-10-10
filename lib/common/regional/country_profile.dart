@@ -8,6 +8,7 @@ import 'package:reclash/models/models.dart';
 class CountryProfile {
   const CountryProfile({
     required this.dns,
+    this.tunMtu = defaultTunMtu,
     this.bypassHead = const [],
     this.restrictedCapabilities = const {},
     this.simNetworkCountries = const {},
@@ -16,6 +17,7 @@ class CountryProfile {
   });
 
   final Dns dns;
+  final int tunMtu;
   final List<String> bypassHead;
 
   /// The gated facets this country may use. Facets absent from [_gatedFacets]
@@ -168,6 +170,7 @@ const _profiles = <String, CountryProfile>{
   ),
   'CN': CountryProfile(
     dns: defaultDns,
+    tunMtu: 9000,
     bypassHead: _bypassChina,
     restrictedCapabilities: {RegionalFacetId.packageMatcher},
     simNetworkCountries: {'CN'},

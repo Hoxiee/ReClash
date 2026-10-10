@@ -814,6 +814,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "После подтверждения существующие данные будут перезаписаны",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Управление перегрузкой",
+    ),
     "connected": MessageLookupByLibrary.simpleMessage("Подключено"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("Подключение…"),
@@ -1198,6 +1201,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Прокси для доступа к серверу NTP",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "Не пересылать ICMP",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "Не пересылать через TUN пакеты ICMP, включая ping, при использовании этого профиля",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
@@ -1671,6 +1680,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Скрывать приложение из недавних задач, когда оно в фоне",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage(
+      "Исключённые интерфейсы",
+    ),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Не захватывать в TUN трафик с указанных интерфейсов. Только Linux.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Исключающий фильтр",
     ),
@@ -2047,6 +2062,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "intranetIP": MessageLookupByLibrary.simpleMessage("Внутренний IP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Недопустимый файл резервной копии",
+    ),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "Введите сеть IPv4 или IPv6 с префиксом, например 192.168.1.0/24 или fd00::/8",
     ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
@@ -3000,6 +3018,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Настроить адреса, маршрутизируемые через туннель",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
+      "Исключённые адреса маршрутов",
+    ),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Эти сети не захватываются TUN",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("Режим маршрутизации"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -4636,6 +4660,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Стоп"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("Остановка VPN…"),
+    "strictRoute": MessageLookupByLibrary.simpleMessage(
+      "Строгая маршрутизация",
+    ),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Помогает предотвратить обход TUN, в том числе для DNS. Может ограничить доступ к этому устройству из локальной сети.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
     "subRule": MessageLookupByLibrary.simpleMessage("Подправило"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("Подправило пусто"),
@@ -4917,6 +4947,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Доступно только с правами администратора",
+    ),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage("По региону"),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU должен быть целым числом от 1280 до 65535",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Отключить"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Включить"),

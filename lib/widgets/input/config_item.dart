@@ -195,6 +195,7 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
     required super.title,
     required super.onChanged,
     this.itemMaxLength,
+    this.itemValidator,
     this.maxWidth,
     this.illustration = NullStatusIllustration.data,
     super.subtitle,
@@ -203,6 +204,8 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
   });
 
   final int? itemMaxLength;
+  final String? Function(String item, AppLocalizations appLocalizations)?
+  itemValidator;
   final double? maxWidth;
   final NullStatusIllustration illustration;
 
@@ -226,6 +229,9 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
         title: label,
         items: value,
         itemMaxLength: itemMaxLength,
+        itemValidator: itemValidator == null
+            ? null
+            : (item) => itemValidator!(item, appLocalizations),
         titleBuilder: (item) => Text(item),
         illustration: illustration,
       ),

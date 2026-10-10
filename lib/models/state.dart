@@ -312,6 +312,11 @@ abstract class VpnState with _$VpnState {
   const factory VpnState({
     required TunStack stack,
     required VpnProps vpnProps,
+    @Default(defaultTunMtu) int mtu,
+    @Default(defaultCongestionController) String congestionController,
+    @Default([]) List<String> routeAddress,
+    @Default([]) List<String> routeExcludeAddress,
+    bool? disableIcmpForwarding,
   }) = _VpnState;
 }
 
@@ -385,6 +390,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(false) bool overrideNtp,
     required bool appendSystemDns,
     @Default(false) bool overrideNetwork,
+    ProfileTun? tunOverride,
     required List<ProxyGroup> proxyGroups,
     required List<Rule> rules,
     required List<Rule> addedRules,
@@ -428,6 +434,7 @@ abstract class SetupState with _$SetupState {
     required Script? script,
     required bool overrideDns,
     required Dns dns,
+    ProfileTun? tunOverride,
     @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
     @Default({}) Map<String, List<String>> serviceRules,
     String? matchTarget,

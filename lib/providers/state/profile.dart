@@ -107,6 +107,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     script: script,
     overrideDns: overrideDns,
     dns: dns,
+    tunOverride: profile?.tunOverride,
     serviceRoutePolicies: profile?.serviceRoutePolicies ?? const [],
     serviceRules: {
       for (final policy in profile?.serviceRoutePolicies ?? const [])

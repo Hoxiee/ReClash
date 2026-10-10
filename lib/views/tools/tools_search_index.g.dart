@@ -583,6 +583,32 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       category: 'configuration',
       gate: 'mobile',
     ),
+    const DeepSettingSpec(
+      title: 'MTU',
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'always',
+      keywords: ['TUN', 'MTU'],
+    ),
+    DeepSettingSpec(
+      title: l.congestionController,
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'mipsStack',
+    ),
+    DeepSettingSpec(
+      title: l.strictRoute,
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'linuxOrWindows',
+    ),
+    DeepSettingSpec(
+      title: l.routeExcludeAddress,
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'always',
+      keywords: const ['TUN', 'CIDR'],
+    ),
     DeepSettingSpec(
       title: l.options,
       paneId: 'network',

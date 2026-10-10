@@ -9,9 +9,11 @@
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_reclash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
-                                         jstring stack, jstring address, jstring dns) {
+                                         jstring stack, jstring address, jstring dns,
+                                         jstring options) {
     const auto interface = new_global(cb);
-    return startTUN(interface, fd, get_string(stack), get_string(address), get_string(dns))
+    return startTUN(interface, fd, get_string(stack), get_string(address), get_string(dns),
+                    get_string(options))
            ? JNI_TRUE
            : JNI_FALSE;
 }

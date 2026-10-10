@@ -820,6 +820,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "Растасаңыз, бар деректердің үстінен жазылады.",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Кептелісті басқару",
+    ),
     "connected": MessageLookupByLibrary.simpleMessage("Жалғанған"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("Қосылуда…"),
@@ -1202,6 +1205,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP серверіне қосылу үшін қолданылатын прокси",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Тікелей"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "ICMP бағыттауды өшіру",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "Осы профиль үшін ping қоса алғанда ICMP пакеттерін TUN арқылы жібермеу",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP-ні өшіру"),
     "disabled": MessageLookupByLibrary.simpleMessage("Өшірулі"),
     "discardChanges": MessageLookupByLibrary.simpleMessage(
@@ -1677,6 +1686,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданба фонда жүргенде оны соңғы қолданбалардан жасыру",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage(
+      "Шығарылған интерфейстер",
+    ),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Бұл интерфейстерден келетін трафик TUN арқылы өтпейді. Тек Linux үшін.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Проксилерді алып тастау сүзгісі",
     ),
@@ -2053,6 +2068,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "intranetIP": MessageLookupByLibrary.simpleMessage("Ішкі желі IP-і"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Жарамсыз сақтық көшірме файлы",
+    ),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "Префиксі бар IPv4 немесе IPv6 желісін енгізіңіз, мысалы 192.168.1.0/24 немесе fd00::/8",
     ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
@@ -2996,6 +3014,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("Бағыттау адрестері"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Бағыттау адрестерін баптау",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
+      "Маршруттан шығарылған мекенжайлар",
+    ),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Бұл желілер TUN арқылы өтпейді",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("Бағыттау режимі"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage(
@@ -4618,6 +4642,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "stop": MessageLookupByLibrary.simpleMessage("Тоқтату"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPN тоқтатылуда…"),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("Қатаң маршруттау"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS сияқты трафиктің TUN-ды айналып өтуіне жол бермеуге көмектеседі. Басқа құрылғылардың осы құрылғыға қатынауын шектеуі мүмкін.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
     "subRule": MessageLookupByLibrary.simpleMessage("Ішкі ереже"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("Ішкі ереже бос"),
@@ -4897,6 +4925,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Тек әкімші режимінде ғана қолданылады",
+    ),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Аймақтың әдепкі мәні",
+    ),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU 1280 мен 65535 арасындағы бүтін сан болуы керек",
     ),
     "turnOff": MessageLookupByLibrary.simpleMessage("Өшіру"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Қосу"),

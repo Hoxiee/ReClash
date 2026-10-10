@@ -691,6 +691,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmOverwriteTip": MessageLookupByLibrary.simpleMessage(
       "확인하면 기존 데이터를 덮어씁니다",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage("혼잡 제어"),
     "connected": MessageLookupByLibrary.simpleMessage("연결됨"),
     "connectedFor": m6,
     "connecting": MessageLookupByLibrary.simpleMessage("연결 중…"),
@@ -987,6 +988,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP 서버에 연결할 때 사용하는 프록시",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("직접"),
+    "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
+      "ICMP 전달 비활성화",
+    ),
+    "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
+      "이 프로필에서 ping을 포함한 ICMP 패킷을 TUN으로 전달하지 않습니다",
+    ),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP 사용 안 함"),
     "disabled": MessageLookupByLibrary.simpleMessage("꺼짐"),
     "discardChanges": MessageLookupByLibrary.simpleMessage("변경 사항을 취소할까요?"),
@@ -1378,6 +1385,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "백그라운드에 있을 때 앱을 최근 앱 목록에서 숨깁니다",
     ),
+    "excludeInterface": MessageLookupByLibrary.simpleMessage("제외할 인터페이스"),
+    "excludeInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "이 인터페이스의 트래픽은 TUN으로 전달하지 않습니다. Linux 전용입니다.",
+    ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage("제외 프록시 필터"),
     "excludeType": MessageLookupByLibrary.simpleMessage("제외 유형"),
     "existsTip": m40,
@@ -1681,6 +1692,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "interval": MessageLookupByLibrary.simpleMessage("간격"),
     "intranetIP": MessageLookupByLibrary.simpleMessage("사설 IP"),
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage("잘못된 백업 파일입니다."),
+    "invalidCidr": MessageLookupByLibrary.simpleMessage(
+      "192.168.1.0/24 또는 fd00::/8처럼 접두사가 있는 IPv4 또는 IPv6 네트워크를 입력하세요",
+    ),
     "invalidPolicy": m54,
     "invalidProxy": m55,
     "invalidProxyProvider": m56,
@@ -2433,6 +2447,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "routeAddress": MessageLookupByLibrary.simpleMessage("라우팅 주소"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "수신 대기할 라우팅 주소를 설정합니다",
+    ),
+    "routeExcludeAddress": MessageLookupByLibrary.simpleMessage("제외할 경로 주소"),
+    "routeExcludeAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "이 네트워크는 TUN을 거치지 않습니다",
     ),
     "routeMode": MessageLookupByLibrary.simpleMessage("라우팅 모드"),
     "routeModeBypassPrivate": MessageLookupByLibrary.simpleMessage("사설 주소 우회"),
@@ -3721,6 +3739,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "statusDesc": MessageLookupByLibrary.simpleMessage("끄면 시스템 DNS를 사용합니다"),
     "stop": MessageLookupByLibrary.simpleMessage("중지"),
     "stopVpn": MessageLookupByLibrary.simpleMessage("VPN 중지 중…"),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("엄격한 라우팅"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "DNS 등의 트래픽이 TUN을 우회하지 않도록 돕습니다. 다른 기기에서 이 기기로의 접근이 제한될 수 있습니다.",
+    ),
     "style": MessageLookupByLibrary.simpleMessage("스타일"),
     "subRule": MessageLookupByLibrary.simpleMessage("하위 규칙"),
     "subRuleEmpty": MessageLookupByLibrary.simpleMessage("하위 규칙이 비어 있습니다"),
@@ -3963,6 +3985,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage("관리자 모드에서만 작동합니다"),
+    "tunMtuAutomatic": MessageLookupByLibrary.simpleMessage("지역 기본값"),
+    "tunMtuInvalid": MessageLookupByLibrary.simpleMessage(
+      "MTU는 1280에서 65535 사이의 정수여야 합니다",
+    ),
     "turnOff": MessageLookupByLibrary.simpleMessage("끄기"),
     "turnOn": MessageLookupByLibrary.simpleMessage("켜기"),
     "undo": MessageLookupByLibrary.simpleMessage("실행 취소"),
