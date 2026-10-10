@@ -176,3 +176,64 @@ func TestCoarseEnvClass(t *testing.T) {
 		}
 	}
 }
+
+func TestBuildParkNodesListsEveryConfigNode(t *testing.T) {
+	now := time.Now()
+	counters := newSubscriptionCounters(now.Add(-time.Minute))
+	counters.updatedAt = now
+	counters.nodes["secret-fast"] = &subscriptionNodeStat{
+		attempts:    6,
+		failures:    2,
+		failStreak:  1,
+		classCounts: map[string]int{"timeout": 2},
+	}
+
+	metadata := subscriptionNodeMetadata{
+		nodes: map[string]subscriptionNodeLabel{
+			"secret-fast":    {Protocol: "vless", Transport: "tcp", Groups: []string{"DE"}, PositionHint: 1},
+			"secret-standby": {Protocol: "ss", Transport: "ws", Groups: []string{"NL"}, PositionHint: 2},
+		},
+	}
+
+	park := buildParkNodes(counters, metadata, func(name string) string {
+		if name == "secret-fast" {
+			return "DE"
+		}
+		return "NL"
+	})
+
+	if len(park) != 2 {
+		t.Fatalf("park = %d, want every config node (2)", len(park))
+	}
+	if park[0].Alias != "node-001" || park[1].Alias != "node-002" {
+		t.Fatalf("aliases = %q,%q, want canonical node-001,node-002", park[0].Alias, park[1].Alias)
+	}
+	// positionHint 1 sorts first and is the observed node.
+	if park[0].Attempts != 6 || park[0].Failures != 2 || park[0].Successes != 4 {
+		t.Fatalf("observed stats missing: %+v", park[0])
+	}
+	if park[0].DominantClass != "timeout" || park[0].EgressCountry != "DE" {
+		t.Fatalf("observed labels missing: %+v", park[0])
+	}
+	// The never-dialed standby node still appears, with zero attempts.
+	if park[1].Attempts != 0 || park[1].Protocol != "ss" || park[1].EgressCountry != "NL" {
+		t.Fatalf("standby node wrong: %+v", park[1])
+	}
+
+	report := exportReportWithPark(counters, metadata, now)
+	blob, err := json.Marshal(report)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if strings.Contains(string(blob), "secret-") {
+		t.Fatal("park leaked a real node name")
+	}
+}
+
+// exportReportWithPark mirrors exportVerboseSubscriptionReport without the live
+// engine singletons, so the test can marshal a report that carries the park.
+func exportReportWithPark(counters subscriptionCounters, metadata subscriptionNodeMetadata, now time.Time) subscriptionReport {
+	report := buildSubscriptionReport(counters, metadata, now, "", "", func(string) string { return "" })
+	report.Park = buildParkNodes(counters, metadata, func(string) string { return "" })
+	return report
+}

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -14,6 +15,8 @@ const subscriptionConnectTimeout = Duration(seconds: 12);
 const subscriptionReceiveTimeout = Duration(seconds: 30);
 const subscriptionRedirectLimit = 5;
 const maxSubscriptionResponseBytes = 16 * 1024 * 1024;
+const telemetrySendTimeout = Duration(seconds: 20);
+const maxTelemetryReportBytes = 1024 * 1024;
 
 class Request {
   late final Dio dio;
@@ -186,6 +189,40 @@ class Request {
       );
       rethrow;
     }
+  }
+
+  /// Submits a subscription report to a provider's opt-in telemetry sink. The
+  /// user confirms every call; this never runs in the background. The report
+  /// goes out directly (not through a proxy) so a sick node cannot swallow its
+  /// own diagnosis, and only to an absolute HTTPS URL without embedded
+  /// credentials. The send is time-bounded and the payload is size-capped so a
+  /// dead or hostile ingest cannot hang the UI or carry a runaway body. Throws
+  /// on any failure so the caller can tell the user it did not go through.
+  Future<void> submitTelemetryReport(
+    String url,
+    Map<String, Object?> report,
+  ) async {
+    final target = Uri.tryParse(url);
+    if (target == null ||
+        target.scheme.toLowerCase() != 'https' ||
+        target.userInfo.isNotEmpty) {
+      throw ArgumentError('telemetry URL must be an absolute HTTPS URL');
+    }
+    final payload = json.encode(report);
+    if (utf8.encode(payload).length > maxTelemetryReportBytes) {
+      throw ArgumentError('telemetry report exceeds the size limit');
+    }
+    await dio.postUri<void>(
+      target,
+      data: payload,
+      options: Options(
+        responseType: ResponseType.plain,
+        contentType: Headers.jsonContentType,
+        sendTimeout: telemetrySendTimeout,
+        receiveTimeout: telemetrySendTimeout,
+        headers: const {'ReClash-Telemetry-Schema': '1'},
+      ),
+    );
   }
 
   /// Lists releases instead of hitting `releases/latest`, which hides every

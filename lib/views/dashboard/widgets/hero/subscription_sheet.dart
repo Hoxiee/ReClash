@@ -283,7 +283,11 @@ class _Body extends ConsumerWidget {
         title: Text(l10n.subscriptionReport),
         trailing: chevron(),
         onPressed: () => unawaited(
-          openSubscriptionReportSheet(context, reportUrl: reportUrl),
+          openSubscriptionReportSheet(
+            context,
+            reportUrl: reportUrl,
+            telemetryUrl: panelMeta?.telemetryUrl,
+          ),
         ),
       ),
     ];

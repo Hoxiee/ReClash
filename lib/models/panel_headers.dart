@@ -77,6 +77,10 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'reportUrl',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-telemetryurl'],
+    canonicalKey: 'telemetryUrl',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-announceurl'],
     canonicalKey: 'announceUrl',
   ),

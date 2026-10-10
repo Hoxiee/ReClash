@@ -180,6 +180,7 @@ abstract class SubscriptionReport with _$SubscriptionReport {
     SubscriptionUpdateReport? subscriptionUpdate,
     @Default(SubscriptionDialReport()) SubscriptionDialReport runtimeDial,
     @Default([]) List<SubscriptionNodeReport> nodes,
+    @Default([]) List<SubscriptionNodeReport> park,
   }) = _SubscriptionReport;
 
   factory SubscriptionReport.fromJson(Map<String, Object?> json) =>

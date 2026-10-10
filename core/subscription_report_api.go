@@ -20,6 +20,9 @@ func init() {
 	registerMethod(subscriptionReportExportMethod, withoutArguments(func(response MethodResponse) {
 		response.success(exportSubscriptionReport())
 	}))
+	registerMethod(subscriptionReportExportVerboseMethod, withoutArguments(func(response MethodResponse) {
+		response.success(exportVerboseSubscriptionReport())
+	}))
 }
 
 func setSubscriptionMetadata(params subscriptionMetadataParams) {
@@ -50,4 +53,23 @@ func exportSubscriptionReport() subscriptionReport {
 		status.Env,
 		rcxEngineInstance.ExitCountryFor,
 	)
+}
+
+// exportVerboseSubscriptionReport adds the full-park per-node section the opt-in
+// telemetry send carries. It is a superset of the default export, so the public
+// report link keeps using the lean one.
+func exportVerboseSubscriptionReport() subscriptionReport {
+	counters := subscriptionReporterInstance.Snapshot()
+	metadata := currentSubscriptionMetadata()
+	status := rcxEngineInstance.Status()
+	report := buildSubscriptionReport(
+		counters,
+		metadata,
+		time.Now(),
+		status.Terrain,
+		status.Env,
+		rcxEngineInstance.ExitCountryFor,
+	)
+	report.Park = buildParkNodes(counters, metadata, rcxEngineInstance.ExitCountryFor)
+	return report
 }

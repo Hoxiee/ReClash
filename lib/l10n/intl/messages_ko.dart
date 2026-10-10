@@ -3869,6 +3869,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("JSON 저장"),
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage("공급자에게 보내기"),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "익명화된 구독 보고서를 제공자에게 직접 전송합니다. 확인할 때만 전송되며, 백그라운드에서는 아무것도 전송되지 않습니다.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("제공자에게 전송할까요?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "보고서를 전송하지 못했습니다",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "보고서를 제공자에게 전송했습니다",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "업데이트 실패",
     ),

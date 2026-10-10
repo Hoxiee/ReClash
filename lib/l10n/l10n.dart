@@ -4273,6 +4273,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Send to provider?`
+  String get subscriptionReportTelemetryConsentTitle {
+    return Intl.message(
+      'Send to provider?',
+      name: 'subscriptionReportTelemetryConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This sends the anonymized subscription report directly to your provider. It goes out only when you confirm — nothing is sent in the background.`
+  String get subscriptionReportTelemetryConsent {
+    return Intl.message(
+      'This sends the anonymized subscription report directly to your provider. It goes out only when you confirm — nothing is sent in the background.',
+      name: 'subscriptionReportTelemetryConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report sent to provider`
+  String get subscriptionReportTelemetrySent {
+    return Intl.message(
+      'Report sent to provider',
+      name: 'subscriptionReportTelemetrySent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not send the report`
+  String get subscriptionReportTelemetryFailed {
+    return Intl.message(
+      'Could not send the report',
+      name: 'subscriptionReportTelemetryFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copied to clipboard`
   String get subscriptionReportCopied {
     return Intl.message(

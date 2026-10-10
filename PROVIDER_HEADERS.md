@@ -18,6 +18,7 @@ Profile-Title: Example VPN
 ReClash-Announce: Maintenance is scheduled for Sunday.
 ReClash-SupportURL: https://support.example.com
 ReClash-ReportURL: https://example.com/report
+ReClash-TelemetryURL: https://example.com/ingest
 ReClash-AnnounceURL: https://example.com/news
 ReClash-WebPageURL: https://example.com/account
 ReClash-ExpireDays: 7,3,1
@@ -54,6 +55,7 @@ ReClash-AppRouting: domestic
 | `announce` | `reclash-announce`, `announce` | `base64` | Plain text or Base64 | Provider announcement. Takes priority over `announce`. |
 | `supportUrl` | `reclash-supporturl`, `support-url`, `flclashx-supporturl` | — | Provider support URL | Support page. Use an absolute HTTPS URL. |
 | `reportUrl` | `reclash-reporturl`, `report-url` | — | Provider issue-report URL | Subscription issue-report action. Use an absolute HTTPS URL. |
+| `telemetryUrl` | `reclash-telemetryurl` | — | Provider telemetry ingest URL | Opt-in telemetry sink. When set, the subscription report sheet offers a direct send that POSTs the report JSON to this endpoint. The user confirms every send; nothing is sent in the background. Use an absolute HTTPS URL. |
 | `announceUrl` | `reclash-announceurl` | — | Provider announcement URL | Turns the announcement into a link: opens instead of the dismiss button on the announcement sheet and card. Use an absolute HTTPS URL. |
 | `webPageUrl` | `reclash-webpageurl`, `profile-web-page-url` | — | Provider account URL | Personal-account link in the subscription details. Also read from the Profile-Web-Page-Url header that marzban and 3x-ui already emit. Use an absolute HTTPS URL. |
 | `expireNotifyDays` | `reclash-expiredays` | — | Comma-separated days | Days-before-expiry the client reminds at. Overrides the default 3,2,1. |

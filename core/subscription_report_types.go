@@ -82,4 +82,11 @@ type subscriptionReport struct {
 	// Nodes lists only the worst top-N observed nodes that had failures, not the
 	// whole park; ConfigNodeCount and ObservedNodeCount are its denominators.
 	Nodes []subscriptionNodeReport `json:"nodes"`
+	// Park lists every config node — observed or not — under a stable canonical
+	// alias, so a provider can see standby and never-dialed nodes the bounded
+	// Nodes list omits. Populated only in the verbose export the opt-in telemetry
+	// send requests; empty (and omitted) in the default export the public
+	// report link carries. Its aliases are independent of the Nodes list's
+	// worst-first ranking; a park entry with attempts 0 was never dialed.
+	Park []subscriptionNodeReport `json:"park,omitempty"`
 }

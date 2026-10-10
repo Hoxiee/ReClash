@@ -28,6 +28,7 @@ void main() {
     WidgetTester tester,
     SubscriptionFault fault, {
     String? reportUrl,
+    String? telemetryUrl,
   }) async {
     const size = Size(900, 1600);
     tester.view.physicalSize = size;
@@ -48,6 +49,7 @@ void main() {
             body: SubscriptionReportSheet(
               report: _report(fault),
               reportUrl: reportUrl,
+              telemetryUrl: telemetryUrl,
             ),
           ),
         ),
@@ -94,6 +96,24 @@ void main() {
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();
     expect(find.text('Send to provider'), findsNothing);
+  });
+
+  testWidgets('gates a direct telemetry send behind an explicit consent', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      SubscriptionFault.server,
+      telemetryUrl: 'https://example.com/ingest',
+    );
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('Send to provider'), findsOneWidget);
+
+    await tester.tap(find.text('Send to provider'));
+    await tester.pumpAndSettle();
+    // Nothing goes out until the user confirms the consent dialog.
+    expect(find.text('Send to provider?'), findsOneWidget);
   });
 
   testWidgets('inconclusive reads as no single cause, not a blame', (

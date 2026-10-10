@@ -2644,7 +2644,7 @@ as int,
 /// @nodoc
 mixin _$SubscriptionReport {
 
- SubscriptionVerdict? get verdict; int get schemaVersion; int get generatedAt; String get coreVersion; String get appVersion; String get platform; String get architecture; int get windowStart; int get windowEnd; String get terrain; String get env; List<String> get presets; int get droppedEvents; int get configNodeCount; int get observedNodeCount; SubscriptionUpdateReport? get subscriptionUpdate; SubscriptionDialReport get runtimeDial; List<SubscriptionNodeReport> get nodes;
+ SubscriptionVerdict? get verdict; int get schemaVersion; int get generatedAt; String get coreVersion; String get appVersion; String get platform; String get architecture; int get windowStart; int get windowEnd; String get terrain; String get env; List<String> get presets; int get droppedEvents; int get configNodeCount; int get observedNodeCount; SubscriptionUpdateReport? get subscriptionUpdate; SubscriptionDialReport get runtimeDial; List<SubscriptionNodeReport> get nodes; List<SubscriptionNodeReport> get park;
 /// Create a copy of SubscriptionReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2658,20 +2658,20 @@ $SubscriptionReportCopyWith<SubscriptionReport> get copyWith => _$SubscriptionRe
 @override
 bool operator ==(Object other) {
   final _this = this as SubscriptionReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionReport&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.schemaVersion, _this.schemaVersion) || other.schemaVersion == _this.schemaVersion)&&(identical(other.generatedAt, _this.generatedAt) || other.generatedAt == _this.generatedAt)&&(identical(other.coreVersion, _this.coreVersion) || other.coreVersion == _this.coreVersion)&&(identical(other.appVersion, _this.appVersion) || other.appVersion == _this.appVersion)&&(identical(other.platform, _this.platform) || other.platform == _this.platform)&&(identical(other.architecture, _this.architecture) || other.architecture == _this.architecture)&&(identical(other.windowStart, _this.windowStart) || other.windowStart == _this.windowStart)&&(identical(other.windowEnd, _this.windowEnd) || other.windowEnd == _this.windowEnd)&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&const DeepCollectionEquality().equals(other.presets, _this.presets)&&(identical(other.droppedEvents, _this.droppedEvents) || other.droppedEvents == _this.droppedEvents)&&(identical(other.configNodeCount, _this.configNodeCount) || other.configNodeCount == _this.configNodeCount)&&(identical(other.observedNodeCount, _this.observedNodeCount) || other.observedNodeCount == _this.observedNodeCount)&&(identical(other.subscriptionUpdate, _this.subscriptionUpdate) || other.subscriptionUpdate == _this.subscriptionUpdate)&&(identical(other.runtimeDial, _this.runtimeDial) || other.runtimeDial == _this.runtimeDial)&&const DeepCollectionEquality().equals(other.nodes, _this.nodes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionReport&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.schemaVersion, _this.schemaVersion) || other.schemaVersion == _this.schemaVersion)&&(identical(other.generatedAt, _this.generatedAt) || other.generatedAt == _this.generatedAt)&&(identical(other.coreVersion, _this.coreVersion) || other.coreVersion == _this.coreVersion)&&(identical(other.appVersion, _this.appVersion) || other.appVersion == _this.appVersion)&&(identical(other.platform, _this.platform) || other.platform == _this.platform)&&(identical(other.architecture, _this.architecture) || other.architecture == _this.architecture)&&(identical(other.windowStart, _this.windowStart) || other.windowStart == _this.windowStart)&&(identical(other.windowEnd, _this.windowEnd) || other.windowEnd == _this.windowEnd)&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&const DeepCollectionEquality().equals(other.presets, _this.presets)&&(identical(other.droppedEvents, _this.droppedEvents) || other.droppedEvents == _this.droppedEvents)&&(identical(other.configNodeCount, _this.configNodeCount) || other.configNodeCount == _this.configNodeCount)&&(identical(other.observedNodeCount, _this.observedNodeCount) || other.observedNodeCount == _this.observedNodeCount)&&(identical(other.subscriptionUpdate, _this.subscriptionUpdate) || other.subscriptionUpdate == _this.subscriptionUpdate)&&(identical(other.runtimeDial, _this.runtimeDial) || other.runtimeDial == _this.runtimeDial)&&const DeepCollectionEquality().equals(other.nodes, _this.nodes)&&const DeepCollectionEquality().equals(other.park, _this.park));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SubscriptionReport;
-  return Object.hash(runtimeType,_this.verdict,_this.schemaVersion,_this.generatedAt,_this.coreVersion,_this.appVersion,_this.platform,_this.architecture,_this.windowStart,_this.windowEnd,_this.terrain,_this.env,const DeepCollectionEquality().hash(_this.presets),_this.droppedEvents,_this.configNodeCount,_this.observedNodeCount,_this.subscriptionUpdate,_this.runtimeDial,const DeepCollectionEquality().hash(_this.nodes));
+  return Object.hashAll([runtimeType,_this.verdict,_this.schemaVersion,_this.generatedAt,_this.coreVersion,_this.appVersion,_this.platform,_this.architecture,_this.windowStart,_this.windowEnd,_this.terrain,_this.env,const DeepCollectionEquality().hash(_this.presets),_this.droppedEvents,_this.configNodeCount,_this.observedNodeCount,_this.subscriptionUpdate,_this.runtimeDial,const DeepCollectionEquality().hash(_this.nodes),const DeepCollectionEquality().hash(_this.park)]);
 }
 
 @override
 String toString() {
   final _this = this as SubscriptionReport;
-  return 'SubscriptionReport(verdict: ${_this.verdict}, schemaVersion: ${_this.schemaVersion}, generatedAt: ${_this.generatedAt}, coreVersion: ${_this.coreVersion}, appVersion: ${_this.appVersion}, platform: ${_this.platform}, architecture: ${_this.architecture}, windowStart: ${_this.windowStart}, windowEnd: ${_this.windowEnd}, terrain: ${_this.terrain}, env: ${_this.env}, presets: ${_this.presets}, droppedEvents: ${_this.droppedEvents}, configNodeCount: ${_this.configNodeCount}, observedNodeCount: ${_this.observedNodeCount}, subscriptionUpdate: ${_this.subscriptionUpdate}, runtimeDial: ${_this.runtimeDial}, nodes: ${_this.nodes})';
+  return 'SubscriptionReport(verdict: ${_this.verdict}, schemaVersion: ${_this.schemaVersion}, generatedAt: ${_this.generatedAt}, coreVersion: ${_this.coreVersion}, appVersion: ${_this.appVersion}, platform: ${_this.platform}, architecture: ${_this.architecture}, windowStart: ${_this.windowStart}, windowEnd: ${_this.windowEnd}, terrain: ${_this.terrain}, env: ${_this.env}, presets: ${_this.presets}, droppedEvents: ${_this.droppedEvents}, configNodeCount: ${_this.configNodeCount}, observedNodeCount: ${_this.observedNodeCount}, subscriptionUpdate: ${_this.subscriptionUpdate}, runtimeDial: ${_this.runtimeDial}, nodes: ${_this.nodes}, park: ${_this.park})';
 }
 
 
@@ -2682,7 +2682,7 @@ abstract mixin class $SubscriptionReportCopyWith<$Res>  {
   factory $SubscriptionReportCopyWith(SubscriptionReport value, $Res Function(SubscriptionReport) _then) = _$SubscriptionReportCopyWithImpl;
 @useResult
 $Res call({
- SubscriptionVerdict? verdict, int schemaVersion, int generatedAt, String coreVersion, String appVersion, String platform, String architecture, int windowStart, int windowEnd, String terrain, String env, List<String> presets, int droppedEvents, int configNodeCount, int observedNodeCount, SubscriptionUpdateReport? subscriptionUpdate, SubscriptionDialReport runtimeDial, List<SubscriptionNodeReport> nodes
+ SubscriptionVerdict? verdict, int schemaVersion, int generatedAt, String coreVersion, String appVersion, String platform, String architecture, int windowStart, int windowEnd, String terrain, String env, List<String> presets, int droppedEvents, int configNodeCount, int observedNodeCount, SubscriptionUpdateReport? subscriptionUpdate, SubscriptionDialReport runtimeDial, List<SubscriptionNodeReport> nodes, List<SubscriptionNodeReport> park
 });
 
 
@@ -2699,7 +2699,7 @@ class _$SubscriptionReportCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? verdict = freezed,Object? schemaVersion = null,Object? generatedAt = null,Object? coreVersion = null,Object? appVersion = null,Object? platform = null,Object? architecture = null,Object? windowStart = null,Object? windowEnd = null,Object? terrain = null,Object? env = null,Object? presets = null,Object? droppedEvents = null,Object? configNodeCount = null,Object? observedNodeCount = null,Object? subscriptionUpdate = freezed,Object? runtimeDial = null,Object? nodes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? verdict = freezed,Object? schemaVersion = null,Object? generatedAt = null,Object? coreVersion = null,Object? appVersion = null,Object? platform = null,Object? architecture = null,Object? windowStart = null,Object? windowEnd = null,Object? terrain = null,Object? env = null,Object? presets = null,Object? droppedEvents = null,Object? configNodeCount = null,Object? observedNodeCount = null,Object? subscriptionUpdate = freezed,Object? runtimeDial = null,Object? nodes = null,Object? park = null,}) {
   return _then(SubscriptionReport(
 verdict: freezed == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
 as SubscriptionVerdict?,schemaVersion: null == schemaVersion ? _self.schemaVersion : schemaVersion // ignore: cast_nullable_to_non_nullable
@@ -2719,6 +2719,7 @@ as int,observedNodeCount: null == observedNodeCount ? _self.observedNodeCount : 
 as int,subscriptionUpdate: freezed == subscriptionUpdate ? _self.subscriptionUpdate : subscriptionUpdate // ignore: cast_nullable_to_non_nullable
 as SubscriptionUpdateReport?,runtimeDial: null == runtimeDial ? _self.runtimeDial : runtimeDial // ignore: cast_nullable_to_non_nullable
 as SubscriptionDialReport,nodes: null == nodes ? _self.nodes : nodes // ignore: cast_nullable_to_non_nullable
+as List<SubscriptionNodeReport>,park: null == park ? _self.park : park // ignore: cast_nullable_to_non_nullable
 as List<SubscriptionNodeReport>,
   ));
 }
@@ -2837,10 +2838,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes,  List<SubscriptionNodeReport> park)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SubscriptionReport() when $default != null:
-return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes);case _:
+return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes,_that.park);case _:
   return orElse();
 
 }
@@ -2858,10 +2859,10 @@ return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes,  List<SubscriptionNodeReport> park)  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionReport():
-return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes);case _:
+return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes,_that.park);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2878,10 +2879,10 @@ return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SubscriptionVerdict? verdict,  int schemaVersion,  int generatedAt,  String coreVersion,  String appVersion,  String platform,  String architecture,  int windowStart,  int windowEnd,  String terrain,  String env,  List<String> presets,  int droppedEvents,  int configNodeCount,  int observedNodeCount,  SubscriptionUpdateReport? subscriptionUpdate,  SubscriptionDialReport runtimeDial,  List<SubscriptionNodeReport> nodes,  List<SubscriptionNodeReport> park)?  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionReport() when $default != null:
-return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes);case _:
+return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVersion,_that.appVersion,_that.platform,_that.architecture,_that.windowStart,_that.windowEnd,_that.terrain,_that.env,_that.presets,_that.droppedEvents,_that.configNodeCount,_that.observedNodeCount,_that.subscriptionUpdate,_that.runtimeDial,_that.nodes,_that.park);case _:
   return null;
 
 }
@@ -2893,7 +2894,7 @@ return $default(_that.verdict,_that.schemaVersion,_that.generatedAt,_that.coreVe
 @JsonSerializable()
 
 class _SubscriptionReport implements SubscriptionReport {
-  const _SubscriptionReport({this.verdict, this.schemaVersion = 1, this.generatedAt = 0, this.coreVersion = '', this.appVersion = '', this.platform = '', this.architecture = '', this.windowStart = 0, this.windowEnd = 0, this.terrain = '', this.env = '',  List<String> presets = const [], this.droppedEvents = 0, this.configNodeCount = 0, this.observedNodeCount = 0, this.subscriptionUpdate, this.runtimeDial = const SubscriptionDialReport(),  List<SubscriptionNodeReport> nodes = const []}): _presets = presets,_nodes = nodes;
+  const _SubscriptionReport({this.verdict, this.schemaVersion = 1, this.generatedAt = 0, this.coreVersion = '', this.appVersion = '', this.platform = '', this.architecture = '', this.windowStart = 0, this.windowEnd = 0, this.terrain = '', this.env = '',  List<String> presets = const [], this.droppedEvents = 0, this.configNodeCount = 0, this.observedNodeCount = 0, this.subscriptionUpdate, this.runtimeDial = const SubscriptionDialReport(),  List<SubscriptionNodeReport> nodes = const [],  List<SubscriptionNodeReport> park = const []}): _presets = presets,_nodes = nodes,_park = park;
   factory _SubscriptionReport.fromJson(Map<String, dynamic> json) => _$SubscriptionReportFromJson(json);
 
 @override final  SubscriptionVerdict? verdict;
@@ -2926,6 +2927,13 @@ class _SubscriptionReport implements SubscriptionReport {
   return EqualUnmodifiableListView(_nodes);
 }
 
+ final  List<SubscriptionNodeReport> _park;
+@override@JsonKey() List<SubscriptionNodeReport> get park {
+  if (_park is EqualUnmodifiableListView) return _park;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_park);
+}
+
 
 /// Create a copy of SubscriptionReport
 /// with the given fields replaced by the non-null parameter values.
@@ -2940,18 +2948,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionReport&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion)&&(identical(other.generatedAt, generatedAt) || other.generatedAt == generatedAt)&&(identical(other.coreVersion, coreVersion) || other.coreVersion == coreVersion)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.architecture, architecture) || other.architecture == architecture)&&(identical(other.windowStart, windowStart) || other.windowStart == windowStart)&&(identical(other.windowEnd, windowEnd) || other.windowEnd == windowEnd)&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&const DeepCollectionEquality().equals(other.presets, _presets)&&(identical(other.droppedEvents, droppedEvents) || other.droppedEvents == droppedEvents)&&(identical(other.configNodeCount, configNodeCount) || other.configNodeCount == configNodeCount)&&(identical(other.observedNodeCount, observedNodeCount) || other.observedNodeCount == observedNodeCount)&&(identical(other.subscriptionUpdate, subscriptionUpdate) || other.subscriptionUpdate == subscriptionUpdate)&&(identical(other.runtimeDial, runtimeDial) || other.runtimeDial == runtimeDial)&&const DeepCollectionEquality().equals(other.nodes, _nodes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionReport&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion)&&(identical(other.generatedAt, generatedAt) || other.generatedAt == generatedAt)&&(identical(other.coreVersion, coreVersion) || other.coreVersion == coreVersion)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.architecture, architecture) || other.architecture == architecture)&&(identical(other.windowStart, windowStart) || other.windowStart == windowStart)&&(identical(other.windowEnd, windowEnd) || other.windowEnd == windowEnd)&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&const DeepCollectionEquality().equals(other.presets, _presets)&&(identical(other.droppedEvents, droppedEvents) || other.droppedEvents == droppedEvents)&&(identical(other.configNodeCount, configNodeCount) || other.configNodeCount == configNodeCount)&&(identical(other.observedNodeCount, observedNodeCount) || other.observedNodeCount == observedNodeCount)&&(identical(other.subscriptionUpdate, subscriptionUpdate) || other.subscriptionUpdate == subscriptionUpdate)&&(identical(other.runtimeDial, runtimeDial) || other.runtimeDial == runtimeDial)&&const DeepCollectionEquality().equals(other.nodes, _nodes)&&const DeepCollectionEquality().equals(other.park, _park));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,verdict,schemaVersion,generatedAt,coreVersion,appVersion,platform,architecture,windowStart,windowEnd,terrain,env,const DeepCollectionEquality().hash(_presets),droppedEvents,configNodeCount,observedNodeCount,subscriptionUpdate,runtimeDial,const DeepCollectionEquality().hash(_nodes));
+    return Object.hashAll([runtimeType,verdict,schemaVersion,generatedAt,coreVersion,appVersion,platform,architecture,windowStart,windowEnd,terrain,env,const DeepCollectionEquality().hash(_presets),droppedEvents,configNodeCount,observedNodeCount,subscriptionUpdate,runtimeDial,const DeepCollectionEquality().hash(_nodes),const DeepCollectionEquality().hash(_park)]);
 }
 
 @override
 String toString() {
-    return 'SubscriptionReport(verdict: $verdict, schemaVersion: $schemaVersion, generatedAt: $generatedAt, coreVersion: $coreVersion, appVersion: $appVersion, platform: $platform, architecture: $architecture, windowStart: $windowStart, windowEnd: $windowEnd, terrain: $terrain, env: $env, presets: $presets, droppedEvents: $droppedEvents, configNodeCount: $configNodeCount, observedNodeCount: $observedNodeCount, subscriptionUpdate: $subscriptionUpdate, runtimeDial: $runtimeDial, nodes: $nodes)';
+    return 'SubscriptionReport(verdict: $verdict, schemaVersion: $schemaVersion, generatedAt: $generatedAt, coreVersion: $coreVersion, appVersion: $appVersion, platform: $platform, architecture: $architecture, windowStart: $windowStart, windowEnd: $windowEnd, terrain: $terrain, env: $env, presets: $presets, droppedEvents: $droppedEvents, configNodeCount: $configNodeCount, observedNodeCount: $observedNodeCount, subscriptionUpdate: $subscriptionUpdate, runtimeDial: $runtimeDial, nodes: $nodes, park: $park)';
 }
 
 
@@ -2962,7 +2970,7 @@ abstract mixin class _$SubscriptionReportCopyWith<$Res> implements $Subscription
   factory _$SubscriptionReportCopyWith(_SubscriptionReport value, $Res Function(_SubscriptionReport) _then) = __$SubscriptionReportCopyWithImpl;
 @override @useResult
 $Res call({
- SubscriptionVerdict? verdict, int schemaVersion, int generatedAt, String coreVersion, String appVersion, String platform, String architecture, int windowStart, int windowEnd, String terrain, String env, List<String> presets, int droppedEvents, int configNodeCount, int observedNodeCount, SubscriptionUpdateReport? subscriptionUpdate, SubscriptionDialReport runtimeDial, List<SubscriptionNodeReport> nodes
+ SubscriptionVerdict? verdict, int schemaVersion, int generatedAt, String coreVersion, String appVersion, String platform, String architecture, int windowStart, int windowEnd, String terrain, String env, List<String> presets, int droppedEvents, int configNodeCount, int observedNodeCount, SubscriptionUpdateReport? subscriptionUpdate, SubscriptionDialReport runtimeDial, List<SubscriptionNodeReport> nodes, List<SubscriptionNodeReport> park
 });
 
 
@@ -2979,7 +2987,7 @@ class __$SubscriptionReportCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? verdict = freezed,Object? schemaVersion = null,Object? generatedAt = null,Object? coreVersion = null,Object? appVersion = null,Object? platform = null,Object? architecture = null,Object? windowStart = null,Object? windowEnd = null,Object? terrain = null,Object? env = null,Object? presets = null,Object? droppedEvents = null,Object? configNodeCount = null,Object? observedNodeCount = null,Object? subscriptionUpdate = freezed,Object? runtimeDial = null,Object? nodes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? verdict = freezed,Object? schemaVersion = null,Object? generatedAt = null,Object? coreVersion = null,Object? appVersion = null,Object? platform = null,Object? architecture = null,Object? windowStart = null,Object? windowEnd = null,Object? terrain = null,Object? env = null,Object? presets = null,Object? droppedEvents = null,Object? configNodeCount = null,Object? observedNodeCount = null,Object? subscriptionUpdate = freezed,Object? runtimeDial = null,Object? nodes = null,Object? park = null,}) {
   return _then(_SubscriptionReport(
 verdict: freezed == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
 as SubscriptionVerdict?,schemaVersion: null == schemaVersion ? _self.schemaVersion : schemaVersion // ignore: cast_nullable_to_non_nullable
@@ -2999,6 +3007,7 @@ as int,observedNodeCount: null == observedNodeCount ? _self.observedNodeCount : 
 as int,subscriptionUpdate: freezed == subscriptionUpdate ? _self.subscriptionUpdate : subscriptionUpdate // ignore: cast_nullable_to_non_nullable
 as SubscriptionUpdateReport?,runtimeDial: null == runtimeDial ? _self.runtimeDial : runtimeDial // ignore: cast_nullable_to_non_nullable
 as SubscriptionDialReport,nodes: null == nodes ? _self._nodes : nodes // ignore: cast_nullable_to_non_nullable
+as List<SubscriptionNodeReport>,park: null == park ? _self._park : park // ignore: cast_nullable_to_non_nullable
 as List<SubscriptionNodeReport>,
   ));
 }

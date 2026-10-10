@@ -33,6 +33,7 @@ abstract class PanelMeta with _$PanelMeta {
     String? webPageUrl,
     String? supportUrl,
     String? reportUrl,
+    String? telemetryUrl,
     List<int>? expireNotifyDays,
     List<int>? trafficNotifyPercent,
     int? updateIntervalMinutes,
@@ -91,6 +92,7 @@ abstract class PanelMeta with _$PanelMeta {
       webPageUrl: map['webPageUrl'],
       supportUrl: map['supportUrl'],
       reportUrl: map['reportUrl'],
+      telemetryUrl: map['telemetryUrl'],
       expireNotifyDays: expireNotifyDays,
       trafficNotifyPercent: trafficNotifyPercent,
       updateIntervalMinutes: interval != null && interval > 0 ? interval : null,
@@ -130,6 +132,7 @@ extension PanelMetaExt on PanelMeta {
       webPageUrl != null ||
       supportUrl != null ||
       reportUrl != null ||
+      telemetryUrl != null ||
       expireNotifyDays != null ||
       trafficNotifyPercent != null ||
       updateIntervalMinutes != null ||

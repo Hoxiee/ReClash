@@ -279,7 +279,9 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<SubscriptionReport> buildSubscriptionReport() async {
+  Future<SubscriptionReport> buildSubscriptionReport({
+    bool verbose = false,
+  }) async {
     final proxies = await _core.getProxies();
     final labels = subscriptionNodeLabelsOf(proxies.proxies);
     final metadata = SubscriptionMetadata(
@@ -287,7 +289,9 @@ class ProfilesAction extends _$ProfilesAction {
       presets: _activeSubscriptionPresets(),
     );
     await _core.setSubscriptionMetadata(metadata);
-    final report = await _core.exportSubscriptionReport();
+    final report = verbose
+        ? await _core.exportVerboseSubscriptionReport()
+        : await _core.exportSubscriptionReport();
     final update = await preferences.getSubscriptionUpdateReport();
     final doctor = ref.read(connectionDoctorProvider);
     final fault = subscriptionFaultOf(

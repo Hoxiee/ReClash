@@ -4796,6 +4796,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
       "Отправить провайдеру",
     ),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "Анонимный отчёт о подписке уйдёт напрямую вашему провайдеру. Он отправляется только по вашему подтверждению — ничего не уходит в фоне.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("Отправить провайдеру?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось отправить отчёт",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "Отчёт отправлен провайдеру",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Сбои обновления",
     ),

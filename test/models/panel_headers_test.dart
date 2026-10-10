@@ -172,6 +172,15 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('parses the telemetry ingest URL', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-telemetryurl': ['https://panel.example.com/ingest'],
+      });
+
+      expect(meta.telemetryUrl, 'https://panel.example.com/ingest');
+      expect(meta.hasContent, isTrue);
+    });
+
     test('parses the announcement and web page URLs', () {
       final meta = PanelMeta.fromHeaders({
         'reclash-announceurl': ['https://panel.example.com/news'],

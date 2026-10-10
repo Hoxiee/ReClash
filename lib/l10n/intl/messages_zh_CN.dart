@@ -3423,6 +3423,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("保存 JSON"),
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage("发送给提供商"),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "这会将匿名的订阅报告直接发送给您的提供商。仅在您确认时发送，不会在后台发送任何内容。",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("发送给提供商？"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "无法发送报告",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "报告已发送给提供商",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新失败",
     ),

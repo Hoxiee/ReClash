@@ -4775,6 +4775,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
       "Üpjün edijä iber",
     ),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "Abunäniň anonim hasabaty göni üpjün edijiňize iberiler. Ol diňe siz tassyklanyňyzda iberiler — fonda hiç zat iberilmeýär.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("Üpjün edijä iberilsinmi?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "Hasabaty ibermek başartmady",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "Hasabat üpjün edijä iberildi",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Täzeleniş säwlikleri",
     ),

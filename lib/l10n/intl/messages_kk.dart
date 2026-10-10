@@ -4778,6 +4778,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
       "Провайдерге жіберу",
     ),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "Жазылымның анонимді есебі тікелей провайдеріңізге жіберіледі. Ол тек сіз растағанда ғана жіберіледі — фонда ештеңе жіберілмейді.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("Провайдерге жіберілсін бе?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "Есепті жіберу мүмкін болмады",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "Есеп провайдерге жіберілді",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Жаңарту ақаулары",
     ),

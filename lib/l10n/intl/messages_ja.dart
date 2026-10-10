@@ -3910,6 +3910,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("JSON を保存"),
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage("プロバイダーに送信"),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "匿名のサブスクリプションレポートをプロバイダーに直接送信します。確認したときのみ送信され、バックグラウンドでは何も送信されません。",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("プロバイダーに送信しますか？"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "レポートを送信できませんでした",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "レポートをプロバイダーに送信しました",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新の失敗",
     ),

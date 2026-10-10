@@ -60,6 +60,7 @@ enum CoreMethod {
   doctorExport,
   subscriptionReportMetadata,
   subscriptionReportExport,
+  subscriptionReportExportVerbose,
   odometerReport,
   odometerSignal,
   outboundIp,

@@ -14,6 +14,7 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   webPageUrl: json['webPageUrl'] as String?,
   supportUrl: json['supportUrl'] as String?,
   reportUrl: json['reportUrl'] as String?,
+  telemetryUrl: json['telemetryUrl'] as String?,
   expireNotifyDays: (json['expireNotifyDays'] as List<dynamic>?)
       ?.map((e) => (e as num).toInt())
       .toList(),
@@ -60,6 +61,7 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'webPageUrl': instance.webPageUrl,
       'supportUrl': instance.supportUrl,
       'reportUrl': instance.reportUrl,
+      'telemetryUrl': instance.telemetryUrl,
       'expireNotifyDays': instance.expireNotifyDays,
       'trafficNotifyPercent': instance.trafficNotifyPercent,
       'updateIntervalMinutes': instance.updateIntervalMinutes,

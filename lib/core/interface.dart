@@ -120,6 +120,8 @@ mixin CoreInterface {
 
   Future<SubscriptionReport> exportSubscriptionReport();
 
+  Future<SubscriptionReport> exportVerboseSubscriptionReport();
+
   Future<bool> setSubscriptionMetadata(SubscriptionMetadata metadata);
 
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
@@ -536,6 +538,20 @@ abstract class CoreHandlerInterface with CoreInterface, CoreHandlerActions {
   Future<SubscriptionReport> exportSubscriptionReport() async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.subscriptionReportExport,
+    );
+    if (data == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty subscription report',
+      );
+    }
+    return SubscriptionReport.fromJson(data);
+  }
+
+  @override
+  Future<SubscriptionReport> exportVerboseSubscriptionReport() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.subscriptionReportExportVerbose,
     );
     if (data == null) {
       throw const CoreMethodException(

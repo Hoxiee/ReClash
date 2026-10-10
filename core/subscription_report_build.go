@@ -165,6 +165,55 @@ func foldNodes(
 	return reports, byProtocol, byGroup, byEgress
 }
 
+// buildParkNodes lists every config node under a stable canonical alias, filled
+// with its observed stats when the witness saw it and left at zero attempts when
+// it never dialed. Nodes are aliased by config position (then name) so the same
+// node keeps the same alias across exports, and no real name ever leaves.
+func buildParkNodes(
+	counters subscriptionCounters,
+	metadata subscriptionNodeMetadata,
+	egress egressLookup,
+) []subscriptionNodeReport {
+	names := make([]string, 0, len(metadata.nodes))
+	for name := range metadata.nodes {
+		names = append(names, name)
+	}
+	sort.Slice(names, func(i, j int) bool {
+		li, lj := metadata.nodes[names[i]], metadata.nodes[names[j]]
+		if li.PositionHint != lj.PositionHint {
+			return li.PositionHint < lj.PositionHint
+		}
+		return names[i] < names[j]
+	})
+
+	park := make([]subscriptionNodeReport, 0, len(names))
+	for i, name := range names {
+		label := metadata.nodes[name]
+		country := ""
+		if egress != nil {
+			country = egress(name)
+		}
+		node := subscriptionNodeReport{
+			Alias:         fmt.Sprintf("node-%03d", i+1),
+			Protocol:      label.Protocol,
+			Transport:     label.Transport,
+			EgressCountry: country,
+			Groups:        label.Groups,
+			PositionHint:  label.PositionHint,
+		}
+		if stat := counters.nodes[name]; stat != nil {
+			node.Attempts = stat.attempts
+			node.Failures = stat.failures
+			node.Successes = stat.attempts - stat.failures
+			node.FailStreak = stat.failStreak
+			node.DominantClass = dominantClass(stat.classCounts)
+			node.DelayBucketMs = doctorDurationBucket(averageDuration(stat))
+		}
+		park = append(park, node)
+	}
+	return park
+}
+
 func worseNode(a, b *subscriptionNodeStat) bool {
 	ra := failureRatio(a)
 	rb := failureRatio(b)

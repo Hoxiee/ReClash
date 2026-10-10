@@ -18,9 +18,11 @@ import 'package:reclash/widgets/widgets.dart';
 Future<void> openSubscriptionReportSheet(
   BuildContext context, {
   String? reportUrl,
+  String? telemetryUrl,
 }) async {
   final page = PagedSheetRoute(
-    builder: (_) => SubscriptionReportView(reportUrl: reportUrl),
+    builder: (_) =>
+        SubscriptionReportView(reportUrl: reportUrl, telemetryUrl: telemetryUrl),
   );
   if (SheetProvider.of(context)?.nestedNavigatorPop != null) {
     await pushPagedSheet(context, page);
@@ -30,7 +32,10 @@ Future<void> openSubscriptionReportSheet(
     context: context,
     props: nestedPagedSheetProps,
     builder: (_) => NestedPagedSheet(
-      builder: (_) => SubscriptionReportView(reportUrl: reportUrl),
+      builder: (_) => SubscriptionReportView(
+        reportUrl: reportUrl,
+        telemetryUrl: telemetryUrl,
+      ),
     ),
   );
 }
@@ -38,9 +43,10 @@ Future<void> openSubscriptionReportSheet(
 /// Builds the report after the sheet opens, so the page can push over the
 /// subscription sheet with a back button while the core export still runs.
 class SubscriptionReportView extends ConsumerStatefulWidget {
-  const SubscriptionReportView({super.key, this.reportUrl});
+  const SubscriptionReportView({super.key, this.reportUrl, this.telemetryUrl});
 
   final String? reportUrl;
+  final String? telemetryUrl;
 
   @override
   ConsumerState<SubscriptionReportView> createState() =>
@@ -91,6 +97,7 @@ class _SubscriptionReportViewState
       content = SubscriptionReportSheet(
         report: report,
         reportUrl: widget.reportUrl,
+        telemetryUrl: widget.telemetryUrl,
       );
     } else {
       final error = _error;
@@ -175,10 +182,12 @@ class SubscriptionReportSheet extends ConsumerStatefulWidget {
     super.key,
     required this.report,
     this.reportUrl,
+    this.telemetryUrl,
   });
 
   final SubscriptionReport report;
   final String? reportUrl;
+  final String? telemetryUrl;
 
   @override
   ConsumerState<SubscriptionReportSheet> createState() =>
@@ -188,6 +197,7 @@ class SubscriptionReportSheet extends ConsumerStatefulWidget {
 class _SubscriptionReportSheetState
     extends ConsumerState<SubscriptionReportSheet> {
   bool _saving = false;
+  bool _sending = false;
 
   Future<void> _copy(String text) async {
     final message = context.appLocalizations.subscriptionReportCopied;
@@ -237,11 +247,60 @@ class _SubscriptionReportSheetState
     }
   }
 
+  Future<void> _sendTelemetry(SubscriptionReport report, String url) async {
+    final appLocalizations = context.appLocalizations;
+    final host = Uri.tryParse(url)?.host ?? url;
+    final consented = await dialogs.confirm(
+      '${appLocalizations.subscriptionReportTelemetryConsent}\n\n$host',
+      title: appLocalizations.subscriptionReportTelemetryConsentTitle,
+      confirmText: appLocalizations.subscriptionReportSend,
+    );
+    if (!consented) return;
+    setState(() => _sending = true);
+    try {
+      // The telemetry wire carries the verbose export (the full node park); the
+      // displayed report stays lean. Fall back to it if the richer export fails.
+      var outbound = report;
+      try {
+        outbound = await ref
+            .read(profilesActionProvider.notifier)
+            .buildSubscriptionReport(verbose: true);
+      } catch (_) {}
+      await request.submitTelemetryReport(url, outbound.toJson());
+      if (!mounted) return;
+      dialogs.showNotifier(
+        appLocalizations.subscriptionReportTelemetrySent,
+        level: MessageLevel.success,
+      );
+    } catch (error, stackTrace) {
+      commonPrint.log(
+        'subscription telemetry ===> ${compactError(error)}, $stackTrace',
+        logLevel: LogLevel.warning,
+      );
+      if (!mounted) return;
+      dialogs.showNotifier(
+        appLocalizations.subscriptionReportTelemetryFailed,
+        level: MessageLevel.error,
+      );
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
   List<CommonPopupMenuItem> _exportMenu(SubscriptionReport report) {
     final appLocalizations = context.appLocalizations;
+    final telemetryUrl = widget.telemetryUrl;
     final reportUrl = widget.reportUrl;
     return [
-      if (reportUrl != null)
+      if (telemetryUrl != null && telemetryUrl.isNotEmpty)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.send,
+          label: appLocalizations.subscriptionReportSend,
+          onPressed: _sending
+              ? null
+              : () => unawaited(_sendTelemetry(report, telemetryUrl)),
+        )
+      else if (reportUrl != null)
         CommonPopupMenuItem(
           glyph: AppGlyphs.send,
           label: appLocalizations.subscriptionReportSend,

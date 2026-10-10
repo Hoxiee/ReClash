@@ -4626,6 +4626,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
       "Send to provider",
     ),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "This sends the anonymized subscription report directly to your provider. It goes out only when you confirm — nothing is sent in the background.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("Send to provider?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not send the report",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "Report sent to provider",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Update failures",
     ),

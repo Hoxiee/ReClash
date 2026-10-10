@@ -301,6 +301,13 @@ _SubscriptionReport _$SubscriptionReportFromJson(
           )
           .toList() ??
       const [],
+  park:
+      (json['park'] as List<dynamic>?)
+          ?.map(
+            (e) => SubscriptionNodeReport.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$SubscriptionReportToJson(_SubscriptionReport instance) =>
@@ -323,6 +330,7 @@ Map<String, dynamic> _$SubscriptionReportToJson(_SubscriptionReport instance) =>
       'subscriptionUpdate': instance.subscriptionUpdate,
       'runtimeDial': instance.runtimeDial,
       'nodes': instance.nodes,
+      'park': instance.park,
     };
 
 _SubscriptionNodeLabel _$SubscriptionNodeLabelFromJson(

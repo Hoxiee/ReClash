@@ -4889,6 +4889,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
       "Provayderga yuborish",
     ),
+    "subscriptionReportTelemetryConsent": MessageLookupByLibrary.simpleMessage(
+      "Obunaning anonim hisoboti to‘g‘ridan-to‘g‘ri provayderingizga yuboriladi. U faqat siz tasdiqlaganingizda yuboriladi — fonda hech narsa yuborilmaydi.",
+    ),
+    "subscriptionReportTelemetryConsentTitle":
+        MessageLookupByLibrary.simpleMessage("Provayderga yuborilsinmi?"),
+    "subscriptionReportTelemetryFailed": MessageLookupByLibrary.simpleMessage(
+      "Hisobotni yuborib bo‘lmadi",
+    ),
+    "subscriptionReportTelemetrySent": MessageLookupByLibrary.simpleMessage(
+      "Hisobot provayderga yuborildi",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Yangilanish nosozliklari",
     ),

@@ -25,6 +25,45 @@ void main() {
     );
   });
 
+  test('submitTelemetryReport rejects a non-HTTPS URL before any request', () async {
+    await expectLater(
+      request.submitTelemetryReport('http://panel.test/ingest', const {}),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('submitTelemetryReport rejects a URL with embedded credentials', () async {
+    await expectLater(
+      request.submitTelemetryReport('https://user:pass@panel.test/ingest', const {}),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('submitTelemetryReport rejects an oversized report before any request', () async {
+    final huge = {'blob': 'x' * (maxTelemetryReportBytes + 1)};
+    await expectLater(
+      request.submitTelemetryReport('https://panel.test/ingest', huge),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('submitTelemetryReport POSTs over HTTPS and surfaces failures', () async {
+    // The mocked HttpClient answers 400, so a reached POST surfaces as a typed
+    // badResponse rather than the pre-flight ArgumentError.
+    await expectLater(
+      request.submitTelemetryReport('https://127.0.0.1/ingest', const {
+        'schema': 1,
+      }),
+      throwsA(
+        isA<DioException>().having(
+          (e) => e.type,
+          'type',
+          DioExceptionType.badResponse,
+        ),
+      ),
+    );
+  });
+
   test('getFileResponseForUrl propagates the typed DioException', () async {
     await expectLater(
       request.getFileResponseForUrl('http://127.0.0.1/anything'),
