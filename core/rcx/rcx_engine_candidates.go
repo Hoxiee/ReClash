@@ -193,7 +193,7 @@ func rcxScaledProofTTL(base time.Duration, park int) time.Duration {
 	if park <= 0 {
 		return base
 	}
-	scaled := time.Duration(park) * rcxProbeBudgetWin / rcxProbeBudgetCap
+	scaled := time.Duration(park) * rcxProbeBudgetWin / time.Duration(rcxProbeBudgetCap)
 	if scaled < base {
 		return base
 	}

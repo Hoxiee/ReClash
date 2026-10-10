@@ -1,4 +1,4 @@
-schema: 1
+schema: 2
 ladder:
     - rung: verdict
       enabled: true
@@ -115,3 +115,101 @@ probe:
     reserve: 40
 terrain:
     enabled: true
+    checks:
+        - foreign
+        - domestic
+        - sni
+    rules:
+        - when:
+            - network.portal is true
+          state: portal
+        - when:
+            - check.portal is true
+          state: portal
+        - when:
+            - network.validated is false
+            - network.unvalidatedMs lt 3000
+          state: unknown
+        - when:
+            - check.foreign is ok
+            - check.sni is fail
+          state: whitelist
+        - when:
+            - check.domestic is ok
+            - check.foreign isNot ok
+          state: whitelist
+        - when:
+            - check.foreign is ok
+          state: normal
+        - when:
+            - check.domestic is fail
+          state: offline
+        - state: unknown
+    states:
+        normal:
+            kind: normal
+            admission:
+                openWorldProven: preferred
+                domesticProven: last-resort
+                breakerProven: viable
+                foreignPrior: viable
+                domesticPrior: last-resort
+                allowLastResort: false
+        offline:
+            kind: offline
+        portal:
+            kind: portal
+        unknown:
+            kind: unknown
+            admission:
+                openWorldProven: preferred
+                domesticProven: last-resort
+                breakerProven: viable
+                foreignPrior: viable
+                domesticPrior: last-resort
+                allowLastResort: true
+        whitelist:
+            kind: whitelist
+            admission:
+                openWorldProven: preferred
+                domesticProven: viable
+                breakerProven: preferred
+                foreignPrior: viable
+                domesticPrior: last-resort
+                allowLastResort: true
+    refreshSeconds: 300
+    urgentSeconds: 30
+    backoffSeconds: 180
+    maxAgeSeconds: 600
+    confirmationRounds: 2
+    timeoutMs: 3000
+    warmupMs: 5000
+settings:
+    strategy: balanced
+    censorCountries: []
+    canaryForeign: []
+    canaryDomestic: []
+    censorSNI: []
+    openMarkers: []
+    domesticMarkers: []
+    localMarkers: []
+    nameHints: []
+    egressEchoes: []
+    countryEchoes: []
+    breakerPatterns: []
+    lanes: []
+    nodeRules: []
+    avoidCountries: []
+    latencyBands: []
+    allowDomesticLastResort: true
+    requireUDP: false
+    respectPick: true
+    dwellSeconds: 90
+    waveWidth: 12
+    proofTTLMinutes: 30
+    degradeConfirmSeconds: 60
+    absCeilingMs: 300
+    throttleFloorKBps: 16
+    switchImproveMs: 0
+    switchImprovePct: 0
+    latencyStepMs: 0

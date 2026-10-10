@@ -3,6 +3,7 @@ package rcx
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,23 +14,23 @@ import (
 )
 
 type rcxMarker struct {
-	URL      string `json:"url"`
-	Statuses []int  `json:"statuses"`
+	URL      string `json:"url" yaml:"url"`
+	Statuses []int  `json:"statuses" yaml:"statuses"`
 }
 
 type rcxLaneSelector struct {
-	Provider     string `json:"p"`
-	NameContains string `json:"has"`
-	Group        string `json:"grp,omitempty"`
+	Provider     string `json:"p" yaml:"provider"`
+	NameContains string `json:"has" yaml:"nameContains"`
+	Group        string `json:"grp,omitempty" yaml:"group"`
 }
 
 type rcxLaneConfig struct {
-	ID        string            `json:"id"`
-	Group     string            `json:"g"`
-	Fallback  string            `json:"fb"`
-	Role      string            `json:"role,omitempty"`
-	Strategy  string            `json:"st,omitempty"`
-	Selectors []rcxLaneSelector `json:"sel"`
+	ID        string            `json:"id" yaml:"id"`
+	Group     string            `json:"g" yaml:"group"`
+	Fallback  string            `json:"fb" yaml:"fallback"`
+	Role      string            `json:"role,omitempty" yaml:"role"`
+	Strategy  string            `json:"st,omitempty" yaml:"strategy"`
+	Selectors []rcxLaneSelector `json:"sel" yaml:"selectors"`
 }
 
 // The version of the shipped preset data. A bump makes the engine drop the
@@ -109,46 +110,53 @@ func rcxFingerprint(values []string) string {
 }
 
 type rcxConfig struct {
-	Enabled                 bool            `json:"on"`
-	Preset                  string          `json:"preset"`
-	DefaultsVersion         int             `json:"dv"`
-	Strategy                string          `json:"st"`
-	CensorCountries         []string        `json:"cc"`
-	CanaryForeign           []string        `json:"cf"`
-	CanaryDomestic          []string        `json:"cd"`
-	CensorSNI               []string        `json:"cs"`
-	OpenMarkers             []rcxMarker     `json:"om"`
-	DomesticMarkers         []rcxMarker     `json:"dm"`
-	LocalMarkers            []rcxMarker     `json:"lm"`
-	NameHints               []string        `json:"nh"`
-	EgressEchoes            []string        `json:"ee"`
-	CountryEchoes           []string        `json:"ce,omitempty"`
-	BreakerPatterns         []string        `json:"bp"`
-	Lanes                   []rcxLaneConfig `json:"ln"`
-	NodeRules               []rcxNodeRule   `json:"nr,omitempty"`
-	AvoidCountries          []string        `json:"ac,omitempty"`
-	LatencyBands            []int           `json:"lb,omitempty"`
-	Ladder                  []rcxRungSpec   `json:"lad,omitempty"`
-	AllowDomesticLastResort bool            `json:"dlr"`
-	RequireUDP              bool            `json:"udp"`
-	RespectPick             bool            `json:"rpk"`
-	DwellSeconds            int             `json:"dwl"`
-	WaveWidth               int             `json:"ww"`
-	ProofTTLMinutes         int             `json:"pttl"`
-	DegradeConfirmSeconds   int             `json:"dgc"`
-	AbsCeilingMs            int             `json:"acm"`
-	ThrottleFloorKBps       int             `json:"tfk"`
-	SwitchImproveMs         int             `json:"sim,omitempty"`
-	SwitchImprovePct        int             `json:"sip,omitempty"`
-	LatencyStepMs           int             `json:"lst,omitempty"`
+	Region                  string          `json:"region,omitempty" yaml:"-"`
+	Enabled                 bool            `json:"on" yaml:"-"`
+	Preset                  string          `json:"preset" yaml:"-"`
+	DefaultsVersion         int             `json:"dv" yaml:"-"`
+	Strategy                string          `json:"st" yaml:"strategy"`
+	CensorCountries         []string        `json:"cc" yaml:"censorCountries"`
+	CanaryForeign           []string        `json:"cf" yaml:"canaryForeign"`
+	CanaryDomestic          []string        `json:"cd" yaml:"canaryDomestic"`
+	CensorSNI               []string        `json:"cs" yaml:"censorSNI"`
+	OpenMarkers             []rcxMarker     `json:"om" yaml:"openMarkers"`
+	DomesticMarkers         []rcxMarker     `json:"dm" yaml:"domesticMarkers"`
+	LocalMarkers            []rcxMarker     `json:"lm" yaml:"localMarkers"`
+	NameHints               []string        `json:"nh" yaml:"nameHints"`
+	EgressEchoes            []string        `json:"ee" yaml:"egressEchoes"`
+	CountryEchoes           []string        `json:"ce,omitempty" yaml:"countryEchoes"`
+	BreakerPatterns         []string        `json:"bp" yaml:"breakerPatterns"`
+	Lanes                   []rcxLaneConfig `json:"ln" yaml:"lanes"`
+	NodeRules               []rcxNodeRule   `json:"nr,omitempty" yaml:"nodeRules"`
+	AvoidCountries          []string        `json:"ac,omitempty" yaml:"avoidCountries"`
+	LatencyBands            []int           `json:"lb,omitempty" yaml:"latencyBands"`
+	Ladder                  []rcxRungSpec   `json:"lad,omitempty" yaml:"-"`
+	AllowDomesticLastResort bool            `json:"dlr" yaml:"allowDomesticLastResort"`
+	RequireUDP              bool            `json:"udp" yaml:"requireUDP"`
+	RespectPick             bool            `json:"rpk" yaml:"respectPick"`
+	DwellSeconds            int             `json:"dwl" yaml:"dwellSeconds"`
+	WaveWidth               int             `json:"ww" yaml:"waveWidth"`
+	ProofTTLMinutes         int             `json:"pttl" yaml:"proofTTLMinutes"`
+	DegradeConfirmSeconds   int             `json:"dgc" yaml:"degradeConfirmSeconds"`
+	AbsCeilingMs            int             `json:"acm" yaml:"absCeilingMs"`
+	ThrottleFloorKBps       int             `json:"tfk" yaml:"throttleFloorKBps"`
+	SwitchImproveMs         int             `json:"sim,omitempty" yaml:"switchImproveMs"`
+	SwitchImprovePct        int             `json:"sip,omitempty" yaml:"switchImprovePct"`
+	LatencyStepMs           int             `json:"lst,omitempty" yaml:"latencyStepMs"`
 	// A YAML decision profile (the import/subscription seam) parsed once in
 	// normalized() into the cached fields below.
-	ProfileYAML      string                        `json:"profile,omitempty"`
-	admitRules       []rcxAdmitRule                `json:"-"`
-	strategyProfiles map[string]rcxStrategyProfile `json:"-"`
-	probePacing      rcxProbeSection               `json:"-"`
-	profileState     rcxProfileState               `json:"-"`
-	terrainDisabled  bool                          `json:"-"`
+	ProfileYAML        string                        `json:"profile,omitempty" yaml:"-"`
+	admitRules         []rcxAdmitRule                `json:"-" yaml:"-"`
+	strategyProfiles   map[string]rcxStrategyProfile `json:"-" yaml:"-"`
+	probePacing        rcxProbeSection               `json:"-" yaml:"-"`
+	profileState       rcxProfileState               `json:"-" yaml:"-"`
+	terrainDisabled    bool                          `json:"-" yaml:"-"`
+	compiled           *rcxCompiledProfile           `json:"-" yaml:"-"`
+	terrainProfile     *rcxTerrainSection            `json:"-" yaml:"-"`
+	terrainAdmission   *rcxAdmissionRow              `json:"-" yaml:"-"`
+	activeContext      rcxProfileContext             `json:"-" yaml:"-"`
+	activeLayers       [3]int                        `json:"-" yaml:"-"`
+	profileFingerprint string                        `json:"-" yaml:"-"`
 }
 
 type rcxRuleAction string
@@ -163,11 +171,11 @@ const (
 // match is the measured egress, not the mmdb origin, so it fires only once a
 // probe has placed the exit.
 type rcxNodeRule struct {
-	Provider     string        `json:"p,omitempty"`
-	NameContains string        `json:"n,omitempty"`
-	Group        string        `json:"g,omitempty"`
-	Country      string        `json:"c,omitempty"`
-	Action       rcxRuleAction `json:"a"`
+	Provider     string        `json:"p,omitempty" yaml:"provider"`
+	NameContains string        `json:"n,omitempty" yaml:"nameContains"`
+	Group        string        `json:"g,omitempty" yaml:"group"`
+	Country      string        `json:"c,omitempty" yaml:"country"`
+	Action       rcxRuleAction `json:"a" yaml:"action"`
 }
 
 func (r rcxNodeRule) matches(provider, name, group, country string) bool {
@@ -222,18 +230,12 @@ const (
 	rcxLaneRoleForeign  = "foreign"
 	rcxLaneRoleDomestic = "domestic"
 
-	rcxDwellSeconds      = 90
-	rcxWaveWidth         = 12
-	rcxProofTTLMinutes   = 30
-	rcxDegradeConfirmSec = 60
-	rcxAbsCeilingMs      = 300
-	rcxColdConfirmSec    = 15
+	rcxColdConfirmSec = 15
 	// Aggregate per-node download floor: sustained transit under demand below it reads
 	// as a squeeze. Anchored at the ~128 kbit/s clamp operators throttle video to.
-	rcxThrottleFloorKBps  = 16
-	rcxThrottleMinConns   = 3
-	rcxProbeConcurrency   = 2
-	rcxProbeStaggerMs     = 250
+
+	rcxThrottleMinConns = 3
+
 	rcxLiveWindowSeconds  = 60
 	rcxFreshWindowSeconds = 1800
 
@@ -252,12 +254,7 @@ type rcxStrategyProfile struct {
 	SwitchPct    int         `yaml:"switchPct"`
 }
 
-var rcxStrategyProfiles = map[string]rcxStrategyProfile{
-	rcxStrategyBalanced: {LatencyBands: []int{80, 120, 180, 320}, SwitchAbsMs: 30, SwitchPct: 20},
-	rcxStrategyStable:   {LatencyBands: []int{120, 200, 320, 550}, SwitchAbsMs: 50, SwitchPct: 30},
-	rcxStrategyLatency:  {DropRungs: []rcxRungID{rcxRungMisfit}, LatencyBands: []int{65, 90, 130, 220}, SwitchAbsMs: 15, SwitchPct: 10},
-	rcxStrategySaver:    {LatencyBands: []int{150, 260, 420, 750}, SwitchAbsMs: 50, SwitchPct: 30},
-}
+var rcxStrategyProfiles map[string]rcxStrategyProfile
 
 // An unknown name degrades to balanced, never a zero record.
 func rcxStrategyProfileFor(strategy string) rcxStrategyProfile {
@@ -406,27 +403,13 @@ func rcxKnownStrategy(name string) bool {
 }
 
 func rcxDefaultConfig() rcxConfig {
-	return rcxConfig{
-		Enabled:                 false,
-		Preset:                  "off",
-		DefaultsVersion:         rcxDefaultsVersion,
-		Strategy:                rcxStrategyBalanced,
-		AllowDomesticLastResort: true,
-		RespectPick:             true,
-		DwellSeconds:            rcxDwellSeconds,
-		WaveWidth:               rcxWaveWidth,
-		ProofTTLMinutes:         rcxProofTTLMinutes,
-		DegradeConfirmSeconds:   rcxDegradeConfirmSec,
-		AbsCeilingMs:            rcxAbsCeilingMs,
-		ThrottleFloorKBps:       rcxThrottleFloorKBps,
-	}
+	c := rcxBuiltInProfile.Settings.config()
+	c.Preset = "off"
+	c.DefaultsVersion = rcxDefaultsVersion
+	return c
 }
 
-// An older host or a truncated payload degrades to shipped values, not zero.
-// Upper bounds fence hand-edited runaways: a million-second dwell is an eternal
-// hold, a million-wide wave spends the hourly budget in one window, and a huge
-// proof TTL keeps corpses Preferred for years.
-func (c rcxConfig) normalized() rcxConfig {
+func (c rcxConfig) boundScalars() rcxConfig {
 	if c.DwellSeconds <= 0 {
 		c.DwellSeconds = rcxDwellSeconds
 	} else if c.DwellSeconds > 3600 {
@@ -457,12 +440,6 @@ func (c rcxConfig) normalized() rcxConfig {
 	} else if c.ThrottleFloorKBps > 1024 {
 		c.ThrottleFloorKBps = 1024
 	}
-	resolved := c.resolveProfile()
-	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = resolved.admit, resolved.strategies, resolved.probe, resolved.state
-	c.terrainDisabled = resolved.terrainDisabled
-	if !c.strategyKnown(c.Strategy) {
-		c.Strategy = rcxStrategyBalanced
-	}
 	if c.SwitchImproveMs < 0 {
 		c.SwitchImproveMs = 0
 	}
@@ -472,15 +449,78 @@ func (c rcxConfig) normalized() rcxConfig {
 	if c.LatencyStepMs < 0 {
 		c.LatencyStepMs = 0
 	}
-	switch {
-	case rcxValidLadder(c.Ladder):
+	return c
+}
+
+func (c rcxConfig) normalized() rcxConfig {
+	c.compiled = nil
+	c.Region = rcxRegion(c)
+	c.activeLayers = [3]int{-1, -1, -1}
+	c = c.boundScalars()
+	source := c
+	resolved := c.resolveProfile()
+	c.admitRules, c.strategyProfiles, c.probePacing, c.profileState = resolved.admit, resolved.strategies, resolved.probe, resolved.state
+	c.terrainProfile = resolved.terrain
+	if !rcxValidLadder(c.Ladder) {
+		c.Ladder = resolved.ladder
+	}
+	if resolved.document != nil {
+		c = resolved.document.Settings.apply(c)
+		c.CensorCountries = rcxCountryFloor(c.CensorCountries, source.CensorCountries)
+	}
+	c = c.boundResolvedProfile()
+	if resolved.document != nil {
+		if err := resolved.document.Contexts.validate(c); err != nil {
+			source.ProfileYAML = ""
+			fallback := source.normalized()
+			fallback.ProfileYAML = c.ProfileYAML
+			fallback.profileState = rcxProfileState{Present: true, Schema: resolved.document.Schema, Reason: rcxProfileReasonInvalid, Detail: err.Error()}
+			if fallback.compiled != nil {
+				fallback.compiled.base.ProfileYAML = fallback.ProfileYAML
+				fallback.compiled.base.profileState = fallback.profileState
+			}
+			return fallback
+		}
+		export := c.profileValues()
+		export.Contexts = resolved.document.Contexts
+		c.compiled = &rcxCompiledProfile{base: c, export: export}
+	}
+	c.updateProfileFingerprint()
+	return c
+}
+
+func (c rcxConfig) boundResolvedProfile() rcxConfig {
+	before := c
+	c = c.boundScalars()
+	c.strategyProfiles = rcxBoundedStrategies(c.strategyProfiles)
+	if !c.strategyKnown(c.Strategy) {
+		c.Strategy = rcxStrategyBalanced
+	}
+	if rcxValidLadder(c.Ladder) {
 		c.Ladder = rcxNormalizeLadder(c.Ladder)
-	case rcxValidLadder(resolved.ladder):
-		c.Ladder = rcxNormalizeLadder(resolved.ladder)
-	default:
+	} else {
 		c.Ladder = nil
 	}
 	c.Lanes = rcxNormalizeLanes(c.Lanes, c.strategyKnown)
+	c.probePacing = c.probe().bounded()
+	c.terrainProfile = c.terrainRules().bounded()
+	c.terrainDisabled = !c.terrainProfile.Enabled
+	if c.profileState.Valid && c.profileState.Schema >= 2 {
+		c.profileState.Clamped = append([]string(nil), c.profileState.Clamped...)
+		x, y := reflect.ValueOf(before), reflect.ValueOf(c)
+		for name, index := range rcxSettingsFields {
+			if !reflect.DeepEqual(x.Field(index).Interface(), y.Field(index).Interface()) {
+				c.profileState.Clamped = append(c.profileState.Clamped, "settings."+name)
+			}
+		}
+		if !reflect.DeepEqual(before.probe(), c.probe()) {
+			c.profileState.Clamped = append(c.profileState.Clamped, "probe")
+		}
+		if !reflect.DeepEqual(before.terrainRules(), c.terrainRules()) {
+			c.profileState.Clamped = append(c.profileState.Clamped, "terrain")
+		}
+		sort.Strings(c.profileState.Clamped)
+	}
 	return c
 }
 
@@ -499,6 +539,10 @@ type rcxProfileState struct {
 	Schema    int      `json:"schema"`
 	Reason    string   `json:"reason,omitempty"`
 	Overrides []string `json:"overrides,omitempty"`
+	Detail    string   `json:"detail,omitempty"`
+	Applied   []string `json:"applied,omitempty"`
+	Clamped   []string `json:"clamped,omitempty"`
+	Effective string   `json:"effective,omitempty"`
 }
 
 // rcxResolvedProfile is the carried profile reduced to the sections the engine
@@ -510,34 +554,55 @@ type rcxResolvedProfile struct {
 	ladder          []rcxRungSpec
 	state           rcxProfileState
 	terrainDisabled bool
+	terrain         *rcxTerrainSection
+	document        *rcxDecisionProfile
 }
 
 // resolveProfile parses the carried profile once: a missing one keeps shipped
 // defaults; a present one also reports whether it parsed under a known schema.
+func rcxBuiltInResolution(state rcxProfileState) rcxResolvedProfile {
+	resolved := rcxResolvedProfile{probe: rcxDefaultProbeSection(), terrain: rcxBuiltInProfile.Terrain, state: state}
+	// Only the shipped contexts need the compiled overlay. With none, the engine
+	// keeps the pre-profile path so an observed terrain label alone does not churn.
+	if !reflect.DeepEqual(rcxBuiltInProfile.Contexts, rcxProfileContexts{}) {
+		resolved.document = &rcxDecisionProfile{Schema: rcxProfileSchema, Contexts: rcxBuiltInProfile.Contexts}
+	}
+	return resolved
+}
+
 func (c rcxConfig) resolveProfile() rcxResolvedProfile {
 	if strings.TrimSpace(c.ProfileYAML) == "" {
-		return rcxResolvedProfile{probe: rcxDefaultProbeSection()}
+		return rcxBuiltInResolution(rcxProfileState{})
 	}
 	state := rcxProfileState{Present: true}
 	parsed, err := rcxDecisionProfileFromYAML([]byte(c.ProfileYAML))
 	if err != nil {
 		state.Reason = rcxProfileReasonInvalid
-		return rcxResolvedProfile{probe: rcxDefaultProbeSection(), state: state}
+		return rcxBuiltInResolution(state)
 	}
 	state.Schema = parsed.Schema
-	if parsed.Schema != rcxProfileSchema {
+	if parsed.Schema != 1 && parsed.Schema != rcxProfileSchema {
 		state.Reason = rcxProfileReasonSchema
-		return rcxResolvedProfile{probe: rcxDefaultProbeSection(), state: state}
+		return rcxBuiltInResolution(state)
+	}
+	if parsed.Schema == 1 && (parsed.Settings != nil || !reflect.DeepEqual(parsed.Contexts, rcxProfileContexts{})) {
+		state.Reason = rcxProfileReasonSchema
+		return rcxBuiltInResolution(state)
+	}
+	if parsed.Schema == 1 && len(parsed.Admission) == 0 {
+		parsed.Admission = nil
 	}
 	state.Valid = true
 	state.Overrides = rcxProfileOverrides(parsed)
 	return rcxResolvedProfile{
 		admit:           parsed.Admission,
 		strategies:      rcxBoundedStrategies(parsed.Strategies),
-		probe:           parsed.Probe.bounded(),
+		probe:           parsed.Probe,
 		ladder:          parsed.Ladder,
 		state:           state,
 		terrainDisabled: parsed.Terrain != nil && !parsed.Terrain.Enabled,
+		terrain:         parsed.Terrain,
+		document:        &parsed,
 	}
 }
 
@@ -554,14 +619,20 @@ func rcxProfileOverrides(p rcxDecisionProfile) []string {
 	if len(p.Strategies) > 0 {
 		out = append(out, "strategies")
 	}
-	if len(p.Admission) > 0 {
+	if p.Admission != nil {
 		out = append(out, "admission")
 	}
-	if p.Probe != (rcxProbeSection{}) && p.Probe.bounded() != rcxDefaultProbeSection() {
+	if p.Probe != (rcxProbeSection{}) && !reflect.DeepEqual(p.Probe.bounded(), rcxDefaultProbeSection()) {
 		out = append(out, "probe")
 	}
-	if p.Terrain != nil && !p.Terrain.Enabled {
+	if p.Terrain != nil && !reflect.DeepEqual(p.Terrain.bounded(), rcxDefaultTerrainSection()) {
 		out = append(out, "terrain")
+	}
+	if p.Settings != nil {
+		out = append(out, "settings")
+	}
+	if !reflect.DeepEqual(p.Contexts, rcxProfileContexts{}) {
+		out = append(out, "contexts")
 	}
 	if len(out) == 0 {
 		return nil
@@ -573,7 +644,7 @@ func rcxBoundedStrategies(in map[string]rcxStrategyProfile) map[string]rcxStrate
 	if len(in) == 0 {
 		return nil
 	}
-	out := make(map[string]rcxStrategyProfile, len(in))
+	out := rcxCopyStrategies(rcxStrategyProfiles)
 	for name, sp := range in {
 		fallback, ok := rcxStrategyProfiles[name]
 		if !ok {
@@ -710,6 +781,7 @@ func (c rcxConfig) policy() rcxPolicy {
 		Ladder:            c.ladder(),
 		Strategy:          c.Strategy,
 		Admission:         c.admitRules,
+		TerrainAdmission:  c.terrainAdmission,
 		Strategies:        c.resolvedStrategies(),
 		RequireUDP:        c.RequireUDP,
 		AllowDomesticLast: c.AllowDomesticLastResort,

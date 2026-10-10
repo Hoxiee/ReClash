@@ -81,13 +81,13 @@ const (
 	rcxCanaryTimeout  = 3 * time.Second
 	// A fresh radio attach does not complete TCP+TLS in the steady-state budget,
 	// and a round that times out on both groups is read as "unknown terrain".
-	rcxCanaryWarmup   = 5 * time.Second
-	rcxCanaryRound    = rcxCanaryWarmup + 2*time.Second
-	rcxCanaryBlindly  = 2
-	rcxProbeBudgetCap = 240
+	rcxCanaryWarmup  = 5 * time.Second
+	rcxCanaryRound   = rcxCanaryWarmup + 2*time.Second
+	rcxCanaryBlindly = 2
+
 	rcxMaxProofTTL    = 6 * time.Hour
 	rcxProbeBudgetWin = time.Hour
-	rcxProbeReserve   = 40
+
 	// Absolute bounds a profile's probe spend is clamped to: the budget may be
 	// retuned within [floor..ceil] and the reserve raised, but neither can drop
 	// below the floor the event and rescue waves need to recover a link.
@@ -218,7 +218,7 @@ func (e *rcxEngine) handle(event rcxEvent) {
 	case rcxEventSetRunning:
 		e.applyRunning(event.Flag)
 	case rcxEventSetEnabled:
-		config := e.cfg
+		config := e.cfg.sourceConfig()
 		config.Enabled = event.Flag
 		e.applyConfigLocked(config)
 		e.reconsider()
@@ -271,7 +271,7 @@ func (e *rcxEngine) handle(event rcxEvent) {
 	case rcxEventWakeResults:
 		e.applyWakeResults(event)
 	case rcxEventTerrainReach:
-		if event.Gen != e.reachGen || (event.ConfigGen != 0 && event.ConfigGen != e.configGen) {
+		if event.Gen != e.reachGen {
 			break
 		}
 		e.reaching = false
@@ -281,7 +281,7 @@ func (e *rcxEngine) handle(event rcxEvent) {
 			e.canaries = event.Canaries
 			e.lastReachAt = e.runtime.Now()
 			e.reachWarm = false
-			measured := e.reachF != rcxProbeOverloaded || e.reachD != rcxProbeOverloaded
+			measured := e.reachF != rcxProbeOverloaded || e.reachD != rcxProbeOverloaded || (e.cfg.terrainRules().checks("sni") && len(e.cfg.CensorSNI) > 0 && e.reachS != rcxProbeOverloaded)
 			if measured {
 				e.reachBlind = 0
 			} else if e.reachBlind++; e.reachBlind < rcxCanaryBlindly {

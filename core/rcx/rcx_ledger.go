@@ -96,7 +96,7 @@ func rcxDefaultLedgerPolicy() rcxLedgerPolicy {
 	}
 }
 
-var rcxLedgerProofTTL = rcxDefaultLedgerPolicy().ProofTTL
+var rcxLedgerProofTTL time.Duration
 
 type rcxLedger struct {
 	mu              sync.Mutex

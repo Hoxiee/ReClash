@@ -419,7 +419,7 @@ func TestOpenMissKeepsProvenIncumbentUnlessReactive(t *testing.T) {
 	}
 
 	now := newFakeRuntime().Now()
-	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	ttl := rcxScaledProofTTL(time.Duration(rcxProofTTLMinutes)*time.Minute, 2)
 
 	spared := map[string]rcxWaveKind{
 		"routine": rcxWaveRoutine, "maintain": rcxWaveMaintain,
@@ -464,7 +464,7 @@ func TestStalledIncumbentSurvivesOneIncidentMissThenDies(t *testing.T) {
 	engine.ledger.NoteIncumbentStalled("current", engine.envKey, runtime.Now())
 
 	now := runtime.Now()
-	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	ttl := rcxScaledProofTTL(time.Duration(rcxProofTTLMinutes)*time.Minute, 2)
 	if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
 		t.Fatal("a stall should already have cleared the open proof")
 	}
@@ -495,7 +495,7 @@ func TestFreshChallengerSurvivesOneIncidentMissAndStaysEligible(t *testing.T) {
 	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
 	engine.ledger.NoteProbe("rival", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
 
-	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	ttl := rcxScaledProofTTL(time.Duration(rcxProofTTLMinutes)*time.Minute, 2)
 	miss := func() {
 		engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
 			{Node: "rival", Role: rcxRoleOpen, Outcome: rcxProbeFail},
@@ -519,7 +519,7 @@ func TestHarvestMissKeepsAnyFreshlyProvenNode(t *testing.T) {
 	engine.since = runtime.Now().Add(-time.Hour)
 	runtime.selected = "current"
 	now := runtime.Now()
-	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	ttl := rcxScaledProofTTL(time.Duration(rcxProofTTLMinutes)*time.Minute, 2)
 	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
 
 	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "current", DelayMs: 0})
@@ -544,7 +544,7 @@ func TestQuarantineSweepSparesTheProvenIncumbent(t *testing.T) {
 	engine.incumbent = "current"
 	runtime.selected = "current"
 	now := runtime.Now()
-	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	ttl := rcxScaledProofTTL(time.Duration(rcxProofTTLMinutes)*time.Minute, 2)
 
 	// Both are open only by live traffic, so a marker sweep finds no evidence.
 	engine.ledger.NoteTrafficProgress("current", engine.envKey, true, now)

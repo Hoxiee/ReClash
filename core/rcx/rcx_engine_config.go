@@ -12,10 +12,21 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 	// The host does not carry this: shipped defaults are the core's to migrate.
 	config.DefaultsVersion = rcxDefaultsVersion
 	config = config.normalized()
+	if config.compiled != nil {
+		context := e.profileContext(config)
+		config = config.compiled.compose(context, config.compiled.selection(context))
+	}
+	e.applyEffectiveConfig(config, true)
+	e.refreshProfileContext()
+}
+
+func (e *rcxEngine) applyEffectiveConfig(config rcxConfig, allowGrant bool) {
 	previous := e.configFP
 	next := config.fingerprints()
 	hasPrevious := previous != (rcxConfigFingerprints{})
-	changed := hasPrevious && previous != next
+	changed := hasPrevious && (previous != next || e.cfg.profileFingerprint != config.profileFingerprint)
+	detectorChanged := hasPrevious && (previous.Canaries != next.Canaries || rcxDetectorFingerprint(e.cfg.terrainRules()) != rcxDetectorFingerprint(config.terrainRules()))
+	pendingGrant := e.pendingGrant
 	if changed {
 		e.configGen++
 		e.supersedeProbe()
@@ -23,14 +34,16 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 		e.laneProbeSeen = map[string]map[string]struct{}{}
 		e.laneProbeAt = map[string]time.Time{}
 		e.resetRescue()
-		e.supersedeReach()
 		e.ledger.Invalidate(
 			previous.Open != next.Open,
 			previous.Domestic != next.Domestic,
 			previous.Countries != next.Countries,
 			previous.Egress != next.Egress,
 		)
-		if previous.Canaries != next.Canaries {
+		if detectorChanged {
+			e.supersedeReach()
+			e.terrain.forget()
+			e.terrain.observe(rcxTerrainUnknown, e.runtime.Now())
 			e.reachF, e.reachD, e.reachS = rcxProbeOverloaded, rcxProbeOverloaded, rcxProbeOverloaded
 			e.reachStableRounds = 0
 			e.lastReachAt = time.Time{}
@@ -39,11 +52,12 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 	// Enabling starts from measurements: the grant wave rides outside the cap,
 	// so a fresh preset is measurable without refilling the hourly budget (which
 	// would let preset flips farm probes past it).
-	if config.operable() && (!e.cfg.operable() || config.Strategy != e.cfg.Strategy) {
+	if allowGrant && config.operable() && (!e.cfg.operable() || config.Strategy != e.cfg.Strategy) {
 		e.pendingGrant = true
 	}
 	e.cfg = config
 	e.syncProbeBudget()
+	e.updateEffectiveProfileReport()
 	e.ledger.SetProofTTL(time.Duration(config.ProofTTLMinutes) * time.Minute)
 	e.syncLaneConfigs(config.Lanes)
 	e.configFP = next
@@ -59,11 +73,14 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 	e.exportProfile = profileYAML
 	e.mu.Unlock()
 	e.refreshEffectiveEnabled()
+	if !allowGrant {
+		e.pendingGrant = pendingGrant
+	}
 	if !config.operable() {
 		e.closeIncident(now, false)
 	}
 	if e.snapshot != nil {
-		e.snapshot.Config = config
+		e.snapshot.Config = config.sourceConfig()
 		e.snapshot.Fingerprints = next
 	}
 }

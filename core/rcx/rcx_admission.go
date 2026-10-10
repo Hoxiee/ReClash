@@ -3,7 +3,7 @@ package rcx
 // rcxProfileSchema versions the data-driven decision profile wire (ladder,
 // strategy profiles, admission rules). A bump rebuilds a stored profile from
 // shipped defaults, the way rcxDefaultsVersion invalidates learned facts.
-const rcxProfileSchema = 1
+const rcxProfileSchema = 2
 
 // rcxFactField names a node fact an admission condition can read. New signals
 // extend the enum plus the reader table below; a token no build knows fails the
@@ -140,37 +140,30 @@ func rcxAdmitFromColumn(c rcxAdmitColumn) rcxAdmitOutcome {
 	return rcxAdmitOutcome{Column: c, FromColumn: true}
 }
 
-// rcxDefaultAdmitRules is the shipped admission ladder as data: the first matching
-// rule wins. The three leading rejects are the safety floor (branded, transit- and
-// open-disproven) that no terrain or profile relaxes; the rest resolve a tier from
-// the active terrain's row. It reproduces the historical rcxAdmitTier if-chain
-// one-to-one, exhaustively locked by the legacy oracle test.
 func rcxDefaultAdmitRules() []rcxAdmitRule {
-	return []rcxAdmitRule{
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactTransit, uint8(rcxProofDisproven))}, Outcome: rcxAdmitVerdict(rcxVerdictReject)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactTrust, uint8(rcxTrustBranded))}, Outcome: rcxAdmitVerdict(rcxVerdictReject)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenWorld, uint8(rcxProofDisproven)), rcxAdmitIsNot(rcxFactDomestic, uint8(rcxProofProven))}, Outcome: rcxAdmitVerdict(rcxVerdictReject)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactExit, uint8(rcxOriginDomestic)), rcxAdmitIs(rcxFactDomestic, uint8(rcxProofProven))}, Outcome: rcxAdmitFromColumn(rcxColDomesticProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactExit, uint8(rcxOriginDomestic))}, Outcome: rcxAdmitFromColumn(rcxColDomesticPrior)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenWorld, uint8(rcxProofProven)), rcxAdmitIs(rcxFactBreaker, 1)}, Outcome: rcxAdmitFromColumn(rcxColBreakerProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenWorld, uint8(rcxProofProven)), rcxAdmitIs(rcxFactTrust, uint8(rcxTrustSuspect)), rcxAdmitIs(rcxFactExit, uint8(rcxOriginUnknown))}, Outcome: rcxAdmitVerdict(rcxVerdictLastResort)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenWorld, uint8(rcxProofProven))}, Outcome: rcxAdmitFromColumn(rcxColOpenWorldProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenedOnce, 1), rcxAdmitIsNot(rcxFactOpenWorld, uint8(rcxProofDisproven)), rcxAdmitIs(rcxFactOpenLapsed, 0), rcxAdmitIsNot(rcxFactOrigin, uint8(rcxOriginDomestic)), rcxAdmitIs(rcxFactBreaker, 1)}, Outcome: rcxAdmitFromColumn(rcxColBreakerProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactOpenedOnce, 1), rcxAdmitIsNot(rcxFactOpenWorld, uint8(rcxProofDisproven)), rcxAdmitIs(rcxFactOpenLapsed, 0), rcxAdmitIsNot(rcxFactOrigin, uint8(rcxOriginDomestic))}, Outcome: rcxAdmitFromColumn(rcxColOpenWorldProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactDomestic, uint8(rcxProofProven))}, Outcome: rcxAdmitFromColumn(rcxColDomesticProven)},
-		{When: []rcxAdmitCond{rcxAdmitIs(rcxFactExit, uint8(rcxOriginUnknown)), rcxAdmitIs(rcxFactOrigin, uint8(rcxOriginDomestic)), rcxAdmitIs(rcxFactOpenedOnce, 0)}, Outcome: rcxAdmitFromColumn(rcxColDomesticPrior)},
-		{When: nil, Outcome: rcxAdmitFromColumn(rcxColForeignPrior)},
+	out := make([]rcxAdmitRule, len(rcxBuiltInProfile.Admission))
+	for i, rule := range rcxBuiltInProfile.Admission {
+		out[i] = rule
+		out[i].When = append([]rcxAdmitCond(nil), rule.When...)
 	}
+	return out
 }
 
-var rcxAdmitRulesDefault = rcxDefaultAdmitRules()
+var rcxAdmitRulesDefault []rcxAdmitRule
 
 // rcxAdmitByRules walks the rules first-match over the active terrain's row. A
 // terrain with no row rejects outright, as before any fact is read.
 func rcxAdmitByRules(terrain rcxTerrain, f rcxFacts, rules []rcxAdmitRule) rcxVerdict {
+	return rcxAdmitByRow(terrain, f, rules, nil)
+}
+
+func rcxAdmitByRow(terrain rcxTerrain, f rcxFacts, rules []rcxAdmitRule, override *rcxAdmissionRow) rcxVerdict {
 	row, ok := rcxAdmissionTable[terrain]
 	if !ok {
 		return rcxVerdictReject
+	}
+	if override != nil {
+		row = *override
 	}
 	for _, rule := range rules {
 		if rule.matches(f) {

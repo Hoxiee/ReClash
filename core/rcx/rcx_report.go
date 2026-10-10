@@ -128,6 +128,7 @@ type rcxReport struct {
 	Bands      []int                `json:"bands"`
 	Ladder     []rcxRungSpec        `json:"ladder"`
 	Profile    rcxProfileState      `json:"profile"`
+	Context    rcxProfileContext    `json:"context"`
 	Strategies []string             `json:"strategies"`
 	ProbesLeft int                  `json:"probesLeft"`
 	ProbeCap   int                  `json:"probeCap"`
@@ -160,6 +161,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 	status := rcxStatus{
 		Enabled:    e.Enabled(),
 		Preset:     e.cfg.Preset,
+		Strategy:   e.cfg.Strategy,
 		Mode:       e.runtime.Mode(),
 		Terrain:    e.terrainCurrent().String(),
 		Env:        e.envKey,
@@ -195,6 +197,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Bands:      e.cfg.latencyBands(),
 		Ladder:     rcxDropRungs(input.Policy.ladderOrDefault(), input.Policy.strategyProfile().DropRungs),
 		Profile:    e.cfg.profileState,
+		Context:    e.profileContext(e.cfg),
 		Strategies: e.cfg.strategyNames(),
 		ProbesLeft: e.budget.Remaining(now),
 		ProbeCap:   e.effectiveProbe().BudgetPerHour,
@@ -232,7 +235,7 @@ func (e *rcxEngine) candidateReports(
 		trust, conf := e.ledger.Trust(e.key(candidate.Name))
 		// The verdict the rank actually used: user rules can cap it down to
 		// last-resort, and the duel must explain that verdict, not the raw one.
-		verdict := rcxCandidateVerdict(candidate, input.Terrain, input.Policy.Admission)
+		verdict := rcxCandidateVerdict(candidate, input.Terrain, input.Policy.Admission, input.Policy.TerrainAdmission)
 		// The latency the rank actually used, so the duel never inverts the
 		// order again. Anything at or above the unmeasured penalty base is not
 		// a latency at all: it maps to -1 (unknown) on the wire, never to a raw

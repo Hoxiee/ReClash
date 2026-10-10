@@ -260,10 +260,12 @@ func TestReportEchoesTheRankedVerdictAndLatency(t *testing.T) {
 		{Name: "ghost", Provider: "p", Type: "Vless", Port: 443, SupportsUDP: true, Order: 2, HostMs: 50, HostAt: now},
 	}
 	engine := newTestEngine(runtime, "ru-home")
-	engine.cfg.NodeRules = []rcxNodeRule{
+	config := engine.cfg.sourceConfig()
+	config.NodeRules = []rcxNodeRule{
 		{Provider: "p", NameContains: "star", Action: rcxRuleLastResort},
 		{Provider: "p", NameContains: "plain", Action: rcxRulePrefer},
 	}
+	engine.applyConfigLocked(config)
 	engine.ledger.NoteProbe("star", engine.envKey, rcxRoleOpen, rcxProbeOK, 120, now)
 	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
 	engine.ledger.NoteQualitySample("star", engine.envKey, marker, engine.qualityEpoch(), 120, now)

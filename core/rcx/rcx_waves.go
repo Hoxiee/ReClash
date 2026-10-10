@@ -584,8 +584,12 @@ func (e *rcxEngine) probeTargets(
 }
 
 func (e *rcxEngine) startReach() {
+	terrain := e.cfg.terrainRules()
+	foreignCheck := terrain.checks("foreign") && len(e.cfg.CanaryForeign) > 0
+	domesticCheck := terrain.checks("domestic") && len(e.cfg.CanaryDomestic) > 0
+	sniCheck := terrain.checks("sni") && len(e.cfg.CanaryForeign) > 0 && len(e.cfg.CensorSNI) > 0
 	if !e.Enabled() || e.reaching || e.screenOff || e.suspended ||
-		e.cfg.terrainDisabled || len(e.cfg.CanaryForeign) == 0 {
+		!foreignCheck && !domesticCheck && !sniCheck {
 		return
 	}
 	e.lastReachAt = e.runtime.Now()
@@ -595,15 +599,15 @@ func (e *rcxEngine) startReach() {
 	if len(e.charged) >= e.escrowQuorum() {
 		e.escrowReach = true
 	}
-	dial := rcxCanaryTimeout
+	dial := time.Duration(terrain.TimeoutMs) * time.Millisecond
 	if e.reachWarm {
-		dial = rcxCanaryWarmup
+		dial = time.Duration(terrain.WarmupMs) * time.Millisecond
 	}
 	gen := e.reachGen
 	configGen := e.configGen
 	quit := e.quit
 	sni := ""
-	if len(e.cfg.CensorSNI) > 0 {
+	if sniCheck {
 		sni = e.cfg.CensorSNI[0]
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -611,13 +615,15 @@ func (e *rcxEngine) startReach() {
 	safeGoDetached("rcx canary round", func() {
 		var (
 			domesticRows    []rcxCanaryReport
-			domesticOutcome rcxProbeOutcome
+			domesticOutcome = rcxProbeOverloaded
 			sniOutcome      = rcxProbeOverloaded
 		)
 		done := make(chan struct{})
 		safeGoDetached("rcx canary domestic", func() {
 			defer close(done)
-			domesticOutcome = e.reachGroup(ctx, domestic, true, dial, &domesticRows, "")
+			if domesticCheck {
+				domesticOutcome = e.reachGroup(ctx, domestic, true, dial, &domesticRows, "")
+			}
 		})
 		sniDone := make(chan struct{})
 		safeGoDetached("rcx canary sni", func() {
@@ -632,7 +638,10 @@ func (e *rcxEngine) startReach() {
 			sniOutcome = e.reachGroup(ctx, foreign, false, dial, &sniRows, sni)
 		})
 		foreignRows := make([]rcxCanaryReport, 0, len(foreign))
-		foreignOutcome := e.reachGroup(ctx, foreign, false, dial, &foreignRows, "")
+		foreignOutcome := rcxProbeOverloaded
+		if foreignCheck {
+			foreignOutcome = e.reachGroup(ctx, foreign, false, dial, &foreignRows, "")
+		}
 		<-done
 		<-sniDone
 		e.sendResult(rcxEvent{

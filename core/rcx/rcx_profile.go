@@ -1,25 +1,17 @@
 package rcx
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
-	"strings"
+	"io"
 
 	yaml "go.yaml.in/yaml/v3"
 )
 
-// rcxDefaultProfileYAML is the shipped built-in decision profile as YAML, embedded
-// into the binary. It is the artifact export emits and the UI/community catalog
-// seed from; a bijection test locks it to the Go-literal defaults it mirrors, so
-// the human-readable face and the compile-safe source can never silently diverge.
-//
 //go:embed rcx_profile_default.yaml
 var rcxDefaultProfileYAML []byte
 
-// rcxDecisionProfile is the shipped decision data expressed as one serializable,
-// human-editable document: the ranking ladder, the per-strategy flavors, and the
-// admission rules. It is the YAML face of the Go-literal defaults, built from them
-// so it cannot drift, and the foundation for import/export and the UI editor.
 type rcxDecisionProfile struct {
 	Schema     int                           `yaml:"schema"`
 	Ladder     []rcxRungSpec                 `yaml:"ladder"`
@@ -27,20 +19,10 @@ type rcxDecisionProfile struct {
 	Admission  []rcxAdmitRule                `yaml:"admission"`
 	Probe      rcxProbeSection               `yaml:"probe"`
 	Terrain    *rcxTerrainSection            `yaml:"terrain,omitempty"`
+	Settings   *rcxSettingsPatch             `yaml:"settings,omitempty"`
+	Contexts   rcxProfileContexts            `yaml:"contexts,omitempty"`
 }
 
-// rcxTerrainSection makes terrain handling an explicit, optional block. Censorship
-// terrain detection matters in some regions and is a rudiment in fully open ones, so
-// a profile can switch it off outright rather than leaving it implied by whether any
-// canary happens to be configured. Absent section keeps it on (the shipped default).
-type rcxTerrainSection struct {
-	Enabled bool `yaml:"enabled"`
-}
-
-// rcxProbeSection is the steady probe spend as data: wave parallelism, stagger, and
-// the share of the hourly budget a wave may burn. Metered is an optional tighter
-// variant swapped in on a data-capped link; budget and reserve are floored by
-// absolute constants so a profile lowers spend but never strips the recovery reserve.
 type rcxProbeSection struct {
 	Concurrency   int              `yaml:"concurrency"`
 	StaggerMs     int              `yaml:"staggerMs"`
@@ -50,12 +32,16 @@ type rcxProbeSection struct {
 }
 
 func rcxDefaultProbeSection() rcxProbeSection {
-	return rcxProbeSection{
-		Concurrency:   rcxProbeConcurrency,
-		StaggerMs:     rcxProbeStaggerMs,
-		BudgetPerHour: rcxProbeBudgetCap,
-		Reserve:       rcxProbeReserve,
+	return rcxCopyProbe(rcxBuiltInProfile.Probe)
+}
+
+func rcxCopyProbe(value rcxProbeSection) rcxProbeSection {
+	if value.Metered != nil {
+		child := *value.Metered
+		child.Metered = nil
+		value.Metered = &child
 	}
+	return value
 }
 
 func (s rcxProbeSection) bounded() rcxProbeSection {
@@ -81,35 +67,74 @@ func (s rcxProbeSection) bounded() rcxProbeSection {
 		s.Reserve = s.BudgetPerHour / 2
 	}
 	if s.Metered != nil {
-		m := s.Metered.bounded()
+		m := *s.Metered
 		m.Metered = nil
+		m = m.bounded()
 		s.Metered = &m
 	}
 	return s
 }
 
 func rcxDefaultDecisionProfile() rcxDecisionProfile {
-	return rcxDecisionProfile{
-		Schema:     rcxProfileSchema,
-		Ladder:     rcxDefaultLadder(),
-		Strategies: rcxStrategyProfiles,
-		Admission:  rcxDefaultAdmitRules(),
-		Probe:      rcxDefaultProbeSection(),
-		Terrain:    &rcxTerrainSection{Enabled: true},
+	p := rcxBuiltInProfile
+	p.Ladder = rcxDefaultLadder()
+	p.Strategies = rcxCopyStrategies(p.Strategies)
+	p.Admission = rcxDefaultAdmitRules()
+	p.Terrain = rcxDefaultTerrainSection()
+	p.Probe = rcxDefaultProbeSection()
+	p.Settings = rcxAllSettings(rcxDefaultConfig())
+	return p
+}
+
+func rcxCopyStrategies(in map[string]rcxStrategyProfile) map[string]rcxStrategyProfile {
+	out := make(map[string]rcxStrategyProfile, len(in))
+	for name, strategy := range in {
+		strategy.LatencyBands = append([]int(nil), strategy.LatencyBands...)
+		strategy.DropRungs = append([]rcxRungID(nil), strategy.DropRungs...)
+		out[name] = strategy
 	}
+	return out
+}
+
+func (p *rcxProbeSection) UnmarshalYAML(node *yaml.Node) error {
+	var patch rcxProbePatch
+	if err := rcxDecodeNode(node, &patch); err != nil {
+		return err
+	}
+	if patch.Metered != nil && patch.Metered.Metered != nil {
+		return fmt.Errorf("rcx: nested metered probe variants are not supported")
+	}
+	base := rcxDefaultProbeSection()
+	metered := patch.Metered
+	patch.Metered = nil
+	value := patch.apply(base)
+	if metered != nil {
+		child := base
+		if base.Metered != nil {
+			child = *base.Metered
+		}
+		child.Metered = nil
+		child = metered.apply(child)
+		value.Metered = &child
+	}
+	*p = value
+	return nil
 }
 
 func (p rcxDecisionProfile) marshalYAML() ([]byte, error) {
 	return yaml.Marshal(p)
 }
 
-// effectiveProfile is the decision profile the engine is actually running after
-// override resolution: the config's ladder, strategy table, admission rules, and
-// probe cadence. It is the export counterpart to the ProfileYAML import, and for a
-// config carrying no profile it equals the shipped default.
 func (c rcxConfig) effectiveProfile() rcxDecisionProfile {
+	if c.compiled != nil {
+		return c.compiled.export
+	}
+	return c.profileValues()
+}
+
+func (c rcxConfig) profileValues() rcxDecisionProfile {
 	admission := c.admitRules
-	if len(admission) == 0 {
+	if admission == nil {
 		admission = rcxDefaultAdmitRules()
 	}
 	return rcxDecisionProfile{
@@ -118,14 +143,77 @@ func (c rcxConfig) effectiveProfile() rcxDecisionProfile {
 		Strategies: c.resolvedStrategies(),
 		Admission:  admission,
 		Probe:      c.probe(),
-		Terrain:    &rcxTerrainSection{Enabled: !c.terrainDisabled},
+		Terrain:    c.terrainRules(),
+		Settings:   rcxAllSettings(c),
 	}
 }
 
+const rcxProfileMaxBytes = 256 * 1024
+
 func rcxDecisionProfileFromYAML(data []byte) (rcxDecisionProfile, error) {
 	var p rcxDecisionProfile
-	err := yaml.Unmarshal(data, &p)
-	return p, err
+	if len(data) > rcxProfileMaxBytes {
+		return p, fmt.Errorf("rcx: profile exceeds %d bytes", rcxProfileMaxBytes)
+	}
+	var node yaml.Node
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&node); err != nil {
+		return p, err
+	}
+	var extra yaml.Node
+	if err := decoder.Decode(&extra); err != io.EOF {
+		return p, fmt.Errorf("rcx: expected one YAML document")
+	}
+	if err := rcxProfileTree(&node, 0); err != nil {
+		return p, err
+	}
+	p.Probe = rcxDefaultProbeSection()
+	if err := rcxDecodeNode(&node, &p); err != nil {
+		return p, err
+	}
+	if p.Schema == 1 {
+		root := &node
+		if root.Kind == yaml.DocumentNode {
+			root = root.Content[0]
+		}
+		for i := 0; i < len(root.Content); i += 2 {
+			if root.Content[i].Value != "terrain" {
+				continue
+			}
+			terrain := root.Content[i+1]
+			for j := 0; j < len(terrain.Content); j += 2 {
+				if terrain.Content[j].Value != "enabled" {
+					return p, fmt.Errorf("rcx: terrain.%s requires schema 2", terrain.Content[j].Value)
+				}
+			}
+		}
+	}
+	if p.Schema == rcxProfileSchema {
+		root := &node
+		if root.Kind == yaml.DocumentNode {
+			root = root.Content[0]
+		}
+		contextsPresent := false
+		for i := 0; i < len(root.Content); i += 2 {
+			contextsPresent = contextsPresent || root.Content[i].Value == "contexts"
+		}
+		if !contextsPresent {
+			p.Contexts = rcxBuiltInProfile.Contexts
+		}
+	}
+	return p, p.validateSize()
+}
+
+func rcxProfileTree(node *yaml.Node, depth int) error {
+	if depth > 24 || node.Kind == yaml.AliasNode || node.Tag == "!!null" {
+		return fmt.Errorf("rcx: profile nesting or alias is not supported")
+	}
+	for _, child := range node.Content {
+		if err := rcxProfileTree(child, depth+1); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Token vocabularies. These are the stable wire contract; an index is the enum's
@@ -246,18 +334,18 @@ func (c *rcxAdmitCond) UnmarshalYAML(value *yaml.Node) error {
 	if err := value.Decode(&raw); err != nil {
 		return err
 	}
-	parts := strings.Fields(raw)
-	if len(parts) != 3 {
-		return fmt.Errorf("rcx: condition %q is not <field> <op> <value>", raw)
+	fieldToken, opToken, valueToken, err := rcxTriplet(raw)
+	if err != nil {
+		return err
 	}
-	field, okField := rcxFieldByToken(parts[0])
-	op, okOp := rcxOpByToken(parts[1])
+	field, okField := rcxFieldByToken(fieldToken)
+	op, okOp := rcxOpByToken(opToken)
 	if !okField || !okOp {
 		return fmt.Errorf("rcx: unknown field or op in %q", raw)
 	}
-	lit, okValue := rcxFactValueByToken(field, parts[2])
+	lit, okValue := rcxFactValueByToken(field, valueToken)
 	if !okValue {
-		return fmt.Errorf("rcx: unknown value %q for field %q", parts[2], parts[0])
+		return fmt.Errorf("rcx: unknown value %q for field %q", valueToken, fieldToken)
 	}
 	*c = rcxAdmitCond{Field: field, Op: op, Value: lit}
 	return nil
@@ -287,7 +375,7 @@ func (r rcxAdmitRule) MarshalYAML() (any, error) {
 
 func (r *rcxAdmitRule) UnmarshalYAML(value *yaml.Node) error {
 	var wire rcxAdmitRuleWire
-	if err := value.Decode(&wire); err != nil {
+	if err := rcxDecodeNode(value, &wire); err != nil {
 		return err
 	}
 	if (wire.Verdict == "") == (wire.Tier == "") {

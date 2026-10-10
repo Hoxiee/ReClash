@@ -155,6 +155,7 @@ func (e *rcxEngine) sealProbeDecision() {
 }
 
 func (e *rcxEngine) reconsider() {
+	e.refreshProfileContext()
 	if !e.running {
 		e.publish(rcxReasonHold, nil, rcxDecisionInput{})
 		return
@@ -366,13 +367,13 @@ func (e *rcxEngine) holdsForLink(reason rcxReason, now time.Time) bool {
 	if reason == rcxReasonPinReturn || reason == rcxReasonColdStart {
 		return false
 	}
-	if !e.switchedAt.IsZero() && now.Sub(e.switchedAt) < rcxSwitchProbation {
+	if !e.switchedAt.IsZero() && now.Sub(e.switchedAt) < e.terrainProbation() {
 		return true
 	}
 	if !e.reaching || e.since.IsZero() {
 		return false
 	}
-	return now.Sub(e.since) < rcxSwitchProbation
+	return now.Sub(e.since) < e.terrainProbation()
 }
 
 func (e *rcxEngine) awaitsMeasurement(in rcxDecisionInput) bool {

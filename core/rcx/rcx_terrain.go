@@ -142,29 +142,12 @@ const rcxUnvalidatedDebounce = 3 * time.Second
 // Android reports every new network unvalidated while its own probe runs, so the
 // flag is a prior: entering portal needs the capability bit or a status mismatch.
 func rcxClassifyTerrain(facts rcxTerrainFacts) rcxTerrain {
-	if facts.CaptivePortal || facts.PortalMarker {
-		return rcxTerrainPortal
-	}
-	if !facts.Validated && facts.UnvalidatedFor < rcxUnvalidatedDebounce {
-		return rcxTerrainUnknown
-	}
-	switch {
-	// Transit works to the anycast IP but a censored SNI is cut on the way: a
-	// bare-IP canary cannot see this, so an SNI-DPI network reads Normal without it.
-	case facts.ForeignReach == rcxProbeOK && facts.SNIReach == rcxProbeFail:
-		return rcxTerrainWhitelist
-	case facts.DomesticReach == rcxProbeOK && facts.ForeignReach != rcxProbeOK:
-		return rcxTerrainWhitelist
-	case facts.ForeignReach == rcxProbeOK:
-		return rcxTerrainNormal
-	case facts.DomesticReach == rcxProbeFail:
-		return rcxTerrainOffline
-	default:
-		return rcxTerrainUnknown
-	}
+	_, kind := rcxBuiltInProfile.Terrain.classify(rcxSignals{terrain: facts})
+	return kind
 }
 
 type rcxTerrainState struct {
+	name          string
 	terrain       rcxTerrain
 	since         time.Time
 	unvalidatedAt time.Time
@@ -178,6 +161,10 @@ const (
 )
 
 func (s *rcxTerrainState) settle(terrain rcxTerrain, measured bool) rcxTerrain {
+	return s.settleWith(terrain, measured, rcxWhitelistConfirm)
+}
+
+func (s *rcxTerrainState) settleWith(terrain rcxTerrain, measured bool, confirmations int) rcxTerrain {
 	if terrain != rcxTerrainWhitelist {
 		if measured || terrain != rcxTerrainUnknown {
 			s.whitelistSeen = 0
@@ -190,14 +177,18 @@ func (s *rcxTerrainState) settle(terrain rcxTerrain, measured bool) rcxTerrain {
 	if measured {
 		s.whitelistSeen++
 	}
-	if s.whitelistSeen >= rcxWhitelistConfirm {
+	if s.whitelistSeen >= confirmations {
 		return terrain
 	}
 	return rcxTerrainUnknown
 }
 
 func (s *rcxTerrainState) witnessWhitelist() bool {
-	if s.terrain == rcxTerrainWhitelist || s.whitelistSeen >= rcxWhitelistConfirm {
+	return s.witnessWhitelistWith(rcxWhitelistConfirm)
+}
+
+func (s *rcxTerrainState) witnessWhitelistWith(confirmations int) bool {
+	if s.terrain == rcxTerrainWhitelist || s.whitelistSeen >= confirmations {
 		return false
 	}
 	s.whitelistSeen++
@@ -205,6 +196,7 @@ func (s *rcxTerrainState) witnessWhitelist() bool {
 }
 
 func (s *rcxTerrainState) forget() {
+	s.name = ""
 	s.whitelistSeen = 0
 }
 

@@ -71,6 +71,8 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 			}
 		}
 	}
+	e.refreshProfileContext()
+	e.updateEffectiveProfileReport()
 	e.classifyTerrain(false)
 	e.supersedeReach()
 	e.startReach()
@@ -262,7 +264,7 @@ func (e *rcxEngine) witnessWhitelist(role rcxRole) {
 	if role != rcxRoleDomestic || e.reachD != rcxProbeOK || e.reachF == rcxProbeOK {
 		return
 	}
-	if e.terrain.witnessWhitelist() {
+	if e.terrain.witnessWhitelistWith(e.cfg.terrainRules().ConfirmationRounds) {
 		e.classifyTerrain(false)
 	}
 }
@@ -272,20 +274,27 @@ func (e *rcxEngine) classifyTerrain(measured bool) {
 	if e.terrain.portalExpired(now) {
 		e.portal = false
 	}
-	terrain := rcxClassifyTerrain(rcxTerrainFacts{
+	name, terrain := e.cfg.terrainRules().classify(rcxSignals{context: e.profileContext(e.cfg), terrain: rcxTerrainFacts{
 		Validated:      e.validated,
 		CaptivePortal:  e.portal,
 		UnvalidatedFor: e.terrain.unvalidatedFor(now),
 		ForeignReach:   e.reachF,
 		DomesticReach:  e.reachD,
 		SNIReach:       e.reachS,
-	})
-	terrain = e.terrain.settle(terrain, measured)
+	}})
+	classified := terrain
+	terrain = e.terrain.settleWith(terrain, measured, e.cfg.terrainRules().ConfirmationRounds)
+	if terrain != classified {
+		name = terrain.String()
+	}
+	nameChanged := name != e.terrain.name
+	e.terrain.name = name
 	if terrain == rcxTerrainOffline {
 		e.rollbackEscrow()
 	}
 	e.trackReachStability(terrain, measured)
-	if !e.terrain.observe(terrain, now) {
+	if !e.terrain.observe(terrain, now) && !nameChanged {
+		e.refreshProfileContext()
 		return
 	}
 	e.resetRescue()
@@ -295,6 +304,7 @@ func (e *rcxEngine) classifyTerrain(measured bool) {
 	if e.envKey != "" {
 		e.snapshot.Regimes[e.envKey] = rcxRegimeMemory{Terrain: terrain, At: now}
 	}
+	e.refreshProfileContext()
 }
 
 func (e *rcxEngine) applyScreenOff(off bool) {
@@ -403,7 +413,7 @@ func (e *rcxEngine) reachInterval() time.Duration {
 		return 0
 	}
 	if e.terrain.terrain == rcxTerrainNormal {
-		return rcxReachRefresh
+		return time.Duration(e.cfg.terrainRules().RefreshSeconds) * time.Second
 	}
 	return e.urgentReachInterval()
 }
@@ -413,11 +423,11 @@ func (e *rcxEngine) reachInterval() time.Duration {
 // resets the streak on any flip, so a real change is still caught within 30s.
 func (e *rcxEngine) urgentReachInterval() time.Duration {
 	if e.reachStableRounds < rcxReachSteady {
-		return rcxReachUrgent
+		return time.Duration(e.cfg.terrainRules().UrgentSeconds) * time.Second
 	}
-	interval := rcxReachUrgent * time.Duration(e.reachStableRounds-rcxReachSteady+2)
-	if interval > rcxReachBackoffCap {
-		return rcxReachBackoffCap
+	interval := time.Duration(e.cfg.terrainRules().UrgentSeconds) * time.Second * time.Duration(e.reachStableRounds-rcxReachSteady+2)
+	if cap := time.Duration(e.cfg.terrainRules().BackoffSeconds) * time.Second; interval > cap {
+		return cap
 	}
 	return interval
 }
@@ -435,6 +445,9 @@ func (e *rcxEngine) trackReachStability(terrain rcxTerrain, measured bool) {
 
 // A stale terrain says nothing: unknown keeps the last-resort rows honest.
 func (e *rcxEngine) terrainCurrent() rcxTerrain {
+	if e.portal {
+		return rcxTerrainPortal
+	}
 	// Terrain handling off: the open-world baseline, never whitelist or portal.
 	if e.cfg.terrainDisabled {
 		return rcxTerrainNormal
@@ -442,7 +455,7 @@ func (e *rcxEngine) terrainCurrent() rcxTerrain {
 	if e.lastReachAt.IsZero() {
 		return e.terrain.terrain
 	}
-	if e.runtime.Now().Sub(e.lastReachAt) > rcxTerrainMaxAge {
+	if e.runtime.Now().Sub(e.lastReachAt) > time.Duration(e.cfg.terrainRules().MaxAgeSeconds)*time.Second {
 		return rcxTerrainUnknown
 	}
 	return e.terrain.terrain

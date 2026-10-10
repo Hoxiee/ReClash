@@ -30,7 +30,7 @@ const (
 // the whole config parse.
 const rcxRungInvalid rcxRungID = 255
 
-const rcxRecurrenceFloorDefault = 2
+var rcxRecurrenceFloorDefault int
 
 func (id rcxRungID) String() string {
 	switch id {
@@ -98,18 +98,7 @@ type rcxRungSpec struct {
 }
 
 func rcxDefaultLadder() []rcxRungSpec {
-	return []rcxRungSpec{
-		{ID: rcxRungVerdict, Enabled: true},
-		{ID: rcxRungMisfit, Enabled: true},
-		{ID: rcxRungRecurrence, Enabled: true, RecurrenceFloor: rcxRecurrenceFloorDefault},
-		{ID: rcxRungDegraded, Enabled: true},
-		{ID: rcxRungHomeRisk, Enabled: true},
-		{ID: rcxRungLatency, Enabled: true},
-		{ID: rcxRungEvidence, Enabled: true},
-		{ID: rcxRungUnproven, Enabled: true},
-		{ID: rcxRungIncumbent, Enabled: true},
-		{ID: rcxRungTiebreak, Enabled: true},
-	}
+	return append([]rcxRungSpec(nil), rcxBuiltInProfile.Ladder...)
 }
 
 type rcxRungCompareFunc func(a, b rcxKey, spec rcxRungSpec) int
