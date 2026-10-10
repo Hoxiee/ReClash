@@ -336,4 +336,51 @@ void main() {
 
     expect(find.byIcon(Icons.rocket_launch), findsNothing);
   });
+
+  group('ElasticPress nesting', () {
+    final pressTransforms = find.byWidgetPredicate(
+      (widget) => widget.runtimeType.toString() == '_PressTransform',
+    );
+
+    testWidgets('a lone press renders one swell', (tester) async {
+      await tester.pumpWidget(
+        const TestApp(
+          child: ElasticPress(child: SizedBox.square(dimension: 40)),
+        ),
+      );
+
+      expect(pressTransforms, findsOneWidget);
+    });
+
+    testWidgets('a nested press renders only the outer swell', (tester) async {
+      await tester.pumpWidget(
+        const TestApp(
+          child: ElasticPress(
+            child: ElasticPress(child: SizedBox.square(dimension: 40)),
+          ),
+        ),
+      );
+
+      expect(
+        pressTransforms,
+        findsOneWidget,
+        reason: 'the inner press must lie flat so the swell does not compound',
+      );
+    });
+
+    testWidgets('a disabled outer press leaves the inner one live', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestApp(
+          child: ElasticPress(
+            enabled: false,
+            child: ElasticPress(child: SizedBox.square(dimension: 40)),
+          ),
+        ),
+      );
+
+      expect(pressTransforms, findsNWidgets(2));
+    });
+  });
 }

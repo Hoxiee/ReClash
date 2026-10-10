@@ -424,7 +424,12 @@ class _ElasticPressState extends State<ElasticPress>
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
+    // Nesting one press inside another multiplies the swell, so the outermost
+    // enabled press owns the gesture and any press below it renders flat.
+    if (widget.enabled && _ElasticPressScope.of(context)) {
+      return widget.child;
+    }
+    final pressed = Listener(
       onPointerDown: _handlePointerDown,
       onPointerMove: _handlePointerMove,
       onPointerUp: _handlePointerEnd,
@@ -440,7 +445,21 @@ class _ElasticPressState extends State<ElasticPress>
         child: widget.child,
       ),
     );
+    return widget.enabled ? _ElasticPressScope(child: pressed) : pressed;
   }
+}
+
+/// Marks the subtree under an enabled [ElasticPress] so a nested press can lie
+/// flat instead of compounding the swell.
+class _ElasticPressScope extends InheritedWidget {
+  const _ElasticPressScope({required super.child});
+
+  static bool of(BuildContext context) =>
+      context.getElementForInheritedWidgetOfExactType<_ElasticPressScope>() !=
+      null;
+
+  @override
+  bool updateShouldNotify(_ElasticPressScope oldWidget) => false;
 }
 
 /// Leaves a press on the filled button or FAB inside to [ElasticPress]; one
