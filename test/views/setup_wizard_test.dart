@@ -1097,7 +1097,7 @@ void main() {
     expect(container.read(profilesProvider), [imported]);
   });
 
-  testWidgets('the disclaimer reads in place with the licence outside it', (
+  testWidgets('the summary reads in place with the licence outside it', (
     tester,
   ) async {
     await _pump(tester);
@@ -1107,7 +1107,7 @@ void main() {
       find.descendant(
         of: find.byType(SetupScrollCard),
         matching: find.textContaining(
-          'non-commercial uses',
+          'what ReClash is, what it is not',
           findRichText: true,
         ),
       ),

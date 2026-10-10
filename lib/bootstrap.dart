@@ -25,6 +25,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/views/settings/navigation.dart';
 import 'package:reclash/views/views.dart';
 
@@ -381,7 +382,9 @@ class Bootstrap {
       return true;
     }
     await _showMandatoryUi();
-    final isDisclaimerAccepted = await dialogs.showDisclaimer();
+    final isDisclaimerAccepted = await dialogs.showDisclaimer(
+      onReadFull: () => showDisclaimerPage(rootNavigatorKey.currentContext!),
+    );
     if (!isDisclaimerAccepted) {
       await _container.read(systemActionProvider.notifier).handleExit();
       return false;

@@ -5212,10 +5212,10 @@ class AppLocalizations {
     return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);
   }
 
-  /// `This software is intended only for non-commercial uses such as learning and research. Using it for any commercial purpose is strictly prohibited; any commercial activity is unrelated to this software.`
+  /// `This statement sets out what ReClash is, what it is not, what it does on its own, and where responsibility lies. Read it in full before you use the app. Continuing means you accept every term below. If you do not accept them, stop using the app and remove it.`
   String get disclaimerDesc {
     return Intl.message(
-      'This software is intended only for non-commercial uses such as learning and research. Using it for any commercial purpose is strictly prohibited; any commercial activity is unrelated to this software.',
+      'This statement sets out what ReClash is, what it is not, what it does on its own, and where responsibility lies. Read it in full before you use the app. Continuing means you accept every term below. If you do not accept them, stop using the app and remove it.',
       name: 'disclaimerDesc',
       desc: '',
       args: [],
@@ -19863,6 +19863,296 @@ class AppLocalizations {
     return Intl.message(
       'The Windows permission request timed out. Dismiss it and try connecting again.',
       name: 'windowsElevationTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What ReClash is`
+  String get disclaimerSoftwareTitle {
+    return Intl.message(
+      'What ReClash is',
+      name: 'disclaimerSoftwareTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash is an open-source network client built on the mihomo (Clash.Meta) core. On your device it manages profiles, applies routing rules and forwards traffic.\n\nReClash is not a service. It does not sell, provide, host or resell proxy servers, nodes or subscriptions, and it has no partnership, agency or guarantee relationship with any provider of them. Every connection target comes from configuration that you add yourself.`
+  String get disclaimerSoftwareContent {
+    return Intl.message(
+      'ReClash is an open-source network client built on the mihomo (Clash.Meta) core. On your device it manages profiles, applies routing rules and forwards traffic.\n\nReClash is not a service. It does not sell, provide, host or resell proxy servers, nodes or subscriptions, and it has no partnership, agency or guarantee relationship with any provider of them. Every connection target comes from configuration that you add yourself.',
+      name: 'disclaimerSoftwareContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your responsibility`
+  String get disclaimerResponsibilityTitle {
+    return Intl.message(
+      'Your responsibility',
+      name: 'disclaimerResponsibilityTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You alone decide how to use ReClash. You are responsible for making sure that use is lawful where you live, and you bear the legal and practical consequences of everything you do with it.\n\nYou also decide which subscriptions, nodes and configurations to import. Whether a source is lawful, its content is safe and its service is reliable is a matter between you and that provider. Paid third-party services are permitted; choosing and paying for them is your decision.`
+  String get disclaimerResponsibilityContent {
+    return Intl.message(
+      'You alone decide how to use ReClash. You are responsible for making sure that use is lawful where you live, and you bear the legal and practical consequences of everything you do with it.\n\nYou also decide which subscriptions, nodes and configurations to import. Whether a source is lawful, its content is safe and its service is reliable is a matter between you and that provider. Paid third-party services are permitted; choosing and paying for them is your decision.',
+      name: 'disclaimerResponsibilityContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Third-party content`
+  String get disclaimerThirdPartyTitle {
+    return Intl.message(
+      'Third-party content',
+      name: 'disclaimerThirdPartyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription links, configuration files, rule sets, scripts and external resources come from third parties. The developers do not review them and cannot verify their legality, accuracy, security or availability.\n\nAny data leak, financial loss, account suspension or other harm caused by third-party content is for you to settle with that third party. The developers accept no responsibility for it.`
+  String get disclaimerThirdPartyContent {
+    return Intl.message(
+      'Subscription links, configuration files, rule sets, scripts and external resources come from third parties. The developers do not review them and cannot verify their legality, accuracy, security or availability.\n\nAny data leak, financial loss, account suspension or other harm caused by third-party content is for you to settle with that third party. The developers accept no responsibility for it.',
+      name: 'disclaimerThirdPartyContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network requests`
+  String get disclaimerNetworkTitle {
+    return Intl.message(
+      'Network requests',
+      name: 'disclaimerNetworkTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash makes some requests on its own. You can see and control them in settings:\n\n- IP check: runs when the app starts and when the connection state changes. It asks public IP services for your address and approximate location. Enabled by default.\n- Update check: asks GitHub for new releases. Enabled by default; you can turn it off.\n- Profile updates: download the subscription URL you added, on a timer. Enabled by default for each profile.\n- Latency and connectivity tests: send requests through the core to test URLs such as gstatic.com.\n\nSmart routing, service checks and IP quality checks run only when you turn them on or tap them.`
+  String get disclaimerNetworkContent {
+    return Intl.message(
+      'ReClash makes some requests on its own. You can see and control them in settings:\n\n- IP check: runs when the app starts and when the connection state changes. It asks public IP services for your address and approximate location. Enabled by default.\n- Update check: asks GitHub for new releases. Enabled by default; you can turn it off.\n- Profile updates: download the subscription URL you added, on a timer. Enabled by default for each profile.\n- Latency and connectivity tests: send requests through the core to test URLs such as gstatic.com.\n\nSmart routing, service checks and IP quality checks run only when you turn them on or tap them.',
+      name: 'disclaimerNetworkContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crash reports (Android)`
+  String get disclaimerCrashTitle {
+    return Intl.message(
+      'Crash reports (Android)',
+      name: 'disclaimerCrashTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On Android the app can send crash reports through Firebase Crashlytics. This is off by default and turns on only if you choose it during setup. A crash report contains the stack trace, error message, app version and basic device information. Settings you choose, subscriptions and traffic are not included.\n\nDesktop builds send no crash reports.`
+  String get disclaimerCrashContent {
+    return Intl.message(
+      'On Android the app can send crash reports through Firebase Crashlytics. This is off by default and turns on only if you choose it during setup. A crash report contains the stack trace, error message, app version and basic device information. Settings you choose, subscriptions and traffic are not included.\n\nDesktop builds send no crash reports.',
+      name: 'disclaimerCrashContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android only`
+  String get disclaimerAndroidOnly {
+    return Intl.message(
+      'Android only',
+      name: 'disclaimerAndroidOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data and privacy`
+  String get disclaimerPrivacyTitle {
+    return Intl.message(
+      'Data and privacy',
+      name: 'disclaimerPrivacyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash does not collect or upload your subscription links, node details, configuration contents, the sites you visit, connection records, traffic or logs. All of that stays on your device, and the developers have no access to it.\n\nThe app reaches the network only when a feature needs it: fetching a subscription URL you added, contacting GitHub for updates, or one of the requests listed above.\n\nThe desktop builds (Windows, macOS and Linux) contain no analytics and no crash-reporting service.`
+  String get disclaimerPrivacyContent {
+    return Intl.message(
+      'ReClash does not collect or upload your subscription links, node details, configuration contents, the sites you visit, connection records, traffic or logs. All of that stays on your device, and the developers have no access to it.\n\nThe app reaches the network only when a feature needs it: fetching a subscription URL you added, contacting GitHub for updates, or one of the requests listed above.\n\nThe desktop builds (Windows, macOS and Linux) contain no analytics and no crash-reporting service.',
+      name: 'disclaimerPrivacyContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Android build includes one Google Firebase service, crash reporting. It is off unless you turn it on.`
+  String get disclaimerAndroidServicesIntro {
+    return Intl.message(
+      'The Android build includes one Google Firebase service, crash reporting. It is off unless you turn it on.',
+      name: 'disclaimerAndroidServicesIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off by default. It turns on only if you opt in during setup, and you can switch it off at any time in the app settings.\n\nWhen the app crashes, the report contains the stack trace and error message, the time of the crash, the app version and build number, basic device information (brand, model, Android version) and a random installation ID that is reset on reinstall.\n\nIt never contains your settings, subscriptions, nodes, traffic or browsing. It is used only to find and fix crashes, not for advertising, and it is not sold or linked to your subscriptions or configurations.`
+  String get disclaimerCrashlyticsContent {
+    return Intl.message(
+      'Off by default. It turns on only if you opt in during setup, and you can switch it off at any time in the app settings.\n\nWhen the app crashes, the report contains the stack trace and error message, the time of the crash, the app version and build number, basic device information (brand, model, Android version) and a random installation ID that is reset on reinstall.\n\nIt never contains your settings, subscriptions, nodes, traffic or browsing. It is used only to find and fix crashes, not for advertising, and it is not sold or linked to your subscriptions or configurations.',
+      name: 'disclaimerCrashlyticsContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When enabled, Google processes and stores crash reports on our behalf. They may be transferred to and stored on servers outside your country or region, including in the United States. Processing is governed by the Google Privacy Policy and the Firebase privacy and security documentation.`
+  String get disclaimerDataProcessingContent {
+    return Intl.message(
+      'When enabled, Google processes and stores crash reports on our behalf. They may be transferred to and stored on servers outside your country or region, including in the United States. Processing is governed by the Google Privacy Policy and the Firebase privacy and security documentation.',
+      name: 'disclaimerDataProcessingContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription report`
+  String get disclaimerSubscriptionReportTitle {
+    return Intl.message(
+      'Subscription report',
+      name: 'disclaimerSubscriptionReportTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app can build an anonymized report about how a subscription performs: connection outcomes and node-level statistics, with real node names replaced by aliases.\n\nThe report is never sent in the background. You create it, decide what to do with it, and either copy or save it, or send it to the provider's telemetry address after you confirm. Sending it is always a separate, explicit step.`
+  String get disclaimerSubscriptionReportContent {
+    return Intl.message(
+      'The app can build an anonymized report about how a subscription performs: connection outcomes and node-level statistics, with real node names replaced by aliases.\n\nThe report is never sent in the background. You create it, decide what to do with it, and either copy or save it, or send it to the provider\'s telemetry address after you confirm. Sending it is always a separate, explicit step.',
+      name: 'disclaimerSubscriptionReportContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No warranty`
+  String get disclaimerWarrantyTitle {
+    return Intl.message(
+      'No warranty',
+      name: 'disclaimerWarrantyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash is provided "as is" and "as available", without warranty of any kind, express or implied. That includes, without limitation, warranties of merchantability, fitness for a particular purpose, non-infringement, uninterrupted operation, freedom from errors and freedom from security vulnerabilities.\n\nThe developers do not guarantee that the app will meet your needs or run without interruption.`
+  String get disclaimerWarrantyContent {
+    return Intl.message(
+      'ReClash is provided "as is" and "as available", without warranty of any kind, express or implied. That includes, without limitation, warranties of merchantability, fitness for a particular purpose, non-infringement, uninterrupted operation, freedom from errors and freedom from security vulnerabilities.\n\nThe developers do not guarantee that the app will meet your needs or run without interruption.',
+      name: 'disclaimerWarrantyContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Limitation of liability`
+  String get disclaimerLiabilityTitle {
+    return Intl.message(
+      'Limitation of liability',
+      name: 'disclaimerLiabilityTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To the maximum extent permitted by applicable law, neither the developers nor any contributor is liable for direct, indirect, incidental, special, punitive or consequential damages arising from using or being unable to use ReClash. That includes data loss, device damage, network failure, business interruption, lost profits and any resulting legal dispute, even if they were warned such damages were possible.`
+  String get disclaimerLiabilityContent {
+    return Intl.message(
+      'To the maximum extent permitted by applicable law, neither the developers nor any contributor is liable for direct, indirect, incidental, special, punitive or consequential damages arising from using or being unable to use ReClash. That includes data loss, device damage, network failure, business interruption, lost profits and any resulting legal dispute, even if they were warned such damages were possible.',
+      name: 'disclaimerLiabilityContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open-source license`
+  String get disclaimerLicenseTitle {
+    return Intl.message(
+      'Open-source license',
+      name: 'disclaimerLicenseTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash is open source under GPL-3.0. You may use, modify and distribute it under that licence. Derivative works must also be released under GPL-3.0, and original copyright notices must be kept.\n\nThird-party components, including the Clash.Meta core, are governed by their own licences. The original authors are not responsible for changed or redistributed versions.`
+  String get disclaimerLicenseContent {
+    return Intl.message(
+      'ReClash is open source under GPL-3.0. You may use, modify and distribute it under that licence. Derivative works must also be released under GPL-3.0, and original copyright notices must be kept.\n\nThird-party components, including the Clash.Meta core, are governed by their own licences. The original authors are not responsible for changed or redistributed versions.',
+      name: 'disclaimerLicenseContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changes to this statement`
+  String get disclaimerChangesTitle {
+    return Intl.message(
+      'Changes to this statement',
+      name: 'disclaimerChangesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This statement may change with any release, and the change takes effect when that release is published. Continuing to use ReClash after an update means you accept the revised statement.`
+  String get disclaimerChangesContent {
+    return Intl.message(
+      'This statement may change with any release, and the change takes effect when that release is published. Continuing to use ReClash after an update means you accept the revised statement.',
+      name: 'disclaimerChangesContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Privacy Policy`
+  String get disclaimerGooglePrivacy {
+    return Intl.message(
+      'Google Privacy Policy',
+      name: 'disclaimerGooglePrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Firebase privacy and security`
+  String get disclaimerFirebasePrivacy {
+    return Intl.message(
+      'Firebase privacy and security',
+      name: 'disclaimerFirebasePrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full text`
+  String get disclaimerReadFull {
+    return Intl.message(
+      'Full text',
+      name: 'disclaimerReadFull',
       desc: '',
       args: [],
     );

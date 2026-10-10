@@ -192,7 +192,7 @@ class Dialogs {
         false;
   }
 
-  Future<bool> showDisclaimer() async {
+  Future<bool> showDisclaimer({Future<void> Function()? onReadFull}) async {
     return await showCommonDialog<bool>(
           dismissible: false,
           child: CommonDialog(
@@ -212,7 +212,18 @@ class Dialogs {
                 child: Text(currentAppLocalizations.agree),
               ),
             ],
-            child: Text(currentAppLocalizations.disclaimerDesc),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(currentAppLocalizations.disclaimerDesc),
+                if (onReadFull != null)
+                  TextButton(
+                    onPressed: onReadFull,
+                    child: Text(currentAppLocalizations.disclaimerReadFull),
+                  ),
+              ],
+            ),
           ),
         ) ??
         false;

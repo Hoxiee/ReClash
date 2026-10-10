@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import '../widgets.dart';
@@ -67,7 +68,6 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
     return SetupStepScaffold(
       title: appLocalizations.setupLegalTitle,
       subtitle: appLocalizations.setupLegalSummary,
-      body: SetupSectionLabel(caption: appLocalizations.setupLegalDetails),
       fillBody: SetupScrollCard(
         children: [
           Padding(
@@ -89,6 +89,11 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
                 value: _crashlytics,
                 onChanged: (value) => setState(() => _crashlytics = value),
               ),
+            ListItem(
+              title: Text(appLocalizations.setupLegalDetails),
+              onTap: () => showDisclaimerPage(context),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
+            ),
             ListItem(
               title: Text(appLocalizations.setupLegalLicense),
               subtitle: const Text('GPL-3.0'),
