@@ -73,6 +73,14 @@ class _HomeShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isBar = ref.watch(isBarSurfaceProvider);
+    // A drilled tab draws its own full-screen chrome on a phone, so the shared
+    // bar would float over that page and cover its lower rows: collapse it while
+    // the active tab is a level deep, and bring it back once the path is empty.
+    final currentPage = ref.watch(currentPageLabelProvider);
+    final drilled = ref.watch(
+      navPathProvider(currentPage).select((stack) => stack.isNotEmpty),
+    );
+    final showBar = isBar && !drilled;
     // The dock owns the start control on a phone; the hero orb owns it on the
     // new dashboard, so the trailing button only rides the classic layout.
     final onClassicDashboard = !ref.watch(newDashboardEnabledProvider);
@@ -83,12 +91,12 @@ class _HomeShell extends ConsumerWidget {
             (state) => state.enabled && state.onlyDpi,
           ),
         );
-    final showStart = isBar && onClassicDashboard && hasStartControl;
+    final showStart = showBar && onClassicDashboard && hasStartControl;
     // The hoisted wallpaper paints one backdrop for the whole content region;
     // a solid shell surface here would cover it, so go transparent when active.
     final wallpaperActive = ref.watch(effectiveWallpaperImageProvider) != null;
-    // The bar is only collapsed in rail mode, never unmounted: one tree
-    // shape across surfaces.
+    // The bar collapses in rail mode and slides out while a tab is drilled,
+    // but the tree shape stays the same across surfaces.
     return Material(
       color: wallpaperActive ? Colors.transparent : context.colorScheme.surface,
       child: Stack(
@@ -98,12 +106,12 @@ class _HomeShell extends ConsumerWidget {
               policy: PageTraversalPolicy(),
               child: MediaQuery.removePadding(
                 removeTop: false,
-                removeBottom: isBar,
+                removeBottom: showBar,
                 removeLeft: isBar,
                 removeRight: isBar,
                 context: context,
                 child: BottomInsetScope(
-                  inset: isBar ? AppNavBar.insetOf(context) : 0,
+                  inset: showBar ? AppNavBar.insetOf(context) : 0,
                   child: child,
                 ),
               ),
@@ -114,7 +122,7 @@ class _HomeShell extends ConsumerWidget {
             right: 0,
             bottom: 0,
             child: AnimatedVisibility.bottomNavigation(
-              visible: isBar,
+              visible: showBar,
               child: MediaQuery.removePadding(
                 removeTop: true,
                 removeBottom: false,
