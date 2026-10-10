@@ -74,6 +74,8 @@ type fakeRuntime struct {
 	swept         [][]string
 	sweepStarted  chan struct{}
 	sweepRelease  chan struct{}
+	shapes        map[string]rcxShapeSample
+	shaped        []string
 
 	groupSelected map[string]string
 	groupMembers  map[string][]string
@@ -191,6 +193,16 @@ func (r *fakeRuntime) Test(ctx context.Context, node string, _ rcxMarker) (int, 
 	default:
 		return 0, false, context.DeadlineExceeded
 	}
+}
+
+func (r *fakeRuntime) ShapeProbe(_ context.Context, node, _ string, _ int64) rcxShapeSample {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.shaped = append(r.shaped, node)
+	if sample, ok := r.shapes[node]; ok {
+		return sample
+	}
+	return rcxShapeSample{Dead: true}
 }
 
 func (r *fakeRuntime) testedNodes() []string {

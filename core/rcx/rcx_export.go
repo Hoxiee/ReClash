@@ -56,20 +56,22 @@ func (rcxNoopOdometer) NoteAutoDecision()    {}
 func (rcxNoopOdometer) NoteCountry(_ string) {}
 
 type (
-	Engine       = rcxEngine
-	Runtime      = rcxRuntime
-	Config       = rcxConfig
-	Member       = rcxMember
-	Marker       = rcxMarker
-	Status       = rcxStatus
-	Report       = rcxReport
-	ProbeOutcome = rcxProbeOutcome
-	ConnSample   = rcxConnSample
-	LaneConfig   = rcxLaneConfig
-	Storage      = rcxStorage
-	CacheStorage = rcxCacheStorage
-	DiagQuery    = rcxDiagQuery
-	DiagBatch    = rcxDiagBatch
+	Engine          = rcxEngine
+	Runtime         = rcxRuntime
+	Config          = rcxConfig
+	Member          = rcxMember
+	Marker          = rcxMarker
+	Status          = rcxStatus
+	Report          = rcxReport
+	ProbeOutcome    = rcxProbeOutcome
+	ConnSample      = rcxConnSample
+	LaneConfig      = rcxLaneConfig
+	Storage         = rcxStorage
+	CacheStorage    = rcxCacheStorage
+	DiagQuery       = rcxDiagQuery
+	DiagBatch       = rcxDiagBatch
+	ShapeSample     = rcxShapeSample
+	ShapeCheckpoint = rcxShapeCheckpoint
 )
 
 const (
@@ -88,6 +90,8 @@ const (
 
 	HarvestFloorMs = rcxHarvestFloorMs
 	LocateTimeout  = rcxLocateTimeout
+
+	ShapePayloadBytes = rcxClampPayloadKB * 1024
 )
 
 var (

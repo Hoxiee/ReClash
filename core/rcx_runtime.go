@@ -560,6 +560,12 @@ func (rcxCoreRuntime) Test(
 	return int(delay), satisfied, err
 }
 
+// ShapeProbe streams a sized payload through node and returns the arrival shape
+// the engine judges for an operator clamp. The driver lives in rcx_shape.go.
+func (rcxCoreRuntime) ShapeProbe(ctx context.Context, node, target string, payloadBytes int64) rcx.ShapeSample {
+	return rcxShapeProbe(ctx, node, target, payloadBytes)
+}
+
 func rcxExpectedStatuses(statuses []int) (utils.IntRanges[uint16], error) {
 	if len(statuses) == 0 {
 		return nil, nil

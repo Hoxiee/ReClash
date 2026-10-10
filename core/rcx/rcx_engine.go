@@ -23,6 +23,7 @@ type rcxRuntime interface {
 	Country(node string) string
 	Locate(ctx context.Context, node, echo string) string
 	Test(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
+	ShapeProbe(ctx context.Context, node, target string, payloadBytes int64) rcxShapeSample
 	Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome
 	ReachSNI(ctx context.Context, addr, serverName string) rcxProbeOutcome
 	Sweep(ctx context.Context, nodes []string)

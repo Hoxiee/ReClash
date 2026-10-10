@@ -228,6 +228,10 @@ type probeRequest struct {
 
 	// until sees the latest chunk and probeScanOverlap bytes before it.
 	until func(tail string) bool
+
+	// onChunk observes cumulative bytes as the body streams, so a shape probe can
+	// time the rate across the stream without retaining the body.
+	onChunk func(total int64)
 }
 
 // runProbe returns nil when the request never got a slot before its deadline.
@@ -315,13 +319,30 @@ func runProbe(parent context.Context, req probeRequest) *ProbeResult {
 		result.RulePayload = route.rulePayload
 	}
 	if req.maxBody > 0 {
-		result.Body = readProbeBody(response.Body, req.maxBody, req.until)
+		result.Body = readProbeBody(response.Body, req.maxBody, req.until, req.onChunk)
 	}
 	return result
 }
 
-func readProbeBody(body io.Reader, maxBody int64, until func(string) bool) string {
+func readProbeBody(body io.Reader, maxBody int64, until func(string) bool, onChunk func(int64)) string {
 	limited := io.LimitReader(body, maxBody)
+	if onChunk != nil {
+		// A shape probe wants the arrival rate, not the bytes: drain and discard,
+		// reporting the running total after each read so the caller times it.
+		chunk := make([]byte, probeScanChunk)
+		var total int64
+		for {
+			n, err := limited.Read(chunk)
+			if n > 0 {
+				total += int64(n)
+				onChunk(total)
+			}
+			if err != nil {
+				break
+			}
+		}
+		return ""
+	}
 	if until == nil {
 		payload, _ := io.ReadAll(limited)
 		return string(payload)
