@@ -4,14 +4,13 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/widgets/widgets.dart';
 
+import 'layout.dart';
 import 'steps/finish.dart';
 import 'steps/language.dart';
 import 'steps/legal.dart';
 import 'steps/subscription.dart';
-import 'widgets.dart';
 
 enum SetupWizardMode { firstRun, revisit }
 
@@ -42,11 +41,19 @@ class SetupWizard extends ConsumerStatefulWidget {
 
 class _SetupWizardState extends ConsumerState<SetupWizard>
     with SingleTickerProviderStateMixin {
-  static const _firstRunStepCount = 4;
-  static const _revisitStepCount = 3;
   static const _switchDuration = Duration(milliseconds: 140);
 
-  int get _stepCount => widget.revisit ? _revisitStepCount : _firstRunStepCount;
+  /// First-run walks every stage; a revisit skips the one-time legal gate.
+  List<SetupStage> get _stages => widget.revisit
+      ? const [SetupStage.welcome, SetupStage.subscription, SetupStage.finish]
+      : const [
+          SetupStage.welcome,
+          SetupStage.legal,
+          SetupStage.subscription,
+          SetupStage.finish,
+        ];
+
+  int get _stepCount => _stages.length;
 
   late final int _initialIndex;
   late final PageController _controller;
@@ -71,6 +78,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
   void initState() {
     super.initState();
     final saved = ref.read(appSettingProvider).setupStep;
+    // A revisit always restarts at the top; a first run resumes where it left
+    // off. The stage order guarantees any resumable index past the legal gate
+    // was only reached by passing it, so resuming never skips consent.
     _initialIndex = widget.revisit ? 0 : saved.clamp(0, _stepCount - 1);
     _index = _initialIndex;
     _controller = PageController(initialPage: _initialIndex);
@@ -171,53 +181,41 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final profile = ref.watch(currentProfileProvider);
+    final footer = widget.revisit
+        ? null
+        : profile?.label.takeFirstValid([appLocalizations.profile]);
     return CommonPopScope(
       onPop: _handlePop,
       child: Scaffold(
         backgroundColor: context.colorScheme.surface,
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: heroBoardMaxWidth),
-              child: FocusTraversalGroup(
-                policy: PageTraversalPolicy(),
-                child: PageFocusScope(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16, bottom: 8),
-                        child: SetupProgress(
-                          count: _stepCount,
-                          index: _index,
-                          label: appLocalizations.setupStepProgress(
-                            _index + 1,
-                            _stepCount,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SlideTransition(
-                          position: _slide,
-                          child: FadeTransition(
-                            opacity: _fade,
-                            child: PageView(
-                              controller: _controller,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: [
-                                for (final (index, step) in _steps().indexed)
-                                  ExcludeFocus(
-                                    excluding: index != _index,
-                                    child: PageFocusScope(
-                                      autofocus: index == _index,
-                                      child: step,
-                                    ),
-                                  ),
-                              ],
+          child: FocusTraversalGroup(
+            policy: PageTraversalPolicy(),
+            child: PageFocusScope(
+              child: SetupShell(
+                stages: _stages,
+                index: _index,
+                onJump: _toStep,
+                footer: footer,
+                child: SlideTransition(
+                  position: _slide,
+                  child: FadeTransition(
+                    opacity: _fade,
+                    child: PageView(
+                      controller: _controller,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (final (index, step) in _steps().indexed)
+                          ExcludeFocus(
+                            excluding: index != _index,
+                            child: PageFocusScope(
+                              autofocus: index == _index,
+                              child: step,
                             ),
                           ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

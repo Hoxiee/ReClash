@@ -6,6 +6,7 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/views/settings/backup_and_restore.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -158,7 +159,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
               child: Column(
                 children: [
                   ListItem(
-                    leading: const GlyphIcon(AppGlyphs.add),
+                    leading: const GlyphIcon(AppGlyphs.addCircle),
                     title: Text(appLocalizations.setupAddAnotherProfile),
                     onTap: _showAdd,
                   ),
@@ -177,7 +178,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
               ),
             ),
           ],
-          if (profiles.isEmpty)
+          if (profiles.isEmpty) ...[
             SetupCard(
               child: Padding(
                 padding: AppInsets.lg,
@@ -201,6 +202,17 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
                 ),
               ),
             ),
+            if (byeDpi)
+              SetupCard(
+                child: ListItem.next(
+                  key: const ValueKey('setup-byedpi'),
+                  leading: const GlyphIcon(AppGlyphs.shield),
+                  title: Text(appLocalizations.desyncModeByedpi),
+                  subtitle: Text(appLocalizations.setupByeDpiDesc),
+                  widget: const DesyncView(),
+                ),
+              ),
+          ],
         ],
       ),
       actions: [
