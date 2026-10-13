@@ -260,6 +260,70 @@ func rcxDecideAt(in rcxDecisionInput) rcxDecision {
 	return rcxDecide(in)
 }
 
+func TestBlockNamesEveryRejection(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	cases := []struct {
+		name  string
+		shape func(*rcxCandidate)
+		tune  func(*rcxDecisionInput)
+		want  rcxBlock
+	}{
+		{name: "clear", want: rcxBlockNone},
+		{name: "absent", shape: func(c *rcxCandidate) { c.InSkeleton = false }, want: rcxBlockAbsent},
+		{name: "ignored", shape: func(c *rcxCandidate) { c.Ignore = true }, want: rcxBlockIgnored},
+		{name: "avoided exit", shape: func(c *rcxCandidate) { c.AvoidExit = true }, want: rcxBlockAvoidExit},
+		{
+			name:  "no udp",
+			shape: func(c *rcxCandidate) { c.Facts.SupportsUDP = false },
+			tune:  func(in *rcxDecisionInput) { in.Policy.RequireUDP = true },
+			want:  rcxBlockNoUDP,
+		},
+		{
+			name:  "cooling",
+			shape: func(c *rcxCandidate) { c.CoolUntil = now.Add(time.Minute) },
+			want:  rcxBlockCooling,
+		},
+		{name: "host dead", shape: func(c *rcxCandidate) { c.HostDead = true }, want: rcxBlockDisproven},
+		{
+			name: "provider circuit",
+			shape: func(c *rcxCandidate) {
+				c.Circuit = true
+				c.Facts.Transit = rcxProofUnknown
+			},
+			want: rcxBlockProviderCircuit,
+		},
+		{
+			name:  "last resort barred",
+			shape: func(c *rcxCandidate) { c.RuleLastResort = true },
+			tune:  func(in *rcxDecisionInput) { in.Policy.AllowDomesticLast = false },
+			want:  rcxBlockLastResort,
+		},
+		{
+			name: "terrain absent from the admission table",
+			tune: func(in *rcxDecisionInput) { in.Terrain = rcxTerrain(9) },
+			want: rcxBlockTerrainUnfit,
+		},
+	}
+	for _, tc := range cases {
+		node := rcxNode("n", foreignProven())
+		if tc.shape != nil {
+			tc.shape(&node)
+		}
+		in := rcxDecisionInput{
+			Terrain:    rcxTerrainNormal,
+			Candidates: []rcxCandidate{node},
+			Policy:     rcxTestPolicy(),
+			Now:        now,
+		}
+		if tc.tune != nil {
+			tc.tune(&in)
+		}
+		if block := rcxBlockOf(node, in); block != tc.want {
+			t.Errorf("%s: block = %q, want %q", tc.name, block, tc.want)
+		}
+	}
+}
+
 func TestDecideHoldsAHealthyIncumbent(t *testing.T) {
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
@@ -545,7 +609,7 @@ func TestDecideDoesNotLatchAFasterDomesticNodeOnACensoredColdStart(t *testing.T)
 	abroad.Evidence, abroad.MedianMs, abroad.HostMs = rcxEvidenceNone, 0, 120
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Candidates: []rcxCandidate{home, abroad},
@@ -569,7 +633,7 @@ func TestDecideSinksASuspectFrontedNodeUnderARealForeignNode(t *testing.T) {
 	abroad.Evidence, abroad.MedianMs, abroad.HostMs = rcxEvidenceNone, 0, 140
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Candidates: []rcxCandidate{suspect, abroad},
@@ -591,7 +655,7 @@ func TestDecideSinksAHomeEgressNodeThatOpenedTheWorld(t *testing.T) {
 	abroad.MedianMs, abroad.HostMs = 0, 140
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Candidates: []rcxCandidate{home, abroad},
@@ -670,7 +734,7 @@ func TestDecideDoesNotRankUnmeasuredForeignNodesByHostPingWhenCensored(t *testin
 	far.Order = 1
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Candidates: []rcxCandidate{near, far},
@@ -716,7 +780,7 @@ func TestDecideArmsCensoringFromMeasuredWhitelistWithoutConfiguredCountry(t *tes
 	far.Order = 1
 
 	policy := rcxTestPolicy()
-	policy.Censoring = false
+	policy.Censor = rcxCensorPolicyFor(rcxCensorOff)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainWhitelist,
 		Candidates: []rcxCandidate{near, far},
@@ -733,19 +797,30 @@ func TestEffectiveCensoringUnionsConfiguredAndMeasured(t *testing.T) {
 		name       string
 		configured bool
 		terrain    rcxTerrain
-		want       bool
+		want       rcxCensorSource
 	}{
-		{"neither", false, rcxTerrainNormal, false},
-		{"configured only", true, rcxTerrainNormal, true},
-		{"measured only", false, rcxTerrainWhitelist, true},
-		{"both", true, rcxTerrainWhitelist, true},
-		{"unknown terrain", false, rcxTerrainUnknown, false},
+		{"neither", false, rcxTerrainNormal, rcxCensorOff},
+		{"configured only", true, rcxTerrainNormal, rcxCensorConfigured},
+		{"measured only", false, rcxTerrainWhitelist, rcxCensorMeasured},
+		{"both", true, rcxTerrainWhitelist, rcxCensorBoth},
+		{"unknown terrain", false, rcxTerrainUnknown, rcxCensorOff},
 	}
 	for _, tc := range cases {
 		in := rcxDecisionInput{Terrain: tc.terrain}
-		in.Policy.Censoring = tc.configured
-		if got := rcxEffectiveCensoring(in); got != tc.want {
-			t.Errorf("%s: rcxEffectiveCensoring = %v, want %v", tc.name, got, tc.want)
+		if tc.configured {
+			in.Policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
+		}
+		effective := rcxEffectiveCensorPolicy(in)
+		if effective.Source != tc.want {
+			t.Errorf("%s: source = %v, want %v", tc.name, effective.Source, tc.want)
+		}
+		if effective.armed() != (tc.want != rcxCensorOff) {
+			t.Errorf("%s: armed = %v under source %v", tc.name, effective.armed(), effective.Source)
+		}
+		// Only an author's own country list may strand traffic rather than fall back
+		// to a domestic egress; a measured whitelist alone must not.
+		if effective.StrandRatherThanDomestic != tc.configured {
+			t.Errorf("%s: strand = %v, want %v", tc.name, effective.StrandRatherThanDomestic, tc.configured)
 		}
 	}
 }
@@ -1245,7 +1320,7 @@ func TestDecideOrdersUnmeasuredProvenByThirtyMsSteps(t *testing.T) {
 	far := rcxNode("far", foreignProven())
 	far.MedianMs, far.HostMs = 0, 140
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	input := rcxDecisionInput{Terrain: rcxTerrainNormal, Policy: policy}
 
 	kNear, kTwin, kFar := rcxKeyOf(near, input), rcxKeyOf(twin, input), rcxKeyOf(far, input)
@@ -1268,7 +1343,7 @@ func TestDecideHoldsAManualPinThroughAnOpenWorldBlip(t *testing.T) {
 	faster.HostMs = 40
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Incumbent:  "be-1",
@@ -1297,7 +1372,7 @@ func TestDecideLeavesADisprovedZombiePinWithNoEgressHistory(t *testing.T) {
 	working.HostMs = 120
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Incumbent:  "fi-2",
@@ -1339,7 +1414,7 @@ func TestRankingLatencyKeepsAnAgedOpenIncumbentInTheFastBand(t *testing.T) {
 	working.MedianMs = 300
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Incumbent:  "fi-2",
@@ -1374,7 +1449,7 @@ func TestLedgerDisprovesAStuckTransitOnlyIncumbentOnAFailingMarker(t *testing.T)
 	working := rcxNode("nl-1", foreignProven())
 	working.QualityConfirmed = true
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainNormal,
 		Incumbent:  "fi-2",
@@ -1407,7 +1482,7 @@ func TestDecideDoesNotStrandTrafficHomeWhenAForeignExitDies(t *testing.T) {
 	home.HostMs = 30
 
 	policy := rcxTestPolicy()
-	policy.Censoring = true
+	policy.Censor = rcxCensorPolicyFor(rcxCensorConfigured)
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainWhitelist,
 		Incumbent:  "be-1",

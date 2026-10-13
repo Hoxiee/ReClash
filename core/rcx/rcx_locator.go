@@ -157,7 +157,7 @@ func (e *rcxEngine) wantsLocate(name string, now time.Time) bool {
 	}
 	// A winner the mmdb only guessed gets one quick country-service check before it
 	// carries traffic; once its egress is measured it rides its speed uncontested.
-	return len(e.cfg.CensorCountries) > 0 && len(e.cfg.CountryEchoes) > 0 &&
+	return e.cfg.censorPolicy().VerifyWinnerCountry && len(e.cfg.CountryEchoes) > 0 &&
 		e.freshExitCountry(key, now) == ""
 }
 

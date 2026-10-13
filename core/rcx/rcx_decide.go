@@ -354,7 +354,7 @@ type rcxPolicy struct {
 	Strategies        map[string]rcxStrategyProfile
 	RequireUDP        bool
 	AllowDomesticLast bool
-	Censoring         bool
+	Censor            rcxCensorPolicy
 	DwellSeconds      int
 	AbsCeilingMs      int
 	SwitchImproveMs   int
@@ -425,34 +425,10 @@ func rcxCandidateVerdict(c rcxCandidate, terrain rcxTerrain, rules []rcxAdmitRul
 	return verdict
 }
 
+// The gate and the block that explains it are one predicate: a second copy would
+// narrate a rejection the engine never made.
 func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
-	if !c.InSkeleton {
-		return false
-	}
-	if c.Ignore || c.AvoidExit {
-		return false
-	}
-	if in.Policy.RequireUDP && !c.Facts.SupportsUDP {
-		return false
-	}
-	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
-		return false
-	}
-	if c.HostDead {
-		return false
-	}
-	if c.Circuit && c.Facts.Transit != rcxProofProven {
-		return false
-	}
-	verdict := rcxCandidateVerdict(c, in.Terrain, in.Policy.Admission, in.Policy.TerrainAdmission)
-	if verdict == rcxVerdictReject {
-		return false
-	}
-	if verdict == rcxVerdictLastResort &&
-		!rcxAllowsLastResort(in.Terrain, in.Policy.AllowDomesticLast, in.Policy.TerrainAdmission) {
-		return false
-	}
-	return true
+	return rcxBlockOf(c, in) == rcxBlockNone
 }
 
 // eligibleInScreen reports whether node, as built into candidates, clears the
@@ -522,7 +498,7 @@ func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
 		return c.MedianMs
 	}
 	unproven := c.Facts.Transit != rcxProofProven && c.Facts.OpenWorld != rcxProofProven
-	if policy.Censoring && unproven {
+	if policy.Censor.UnprovenHasNoLatency && unproven {
 		return 0
 	}
 	host := rcxDiscoveryLatency(c)
@@ -581,7 +557,7 @@ func rcxPinHoldsThroughBlip(c rcxCandidate, in rcxDecisionInput) bool {
 // measured home egress or a suspect flag sinks it before the proven-reaches
 // exemption; only a measured foreign egress clears it outright.
 func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
-	if !policy.Censoring {
+	if !policy.Censor.HomeRiskRung {
 		return 0
 	}
 	if f.Exit == rcxOriginForeign {
@@ -668,13 +644,14 @@ func rcxLatencyBucket(rankMs int, bands []int) uint8 {
 }
 
 // A confirmed whitelist terrain is itself a censorship signal that arms the full posture.
-func rcxEffectiveCensoring(in rcxDecisionInput) bool {
-	return in.Policy.Censoring || in.Terrain == rcxTerrainWhitelist
+func rcxEffectiveCensorPolicy(in rcxDecisionInput) rcxCensorPolicy {
+	return rcxCensorPolicyFor(rcxCensorSourceOf(
+		in.Policy.Censor.configured(), in.Terrain == rcxTerrainWhitelist,
+	))
 }
 
 func rcxDecide(in rcxDecisionInput) rcxDecision {
-	configuredCensoring := in.Policy.Censoring
-	in.Policy.Censoring = rcxEffectiveCensoring(in)
+	in.Policy.Censor = rcxEffectiveCensorPolicy(in)
 	var best *rcxCandidate
 	var bestKey rcxKey
 	var incumbentKey rcxKey
@@ -721,7 +698,7 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		to := best.Name
 		// With no measurements off a censored network, prefer the closest entry
 		// ping; under censorship order stands, as a small ping may be a fronted home.
-		if !in.Policy.Censoring {
+		if !in.Policy.Censor.DistrustEntryPingAtColdStart {
 			withoutOrder := func(key rcxKey) rcxKey { key.order = 0; return key }
 			bestBare := withoutOrder(bestKey)
 			for i := range in.Candidates {
@@ -762,7 +739,7 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	if !incumbentEligible {
 		// Only a configured home censor punishes real traffic surfaced at home; a
 		// merely measured whitelist leaves a domestic node as a valid last resort.
-		if configuredCensoring && incumbentPresent &&
+		if in.Policy.Censor.StrandRatherThanDomestic && incumbentPresent &&
 			!rcxExitsDomestic(incumbentCand.Facts) && rcxExitsDomestic(best.Facts) {
 			return rcxDecision{Reason: rcxReasonStranded, Detail: in.Incumbent}
 		}
@@ -931,7 +908,7 @@ type rcxRanked struct {
 
 // The decision's own key and order: a second ordering would drift from it.
 func rcxRank(in rcxDecisionInput) []rcxRanked {
-	in.Policy.Censoring = rcxEffectiveCensoring(in)
+	in.Policy.Censor = rcxEffectiveCensorPolicy(in)
 	compare := rcxCompareFor(in.Policy)
 	ranked := make([]rcxRanked, 0, len(in.Candidates))
 	for _, c := range in.Candidates {

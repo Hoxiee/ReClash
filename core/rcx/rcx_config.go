@@ -785,7 +785,7 @@ func (c rcxConfig) policy() rcxPolicy {
 		Strategies:        c.resolvedStrategies(),
 		RequireUDP:        c.RequireUDP,
 		AllowDomesticLast: c.AllowDomesticLastResort,
-		Censoring:         len(c.CensorCountries) > 0,
+		Censor:            c.censorPolicy(),
 		DwellSeconds:      c.DwellSeconds,
 		AbsCeilingMs:      c.AbsCeilingMs,
 		SwitchImproveMs:   c.SwitchImproveMs,
@@ -831,6 +831,10 @@ func rcxTokenContains(name, needle string) bool {
 		}
 	}
 	return false
+}
+
+func (c rcxConfig) censorPolicy() rcxCensorPolicy {
+	return rcxCensorPolicyFor(rcxCensorSourceOf(len(c.CensorCountries) > 0, false))
 }
 
 func (c rcxConfig) censors(countryCode string) bool {

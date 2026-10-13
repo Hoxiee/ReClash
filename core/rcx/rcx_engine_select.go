@@ -443,5 +443,5 @@ func (e *rcxEngine) screenOffProbeAllowed(reason rcxReason, now time.Time) bool 
 // Domestic bytes are not open-world proof, so under censorship a live-but-unproven
 // node keeps earning routine probes instead of latching as dead weight.
 func (e *rcxEngine) openUnverified(c rcxCandidate) bool {
-	return len(e.cfg.CensorCountries) > 0 && c.Facts.OpenWorld != rcxProofProven
+	return e.cfg.censorPolicy().KeepProbingUnproven && c.Facts.OpenWorld != rcxProofProven
 }
