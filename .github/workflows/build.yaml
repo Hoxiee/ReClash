@@ -235,6 +235,8 @@ jobs:
         shell: bash
         env:
           CGO_ENABLED: 0
+          # Every first-party package carrying tests, minus build-constrained platform/tun.
+          FIRST_PARTY: ./doctor ./odometer ./rcx ./subscription
         run: |
           # `go test` succeeds silently when a package has no test files, so
           # assert the wrapper actually ships tests before trusting the result.
@@ -242,15 +244,14 @@ jobs:
             echo 'No Go tests found in core/; the test step would pass vacuously.' >&2
             exit 1
           fi
-          test -z "$(gofmt -l ./*.go ./platform ./tun)" || {
-            gofmt -l ./*.go ./platform ./tun >&2
+          test -z "$(gofmt -l ./*.go ./platform ./tun $FIRST_PARTY)" || {
+            gofmt -l ./*.go ./platform ./tun $FIRST_PARTY >&2
             exit 1
           }
-          go test -count=1 .
-          go vet .
-          # `go vet .` only reaches the root package. `platform` and `tun` are
-          # behind build constraints, so they need an explicit GOOS to compile
-          # at all; without this they ship unvetted.
+          go test -count=1 . $FIRST_PARTY
+          go vet . $FIRST_PARTY
+          # `platform` and `tun` are behind build constraints, so they need an
+          # explicit GOOS to compile at all; without this they ship unvetted.
           GOOS=linux go vet ./platform
 
       - name: Setup NDK
