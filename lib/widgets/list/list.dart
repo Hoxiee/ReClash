@@ -159,7 +159,7 @@ class ListItem<T> extends StatelessWidget {
     this.trailing,
     required Widget widget,
     double? maxWidth,
-    bool blur = true,
+    bool blur = false,
     bool forceFull = true,
     ValueChanged<dynamic>? onChanged,
     this.horizontalTitleGap,
@@ -190,7 +190,7 @@ class ListItem<T> extends StatelessWidget {
     this.trailing,
     required Widget widget,
     double? maxWidth,
-    bool blur = true,
+    bool blur = false,
     this.horizontalTitleGap,
     this.dense,
     this.titleTextStyle,
@@ -608,6 +608,29 @@ List<Widget> generateSection({
   ];
 }
 
+class ListFooter extends StatelessWidget {
+  final String text;
+
+  const ListFooter({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: listFooterPadding,
+      child: Text(
+        text,
+        style: context.textTheme.bodySmall
+            ?.adjustSize(1)
+            .copyWith(
+              height: 18 / 13,
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+      ),
+    );
+  }
+}
+
 Widget generateSectionV2({
   String? title,
   required Iterable<Widget> items,
@@ -642,6 +665,7 @@ Widget generateSectionV3({
   String? title,
   required Iterable<Widget> items,
   List<Widget>? actions,
+  String? footer,
 }) {
   final genItems = items.mapIndexed<Widget>(
     (index, item) => ItemPositionProvider(
@@ -654,6 +678,7 @@ Widget generateSectionV3({
       if (items.isNotEmpty && title != null)
         ListHeader(title: title, actions: actions),
       Column(children: [...genItems]),
+      if (items.isNotEmpty && footer != null) ListFooter(text: footer),
     ],
   );
 }

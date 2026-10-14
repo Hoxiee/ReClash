@@ -178,7 +178,7 @@ class _DevicesViewState extends ConsumerState<DevicesView>
       onTap: () => unawaited(_openReceiver()),
     );
     final addTv = ActionCard(
-      icon: AppGlyphs.add,
+      icon: AppGlyphs.addCircle,
       title: l.companionAddTelevision,
       subtitle: l.companionScanTvQr,
       onTap: () => unawaited(_addTelevision()),

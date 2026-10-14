@@ -43,6 +43,7 @@ class SetupLanguageStep extends ConsumerWidget {
     ];
     return SetupStepScaffold(
       header: const SetupLogo(),
+      inlineHeader: true,
       title: appName,
       subtitle: appLocalizations.setupWelcome,
       body: SetupSectionLabel(

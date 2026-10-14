@@ -57,7 +57,7 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _scrollController = sheetScrollController(context);
   }
 
   @override

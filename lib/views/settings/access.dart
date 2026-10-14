@@ -37,7 +37,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
   @override
   void initState() {
     super.initState();
-    _controller = ScrollController();
+    _controller = sheetScrollController(context);
     _searchController = TextEditingController(
       text: ref.read(queryProvider(QueryTag.access)),
     );
@@ -434,7 +434,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
     return switch (type) {
       AccessSortType.none => AppGlyphs.sort,
       AccessSortType.name => AppGlyphs.sortAlpha,
-      AccessSortType.time => AppGlyphs.update,
+      AccessSortType.time => AppGlyphs.sync,
     };
   }
 

@@ -23,7 +23,6 @@ class NotificationComponentsEditor extends ConsumerWidget {
     ];
     final type = await showSheet<NotificationComponentType>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (context) => OverwriteSelectionSheet<NotificationComponentType>(
         title: l.notificationAddComponent,
         sections: [
@@ -74,7 +73,7 @@ class NotificationComponentsEditor extends ConsumerWidget {
       floatBody: true,
       menuItems: [
         CommonPopupMenuItem(
-          glyph: AppGlyphs.add,
+          glyph: AppGlyphs.addCircle,
           label: l.add,
           onPressed: canAdd ? () => _handleAdd(context, ref) : null,
         ),

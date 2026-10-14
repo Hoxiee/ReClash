@@ -79,7 +79,6 @@ class DnsView extends ConsumerWidget {
     );
     final key = await showSheet<DnsOverrideKey>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (context) => OverwriteSelectionSheet<DnsOverrideKey>(
         title: appLocalizations.addOverrideEntry,
         sections: [
@@ -176,7 +175,7 @@ class DnsView extends ConsumerWidget {
       iconActions: [
         if (canAdd)
           IconButtonData(
-            glyph: AppGlyphs.add,
+            glyph: AppGlyphs.addCircle,
             tooltip: appLocalizations.add,
             onPressed: () => _handleAdd(context, ref),
           ),

@@ -5,66 +5,68 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-import 'widgets.dart';
+/// States what the wizard worked out on its own — region and language — instead
+/// of asking for it. Everything here has a settings home of its own, so the
+/// strip only has to offer one way back in.
+class SetupDetectedStrip extends ConsumerWidget {
+  const SetupDetectedStrip({super.key});
 
-class SetupRegionSettings extends ConsumerWidget {
-  const SetupRegionSettings({super.key});
+  Future<void> _change(BuildContext context, WidgetRef ref) async {
+    final l = context.appLocalizations;
+    final picked = await dialogs.showCommonDialog<String>(
+      child: OptionsDialog<String>(
+        title: l.appRegion,
+        options: [...shippedCountryCodes, otherRegionCode],
+        value: ref.read(appRegionProvider),
+        textBuilder: regionLabel,
+      ),
+    );
+    if (picked == null || !context.mounted) return;
+    selectAppRegion(ref.read, picked);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.appLocalizations;
-    final region = ref.watch(appRegionProvider);
-    final sendIdentity = ref.watch(
-      appSettingProvider.select((state) => state.sendDeviceIdentity),
+    final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final locale = getLocaleForString(
+      ref.watch(appSettingProvider.select((state) => state.locale)),
     );
-    return SetupSection(
-      caption: l10n.appRegion,
-      child: SetupCard(
-        child: Column(
-          children: [
-            ListItem<String>.options(
-              key: const ValueKey('setup-app-region'),
-              leading: const GlyphIcon(AppGlyphs.language),
-              title: Text(l10n.appRegion),
-              subtitle: Text(regionLabel(region)),
-              dialogTitle: l10n.appRegion,
-              options: [...shippedCountryCodes, otherRegionCode],
-              value: region,
-              textBuilder: (value) => regionLabel(value),
-              onChanged: (value) {
-                if (!context.mounted || value == null) return;
-                selectAppRegion(ref.read, value);
-              },
-            ),
-            ListItem.toggle(
-              key: const ValueKey('setup-send-hwid'),
-              leading: const GlyphIcon(AppGlyphs.deviceInfo),
-              title: Text(l10n.sendDeviceIdentity),
-              subtitle: Text(l10n.sendDeviceIdentityDesc),
-              value: sendIdentity,
-              onChanged: (value) async {
-                // Regions that seed HWID on by default are the ones whose
-                // providers rely on it; elsewhere the warning would cry wolf.
-                if (!value &&
-                    regionAllowsFacet(region, RegionalFacetId.deviceIdentity)) {
-                  final confirmed = await dialogs.showMessage(
-                    context: context,
-                    title: l10n.sendDeviceIdentity,
-                    message: TextSpan(
-                      text: l10n.sendDeviceIdentityDisableWarning,
-                    ),
-                    confirmText: l10n.turnOff,
-                  );
-                  if (confirmed != true || !context.mounted) return;
-                }
-                ref
-                    .read(appSettingProvider.notifier)
-                    .update(
-                      (state) => state.copyWith(sendDeviceIdentity: value),
-                    );
-              },
-            ),
-          ],
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Material(
+        color: colorScheme.surfaceContainerHigh,
+        shape: AppShape.all(AppCorner.full),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.only(left: AppSpacing.md),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.sm,
+            children: [
+              GlyphIcon(
+                AppGlyphs.language,
+                size: 18,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              Flexible(
+                child: Text(
+                  l.setupDetectedSummary(
+                    regionLabel(ref.watch(appRegionProvider)),
+                    locale?.nativeLabel ?? l.setupSystemLanguage,
+                  ),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              TextButton(
+                onPressed: () => _change(context, ref),
+                child: Text(l.setupDetectedChange),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -30,6 +30,7 @@ import '../config/ntp.dart';
 import '../config/smart_pause.dart';
 import '../config/smart_routing.dart';
 import '../devices/devices.dart';
+import '../disclaimer.dart';
 import '../settings/developer.dart';
 import '../settings/url_scheme.dart';
 import 'connection_doctor.dart';
@@ -1641,20 +1642,15 @@ class _SettingItem extends StatelessWidget {
   }
 }
 
-class _DisclaimerItem extends ConsumerWidget {
+class _DisclaimerItem extends StatelessWidget {
   const _DisclaimerItem();
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
     return DecorationListItem(
       leading: const GlyphIcon(AppGlyphs.gavel),
       title: Text(context.appLocalizations.disclaimer),
-      onPressed: () async {
-        final isDisclaimerAccepted = await dialogs.showDisclaimer();
-        if (!isDisclaimerAccepted) {
-          await ref.read(systemActionProvider.notifier).handleExit();
-        }
-      },
+      onPressed: () => showDisclaimerPage(context),
     );
   }
 }

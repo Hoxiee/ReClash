@@ -43,7 +43,7 @@ class TrackerInfoItem extends ConsumerWidget {
   });
 
   void _openDetail(BuildContext context) {
-    showExtend(
+    showSheetPageOrExtend<void>(
       context,
       builder: (_) {
         return AdaptiveSheetScaffold(

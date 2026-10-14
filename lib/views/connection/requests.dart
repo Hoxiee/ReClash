@@ -16,7 +16,8 @@ class RequestsView extends ConsumerStatefulWidget {
   ConsumerState<RequestsView> createState() => _RequestsViewState();
 }
 
-class _RequestsViewState extends ConsumerState<RequestsView> {
+class _RequestsViewState extends ConsumerState<RequestsView>
+    with RouteMotionHoldMixin<RequestsView> {
   final _listController = TrackerInfoListController();
   late final ScrollController _scrollController;
 
@@ -25,7 +26,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
     super.initState();
     _scrollController =
         widget.scrollController ??
-        ScrollController(initialScrollOffset: double.maxFinite);
+        sheetScrollController(context, initialScrollOffset: double.maxFinite);
     _listController.setTrackerInfos(ref.read(requestsProvider).list);
     ref.listenManual(requestsProvider.select((state) => state.revision), (
       _,
@@ -49,8 +50,10 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
       if (!mounted) {
         return;
       }
-      _listController.setTrackerInfos(ref.read(requestsProvider).list);
-    }, duration: commonDuration);
+      updateWhenRouteSettled(
+        () => _listController.setTrackerInfos(ref.read(requestsProvider).list),
+      );
+    }, duration: renderThrottleDuration);
   }
 
   @override
@@ -74,6 +77,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
           final requests = state.filteredList;
           return NullStatusSwitcher(
             isEmpty: requests.isEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.requests),
               illustration: NullStatusIllustration.requests,

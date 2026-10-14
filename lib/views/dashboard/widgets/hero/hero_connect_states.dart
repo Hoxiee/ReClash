@@ -85,7 +85,7 @@ class _EmptyHero extends ConsumerWidget {
                               .toProfiles()
                         : () => _showAddProfile(context),
                     icon: GlyphIcon(
-                      hasSavedProfiles ? AppGlyphs.folder : AppGlyphs.add,
+                      hasSavedProfiles ? AppGlyphs.folder : AppGlyphs.addCircle,
                     ),
                     label: Text(
                       hasSavedProfiles
@@ -97,7 +97,7 @@ class _EmptyHero extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     OutlinedButton.icon(
                       onPressed: () => _showAddProfile(context),
-                      icon: const GlyphIcon(AppGlyphs.add),
+                      icon: const GlyphIcon(AppGlyphs.addCircle),
                       label: Text(appLocalizations.addProfile),
                     ),
                   ],

@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 
+import '../base/tag.dart';
 import 'list.dart';
 
 class RecordTextStyles {
@@ -27,20 +29,19 @@ class RecordTextStyles {
 class RecordListItem extends StatelessWidget {
   final Widget header;
   final Widget body;
-  final bool isError;
+  final RecordTone tone;
   final VoidCallback? onTap;
 
   const RecordListItem({
     super.key,
     required this.header,
     required this.body,
-    this.isError = false,
+    this.tone = RecordTone.neutral,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final item = ListItem(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -52,18 +53,19 @@ class RecordListItem extends StatelessWidget {
       minTileHeight: 0,
       horizontalTitleGap: AppSpacing.md,
       tileTitleAlignment: ListTileTitleAlignment.top,
-      color: isError ? colorScheme.errorContainer.withValues(alpha: 0.2) : null,
+      color: tone.tintColor(context),
       onTap: onTap,
       title: header,
       subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: body),
     );
-    if (!isError) {
+    final accentColor = tone.accentColor(context);
+    if (accentColor == null) {
       return item;
     }
     return DecoratedBox(
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
-        border: Border(left: BorderSide(color: colorScheme.error, width: 3)),
+        border: Border(left: BorderSide(color: accentColor, width: 3)),
       ),
       child: item,
     );
@@ -102,6 +104,29 @@ class RecordHeader extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class RecordLabel extends StatelessWidget {
+  final String label;
+  final RecordTone tone;
+  final VoidCallback? onPressed;
+
+  const RecordLabel({
+    super.key,
+    required this.label,
+    this.tone = RecordTone.neutral,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppTag.compact(
+      label,
+      foreground: tone.labelColor(context),
+      background: tone.labelContainerColor(context),
+      onTap: onPressed,
     );
   }
 }

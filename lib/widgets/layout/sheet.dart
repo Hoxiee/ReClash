@@ -11,6 +11,7 @@ import 'package:reclash/widgets/base/inherited.dart';
 import '../base/focus.dart';
 import 'popup.dart';
 import 'scaffold.dart';
+import 'sheet_navigator.dart';
 import 'side_sheet.dart';
 import 'snap_sheet.dart';
 
@@ -18,7 +19,8 @@ import 'snap_sheet.dart';
 class SheetProps {
   final double? maxWidth;
   final double? maxHeight;
-  final bool isScrollControlled;
+  final List<double> detents;
+  final SheetTransition transition;
   final bool useSafeArea;
   final Color? backgroundColor;
   final bool blur;
@@ -26,10 +28,11 @@ class SheetProps {
   const SheetProps({
     this.maxWidth,
     this.maxHeight,
+    this.detents = snapSheetDetents,
+    this.transition = SheetTransition.slide,
     this.backgroundColor,
     this.useSafeArea = true,
-    this.isScrollControlled = false,
-    this.blur = true,
+    this.blur = false,
   });
 }
 
@@ -43,16 +46,21 @@ class ExtendProps {
   const ExtendProps({
     this.maxWidth,
     this.useSafeArea = true,
-    this.blur = true,
+    this.blur = false,
     this.forceFull = false,
   });
 }
 
 enum SheetType { page, bottomSheet, sideSheet }
 
-/// Route name tagged onto [showExtend]'s full-page branch so a breakpoint
-/// crossing can dismiss a stray extend sheet without popping unrelated routes.
 const extendSheetRouteName = 'reclash.extendSheet';
+
+enum SheetTransition { slide, stack }
+
+const stackedSheetPeek = 14.0;
+
+/// Flutter's Cupertino sheet measured this on iOS 18.
+const stackedSheetScale = 1 - 0.0835;
 
 Future<T?> showSheet<T>({
   required BuildContext context,
@@ -60,38 +68,68 @@ Future<T?> showSheet<T>({
   SheetProps props = const SheetProps(),
 }) {
   final isMobile = context.isMobileView;
-  return switch (isMobile) {
-    true => showModalBottomSheet<T>(
-      context: context,
-      isScrollControlled: props.isScrollControlled,
-      sheetAnimationStyle: context.disableAnimations
-          ? AnimationStyle.noAnimation
-          : AnimationStyle(curve: AppSpringCurves.sheet),
-      builder: (_) {
-        return SheetProvider(
-          type: SheetType.bottomSheet,
-          child: builder(context),
-        );
-      },
-      backgroundColor: props.backgroundColor,
-      showDragHandle: false,
-      useSafeArea: props.useSafeArea,
-    ),
-    false => showModalSideSheet<T>(
-      useSafeArea: props.useSafeArea,
-      isScrollControlled: props.isScrollControlled,
-      context: context,
-      backgroundColor: props.backgroundColor,
-      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
-      filter: props.blur ? commonFilter : null,
-      builder: (_) {
-        return SheetProvider(
-          type: SheetType.sideSheet,
-          child: builder(context),
-        );
-      },
-    ),
-  };
+  final barrierColor = context.colorScheme.modalScrim;
+  if (isMobile) {
+    final navigator = sheetNavigatorOf(context);
+    return navigator.push(
+      SnapSheetRoute<T>(
+        builder: (sheetContext, _) {
+          final content = builder(sheetContext);
+          return props.maxHeight == null
+              ? content
+              : ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: props.maxHeight!),
+                  child: content,
+                );
+        },
+        detents: props.detents,
+        transition: props.transition,
+        fitsContent: true,
+        useSafeArea: props.useSafeArea,
+        backgroundColor: props.backgroundColor,
+        sheetBarrierColor: barrierColor,
+        barrierLabel: MaterialLocalizations.of(
+          context,
+        ).modalBarrierDismissLabel,
+        capturedThemes: InheritedTheme.capture(
+          from: context,
+          to: navigator.context,
+        ),
+      ),
+    );
+  }
+  return _showSideSheet<T>(
+    context,
+    backgroundColor: props.backgroundColor,
+    maxWidth: props.maxWidth,
+    useSafeArea: props.useSafeArea,
+    blur: props.blur,
+    builder: builder,
+  );
+}
+
+Future<T?> _showSideSheet<T>(
+  BuildContext context, {
+  required WidgetBuilder builder,
+  Color? backgroundColor,
+  double? maxWidth,
+  bool useSafeArea = true,
+  bool blur = false,
+}) {
+  return showModalSideSheet<T>(
+    context: context,
+    backgroundColor: backgroundColor,
+    constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth),
+    useSafeArea: useSafeArea,
+    filter: blur ? commonFilter : null,
+    barrierColor: context.colorScheme.modalScrim,
+    builder: (sheetContext) {
+      return SheetProvider(
+        type: SheetType.sideSheet,
+        child: builder(sheetContext),
+      );
+    },
+  );
 }
 
 Future<T?> showExtend<T>(
@@ -106,63 +144,81 @@ Future<T?> showExtend<T>(
       SheetProvider(type: SheetType.page, child: builder(context)),
       settings: const RouteSettings(name: extendSheetRouteName),
     ),
-    false => showModalSideSheet<T>(
+    false => _showSideSheet<T>(
+      context,
+      builder: builder,
+      maxWidth: props.maxWidth,
       useSafeArea: props.useSafeArea,
-      context: context,
-      constraints: BoxConstraints(maxWidth: props.maxWidth ?? 360),
-      filter: props.blur ? commonFilter : null,
-      builder: (context) {
-        return SheetProvider(
-          type: SheetType.sideSheet,
-          child: builder(context),
-        );
-      },
+      blur: props.blur,
     ),
   };
 }
 
-/// Opens a sheet the reader drags between [detents]; it follows the view across
-/// the mobile breakpoint, reopening in the other form and yielding that form.
+/// Opens a sheet the reader can drag between [detents], starting at the
+/// shortest. Where a sheet cannot have detents the
+/// content keeps its own scroll controller and [initialScrollOffset] is the
+/// caller's own business.
+///
+/// The sheet follows the view across the mobile breakpoint: it reopens in the
+/// other form, and the result is whichever form the reader closes.
 Future<T?> showSnapSheet<T>(
   BuildContext context, {
   required SnapSheetBuilder builder,
   double initialScrollOffset = 0,
   List<double> detents = snapSheetDetents,
-  double? collapsedDetent,
-  SnapSheetController? controller,
+  SheetTransition transition = SheetTransition.slide,
 }) {
   final completer = Completer<T?>();
-  final barrierColor = Theme.of(context).bottomSheetTheme.modalBarrierColor;
 
   void open({required bool isMobile}) {
     var crossed = false;
+    var popped = false;
+
+    // The mobile layout drops a desktop page's navigator, sheet and all.
+    void reopenIfDropped() {
+      if (crossed || popped) {
+        return;
+      }
+      crossed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          open(isMobile: context.isMobileView);
+        } else {
+          completer.complete();
+        }
+      });
+    }
+
     Widget home(BuildContext sheetContext, ScrollController? controller) {
       return _SnapSheetHome(
         isMobile: isMobile,
         onCross: () {
-          final route = ModalRoute.of(sheetContext);
-          if (crossed || route?.isCurrent != true || !context.mounted) {
+          if (crossed || !sheetContext.mounted || !context.mounted) {
+            return;
+          }
+          if (ModalRoute.of(sheetContext)?.isCurrent != true) {
             return;
           }
           crossed = true;
           Navigator.of(sheetContext).pop();
           open(isMobile: !isMobile);
         },
+        onDispose: reopenIfDropped,
         child: builder(sheetContext, controller),
       );
     }
 
+    final barrierColor = context.colorScheme.modalScrim;
     final Future<T?> closed;
     if (isMobile) {
-      final navigator = Navigator.of(context);
+      final navigator = sheetNavigatorOf(context);
       closed = navigator.push(
         SnapSheetRoute<T>(
           builder: home,
           detents: detents,
-          collapsedDetent: collapsedDetent,
+          transition: transition,
           initialScrollOffset: initialScrollOffset,
-          sheetController: controller,
-          sheetBarrierColor: barrierColor ?? Colors.black54,
+          sheetBarrierColor: barrierColor,
           barrierLabel: MaterialLocalizations.of(
             context,
           ).modalBarrierDismissLabel,
@@ -173,25 +229,14 @@ Future<T?> showSnapSheet<T>(
         ),
       );
     } else {
-      controller?.attachSide();
-      closed = showModalSideSheet<T>(
-        context: context,
-        constraints: const BoxConstraints(maxWidth: 360),
-        filter: commonFilter,
-        aside: controller?.aside,
-        builder: (context) {
-          return SheetProvider(
-            type: SheetType.sideSheet,
-            child: home(context, null),
-          );
-        },
+      closed = _showSideSheet<T>(
+        context,
+        builder: (sheetContext) => home(sheetContext, null),
       );
     }
     unawaited(
       closed.then((value) {
-        if (!isMobile) {
-          controller?.detachSide();
-        }
+        popped = true;
         if (!crossed) {
           completer.complete(value);
         }
@@ -203,28 +248,39 @@ Future<T?> showSnapSheet<T>(
   return completer.future;
 }
 
-class _SnapSheetHome extends ConsumerWidget {
+class _SnapSheetHome extends ConsumerStatefulWidget {
   const _SnapSheetHome({
     required this.isMobile,
     required this.onCross,
+    required this.onDispose,
     required this.child,
   });
 
   final bool isMobile;
   final VoidCallback onCross;
+  final VoidCallback onDispose;
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(isMobileViewProvider) != isMobile) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => onCross());
+  ConsumerState<_SnapSheetHome> createState() => _SnapSheetHomeState();
+}
+
+class _SnapSheetHomeState extends ConsumerState<_SnapSheetHome> {
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (ref.watch(isMobileViewProvider) != widget.isMobile) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => widget.onCross());
     }
-    return child;
+    return widget.child;
   }
 }
 
-/// Forwards to [CommonScaffold], which detects the surrounding [SheetType] and
-/// draws the matching bar itself; [sheetTransparentToolBar] maps to [floatBody].
 class AdaptiveSheetScaffold extends StatelessWidget {
   final Widget body;
   final String title;

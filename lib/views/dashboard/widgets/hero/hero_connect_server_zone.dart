@@ -201,7 +201,7 @@ class _ServerPanel extends StatelessWidget {
       child: context.motionDuration(commonDuration) == Duration.zero
           ? panel
           : AnimatedSize(
-              duration: context.motionDuration(commonDuration),
+              duration: context.resizeDuration(commonDuration),
               curve: Easing.standard,
               alignment: Alignment.topCenter,
               child: panel,

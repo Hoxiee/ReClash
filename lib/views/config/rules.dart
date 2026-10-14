@@ -31,7 +31,6 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   void _handleQuickAdd() {
     showSheet<void>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (_) =>
           RulePresetSheet(onAdd: ref.read(globalRulesProvider.notifier).putAll),
     );

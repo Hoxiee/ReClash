@@ -65,14 +65,18 @@ class LogsView extends ConsumerStatefulWidget {
   ConsumerState<LogsView> createState() => _LogsViewState();
 }
 
-class _LogsViewState extends ConsumerState<LogsView> {
+class _LogsViewState extends ConsumerState<LogsView>
+    with RouteMotionHoldMixin<LogsView> {
   final _listController = LogListController();
   late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController(initialScrollOffset: double.maxFinite);
+    _scrollController = sheetScrollController(
+      context,
+      initialScrollOffset: double.maxFinite,
+    );
     _listController.setLogs(ref.read(logsProvider).list);
     ref.listenManual(logsProvider.select((state) => state.revision), (_, _) {
       updateLogsThrottler();
@@ -129,8 +133,10 @@ class _LogsViewState extends ConsumerState<LogsView> {
       if (!mounted) {
         return;
       }
-      _listController.setLogs(ref.read(logsProvider).list);
-    }, duration: commonDuration);
+      updateWhenRouteSettled(
+        () => _listController.setLogs(ref.read(logsProvider).list),
+      );
+    }, duration: renderThrottleDuration);
   }
 
   @override
@@ -156,6 +162,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
           final logs = state.list;
           return NullStatusSwitcher(
             isEmpty: logs.isEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               illustration: NullStatusIllustration.logs,
               label: appLocalizations.nullTip(appLocalizations.logs),
@@ -190,6 +197,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
                       bottom: 16 + BottomInsetScope.of(context),
                     ),
                     itemCount: logs.length,
+                    extentEstimation: zeroDividerExtentEstimation,
                     separatorBuilder: (_, _) => const Divider(height: 0),
                     itemBuilder: (_, index) {
                       final log = logs[index];
@@ -301,102 +309,85 @@ class LogItem extends StatelessWidget {
 
   const LogItem({super.key, required this.log, this.onClick});
 
-  (String date, String time) _splitDateTime() {
-    final parts = log.dateTime.split(' ');
-    if (parts.length >= 2) {
-      return (parts.first, parts.sublist(1).join(' '));
-    }
-    return ('', log.dateTime);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final level = log.logLevel;
-    final accent = level.accentColor(context);
-    final emphasized = level == LogLevel.error || level == LogLevel.warning;
-    final (date, time) = _splitDateTime();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: emphasized ? accent.opacity3 : null,
-        border: Border(left: BorderSide(color: accent, width: 3)),
+    final tone = switch (log.logLevel) {
+      LogLevel.warning => RecordTone.warning,
+      LogLevel.error => RecordTone.error,
+      LogLevel.info => RecordTone.neutral,
+      LogLevel.debug || LogLevel.silent => RecordTone.muted,
+    };
+    final payload = LogPayload.parse(log.payload);
+    return RecordListItem(
+      tone: tone,
+      onTap: () {},
+      header: RecordHeader(
+        children: [
+          RecordTimestamp(log.dateTime),
+          RecordLabel(
+            label: log.logLevel.name,
+            tone: tone,
+            onPressed: () => onClick?.call(log.logLevel.name),
+          ),
+          RecordLabel(label: log.source.name, tone: RecordTone.muted),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(13, 10, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              spacing: 8,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                AppTag(
-                  level.name,
-                  uppercase: true,
-                  foreground: level.onBadgeColor(context),
-                  background: level.badgeColor(context),
-                  letterSpacing: 0.4,
-                  onTap: () => onClick?.call(level.name),
-                ),
-                AppTag(
-                  log.source.name,
-                  uppercase: true,
-                  letterSpacing: 0.4,
-                  side: BorderSide(color: context.colorScheme.outlineVariant),
-                ),
-                const Spacer(),
-                _TimeLabel(date: date, time: time),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            SelectableText(
-              log.payload,
-              style: context.textTheme.bodyMedium
-                  ?.copyWith(
-                    color: level == LogLevel.silent
-                        ? colorScheme.outline
-                        : colorScheme.onSurface,
-                    height: 1.35,
-                  )
-                  .toJetBrainsMono,
-            ),
-          ],
-        ),
-      ),
+      body: _LogBody(payload: payload, errorColor: tone.accentColor(context)),
     );
   }
 }
 
-class _TimeLabel extends StatelessWidget {
-  final String date;
-  final String time;
+class _LogBody extends StatelessWidget {
+  final LogPayload payload;
+  final Color? errorColor;
 
-  const _TimeLabel({required this.date, required this.time});
+  const _LogBody({required this.payload, this.errorColor});
+
+  String get _sourceText => [
+    payload.tag,
+    if (payload.route case final route?) ...[route.source, route.sourceDetail],
+  ].where((text) => text.isNotEmpty).join('  ·  ');
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          time,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.labelMedium
-              ?.copyWith(color: colorScheme.onSurfaceVariant)
-              .toJetBrainsMono,
-        ),
-        if (date.isNotEmpty)
-          Text(
-            date,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelSmall
-                ?.copyWith(color: colorScheme.outline)
-                .toJetBrainsMono,
+    final styles = RecordTextStyles.of(context);
+    final route = payload.route;
+    if (route == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectableText(payload.message, style: styles.primary),
+          if (payload.tag.isNotEmpty) Text(payload.tag, style: styles.muted),
+        ],
+      );
+    }
+    return SelectableText.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: route.destination,
+            style: styles.primary?.copyWith(fontWeight: FontWeight.w500),
           ),
-      ],
+          if (route.error.isNotEmpty)
+            TextSpan(
+              text: '\n${route.error}',
+              style: styles.secondary?.copyWith(color: errorColor),
+            ),
+          const TextSpan(text: '\n'),
+          if (route.rule.isNotEmpty) ...[
+            TextSpan(text: route.rule, style: styles.secondary),
+            TextSpan(text: ' → ', style: styles.muted?.toJetBrainsMono),
+          ],
+          TextSpan(
+            text: route.proxy,
+            style: styles.secondary?.copyWith(
+              color: context.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          TextSpan(text: '\n$_sourceText', style: styles.muted),
+        ],
+      ),
     );
   }
 }

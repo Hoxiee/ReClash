@@ -3,11 +3,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 
 import '../base/inherited.dart';
 import 'sheet.dart';
+import 'sheet_navigator.dart';
 
 /// Receives the sheet's own scroll controller, or null where the sheet has no
 /// detents to drag between and the content keeps its own controller.
@@ -15,119 +18,136 @@ typedef SnapSheetBuilder =
     Widget Function(BuildContext context, ScrollController? controller);
 
 /// The heights a snap sheet rests at, as a fraction of the space it gets.
-const snapSheetDetents = [0.5, 0.9];
+const snapSheetDetents = [9 / 16, 0.9];
 
-const _settleDuration = Duration(milliseconds: 400);
-const _settleCurve = Curves.easeInOutCubicEmphasized;
+final _settleSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 450),
+);
+
+/// The default tolerance holds a settle, and the input it blocks, for most of
+/// a second after the sheet looks still.
+const _settleTolerance = Tolerance(distance: 0.5, velocity: 10);
+
+/// UIScrollView.DecelerationRate.normal, which UIKit projects a release with
+/// to choose the detent a sheet comes to rest at.
+const _decelerationRate = 0.998;
 
 const _bounceExtent = 120.0;
 const _bounceResistance = 6.0;
 
 const _dismissVelocity = 700.0;
 
-/// Moves an open snap sheet out of the page's way and back: a bottom sheet
-/// drops to its shortest detent, a side sheet slides off. Its value is the
-/// height a bottom sheet rests at, so the page can keep its content clear;
-/// zero for a side sheet, while detached, or once closing.
-class SnapSheetController extends ChangeNotifier
-    implements ValueListenable<double> {
-  SnapSheetController({required TickerProvider vsync})
-    : _aside = AnimationController(
-        vsync: vsync,
-        duration: const Duration(milliseconds: 300),
-      );
+/// Wheel events closer together than this are one turn of the wheel, the
+/// span Chromium latches a wheel sequence to one scroller for.
+const _wheelTurnGap = Duration(milliseconds: 500);
 
-  final AnimationController _aside;
-  late final Animation<double> aside = CurvedAnimation(
-    parent: _aside,
-    curve: Curves.easeInOutCubic,
-  );
-  _SnapSheetExtent? _extent;
-  bool _sideAttached = false;
-  double _height = 0;
-
-  @override
-  double get value => _height;
-
-  bool get isAttached => _extent != null || _sideAttached;
-
-  void collapse() {
-    final extent = _extent;
-    if (extent != null) {
-      extent.collapse();
-    } else if (_sideAttached) {
-      _aside.forward();
-    }
-  }
-
-  void restore() {
-    final extent = _extent;
-    if (extent != null) {
-      extent.restore();
-    } else if (_sideAttached) {
-      _aside.reverse();
-    }
-  }
-
-  void attachSide() {
-    _sideAttached = true;
-    _aside.value = 0;
-  }
-
-  void detachSide() => _sideAttached = false;
-
-  @override
-  void dispose() {
-    _aside.dispose();
-    super.dispose();
-  }
-
-  void _publish(double height) {
-    if (_height == height) {
-      return;
-    }
-    _height = height;
-    notifyListeners();
-  }
-}
-
-class SnapSheetRoute<T> extends PopupRoute<T> {
+class SnapSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
   SnapSheetRoute({
     required this.builder,
     required this.capturedThemes,
     required this.sheetBarrierColor,
     required this.barrierLabel,
     this.detents = snapSheetDetents,
-    this.collapsedDetent,
+    this.transition = SheetTransition.slide,
+    this.fitsContent = false,
+    this.useSafeArea = true,
+    this.backgroundColor,
     this.initialScrollOffset = 0,
-    this.sheetController,
   });
 
   final SnapSheetBuilder builder;
   final CapturedThemes capturedThemes;
   final Color sheetBarrierColor;
   final List<double> detents;
+  final SheetTransition transition;
 
-  /// Below every detent, reached only through [SnapSheetController.collapse];
-  /// the page shows through undimmed there.
-  final double? collapsedDetent;
+  final bool fitsContent;
+  final bool useSafeArea;
+  final Color? backgroundColor;
+
   final double initialScrollOffset;
-  final SnapSheetController? sheetController;
 
   @override
   final String barrierLabel;
 
   @override
-  Color? get barrierColor => collapsedDetent == null ? sheetBarrierColor : null;
+  Color? get barrierColor => sheetBarrierColor;
 
   @override
   bool get barrierDismissible => true;
 
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  final _dismissHandler = ValueNotifier<SheetDismissHandler?>(null);
+
+  /// A drag below the shortest detent, as a fraction of that detent.
+  final _pulledDown = ValueNotifier(0.0);
+
+  final _coveringSheet = ValueNotifier<SnapSheetRoute<dynamic>?>(null);
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 200);
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    super.didChangeNext(nextRoute);
+    _coveringSheet.value = nextRoute is SnapSheetRoute ? nextRoute : null;
+  }
+
+  Future<void> _dismiss() async {
+    final handler = _dismissHandler.value;
+    if (handler != null) {
+      await handler();
+    } else {
+      await navigator?.maybePop();
+    }
+  }
+
+  @override
+  Widget buildModalBarrier() {
+    void onDismiss() => unawaited(_dismiss());
+    final color = barrierColor;
+    if (color == null || color.a == 0 || offstage) {
+      return ModalBarrier(
+        dismissible: barrierDismissible,
+        semanticsLabel: barrierLabel,
+        barrierSemanticsDismissible: semanticsDismissible,
+        onDismiss: onDismiss,
+      );
+    }
+    return AnimatedModalBarrier(
+      color: animation!.drive(
+        ColorTween(
+          begin: color.withValues(alpha: 0),
+          end: color,
+        ).chain(CurveTween(curve: barrierCurve)),
+      ),
+      dismissible: barrierDismissible,
+      semanticsLabel: barrierLabel,
+      barrierSemanticsDismissible: semanticsDismissible,
+      onDismiss: onDismiss,
+    );
+  }
+
+  @override
+  void dispose() {
+    _dismissHandler.dispose();
+    _pulledDown.dispose();
+    _coveringSheet.dispose();
+    super.dispose();
+  }
+
+  bool _disableAnimations = false;
+
+  @override
+  void install() {
+    _disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(navigator!.context) ?? false;
+    super.install();
+  }
+
+  @override
+  Duration get transitionDuration =>
+      _disableAnimations ? Duration.zero : const Duration(milliseconds: 300);
+
+  @override
+  Duration get reverseTransitionDuration =>
+      _disableAnimations ? Duration.zero : const Duration(milliseconds: 200);
 
   @override
   Widget buildPage(
@@ -138,11 +158,17 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
     return capturedThemes.wrap(
       _SnapSheet(
         detents: detents,
-        collapsedDetent: collapsedDetent,
+        transition: transition,
+        fitsContent: fitsContent,
+        useSafeArea: useSafeArea,
+        backgroundColor: backgroundColor,
         initialScrollOffset: initialScrollOffset,
         animation: animation,
-        controller: sheetController,
-        scrimColor: collapsedDetent == null ? null : sheetBarrierColor,
+        secondaryAnimation: secondaryAnimation,
+        pulledDown: _pulledDown,
+        coveringSheet: _coveringSheet,
+        dismiss: _dismiss,
+        dismissHandler: _dismissHandler,
         builder: builder,
       ),
     );
@@ -152,20 +178,32 @@ class SnapSheetRoute<T> extends PopupRoute<T> {
 class _SnapSheet extends StatefulWidget {
   const _SnapSheet({
     required this.detents,
-    required this.collapsedDetent,
+    required this.transition,
+    required this.fitsContent,
+    required this.useSafeArea,
+    required this.backgroundColor,
     required this.initialScrollOffset,
     required this.animation,
-    required this.controller,
-    required this.scrimColor,
+    required this.secondaryAnimation,
+    required this.pulledDown,
+    required this.coveringSheet,
+    required this.dismiss,
+    required this.dismissHandler,
     required this.builder,
   });
 
   final List<double> detents;
-  final double? collapsedDetent;
+  final SheetTransition transition;
+  final bool fitsContent;
+  final bool useSafeArea;
+  final Color? backgroundColor;
   final double initialScrollOffset;
   final Animation<double> animation;
-  final SnapSheetController? controller;
-  final Color? scrimColor;
+  final Animation<double> secondaryAnimation;
+  final ValueNotifier<double> pulledDown;
+  final ValueListenable<SnapSheetRoute<dynamic>?> coveringSheet;
+  final Future<void> Function() dismiss;
+  final ValueNotifier<SheetDismissHandler?> dismissHandler;
   final SnapSheetBuilder builder;
 
   @override
@@ -176,29 +214,43 @@ class _SnapSheetState extends State<_SnapSheet>
     with SingleTickerProviderStateMixin {
   late final _extent = _SnapSheetExtent(
     detents: widget.detents,
-    collapsedDetent: widget.collapsedDetent,
+    fitsContent: widget.fitsContent,
     vsync: this,
-    dismiss: () => Navigator.of(context).maybePop(),
-    onRest: _publishRest,
+    dismiss: widget.dismiss,
   );
   late final _scrollController = _SnapSheetScrollController(
     extent: _extent,
     initialScrollOffset: widget.initialScrollOffset,
   );
-  late final _entrance = widget.animation.drive(
-    Tween(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).chain(CurveTween(curve: Easing.emphasizedDecelerate)),
+  late final _entranceCurve = CurvedAnimation(
+    parent: widget.animation,
+    curve: Easing.emphasizedDecelerate,
+    reverseCurve: Easing.emphasizedAccelerate,
   );
 
+  /// Keeps pace with the entrance of the sheet covering this one.
+  late final _coverCurve = CurvedAnimation(
+    parent: widget.secondaryAnimation,
+    curve: Easing.emphasizedDecelerate,
+    reverseCurve: Easing.emphasizedAccelerate,
+  );
+  final _surfaceClaimed = ValueNotifier(false);
+
+  bool get _stacks => widget.transition == SheetTransition.stack;
+
   bool _keyboardShown = false;
+  Duration? _lastWheel;
 
   @override
   void initState() {
     super.initState();
-    widget.controller?._extent = _extent;
     widget.animation.addStatusListener(_handleRouteStatus);
+    _extent.addListener(_reportPulledDown);
+  }
+
+  void _reportPulledDown() {
+    final shortest = _extent.minPixels;
+    widget.pulledDown.value = shortest > 0 ? _extent.overhang / shortest : 0;
   }
 
   bool get _closing => switch (widget.animation.status) {
@@ -206,30 +258,25 @@ class _SnapSheetState extends State<_SnapSheet>
     _ => false,
   };
 
-  void _publishRest(double height) {
-    if (!_closing) {
-      widget.controller?._publish(height);
-    }
-  }
-
   void _handleRouteStatus(AnimationStatus status) {
     if (_closing) {
-      widget.controller?._publish(0);
+      _extent._stopSettle();
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final keyboardShown = MediaQuery.viewInsetsOf(context).bottom > 0;
-    if (keyboardShown && !_keyboardShown && !_extent.isAtMax) {
+  void _handleKeyboard(bool keyboardShown) {
+    if (keyboardShown && !_keyboardShown) {
       // The scaffold inside shrinks by the keyboard's height, which at the
       // shorter detent can leave no room for the content.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _extent.settleTowards(1);
-        }
-      });
+      if (_extent.isAtMax) {
+        _extent.holdAtMax();
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _extent.settleTowards(1);
+          }
+        });
+      }
     }
     _keyboardShown = keyboardShown;
   }
@@ -237,13 +284,19 @@ class _SnapSheetState extends State<_SnapSheet>
   @override
   void dispose() {
     widget.animation.removeStatusListener(_handleRouteStatus);
-    final controller = widget.controller;
-    if (controller != null && identical(controller._extent, _extent)) {
-      controller._extent = null;
-    }
     _scrollController.dispose();
     _extent.dispose();
+    _entranceCurve.dispose();
+    _coverCurve.dispose();
+    _surfaceClaimed.dispose();
     super.dispose();
+  }
+
+  ScrollController _createScrollController({double initialScrollOffset = 0}) {
+    return _SnapSheetScrollController(
+      extent: _extent,
+      initialScrollOffset: initialScrollOffset,
+    );
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -254,47 +307,126 @@ class _SnapSheetState extends State<_SnapSheet>
     _extent.settleAt(-details.velocity.pixelsPerSecond.dy);
   }
 
+  /// Sees the events the content scrolls with too, so a turn the content
+  /// started never moves the sheet, and no turn moves it past one detent.
+  void _handlePointerSignal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || event.scrollDelta.dy == 0) {
+      return;
+    }
+    final last = _lastWheel;
+    _lastWheel = event.timeStamp;
+    if (last != null && event.timeStamp - last < _wheelTurnGap) {
+      return;
+    }
+    GestureBinding.instance.pointerSignalResolver.register(
+      event,
+      (_) => _extent.settleTowards(event.scrollDelta.dy),
+    );
+  }
+
+  Widget _place(SnapSheetRoute<dynamic>? covering, Widget child) {
+    // A SlideTransition asserts on a mouse hit test awaiting layout.
+    final entrance = (1 - _entranceCurve.value) * _extent.height;
+    final cover = covering == null
+        ? 0.0
+        : clampDouble(_coverCurve.value - covering._pulledDown.value, 0, 1);
+    final scale = 1 - (1 - stackedSheetScale) * cover;
+    return Transform(
+      alignment: cover > 0 ? Alignment.topCenter : null,
+      transform: Matrix4.diagonal3Values(scale, scale, 1)
+        ..setTranslationRaw(
+          0,
+          _extent.overhang + entrance - stackedSheetPeek * cover,
+          0,
+        ),
+      child: widget.fitsContent
+          ? child
+          : SizedBox(height: _extent.height, child: child),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final sheetColor = context.colorScheme.surfaceContainerLow;
+    _extent.disableAnimations = context.disableAnimations;
+    final sheetColor =
+        widget.backgroundColor ?? context.colorScheme.surfaceContainerLow;
     final theme = Theme.of(context);
-    final sheet = SafeArea(
+    final fitsContent = widget.fitsContent;
+    Widget content = widget.builder(context, _scrollController);
+    if (fitsContent) {
+      content = PrimaryScrollController(
+        controller: _scrollController,
+        automaticallyInheritForPlatforms: TargetPlatform.values.toSet(),
+        child: content,
+      );
+    }
+    content = SheetScrollScope(
+      createController: _createScrollController,
+      child: content,
+    );
+    Widget scoped = _SheetKeyboard(
+      extent: _extent,
+      onChanged: _handleKeyboard,
+      child: SheetProvider(
+        type: SheetType.bottomSheet,
+        child: SheetOverhangScope(
+          overhang: _extent,
+          fitsContent: fitsContent,
+          child: SheetDismissScope(
+            handler: widget.dismissHandler,
+            child: SheetSettlingScope(
+              settling: _extent.settling,
+              child: content,
+            ),
+          ),
+        ),
+      ),
+    );
+    if (_stacks) {
+      scoped = SheetStackScope(
+        surfaceClaimed: _surfaceClaimed,
+        child: CustomPaint(
+          painter: _SheetSurfacePainter(
+            color: sheetColor,
+            claimed: _surfaceClaimed,
+          ),
+          child: Material(type: MaterialType.transparency, child: scoped),
+        ),
+      );
+    } else {
+      scoped = Material(color: sheetColor, child: scoped);
+    }
+    return SafeArea(
+      top: widget.useSafeArea,
+      left: widget.useSafeArea,
+      right: widget.useSafeArea,
       bottom: false,
       child: LayoutBuilder(
         builder: (context, constraints) {
           _extent.resize(constraints.maxHeight);
           return Align(
             alignment: Alignment.bottomCenter,
-            child: ListenableBuilder(
-              listenable: _extent,
-              builder: (_, child) {
-                return SlideTransition(
-                  position: _entrance,
-                  child: Transform.translate(
-                    offset: Offset(0, _extent.overhang),
-                    child: SizedBox(height: _extent.height, child: child),
-                  ),
-                );
-              },
-              child: GestureDetector(
-                onVerticalDragUpdate: _handleDragUpdate,
-                onVerticalDragEnd: _handleDragEnd,
-                child: ClipRSuperellipse(
-                  borderRadius: AppRadius.top(AppCorner.xxl),
-                  child: Theme(
-                    data: theme.copyWith(scaffoldBackgroundColor: sheetColor),
-                    child: ColoredBox(
-                      color: sheetColor,
-                      child: SheetProvider(
-                        type: SheetType.bottomSheet,
-                        child: SheetOverhangScope(
-                          overhang: _extent,
-                          child: SheetSettlingScope(
-                            settling: _extent.settling,
-                            child: widget.builder(context, _scrollController),
-                          ),
-                        ),
-                      ),
+            child: ValueListenableBuilder(
+              valueListenable: widget.coveringSheet,
+              builder: (_, covering, child) => ListenableBuilder(
+                listenable: Listenable.merge([
+                  _extent,
+                  _entranceCurve,
+                  if (covering != null) ...[_coverCurve, covering._pulledDown],
+                ]),
+                builder: (_, child) => _place(covering, child!),
+                child: child,
+              ),
+              child: Listener(
+                onPointerSignal: _handlePointerSignal,
+                child: GestureDetector(
+                  onVerticalDragUpdate: _handleDragUpdate,
+                  onVerticalDragEnd: _handleDragEnd,
+                  child: ClipRSuperellipse(
+                    borderRadius: AppRadius.top(AppCorner.xxl),
+                    child: Theme(
+                      data: theme.copyWith(scaffoldBackgroundColor: sheetColor),
+                      child: scoped,
                     ),
                   ),
                 ),
@@ -304,28 +436,70 @@ class _SnapSheetState extends State<_SnapSheet>
         },
       ),
     );
-    final scrimColor = widget.scrimColor;
-    if (scrimColor == null) {
-      return sheet;
+  }
+}
+
+class _SheetSurfacePainter extends CustomPainter {
+  _SheetSurfacePainter({required this.color, required this.claimed})
+    : super(repaint: claimed);
+
+  final Color color;
+  final ValueListenable<bool> claimed;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (!claimed.value) {
+      canvas.drawRect(Offset.zero & size, Paint()..color = color);
     }
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        IgnorePointer(
-          child: ListenableBuilder(
-            listenable: Listenable.merge([widget.animation, _extent]),
-            builder: (_, _) {
-              final shown =
-                  Curves.ease.transform(widget.animation.value) *
-                  _extent.raised;
-              return ColoredBox(
-                color: scrimColor.withValues(alpha: scrimColor.a * shown),
-              );
-            },
-          ),
-        ),
-        sheet,
-      ],
+  }
+
+  @override
+  bool shouldRepaint(_SheetSurfacePainter oldDelegate) =>
+      color != oldDelegate.color || claimed != oldDelegate.claimed;
+}
+
+/// Out here the keyboard's motion skips a nested sheet's NavigatorResizable,
+/// which learns a page's new size a frame late.
+class _SheetKeyboard extends StatefulWidget {
+  const _SheetKeyboard({
+    required this.extent,
+    required this.onChanged,
+    required this.child,
+  });
+
+  final _SnapSheetExtent extent;
+  final ValueChanged<bool> onChanged;
+  final Widget child;
+
+  @override
+  State<_SheetKeyboard> createState() => _SheetKeyboardState();
+}
+
+class _SheetKeyboardState extends State<_SheetKeyboard> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.onChanged(MediaQuery.viewInsetsOf(context).bottom > 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = MediaQuery.of(context);
+    final keyboard = data.viewInsets.bottom;
+    final child = MediaQuery(
+      data: data.removeViewInsets(removeBottom: true),
+      child: widget.child,
+    );
+    if (widget.extent.fitsContent) {
+      return _FitSheetBox(
+        extent: widget.extent,
+        keyboard: keyboard,
+        child: child,
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboard),
+      child: child,
     );
   }
 }
@@ -338,15 +512,17 @@ class _SnapSheetExtent extends ChangeNotifier
   _SnapSheetExtent({
     required this.detents,
     required this.dismiss,
-    required this.onRest,
     required TickerProvider vsync,
-    this.collapsedDetent,
+    this.fitsContent = false,
   }) {
     _settle = AnimationController.unbounded(vsync: vsync)
       ..addListener(() => setPixels(_settle.value))
-      ..addStatusListener((_) {
+      ..addStatusListener((status) {
         if (!_settle.isAnimating) {
           settling.value = false;
+        }
+        if (status == AnimationStatus.completed) {
+          setPixels(_settleTarget);
         }
       });
   }
@@ -354,42 +530,48 @@ class _SnapSheetExtent extends ChangeNotifier
   /// Rest heights as fractions of [_available], shortest first.
   final List<double> detents;
 
-  final double? collapsedDetent;
+  final bool fitsContent;
 
-  final Future<bool> Function() dismiss;
-
-  final ValueChanged<double> onRest;
+  final Future<void> Function() dismiss;
 
   final settling = ValueNotifier(false);
 
+  late final ValueListenable<bool> open = _SheetOpen(this);
+
   late final AnimationController _settle;
   bool _disposed = false;
+  bool disableAnimations = false;
   double _available = 0;
   double _pixels = 0;
   double _settleFraction = 0;
+  double _settleTarget = 0;
+
+  /// Infinite while the content fills the height it was laid out to.
+  double _fitHeight = double.infinity;
+  bool _fitted = false;
+  double _keyboard = 0;
+
+  int _restStop = 0;
+  int? _heldFrom;
 
   double get pixels => _pixels;
 
   bool get isSettling => _settle.isAnimating;
 
-  double get minPixels => detents.first * _available;
+  List<double> get _stops => [
+    for (final detent in detents)
+      fitsContent
+          ? math.min(detent * _available, _fitHeight + _keyboard)
+          : detent * _available,
+  ];
 
-  double get maxPixels => detents.last * _available;
+  double get minPixels => _stops.first;
+
+  double get maxPixels => _stops.last;
 
   double get overhang => math.max(minPixels - _pixels, 0);
 
   double get height => math.max(minPixels, _pixels);
-
-  double get _floorPixels => (collapsedDetent ?? detents.first) * _available;
-
-  /// From 0 at the collapsed height or shortest detent to 1 at the tallest.
-  double get raised {
-    final range = maxPixels - _floorPixels;
-    if (range <= 0) {
-      return 1;
-    }
-    return clampDouble((_pixels - _floorPixels) / range, 0, 1);
-  }
 
   @override
   double get value => overhang;
@@ -398,11 +580,41 @@ class _SnapSheetExtent extends ChangeNotifier
 
   bool get isOpen =>
       isAtMax ||
-      (isSettling && _settleFraction >= detents.last - precisionErrorTolerance);
+      (isSettling &&
+          _settleFraction * _available >= maxPixels - precisionErrorTolerance);
+
+  int? _stopAt(double pixels) {
+    bool at(double stop) => (stop - pixels).abs() < precisionErrorTolerance;
+    final stops = _stops;
+    if (at(stops[_restStop])) {
+      return _restStop;
+    }
+    final index = stops.indexWhere(at);
+    return index < 0 ? null : index;
+  }
+
+  int? get _restingStop => isSettling ? null : _stopAt(_pixels);
+
+  double get fitLimit {
+    final stop = _restingStop;
+    return math.min(
+      stop == null ? height : detents[stop] * _available,
+      detents.last * _available,
+    );
+  }
 
   /// Rescales silently: the sheet reads [pixels] later in the same build.
   void resize(double available) {
     if (_available == available) {
+      return;
+    }
+    if (fitsContent) {
+      if (_fitted) {
+        _moveStops(() => _available = available);
+      } else {
+        _available = available;
+        _pixels = minPixels;
+      }
       return;
     }
     var fraction = _available == 0 ? detents.first : _pixels / _available;
@@ -416,22 +628,60 @@ class _SnapSheetExtent extends ChangeNotifier
       });
     }
     _available = available;
-    _pixels = clampDouble(
-      fraction * available,
-      _collapsed ? _floorPixels : minPixels,
-      maxPixels,
-    );
-    final resting = _pixels;
-    // Resized during layout, where the page listening cannot rebuild yet.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_disposed) {
-        onRest(resting);
-      }
-    });
+    _pixels = clampDouble(fraction * available, minPixels, maxPixels);
+  }
+
+  /// Follows the content's height silently, as [resize] does, unless a drag
+  /// holds the sheet elsewhere.
+  void fitContent(double height, double limit, double keyboard) {
+    final fills = height >= limit - precisionErrorTolerance;
+    final fit = !fills
+        ? height
+        : _fitHeight >= limit - precisionErrorTolerance
+        ? _fitHeight
+        : double.infinity;
+    if (!_fitted) {
+      _fitted = true;
+      _fitHeight = fit;
+      _keyboard = keyboard;
+      _pixels = minPixels;
+      return;
+    }
+    if (fit != _fitHeight || keyboard != _keyboard) {
+      _moveStops(() {
+        _fitHeight = fit;
+        _keyboard = keyboard;
+      });
+    }
+    if (keyboard == 0) {
+      _releaseHold();
+    }
+  }
+
+  void _moveStops(VoidCallback change) {
+    final before = _stops;
+    final resting = _restingStop;
+    final settling = isSettling ? _stopAt(_settleTarget) : null;
+    change();
+    // Every retarget restarts the settle, whose first frame stands still.
+    if (listEquals(before, _stops)) {
+      return;
+    }
+    if (settling != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_disposed && isSettling) {
+          _settleTo(_stops[settling]);
+        }
+      });
+    } else if (resting != null) {
+      _restStop = resting;
+      _pixels = _stops[resting];
+    } else if (!isSettling) {
+      _pixels = math.min(_pixels, maxPixels);
+    }
   }
 
   void applyDelta(double delta) {
-    _restoreFraction = null;
     _stopSettle();
     setPixels(_pixels + _withFriction(delta));
   }
@@ -441,6 +691,7 @@ class _SnapSheetExtent extends ChangeNotifier
       return;
     }
     _pixels = value;
+    _restStop = _stopAt(value) ?? _restStop;
     notifyListeners();
   }
 
@@ -466,29 +717,43 @@ class _SnapSheetExtent extends ChangeNotifier
   }
 
   void settleAt(double velocity) {
-    final wasCollapsed = _collapsed;
-    _collapsed = false;
-    if (wasCollapsed && velocity > -_dismissVelocity) {
-      _settleTo(_targetFor(velocity));
-      return;
-    }
     if (overhang > 0 &&
-        (velocity <= -_dismissVelocity || overhang >= minPixels / 2)) {
-      _stopSettle();
-      unawaited(
-        dismiss().then((dismissed) {
-          if (!dismissed) {
-            _settleTo(minPixels);
-          }
-        }),
-      );
+        (velocity <= -_dismissVelocity ||
+            minPixels - _projected(velocity) >= minPixels / 2)) {
+      // Springs back while a guard decides, and leaves from there if it
+      // closes, the way UIKit answers a refused swipe.
+      _settleTo(minPixels, velocity: velocity);
+      unawaited(dismiss());
       return;
     }
-    _settleTo(_targetFor(velocity));
+    _settleTo(_targetFor(velocity), velocity: velocity);
+  }
+
+  /// Keeps a fit sheet resting where its stops meet at the tallest as the
+  /// keyboard parts them, until it is gone and they meet again.
+  void holdAtMax() {
+    if (!fitsContent) {
+      return;
+    }
+    _heldFrom ??= _restStop;
+    _restStop = detents.length - 1;
+  }
+
+  void _releaseHold() {
+    final from = _heldFrom;
+    if (from == null || isSettling) {
+      return;
+    }
+    _heldFrom = null;
+    final stops = _stops;
+    if (_restStop == stops.length - 1 &&
+        (stops[from] - stops.last).abs() < precisionErrorTolerance) {
+      _restStop = from;
+    }
   }
 
   void settleTowards(double direction) {
-    final target = _targetFor(direction.sign * kMinFlingVelocity);
+    final target = _nextStop(direction);
     if (isSettling &&
         (target - _settleFraction * _available).abs() <
             precisionErrorTolerance) {
@@ -497,43 +762,33 @@ class _SnapSheetExtent extends ChangeNotifier
     _settleTo(target);
   }
 
-  double? _restoreFraction;
-  bool _collapsed = false;
-
-  void collapse() {
-    _restoreFraction ??= isSettling
-        ? _settleFraction
-        : (_available == 0 ? null : _pixels / _available);
-    _collapsed = true;
-    _settleTo(_floorPixels);
-  }
-
-  /// Returns to where [collapse] found the sheet, unless a drag moved it since.
-  void restore() {
-    final fraction = _restoreFraction;
-    _restoreFraction = null;
-    _collapsed = false;
-    if (fraction != null) {
-      _settleTo(fraction * _available);
-    }
-  }
-
   void _stopSettle() {
     _settle.stop();
     settling.value = false;
   }
 
-  void _settleTo(double target) {
+  void _settleTo(double target, {double? velocity}) {
+    final carried = velocity ?? (isSettling ? _settle.velocity : 0.0);
     _stopSettle();
     _settleFraction = _available == 0 ? 0 : target / _available;
-    onRest(target);
-    if ((target - _pixels).abs() < precisionErrorTolerance) {
+    _settleTarget = target;
+    final distance = (target - _pixels).abs();
+    if (disableAnimations || distance < precisionErrorTolerance) {
       setPixels(target);
       return;
     }
-    _settle
-      ..value = _pixels
-      ..animateTo(target, duration: _settleDuration, curve: _settleCurve);
+    // Past this a critically damped spring overshoots the detent.
+    final reach =
+        math.sqrt(_settleSpring.stiffness / _settleSpring.mass) * distance;
+    _settle.animateWith(
+      SpringSimulation(
+        _settleSpring,
+        _pixels,
+        target,
+        clampDouble(carried, -reach, reach),
+        tolerance: _settleTolerance,
+      ),
+    );
     settling.value = true;
   }
 
@@ -545,15 +800,25 @@ class _SnapSheetExtent extends ChangeNotifier
     super.dispose();
   }
 
+  double _projected(double velocity) =>
+      _pixels + velocity / 1000 * _decelerationRate / (1 - _decelerationRate);
+
   double _targetFor(double velocity) {
-    final stops = [for (final detent in detents) detent * _available];
-    if (velocity >= kMinFlingVelocity) {
+    final projected = _projected(velocity);
+    return _stops.reduce(
+      (a, b) => (a - projected).abs() <= (b - projected).abs() ? a : b,
+    );
+  }
+
+  double _nextStop(double direction) {
+    final stops = _stops;
+    if (direction > 0) {
       return stops.firstWhere(
         (stop) => stop > _pixels + precisionErrorTolerance,
         orElse: () => maxPixels,
       );
     }
-    if (velocity <= -kMinFlingVelocity) {
+    if (direction < 0) {
       return stops.lastWhere(
         (stop) => stop < _pixels - precisionErrorTolerance,
         orElse: () => minPixels,
@@ -565,10 +830,33 @@ class _SnapSheetExtent extends ChangeNotifier
   }
 }
 
-class _SnapSheetScrollController extends ScrollController {
+/// Layout moves the detents silently, so this never caches isOpen.
+class _SheetOpen implements ValueListenable<bool> {
+  _SheetOpen(this._extent)
+    : _changes = Listenable.merge([_extent, _extent.settling]);
+
+  final _SnapSheetExtent _extent;
+  final Listenable _changes;
+
+  @override
+  bool get value => _extent.isOpen;
+
+  @override
+  void addListener(VoidCallback listener) => _changes.addListener(listener);
+
+  @override
+  void removeListener(VoidCallback listener) =>
+      _changes.removeListener(listener);
+}
+
+class _SnapSheetScrollController extends ScrollController
+    with SheetScrollController {
   _SnapSheetScrollController({required this.extent, super.initialScrollOffset});
 
   final _SnapSheetExtent extent;
+
+  @override
+  ValueListenable<bool> get sheetOpen => extent.open;
 
   @override
   ScrollPosition createScrollPosition(
@@ -576,8 +864,11 @@ class _SnapSheetScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    if (axisDirectionToAxis(context.axisDirection) == Axis.horizontal) {
+      return super.createScrollPosition(physics, context, oldPosition);
+    }
     return _SnapSheetScrollPosition(
-      physics: physics,
+      physics: _SheetContentPhysics(parent: physics),
       context: context,
       oldPosition: oldPosition,
       initialPixels: initialScrollOffset,
@@ -590,7 +881,8 @@ class _SnapSheetScrollController extends ScrollController {
 /// sheet grows from, and keeps it there until release or until the sheet
 /// reaches its tallest detent, where the rest of the drag scrolls the content.
 /// Once the sheet is on its way to that detent the content scrolls at once.
-class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext {
+class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext
+    with ScrubbableScrollPosition {
   _SnapSheetScrollPosition({
     required this.extent,
     required super.physics,
@@ -604,6 +896,8 @@ class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext {
   final _SnapSheetExtent extent;
 
   bool _sheetHeld = false;
+
+  bool get _isDragged => activity is DragScrollActivity;
 
   bool get _isReversed => axisDirectionIsReversed(axisDirection);
 
@@ -626,7 +920,7 @@ class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext {
   double _sheetVelocity(double velocity) => _isReversed ? -velocity : velocity;
 
   bool _sheetTakes(double sheetDelta) {
-    if (_contentScrolled) {
+    if (isScrubbing || _contentScrolled) {
       return false;
     }
     return sheetDelta < 0 || !extent.isOpen;
@@ -672,18 +966,25 @@ class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext {
     ScrollMetrics newPosition,
   ) {
     final grown = newPosition.viewportDimension - oldPosition.viewportDimension;
+    var pixels = newPosition.pixels;
     if (_isReversed && grown != 0) {
-      final pinned = clampDouble(
-        newPosition.pixels - grown,
+      pixels = clampDouble(
+        pixels - grown,
         newPosition.minScrollExtent,
         newPosition.maxScrollExtent,
       );
-      if (pinned != newPosition.pixels) {
-        correctPixels(pinned);
-        return false;
-      }
     }
-    return super.correctForNewDimensions(oldPosition, newPosition);
+    final corrected = physics.adjustPositionForNewDimensions(
+      oldPosition: oldPosition,
+      newPosition: newPosition.copyWith(pixels: pixels),
+      isScrolling: activity!.isScrolling,
+      velocity: activity!.velocity,
+    );
+    if (corrected == newPosition.pixels) {
+      return true;
+    }
+    correctPixels(corrected);
+    return false;
   }
 
   void _followSettling() {
@@ -727,10 +1028,131 @@ class _SnapSheetScrollPosition extends ScrollPositionWithSingleContext {
   }
 }
 
+/// Keeps a drag that grows the sheet alive once the content fits its viewport.
+class _SheetContentPhysics extends ScrollPhysics {
+  const _SheetContentPhysics({super.parent});
+
+  @override
+  _SheetContentPhysics applyTo(ScrollPhysics? ancestor) {
+    return _SheetContentPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
+    return (position is _SnapSheetScrollPosition && position._isDragged) ||
+        super.shouldAcceptUserOffset(position);
+  }
+}
+
 /// Keeps taps off the rows while the sheet settles, as a fling does.
 class _SettlingScrollActivity extends IdleScrollActivity {
   _SettlingScrollActivity(super.delegate);
 
   @override
   bool get shouldIgnorePointer => true;
+}
+
+/// Lays the content out at its own height, up to the fit limit, and rests the
+/// sheet there; a drag past that height stretches the surface below it.
+/// Never tight nor twice a frame: a nested sheet's NavigatorResizable asserts
+/// on the first and relays out without end on the second.
+class _FitSheetBox extends SingleChildRenderObjectWidget {
+  const _FitSheetBox({
+    required this.extent,
+    required this.keyboard,
+    required super.child,
+  });
+
+  final _SnapSheetExtent extent;
+  final double keyboard;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFitSheetBox(extent: extent, keyboard: keyboard);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderFitSheetBox renderObject,
+  ) {
+    renderObject
+      ..extent = extent
+      ..keyboard = keyboard;
+  }
+}
+
+class _RenderFitSheetBox extends RenderProxyBox {
+  _RenderFitSheetBox({
+    required _SnapSheetExtent extent,
+    required double keyboard,
+  }) : _extent = extent,
+       _keyboard = keyboard;
+
+  _SnapSheetExtent _extent;
+  double _keyboard;
+
+  set keyboard(double value) {
+    if (value == _keyboard) {
+      return;
+    }
+    _keyboard = value;
+    markNeedsLayout();
+  }
+
+  set extent(_SnapSheetExtent value) {
+    if (identical(value, _extent)) {
+      return;
+    }
+    if (attached) {
+      _extent.removeListener(markNeedsLayout);
+      value.addListener(markNeedsLayout);
+    }
+    _extent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _extent.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _extent.removeListener(markNeedsLayout);
+    super.detach();
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(
+      Size(
+        constraints.maxWidth,
+        math.min(_extent.fitLimit, constraints.maxHeight),
+      ),
+    );
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child!;
+    final width = constraints.maxWidth;
+    final limit = math.min(_extent.fitLimit, constraints.maxHeight);
+    final keyboard = math.min(_keyboard, limit);
+    child.layout(
+      BoxConstraints(
+        minWidth: width,
+        maxWidth: width,
+        maxHeight: limit - keyboard,
+      ),
+      parentUsesSize: true,
+    );
+    final natural = child.size.height;
+    _extent.fitContent(natural, limit - keyboard, keyboard);
+    size = Size(
+      width,
+      constraints.constrainHeight(math.max(natural + keyboard, _extent.height)),
+    );
+  }
 }

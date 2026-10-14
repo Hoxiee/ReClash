@@ -311,7 +311,14 @@ class _DoctorWaterfallCard extends StatelessWidget {
     return _DoctorPanel(
       title: appLocalizations.doctorWaterfall,
       icon: AppGlyphs.signalChart,
-      trailing: maxEnd > 0 ? MetaChip(label: context.delayText(maxEnd)) : null,
+      trailing: maxEnd > 0
+          ? FadeScaleBox(
+              child: MetaChip(
+                key: ValueKey(maxEnd),
+                label: context.delayText(maxEnd),
+              ),
+            )
+          : null,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -400,25 +407,85 @@ class _DoctorWaterfallHint extends StatelessWidget {
   }
 }
 
-class _DoctorWaterfall extends StatelessWidget {
+/// Draws the measured probes as bars on one axis and grows them in as a run
+/// lands, one after another, so the chart reads as the path being walked
+/// instead of a block of bars appearing at once.
+class _DoctorWaterfall extends StatefulWidget {
   const _DoctorWaterfall({required this.evidence, required this.maxEnd});
 
   final List<DoctorEvidence> evidence;
   final int maxEnd;
 
   @override
+  State<_DoctorWaterfall> createState() => _DoctorWaterfallState();
+}
+
+class _DoctorWaterfallState extends State<_DoctorWaterfall>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _grow = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 620),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _grow.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations) _grow.value = 1;
+  }
+
+  @override
+  void didUpdateWidget(covariant _DoctorWaterfall oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_signature(oldWidget) == _signature(widget)) return;
+    if (context.disableAnimations) {
+      _grow.value = 1;
+      return;
+    }
+    _grow.forward(from: 0);
+  }
+
+  String _signature(_DoctorWaterfall widget) =>
+      '${widget.evidence.length}|${widget.maxEnd}';
+
+  @override
+  void dispose() {
+    _grow.dispose();
+    super.dispose();
+  }
+
+  Animation<double> _reveal(int index, int count) {
+    final start = index * 0.55 / count;
+    return _grow.drive(
+      CurveTween(
+        curve: Interval(start, math.min(1, start + 0.45),
+            curve: Curves.easeOutCubic),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    if (evidence.isEmpty) {
+    if (widget.evidence.isEmpty) {
       return _DoctorEmptyRow(text: appLocalizations.doctorNoEvidence);
     }
-    final scale = maxEnd > 0 ? maxEnd : 1;
+    final scale = widget.maxEnd > 0 ? widget.maxEnd : 1;
     return Column(
       children: [
-        for (final fact in evidence)
+        for (final (index, fact) in widget.evidence.indexed)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 3),
-            child: _WaterfallRow(fact: fact, maxEnd: scale),
+            child: _WaterfallRow(
+              fact: fact,
+              maxEnd: scale,
+              reveal: _reveal(index, widget.evidence.length),
+            ),
           ),
       ],
     );
@@ -429,10 +496,15 @@ class _DoctorWaterfall extends StatelessWidget {
 /// end — a trailing zone is reserved on every row so the number always lands
 /// beside its own bar instead of in a distant fixed column.
 class _WaterfallRow extends StatelessWidget {
-  const _WaterfallRow({required this.fact, required this.maxEnd});
+  const _WaterfallRow({
+    required this.fact,
+    required this.maxEnd,
+    required this.reveal,
+  });
 
   final DoctorEvidence fact;
   final int maxEnd;
+  final Animation<double> reveal;
 
   static const _labelWidth = 84.0;
   static const _trackHeight = 18.0;
@@ -496,14 +568,10 @@ class _WaterfallRow extends StatelessWidget {
                       bottom: 0,
                       left: left,
                       width: barWidth,
-                      child: Opacity(
-                        opacity: fact.consequence ? 0.45 : 1,
-                        child: DecoratedBox(
-                          decoration: ShapeDecoration(
-                            color: color,
-                            shape: AppShape.full,
-                          ),
-                        ),
+                      child: _WaterfallBar(
+                        reveal: reveal,
+                        color: color,
+                        dim: fact.consequence,
                       ),
                     ),
                     if (ms.isNotEmpty)
@@ -513,11 +581,16 @@ class _WaterfallRow extends StatelessWidget {
                         left: barEnd + 6,
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            ms,
-                            style: context.textTheme.labelSmall
-                                ?.copyWith(color: colors.onSurfaceVariant)
-                                .toJetBrainsMono,
+                          child: FadeTransition(
+                            opacity: reveal.drive(
+                              CurveTween(curve: const Interval(0.55, 1)),
+                            ),
+                            child: RollingDigits(
+                              value: ms,
+                              style: context.textTheme.labelSmall
+                                  ?.copyWith(color: colors.onSurfaceVariant)
+                                  .toJetBrainsMono,
+                            ),
                           ),
                         ),
                       ),
@@ -528,6 +601,39 @@ class _WaterfallRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The bar itself, grown from its own start offset so a row extends along the
+/// time axis. Only this leaf repaints per frame; the row's label and reading
+/// keep their layout.
+class _WaterfallBar extends StatelessWidget {
+  const _WaterfallBar({
+    required this.reveal,
+    required this.color,
+    required this.dim,
+  });
+
+  final Animation<double> reveal;
+  final Color color;
+  final bool dim;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: reveal,
+      child: Opacity(
+        opacity: dim ? 0.45 : 1,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(color: color, shape: AppShape.full),
+        ),
+      ),
+      builder: (context, child) => Transform.scale(
+        scaleX: reveal.value.clamp(0.02, 1),
+        alignment: Alignment.centerLeft,
+        child: child,
+      ),
     );
   }
 }
@@ -825,7 +931,7 @@ class _DoctorEvidenceDisclosureState extends State<_DoctorEvidenceDisclosure> {
               ),
             ),
             AnimatedSize(
-              duration: context.motionDuration(commonDuration),
+              duration: context.resizeDuration(commonDuration),
               alignment: Alignment.topCenter,
               curve: Curves.easeOutCubic,
               child: _open

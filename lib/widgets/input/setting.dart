@@ -69,6 +69,7 @@ class SettingSection extends StatelessWidget {
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
     this.search,
+    this.footer,
   }) : _isSliver = false;
 
   const SettingSection.sliver({
@@ -83,6 +84,7 @@ class SettingSection extends StatelessWidget {
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
     this.search,
+    this.footer,
   }) : _isSliver = true;
 
   final List<Widget> items;
@@ -96,6 +98,7 @@ class SettingSection extends StatelessWidget {
   final Duration enterDelay;
   final bool _isSliver;
   final SettingSearch? search;
+  final String? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +115,7 @@ class SettingSection extends StatelessWidget {
     // the group above, so it falls back to that same gap unless the caller
     // pinned an explicit top (e.g. the first group under the app bar).
     final effectiveTop = top ?? (header == null ? _headerlessSectionGap : 0);
-    final body = generateSectionV3(items: items);
+    final body = generateSectionV3(items: items, footer: footer);
     final content = Column(children: [?header, body]);
     final animated = animateEnter
         ? FadeSlideEnterBox(delay: enterDelay, child: content)
@@ -163,7 +166,7 @@ class SettingsScrollView extends StatefulWidget {
 }
 
 class _SettingsScrollViewState extends State<SettingsScrollView> {
-  final _controller = ScrollController();
+  late final _controller = sheetScrollController(context);
 
   @override
   void dispose() {
@@ -194,7 +197,7 @@ class SettingsListView extends StatefulWidget {
 }
 
 class _SettingsListViewState extends State<SettingsListView> {
-  final _controller = ScrollController();
+  late final _controller = sheetScrollController(context);
 
   @override
   void dispose() {

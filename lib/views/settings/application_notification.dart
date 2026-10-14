@@ -255,7 +255,7 @@ class _NotificationSettingsViewState
               ),
             ),
             _settingsLink(
-              icon: AppGlyphs.update,
+              icon: AppGlyphs.sync,
               title: l.notificationSubscriptionChannel,
               subtitle: _subscriptionChannelId,
               onPressed: () => _openSettings(_subscriptionChannelId),

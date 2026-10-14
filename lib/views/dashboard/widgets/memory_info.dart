@@ -361,7 +361,7 @@ class _MemorySection extends StatelessWidget {
         ),
         AnimatedSize(
           alignment: Alignment.topCenter,
-          duration: context.motionDuration(commonDuration),
+          duration: context.resizeDuration(commonDuration),
           curve: Easing.standard,
           child: FadeThroughBox(
             alignment: Alignment.topCenter,

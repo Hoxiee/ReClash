@@ -32,7 +32,6 @@ class _StandardContentState extends ConsumerState<StandardContent> {
   void _handleQuickAdd() {
     showSheet<void>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (_) => RulePresetSheet(
         onAdd: ref.read(profileAddedRulesProvider(_profileId).notifier).putAll,
       ),
@@ -211,7 +210,6 @@ class _MatchTargetItem extends ConsumerWidget {
   Future<void> _handleSelect(BuildContext context, WidgetRef ref) async {
     final res = await showSheet<String>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (context) => Consumer(
         builder: (_, ref, _) {
           final appLocalizations = context.appLocalizations;

@@ -122,13 +122,13 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
     final selected = currentProfile ?? profiles.firstOrNull;
     final importing = profiles.isEmpty || _showImporter;
     return SetupStepScaffold(
+      header: const SetupDetectedStrip(),
       title: appLocalizations.setupSubscriptionTitle,
       subtitle: appLocalizations.setupSubscriptionDesc,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          const SetupRegionSettings(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(

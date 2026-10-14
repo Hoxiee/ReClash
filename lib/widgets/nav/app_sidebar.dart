@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/effect/animated_visibility.dart';
+import 'package:reclash/widgets/layout/popup.dart';
 import 'package:reclash/widgets/nav/app_nav_rail.dart';
 import 'package:reclash/widgets/theme/wallpaper.dart';
 
@@ -93,11 +94,49 @@ class AppSidebarContainer extends ConsumerWidget {
     return KeyEventResult.handled;
   }
 
+  void _showRailMenu(BuildContext context, WidgetRef ref, Offset globalPoint) {
+    final appLocalizations = context.appLocalizations;
+    final navigator = Navigator.of(context);
+    final navigatorBox = navigator.context.findRenderObject();
+    if (navigatorBox is! RenderBox) {
+      return;
+    }
+    final point = navigatorBox.globalToLocal(globalPoint);
+    final wide = ref.read(appSettingProvider).railWide;
+    void choose({required bool value}) => ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(railWide: value));
+    final route = CommonPopupRoute<void>(
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      placement: PopupPlacement.belowPoint,
+      modal: false,
+      anchorOf: () => point & Size.zero,
+      builder: (_) => CommonPopupMenu(
+        items: [
+          CommonPopupMenuItem(
+            label: appLocalizations.sidebarOpenNarrow,
+            checked: !wide,
+            onPressed: () => choose(value: false),
+          ),
+          CommonPopupMenuItem(
+            label: appLocalizations.sidebarOpenWide,
+            checked: wide,
+            onPressed: () => choose(value: true),
+          ),
+        ],
+      ),
+    );
+    navigator.push(route);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showRail = ref.watch(navSurfaceProvider) == NavSurface.rail;
     final sidebarExpanded = ref.watch(
       appSettingProvider.select((state) => state.sidebarExpanded),
+    );
+    final railWide = ref.watch(
+      appSettingProvider.select((state) => state.railWide),
     );
     // One wallpaper spans the whole shell so the rail shares the content's
     // continuous backdrop instead of standing as an opaque cut-out beside it.
@@ -123,16 +162,25 @@ class AppSidebarContainer extends ConsumerWidget {
                       Expanded(
                         child: ScrollConfiguration(
                           behavior: const HiddenBarScrollBehavior(),
-                          child: AppNavRail(
-                            expanded: sidebarExpanded,
-                            onToggle: () => ref
-                                .read(appSettingProvider.notifier)
-                                .update(
-                                  (state) => state.copyWith(
-                                    sidebarExpanded: !state.sidebarExpanded,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onSecondaryTapUp: (details) => _showRailMenu(
+                              context,
+                              ref,
+                              details.globalPosition,
+                            ),
+                            child: AppNavRail(
+                              expanded: sidebarExpanded,
+                              wide: railWide,
+                              onToggle: () => ref
+                                  .read(appSettingProvider.notifier)
+                                  .update(
+                                    (state) => state.copyWith(
+                                      sidebarExpanded: !state.sidebarExpanded,
+                                    ),
                                   ),
-                                ),
-                            onToPage: (label) => _handleToPage(ref, label),
+                              onToPage: (label) => _handleToPage(ref, label),
+                            ),
                           ),
                         ),
                       ),

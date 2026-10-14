@@ -114,7 +114,7 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
 
 enum _NullStatusSlot { empty, noResults, content }
 
-class NullStatus extends StatelessWidget {
+class NullStatus extends StatefulWidget {
   final String label;
   final String? description;
   final Widget? action;
@@ -129,15 +129,27 @@ class NullStatus extends StatelessWidget {
   });
 
   @override
+  State<NullStatus> createState() => _NullStatusState();
+}
+
+class _NullStatusState extends State<NullStatus> {
+  late final _controller = sheetScrollController(context);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final description = this.description;
-    final action = this.action;
+    final NullStatus(:label, :description, :action, :illustration) = widget;
     final textTheme = context.textTheme;
     final colorScheme = context.colorScheme;
     final compact = MediaQuery.sizeOf(context).height < _compactHeight;
     return Align(
       child: SingleChildScrollView(
-        primary: false,
+        controller: _controller,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),

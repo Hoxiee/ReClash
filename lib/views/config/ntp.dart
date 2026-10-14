@@ -55,7 +55,6 @@ class NtpView extends ConsumerWidget {
         .toList();
     final key = await showSheet<NtpOverrideKey>(
       context: context,
-      props: const SheetProps(isScrollControlled: true),
       builder: (context) => OverwriteSelectionSheet<NtpOverrideKey>(
         title: appLocalizations.addOverrideEntry,
         sections: [
@@ -153,7 +152,7 @@ class NtpView extends ConsumerWidget {
       iconActions: [
         if (canAdd)
           IconButtonData(
-            glyph: AppGlyphs.add,
+            glyph: AppGlyphs.addCircle,
             tooltip: appLocalizations.add,
             onPressed: () => _handleAdd(context, ref),
           ),

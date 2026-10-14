@@ -11,12 +11,14 @@ import '../base/inherited.dart';
 import '../feedback/loading.dart';
 import '../input/button.dart';
 import '../input/chip.dart';
+import '../input/search_field.dart';
 import '../nav/app_nav_bar.dart';
 import '../theme/panel_background.dart';
 import '../theme/wallpaper.dart';
 import 'floating_header.dart';
 import 'popup.dart';
 import 'sheet.dart';
+import 'sheet_navigator.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -178,6 +180,10 @@ mixin _AppBarLayerState on _CommonScaffoldStateBase {
   }
 
   void handleToSearch() {
+    if (context.isInBottomSheet) {
+      _searchFocusNode.requestFocus();
+      return;
+    }
     _updateSearchState((state) => state?.copyWith(query: ''));
   }
 
@@ -271,7 +277,8 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       data: useCloseIcon
           ? IconButtonData(
               glyph: AppGlyphs.close,
-              onPressed: context.safeNestedPop,
+              onPressed:
+                  SheetProvider.of(context)?.onClose ?? context.safeNestedPop,
               tooltip: appLocalizations.close,
             )
           : IconButtonData(
@@ -353,6 +360,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
   Widget _buildSearchField(AppBarSearchState? startState) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
+    final onRegexChange = startState?.onRegexChange;
     return _SearchFieldReveal(
       color: colorScheme.surfaceContainerHigh,
       child: Row(
@@ -385,7 +393,13 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
               ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          if (onRegexChange != null)
+            RegexSearchToggle(
+              active: startState!.useRegex,
+              onChanged: (value) => onRegexChange(value),
+            )
+          else
+            const SizedBox(width: AppSpacing.md),
         ],
       ),
     );
@@ -403,7 +417,10 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
       return _buildSearchActions(searchState);
     }
     final pop = form.pop;
-    final hasSearchButton = searchState != null && searchState.autoAddSearch;
+    final hasSearchButton =
+        !form.hasDockedSearch &&
+        searchState != null &&
+        searchState.autoAddSearch;
     final lead = hasSearchButton
         ? IconButtonData(
             glyph: AppGlyphs.search,
@@ -440,6 +457,9 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
         fold.overflow.isNotEmpty;
     final popAsSuffix = !_isEdit && pop?.asSuffix == true;
     return genActions([
+      if (form.hasDockedSearch)
+        for (final data in widget.searchActions)
+          ElasticPress(child: AppBarActionButton(data: data)),
       if (pinPrimaryLeading)
         ElasticPress(
           enabled: !primaryAction.isLoading,
@@ -503,29 +523,17 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
     ], edge: AppBarActionEdge.container);
   }
 
-  /// The searching action cluster: the regex toggle folds into one pill with
-  /// the close button, so the extra controls read as a single grouped capsule.
+  /// The searching action cluster: just the close button, since the regex
+  /// toggle now rides inside the search field itself.
   List<Widget> _buildSearchActions(AppBarSearchState? searchState) {
     final appLocalizations = context.appLocalizations;
-    final onRegexChange = searchState?.onRegexChange;
     final close = IconButtonData(
       glyph: AppGlyphs.close,
       tooltip: appLocalizations.clearSearch,
       onPressed: _handleClear,
     );
     return genActions([
-      if (onRegexChange != null)
-        TonalButtonGroup(
-          children: [
-            _RegexToggleButton(
-              active: searchState!.useRegex,
-              onChanged: (value) => onRegexChange(value),
-            ),
-            AppBarActionButton(data: close),
-          ],
-        )
-      else
-        ElasticPress(child: AppBarActionButton(data: close)),
+      ElasticPress(child: AppBarActionButton(data: close)),
       for (final data in widget.searchActions)
         ElasticPress(child: AppBarActionButton(data: data)),
     ], edge: AppBarActionEdge.container);
@@ -557,6 +565,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
     required IconButtonData? primaryAction,
   }) {
     final isBottomSheet = form.isBottomSheet;
+    final uncovered = ReverseAnimation(sheetCoverOf(context));
     return PreferredSize(
       preferredSize: Size.fromHeight(
         isBottomSheet ? sheetToolbarHeight : pageToolbarHeight,
@@ -590,15 +599,18 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
                           : null,
                       leading: _buildLeading(backAction, pop: form.pop),
                       title: _buildTitle(state.searchState),
-                      actions: _buildActions(
-                        primaryAction,
-                        state.actions.isNotEmpty
-                            ? state.actions
-                            : widget.actions ?? const [],
-                        form,
-                        backAction,
-                        state.searchState,
-                      ),
+                      actions: [
+                        for (final action in _buildActions(
+                          primaryAction,
+                          state.actions.isNotEmpty
+                              ? state.actions
+                              : widget.actions ?? const [],
+                          form,
+                          backAction,
+                          state.searchState,
+                        ))
+                          FadeTransition(opacity: uncovered, child: action),
+                      ],
                     ),
                   );
                   return isBottomSheet ? appBar : _buildFloatingHeader(appBar);
@@ -659,7 +671,7 @@ mixin _AppBarBuilder on _CommonScaffoldStateBase, _AppBarLayerState {
 class CommonScaffoldState extends _CommonScaffoldStateBase
     with _AppBarLayerState, _KeywordChipsState, _AppBarBuilder {
   bool get _hasActions {
-    return _appBarState.value.searchState != null ||
+    return (context.isInBottomSheet && widget.searchActions.isNotEmpty) ||
         widget.primaryAction != null ||
         widget.iconActions.isNotEmpty ||
         widget.menuItems.isNotEmpty ||
@@ -676,7 +688,11 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
     );
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
     final backAction = widget.backAction ?? backActionProvider?.backAction;
-    final form = _SheetForm.of(context, hasActions: _hasActions);
+    final form = _SheetForm.of(
+      context,
+      hasActions: _hasActions,
+      searchState: widget.searchState,
+    );
     final isBottomSheet = form.isBottomSheet;
     final isTV = widget.isTV ?? system.isTV;
     final bottomInset = BottomInsetScope.of(context);
@@ -829,12 +845,8 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
     );
     final body = SafeArea(
       top: !barFloats,
-      // A side sheet floats as a card offset from the trailing edge; its
-      // leading edge sits deep in the screen, far from any left display
-      // cutout, so honoring that cutout here only doubles the left padding.
-      left: !form.isSideSheet,
       child: FloatingBarScope(
-        inset: appBarInset,
+        inset: scrollsUnder ? appBarInset : 0,
         child: barFloats && !widget.floatBody
             ? MediaQuery.removePadding(
                 context: context,
@@ -880,10 +892,32 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
     );
   }
 
-  /// Renders the modal bottom-sheet form: the toolbar folds into a floating,
-  /// fading header over the body, matching every other sheet. A snap sheet
-  /// (one that brings a [SheetOverhangScope]) fills its detent and clips its
-  /// own corners; any other sheet hugs its content and clips here.
+  Widget _buildDockedSearch(AppBarSearchState searchState) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([_textController, _searchFocusNode]),
+      builder: (context, child) => BackLayerScope(
+        enabled: _textController.text.isNotEmpty || _searchFocusNode.hasFocus,
+        onBack: () {
+          if (_textController.text.isNotEmpty) {
+            _handleClearInput();
+          } else {
+            _searchFocusNode.unfocus();
+          }
+        },
+        child: child!,
+      ),
+      child: DockedSearchBar(
+        controller: _textController,
+        focusNode: _searchFocusNode,
+        onChanged: searchState.onSearch,
+        useRegex: searchState.useRegex,
+        onRegexChange: searchState.onRegexChange == null
+            ? null
+            : (value) => searchState.onRegexChange!(value),
+      ),
+    );
+  }
+
   Widget _buildBottomSheet({
     required VoidCallback? backAction,
     required PreferredSizeWidget appBar,
@@ -892,7 +926,7 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
     required Widget? fab,
     required _SheetForm form,
   }) {
-    final hugsContent = SheetOverhangScope.of(context) == null;
+    final hugsContent = !SheetOverhangScope.fillsDetentOf(context);
     const overlap = sheetAppBarHeight;
     final sheetContent = ValueListenableBuilder(
       valueListenable: _keywordsNotifier,
@@ -915,7 +949,10 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
                 removeTop: true,
                 child: Padding(
                   padding: const EdgeInsets.only(top: overlap),
-                  child: widget.body,
+                  child: TopInsetScope(
+                    inset: 0,
+                    child: FloatingBarScope(inset: 0, child: widget.body),
+                  ),
                 ),
               );
         return FloatingBarScope(
@@ -950,7 +987,13 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
         );
       },
     );
-    final insetContent = sheetContent;
+    final safeContent = SafeArea(top: false, child: sheetContent);
+    final insetContent = form.hasDockedSearch
+        ? BottomInsetScope(
+            inset: bottomInset + BottomInsetScope.dockedSearchInset,
+            child: safeContent,
+          )
+        : safeContent;
     final foreground = NotificationListener<UserScrollNotification>(
       child: DockedPageScope(
         docked: false,
@@ -973,14 +1016,10 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
     final sheetBody = FloatingHeaderBody(
       backgroundColor:
           widget.backgroundColor ?? context.colorScheme.surfaceContainerLow,
-      // The floating scrim is an IgnorePointer, so blank spots on the toolbar
-      // fall through to the scrollable and only the buttons caught the modal's
-      // drag-to-dismiss. An opaque catcher shadows the body across the whole
-      // strip, letting the framework drag win uncontested from anywhere on top.
-      header: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        child: SheetToolBar(appBar: appBar),
-      ),
+      header: SheetToolBar(appBar: appBar),
+      footer: form.dockedSearch == null || _isEdit
+          ? null
+          : _buildDockedSearch(form.dockedSearch!),
       body: foreground,
     );
     final sheetFab = fab == null ? null : SheetOverhangLift(child: fab);
@@ -996,11 +1035,7 @@ class CommonScaffoldState extends _CommonScaffoldStateBase
       borderRadius: AppRadius.top(AppCorner.xxl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(child: sheetBody),
-          SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
-          SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
-        ],
+        children: [Flexible(child: sheetBody)],
       ),
     );
   }
@@ -1254,10 +1289,15 @@ class _SheetForm {
     required this.isSheet,
     required this.isBottomSheet,
     required this.isSideSheet,
+    required this.dockedSearch,
     required this.pop,
   });
 
-  factory _SheetForm.of(BuildContext context, {required bool hasActions}) {
+  factory _SheetForm.of(
+    BuildContext context, {
+    required bool hasActions,
+    required AppBarSearchState? searchState,
+  }) {
     final provider = SheetProvider.of(context);
     final isModal = provider != null && provider.type != SheetType.page;
     final isBottomSheet = provider?.type == SheetType.bottomSheet;
@@ -1265,8 +1305,13 @@ class _SheetForm {
       isSheet: provider != null,
       isBottomSheet: isBottomSheet,
       isSideSheet: provider?.type == SheetType.sideSheet,
+      dockedSearch: isBottomSheet ? searchState : null,
       pop: isModal
-          ? _SheetPop.of(context, provider, hasActions: hasActions)
+          ? _SheetPop.of(
+              context,
+              provider,
+              hasActions: hasActions || searchState != null && !isBottomSheet,
+            )
           : null,
     );
   }
@@ -1274,7 +1319,10 @@ class _SheetForm {
   final bool isSheet;
   final bool isBottomSheet;
   final bool isSideSheet;
+  final AppBarSearchState? dockedSearch;
   final _SheetPop? pop;
+
+  bool get hasDockedSearch => dockedSearch != null;
 }
 
 /// The pop control a modal sheet draws for itself: a close glyph when the sheet
@@ -1303,27 +1351,6 @@ class _SheetPop {
 
 /// The regex toggle that sits inside the searching action pill: a selectable
 /// icon button that tints its glyph to [primary] while active.
-class _RegexToggleButton extends StatelessWidget {
-  const _RegexToggleButton({required this.active, required this.onChanged});
-
-  final bool active;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return IconButton(
-      isSelected: active,
-      tooltip: context.appLocalizations.regexSearch,
-      onPressed: () => onChanged(!active),
-      icon: GlyphIcon(
-        AppGlyphs.code,
-        color: active ? colorScheme.primary : null,
-      ),
-    ).withAppTooltip();
-  }
-}
-
 /// Grows the search pill leftward out of the search button on first build, so
 /// the capsule reads as sliding out from under the action that opened it. The
 /// shell snaps in first, then its contents fade up once there is room, so the

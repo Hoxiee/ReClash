@@ -317,27 +317,13 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
 
   Widget _buildPrerequisiteItem({
     required String title,
-    required String desc,
     required Widget action,
     SettingSearch? search,
   }) {
     return DecorationListItem(
-      minVerticalPadding: 0,
-      title: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: TooltipLabel(title),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Text(desc),
-            Align(alignment: Alignment.centerRight, child: action),
-          ],
-        ),
-      ),
+      search: search,
+      title: TooltipLabel(title),
+      trailing: action,
     );
   }
 
@@ -351,7 +337,6 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     return _buildPrerequisiteItem(
       search: const SettingSearch(gate: SettingGate.android),
       title: appLocalizations.ignoreBatteryOptimization,
-      desc: appLocalizations.batteryOptimizationDesc,
       action: Stack(
         alignment: Alignment.centerRight,
         children: [
@@ -386,7 +371,6 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     return _buildPrerequisiteItem(
       search: const SettingSearch(),
       title: appLocalizations.locationPermission,
-      desc: appLocalizations.locationPermissionDesc,
       action: _buildAuthorizeButton(
         authorized: granted,
         onPressed: _handleRequestLocationPermission,
@@ -395,12 +379,18 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
   }
 
   Widget _buildPrerequisites() {
+    final appLocalizations = context.appLocalizations;
     return SettingSection(
       top: 16,
+      title: appLocalizations.prerequisites,
       items: [
         if (_isAndroid) _buildBatteryOptimizationItem(),
         if (_isAndroid || _isMacOS) _buildLocationPermissionItem(),
       ],
+      footer: [
+        if (_isAndroid) appLocalizations.batteryOptimizationDesc,
+        if (_isAndroid || _isMacOS) appLocalizations.locationPermissionDesc,
+      ].join('\n'),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
@@ -13,6 +14,7 @@ class ConnectionDoctorPathMap extends StatefulWidget {
     super.key,
     required this.snapshot,
     this.blame,
+    this.reduceMotion = false,
   });
 
   final DoctorSnapshot snapshot;
@@ -21,17 +23,31 @@ class ConnectionDoctorPathMap extends StatefulWidget {
   /// failure so the picture and the answer never disagree about the culprit.
   final String? blame;
 
+  final bool reduceMotion;
+
   @override
   State<ConnectionDoctorPathMap> createState() =>
       _ConnectionDoctorPathMapState();
 }
 
 class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _intro = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 640),
   );
+
+  late final AnimationController _flow = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
+
+  // One animation per station, built once: a `CurvedAnimation` created in build
+  // would register a fresh status listener on every rebuild.
+  late final List<CurvedAnimation> _reveals = [
+    for (final (index, _) in doctorPathStageIds.indexed)
+      CurvedAnimation(parent: _intro, curve: _stageInterval(index)),
+  ];
 
   @override
   void initState() {
@@ -40,26 +56,49 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
   }
 
   @override
-  void didUpdateWidget(covariant ConnectionDoctorPathMap oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_signature(oldWidget.snapshot) != _signature(widget.snapshot)) {
-      _intro.forward(from: 0);
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_still) _intro.value = 1;
   }
 
-  // The reveal cascade is a first-impression flourish, so it plays once for a
-  // given shape of path and never again while an exam ticks. Keying it on the
-  // per-stage states made every check restart the whole animation — that was
-  // the picture "jumping" on each probe. Individual stations now swap colour
-  // and icon in place instead, with no layout move.
+  @override
+  void didUpdateWidget(covariant ConnectionDoctorPathMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_signature(oldWidget.snapshot) == _signature(widget.snapshot)) return;
+    if (_still) {
+      _intro.value = 1;
+      return;
+    }
+    _intro.forward(from: 0);
+  }
+
+  bool get _still => context.disableAnimations || widget.reduceMotion;
+
+  // Keyed on the shape of the path, not the per-stage states: the cascade must
+  // not restart while an exam ticks.
   String _signature(DoctorSnapshot snapshot) {
-    return '${snapshot.supported}|${snapshot.isFresh}|${snapshot.pathKind.name}';
+    return '${snapshot.supported}|${snapshot.pathKind.name}';
   }
 
   @override
   void dispose() {
+    for (final reveal in _reveals) {
+      reveal.dispose();
+    }
+    _flow.dispose();
     _intro.dispose();
     super.dispose();
+  }
+
+  // Only `repeat`/`stop` here: assigning `value` would notify listeners from
+  // inside build and mark already-built descendants dirty.
+  void _syncFlow(bool wanted) {
+    if (wanted == _flow.isAnimating) return;
+    if (wanted) {
+      _flow.repeat();
+      return;
+    }
+    _flow.stop();
   }
 
   @override
@@ -72,6 +111,10 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
     final summary = doctorPathSummary(context, widget.snapshot, stages);
     final timings = doctorStageTimings(widget.snapshot);
     final roundTrip = doctorPathRoundTripMs(widget.snapshot);
+    final checking = stages.any(
+      (stage) => stage.state == DoctorStageState.checking,
+    );
+    _syncFlow(checking && !_still);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -85,7 +128,13 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
                 ),
               ),
             ),
-            if (roundTrip > 0) MetaChip(label: context.delayText(roundTrip)),
+            if (roundTrip > 0)
+              FadeScaleBox(
+                child: MetaChip(
+                  key: ValueKey(roundTrip),
+                  label: context.delayText(roundTrip),
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 6),
@@ -98,59 +147,25 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AnimatedBuilder(
-          animation: _intro,
-          builder: (context, _) {
-            final progress = context.disableAnimations ? 1.0 : _intro.value;
-            // The journey is always vertical: the stations read as a top-down
-            // route at any width, so nothing cramps on a narrow screen.
-            return _VerticalDoctorPath(
-              stages: stages,
-              timings: timings,
-              progress: progress,
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-double _staged(double progress, int index, int count) {
-  final span = count > 1 ? 0.62 / count : 0.0;
-  final start = index * span;
-  final local = ((progress - start) / 0.44).clamp(0.0, 1.0);
-  return Curves.easeOutCubic.transform(local);
-}
-
-class _VerticalDoctorPath extends StatelessWidget {
-  const _VerticalDoctorPath({
-    required this.stages,
-    required this.timings,
-    required this.progress,
-  });
-
-  final List<DoctorPathStage> stages;
-  final Map<String, int> timings;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      // Left-align so the narrow connector rail keeps its 18px offset under the
-      // marker column; a centering Column floats it into the middle instead.
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var index = 0; index < stages.length; index++) ...[
+        for (final (index, stage) in stages.indexed) ...[
           _DoctorPathNode(
-            stage: stages[index],
-            millis: timings[stages[index].id] ?? 0,
-            reveal: _staged(progress, index, stages.length),
+            key: ValueKey('node_${stage.id}'),
+            stage: stage,
+            millis: timings[stage.id] ?? 0,
+            reveal: _reveals[index],
           ),
           if (index < stages.length - 1)
-            _DoctorPathConnector(
-              state: _connectorState(stages[index], stages[index + 1]),
-              fill: _staged(progress, index, stages.length),
+            _DoctorPathRail(
+              key: ValueKey('rail_${stage.id}'),
+              state: _connectorState(stage, stages[index + 1]),
+              reveal: _reveals[index],
+              // Without motion the rail stays a solid state colour: a frozen
+              // dim rail with no travelling head reads as a dead segment.
+              flow:
+                  stages[index + 1].state == DoctorStageState.checking &&
+                      !_still
+                  ? _flow
+                  : null,
             ),
         ],
       ],
@@ -158,8 +173,18 @@ class _VerticalDoctorPath extends StatelessWidget {
   }
 }
 
+Interval _stageInterval(int index) {
+  final start = index * 0.62 / doctorPathStageIds.length;
+  return Interval(start, math.min(1, start + 0.44));
+}
+
+final _markerScale = Tween<double>(begin: 0.82, end: 1);
+final _bodyFade = Tween<double>(begin: 0.35, end: 1);
+final _revealCurve = CurveTween(curve: Curves.easeOutCubic);
+
 class _DoctorPathNode extends StatelessWidget {
   const _DoctorPathNode({
+    super.key,
     required this.stage,
     required this.millis,
     required this.reveal,
@@ -167,57 +192,32 @@ class _DoctorPathNode extends StatelessWidget {
 
   final DoctorPathStage stage;
   final int millis;
-  final double reveal;
+  final Animation<double> reveal;
 
   @override
   Widget build(BuildContext context) {
     final stateLabel = doctorPathStateLabel(context, stage.state);
     final visual = doctorPathVisual(context, stage.state);
+    final eased = reveal.drive(_revealCurve);
     // Constant diameter keeps the vertical rail perfectly straight; the culprit
     // stands out through its glow and bold label, not a wider marker. The
     // marker reads as proof beneath the verdict, so it stays smaller than the
     // answer medallion above it.
-    const diameter = 40.0;
-    final glow = _glow(visual, stage);
-    final marker = Transform.scale(
-      scale: 0.82 + 0.18 * reveal,
-      child: Container(
-        width: diameter,
-        height: diameter,
-        decoration: ShapeDecoration(
-          color: visual.background,
-          shape: AppShape.circle.copyWith(
-            side: BorderSide(
-              color: visual.foreground,
-              width: stage.culprit ? 2.5 : 2,
-            ),
-          ),
-          shadows: glow == null
-              ? null
-              : [
-                  BoxShadow(
-                    color: glow.color.withValues(alpha: glow.alpha * reveal),
-                    blurRadius: glow.blur,
-                    spreadRadius: glow.spread,
-                  ),
-                ],
-        ),
-        alignment: Alignment.center,
-        child: GlyphIcon(
-          visual.icon ?? stage.icon,
-          color: visual.foreground,
-          size: 20,
-        ),
-      ),
+    final marker = ScaleTransition(
+      scale: eased.drive(_markerScale),
+      child: _DoctorPathMarker(stage: stage, visual: visual),
     );
     return Semantics(
       key: ValueKey('doctor_path_${stage.id}'),
       label: _semanticsLabel(stateLabel),
       child: Opacity(
-        opacity: (stage.dimmed ? 0.5 : 1.0) * (0.35 + 0.65 * reveal),
-        child: SizedBox(
-          width: double.infinity,
-          child: _verticalBody(context, marker, stateLabel, visual.foreground),
+        opacity: stage.dimmed ? 0.5 : 1,
+        child: FadeTransition(
+          opacity: eased.drive(_bodyFade),
+          child: SizedBox(
+            width: double.infinity,
+            child: _verticalBody(context, marker, stateLabel, visual.foreground),
+          ),
         ),
       ),
     );
@@ -259,8 +259,8 @@ class _DoctorPathNode extends StatelessWidget {
                     ),
                     if (millis > 0 && !stage.dimmed) ...[
                       const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        context.delayText(millis),
+                      RollingDigits(
+                        value: context.delayText(millis),
                         style: context.textTheme.labelSmall
                             ?.copyWith(
                               color: context.colorScheme.onSurfaceVariant,
@@ -299,56 +299,206 @@ class _DoctorPathNode extends StatelessWidget {
   }
 }
 
-({Color color, double alpha, double blur, double spread})? _glow(
-  DoctorPathVisual visual,
-  DoctorPathStage stage,
-) {
+class _DoctorPathMarker extends StatelessWidget {
+  const _DoctorPathMarker({required this.stage, required this.visual});
+
+  final DoctorPathStage stage;
+  final DoctorPathVisual visual;
+
+  static const _diameter = 40.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = visual.icon ?? stage.icon;
+    return TweenAnimationBuilder<_StageTone>(
+      tween: _StageToneTween(end: _toneOf(visual, stage)),
+      duration: context.motionDuration(commonDuration),
+      curve: Curves.easeOut,
+      builder: (context, tone, child) => Container(
+        width: _diameter,
+        height: _diameter,
+        alignment: Alignment.center,
+        decoration: ShapeDecoration(
+          color: tone.background,
+          shape: AppShape.circle.copyWith(
+            side: BorderSide(color: tone.foreground, width: tone.border),
+          ),
+          shadows: tone.glowAlpha <= 0
+              ? null
+              : [
+                  BoxShadow(
+                    color: tone.foreground.withValues(alpha: tone.glowAlpha),
+                    blurRadius: tone.glowBlur,
+                    spreadRadius: tone.glowSpread,
+                  ),
+                ],
+        ),
+        child: FadeScaleBox(
+          child: GlyphIcon(
+            icon,
+            key: ValueKey(icon),
+            color: tone.foreground,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+typedef _StageTone = ({
+  Color foreground,
+  Color background,
+  double border,
+  double glowAlpha,
+  double glowBlur,
+  double glowSpread,
+});
+
+class _StageToneTween extends Tween<_StageTone> {
+  _StageToneTween({super.end});
+
+  @override
+  _StageTone lerp(double t) {
+    final from = begin ?? end!;
+    final to = end ?? begin!;
+    return (
+      foreground: Color.lerp(from.foreground, to.foreground, t)!,
+      background: Color.lerp(from.background, to.background, t)!,
+      border: lerpDouble(from.border, to.border, t)!,
+      glowAlpha: lerpDouble(from.glowAlpha, to.glowAlpha, t)!,
+      glowBlur: lerpDouble(from.glowBlur, to.glowBlur, t)!,
+      glowSpread: lerpDouble(from.glowSpread, to.glowSpread, t)!,
+    );
+  }
+}
+
+_StageTone _toneOf(DoctorPathVisual visual, DoctorPathStage stage) {
+  final glow = _glow(stage);
+  return (
+    foreground: visual.foreground,
+    background: visual.background,
+    border: stage.culprit ? 2.5 : 2,
+    glowAlpha: glow?.alpha ?? 0,
+    glowBlur: glow?.blur ?? 0,
+    glowSpread: glow?.spread ?? 0,
+  );
+}
+
+({double alpha, double blur, double spread})? _glow(DoctorPathStage stage) {
   if (stage.culprit) {
-    return (color: visual.foreground, alpha: 0.6, blur: 20, spread: 1);
+    return (alpha: 0.6, blur: 20, spread: 1);
   }
   return switch (stage.state) {
-    DoctorStageState.checking => (
-      color: visual.foreground,
-      alpha: 0.5,
-      blur: 14,
-      spread: 0,
-    ),
-    DoctorStageState.passed => (
-      color: visual.foreground,
-      alpha: 0.32,
-      blur: 11,
-      spread: 0,
-    ),
+    DoctorStageState.checking => (alpha: 0.5, blur: 14, spread: 0),
+    DoctorStageState.passed => (alpha: 0.32, blur: 11, spread: 0),
     _ => null,
   };
 }
 
-class _DoctorPathConnector extends StatelessWidget {
-  const _DoctorPathConnector({required this.state, required this.fill});
+class _DoctorPathRail extends StatelessWidget {
+  const _DoctorPathRail({
+    super.key,
+    required this.state,
+    required this.reveal,
+    required this.flow,
+  });
 
   final DoctorStageState state;
-  final double fill;
+  final Animation<double> reveal;
+  final Animation<double>? flow;
+
+  // Sits centred under the 40px marker (20 − half the 4px track) so the rail
+  // runs straight down the column of stations.
+  static const _width = 4.0;
+  static const _height = 18.0;
+  static const _inset = 18.0;
 
   @override
   Widget build(BuildContext context) {
     final color = doctorPathVisual(context, state).foreground;
     final track = context.colorScheme.surfaceContainerHighest;
-    final progress = math.max(0.02, fill);
-    // Sits centred under the 40px marker (20 − half the 4px track) so the rail
-    // runs straight down the column of stations.
-    return Container(
-      width: 4,
-      height: 18,
-      margin: const EdgeInsets.only(left: 18),
-      alignment: Alignment.topCenter,
-      decoration: BoxDecoration(color: track, borderRadius: AppRadius.full),
-      child: FractionallySizedBox(heightFactor: progress, child: _bar(color)),
+    final flow = this.flow;
+    return Padding(
+      padding: const EdgeInsets.only(left: _inset),
+      child: RepaintBoundary(
+        child: SizedBox(
+          width: _width,
+          height: _height,
+          child: AnimatedBuilder(
+            animation: flow == null
+                ? reveal
+                : Listenable.merge([reveal, flow]),
+            builder: (context, _) => CustomPaint(
+              painter: _RailPainter(
+                color: color,
+                track: track,
+                fill: math.max(0.02, Curves.easeOutCubic.transform(reveal.value)),
+                flow: flow?.value,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
+}
 
-  Widget _bar(Color color) => DecoratedBox(
-    decoration: BoxDecoration(color: color, borderRadius: AppRadius.full),
-  );
+class _RailPainter extends CustomPainter {
+  const _RailPainter({
+    required this.color,
+    required this.track,
+    required this.fill,
+    required this.flow,
+  });
+
+  final Color color;
+  final Color track;
+  final double fill;
+
+  /// Head position of the travelling light, or null when the path is settled.
+  final double? flow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final radius = Radius.circular(size.width / 2);
+    final shape = RRect.fromRectAndRadius(Offset.zero & size, radius);
+    canvas.drawRRect(shape, Paint()..color = track);
+    final flow = this.flow;
+    final filled = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height * fill.clamp(0, 1)),
+      radius,
+    );
+    // A probe in flight leaves the rail dim so the travelling head reads as the
+    // live part.
+    canvas.drawRRect(
+      filled,
+      Paint()..color = flow == null ? color : color.withValues(alpha: 0.24),
+    );
+    if (flow == null) return;
+    const tail = 10.0;
+    final head = (size.height + tail) * flow - tail;
+    canvas.save();
+    canvas.clipRRect(shape);
+    canvas.drawRect(
+      Rect.fromLTRB(0, head - tail, size.width, head),
+      Paint()
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5)
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [color.withValues(alpha: 0), color],
+        ).createShader(Rect.fromLTRB(0, head - tail, size.width, head)),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_RailPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.track != track ||
+      oldDelegate.fill != fill ||
+      oldDelegate.flow != flow;
 }
 
 DoctorStageState _connectorState(

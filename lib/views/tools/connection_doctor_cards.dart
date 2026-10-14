@@ -190,6 +190,9 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     final appLocalizations = context.appLocalizations;
     final snapshot = ref.watch(connectionDoctorProvider);
     final answer = connectionDoctorAnswer(appLocalizations, snapshot);
+    final reduceMotion = ref.watch(
+      appSettingProvider.select((state) => state.reduceMotion),
+    );
     return CommonScaffold(
       title: appLocalizations.connectionDoctor,
       isLoading: _initializing,
@@ -222,7 +225,12 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
                     Expanded(
                       child: TabBarView(
                         children: [
-                          _overviewTab(snapshot, answer, inset: false),
+                          _overviewTab(
+                            snapshot,
+                            answer,
+                            inset: false,
+                            reduceMotion: reduceMotion,
+                          ),
                           _technicalTab(snapshot),
                         ],
                       ),
@@ -231,7 +239,12 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
                 ),
               ),
             )
-          : _overviewTab(snapshot, answer, inset: true),
+          : _overviewTab(
+              snapshot,
+              answer,
+              inset: true,
+              reduceMotion: reduceMotion,
+            ),
     );
   }
 
@@ -239,6 +252,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
     DoctorSnapshot snapshot,
     DoctorAnswer answer, {
     required bool inset,
+    required bool reduceMotion,
   }) {
     return ListView(
       key: const PageStorageKey('doctor-overview'),
@@ -248,16 +262,22 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          child: _DoctorSmoothResize(
-            child: _DoctorDiagnosisCard(
-              snapshot: snapshot,
-              answer: answer,
-              busy: _busy,
-              canStart: snapshot.action('startStandard')?.eligible == true,
-              canFlushDns: snapshot.action('flushDns')?.eligible == true,
-              canCancel: snapshot.action('cancel')?.eligible == true,
-              onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
-              onCancel: () => unawaited(_cancel()),
+          child: FadeSlideEnterBox(
+            key: const ValueKey('doctor-diagnosis-enter'),
+            axis: Axis.vertical,
+            distance: _cardEnterDistance,
+            child: _DoctorSmoothResize(
+              child: _DoctorDiagnosisCard(
+                snapshot: snapshot,
+                answer: answer,
+                busy: _busy,
+                reduceMotion: reduceMotion,
+                canStart: snapshot.action('startStandard')?.eligible == true,
+                canFlushDns: snapshot.action('flushDns')?.eligible == true,
+                canCancel: snapshot.action('cancel')?.eligible == true,
+                onRemedy: (remedy) => unawaited(_applyRemedy(remedy)),
+                onCancel: () => unawaited(_cancel()),
+              ),
             ),
           ),
         ),
@@ -317,6 +337,10 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView>
   }
 }
 
+/// Travel for the cards' one-shot entry, small enough that the screen settles
+/// into place rather than sliding in from off-card.
+const _cardEnterDistance = 14.0;
+
 /// Animates a child's height changes instead of snapping, so the verdict and
 /// steps cards glide as an exam moves between checking, result, and idle —
 /// the jumps the old screen showed on every check.
@@ -328,7 +352,7 @@ class _DoctorSmoothResize extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: context.motionDuration(commonDuration),
+      duration: context.resizeDuration(commonDuration),
       alignment: Alignment.topCenter,
       curve: Curves.easeOutCubic,
       child: child,
@@ -348,14 +372,20 @@ class _DoctorProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (value == null) {
-      return LinearProgressIndicator(minHeight: minHeight);
+      return LinearProgressIndicator(
+        minHeight: minHeight,
+        borderRadius: AppRadius.full,
+      );
     }
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(end: value!.clamp(0.0, 1.0)),
       duration: context.motionDuration(const Duration(milliseconds: 350)),
       curve: Curves.easeOut,
-      builder: (context, animated, _) =>
-          LinearProgressIndicator(value: animated, minHeight: minHeight),
+      builder: (context, animated, _) => LinearProgressIndicator(
+        value: animated,
+        minHeight: minHeight,
+        borderRadius: AppRadius.full,
+      ),
     );
   }
 }
@@ -369,6 +399,7 @@ class _DoctorDiagnosisCard extends StatelessWidget {
     required this.snapshot,
     required this.answer,
     required this.busy,
+    required this.reduceMotion,
     required this.canStart,
     required this.canFlushDns,
     required this.canCancel,
@@ -379,6 +410,7 @@ class _DoctorDiagnosisCard extends StatelessWidget {
   final DoctorSnapshot snapshot;
   final DoctorAnswer answer;
   final bool busy;
+  final bool reduceMotion;
   final bool canStart;
   final bool canFlushDns;
   final bool canCancel;
@@ -406,46 +438,84 @@ class _DoctorDiagnosisCard extends StatelessWidget {
     return CommonCard(
       radius: AppCorner.xl,
       accent: tone,
-      child: Padding(
-        padding: AppInsets.lg,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _verdict(context, appLocalizations, colors, tone),
-            if (snapshot.supported &&
-                snapshot.isFresh &&
-                !examining &&
-                snapshot.evidence.isNotEmpty)
-              _DoctorGlance(snapshot: snapshot),
-            if (examining) ...[
-              const SizedBox(height: AppSpacing.lg),
-              _DoctorProgressBar(value: progressValue, minHeight: 6),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                appLocalizations.doctorProgress(
-                  progress.completed,
-                  progress.total,
-                ),
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ],
-            if (snapshot.supported) ...[
-              const _DoctorSeam(),
-              ConnectionDoctorPathMap(snapshot: snapshot, blame: answer.blame),
-            ],
-            if (showActions) ...[
-              const _DoctorSeam(),
-              _actions(
-                context,
-                appLocalizations,
-                remedies: remedies,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: _DoctorAura(
+                tone: tone,
                 examining: examining,
+                reduceMotion: reduceMotion,
               ),
-            ],
-          ],
-        ),
+            ),
+          ),
+          Padding(
+            padding: AppInsets.lg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _verdict(context, appLocalizations, colors, tone, examining),
+                if (snapshot.supported &&
+                    snapshot.isFresh &&
+                    !examining &&
+                    snapshot.evidence.isNotEmpty)
+                  FadeSlideEnterBox(
+                    key: const ValueKey('doctor-glance-enter'),
+                    axis: Axis.vertical,
+                    distance: AppSpacing.sm,
+                    child: _DoctorGlance(snapshot: snapshot),
+                  ),
+                if (examining)
+                  FadeSlideEnterBox(
+                    key: const ValueKey('doctor-progress-enter'),
+                    axis: Axis.vertical,
+                    distance: AppSpacing.sm,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _DoctorProgressBar(value: progressValue),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            appLocalizations.doctorProgress(
+                              progress.completed,
+                              progress.total,
+                            ),
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (snapshot.supported) ...[
+                  const _DoctorSeam(),
+                  ConnectionDoctorPathMap(
+                    snapshot: snapshot,
+                    blame: answer.blame,
+                    reduceMotion: reduceMotion,
+                  ),
+                ],
+                if (showActions) ...[
+                  const _DoctorSeam(),
+                  FadeSlideEnterBox(
+                    key: const ValueKey('doctor-actions-enter'),
+                    axis: Axis.vertical,
+                    distance: AppSpacing.sm,
+                    child: _actions(
+                      context,
+                      appLocalizations,
+                      remedies: remedies,
+                      examining: examining,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -455,11 +525,17 @@ class _DoctorDiagnosisCard extends StatelessWidget {
     AppLocalizations appLocalizations,
     ColorScheme colors,
     Color tone,
+    bool examining,
   ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _DoctorVerdictMark(icon: _answerIcon(answer.tone), tone: tone),
+        _DoctorVerdictMark(
+          icon: _answerIcon(answer.tone),
+          tone: tone,
+          examining: examining,
+          reduceMotion: reduceMotion,
+        ),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
@@ -523,41 +599,294 @@ class _DoctorDiagnosisCard extends StatelessWidget {
   }
 }
 
-/// The verdict glyph as a living mark: a tone-tinted halo behind the medallion
-/// that swells in as the answer resolves, so a settled result lands with weight
-/// instead of appearing flat. One-shot, so it never fights `pumpAndSettle`.
-class _DoctorVerdictMark extends StatelessWidget {
-  const _DoctorVerdictMark({required this.icon, required this.tone});
+/// The verdict glyph as a living mark, wearing the hero orb's vocabulary at
+/// medallion size: while a check runs a comet sweeps the ring, and when the
+/// answer lands the ring settles into an even contour and swells once, so a
+/// result arrives with weight instead of appearing flat. The sweep is the only
+/// loop on the screen and parks itself whenever motion is reduced.
+class _DoctorVerdictMark extends StatefulWidget {
+  const _DoctorVerdictMark({
+    required this.icon,
+    required this.tone,
+    required this.examining,
+    required this.reduceMotion,
+  });
 
   final Glyph icon;
   final Color tone;
+  final bool examining;
+  final bool reduceMotion;
+
+  @override
+  State<_DoctorVerdictMark> createState() => _DoctorVerdictMarkState();
+}
+
+class _DoctorVerdictMarkState extends State<_DoctorVerdictMark>
+    with TickerProviderStateMixin {
+  static const _medallion = 48.0;
+  static const _ringGap = 5.0;
+
+  late final AnimationController _sweep = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
+
+  late final AnimationController _swell = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 520),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _swell.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_still) _swell.value = 1;
+  }
+
+  @override
+  void didUpdateWidget(covariant _DoctorVerdictMark oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final landed = oldWidget.examining && !widget.examining;
+    if (oldWidget.tone == widget.tone && !landed) return;
+    if (_still) {
+      _swell.value = 1;
+    } else {
+      _swell.forward(from: 0);
+    }
+    // The orb answers a landing the same way; the doctor's landing is the
+    // moment the user was waiting for, so it gets the same one tap of feedback.
+    if (landed && defaultTargetPlatform == TargetPlatform.android) {
+      HapticFeedback.lightImpact();
+    }
+  }
+
+  bool get _still => context.disableAnimations || widget.reduceMotion;
+
+  @override
+  void dispose() {
+    _swell.dispose();
+    _sweep.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final live = widget.examining && !_still;
+    if (live) {
+      if (!_sweep.isAnimating) _sweep.repeat();
+    } else if (_sweep.isAnimating) {
+      _sweep.stop();
+    }
     return TweenAnimationBuilder<double>(
-      key: ValueKey(tone),
-      tween: Tween(begin: 0, end: 1),
-      duration: context.motionDuration(commonDuration),
-      curve: Curves.easeOutBack,
-      builder: (context, value, child) {
-        final eased = value.clamp(0.0, 1.0);
-        return DecoratedBox(
-          decoration: ShapeDecoration(
-            shape: AppShape.md,
-            shadows: [
-              BoxShadow(
-                color: tone.withValues(alpha: 0.4 * eased),
-                blurRadius: 20,
-                spreadRadius: 1,
+      tween: Tween<double>(end: widget.examining ? 1 : 0),
+      duration: context.motionDuration(const Duration(milliseconds: 420)),
+      curve: Curves.easeOut,
+      builder: (context, examining, child) => RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_sweep, _swell]),
+          builder: (context, medallion) {
+            final swell = Curves.easeOutBack.transform(_swell.value);
+            return CustomPaint(
+              painter: _VerdictRingPainter(
+                tone: widget.tone,
+                spin: _sweep.value,
+                swell: swell,
+                live: examining,
               ),
-            ],
-          ),
-          child: Transform.scale(scale: 0.72 + 0.28 * value, child: child),
-        );
-      },
-      child: AppMedallion(icon: icon, tone: tone, size: 48),
+              child: Padding(
+                padding: const EdgeInsets.all(_ringGap),
+                child: Transform.scale(
+                  scale: 0.78 + 0.22 * swell,
+                  child: medallion,
+                ),
+              ),
+            );
+          },
+          child: child,
+        ),
+      ),
+      child: AppMedallion(
+        icon: widget.icon,
+        tone: widget.tone,
+        size: _medallion,
+      ),
     );
   }
+}
+
+class _VerdictRingPainter extends CustomPainter {
+  const _VerdictRingPainter({
+    required this.tone,
+    required this.spin,
+    required this.swell,
+    required this.live,
+  });
+
+  final Color tone;
+  final double spin;
+  final double swell;
+  final double live;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final stroke = size.shortestSide * 0.055;
+    final radius = (size.shortestSide - stroke) / 2;
+    final reveal = swell.clamp(0.0, 1.0);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke * 2.2
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, stroke * 1.8)
+        ..color = tone.withValues(alpha: (0.18 + 0.16 * live) * reveal),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..color = tone.withValues(alpha: 0.42 * reveal * (1 - live)),
+    );
+    if (live <= 0) return;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..shader = SweepGradient(
+          colors: [
+            tone.withValues(alpha: 0),
+            tone.withValues(alpha: 0.95 * live),
+            tone.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.55, 1],
+          transform: GradientRotation(-math.pi / 2 + spin * 2 * math.pi),
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_VerdictRingPainter oldDelegate) =>
+      oldDelegate.tone != tone ||
+      oldDelegate.spin != spin ||
+      oldDelegate.swell != swell ||
+      oldDelegate.live != live;
+}
+
+/// A barely-there wash of the verdict tone drifting behind the diagnosis card,
+/// so the hero reads as lit from within by its own answer. Pure decoration: it
+/// holds a single still frame whenever motion is reduced or the page is away.
+class _DoctorAura extends StatefulWidget {
+  const _DoctorAura({
+    required this.tone,
+    required this.examining,
+    required this.reduceMotion,
+  });
+
+  final Color tone;
+  final bool examining;
+  final bool reduceMotion;
+
+  @override
+  State<_DoctorAura> createState() => _DoctorAuraState();
+}
+
+class _DoctorAuraState extends State<_DoctorAura>
+    with SingleTickerProviderStateMixin {
+  static const _stillFrame = 0.18;
+
+  late final AnimationController _drift = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 26),
+  );
+
+  @override
+  void dispose() {
+    _drift.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final still =
+        widget.reduceMotion ||
+        context.disableAnimations ||
+        !PageActivityScope.isActiveOf(context);
+    if (still) {
+      if (_drift.isAnimating) _drift.stop();
+    } else if (!_drift.isAnimating) {
+      _drift.repeat();
+    }
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _drift,
+        builder: (context, _) => CustomPaint(
+          painter: _DoctorAuraPainter(
+            tone: widget.tone,
+            progress: still ? _stillFrame : _drift.value,
+            strength: widget.examining ? 1.35 : 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DoctorAuraPainter extends CustomPainter {
+  const _DoctorAuraPainter({
+    required this.tone,
+    required this.progress,
+    required this.strength,
+  });
+
+  final Color tone;
+  final double progress;
+  final double strength;
+
+  /// Per-blob `(centre x, centre y, radius, alpha, speed)` in canvas fractions.
+  static const _blobs = <(double, double, double, double, double)>[
+    (0.16, 0.10, 0.62, 0.11, 1),
+    (0.88, 0.04, 0.44, 0.07, -0.64),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final (x, y, extent, alpha, speed) in _blobs) {
+      final angle = progress * 2 * math.pi * speed;
+      final center = Offset(
+        size.width * (x + 0.03 * math.cos(angle)),
+        size.height * (y + 0.12 * math.sin(angle)),
+      );
+      final radius = size.width * extent * 0.5;
+      final bounds = Rect.fromCircle(center: center, radius: radius);
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              tone.withValues(alpha: (alpha * strength).clamp(0.0, 1.0)),
+              tone.withValues(alpha: 0),
+            ],
+          ).createShader(bounds),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DoctorAuraPainter oldDelegate) =>
+      oldDelegate.tone != tone ||
+      oldDelegate.progress != progress ||
+      oldDelegate.strength != strength;
 }
 
 /// A quiet at-a-glance readout under the verdict: the machine facts a reader
@@ -672,44 +1001,52 @@ class _DoctorStepsCard extends StatelessWidget {
     if (answer.steps.isEmpty) return const SizedBox.shrink();
     final appLocalizations = context.appLocalizations;
     final colors = context.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: CommonCard(
-        radius: AppCorner.xl,
-        child: Padding(
-          padding: AppInsets.lg,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                appLocalizations.doctorWhatToTry,
-                style: context.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              for (final step in answer.steps)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2, right: 8),
-                        child: GlyphIcon(
-                          AppGlyphs.chevronForward,
-                          size: 20,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(step, style: context.textTheme.bodyMedium),
-                      ),
-                    ],
+    return FadeSlideEnterBox(
+      axis: Axis.vertical,
+      distance: _cardEnterDistance,
+      delay: const Duration(milliseconds: 90),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: CommonCard(
+          radius: AppCorner.xl,
+          child: Padding(
+            padding: AppInsets.lg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  appLocalizations.doctorWhatToTry,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
-            ],
+                const SizedBox(height: AppSpacing.sm),
+                for (final step in answer.steps)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, right: 8),
+                          child: GlyphIcon(
+                            AppGlyphs.chevronForward,
+                            size: 20,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            step,
+                            style: context.textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -752,7 +1089,7 @@ class _DoctorDetails extends StatelessWidget {
         _confidenceLabel(appLocalizations, snapshot.confidence),
       ),
       (
-        AppGlyphs.update,
+        AppGlyphs.sync,
         appLocalizations.status,
         snapshot.isFresh
             ? appLocalizations.doctorFresh

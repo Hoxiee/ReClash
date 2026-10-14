@@ -169,9 +169,11 @@ class _PageFocusScopeState extends State<PageFocusScope> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.autofocus) return;
       final target = FocusTraversalGroup.of(context).findFirstFocus(_node);
-      if (target != null) {
-        FocusTraversalPolicy.defaultTraversalRequestFocusCallback(target);
-      }
+      // requestFocus, not the traversal callback: that one reveals the target
+      // through every enclosing scrollable, and a pager counts as one, so it
+      // would drag the page off its own offset. FocusedScrollView still
+      // reveals the focused widget inside the scroll view that owns it.
+      target?.requestFocus();
     });
   }
 

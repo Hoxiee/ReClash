@@ -360,7 +360,7 @@ class _AddedContainer extends StatelessWidget {
                 iconSize: 20,
                 padding: AppInsets.xxs,
                 onPressed: () => _handleAdd(context),
-                icon: const GlyphIcon(AppGlyphs.add),
+                icon: const GlyphIcon(AppGlyphs.addCircle),
               ).withAppTooltip(),
             ),
           ),

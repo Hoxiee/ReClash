@@ -112,7 +112,7 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
           title: appLocalizations.profiles,
           floatBody: true,
           primaryAction: IconButtonData(
-            glyph: AppGlyphs.add,
+            glyph: AppGlyphs.addCircle,
             onPressed: _handleShowAddExtendPage,
             tooltip: appLocalizations.addProfile,
           ),

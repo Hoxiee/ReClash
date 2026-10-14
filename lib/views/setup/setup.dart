@@ -7,7 +7,8 @@ import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import 'layout.dart';
-import 'steps/finish.dart';
+import 'steps/check.dart';
+import 'steps/coverage.dart';
 import 'steps/language.dart';
 import 'steps/legal.dart';
 import 'steps/subscription.dart';
@@ -45,18 +46,22 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
 
   /// First-run walks every stage; a revisit skips the one-time legal gate.
   List<SetupStage> get _stages => widget.revisit
-      ? const [SetupStage.welcome, SetupStage.subscription, SetupStage.finish]
+      ? const [
+          SetupStage.welcome,
+          SetupStage.subscription,
+          SetupStage.coverage,
+          SetupStage.check,
+        ]
       : const [
           SetupStage.welcome,
           SetupStage.legal,
           SetupStage.subscription,
-          SetupStage.finish,
+          SetupStage.coverage,
+          SetupStage.check,
         ];
 
   int get _stepCount => _stages.length;
 
-  late final int _initialIndex;
-  late final PageController _controller;
   late final AnimationController _switchController = AnimationController(
     vsync: this,
     duration: _switchDuration,
@@ -73,6 +78,8 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     Tween(begin: Offset.zero, end: Offset.zero),
   );
   late int _index;
+  SetupCheckOutcome _outcome = SetupCheckOutcome.pending;
+  String? _outcomeDetail;
 
   @override
   void initState() {
@@ -81,9 +88,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     // A revisit always restarts at the top; a first run resumes where it left
     // off. The stage order guarantees any resumable index past the legal gate
     // was only reached by passing it, so resuming never skips consent.
-    _initialIndex = widget.revisit ? 0 : saved.clamp(0, _stepCount - 1);
-    _index = _initialIndex;
-    _controller = PageController(initialPage: _initialIndex);
+    _index = widget.revisit ? 0 : saved.clamp(0, _stepCount - 1);
     if (!widget.revisit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _seedRegion();
@@ -102,7 +107,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
   void dispose() {
     _switchIn.dispose();
     _switchController.dispose();
-    _controller.dispose();
     super.dispose();
   }
 
@@ -117,7 +121,6 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
           .read(appSettingProvider.notifier)
           .update((state) => state.copyWith(setupStep: index));
     }
-    _controller.jumpToPage(index);
     FocusManager.instance.primaryFocus?.unfocus();
     if (context.disableAnimations ||
         ref.read(appSettingProvider).tabAnimation == TabAnimation.off) {
@@ -143,6 +146,14 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     return false;
   }
 
+  void _handleOutcome(SetupCheckOutcome outcome, String? detail) {
+    if (!mounted || (outcome == _outcome && detail == _outcomeDetail)) return;
+    setState(() {
+      _outcome = outcome;
+      _outcomeDetail = detail;
+    });
+  }
+
   void _handleDone() {
     if (!widget.revisit) {
       ref
@@ -162,10 +173,12 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
             onNext: () => _toStep(2),
             onBack: () => _toStep(0),
           ),
-          SetupFinishStep(
+          SetupCoverageStep(onNext: () => _toStep(3), onBack: () => _toStep(1)),
+          SetupCheckStep(
             revisit: true,
             onDone: _handleDone,
-            onBack: () => _toStep(1),
+            onBack: () => _toStep(2),
+            onOutcome: _handleOutcome,
           ),
         ]
       : [
@@ -175,16 +188,16 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
             onNext: () => _toStep(3),
             onBack: () => _toStep(1),
           ),
-          SetupFinishStep(onDone: _handleDone, onBack: () => _toStep(2)),
+          SetupCoverageStep(onNext: () => _toStep(4), onBack: () => _toStep(2)),
+          SetupCheckStep(
+            onDone: _handleDone,
+            onBack: () => _toStep(3),
+            onOutcome: _handleOutcome,
+          ),
         ];
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final profile = ref.watch(currentProfileProvider);
-    final footer = widget.revisit
-        ? null
-        : profile?.label.takeFirstValid([appLocalizations.profile]);
     return CommonPopScope(
       onPop: _handlePop,
       child: Scaffold(
@@ -197,24 +210,20 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                 stages: _stages,
                 index: _index,
                 onJump: _toStep,
-                footer: footer,
+                outcome: _outcome,
+                outcomeDetail: _outcomeDetail,
                 child: SlideTransition(
                   position: _slide,
                   child: FadeTransition(
                     opacity: _fade,
-                    child: PageView(
-                      controller: _controller,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        for (final (index, step) in _steps().indexed)
-                          ExcludeFocus(
-                            excluding: index != _index,
-                            child: PageFocusScope(
-                              autofocus: index == _index,
-                              child: step,
-                            ),
-                          ),
-                      ],
+                    // One step at a time, with no pager underneath it: a pager
+                    // is a scrollable, and anything that reveals a focused
+                    // widget through its ancestors would scroll the wizard off
+                    // the step it just opened.
+                    child: PageFocusScope(
+                      key: ValueKey(_index),
+                      autofocus: true,
+                      child: _steps()[_index],
                     ),
                   ),
                 ),

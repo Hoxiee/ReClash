@@ -482,7 +482,7 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
                           children: [
                             Expanded(
                               child: AnimatedSize(
-                                duration: context.motionDuration(
+                                duration: context.resizeDuration(
                                   const Duration(milliseconds: 200),
                                 ),
                                 curve: Curves.easeOutCubic,

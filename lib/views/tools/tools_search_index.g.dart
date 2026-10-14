@@ -591,6 +591,19 @@ List<DeepSettingSpec> deepSettingSpecs(AppLocalizations l) {
       keywords: ['TUN', 'MTU'],
     ),
     DeepSettingSpec(
+      title: l.disableIcmpForwarding,
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'always',
+      keywords: const ['TUN', 'ICMP', 'ping'],
+    ),
+    DeepSettingSpec(
+      title: l.excludeInterface,
+      paneId: 'network',
+      category: 'configuration',
+      gate: 'linux',
+    ),
+    DeepSettingSpec(
       title: l.congestionController,
       paneId: 'network',
       category: 'configuration',

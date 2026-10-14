@@ -48,7 +48,7 @@ class OverwriteSelectionSheet<T> extends ConsumerStatefulWidget {
 
 class _OverwriteSelectionSheetState<T>
     extends ConsumerState<OverwriteSelectionSheet<T>> {
-  final _controller = ScrollController();
+  late final _controller = sheetScrollController(context);
   final _selectedKey = GlobalKey();
   var _revealRequested = false;
   var _query = SearchQuery('');

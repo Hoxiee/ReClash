@@ -75,12 +75,19 @@ class _HomeShell extends ConsumerWidget {
     final isBar = ref.watch(isBarSurfaceProvider);
     // A drilled tab draws its own full-screen chrome on a phone, so the shared
     // bar would float over that page and cover its lower rows: collapse it while
-    // the active tab is a level deep, and bring it back once the path is empty.
+    // the active tab is a level deep. A tablet-width bar surface still lays the
+    // drilled tab out as a two-pane list/detail, so the bar stays there — only
+    // the single-column full-screen path hides it.
     final currentPage = ref.watch(currentPageLabelProvider);
     final drilled = ref.watch(
       navPathProvider(currentPage).select((stack) => stack.isNotEmpty),
     );
-    final showBar = isBar && !drilled;
+    final twoPane =
+        ref.watch(viewModeProvider) == ViewMode.desktop &&
+        ref.watch(
+          viewSizeProvider.select((size) => size.shortestSide > maxMobileWidth),
+        );
+    final showBar = isBar && !(drilled && !twoPane);
     // The dock owns the start control on a phone; the hero orb owns it on the
     // new dashboard, so the trailing button only rides the classic layout.
     final onClassicDashboard = !ref.watch(newDashboardEnabledProvider);

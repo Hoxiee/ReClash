@@ -417,7 +417,7 @@ class _AddPrimaryColorTile extends StatelessWidget {
         tooltip: context.appLocalizations.add,
         onPressed: onPressed,
         iconSize: 24,
-        icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.add),
+        icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.addCircle),
       ).withAppTooltip(),
     );
   }

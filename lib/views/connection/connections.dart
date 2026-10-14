@@ -26,7 +26,10 @@ class ConnectionsView extends ConsumerStatefulWidget {
 }
 
 class _ConnectionsViewState extends ConsumerState<ConnectionsView>
-    with WidgetsBindingObserver, ActivePollingMixin<ConnectionsView> {
+    with
+        WidgetsBindingObserver,
+        ActivePollingMixin<ConnectionsView>,
+        RouteMotionHoldMixin<ConnectionsView> {
   CoreHandlerInterface get _core => ref.read(coreHandlerProvider);
 
   final _listController = TrackerInfoListController();
@@ -107,25 +110,33 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     ];
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems() {
-    return [
-      CommonPopupMenuItem(
-        label: context.appLocalizations.closeConnections,
-        glyph: AppGlyphs.clearAll,
-        onPressed: _handleCloseConnections,
-      ),
-      CommonPopupMenuItem(
-        label: context.appLocalizations.sort,
-        glyph: AppGlyphs.sort,
-        subItems: _buildSortItems(),
-      ),
-    ];
+  Widget _buildActionGroup(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return TonalButtonGroup(
+      children: [
+        IconButton(
+          tooltip: appLocalizations.closeConnections,
+          onPressed: _handleCloseConnections,
+          icon: const GlyphIcon(AppGlyphs.clearAll),
+        ).withAppTooltip(),
+        CommonPopupBox(
+          targetBuilder: (open) => IconButton(
+            tooltip: appLocalizations.sort,
+            onPressed: () =>
+                open(offset: Offset(0, context.isMobileView ? 0 : 20)),
+            icon: const GlyphIcon(AppGlyphs.sort),
+          ).withAppTooltip(),
+          popupBuilder: (_) => CommonPopupMenu(items: _buildSortItems()),
+        ),
+      ],
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    _scrollController = widget.scrollController ?? ScrollController();
+    _scrollController =
+        widget.scrollController ?? sheetScrollController(context);
   }
 
   @override
@@ -134,7 +145,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     if (trackerInfos == null || !isCurrent()) {
       return;
     }
-    _applyConnections(trackerInfos);
+    updateWhenRouteSettled(() => _applyConnections(trackerInfos));
   }
 
   Future<void> _refreshConnections() async {
@@ -183,7 +194,6 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final isInSheet = context.isInSheet;
     return CommonScaffold(
       title: appLocalizations.connections,
       floatBody: true,
@@ -196,27 +206,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         },
         useRegex: _listController.value.useRegex,
       ),
-      iconActions: [
-        if (!isInSheet)
-          IconButtonData(
-            glyph: AppGlyphs.clearAll,
-            tooltip: appLocalizations.closeConnections,
-            onPressed: _handleCloseConnections,
-          ),
-      ],
-      actions: [
-        if (!isInSheet)
-          CommonPopupBox(
-            targetBuilder: (open) => IconButton(
-              tooltip: appLocalizations.sort,
-              onPressed: () =>
-                  open(offset: Offset(0, context.isMobileView ? 0 : 20)),
-              icon: const GlyphIcon(AppGlyphs.sort),
-            ).withAppTooltip(),
-            popupBuilder: (_) => CommonPopupMenu(items: _buildSortItems()),
-          ),
-      ],
-      menuItems: isInSheet ? _buildMenuItems() : const [],
+      actions: [_buildActionGroup(context)],
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
@@ -232,6 +222,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               Expanded(
                 child: NullStatusSwitcher(
                   isEmpty: connections.isEmpty,
+                  isSearching: state.isSearching,
                   nullStatus: NullStatus(
                     label: appLocalizations.nullTip(
                       appLocalizations.connections,

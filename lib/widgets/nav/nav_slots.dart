@@ -75,6 +75,22 @@ class NavSlots<T> extends ChangeNotifier {
   /// collapse out, new keys grow in, and a key that returns before it finished
   /// leaving simply grows back.
   void sync(List<T> keys) {
+    // Steady-state ticks (a fold progress rebuild, a parent setState) land
+    // here with the same membership: bail out before re-merging the strip and
+    // notifying every listener twice per animation frame.
+    if (_slots.every((slot) => !slot.leaving) &&
+        _slots.length == keys.length) {
+      var same = true;
+      for (var i = 0; i < keys.length; i++) {
+        if (_slots[i].key != keys[i]) {
+          same = false;
+          break;
+        }
+      }
+      if (same) {
+        return;
+      }
+    }
     final present = keys.toSet();
     for (final slot in _slots) {
       if (!present.contains(slot.key) && !slot.leaving) {

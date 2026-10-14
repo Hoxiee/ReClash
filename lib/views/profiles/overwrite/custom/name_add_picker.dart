@@ -101,7 +101,7 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.add,
                 onPressed: onAdd,
-                icon: const GlyphIcon(AppGlyphs.add, size: 18),
+                icon: const GlyphIcon(AppGlyphs.addCircle, size: 18),
               ).withAppTooltip(),
             ),
           ),

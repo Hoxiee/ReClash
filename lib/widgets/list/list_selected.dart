@@ -177,7 +177,7 @@ class DecorationListItem extends StatelessWidget {
     this.trailing,
     required Widget widget,
     double? maxWidth,
-    bool blur = true,
+    bool blur = false,
     bool forceFull = true,
     bool preferSheet = false,
     ValueChanged<dynamic>? onChanged,

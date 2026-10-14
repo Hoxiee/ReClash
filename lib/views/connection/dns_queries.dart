@@ -55,7 +55,8 @@ class DnsQueriesView extends ConsumerStatefulWidget {
   ConsumerState<DnsQueriesView> createState() => _DnsQueriesViewState();
 }
 
-class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
+class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
+    with RouteMotionHoldMixin<DnsQueriesView> {
   final _listController = DnsQueryListController();
   late final ScrollController _scrollController;
 
@@ -64,7 +65,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
     super.initState();
     _scrollController =
         widget.scrollController ??
-        ScrollController(initialScrollOffset: double.maxFinite);
+        sheetScrollController(context, initialScrollOffset: double.maxFinite);
     _listController.setDnsQueries(ref.read(dnsQueriesProvider).list);
     ref.listenManual(dnsQueriesProvider.select((state) => state.revision), (
       _,
@@ -88,8 +89,10 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
       if (!mounted) {
         return;
       }
-      _listController.setDnsQueries(ref.read(dnsQueriesProvider).list);
-    }, duration: commonDuration);
+      updateWhenRouteSettled(
+        () => _listController.setDnsQueries(ref.read(dnsQueriesProvider).list),
+      );
+    }, duration: renderThrottleDuration);
   }
 
   @override
@@ -113,6 +116,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
           final dnsQueries = state.list;
           return NullStatusSwitcher(
             isEmpty: dnsQueries.isEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.dnsQueries),
               illustration: NullStatusIllustration.dns,
@@ -218,7 +222,7 @@ class DnsQueryItem extends StatelessWidget {
   });
 
   void _openDetail(BuildContext context) {
-    showExtend(
+    showSheetPageOrExtend<void>(
       context,
       builder: (_) {
         return AdaptiveSheetScaffold(
@@ -238,7 +242,7 @@ class DnsQueryItem extends StatelessWidget {
         ? dnsQuery.error
         : dnsQuery.answers.join(', ');
     return RecordListItem(
-      isError: dnsQuery.isFailed,
+      tone: dnsQuery.isFailed ? RecordTone.error : RecordTone.neutral,
       onTap: () => _openDetail(context),
       header: RecordHeader(
         trailing: Text('${dnsQuery.delay} ms'),

@@ -1,7 +1,53 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/widgets/widgets.dart';
+
+/// The widest the wizard grows: a decision column with the receipt beside it.
+/// Past that it centres, because a form read across a 4K window is unreadable.
+const double setupIslandMaxWidth = 1160;
+
+const double setupLogoSize = 88;
+
+/// Side inset shared by the body, the receipt and the action bar, so the
+/// buttons land under the receipt's edge instead of floating mid-column.
+const double _gutter = AppSpacing.xl;
+
+const double _asideWidth = 320;
+const double _actionHeight = 52;
+
+/// Carries the shell's layout decision and its chrome down to the step, which
+/// lays both out: the action bar can then span the window while its buttons
+/// still line up with the column above them.
+class SetupLayoutScope extends InheritedWidget {
+  const SetupLayoutScope({
+    super.key,
+    required this.wide,
+    this.aside,
+    this.banner,
+    required super.child,
+  });
+
+  final bool wide;
+
+  /// The receipt, beside the step body on a wide window.
+  final Widget? aside;
+
+  /// The dot progress, above the step body everywhere else.
+  final Widget? banner;
+
+  static SetupLayoutScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SetupLayoutScope>();
+
+  static bool isWide(BuildContext context) => of(context)?.wide ?? false;
+
+  @override
+  bool updateShouldNotify(SetupLayoutScope oldWidget) =>
+      wide != oldWidget.wide ||
+      aside != oldWidget.aside ||
+      banner != oldWidget.banner;
+}
 
 class SetupStepScaffold extends StatefulWidget {
   const SetupStepScaffold({
@@ -10,6 +56,7 @@ class SetupStepScaffold extends StatefulWidget {
     required this.actions,
     this.subtitle,
     this.header,
+    this.inlineHeader = false,
     this.body,
     this.fillBody,
     this.tail,
@@ -18,6 +65,11 @@ class SetupStepScaffold extends StatefulWidget {
   final String title;
   final String? subtitle;
   final Widget? header;
+
+  /// Puts a [setupLogoSize] header beside the heading on a wide window, where
+  /// a masthead stacked over a left-aligned title reads as two headings.
+  final bool inlineHeader;
+
   final Widget? body;
 
   /// Gets a bounded slot of its own between the heading block and [tail], so a
@@ -39,7 +91,6 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
   static const _fillMinExtent = 520.0;
 
   final _controller = ScrollController();
-  bool _scrolledUnder = false;
 
   @override
   void dispose() {
@@ -47,50 +98,58 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
     super.dispose();
   }
 
-  void _setScrolledUnder(bool value) {
-    if (value == _scrolledUnder) return;
-    // Metrics land during layout, where the flag cannot be applied in place.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || value == _scrolledUnder) return;
-      setState(() => _scrolledUnder = value);
-    });
-  }
-
-  bool _onScroll(int depth, ScrollMetrics metrics) {
-    if (depth == 0) {
-      _setScrolledUnder(metrics.extentAfter > 0.5);
-    }
-    return false;
-  }
-
-  Widget _head(BuildContext context) {
+  Widget _heading(BuildContext context, bool wide) {
     final textTheme = context.textTheme;
+    // A wide window reads as a document column, where centred headings drift
+    // away from the cards below them; a phone keeps the centred masthead.
+    final align = wide ? TextAlign.start : TextAlign.center;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.header case final header?) ...[
-          header,
-          const SizedBox(height: AppSpacing.xxl),
-        ],
         Semantics(
           header: true,
           child: Text(
             widget.title,
-            textAlign: TextAlign.center,
-            style: textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            textAlign: align,
+            style: (wide ? textTheme.headlineMedium : textTheme.headlineSmall)
+                ?.copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
           ),
         ),
         if (widget.subtitle case final subtitle?) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
             subtitle,
-            textAlign: TextAlign.center,
+            textAlign: align,
             style: textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
           ),
+        ],
+      ],
+    );
+  }
+
+  Widget _head(BuildContext context) {
+    final wide = SetupLayoutScope.isWide(context);
+    final heading = _heading(context, wide);
+    final header = widget.header;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (header == null)
+          heading
+        else if (wide && widget.inlineHeader)
+          Row(
+            spacing: AppSpacing.xl,
+            children: [
+              SizedBox.square(dimension: setupLogoSize, child: header),
+              Expanded(child: heading),
+            ],
+          )
+        else ...[
+          header,
+          const SizedBox(height: AppSpacing.xxl),
+          heading,
         ],
         if (widget.body case final body?) ...[
           const SizedBox(height: AppSpacing.xxl),
@@ -101,23 +160,18 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
   }
 
   Widget _pageView(BuildContext context) {
-    return NotificationListener<ScrollMetricsNotification>(
-      onNotification: (notification) =>
-          _onScroll(notification.depth, notification.metrics),
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (notification) =>
-            _onScroll(notification.depth, notification.metrics),
-        child: FocusedScrollView(
-          controller: _controller,
-          child: SingleChildScrollView(
-            controller: _controller,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 20,
-              children: [_head(context), ?widget.fillBody, ?widget.tail],
-            ),
-          ),
+    return FocusedScrollView(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        padding: const EdgeInsets.only(
+          top: AppSpacing.xl,
+          bottom: AppSpacing.xxl,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: AppSpacing.xl,
+          children: [_head(context), ?widget.fillBody, ?widget.tail],
         ),
       ),
     );
@@ -126,79 +180,190 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
   /// Loose flex, not [Expanded]: the slot caps the body at the screen instead
   /// of stretching a short list over empty space.
   Widget _fillView(BuildContext context, Widget fillBody) {
-    _setScrolledUnder(false);
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.xl,
+            bottom: AppSpacing.xl,
+          ),
+          child: _head(context),
+        ),
+        Flexible(child: fillBody),
+        if (widget.tail case final tail?)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-            child: _head(context),
+            padding: const EdgeInsets.only(top: AppSpacing.xl),
+            child: tail,
           ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: fillBody,
-            ),
-          ),
-          if (widget.tail case final tail?)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-              child: tail,
-            ),
-        ],
-      ),
+      ],
     );
   }
+
+  Widget _footer(BuildContext context) {
+    final actions = [
+      for (final action in widget.actions)
+        SizedBox(height: _actionHeight, child: TvFocusOutline(child: action)),
+    ];
+    if (SetupLayoutScope.isWide(context)) {
+      // Wrap, not Row: a step can offer three actions, and the check step's
+      // labels are long enough to overflow a single line in a narrow column.
+      return Wrap(
+        alignment: WrapAlignment.end,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: actions.reversed.toList(),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      spacing: AppSpacing.sm,
+      children: actions,
+    );
+  }
+
+  /// The centred column every band shares. [SizedBox.expand] keeps it at the
+  /// window width under a loose constraint, so a short step still fills it.
+  Widget _island(BuildContext context, {required bool wide, Widget? child}) =>
+      Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: wide ? setupIslandMaxWidth : heroBoardMaxWidth,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _gutter),
+            child: SizedBox(width: double.infinity, child: child),
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final footerChildren = <Widget>[];
-    for (var index = 0; index < widget.actions.length; index++) {
-      footerChildren.add(TvFocusOutline(child: widget.actions[index]));
-      if (index < widget.actions.length - 1) {
-        footerChildren.add(const SizedBox(height: AppSpacing.sm));
-      }
-    }
+    final scope = SetupLayoutScope.of(context);
+    final wide = scope?.wide ?? false;
+    final body = LayoutBuilder(
+      builder: (context, constraints) {
+        final fillBody = widget.fillBody;
+        final fits =
+            constraints.maxHeight >=
+            MediaQuery.textScalerOf(context).scale(_fillMinExtent);
+        if (fillBody == null || !fits) {
+          return _pageView(context);
+        }
+        return _fillView(context, fillBody);
+      },
+    );
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final fillBody = widget.fillBody;
-              final fits =
-                  constraints.maxHeight >=
-                  MediaQuery.textScalerOf(context).scale(_fillMinExtent);
-              if (fillBody == null || !fits) {
-                return _pageView(context);
-              }
-              return _fillView(context, fillBody);
+          child: _island(
+            context,
+            wide: wide,
+            child: switch (scope?.aside) {
+              final aside? => Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: AppSpacing.xxl,
+                children: [
+                  Expanded(child: body),
+                  SizedBox(
+                    width: _asideWidth,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xl,
+                      ),
+                      child: aside,
+                    ),
+                  ),
+                ],
+              ),
+              null => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [?scope?.banner, Expanded(child: body)],
+              ),
             },
           ),
         ),
+        // A band across the window, not a button adrift in the column: the
+        // divider and the raised surface are what separate decision from act.
         DecoratedBox(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: colorScheme.surfaceContainer,
             border: Border(
-              top: BorderSide(
-                color: _scrolledUnder
-                    ? colorScheme.outlineVariant
-                    : Colors.transparent,
-              ),
+              top: BorderSide(color: colorScheme.outlineVariant),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: footerChildren,
+          child: _island(
+            context,
+            wide: wide,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+              child: _footer(context),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One system permission the wizard can ask for, with its own status line so
+/// the row says what happened rather than only what it wants.
+class SetupPermissionRow extends StatelessWidget {
+  const SetupPermissionRow({
+    super.key,
+    required this.title,
+    required this.desc,
+    required this.status,
+    this.granted = false,
+    this.failed = false,
+    this.pending = false,
+    this.onPressed,
+    this.trailing,
+  });
+
+  final String title;
+  final String desc;
+  final String status;
+  final bool granted;
+  final bool failed;
+  final bool pending;
+  final VoidCallback? onPressed;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final tone = failed
+        ? colorScheme.error
+        : granted
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
+    return ListItem(
+      title: Text(title),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(desc),
+          Text(
+            status,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: tone,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+      onTap: pending ? null : onPressed,
+      trailing: pending
+          ? const SizedBox.square(dimension: 20, child: CommonCircleLoading())
+          : trailing ??
+                (onPressed == null
+                    ? GlyphIcon(AppGlyphs.check, size: 20, color: tone)
+                    : const GlyphIcon(AppGlyphs.chevronForward, size: 20)),
     );
   }
 }
@@ -212,7 +377,9 @@ class SetupPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FilledButton(
     onPressed: onPressed,
-    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+    // A finite minimum: the stacked footer stretches the button itself, and a
+    // Size.fromHeight minimum would force infinite width inside a footer row.
+    style: FilledButton.styleFrom(minimumSize: const Size(160, _actionHeight)),
     child: Text(label),
   );
 }
@@ -222,15 +389,17 @@ class SetupLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = 88.0;
     return ExcludeSemantics(
-      child: Center(
+      child: Align(
+        alignment: SetupLayoutScope.isWide(context)
+            ? AlignmentDirectional.centerStart
+            : Alignment.center,
         child: ClipRSuperellipse(
-          borderRadius: AppRadius.all(AppCorner.fit(size)),
+          borderRadius: AppRadius.all(AppCorner.fit(setupLogoSize)),
           child: Image.asset(
             'assets/images/icon.png',
-            width: size,
-            height: size,
+            width: setupLogoSize,
+            height: setupLogoSize,
             fit: BoxFit.cover,
           ),
         ),

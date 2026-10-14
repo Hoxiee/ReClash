@@ -382,7 +382,7 @@ class _TunMtuItem extends ConsumerWidget {
               tooltip: l.reset,
               icon: const Icon(Icons.restore),
               onPressed: () => setMtu(ref, null),
-            ),
+            ).withAppTooltip(),
       dialogTitle: 'MTU',
       value: '$effectiveMtu',
       maxLength: 5,
@@ -397,6 +397,90 @@ class _TunMtuItem extends ConsumerWidget {
         if (value == null) return;
         setMtu(ref, int.parse(value.trim()));
       },
+    );
+  }
+}
+
+enum _IcmpForwardingMode { inherit, disabled, forwarded }
+
+class _TunIcmpItem extends ConsumerWidget {
+  const _TunIcmpItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final disabled = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => state.tun.disableIcmpForwarding,
+      ),
+    );
+    final mode = switch (disabled) {
+      null => _IcmpForwardingMode.inherit,
+      true => _IcmpForwardingMode.disabled,
+      false => _IcmpForwardingMode.forwarded,
+    };
+    String label(Object? mode) => switch (mode) {
+      _IcmpForwardingMode.disabled => l.enabled,
+      _IcmpForwardingMode.forwarded => l.disabled,
+      _ => l.followProfile,
+    };
+    final setMode = _tunWriter<bool?>(
+      (state, value) => state.copyWith.tun(disableIcmpForwarding: value),
+    );
+    return DecorationListItem.options(
+      search: const SettingSearch(keywords: ['TUN', 'ICMP', 'ping']),
+      title: Text(l.disableIcmpForwarding),
+      subtitle: Text('${label(mode)}\n${l.disableIcmpForwardingDesc}'),
+      dialogTitle: l.disableIcmpForwarding,
+      options: _IcmpForwardingMode.values,
+      value: mode,
+      textBuilder: label,
+      onChanged: (value) => setMode(ref, switch (value) {
+        _IcmpForwardingMode.disabled => true,
+        _IcmpForwardingMode.forwarded => false,
+        _ => null,
+      }),
+    );
+  }
+}
+
+class _TunExcludeInterfaceItem extends ConsumerWidget {
+  const _TunExcludeInterfaceItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final interfaces = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.excludeInterface),
+    );
+    final setInterfaces = _tunWriter<List<String>?>(
+      (state, value) => state.copyWith.tun(excludeInterface: value),
+    );
+    return DecorationListItem.open(
+      search: const SettingSearch(gate: SettingGate.linux),
+      title: Text(l.excludeInterface),
+      subtitle: Text(
+        '${interfaces == null || interfaces.isEmpty ? l.followProfile : interfaces.join(', ')}\n${l.excludeInterfaceDesc}',
+      ),
+      trailing: interfaces == null
+          ? null
+          : IconButton(
+              tooltip: l.reset,
+              icon: const Icon(Icons.restore),
+              onPressed: () => setInterfaces(ref, null),
+            ).withAppTooltip(),
+      blur: false,
+      forceFull: false,
+      preferSheet: true,
+      widget: ListInputPage(
+        title: l.excludeInterface,
+        items: interfaces ?? const [],
+        itemMaxLength: TextInputLimits.name,
+        itemNormalizer: (item) => item.trim(),
+        titleBuilder: (item) => Text(item),
+      ),
+      onChanged: (items) =>
+          setInterfaces(ref, List<String>.from(items as List)),
     );
   }
 }
@@ -447,6 +531,8 @@ List<Widget> tunOptionsItems({
       ),
     ),
   ),
+  const _TunIcmpItem(),
+  if (isLinux) const _TunExcludeInterfaceItem(),
 ];
 
 class _TunSection extends ConsumerWidget {

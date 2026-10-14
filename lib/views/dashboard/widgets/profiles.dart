@@ -88,7 +88,7 @@ class _ProfilesCardState extends ConsumerState<ProfilesCard> {
                 illustration: NullStatusIllustration.profile,
                 action: FilledButton.tonalIcon(
                   onPressed: () => _showAddProfile(context),
-                  icon: const GlyphIcon(AppGlyphs.add, fill: 1),
+                  icon: const GlyphIcon(AppGlyphs.addCircle, fill: 1),
                   label: Text(appLocalizations.addProfile),
                 ),
               )

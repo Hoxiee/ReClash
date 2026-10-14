@@ -4,61 +4,38 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/ui/color.dart';
-import 'package:reclash/common/ui/motion.dart';
 import 'package:reclash/common/ui/shape.dart';
-import 'package:reclash/common/util/context.dart';
+import 'package:reclash/widgets/layout/drag_back.dart';
+import 'package:reclash/widgets/layout/sheet_navigator.dart';
 
 const Duration _bottomSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
-const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
+const Curve _modalBottomSheetCurve = Easing.standardDecelerate;
+
+const double _minWidth = 360;
+const double _maxWidth = 560;
+const double _widthFactor = 0.4;
 
 /// The desktop side sheet floats as a card, inset from the top, trailing, and
 /// bottom window edges so its rounded corners and shadow read against the scrim.
 const EdgeInsets _sideSheetMargin = EdgeInsets.fromLTRB(0, 16, 16, 16);
 
-Duration _enterDurationOf(BuildContext context) =>
-    context.motionDuration(_bottomSheetEnterDuration);
-
-Duration _exitDurationOf(BuildContext context) =>
-    context.motionDuration(_bottomSheetExitDuration);
+double _widthFor(double viewWidth) {
+  return (viewWidth * _widthFactor).clamp(_minWidth, _maxWidth);
+}
 
 class SideSheet extends StatefulWidget {
   const SideSheet({
     super.key,
-    this.animationController,
-    this.enableDrag = true,
-    this.showDragHandle,
-    this.dragHandleColor,
-    this.dragHandleSize,
-    this.onDragStart,
-    this.onDragEnd,
     this.backgroundColor,
     this.shadowColor,
     this.elevation,
     this.shape,
     this.clipBehavior,
-    this.constraints,
-    required this.onClosing,
     required this.builder,
   }) : assert(elevation == null || elevation >= 0.0);
 
-  final AnimationController? animationController;
-
-  final VoidCallback onClosing;
-
   final WidgetBuilder builder;
-
-  final bool enableDrag;
-
-  final bool? showDragHandle;
-
-  final Color? dragHandleColor;
-
-  final Size? dragHandleSize;
-
-  final BottomSheetDragStartHandler? onDragStart;
-
-  final BottomSheetDragEndHandler? onDragEnd;
 
   final Color? backgroundColor;
 
@@ -70,19 +47,17 @@ class SideSheet extends StatefulWidget {
 
   final Clip? clipBehavior;
 
-  final BoxConstraints? constraints;
-
   @override
   State<SideSheet> createState() => _SideSheetState();
 
   static AnimationController createAnimationController(
     TickerProvider vsync, {
-    Duration? duration,
-    Duration? reverseDuration,
+    Duration duration = _bottomSheetEnterDuration,
+    Duration reverseDuration = _bottomSheetExitDuration,
   }) {
     return AnimationController(
-      duration: duration ?? _bottomSheetEnterDuration,
-      reverseDuration: reverseDuration ?? _bottomSheetExitDuration,
+      duration: duration,
+      reverseDuration: reverseDuration,
       debugLabel: 'SideSheet',
       vsync: vsync,
     );
@@ -112,14 +87,10 @@ class _SideSheetState extends State<SideSheet> {
     final ShapeBorder shape =
         widget.shape ?? (chromeless ? AppShape.none : AppShape.xl);
 
-    final BoxConstraints constraints =
-        widget.constraints ??
-        const BoxConstraints(maxWidth: 320, minWidth: 320);
-
     final Clip clipBehavior =
         widget.clipBehavior ?? (chromeless ? Clip.none : Clip.antiAlias);
 
-    final Widget sideSheet = Material(
+    return Material(
       key: _childKey,
       color: color,
       elevation: elevation,
@@ -129,8 +100,6 @@ class _SideSheetState extends State<SideSheet> {
       clipBehavior: clipBehavior,
       child: widget.builder(context),
     );
-
-    return ConstrainedBox(constraints: constraints, child: sideSheet);
   }
 }
 
@@ -140,16 +109,14 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   const _SideSheetLayoutWithSizeListener({
     required this.onChildSizeChanged,
     required this.animationValue,
-    required this.isScrollControlled,
-    required this.scrollControlDisabledMaxHeightRatio,
+    required this.width,
     required this.margin,
     super.child,
   });
 
   final _SizeChangeCallback<Size> onChildSizeChanged;
   final double animationValue;
-  final bool isScrollControlled;
-  final double scrollControlDisabledMaxHeightRatio;
+  final double width;
   final EdgeInsets margin;
 
   @override
@@ -159,8 +126,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     return _RenderSideSheetLayoutWithSizeListener(
       onChildSizeChanged: onChildSizeChanged,
       animationValue: animationValue,
-      isScrollControlled: isScrollControlled,
-      scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
+      width: width,
       margin: margin,
     );
   }
@@ -172,9 +138,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   ) {
     renderObject.onChildSizeChanged = onChildSizeChanged;
     renderObject.animationValue = animationValue;
-    renderObject.isScrollControlled = isScrollControlled;
-    renderObject.scrollControlDisabledMaxHeightRatio =
-        scrollControlDisabledMaxHeightRatio;
+    renderObject.width = width;
     renderObject.margin = margin;
   }
 }
@@ -184,14 +148,11 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     RenderBox? child,
     required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
-    required bool isScrollControlled,
-    required double scrollControlDisabledMaxHeightRatio,
+    required double width,
     required EdgeInsets margin,
   }) : _onChildSizeChanged = onChildSizeChanged,
        _animationValue = animationValue,
-       _isScrollControlled = isScrollControlled,
-       _scrollControlDisabledMaxHeightRatio =
-           scrollControlDisabledMaxHeightRatio,
+       _width = width,
        _margin = margin,
        super(child);
 
@@ -221,28 +182,15 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  bool get isScrollControlled => _isScrollControlled;
-  bool _isScrollControlled;
+  double get width => _width;
+  double _width;
 
-  set isScrollControlled(bool newValue) {
-    if (_isScrollControlled == newValue) {
+  set width(double newValue) {
+    if (_width == newValue) {
       return;
     }
 
-    _isScrollControlled = newValue;
-    markNeedsLayout();
-  }
-
-  double get scrollControlDisabledMaxHeightRatio =>
-      _scrollControlDisabledMaxHeightRatio;
-  double _scrollControlDisabledMaxHeightRatio;
-
-  set scrollControlDisabledMaxHeightRatio(double newValue) {
-    if (_scrollControlDisabledMaxHeightRatio == newValue) {
-      return;
-    }
-
-    _scrollControlDisabledMaxHeightRatio = newValue;
+    _width = newValue;
     markNeedsLayout();
   }
 
@@ -312,8 +260,13 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
-      maxHeight: math.max(0.0, constraints.maxHeight - _margin.vertical),
+    final double maxWidth = math.max(
+      0.0,
+      constraints.maxWidth - _margin.horizontal,
+    );
+    return BoxConstraints.tightFor(
+      width: math.min(width, maxWidth),
+      height: math.max(0.0, constraints.maxHeight - _margin.vertical),
     );
   }
 
@@ -361,31 +314,20 @@ class _ModalSideSheet<T> extends StatefulWidget {
     this.elevation,
     this.shape,
     this.clipBehavior,
-    this.constraints,
-    this.isScrollControlled = false,
-    this.scrollControlDisabledMaxHeightRatio =
-        _defaultScrollControlDisabledMaxHeightRatio,
-    this.enableDrag = true,
-    this.showDragHandle = false,
   });
 
   final ModalSideSheetRoute<T> route;
-  final bool isScrollControlled;
-  final double scrollControlDisabledMaxHeightRatio;
   final Color? backgroundColor;
   final double? elevation;
   final ShapeBorder? shape;
   final Clip? clipBehavior;
-  final BoxConstraints? constraints;
-  final bool enableDrag;
-  final bool showDragHandle;
 
   @override
   _ModalSideSheetState<T> createState() => _ModalSideSheetState<T>();
 }
 
 class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
-  ParametricCurve<double> animationCurve = AppSpringCurves.sheet;
+  ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
@@ -412,29 +354,25 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
       context,
     );
     final String routeLabel = _getRouteLabel(localizations);
+    final defaultWidth = _widthFor(MediaQuery.sizeOf(context).width);
+    final width =
+        widget.route.constraints?.constrainWidth(defaultWidth) ?? defaultWidth;
 
+    final route = widget.route;
     return AnimatedBuilder(
-      animation: widget.route._presence,
-      child: SideSheet(
-        animationController: widget.route._animationController,
-        onClosing: () {
-          if (widget.route.isCurrent) {
-            Navigator.pop(context);
-          }
-        },
-        builder: widget.route.builder,
-        backgroundColor: widget.backgroundColor,
-        elevation: widget.elevation,
-        shape: widget.shape,
-        clipBehavior: widget.clipBehavior,
-        constraints: widget.constraints,
-        enableDrag: widget.enableDrag,
-        showDragHandle: widget.showDragHandle,
+      animation: route.animation!,
+      child: route.dragBackDetector(
+        SideSheet(
+          builder: route.builder,
+          backgroundColor: widget.backgroundColor,
+          elevation: widget.elevation,
+          shape: widget.shape,
+          clipBehavior: widget.clipBehavior,
+        ),
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue =
-            animationCurve.transform(widget.route.animation!.value) *
-            (1 - (widget.route.aside?.value ?? 0));
+        final curve = route.isDragBackActive ? Curves.linear : animationCurve;
+        final double animationValue = curve.transform(route.animation!.value);
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -448,9 +386,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
                 );
               },
               animationValue: animationValue,
-              isScrollControlled: widget.isScrollControlled,
-              scrollControlDisabledMaxHeightRatio:
-                  widget.scrollControlDisabledMaxHeightRatio,
+              width: width,
               margin: _sideSheetMargin,
               child: child,
             ),
@@ -461,7 +397,8 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
   }
 }
 
-class ModalSideSheetRoute<T> extends PopupRoute<T> {
+class ModalSideSheetRoute<T> extends PopupRoute<T>
+    with DragBackRouteMixin<T>, SheetCoverRouteMixin<T> {
   ModalSideSheetRoute({
     required this.builder,
     this.capturedThemes,
@@ -471,34 +408,19 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
-    this.constraints,
     this.modalBarrierColor,
     this.isDismissible = true,
-    this.isScrollControlled = false,
-    this.scrollControlDisabledMaxHeightRatio =
-        _defaultScrollControlDisabledMaxHeightRatio,
     super.settings,
     this.transitionAnimationController,
     this.anchorPoint,
+    this.constraints,
     this.useSafeArea = false,
     super.filter,
-    this.aside,
   });
-
-  /// Slides the sheet off, scrim and all, as it runs to 1 without closing it.
-  final Animation<double>? aside;
-
-  late final Animation<double> _presence = aside == null
-      ? animation!
-      : _SidePresence(animation!, aside!);
 
   final WidgetBuilder builder;
 
   final CapturedThemes? capturedThemes;
-
-  final bool isScrollControlled;
-
-  final double scrollControlDisabledMaxHeightRatio;
 
   final Color? backgroundColor;
 
@@ -508,8 +430,6 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
 
   final Clip? clipBehavior;
 
-  final BoxConstraints? constraints;
-
   final Color? modalBarrierColor;
 
   final bool isDismissible;
@@ -517,8 +437,17 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   final AnimationController? transitionAnimationController;
 
   final Offset? anchorPoint;
-
+  final BoxConstraints? constraints;
   final bool useSafeArea;
+
+  bool _disableAnimations = false;
+
+  @override
+  void install() {
+    _disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(navigator!.context) ?? false;
+    super.install();
+  }
 
   final String? barrierOnTapHint;
 
@@ -540,19 +469,12 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _transitionDuration;
+  Duration get transitionDuration =>
+      _disableAnimations ? Duration.zero : _bottomSheetEnterDuration;
 
   @override
-  Duration get reverseTransitionDuration => _reverseTransitionDuration;
-
-  Duration _transitionDuration = _bottomSheetEnterDuration;
-  Duration _reverseTransitionDuration = _bottomSheetExitDuration;
-
-  // Before install(): it builds the controller with these durations.
-  void _resolveMotionFrom(BuildContext context) {
-    _transitionDuration = _enterDurationOf(context);
-    _reverseTransitionDuration = _exitDurationOf(context);
-  }
+  Duration get reverseTransitionDuration =>
+      _disableAnimations ? Duration.zero : _bottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
@@ -591,23 +513,24 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
       anchorPoint: anchorPoint,
       child: Builder(
         builder: (BuildContext context) {
-          final colorScheme = Theme.of(context).colorScheme;
           return _ModalSideSheet<T>(
             route: this,
-            backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
+            backgroundColor: backgroundColor,
             elevation: elevation,
             shape: shape,
             clipBehavior: clipBehavior,
-            constraints: constraints,
-            isScrollControlled: isScrollControlled,
-            scrollControlDisabledMaxHeightRatio:
-                scrollControlDisabledMaxHeightRatio,
           );
         },
       ),
     );
 
-    final Widget sideSheet = content;
+    final Widget sideSheet = useSafeArea
+        ? SafeArea(bottom: false, child: content)
+        : MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: content,
+          );
 
     return capturedThemes?.wrap(sideSheet) ?? sideSheet;
   }
@@ -616,7 +539,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   Widget buildModalBarrier() {
     if (barrierColor.a != 0 && !offstage) {
       assert(barrierColor != barrierColor.opacity0);
-      final Animation<Color?> color = _presence.drive(
+      final Animation<Color?> color = animation!.drive(
         ColorTween(
           begin: barrierColor.opacity0,
           end: barrierColor,
@@ -650,62 +573,47 @@ Future<T?> showModalSideSheet<T>({
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
-  BoxConstraints? constraints,
   Color? barrierColor,
-  bool isScrollControlled = false,
-  double scrollControlDisabledMaxHeightRatio =
-      _defaultScrollControlDisabledMaxHeightRatio,
   bool useRootNavigator = false,
   bool isDismissible = true,
-  bool useSafeArea = false,
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
+  BoxConstraints? constraints,
+  bool useSafeArea = false,
   ImageFilter? filter,
-  Animation<double>? aside,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final NavigatorState navigator = Navigator.of(
-    context,
-    rootNavigator: useRootNavigator,
-  );
+  final navigator = useRootNavigator
+      ? Navigator.of(context, rootNavigator: true)
+      : sheetNavigatorOf(context);
   final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-  final route = ModalSideSheetRoute<T>(
-    builder: builder,
-    filter: filter,
-    capturedThemes: InheritedTheme.capture(
-      from: context,
-      to: navigator.context,
+  return navigator.push(
+    ModalSideSheetRoute<T>(
+      builder: builder,
+      capturedThemes: InheritedTheme.capture(
+        from: context,
+        to: navigator.context,
+      ),
+      barrierLabel: barrierLabel ?? localizations.scrimLabel,
+      barrierOnTapHint: localizations.scrimOnTapHint(
+        localizations.bottomSheetLabel,
+      ),
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      clipBehavior: clipBehavior,
+      isDismissible: isDismissible,
+      modalBarrierColor:
+          barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
+      settings: routeSettings,
+      transitionAnimationController: transitionAnimationController,
+      anchorPoint: anchorPoint,
+      constraints: constraints,
+      useSafeArea: useSafeArea,
+      filter: filter,
     ),
-    isScrollControlled: isScrollControlled,
-    scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
-    barrierLabel: barrierLabel ?? localizations.scrimLabel,
-    barrierOnTapHint: localizations.scrimOnTapHint(
-      localizations.bottomSheetLabel,
-    ),
-    backgroundColor: backgroundColor,
-    elevation: elevation,
-    shape: shape,
-    clipBehavior: clipBehavior,
-    constraints: constraints,
-    isDismissible: isDismissible,
-    modalBarrierColor:
-        barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
-    settings: routeSettings,
-    transitionAnimationController: transitionAnimationController,
-    anchorPoint: anchorPoint,
-    useSafeArea: useSafeArea,
-    aside: aside,
-  ).._resolveMotionFrom(context);
-  return navigator.push(route);
-}
-
-class _SidePresence extends CompoundAnimation<double> {
-  _SidePresence(Animation<double> entrance, Animation<double> aside)
-    : super(first: entrance, next: aside);
-
-  @override
-  double get value => first.value * (1 - next.value);
+  );
 }

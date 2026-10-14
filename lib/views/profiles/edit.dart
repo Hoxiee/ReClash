@@ -16,7 +16,6 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:yaml/yaml.dart';
 
 import 'client_preset_selector.dart';
-import 'tun_override.dart';
 
 Object? _plainYaml(Object? node) => switch (node) {
   YamlMap() => {
@@ -53,7 +52,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late final TextEditingController _customUserAgentController;
   late bool _autoUpdate;
   late SubscriptionClient _clientCompatibility;
-  late ProfileTun _tunOverride;
   String? _rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _fileInfoNotifier = ValueNotifier<FileInfo?>(null);
@@ -67,7 +65,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _urlController = TextEditingController(text: widget.profile.url);
     _autoUpdate = widget.profile.autoUpdate;
     _clientCompatibility = widget.profile.clientCompatibility;
-    _tunOverride = widget.profile.tunOverride ?? const ProfileTun();
     _customUserAgentController = TextEditingController(
       text: widget.profile.customUserAgent,
     );
@@ -96,11 +93,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       autoUpdate: _autoUpdate,
       clientCompatibility: _clientCompatibility,
       customUserAgent: _customUserAgentController.text.trim(),
-      tunOverride:
-          _tunOverride.disableIcmpForwarding == null &&
-              _tunOverride.excludeInterface == null
-          ? null
-          : _tunOverride,
       autoUpdateDuration: Duration(
         minutes: int.parse(_autoUpdateDurationController.text),
       ),
@@ -354,11 +346,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         fileInfoNotifier: _fileInfoNotifier,
         onEdit: _editProfileFile,
         onUpload: _uploadProfileFile,
-      ),
-      ProfileTunEditor(
-        value: _tunOverride,
-        isLinux: system.isLinux,
-        onChanged: (value) => setState(() => _tunOverride = value),
       ),
     ];
     return FocusTraversalGroup(

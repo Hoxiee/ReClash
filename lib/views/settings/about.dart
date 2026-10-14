@@ -31,13 +31,26 @@ class AboutView extends ConsumerWidget {
 
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     final commonAction = ref.read(commonActionProvider.notifier);
+    final l10n = context.appLocalizations;
     final acceptPrereleases = ref
         .read(appSettingProvider)
         .acceptPrereleaseUpdates;
-    final data = await globalState.safeRun<Map<String, dynamic>?>(
-      () => request.checkForUpdate(acceptPrereleases: acceptPrereleases),
-      title: context.appLocalizations.checkUpdate,
-    );
+    final Map<String, dynamic>? data;
+    try {
+      data = await request.checkForUpdate(acceptPrereleases: acceptPrereleases);
+    } catch (error) {
+      commonPrint.log(
+        'checkUpdate failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      unawaited(
+        dialogs.showMessage(
+          title: l10n.checkUpdate,
+          message: TextSpan(text: userFacingErrorMessage(error, l10n)),
+        ),
+      );
+      return;
+    }
     unawaited(commonAction.checkUpdateResultHandle(data: data, isUser: true));
   }
 

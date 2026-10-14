@@ -98,12 +98,17 @@ class RoutingDiagView extends ConsumerStatefulWidget {
 }
 
 class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
-    with WidgetsBindingObserver, ActivePollingMixin<RoutingDiagView> {
+    with
+        WidgetsBindingObserver,
+        ActivePollingMixin<RoutingDiagView>,
+        RouteMotionHoldMixin<RoutingDiagView> {
   final List<_DiagRow> _rows = [];
   List<_DiagRow> _visible = const [];
   final Set<int> _expanded = {};
   final Set<String> _kinds = {..._diagKinds};
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController = sheetScrollController(
+    context,
+  );
   int _cursor = 0;
   int _dropped = 0;
   bool _autoScroll = true;
@@ -186,23 +191,27 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
       if (batch.cursor > _cursor) _cursor = batch.cursor;
       return;
     }
-    setState(() {
-      if (hadDrop) {
-        _rows.add(_GapRow(batch.dropped - _dropped));
-        _dropped = batch.dropped;
-      }
-      for (final entry in batch.entries) {
-        _appendEntry(entry);
-      }
-      if (batch.cursor > _cursor) {
-        _cursor = batch.cursor;
-      }
-      if (_rows.length > _maxLocalRows) {
-        _rows.removeRange(0, _rows.length - _maxLocalRows);
-      }
-      _rebuildVisible();
+    // Accumulate rows and advance the cursor unconditionally; only the repaint
+    // is held while the sheet route animates, so no batch is pulled twice.
+    if (hadDrop) {
+      _rows.add(_GapRow(batch.dropped - _dropped));
+      _dropped = batch.dropped;
+    }
+    for (final entry in batch.entries) {
+      _appendEntry(entry);
+    }
+    if (batch.cursor > _cursor) {
+      _cursor = batch.cursor;
+    }
+    if (_rows.length > _maxLocalRows) {
+      _rows.removeRange(0, _rows.length - _maxLocalRows);
+    }
+    _rebuildVisible();
+    updateWhenRouteSettled(() {
+      if (!mounted) return;
+      setState(() {});
+      _maybeAutoScroll();
     });
-    _maybeAutoScroll();
   }
 
   // A repeat re-emits as a fresh seq that matches the previous entry, so fold it
