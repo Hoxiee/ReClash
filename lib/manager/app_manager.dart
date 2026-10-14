@@ -310,6 +310,9 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         }
         ref.read(routeTrackerProvider.notifier).markResumed();
         ref.read(setupActionProvider.notifier).tryCheckIp();
+        // The startup check is the only other trigger; a long-lived session
+        // relies on resume to reach the next throttled interval.
+        unawaited(ref.read(commonActionProvider.notifier).autoCheckUpdate());
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {

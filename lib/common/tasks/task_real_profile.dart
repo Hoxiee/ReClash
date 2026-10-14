@@ -176,7 +176,15 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['tun']['strict-route'] = realPatchConfig.tun.strictRoute;
   rawConfig['tun']['route-exclude-address'] =
       realPatchConfig.tun.routeExcludeAddress;
-  rawConfig['tun'].addAll(data.tunOverride?.toJson() ?? const {});
+  // Omitted means inherit: the profile keeps whatever its own YAML declared.
+  final disableIcmpForwarding = realPatchConfig.tun.disableIcmpForwarding;
+  if (disableIcmpForwarding != null) {
+    rawConfig['tun']['disable-icmp-forwarding'] = disableIcmpForwarding;
+  }
+  final excludeInterface = realPatchConfig.tun.excludeInterface;
+  if (excludeInterface != null) {
+    rawConfig['tun']['exclude-interface'] = excludeInterface;
+  }
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   rawConfig['geo-auto-update'] = realPatchConfig.geoAutoUpdate;
   rawConfig['geo-update-interval'] = realPatchConfig.geoUpdateInterval;

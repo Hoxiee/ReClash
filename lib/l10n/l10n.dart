@@ -1213,10 +1213,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Prevent TUN from forwarding ICMP packets, including ping, for this profile`
+  /// `Prevent TUN from forwarding ICMP packets, including ping`
   String get disableIcmpForwardingDesc {
     return Intl.message(
-      'Prevent TUN from forwarding ICMP packets, including ping, for this profile',
+      'Prevent TUN from forwarding ICMP packets, including ping',
       name: 'disableIcmpForwardingDesc',
       desc: '',
       args: [],
@@ -2348,10 +2348,25 @@ class AppLocalizations {
     );
   }
 
-  /// `A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads, no telemetry.`
+  /// `Narrow`
+  String get sidebarOpenNarrow {
+    return Intl.message(
+      'Narrow',
+      name: 'sidebarOpenNarrow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wide`
+  String get sidebarOpenWide {
+    return Intl.message('Wide', name: 'sidebarOpenWide', desc: '', args: []);
+  }
+
+  /// `A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads. Optional crash reports only if you turn them on.`
   String get desc {
     return Intl.message(
-      'A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads, no telemetry.',
+      'A cross-platform client built on the mihomo core and the FlClash project. Open source, no ads. Optional crash reports only if you turn them on.',
       name: 'desc',
       desc: '',
       args: [],
@@ -20153,6 +20168,221 @@ class AppLocalizations {
     return Intl.message(
       'Full text',
       name: 'disclaimerReadFull',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Consent`
+  String get setupStageConsent {
+    return Intl.message(
+      'Consent',
+      name: 'setupStageConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coverage`
+  String get setupStageCoverage {
+    return Intl.message(
+      'Coverage',
+      name: 'setupStageCoverage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check`
+  String get setupStageCheck {
+    return Intl.message('Check', name: 'setupStageCheck', desc: '', args: []);
+  }
+
+  /// `Your connection`
+  String get setupReceiptTitle {
+    return Intl.message(
+      'Your connection',
+      name: 'setupReceiptTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accepted`
+  String get setupReceiptConsent {
+    return Intl.message(
+      'Accepted',
+      name: 'setupReceiptConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No profile`
+  String get setupReceiptNoProfile {
+    return Intl.message(
+      'No profile',
+      name: 'setupReceiptNoProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We'll connect and measure the path`
+  String get setupReceiptCheckPending {
+    return Intl.message(
+      'We\'ll connect and measure the path',
+      name: 'setupReceiptCheckPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking now`
+  String get setupReceiptCheckRunning {
+    return Intl.message(
+      'Checking now',
+      name: 'setupReceiptCheckRunning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passed just now`
+  String get setupReceiptCheckPassed {
+    return Intl.message(
+      'Passed just now',
+      name: 'setupReceiptCheckPassed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not confirmed`
+  String get setupReceiptCheckFailed {
+    return Intl.message(
+      'Not confirmed',
+      name: 'setupReceiptCheckFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap a finished entry to go back to it`
+  String get setupReceiptHint {
+    return Intl.message(
+      'Tap a finished entry to go back to it',
+      name: 'setupReceiptHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What should go through ReClash?`
+  String get setupCoverageTitle {
+    return Intl.message(
+      'What should go through ReClash?',
+      name: 'setupCoverageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All device traffic`
+  String get setupCoverageAll {
+    return Intl.message(
+      'All device traffic',
+      name: 'setupCoverageAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system asks for administrator rights once. Apps need no setup of their own.`
+  String get setupCoverageAllDesc {
+    return Intl.message(
+      'The system asks for administrator rights once. Apps need no setup of their own.',
+      name: 'setupCoverageAllDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every app rides the VPN unless you exclude it later.`
+  String get setupCoverageDeviceDesc {
+    return Intl.message(
+      'Every app rides the VPN unless you exclude it later.',
+      name: 'setupCoverageDeviceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only the apps I pick`
+  String get setupCoverageSelected {
+    return Intl.message(
+      'Only the apps I pick',
+      name: 'setupCoverageSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose which apps use the VPN; the rest connect directly.`
+  String get setupCoverageSelectedDesc {
+    return Intl.message(
+      'Choose which apps use the VPN; the rest connect directly.',
+      name: 'setupCoverageSelectedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart Routing, DNS and rules are not asked here. Set them in the app once your connection works.`
+  String get setupAdvancedLater {
+    return Intl.message(
+      'Smart Routing, DNS and rules are not asked here. Set them in the app once your connection works.',
+      name: 'setupAdvancedLater',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detected: {region} · {language}`
+  String setupDetectedSummary(Object region, Object language) {
+    return Intl.message(
+      'Detected: $region · $language',
+      name: 'setupDetectedSummary',
+      desc: '',
+      args: [region, language],
+    );
+  }
+
+  /// `Change`
+  String get setupDetectedChange {
+    return Intl.message(
+      'Change',
+      name: 'setupDetectedChange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Let's check your connection`
+  String get setupCheckTitle {
+    return Intl.message(
+      'Let\'s check your connection',
+      name: 'setupCheckTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking your connection`
+  String get setupCheckRunningTitle {
+    return Intl.message(
+      'Checking your connection',
+      name: 'setupCheckRunningTitle',
       desc: '',
       args: [],
     );

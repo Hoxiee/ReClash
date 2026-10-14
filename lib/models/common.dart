@@ -180,6 +180,9 @@ abstract class LogsState with _$LogsState {
 extension LogsStateExt on LogsState {
   bool get hasFilters => sources.isNotEmpty || levels.isNotEmpty;
 
+  bool get isSearching =>
+      keywords.isNotEmpty || query.trim().isNotEmpty || hasFilters;
+
   LogsState toggleSource(LogSource source) {
     return copyWith(sources: _toggleSet(sources, source));
   }
@@ -221,6 +224,8 @@ abstract class TrackerInfosState with _$TrackerInfosState {
 }
 
 extension TrackerInfosStateExt on TrackerInfosState {
+  bool get isSearching => keywords.isNotEmpty || query.trim().isNotEmpty;
+
   List<TrackerInfo> get list => filteredList..sort(_compareBySort);
 
   List<TrackerInfo> get filteredList {
@@ -350,6 +355,8 @@ abstract class DnsQueriesState with _$DnsQueriesState {
 }
 
 extension DnsQueriesStateExt on DnsQueriesState {
+  bool get isSearching => keywords.isNotEmpty || query.trim().isNotEmpty;
+
   List<DnsQuery> get list {
     final matcher = SearchMatcher(query.trim(), useRegex: useRegex);
     return dnsQueries

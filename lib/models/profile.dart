@@ -135,7 +135,6 @@ abstract class Profile with _$Profile {
     SubscriptionInfo? subscriptionInfo,
     PanelMeta? panelMeta,
     ProviderCapabilityManifest? capabilityManifest,
-    ProfileTun? tunOverride,
     @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
     @Default([]) List<ManualCapabilitySelector> manualCapabilitySelectors,
     CapabilityManifestIssue? capabilityManifestIssue,

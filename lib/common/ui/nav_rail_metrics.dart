@@ -12,6 +12,11 @@ abstract final class NavRailMetrics {
   static const double compactSlotHeight = 44;
   static const double expandedSlotHeight = 58;
 
+  /// The wide sidebar is a labelled list rather than an icon column, so it has
+  /// its own width and a single-line slot.
+  static const double wideWidth = 232;
+  static const double wideSlotHeight = 44;
+
   static const double pillInsetX = 6;
   static const double pillInsetY = 4;
 

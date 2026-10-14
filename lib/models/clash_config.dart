@@ -292,6 +292,12 @@ abstract class Tun with _$Tun {
     @JsonKey(name: 'route-exclude-address')
     @Default([])
     List<String> routeExcludeAddress,
+    // The core treats these two as config-owned: its live tun patch ignores
+    // them, so null means "keep whatever the profile YAML says".
+    @JsonKey(name: 'disable-icmp-forwarding', includeIfNull: false)
+    bool? disableIcmpForwarding,
+    @JsonKey(name: 'exclude-interface', includeIfNull: false)
+    List<String>? excludeInterface,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
@@ -322,19 +328,6 @@ String _congestionControllerFromJson(Object? value) =>
     value is String && value.trim().isNotEmpty
     ? value.trim()
     : defaultCongestionController;
-
-@freezed
-abstract class ProfileTun with _$ProfileTun {
-  const factory ProfileTun({
-    @JsonKey(name: 'disable-icmp-forwarding', includeIfNull: false)
-    bool? disableIcmpForwarding,
-    @JsonKey(name: 'exclude-interface', includeIfNull: false)
-    List<String>? excludeInterface,
-  }) = _ProfileTun;
-
-  factory ProfileTun.fromJson(Map<String, Object?> json) =>
-      _$ProfileTunFromJson(json);
-}
 
 extension TunExt on Tun {
   int resolveMtu(String? region) => mtu ?? profileForCode(region).tunMtu;

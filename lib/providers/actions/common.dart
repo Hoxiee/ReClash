@@ -104,6 +104,9 @@ class CommonAction extends _$CommonAction {
 
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
+    // First-run update prompts belong to the setup gate; a dialog here would
+    // land on top of the wizard and strand it.
+    if (ref.read(needsSetupProvider)) return false;
     final now = DateTime.now();
     if (!shouldRunAutoUpdateCheck(
       await preferences.getLastUpdateCheckAt(),
@@ -111,50 +114,23 @@ class CommonAction extends _$CommonAction {
     )) {
       return false;
     }
+    final Map<String, dynamic>? res;
+    try {
+      res = await request.checkForUpdate(
+        acceptPrereleases: ref.read(appSettingProvider).acceptPrereleaseUpdates,
+      );
+    } catch (error) {
+      // A failed check must not stamp the throttle, or a transient outage hides
+      // updates for a full interval.
+      commonPrint.log(
+        'autoCheckUpdate failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return false;
+    }
     await preferences.saveLastUpdateCheckAt(now.millisecondsSinceEpoch);
-    final res = await request.checkForUpdate(
-      acceptPrereleases: ref.read(appSettingProvider).acceptPrereleaseUpdates,
-    );
     await checkUpdateResultHandle(data: res);
     return res != null;
-  }
-
-  TextSpan _releaseSpan(BuildContext context, String tagName, String? body) {
-    final textTheme = context.textTheme;
-    final version = parseReleaseChangelog(body);
-    return TextSpan(
-      text: '$tagName \n',
-      style: textTheme.headlineSmall,
-      children: version == null
-          ? [
-              TextSpan(text: '\n', style: textTheme.bodyMedium),
-              for (final submit in parseReleaseBody(body))
-                TextSpan(text: '- $submit \n', style: textTheme.bodyMedium),
-            ]
-          : _changelogSpans(context, version),
-    );
-  }
-
-  List<TextSpan> _changelogSpans(
-    BuildContext context,
-    ChangelogVersion version,
-  ) {
-    final textTheme = context.textTheme;
-    return [
-      for (final group in version.visibleGroups) ...[
-        TextSpan(
-          text:
-              '\n${changelogGroupTitle(currentAppLocalizations, group.type)}\n',
-          style: textTheme.labelLarge?.copyWith(
-            color: group.type == ChangelogType.breaking
-                ? context.colorScheme.error
-                : context.colorScheme.primary,
-          ),
-        ),
-        for (final entry in group.entries)
-          TextSpan(text: '• ${entry.text}\n', style: textTheme.bodyMedium),
-      ],
-    ];
   }
 
   Future<void> checkUpdateResultHandle({
@@ -162,32 +138,44 @@ class CommonAction extends _$CommonAction {
     bool isUser = false,
   }) async {
     if (data != null) {
-      final context = globalState.navigatorKey.currentContext!;
+      final context = globalState.navigatorKey.currentContext;
+      if (context == null) {
+        commonPrint.log(
+          'skip update offer: no navigator context',
+          logLevel: LogLevel.warning,
+        );
+        return;
+      }
       final updater = ref.read(appUpdateActionProvider.notifier);
-      final res = await dialogs.showMessage(
-        title: currentAppLocalizations.discoverNewVersion,
-        message: _releaseSpan(
-          context,
-          data['tag_name'] as String,
-          data['body'] as String?,
-        ),
-        confirmText: updater.isSupported
+      final choice = await UpdateOfferScreen.show(
+        context,
+        release: data,
+        primaryLabel: updater.isSupported
             ? currentAppLocalizations.installUpdate
             : currentAppLocalizations.goDownload,
-        cancelText: isUser ? null : currentAppLocalizations.noLongerRemind,
+        // A manual check offers only install plus back; an automatic one adds
+        // the mute so a repeated prompt can be turned off.
+        skipLabel: isUser ? null : currentAppLocalizations.noLongerRemind,
       );
-      if (res == true) {
-        unawaited(
-          updater.isSupported
-              ? updater.install(data)
-              : launchUrl(
-                  Uri.parse('https://github.com/$repository/releases/latest'),
-                ),
-        );
-      } else if (!isUser && res == false) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(autoCheckUpdate: false));
+      switch (choice) {
+        case UpdateOfferChoice.install:
+          unawaited(
+            updater.isSupported
+                ? updater.install(data)
+                : launchUrl(
+                    Uri.parse(
+                      'https://github.com/$repository/releases/latest',
+                    ),
+                  ),
+          );
+        case UpdateOfferChoice.skip:
+          if (!isUser) {
+            ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(autoCheckUpdate: false));
+          }
+        case UpdateOfferChoice.dismiss:
+          break;
       }
     } else if (isUser) {
       unawaited(

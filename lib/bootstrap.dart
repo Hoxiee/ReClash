@@ -27,6 +27,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/views/settings/navigation.dart';
+import 'package:reclash/views/update_offer.dart';
 import 'package:reclash/views/views.dart';
 
 enum StartupOutcome { completed, exitRequested }
@@ -300,10 +301,52 @@ class Bootstrap {
     await bootGuard.markSetup();
     try {
       if (!context.mounted) return;
-      await SetupWizard.show(context);
+      // The wizard is pushed first so it covers the profile-less dashboard at
+      // once; the async update check then rides on top of it instead of
+      // leaving the dashboard flashing underneath for the network round-trip.
+      final wizardDone = SetupWizard.show(context);
+      await _maybeOfferUpdateBeforeSetup(context);
+      await wizardDone;
     } finally {
       await bootGuard.markStarting();
       await _container.read(storeActionProvider.notifier).savePreferences();
+    }
+  }
+
+  /// Checks once up front and, when a newer release exists, offers it over the
+  /// wizard so the choice precedes setup instead of a dialog interrupting it.
+  /// The throttle is stamped either way, so [autoCheckUpdate] does not re-offer
+  /// the moment setup finishes.
+  Future<void> _maybeOfferUpdateBeforeSetup(BuildContext context) async {
+    final setting = _container.read(appSettingProvider);
+    if (!setting.autoCheckUpdate) return;
+    final updater = _container.read(appUpdateActionProvider.notifier);
+    if (!updater.isSupported) return;
+    Map<String, dynamic>? release;
+    try {
+      release = await request.checkForUpdate(
+        acceptPrereleases: setting.acceptPrereleaseUpdates,
+      );
+    } catch (error) {
+      commonPrint.log(
+        'setup update check failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return;
+    }
+    await preferences.saveLastUpdateCheckAt(
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    if (release == null || !context.mounted) return;
+    final choice = await UpdateOfferScreen.show(
+      context,
+      release: release,
+      subtitle: currentAppLocalizations.setupUpdateDesc,
+      primaryLabel: currentAppLocalizations.installUpdate,
+      skipLabel: currentAppLocalizations.setupUpdateSkip,
+    );
+    if (choice == UpdateOfferChoice.install) {
+      unawaited(updater.install(release));
     }
   }
 

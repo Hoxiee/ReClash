@@ -49,9 +49,6 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
       : ProviderCapabilityManifest.fromJson(
           json['capabilityManifest'] as Map<String, dynamic>,
         ),
-  tunOverride: json['tunOverride'] == null
-      ? null
-      : ProfileTun.fromJson(json['tunOverride'] as Map<String, dynamic>),
   serviceRoutePolicies:
       (json['serviceRoutePolicies'] as List<dynamic>?)
           ?.map((e) => ServiceRoutePolicy.fromJson(e as Map<String, dynamic>))
@@ -108,7 +105,6 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'subscriptionInfo': instance.subscriptionInfo,
   'panelMeta': instance.panelMeta,
   'capabilityManifest': instance.capabilityManifest,
-  'tunOverride': instance.tunOverride,
   'serviceRoutePolicies': instance.serviceRoutePolicies,
   'manualCapabilitySelectors': instance.manualCapabilitySelectors,
   'capabilityManifestIssue':

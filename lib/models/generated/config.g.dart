@@ -108,6 +108,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   acceptPrereleaseUpdates: json['acceptPrereleaseUpdates'] as bool? ?? false,
   showLabel: json['showLabel'] as bool? ?? false,
   sidebarExpanded: json['sidebarExpanded'] as bool? ?? false,
+  railWide: json['railWide'] as bool? ?? false,
   navSurface:
       $enumDecodeNullable(_$NavSurfaceEnumMap, json['navSurface']) ??
       NavSurface.auto,
@@ -188,6 +189,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'acceptPrereleaseUpdates': instance.acceptPrereleaseUpdates,
       'showLabel': instance.showLabel,
       'sidebarExpanded': instance.sidebarExpanded,
+      'railWide': instance.railWide,
       'navSurface': _$NavSurfaceEnumMap[instance.navSurface]!,
       'disclaimerAccepted': instance.disclaimerAccepted,
       'setupCompleted': instance.setupCompleted,

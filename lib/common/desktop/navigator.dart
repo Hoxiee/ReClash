@@ -42,9 +42,10 @@ class BaseNavigator {
     BuildContext context,
     Widget child, {
     RouteSettings? settings,
+    bool rootNavigator = false,
   }) async {
     if (!context.isMobileView) {
-      return Navigator.of(context).push<T>(
+      return Navigator.of(context, rootNavigator: rootNavigator).push<T>(
         CommonDesktopRoute(
           settings: settings,
           builder: (context) => child,
@@ -55,7 +56,7 @@ class BaseNavigator {
         ),
       );
     }
-    return Navigator.of(context).push<T>(
+    return Navigator.of(context, rootNavigator: rootNavigator).push<T>(
       CommonRoute(
         settings: settings,
         builder: (context) => child,

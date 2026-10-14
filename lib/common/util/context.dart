@@ -54,7 +54,8 @@ extension BuildContextExtension on BuildContext {
           : MediaQuery.paddingOf(this).top + pageToolbarHeight);
 
   double get contentTopPadding =>
-      isInBottomSheet ? sheetAppBarHeight : appBarInset + 12;
+      TopInsetScope.of(this) ??
+      (isInBottomSheet ? sheetAppBarHeight : appBarInset + 12);
 
   void showNotifier(
     String text, {
@@ -93,6 +94,13 @@ extension BuildContextExtension on BuildContext {
 
   Duration motionDuration(Duration duration) =>
       disableAnimations ? Duration.zero : duration;
+
+  /// Duration for an animation that re-dirties its own layout when it ends:
+  /// `AnimatedSize` restarts its controller from inside `performLayout`, and a
+  /// zero duration makes that completion synchronous, which asserts mid-layout.
+  /// A single frame is the shortest step that still reads as instant.
+  Duration resizeDuration(Duration duration) =>
+      disableAnimations ? const Duration(milliseconds: 1) : duration;
 
   TextTheme get textTheme => Theme.of(this).textTheme;
 

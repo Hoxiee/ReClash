@@ -39,7 +39,12 @@ class AppUpdateAction extends _$AppUpdateAction {
       updateApkFileName(release['tag_name'] as String? ?? ''),
     );
     final apkFile = File(apkPath);
-    if (!await matchesUpdateAsset(apkFile, asset)) {
+    // A bare size match can admit a truncated or swapped file, so a cached APK
+    // is reused only when a digest proves it byte-for-byte.
+    final reuseCached =
+        asset.sha256 != null && await matchesUpdateAsset(apkFile, asset);
+    await removeStaleUpdateApks(apkPath);
+    if (!reuseCached) {
       if (!await _download(asset, apkPath)) {
         return;
       }
@@ -49,7 +54,6 @@ class AppUpdateAction extends _$AppUpdateAction {
         return;
       }
     }
-    await removeStaleUpdateApks(apkPath);
     if (await app?.installApk(apkPath) == true) {
       return;
     }
@@ -187,8 +191,17 @@ class _UpdateProgressDialog extends StatelessWidget {
 class _ApkInstallRetry with WidgetsBindingObserver {
   _ApkInstallRetry(this._apkPath);
 
+  // `canRequestPackageInstalls()` can keep reading the pre-grant value for a
+  // frame or two after the return, so a refusal is polled before it is trusted
+  // and the observer rides a few resumes before giving up.
+  static const _pollAttempts = 4;
+  static const _pollInterval = Duration(milliseconds: 150);
+  static const _maxResumesWithoutGrant = 5;
+
   final String _apkPath;
   bool _armed = false;
+  bool _busy = false;
+  int _resumesWithoutGrant = 0;
 
   void arm() {
     if (_armed) return;
@@ -204,11 +217,24 @@ class _ApkInstallRetry with WidgetsBindingObserver {
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state != AppLifecycleState.resumed || !_armed) return;
-    // One shot: retrying without the grant would bounce the user straight back
-    // into settings, so a refusal waits for the next explicit check.
-    dispose();
-    if (await app?.canRequestPackageInstalls() != true) return;
-    await app?.installApk(_apkPath);
+    if (state != AppLifecycleState.resumed || !_armed || _busy) return;
+    _busy = true;
+    try {
+      for (var attempt = 0; attempt < _pollAttempts; attempt++) {
+        if (!_armed) return;
+        if (await app?.canRequestPackageInstalls() == true) {
+          dispose();
+          await app?.installApk(_apkPath);
+          return;
+        }
+        await Future<void>.delayed(_pollInterval);
+      }
+      // Re-firing here would bounce the user back into settings; just wait.
+      if (++_resumesWithoutGrant >= _maxResumesWithoutGrant) {
+        dispose();
+      }
+    } finally {
+      _busy = false;
+    }
   }
 }

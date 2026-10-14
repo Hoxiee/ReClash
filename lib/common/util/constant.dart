@@ -34,6 +34,11 @@ final listHeaderPadding = EdgeInsets.only(
   top: 24.mAp,
   bottom: 8.mAp,
 );
+final listFooterPadding = EdgeInsets.only(
+  left: 16.mAp,
+  right: 16.mAp,
+  top: 8.mAp,
+);
 const pageToolbarHeight = 64.0;
 const sheetToolbarHeight = 48.0;
 const sheetAppBarHeight = 68.0;

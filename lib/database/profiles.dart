@@ -31,9 +31,6 @@ class Profiles extends Table {
   TextColumn get panelMeta =>
       text().map(const PanelMetaConverter()).nullable()();
 
-  TextColumn get tunOverride =>
-      text().map(const ProfileTunConverter()).nullable()();
-
   TextColumn get capabilityManifest =>
       text().map(const CapabilityManifestConverter()).nullable()();
 
@@ -109,18 +106,6 @@ class PanelMetaConverter extends TypeConverter<PanelMeta?, String?> {
     if (value == null) return null;
     return json.encode(value.toJson());
   }
-}
-
-class ProfileTunConverter extends TypeConverter<ProfileTun?, String?> {
-  const ProfileTunConverter();
-
-  @override
-  ProfileTun? fromSql(String? fromDb) =>
-      fromDb == null ? null : ProfileTun.fromJson(json.decode(fromDb));
-
-  @override
-  String? toSql(ProfileTun? value) =>
-      value == null ? null : json.encode(value.toJson());
 }
 
 class CapabilityManifestConverter
@@ -261,7 +246,6 @@ extension RawProfilExt on RawProfile {
       autoUpdateDuration: Duration(milliseconds: autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo,
       panelMeta: panelMeta,
-      tunOverride: tunOverride,
       capabilityManifest: capabilityManifest,
       serviceRoutePolicies: serviceRoutePolicies,
       manualCapabilitySelectors: manualCapabilitySelectors,
@@ -295,7 +279,6 @@ extension ProfilesCompanionExt on Profile {
       autoUpdateDurationMillis: autoUpdateDuration.inMilliseconds,
       subscriptionInfo: Value(subscriptionInfo),
       panelMeta: Value(panelMeta),
-      tunOverride: Value(tunOverride),
       capabilityManifest: Value(capabilityManifest),
       serviceRoutePolicies: Value(serviceRoutePolicies),
       manualCapabilitySelectors: Value(manualCapabilitySelectors),

@@ -41,7 +41,7 @@ final class AppUpdateActionProvider
   }
 }
 
-String _$appUpdateActionHash() => r'e935fdbc2543ad5b51e6e614f9cee34a7e98fb5f';
+String _$appUpdateActionHash() => r'750cb0df6aa8b350bbcb21dbaa2d7001aaaa8ab5';
 
 abstract class _$AppUpdateAction extends $Notifier<void> {
   void build();
@@ -143,7 +143,7 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'5fb2d4905d56284175ad52814a78ea985b2219d5';
+String _$commonActionHash() => r'04f178ffaf522de233cf5b13bc2737bfd31832c1';
 
 abstract class _$CommonAction extends $Notifier<void> {
   void build();
@@ -298,7 +298,7 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'3de949a4210bf0cd1a1522d462532e2e390e9916';
+String _$profilesActionHash() => r'12f5c3801d637531d0851cf941f11a78759bbfcb';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
   void build();
@@ -401,7 +401,7 @@ final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
   }
 }
 
-String _$setupActionHash() => r'4d4526302857e355859e7ce22ec8b8d022d544bc';
+String _$setupActionHash() => r'6e3dbcf5192782ecde8e67d4e49b4358cb162c45';
 
 abstract class _$SetupAction extends $Notifier<void> {
   void build();

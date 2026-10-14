@@ -75,7 +75,7 @@ class ProxiesAction extends _$ProxiesAction {
     try {
       commonPrint.log('updateGroups');
       final isStart = ref.read(isStartProvider);
-      final List<Group> groups = await retry(
+      final List<Group>? groups = await retry(
         task: () async {
           final sortType = ref.read(
             effectiveProxiesStyleProvider.select((state) => state.sortType),
@@ -99,13 +99,16 @@ class ProxiesAction extends _$ProxiesAction {
               'updateGroups error: $error',
               logLevel: coreFailureLogLevel(error),
             );
-            return <Group>[];
+            return null;
           }
         },
-        retryIf: (res) => res.isEmpty,
+        retryIf: (res) => res == null,
         maxAttempts: 5,
         delay: const Duration(milliseconds: 300),
       );
+      if (groups == null) {
+        return;
+      }
       // A running core only reports no groups between reloads or before it has
       // settled; dropping the live set then would blink the proxies tab out and
       // strand a correct profile. Hold the last groups until a real set lands.

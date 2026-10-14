@@ -33,6 +33,9 @@ part 'scripts.dart';
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
+  /// Version 6 only ever added a per-profile TUN override column that the
+  /// settings-level knobs replaced before any release, so it has no step; the
+  /// number stays put so databases already at 6 are not downgraded.
   @override
   int get schemaVersion => 6;
 
@@ -76,9 +79,6 @@ class Database extends _$Database {
         }
         if (from < 5) {
           await _purgeOrphans();
-        }
-        if (from < 6) {
-          await _addColumnIfMissing(m, profiles, profiles.tunOverride);
         }
       },
       beforeOpen: (details) async {

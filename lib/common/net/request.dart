@@ -225,31 +225,56 @@ class Request {
     );
   }
 
-  /// Lists releases instead of hitting `releases/latest`, which hides every
+
   /// prerelease and 404s on a repo that has only ever shipped them. The channel
   /// policy lives in [selectUpdateRelease]; [acceptPrereleases] lets a stable
-  /// build opt into prerelease upgrades.
+  /// build opt into prerelease upgrades. Returns null when the build is already
+  /// current, and throws on a network or API failure so a caller can tell a
+  /// failed check from an up-to-date one.
   Future<Map<String, dynamic>?> checkForUpdate({
     required bool acceptPrereleases,
   }) async {
-    try {
-      final response = await dio.get(
-        'https://api.github.com/repos/$repository/releases',
-        queryParameters: const {'per_page': 50},
-        options: Options(responseType: ResponseType.json),
+    final response = await dio.get(
+      'https://api.github.com/repos/$repository/releases',
+      queryParameters: const {'per_page': 50},
+      options: Options(responseType: ResponseType.json),
+    );
+    final releases = (response.data as List)
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    final installedVersion = globalState.packageInfo.version;
+    final selected = selectUpdateRelease(
+      releases,
+      installedVersion: installedVersion,
+      acceptPrereleases: acceptPrereleases,
+    );
+    if (selected == null) {
+      _warnOnEpochlessRelease(releases, installedVersion);
+    }
+    return selected;
+  }
+
+  /// A higher release that lacks the epoch marker is dropped silently by
+  /// [selectUpdateRelease]; surface it so a mis-tagged release is diagnosable.
+  void _warnOnEpochlessRelease(
+    List<Map<String, dynamic>> releases,
+    String installedVersion,
+  ) {
+    final installed = tryParseAppVersion(installedVersion);
+    if (installed == null) return;
+    for (final release in releases) {
+      if (release['draft'] == true) continue;
+      final tag = release['tag_name'];
+      if (tag is! String) continue;
+      final version = tryParseAppVersion(tag.replaceFirst(RegExp(r'^v'), ''));
+      if (version == null || version.compareTo(installed) <= 0) continue;
+      final body = release['body'];
+      if (body is String && body.contains(releaseEpochMarker)) continue;
+      commonPrint.log(
+        'update $tag ignored: release body is missing $releaseEpochMarker',
+        logLevel: LogLevel.warning,
       );
-      if (response.statusCode != 200) return null;
-      final releases = (response.data as List)
-          .whereType<Map<String, dynamic>>()
-          .toList();
-      return selectUpdateRelease(
-        releases,
-        installedVersion: globalState.packageInfo.version,
-        acceptPrereleases: acceptPrereleases,
-      );
-    } catch (error) {
-      commonPrint.log('checkForUpdate failed', logLevel: LogLevel.warning);
-      return null;
+      return;
     }
   }
 
@@ -263,6 +288,7 @@ class Request {
     CancelToken? cancelToken,
   }) async {
     final tmpPath = '$targetPath.tmp';
+    await File(tmpPath).safeDelete();
     try {
       await dio.download(
         url,

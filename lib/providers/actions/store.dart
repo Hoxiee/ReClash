@@ -93,11 +93,42 @@ class StoreAction extends _$StoreAction {
     await preferences.clearPreferences();
     commonPrint.log('clear preferences');
     await database.close();
-    await File(await appPath.databasePath).safeDelete(recursive: true);
+    final databasePath = await appPath.databasePath;
+    await File(databasePath).safeDelete(recursive: true);
+    for (final suffix in const ['-wal', '-shm', '-journal']) {
+      await File('$databasePath$suffix').safeDelete();
+    }
+    final homeDirPath = await appPath.homeDirPath;
     await Directory(await appPath.profilesPath).safeDelete(recursive: true);
+    await Directory(await appPath.scriptsDirPath).safeDelete(recursive: true);
     await Directory(
       await appPath.wallpapersDirPath,
     ).safeDelete(recursive: true);
+    await File(await appPath.configFilePath).safeDelete();
+    await Directory(await appPath.restoreDirPath).safeDelete(recursive: true);
+    await safeDeletePath(webDashboardDirIn(homeDirPath));
+    for (final geoFileName in const [MMDB, GEOIP, GEOSITE, ASN]) {
+      await File(join(homeDirPath, geoFileName)).safeDelete();
+    }
+    await _deleteStaleUpdateApks(homeDirPath);
+    // The file sink holds the logs directory open; close it before deleting.
+    await fileLogger.dispose();
+    await Directory(
+      join(homeDirPath, 'logs'),
+    ).safeDelete(recursive: true);
+    // backup.zip, the lock file and the core binary copy stay: the backup is
+    // the only way back, the rest belongs to the running install itself.
     unawaited(ref.read(systemActionProvider.notifier).handleExit(false));
+  }
+
+  Future<void> _deleteStaleUpdateApks(String homeDirPath) async {
+    try {
+      await for (final entity in Directory(homeDirPath).list()) {
+        if (entity is! File) continue;
+        if (isStaleUpdateApk(basename(entity.path), keepFileName: '')) {
+          await entity.safeDelete();
+        }
+      }
+    } catch (_) {}
   }
 }

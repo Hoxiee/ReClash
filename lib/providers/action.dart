@@ -27,6 +27,7 @@ import 'package:reclash/plugins/service.dart';
 import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/update_offer.dart';
 import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';

@@ -98,11 +98,6 @@ VpnState vpnState(Ref ref) {
   final routeMode = ref.watch(
     networkSettingProvider.select((state) => state.routeMode),
   );
-  final disableIcmpForwarding = ref.watch(
-    currentProfileProvider.select(
-      (profile) => profile?.tunOverride?.disableIcmpForwarding,
-    ),
-  );
   return VpnState(
     stack: tun.stack,
     vpnProps: vpnProps,
@@ -112,7 +107,7 @@ VpnState vpnState(Ref ref) {
         : defaultCongestionController,
     routeAddress: tun.resolveRouteAddress(routeMode),
     routeExcludeAddress: tun.routeExcludeAddress,
-    disableIcmpForwarding: disableIcmpForwarding,
+    disableIcmpForwarding: tun.disableIcmpForwarding,
   );
 }
 

@@ -138,6 +138,21 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         _scheduleFullSetup();
       },
     );
+    // The Core's live tun patch leaves these two alone so a profile's own YAML
+    // keeps owning them, which makes a rebuilt config the only way in.
+    ref.listenManual(
+      patchClashConfigProvider.select(
+        (state) => (
+          disableIcmpForwarding: state.tun.disableIcmpForwarding,
+          // A new List with the same names is not a new selection.
+          excludeInterface: state.tun.excludeInterface?.join(','),
+        ),
+      ),
+      (prev, next) {
+        if (prev == next) return;
+        _scheduleFullSetup();
+      },
+    );
     ref.listenManual(
       appSettingProvider.select((state) => state.smartRoutingDiagnostics),
       (prev, next) {

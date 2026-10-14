@@ -593,7 +593,6 @@ class SetupAction extends _$SetupAction {
         overrideNtp: overrideNtp,
         appendSystemDns: appendSystemDns,
         overrideNetwork: overrideNetwork,
-        tunOverride: setupState.tunOverride,
         addedRules: addedRules,
         defaultUA: defaultUA,
         smartRouting: smartRouting,

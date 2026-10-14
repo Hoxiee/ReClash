@@ -131,15 +131,6 @@ class $ProfilesTable extends Profiles
         requiredDuringInsert: false,
       ).withConverter<PanelMeta?>($ProfilesTable.$converterpanelMeta);
   @override
-  late final GeneratedColumnWithTypeConverter<ProfileTun?, String> tunOverride =
-      GeneratedColumn<String>(
-        'tun_override',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-      ).withConverter<ProfileTun?>($ProfilesTable.$convertertunOverride);
-  @override
   late final GeneratedColumnWithTypeConverter<
     ProviderCapabilityManifest?,
     String
@@ -327,7 +318,6 @@ class $ProfilesTable extends Profiles
     autoUpdateDurationMillis,
     subscriptionInfo,
     panelMeta,
-    tunOverride,
     capabilityManifest,
     serviceRoutePolicies,
     manualCapabilitySelectors,
@@ -528,12 +518,6 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}panel_meta'],
         ),
       ),
-      tunOverride: $ProfilesTable.$convertertunOverride.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}tun_override'],
-        ),
-      ),
       capabilityManifest: $ProfilesTable.$convertercapabilityManifest.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -628,8 +612,6 @@ class $ProfilesTable extends Profiles
       const SubscriptionInfoConverter();
   static TypeConverter<PanelMeta?, String?> $converterpanelMeta =
       const PanelMetaConverter();
-  static TypeConverter<ProfileTun?, String?> $convertertunOverride =
-      const ProfileTunConverter();
   static TypeConverter<ProviderCapabilityManifest?, String?>
   $convertercapabilityManifest = const CapabilityManifestConverter();
   static TypeConverter<List<ServiceRoutePolicy>, String>
@@ -679,7 +661,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final int autoUpdateDurationMillis;
   final SubscriptionInfo? subscriptionInfo;
   final PanelMeta? panelMeta;
-  final ProfileTun? tunOverride;
   final ProviderCapabilityManifest? capabilityManifest;
   final List<ServiceRoutePolicy> serviceRoutePolicies;
   final List<ManualCapabilitySelector> manualCapabilitySelectors;
@@ -707,7 +688,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.autoUpdateDurationMillis,
     this.subscriptionInfo,
     this.panelMeta,
-    this.tunOverride,
     this.capabilityManifest,
     required this.serviceRoutePolicies,
     required this.manualCapabilitySelectors,
@@ -760,11 +740,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     if (!nullToAbsent || panelMeta != null) {
       map['panel_meta'] = Variable<String>(
         $ProfilesTable.$converterpanelMeta.toSql(panelMeta),
-      );
-    }
-    if (!nullToAbsent || tunOverride != null) {
-      map['tun_override'] = Variable<String>(
-        $ProfilesTable.$convertertunOverride.toSql(tunOverride),
       );
     }
     if (!nullToAbsent || capabilityManifest != null) {
@@ -856,9 +831,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       panelMeta: panelMeta == null && nullToAbsent
           ? const Value.absent()
           : Value(panelMeta),
-      tunOverride: tunOverride == null && nullToAbsent
-          ? const Value.absent()
-          : Value(tunOverride),
       capabilityManifest: capabilityManifest == null && nullToAbsent
           ? const Value.absent()
           : Value(capabilityManifest),
@@ -908,7 +880,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         json['subscriptionInfo'],
       ),
       panelMeta: serializer.fromJson<PanelMeta?>(json['panelMeta']),
-      tunOverride: serializer.fromJson<ProfileTun?>(json['tunOverride']),
       capabilityManifest: serializer.fromJson<ProviderCapabilityManifest?>(
         json['capabilityManifest'],
       ),
@@ -964,7 +935,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         subscriptionInfo,
       ),
       'panelMeta': serializer.toJson<PanelMeta?>(panelMeta),
-      'tunOverride': serializer.toJson<ProfileTun?>(tunOverride),
       'capabilityManifest': serializer.toJson<ProviderCapabilityManifest?>(
         capabilityManifest,
       ),
@@ -1010,7 +980,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     int? autoUpdateDurationMillis,
     Value<SubscriptionInfo?> subscriptionInfo = const Value.absent(),
     Value<PanelMeta?> panelMeta = const Value.absent(),
-    Value<ProfileTun?> tunOverride = const Value.absent(),
     Value<ProviderCapabilityManifest?> capabilityManifest =
         const Value.absent(),
     List<ServiceRoutePolicy>? serviceRoutePolicies,
@@ -1047,7 +1016,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         ? subscriptionInfo.value
         : this.subscriptionInfo,
     panelMeta: panelMeta.present ? panelMeta.value : this.panelMeta,
-    tunOverride: tunOverride.present ? tunOverride.value : this.tunOverride,
     capabilityManifest: capabilityManifest.present
         ? capabilityManifest.value
         : this.capabilityManifest,
@@ -1098,9 +1066,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ? data.subscriptionInfo.value
           : this.subscriptionInfo,
       panelMeta: data.panelMeta.present ? data.panelMeta.value : this.panelMeta,
-      tunOverride: data.tunOverride.present
-          ? data.tunOverride.value
-          : this.tunOverride,
       capabilityManifest: data.capabilityManifest.present
           ? data.capabilityManifest.value
           : this.capabilityManifest,
@@ -1155,7 +1120,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('panelMeta: $panelMeta, ')
-          ..write('tunOverride: $tunOverride, ')
           ..write('capabilityManifest: $capabilityManifest, ')
           ..write('serviceRoutePolicies: $serviceRoutePolicies, ')
           ..write('manualCapabilitySelectors: $manualCapabilitySelectors, ')
@@ -1188,7 +1152,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     autoUpdateDurationMillis,
     subscriptionInfo,
     panelMeta,
-    tunOverride,
     capabilityManifest,
     serviceRoutePolicies,
     manualCapabilitySelectors,
@@ -1220,7 +1183,6 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.autoUpdateDurationMillis == this.autoUpdateDurationMillis &&
           other.subscriptionInfo == this.subscriptionInfo &&
           other.panelMeta == this.panelMeta &&
-          other.tunOverride == this.tunOverride &&
           other.capabilityManifest == this.capabilityManifest &&
           other.serviceRoutePolicies == this.serviceRoutePolicies &&
           other.manualCapabilitySelectors == this.manualCapabilitySelectors &&
@@ -1250,7 +1212,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<int> autoUpdateDurationMillis;
   final Value<SubscriptionInfo?> subscriptionInfo;
   final Value<PanelMeta?> panelMeta;
-  final Value<ProfileTun?> tunOverride;
   final Value<ProviderCapabilityManifest?> capabilityManifest;
   final Value<List<ServiceRoutePolicy>> serviceRoutePolicies;
   final Value<List<ManualCapabilitySelector>> manualCapabilitySelectors;
@@ -1278,7 +1239,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.autoUpdateDurationMillis = const Value.absent(),
     this.subscriptionInfo = const Value.absent(),
     this.panelMeta = const Value.absent(),
-    this.tunOverride = const Value.absent(),
     this.capabilityManifest = const Value.absent(),
     this.serviceRoutePolicies = const Value.absent(),
     this.manualCapabilitySelectors = const Value.absent(),
@@ -1307,7 +1267,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     required int autoUpdateDurationMillis,
     this.subscriptionInfo = const Value.absent(),
     this.panelMeta = const Value.absent(),
-    this.tunOverride = const Value.absent(),
     this.capabilityManifest = const Value.absent(),
     this.serviceRoutePolicies = const Value.absent(),
     this.manualCapabilitySelectors = const Value.absent(),
@@ -1342,7 +1301,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<int>? autoUpdateDurationMillis,
     Expression<String>? subscriptionInfo,
     Expression<String>? panelMeta,
-    Expression<String>? tunOverride,
     Expression<String>? capabilityManifest,
     Expression<String>? serviceRoutePolicies,
     Expression<String>? manualCapabilitySelectors,
@@ -1372,7 +1330,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         'auto_update_duration_millis': autoUpdateDurationMillis,
       if (subscriptionInfo != null) 'subscription_info': subscriptionInfo,
       if (panelMeta != null) 'panel_meta': panelMeta,
-      if (tunOverride != null) 'tun_override': tunOverride,
       if (capabilityManifest != null) 'capability_manifest': capabilityManifest,
       if (serviceRoutePolicies != null)
         'service_route_policies': serviceRoutePolicies,
@@ -1406,7 +1363,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<int>? autoUpdateDurationMillis,
     Value<SubscriptionInfo?>? subscriptionInfo,
     Value<PanelMeta?>? panelMeta,
-    Value<ProfileTun?>? tunOverride,
     Value<ProviderCapabilityManifest?>? capabilityManifest,
     Value<List<ServiceRoutePolicy>>? serviceRoutePolicies,
     Value<List<ManualCapabilitySelector>>? manualCapabilitySelectors,
@@ -1436,7 +1392,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
       panelMeta: panelMeta ?? this.panelMeta,
-      tunOverride: tunOverride ?? this.tunOverride,
       capabilityManifest: capabilityManifest ?? this.capabilityManifest,
       serviceRoutePolicies: serviceRoutePolicies ?? this.serviceRoutePolicies,
       manualCapabilitySelectors:
@@ -1501,11 +1456,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     if (panelMeta.present) {
       map['panel_meta'] = Variable<String>(
         $ProfilesTable.$converterpanelMeta.toSql(panelMeta.value),
-      );
-    }
-    if (tunOverride.present) {
-      map['tun_override'] = Variable<String>(
-        $ProfilesTable.$convertertunOverride.toSql(tunOverride.value),
       );
     }
     if (capabilityManifest.present) {
@@ -1598,7 +1548,6 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('panelMeta: $panelMeta, ')
-          ..write('tunOverride: $tunOverride, ')
           ..write('capabilityManifest: $capabilityManifest, ')
           ..write('serviceRoutePolicies: $serviceRoutePolicies, ')
           ..write('manualCapabilitySelectors: $manualCapabilitySelectors, ')
@@ -4300,7 +4249,6 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       required int autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
       Value<PanelMeta?> panelMeta,
-      Value<ProfileTun?> tunOverride,
       Value<ProviderCapabilityManifest?> capabilityManifest,
       Value<List<ServiceRoutePolicy>> serviceRoutePolicies,
       Value<List<ManualCapabilitySelector>> manualCapabilitySelectors,
@@ -4330,7 +4278,6 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<int> autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
       Value<PanelMeta?> panelMeta,
-      Value<ProfileTun?> tunOverride,
       Value<ProviderCapabilityManifest?> capabilityManifest,
       Value<List<ServiceRoutePolicy>> serviceRoutePolicies,
       Value<List<ManualCapabilitySelector>> manualCapabilitySelectors,
@@ -4461,12 +4408,6 @@ class $$ProfilesTableFilterComposer
         column: $table.panelMeta,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
-
-  ColumnWithTypeConverterFilters<ProfileTun?, ProfileTun, String>
-  get tunOverride => $composableBuilder(
-    column: $table.tunOverride,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
 
   ColumnWithTypeConverterFilters<
     ProviderCapabilityManifest?,
@@ -4691,11 +4632,6 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get tunOverride => $composableBuilder(
-    column: $table.tunOverride,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get capabilityManifest => $composableBuilder(
     column: $table.capabilityManifest,
     builder: (column) => ColumnOrderings(column),
@@ -4827,12 +4763,6 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<PanelMeta?, String> get panelMeta =>
       $composableBuilder(column: $table.panelMeta, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<ProfileTun?, String> get tunOverride =>
-      $composableBuilder(
-        column: $table.tunOverride,
-        builder: (column) => column,
-      );
 
   GeneratedColumnWithTypeConverter<ProviderCapabilityManifest?, String>
   get capabilityManifest => $composableBuilder(
@@ -5001,7 +4931,6 @@ class $$ProfilesTableTableManager
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
                 Value<PanelMeta?> panelMeta = const Value.absent(),
-                Value<ProfileTun?> tunOverride = const Value.absent(),
                 Value<ProviderCapabilityManifest?> capabilityManifest =
                     const Value.absent(),
                 Value<List<ServiceRoutePolicy>> serviceRoutePolicies =
@@ -5036,7 +4965,6 @@ class $$ProfilesTableTableManager
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 panelMeta: panelMeta,
-                tunOverride: tunOverride,
                 capabilityManifest: capabilityManifest,
                 serviceRoutePolicies: serviceRoutePolicies,
                 manualCapabilitySelectors: manualCapabilitySelectors,
@@ -5067,7 +4995,6 @@ class $$ProfilesTableTableManager
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
                 Value<PanelMeta?> panelMeta = const Value.absent(),
-                Value<ProfileTun?> tunOverride = const Value.absent(),
                 Value<ProviderCapabilityManifest?> capabilityManifest =
                     const Value.absent(),
                 Value<List<ServiceRoutePolicy>> serviceRoutePolicies =
@@ -5102,7 +5029,6 @@ class $$ProfilesTableTableManager
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 panelMeta: panelMeta,
-                tunOverride: tunOverride,
                 capabilityManifest: capabilityManifest,
                 serviceRoutePolicies: serviceRoutePolicies,
                 manualCapabilitySelectors: manualCapabilitySelectors,

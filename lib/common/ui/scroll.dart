@@ -1,9 +1,23 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/scroll.dart';
+
+bool isTouchPlatform(TargetPlatform platform) => switch (platform) {
+  TargetPlatform.android ||
+  TargetPlatform.iOS ||
+  TargetPlatform.fuchsia => true,
+  TargetPlatform.linux ||
+  TargetPlatform.macOS ||
+  TargetPlatform.windows => false,
+};
+
+double zeroDividerExtentEstimation(int? index, double crossAxisExtent) {
+  return index != null && index.isEven ? 100 : 0;
+}
 
 class BaseScrollBehavior extends MaterialScrollBehavior {
   const BaseScrollBehavior({this.scrollbarPadding = EdgeInsets.zero});
@@ -43,7 +57,7 @@ class BaseScrollBehavior extends MaterialScrollBehavior {
         !showScrollbar(context)) {
       return child;
     }
-    return CommonScrollBar(
+    return CommonScrollBar.ambient(
       controller: details.controller,
       padding: scrollbarPadding,
       child: child,
@@ -116,6 +130,14 @@ class NextClampingScrollPhysics extends ClampingScrollPhysics {
       tolerance: tolerance,
     );
   }
+}
+
+mixin ScrubbableScrollPosition on ScrollPosition {
+  bool isScrubbing = false;
+}
+
+mixin SheetScrollController on ScrollController {
+  ValueListenable<bool> get sheetOpen;
 }
 
 class ReverseScrollController extends ScrollController {

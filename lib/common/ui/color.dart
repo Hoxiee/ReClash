@@ -110,6 +110,8 @@ extension ColorExtension on Color {
 }
 
 extension ColorSchemeExtension on ColorScheme {
+  Color get modalScrim => scrim.withValues(alpha: 0.32);
+
   Color get success => Colors.green.harmonizeWith(primary);
 
   Color get warning => Colors.orange.harmonizeWith(primary);
