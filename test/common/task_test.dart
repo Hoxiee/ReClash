@@ -205,6 +205,44 @@ void main() {
     },
   );
 
+  test('makeRealProfileTask leaves profile-owned TUN keys alone', () async {
+    Future<YamlMap> build(Tun tun) async {
+      final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+        await encodeJSONTask({
+          'tun': {
+            'disable-icmp-forwarding': true,
+            'exclude-interface': ['docker0'],
+          },
+        }),
+      );
+      final result = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 7,
+          rawConfig: rawConfig,
+          realPatchConfig: PatchClashConfig(tun: tun),
+          overrideDns: false,
+          appendSystemDns: false,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules: const [],
+          defaultUA: 'ReClash-Test',
+        ),
+      );
+      return loadYaml(result.yaml) as YamlMap;
+    }
+
+    final inherited = await build(const Tun());
+    expect(inherited['tun']['disable-icmp-forwarding'], true);
+    expect(inherited['tun']['exclude-interface'], ['docker0']);
+
+    final overridden = await build(
+      const Tun(disableIcmpForwarding: false, excludeInterface: []),
+    );
+    expect(overridden['tun']['disable-icmp-forwarding'], false);
+    expect(overridden['tun']['exclude-interface'], isEmpty);
+  });
+
   test(
     'makeRealProfileTask falls back to the app UA when default is chosen',
     () async {

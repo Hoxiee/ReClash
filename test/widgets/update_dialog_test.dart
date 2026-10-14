@@ -60,9 +60,21 @@ Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
   return container;
 }
 
-/// The dialog blocks until the user answers, so tests must close it before
-/// awaiting the call that opened it.
-Future<void> tapCancel(WidgetTester tester) async {
+/// The offer screen blocks until the user answers, so tests must close it
+/// before awaiting the call that opened it. A back gesture resolves to the
+/// dismiss choice, leaving auto-check settings untouched.
+Future<void> dismissOffer(WidgetTester tester) async {
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+}
+
+Future<void> tapMute(WidgetTester tester) async {
+  await tester.tap(find.byType(OutlinedButton));
+  await tester.pumpAndSettle();
+}
+
+/// The up-to-date notice is still a plain dialog with a single text button.
+Future<void> tapDialog(WidgetTester tester) async {
   await tester.tap(find.byType(TextButton).first);
   await tester.pumpAndSettle();
 }
@@ -87,12 +99,12 @@ void main() {
         .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('v0.8.96'), findsOneWidget);
+    expect(find.textContaining('v0.8.96'), findsWidgets);
     expect(find.textContaining('Re-import backups'), findsOneWidget);
     expect(find.textContaining('Override scripts'), findsOneWidget);
     expect(find.textContaining('Breaking changes'), findsOneWidget);
 
-    await tapCancel(tester);
+    await dismissOffer(tester);
     await shown;
   });
 
@@ -109,7 +121,7 @@ void main() {
     expect(find.textContaining('新功能'), findsOneWidget);
     expect(find.textContaining('Override scripts'), findsOneWidget);
 
-    await tapCancel(tester);
+    await dismissOffer(tester);
     await shown;
   });
 
@@ -123,13 +135,13 @@ void main() {
         .checkUpdateResultHandle(data: release(_bulletsOnly));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('- Override scripts'), findsOneWidget);
+    expect(find.textContaining('Override scripts'), findsOneWidget);
 
-    await tapCancel(tester);
+    await dismissOffer(tester);
     await shown;
   });
 
-  testWidgets('stops reminding when an automatic check is dismissed', (
+  testWidgets('stops reminding when an automatic check is muted', (
     tester,
   ) async {
     final container = await pumpApp(tester);
@@ -138,10 +150,29 @@ void main() {
         .read(commonActionProvider.notifier)
         .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
     await tester.pumpAndSettle();
-    await tapCancel(tester);
+    await tapMute(tester);
     await shown;
 
     expect(container.read(appSettingProvider).autoCheckUpdate, isFalse);
+  });
+
+  testWidgets('a back gesture leaves the auto-check setting intact', (
+    tester,
+  ) async {
+    final container = await pumpApp(tester);
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(autoCheckUpdate: true));
+    await tester.pump();
+
+    final shown = container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
+    await tester.pumpAndSettle();
+    await dismissOffer(tester);
+    await shown;
+
+    expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
   });
 
   testWidgets('a manual check keeps the setting and reports a failure', (
@@ -163,7 +194,7 @@ void main() {
 
     expect(find.text('Check for updates'), findsOneWidget);
 
-    await tapCancel(tester);
+    await tapDialog(tester);
     await shown;
     expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
   });

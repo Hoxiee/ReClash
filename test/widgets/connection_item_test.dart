@@ -136,6 +136,63 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('TrackerInfoItem opens its detail inside the same sheet', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        child: Builder(
+          builder: (context) => FilledButton(
+            onPressed: () => showSheet<void>(
+              context: context,
+              props: nestedPagedSheetProps,
+              builder: (_) => NestedPagedSheet(
+                builder: (_) => AdaptiveSheetScaffold(
+                  title: 'list',
+                  body: ListView(
+                    children: [
+                      TrackerInfoItem(
+                        trackerInfo: _tracker(host: 'opens.example'),
+                        detailTitle: 'detail',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TrackerInfoDetailView), findsNothing);
+
+    await tester.tap(find.byType(TrackerInfoItem));
+    await tester.pumpAndSettle();
+
+    // The detail rode into the same sheet as a pushed page: it shows while the
+    // list page stays mounted underneath, so system back returns to the list
+    // rather than dismissing the whole sheet.
+    expect(find.byType(TrackerInfoDetailView), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TrackerInfoDetailView), findsNothing);
+    expect(find.text('list'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets(
     'TrackerInfoItem reads from the rule through the group to the node',
     (tester) async {

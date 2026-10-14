@@ -118,28 +118,40 @@ void main() {
     );
   });
 
-  group('profile TUN overrides', () {
+  group('profile-owned TUN keys', () {
     test('inherit omits both keys', () {
-      expect(const ProfileTun().toJson(), isEmpty);
-      expect(ProfileTun.fromJson({}), const ProfileTun());
+      const tun = Tun();
+      expect(tun.disableIcmpForwarding, isNull);
+      expect(tun.excludeInterface, isNull);
+      expect(tun.toJson(), isNot(contains('disable-icmp-forwarding')));
+      expect(tun.toJson(), isNot(contains('exclude-interface')));
     });
 
     test('explicit false and empty list are not inheritance', () {
-      const tun = ProfileTun(
-        disableIcmpForwarding: false,
-        excludeInterface: [],
+      const tun = Tun(disableIcmpForwarding: false, excludeInterface: []);
+      expect(
+        tun.toJson(),
+        allOf(
+          containsPair('disable-icmp-forwarding', false),
+          containsPair('exclude-interface', <String>[]),
+        ),
       );
-      expect(tun.toJson(), {
-        'disable-icmp-forwarding': false,
-        'exclude-interface': <String>[],
-      });
-      expect(ProfileTun.fromJson(jsonDecode(jsonEncode(tun.toJson()))), tun);
-      expect(tun.copyWith(disableIcmpForwarding: null).toJson(), {
-        'exclude-interface': <String>[],
-      });
-      expect(tun.copyWith(excludeInterface: null).toJson(), {
-        'disable-icmp-forwarding': false,
-      });
+      expect(Tun.fromJson(jsonDecode(jsonEncode(tun.toJson()))), tun);
+      expect(
+        tun.copyWith(disableIcmpForwarding: null).toJson(),
+        isNot(contains('disable-icmp-forwarding')),
+      );
+      expect(
+        tun.copyWith(excludeInterface: null).toJson(),
+        isNot(contains('exclude-interface')),
+      );
+    });
+
+    test('both keys survive getRealTun', () {
+      const tun = Tun(disableIcmpForwarding: true, excludeInterface: ['eth0']);
+      final effective = tun.getRealTun(RouteMode.config);
+      expect(effective.disableIcmpForwarding, isTrue);
+      expect(effective.excludeInterface, ['eth0']);
     });
   });
 }

@@ -9,24 +9,16 @@ void main() {
   ) async {
     final controller = SideSheet.createAnimationController(tester);
     addTearDown(controller.dispose);
-    var closed = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SideSheet(
-            animationController: controller,
-            onClosing: () {
-              closed = true;
-            },
-            enableDrag: false,
-            showDragHandle: true,
             backgroundColor: Colors.red,
             shadowColor: Colors.blue,
             elevation: 4,
             shape: const RoundedRectangleBorder(),
             clipBehavior: Clip.hardEdge,
-            constraints: const BoxConstraints(minWidth: 240, maxWidth: 240),
             builder: (_) => const Text('Content'),
           ),
         ),
@@ -41,13 +33,11 @@ void main() {
     expect(material.color, Colors.red);
     expect(material.shadowColor, Colors.blue);
     expect(material.elevation, 4);
-    expect(tester.getSize(find.byType(SideSheet)).width, 240);
     expect(controller.duration, const Duration(milliseconds: 300));
     expect(controller.reverseDuration, const Duration(milliseconds: 200));
-    expect(closed, isFalse);
   });
 
-  testWidgets('modal side sheet floats as an inset, rounded, raised card', (
+  testWidgets('modal side sheet floats as an inset card on the trailing edge', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -133,7 +123,6 @@ void main() {
                     result = await showModalSideSheet<String>(
                       context: context,
                       useSafeArea: true,
-                      isScrollControlled: true,
                       barrierColor: Colors.black45,
                       backgroundColor: Colors.green,
                       elevation: 3,

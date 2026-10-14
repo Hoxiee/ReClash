@@ -2,12 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/glyph_finders.dart';
+import '../helpers/test_app.dart';
 
 /// Mirrors how a real view drives search: flipping regex calls [onRegexChange],
 /// which does a setState and republishes a fresh [AppBarSearchState] (with a new
@@ -33,7 +33,11 @@ class _SearchHostState extends State<_SearchHost> {
         onRegexChange: (value) => setState(() => _useRegex = value),
         useRegex: _useRegex,
       ),
-      body: const SizedBox(),
+      body: ListView.builder(
+        itemCount: 40,
+        itemBuilder: (_, index) =>
+            SizedBox(height: 40, child: Text('row $index')),
+      ),
     );
   }
 }
@@ -41,15 +45,7 @@ class _SearchHostState extends State<_SearchHost> {
 Widget _wrap(ProviderContainer container, Widget child) {
   return UncontrolledProviderScope(
     container: container,
-    child: MaterialApp(
-      navigatorKey: globalState.navigatorKey,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        ...GlobalMaterialLocalizations.delegates,
-      ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
-      home: child,
-    ),
+    child: TestApp(child: child),
   );
 }
 
@@ -92,7 +88,7 @@ void main() {
     );
   });
 
-  testWidgets('regex and close fold into one grouped pill', (tester) async {
+  testWidgets('the regex toggle rides inside the search field', (tester) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
@@ -102,52 +98,63 @@ void main() {
     await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
 
-    final group = find.byType(TonalButtonGroup);
-    expect(group, findsOneWidget);
+    expect(find.byType(RegexSearchToggle), findsOneWidget);
     expect(
-      find.descendant(of: group, matching: find.byGlyph(AppGlyphs.code)),
-      findsOneWidget,
-      reason: 'the regex toggle belongs inside the grouped pill',
+      find.ancestor(
+        of: find.byGlyph(AppGlyphs.code),
+        matching: find.byType(TonalButtonGroup),
+      ),
+      findsNothing,
+      reason: 'the regex toggle lives in the field, not an app-bar pill',
     );
     expect(
-      find.descendant(of: group, matching: find.byGlyph(AppGlyphs.close)),
+      find.byGlyph(AppGlyphs.close),
       findsOneWidget,
-      reason: 'the close button shares the grouped pill with regex',
+      reason: 'the close button stays its own app-bar control',
     );
   });
 
-  testWidgets(
-    'a bottom sheet gets the app-bar search button, not a docked bar',
-    (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      globalState.container = container;
+  testWidgets('a bottom sheet docks search and keeps its regex control', (
+    tester,
+  ) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    globalState.container = container;
+    var query = '';
 
-      await tester.pumpWidget(
-        _wrap(
-          container,
-          SheetProvider(
-            type: SheetType.bottomSheet,
-            child: CommonScaffold(
-              title: 'Connections',
-              searchState: AppBarSearchState(onSearch: (_) {}),
-              body: const SizedBox(),
-            ),
-          ),
+    await tester.pumpWidget(
+      _wrap(
+        container,
+        SheetProvider(
+          type: SheetType.bottomSheet,
+          child: _SearchHost(onSearch: (value) => query = value),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(DockedSearchBar), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byGlyph(AppGlyphs.search),
+      ),
+      findsNothing,
+    );
 
-      expect(
-        find.byType(DockedSearchBar),
-        findsNothing,
-        reason: 'sheets no longer dock a search bar at the bottom',
-      );
-      expect(
-        find.byGlyph(AppGlyphs.search),
-        findsOneWidget,
-        reason: 'the app-bar search button drives search inside a sheet',
-      );
-    },
-  );
+    await tester.enterText(find.byType(TextField), 'needle');
+    await tester.pump();
+    await tester.tap(find.byGlyph(AppGlyphs.code));
+    await tester.pumpAndSettle();
+
+    expect(query, 'needle');
+    expect(
+      tester.state<_SearchHostState>(find.byType(_SearchHost))._useRegex,
+      isTrue,
+    );
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'needle',
+    );
+    expect(find.text('Logs'), findsOneWidget);
+  });
 }

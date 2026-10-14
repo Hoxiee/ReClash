@@ -151,7 +151,7 @@ void main() {
     );
 
     test(
-      'clears the groups once retry is exhausted after core throws',
+      'holds the groups once retry is exhausted after core throws',
       () async {
         when(core.getProxies).thenThrow(StateError('core down'));
         final container = buildContainer();
@@ -161,10 +161,27 @@ void main() {
 
         await actionOf(container).updateGroups();
 
-        expect(container.read(groupsProvider), isEmpty);
+        expect(container.read(groupsProvider).map((group) => group.name), [
+          'Stale',
+        ]);
         verify(core.getProxies).called(5);
       },
     );
+
+    test('clears the groups when the core reports none', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+      final container = buildContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Stale', const []),
+      ];
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider), isEmpty);
+      verify(core.getProxies).called(1);
+    });
 
     test('a core status change alone does not clear the groups', () {
       final container = buildContainer();

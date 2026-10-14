@@ -89,7 +89,6 @@ class _NestedSheetHarness {
                   showSheet(
                     context: context,
                     props: const SheetProps(
-                      isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       maxWidth: double.maxFinite,
                     ),

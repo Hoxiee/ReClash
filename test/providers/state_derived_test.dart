@@ -113,6 +113,32 @@ void main() {
     expect(container.read(navigationStateProvider).currentIndex, 0);
   });
 
+  test('proxies tab survives empty groups once profiles exist', () {
+    Iterable<PageLabel> labels() => container
+        .read(currentNavigationItemsStateProvider)
+        .value
+        .map((item) => item.label);
+    container.read(initProvider.notifier).value = true;
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(1200, 800));
+    expect(labels(), isNot(contains(PageLabel.proxies)));
+
+    _profiles(container).replace([Profile.normal(label: 'Primary')]);
+    container.read(groupsProvider.notifier).value = const [];
+    expect(labels(), contains(PageLabel.proxies));
+
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(mode: Mode.direct));
+    expect(labels(), isNot(contains(PageLabel.proxies)));
+
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(mode: Mode.rule));
+    expect(labels(), contains(PageLabel.proxies));
+  });
+
   test('an active rail carries the observability tabs out of Tools', () {
     final railBox = ProviderContainer(
       overrides: [

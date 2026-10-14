@@ -5,6 +5,7 @@ import 'package:reclash/widgets/base/inherited.dart';
 import 'package:reclash/widgets/base/scroll.dart';
 import 'package:reclash/widgets/layout/sheet.dart';
 
+import '../helpers/scrollbar.dart';
 import '../helpers/test_app.dart';
 
 Widget _list() {
@@ -27,6 +28,8 @@ void main() {
     (tester) async {
       const viewPadding = EdgeInsets.only(top: 20, bottom: 8);
       late EdgeInsets childPadding;
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         MediaQuery(
@@ -34,7 +37,7 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: CommonScrollBar(
-              controller: ScrollController(),
+              controller: controller,
               padding: const EdgeInsets.only(top: sheetAppBarHeight),
               child: Builder(
                 builder: (context) {
@@ -47,7 +50,9 @@ void main() {
         ),
       );
 
-      final scrollBarContext = tester.element(find.byType(Scrollbar).first);
+      final scrollBarContext = tester.element(
+        find.byWidgetPredicate((widget) => widget is RawScrollbar).first,
+      );
       expect(
         MediaQuery.paddingOf(scrollBarContext),
         viewPadding.copyWith(top: viewPadding.top + sheetAppBarHeight),
@@ -75,10 +80,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final scrollBar = tester.widget<CommonScrollBar>(
-        find.byType(CommonScrollBar),
+      final viewportTop = tester.getTopLeft(find.byType(Scrollable)).dy;
+      expect(
+        viewportTop +
+            scrollbarPainter(tester).padding.resolve(TextDirection.ltr).top,
+        sheetAppBarHeight,
       );
-      expect(scrollBar.padding, const EdgeInsets.only(top: sheetAppBarHeight));
     },
   );
 
@@ -97,10 +104,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final scrollBar = tester.widget<CommonScrollBar>(
-        find.byType(CommonScrollBar),
+      final viewportTop = tester.getTopLeft(find.byType(Scrollable)).dy;
+      expect(
+        viewportTop +
+            scrollbarPainter(tester).padding.resolve(TextDirection.ltr).top,
+        sheetAppBarHeight,
       );
-      expect(scrollBar.padding, const EdgeInsets.only(top: sheetAppBarHeight));
     },
   );
 }

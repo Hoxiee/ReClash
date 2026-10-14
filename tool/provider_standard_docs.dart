@@ -74,6 +74,15 @@ const headerDocs = <String, Map<String, String>>{
     'purpose': 'Subscription issue-report action. Use an absolute HTTPS URL.',
     'example': 'ReClash-ReportURL: https://example.com/report',
   },
+  'telemetryUrl': {
+    'value': 'Provider telemetry ingest URL',
+    'purpose':
+        'Opt-in telemetry sink. When set, the subscription report sheet offers '
+        'a direct send that POSTs the report JSON to this endpoint. The user '
+        'confirms every send; nothing is sent in the background. Use an '
+        'absolute HTTPS URL.',
+    'example': 'ReClash-TelemetryURL: https://example.com/ingest',
+  },
   'announceUrl': {
     'value': 'Provider announcement URL',
     'purpose':

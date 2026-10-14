@@ -4,9 +4,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/profiles/add.dart';
-import 'package:reclash/views/setup/steps/finish.dart';
+import 'package:reclash/views/setup/region.dart';
+import 'package:reclash/views/setup/steps/coverage.dart';
 import 'package:reclash/views/setup/steps/subscription.dart';
 
 import '../helpers/test_app.dart';
@@ -25,8 +25,7 @@ class _ImportAction extends ProfilesAction {
 }
 
 Widget _subscription() => SetupSubscriptionStep(onNext: () {}, onBack: () {});
-Widget _finish({bool revisit = false}) =>
-    SetupFinishStep(onDone: () {}, onBack: () {}, revisit: revisit);
+Widget _coverage() => SetupCoverageStep(onNext: () {}, onBack: () {});
 
 Future<void> _show(
   WidgetTester tester,
@@ -75,7 +74,7 @@ Future<ProviderContainer> _pump(
 }
 
 Future<void> _select(WidgetTester tester, String label) async {
-  await tester.tap(find.byKey(const ValueKey('setup-app-region')).last);
+  await tester.tap(find.widgetWithText(TextButton, 'Change').last);
   await tester.pumpAndSettle();
   await tester.tap(find.text(label).last);
   await tester.pumpAndSettle();
@@ -113,104 +112,67 @@ void main() {
     tester,
   ) async {
     final container = await _pump(tester);
-    final selector = find.byKey(const ValueKey('setup-app-region')).last;
+    final strip = find.byType(SetupDetectedStrip);
     expect(
-      tester.getTopLeft(selector).dy,
+      tester.getTopLeft(strip).dy,
       lessThan(tester.getTopLeft(find.text('URL')).dy),
     );
-    expect(find.text('Send HWID'), findsOneWidget);
 
     await _select(tester, 'Russia');
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
     await _import(tester);
     expect(_ImportAction.identities, [true]);
   });
 
-  testWidgets('manual HWID off survives rebuilding, navigation and revisit', (
+  testWidgets('HWID turned off in settings survives later region picks', (
     tester,
   ) async {
     final container = await _pump(tester);
     await _select(tester, 'Russia');
-    await tester.tap(find.byKey(const ValueKey('setup-send-hwid')).last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Turn off'));
-    await tester.pumpAndSettle();
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-
     container
         .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(locale: 'ru'));
+        .update((state) => state.copyWith(sendDeviceIdentity: false));
     await tester.pumpAndSettle();
+
     await _select(tester, 'Russia');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-
-    await _show(tester, container, _finish());
+    await _select(tester, 'Iran');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-    await _show(tester, container, _subscription());
-    await _show(tester, container, _finish(revisit: true));
+
+    await _show(tester, container, _coverage());
+    await _select(tester, 'Other');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
     await _show(tester, container, _subscription());
     await _import(tester);
     expect(_ImportAction.identities, [false]);
   });
 
-  testWidgets('HWID off outside Russia applies without confirmation', (
+  testWidgets('the coverage step hosts the same detected strip', (
+    tester,
+  ) async {
+    final container = await _pump(tester, child: _coverage());
+
+    expect(find.byType(SetupDetectedStrip), findsOneWidget);
+    await _select(tester, 'Iran');
+
+    expect(container.read(appSettingProvider).region, 'IR');
+    expect(container.read(smartRoutingSettingProvider).preset, 'ir');
+    expect(find.textContaining('Detected: Iran'), findsOneWidget);
+  });
+
+  testWidgets('Other keeps routing off and supplies operational markers', (
     tester,
   ) async {
     final container = await _pump(tester);
-    await _select(tester, 'Russia');
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     await _select(tester, 'Iran');
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+    await _select(tester, 'Other');
 
-    await tester.tap(find.byKey(const ValueKey('setup-send-hwid')).last);
-    await tester.pumpAndSettle();
+    final props = container.read(smartRoutingSettingProvider);
+    expect(props.enabled, isFalse);
+    expect(props.censorCountries, isEmpty);
+    expect(props.openMarkers, isNotEmpty);
+    expect(props.rcxParams.canaryForeign, isNotEmpty);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-    expect(find.text('Turn off'), findsNothing);
-  });
-
-  testWidgets(
-    'Other keeps routing independent and supplies operational markers',
-    (tester) async {
-      final container = await _pump(tester, child: _finish());
-      final toggle = find.byKey(const ValueKey('setup-smart-routing')).last;
-      await tester.tap(toggle);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Enable anyway'));
-      await tester.pumpAndSettle();
-      final props = container.read(smartRoutingSettingProvider);
-      expect(props.unlocked, isTrue);
-      expect(props.rcxParams.openMarkers, isNotEmpty);
-      expect(props.rcxParams.canaryForeign, isNotEmpty);
-      expect(props.censorCountries, isEmpty);
-      expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-
-      await _show(tester, container, _subscription());
-      await _select(tester, 'Iran');
-      expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
-      await _select(tester, 'Other');
-      expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
-      expect(
-        container.read(smartRoutingSettingProvider).openMarkers,
-        isNotEmpty,
-      );
-    },
-  );
-
-  testWidgets('finish preset opens the strategy dialog without enabling', (
-    tester,
-  ) async {
-    final container = await _pump(tester, child: _finish());
-    expect(find.text('Geo resources'), findsOneWidget);
-    expect(
-      find.text('Access control'),
-      system.isAndroid ? findsOneWidget : findsNothing,
-    );
-    await tester.tap(find.text('Preset'));
-    await tester.pumpAndSettle();
-    expect(find.byType(RoutingStudioView), findsNothing);
-    expect(find.text('Saver'), findsOneWidget);
-    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
-    expect(container.read(desyncSettingProvider).enabled, isFalse);
   });
 }

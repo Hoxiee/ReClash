@@ -205,7 +205,7 @@ void main() {
 
     holdStageKey(tester);
 
-    await tester.tap(find.byGlyph(AppGlyphs.add));
+    await tester.tap(find.byGlyph(AppGlyphs.addCircle));
     await tester.pump();
     // The staging flow debounces before it writes through.
     await tester.pump(const Duration(milliseconds: 400));
@@ -237,13 +237,13 @@ void main() {
 
     holdStageKey(tester, scenes: const ['a', 'b']);
 
-    await tester.tap(find.byGlyph(AppGlyphs.add).first);
+    await tester.tap(find.byGlyph(AppGlyphs.addCircle).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(container.read(proxyGroupProvider).proxies, ['alpha']);
 
-    await tester.tap(find.byGlyph(AppGlyphs.add).last);
+    await tester.tap(find.byGlyph(AppGlyphs.addCircle).last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 

@@ -234,7 +234,7 @@ void main() {
     expect(find.text('Location permission'), findsOneWidget);
   });
 
-  testWidgets('the authorize action sits on its own line under the text', (
+  testWidgets('the authorize action trails the row above the footer text', (
     tester,
   ) async {
     await pumpView(tester, isMacOS: true, locale: const Locale('ru'));
@@ -251,8 +251,8 @@ void main() {
         .first;
 
     expect(
-      tester.getTopLeft(button).dy,
-      greaterThanOrEqualTo(tester.getBottomLeft(desc).dy),
+      tester.getBottomLeft(button).dy,
+      lessThanOrEqualTo(tester.getTopLeft(desc).dy),
     );
     expect(
       tester.getRect(button).right,

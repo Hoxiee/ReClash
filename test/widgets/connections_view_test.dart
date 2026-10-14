@@ -76,15 +76,18 @@ void main() {
     expect(builtItems, lessThan(connections.length));
     expect(find.textContaining('host-0.com'), findsOneWidget);
 
+    // Anchor the scroll on a currently-built row rather than host-0: the list
+    // keeps at least one TrackerInfoItem built throughout, so its scrollable
+    // stays resolvable even after host-0 leaves the cache.
     await tester.scrollUntilVisible(
       find.textContaining('host-99.com'),
       800,
-      scrollable: find.byWidgetPredicate(
-        (widget) =>
-            widget is Scrollable &&
-            widget.axisDirection == AxisDirection.down &&
-            widget.controller != null,
-      ),
+      scrollable: find
+          .ancestor(
+            of: find.byType(TrackerInfoItem).first,
+            matching: find.byType(Scrollable),
+          )
+          .first,
     );
 
     expect(find.textContaining('host-99.com'), findsOneWidget);

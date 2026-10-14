@@ -158,7 +158,7 @@ void main() {
     expect(
       tester
           .widgetList<RecordListItem>(find.byType(RecordListItem))
-          .where((item) => item.isError),
+          .where((item) => item.tone == RecordTone.error),
       hasLength(2),
     );
     final errorTile = tester.widget<ListTile>(

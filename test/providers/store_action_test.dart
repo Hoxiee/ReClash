@@ -181,6 +181,68 @@ void main() {
       expect(profilesDir.existsSync(), isFalse);
     });
 
+    test('removes scripts, the applied config and local caches', () async {
+      final homeDirPath = await appPath.homeDirPath;
+      final scriptsDir = Directory(await appPath.scriptsDirPath)
+        ..createSync(recursive: true);
+      File(join(scriptsDir.path, '1.js')).writeAsStringSync('x');
+      final configFile = File(await appPath.configFilePath)
+        ..writeAsStringSync('x');
+      final restoreDir = Directory(await appPath.restoreDirPath)
+        ..createSync(recursive: true);
+      File(join(restoreDir.path, 'stale.json')).writeAsStringSync('x');
+      final logsDir = Directory(join(homeDirPath, 'logs'))
+        ..createSync(recursive: true);
+      File(join(logsDir.path, 'ReClash_2026-01-01.log'))
+          .writeAsStringSync('x');
+      final dashboardEntry = File(
+        join(webDashboardDirIn(homeDirPath), 'zashboard', 'index.html'),
+      )..createSync(recursive: true);
+      dashboardEntry.writeAsStringSync('x');
+      final geoFiles = [MMDB, GEOIP, GEOSITE, ASN]
+          .map((name) => File(join(homeDirPath, name))..writeAsStringSync('x'))
+          .toList();
+      final staleApk = File(join(homeDirPath, 'update-v1.apk'))
+        ..writeAsStringSync('x');
+      final container = buildContainer();
+
+      await container.read(storeActionProvider.notifier).handleClear();
+
+      expect(scriptsDir.existsSync(), isFalse);
+      expect(configFile.existsSync(), isFalse);
+      expect(restoreDir.existsSync(), isFalse);
+      expect(logsDir.existsSync(), isFalse);
+      expect(Directory(webDashboardDirIn(homeDirPath)).existsSync(), isFalse);
+      for (final geoFile in geoFiles) {
+        expect(geoFile.existsSync(), isFalse);
+      }
+      expect(staleApk.existsSync(), isFalse);
+    });
+
+    test('removes database sidecar files but keeps the backup', () async {
+      final databasePath = await appPath.databasePath;
+      final sidecars = ['-wal', '-shm', '-journal']
+          .map((suffix) => File('$databasePath$suffix')..writeAsStringSync('x'))
+          .toList();
+      final backupFile = File(await appPath.backupFilePath)
+        ..writeAsStringSync('x');
+      final lockFile = File(await appPath.lockFilePath)
+        ..writeAsStringSync('x');
+      final container = buildContainer();
+
+      await container.read(storeActionProvider.notifier).handleClear();
+
+      for (final sidecar in sidecars) {
+        expect(sidecar.existsSync(), isFalse);
+      }
+      expect(
+        backupFile.existsSync(),
+        isTrue,
+        reason: 'the backup is the only way back the dialog promises.',
+      );
+      expect(lockFile.existsSync(), isTrue);
+    });
+
     test('exits without asking for a save', () async {
       final container = buildContainer();
 

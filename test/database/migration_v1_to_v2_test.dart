@@ -140,17 +140,6 @@ void main() {
     expect(_userVersion(raw), database.schemaVersion);
   });
 
-  test('the v6 upgrade adds tun_override to profiles', () async {
-    raw.execute('ALTER TABLE profiles DROP COLUMN tun_override');
-    raw.execute('PRAGMA user_version = 5');
-    expect(_columnsOf(raw, 'profiles'), isNot(contains('tun_override')));
-
-    final database = await openAndMigrate();
-
-    expect(_columnsOf(raw, 'profiles'), contains('tun_override'));
-    expect(_userVersion(raw), database.schemaVersion);
-  });
-
   test('the v3 upgrade adds match_target to profiles', () async {
     _downgradeToV2(raw);
     expect(_columnsOf(raw, 'profiles'), isNot(contains('match_target')));

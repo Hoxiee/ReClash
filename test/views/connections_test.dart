@@ -182,7 +182,7 @@ void main() {
   });
 
   for (final width in [390.0, 1400.0]) {
-    testWidgets('groups search with close and keeps sort separate at $width', (
+    testWidgets('pulls close and sort into one visible group at $width', (
       tester,
     ) async {
       when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);
@@ -190,27 +190,22 @@ void main() {
 
       await pumpConnections(tester, size: Size(width, 1000));
 
-      final search = find.byGlyph(AppGlyphs.search);
       final close = find.byGlyph(AppGlyphs.clearAll);
       final sort = find.byGlyph(AppGlyphs.sort);
-      final searchGroup = find.ancestor(
-        of: search,
-        matching: find.byType(TonalButtonGroup),
-      );
-      final closeGroup = find.ancestor(
-        of: close,
-        matching: find.byType(TonalButtonGroup),
-      );
-      expect(searchGroup, findsOneWidget);
-      expect(closeGroup, findsOneWidget);
-      expect(searchGroup.evaluate().single, same(closeGroup.evaluate().single));
-      expect(sort, findsOneWidget);
+      final group = find.byType(TonalButtonGroup);
+      expect(group, findsOneWidget);
       expect(
-        find.ancestor(of: sort, matching: find.byType(TonalButtonGroup)),
-        findsNothing,
+        find.descendant(of: group, matching: close),
+        findsOneWidget,
+        reason: 'close shares the single action group',
+      );
+      expect(
+        find.descendant(of: group, matching: sort),
+        findsOneWidget,
+        reason: 'sort shares the single action group',
       );
       expect(find.byGlyph(AppGlyphs.more), findsNothing);
-      expect(tester.getCenter(search).dx, lessThan(tester.getCenter(close).dx));
+      expect(find.byGlyph(AppGlyphs.search), findsOneWidget);
       expect(tester.getCenter(close).dx, lessThan(tester.getCenter(sort).dx));
 
       await tester.tap(close);
@@ -225,7 +220,7 @@ void main() {
 
   for (final sheetType in [SheetType.bottomSheet, SheetType.sideSheet]) {
     testWidgets(
-      'keeps search with more and menu actions in ${sheetType.name}',
+      'surfaces close and sort without an overflow in ${sheetType.name}',
       (tester) async {
         when(
           core.getConnections,
@@ -238,37 +233,30 @@ void main() {
           size: Size(sheetType == SheetType.bottomSheet ? 390 : 600, 1000),
         );
 
-        expect(find.byGlyph(AppGlyphs.clearAll), findsNothing);
-        expect(find.byGlyph(AppGlyphs.sort), findsNothing);
-
-        final searchGroup = find.ancestor(
-          of: find.byGlyph(AppGlyphs.search),
-          matching: find.byType(TonalButtonGroup),
-        );
-        final moreGroup = find.ancestor(
-          of: find.byGlyph(AppGlyphs.more),
-          matching: find.byType(TonalButtonGroup),
-        );
-        expect(searchGroup, findsOneWidget);
-        expect(moreGroup, findsOneWidget);
+        expect(find.byGlyph(AppGlyphs.more), findsNothing);
+        final group = find.byType(TonalButtonGroup);
+        expect(group, findsOneWidget);
         expect(
-          searchGroup.evaluate().single,
-          same(moreGroup.evaluate().single),
+          find.descendant(of: group, matching: find.byGlyph(AppGlyphs.clearAll)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: group, matching: find.byGlyph(AppGlyphs.sort)),
+          findsOneWidget,
         );
 
-        await tester.tap(find.byGlyph(AppGlyphs.more));
-        await tester.pumpAndSettle();
+        if (sheetType == SheetType.bottomSheet) {
+          expect(find.byType(DockedSearchBar), findsOneWidget);
+          expect(
+            find.descendant(
+              of: find.byType(AppBar),
+              matching: find.byGlyph(AppGlyphs.search),
+            ),
+            findsNothing,
+          );
+        }
 
-        final appLocalizations = AppLocalizations.current;
-        final menu = tester.widget<CommonPopupMenu>(
-          find.byType(CommonPopupMenu),
-        );
-        expect(menu.items.map((item) => item.label), [
-          appLocalizations.closeConnections,
-          appLocalizations.sort,
-        ]);
-
-        await tester.tap(find.text(appLocalizations.closeConnections));
+        await tester.tap(find.byGlyph(AppGlyphs.clearAll));
         await tester.pumpAndSettle();
 
         verify(core.closeConnections).called(1);
@@ -293,10 +281,6 @@ void main() {
         await pumpConnections(tester, sheetType: sheetType);
 
         Future<void> openSortMenu() async {
-          if (sheetType != null) {
-            await tester.tap(find.byGlyph(AppGlyphs.more));
-            await tester.pumpAndSettle();
-          }
           await tester.tap(find.byGlyph(AppGlyphs.sort));
           await tester.pumpAndSettle();
         }
@@ -316,11 +300,8 @@ void main() {
         final menu = tester.widget<CommonPopupMenu>(
           find.byType(CommonPopupMenu),
         );
-        final sortItems = sheetType == null
-            ? menu.items
-            : menu.items.last.subItems;
         expect(
-          sortItems.singleWhere((item) => item.glyph == AppGlyphs.check).label,
+          menu.items.singleWhere((item) => item.glyph == AppGlyphs.check).label,
           appLocalizations.host,
         );
         expect(tester.takeException(), isNull);

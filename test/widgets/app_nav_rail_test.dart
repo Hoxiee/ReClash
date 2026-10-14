@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +57,7 @@ void main() {
     WidgetTester tester, {
     double viewWidth = 800,
     bool expanded = false,
+    bool wide = false,
     double height = 500,
     Locale? locale,
   }) async {
@@ -85,7 +87,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: SizedBox(
                 height: height,
-                child: AppNavRail(expanded: expanded),
+                child: AppNavRail(expanded: expanded, wide: wide),
               ),
             ),
           ),
@@ -248,6 +250,111 @@ void main() {
     expect(
       tester.getSize(find.byType(AppNavRail)).width,
       NavRailMetrics.expandedWidth,
+    );
+  });
+
+  testWidgets('the wide rail is a labelled list at a fixed width', (
+    tester,
+  ) async {
+    await pumpRail(tester, expanded: true, wide: true);
+
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.wideWidth,
+    );
+    final dashboardRow = tester.getRect(find.text(PageLabel.dashboard.label));
+    final dashboardIcon = tester.getRect(
+      find.byGlyph(AppGlyphs.dashboard).first,
+    );
+    expect(dashboardRow.left, greaterThan(dashboardIcon.right));
+    expect(dashboardRow.center.dy, closeTo(dashboardIcon.center.dy, 1));
+    // Slot tooltips stay off while the labels read; the foot toggle keeps
+    // its own expand/collapse hint and is excluded here.
+    Element? toggleTooltip;
+    tester
+        .element(find.byKey(AppNavRail.toggleKey))
+        .visitAncestorElements((element) {
+          if (element.widget is AppTooltip) {
+            toggleTooltip = element;
+            return false;
+          }
+          return true;
+        });
+    expect(
+      find
+          .byType(AppTooltip)
+          .evaluate()
+          .where((element) => element != toggleTooltip)
+          .every((element) => (element.widget as AppTooltip).message == null),
+      isTrue,
+    );
+  });
+
+  testWidgets('right-clicking the rail toggles the wide mode', (tester) async {
+    tester.view.physicalSize = const Size(1200, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(1200, 600);
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(navSurface: NavSurface.rail));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          child: AppSidebarContainer(child: SizedBox.expand()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.compactWidth,
+    );
+
+    final rail = tester.getCenter(find.byType(AppNavRail));
+    final gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await gesture.down(rail);
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(AppSidebarContainer)),
+    );
+    await tester.tap(find.text(l10n.sidebarOpenWide));
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).railWide, isTrue);
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.compactWidth,
+    );
+
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.wideWidth,
+    );
+
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(AppNavRail)).width,
+      NavRailMetrics.compactWidth,
     );
   });
 
@@ -506,5 +613,282 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(focusInRail(), isTrue);
+  });
+
+  testWidgets('wide folding never moves the icons and fades labels late', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
+
+    var expanded = true;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 500,
+                child: StatefulBuilder(
+                  builder: (context, setState) => AppNavRail(
+                    expanded: expanded,
+                    wide: true,
+                    onToggle: () => setState(() => expanded = !expanded),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    double labelOpacity(String text) {
+      final el = tester.element(find.text(text));
+      double? opacity;
+      el.visitAncestorElements((ancestor) {
+        if (opacity == null && ancestor.widget is Opacity) {
+          opacity = (ancestor.widget as Opacity).opacity;
+        }
+        return opacity == null;
+      });
+      return opacity ?? -1;
+    }
+
+    final slotDx = tester.getTopLeft(find.byType(GlyphIcon).first).dx;
+    final toggleDx = tester.getTopLeft(find.byType(GlyphIcon).last).dx;
+
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    var midOpacity = -1.0;
+    var lateOpacity = -1.0;
+    for (var i = 0; i < 14; i++) {
+      await tester.pump(const Duration(milliseconds: 30));
+      final width = tester.getSize(find.byType(AppNavRail)).width;
+      expect(width, greaterThanOrEqualTo(NavRailMetrics.compactWidth - 0.01));
+      expect(width, lessThanOrEqualTo(NavRailMetrics.wideWidth + 0.01));
+      expect(
+        tester.getTopLeft(find.byType(GlyphIcon).first).dx,
+        closeTo(slotDx, 0.01),
+      );
+      expect(
+        tester.getTopLeft(find.byType(GlyphIcon).last).dx,
+        closeTo(toggleDx, 0.01),
+      );
+      // The foot toggle is a fixed square, never a stretched bar.
+      expect(
+        tester.getSize(find.byKey(AppNavRail.toggleKey)),
+        const Size(
+          NavRailMetrics.compactWidth - NavRailMetrics.pillInsetX * 2,
+          NavRailMetrics.compactSlotHeight - NavRailMetrics.pillInsetY * 2,
+        ),
+      );
+      if (width < 200 && width > 150) {
+        midOpacity = labelOpacity(PageLabel.dashboard.label);
+      }
+      if (width < 90 && width > 50) {
+        lateOpacity = labelOpacity(PageLabel.dashboard.label);
+      }
+    }
+    // The shrinking edge curtains the labels away; they dissolve at the end.
+    expect(midOpacity, greaterThan(0.5));
+    expect(lateOpacity, lessThan(0.5));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.byType(GlyphIcon).first).dx,
+      closeTo(slotDx, 0.01),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the foot separator only shows while the rail scrolls', (
+    tester,
+  ) async {
+    await pumpRail(tester);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(AppNavRail.footSeparatorKey)).height,
+      0,
+    );
+  });
+
+  testWidgets('a mouse drag scrolls a short rail', (tester) async {
+    await pumpRail(tester, expanded: true, height: 180);
+    await tester.pumpAndSettle();
+
+    final pixels = tester
+        .state<ScrollableState>(find.byType(Scrollable))
+        .position
+        .pixels;
+    expect(pixels, 0);
+
+    await tester.dragFrom(
+      tester.getCenter(find.byType(SingleChildScrollView)),
+      const Offset(0, -120),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      greaterThan(0),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the foot separator shows while the rail scrolls', (
+    tester,
+  ) async {
+    await pumpRail(tester, height: 180);
+    await tester.pumpAndSettle();
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(AppNavRail.footSeparatorKey)).height,
+      NavRailMetrics.groupGap + NavRailMetrics.hairline,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the foot toggle hints expand and collapse', (tester) async {    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items()),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
+
+    AppLocalizations l10n() =>
+        AppLocalizations.of(tester.element(find.byType(AppNavRail)));
+    AppTooltip toggleTooltip() => tester.widget(
+      find.ancestor(
+        of: find.byKey(AppNavRail.toggleKey),
+        matching: find.byType(AppTooltip),
+      ),
+    );
+
+    var expanded = false;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 500,
+                child: StatefulBuilder(
+                  builder: (context, setState) => AppNavRail(
+                    expanded: expanded,
+                    onToggle: () => setState(() => expanded = !expanded),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(toggleTooltip().message, l10n().showMore);
+
+    await tester.tap(find.byKey(AppNavRail.toggleKey));
+    await tester.pumpAndSettle();
+    expect(toggleTooltip().message, l10n().showLess);
+  });
+
+  testWidgets('the last slot stays reachable above the foot toggle', (
+    tester,
+  ) async {
+    // Seven expanded slots need 473px of list against a 500px rail: the list
+    // fits the body but not the scroll viewport above the foot, so the rail
+    // must scroll. Judging by the whole height strands Tools under the foot
+    // with no way to reach it.
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final seven = [
+      (AppGlyphs.dashboard, PageLabel.dashboard),
+      (AppGlyphs.proxies, PageLabel.proxies),
+      (AppGlyphs.profiles, PageLabel.profiles),
+      (AppGlyphs.requests, PageLabel.requests),
+      (AppGlyphs.connections, PageLabel.connections),
+      (AppGlyphs.dns, PageLabel.dns),
+      (AppGlyphs.tools, PageLabel.tools),
+    ];
+    container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              for (final (glyph, label) in seven)
+                NavigationItem(
+                  glyph: glyph,
+                  label: label,
+                  builder: (_) => const SizedBox.shrink(),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(800, 600);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          includeNavigatorKey: false,
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 500,
+                child: AppNavRail(expanded: true),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scrollable verdict: the separator is up and the tail is reachable.
+    expect(
+      tester.getSize(find.byKey(AppNavRail.footSeparatorKey)).height,
+      NavRailMetrics.groupGap + NavRailMetrics.hairline,
+    );
+    await tester.dragUntilVisible(
+      find.byGlyph(AppGlyphs.tools).first,
+      find.byType(SingleChildScrollView),
+      const Offset(0, -60),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byGlyph(AppGlyphs.tools), findsWidgets);
+    expect(tester.takeException(), isNull);
   });
 }

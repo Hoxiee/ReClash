@@ -97,6 +97,18 @@ Future<void> _resize(
   await tester.pumpAndSettle();
 }
 
+// The doctor's ambient motion — the verdict ring's sweep, the path rail's
+// travelling light, the diagnosis card's drifting aura — loops for as long as a
+// check is in flight, and `pumpAndSettle` would wait on it forever. Reduced
+// motion is the contract that parks all three, so the harness asserts against
+// that screen. It rides the platform flag rather than a MediaQuery under the
+// app, because the Doctor also opens as a pushed sheet above it.
+void _withoutAmbientMotion(WidgetTester tester) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
+
 Future<ProviderContainer> _pumpDoctor(
   WidgetTester tester,
   _MockCoreHandler core,
@@ -109,6 +121,7 @@ Future<ProviderContainer> _pumpDoctor(
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   tester.platformDispatcher.textScaleFactorTestValue = textScaleFactor;
+  _withoutAmbientMotion(tester);
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

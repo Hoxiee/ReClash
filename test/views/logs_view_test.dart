@@ -82,11 +82,12 @@ void main() {
       await tester.pump();
     }
     // With the scroll-to-end FAB gone, no FAB zone reserves the bottom, so the
-    // pill follows the thumb: at the oldest end its center rests 24px above the
-    // track bottom, mirroring the newest-end resting position.
+    // pill follows the thumb. The record-style rows make the oldest-end thumb
+    // longer than the 48px minimum, so its center rests 32px above the track
+    // bottom.
     expect(
       tester.getCenter(find.byKey(hintKey)).dy,
-      closeTo(scrollableRect.bottom - 24, 6),
+      closeTo(scrollableRect.bottom - 32, 6),
     );
 
     await gesture.up();

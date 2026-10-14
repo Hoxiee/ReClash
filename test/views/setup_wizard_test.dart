@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,15 +9,21 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/application_setting.dart';
+import 'package:reclash/views/setup/layout.dart';
 import 'package:reclash/views/setup/setup.dart';
-import 'package:reclash/views/setup/steps/finish.dart';
+import 'package:reclash/views/setup/steps/check.dart';
 import 'package:reclash/views/setup/widgets.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+
+const _provider = Profile(
+  id: 1,
+  label: 'Provider',
+  autoUpdateDuration: defaultUpdateDuration,
+);
 
 class _ExitingSystemAction extends SystemAction {
   static final List<String> calls = [];
@@ -114,45 +118,90 @@ class _RestoringBackupAction extends BackupAction {
   }
 }
 
-class _TestPermissionGateway implements SetupPermissionGateway {
-  bool notificationGranted;
+/// Records what the check step asks of the core instead of starting one.
+class _RecordingSetupAction extends SetupAction {
+  final requests = <(bool running, bool initialize)>[];
+  int authorizations = 0;
+  bool started = true;
+
+  @override
+  void beginTunAuthorization({bool allowPrompt = true}) => authorizations++;
+
+  @override
+  Future<bool> setRunning(bool running, {bool initialize = false}) async {
+    requests.add((running, initialize));
+    // The check step waits on `isStartProvider`, which reads the run time.
+    if (started) {
+      ref.read(runTimeProvider.notifier).value = running ? 1 : null;
+    }
+    return started;
+  }
+}
+
+/// A doctor that answers with a prepared snapshot, so the check step can be
+/// driven through a verdict without a core.
+class _FakeDoctor extends ConnectionDoctor {
+  _FakeDoctor({this.initial = _observing, this.settled});
+
+  static const _observing = DoctorSnapshot(
+    supported: true,
+    state: DoctorExamState.observing,
+    health: DoctorHealth.unknown,
+    confidence: DoctorConfidence.insufficient,
+    severity: DoctorSeverity.info,
+  );
+
+  final DoctorSnapshot initial;
+
+  /// What [start] resolves to; null leaves the snapshot where it was.
+  DoctorSnapshot? settled;
+
+  final starts = <DoctorExamMode>[];
+  int refreshes = 0;
+  int cancels = 0;
+  int flushes = 0;
+
+  @override
+  DoctorSnapshot build() => initial;
+
+  @override
+  Future<DoctorSnapshot> start(DoctorExamMode mode) async {
+    starts.add(mode);
+    final next = settled;
+    if (next != null) state = next;
+    return state;
+  }
+
+  @override
+  Future<DoctorSnapshot> refresh({int minimumRevision = 0}) async {
+    refreshes++;
+    return state;
+  }
+
+  @override
+  Future<DoctorSnapshot> cancel() async {
+    cancels++;
+    state = state.copyWith(state: DoctorExamState.cancelled);
+    return state;
+  }
+
+  @override
+  Future<DoctorSnapshot> flushDns() async {
+    flushes++;
+    return state;
+  }
+}
+
+class _TestCheckGateway implements SetupCheckGateway {
+  _TestCheckGateway({this.isAndroid = false});
+
+  @override
+  final bool isAndroid;
+
   bool batteryGranted = false;
-  Error? notificationCheckError;
-  Error? notificationRequestError;
   Error? batteryOpenError;
-  Completer<void>? notificationRequest;
-  Completer<void>? batteryOpen;
-  int notificationChecks = 0;
-  int notificationRequests = 0;
-  int appSettingsOpens = 0;
-  int batterySettingsOpens = 0;
+  int batteryOpens = 0;
   int batteryChecks = 0;
-
-  _TestPermissionGateway({this.notificationGranted = false});
-
-  @override
-  bool get isAndroid => true;
-
-  @override
-  Future<bool> isNotificationsPermissionGranted() async {
-    notificationChecks++;
-    final error = notificationCheckError;
-    if (error != null) throw error;
-    return notificationGranted;
-  }
-
-  @override
-  Future<void> requestNotificationsPermission() async {
-    notificationRequests++;
-    final error = notificationRequestError;
-    if (error != null) throw error;
-    await notificationRequest?.future;
-  }
-
-  @override
-  Future<void> openAppSettings() async {
-    appSettingsOpens++;
-  }
 
   @override
   Future<void> checkBatteryOptimizationDisable(ProviderReader read) async {
@@ -162,19 +211,61 @@ class _TestPermissionGateway implements SetupPermissionGateway {
 
   @override
   Future<void> openBatteryOptimizationSettings() async {
-    batterySettingsOpens++;
+    batteryOpens++;
     final error = batteryOpenError;
     if (error != null) throw error;
-    await batteryOpen?.future;
   }
 }
+
+DoctorSnapshot _snapshot({
+  DoctorExamState state = DoctorExamState.complete,
+  DoctorHealth health = DoctorHealth.healthy,
+  DoctorSeverity severity = DoctorSeverity.info,
+  DoctorConfidence confidence = DoctorConfidence.confirmed,
+  DoctorPathKind pathKind = DoctorPathKind.tun,
+  String causeCode = '',
+  DoctorLayer layer = DoctorLayer.unknown,
+  List<DoctorStage> stages = const [
+    DoctorStage(id: 'app', state: DoctorStageState.passed),
+    DoctorStage(id: 'ingress', state: DoctorStageState.passed),
+    DoctorStage(id: 'route', state: DoctorStageState.passed),
+    DoctorStage(id: 'internet', state: DoctorStageState.passed),
+    DoctorStage(id: 'response', state: DoctorStageState.passed),
+  ],
+}) => DoctorSnapshot(
+  revision: 1,
+  supported: true,
+  state: state,
+  health: health,
+  severity: severity,
+  confidence: confidence,
+  pathKind: pathKind,
+  captureState: DoctorCaptureState.active,
+  stages: stages,
+  causeCode: causeCode,
+  layer: layer,
+  progress: const DoctorProgress(completed: 5, total: 5),
+  freshUntil: DateTime.now().millisecondsSinceEpoch + 60000,
+);
+
+DoctorSnapshot _dnsStale() => _snapshot(
+  health: DoctorHealth.broken,
+  severity: DoctorSeverity.critical,
+  causeCode: 'coreResolverStale',
+  layer: DoctorLayer.dns,
+  stages: const [
+    DoctorStage(id: 'app', state: DoctorStageState.passed),
+    DoctorStage(id: 'ingress', state: DoctorStageState.passed),
+    DoctorStage(id: 'route', state: DoctorStageState.failed),
+  ],
+);
 
 Future<ProviderContainer> _pump(
   WidgetTester tester, {
   List<Profile> profiles = const [],
   AppSettingProps appSettings = const AppSettingProps(),
   Widget child = const SetupWizard(),
-  Size size = const Size(1000, 1600),
+  Size size = const Size(900, 1600),
   double textScale = 1,
   bool disableAnimations = false,
   Locale? locale,
@@ -201,6 +292,7 @@ Future<ProviderContainer> _pump(
   container.listen(smartRoutingSettingProvider, (_, _) {});
   container.listen(networkSettingProvider, (_, _) {});
   container.listen(patchClashConfigProvider, (_, _) {});
+  container.listen(vpnSettingProvider, (_, _) {});
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -222,6 +314,20 @@ Future<ProviderContainer> _pump(
   return container;
 }
 
+Widget _checkStep({
+  required SetupCheckGateway gateway,
+  List<SetupCheckOutcome>? outcomes,
+  VoidCallback? onDone,
+  VoidCallback? onBack,
+  bool revisit = false,
+}) => SetupCheckStep(
+  gateway: gateway,
+  revisit: revisit,
+  onDone: onDone ?? () {},
+  onBack: onBack ?? () {},
+  onOutcome: (outcome, _) => outcomes?.add(outcome),
+);
+
 Future<void> _toLegal(WidgetTester tester) async {
   await tester.tap(find.text('Next'));
   await tester.pumpAndSettle();
@@ -237,11 +343,34 @@ Future<void> _toRevisitSubscription(WidgetTester tester) async {
   await _toLegal(tester);
 }
 
-Future<void> _toFinish(WidgetTester tester) async {
-  await _toSubscription(tester);
+Future<void> _past(WidgetTester tester) async {
   await tester.tap(
     find.widgetWithText(FilledButton, 'Continue without a profile'),
   );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _toCoverage(WidgetTester tester) async {
+  await _toSubscription(tester);
+  await _past(tester);
+}
+
+Future<void> _toCheck(WidgetTester tester, {bool withProfile = false}) async {
+  await _toSubscription(tester);
+  if (withProfile) {
+    await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+    await tester.pumpAndSettle();
+  } else {
+    await _past(tester);
+  }
+  await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _pickRegion(WidgetTester tester, String label) async {
+  await tester.tap(find.widgetWithText(TextButton, 'Change'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(label).last);
   await tester.pumpAndSettle();
 }
 
@@ -261,19 +390,14 @@ Finder _stepScroll() => find.descendant(
   matching: find.byType(SingleChildScrollView),
 );
 
-Future<ProviderContainer> _pumpFinish(
-  WidgetTester tester,
-  SetupPermissionGateway gateway,
-) {
-  return _pump(
-    tester,
-    child: SetupFinishStep(
-      permissionGateway: gateway,
-      onDone: () {},
-      onBack: () {},
-    ),
-  );
-}
+Switch _autoRunSwitch(WidgetTester tester) => tester.widget<Switch>(
+  find
+      .descendant(
+        of: find.byKey(const ValueKey('setup-auto-run')).first,
+        matching: find.byType(Switch),
+      )
+      .first,
+);
 
 String? _focusedText() {
   final context = FocusManager.instance.primaryFocus?.context;
@@ -349,12 +473,12 @@ void main() {
   ) async {
     await _pump(
       tester,
-      appSettings: const AppSettingProps(locale: 'zh_CN'),
+      appSettings: const AppSettingProps(locale: 'ru'),
       size: const Size(400, 900),
     );
 
     expect(_cardScroll(tester).pixels, greaterThan(0));
-    expect(find.text('简体中文'), findsOneWidget);
+    expect(find.text('Русский'), findsOneWidget);
   });
 
   testWidgets('a screen too short for a bounded list scrolls as one page', (
@@ -591,16 +715,7 @@ void main() {
   testWidgets('an added profile replaces the pickers and unlocks Next', (
     tester,
   ) async {
-    await _pump(
-      tester,
-      profiles: const [
-        Profile(
-          id: 1,
-          label: 'Provider',
-          autoUpdateDuration: defaultUpdateDuration,
-        ),
-      ],
-    );
+    await _pump(tester, profiles: const [_provider]);
     await _toSubscription(tester);
 
     expect(find.text('QR code'), findsNothing);
@@ -637,39 +752,29 @@ void main() {
     expect(container.read(appSettingProvider).autoRun, isFalse);
   });
 
-  testWidgets('picking a region writes the preset without enabling routing', (
+  testWidgets('the detected strip writes the preset without enabling routing', (
     tester,
   ) async {
     final container = await _pump(tester);
     await _toSubscription(tester);
 
-    await tester.tap(find.byKey(const ValueKey('setup-app-region')).last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Iran'));
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Continue without a profile'),
-    );
-    await tester.pumpAndSettle();
+    await _pickRegion(tester, 'Iran');
+    await _past(tester);
 
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, 'ir');
     expect(props.enabled, isFalse);
     expect(container.read(appSettingProvider).region, 'IR');
+    expect(find.textContaining('Detected: Iran'), findsOneWidget);
   });
 
   testWidgets('leaving the region unpicked leaves the engine off', (
     tester,
   ) async {
     final container = await _pump(tester);
-    await _toFinish(tester);
+    await _toCheck(tester);
 
     expect(container.read(appSettingProvider).region, isNull);
-    expect(
-      find.byKey(const ValueKey('setup-smart-routing-preset')),
-      findsWidgets,
-    );
-
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, neutralPreset);
     expect(props.enabled, isFalse);
@@ -677,9 +782,9 @@ void main() {
 
   testWidgets('Done records completion and removes the route', (tester) async {
     final container = await _pump(tester);
-    await _toFinish(tester);
+    await _toCheck(tester);
 
-    await tester.tap(find.text('Done'));
+    await tester.tap(find.byKey(const ValueKey('setup-done')).first);
     await tester.pumpAndSettle();
 
     expect(container.read(appSettingProvider).setupCompleted, isTrue);
@@ -707,6 +812,22 @@ void main() {
 
     expect(find.text('Choose your language'), findsOne);
     expect(_ExitingSystemAction.calls, isEmpty);
+  });
+
+  testWidgets('each step is mounted alone, with no pager under it', (
+    tester,
+  ) async {
+    await _pump(tester);
+    expect(find.byType(SetupStepScaffold), findsOneWidget);
+
+    await _toLegal(tester);
+
+    // A pager here is a scrollable: revealing a focused footer button through
+    // it would scroll the wizard off the step it just opened.
+    expect(find.byType(PageView), findsNothing);
+    expect(find.byType(SetupStepScaffold), findsOneWidget);
+    expect(find.text('Choose your language'), findsNothing);
+    expect(find.text('Before you continue'), findsOneWidget);
   });
 
   testWidgets('resumes an unfinished required setup step', (tester) async {
@@ -782,7 +903,7 @@ void main() {
     final semantics = tester.ensureSemantics();
     await _pump(tester);
 
-    expect(find.bySemanticsLabel('Step 1 of 4'), findsOneWidget);
+    expect(find.bySemanticsLabel('Step 1 of 5'), findsOneWidget);
     final titleSemantics = tester.getSemantics(find.text('ReClash'));
     expect(titleSemantics.flagsCollection.isHeader, isTrue);
     semantics.dispose();
@@ -946,14 +1067,10 @@ void main() {
       tester,
       appSettings: const AppSettingProps(locale: 'ru'),
     );
-    await _toFinish(tester);
+    await _toCoverage(tester);
 
     expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
-    expect(
-      find.byKey(const ValueKey('setup-smart-routing-preset')),
-      findsWidgets,
-    );
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
@@ -974,10 +1091,6 @@ void main() {
 
     expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
-    expect(
-      find.byKey(const ValueKey('setup-smart-routing-preset')),
-      findsWidgets,
-    );
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
@@ -994,79 +1107,13 @@ void main() {
         ),
       ],
     );
-    await _toFinish(tester);
+    await _toCoverage(tester);
 
     expect(container.read(appSettingProvider).region, 'RU');
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, 'ru');
     expect(props.enabled, isFalse);
-  });
-
-  testWidgets('auto-run is disabled without a profile and summarized', (
-    tester,
-  ) async {
-    final container = await _pump(
-      tester,
-      appSettings: const AppSettingProps(autoRun: true),
-    );
-    await _toFinish(tester);
-
-    expect(container.read(appSettingProvider).autoRun, isFalse);
-    expect(find.text('Add a profile to enable automatic connection'), findsOne);
-    expect(find.textContaining('No VPN profile'), findsOneWidget);
-    expect(find.text('Automatic connection: off'), findsOneWidget);
-    expect(find.text('Done and connect'), findsNothing);
-  });
-
-  testWidgets('profile enables auto-run and changes the done action', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      profiles: const [
-        Profile(
-          id: 1,
-          label: 'Provider',
-          autoUpdateDuration: defaultUpdateDuration,
-        ),
-      ],
-      appSettings: const AppSettingProps(autoRun: true),
-    );
-    await _toSubscription(tester);
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Profile: Provider'), findsOneWidget);
-    expect(find.text('Automatic connection: on'), findsOneWidget);
-    expect(find.text('Done and connect'), findsOneWidget);
-  });
-
-  testWidgets('revisit never promises to connect on completion', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      profiles: const [
-        Profile(
-          id: 1,
-          label: 'Provider',
-          autoUpdateDuration: defaultUpdateDuration,
-        ),
-      ],
-      appSettings: const AppSettingProps(
-        autoRun: true,
-        disclaimerAccepted: true,
-        setupCompleted: true,
-      ),
-      child: const SetupWizard(revisit: true),
-    );
-    await _toRevisitSubscription(tester);
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Done'), findsOneWidget);
-    expect(find.text('Done and connect'), findsNothing);
   });
 
   testWidgets('panel defaults take priority over auto-run recommendation', (
@@ -1166,7 +1213,7 @@ void main() {
     final fade = tester.widget<FadeTransition>(
       find
           .ancestor(
-            of: find.byType(PageView),
+            of: find.byType(SetupStepScaffold),
             matching: find.byType(FadeTransition),
           )
           .first,
@@ -1200,7 +1247,12 @@ void main() {
     await _focusText(tester, 'Continue without a profile');
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.pumpAndSettle();
-    expect(find.text('Review your setup'), findsOneWidget);
+    expect(find.text('What should go through ReClash?'), findsOneWidget);
+
+    await _focusText(tester, 'Next');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(find.text("Let's check your connection"), findsOneWidget);
 
     await _focusText(tester, 'Done');
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
@@ -1213,9 +1265,9 @@ void main() {
   ) async {
     addTearDown(() => system.isTVForTesting = false);
     system.isTVForTesting = true;
-    await _pump(tester, size: const Size(960, 540), disableAnimations: true);
+    await _pump(tester, size: const Size(940, 540), disableAnimations: true);
 
-    await _focusText(tester, '简体中文');
+    await _focusText(tester, 'Русский');
     await tester.pumpAndSettle();
 
     final focusRect = FocusManager.instance.primaryFocus!.rect;
@@ -1243,27 +1295,6 @@ void main() {
     );
   });
 
-  testWidgets('desktop routing controls update settings and summary', (
-    tester,
-  ) async {
-    if (!system.isDesktop) return;
-    final container = await _pump(tester);
-    await _toFinish(tester);
-
-    expect(find.text('Connection'), findsOneWidget);
-    expect(find.text('Setup summary'), findsOneWidget);
-    expect(find.text('System proxy'), findsOneWidget);
-    expect(find.text('TUN'), findsOneWidget);
-    await tester.tap(find.text('System proxy'));
-    await tester.tap(find.text('TUN'));
-    await tester.pumpAndSettle();
-
-    expect(container.read(networkSettingProvider).systemProxy, isFalse);
-    expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
-    expect(find.text('System proxy: off'), findsOneWidget);
-    expect(find.text('TUN: on'), findsOneWidget);
-  });
-
   testWidgets('revisit without a profile preserves stored auto-run', (
     tester,
   ) async {
@@ -1277,16 +1308,12 @@ void main() {
       child: const SetupWizard.revisit(),
     );
     await _toRevisitSubscription(tester);
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Continue without a profile'),
-    );
+    await _past(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Next'));
     await tester.pumpAndSettle();
 
+    expect(find.text("Let's check your connection"), findsOneWidget);
     expect(container.read(appSettingProvider).autoRun, isTrue);
-    expect(
-      find.text('Add a profile to enable automatic connection'),
-      findsNWidgets(2),
-    );
   });
 
   testWidgets(
@@ -1302,121 +1329,400 @@ void main() {
     },
   );
 
-  group('finish permissions', () {
-    testWidgets('shows deferred VPN and granted notification states', (
+  group('coverage', () {
+    testWidgets('each option writes the settings it stands for', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway(notificationGranted: true);
+      final container = await _pump(tester);
+      await _toCoverage(tester);
 
-      await _pumpFinish(tester, gateway);
+      expect(find.text('What should go through ReClash?'), findsOneWidget);
+      expect(find.textContaining('Smart Routing, DNS and rules'), findsOne);
 
-      expect(gateway.notificationChecks, 1);
-      expect(find.text('Requested on first connection'), findsOneWidget);
-      expect(find.byGlyph(AppGlyphs.clock), findsOneWidget);
-      expect(find.text('Allowed'), findsOneWidget);
+      if (system.isAndroid) {
+        await tester.tap(
+          find.byKey(const ValueKey('setup-coverage-selectedApps')).first,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          container.read(vpnSettingProvider).accessControlProps.enable,
+          isTrue,
+        );
+        expect(find.byKey(const ValueKey('setup-coverage-apps')), findsWidgets);
+
+        await tester.tap(
+          find.byKey(const ValueKey('setup-coverage-device')).first,
+        );
+        await tester.pumpAndSettle();
+        expect(
+          container.read(vpnSettingProvider).accessControlProps.enable,
+          isFalse,
+        );
+        expect(find.byKey(const ValueKey('setup-coverage-apps')), findsNothing);
+        return;
+      }
+
+      expect(find.byKey(const ValueKey('setup-coverage-apps')), findsNothing);
+      await tester.tap(
+        find.byKey(const ValueKey('setup-coverage-device')).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+      expect(container.read(networkSettingProvider).systemProxy, isFalse);
+
+      await tester.tap(
+        find.byKey(const ValueKey('setup-coverage-localProxy')).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
+      expect(container.read(networkSettingProvider).systemProxy, isFalse);
+
+      await tester.tap(
+        find.byKey(const ValueKey('setup-coverage-systemProxy')).first,
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
+      expect(container.read(networkSettingProvider).systemProxy, isTrue);
     });
 
-    testWidgets('blocks repeated notification requests while pending', (
+    testWidgets('the chosen coverage leads the check step plan', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway()
-        ..notificationRequest = Completer<void>();
-      await _pumpFinish(tester, gateway);
-
-      await tester.tap(find.text('Allow').first);
-      await tester.pump();
-      await tester.tap(find.text('Checking…'));
-      await tester.pump();
-
-      expect(gateway.notificationRequests, 1);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
-
-      gateway.notificationGranted = true;
-      gateway.notificationRequest!.complete();
+      if (system.isAndroid) return;
+      await _pump(tester);
+      await _toCoverage(tester);
+      await tester.tap(
+        find.byKey(const ValueKey('setup-coverage-device')).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
       await tester.pumpAndSettle();
 
-      expect(gateway.notificationChecks, 2);
-      expect(find.text('Allowed'), findsOneWidget);
+      expect(find.text('All device traffic'), findsOneWidget);
+    });
+  });
+
+  group('receipt', () {
+    Future<List<int>> showReceipt(
+      WidgetTester tester, {
+      int index = 3,
+      List<Profile> profiles = const [_provider],
+    }) async {
+      final jumps = <int>[];
+      await _pump(
+        tester,
+        size: const Size(1200, 900),
+        appSettings: const AppSettingProps(locale: 'ru'),
+        profiles: profiles,
+        child: SetupShell(
+          stages: const [
+            SetupStage.welcome,
+            SetupStage.legal,
+            SetupStage.subscription,
+            SetupStage.coverage,
+            SetupStage.check,
+          ],
+          index: index,
+          onJump: jumps.add,
+          outcome: SetupCheckOutcome.pending,
+          child: const SizedBox.expand(),
+        ),
+      );
+      return jumps;
+    }
+
+    testWidgets('a wide layout lists what every decided stage holds', (
+      tester,
+    ) async {
+      await showReceipt(tester);
+
+      expect(find.byType(SetupReceipt), findsOneWidget);
+      expect(find.text('Step 4 of 5'), findsOneWidget);
+      expect(find.text('Русский'), findsOneWidget);
+      expect(find.text('Accepted'), findsOneWidget);
+      expect(find.text('Provider'), findsOneWidget);
+      expect(
+        find.text(
+          system.isAndroid ? 'Connect device apps' : 'Use the system proxy',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text("We'll connect and measure the path"), findsOneWidget);
     });
 
-    testWidgets('denied notification opens app settings after one request', (
+    testWidgets('visited rows jump back and later ones stay put', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway();
-      await _pumpFinish(tester, gateway);
+      final jumps = await showReceipt(tester);
 
-      await tester.tap(find.text('Allow').first);
+      await tester.tap(find.text('Profile'));
       await tester.pumpAndSettle();
-      expect(find.text('Open settings'), findsOneWidget);
+      expect(jumps, [2]);
 
-      await tester.tap(find.text('Open settings'));
+      await tester.tap(find.text('Check'));
+      await tester.pumpAndSettle();
+      expect(jumps, [2]);
+    });
+  });
+
+  group('check', () {
+    testWidgets('connect and check starts the core and runs an exam', (
+      tester,
+    ) async {
+      final setup = _RecordingSetupAction();
+      final doctor = _FakeDoctor(settled: _snapshot());
+      final outcomes = <SetupCheckOutcome>[];
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(() => setup),
+          connectionDoctorProvider.overrideWith(() => doctor),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway(), outcomes: outcomes),
+      );
+
+      expect(find.text("Let's check your connection"), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('setup-connect-check')).first);
       await tester.pumpAndSettle();
 
-      expect(gateway.notificationRequests, 1);
-      expect(gateway.appSettingsOpens, 1);
+      expect(setup.authorizations, 1);
+      expect(setup.requests, [(true, true)]);
+      expect(doctor.starts, [DoctorExamMode.standard]);
+      expect(outcomes, [SetupCheckOutcome.running, SetupCheckOutcome.passed]);
     });
 
-    testWidgets('notification errors recover with an app settings action', (
+    testWidgets('a healthy verdict shows the path and completes setup', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway()
-        ..notificationCheckError = StateError('unavailable');
-      await _pumpFinish(tester, gateway);
+      final doctor = _FakeDoctor(settled: _snapshot());
+      final container = await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(() => doctor),
+        ],
+      );
+      await _toCheck(tester, withProfile: true);
 
-      expect(find.text('Open settings'), findsOneWidget);
-      await tester.tap(find.text('Open settings'));
+      await tester.tap(find.byKey(const ValueKey('setup-connect-check')).first);
       await tester.pumpAndSettle();
 
-      expect(gateway.appSettingsOpens, 1);
+      expect(find.text('Connection looks healthy'), findsOneWidget);
+      expect(find.text('App'), findsOneWidget);
+      expect(find.text('Proxy / Internet'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('setup-done')).first);
+      await tester.pumpAndSettle();
+
+      expect(container.read(appSettingProvider).setupCompleted, isTrue);
+      expect(find.byType(SetupWizard), findsNothing);
     });
 
-    testWidgets('permission states refresh after returning to the app', (
+    testWidgets('an unhealthy verdict offers a remedy the wizard can run', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway();
-      final container = await _pumpFinish(tester, gateway);
-      expect(gateway.notificationChecks, 1);
+      final doctor = _FakeDoctor(settled: _dnsStale());
+      final outcomes = <SetupCheckOutcome>[];
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(() => doctor),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway(), outcomes: outcomes),
+      );
 
-      gateway.notificationGranted = true;
+      await tester.tap(find.byKey(const ValueKey('setup-connect-check')).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('DNS data is outdated'), findsOneWidget);
+      expect(find.textContaining('Clear the DNS cache'), findsOneWidget);
+      expect(outcomes.last, SetupCheckOutcome.failed);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Flush DNS cache'));
+      await tester.pumpAndSettle();
+
+      expect(doctor.flushes, 1);
+      expect(doctor.starts, [DoctorExamMode.standard, DoctorExamMode.standard]);
+    });
+
+    testWidgets('a failed start reports the failure without a verdict', (
+      tester,
+    ) async {
+      final setup = _RecordingSetupAction()..started = false;
+      final doctor = _FakeDoctor();
+      final outcomes = <SetupCheckOutcome>[];
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(() => setup),
+          connectionDoctorProvider.overrideWith(() => doctor),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway(), outcomes: outcomes),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('setup-connect-check')).first);
+      await tester.pumpAndSettle();
+
+      expect(doctor.starts, isEmpty);
+      expect(outcomes.last, SetupCheckOutcome.failed);
+      expect(
+        find.textContaining('Could not confirm that the connection started'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('saving without connecting never touches the core', (
+      tester,
+    ) async {
+      final setup = _RecordingSetupAction();
+      final doctor = _FakeDoctor();
+      final outcomes = <SetupCheckOutcome>[];
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(() => setup),
+          connectionDoctorProvider.overrideWith(() => doctor),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway(), outcomes: outcomes),
+      );
+
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+
+      expect(setup.requests, isEmpty);
+      expect(setup.authorizations, 0);
+      expect(doctor.starts, isEmpty);
+      expect(outcomes, [SetupCheckOutcome.saved]);
+      expect(find.text('Settings saved'), findsOneWidget);
+      expect(find.byKey(const ValueKey('setup-done')), findsOneWidget);
+    });
+
+    testWidgets('auto-run stays off and unreachable without a profile', (
+      tester,
+    ) async {
+      final container = await _pump(
+        tester,
+        appSettings: const AppSettingProps(autoRun: true),
+        overrides: [
+          byeDpiSupportedProvider.overrideWithValue(true),
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(_FakeDoctor.new),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway()),
+      );
+
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Add a profile to enable automatic connection'),
+        findsOneWidget,
+      );
+      expect(_autoRunSwitch(tester).value, isFalse);
+      expect(_autoRunSwitch(tester).onChanged, isNull);
+      expect(container.read(appSettingProvider).autoRun, isTrue);
+    });
+
+    testWidgets('a profile lets auto-run be turned on', (tester) async {
+      final container = await _pump(
+        tester,
+        profiles: const [_provider],
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(_FakeDoctor.new),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway()),
+      );
+
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('setup-auto-run')).first);
+      await tester.pumpAndSettle();
+
+      expect(container.read(appSettingProvider).autoRun, isTrue);
+      expect(_autoRunSwitch(tester).value, isTrue);
+    });
+
+    testWidgets('an Android check asks for the battery exemption once', (
+      tester,
+    ) async {
+      final gateway = _TestCheckGateway(isAndroid: true);
+      final container = await _pump(
+        tester,
+        profiles: const [_provider],
+        appSettings: const AppSettingProps(autoRun: true),
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(_FakeDoctor.new),
+        ],
+        child: _checkStep(gateway: gateway),
+      );
+
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+      expect(find.text('Battery optimization'), findsOneWidget);
+
       gateway.batteryGranted = true;
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.tap(find.text('Battery optimization'));
       await tester.pumpAndSettle();
 
-      expect(gateway.notificationChecks, 2);
-      expect(gateway.batteryChecks, 2);
+      expect(gateway.batteryOpens, 1);
+      expect(gateway.batteryChecks, 1);
       expect(container.read(batteryOptimizationDisableProvider), isTrue);
-      expect(find.text('Allowed'), findsNWidgets(2));
+      expect(find.text('Battery optimization'), findsNothing);
     });
 
-    testWidgets('battery result refreshes immediately after settings', (
+    testWidgets('a failed battery prompt releases the pending state', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway();
-      final container = await _pumpFinish(tester, gateway);
-
-      gateway.batteryGranted = true;
-      await tester.tap(find.text('Allow').last);
-      await tester.pumpAndSettle();
-
-      expect(gateway.batterySettingsOpens, 1);
-      expect(gateway.batteryChecks, 2);
-      expect(container.read(batteryOptimizationDisableProvider), isTrue);
-      expect(find.text('Allowed'), findsOneWidget);
-    });
-
-    testWidgets('battery failure always releases the pending state', (
-      tester,
-    ) async {
-      final gateway = _TestPermissionGateway()
+      final gateway = _TestCheckGateway(isAndroid: true)
         ..batteryOpenError = StateError('unavailable');
-      await _pumpFinish(tester, gateway);
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        appSettings: const AppSettingProps(autoRun: true),
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(_FakeDoctor.new),
+        ],
+        child: _checkStep(gateway: gateway),
+      );
 
-      await tester.tap(find.text('Allow').last);
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow'));
       await tester.pumpAndSettle();
 
-      expect(gateway.batterySettingsOpens, 1);
-      expect(find.text('Allow'), findsNWidgets(2));
-      expect(find.byType(CommonCircleLoading), findsNothing);
+      expect(gateway.batteryOpens, 1);
+      expect(gateway.batteryChecks, 0);
+      expect(find.text('Allow'), findsOneWidget);
+      expect(find.text('Checking…'), findsNothing);
+    });
+
+    testWidgets('a desktop check never asks for the battery exemption', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        profiles: const [_provider],
+        appSettings: const AppSettingProps(autoRun: true),
+        overrides: [
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          connectionDoctorProvider.overrideWith(_FakeDoctor.new),
+        ],
+        child: _checkStep(gateway: _TestCheckGateway()),
+      );
+
+      await tester.tap(find.text('Save without connecting'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Battery optimization'), findsNothing);
     });
   });
 
@@ -1424,7 +1730,7 @@ void main() {
     ('compact portrait', const Size(360, 640), 1.3),
     ('compact landscape', const Size(640, 360), 1.3),
     ('large text', const Size(400, 720), 2),
-    ('desktop', const Size(1200, 800), 1),
+    ('desktop', const Size(900, 800), 1),
   ]) {
     testWidgets('${scenario.$1} scrolls to the primary action', (tester) async {
       await _pump(tester, size: scenario.$2, textScale: scenario.$3);
