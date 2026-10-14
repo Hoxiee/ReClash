@@ -31,6 +31,7 @@ const (
 	rcxEventHarvested
 	rcxEventDeepScan
 	rcxEventHostSweep
+	rcxEventShapeResult
 )
 
 type rcxEvent struct {
@@ -46,6 +47,8 @@ type rcxEvent struct {
 	Foreign    rcxProbeOutcome
 	Domestic   rcxProbeOutcome
 	SNI        rcxProbeOutcome
+	Shape      rcxClampVerdict
+	ShapeKBps  int
 	Canaries   []rcxCanaryReport
 	Gen        uint32
 	ConfigGen  uint32
@@ -183,6 +186,7 @@ func (e *rcxEngine) loop() {
 			e.maybeRefreshTerrain()
 			e.reconsider()
 			e.maintain()
+			e.maybeShapeStandby()
 			e.persist(false)
 		}
 		syncTickers()
@@ -254,6 +258,8 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.startDeepScan()
 	case rcxEventHostSweep:
 		e.applyHostSweep(event.Gen)
+	case rcxEventShapeResult:
+		e.applyShapeResult(event)
 	case rcxEventProbeResult:
 		e.applyProbeResult(event)
 	case rcxEventProbeResults:

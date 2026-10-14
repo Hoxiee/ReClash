@@ -145,6 +145,12 @@ type rcxEngine struct {
 	wantPick            string
 	downFrozen          map[string]time.Time
 	throttled           map[string]time.Time
+	shaping             bool
+	shapeGen            uint32
+	shapeCancel         context.CancelFunc
+	shapedAt            map[string]time.Time
+	shapeClamp          map[string]int
+	shapeReading        map[string]rcxShapeReading
 	lastSampleAt        time.Time
 	charged             map[string]int
 	chargedAt           time.Time
@@ -197,6 +203,9 @@ func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 		wake:          make(chan struct{}, 1),
 		downFrozen:    map[string]time.Time{},
 		throttled:     map[string]time.Time{},
+		shapedAt:      map[string]time.Time{},
+		shapeClamp:    map[string]int{},
+		shapeReading:  map[string]rcxShapeReading{},
 		openSeen:      map[string]rcxOpenSighting{},
 		charged:       map[string]int{},
 		providerFails: map[string]time.Time{},
@@ -342,6 +351,7 @@ func (e *rcxEngine) Start() {
 	e.configFP = e.snapshot.Fingerprints
 	e.ledger.SetFingerprints(e.configFP.Open, e.configFP.Domestic)
 	e.applyConfigLocked(e.snapshot.Config)
+	e.supersedeShape()
 	e.networkFacts = nil
 	e.running = false
 	e.sampleLink()

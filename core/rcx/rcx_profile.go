@@ -24,11 +24,15 @@ type rcxDecisionProfile struct {
 }
 
 type rcxProbeSection struct {
-	Concurrency   int              `yaml:"concurrency"`
-	StaggerMs     int              `yaml:"staggerMs"`
-	BudgetPerHour int              `yaml:"budgetPerHour"`
-	Reserve       int              `yaml:"reserve"`
-	Metered       *rcxProbeSection `yaml:"metered,omitempty"`
+	Concurrency   int `yaml:"concurrency"`
+	StaggerMs     int `yaml:"staggerMs"`
+	BudgetPerHour int `yaml:"budgetPerHour"`
+	Reserve       int `yaml:"reserve"`
+	// A sized URL the clamp probe pulls through a standby to read its throughput
+	// shape. Empty keeps the shape probe dormant: no endpoint is contacted and no
+	// clamp verdict is produced.
+	ShapeTarget string           `yaml:"shapeTarget,omitempty"`
+	Metered     *rcxProbeSection `yaml:"metered,omitempty"`
 }
 
 func rcxDefaultProbeSection() rcxProbeSection {

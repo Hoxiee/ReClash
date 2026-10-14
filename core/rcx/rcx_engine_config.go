@@ -100,6 +100,7 @@ func (e *rcxEngine) refreshEffectiveEnabled() {
 		e.supersedeProbe()
 		e.supersedeWake()
 		e.supersedeReach()
+		e.supersedeShape()
 	}
 	if !was && want {
 		e.pendingGrant = true

@@ -13,6 +13,7 @@ type rcxProbePatch struct {
 	StaggerMs     *int           `yaml:"staggerMs,omitempty"`
 	BudgetPerHour *int           `yaml:"budgetPerHour,omitempty"`
 	Reserve       *int           `yaml:"reserve,omitempty"`
+	ShapeTarget   *string        `yaml:"shapeTarget,omitempty"`
 	Metered       *rcxProbePatch `yaml:"metered,omitempty"`
 }
 
@@ -31,6 +32,9 @@ func (p *rcxProbePatch) apply(value rcxProbeSection) rcxProbeSection {
 	}
 	if p.Reserve != nil {
 		value.Reserve = *p.Reserve
+	}
+	if p.ShapeTarget != nil {
+		value.ShapeTarget = *p.ShapeTarget
 	}
 	if p.Metered != nil {
 		metered := value

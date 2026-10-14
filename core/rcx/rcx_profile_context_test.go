@@ -24,6 +24,58 @@ func composeProfile(t *testing.T, config rcxConfig, context rcxProfileContext) r
 	return config.compiled.compose(context, config.compiled.selection(context))
 }
 
+func TestProfileV2RegionLayerComposesThroughEngineApply(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	config := testConfig("ru")
+	config.ProfileYAML = `schema: 2
+settings:
+  dwellSeconds: 90
+contexts:
+  region:
+    - id: region-ru
+      when: [region is RU]
+      set:
+        settings:
+          dwellSeconds: 55
+          censorCountries: [IR]
+`
+	engine.applyConfigLocked(config)
+	if engine.cfg.DwellSeconds != 55 {
+		t.Fatalf("region layer did not compose through the apply path: dwell=%d", engine.cfg.DwellSeconds)
+	}
+	if !engine.cfg.censors("RU") || !engine.cfg.censors("IR") {
+		t.Fatalf("region layer dropped the safety floor: %v", engine.cfg.CensorCountries)
+	}
+	if len(engine.cfg.profileState.Applied) != 1 || engine.cfg.profileState.Applied[0] != "region-ru" {
+		t.Fatalf("applied region rules = %v", engine.cfg.profileState.Applied)
+	}
+	if engine.snapshot.Config.DwellSeconds != 90 {
+		t.Fatal("the region patch leaked into the persisted base")
+	}
+}
+
+func TestProfileV2RegionLayerSkipsAForeignRegion(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "us")
+	config := testConfig("us")
+	config.ProfileYAML = `schema: 2
+settings:
+  dwellSeconds: 90
+contexts:
+  region:
+    - id: region-ru
+      when: [region is RU]
+      set:
+        settings:
+          dwellSeconds: 55
+`
+	engine.applyConfigLocked(config)
+	if engine.cfg.DwellSeconds != 90 || len(engine.cfg.profileState.Applied) != 0 {
+		t.Fatalf("a non-RU region matched the RU rule: dwell=%d applied=%v", engine.cfg.DwellSeconds, engine.cfg.profileState.Applied)
+	}
+}
+
 func TestProfileV2SettingsPreserveFalseZeroAndEmpty(t *testing.T) {
 	config := compiledProfileConfig(t, `schema: 2
 settings:

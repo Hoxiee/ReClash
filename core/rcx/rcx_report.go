@@ -63,6 +63,8 @@ type rcxCandidateReport struct {
 	Prefer     bool   `json:"prefer"`
 	RuleCapped bool   `json:"ruleCapped"`
 	Degraded   bool   `json:"degraded"`
+	Clamp      string `json:"clamp,omitempty"`
+	ClampKBps  int    `json:"clampKBps,omitempty"`
 	HomeRisk   int    `json:"homeRisk"`
 	Recurrence int    `json:"recurrence"`
 	Confirmed  bool   `json:"confirmed"`
@@ -233,6 +235,7 @@ func (e *rcxEngine) candidateReports(
 			cool = int(candidate.CoolUntil.Sub(now) / time.Second)
 		}
 		trust, conf := e.ledger.Trust(e.key(candidate.Name))
+		clamp := e.shapeReading[e.key(candidate.Name)]
 		// The verdict the rank actually used: user rules can cap it down to
 		// last-resort, and the duel must explain that verdict, not the raw one.
 		verdict := rcxCandidateVerdict(candidate, input.Terrain, input.Policy.Admission, input.Policy.TerrainAdmission)
@@ -263,6 +266,8 @@ func (e *rcxEngine) candidateReports(
 			RuleCapped: candidate.RuleLastResort && verdict == rcxVerdictLastResort,
 			Breaker:    candidate.Facts.Breaker,
 			Degraded:   candidate.Degraded,
+			Clamp:      clamp.label(),
+			ClampKBps:  clamp.kbps,
 			HomeRisk:   int(row.Key.homeRisk),
 			Recurrence: candidate.Recurrence,
 			Confirmed:  candidate.QualityConfirmed,
