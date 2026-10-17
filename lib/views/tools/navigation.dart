@@ -1,8 +1,6 @@
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/tools.dart';
-import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/about.dart';
 import 'package:reclash/views/access.dart';
 import 'package:reclash/views/application_setting.dart';
@@ -22,12 +20,12 @@ import 'package:reclash/views/developer.dart';
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/views/dns_queries.dart';
 import 'package:reclash/views/hotkey.dart';
+import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 ToolPage? toolPageOf(Widget widget) => switch (widget) {
   ApplicationSettingView() => ToolPage.application,
@@ -40,6 +38,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   OnDemandView() => ToolPage.onDemand,
   UserAgentsView() => ToolPage.userAgents,
   ThemeView() => ToolPage.theme,
+  LanguageView() => ToolPage.locale,
   HotKeyView() => ToolPage.hotkey,
   AccessView() => ToolPage.access,
   ResourcesView() => ToolPage.resources,
@@ -69,7 +68,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.onDemand => const OnDemandView(),
   ToolPage.userAgents => const UserAgentsView(),
   ToolPage.theme => const ThemeView(),
-  ToolPage.locale => const _ToolsLanguageView(),
+  ToolPage.locale => const LanguageView(),
   ToolPage.hotkey => const HotKeyView(),
   ToolPage.access => const AccessView(),
   ToolPage.resources => const ResourcesView(),
@@ -85,43 +84,3 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.rules => const AddedRulesView(),
   ToolPage.scripts => const ScriptsView(),
 };
-
-class _ToolsLanguageView extends ConsumerWidget {
-  const _ToolsLanguageView();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.appLocalizations;
-    final locale = ref.watch(
-      appSettingProvider.select((value) => value.locale),
-    );
-    return BaseScaffold(
-      title: l.language,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
-        child: Column(
-          children: [
-            generateSection(
-              items: [
-                ListItem<Locale?>.options(
-                  title: Text(l.language),
-                  value: getLocaleForString(locale),
-                  options: [
-                    null,
-                    ...AppLocalizations.delegate.supportedLocales,
-                  ],
-                  textBuilder: (locale) => locale?.label ?? l.defaultText,
-                  onChanged: (locale) => ref
-                      .read(appSettingProvider.notifier)
-                      .update(
-                        (value) => value.copyWith(locale: locale?.toString()),
-                      ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

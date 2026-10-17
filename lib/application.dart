@@ -150,10 +150,11 @@ class ApplicationState extends ConsumerState<Application> {
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
           onNavigationNotification: (_) => true,
-          localizationsDelegates: const [
+          localizationsDelegates: [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
+            ...fallbackMaterialLocalizationsDelegates,
           ],
           builder: (context, child) {
             return ThemeCrossFade(

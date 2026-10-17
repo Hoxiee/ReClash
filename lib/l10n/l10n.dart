@@ -7936,6 +7936,41 @@ class AppLocalizations {
     );
   }
 
+  /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
+  String get translationNotice {
+    return Intl.message(
+      'ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.',
+      name: 'translationNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest a translation fix`
+  String get translationSuggestFix {
+    return Intl.message(
+      'Suggest a translation fix',
+      name: 'translationSuggestFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Kazakh`
+  String get kk {
+    return Intl.message('Kazakh', name: 'kk', desc: '', args: []);
+  }
+
+  /// `Turkmen`
+  String get tk {
+    return Intl.message('Turkmen', name: 'tk', desc: '', args: []);
+  }
+
+  /// `Uzbek`
+  String get uz {
+    return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
+  }
+
   /// `Prevent duplicate subscriptions`
   String get preventDuplicateProfiles {
     return Intl.message(
@@ -7973,6 +8008,16 @@ class AppLocalizations {
       name: 'disclaimerReadToEnd',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Dropped include-all from the proxy groups {groups}; add the proxies or proxy providers they use`
+  String customImportDroppedIncludeAll(Object groups) {
+    return Intl.message(
+      'Dropped include-all from the proxy groups $groups; add the proxies or proxy providers they use',
+      name: 'customImportDroppedIncludeAll',
+      desc: '',
+      args: [groups],
     );
   }
 
@@ -8231,8 +8276,11 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
       Locale.fromSubtags(languageCode: 'es'),
       Locale.fromSubtags(languageCode: 'fr'),
       Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'kk'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'tk'),
+      Locale.fromSubtags(languageCode: 'uz'),
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }

@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "Leer hasta el final"
+  "disclaimerReadToEnd": "Leer hasta el final",
+  "customImportDroppedIncludeAll": "Se descartó include-all de los grupos de proxies {groups}; añade los proxies o proveedores de proxies que usan"
 }

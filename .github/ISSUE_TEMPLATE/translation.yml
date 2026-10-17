@@ -1,0 +1,57 @@
+name: Translation fix
+description: Suggest a better wording for a ReClash translation
+title: '[Translation] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve ReClash translations. Submit one phrase per issue and search existing issues first to avoid duplicates.
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - English
+        - Spanish
+        - French
+        - Japanese
+        - Korean
+        - Russian
+        - Simplified Chinese
+        - Uzbek
+        - Kazakh
+        - Turkmen
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Where does it appear?
+      description: Name the screen or setting where you saw the phrase.
+      placeholder: Tools → Language; profile list empty state
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text
+      description: Copy the phrase exactly as shown in the app.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested wording
+      description: Write how a native speaker would say it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshot or context
+      description: A screenshot helps; paste it here.

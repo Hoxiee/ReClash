@@ -44,10 +44,11 @@ class TestApp extends StatelessWidget {
       theme: theme,
       darkTheme: darkTheme,
       themeMode: themeMode,
-      localizationsDelegates: const [
+      localizationsDelegates: [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
+        ...fallbackMaterialLocalizationsDelegates,
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
