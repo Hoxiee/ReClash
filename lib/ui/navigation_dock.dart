@@ -4,6 +4,7 @@ import 'package:reclash/ui/context.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
+import 'package:reclash/ui/tooltip.dart';
 import 'package:reclash/ui/typography.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,6 +17,7 @@ import 'package:material_color_utilities/material_color_utilities.dart'
 import 'package:material_ui/material_ui.dart';
 
 import 'liquid_glass.dart';
+import 'nav_slots.dart';
 
 const double _barHeight = 62;
 const double _barPadding = 4;
@@ -92,6 +94,10 @@ final _hoverSpring = SpringDescription.withDurationAndBounce(
 final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
+final _revealSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 380),
+  bounce: 0.18,
+);
 final _glowInSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 100),
 );
@@ -132,6 +138,9 @@ Rect _lensRect({
   double span,
   int count,
 ) {
+  if (span <= _barPadding * 2) {
+    return (pitch: 0, lens: 0, inset: 0);
+  }
   if (count <= 1) {
     return (pitch: span - _barPadding * 2, lens: span, inset: _barPadding);
   }
@@ -163,6 +172,13 @@ class _Spring extends ChangeNotifier implements ValueListenable<double> {
   SpringDescription? _spring;
   double _now = 0;
   double _start = 0;
+  bool _reduceMotion = false;
+
+  set reduceMotion(bool value) {
+    if (_reduceMotion == value) return;
+    _reduceMotion = value;
+    if (value) jumpTo(_target);
+  }
 
   @override
   double get value => _value;
@@ -181,6 +197,10 @@ class _Spring extends ChangeNotifier implements ValueListenable<double> {
   }
 
   void springTo(double target, SpringDescription spring) {
+    if (_reduceMotion) {
+      jumpTo(target);
+      return;
+    }
     _simulation = SpringSimulation(
       spring,
       _value,
@@ -252,10 +272,12 @@ class _DockSurface extends StatelessWidget {
     required this.glass,
     required this.style,
     required this.glow,
+    this.compact = false,
     required this.child,
   });
 
   final bool glass;
+  final bool compact;
   final LiquidGlassStyle style;
   final ValueListenable<LiquidGlassGlow> glow;
   final Widget child;
@@ -270,6 +292,9 @@ class _DockSurface extends StatelessWidget {
             LiquidGlass(style: style, glow: glow, child: child),
         child: child,
       );
+    }
+    if (compact) {
+      return child;
     }
     return DecoratedBox(
       decoration: ShapeDecoration(
@@ -298,10 +323,19 @@ class _DockSurface extends StatelessWidget {
 }
 
 class NavigationDockDestination {
-  const NavigationDockDestination({required this.glyph, required this.label});
+  const NavigationDockDestination({
+    required this.glyph,
+    required this.label,
+    this.id,
+    this.group = 0,
+  });
 
   final Glyph glyph;
   final String label;
+  final Object? id;
+  final int group;
+
+  Object get identity => id ?? glyph;
 }
 
 class NavigationDock extends StatelessWidget {
@@ -310,11 +344,13 @@ class NavigationDock extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
   });
 
   final List<NavigationDockDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final NavigationDestinationLabelBehavior labelBehavior;
 
   static double heightOf(BuildContext context) {
     return _barHeight +
@@ -348,18 +384,36 @@ class NavigationDock extends StatelessWidget {
             children: [
               Flexible(
                 child: _HitSlop(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: destinations.length >= _fullWidthCount
-                          ? double.infinity
-                          : destinations.length * _maxItemExtent +
-                                _barPadding * 4,
-                    ),
-                    child: FloatingNavigationBar(
-                      destinations: destinations,
-                      selectedIndex: selectedIndex,
-                      onSelected: onSelected,
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final grouped =
+                          destinations
+                              .map((item) => item.group)
+                              .toSet()
+                              .length >
+                          1;
+                      final targetWidth =
+                          destinations.length >= _fullWidthCount && !grouped
+                          ? constraints.maxWidth
+                          : math.min(
+                              constraints.maxWidth,
+                              destinations.length * _maxItemExtent +
+                                  _barPadding * 4,
+                            );
+                      return AnimatedContainer(
+                        duration: context.motionDuration(
+                          const Duration(milliseconds: 280),
+                        ),
+                        curve: Curves.easeOutCubic,
+                        width: targetWidth,
+                        child: FloatingNavigationBar(
+                          destinations: destinations,
+                          selectedIndex: selectedIndex,
+                          onSelected: onSelected,
+                          labelBehavior: labelBehavior,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -373,7 +427,14 @@ class NavigationDock extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: _shadowRoom + height + _bottomMarginOf(context),
-      child: RepaintBoundary(child: LayoutBuilder(builder: (_, _) => dock)),
+      child: RepaintBoundary(
+        child: LayoutBuilder(
+          // The bar tracks raw pointers, so without a drag recognizer of its
+          // own a sideways swipe on it would drag the page back.
+          builder: (_, _) =>
+              GestureDetector(onHorizontalDragUpdate: (_) {}, child: dock),
+        ),
+      ),
     );
   }
 }
@@ -878,11 +939,17 @@ class FloatingNavigationBar extends StatefulWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
+    this.compact = false,
+    this.position,
   });
 
   final List<NavigationDockDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final NavigationDestinationLabelBehavior labelBehavior;
+  final bool compact;
+  final Animation<double>? position;
 
   @override
   State<FloatingNavigationBar> createState() => _FloatingNavigationBarState();
@@ -907,9 +974,19 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   late final Listenable _motion = Listenable.merge([_lens, _lift, _jelly]);
   late final Listenable _hoverMotion = Listenable.merge([_hover, _hoverShow]);
   final List<_Spring> _parallax = [];
+  final Map<Object, _Spring> _reveal = {};
+  late final _Spring _stillParallax = _Spring(this, 0);
+  late final NavSlots<Object> _slots = NavSlots<Object>(
+    vsync: this,
+    spring: _travelSpring,
+  );
+  Map<Object, NavigationDockDestination> _destinationById = {};
+  final Map<Object, NavigationDockDestination> _snapshots = {};
+  bool _seededSlots = false;
   bool _lifted = false;
   int? _pointer;
   int? _pressedIndex;
+  Object? _pressedIdentity;
   double _pressX = 0;
   bool _dragging = false;
   bool _dropping = false;
@@ -921,10 +998,23 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   int get _selectedIndex => widget.selectedIndex.clamp(0, _lastIndex);
 
-  ({double pitch, double lens, double inset}) get _layout => _dockLayout(
-    context.size!.width - _barPadding * 2,
-    widget.destinations.length,
-  );
+  ({double pitch, double lens, double inset}) _layoutFor(double span) {
+    if (widget.compact) {
+      final pitch = span / math.max(1, widget.destinations.length);
+      return (pitch: pitch, lens: pitch, inset: 0);
+    }
+    return _dockLayout(span, widget.destinations.length);
+  }
+
+  ({double pitch, double lens, double inset}) get _layout =>
+      _layoutFor(context.size!.width - _barPadding * 2);
+
+  void _syncPosition() {
+    final position = widget.position;
+    if (_pointer == null && !_dropping && !_lifted && position != null) {
+      _lens.jumpTo(position.value);
+    }
+  }
 
   @override
   void initState() {
@@ -938,13 +1028,37 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _glow.addListener(_shine);
     _glowSpread.addListener(_shine);
     _hoverAt.addListener(_leanContent);
+    _slots.addListener(_slotsChanged);
+    widget.position?.addListener(_syncPosition);
+    _syncPosition();
+    _syncDestinations(seed: true);
     _syncParallax();
+    _syncReveal();
   }
 
   @override
   void didUpdateWidget(covariant FloatingNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.position != widget.position) {
+      oldWidget.position?.removeListener(_syncPosition);
+      widget.position?.addListener(_syncPosition);
+      _syncPosition();
+    }
+    _syncDestinations();
     _syncParallax();
+    _syncReveal();
+    final pressedIdentity = _pressedIdentity;
+    if (pressedIdentity != null) {
+      final livePressedIndex = _activeIndexFor(pressedIdentity);
+      if (livePressedIndex < 0) {
+        _pressedIdentity = null;
+        _pressedIndex = null;
+        _dragging = false;
+      } else {
+        _pressedIndex = livePressedIndex;
+        _lens.springTo(livePressedIndex.toDouble(), _travelSpring);
+      }
+    }
     _leanContent();
     final rest = _lensRest;
     if (_pressedIndex == null && _lens.target != rest) {
@@ -954,9 +1068,17 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   @override
   void dispose() {
+    widget.position?.removeListener(_syncPosition);
     for (final parallax in _parallax) {
       parallax.dispose();
     }
+    _stillParallax.dispose();
+    for (final reveal in _reveal.values) {
+      reveal.dispose();
+    }
+    _slots
+      ..removeListener(_slotsChanged)
+      ..dispose();
     _lens.dispose();
     _lift.dispose();
     _hover.dispose();
@@ -994,6 +1116,81 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     );
   }
 
+  void _syncReduceMotion(bool reduceMotion) {
+    final springs = [
+      _lens,
+      _lift,
+      _hover,
+      _hoverShow,
+      _swell,
+      _stretch,
+      _jelly,
+      _glow,
+      _glowSpread,
+      ..._parallax,
+      _stillParallax,
+      ..._reveal.values,
+    ];
+    for (final spring in springs) {
+      spring.reduceMotion = reduceMotion;
+    }
+    _slots.reduceMotion = reduceMotion;
+  }
+
+  void _slotsChanged() {
+    if (!mounted) return;
+    final live = _slots.slots.map((slot) => slot.key).toSet();
+    _snapshots.removeWhere((key, _) => !live.contains(key));
+    _syncParallax();
+    _syncReveal();
+    setState(() {});
+  }
+
+  void _syncDestinations({bool seed = false}) {
+    _snapshots.addAll(_destinationById);
+    final occurrences = <Object, int>{};
+    final keys = [
+      for (final destination in widget.destinations)
+        _slotKey(destination, occurrences),
+    ];
+    _destinationById = {
+      for (final (index, destination) in widget.destinations.indexed)
+        keys[index]: destination,
+    };
+    _snapshots.addAll(_destinationById);
+    final ids = _destinationById.keys.toList();
+    if (!_seededSlots || seed) {
+      _slots.seed(ids);
+      _seededSlots = true;
+    } else {
+      _slots.sync(ids);
+    }
+  }
+
+  Object _slotKey(
+    NavigationDockDestination destination,
+    Map<Object, int> occurrences,
+  ) {
+    final identity = destination.identity;
+    final occurrence = occurrences.update(
+      identity,
+      (count) => count + 1,
+      ifAbsent: () => 0,
+    );
+    if (destination.id != null || occurrence == 0) return identity;
+    return (glyph: identity, occurrence: occurrence);
+  }
+
+  List<Object> get _liveKeys {
+    final occurrences = <Object, int>{};
+    return [
+      for (final destination in widget.destinations)
+        _slotKey(destination, occurrences),
+    ];
+  }
+
+  int _activeIndexFor(Object? identity) => _liveKeys.indexOf(identity!);
+
   void _syncParallax() {
     final count = widget.destinations.length;
     while (_parallax.length > count) {
@@ -1001,6 +1198,32 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     }
     while (_parallax.length < count) {
       _parallax.add(_Spring(this, 0));
+    }
+  }
+
+  void _syncReveal() {
+    final slots = _slots.slots;
+    final live = {for (final slot in slots) slot.key};
+    _reveal.removeWhere((key, reveal) {
+      if (live.contains(key)) return false;
+      reveal.dispose();
+      return true;
+    });
+    final liveKeys = _liveKeys;
+    for (final slot in slots) {
+      if (slot.leaving) continue;
+      final target = switch (widget.labelBehavior) {
+        NavigationDestinationLabelBehavior.alwaysShow => 1.0,
+        NavigationDestinationLabelBehavior.alwaysHide => 0.0,
+        NavigationDestinationLabelBehavior.onlyShowSelected =>
+          liveKeys.indexOf(slot.key) == _selectedIndex ? 1.0 : 0.0,
+      };
+      final reveal = _reveal[slot.key];
+      if (reveal == null) {
+        _reveal[slot.key] = _Spring(this, target);
+      } else if (reveal.target != target) {
+        reveal.springTo(target, _revealSpring);
+      }
     }
   }
 
@@ -1021,6 +1244,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final lifted = _lift.value > 0;
     if (lifted != _lifted) {
       setState(() => _lifted = lifted);
+      if (!lifted) _syncPosition();
     }
   }
 
@@ -1036,20 +1260,85 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _lift.springTo(0, _liftSpring);
   }
 
+  List<double> _activeCenters({required double pitch, required double inset}) {
+    final liveKeys = _liveKeys;
+    final slots = _slots.slots;
+    final totalWeight = slots.fold<double>(
+      0,
+      (total, slot) => total + slot.weight.value.clamp(0.0, 1.0),
+    );
+    if (totalWeight <= 0) {
+      return [
+        for (var index = 0; index < liveKeys.length; index++)
+          inset + (index + 0.5) * pitch,
+      ];
+    }
+    var leading = inset;
+    final centers = <double>[];
+    for (final slot in slots) {
+      final width =
+          pitch *
+          liveKeys.length *
+          slot.weight.value.clamp(0.0, 1.0) /
+          totalWeight;
+      if (!slot.leaving && liveKeys.contains(slot.key)) {
+        centers.add(leading + width / 2);
+      }
+      leading += width;
+    }
+    return centers;
+  }
+
+  double _visualPosition(
+    double position,
+    ({double pitch, double lens, double inset}) layout,
+  ) {
+    final centers = _activeCenters(pitch: layout.pitch, inset: layout.inset);
+    if (centers.isEmpty || layout.pitch <= 0) return position;
+    late final double center;
+    if (centers.length == 1) {
+      center = centers.single + position * layout.pitch;
+    } else if (position < 0) {
+      center = centers.first + position * (centers[1] - centers[0]);
+    } else if (position > centers.length - 1) {
+      center =
+          centers.last +
+          (position - centers.length + 1) *
+              (centers.last - centers[centers.length - 2]);
+    } else {
+      final index = position.floor();
+      final next = math.min(index + 1, centers.length - 1);
+      center =
+          centers[index] +
+          (centers[next] - centers[index]) * (position - index);
+    }
+    return (center - layout.inset) / layout.pitch - 0.5;
+  }
+
   double _positionAt(Offset localPosition) {
     final width = context.size!.width;
     final dx = Directionality.of(context) == TextDirection.ltr
         ? localPosition.dx
         : width - localPosition.dx;
     final layout = _layout;
-    final position = (dx - _barPadding - layout.inset) / layout.pitch - 0.5;
-    if (position < 0) {
-      return _rubberBand(position, _overdrag);
+    if (layout.pitch <= 0) return _selectedIndex.toDouble();
+    final centers = _activeCenters(pitch: layout.pitch, inset: layout.inset);
+    if (centers.isEmpty) return 0;
+    final x = dx - _barPadding;
+    if (x <= centers.first) {
+      return _rubberBand((x - centers.first) / layout.pitch, _overdrag);
     }
-    if (position > _lastIndex) {
-      return _lastIndex + _rubberBand(position - _lastIndex, _overdrag);
+    if (x >= centers.last) {
+      return _lastIndex +
+          _rubberBand((x - centers.last) / layout.pitch, _overdrag);
     }
-    return position;
+    for (var index = 0; index < centers.length - 1; index++) {
+      if (x <= centers[index + 1]) {
+        return index +
+            (x - centers[index]) / (centers[index + 1] - centers[index]);
+      }
+    }
+    return _lastIndex.toDouble();
   }
 
   int _indexAt(double position) => position.round().clamp(0, _lastIndex);
@@ -1173,6 +1462,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     }
     final index = _indexAt(_positionAt(localPosition));
     _pressedIndex = index;
+    _pressedIdentity = _liveKeys[index];
     _pressX = localPosition.dx;
     _dragging = false;
     _dropping = false;
@@ -1200,6 +1490,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final position = _positionAt(localPosition);
     _lens.springTo(position, _followSpring);
     final index = _indexAt(position);
+    _pressedIdentity = _liveKeys[index];
     if (index != _pressedIndex) {
       HapticFeedback.selectionClick();
       _pressedIndex = index;
@@ -1210,7 +1501,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   /// past the one under the finger.
   void _fling(double velocityX) {
     final pressed = _pressedIndex;
-    if (!_dragging || pressed == null) {
+    if (!_dragging || pressed == null || widget.destinations.isEmpty) {
       return;
     }
     final extent = _layout.pitch;
@@ -1228,15 +1519,22 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     if (index != pressed) {
       HapticFeedback.selectionClick();
       _pressedIndex = index;
+      _pressedIdentity = _liveKeys[index];
     }
   }
 
   void _release({required bool commit}) {
-    final index = _pressedIndex;
-    if (index == null) {
+    final identity = _pressedIdentity;
+    final index = identity == null ? -1 : _activeIndexFor(identity);
+    _pressedIdentity = null;
+    _pressedIndex = null;
+    if (index < 0) {
+      _dragging = false;
+      _dropping = true;
+      _lens.springTo(_selectedIndex.toDouble(), _travelSpring);
+      _dropLift();
       return;
     }
-    _pressedIndex = null;
     _dragging = false;
     _dropping = true;
     _lens.springTo((commit ? index : _selectedIndex).toDouble(), _travelSpring);
@@ -1248,6 +1546,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   @override
   Widget build(BuildContext context) {
+    _syncReduceMotion(context.disableAnimations);
     final colorScheme = context.colorScheme;
     final labelStyle = AppTextStyle.custom(
       context,
@@ -1255,8 +1554,13 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
       leading: _labelLeading,
       weight: FontWeight.w500,
     );
+    final slots = _slots.slots;
+    final destinations = [
+      for (final slot in slots)
+        _destinationById[slot.key] ?? _snapshots[slot.key]!,
+    ];
     final labels = [
-      for (final destination in widget.destinations)
+      for (final destination in destinations)
         _measureLabel(context, destination.label, labelStyle),
     ];
     final widest = labels.fold(
@@ -1273,10 +1577,13 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final bar = _DockSurface(
       glass: glass,
       style: LiquidGlassStyle.pill(colorScheme),
+      compact: widget.compact,
       glow: _touchGlow,
       child: Material(
         color: glass
             ? Colors.transparent
+            : widget.compact
+            ? context.raisedSurfaceLevel.colorOf(colorScheme)
             : SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
         shape: AppShape.full,
         // Raw pointers rather than recognizers: a drag has nothing to win the
@@ -1297,83 +1604,180 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
               child: RepaintBoundary(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final layout = _dockLayout(
-                      constraints.maxWidth,
-                      widget.destinations.length,
-                    );
+                    final layout = _layoutFor(constraints.maxWidth);
                     final room = layout.pitch - _labelInset * 2;
                     final labelScale = widest <= room
                         ? 1.0
                         : math.max(room / widest, _minLabelSize / _labelSize);
                     Rect lensRect() => _lensRect(
-                      position: _lens.value,
+                      position: _visualPosition(_lens.value, layout),
                       stretch: _jelly.value,
                       pitch: layout.pitch,
                       width: layout.lens,
                       height: constraints.maxHeight,
                       lift: _lift.value,
                     ).shift(Offset(layout.inset, 0));
+                    final totalWeight = slots.fold<double>(
+                      0,
+                      (total, slot) =>
+                          total + slot.weight.value.clamp(0.0, 1.0),
+                    );
+                    final contentWidth = math.max(
+                      0.0,
+                      constraints.maxWidth - layout.inset * 2,
+                    );
                     Widget items(_LensPart part) => Padding(
                       padding: EdgeInsets.symmetric(horizontal: layout.inset),
                       child: Row(
                         children: [
                           for (final (index, destination)
-                              in widget.destinations.indexed)
-                            Expanded(
-                              child: _FloatingBarItem(
-                                destination: destination,
-                                selected: index == _selectedIndex,
-                                index: index,
-                                part: part,
-                                lens: _lens,
-                                lensWidth: layout.lens,
-                                jelly: _jelly,
-                                parallax: _parallax[index],
-                                lift: _lift,
-                                labelStyle: labelStyle.copyWith(
-                                  fontSize: _labelSize * labelScale,
+                              in destinations.indexed)
+                            SizedBox(
+                              key: ValueKey(slots[index].key),
+                              width: totalWeight == 0
+                                  ? 0
+                                  : contentWidth *
+                                        slots[index].weight.value.clamp(
+                                          0.0,
+                                          1.0,
+                                        ) /
+                                        totalWeight,
+                              child: Opacity(
+                                opacity: slots[index].weight.value.clamp(
+                                  0.0,
+                                  1.0,
                                 ),
-                                labelHeight: lineHeight,
-                                labelOverflows:
-                                    labels[index].width * labelScale > room,
-                                onActivate: () => widget.onSelected(index),
+                                child: IgnorePointer(
+                                  ignoring: slots[index].leaving,
+                                  child: ExcludeSemantics(
+                                    excluding: slots[index].leaving,
+                                    child: _FloatingBarItem(
+                                      destination: destination,
+                                      compact: widget.compact,
+                                      selected:
+                                          !slots[index].leaving &&
+                                          _activeIndexFor(slots[index].key) ==
+                                              _selectedIndex,
+                                      index: slots[index].leaving
+                                          ? -1000
+                                          : _activeIndexFor(slots[index].key),
+                                      part: part,
+                                      lens: _lens,
+                                      lensWidth: layout.lens,
+                                      jelly: _jelly,
+                                      parallax: slots[index].leaving
+                                          ? _stillParallax
+                                          : _parallax[_activeIndexFor(
+                                              slots[index].key,
+                                            )],
+                                      lift: _lift,
+                                      labelStyle: labelStyle.copyWith(
+                                        fontSize: _labelSize * labelScale,
+                                      ),
+                                      labelHeight: lineHeight,
+                                      reveal:
+                                          _reveal[slots[index].key] ??
+                                          kAlwaysCompleteAnimation,
+                                      tooltip:
+                                          widget.labelBehavior !=
+                                              NavigationDestinationLabelBehavior
+                                                  .alwaysShow ||
+                                          labels[index].width * labelScale >
+                                              room,
+                                      onActivate: () {
+                                        final liveIndex = _activeIndexFor(
+                                          slots[index].key,
+                                        );
+                                        if (liveIndex >= 0) {
+                                          widget.onSelected(liveIndex);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                         ],
                       ),
                     );
-                    final lensed =
-                        glass && _lifted && widget.destinations.isNotEmpty;
+                    final lensed = glass && _lifted && slots.isNotEmpty;
                     return Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        if (widget.destinations.isNotEmpty)
+                        if (slots.isNotEmpty)
                           AnimatedBuilder(
                             animation: _motion,
                             builder: (_, _) => _Lens(
                               rect: lensRect(),
                               lift: _lift.value,
                               glass: glass,
+                              filled: widget.compact,
                             ),
                           ),
-                        if (widget.destinations.isNotEmpty)
+                        if (slots.isNotEmpty)
                           AnimatedBuilder(
                             animation: _hoverMotion,
                             builder: (_, _) => _HoverHighlight(
                               start:
                                   layout.inset +
-                                  (_hover.value + 0.5) * layout.pitch -
+                                  (_visualPosition(_hover.value, layout) +
+                                          0.5) *
+                                      layout.pitch -
                                   layout.lens / 2,
                               width: layout.lens,
                               opacity: _hoverShow.value,
                             ),
                           ),
-                        if (glass && widget.destinations.isNotEmpty)
+                        if (glass && slots.isNotEmpty)
                           AnimatedBuilder(
                             animation: _motion,
                             builder: (_, _) =>
                                 _GlassLens(rect: lensRect(), lift: _lift.value),
                           ),
+                        IgnorePointer(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: layout.inset,
+                            ),
+                            child: Row(
+                              children: [
+                                for (final (index, destination)
+                                    in destinations.indexed)
+                                  SizedBox(
+                                    width: totalWeight == 0
+                                        ? 0
+                                        : contentWidth *
+                                              slots[index].weight.value.clamp(
+                                                0.0,
+                                                1.0,
+                                              ) /
+                                              totalWeight,
+                                    child: Align(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child:
+                                          index > 0 &&
+                                              destination.group !=
+                                                  destinations[index - 1].group
+                                          ? Opacity(
+                                              opacity: slots[index].weight.value
+                                                  .clamp(0.0, 1.0),
+                                              child: SizedBox(
+                                                width: 1,
+                                                height: _iconSize,
+                                                child: ColoredBox(
+                                                  color: colorScheme
+                                                      .outlineVariant,
+                                                ),
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
                         items(lensed ? _LensPart.outside : _LensPart.both),
                         if (lensed)
                           AnimatedBuilder(
@@ -1396,6 +1800,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         ),
       ),
     );
+    if (widget.compact) return bar;
     return AnimatedBuilder(
       animation: _barMotion,
       builder: (_, child) => _PressTransform(
@@ -1445,10 +1850,16 @@ class _HoverHighlight extends StatelessWidget {
 }
 
 class _Lens extends StatelessWidget {
-  const _Lens({required this.rect, required this.lift, required this.glass});
+  const _Lens({
+    required this.rect,
+    required this.lift,
+    required this.glass,
+    this.filled = false,
+  });
 
   final Rect rect;
   final double lift;
+  final bool filled;
 
   /// On glass the lens rests as a platter in the secondary hue, sunk in dark
   /// mode as iOS's tab bar marks its selection, and clears as it lifts into
@@ -1471,6 +1882,8 @@ class _Lens extends StatelessWidget {
         decoration: ShapeDecoration(
           color: glass
               ? platter.withValues(alpha: platter.a * (1 - lifted))
+              : filled
+              ? colorScheme.primary
               : Color.alphaBlend(
                   colorScheme.onSurface.withValues(alpha: 0.08 * lifted),
                   SurfaceLevel.floatingOf(
@@ -1615,6 +2028,7 @@ enum _LensPart { both, outside, inside }
 class _FloatingBarItem extends StatefulWidget {
   const _FloatingBarItem({
     required this.destination,
+    required this.compact,
     required this.selected,
     required this.index,
     required this.part,
@@ -1625,11 +2039,13 @@ class _FloatingBarItem extends StatefulWidget {
     required this.lift,
     required this.labelStyle,
     required this.labelHeight,
-    required this.labelOverflows,
+    required this.reveal,
+    required this.tooltip,
     required this.onActivate,
   });
 
   final NavigationDockDestination destination;
+  final bool compact;
   final bool selected;
   final int index;
 
@@ -1643,7 +2059,10 @@ class _FloatingBarItem extends StatefulWidget {
   final ValueListenable<double> lift;
   final TextStyle? labelStyle;
   final double labelHeight;
-  final bool labelOverflows;
+
+  /// How far the label shows, from 0, the glyph alone and centred, to 1.
+  final ValueListenable<double> reveal;
+  final bool tooltip;
   final VoidCallback onActivate;
 
   @override
@@ -1665,7 +2084,9 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final color = colorScheme.onSurfaceVariant;
-    var tint = colorScheme.primary;
+    var tint = widget.compact && !LiquidGlassScope.of(context)
+        ? colorScheme.onPrimary
+        : colorScheme.primary;
     if (widget.part == _LensPart.inside &&
         LiquidGlassScope.qualityOf(context) == LiquidGlassQuality.standard) {
       // Without a pane of its own the copy takes the light that one adds.
@@ -1677,6 +2098,12 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
         blue: math.min(tint.b * brightness, 1),
       );
     }
+    final glyph = GlyphIcon(
+      widget.destination.glyph,
+      size: widget.compact ? 20 : _iconSize,
+      color: color,
+      fill: 1,
+    );
     final content = _LensTint(
       part: widget.part,
       lens: widget.lens,
@@ -1687,33 +2114,56 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
       index: widget.index,
       color: tint,
       textDirection: Directionality.of(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: _labelInset),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GlyphIcon(
-              widget.destination.glyph,
-              size: _iconSize,
-              color: color,
-              fill: 1,
-            ),
-            const SizedBox(height: _labelGap),
-            SizedBox(
-              height: widget.labelHeight,
-              child: Center(
-                child: Text(
-                  widget.destination.label,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: widget.labelStyle?.copyWith(color: color),
-                ),
+      child: widget.compact
+          ? Center(child: glyph)
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _labelInset),
+              child: ListenableBuilder(
+                listenable: widget.reveal,
+                builder: (context, _) {
+                  final reveal = widget.reveal.value;
+                  final drop = Offset(
+                    0,
+                    (1 - reveal) * (_labelGap + widget.labelHeight) / 2,
+                  );
+                  final shown = Curves.easeOut.transform(
+                    ((reveal - 0.3) / 0.7).clamp(0.0, 1.0),
+                  );
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Transform.translate(offset: drop, child: glyph),
+                      const SizedBox(height: _labelGap),
+                      // Fading by the text's own alpha: an Opacity layer would
+                      // composite the item and escape the lens tint's saveLayer.
+                      Transform.translate(
+                        offset: drop,
+                        child: Transform.scale(
+                          scale: 0.8 + 0.2 * shown,
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            height: widget.labelHeight,
+                            child: Center(
+                              child: Text(
+                                widget.destination.label,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                style: widget.labelStyle?.copyWith(
+                                  color: color.withValues(
+                                    alpha: color.a * shown,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
-          ],
-        ),
-      ),
     );
     if (widget.part == _LensPart.inside) {
       return content;
@@ -1738,8 +2188,13 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
               side: _focused ? focusRingSide(colorScheme) : BorderSide.none,
             ),
           ),
-          child: widget.labelOverflows
-              ? Tooltip(message: widget.destination.label, child: content)
+          child: widget.tooltip
+              ? widget.compact
+                    ? AppTooltip(
+                        message: widget.destination.label,
+                        child: content,
+                      )
+                    : Tooltip(message: widget.destination.label, child: content)
               : content,
         ),
       ),

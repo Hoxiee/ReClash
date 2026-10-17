@@ -120,6 +120,8 @@ class ListItem<T> extends StatelessWidget {
   final double? horizontalTitleGap;
   final double minVerticalPadding;
   final Color? color;
+  final bool isSelected;
+  final bool holdsSelection;
   final double? minTileHeight;
   final void Function()? onTap;
 
@@ -133,6 +135,8 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.onTap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -151,6 +155,8 @@ class ListItem<T> extends StatelessWidget {
     bool preferSheet = false,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -172,6 +178,8 @@ class ListItem<T> extends StatelessWidget {
     required Widget widget,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -190,6 +198,8 @@ class ListItem<T> extends StatelessWidget {
     required ValueChanged<T> onChanged,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -219,6 +229,8 @@ class ListItem<T> extends StatelessWidget {
     String? resetValue,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -244,6 +256,8 @@ class ListItem<T> extends StatelessWidget {
     ValueChanged<bool?>? onChanged,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -261,6 +275,8 @@ class ListItem<T> extends StatelessWidget {
     ValueChanged<bool>? onChanged,
     this.horizontalTitleGap,
     this.color,
+    this.isSelected = false,
+    this.holdsSelection = false,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
@@ -286,13 +302,21 @@ class ListItem<T> extends StatelessWidget {
           trailing: trailing ?? this.trailing,
           contentPadding: padding,
           horizontalTitleGap: horizontalTitleGap,
+          isSelected: isSelected,
+          fillsSelection: isSelected && !holdsSelection,
+          holdsSelection: holdsSelection,
           onPressed: onTap,
         ),
       );
     }
     return ListTile(
       key: key,
-      tileColor: color,
+      tileColor: isSelected
+          ? holdsSelection
+                ? context.colorScheme.secondaryContainer.withValues(alpha: 0.8)
+                : color ?? Theme.of(context).colorScheme.primaryContainer
+          : color,
+      selected: isSelected && !holdsSelection,
       titleTextStyle: context.listTitleStyle,
       subtitleTextStyle: context.listSubtitleStyle,
       leading: leading ?? this.leading,

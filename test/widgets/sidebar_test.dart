@@ -38,29 +38,33 @@ Widget _sidebar({
   VoidCallback? onToggle,
   Size windowControls = Size.zero,
   EdgeInsets safePadding = EdgeInsets.zero,
+  bool disableAnimations = false,
 }) {
   return TestApp(
-    child: Scaffold(
-      body: Row(
-        children: [
-          SizedBox(
-            height: 400,
-            child: Builder(
-              builder: (context) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(padding: safePadding),
-                child: NavigationSidebar(
-                  destinations: destinations,
-                  selectedIndex: selectedIndex,
-                  expanded: expanded,
-                  onSelected: onSelected ?? (_) {},
-                  onToggle: onToggle,
-                  windowControls: windowControls,
+    child: MediaQuery(
+      data: MediaQueryData(disableAnimations: disableAnimations),
+      child: Scaffold(
+        body: Row(
+          children: [
+            SizedBox(
+              height: 400,
+              child: Builder(
+                builder: (context) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(padding: safePadding),
+                  child: NavigationSidebar(
+                    destinations: destinations,
+                    selectedIndex: selectedIndex,
+                    expanded: expanded,
+                    onSelected: onSelected ?? (_) {},
+                    onToggle: onToggle,
+                    windowControls: windowControls,
+                  ),
                 ),
               ),
             ),
-          ),
-          const Expanded(child: SizedBox.expand(key: ValueKey('content'))),
-        ],
+            const Expanded(child: SizedBox.expand(key: ValueKey('content'))),
+          ],
+        ),
       ),
     ),
   );
@@ -107,7 +111,235 @@ Finder _tip(String message) => find.byWidgetPredicate(
   (widget) => widget is AppTooltip && widget.message == message,
 );
 
+Iterable<double> _membershipOpacities(WidgetTester tester, String label) =>
+    tester
+        .widgetList<Opacity>(
+          find.ancestor(of: find.text(label), matching: find.byType(Opacity)),
+        )
+        .where((opacity) => !opacity.alwaysIncludeSemantics)
+        .map((opacity) => opacity.opacity);
+
 void main() {
+  testWidgets('destination slots animate insertion and removal', (
+    tester,
+  ) async {
+    const start = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(glyph: AppGlyphs.profiles, label: 'C', id: 'c'),
+    ];
+    await tester.pumpWidget(_sidebar(destinations: start));
+    expect(_membershipOpacities(tester, 'A'), contains(1));
+
+    final inserted = [
+      start[0],
+      const SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+      start[1],
+    ];
+    await tester.pumpWidget(_sidebar(destinations: inserted));
+    expect(_membershipOpacities(tester, 'B'), contains(0));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(_membershipOpacities(tester, 'B').single, inExclusiveRange(0, 1));
+    await tester.pumpAndSettle();
+    expect(_membershipOpacities(tester, 'B'), contains(1));
+
+    await tester.pumpWidget(_sidebar(destinations: start));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(_membershipOpacities(tester, 'B').single, inExclusiveRange(0, 1));
+    await tester.pumpAndSettle();
+    expect(find.text('B'), findsNothing);
+  });
+
+  testWidgets('a returning destination revives its slot with fresh data', (
+    tester,
+  ) async {
+    const before = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(glyph: AppGlyphs.proxies, label: 'Old', id: 'b'),
+    ];
+    final after = [
+      before[0],
+      const SidebarDestination(glyph: AppGlyphs.proxies, label: 'New', id: 'b'),
+    ];
+    await tester.pumpWidget(_sidebar(destinations: before));
+    await tester.pumpWidget(_sidebar(destinations: [before[0]]));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpWidget(_sidebar(destinations: after));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Old'), findsNothing);
+    expect(find.text('New'), findsOneWidget);
+  });
+
+  testWidgets('duplicate glyphs keep distinct legacy slots', (tester) async {
+    const destinations = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'First'),
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'Second'),
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'Third'),
+    ];
+    int? selected;
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: destinations,
+        onSelected: (index) => selected = index,
+      ),
+    );
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+    expect(find.text('Third'), findsOneWidget);
+    await tester.tap(find.text('Third'));
+    expect(selected, 2);
+  });
+
+  testWidgets('group changes animate their separator', (tester) async {
+    const first = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+    ];
+    await tester.pumpWidget(_sidebar(destinations: first));
+    expect(
+      find.byWidgetPredicate(NavigationSidebar.isGroupDivider),
+      findsNothing,
+    );
+
+    const separated = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(
+        glyph: AppGlyphs.proxies,
+        label: 'B',
+        group: 1,
+        id: 'b',
+      ),
+    ];
+    await tester.pumpWidget(_sidebar(destinations: separated));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.byWidgetPredicate(NavigationSidebar.isGroupDivider),
+      findsOneWidget,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(_sidebar(destinations: first));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.byWidgetPredicate(NavigationSidebar.isGroupDivider),
+      findsOneWidget,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate(NavigationSidebar.isGroupDivider),
+      findsNothing,
+    );
+  });
+
+  testWidgets('group dividers track animated slot changes, including empty', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: const [
+          SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+          SidebarDestination(
+            glyph: AppGlyphs.proxies,
+            label: 'B',
+            group: 1,
+            id: 'b',
+          ),
+        ],
+      ),
+    );
+    expect(
+      find.byWidgetPredicate(NavigationSidebar.isGroupDivider),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(_sidebar(destinations: const []));
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a leaving destination cannot be tapped', (tester) async {
+    const destinations = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+    ];
+    int? selected;
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: destinations,
+        onSelected: (index) => selected = index,
+      ),
+    );
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: [destinations[0]],
+        onSelected: (index) => selected = index,
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('B').hitTestable(), findsNothing);
+    expect(
+      tester.widgetList<Opacity>(
+        find.ancestor(of: find.text('B'), matching: find.byType(Opacity)),
+      ),
+      isNotEmpty,
+    );
+    expect(selected, isNull);
+  });
+
+  testWidgets('tap resolves the current identity index during reorder', (
+    tester,
+  ) async {
+    const before = [
+      SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+      SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+      SidebarDestination(glyph: AppGlyphs.profiles, label: 'C', id: 'c'),
+    ];
+    final after = [before[2], before[0], before[1]];
+    int? selected;
+    await tester.pumpWidget(
+      _sidebar(destinations: before, onSelected: (index) => selected = index),
+    );
+    await tester.pumpWidget(
+      _sidebar(destinations: after, onSelected: (index) => selected = index),
+    );
+    await tester.tap(find.text('B'));
+    expect(selected, 2);
+  });
+
+  testWidgets('reduced motion settles slots immediately mid-flight', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: const [
+          SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+        ],
+      ),
+    );
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: const [
+          SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+          SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+        ],
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(
+      _sidebar(
+        destinations: const [
+          SidebarDestination(glyph: AppGlyphs.dashboard, label: 'A', id: 'a'),
+          SidebarDestination(glyph: AppGlyphs.proxies, label: 'B', id: 'b'),
+        ],
+        disableAnimations: true,
+      ),
+    );
+    expect(_membershipOpacities(tester, 'B'), contains(1));
+  });
+
   testWidgets('group dividers separate destination groups', (tester) async {
     await tester.pumpWidget(
       _sidebar(

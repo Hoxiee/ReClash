@@ -113,6 +113,7 @@ class CommonCard extends StatelessWidget {
     this.statesController,
     this.inert = false,
     this.fillsSelection = false,
+    this.holdsSelection = false,
     required this.child,
   }) : isSelected = isSelected ?? false;
 
@@ -124,6 +125,7 @@ class CommonCard extends StatelessWidget {
   /// A selected card keeps its fill unless [fillsSelection]; callers mark it.
   final bool isSelected;
   final bool fillsSelection;
+  final bool holdsSelection;
   final bool isError;
   final void Function()? onPressed;
   final Widget child;
@@ -155,7 +157,26 @@ class CommonCard extends StatelessWidget {
     if (_filled) {
       return colorScheme.primary;
     }
-    return level.colorOf(colorScheme);
+    return isSelected && holdsSelection
+        ? colorScheme.secondaryContainer.withValues(alpha: 0.8)
+        : level.colorOf(colorScheme);
+  }
+
+  Color? _buildOverlayColor(BuildContext context, Set<WidgetState> states) {
+    if (!holdsSelection) {
+      return null;
+    }
+    final base = _buildForegroundColor(context);
+    if (states.contains(WidgetState.pressed)) {
+      return base.withValues(alpha: 0.1);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return base.withValues(alpha: 0.08);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return base.withValues(alpha: 0.1);
+    }
+    return null;
   }
 
   Color _buildForegroundColor(BuildContext context) {
@@ -165,6 +186,9 @@ class CommonCard extends StatelessWidget {
     }
     if (_filled) {
       return colorScheme.onPrimary;
+    }
+    if (isSelected && holdsSelection) {
+      return colorScheme.onSecondaryContainer;
     }
     return colorScheme.onSurfaceVariant;
   }
@@ -203,6 +227,11 @@ class CommonCard extends StatelessWidget {
               backgroundColor: WidgetStatePropertyAll(
                 _buildBackgroundColor(context, level),
               ),
+              overlayColor: holdsSelection
+                  ? WidgetStateProperty.resolveWith(
+                      (states) => _buildOverlayColor(context, states),
+                    )
+                  : null,
               side: WidgetStateProperty.resolveWith(
                 (states) => _buildBorderSide(
                   context,

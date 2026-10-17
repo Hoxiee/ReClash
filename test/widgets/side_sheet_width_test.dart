@@ -79,12 +79,12 @@ void main() {
   for (final MapEntry(key: name, value: opener) in _openers.entries) {
     for (final (viewWidth, width) in expectedWidths) {
       testWidgets('$name in a ${viewWidth.round()} dp window opens a '
-          'full-height side sheet ${width.round()} dp wide', (tester) async {
+          'floating side sheet ${width.round()} dp wide', (tester) async {
         final view = Size(viewWidth, 800);
         await open(tester, view, opener);
         expect(
           sheetRect(tester),
-          Rect.fromLTWH(viewWidth - width, 0, width, view.height),
+          Rect.fromLTWH(viewWidth - width - 16, 16, width, view.height - 32),
         );
         expect(tester.takeException(), isNull);
       });
@@ -99,11 +99,17 @@ void main() {
 
     tester.view.physicalSize = const Size(1600, 900);
     await tester.pumpAndSettle();
-    expect(sheetRect(tester), const Rect.fromLTWH(1600 - 560, 0, 560, 900));
+    expect(
+      sheetRect(tester),
+      const Rect.fromLTWH(1600 - 560 - 16, 16, 560, 900 - 32),
+    );
 
     tester.view.physicalSize = const Size(1000, 800);
     await tester.pumpAndSettle();
-    expect(sheetRect(tester), const Rect.fromLTWH(1000 - 400, 0, 400, 800));
+    expect(
+      sheetRect(tester),
+      const Rect.fromLTWH(1000 - 400 - 16, 16, 400, 800 - 32),
+    );
   });
 
   testWidgets('a page beside the sidebar opens the same width as the window '
@@ -114,6 +120,9 @@ void main() {
       _openers['showSheet']!,
       sidebarWidth: 240,
     );
-    expect(sheetRect(tester), const Rect.fromLTWH(1280 - 512, 0, 512, 800));
+    expect(
+      sheetRect(tester),
+      const Rect.fromLTWH(1280 - 512 - 16, 16, 512, 800 - 32),
+    );
   });
 }

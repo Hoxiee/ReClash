@@ -1,3 +1,4 @@
+import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/side_sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,8 +40,33 @@ void main() {
           .first,
     );
     expect(material.color, Colors.red);
+    expect(material.shape, AppShape.xl);
+    expect(material.clipBehavior, Clip.antiAlias);
+    expect(material.elevation, 3);
     expect(controller.duration, const Duration(milliseconds: 300));
     expect(controller.reverseDuration, const Duration(milliseconds: 200));
+  });
+
+  testWidgets('a transparent SideSheet has no rounded chrome', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SideSheet(
+            backgroundColor: Colors.transparent,
+            builder: (_) => const Text('Content'),
+          ),
+        ),
+      ),
+    );
+
+    final material = tester.widget<Material>(
+      find
+          .ancestor(of: find.text('Content'), matching: find.byType(Material))
+          .first,
+    );
+    expect(material.shape, AppShape.none);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 0);
   });
 
   testWidgets(

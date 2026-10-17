@@ -173,6 +173,7 @@ class _Sidebar extends ConsumerWidget {
       destinations: [
         for (final item in items)
           SidebarDestination(
+            id: item.label,
             glyph: item.glyph,
             label: item.label.label,
             group: _groupOf(item.label),

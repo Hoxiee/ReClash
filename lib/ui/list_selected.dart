@@ -6,6 +6,8 @@ class DecorationListItem extends StatefulWidget {
   final Widget? leading;
   final Widget? trailing;
   final bool? isSelected;
+  final bool fillsSelection;
+  final bool holdsSelection;
   final double? horizontalTitleGap;
   final EdgeInsetsGeometry? contentPadding;
   final VoidCallback? onPressed;
@@ -20,6 +22,8 @@ class DecorationListItem extends StatefulWidget {
     this.trailing,
     this.subtitle,
     this.isSelected,
+    this.fillsSelection = false,
+    this.holdsSelection = false,
     this.onPressed,
     this.horizontalTitleGap,
     this.minVerticalPadding,
@@ -67,6 +71,8 @@ class _DecorationListItemState extends State<DecorationListItem> {
         shape: AppShape.of(borderRadius),
         isError: widget.invalid,
         isSelected: widget.isSelected,
+        fillsSelection: widget.fillsSelection,
+        holdsSelection: widget.holdsSelection,
         padding: EdgeInsets.zero,
         statesController: _states,
         inert: sorting,
