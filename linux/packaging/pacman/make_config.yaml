@@ -1,0 +1,38 @@
+display_name: ReClash
+package_name: reclash
+maintainer:
+  name: Hoxiee
+  email: hoxiee.dev@gmail.com
+
+licenses:
+  - Other
+
+installed_size: 6604
+icon: ./assets/images/icon.png
+
+dependencies:
+  - gtk3
+  - libayatana-appindicator
+  - libkeybinder3
+  - libsecret
+
+supported_mime_type:
+  - x-scheme-handler/clash
+  - x-scheme-handler/clashmeta
+  - x-scheme-handler/reclash
+
+keywords:
+  - ReClash
+  - Clash
+  - ClashMeta
+  - Proxy
+
+generic_name: ReClash
+
+categories:
+  - Network
+
+startup_notify: true
+# Should equal the app id (com.reclash). NOTE: the current flutter_distributor
+# pacman maker does not emit StartupWMClass; kept for parity/forward-compat.
+startup_wm_class: com.reclash
