@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "Obuna takrorlanishining oldini olish",
+  "preventDuplicateProfilesDesc": "Mavjud profil ishlatayotgan obuna havolasini rad etish",
+  "profileImportDuplicate": "Bu obuna havolasiga ega profil allaqachon mavjud"
+}

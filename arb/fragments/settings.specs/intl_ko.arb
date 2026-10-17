@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "끝까지 읽기"
+  "disclaimerReadToEnd": "끝까지 읽기",
+  "customImportDroppedIncludeAll": "프록시 그룹 {groups}에서 include-all을 제거했습니다. 해당 그룹이 사용하는 프록시나 프록시 공급자를 추가하세요"
 }

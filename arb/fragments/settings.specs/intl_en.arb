@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "Read to the end"
+  "disclaimerReadToEnd": "Read to the end",
+  "customImportDroppedIncludeAll": "Dropped include-all from the proxy groups {groups}; add the proxies or proxy providers they use"
 }

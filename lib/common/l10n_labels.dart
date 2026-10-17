@@ -119,7 +119,59 @@ extension LocaleL10n on Locale {
       'ko' => appLocalizations.ko,
       'ru' => appLocalizations.ru,
       'zh_CN' => appLocalizations.zhCN,
+      'uz' => appLocalizations.uz,
+      'kk' => appLocalizations.kk,
+      'tk' => appLocalizations.tk,
       final code => code,
+    };
+  }
+
+  /// Fixed names: a language picker must stay readable in any locale.
+  String get nativeLabel {
+    return switch (toString()) {
+      'en' => 'English',
+      'es' => 'Español',
+      'fr' => 'Français',
+      'ja' => '日本語',
+      'ko' => '한국어',
+      'ru' => 'Русский',
+      'uz' => 'Oʻzbekcha',
+      'kk' => 'Қазақша',
+      'tk' => 'Türkmençe',
+      'zh_CN' => '简体中文',
+      final code => code,
+    };
+  }
+
+  String get englishLabel {
+    return switch (toString()) {
+      'en' => 'English',
+      'es' => 'Spanish',
+      'fr' => 'French',
+      'ja' => 'Japanese',
+      'ko' => 'Korean',
+      'ru' => 'Russian',
+      'uz' => 'Uzbek',
+      'kk' => 'Kazakh',
+      'tk' => 'Turkmen',
+      'zh_CN' => 'Chinese (Simplified)',
+      final code => code,
+    };
+  }
+
+  String get flagEmoji {
+    return switch (toString()) {
+      'en' => '🇬🇧',
+      'es' => '🇪🇸',
+      'fr' => '🇫🇷',
+      'ja' => '🇯🇵',
+      'ko' => '🇰🇷',
+      'ru' => '🇷🇺',
+      'uz' => '🇺🇿',
+      'kk' => '🇰🇿',
+      'tk' => '🇹🇲',
+      'zh_CN' => '🇨🇳',
+      _ => '🌐',
     };
   }
 }

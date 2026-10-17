@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "Жазылым қайталануын болдырмау",
+  "preventDuplicateProfilesDesc": "Бұрыннан бар профиль қолданатын жазылым сілтемесін қабылдамау",
+  "profileImportDuplicate": "Бұл жазылым сілтемесі бар профиль қазірдің өзінде бар"
+}

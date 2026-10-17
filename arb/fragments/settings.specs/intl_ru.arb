@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "Дочитайте до конца"
+  "disclaimerReadToEnd": "Дочитайте до конца",
+  "customImportDroppedIncludeAll": "У групп прокси {groups} отброшен include-all; добавьте прокси или провайдеры прокси, которые они используют"
 }

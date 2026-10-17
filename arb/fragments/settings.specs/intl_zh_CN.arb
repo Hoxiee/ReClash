@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "请阅读至底部"
+  "disclaimerReadToEnd": "请阅读至底部",
+  "customImportDroppedIncludeAll": "已丢弃策略组 {groups} 的 include-all，请为这些策略组添加代理或代理集"
 }

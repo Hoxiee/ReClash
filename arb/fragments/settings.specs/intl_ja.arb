@@ -1,3 +1,4 @@
 {
-  "disclaimerReadToEnd": "最後までお読みください"
+  "disclaimerReadToEnd": "最後までお読みください",
+  "customImportDroppedIncludeAll": "プロキシグループ {groups} の include-all を破棄しました。これらのグループで使うプロキシまたはプロキシプロバイダーを追加してください"
 }
