@@ -144,7 +144,12 @@ void main() {
     await tester.pump();
     expect(find.byType(NavigationSidebar), findsOneWidget);
 
-    await tester.tap(find.byGlyph(AppGlyphs.search));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CommonScaffold),
+        matching: find.byGlyph(AppGlyphs.search),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'needle');

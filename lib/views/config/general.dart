@@ -150,6 +150,7 @@ class UaItem extends ConsumerWidget {
         subtitle: Text(globalUa ?? appLocalizations.defaultText),
         widget: const UserAgentsView(),
         forceFull: false,
+        preferSheet: true,
       ),
     );
   }

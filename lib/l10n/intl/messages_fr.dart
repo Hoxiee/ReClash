@@ -224,16 +224,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m77(label) => "${label} doit être un seul élément";
 
-  static String m78(value) => "Pic ${value}";
+  static String m78(count) => "${count} résultats";
 
-  static String m79(value) => "Total ${value}";
+  static String m79(value) => "Pic ${value}";
 
-  static String m80(label) => "${label} doit être une URL";
+  static String m80(value) => "Total ${value}";
 
-  static String m81(count) =>
-      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+  static String m81(label) => "${label} doit être une URL";
 
   static String m82(count) =>
+      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+
+  static String m83(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -338,6 +340,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Ajouter le DNS du système",
+    ),
+    "applicationSettings": MessageLookupByLibrary.simpleMessage(
+      "Paramètres de l’application",
     ),
     "authentication": MessageLookupByLibrary.simpleMessage("Authentification"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
@@ -1955,6 +1960,61 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Basculer"),
     "tolerance": MessageLookupByLibrary.simpleMessage("Tolérance"),
     "tools": MessageLookupByLibrary.simpleMessage("Outils"),
+    "toolsAction": MessageLookupByLibrary.simpleMessage("Action"),
+    "toolsChoose": MessageLookupByLibrary.simpleMessage(
+      "Choisissez une section ou recherchez un réglage",
+    ),
+    "toolsCloseConnectionsConfirm": MessageLookupByLibrary.simpleMessage(
+      "Toutes les connexions actives seront fermées. Continuer ?",
+    ),
+    "toolsCompleted": MessageLookupByLibrary.simpleMessage("Action terminée"),
+    "toolsConfiguration": MessageLookupByLibrary.simpleMessage("Configuration"),
+    "toolsData": MessageLookupByLibrary.simpleMessage("Ressources et données"),
+    "toolsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Aucun réglage ni aucune action correspondante",
+    ),
+    "toolsInformation": MessageLookupByLibrary.simpleMessage(
+      "Informations et dépannage",
+    ),
+    "toolsLastUsed": MessageLookupByLibrary.simpleMessage("Utilisés récemment"),
+    "toolsNeedsAuthentication": MessageLookupByLibrary.simpleMessage(
+      "Activez d’abord l’authentification",
+    ),
+    "toolsNeedsController": MessageLookupByLibrary.simpleMessage(
+      "Activez d’abord le contrôleur externe",
+    ),
+    "toolsNeedsCore": MessageLookupByLibrary.simpleMessage(
+      "Démarrez le noyau pour cette action",
+    ),
+    "toolsNeedsCustomInterface": MessageLookupByLibrary.simpleMessage(
+      "Sélectionnez d’abord une interface réseau personnalisée",
+    ),
+    "toolsNeedsMipsStack": MessageLookupByLibrary.simpleMessage(
+      "Sélectionnez d’abord la pile réseau MIPS",
+    ),
+    "toolsNeedsOverride": MessageLookupByLibrary.simpleMessage(
+      "Ajoutez d’abord cette surcharge sur la page DNS",
+    ),
+    "toolsNeedsWebdav": MessageLookupByLibrary.simpleMessage(
+      "Configurez d’abord WebDAV",
+    ),
+    "toolsObservation": MessageLookupByLibrary.simpleMessage("Diagnostic"),
+    "toolsPin": MessageLookupByLibrary.simpleMessage("Épingler"),
+    "toolsPinned": MessageLookupByLibrary.simpleMessage("Épinglés"),
+    "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
+      "Redémarrer le noyau",
+    ),
+    "toolsResults": m78,
+    "toolsRun": MessageLookupByLibrary.simpleMessage("Exécuter"),
+    "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
+    "toolsSetting": MessageLookupByLibrary.simpleMessage("Réglage"),
+    "toolsUnpin": MessageLookupByLibrary.simpleMessage("Désépingler"),
+    "toolsUpdateResources": MessageLookupByLibrary.simpleMessage(
+      "Mettre à jour les ressources",
+    ),
+    "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
+      "La mise à jour des règles et scripts peut réappliquer la configuration et affecter les connexions. Continuer ?",
+    ),
     "torch": MessageLookupByLibrary.simpleMessage("Lampe torche"),
     "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Reçu"),
@@ -1962,8 +2022,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Envoyé"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Port TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafic"),
-    "trafficPeak": m78,
-    "trafficTotal": m79,
+    "trafficPeak": m79,
+    "trafficTotal": m80,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafic utilisé"),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
@@ -2001,7 +2061,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bande passante d’envoi",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m80,
+    "urlTip": m81,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -2030,8 +2090,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m81,
-    "yearsAgoShort": m82,
+    "yearsAgo": m82,
+    "yearsAgoShort": m83,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

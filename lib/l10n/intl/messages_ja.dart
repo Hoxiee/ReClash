@@ -191,15 +191,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m77(label) => "${label}は1項目のみ指定できます";
 
-  static String m78(value) => "ピーク ${value}";
+  static String m78(count) => "${count} 件の結果";
 
-  static String m79(value) => "累計 ${value}";
+  static String m79(value) => "ピーク ${value}";
 
-  static String m80(label) => "${label}はURLである必要があります";
+  static String m80(value) => "累計 ${value}";
 
-  static String m81(count) => "${count} 年前";
+  static String m81(label) => "${label}はURLである必要があります";
 
   static String m82(count) => "${count} 年前";
+
+  static String m83(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -274,6 +276,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("アプリアイコンのデザイン"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("ローカルプロキシがありません"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
+    "applicationSettings": MessageLookupByLibrary.simpleMessage("アプリの設定"),
     "authentication": MessageLookupByLibrary.simpleMessage("認証"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "認証を有効にすると、ローカルプロキシポートの利用にユーザー名とパスワードが必要になります。",
@@ -1554,6 +1557,49 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("切り替え"),
     "tolerance": MessageLookupByLibrary.simpleMessage("許容値"),
     "tools": MessageLookupByLibrary.simpleMessage("ツール"),
+    "toolsAction": MessageLookupByLibrary.simpleMessage("操作"),
+    "toolsChoose": MessageLookupByLibrary.simpleMessage("セクションを選ぶか設定を検索してください"),
+    "toolsCloseConnectionsConfirm": MessageLookupByLibrary.simpleMessage(
+      "すべての接続が切断されます。続行しますか？",
+    ),
+    "toolsCompleted": MessageLookupByLibrary.simpleMessage("操作が完了しました"),
+    "toolsConfiguration": MessageLookupByLibrary.simpleMessage("設定"),
+    "toolsData": MessageLookupByLibrary.simpleMessage("リソースとデータ"),
+    "toolsEmpty": MessageLookupByLibrary.simpleMessage("一致する設定や操作はありません"),
+    "toolsInformation": MessageLookupByLibrary.simpleMessage("情報とデバッグ"),
+    "toolsLastUsed": MessageLookupByLibrary.simpleMessage("最近使った項目"),
+    "toolsNeedsAuthentication": MessageLookupByLibrary.simpleMessage(
+      "先に認証を有効にしてください",
+    ),
+    "toolsNeedsController": MessageLookupByLibrary.simpleMessage(
+      "先に外部コントローラーを有効にしてください",
+    ),
+    "toolsNeedsCore": MessageLookupByLibrary.simpleMessage("この操作にはコアの起動が必要です"),
+    "toolsNeedsCustomInterface": MessageLookupByLibrary.simpleMessage(
+      "先にカスタムネットワークインターフェースを選択してください",
+    ),
+    "toolsNeedsMipsStack": MessageLookupByLibrary.simpleMessage(
+      "先に MIPS ネットワークスタックを選択してください",
+    ),
+    "toolsNeedsOverride": MessageLookupByLibrary.simpleMessage(
+      "先に DNS ページでこの上書きを追加してください",
+    ),
+    "toolsNeedsWebdav": MessageLookupByLibrary.simpleMessage(
+      "先に WebDAV を設定してください",
+    ),
+    "toolsObservation": MessageLookupByLibrary.simpleMessage("診断"),
+    "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
+    "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
+    "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
+    "toolsResults": m78,
+    "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
+    "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
+    "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
+    "toolsUnpin": MessageLookupByLibrary.simpleMessage("ピン留めを解除"),
+    "toolsUpdateResources": MessageLookupByLibrary.simpleMessage("リソースを更新"),
+    "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
+      "ルールやスクリプトの更新により設定が再適用され、接続に影響する場合があります。続行しますか？",
+    ),
     "torch": MessageLookupByLibrary.simpleMessage("ライト"),
     "total": MessageLookupByLibrary.simpleMessage("合計"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("ダウンロード量"),
@@ -1561,8 +1607,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m78,
-    "trafficTotal": m79,
+    "trafficPeak": m79,
+    "trafficTotal": m80,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "transport": MessageLookupByLibrary.simpleMessage("トランスポート"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
@@ -1592,7 +1638,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m80,
+    "urlTip": m81,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -1615,8 +1661,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m81,
-    "yearsAgoShort": m82,
+    "yearsAgo": m82,
+    "yearsAgoShort": m83,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

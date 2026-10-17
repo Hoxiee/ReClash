@@ -452,7 +452,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
             },
             decoration: InputDecoration(hintText: localizations.search),
           )
-        : widget.titleWidget ??
+        : PagePresentationScope.of(context)?.title ??
+              widget.titleWidget ??
               (widget.titleMenuItems.isEmpty
                   ? Text(widget.title!)
                   : CommonPopupBox(
@@ -633,7 +634,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
     final pushed =
         form.pop == null &&
         widget.titleWidget == null &&
-        isMobileView &&
+        PagePresentationScope.of(context)?.title == null &&
+        ViewScope.isMobileOf(context) &&
         ModalRoute.of(context)?.impliesAppBarDismissal == true;
     final compactTitle = isCompact || pushed;
     final titleEndInset = appBarActionInset(
@@ -724,14 +726,25 @@ class CommonScaffoldState extends State<CommonScaffold> {
       hasConfirmationAction: widget.confirmationAction != null,
     );
     final isCompact = form.isCompact;
+    final isBottomSheet = form.isBottomSheet;
     final bottomInset = BottomInsetScope.of(context);
     // A detent sheet fills the height its detent gives it and clips its own
     // corners; any other bottom sheet sizes to its content and brings both.
     final hugsContent = isCompact && !SheetOverhangScope.fillsDetentOf(context);
     // The page's bar floats over its body, which leaves the bar's height at
     // its top through MediaQuery padding, as extendBodyBehindAppBar does.
-    final barFloats = !isCompact;
-    final sortableBody = SortModeScope(sorting: _sorting, child: widget.body);
+    final barFloats = !isBottomSheet;
+    final presentation = PagePresentationScope.of(context);
+    final contentBody = SortModeScope(sorting: _sorting, child: widget.body);
+    final sortableBody = presentation == null
+        ? contentBody
+        : Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: presentation.maxBodyWidth),
+              child: contentBody,
+            ),
+          );
     final body = SafeArea(
       top: !barFloats,
       child: ValueListenableBuilder(
@@ -1094,6 +1107,7 @@ class AppBarActionButton extends StatelessWidget {
 class _SheetForm {
   const _SheetForm({
     required this.isCompact,
+    required this.isBottomSheet,
     required this.hasDragHandle,
     required this.dockedSearch,
     required this.pop,
@@ -1109,8 +1123,10 @@ class _SheetForm {
     final provider = SheetProvider.of(context);
     final isModal = provider != null && provider.type != SheetType.page;
     final isCompact = provider?.type.isCompact ?? false;
+    final isBottomSheet = provider?.type == SheetType.bottomSheet;
     return _SheetForm(
       isCompact: isCompact,
+      isBottomSheet: isBottomSheet,
       hasDragHandle: provider?.type == SheetType.bottomSheet,
       dockedSearch: isCompact ? searchState : null,
       pop: !isModal
@@ -1128,6 +1144,7 @@ class _SheetForm {
   }
 
   final bool isCompact;
+  final bool isBottomSheet;
   final bool hasDragHandle;
   final AppBarSearchState? dockedSearch;
   final _SheetPop? pop;

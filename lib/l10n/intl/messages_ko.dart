@@ -192,15 +192,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m77(label) => "${label}은(는) 하나만 입력해야 합니다";
 
-  static String m78(value) => "최고 ${value}";
+  static String m78(count) => "결과 ${count}개";
 
-  static String m79(value) => "합계 ${value}";
+  static String m79(value) => "최고 ${value}";
 
-  static String m80(label) => "${label}은(는) URL이어야 합니다";
+  static String m80(value) => "합계 ${value}";
 
-  static String m81(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m81(label) => "${label}은(는) URL이어야 합니다";
 
   static String m82(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m83(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -271,6 +273,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("앱 아이콘 디자인"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("로컬 프록시 없음"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("시스템 DNS 추가"),
+    "applicationSettings": MessageLookupByLibrary.simpleMessage("앱 설정"),
     "authentication": MessageLookupByLibrary.simpleMessage("인증"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "인증을 켜면 로컬 프록시 포트에서 사용자 이름과 비밀번호를 요구합니다.",
@@ -1527,6 +1530,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("전환"),
     "tolerance": MessageLookupByLibrary.simpleMessage("허용 오차"),
     "tools": MessageLookupByLibrary.simpleMessage("도구"),
+    "toolsAction": MessageLookupByLibrary.simpleMessage("작업"),
+    "toolsChoose": MessageLookupByLibrary.simpleMessage("섹션을 선택하거나 설정을 검색하세요"),
+    "toolsCloseConnectionsConfirm": MessageLookupByLibrary.simpleMessage(
+      "모든 활성 연결이 종료됩니다. 계속할까요?",
+    ),
+    "toolsCompleted": MessageLookupByLibrary.simpleMessage("작업 완료"),
+    "toolsConfiguration": MessageLookupByLibrary.simpleMessage("구성"),
+    "toolsData": MessageLookupByLibrary.simpleMessage("리소스 및 데이터"),
+    "toolsEmpty": MessageLookupByLibrary.simpleMessage("일치하는 설정이나 작업이 없습니다"),
+    "toolsInformation": MessageLookupByLibrary.simpleMessage("정보 및 디버깅"),
+    "toolsLastUsed": MessageLookupByLibrary.simpleMessage("최근 사용 항목"),
+    "toolsNeedsAuthentication": MessageLookupByLibrary.simpleMessage(
+      "먼저 인증을 활성화하세요",
+    ),
+    "toolsNeedsController": MessageLookupByLibrary.simpleMessage(
+      "먼저 외부 컨트롤러를 활성화하세요",
+    ),
+    "toolsNeedsCore": MessageLookupByLibrary.simpleMessage(
+      "이 작업을 사용하려면 코어를 시작하세요",
+    ),
+    "toolsNeedsCustomInterface": MessageLookupByLibrary.simpleMessage(
+      "먼저 사용자 지정 네트워크 인터페이스를 선택하세요",
+    ),
+    "toolsNeedsMipsStack": MessageLookupByLibrary.simpleMessage(
+      "먼저 MIPS 네트워크 스택을 선택하세요",
+    ),
+    "toolsNeedsOverride": MessageLookupByLibrary.simpleMessage(
+      "먼저 DNS 페이지에서 이 재정의 항목을 추가하세요",
+    ),
+    "toolsNeedsWebdav": MessageLookupByLibrary.simpleMessage(
+      "먼저 WebDAV를 설정하세요",
+    ),
+    "toolsObservation": MessageLookupByLibrary.simpleMessage("진단"),
+    "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
+    "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
+    "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
+    "toolsResults": m78,
+    "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
+    "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
+    "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
+    "toolsUnpin": MessageLookupByLibrary.simpleMessage("고정 해제"),
+    "toolsUpdateResources": MessageLookupByLibrary.simpleMessage("리소스 업데이트"),
+    "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
+      "규칙과 스크립트를 업데이트하면 구성이 다시 적용되어 연결에 영향을 줄 수 있습니다. 계속할까요?",
+    ),
     "torch": MessageLookupByLibrary.simpleMessage("손전등"),
     "total": MessageLookupByLibrary.simpleMessage("합계"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("다운로드량"),
@@ -1534,8 +1582,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m78,
-    "trafficTotal": m79,
+    "trafficPeak": m79,
+    "trafficTotal": m80,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "transport": MessageLookupByLibrary.simpleMessage("전송"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
@@ -1567,7 +1615,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m80,
+    "urlTip": m81,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1590,8 +1638,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m81,
-    "yearsAgoShort": m82,
+    "yearsAgo": m82,
+    "yearsAgoShort": m83,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

@@ -123,6 +123,41 @@ void main() {
     addTearDown(() => navigationPort = null);
   });
 
+  testWidgets('five destinations fit a narrow large-text dock', (tester) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestApp(
+        child: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(320, 800),
+            textScaler: TextScaler.linear(2),
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: NavigationDock(
+              destinations: [
+                for (var i = 0; i < 5; i++)
+                  NavigationDockDestination(
+                    glyph: AppGlyphs.settings,
+                    label: 'Page $i',
+                  ),
+              ],
+              selectedIndex: 0,
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final bar = tester.getRect(find.byType(FloatingNavigationBar));
+    expect(bar.right, lessThanOrEqualTo(320));
+    expect(bar.width / 5, greaterThanOrEqualTo(44));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the dock stays centred alone on every page, the dashboard '
       'included', (tester) async {
     final container = await _pumpHome(tester);

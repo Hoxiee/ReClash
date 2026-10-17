@@ -291,6 +291,7 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
             : (item) => itemValidator(item, appLocalizations),
         titleBuilder: (item) => Text(item),
       ),
+      forceFull: false,
       onChanged: (items) {
         final next = List<String>.from(items as List);
         if (!listEquals(next, value)) {

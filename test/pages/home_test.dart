@@ -10,7 +10,7 @@ import 'package:reclash/pages/home.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/views/config/general.dart';
+import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/navigation.dart';
@@ -474,15 +474,15 @@ void main() {
       );
       await tester.pump();
 
-      final generalItem = find.text('General');
+      final applicationItem = find.text('Application settings').last;
       await tester.scrollUntilVisible(
-        generalItem,
+        applicationItem,
         500,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(generalItem);
+      await tester.tap(applicationItem);
       await tester.pumpAndSettle();
-      expect(find.byType(GeneralView), findsOneWidget);
+      expect(find.byType(ApplicationSettingView), findsOneWidget);
 
       final logItem = find.text('Logcat');
       await tester.scrollUntilVisible(
@@ -490,7 +490,7 @@ void main() {
         500,
         scrollable: find
             .descendant(
-              of: find.byType(GeneralView),
+              of: find.byType(ApplicationSettingView),
               matching: find.byType(Scrollable),
             )
             .first,
@@ -499,7 +499,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(appSettingProvider).openLogs, isTrue);
-      expect(find.byType(GeneralView), findsOneWidget);
+      expect(find.byType(ApplicationSettingView), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
@@ -1050,7 +1050,12 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byGlyph(AppGlyphs.search));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CommonScaffold),
+        matching: find.byGlyph(AppGlyphs.search),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'needle');
@@ -1173,7 +1178,12 @@ void main() {
 
     await tester.tap(find.text('Open nested search'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byGlyph(AppGlyphs.search));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CommonScaffold),
+        matching: find.byGlyph(AppGlyphs.search),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'needle');
     expect(query, 'needle');

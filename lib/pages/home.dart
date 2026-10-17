@@ -1,3 +1,5 @@
+import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
@@ -20,28 +22,30 @@ class HomePage extends ConsumerWidget {
     if (!hasViewSize) {
       return const SizedBox.shrink();
     }
-    return HomeBackScopeContainer(
-      child: AppSidebarContainer(
-        child: _HomeShell(
-          child: Consumer(
-            builder: (_, ref, _) {
-              final navigationItems = ref
-                  .watch(currentNavigationItemsStateProvider)
-                  .value;
-              final isMobile = ref.watch(isMobileViewProvider);
-              return _HomePageView(
-                navigationItems: navigationItems,
-                pageBuilder: (_, index) {
-                  final navigationItem = navigationItems[index];
-                  return _NavigationPage(
-                    key: ValueKey(navigationItem.label),
-                    item: navigationItem,
-                    isMobile: isMobile,
-                    view: navigationItem.builder(context),
-                  );
-                },
-              );
-            },
+    return ToolsSearchLauncher(
+      child: HomeBackScopeContainer(
+        child: AppSidebarContainer(
+          child: _HomeShell(
+            child: Consumer(
+              builder: (_, ref, _) {
+                final navigationItems = ref
+                    .watch(currentNavigationItemsStateProvider)
+                    .value;
+                final isMobile = ref.watch(isMobileViewProvider);
+                return _HomePageView(
+                  navigationItems: navigationItems,
+                  pageBuilder: (_, index) {
+                    final navigationItem = navigationItems[index];
+                    return _NavigationPage(
+                      key: ValueKey(navigationItem.label),
+                      item: navigationItem,
+                      isMobile: isMobile,
+                      view: navigationItem.builder(context),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -192,7 +196,7 @@ class _NavigationPage extends StatelessWidget {
     final keptView = KeepScope(
       key: ValueKey(item.label),
       keep: item.keep,
-      child: isMobile
+      child: isMobile || item.label == PageLabel.tools
           ? scopedView
           : Navigator(
               key: ValueKey('${item.label.name}_navigator'),
@@ -427,6 +431,11 @@ class HomeBackScopeContainer extends ConsumerWidget {
         final pageLabel = ref.read(shownPageLabelProvider);
         final realContext =
             GlobalObjectKey(pageLabel).currentContext ?? context;
+        if (pageLabel == PageLabel.tools) {
+          final host = const GlobalObjectKey(PageLabel.tools).currentState;
+          if (host is ToolsViewState && await host.handleBack()) return false;
+          if (!context.mounted) return false;
+        }
         final canPop = Navigator.canPop(realContext);
         if (canPop) {
           Navigator.of(realContext).pop();
