@@ -6,12 +6,12 @@ Detailed machine reports and check receipts belong in Git common-dir state, not 
 
 ## Source Boundary
 
-The initial source observation is `b405e90ca6647328721a189aa15ae9d53d898a2d` from FlClash dev; the current V1 source
-is recorded by the accepted vendor snapshot. `vendor/flclash` keeps normalized snapshots append-only. Each accepted
-snapshot also produces an independent parentless product-base commit with the same tree and provenance; `dev` replays
-feature commits above that product base and does not inherit prior vendor-snapshot ancestry. Raw upstream history remains
-provenance, not product history. Existing release tags remain unchanged.
-
+The initial source observation is `b405e90ca6647328721a189aa15ae9d53d898a2d` from FlClash dev; normalized V1
+corresponds to raw source `a8655b0809085905da71fad1d323fc1f34879e79`. The current V1 source is recorded by the accepted
+vendor snapshot. `vendor/flclash` keeps normalized snapshots append-only. Each accepted snapshot also produces an
+independent parentless product-base commit with the same tree and provenance; `dev` replays feature commits above that
+product base and does not inherit prior vendor-snapshot ancestry. Raw upstream history remains provenance, not product
+history. Existing release tags remain unchanged.
 The downstream delta is recorded by independent behavior and maintenance boundaries:
 
 | Feature group | Intent | Contract/check boundary |
@@ -76,5 +76,4 @@ from settings specifications and the Tools catalog.
 Before activating: commit the intended maintenance source, inspect that exact dev/source/recipe combination, require no
 markers or unexplained residuals, and run full plus affected-platform checks. A temporary-repository structural
 bootstrap rehearsal is not final candidate verification, acceptance, native-platform evidence or publication authority.
-Keep our version and historical releases unchanged; deciding how the older release line relates to dev remains a
-separate product/release operation, not a hidden prerequisite that rewrites history.
+The normalized product line starts at `0.1.0-pre.1`; ReClash-Alpha version history is unrelated. Existing release tags remain untouched.

@@ -575,17 +575,15 @@ feature branches and worktrees after integration.
 
 Keep a feature as one Conventional Commit in the final `dev` history. The feature commit contains its implementation,
 tests, affected contracts, owned ARB fragments, and generated localization output; never collect feature strings into a
-global `feat(l10n)` follow-up. During private work, either wait to commit or keep one local checkpoint and amend that
-unshared feature commit as implementation evolves. Do not create a commit for each iteration. Prefer landing a feature's
-foundation before dependent work; if work must be stacked, rebase the dependent branch only while it remains private and
-unshared.
+global `feat(l10n)` follow-up. Keep iteration changes uncommitted in the feature worktree until the feature is ready.
+Prefer landing a feature's foundation before dependent work; if work must be stacked, keep the dependent branch private
+until its base is integrated.
 
 Integrate a private one-commit feature with `git merge --ff-only` into `dev`. If a review branch was pushed with multiple
-work commits, squash-merge it into `dev`. Do not amend `dev`, a pushed commit, or a commit another branch/worktree depends on during ordinary work; a user may
-explicitly request a local, unshared history correction. Otherwise use a normal follow-up fix. Keep upstream vendor sync
+work commits, squash-merge it into `dev`. Do not rewrite an existing commit unless the user explicitly asks. Keep upstream vendor sync
 separate from product feature branches.
 
-Publish explicitly to ReClash's `origin`, for example `git push origin dev`. Never use bare `git push` or push to
+Publish explicitly to ReClash's `origin` only after the user authorizes publication. Never use bare `git push` or push to
 `flclash`; this checkout's `dev` may track `flclash/dev`.
 
 ## Commit Messages
@@ -614,9 +612,8 @@ Install the hooks once with `pre-commit install --hook-type pre-commit --hook-ty
 
 ### Updating Feature Commits
 
-Before integration, fold fixes and test updates into the feature's single private commit with `git commit --amend`.
-After it is pushed, shared with another worktree, merged, or included in a stable tag, do not rewrite it; use a regular
-follow-up commit. Create `fixup!` commits only when the user explicitly requests one.
+Keep iteration changes uncommitted until the feature is ready. After creating its commit, use a regular follow-up commit
+for corrections; rewrite history only when the user explicitly asks.
 
 ### Changelog Trailers
 
