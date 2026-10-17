@@ -85,7 +85,7 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
           plainDark ?? colorScheme.elevated,
         ),
     ],
-  ).withAppShapes.withAppSurfaces.withAppTypography;
+  ).withAppShapes.withAppSurfaces.withAppTypography.withAppTooltips;
   _appThemes[brightness] = (inputs: inputs, theme: theme);
   return theme;
 }
