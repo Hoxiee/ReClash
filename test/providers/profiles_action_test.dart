@@ -9,6 +9,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +17,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yaml/yaml.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
@@ -32,6 +34,12 @@ void main() {
 
   setUpAll(() async {
     await AppLocalizations.load(const Locale('en'));
+    globalState.packageInfo = PackageInfo(
+      appName: 'ReClash',
+      packageName: 'com.reclash',
+      version: '1.0.0',
+      buildNumber: '1',
+    );
     home = Directory.systemTemp.createTempSync('reclash-profiles-action-');
     await useAppPaths(home);
   });
@@ -144,6 +152,89 @@ void main() {
       expect(find.text(currentAppLocalizations.shareLinksInvalid), findsOne);
       expect(container.read(profilesProvider), isEmpty);
       verifyNever(() => core.validateConfig(any()));
+    });
+  });
+
+  group('addProfileFromLink with a subscription link', () {
+    testWidgets('refuses an existing URL with surrounding stored whitespace', (
+      tester,
+    ) async {
+      const url = 'https://sub.example.com/clash.yaml';
+      container
+          .read(profilesProvider.notifier)
+          .put(Profile.normal(label: 'Existing', url: '  $url  '));
+      await pumpHost(tester);
+      await container
+          .read(profilesActionProvider.notifier)
+          .addProfileFromLink(url);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(currentAppLocalizations.profileImportDuplicate),
+        findsOne,
+      );
+      expect(container.read(profilesProvider), hasLength(1));
+      verifyNever(() => core.validateConfig(any()));
+    });
+
+    testWidgets('disabled prevention permits another import of the same URL', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await tester.runAsync(() async {
+        final overrides = HttpOverrides.current;
+        HttpOverrides.global = null;
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        var downloads = 0;
+        server.listen((request) async {
+          downloads++;
+          request.response.write('proxies: []\n');
+          await request.response.close();
+        });
+        try {
+          final url = 'http://127.0.0.1:${server.port}/profile.yaml';
+          container
+              .read(profilesProvider.notifier)
+              .put(Profile.normal(label: 'Existing', url: url));
+          container
+              .read(appSettingProvider.notifier)
+              .update(
+                (value) => value.copyWith(preventDuplicateProfiles: false),
+              );
+          await container
+              .read(profilesActionProvider.notifier)
+              .addProfileFromLink(url);
+          expect(downloads, 1);
+          expect(container.read(profilesProvider), hasLength(2));
+          verify(() => core.validateConfig(any())).called(1);
+        } finally {
+          await server.close(force: true);
+          HttpOverrides.global = overrides;
+        }
+      });
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('refuses a URL an existing profile already tracks', (
+      tester,
+    ) async {
+      const url = 'https://sub.example.com/clash.yaml';
+      container
+          .read(profilesProvider.notifier)
+          .put(Profile.normal(label: 'Existing', url: url));
+      await pumpHost(tester);
+
+      await container
+          .read(profilesActionProvider.notifier)
+          .addProfileFromLink(url);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(currentAppLocalizations.profileImportDuplicate),
+        findsOne,
+      );
+      expect(container.read(profilesProvider), hasLength(1));
     });
   });
 
