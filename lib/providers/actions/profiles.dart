@@ -355,9 +355,11 @@ class ProfilesAction extends _$ProfilesAction {
     String ageSecretKey = '',
   }) async {
     _showProfiles();
-    final profile = await globalState.loadingRun(
-      tag: LoadingTag.profiles,
-      () => link.isShareLink
+    final profile = await globalState.loadingRun(tag: LoadingTag.profiles, () {
+      if (!link.isShareLink) {
+        _throwIfDuplicateSubscription(link);
+      }
+      return link.isShareLink
           ? _fromShareLinks(Profile.normal(label: label), [link])
           : _withAgeSecretKey(
               Profile.normal(
@@ -365,9 +367,8 @@ class ProfilesAction extends _$ProfilesAction {
                 url: link,
               ).copyWith(ageSecretKey: ageSecretKey),
               _download,
-            ),
-      title: currentAppLocalizations.addProfile,
-    );
+            );
+    }, title: currentAppLocalizations.addProfile);
     if (profile != null) {
       putProfile(profile);
     }
@@ -389,15 +390,34 @@ class ProfilesAction extends _$ProfilesAction {
           else if (link == shareLinks.first)
             (profile: Profile.normal(), shareLinks: shareLinks),
       ],
-      (item) async => putProfile(
-        await (item.shareLinks.isEmpty
-            ? _download(item.profile)
-            : _fromShareLinks(item.profile, item.shareLinks)),
-      ),
+      (item) async {
+        if (item.shareLinks.isEmpty) {
+          _throwIfDuplicateSubscription(item.profile.url);
+        }
+        return putProfile(
+          await (item.shareLinks.isEmpty
+              ? _download(item.profile)
+              : _fromShareLinks(item.profile, item.shareLinks)),
+        );
+      },
       label: (item) => item.shareLinks.firstOrNull ?? item.profile.url,
       concurrency: maxConcurrentImports,
       tag: LoadingTag.profiles,
     );
+  }
+
+  /// A link import pointed at a subscription URL that an existing profile
+  /// already tracks is refused instead of creating a duplicate. Share links
+  /// and file imports have no stable URL and skip this check at the call site.
+  void _throwIfDuplicateSubscription(String url) {
+    if (!ref.read(appSettingProvider).preventDuplicateProfiles) return;
+    final normalizedUrl = url.trim();
+    final hasDuplicate = ref
+        .read(profilesProvider)
+        .any((profile) => profile.url.trim() == normalizedUrl);
+    if (hasDuplicate) {
+      throw MessageException(currentAppLocalizations.profileImportDuplicate);
+    }
   }
 
   Future<Profile> _download(Profile profile) {
