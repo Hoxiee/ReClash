@@ -36,7 +36,7 @@ void main() {
       r'set\(APPLICATION_ID "([^"]+)"\)',
     ).firstMatch(File('linux/CMakeLists.txt').readAsStringSync())!.group(1);
 
-    for (final format in ['deb', 'rpm', 'appimage']) {
+    for (final format in ['deb', 'rpm', 'appimage', 'pacman']) {
       final config =
           loadYaml(
                 File(

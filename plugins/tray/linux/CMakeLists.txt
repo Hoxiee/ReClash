@@ -10,6 +10,10 @@ add_library(${PLUGIN_NAME} SHARED
   "tray_plugin.cc"
 )
 apply_standard_settings(${PLUGIN_NAME})
+# libayatana-appindicator >= 0.6 marks app_indicator_new deprecated with no
+# replacement in this API generation; downgrade just that warning so the
+# -Werror build keeps working on newer distros.
+target_compile_options(${PLUGIN_NAME} PRIVATE -Wno-error=deprecated-declarations)
 set_target_properties(${PLUGIN_NAME} PROPERTIES
   CXX_VISIBILITY_PRESET hidden)
 target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
