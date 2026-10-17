@@ -8,6 +8,8 @@ import 'package:reclash/ui/keyboard.dart';
 import 'package:reclash/ui/l10n.dart';
 import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/models.dart';
+import 'package:reclash/ui/page_background.dart';
+import 'package:reclash/ui/page_viewport.dart';
 import 'package:reclash/ui/pop_scope.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
@@ -29,12 +31,14 @@ import 'liquid_glass.dart';
 import 'loading.dart';
 import 'motion.dart';
 import 'navigation_dock.dart';
+import 'navigation_title.dart';
 import 'popup.dart';
 import 'search_field.dart';
 import 'sheet.dart';
 import 'sheet_header.dart';
 import 'sheet_navigator.dart';
 import 'sortable.dart';
+import 'tab_motion.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -49,6 +53,11 @@ class CommonScaffold extends StatefulWidget {
   final List<CommonPopupMenuItem> titleMenuItems;
   final bool isLoading;
   final List<Widget>? actions;
+
+  /// Holds the trailing edge past the overflow menu, so menus that come and
+  /// go with a page leave it in place.
+  final Widget? trailing;
+  final bool animateTrailingPress;
 
   final IconButtonData? primaryAction;
 
@@ -85,6 +94,8 @@ class CommonScaffold extends StatefulWidget {
     this.titleWidget,
     this.titleMenuItems = const [],
     this.actions,
+    this.trailing,
+    this.animateTrailingPress = true,
     this.backAction,
     this.isLoading = false,
     this.searchState,
@@ -546,7 +557,30 @@ class CommonScaffoldState extends State<CommonScaffold>
   }
 
   Widget _buildTitle({required bool compact}) {
-    return widget.titleWidget ??
+    final presentation = PagePresentationScope.of(context);
+    final previous = presentation?.previousTitle;
+    if (previous != null) {
+      final title =
+          presentation?.transitionTitle ??
+          [previous, widget.title].whereType<String>().join(' › ');
+      final animation = ModalRoute.of(context)?.animation;
+      final style = compact
+          ? AppTextStyle.headline.of(context)
+          : AppTextStyle.pageTitle.of(context);
+      return AnimatedBuilder(
+        animation: animation ?? const AlwaysStoppedAnimation<double>(1),
+        builder: (_, _) => NavigationTitle(
+          previous: previous,
+          title: title,
+          progress: animation?.value ?? 1,
+          previousStyle: style,
+          style: style,
+          onSelect: presentation?.onTitleSelect,
+        ),
+      );
+    }
+    return PagePresentationScope.of(context)?.title ??
+        widget.titleWidget ??
         (widget.titleMenuItems.isEmpty
             ? Text(widget.title!)
             : CommonPopupBox(
@@ -599,7 +633,8 @@ class CommonScaffoldState extends State<CommonScaffold>
         ...widget.iconActions,
       ],
       confirmation: atFoot ? null : widget.confirmationAction,
-      widgetCount: widgets.length + selection.slots,
+      widgetCount:
+          widgets.length + selection.slots + (widget.trailing == null ? 0 : 1),
       menuItems: widget.menuItems,
     );
     final shown = [?lead, ...fold.shown];
@@ -632,6 +667,8 @@ class CommonScaffoldState extends State<CommonScaffold>
       for (final action in widgets) ElasticPress(child: action),
       if (fold.overflow.isNotEmpty)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
+      if (widget.trailing case final trailing?)
+        ElasticPress(enabled: widget.animateTrailingPress, child: trailing),
     ];
     if (lead != null) {
       actions.first = KeyedSubtree(
@@ -712,9 +749,18 @@ class CommonScaffoldState extends State<CommonScaffold>
           ),
           TextButton(
             onPressed: confirmation.isLoading ? null : confirmation.onPressed,
-            child: confirmation.isLoading
-                ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
-                : Text(confirmation.tooltip!),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(
+                  opacity: confirmation.isLoading ? 0 : 1,
+                  alwaysIncludeSemantics: true,
+                  child: Text(confirmation.tooltip!),
+                ),
+                if (confirmation.isLoading)
+                  CommonCircleLoading(size: TonalButtonSize.bar.icon),
+              ],
+            ),
           ),
         ],
       ),
@@ -758,8 +804,9 @@ class CommonScaffoldState extends State<CommonScaffold>
     final isMobileView = ViewScope.isMobileOf(context);
     final pushed =
         form.pop == null &&
-        widget.titleWidget == null &&
-        isMobileView &&
+        (widget.titleWidget == null || widget.title != null) &&
+        PagePresentationScope.of(context)?.title == null &&
+        ViewScope.isMobileOf(context) &&
         ModalRoute.of(context)?.impliesAppBarDismissal == true;
     final compactTitle = isCompact || pushed;
     final titleEndInset = appBarActionInset(
@@ -776,10 +823,51 @@ class CommonScaffoldState extends State<CommonScaffold>
         clipBehavior: Clip.none,
         children: [
           ListenableBuilder(
-            listenable: Listenable.merge([_appBarState, _searchCovered]),
+            listenable: Listenable.merge([
+              _appBarState,
+              _searchCovered,
+              ?ModalRoute.of(context)?.animation,
+            ]),
             builder: (_, _) {
               final state = _appBarState.value;
               final leading = _buildLeading(backAction, pop: form.pop);
+              final presentation = PagePresentationScope.of(context);
+              final motion =
+                  !isCompact &&
+                      !_isSearch &&
+                      presentation?.previousTitle != null
+                  ? ModalRoute.of(context)?.animation
+                  : null;
+              final progress = context.disableAnimations
+                  ? 1.0
+                  : motion?.value ?? 1.0;
+              final position = Curves.easeInOutCubicEmphasized.transform(
+                progress,
+              );
+              final hasPreviousBack = presentation?.previousHasBack == true;
+              final leadingProgress = motion == null || hasPreviousBack
+                  ? 1.0
+                  : progress;
+              final width = appBarLeadingWidth(
+                _isCompactBar(context, isMobileView),
+              );
+              final animatedLeading = leading == null || motion == null
+                  ? leading
+                  : OverflowBox(
+                      minWidth: width,
+                      maxWidth: width,
+                      child: Transform.scale(
+                        scale:
+                            1 -
+                            (1 - leadingProgress) *
+                                (1 - leadingProgress) *
+                                (1 - 2.5 * leadingProgress),
+                        child: Opacity(
+                          opacity: leadingProgress,
+                          child: leading,
+                        ),
+                      ),
+                    );
               final barSearch =
                   state.searchState != null && !form.hasDockedSearch;
               final covered = barSearch && _searchCovered.value;
@@ -804,10 +892,10 @@ class CommonScaffoldState extends State<CommonScaffold>
                         motion: _searchMotion,
                         width: TonalButtonSize.bar.button,
                         liftOf: (frame) => frame.glassLift,
-                        child: leading,
+                        child: animatedLeading!,
                       ),
                     )
-                  : leading;
+                  : animatedLeading;
               final appBar = AppBar(
                 clipBehavior: Clip.none,
                 automaticallyImplyLeading: false,
@@ -822,7 +910,14 @@ class CommonScaffoldState extends State<CommonScaffold>
                     ? null
                     : underField(searchLeading, _leadingUnderSearch),
                 // The leading slot already trails its button by a margin.
-                titleSpacing: leading == null ? null : 0,
+                leadingWidth: motion == null || leading == null
+                    ? null
+                    : width * (hasPreviousBack ? 1 : position),
+                titleSpacing: leading == null
+                    ? null
+                    : motion == null || hasPreviousBack
+                    ? 0
+                    : 16 * (1 - position),
                 title: hidesBar
                     ? null
                     : underField(
@@ -837,7 +932,9 @@ class CommonScaffoldState extends State<CommonScaffold>
                         _titleUnderSearch,
                       ),
                 actions: [
-                  if (!covered)
+                  if (!covered &&
+                      ModalRoute.of(context)?.animation?.status !=
+                          AnimationStatus.reverse)
                     for (final action in _buildActions(
                       state.searchState != null,
                       widget.primaryAction,
@@ -873,6 +970,30 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
   }
 
+  bool _hasPageWallpaper(BuildContext context) {
+    final sheet = SheetProvider.of(context);
+    return (sheet == null || sheet.type == SheetType.page) &&
+        !ElevatedSurfaceTheme.isIn(context);
+  }
+
+  Widget _pageBackground(BuildContext context, Widget child) {
+    if (!_hasPageWallpaper(context)) {
+      return PageBackgroundScope(cardOpacity: 1, child: child);
+    }
+    return PageBackground(
+      baseColor:
+          widget.backgroundColor ??
+          SurfaceLevel.page.colorOf(context.colorScheme),
+      child: child,
+    );
+  }
+
+  Color? _scaffoldBackgroundColor(BuildContext context) =>
+      _hasPageWallpaper(context) &&
+          PageBackgroundRegistration.maybeOf(context) != null
+      ? Colors.transparent
+      : widget.backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     assert(widget.title != null || widget.titleWidget != null);
@@ -886,14 +1007,21 @@ class CommonScaffoldState extends State<CommonScaffold>
     final isCompact = form.isCompact;
     _searchFillsBar = _isCompactBar(context, ViewScope.isMobileOf(context));
     _searchDocked = form.hasDockedSearch;
+    final isBottomSheet = form.isBottomSheet;
     final bottomInset = BottomInsetScope.of(context);
     // A detent sheet fills the height its detent gives it and clips its own
     // corners; any other bottom sheet sizes to its content and brings both.
     final hugsContent = isCompact && !SheetOverhangScope.fillsDetentOf(context);
     // The page's bar floats over its body, which leaves the bar's height at
     // its top through MediaQuery padding, as extendBodyBehindAppBar does.
-    final barFloats = !isCompact;
-    final sortableBody = SortModeScope(sorting: _sorting, child: widget.body);
+    final barFloats = !isBottomSheet;
+    final presentation = PagePresentationScope.of(context);
+    final sortableBody = SortModeScope(
+      sorting: _sorting,
+      child: presentation == null
+          ? widget.body
+          : PagePresentationScope(child: widget.body),
+    );
     final body = SafeArea(
       top: !barFloats,
       bottom: false,
@@ -946,6 +1074,9 @@ class CommonScaffoldState extends State<CommonScaffold>
       ),
     );
     final appBar = _buildAppBar(backAction, form);
+    final header = !isCompact && PageViewport.contains(context)
+        ? ViewportAppBar(appBar: appBar)
+        : _PageAppBar(appBar: appBar);
     final content = form.hasDockedSearch
         ? BottomInsetScope(
             inset: bottomInset + BottomInsetScope.dockedSearchInset,
@@ -954,27 +1085,33 @@ class CommonScaffoldState extends State<CommonScaffold>
         : body;
     if (!isCompact) {
       final docked = form.dockedSearch;
-      return AppBarInsetScope(
-        child: Scaffold(
-          appBar: appBar,
-          extendBodyBehindAppBar: barFloats,
-          body: _BodyScope(
-            child: docked == null
-                ? content
-                : Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      content,
-                      if (!_sorting)
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: _buildDockedSearch(docked),
-                        ),
-                    ],
-                  ),
+      return _pageBackground(
+        context,
+        AppBarInsetScope(
+          child: Scaffold(
+            appBar: header,
+            extendBodyBehindAppBar: barFloats,
+            body: TabContentMotion.wrap(
+              context,
+              _BodyScope(
+                child: docked == null
+                    ? content
+                    : Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          content,
+                          if (!_sorting)
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: _buildDockedSearch(docked),
+                            ),
+                        ],
+                      ),
+              ),
+            ),
+            resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+            backgroundColor: _scaffoldBackgroundColor(context),
           ),
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
         ),
       );
     }
@@ -1001,19 +1138,30 @@ class CommonScaffoldState extends State<CommonScaffold>
           )
         : sheetBody;
     if (!hugsContent) {
-      return AppBarInsetScope(
-        child: Scaffold(
-          body: footed,
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
-        ),
-      );
+      return isBottomSheet
+          ? AppBarInsetScope(
+              child: Scaffold(
+                body: footed,
+                resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+                backgroundColor: widget.backgroundColor,
+              ),
+            )
+          : _pageBackground(
+              context,
+              AppBarInsetScope(
+                child: Scaffold(
+                  body: footed,
+                  resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+                  backgroundColor: _scaffoldBackgroundColor(context),
+                ),
+              ),
+            );
     }
     final hugging = Column(
       mainAxisSize: MainAxisSize.min,
       children: [Flexible(child: footed)],
     );
-    return AppBarInsetScope(
+    final page = AppBarInsetScope(
       child: form.hasDragHandle
           ? ClipRSuperellipse(
               borderRadius: AppRadius.top(AppCorner.xxl),
@@ -1021,6 +1169,7 @@ class CommonScaffoldState extends State<CommonScaffold>
             )
           : hugging,
     );
+    return isBottomSheet ? page : _pageBackground(context, page);
   }
 }
 
@@ -2131,6 +2280,7 @@ class AppBarActionButton extends StatelessWidget {
 class _SheetForm {
   const _SheetForm({
     required this.isCompact,
+    required this.isBottomSheet,
     required this.hasDragHandle,
     required this.dockedSearch,
     required this.pop,
@@ -2153,8 +2303,10 @@ class _SheetForm {
             !isModal &&
             ViewScope.isMobileOf(context) &&
             ModalRoute.of(context)?.impliesAppBarDismissal == true);
+    final isBottomSheet = provider?.type == SheetType.bottomSheet;
     return _SheetForm(
       isCompact: isCompact,
+      isBottomSheet: isBottomSheet,
       hasDragHandle: provider?.type == SheetType.bottomSheet,
       dockedSearch: docksSearch ? searchState : null,
       pop: !isModal
@@ -2169,6 +2321,7 @@ class _SheetForm {
   }
 
   final bool isCompact;
+  final bool isBottomSheet;
   final bool hasDragHandle;
   final AppBarSearchState? dockedSearch;
   final _SheetPop? pop;
@@ -2365,5 +2518,28 @@ class BaseScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(body: body, title: title);
+  }
+}
+
+/// A bar laid out in its page hides as soon as the page's tab is left, as a
+/// [ViewportAppBar] does, while the tab switch carries the page body away.
+class _PageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _PageAppBar({required this.appBar});
+
+  final PreferredSizeWidget appBar;
+
+  @override
+  Size get preferredSize => appBar.preferredSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = PageActivityScope.isActiveOf(context);
+    return IgnorePointer(
+      ignoring: !active,
+      child: ExcludeSemantics(
+        excluding: !active,
+        child: Opacity(opacity: active ? 1 : 0, child: appBar),
+      ),
+    );
   }
 }

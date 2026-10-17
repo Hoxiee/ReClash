@@ -188,15 +188,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m77(label) => "${label}只能是一项";
 
-  static String m78(value) => "峰值 ${value}";
+  static String m78(count) => "${count} 个结果";
 
-  static String m79(value) => "累计 ${value}";
+  static String m79(value) => "峰值 ${value}";
 
-  static String m80(label) => "${label}必须为URL";
+  static String m80(value) => "累计 ${value}";
 
-  static String m81(count) => "${count} 年前";
+  static String m81(label) => "${label}必须为URL";
 
   static String m82(count) => "${count} 年前";
+
+  static String m83(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -267,6 +269,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("应用图标设计"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("暂无本地代理"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
+    "applicationSettings": MessageLookupByLibrary.simpleMessage("应用设置"),
     "authentication": MessageLookupByLibrary.simpleMessage("认证"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
       "认证开启后，使用本地代理端口需要账号密码。",
@@ -1401,6 +1404,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "tolerance": MessageLookupByLibrary.simpleMessage("容差"),
     "tools": MessageLookupByLibrary.simpleMessage("工具"),
+    "toolsAction": MessageLookupByLibrary.simpleMessage("操作"),
+    "toolsChoose": MessageLookupByLibrary.simpleMessage("选择分区或搜索设置"),
+    "toolsCloseConnectionsConfirm": MessageLookupByLibrary.simpleMessage(
+      "这将关闭所有活动连接。是否继续？",
+    ),
+    "toolsCompleted": MessageLookupByLibrary.simpleMessage("操作已完成"),
+    "toolsConfiguration": MessageLookupByLibrary.simpleMessage("配置"),
+    "toolsData": MessageLookupByLibrary.simpleMessage("资源与数据"),
+    "toolsEmpty": MessageLookupByLibrary.simpleMessage("未找到匹配的设置或操作"),
+    "toolsInformation": MessageLookupByLibrary.simpleMessage("信息与调试"),
+    "toolsLastUsed": MessageLookupByLibrary.simpleMessage("最近使用"),
+    "toolsNeedsAuthentication": MessageLookupByLibrary.simpleMessage(
+      "请先启用身份验证",
+    ),
+    "toolsNeedsController": MessageLookupByLibrary.simpleMessage("请先启用外部控制器"),
+    "toolsNeedsCore": MessageLookupByLibrary.simpleMessage("请先启动内核"),
+    "toolsNeedsCustomInterface": MessageLookupByLibrary.simpleMessage(
+      "请先选择自定义网络接口",
+    ),
+    "toolsNeedsMipsStack": MessageLookupByLibrary.simpleMessage(
+      "请先选择 MIPS 网络栈",
+    ),
+    "toolsNeedsOverride": MessageLookupByLibrary.simpleMessage(
+      "请先在 DNS 页面添加此覆盖项",
+    ),
+    "toolsNeedsWebdav": MessageLookupByLibrary.simpleMessage("请先配置 WebDAV"),
+    "toolsObservation": MessageLookupByLibrary.simpleMessage("诊断"),
+    "toolsPin": MessageLookupByLibrary.simpleMessage("固定"),
+    "toolsPinned": MessageLookupByLibrary.simpleMessage("已固定"),
+    "toolsRestartCore": MessageLookupByLibrary.simpleMessage("重启内核"),
+    "toolsResults": m78,
+    "toolsRun": MessageLookupByLibrary.simpleMessage("执行"),
+    "toolsSection": MessageLookupByLibrary.simpleMessage("分区"),
+    "toolsSetting": MessageLookupByLibrary.simpleMessage("设置"),
+    "toolsUnpin": MessageLookupByLibrary.simpleMessage("取消固定"),
+    "toolsUpdateResources": MessageLookupByLibrary.simpleMessage("更新资源"),
+    "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
+      "更新规则和脚本可能重新应用配置并影响连接。是否继续？",
+    ),
     "torch": MessageLookupByLibrary.simpleMessage("手电筒"),
     "total": MessageLookupByLibrary.simpleMessage("总计"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("下载总量"),
@@ -1408,8 +1450,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("上传总量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "traffic": MessageLookupByLibrary.simpleMessage("流量"),
-    "trafficPeak": m78,
-    "trafficTotal": m79,
+    "trafficPeak": m79,
+    "trafficTotal": m80,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "transport": MessageLookupByLibrary.simpleMessage("传输协议"),
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
@@ -1439,7 +1481,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m80,
+    "urlTip": m81,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1462,8 +1504,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m81,
-    "yearsAgoShort": m82,
+    "yearsAgo": m82,
+    "yearsAgoShort": m83,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

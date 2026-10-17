@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -19,6 +21,98 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 void main() {
+  testWidgets('explicit route exit awaits guards without popping on refusal', (
+    tester,
+  ) async {
+    final answer = Completer<bool>();
+    late Route<dynamic> route;
+    var calls = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CommonPopScope(
+          onPop: (_) {
+            calls++;
+            return answer.future;
+          },
+          child: Builder(
+            builder: (context) {
+              route = ModalRoute.of(context)!;
+              return const Text('draft');
+            },
+          ),
+        ),
+      ),
+    );
+    var completed = false;
+    final pending = canLeaveRoute(route).then((value) {
+      completed = true;
+      return value;
+    });
+    await tester.pump();
+    expect(calls, 1);
+    expect(completed, isFalse);
+    answer.complete(false);
+    expect(await pending, isFalse);
+    expect(route.isActive, isTrue);
+    expect(find.text('draft'), findsOneWidget);
+  });
+
+  testWidgets(
+    'explicit route exit respects an unregistered blocking PopScope',
+    (tester) async {
+      late Route<dynamic> route;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PopScope(
+            canPop: false,
+            child: Builder(
+              builder: (context) {
+                route = ModalRoute.of(context)!;
+                return const Text('blocked');
+              },
+            ),
+          ),
+        ),
+      );
+      expect(await canLeaveRoute(route), isFalse);
+      expect(route.isActive, isTrue);
+    },
+  );
+
+  testWidgets('an explicitly approved pop runs its success cleanup once', (
+    tester,
+  ) async {
+    final navigator = GlobalKey<NavigatorState>();
+    late Route<dynamic> route;
+    var cleanups = 0;
+    await tester.pumpWidget(
+      MaterialApp(navigatorKey: navigator, home: const Text('origin')),
+    );
+    unawaited(
+      navigator.currentState!.push<void>(
+        MaterialPageRoute(
+          builder: (_) => CommonPopScope(
+            onPop: (_) async => true,
+            onPopSuccess: () => cleanups++,
+            child: Builder(
+              builder: (context) {
+                route = ModalRoute.of(context)!;
+                return const Text('draft');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(await canLeaveRoute(route), isTrue);
+    expect(cleanups, 0);
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(cleanups, 1);
+    expect(find.text('origin'), findsOneWidget);
+  });
+
   testWidgets('back layers are consumed from inner to outer', (tester) async {
     var innerActive = true;
     var outerActive = true;

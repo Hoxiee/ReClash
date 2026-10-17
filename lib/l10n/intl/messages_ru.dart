@@ -213,16 +213,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m77(label) => "«${label}» — только одно значение";
 
-  static String m78(value) => "Пик ${value}";
+  static String m78(count) => "Результатов: ${count}";
 
-  static String m79(value) => "Всего ${value}";
+  static String m79(value) => "Пик ${value}";
 
-  static String m80(label) => "Значение «${label}» должно быть URL";
+  static String m80(value) => "Всего ${value}";
 
-  static String m81(count) =>
-      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+  static String m81(label) => "Значение «${label}» должно быть URL";
 
   static String m82(count) =>
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+
+  static String m83(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -327,6 +329,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Добавлять системный DNS",
+    ),
+    "applicationSettings": MessageLookupByLibrary.simpleMessage(
+      "Настройки приложения",
     ),
     "authentication": MessageLookupByLibrary.simpleMessage("Аутентификация"),
     "authenticationDesc": MessageLookupByLibrary.simpleMessage(
@@ -1904,6 +1909,65 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "tolerance": MessageLookupByLibrary.simpleMessage("Допуск"),
     "tools": MessageLookupByLibrary.simpleMessage("Инструменты"),
+    "toolsAction": MessageLookupByLibrary.simpleMessage("Действие"),
+    "toolsChoose": MessageLookupByLibrary.simpleMessage(
+      "Выберите раздел или найдите настройку",
+    ),
+    "toolsCloseConnectionsConfirm": MessageLookupByLibrary.simpleMessage(
+      "Все активные соединения будут закрыты. Продолжить?",
+    ),
+    "toolsCompleted": MessageLookupByLibrary.simpleMessage(
+      "Действие выполнено",
+    ),
+    "toolsConfiguration": MessageLookupByLibrary.simpleMessage("Конфигурация"),
+    "toolsData": MessageLookupByLibrary.simpleMessage("Ресурсы и данные"),
+    "toolsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Настройки и действия не найдены",
+    ),
+    "toolsInformation": MessageLookupByLibrary.simpleMessage(
+      "Сведения и отладка",
+    ),
+    "toolsLastUsed": MessageLookupByLibrary.simpleMessage(
+      "Недавно использованные",
+    ),
+    "toolsNeedsAuthentication": MessageLookupByLibrary.simpleMessage(
+      "Сначала включите аутентификацию",
+    ),
+    "toolsNeedsController": MessageLookupByLibrary.simpleMessage(
+      "Сначала включите внешний контроллер",
+    ),
+    "toolsNeedsCore": MessageLookupByLibrary.simpleMessage(
+      "Для этого действия запустите ядро",
+    ),
+    "toolsNeedsCustomInterface": MessageLookupByLibrary.simpleMessage(
+      "Сначала выберите пользовательский сетевой интерфейс",
+    ),
+    "toolsNeedsMipsStack": MessageLookupByLibrary.simpleMessage(
+      "Сначала выберите сетевой стек MIPS",
+    ),
+    "toolsNeedsOverride": MessageLookupByLibrary.simpleMessage(
+      "Сначала добавьте это переопределение на странице DNS",
+    ),
+    "toolsNeedsWebdav": MessageLookupByLibrary.simpleMessage(
+      "Сначала настройте WebDAV",
+    ),
+    "toolsObservation": MessageLookupByLibrary.simpleMessage("Диагностика"),
+    "toolsPin": MessageLookupByLibrary.simpleMessage("Закрепить"),
+    "toolsPinned": MessageLookupByLibrary.simpleMessage("Закреплённое"),
+    "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
+      "Перезапустить ядро",
+    ),
+    "toolsResults": m78,
+    "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
+    "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
+    "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
+    "toolsUnpin": MessageLookupByLibrary.simpleMessage("Открепить"),
+    "toolsUpdateResources": MessageLookupByLibrary.simpleMessage(
+      "Обновить ресурсы",
+    ),
+    "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
+      "Обновление правил и скриптов может повторно применить конфигурацию и повлиять на соединения. Продолжить?",
+    ),
     "torch": MessageLookupByLibrary.simpleMessage("Фонарик"),
     "total": MessageLookupByLibrary.simpleMessage("Всего"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Загружено"),
@@ -1911,8 +1975,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m78,
-    "trafficTotal": m79,
+    "trafficPeak": m79,
+    "trafficTotal": m80,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "transport": MessageLookupByLibrary.simpleMessage("Транспорт"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
@@ -1948,7 +2012,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m80,
+    "urlTip": m81,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -1981,8 +2045,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m81,
-    "yearsAgoShort": m82,
+    "yearsAgo": m82,
+    "yearsAgoShort": m83,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

@@ -82,6 +82,17 @@ class CommonAction extends _$CommonAction {
     }
   }
 
+  Future<void> checkForUpdates() async {
+    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
+    final result = await globalState.loadingRun(
+      () async => (release: await request.checkForUpdate()),
+      title: currentAppLocalizations.checkUpdate,
+      tag: LoadingTag.checkUpdate,
+    );
+    if (result == null || !ref.mounted) return;
+    await checkUpdateResultHandle(data: result.release, isUser: true);
+  }
+
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
     final Map<String, dynamic>? res;

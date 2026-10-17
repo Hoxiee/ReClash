@@ -7975,6 +7975,251 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Application settings`
+  String get applicationSettings {
+    return Intl.message(
+      'Application settings',
+      name: 'applicationSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configuration`
+  String get toolsConfiguration {
+    return Intl.message(
+      'Configuration',
+      name: 'toolsConfiguration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resources and data`
+  String get toolsData {
+    return Intl.message(
+      'Resources and data',
+      name: 'toolsData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Diagnostics`
+  String get toolsObservation {
+    return Intl.message(
+      'Diagnostics',
+      name: 'toolsObservation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Information and debugging`
+  String get toolsInformation {
+    return Intl.message(
+      'Information and debugging',
+      name: 'toolsInformation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pinned`
+  String get toolsPinned {
+    return Intl.message('Pinned', name: 'toolsPinned', desc: '', args: []);
+  }
+
+  /// `Pin`
+  String get toolsPin {
+    return Intl.message('Pin', name: 'toolsPin', desc: '', args: []);
+  }
+
+  /// `Unpin`
+  String get toolsUnpin {
+    return Intl.message('Unpin', name: 'toolsUnpin', desc: '', args: []);
+  }
+
+  /// `Action`
+  String get toolsAction {
+    return Intl.message('Action', name: 'toolsAction', desc: '', args: []);
+  }
+
+  /// `Setting`
+  String get toolsSetting {
+    return Intl.message('Setting', name: 'toolsSetting', desc: '', args: []);
+  }
+
+  /// `Section`
+  String get toolsSection {
+    return Intl.message('Section', name: 'toolsSection', desc: '', args: []);
+  }
+
+  /// `Run`
+  String get toolsRun {
+    return Intl.message('Run', name: 'toolsRun', desc: '', args: []);
+  }
+
+  /// `Update resources`
+  String get toolsUpdateResources {
+    return Intl.message(
+      'Update resources',
+      name: 'toolsUpdateResources',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart core`
+  String get toolsRestartCore {
+    return Intl.message(
+      'Restart core',
+      name: 'toolsRestartCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the core to use this action`
+  String get toolsNeedsCore {
+    return Intl.message(
+      'Start the core to use this action',
+      name: 'toolsNeedsCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable authentication first`
+  String get toolsNeedsAuthentication {
+    return Intl.message(
+      'Enable authentication first',
+      name: 'toolsNeedsAuthentication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable the external controller first`
+  String get toolsNeedsController {
+    return Intl.message(
+      'Enable the external controller first',
+      name: 'toolsNeedsController',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No matching settings or actions`
+  String get toolsEmpty {
+    return Intl.message(
+      'No matching settings or actions',
+      name: 'toolsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a section or search for a setting`
+  String get toolsChoose {
+    return Intl.message(
+      'Choose a section or search for a setting',
+      name: 'toolsChoose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recently used`
+  String get toolsLastUsed {
+    return Intl.message(
+      'Recently used',
+      name: 'toolsLastUsed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will close all active connections. Continue?`
+  String get toolsCloseConnectionsConfirm {
+    return Intl.message(
+      'This will close all active connections. Continue?',
+      name: 'toolsCloseConnectionsConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Updating rules and scripts may reapply the configuration and affect connections. Continue?`
+  String get toolsUpdateResourcesConfirm {
+    return Intl.message(
+      'Updating rules and scripts may reapply the configuration and affect connections. Continue?',
+      name: 'toolsUpdateResourcesConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action completed`
+  String get toolsCompleted {
+    return Intl.message(
+      'Action completed',
+      name: 'toolsCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} results`
+  String toolsResults(Object count) {
+    return Intl.message(
+      '$count results',
+      name: 'toolsResults',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Add this DNS override on the DNS page first`
+  String get toolsNeedsOverride {
+    return Intl.message(
+      'Add this DNS override on the DNS page first',
+      name: 'toolsNeedsOverride',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a custom network interface first`
+  String get toolsNeedsCustomInterface {
+    return Intl.message(
+      'Select a custom network interface first',
+      name: 'toolsNeedsCustomInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configure WebDAV first`
+  String get toolsNeedsWebdav {
+    return Intl.message(
+      'Configure WebDAV first',
+      name: 'toolsNeedsWebdav',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the MIPS network stack first`
+  String get toolsNeedsMipsStack {
+    return Intl.message(
+      'Select the MIPS network stack first',
+      name: 'toolsNeedsMipsStack',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

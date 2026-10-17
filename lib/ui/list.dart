@@ -56,13 +56,14 @@ final class _CheckboxAction extends _ListItemAction {
 final class _OpenAction extends _ListItemAction {
   final Widget widget;
   final ValueChanged<dynamic>? onChanged;
-
   final bool forceFull;
+  final bool preferSheet;
 
   const _OpenAction({
     required this.widget,
     this.onChanged,
     required this.forceFull,
+    required this.preferSheet,
   });
 }
 
@@ -147,6 +148,7 @@ class ListItem<T> extends StatelessWidget {
     required Widget widget,
     ValueChanged<dynamic>? onChanged,
     bool forceFull = true,
+    bool preferSheet = false,
     this.horizontalTitleGap,
     this.color,
     this.minTileHeight,
@@ -156,6 +158,7 @@ class ListItem<T> extends StatelessWidget {
          widget: widget,
          onChanged: onChanged,
          forceFull: forceFull,
+         preferSheet: preferSheet,
        ),
        onTap = null;
 
@@ -315,6 +318,18 @@ class ListItem<T> extends StatelessWidget {
       case final _OpenAction openDelegate:
         final child = openDelegate.widget;
         final onChanged = openDelegate.onChanged;
+        final navigation = PageNavigationScope.of(context);
+        if (onChanged == null &&
+            !openDelegate.preferSheet &&
+            navigation != null &&
+            navigation.canOpen(child)) {
+          return _buildListTile(
+            context,
+            position: position,
+            trailing: _pageTrailing,
+            onTap: () => navigation.open(child),
+          );
+        }
         if (!context.isMobileView) {
           return _buildListTile(
             context,
@@ -353,12 +368,12 @@ class ListItem<T> extends StatelessWidget {
           position: position,
           trailing: _pageTrailing,
           onTap: () {
-            showExtend(
-              context,
-              builder: (_) {
-                return child;
-              },
-            );
+            final navigation = PageNavigationScope.of(context);
+            if (navigation != null && navigation.canOpen(child)) {
+              navigation.open(child);
+              return;
+            }
+            showExtend(context, builder: (_) => child);
           },
         );
       case final _OptionsAction options:

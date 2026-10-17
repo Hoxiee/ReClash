@@ -23,33 +23,28 @@ class CommonPopScope extends StatelessWidget {
   Widget build(BuildContext context) {
     final route = ModalRoute.of(context);
     final hasBackLayer = route?.willHandlePopInternally == true;
-    return PopScope(
-      canPop: onPop == null || hasBackLayer,
-      onPopInvokedWithResult: onPop == null
-          ? null
-          : (didPop, _) async {
-              if (didPop) {
-                return;
-              }
-              // BackLayerScope adds its entry a frame after this builds, which
-              // rebuilds nothing here on a route with another below it.
-              if (route?.willHandlePopInternally == true) {
-                Navigator.of(context).pop();
-                return;
-              }
-              final res = await onPop!(context);
-              if (!context.mounted) {
-                return;
-              }
-              if (!res) {
-                return;
-              }
-              Navigator.of(context).pop();
-              if (onPopSuccess != null) {
-                await onPopSuccess!();
-              }
-            },
-      child: child,
+    return _RouteExitRegistration(
+      onExit: onPop,
+      child: PopScope(
+        canPop: onPop == null || hasBackLayer,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (didPop) {
+            await onPopSuccess?.call();
+            return;
+          }
+          if (onPop == null) return;
+          // BackLayerScope adds its entry a frame after this builds, which
+          // rebuilds nothing here on a route with another below it.
+          if (route?.willHandlePopInternally == true) {
+            Navigator.of(context).pop();
+            return;
+          }
+          final res = await onPop!(context);
+          if (!context.mounted || !res) return;
+          Navigator.of(context).pop();
+        },
+        child: child,
+      ),
     );
   }
 }
@@ -144,4 +139,74 @@ class _BackLayerScopeState extends State<BackLayerScope> {
   Widget build(BuildContext context) {
     return widget.child;
   }
+}
+
+final _routeExitGuards = Expando<Set<Future<bool> Function()>>();
+
+Future<bool> canLeaveRoute(Route<dynamic> route) async {
+  final guards = _routeExitGuards[route]?.toList().reversed;
+  if (guards == null || guards.isEmpty) {
+    return route.popDisposition != RoutePopDisposition.doNotPop;
+  }
+  for (final guard in guards) {
+    final allowed = await guard();
+    if (!route.isActive) return true;
+    if (!allowed) return false;
+  }
+  return true;
+}
+
+class _RouteExitRegistration extends StatefulWidget {
+  const _RouteExitRegistration({required this.onExit, required this.child});
+
+  final FutureOr<bool> Function(BuildContext context)? onExit;
+  final Widget child;
+
+  @override
+  State<_RouteExitRegistration> createState() => _RouteExitRegistrationState();
+}
+
+class _RouteExitRegistrationState extends State<_RouteExitRegistration> {
+  ModalRoute<dynamic>? _route;
+
+  Future<bool> _check() async =>
+      !mounted || widget.onExit == null || await widget.onExit!(context);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (identical(route, _route)) return;
+    _detach();
+    _route = route;
+    if (route != null && widget.onExit != null) {
+      (_routeExitGuards[route] ??= <Future<bool> Function()>{}).add(_check);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _RouteExitRegistration oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final route = _route;
+    if (route == null) return;
+    if (widget.onExit == null) {
+      _detach();
+    } else {
+      (_routeExitGuards[route] ??= <Future<bool> Function()>{}).add(_check);
+    }
+  }
+
+  void _detach() {
+    final route = _route;
+    if (route != null) _routeExitGuards[route]?.remove(_check);
+  }
+
+  @override
+  void dispose() {
+    _detach();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

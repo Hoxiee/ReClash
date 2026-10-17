@@ -274,3 +274,58 @@ ScrollController sheetScrollController(
   }
   return createController(initialScrollOffset: initialScrollOffset);
 }
+
+class PageNavigationScope extends InheritedWidget {
+  const PageNavigationScope({
+    super.key,
+    required this.canOpen,
+    required this.open,
+    required super.child,
+  });
+
+  final bool Function(Widget page) canOpen;
+  final void Function(Widget page) open;
+
+  static PageNavigationScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PageNavigationScope>();
+
+  @override
+  bool updateShouldNotify(PageNavigationScope oldWidget) =>
+      canOpen != oldWidget.canOpen || open != oldWidget.open;
+}
+
+class GlobalSearchScope extends InheritedWidget {
+  const GlobalSearchScope({
+    super.key,
+    required this.open,
+    required super.child,
+  });
+
+  final void Function(BuildContext context) open;
+
+  static GlobalSearchScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GlobalSearchScope>();
+
+  @override
+  bool updateShouldNotify(GlobalSearchScope oldWidget) =>
+      open != oldWidget.open;
+}
+
+class PagePresentationScope extends InheritedWidget {
+  const PagePresentationScope({
+    super.key,
+    this.title,
+    this.maxBodyWidth = double.infinity,
+    required super.child,
+  });
+
+  final Widget? title;
+  final double maxBodyWidth;
+
+  static PagePresentationScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PagePresentationScope>();
+
+  @override
+  bool updateShouldNotify(PagePresentationScope oldWidget) =>
+      title != oldWidget.title || maxBodyWidth != oldWidget.maxBodyWidth;
+}
