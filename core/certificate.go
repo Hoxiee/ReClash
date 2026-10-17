@@ -8,7 +8,7 @@ import (
 	"github.com/metacubex/tls"
 )
 
-// The inverse of checkCertificate, which FlClashHttpOverrides applies to Dart's own downloads.
+// The inverse of checkCertificate, which ReClashHttpOverrides applies to Dart's own downloads.
 var skipCertVerify atomic.Bool
 
 func relaxCertVerify(tlsConfig *tls.Config) {

@@ -429,7 +429,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/reclash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/reclash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReClash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReClash";
 			};
 			name = Debug;
 		};
@@ -443,7 +443,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/reclash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/reclash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReClash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReClash";
 			};
 			name = Release;
 		};
@@ -457,7 +457,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/reclash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/reclash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReClash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReClash";
 			};
 			name = Profile;
 		};
