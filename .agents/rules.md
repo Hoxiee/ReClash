@@ -173,7 +173,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
 
 - `core/mihomo` is a fork of mihomo, and changes to it are budgeted for features, not repairs. Fixing a bug there is
   low priority even when the bug is real and the fix is small: every patch is one more thing to carry across an upstream
-  rebase. Solve it on the FlClash side of the boundary and note the mihomo behaviour you are working around. Reach into
+  rebase. Solve it on the ReClash side of the boundary and note the mihomo behaviour you are working around. Reach into
   the submodule only for a feature that has nowhere else to live, or when the problem is one the FlClash patches
   themselves introduced — and say which of the two it is in the commit message.
 - Do not expose direct filesystem deletion APIs through Core or helper IPC; use
@@ -238,7 +238,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   `invalidateAllProxies` on `tunnel.UpdateProxies` and validated against each provider's `Version()`, so a rebuild
   costs one read per provider rather than one per proxy. Anything else added to `tunnel/patch.go` that derives from the
   proxy set needs both signals: the external controller can reload the config through `hub/route/configs.go` without
-  going through FlClash's `applyConfig`, so a hook on the FlClash side alone would miss a profile switch.
+  going through FlClash's `applyConfig`, so a hook on the ReClash side alone would miss a profile switch.
 - Core state that mirrors mihomo state goes stale at the next `applyConfig`, which replaces every proxy, provider and
   rule. Read the tunnel instead of caching a snapshot of it: `lookupExternalProvider` kept one that was rebuilt only
   when the host asked for the provider list, and the host asks after a successful setup and not after a failed one, so
@@ -264,7 +264,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   `downloadTimeoutDuration` matches mihomo's `resource.DefaultHttpTimeout`, which bounds the Core's provider downloads
   end to end. `shareLinkSchemes` are the schemes mihomo's `ConvertsV2Ray` reads, less http(s), which is a subscription.
 - Anything on the mihomo side that is reached from both a user-triggered core method and mihomo's own background
-  scheduler needs its in-flight guard on the FlClash side. `updater.UpdateMMDB` and its siblings have none — only the
+  scheduler needs its in-flight guard on the ReClash side. `updater.UpdateMMDB` and its siblings have none — only the
   batch `UpdateGeoDatabases` does — and two concurrent runs close the mmap'd database twice, so `handleUpdateGeoData`
   claims per resource and `updater.GeoUpdateHook` releases.
 - A failed `applyConfig` rolls the tunnel back to the default config, and that rollback is the whole recovery:
@@ -296,7 +296,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   unconditional.
 - Recovery is graded: the first failed launch only skips `initStatus`, and `currentProfileId` is cleared only from
   `crashRecoveryClearThreshold` consecutive failures on. Do not let a single interrupted launch write to the config.
-- Desktop process ownership belongs to `DesktopCoreLifecycle`; do not start/kill `FlClashCore` from providers, widgets,
+- Desktop process ownership belongs to `DesktopCoreLifecycle`; do not start/kill `ReClashCore` from providers, widgets,
   managers, or ad hoc exit callbacks. Acquire and release it through a `CoreProcessLease`.
 - `CoreController.close()` and platform `close()` implementations are terminal and idempotent. Application shutdown must
   stay centralized in `SystemAction`/`SystemExitCoordinator`.
@@ -375,6 +375,10 @@ it there is.
   device numbers, so a case near the line is settled with a profile build. No gate checks this rule.
 
 ## Testing Rules
+
+Prefer tests for user-visible behavior and stable contracts over implementation-specific widget assertions. When the
+maintainer will visually review a small UI change, do not add micro-tests pinning exact colors, fills, geometry, or
+internal widget flags; test meaningful interactions, accessibility contracts, and behavior regressions instead.
 
 The `core/` directory is excluded from automated coverage accounting. Do not add coverage instrumentation or coverage
 collection for code under `core/`. CI still runs `CGO_ENABLED=0 go test .` and `go vet .` to compile/check the Go wrapper,
@@ -542,14 +546,35 @@ failure, disposal, and any timer boundary that changes visible state.
 
 ## Running the App Locally
 
-- An agent starts FlClash on the host only as a safe mode build (`--dart-define=SAFE_MODE=true`, see
+- An agent starts ReClash on the host only as a safe mode build (`--dart-define=SAFE_MODE=true`, see
   `.agents/commands.md`). A normal build takes over the host network, so the user runs it, never the agent.
-- Never end a FlClash process the agent did not start, and never kill by name (`pkill`, `killall`, a pattern on the
+- Never end a ReClash process the agent did not start, and never kill by name (`pkill`, `killall`, a pattern on the
   executable path): the user's own instance matches too. Record the pid of every process you launch, check with
   `ps -o pid,command -p <pid>` that its executable is your own build output, and end only that pid.
 - Only a macOS or Android debug build has its own data directory; every other build shares the installed app's data
   directory and single-instance lock, so it cannot start while the user's instance runs. `.agents/commands.md` lists
   which builds are kept apart.
+
+## Feature Branches and Commit Shape
+
+Keep `dev` clean. Give each independent feature a short-lived `feature/<slug>` branch and its own worktree; parallel
+agents never share a worktree or mutable feature branch. Check status first and preserve unrelated caller WIP. Remove
+feature branches and worktrees after integration.
+
+Keep a feature as one Conventional Commit in the final `dev` history. The feature commit contains its implementation,
+tests, affected contracts, owned ARB fragments, and generated localization output; never collect feature strings into a
+global `feat(l10n)` follow-up. During private work, either wait to commit or keep one local checkpoint and amend that
+unshared feature commit as implementation evolves. Do not create a commit for each iteration. Prefer landing a feature's
+foundation before dependent work; if work must be stacked, rebase the dependent branch only while it remains private and
+unshared.
+
+Integrate a private one-commit feature with `git merge --ff-only` into `dev`. If a review branch was pushed with multiple
+work commits, squash-merge it into `dev`. Do not amend `dev`, a pushed commit, or a commit another branch/worktree depends on during ordinary work; a user may
+explicitly request a local, unshared history correction. Otherwise use a normal follow-up fix. Keep upstream vendor sync
+separate from product feature branches.
+
+Publish explicitly to ReClash's `origin`, for example `git push origin dev`. Never use bare `git push` or push to
+`flclash`; this checkout's `dev` may track `flclash/dev`.
 
 ## Commit Messages
 
@@ -575,17 +600,11 @@ Write what the change does, not that something changed: `perf(views): stop redoi
 
 Install the hooks once with `pre-commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg`.
 
-### Fixup Commits
+### Updating Feature Commits
 
-A follow-up to a change that has not shipped in a stable release goes in as `git commit --fixup=<target>`, aimed at the
-commit that introduced what it amends.
-
-- Only stable tags (`vX.Y.Z`) close a commit. A target reached only by pre-release tags (`vX.Y.Z-pre.N`) is still open
-  for fixups, so do not steer away from it or flag it.
-- A commit a stable tag contains takes no fixup; land the follow-up as a regular commit. Check with
-  `git tag --contains <target> | grep -v -- '-pre'`, which must print nothing.
-- Asking for a fixup means creating the `fixup!` commit only. Do not run `git rebase --autosquash` or otherwise fold it
-  into its target unless the user asks for the squash.
+Before integration, fold fixes and test updates into the feature's single private commit with `git commit --amend`.
+After it is pushed, shared with another worktree, merged, or included in a stable tag, do not rewrite it; use a regular
+follow-up commit. Create `fixup!` commits only when the user explicitly requests one.
 
 ### Changelog Trailers
 
@@ -652,12 +671,28 @@ l10n paths for that reason. It is harmless because the file only needs `Locale`,
 human writes takes Material from `material_ui`; `cupertino_ui` is banned outright and
 survives only as a transitive dependency of `material_ui`.
 
-Strings live in `arb/intl_{en,zh_CN,ja,ru,fr,es,ko}.arb` — flat JSON, no `@` metadata. Add a key to all seven, then regenerate with
-`dart run intl_utils:generate`, which rewrites `lib/l10n/`. A key present in only some locales silently falls back to
-English at runtime, so add the translation rather than leaving it out.
+Localization source has three layers:
+
+- `arb_upstream/intl_<locale>.arb` and `upstream_l10n/` retain vendor-owned ARB and generated Dart bases after normalization; `upstream_l10n/` is provenance only, never imported by the app.
+- `arb/locales/intl_<locale>.arb` contains the stable baseline translation for a locale not supplied by upstream; do not add feature-specific strings there.
+- `arb/fragments/<feature>/intl_<locale>.arb` is the only place to add or change ReClash-owned messages.
+
+Run `dart run tool/assemble_l10n.dart` to produce the flat `arb/intl_<locale>.arb` files consumed by `intl_utils`, then
+run `dart run intl_utils:generate` to update `lib/l10n/`. Never edit assembled ARBs or generated Dart by hand. The
+assembler rejects duplicate feature ownership and locale key mismatches; a fragment value deliberately overrides its
+upstream base, and a `null` message value deliberately removes a base key. Keep each key in the fragment for the feature
+that owns its behavior; do not create a global translation patch queue.
 
 Labels for enum values go through the exhaustive switches in `lib/common/l10n_labels.dart`, never
 `Intl.message(<runtime string>)`. A key built from an enum name or a stored string is invisible to the analyzer, and a
 failed lookup returns the key itself, so a stale key ships as `routeMode_config` in the UI rather than throwing.
 `test/lint/dynamic_message_key_test.dart` fails on any `Intl.message(` in `lib` outside the generated code, and checks
-that every locale carries the same keys and has a display name.
+that every assembled locale carries the same keys and has a display name.
+
+## Fork Intent and Sync Authority
+
+Use the scoped fork context before edits and keep affected `.fork/features/` intent contracts accurate. Prefer narrow,
+feature-owned integration seams when they reduce overlap; do not refactor unrelated code during sync. Unknown paths
+need classification, and critical intent or maintenance-policy changes need explicit review. A sync request authorizes
+routine isolated preparation, not production acceptance, releases or publication. Preserve caller WIP and use the
+[fork maintenance protocol](fork-maintenance.md) for source trust, normalization, coverage and Git-native recovery.

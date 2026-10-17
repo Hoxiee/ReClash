@@ -1,0 +1,12 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  tabs: The default tab transition remains fade unless the user selects otherwise.
+  specs: Settings retain their declared state and apply semantics across the specification-based views.
+  routes: Real setting specification lists have unique IDs and routes retain their page and setting ID.
+watch: ['lib/views/config/**', 'lib/models/config.dart', 'lib/providers/setting*', 'lib/common/preferences.dart', lib/views/application_setting.dart, lib/views/backup_and_restore.dart, lib/views/developer.dart, lib/views/disclaimer.dart, lib/views/hotkey.dart, lib/views/resources.dart, lib/views/theme.dart, test/models/config_test.dart, test/providers/config_test.dart, test/views/resources_view_test.dart, test/views/theme_test.dart, test/widgets/tools_workspace_test.dart]
+checks:
+  config: [tabs]
+  specs: [routes, specs]

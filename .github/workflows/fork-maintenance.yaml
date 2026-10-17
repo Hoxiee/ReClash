@@ -1,0 +1,50 @@
+name: Fork maintenance
+
+on:
+  push:
+    paths:
+      - '.fork/**'
+      - 'tool/fork.dart'
+      - 'tool/check_format.dart'
+      - 'tool/src/fork/**'
+      - 'test/tool/fork*'
+      - 'test/tool/check_format_test.dart'
+      - 'test/widgets/fork_*'
+      - '.github/workflows/fork-maintenance.yaml'
+  pull_request:
+    paths:
+      - '.fork/**'
+      - 'tool/fork.dart'
+      - 'tool/check_format.dart'
+      - 'tool/src/fork/**'
+      - 'test/tool/fork*'
+      - 'test/tool/check_format_test.dart'
+      - 'test/widgets/fork_*'
+      - '.github/workflows/fork-maintenance.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+      - run: git config --global user.name 'Fork maintenance tests'
+      - run: git config --global user.email 'maintenance@localhost'
+      - run: flutter pub get
+      - run: dart run tool/fork.dart check
+      - run: dart tool/check_format.dart
+      - run: flutter test test/tool/fork_registry_test.dart test/tool/fork_context_test.dart test/tool/fork_normalize_test.dart test/tool/fork_sync_test.dart test/tool/fork_identity_test.dart test/tool/check_format_test.dart test/widgets/fork_tooltip_contract_test.dart test/widgets/fork_setting_spec_contract_test.dart

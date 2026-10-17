@@ -1,0 +1,16 @@
+v: 1
+kind: integration
+state: active
+risk: routine
+must:
+  keys: Every assembled locale carries the English reference key set.
+  labels: Runtime-generated Intl.message keys cannot ship; supported locales have translated display names.
+  ownership: Each ReClash message has one feature-fragment owner; duplicate keys fail assembly.
+  sources: Upstream ARB and generated Dart bases, downstream-only locale baselines, fragments and app outputs remain separate.
+  normalization: Upstream ARB and generated l10n paths normalize away from app-owned outputs.
+watch: [arb/**, arb_upstream/**, upstream_l10n/**, .fork/branding.yaml, tool/assemble_l10n.dart, tool/src/fork/normalize.dart, lib/application.dart, lib/common/app_localizations.dart, lib/common/l10n_labels.dart, lib/views/language.dart, lib/views/tools/navigation.dart, lib/l10n/**, test/helpers/test_app.dart, test/l10n/**, test/tool/l10n_assembler_test.dart, test/lint/dynamic_message_key_test.dart, test/tool/fork_normalize_test.dart, test/views/language_view_test.dart]
+checks:
+  localization: [keys, labels]
+  localization-assembly: [ownership, sources]
+  fork-tests: [normalization]
+drop: The localization contract remains even if upstream supplies all translated product strings.

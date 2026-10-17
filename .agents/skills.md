@@ -12,6 +12,8 @@ match a task against the skill `name` and `description`, then load the full inst
   VPN/TUN, and Windows Helper flow.
 - `pre-commit-quality-review`: lightweight triage before commits, with scoped structural review and user decisions on concrete regressions.
 
+- `fork-maintenance`: compact intent contracts, vendor snapshots, upstream impact, isolated sync and verification.
+
 ## Authoring Notes
 
 - Add new repeatable workflows as `.agents/skills/<skill-name>/SKILL.md`, and add the matching

@@ -70,6 +70,12 @@ Read these only when the task touches their area:
   suites that cover it, as CI does. If a toolchain the build hook needs is missing (Go, and on Linux and Windows
   cargo), say which check was skipped rather than dropping it silently.
 
+## Fork Intent
+
+- Before editing, run `dart run tool/fork.dart context --paths <path>`; update affected contracts when intent changes.
+- Unknown paths are unclassified; critical decisions require explicit review, not a clean merge.
+- For vendor sync or maintenance policy, load `fork-maintenance`; details: [.agents/fork-maintenance.md](.agents/fork-maintenance.md).
+
 ## Repo Skills
 
 Use repo skills from `.agents/skills/` when a task matches their descriptions; `.claude/skills/` symlinks expose the

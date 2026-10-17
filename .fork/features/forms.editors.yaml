@@ -1,0 +1,10 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  rules: Rule forms validate submissions and preserve rule metadata when existing rules are edited.
+  editors: Map and named-URL editors validate and preserve structured values through editing and batch input.
+watch: ['lib/features/form/**', test/features/rule_dialog_test.dart, test/features/named_url_form_test.dart, test/widgets/input_test.dart]
+checks:
+  tests: [rules, editors]

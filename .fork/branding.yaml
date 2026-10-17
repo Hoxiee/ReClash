@@ -1,0 +1,54 @@
+v: 1
+preserve:
+  - https://chen08209.github.io/FlClash
+  - Copyright (c) 2025 FlClash
+  - https://github.com/chen08209/FlClash
+  - git@github.com:chen08209/FlClash
+  - chen08209/FlClash
+paths:
+  arb: arb_upstream
+  lib/l10n: upstream_l10n
+  core/Clash.Meta: core/mihomo
+  android/app/src/main/kotlin/com/follow/clash: android/app/src/main/kotlin/com/reclash
+  android/core/src/main/java/com/follow/clash: android/core/src/main/java/com/reclash
+  plugins/wifi_ssid/android/src/main/kotlin/com/follow/clash: plugins/wifi_ssid/android/src/main/kotlin/com/reclash
+rules:
+  - paths: ['**/*.dart']
+    replace:
+      'package:fl_clash/': 'package:reclash/'
+      FlClash: ReClash
+  - paths: [pubspec.yaml]
+    replace:
+      'name: fl_clash': 'name: reclash'
+      core/Clash.Meta: core/mihomo
+  - paths: ['core/**', Makefile, '.gitmodules', '.github/**', '.agents/**', 'android/**', 'plugins/**']
+    replace:
+      core/Clash.Meta: core/mihomo
+      ./Clash.Meta: ./mihomo
+      'path = core/Clash.Meta': 'path = core/mihomo'
+  - paths: ['android/**', 'linux/**', 'macos/**', 'windows/**']
+    replace:
+      com.follow.clash: com.reclash
+      com/follow/clash: com/reclash
+      fl_clash: reclash
+      FlClash: ReClash
+      flclash: reclash
+  - paths: ['lib/**', 'test/**', 'tool/**']
+    replace:
+      core/Clash.Meta: core/mihomo
+      com.follow.clash: com.reclash
+      fl_clash: reclash
+      flclash: reclash
+  - paths: ['plugins/**/pubspec.yaml', 'plugins/**/windows/**', 'plugins/**/linux/**', 'plugins/**/android/**', 'plugins/**/macos/**', 'services/helper/**', 'site/**', build_config.yaml]
+    replace:
+      com.follow.clash: com.reclash
+      com/follow/clash: com/reclash
+      fl_clash: reclash
+      FlClash: ReClash
+      flclash: reclash
+  - paths: [Makefile]
+    replace:
+      'Clash.Meta core sources': 'mihomo core sources'
+  - paths: [test/common/system_test.dart]
+    replace:
+      'Fl Clash': 'Re Clash'
