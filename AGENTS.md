@@ -43,8 +43,8 @@ Read these only when the task touches their area:
   touch. Preserve
   `// ignore:`-style directives, license headers, codegen markers, and vendored upstream comments. See
   [.agents/rules.md](.agents/rules.md) for what belongs in a test or in `.agents/` instead.
-- Start FlClash on the host only as a safe mode build, and end only processes you started, by recorded pid. Never
-  kill a FlClash instance by name; the user's own instance is not yours to close. See
+- Start ReClash on the host only as a safe mode build, and end only processes you started, by recorded pid. Never
+  kill a ReClash instance by name; the user's own instance is not yours to close. See
   [.agents/rules.md](.agents/rules.md).
 - Use `flutter test`, not `dart test`, because models pull in Flutter types.
 - Run code generation after modifying models, providers, or database schema.

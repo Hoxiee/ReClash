@@ -54,11 +54,11 @@ void main() {
     test('escapes reserved characters in the executable path', () {
       const plan = LinuxProtocolRegistrationPlan(
         schemes: ['reclash'],
-        executable: r'/opt/my "apps"/$HOME/100%/Fl`Clash\bin',
+        executable: r'/opt/my "apps"/$HOME/100%/Re`Clash\bin',
         applicationsDir: '/tmp',
       );
 
-      expect(plan.exec, r'"/opt/my \"apps\"/\$HOME/100%%/Fl\`Clash\\bin" %u');
+      expect(plan.exec, r'"/opt/my \"apps\"/\$HOME/100%%/Re\`Clash\\bin" %u');
     });
   });
 }

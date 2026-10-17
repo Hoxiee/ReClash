@@ -1,6 +1,6 @@
 # Surfaces
 
-FlClash draws structure with fills and keeps color for state. A surface stands out from what it sits on by a step in
+ReClash draws structure with fills and keeps color for state. A surface stands out from what it sits on by a step in
 lightness, never by a border. Color appears where something is selected, on, failing, or the one action a screen is
 for. The dashboard set this direction; every other screen follows it, and Material components keep their behavior
 but give up their tonal container fills.

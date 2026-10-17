@@ -111,7 +111,7 @@ class VpnService : SystemVpnService(), ManagedService {
         }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Android starts always-on VPN through this callback instead of ReClash's bound-service
+        // Android starts always-on VPN through this callback instead of the bound-service
         // path. Notify the app layer so it can restore Core and fully initialize the VPN service.
         notifyVpnStartRequested()
         return super.onStartCommand(intent, flags, startId)

@@ -7,7 +7,7 @@ The Go proxy core in `core/` operates in two modes.
 Android lib mode:
 
 - `gomobile bind` builds `core/mobile` into an AAR: a native library per ABI, shipped as `libclash.so`, and the Java
-  classes gobind generates in `com.follow.clash.core.mobile`. The `:core` Gradle module builds it and takes in its
+  classes gobind generates in `com.reclash.core.mobile`. The `:core` Gradle module builds it and takes in its
   classes and libraries (see Android Core Build).
 - The Android `:core` module owns the binding: `Core.kt` is the only caller of the generated `Mobile` class. Flutter
   crosses MethodChannels through `lib/plugins/service.dart` and Android's `ServicePlugin` rather than calling the Core
@@ -96,7 +96,7 @@ it on Android, where the seccomp policy kills the process for `settimeofday`.
 
 TUN is the exception to covering the raw struct. The network settings own only `Tun.coreJson` (`enable`, `device`,
 `stack`, and `auto-route` always on), spread last over the profile's section and patched again on every
-`updateConfig`, so `TunOverrideKey` offers only keys outside it that work in FlClash's TUN. Its keys exist app-wide
+`updateConfig`, so `TunOverrideKey` offers only keys outside it that work in ReClash's TUN. Its keys exist app-wide
 (`PatchClashConfig.tunOverride` with `tunOverrideKeys`, listed in the network page's TUN section as `OverrideEntry`
 rows and added from its last row, as a custom group's options are) for every profile, and per custom profile, whose own keys `ProfileOverrides.overAppTun` lays over the app-wide ones. MTU,
 congestion control, strict route and the route lists are such keys on desktop, so a profile's own values apply unless
@@ -140,7 +140,7 @@ Safe mode clears these extra inbounds and iptables, closes DNS listening and dis
 local overrides. The editor omits disabled alternate controllers and keeps listener completion.
 
 An open external controller always has a secret, because mihomo serves a controller with an empty one to every local
-user and, through CORS, to any page the user visits. `PatchClashConfig.secret` is that secret and it belongs to FlClash,
+user and, through CORS, to any page the user visits. `PatchClashConfig.secret` is that secret and it belongs to ReClash,
 as the address does: the task writes it over whatever the profile carries, and `UpdateParams.secret` hands the same value
 to a running Core, which restarts the controller when it changes. `ensureControllerSecret` keeps the pair consistent
 (an open controller gets a generated secret, a closed one drops it, so every opening rotates it) and runs where a
@@ -155,10 +155,39 @@ it does not isolate programs already running there, so on Android any app holdin
 the outbound IP (#1934). The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
 four paths that must stay in sync: `_makeRealProfileTask` writes the credentials into `authentication` and force-clears
 `skip-auth-prefixes` so a profile cannot silently exempt loopback; `UpdateParams.authentication` applies the same list
-to a running core; `FlClashHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
+to a running core; `ReClashHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
 withholds the Android VPN system proxy declaration because `ProxyInfo` cannot carry credentials (TUN still captures that
 traffic). Desktop system proxy is deliberately not gated — dropping it would leak traffic direct, so the setting's
 description tells users to supply credentials manually instead.
+
+### Web Dashboard Access
+
+`lib/common/web_dashboard/` owns pinned zashboard and MetaCubeXD releases, SHA-256 verification, archive validation and
+managed storage. Valid installations live in `web-dashboard/<flavor>/`, with a bounded `.reclash-panel.json` manifest
+and a nonempty `index.html`. The profile task serves only this managed root through `external-ui` and clears
+`external-ui-name` and `external-ui-url`; a profile cannot redirect dashboard storage or initiate an automatic download.
+Both dashboards use `/ui/<flavor>/`, so changing flavor neither downloads the other panel nor reapplies the profile.
+
+Downloads and isolate-based verification/extraction use a fresh `.web-dashboard-work/<operation>/` directory outside
+the served tree. Size, entry count, path, link, duplicate and checksum checks precede publication. Directory replacement
+keeps the previous installation until staging succeeds and rolls back on rename failure; if rollback itself fails, the
+work directory retains `previous` for recovery. `StoreAction.handleClear` ends access and awaits cancellation before
+`clearAppData` removes only the two managed dashboard directories.
+
+`WebDashboardAccess` owns runtime session tokens and a temporary secret, never stored controller settings. Saved
+controller settings take precedence; otherwise an active owner opens the loopback controller with a generated secret.
+`SetupAction._effectivePatchConfig` and `updateParamsProvider` share this effective config. `prepareWebDashboard` applies
+only when Core has not received the installed root, and `syncWebDashboardAccess` queues a live patch behind existing
+setup work. Opening a dashboard requires an initialized, connected Core and a selected profile; it never starts Core
+or VPN, and Safe Mode refuses access before install, apply, probe or browser launch.
+
+An embedded Android/macOS page releases its own owner on disposal or load failure. Windows/Linux use an external
+browser; a successful browser launch or handoff retains the same owner until explicit end or application exit.
+Cancellation, failed apply/probe/launch and stale callbacks cannot retain a failed opening or close another session.
+Removing one panel ends only its owners. Controller-setting changes, Core disconnect, profile removal and Safe Mode
+revoke existing access. The Core API probe is authenticated and bounded by a shared deadline, while credentials stay
+in the dashboard URL fragment and never enter request paths or error messages. Embedded navigation stays within the
+selected panel; external main-frame links use the system browser and Core API or external subframe navigation is blocked.
 
 ### Local Trust Boundary
 
@@ -172,8 +201,8 @@ A process running as the same account is not stopped. It can ask the Helper to s
 against a socket or pipe it owns, or run a setuid Core against a port it listens on, and so become the host that drives
 a privileged Core: `initClash` chooses the home directory every path check anchors on, and `getConfig`,
 `getProfileBase`, `getProfileOutbounds` and a `setupConfig` or `buildProfile` base read any path.
-The Core connects to whatever address it is given and cannot tell that host from FlClash. An account check cannot
-distinguish it from a same-account process that can already read FlClash's memory and files. This remains a user-to-root
+The Core connects to whatever address it is given and cannot tell that host from ReClash. An account check cannot
+distinguish it from a same-account process that can already read ReClash's memory and files. This remains a user-to-root
 or user-to-SYSTEM privilege escalation, not a complete security fix. An open external
 controller is inside the same boundary: its secret is stored under the account, and `/upgrade` stays mounted (it fetches
 fixed MetaCubeX release URLs, not caller-chosen code). mihomo's `IsSafePath` compares paths lexically, so a symlink inside
@@ -241,7 +270,10 @@ Application exit is centralized in `SystemAction` and `SystemExitCoordinator`:
 4. Exit the application exactly once.
 
 The coordinator is idempotent, continues later cleanup steps after an earlier error, preserves the first error for the
-caller, and uses a three-second watchdog as an emergency application-exit path. `Application.dispose()` and
+caller, and uses a three-second watchdog as an emergency application-exit path. Full data reset first confirms a Core
+stop, cleans up host resources, and terminally closes Core before deleting local data. It preserves ZIP archives and
+the live instance lock, blocks preference writes until exit, and never sweeps the shared desktop temporary directory.
+Autostart removal is wired through `disableAutoLaunchPort` at bootstrap so shared actions do not import desktop plugins. `Application.dispose()` and
 `CoreManager.onCrash()` do not independently destroy Core; this avoids competing shutdown owners.
 
 ### Applying Setting Changes
@@ -326,7 +358,7 @@ Quick Settings, notification, revoke, and Always-on VPN paths converge on the sa
   last command was a stop (on-demand suspension stops the service while `isStartProvider` stays true), and
   `AndroidManager` answers the rest with `setRunning(false)`. The report is read on the platform thread, where the
   commands arrive, so the revision and the intent it carries describe the same instant.
-- Android may create an Always-on `VpnService` through `onStartCommand()` without FlClash's bound-service path. The service
+- Android may create an Always-on `VpnService` through `onStartCommand()` @@KEEP0@@. The service
   sends the explicit, permission-protected `VPN_START_REQUESTED` broadcast to `ServiceBroadcastReceiver`, which routes it to
   `ServiceState.handleStartAction()` so Core/configuration and the normal binding are restored before TUN is treated as
   ready.
@@ -384,7 +416,7 @@ Dialer-loop events come from the fork's `component/proxydialer/patch.go`. mihomo
 back to its own proxy until the stack overflows, so a dial that asks the same `dialer-proxy` for an address it is
 already dialing through it fails with `ErrDialerLoop`. `core/hooks.go` reports each looping name at most once every
 three seconds as a priority event, which the app shows as an error notice whether or not logs are captured. The custom
-profile pages flag only the loops FlClash can follow on its own, through a group's own list or an `include-all-proxies`
+profile pages flag only the loops ReClash can follow on its own, through a group's own list or an `include-all-proxies`
 that no filter, exclude filter or exclude type narrows; what filters and providers pick, including provider proxies
 that carry their own `dialer-proxy`, is left to this guard.
 
@@ -914,7 +946,26 @@ few keys of a `tun` section the network settings own, so its spec does not mix i
 ## Where A Route Opens
 
 On desktop each navigation destination has its own `Navigator` (`_NavigationPage` in `lib/pages/home.dart`); on mobile
-there is none, and everything goes on the root navigator, `rootNavigatorKey` in `lib/ui/navigator.dart`. A route
+ordinary destinations use the root navigator, `rootNavigatorKey` in `lib/ui/navigator.dart`. Tools owns its workspace
+navigator on both layouts: its mobile catalog is the first route, while the split catalog stays outside the detail
+navigator. Navigator route state owns catalog coverage, not a Tools observer. Every Tools page covers the routes beneath
+with `PageBackdrop`, the shared wallpaper painted through a `CompositedTransformFollower` at the place the shared
+`PageBackground` paints it, so it holds still while the page slides or changes tabs. `SlideOverPageTransition` in
+`lib/ui/page_transition.dart` moves Tools pages: a page slides in from the trailing edge over the one beneath, which
+trails it by a quarter of the width and fades, the same motion a drag back plays under the finger, and a shadow on the
+page's leading edge keeps the two apart over the wallpaper they share. Compact detail pages carry
+inline app bars and cover the catalog and its navigation together; `_HomePageView` moves the floating bar into or out of Tools only
+once a tab switch settles. Only split Tools panes anchor app bars outside page transforms, in their own navigator's
+overlay so a menu or dialog above the page still covers the bar; `PagePresentationScope` supplies the full previous path
+and back-button state for route-driven header motion. A split pane keeps a page's content to a centered 840-wide column
+through `CappedBodyScope`, yet its body spans the pane so the scrollbar sits at the window edge and the margins scroll:
+each page adds `context.bodyInsets` to its scroll view's padding, and pads anything outside one by it too, as
+`SettingsPageScroll` and `RecordTableFrame` do. `capped pages scroll across their pane inside one column` in
+`test/widgets/tools_workspace_test.dart` fails a page that misses it. A section a Tools page lists, such as a custom
+resource list, is a `ToolPage` of its own beneath that page. A page one opens with arguments, such as an auto-routing
+group, a scenario or an editor, still goes through `BaseNavigator.push`: the `push` of the workspace's
+`PageNavigationScope` turns it into one more step of the opener's path, with the same backdrop, slide, header and
+column, while `ListItem.open` editors keep their sheets. A route
 takes the navigator of the context it opens from: `BaseNavigator.push`, `showExtend`, `showSheet`, `showFormSheet` and
 `showSnapSheet` all do, so a page or sheet opened from a destination stays beside the navigation rail, leaves the rail usable, and
 stays in that destination's stack when the user switches away and back. `sheetNavigatorOf` lifts a sheet out of a
@@ -943,7 +994,7 @@ rebuilds one row instead of the whole section. Titles and subtitles are `ConfigL
 `AppLocalizations`, which keeps literal labels such as `IPv6` and localized labels in the same shape.
 
 Build settings screens from these directly, or from a file-local helper that binds one provider once — see `_networkToggle`
-in `lib/views/config/network.dart` and `_appSettingToggle` in `lib/views/config/general.dart`. Declare a named
+in `lib/views/config/network.dart` and `_clashToggle` in `lib/views/config/general.dart`. Declare a named
 `ConsumerWidget` only when a row is genuinely reused across screens. Rows with bespoke behaviour — a custom dialog, a derived value, or a
 second provider write — stay hand-written rather than growing extra parameters on the shared items.
 
@@ -1295,7 +1346,12 @@ action notifier, which is only ever read. A derived provider it listens to is ne
 of it returns a stale value. So an action that has to follow a signal listens to the keep-alive provider that holds
 it, as `SetupAction` does with `appVisibleProvider`, not to a provider derived from that.
 
-On Android the Core does not react to the screen or to Doze. Doze's firewall keeps apps without an exemption off the
+On Android the Core's tunnel does not react to the screen or to Doze. The routing engine (`core/rcx`) receives power and
+network hints from the service (on desktop the Core samples the battery itself and spots a resume by a late tick,
+`core/rcx_power*.go`), and uses them only to schedule its own checks; it never holds back or hides mihomo's
+health checks or their results. Advanced profiles add declared checks and exit-country echoes through a node, which dial
+the adapter itself so a site the node cannot reach never counts as a failed dial of the node, and direct network
+diagnostics, which leave through the `DIRECT` outbound so they see what direct rules see (`core/rcx_check.go`). Doze's firewall keeps apps without an exemption off the
 network before their traffic reaches the TUN, so what still arrives is traffic Doze allows, FCM among it; suspending the
 tunnel rejects exactly that and stalls push reconnects until their backoff runs out. The VPN service keeps its own
 network as a foreground service (`dumpsys netpolicy` shows its `DOZE` block allowed by `FOREGROUND`), so health checks
@@ -1305,11 +1361,29 @@ every proxy group is a provider, `select` groups included, and checking one test
 shown to cut the VPN's own network while the screen is off, holding back failures measured then needs only a screen
 on/off signal.
 
+Routing profiles are edited against the running engine: the `rcxStudio` method lints a draft with line-precise
+errors, compiles it beside the live library and decides the group under it from the same evidence, and formats,
+parses conditions for the builder and merges a fork with its changed source, all without changing what any group runs
+(`core/rcx/studio.go`). The user's own profiles live in `Config.rcxProfiles`, shared by every subscription, and reach
+the Core inside the user layer that `currentRoutingLayerProvider` builds, with the subscription's hosts, which a
+provider profile may contact without asking. A provider's routing bundle (`reclash-routing`) is saved beside the
+config as `<id>.routing.yaml`, and the Core reads it with the subscription.
+
+A scenario (`core/rcx/scenario.go`) is the second level above smart groups: chosen per subscription, it lays programs
+over the group bindings for the current network kind and publishes a tunnel mode through `Runtime.ApplyMode`.
+`core/rcx_runtime.go` keeps the user's mode and the scenario's wish apart and applies the scenario's over the user's
+in `updateConfig` and after setup, so `General.Mode` stays the user's. The host shows the mode in force through
+`effectiveModeProvider`; a mode the user picks sets `RcxUserLayer.manualMode` until they choose Auto.
+
 ## Database
 
 The app uses Drift/SQLite in `lib/database/`. `schemaVersion` in `lib/database/database.dart` is the migration
 counter; a schema change bumps it and goes into the one step the coming release takes, as the Migrations section of
-`.agents/rules.md` describes.
+`.agents/rules.md` describes. ReClash schema 22 converges the two schema-21 shapes: FlClash v0.9.2
+adds `ip_qualities`, while ReClash adds subscription state and provider request headers. The migration checks
+actual tables and columns before adding them. Backup import migrates only its staged database copy; the archive
+and active database remain untouched until validation completes. Unknown newer schema versions are rejected,
+not relabeled as an older compatible schema.
 
 Tables:
 
@@ -1444,7 +1518,7 @@ timeout back into `UpdatingKeys`, and do not widen the disconnect reset to every
 
 ## Safe Mode
 
-`--dart-define=SAFE_MODE=true` builds a FlClash that never changes the host network, so a development build can run
+`--dart-define=SAFE_MODE=true` builds a ReClash that never changes the host network, so a development build can run
 next to an installed one. It is a compile-time constant with two faces: `safeModeBuild` in `lib/common/constant.dart`
 for the process-wide handles that exist before the provider container, and `safeModeProvider` in
 `lib/providers/app.dart` for everything reached through Riverpod, which is also what tests override. Settings are never
@@ -1466,7 +1540,7 @@ rewritten; each owner reads the flag where it would otherwise act:
   installed app (only a macOS or Android debug build has its own bundle id) and would restore from its record.
 - Login item: the `autoLaunch` handle in `lib/common/launch.dart` is `null`, so neither the boot sync nor the setting
   listener registers the build's executable or removes the installed app's entry, which on Windows is the same
-  `FlClash` value in the user's Run key.
+  `ReClash` value in the user's Run key.
 - Privileged Core: `CoreService` resolves the launcher with `hasHelper: false`, which is the direct child-process path
   on every desktop platform; the Helper keeps managing the installed app's Core.
 - Core listeners: `SetupAction` never calls `startListener` or `stopListener`, for a run or for an on-demand
@@ -1523,20 +1597,26 @@ Platform projects copy the artifacts out of `libclash/`; application code must n
 
 - Android: nothing. The hook returns without building, because it runs once per architecture while gomobile packs
   every ABI and one set of Java classes into a single AAR.
-- macOS: a standalone `FlClashCore`. `Release.xcconfig` pins release and profile `ARCHS` to the host because
+- macOS: a standalone `ReClashCore`. `Release.xcconfig` pins release and profile `ARCHS` to the host because
   flutter_tools otherwise builds a universal binary and every artifact ships one slice; the hook skips a non-host slice
   for the same reason. The `Stage Core` phase copies the Core after the hook may have rewritten it and fails when it is
   missing or lacks a slice for `ARCHS`, so a skipped hook cannot stage a stale Core silently.
-- Linux and Windows: `FlClashCore`, the Rust `FlClashHelperService`, and a `manifest.json` holding `coreSha256`; the
-  Core builds first because the Helper embeds its hash. The CMake `install` rules copy them, and the Windows bundle
-  places `manifest.json` beside the executable. A Helper running from a Debug build keeps its exe open and the install
-  fails behind an opaque `MSB3073`, so `windows/CMakeLists.txt` stops it from an `install(CODE)` step for the `Debug`
-  configuration only, and only when the staged Helper differs from the installed one; that step is where the
-  configuration is known, and a Release install never stops a registered service. The step matches the process by
-  executable path rather than image name, so a Helper registered from an installed release keeps running.
+- Linux: `ReClashCore`, the Rust `ReClashHelperService`, and a `manifest.json` holding the pair's hashes and Helper
+  protocol; the Core builds first because the Helper embeds its hash. CMake copies the verified pair.
+- Windows: `ReClashCore.exe` and `manifest.json` beside the GUI; no SCM Helper is bundled. CMake requires app-local
+  MSVC runtime DLLs. `setup.dart` validates the staged native dependencies before either package format and validates
+  the final ZIP. Release CI installs, launches, upgrades and uninstalls both native architectures, checks Core init
+  RPC and verifies owned shutdown before publication. `WINDOWS_SIGNING_REQUIRED=true` also requires valid Authenticode
+  signatures; this check does not supply a signing certificate.
 
-Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Windows and
-Linux, a Rust helper:
+Windows installer identity is `E642C6C1-B712-41C2-969E-3C2049CA883F`, shared with ReClash-Alpha and distinct from FlClash.
+The former inherited GUID is not treated as an upgrade identity: it cannot distinguish FlClash from older ReClash.
+Installation asks the exact installed runner to exit through `SystemExitCoordinator`, waits for it, and unregisters
+only a legacy service whose image points into that installation. It never terminates processes by name. Setup offers
+English, Russian, Simplified Chinese and Korean; x64 runs on x64-compatible hosts and the native ARM64 package requires ARM64.
+
+Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Linux,
+a Rust helper:
 
 - Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and `core/mihomo`, module files, the
   effective build configuration, `setup_hooks` sources, target flags and the Go toolchain.
@@ -1549,43 +1629,16 @@ Linux, a Rust helper:
 - `flutter clean` removes `.dart_tool` and forces one full rebuild; deleting `.dart_tool/setup_build_cache/` does the
   same without a clean.
 
-Windows helper integrity/version check:
+Desktop artifact integrity:
 
-- `setup_hooks` constructs the Core first, calculates its SHA256, and always
-  builds the Rust Helper with release hardening and that expected hash.
-- Flutter reads the Core SHA256 from the bundled `manifest.json` and sends it with `/ping`. Debug, Profile, and Release
-  builds use the same Helper protocol and may use TUN through the same flow.
-- `/ping` is loopback-only and requires no request token. The Helper compares the requested SHA256 with its embedded value
-  and checks that the fixed `FlClashCore.exe` beside it exists; `/start` performs the actual Core SHA256 verification before
-  every launch. The response includes the running Helper path and protocol header; Dart checks both against the current
-  installation. The launcher selects the Helper only when `/ping` reports ready; any other readiness (missing manifest,
-  unavailable Helper, or a Helper built for a different Core) falls back to the direct Core without requesting elevation.
-  If `/start` reports a pre-spawn failure — `coreVerificationFailed` (the on-disk Core no longer matches the SHA the
-  Helper and manifest agree on) or `processLaunchFailed` (the Core process could not be spawned) — the launcher degrades
-  to the direct Core rather than failing the launch. `/start` releases the previously managed Core before it verifies,
-  so the Helper owns no Core when either code is reported and the direct retry cannot race a Helper-managed Core.
-  A mismatched Helper is reinstalled through the explicit TUN authorization flow, not at startup.
-- TUN is not a required run condition. A direct Core runs unelevated and cannot bring up TUN, so any degrade to the
-  direct Core — an unready Helper at resolve time, or a pre-spawn `/start` failure — silently drops TUN and keeps the
-  Core running. Degrading is preferred over failing the launch: an unverified Core carries no privilege the direct
-  launch path did not already have. `manifestMissing` is the one readiness that is surfaced to the user, because it
-  means the installation itself is incomplete.
-- Flutter creates a 128-bit lowercase-hex session ID and uses it as the random named-pipe suffix. `/start` receives only
-  that address and session ID, validates the fixed `FlClashCore_<session>` namespace, starts the fixed Core beside the
-  Helper, and returns the same session ID plus the spawned PID. Flutter verifies both the session and named-pipe peer PID.
-- `/stop` requires the same session ID. A missing process returns `notRunning`; a different owner returns
-  `sessionMismatch` without terminating that process. Session IDs are ownership tokens for lifecycle safety, not a claim
-  that the loopback HTTP endpoints are authenticated.
-- The Core must not outlive the Helper. On Linux the systemd unit's cgroup and `Restart=on-failure` cover that; on
-  Windows the Helper puts the Core in a Job Object with `KILL_ON_JOB_CLOSE`, so the kernel kills the Core when the Helper
-  process ends for any reason, and the `install` subcommand configures SCM failure actions (three restarts, 5 s apart,
-  reset after 24 h). Stopping a Core sends SIGTERM first on Linux, because only a shutdown removes the policy routes
-  sing-tun installed; the Core runs the same teardown itself when its IPC host disconnects or it receives a termination
-  signal. `HelperClient.stopTimeout` must stay above the Helper's graceful-plus-kill budget.
-- Never take `MANAGED_CORE` or `LOGS` with `lock().unwrap()`. The Helper is a long-lived service running as SYSTEM, so a
-  single panic while a lock is held would poison it and turn every later request into another panic — the service stays
-  dead until Windows restarts it. `lock_surviving_poison` recovers the guard through `PoisonError::into_inner` instead.
-  `hub.rs` uses it at every lock site, tests included, and two tests in that file pin the behaviour.
+- `setup_hooks` builds Core before the Linux Helper and records both final hashes and protocol `9`. Windows records
+  only the Core hash; its privileged runtime uses the verified managed UAC launch described under Desktop Privileged Core.
+- `tool/windows_package.dart` resolves imports, delay imports and forwarded exports from the app-local bundle, checks
+  reachable PE architecture and Core SHA256, and rejects an SCM Helper anywhere in the payload. `--compare-installed`
+  checks every installed file against the ZIP, allowing only Inno's own uninstaller files as additions.
+- `--require-signed` checks for embedded certificates in the primary app images; `check_windows_package.ps1` performs
+  Windows Authenticode trust verification of those images and the installer. `--finalize-manifest` is available when
+  a signing stage changes the Core image; signatures are verified separately from the manifest's consistency hash.
 
 Build configuration defaults live in `plugins/setup/setup_hooks/lib/src/options.dart` and can be overridden via the root
 `build_config.yaml`.
@@ -1595,7 +1648,7 @@ its version only from its own CI, so the fork alone reports the placeholder `1.1
 user agents; `GoBuilder` passes the value as `-X github.com/metacubex/mihomo/constant.Version=...` for every build,
 local and CI alike. Bump it whenever the submodule moves onto a new upstream release.
 
-Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `FlClash-0.8.93-macos-arm64.dmg`.
+Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `ReClash-0.8.93-macos-arm64.dmg`.
 
 #### Android Core Build
 
@@ -1635,15 +1688,15 @@ NDK version stands in for the hook's cache.
   finds what it rewrites, the constant exactly once. Go writes no `DT_SONAME` into a c-shared library, so the ELF
   needs no change.
 - The AAR's own `proguard.txt` goes with the rest of it. `android/core/consumer-rules.pro` keeps `go.**` and
-  `com.follow.clash.core.mobile.**`, the classes gobind's C glue looks up by name.
+  `com.reclash.core.mobile.**`, the classes gobind's C glue looks up by name.
 - The CI `android` job compiles `:core` without Flutter, so it passes `-Ptarget-platform=android-arm64` to build one ABI.
 
 ## Local Plugins
 
 - `setup`: build-time harness for Go core artifacts and the Rust helper, driven by a Dart build hook; no runtime Dart API.
-- `proxy`: system proxy configuration. On Windows the package installer and uninstaller kill the app, and then run
-  `FlClash.exe --clear-stale-proxy`, the installer once the new files are in place; the runner hands it to the plugin
-  before any engine starts, and it turns off only a proxy still set to FlClash's `127.0.0.1:<port>` with nothing
+- `proxy`: system proxy configuration. On Windows the package installer and uninstaller request owned app shutdown, then run
+  `ReClash.exe --clear-stale-proxy`, the installer once the new files are in place; the runner hands it to the plugin
+  before any engine starts, and it turns off only a proxy still set to ReClash's `127.0.0.1:<port>` with nothing
   listening on that port. In the app `SystemProxyQueue` sets the system proxy when the Core starts with it on, and
   stops it on a stop or exit only when this run set it, since a stop also clears a proxy, PAC or auto-detect setting
   someone else made. Nothing is stored, so a launch leaves alone the proxy a crashed run left.
@@ -1710,7 +1763,7 @@ folding, caret, gutter and pointer code sit in `lib/code_forge/code_area/` part 
   the fold, and a caret put there any other way opens it.
 - The controller reaches the mounted editor only through the `CodeForgeView` it attaches, which the editor's state
   implements by forwarding to its renderer.
-- FlClash supplies the suggestion popup, context menu and scrollbar; the package has no built-in versions of them.
+- ReClash supplies the suggestion popup, context menu and scrollbar; the package has no built-in versions of them.
   It also passes the vertical scroll controller, `sheetScrollController`, so the editor in a sheet grows and closes
   the sheet as a list does.
 - `Rope` keeps its length and line count between its own `insert` and `delete`, which every edit goes through, so
@@ -1841,97 +1894,59 @@ returns the JSON the script produced. Nothing about the script runs in Dart.
   nullish coalescing, `Object.fromEntries`, named capture groups and lookbehind in one pass. Keep it first-party and
   free of external URLs — vendoring somebody's published script here carries their attribution and their links.
 
-## Rust Helper Service
+## Subscription Import Paths
 
-`services/helper/` is the privileged helper that starts the core elevated so TUN works. It ships on Windows and Linux
-and is built by the setup build hook alongside the Core, which always compiles the Helper in Rust release mode
-after calculating the SHA256 of the Core produced for the active Flutter configuration.
+All subscription entrypoints, route selection, cancellation, failure handling and local test scenarios are recorded in
+[`subscription-import.md`](subscription-import.md).
 
-The helper owns its Windows Service Control Manager lifecycle through two elevated commands:
+## Desktop Privileged Core
 
-- `FlClashHelperService.exe install --owner-pid <pid>` reads the account of that process (the app, which Dart names with
-  its own PID because the elevated installer may be another administrator), stops and removes any stale registration,
-  creates the auto-start service for the current executable path with `--owner-sid <SID>` as its launch argument,
-  starts it, and waits for the running state. A service started without an owner exits instead of serving anyone.
-- `FlClashHelperService.exe uninstall` stops the service, waits for shutdown, removes its registration, and is also used
-  by the Windows package uninstaller.
+`DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without
+privileges. TUN enable, an explicit start/restart, and the connection wizard may grant one authorization attempt;
+bootstrap, recovery and Safe Mode never raise a system prompt. Registration/readiness, an active privileged lease and
+`CoreInfo.tunActive` are separate. System DNS follows applied TUN, not merely the saved switch or authorization.
+Cancellation revokes pending grants; a late launch is stopped, and an unconfirmed exit prevents replacement.
 
-The Dart layer only launches the helper's `install` command through `ShellExecuteW`; it does not compose `sc.exe`,
-`taskkill`, or `cmd.exe` command lines.
+Linux builds `services/helper/` beside Core with the final Core SHA256 embedded. Protocol `9` uses a per-owner systemd
+`Type=notify` unit with `User`, `Group`, `NoNewPrivileges` and only `CAP_NET_ADMIN`/`CAP_NET_RAW`. Helper and Core never
+run as root. Core clears ambient capabilities on every Go thread before processing requests. The private runtime is
+`/run/reclash-helper-<uid>` (0700), the socket is `helper.sock` (0600), and each peer must have the owner UID.
+`pkexec --disable-internal-agent` installs the verified pair into
+`/var/lib/reclash-helper/<uid>/bundles/<coreSha256>-<helperSha256>` under an installer lock, with rollback and scoped
+inactive-bundle pruning. AppImage uses the same stable bundle. Cancellation is final; there is no sudo/password or
+setuid fallback, and a host without systemd reports the Helper unavailable.
 
-Linux takes the same shape with systemd in place of the Service Control Manager, and the same install timing: nothing
-is registered at package install, and `Linux.registerService` asks for elevation only when TUN authorization needs it.
-Elevation goes through `pkexec` so polkit raises the system prompt. When pkexec is missing, or exits 127 because no
-polkit agent runs (common under tiling window managers), it falls back to `sudo`: cached credentials first, then a
-password the app asks for and hands to `sudo -S` on stdin. A 126 means the user dismissed the polkit dialog and is final.
+An explicit authorization installs with `--replace-owned`: an unregistered unit is replaced only when its entire
+shipped ReClash unit, owner, protected executable path and Helper hash match. External units and drop-ins block
+replacement. A confirmed stop precedes the swap; failure restores the original unit and registration, including an
+originally absent registration. No old Helper protocol is accepted. Installer exit codes and bounded stderr reach
+application diagnostics, with separate registration, systemd, integrity and authorization errors.
 
-- `FlClashHelperService install`, run through `LinuxElevation` (`lib/common/linux_elevation.dart`), writes
-  `/etc/systemd/system/flclash-helper.service` for the current executable path and enables and restarts it. It reads
-  `PKEXEC_UID`/`SUDO_UID` to learn who asked, and refuses to install without one — there would be no account to grant
-  the socket to. It also refuses a Helper whose binary or directory is not root-owned and non-writable (a unit runs it
-  as root at every boot, so an unpacked bundle would be a standing escalation), and refuses to replace a unit already
-  installed for a different UID rather than restart the service out from under that account.
-- That ownership check is why the `flutter_distributor` fork normalizes the packaging tree to 0755/0644 before
-  `dpkg-deb`, `rpmbuild` and `appimagetool` run: they record modes verbatim, and Ubuntu's per-user default umask
-  of 002 would otherwise ship `/opt/FlClash` as 0775, which the installer rejects as group-writable.
-- The rpm spec sets `debug_package` and `__os_install_post` to nil for the same reason: rpmbuild's find-debuginfo and
-  brp-strip rewrite `FlClashCore`, and a Core whose SHA256 no longer matches the Helper's embedded value is refused at
-  `/start`, which silently degrades every launch to the direct Core.
-- `FlClashHelperService uninstall` disables the unit, removes it and reloads systemd.
-- The unit carries `Group=` (the owner's primary GID), `RuntimeDirectory=flclash`, the owner's UID/GID in
-  `FLCLASH_HELPER_OWNER_UID`/`_GID`, a double-quoted `ExecStart=` with `%` escaped, and `Restart=on-failure` under a
-  start limit so a broken unit ends up failed instead of restarting forever. The helper serves
-  `/run/flclash/helper.sock` at mode `0660`, additionally drops any connection whose `SO_PEERCRED` UID is not the
-  owner's, logs and retries an `accept` failure instead of letting hyper end the server, and handles SIGTERM so
-  `systemctl stop` still runs its own Core teardown.
-- `/start` additionally requires the Core address to be a socket owned by the owner UID before spawning, since the
-  Core connects to it as root.
-- The Core is spawned with the owner's real UID and an effective UID of 0, which is what a setuid Core would have had.
-  It is the signal `core/ownership_unix.go` uses to hand the files it created back to the user; without it a root
-  service would leave a root-owned config tree in the owner's home.
-- An AppImage has neither a stable executable path nor a writable Core, and its FUSE mount is `nosuid`, so
-  `system.isAppImage` reports TUN authorization as unavailable instead of prompting for a password that cannot help.
-- A Linux host without systemd (`/run/systemd/system` absent) has no Helper: `system.hasHelperService` is false there,
-  readiness is the `stat` check, and the same elevation sets the setuid bit on the bundled Core as before.
+Native DEB/RPM installations record package origin only after matching the protected package marker and pair. Their
+pre-removal hooks run that packaged Helper while its files still exist and remove only matching owner registrations
+and pairs. Upgrade hooks are no-ops. AppImage-commissioned pairs, unowned records and pairs from another version remain;
+they can be removed explicitly through the owner-scoped `uninstall` command. A native package owns the registrations
+it commissioned, not every installation sharing the unit prefix.
 
-A setuid Core is a root process for whoever gives it an address to dial (`argv[1]`), so its mode never lets others
-execute it: macOS runs `chown root:admin` and `chmod 4750` (and refuses an account outside the `admin` group, which
-could not run the result), and a Linux host without systemd hands it to the primary group of the user that
-`PKEXEC_UID` or `SUDO_UID` names. `System.isPrivilegedStatOutput` reads a Core that others can execute as unauthorized, so one that an earlier
-version marked `+sx` is re-authorized on the next TUN enable.
+Linux Helper accepts bounded, same-owner `/ping`, `/start`, `/stop` and `/logs` requests, rejects browser origins and
+non-local hosts, and checks the current hash/protocol. Start and stop use a 32-character lowercase-hex session ID.
+A successful stop confirms the child exited; failure retains the child and prevents replacement or direct fallback.
 
-In every Flutter build mode `/start` opens the fixed Core executable beside the Helper without write/delete sharing,
-validates it against the SHA256 embedded only in the Helper, and keeps that handle open through process creation.
-`/ping` only compares the requested `coreSha256` with the Helper's embedded value and checks the fixed Core path exists;
-it never hashes the Core. Protocol version 6 (8 on Windows, where the owner check and the browser-origin check arrived
-and an older Helper must be reinstalled) uses 32-character lowercase-hex session ownership:
+Windows uses managed `ShellExecuteExW` UAC launch, not a runtime SCM service. A verified fixed Core image and a local
+first-instance bootstrap pipe bind PID, creation time, session and elevated token identity, including alternate-admin
+UAC. Temporary DACL grants are restored, and Core joins a kill-on-job-close job before readiness. A cancelled or late
+UAC result cannot become the active lease. Installed-product maintenance alone may gracefully terminate a verified
+installed runner through `SystemExitCoordinator` and remove its matching old Helper service.
 
-- `GET /ping?coreSha256=...` returns the current Helper executable path with `x-flclash-helper-protocol` when the
-  requested SHA matches.
-- `POST /start` rejects unknown JSON fields and validates `{address, sessionId}` and, on Linux, the socket owner, which
-  leaves a running Core alone. It then releases any previously managed Core before verifying the Core — so every
-  outcome of a request that passed validation, including a rejected one, leaves the Helper owning no Core — and returns
-  `{sessionId, pid}`.
-- `POST /stop` validates `{sessionId}` and only stops the matching managed Core. A session mismatch is HTTP 409.
-- `GET /logs` exposes the bounded recent Helper/Core stderr buffer with `no-store` caching.
+macOS preserves deployment target 12: signed Helper registration uses `SMAppService.daemon` on 13+ and `SMJobBless` on
+12. Public low-level XPC identity validation binds the caller and fixed signed Core. Registration requiring Settings
+approval is not readiness. A root managed Core is the current backend; it receives a socketpair bootstrap and retains
+the authenticated owner's real UID/GID for generated-file ownership. Its sandbox denies execution/fork outside the
+fixed launch and confines data reads/writes, with only required system resources admitted. There is no setuid or
+osascript fallback; unsigned/ad-hoc builds fail closed for this backend.
 
-`/start` and `/stop` take at most 4096 bytes and need a `Content-Length` (HTTP 413 and 411 otherwise); `HelperClient`
-always sends one. All endpoints reject `Origin` headers and non-local `Host` values, preventing browser requests and DNS
-rebinding through an owner-account browser, which would otherwise pass the Windows account check. The accepted
-authorities are `127.0.0.1`, `localhost` and the Linux Unix-socket placeholder `FlClashHelperService`. The Helper grants
-no CORS access.
-
-Endpoints bind only to `127.0.0.1` on Windows and to `/run/flclash/helper.sock` on Linux, and do not use
-request-token authentication. The Windows port is picked by the system, because Hyper-V and WinNAT reserve ranges that
-can cover any fixed one, and published as the `Port` DWORD of a volatile `Runtime` key under the service's own registry
-key, which only administrators can write; `HelperClient` reads it per request and falls back to 47890, where a Helper
-from before listens. Who may call them is decided per connection, before any request is read: the Linux
-socket drops a peer whose `SO_PEERCRED` UID is not the owner's, and the Windows listener (`service/peer.rs`) traces the
-connection through the TCP table to the process holding its client end and drops it unless that process runs as the
-owner SID the service was registered with. The Windows Core runs as SYSTEM and dials whatever pipe `/start` names, so
-without that check any local account would host a SYSTEM Core. What no per-connection check closes is a process that
-runs as the owner itself, on either platform. Lifecycle safety also comes from the fixed executable/hash, the strict
-address namespace (`\\.\pipe\FlClashCore_<32 hex>` on Windows, `/tmp/FlClashSocket_<digits>.sock` on Linux), the session-scoped stop
-contract, Dart-side peer-PID verification on Windows and, on Unix, the Core socket that `plugins/rust_api` sets to
-mode `0600` so only the owning user (and the root-effective Core) can connect. When the Helper service itself shuts
-down, it unconditionally stops the Core process it owns; under systemd the unit's control group does the same.
+Every desktop manifest records the final Core hash; Linux also records final Helper hash and string protocol `9`.
+macOS recomputes the manifest after signing. Hashes attest consistency, not publisher provenance. Managed privileged
+Core pins its application home and each IPC peer; file RPCs use an opened `os.Root`, reject non-regular/multiply-linked
+input, and cannot escape through symlinks. Flutter stages external profile inputs as the GUI user under its home.
+Native acceptance still requires real polkit/systemd, Windows UAC/token/job, and signed macOS XPC hosts.

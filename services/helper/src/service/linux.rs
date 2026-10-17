@@ -23,8 +23,8 @@ const SERVICE_NAME: &str = "reclash-helper";
 const UNIT_PATH: &str = "/etc/systemd/system/reclash-helper.service";
 const RUNTIME_DIR_NAME: &str = "reclash";
 const SOCKET_PATH: &str = "/run/reclash/helper.sock";
-const OWNER_UID_ENV: &str = "FLCLASH_HELPER_OWNER_UID";
-const OWNER_GID_ENV: &str = "FLCLASH_HELPER_OWNER_GID";
+const OWNER_UID_ENV: &str = "RECLASH_HELPER_OWNER_UID";
+const OWNER_GID_ENV: &str = "RECLASH_HELPER_OWNER_GID";
 const SOCKET_MODE: u32 = 0o660;
 const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
 
@@ -391,8 +391,8 @@ mod tests {
 
         assert!(unit.contains("ExecStart=\"/opt/ReClash/ReClashHelperService\"\n"));
         assert!(unit.contains("Group=1001\n"));
-        assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_UID=1000\n"));
-        assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_GID=1001\n"));
+        assert!(unit.contains("Environment=RECLASH_HELPER_OWNER_UID=1000\n"));
+        assert!(unit.contains("Environment=RECLASH_HELPER_OWNER_GID=1001\n"));
         assert!(unit.contains("RuntimeDirectory=reclash\n"));
         assert!(unit.contains("Restart=on-failure\n"));
         assert!(unit.contains("StartLimitBurst=5\n"));

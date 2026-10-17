@@ -63,7 +63,7 @@ docs/
 /android/core/**/cmake-build-*/
 /android/core/**/jniLibs/
 
-#FlClash
+#ReClash
 /libclash/
 /android/app/src/main/jniLibs/
 /services/helper/target

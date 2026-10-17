@@ -97,14 +97,14 @@ class AboutView extends ConsumerWidget {
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,
                 title: appLocalizations.core,
-                url: 'https://github.com/chen08209/Clash.Meta/tree/ReClash',
-                label: 'github.com/chen08209/Clash.Meta',
+                url: 'https://github.com/Hoxiee/mihomo/tree/ReClash',
+                label: 'github.com/Hoxiee/mihomo',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.send,
                 title: 'Telegram',
-                url: 'https://t.me/ReClash',
-                label: 't.me/ReClash',
+                url: 'https://t.me/ReClashApp',
+                label: 't.me/ReClashApp',
               ),
             ],
           ),

@@ -10,7 +10,7 @@ import (
 	"github.com/metacubex/mihomo/log"
 )
 
-var debugStderr = os.Getenv("FLCLASH_CORE_DEBUG") != ""
+var debugStderr = os.Getenv("RECLASH_CORE_DEBUG") != ""
 
 func logError(format string, args ...any) {
 	log.Errorln(format, args...)

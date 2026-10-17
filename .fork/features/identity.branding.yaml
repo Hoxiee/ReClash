@@ -6,6 +6,6 @@ must:
   android: Android namespace and applicationId remain com.reclash.
   windows: Windows installer AppId and ReClash.exe retain installed-product compatibility.
   attribution: The FlClash credit link and bundled ReClash, Mihomo, font and emoji licenses remain present.
-watch: ['android/**', 'linux/**', 'windows/**', 'macos/**', pubspec.yaml, 'assets/data/licenses/**', lib/views/about.dart, lib/bootstrap.dart, lib/common/common.dart, lib/common/constant.dart, lib/common/licenses.dart, 'assets/images/avatar/**', 'plugins/**/README.md', 'plugins/**/LICENSE', 'plugins/**/CHANGELOG.md', services/helper/src/service/linux.rs, test/common/protocol_test.dart]
+watch: ['android/**', 'linux/**', 'windows/**', 'macos/**', pubspec.yaml, distribute_options.yaml,'assets/data/licenses/**', lib/views/about.dart, lib/bootstrap.dart, lib/common/common.dart, lib/common/licenses.dart, 'assets/images/avatar/**', 'plugins/**/README.md', 'plugins/**/LICENSE', services/helper/src/service/linux.rs, test/common/protocol_test.dart]
 checks:
   identity: [android, windows, attribution]

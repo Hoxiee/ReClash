@@ -1,6 +1,6 @@
 # Project Context
 
-FlClash is a multi-platform proxy client based on ClashMeta (mihomo), built with Flutter. It supports Android, Windows, macOS, and Linux, using Material You from `material_ui` as the base with Apple's Human Interface interaction conventions layered on top.
+ReClash is a multi-platform proxy client based on ClashMeta (mihomo), built with Flutter. It supports Android, Windows, macOS, and Linux, using Material You from `material_ui` as the base with Apple's Human Interface interaction conventions layered on top.
 
 ## Version Notes
 
@@ -17,11 +17,11 @@ FlClash is a multi-platform proxy client based on ClashMeta (mihomo), built with
 ## Forked Dependencies
 
 One `pubspec.yaml` dependency is pinned to a fork by commit SHA. The fork lives
-under `chen08209`, the same account that owns this repository, so it is
-maintained in-house rather than tracked from a third party: advancing a pin is a
-local decision, and there is no external maintainer to wait on for the patch
-itself. What the fork still waits on is the *upstream* fix that would let the pin
-be dropped entirely, recorded below.
+under `chen08209`, the upstream FlClash account, so it tracks FlClash rather
+than a third party: advancing a pin follows upstream, and there is no other
+external maintainer to wait on for the patch itself. What the fork still waits
+on is the *upstream* fix that would let the pin be dropped entirely, recorded
+below.
 
 Each entry records what the fork changes and what has to be true before it can go
 back to the published package, so a future upgrade does not have to rediscover it.
@@ -43,7 +43,7 @@ now, see the window plugin section of `architecture.md`.
 - Migrates `win32_registry` from `^2.0.0` to `^3.0.3`, which is a breaking rename
   across the whole Windows implementation (`Registry.openPath` → `CURRENT_USER.open`,
   `createValue` → `setValue`, `getStringValue` → `getString`).
-- This one is not optional while it lasts: FlClash depends on `win32_registry: ^3.0.3`
+- This one is not optional while it lasts: ReClash depends on `win32_registry: ^3.0.3`
   directly, and upstream's `^2.0.0` constraint cannot co-resolve with it.
 - Drop the fork when upstream publishes a release that accepts `win32_registry` 3.x.
 
@@ -55,7 +55,7 @@ and the Core applies the merge.
 
 The `code_forge` fork (`chen08209/code_forge`) is frozen: its Dart code now lives
 in the in-repo `plugins/code_forge` package and its Rust code in the `editor/`
-module of `plugins/rust_api`, both trimmed to what FlClash uses.
+module of `plugins/rust_api`, both trimmed to what ReClash uses.
 `plugins/code_forge/README.md` records what was kept and what was removed;
 upstream's MIT notice stays in `plugins/code_forge/LICENSE`.
 

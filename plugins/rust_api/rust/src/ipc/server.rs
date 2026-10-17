@@ -210,7 +210,7 @@ mod tests {
     fn socket_path() -> String {
         static NEXT: AtomicUsize = AtomicUsize::new(0);
         let name = format!(
-            "flclash-ipc-{}-{}.sock",
+            "reclash-ipc-{}-{}.sock",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed),
         );
@@ -463,7 +463,7 @@ mod tests {
     #[test]
     fn an_unusable_address_fails_the_bind() {
         let path = std::env::temp_dir()
-            .join("flclash-ipc-missing-dir")
+            .join("reclash-ipc-missing-dir")
             .join("core.sock");
 
         assert!(Server::bind(path.to_str().unwrap().to_owned()).is_err());

@@ -1,8 +1,8 @@
 script_template: inno_setup.iss
 app_id: 728B3532-C74B-4870-9068-BE70FE12A3E6
 app_name: ReClash
-publisher: chen08209
-publisher_url: https://github.com/chen08209/FlClash
+publisher: Hoxiee
+publisher_url: https://github.com/Hoxiee/ReClash
 display_name: ReClash
 executable_name: ReClash.exe
 output_base_file_name: ReClash.exe
