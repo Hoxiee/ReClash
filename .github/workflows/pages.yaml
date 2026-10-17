@@ -29,7 +29,7 @@ jobs:
   tag:
     # head_branch also names a branch push's branch, so only a tag at the built commit counts as a release.
     if: >-
-      github.repository == 'chen08209/FlClash' &&
+      github.repository == 'Hoxiee/ReClash' &&
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.conclusion == 'success' &&
       startsWith(github.event.workflow_run.head_branch, 'v') &&
@@ -52,7 +52,7 @@ jobs:
   deploy:
     needs: tag
     if: >-
-      github.repository == 'chen08209/FlClash' &&
+      github.repository == 'Hoxiee/ReClash' &&
       !cancelled() &&
       (github.event_name != 'workflow_run' || needs.tag.outputs.stable == 'true')
     runs-on: ubuntu-latest

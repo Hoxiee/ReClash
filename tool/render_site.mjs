@@ -18,7 +18,7 @@ const PAGES = [
 const sandbox = {};
 runInNewContext(readFileSync(join(out, 'assets/shared.js'), 'utf8'), sandbox);
 const { REPO, FIRST_PAGE, STRINGS, parseChangelog, changelogMeta, escapeHtml: escape, timelineHtml } =
-  sandbox.FlClashSite;
+  sandbox.ReClashSite;
 
 const template = readFileSync(join(out, 'index.html'), 'utf8');
 const versions = parseChangelog(readFileSync(join(out, 'CHANGELOG.md'), 'utf8'));
@@ -37,7 +37,7 @@ function structuredData(t, page) {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'FlClash',
+    name: 'ReClash',
     url: siteUrl + page.path,
     description: t.pageDescription,
     inLanguage: page.locale,

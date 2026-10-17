@@ -331,7 +331,8 @@ jobs:
 
   build:
     # Releases publish where the release links point: the public repository.
-    if: github.repository == 'chen08209/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'Hoxiee/ReClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [ dart, plugins, go, android, rust, windows-helper-test ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -433,7 +434,7 @@ jobs:
         if: matrix.platform == 'macos' && matrix.arch == 'amd64'
         run: plutil -replace FLTEnableImpeller -bool NO macos/Runner/Info.plist
 
-      # The core embeds this bundle and FlClashHttpOverrides.trustCoreRoots loads it for Dart.
+      # The core embeds this bundle and ReClashHttpOverrides.trustCoreRoots loads it for Dart.
       # Pinned by hash, so a new bundle from https://curl.se/docs/caextract.html is a reviewed bump.
       - name: Fetch CA certificates
         shell: bash
@@ -544,15 +545,15 @@ jobs:
         if: ${{ env.IS_STABLE == 'true' }}
         run: |
           version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          arm_sha=$(sha256sum "./dist/FlClash-${version}-macos-arm64.dmg" | awk '{print $1}')
-          amd_sha=$(sha256sum "./dist/FlClash-${version}-macos-amd64.dmg" | awk '{print $1}')
+          arm_sha=$(sha256sum "./dist/ReClash-${version}-macos-arm64.dmg" | awk '{print $1}')
+          amd_sha=$(sha256sum "./dist/ReClash-${version}-macos-amd64.dmg" | awk '{print $1}')
 
           mkdir -p ./brew/Casks
           sed \
             -e "s|VERSION|$version|g" \
             -e "s|ARM_SHA256|$arm_sha|g" \
             -e "s|AMD_SHA256|$amd_sha|g" \
-            ./.github/homebrew_cask_template.rb > ./brew/Casks/flclash.rb
+            ./.github/homebrew_cask_template.rb > ./brew/Casks/reclash.rb
 
       - name: Push to Homebrew tap
         if: ${{ env.IS_STABLE == 'true' }}
@@ -561,10 +562,10 @@ jobs:
           SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_SSH_DEPLOY_KEY }}
         with:
           source-directory: ./brew/
-          destination-github-username: chen08209
+          destination-github-username: Hoxiee
           destination-repository-name: homebrew-tap
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
+          user-name: 'Hoxiee'
+          user-email: 'hoxiee.dev@gmail.com'
           target-branch: main
           commit-message: Update Homebrew cask from ${{ github.ref_name }}
           target-directory: /
@@ -583,10 +584,10 @@ jobs:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
           source-directory: ./tmp/
-          destination-github-username: chen08209
-          destination-repository-name: FlClash-fdroid-repo
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
+          destination-github-username: Hoxiee
+          destination-repository-name: ReClash-fdroid-repo
+          user-name: 'Hoxiee'
+          user-email: 'hoxiee.dev@gmail.com'
           target-branch: main
           commit-message: Update from ${{ github.ref_name }}
           target-directory: /tmp/
