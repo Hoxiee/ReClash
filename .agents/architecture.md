@@ -369,7 +369,7 @@ Go event delivery is intentionally non-blocking:
   the Flutter engine detaches while the service keeps the Core running; request and DNS events would otherwise be
   encoded per connection and per query for nobody.
 
-DNS query events come from the Clash.Meta fork's `dns/patch.go` and are raised where mihomo writes its `[DNS]` debug
+DNS query events come from the mihomo fork's `dns/patch.go` and are raised where mihomo writes its `[DNS]` debug
 log, so the DNS page lists the same resolutions: one event per cache hit, and one per upstream exchange however many
 callers singleflight merged into it, carrying the upstream whose answer was used. Fake-IP and hosts answers never reach
 a resolver and are not recorded. Queries from apps arrive with the `DNSContext` that `Service.ServeMsg` created and
@@ -1426,7 +1426,7 @@ Platform projects copy the artifacts out of `libclash/`; application code must n
 Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Windows and
 Linux, a Rust helper:
 
-- Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and `Clash.Meta`, module files, the
+- Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and `core/mihomo`, module files, the
   effective build configuration, `setup_hooks` sources, target flags and the Go toolchain.
   Helper fingerprints cover its Rust sources and manifests, Cargo/Rust toolchains and flags, and the expected Core
   SHA256.

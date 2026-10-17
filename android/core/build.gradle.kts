@@ -229,7 +229,7 @@ val bindCore =
     tasks.register<GomobileBind>("bindCore") {
         sources.from(
             fileTree(goModule) {
-                exclude("**/*_test.go", "**/testdata/**", "cmd/**", "Clash.Meta/.github/**")
+                exclude("**/*_test.go", "**/testdata/**", "cmd/**", "mihomo/.github/**")
             },
         )
         moduleDirectory.set(goModule)
