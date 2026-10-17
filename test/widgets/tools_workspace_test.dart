@@ -8,7 +8,6 @@ import 'dart:async';
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/widgets/input.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';

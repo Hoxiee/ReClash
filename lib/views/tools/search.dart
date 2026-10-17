@@ -225,6 +225,7 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
     Widget row(ToolEntry entry, {int? index}) {
       final pinned = session.pinned.contains(entry.id);
       final selected = searching && _focus.hasFocus && index == _selected;
+      final isActive = selected || session.path.lastOrNull?.id == entry.id;
       return ContextMenuRegion(
         key: searching
             ? _resultKeys.putIfAbsent(entry.id, GlobalKey.new)
@@ -241,8 +242,10 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                 ),
               ],
         child: Semantics(
-          selected: selected,
+          selected: isActive,
           child: ListItem(
+            isSelected: isActive,
+            holdsSelection: true,
             leading: GlyphIcon(entry.glyph),
             title: Text(entry.title),
             subtitle: searching || entry.route?.settingId != null
@@ -261,8 +264,6 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                 : null,
             trailing: busy.contains(entry.command)
                 ? const CommonCircleLoading(size: 20)
-                : selected || session.path.lastOrNull?.id == entry.id
-                ? const SelectionCheck()
                 : entry.command != null
                 ? Text(l.toolsRun)
                 : null,

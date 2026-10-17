@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/providers/providers.dart';
@@ -15,6 +16,8 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 const _windowChannel = MethodChannel('window');
+
+const _closeWarning = Color(0xFFEE2C3C);
 
 const _contentKey = Key('window-header-test-content');
 
@@ -122,7 +125,7 @@ void main() {
 
   group('getWindowHeaderHeight', () {
     test('Windows reserves more than macOS, mobile reserves nothing', () {
-      expect(_windowsHeaderHeight, 32);
+      expect(_windowsHeaderHeight, 40);
       expect(_macOSHeaderHeight, 28);
       expect(getWindowHeaderHeight(isDesktop: false, isMacOS: false), 0);
     });
@@ -258,7 +261,7 @@ void main() {
       await pumpBar(tester, width: 900);
 
       final slot = getCaptionButtonSize(_windowsHeaderHeight);
-      expect(slot, const Size(46, 32));
+      expect(slot, const Size(46, 40));
       for (final icon in _captionIcons) {
         expect(
           tester.getSize(_captionButton(icon)),
@@ -347,7 +350,15 @@ void main() {
       expect(themeStyle.minimumSize?.resolve({}), size);
       expect(themeStyle.splashFactory, isNull);
       expect(themeStyle.animationDuration, isNull);
-      expect(themeStyle.overlayColor, isNull);
+      expect(themeStyle.overlayColor?.resolve({}), isNull);
+      expect(
+        themeStyle.overlayColor?.resolve({WidgetState.hovered}),
+        onSurface.withValues(alpha: 0.08),
+      );
+      expect(
+        themeStyle.overlayColor?.resolve({WidgetState.pressed}),
+        onSurface.withValues(alpha: 0.12),
+      );
       expect(themeStyle.foregroundColor?.resolve({}), onSurface);
       expect(
         themeStyle.foregroundColor?.resolve({WidgetState.pressed}),
@@ -360,20 +371,19 @@ void main() {
 
       final closeIcon = _glyph(CaptionGlyph.close);
       final close = tester.widget<IconButton>(_captionButton(closeIcon));
-      final colorScheme = Theme.of(tester.element(closeIcon)).colorScheme;
       final style = close.style!;
 
       expect(
         style.backgroundColor?.resolve({WidgetState.hovered}),
-        colorScheme.error,
+        _closeWarning,
       );
       expect(
         style.foregroundColor?.resolve({WidgetState.hovered}),
-        colorScheme.onError,
+        Colors.white,
       );
       expect(
         style.backgroundColor?.resolve({WidgetState.pressed}),
-        colorScheme.error,
+        _closeWarning,
       );
       expect(style.backgroundColor?.resolve({}), isNull);
       expect(style.foregroundColor?.resolve({}), isNull);
@@ -383,9 +393,10 @@ void main() {
       );
       expect(
         style.overlayColor?.resolve({WidgetState.pressed}),
-        colorScheme.onError.opacity12,
+        Colors.white.withValues(alpha: 0.12),
         reason:
-            'the ripple on the error colored close button must stay visible',
+            'the ripple on the warning colored close button must stay '
+            'visible',
       );
 
       for (final icon in [
@@ -402,7 +413,7 @@ void main() {
       }
     });
 
-    testWidgets('hovering the close button paints it in the error colors', (
+    testWidgets('hovering the close button paints it in the warning colour', (
       tester,
     ) async {
       await pumpBar(tester, width: 900);
@@ -414,8 +425,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final context = tester.element(_glyph(CaptionGlyph.close));
-      final colorScheme = Theme.of(context).colorScheme;
-      expect(IconTheme.of(context).color, colorScheme.onError);
+      expect(IconTheme.of(context).color, Colors.white);
       final material = tester.widget<Material>(
         find
             .descendant(
@@ -424,7 +434,7 @@ void main() {
             )
             .first,
       );
-      expect(material.color, colorScheme.error);
+      expect(material.color, _closeWarning);
     });
 
     testWidgets('the bar keeps its height in a narrow window', (tester) async {
@@ -783,6 +793,107 @@ void main() {
           reason: 'view size $viewSize',
         );
       }
+    });
+  });
+
+  group('WindowStatusIndicator', () {
+    const server = 'Tokyo #1';
+
+    Future<void> pumpIndicator(
+      WidgetTester tester, {
+      required WindowStatus status,
+      String serverName = '',
+    }) async {
+      final container = ProviderContainer(
+        overrides: [
+          windowStatusProvider.overrideWithValue(status),
+          windowServerNameProvider.overrideWithValue(serverName),
+        ],
+      );
+      addTearDown(container.dispose);
+      globalState.container = container;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            includeNavigatorKey: false,
+            child: WindowStatusIndicator(),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('appends the server name after the connected label', (
+      tester,
+    ) async {
+      await pumpIndicator(
+        tester,
+        status: WindowStatus.running,
+        serverName: server,
+      );
+
+      expect(find.text('Connected • Tokyo #1'), findsOneWidget);
+    });
+
+    testWidgets('shows only the connected label without a server', (
+      tester,
+    ) async {
+      await pumpIndicator(tester, status: WindowStatus.running);
+
+      expect(find.text('Connected'), findsOneWidget);
+      expect(find.textContaining('•'), findsNothing);
+    });
+
+    testWidgets('never appends a server while off', (tester) async {
+      await pumpIndicator(tester, status: WindowStatus.off, serverName: server);
+
+      expect(find.text('Not running'), findsOneWidget);
+      expect(find.textContaining('Tokyo'), findsNothing);
+    });
+  });
+
+  group('windowStatusOf', () {
+    test('a suspend on an excluded ssid parks a running run', () {
+      expect(
+        windowStatusOf(
+          isStart: true,
+          suspended: true,
+          coreStatus: CoreStatus.connected,
+        ),
+        WindowStatus.suspended,
+      );
+      expect(
+        windowStatusOf(
+          isStart: true,
+          suspended: true,
+          coreStatus: CoreStatus.connecting,
+        ),
+        WindowStatus.suspended,
+      );
+    });
+
+    test('a stopped run is off no matter what the core reports', () {
+      expect(
+        windowStatusOf(
+          isStart: false,
+          suspended: false,
+          coreStatus: CoreStatus.connected,
+        ),
+        WindowStatus.off,
+      );
+    });
+
+    test('a run whose core died reads disconnected', () {
+      expect(
+        windowStatusOf(
+          isStart: true,
+          suspended: false,
+          coreStatus: CoreStatus.disconnected,
+        ),
+        WindowStatus.disconnected,
+      );
     });
   });
 }

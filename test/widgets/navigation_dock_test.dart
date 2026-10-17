@@ -179,6 +179,241 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a destination keeps its identity when order changes mid-press', (
+    tester,
+  ) async {
+    tester.view.physicalSize = _mobileSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var selected = -1;
+    var destinations = <NavigationDockDestination>[
+      const NavigationDockDestination(
+        glyph: AppGlyphs.dashboard,
+        label: 'Home',
+        id: 'home',
+      ),
+      const NavigationDockDestination(
+        glyph: AppGlyphs.tools,
+        label: 'Tools',
+        id: 'tools',
+      ),
+    ];
+    Widget dock() => TestApp(
+      child: Scaffold(
+        body: Align(
+          alignment: Alignment.bottomCenter,
+          child: NavigationDock(
+            destinations: destinations,
+            selectedIndex: 0,
+            onSelected: (index) => selected = index,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(dock());
+    final bar = tester.getRect(find.byType(FloatingNavigationBar));
+    final pointer = await tester.startGesture(
+      Offset(bar.left + bar.width * 0.25, bar.center.dy),
+    );
+    await tester.pump();
+    destinations = [destinations[1], destinations[0]];
+    await tester.pumpWidget(dock());
+    await pointer.up();
+    await tester.pumpAndSettle();
+    expect(selected, 1);
+
+    selected = -1;
+    final currentBar = tester.getRect(find.byType(FloatingNavigationBar));
+    final pending = await tester.startGesture(
+      Offset(currentBar.left + currentBar.width * 0.25, currentBar.center.dy),
+    );
+    await tester.pump();
+    destinations = destinations
+        .where((destination) => destination.id != 'tools')
+        .toList();
+    await tester.pumpWidget(dock());
+    await pending.up();
+    await tester.pumpAndSettle();
+    expect(selected, -1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('removed slots fade out and revive without duplicates', (
+    tester,
+  ) async {
+    tester.view.physicalSize = _mobileSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var destinations = <NavigationDockDestination>[
+      const NavigationDockDestination(
+        glyph: AppGlyphs.dashboard,
+        label: 'Home',
+        id: 'home',
+      ),
+      const NavigationDockDestination(
+        glyph: AppGlyphs.tools,
+        label: 'Tools',
+        id: 'tools',
+      ),
+    ];
+    Widget dock() => TestApp(
+      child: Scaffold(
+        body: Align(
+          alignment: Alignment.bottomCenter,
+          child: NavigationDock(
+            destinations: destinations,
+            selectedIndex: 0,
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(dock());
+    const added = NavigationDockDestination(
+      glyph: AppGlyphs.profiles,
+      label: 'Profiles',
+      id: 'profiles',
+    );
+    destinations = [...destinations, added];
+    await tester.pumpWidget(dock());
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(find.text('Profiles'), findsOneWidget);
+    destinations = destinations.where((item) => item.id != 'profiles').toList();
+    await tester.pumpWidget(dock());
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(find.text('Profiles'), findsOneWidget);
+    destinations = [...destinations, added];
+    await tester.pumpWidget(dock());
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(find.text('Profiles'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Profiles'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reduced motion removes slots immediately during transitions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = _mobileSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var destinations = <NavigationDockDestination>[
+      const NavigationDockDestination(
+        glyph: AppGlyphs.dashboard,
+        label: 'Home',
+        id: 'home',
+      ),
+      const NavigationDockDestination(
+        glyph: AppGlyphs.profiles,
+        label: 'Profiles',
+        id: 'profiles',
+      ),
+    ];
+    Widget dock() => TestApp(
+      child: MediaQuery(
+        data: const MediaQueryData(size: _mobileSize, disableAnimations: true),
+        child: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: NavigationDock(
+              destinations: destinations,
+              selectedIndex: 0,
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(dock());
+    destinations = destinations
+        .where((destination) => destination.id != 'profiles')
+        .toList();
+    await tester.pumpWidget(dock());
+    await tester.pump();
+    expect(find.text('Profiles'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('weighted slot geometry keeps the lens aligned through changes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = _mobileSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var selectedIndex = 2;
+    var destinations = <NavigationDockDestination>[
+      const NavigationDockDestination(
+        glyph: AppGlyphs.dashboard,
+        label: 'Home',
+        id: 'home',
+      ),
+      const NavigationDockDestination(
+        glyph: AppGlyphs.profiles,
+        label: 'Profiles',
+        id: 'profiles',
+      ),
+      const NavigationDockDestination(
+        glyph: AppGlyphs.tools,
+        label: 'Tools',
+        id: 'tools',
+      ),
+    ];
+    Widget dock() => TestApp(
+      child: Scaffold(
+        body: Align(
+          alignment: Alignment.bottomCenter,
+          child: NavigationDock(
+            destinations: destinations,
+            selectedIndex: selectedIndex,
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    Future<void> expectLensAt(String label) async {
+      final lensCenter = tester.getCenter(_lens).dx;
+      final labelFinder = find.text(label);
+      expect(labelFinder, findsOneWidget);
+      expect(
+        (tester.getCenter(labelFinder).dx - lensCenter).abs(),
+        lessThan(2),
+      );
+    }
+
+    await tester.pumpWidget(dock());
+    await tester.pumpAndSettle();
+    await expectLensAt('Tools');
+
+    destinations = [
+      ...destinations,
+      const NavigationDockDestination(
+        glyph: AppGlyphs.settings,
+        label: 'Settings',
+        id: 'settings',
+      ),
+    ];
+    await tester.pumpWidget(dock());
+    await tester.pump(const Duration(milliseconds: 100));
+    await expectLensAt('Tools');
+
+    destinations = destinations
+        .where((destination) => destination.id != 'home')
+        .toList();
+    selectedIndex = 1;
+    await tester.pumpWidget(dock());
+    await tester.pump(const Duration(milliseconds: 100));
+    final transitioningLens = tester.getCenter(_lens).dx;
+    final transitioningBar = tester.getRect(find.byType(FloatingNavigationBar));
+    expect(transitioningLens.isFinite, isTrue);
+    expect(
+      transitioningLens,
+      inInclusiveRange(transitioningBar.left, transitioningBar.right),
+    );
+    await tester.pumpAndSettle();
+    await expectLensAt('Tools');
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a tap that just misses the bar still reaches it', (
     tester,
   ) async {
@@ -544,6 +779,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       return tester.getRect(find.byType(FloatingNavigationBar));
     }
 

@@ -9,10 +9,10 @@ import 'constant.dart';
 
 double getWindowHeaderHeight({required bool isDesktop, required bool isMacOS}) {
   if (!isDesktop) return 0;
-  return isMacOS ? 28 : 32;
+  return isMacOS ? 28 : 40;
 }
 
-/// Windows 11 draws its caption buttons 46 wide over a 32 tall title bar.
+/// Windows 11 draws its caption buttons 46 wide over a 40 tall title bar.
 const captionButtonWidth = 46.0;
 
 /// The pin is not a caption button: it keeps the round Material button in a

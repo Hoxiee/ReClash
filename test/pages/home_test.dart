@@ -1001,6 +1001,70 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('an interrupted tab switch releases a non-kept page', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var disposed = false;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                glyph: AppGlyphs.dashboard,
+                label: PageLabel.dashboard,
+                keep: false,
+                builder: (_) =>
+                    _DisposeRecorder(onDispose: () => disposed = true),
+              ),
+              NavigationItem(
+                glyph: AppGlyphs.proxies,
+                label: PageLabel.proxies,
+                builder: (_) => const Text('page:proxies'),
+              ),
+              NavigationItem(
+                glyph: AppGlyphs.tools,
+                label: PageLabel.tools,
+                builder: (_) => const Text('page:tools'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 240));
+
+    expect(disposed, isTrue);
+    expect(find.text('page:proxies'), findsNothing);
+    expect(find.text('page:tools'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('switching home pages exits a generic search layer', (
     tester,
   ) async {
@@ -1276,7 +1340,7 @@ void main() {
   });
 
   testWidgets(
-    'desktop tabbing past page content does not scroll the PageView',
+    'desktop tabbing past page content does not change the active tab',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 800);
       tester.view.devicePixelRatio = 1;
@@ -1334,7 +1398,7 @@ void main() {
         matching: _glyph(glyph),
       );
 
-      // Visit another page so its content stays alive in the PageView cache.
+      // Посещённая вкладка должна сохранять состояние вне экрана.
       await tester.tap(railIcon(AppGlyphs.profiles));
       await tester.pumpAndSettle();
       expect(container.read(currentPageLabelProvider), PageLabel.profiles);
@@ -1361,7 +1425,7 @@ void main() {
       expect(
         find.text('page:profiles').hitTestable(),
         findsNothing,
-        reason: 'focus traversal scrolled the PageView to another page',
+        reason: 'focus traversal exposed an inactive page',
       );
       expect(tester.takeException(), isNull);
     },
@@ -1503,4 +1567,24 @@ class _InitRecorderState extends State<_InitRecorder> {
 
   @override
   Widget build(BuildContext context) => Text('page:${widget.label.name}');
+}
+
+class _DisposeRecorder extends StatefulWidget {
+  const _DisposeRecorder({required this.onDispose});
+
+  final VoidCallback onDispose;
+
+  @override
+  State<_DisposeRecorder> createState() => _DisposeRecorderState();
+}
+
+class _DisposeRecorderState extends State<_DisposeRecorder> {
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Text('page:dashboard');
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/launch.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -407,6 +408,7 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
       onDragStart: desktopWindow.startDragging,
       onDoubleTap: caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
+      leading: system.isMacOS ? null : const WindowStatusIndicator(),
       actions: system.isMacOS
           ? null
           : WindowHeaderActions(
@@ -430,6 +432,7 @@ class WindowHeaderBar extends StatelessWidget {
     required this.onDoubleTap,
     this.translucent = false,
     this.title,
+    this.leading,
     this.actions,
   });
 
@@ -438,6 +441,7 @@ class WindowHeaderBar extends StatelessWidget {
   final VoidCallback onDoubleTap;
   final bool translucent;
   final Widget? title;
+  final Widget? leading;
   final Widget? actions;
 
   @override
@@ -445,7 +449,11 @@ class WindowHeaderBar extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return Material(
       color: translucent ? Colors.transparent : null,
-      shape: Border(bottom: Divider.createBorderSide(context)),
+      shape: Border(
+        bottom: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
       child: SizedBox(
         height: height,
         child: Stack(
@@ -459,16 +467,28 @@ class WindowHeaderBar extends StatelessWidget {
                 onDoubleTap: onDoubleTap,
                 child: ColoredBox(
                   color: translucent
-                      ? colorScheme.chromeSurface.withValues(
+                      ? colorScheme.surface.withValues(
                           alpha: kSidebarBlurOpacity,
                         )
-                      : colorScheme.chromeSurface,
+                      : colorScheme.surface,
                 ),
               ),
             ),
             if (title != null)
               Positioned.fill(
                 child: IgnorePointer(child: Center(child: title)),
+              ),
+            if (leading != null)
+              PositionedDirectional(
+                top: 0,
+                bottom: 0,
+                start: 0,
+                child: IgnorePointer(
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 10),
+                    child: Center(child: leading),
+                  ),
+                ),
               ),
             if (actions != null)
               Positioned(
@@ -488,8 +508,17 @@ class WindowHeaderBar extends StatelessWidget {
                       padding: const WidgetStatePropertyAll(EdgeInsets.zero),
                       shape: const WidgetStatePropertyAll(AppShape.none),
                       foregroundColor: WidgetStatePropertyAll(
-                        context.colorScheme.onSurface,
+                        colorScheme.onSurface,
                       ),
+                      overlayColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return colorScheme.onSurface.withValues(alpha: 0.12);
+                        }
+                        if (states.contains(WidgetState.hovered)) {
+                          return colorScheme.onSurface.withValues(alpha: 0.08);
+                        }
+                        return null;
+                      }),
                     ),
                   ),
                   child: actions!,
@@ -501,6 +530,10 @@ class WindowHeaderBar extends StatelessWidget {
     );
   }
 }
+
+/// Fixed rather than themed: the close affordance stays the same alarming red
+/// in every colour scheme, matching the platform convention.
+const _closeHoverColor = Color(0xFFEE2C3C);
 
 class WindowHeaderActions extends StatelessWidget {
   const WindowHeaderActions({
@@ -545,28 +578,25 @@ class WindowHeaderActions extends StatelessWidget {
                     ? appLocalizations.unpinWindow
                     : appLocalizations.pinWindow,
                 style: const ButtonStyle(
-                  shape: WidgetStatePropertyAll(CircleBorder()),
+                  shape: WidgetStatePropertyAll(AppShape.circle),
                   minimumSize: WidgetStatePropertyAll(Size.zero),
                   maximumSize: WidgetStatePropertyAll(Size.infinite),
                   iconSize: WidgetStatePropertyAll(pinIconSize),
                 ),
                 onPressed: onPin,
-                icon: AnimatedGlyph(
-                  glyph: AppGlyphs.pin,
-                  filled: state.isPinned,
-                ),
-              ),
+                icon: GlyphIcon(AppGlyphs.pin, fill: state.isPinned ? 1 : 0),
+              ).withAppTooltip(),
             ),
             IconButton(
               tooltip: appLocalizations.minimize,
               onPressed: onMinimize,
               icon: const CaptionIcon(CaptionGlyph.minimize),
-            ),
+            ).withAppTooltip(),
             IconButton(
               tooltip: maximizeTooltip,
               onPressed: onMaximize,
               icon: CaptionIcon(maximizeGlyph),
-            ),
+            ).withAppTooltip(),
             IconButton(
               tooltip: appLocalizations.close,
               style: ButtonStyle(
@@ -574,26 +604,172 @@ class WindowHeaderActions extends StatelessWidget {
                   final active =
                       states.contains(WidgetState.hovered) ||
                       states.contains(WidgetState.pressed);
-                  return active ? context.colorScheme.error : null;
+                  return active ? _closeHoverColor : null;
                 }),
                 foregroundColor: WidgetStateProperty.resolveWith((states) {
                   final active =
                       states.contains(WidgetState.hovered) ||
                       states.contains(WidgetState.pressed);
-                  return active ? context.colorScheme.onError : null;
+                  return active ? Colors.white : null;
                 }),
                 overlayColor: WidgetStateProperty.resolveWith((states) {
                   return states.contains(WidgetState.pressed)
-                      ? context.colorScheme.onError.opacity12
+                      ? Colors.white.withValues(alpha: 0.12)
                       : Colors.transparent;
                 }),
               ),
               onPressed: onClose,
               icon: const CaptionIcon(CaptionGlyph.close),
-            ),
+            ).withAppTooltip(),
           ],
         );
       },
     );
   }
+}
+
+/// The tunnel state the title bar dot carries, drawn from this repo's own
+/// status providers.
+enum WindowStatus { off, connecting, running, suspended, disconnected }
+
+WindowStatus windowStatusOf({
+  required bool isStart,
+  required bool suspended,
+  required CoreStatus coreStatus,
+}) {
+  if (coreStatus == CoreStatus.connecting) {
+    return isStart && suspended
+        ? WindowStatus.suspended
+        : WindowStatus.connecting;
+  }
+  if (!isStart) return WindowStatus.off;
+  if (suspended) return WindowStatus.suspended;
+  return switch (coreStatus) {
+    CoreStatus.connecting => WindowStatus.connecting,
+    CoreStatus.connected => WindowStatus.running,
+    CoreStatus.disconnected => WindowStatus.disconnected,
+  };
+}
+
+final windowStatusProvider = Provider<WindowStatus>((ref) {
+  return windowStatusOf(
+    isStart: ref.watch(isStartProvider),
+    suspended: ref.watch(suspendProvider),
+    coreStatus: ref.watch(coreStatusProvider),
+  );
+});
+
+/// Alpha appends the active server to the connected label. Here only global
+/// mode names a single server - the GLOBAL group's selection - while rule
+/// mode routes each request on its own.
+final windowServerNameProvider = Provider<String>((ref) {
+  if (ref.watch(windowStatusProvider) != WindowStatus.running) {
+    return '';
+  }
+  final mode = ref.watch(
+    patchClashConfigProvider.select((state) => state.mode),
+  );
+  if (mode != Mode.global) {
+    return '';
+  }
+  return _stripLeadingEmoji(
+    ref.watch(selectedProxyNameProvider(GroupName.GLOBAL.name)) ?? '',
+  );
+});
+
+/// The connection state carried into the title bar, so a window shrunk to a
+/// strip still says whether the tunnel is up.
+class WindowStatusIndicator extends ConsumerWidget {
+  const WindowStatusIndicator({super.key});
+
+  static const double _dotSize = 8;
+  static const double _maxLabelWidth = 270;
+  static const double _labelSpacing = 8;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(windowStatusProvider);
+    final colorScheme = context.colorScheme;
+    final dotColor = switch (status) {
+      WindowStatus.off => colorScheme.onSurfaceVariant,
+      WindowStatus.connecting => colorScheme.primary,
+      WindowStatus.running => colorScheme.success,
+      WindowStatus.suspended => colorScheme.warning,
+      WindowStatus.disconnected => colorScheme.error,
+    };
+    final baseLabel = _statusLabel(context.appLocalizations, status);
+    final serverName = ref.watch(windowServerNameProvider);
+    final label = status == WindowStatus.running && serverName.isNotEmpty
+        ? '$baseLabel • $serverName'
+        : baseLabel;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: context.motionDuration(const Duration(milliseconds: 320)),
+          width: _dotSize,
+          height: _dotSize,
+          decoration: BoxDecoration(
+            color: dotColor,
+            shape: BoxShape.circle,
+            boxShadow: status == WindowStatus.off
+                ? null
+                : [
+                    BoxShadow(
+                      color: dotColor.withValues(alpha: 0.5),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+          ),
+        ),
+        const SizedBox(width: _labelSpacing),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxLabelWidth),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyle.caption1
+                .of(context)
+                .copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _statusLabel(AppLocalizations appLocalizations, WindowStatus status) =>
+    switch (status) {
+      WindowStatus.off => appLocalizations.notRunning,
+      WindowStatus.connecting => appLocalizations.connecting,
+      WindowStatus.running => appLocalizations.connected,
+      WindowStatus.suspended => appLocalizations.suspended,
+      WindowStatus.disconnected => appLocalizations.disconnected,
+    };
+
+/// Subscription names open with a flag emoji; a title bar label reads the
+/// server, not its flag.
+String _stripLeadingEmoji(String text) {
+  bool isEmojiRune(int rune) =>
+      (rune >= 0x1F000 && rune <= 0x1FAFF) ||
+      (rune >= 0x2600 && rune <= 0x27BF) ||
+      (rune >= 0x2190 && rune <= 0x21FF) ||
+      (rune >= 0x2B00 && rune <= 0x2BFF) ||
+      (rune >= 0x2300 && rune <= 0x23FF) ||
+      rune == 0x200D ||
+      rune == 0xFE0F;
+  bool isSpace(int rune) =>
+      rune == 0x20 || rune == 0x09 || rune == 0xA0 || rune == 0x0A;
+
+  final runes = text.runes.toList();
+  var start = 0;
+  while (start < runes.length &&
+      (isEmojiRune(runes[start]) || isSpace(runes[start]))) {
+    start++;
+  }
+  return String.fromCharCodes(
+    runes.sublist(start),
+  ).replaceAll(RegExp(r'\s+'), ' ').trim();
 }

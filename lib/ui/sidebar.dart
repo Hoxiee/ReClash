@@ -3,7 +3,9 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:reclash/ui/context.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/ui/inherited.dart';
 import 'package:reclash/ui/l10n.dart';
+import 'package:reclash/ui/nav_slots.dart';
 import 'package:reclash/ui/scroll_behavior.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/spring.dart';
@@ -47,12 +49,32 @@ final _pressSpring = SpringDescription.withDurationAndBounce(
   bounce: 0.24,
 );
 final _itemShape = AppShape.all(10);
+final _slotSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 420),
+);
+
+class _DestinationKey {
+  const _DestinationKey(this.identity, this.occurrence);
+
+  final Object identity;
+  final int occurrence;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _DestinationKey &&
+      other.identity == identity &&
+      other.occurrence == occurrence;
+
+  @override
+  int get hashCode => Object.hash(identity, occurrence);
+}
 
 class SidebarDestination {
   const SidebarDestination({
     required this.glyph,
     required this.label,
     this.group = 0,
+    this.id,
   });
 
   final Glyph glyph;
@@ -60,6 +82,9 @@ class SidebarDestination {
 
   /// Group separators draw between different groups, never inside one.
   final int group;
+  final Object? id;
+
+  Object get identity => id ?? glyph;
 }
 
 /// Where the sidebar cannot widen in place, [onToggle] is null and the toggle
@@ -314,18 +339,106 @@ class _SidebarPane extends StatefulWidget {
 
 class _SidebarPaneState extends State<_SidebarPane>
     with TickerProviderStateMixin {
-  late final ScrollController _scrollController = ScrollController();
-  late final NavSpring _hover = NavSpring(
-    this,
-    widget.selectedIndex
-        .clamp(0, math.max(0, widget.destinations.length - 1))
-        .toDouble(),
-  );
+  late final ScrollController _scrollController;
+
+  late final NavSpring _hover = NavSpring(this, 0);
   late final NavSpring _hoverShow = NavSpring(this, 0);
+  late final NavSlots<_DestinationKey> _slots = NavSlots<_DestinationKey>(
+    vsync: this,
+    spring: _slotSpring,
+  );
+  final Map<_DestinationKey, SidebarDestination> _destinationsById = {};
+  final Map<_DestinationKey, NavSpring> _groupSprings = {};
+  final Map<_DestinationKey, bool> _groupTargets = {};
+  _DestinationKey? _hoveredIdentity;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = sheetScrollController(context);
+    _slots.seed(_destinationKeys(widget.destinations));
+    _cacheDestinations();
+    _syncGroupSprings(seed: true);
+    _slots.addListener(_handleSlotsChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SidebarPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _slots.sync(_destinationKeys(widget.destinations));
+    _cacheDestinations();
+    _syncGroupSprings();
+    final hoveredIdentity = _hoveredIdentity;
+    if (hoveredIdentity != null) {
+      final liveKeys = _slots.slots
+          .where((slot) => !slot.leaving)
+          .map((slot) => slot.key)
+          .toList();
+      final index = liveKeys.indexOf(hoveredIdentity);
+      if (index < 0) {
+        _hoveredIdentity = null;
+      } else {
+        _spring(_hover, index.toDouble(), _hoverSpring);
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _slots.reduceMotion = _reduceMotion;
+    if (_reduceMotion) {
+      final liveKeys = _slots.slots
+          .where((slot) => !slot.leaving)
+          .map((slot) => slot.key)
+          .toList();
+      final hoveredIdentity = _hoveredIdentity;
+      final hoverIndex = hoveredIdentity == null
+          ? -1
+          : liveKeys.indexOf(hoveredIdentity);
+      _hover.jumpTo(hoverIndex < 0 ? 0 : hoverIndex.toDouble());
+      _hoverShow.jumpTo(hoverIndex < 0 ? 0 : 1);
+      for (final entry in _groupSprings.entries) {
+        entry.value.jumpTo(_groupTargets[entry.key] == true ? 1 : 0);
+      }
+    }
+  }
+
+  List<_DestinationKey> _destinationKeys(
+    List<SidebarDestination> destinations,
+  ) {
+    final occurrences = <Object, int>{};
+    return [
+      for (final destination in destinations)
+        _DestinationKey(
+          destination.identity,
+          occurrences.update(
+            destination.identity,
+            (count) => count + 1,
+            ifAbsent: () => 0,
+          ),
+        ),
+    ];
+  }
+
+  void _cacheDestinations() {
+    final keys = _destinationKeys(widget.destinations);
+    for (var i = 0; i < keys.length; i++) {
+      _destinationsById[keys[i]] = widget.destinations[i];
+    }
+    final retained = _slots.slots.map((slot) => slot.key).toSet();
+    _destinationsById.removeWhere((key, _) => !retained.contains(key));
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _slots.removeListener(_handleSlotsChanged);
+    _slots.dispose();
+    for (final spring in _groupSprings.values) {
+      spring.dispose();
+    }
+    _groupSprings.clear();
     _hover.dispose();
     _hoverShow.dispose();
     super.dispose();
@@ -354,15 +467,75 @@ class _SidebarPaneState extends State<_SidebarPane>
     return best;
   }
 
-  void _onHover(double y, List<double> centers) {
-    if (centers.isEmpty) {
-      return;
-    }
-    _spring(_hover, _nearestIndex(y, centers).toDouble(), _hoverSpring);
+  void _onHover(
+    double y,
+    List<double> centers,
+    List<_DestinationKey> identities,
+  ) {
+    if (centers.isEmpty) return;
+    final index = _nearestIndex(y, centers);
+    _hoveredIdentity = identities[index];
+    _spring(_hover, index.toDouble(), _hoverSpring);
     _spring(_hoverShow, 1, _hoverFadeSpring);
   }
 
-  void _onExit() => _spring(_hoverShow, 0, _hoverFadeSpring);
+  void _onExit() {
+    _hoveredIdentity = null;
+    _spring(_hoverShow, 0, _hoverFadeSpring);
+  }
+
+  void _selectIdentity(_DestinationKey key) {
+    final index = _destinationKeys(widget.destinations).indexOf(key);
+    if (index >= 0) widget.onSelected(index);
+  }
+
+  void _handleSlotsChanged() => _syncGroupSprings();
+
+  void _syncGroupSprings({bool seed = false}) {
+    final retained = <Object>{};
+    int? previousGroup;
+    for (final slot in _slots.slots) {
+      final destination = _destinationsById[slot.key];
+      if (destination == null) continue;
+      retained.add(slot.key);
+      final separates =
+          previousGroup != null && destination.group != previousGroup;
+      final spring = _groupSprings.putIfAbsent(
+        slot.key,
+        () => NavSpring(this, seed && separates ? 1 : 0),
+      );
+      final oldTarget = _groupTargets[slot.key];
+      _groupTargets[slot.key] = separates;
+      if (!seed && oldTarget != separates) {
+        _spring(spring, separates ? 1 : 0, _slotSpring);
+      }
+      previousGroup = destination.group;
+    }
+    for (final key in _groupSprings.keys.toList()) {
+      if (retained.contains(key)) continue;
+      _groupSprings.remove(key)!.dispose();
+      _groupTargets.remove(key);
+    }
+  }
+
+  double _slotExtent(double stride) {
+    var extent = 0.0;
+    var previousReveal = 0.0;
+    var hasPrevious = false;
+    for (final slot in _slots.slots) {
+      final destination = _destinationsById[slot.key];
+      if (destination == null) continue;
+      final reveal = slot.weight.value.clamp(0.0, 1.0);
+      final divider = _groupSprings[slot.key]?.value.clamp(0.0, 1.0) ?? 0.0;
+      if (hasPrevious) {
+        extent += _dividerExtent * divider * math.min(previousReveal, reveal);
+      }
+      extent += stride * reveal;
+      previousReveal = reveal;
+      hasPrevious = true;
+    }
+    return extent;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -385,19 +558,7 @@ class _SidebarPaneState extends State<_SidebarPane>
         ? null
         : label;
     final stride = itemHeight + _pillInsetY * 2;
-    final centers = <double>[];
-    var y = 0.0;
-    int? prevGroup;
-    for (var i = 0; i < widget.destinations.length; i++) {
-      final group = widget.destinations[i].group;
-      if (i > 0 && group != prevGroup) {
-        y += _dividerExtent;
-      }
-      prevGroup = group;
-      centers.add(y + stride / 2);
-      y += stride;
-    }
-    final extent = y;
+
     return SizedBox(
       width: lerpDouble(compactWidth, _expandedWidth, widget.progress),
       child: Column(
@@ -406,33 +567,149 @@ class _SidebarPaneState extends State<_SidebarPane>
           SizedBox(height: widget.windowControls.height + _verticalInset),
           Expanded(
             child: LayoutBuilder(
-              builder: (context, constraints) {
-                // The foot stays clear of the toggle: only a list that
-                // actually scrolls earns the hairline above it.
-                final scrollable = extent > constraints.maxHeight;
-                return Column(
+              builder: (context, constraints) => AnimatedBuilder(
+                animation: Listenable.merge([_slots, ..._groupSprings.values]),
+                builder: (context, _) => Column(
                   children: [
                     Expanded(
                       child: ScrollConfiguration(
                         behavior: const HiddenBarScrollBehavior(),
                         child: SingleChildScrollView(
                           controller: _scrollController,
-                          child: MouseRegion(
-                            onHover: (event) =>
-                                _onHover(event.localPosition.dy, centers),
-                            onExit: (_) => _onExit(),
-                            child: AnimatedBuilder(
-                              animation: Listenable.merge([_hover, _hoverShow]),
-                              builder: (context, _) {
-                                final show = _hoverShow.value;
-                                final hoverAt = _hover.value;
-                                double hoverOf(int index) =>
-                                    show *
-                                    math
-                                        .max(0, 1 - (hoverAt - index).abs())
-                                        .toDouble();
-                                return Stack(
+                          child: AnimatedBuilder(
+                            animation: Listenable.merge([
+                              _slots,
+                              ..._groupSprings.values,
+                              _hover,
+                              _hoverShow,
+                            ]),
+                            builder: (context, _) {
+                              final slots = _slots.slots;
+                              final layouts = <_SidebarSlotLayout>[];
+                              final centers = <double>[];
+                              final liveIdentities = <_DestinationKey>[];
+                              final liveIndex = <_DestinationKey, int>{};
+                              var y = 0.0;
+                              var previousReveal = 0.0;
+                              var hasPrevious = false;
+                              for (final slot in slots) {
+                                final destination = _destinationsById[slot.key];
+                                if (destination == null) continue;
+                                final reveal = slot.weight.value.clamp(
+                                  0.0,
+                                  1.0,
+                                );
+                                final divider =
+                                    _groupSprings[slot.key]?.value.clamp(
+                                      0.0,
+                                      1.0,
+                                    ) ??
+                                    0.0;
+                                final gap = hasPrevious
+                                    ? _dividerExtent *
+                                          divider *
+                                          math.min(previousReveal, reveal)
+                                    : 0.0;
+                                y += gap;
+                                final top = y;
+                                final height = stride * reveal;
+                                final live = !slot.leaving && reveal > 0.001;
+                                final index = live ? centers.length : -1;
+                                if (live) {
+                                  liveIndex[slot.key] = index;
+                                  liveIdentities.add(slot.key);
+                                  centers.add(top + height / 2);
+                                }
+                                layouts.add(
+                                  _SidebarSlotLayout(
+                                    slot: slot,
+                                    destination: destination,
+                                    reveal: reveal,
+                                    dividerBefore: gap,
+                                    liveIndex: index,
+                                  ),
+                                );
+                                y += height;
+                                previousReveal = reveal;
+                                hasPrevious = true;
+                              }
+                              final extent = y;
+                              final selectedKey =
+                                  widget.selectedIndex >= 0 &&
+                                      widget.selectedIndex <
+                                          widget.destinations.length
+                                  ? _destinationKeys(
+                                      widget.destinations,
+                                    )[widget.selectedIndex]
+                                  : null;
+                              final selectedLayoutIndex = selectedKey == null
+                                  ? -1
+                                  : liveIndex[selectedKey] ?? -1;
+                              final show = _hoverShow.value;
+                              final hoverAt = _hover.value;
+                              double hoverOf(_SidebarSlotLayout layout) {
+                                if (layout.liveIndex < 0) return 0;
+                                return show *
+                                    math.max(
+                                      0,
+                                      1 - (hoverAt - layout.liveIndex).abs(),
+                                    );
+                              }
+
+                              return MouseRegion(
+                                onHover: (event) => _onHover(
+                                  event.localPosition.dy,
+                                  centers,
+                                  liveIdentities,
+                                ),
+                                onExit: (_) => _onExit(),
+                                child: Stack(
                                   children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        for (final layout in layouts) ...[
+                                          if (layout.dividerBefore > 0)
+                                            _AnimatedGroupDivider(
+                                              extent: layout.dividerBefore,
+                                              margin: sideInset + 4,
+                                            ),
+                                          _SidebarSlot(
+                                            key: ValueKey(layout.slot.key),
+                                            layout: layout,
+                                            colors: colors,
+                                            itemHeight: itemHeight,
+                                            stride: stride,
+                                            sideInset: sideInset,
+                                            tooltip: rowTooltip(
+                                              layout.destination.label,
+                                            ),
+                                            selected:
+                                                layout.slot.key ==
+                                                    selectedKey &&
+                                                !layout.slot.leaving,
+                                            color: Color.lerp(
+                                              colors.icon,
+                                              colors.label,
+                                              layout.slot.key == selectedKey
+                                                  ? 1.0
+                                                  : hoverOf(layout),
+                                            )!,
+                                            fill: layout.slot.key == selectedKey
+                                                ? 1.0
+                                                : hoverOf(layout) * 0.7,
+                                            rowWidth: rowWidth,
+                                            iconInset: iconInset,
+                                            style: labelStyle,
+                                            labelOpacity: labelOpacity,
+                                            onTap: () => _selectIdentity(
+                                              layout.slot.key,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                     _HoverGhost(
                                       key: NavigationSidebar.hoverGhostKey,
                                       centers: centers,
@@ -442,90 +719,25 @@ class _SidebarPaneState extends State<_SidebarPane>
                                       sideInset: sideInset,
                                       color: colors.hoverGhost,
                                     ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        for (
-                                          var index = 0;
-                                          index < widget.destinations.length;
-                                          index++
-                                        ) ...[
-                                          if (index > 0 &&
-                                              widget
-                                                      .destinations[index]
-                                                      .group !=
-                                                  widget
-                                                      .destinations[index - 1]
-                                                      .group)
-                                            _GroupDivider(
-                                              margin: sideInset + 4,
-                                            ),
-                                          Builder(
-                                            builder: (context) {
-                                              final selected =
-                                                  index == widget.selectedIndex;
-                                              final hover = hoverOf(index);
-                                              final color = Color.lerp(
-                                                colors.icon,
-                                                colors.label,
-                                                selected ? 1.0 : hover,
-                                              )!;
-                                              return _SidebarButton(
-                                                key: ValueKey(
-                                                  widget
-                                                      .destinations[index]
-                                                      .label,
-                                                ),
-                                                colors: colors,
-                                                height: itemHeight,
-                                                sideInset: sideInset,
-                                                selected: selected,
-                                                tooltip: rowTooltip(
-                                                  widget
-                                                      .destinations[index]
-                                                      .label,
-                                                ),
-                                                hoverDelayScale: 2,
-                                                onTap: () =>
-                                                    widget.onSelected(index),
-                                                child: _DestinationRow(
-                                                  destination: widget
-                                                      .destinations[index],
-                                                  color: color,
-                                                  fill: selected
-                                                      ? 1.0
-                                                      : hover * 0.7,
-                                                  width: rowWidth,
-                                                  iconInset: iconInset,
-                                                  style: labelStyle,
-                                                  labelOpacity: labelOpacity,
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    if (widget.selectedIndex <
-                                        widget.destinations.length)
+                                    if (selectedLayoutIndex >= 0)
                                       _SelectionIndicator(
                                         color: colors.indicator,
-                                        index: widget.selectedIndex,
+                                        index: selectedLayoutIndex,
                                         centers: centers,
                                         start: sideInset,
                                       ),
+                                    SizedBox(height: extent),
                                   ],
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),
                     ),
                     _FootSeparator(
                       key: NavigationSidebar.footSeparatorKey,
-                      visible: scrollable,
+                      visible: _slotExtent(stride) > constraints.maxHeight,
                       sideInset: sideInset,
                     ),
                     Align(
@@ -550,11 +762,126 @@ class _SidebarPaneState extends State<_SidebarPane>
                     ),
                     const SizedBox(height: _verticalInset + _toggleGap),
                   ],
-                );
-              },
+                ),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SidebarSlotLayout {
+  const _SidebarSlotLayout({
+    required this.slot,
+    required this.destination,
+    required this.reveal,
+    required this.dividerBefore,
+    required this.liveIndex,
+  });
+
+  final NavSlot<_DestinationKey> slot;
+  final SidebarDestination destination;
+  final double reveal;
+  final double dividerBefore;
+  final int liveIndex;
+}
+
+class _AnimatedGroupDivider extends StatelessWidget {
+  const _AnimatedGroupDivider({required this.extent, required this.margin});
+
+  final double extent;
+  final double margin;
+
+  @override
+  Widget build(BuildContext context) {
+    final reveal = (extent / _dividerExtent).clamp(0.0, 1.0);
+    return ClipRect(
+      child: Align(
+        alignment: Alignment.topCenter,
+        heightFactor: reveal,
+        child: Opacity(
+          opacity: reveal,
+          child: _GroupDivider(margin: margin),
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarSlot extends StatelessWidget {
+  const _SidebarSlot({
+    super.key,
+    required this.layout,
+    required this.colors,
+    required this.itemHeight,
+    required this.stride,
+    required this.sideInset,
+    required this.tooltip,
+    required this.selected,
+    required this.color,
+    required this.fill,
+    required this.rowWidth,
+    required this.iconInset,
+    required this.style,
+    required this.labelOpacity,
+    required this.onTap,
+  });
+
+  final _SidebarSlotLayout layout;
+  final _SidebarColors colors;
+  final double itemHeight;
+  final double stride;
+  final double sideInset;
+  final String? tooltip;
+  final bool selected;
+  final Color color;
+  final double fill;
+  final double rowWidth;
+  final double iconInset;
+  final TextStyle? style;
+  final double labelOpacity;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final reveal = layout.reveal;
+    final leaving = layout.slot.leaving;
+    return ClipRect(
+      child: Align(
+        alignment: Alignment.topCenter,
+        heightFactor: reveal,
+        child: Opacity(
+          opacity: reveal,
+          child: IgnorePointer(
+            ignoring: leaving,
+            child: ExcludeSemantics(
+              excluding: leaving,
+              child: SizedBox(
+                height: stride,
+                child: _SidebarButton(
+                  colors: colors,
+                  height: itemHeight,
+                  sideInset: sideInset,
+                  selected: selected,
+                  tooltip: tooltip,
+                  hoverDelayScale: 2,
+                  onTap: onTap,
+                  child: _DestinationRow(
+                    destination: layout.destination,
+                    color: color,
+                    fill: fill,
+                    width: rowWidth,
+                    iconInset: iconInset,
+                    style: style,
+                    labelOpacity: labelOpacity,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -612,6 +939,12 @@ class _FootSeparatorState extends State<_FootSeparator>
     duration: const Duration(milliseconds: 180),
     value: widget.visible ? 1 : 0,
   );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations) _controller.value = widget.visible ? 1 : 0;
+  }
 
   @override
   void didUpdateWidget(covariant _FootSeparator oldWidget) {
@@ -709,7 +1042,6 @@ class _HoverGhost extends StatelessWidget {
 
 class _SidebarButton extends StatefulWidget {
   const _SidebarButton({
-    super.key,
     required this.colors,
     required this.height,
     required this.sideInset,
@@ -913,11 +1245,19 @@ class _SelectionIndicatorState extends State<_SelectionIndicator>
   void didUpdateWidget(covariant _SelectionIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.index != widget.index) {
-      // Capture the departure in the old geometry: recomputing it from the
-      // new centers teleports the start when a page change lands mid-layout.
       _from = _topOf(oldWidget.index, oldWidget.centers);
-      _controller.forward(from: 0);
+      if (context.disableAnimations) {
+        _controller.value = 1;
+      } else {
+        _controller.forward(from: 0);
+      }
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations) _controller.value = 1;
   }
 
   @override

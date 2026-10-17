@@ -7,7 +7,6 @@ import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -99,6 +98,7 @@ class _HomeShell extends ConsumerWidget {
                         destinations: [
                           for (final item in navigationItems)
                             NavigationDockDestination(
+                              id: item.label,
                               glyph: item.glyph,
                               label: item.label.label,
                             ),
@@ -117,10 +117,11 @@ class _HomeShell extends ConsumerWidget {
           AnimatedVisibility.bottomNavigation(
             visible: isMobile && !floating,
             child: _NavigationPadding(
-              child: NavigationBar(
+              child: AnimatedNavigationBar(
                 destinations: [
                   for (final (index, item) in navigationItems.indexed)
-                    NavigationDestination(
+                    NavigationBarEntry(
+                      id: item.label,
                       icon: AnimatedGlyph(
                         glyph: item.glyph,
                         filled: index == state.currentIndex,
@@ -129,7 +130,7 @@ class _HomeShell extends ConsumerWidget {
                     ),
                 ],
                 selectedIndex: state.currentIndex,
-                onDestinationSelected: (index) {
+                onSelected: (index) {
                   _handleToPage(navigationItems[index].label, ref);
                 },
               ),
@@ -240,181 +241,211 @@ class _HomePageView extends ConsumerStatefulWidget {
   ConsumerState createState() => _HomePageViewState();
 }
 
-class _HomePageViewState extends ConsumerState<_HomePageView> {
-  late PageController _pageController;
+enum _TabRole { idle, outgoing, incoming }
 
-  List<int>? _order;
-  int _slide = 0;
+class _HomePageViewState extends ConsumerState<_HomePageView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _transition = AnimationController(
+    vsync: this,
+    value: 1,
+    duration: fadeTabDuration,
+  )..addStatusListener(_onTransitionStatus);
+
+  final Set<PageLabel> _mounted = {};
+  PageLabel? _active;
+  PageLabel? _outgoing;
+  double _direction = 1;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _pageIndex);
-    ref.listenManual(currentPageLabelProvider, (prev, next) {
-      if (prev != next) {
-        _toPage(next);
-      }
+    _active = _shownCurrent;
+    if (_active != null) _mounted.add(_active!);
+    ref.listenManual(currentPageLabelProvider, (_, _) => _syncCurrent());
+  }
+
+  PageLabel? get _shownCurrent => widget.navigationItems.isEmpty
+      ? null
+      : shownPageLabelOf(
+          ref.read(currentPageLabelProvider),
+          widget.navigationItems,
+        );
+
+  int _indexOf(PageLabel? label) =>
+      widget.navigationItems.indexWhere((item) => item.label == label);
+
+  void _pruneMounted() {
+    final items = {for (final item in widget.navigationItems) item.label: item};
+    _mounted.removeWhere(
+      (label) =>
+          !items.containsKey(label) ||
+          (label != _active && label != _outgoing && !items[label]!.keep),
+    );
+  }
+
+  void _syncCurrent() {
+    final target = _shownCurrent;
+    if (target != _active) {
+      _goTo(target);
+    } else if (_outgoing != null && _indexOf(_outgoing) == -1) {
+      _finishTransition();
+    }
+    _pruneMounted();
+  }
+
+  void _goTo(PageLabel? target) {
+    final animation = ref.read(appSettingProvider).tabAnimation;
+    final leaving = _transition.isAnimating && _outgoing != null
+        ? _outgoing
+        : _active;
+    final from = _indexOf(leaving);
+    final to = _indexOf(target);
+    final instant =
+        !ref.read(isMobileViewProvider) ||
+        context.disableAnimations ||
+        from == -1 ||
+        to == -1 ||
+        leaving == target;
+    _transition.stop();
+    setState(() {
+      _active = target;
+      _outgoing = instant ? null : leaving;
+      if (target != null) _mounted.add(target);
+      if (from != -1 && to != -1) _direction = to >= from ? 1 : -1;
+      _pruneMounted();
     });
+    if (instant) {
+      _transition.value = 1;
+    } else {
+      _transition.duration = animation == TabAnimation.fade
+          ? fadeTabDuration
+          : kTabScrollDuration;
+      _transition.forward(from: 0);
+    }
+  }
+
+  void _onTransitionStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && _outgoing != null) {
+      setState(() {
+        _outgoing = null;
+        _pruneMounted();
+      });
+    }
+  }
+
+  void _finishTransition() {
+    _transition.stop();
+    _outgoing = null;
+    _pruneMounted();
+    _transition.value = 1;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations && _transition.isAnimating) {
+      _finishTransition();
+    }
   }
 
   @override
   void didUpdateWidget(covariant _HomePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(
-      _labelsOf(oldWidget.navigationItems),
-      _labelsOf(widget.navigationItems),
-    )) {
-      _order = null;
-      _updatePageController();
+    _syncCurrent();
+    if (!ref.read(isMobileViewProvider) && _transition.isAnimating) {
+      _finishTransition();
     }
-  }
-
-  static List<PageLabel> _labelsOf(List<NavigationItem> items) => [
-    for (final item in items) item.label,
-  ];
-
-  int get _pageIndex => _indexOf(ref.read(currentPageLabelProvider));
-
-  int _indexOf(PageLabel pageLabel) {
-    final shown = shownPageLabelOf(pageLabel, widget.navigationItems);
-    return widget.navigationItems.indexWhere((item) => item.label == shown);
-  }
-
-  Future<void> _toPage(
-    PageLabel pageLabel, [
-    bool ignoreAnimateTo = false,
-  ]) async {
-    if (!mounted) {
-      return;
-    }
-    final index = _indexOf(pageLabel);
-    if (index == -1) {
-      return;
-    }
-    final tabAnimation = ref.read(appSettingProvider).tabAnimation;
-    final isMobile = ref.read(isMobileViewProvider);
-    final slide = ++_slide;
-    final page = _pageController.hasClients
-        ? _pageController.page?.round() ?? index
-        : index;
-    final current = _order?[page] ?? page;
-    if (_order != null) {
-      setState(() => _order = null);
-      _pageController.jumpToPage(current);
-    }
-    if (!isMobile || ignoreAnimateTo) {
-      _pageController.jumpToPage(index);
-      return;
-    }
-    // As TabBarView does, so no page between is built and painted on the way.
-    if ((index - current).abs() > 1) {
-      final adjacent = index > current ? index - 1 : index + 1;
-      setState(() {
-        _order = List.generate(widget.navigationItems.length, (item) => item)
-          ..[adjacent] = current
-          ..[current] = adjacent;
-      });
-      _pageController.jumpToPage(adjacent);
-    }
-    final fade = tabAnimation == TabAnimation.fade;
-    await _pageController.animateToPage(
-      index,
-      duration: fade ? fadeTabDuration : kTabScrollDuration,
-      curve: fade ? fadeTabCurve : Curves.easeOut,
-    );
-    if (mounted && slide == _slide && _order != null) {
-      setState(() => _order = null);
-    }
-  }
-
-  void _updatePageController() {
-    final pageLabel = ref.read(currentPageLabelProvider);
-    _toPage(pageLabel, true);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _transition.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final itemCount = ref.watch(
-      currentNavigationItemsStateProvider.select((state) => state.value.length),
-    );
     final fade = ref.watch(
       appSettingProvider.select(
         (state) => state.tabAnimation == TabAnimation.fade,
       ),
     );
-    return PageView.builder(
-      controller: _pageController,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
-      findChildIndexCallback: (key) {
-        if (key is! ValueKey<PageLabel>) {
-          return null;
-        }
-        final index = widget.navigationItems.indexWhere(
-          (item) => item.label == key.value,
-        );
-        if (index == -1) {
-          return null;
-        }
-        return _order?.indexOf(index) ?? index;
-      },
-      itemBuilder: (context, index) {
-        final page = widget.pageBuilder(context, _order?[index] ?? index);
-        return _FadeTabPage(
-          key: page.key,
-          controller: _pageController,
-          position: index,
-          enabled: fade,
-          child: page,
-        );
-      },
+    final idle = <Widget>[];
+    Widget? outgoing;
+    Widget? incoming;
+    for (var index = 0; index < widget.navigationItems.length; index++) {
+      final label = widget.navigationItems[index].label;
+      if (!_mounted.contains(label)) continue;
+      final role = label == _active
+          ? _TabRole.incoming
+          : label == _outgoing
+          ? _TabRole.outgoing
+          : _TabRole.idle;
+      final page = _TabTransition(
+        key: ValueKey(label),
+        animation: _transition,
+        role: role,
+        fade: fade,
+        direction: _direction,
+        child: widget.pageBuilder(context, index),
+      );
+      switch (role) {
+        case _TabRole.idle:
+          idle.add(page);
+        case _TabRole.outgoing:
+          outgoing = page;
+        case _TabRole.incoming:
+          incoming = page;
+      }
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [...idle, ?outgoing, ?incoming],
     );
   }
 }
 
-/// Cancels the page view's slide so a tab switch cross-fades in place, and
-/// wraps every page even when off so switching the setting keeps their state.
-class _FadeTabPage extends StatelessWidget {
-  const _FadeTabPage({
+class _TabTransition extends StatelessWidget {
+  const _TabTransition({
     super.key,
-    required this.controller,
-    required this.position,
-    required this.enabled,
+    required this.animation,
+    required this.role,
+    required this.fade,
+    required this.direction,
     required this.child,
   });
 
-  final PageController controller;
-  final int position;
-  final bool enabled;
+  final Animation<double> animation;
+  final _TabRole role;
+  final bool fade;
+  final double direction;
   final Widget child;
-
-  double get _delta {
-    if (!controller.hasClients || !controller.position.hasContentDimensions) {
-      return 0;
-    }
-    final page = controller.page ?? position.toDouble();
-    return (position - page).clamp(-1.0, 1.0);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, child) {
-        final offset = _delta;
-        final delta = enabled ? offset : 0.0;
-        return FractionalTranslation(
-          translation: Offset(-delta, 0),
-          child: Opacity(opacity: 1 - delta.abs(), child: child),
-        );
-      },
-      child: child,
+    final active = role != _TabRole.idle;
+    final incoming = role == _TabRole.incoming;
+    return Offstage(
+      offstage: !active,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (_, child) {
+          final t = (fade ? fadeTabCurve : Curves.easeOut).transform(
+            animation.value,
+          );
+          final offset = !active || fade
+              ? 0.0
+              : incoming
+              ? direction * (1 - t)
+              : -direction * t;
+          final opacity = active && fade ? (incoming ? t : 1 - t) : 1.0;
+          return FractionalTranslation(
+            translation: Offset(offset, 0),
+            child: Opacity(opacity: opacity, child: child),
+          );
+        },
+        child: RepaintBoundary(child: child),
+      ),
     );
   }
 }

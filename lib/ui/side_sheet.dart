@@ -15,6 +15,7 @@ const Curve _sideSheetCurve = Easing.standardDecelerate;
 const double _minWidth = 360;
 const double _maxWidth = 560;
 const double _widthFactor = 0.4;
+const EdgeInsets _sideSheetMargin = EdgeInsets.fromLTRB(0, 16, 16, 16);
 
 double _widthFor(double viewWidth) {
   return (viewWidth * _widthFactor).clamp(_minWidth, _maxWidth);
@@ -45,12 +46,20 @@ class _SideSheetState extends State<SideSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        widget.backgroundColor ??
+        SurfaceLevel.page.colorOf(Theme.of(context).colorScheme);
+    final chromeless = color.a == 0;
     return Material(
       key: _childKey,
-      color:
-          widget.backgroundColor ??
-          SurfaceLevel.page.colorOf(Theme.of(context).colorScheme),
-      shape: AppShape.none,
+      color: color,
+      elevation: chromeless ? 0 : 3,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: chromeless
+          ? Colors.transparent
+          : Theme.of(context).colorScheme.shadow,
+      shape: chromeless ? AppShape.none : AppShape.xl,
+      clipBehavior: chromeless ? Clip.none : Clip.antiAlias,
       child: widget.builder(context),
     );
   }
@@ -63,12 +72,14 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     required this.onChildSizeChanged,
     required this.animationValue,
     required this.width,
+    required this.margin,
     super.child,
   });
 
   final _SizeChangeCallback<Size> onChildSizeChanged;
   final double animationValue;
   final double width;
+  final EdgeInsets margin;
 
   @override
   _RenderSideSheetLayoutWithSizeListener createRenderObject(
@@ -78,6 +89,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
       onChildSizeChanged: onChildSizeChanged,
       animationValue: animationValue,
       width: width,
+      margin: margin,
     );
   }
 
@@ -89,6 +101,7 @@ class _SideSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
     renderObject.onChildSizeChanged = onChildSizeChanged;
     renderObject.animationValue = animationValue;
     renderObject.width = width;
+    renderObject.margin = margin;
   }
 }
 
@@ -98,9 +111,11 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     required _SizeChangeCallback<Size> onChildSizeChanged,
     required double animationValue,
     required double width,
+    required EdgeInsets margin,
   }) : _onChildSizeChanged = onChildSizeChanged,
        _animationValue = animationValue,
        _width = width,
+       _margin = margin,
        super(child);
 
   Size _lastSize = Size.zero;
@@ -138,6 +153,18 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
     }
 
     _width = newValue;
+    markNeedsLayout();
+  }
+
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+
+  set margin(EdgeInsets newValue) {
+    if (_margin == newValue) {
+      return;
+    }
+
+    _margin = newValue;
     markNeedsLayout();
   }
 
@@ -196,13 +223,19 @@ class _RenderSideSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints.tightFor(
-      width: math.min(width, constraints.maxWidth),
-      height: constraints.maxHeight,
+      width: math.min(
+        width,
+        math.max(0.0, constraints.maxWidth - margin.horizontal),
+      ),
+      height: math.max(0.0, constraints.maxHeight - margin.vertical),
     );
   }
 
   Offset _getPositionForChild(Size size, Size childSize) {
-    return Offset(size.width - childSize.width * animationValue, 0.0);
+    return Offset(
+      size.width - (childSize.width + margin.right) * animationValue,
+      margin.top,
+    );
   }
 
   @override
@@ -259,7 +292,12 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
   }
 
   EdgeInsets _getNewClipDetails(Size topLayerSize) {
-    return EdgeInsets.fromLTRB(0, 0, topLayerSize.width, 0);
+    return EdgeInsets.fromLTRB(
+      0,
+      0,
+      topLayerSize.width + _sideSheetMargin.right,
+      0,
+    );
   }
 
   @override
@@ -298,6 +336,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
               },
               animationValue: animationValue,
               width: width,
+              margin: _sideSheetMargin,
               child: child,
             ),
           ),
