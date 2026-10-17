@@ -1418,6 +1418,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Pulsa una combinación de teclas",
     ),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Evitar suscripciones duplicadas",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Rechazar un enlace de suscripción que ya usa un perfil existente",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Vista previa"),
     "previousMatch": MessageLookupByLibrary.simpleMessage(
       "Coincidencia anterior",
@@ -1438,6 +1444,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "El perfil se ha modificado. ¿Desactivar la actualización automática?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Ya existe un perfil con esta URL de suscripción",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Introduce el nombre del perfil",

@@ -1029,6 +1029,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "preSharedKey": MessageLookupByLibrary.simpleMessage("预共享密钥"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下组合键"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage("防止重复订阅"),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "拒绝已有配置使用的订阅链接",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("预览"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("上一个匹配"),
     "privateKey": MessageLookupByLibrary.simpleMessage("私钥"),
@@ -1043,6 +1047,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "配置文件已经修改，是否关闭自动更新？",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "已存在使用该订阅链接的配置",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "请输入配置名称",

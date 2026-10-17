@@ -951,5 +951,8 @@
   "creditByeDpi": "ByeDPI — инструмент обхода DPI",
   "license": "Лицензия",
   "licenses": "Лицензии",
-  "licensesDesc": "Пакеты, входящие в приложение"
+  "licensesDesc": "Пакеты, входящие в приложение",
+  "preventDuplicateProfiles": "Запрет дубликатов подписок",
+  "preventDuplicateProfilesDesc": "Отклонять ссылку подписки, которую уже использует существующий профиль",
+  "profileImportDuplicate": "Профиль с этим URL подписки уже добавлен"
 }

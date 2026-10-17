@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "구독 중복 방지",
+  "preventDuplicateProfilesDesc": "기존 프로필이 이미 사용하는 구독 링크를 거부합니다",
+  "profileImportDuplicate": "이 구독 URL의 프로필이 이미 있습니다"
+}

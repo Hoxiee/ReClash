@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "Empêcher les abonnements en double",
+  "preventDuplicateProfilesDesc": "Refuser un lien d'abonnement déjà utilisé par un profil existant",
+  "profileImportDuplicate": "Un profil avec cette URL d'abonnement existe déjà"
+}

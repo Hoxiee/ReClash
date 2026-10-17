@@ -1113,6 +1113,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "preSharedKey": MessageLookupByLibrary.simpleMessage("사전 공유 키"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("사전 요건"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("키 조합을 누르세요"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "구독 중복 방지",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "기존 프로필이 이미 사용하는 구독 링크를 거부합니다",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("미리보기"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("이전 결과"),
     "privateKey": MessageLookupByLibrary.simpleMessage("개인 키"),
@@ -1127,6 +1133,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "프로필이 수정되었습니다. 자동 업데이트를 끄시겠습니까?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "이 구독 URL의 프로필이 이미 있습니다",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "프로필 이름을 입력하세요",

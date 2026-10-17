@@ -67,6 +67,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   editorFontSize:
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
       EditorFontSize.standard,
+  preventDuplicateProfiles: json['preventDuplicateProfiles'] as bool? ?? true,
   serviceOrder:
       (json['serviceOrder'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -120,6 +121,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'hideIp': instance.hideIp,
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
+      'preventDuplicateProfiles': instance.preventDuplicateProfiles,
       'serviceOrder': instance.serviceOrder,
       'disabledServices': instance.disabledServices,
       'tableColumnWidths': instance.tableColumnWidths,

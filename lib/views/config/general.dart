@@ -336,6 +336,12 @@ class GeneralView extends ConsumerWidget {
         select: (state) => state.onlyStatisticsProxy,
         update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
       ),
+      _appSettingToggle(
+        title: (l) => l.preventDuplicateProfiles,
+        select: (state) => state.preventDuplicateProfiles,
+        update: (state, value) =>
+            state.copyWith(preventDuplicateProfiles: value),
+      ),
     ];
   }
 

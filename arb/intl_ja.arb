@@ -951,5 +951,8 @@
   "creditByeDpi": "ByeDPI — DPI 回避ツール",
   "license": "ライセンス",
   "licenses": "ライセンス一覧",
-  "licensesDesc": "アプリに同棑されているパッケージ"
+  "licensesDesc": "アプリに同棑されているパッケージ",
+  "preventDuplicateProfiles": "サブスクリプションの重複を防ぐ",
+  "preventDuplicateProfilesDesc": "既存のプロファイルが使用している購読リンクを拒否します",
+  "profileImportDuplicate": "このサブスクリプションURLのプロファイルは既に存在します"
 }

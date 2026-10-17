@@ -18,6 +18,21 @@ T roundTrip<T>(
 }
 
 void main() {
+  test('region JSON keeps supported codes and rejects unknown values', () {
+    expect(AppSettingProps.fromJson({'regionCode': ' ru '}).regionCode, 'RU');
+    for (final value in [null, '', 'US', 'UNKNOWN', 7]) {
+      expect(
+        AppSettingProps.fromJson({'regionCode': value}).regionCode,
+        isNull,
+      );
+    }
+    const settings = AppSettingProps(
+      regionCode: 'EG',
+      enabledServices: ['netflix'],
+    );
+    expect(roundTrip(settings.toJson, AppSettingProps.fromJson), settings);
+  });
+
   group('GeoResource JSON', () {
     test('exposes mihomo raw config keys', () {
       expect(GeoResource.MMDB.configKey, 'mmdb');
@@ -117,6 +132,31 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
+    test('service automation defaults and choices survive JSON', () {
+      final defaults = AppSettingProps.fromJson({});
+      expect(defaults.autoCheckActiveServices, isTrue);
+      expect(defaults.autoCheckAllServices, isFalse);
+      expect(defaults.serviceCheckOnlyWhenConnected, isTrue);
+      for (final active in [false, true]) {
+        for (final all in [false, true]) {
+          for (final connected in [false, true]) {
+            final settings = AppSettingProps(
+              autoCheckActiveServices: active,
+              autoCheckAllServices: all,
+              serviceCheckOnlyWhenConnected: connected,
+            );
+            final restored = roundTrip(
+              settings.toJson,
+              AppSettingProps.fromJson,
+            );
+            expect(restored.autoCheckActiveServices, active);
+            expect(restored.autoCheckAllServices, all);
+            expect(restored.serviceCheckOnlyWhenConnected, connected);
+          }
+        }
+      }
+    });
+
     test('default values survive round-trip', () {
       const props = AppSettingProps();
       final restored = roundTrip(
@@ -130,12 +170,93 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.tabAnimation, TabAnimation.fade);
+      expect(restored.preventDuplicateProfiles, true);
       expect(restored.autoCheckUpdate, true);
-      expect(restored.sidebarExpanded, true);
+      expect(restored.autoDownloadUpdate, false);
+      expect(restored.autoInstallUpdate, false);
+      expect(restored.updateChannel, isNull);
+      expect(restored.regionCode, isNull);
+      expect(restored.setupCompleted, isNull);
+      expect(restored.setupStep, 0);
+      expect(restored.setupProfileId, isNull);
+      expect(restored.setupCoverage, isNull);
+      expect(restored.setupRegionCode, isNull);
+      expect(restored.setupRegionChosen, isFalse);
+      expect(restored.sidebarExpanded, false);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.userAgents, defaultUserAgents);
       expect(restored.filters, defaultFilters);
+    });
+
+    test('setup state distinguishes legacy settings from completed setup', () {
+      expect(AppSettingProps.fromJson({}).setupCompleted, isNull);
+      expect(
+        AppSettingProps.fromJson({'setupCompleted': null}).setupCompleted,
+        isNull,
+      );
+
+      const props = AppSettingProps(
+        setupCompleted: false,
+        setupStep: 3,
+        setupProfileId: 42,
+        setupCoverage: 'full',
+        setupRegionCode: 'RU',
+        setupRegionChosen: true,
+        acceptedDisclaimerVersion: 2,
+      );
+      final restored = roundTrip(props.toJson, AppSettingProps.fromJson);
+      expect(restored.setupCompleted, isFalse);
+      expect(restored.setupStep, 3);
+      expect(restored.setupProfileId, 42);
+      expect(restored.setupCoverage, 'full');
+      expect(restored.setupRegionCode, 'RU');
+      expect(restored.setupRegionChosen, isTrue);
+      expect(restored.acceptedDisclaimerVersion, 2);
+
+      final neutralRegion = roundTrip(
+        () => const AppSettingProps(setupRegionChosen: true).toJson(),
+        AppSettingProps.fromJson,
+      );
+      expect(neutralRegion.setupRegionCode, isNull);
+      expect(neutralRegion.setupRegionChosen, isTrue);
+    });
+
+    test(
+      'saved update channel round-trips and missing channel stays unset',
+      () {
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'pre'}).updateChannel,
+          UpdateChannel.pre,
+        );
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'release'}).updateChannel,
+          UpdateChannel.release,
+        );
+        expect(AppSettingProps.fromJson({}).updateChannel, isNull);
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'unknown'}).updateChannel,
+          isNull,
+        );
+      },
+    );
+
+    test('update preferences round-trip independently', () {
+      for (final check in [false, true]) {
+        for (final preload in [false, true]) {
+          for (final install in [false, true]) {
+            final props = AppSettingProps(
+              autoCheckUpdate: check,
+              autoDownloadUpdate: preload,
+              autoInstallUpdate: install,
+            );
+            final restored = roundTrip(props.toJson, AppSettingProps.fromJson);
+            expect(restored.autoCheckUpdate, check);
+            expect(restored.autoDownloadUpdate, preload);
+            expect(restored.autoInstallUpdate, install);
+          }
+        }
+      }
     });
 
     test('a saved outboundModeV2 card folds into outboundMode', () {
@@ -254,22 +375,30 @@ void main() {
     test('custom values survive round-trip', () {
       const props = AppSettingProps(
         locale: 'zh_CN',
+        regionCode: 'RU',
         onlyStatisticsProxy: true,
         autoLaunch: true,
         closeConnections: false,
         userAgents: ['CustomUA/1.0'],
         filters: [Filter(label: 'Asia', regex: 'hk`jp')],
+        serviceOrder: ['youtube', 'google'],
+        enabledServices: ['netflix'],
+        disabledServices: ['discord'],
       );
       final restored = roundTrip(
         () => props.toJson(),
         AppSettingProps.fromJson,
       );
       expect(restored.locale, 'zh_CN');
+      expect(restored.regionCode, 'RU');
       expect(restored.onlyStatisticsProxy, true);
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
       expect(restored.userAgents, ['CustomUA/1.0']);
       expect(restored.filters, [const Filter(label: 'Asia', regex: 'hk`jp')]);
+      expect(restored.serviceOrder, ['youtube', 'google']);
+      expect(restored.enabledServices, ['netflix']);
+      expect(restored.disabledServices, ['discord']);
     });
 
     test('a legacy custom user agent joins the presets', () {
@@ -322,7 +451,7 @@ void main() {
         }).sidebarExpanded,
         true,
       );
-      expect(AppSettingProps.fromJson({}).sidebarExpanded, true);
+      expect(AppSettingProps.fromJson({}).sidebarExpanded, false);
     });
 
     test('safeFromJson returns default on null', () {
@@ -555,7 +684,7 @@ void main() {
     test('a legacy config keeps overriding what it used to, defaults '
         'included', () {
       final config = PatchClashConfig.fromJson(
-        savedBefore({'tcp-concurrent': false}),
+        savedBefore({'tcp-concurrent': false, 'ipv6': false}),
       );
 
       expect(config.generalOverrideKeys, {
@@ -608,13 +737,13 @@ void main() {
 
     test('drops every field the update params patch live', () {
       final live = defaultClashConfig.copyWith(
-        tun: const Tun(enable: true, stack: TunStack.gvisor, mtu: 1500),
+        tun: const Tun(enable: false, stack: TunStack.gvisor, mtu: 1500),
         mixedPort: 8899,
         allowLan: true,
         findProcessMode: FindProcessMode.always,
         mode: Mode.global,
         logLevel: LogLevel.debug,
-        ipv6: true,
+        ipv6: false,
         tcpConcurrent: false,
         externalController: ExternalControllerStatus.open,
         secret: 'secret',

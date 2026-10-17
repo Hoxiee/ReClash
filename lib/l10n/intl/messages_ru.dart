@@ -1386,6 +1386,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Нажмите сочетание клавиш",
     ),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Запрет дубликатов подписок",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Отклонять ссылку подписки, которую уже использует существующий профиль",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
     "previousMatch": MessageLookupByLibrary.simpleMessage(
       "Предыдущее совпадение",
@@ -1404,6 +1410,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Профиль изменён. Отключить автообновление?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Профиль с этим URL подписки уже добавлен",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Введите название профиля",

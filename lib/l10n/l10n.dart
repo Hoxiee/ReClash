@@ -7935,6 +7935,36 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Prevent duplicate subscriptions`
+  String get preventDuplicateProfiles {
+    return Intl.message(
+      'Prevent duplicate subscriptions',
+      name: 'preventDuplicateProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refuse a subscription link that an existing profile already uses`
+  String get preventDuplicateProfilesDesc {
+    return Intl.message(
+      'Refuse a subscription link that an existing profile already uses',
+      name: 'preventDuplicateProfilesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A profile with this subscription URL already exists`
+  String get profileImportDuplicate {
+    return Intl.message(
+      'A profile with this subscription URL already exists',
+      name: 'profileImportDuplicate',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

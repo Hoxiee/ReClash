@@ -1325,6 +1325,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Press a key combination",
     ),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Prevent duplicate subscriptions",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "Refuse a subscription link that an existing profile already uses",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("Preview"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("Previous match"),
     "privateKey": MessageLookupByLibrary.simpleMessage("Private key"),
@@ -1343,6 +1349,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "The profile has been modified. Turn off auto update?",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "A profile with this subscription URL already exists",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please enter the profile name",
