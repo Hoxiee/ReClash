@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "Prevent duplicate subscriptions",
+  "preventDuplicateProfilesDesc": "Refuse a subscription link that an existing profile already uses",
+  "profileImportDuplicate": "A profile with this subscription URL already exists"
+}

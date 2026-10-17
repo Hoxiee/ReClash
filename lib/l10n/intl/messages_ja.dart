@@ -1132,6 +1132,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "preSharedKey": MessageLookupByLibrary.simpleMessage("事前共有鍵"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーの組み合わせを押してください"),
+    "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの重複を防ぐ",
+    ),
+    "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(
+      "既存のプロファイルが使用している購読リンクを拒否します",
+    ),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
     "previousMatch": MessageLookupByLibrary.simpleMessage("前の一致"),
     "privateKey": MessageLookupByLibrary.simpleMessage("秘密鍵"),
@@ -1146,6 +1152,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileExpiresIn": m60,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "プロファイルが変更されています。自動更新を無効にしますか？",
+    ),
+    "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションURLのプロファイルは既に存在します",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "プロファイル名を入力してください",

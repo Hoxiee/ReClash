@@ -951,5 +951,8 @@
   "creditByeDpi": "ByeDPI — l'outil de contournement DPI",
   "license": "Licence",
   "licenses": "Licences",
-  "licensesDesc": "Paquets inclus dans l'application"
+  "licensesDesc": "Paquets inclus dans l'application",
+  "preventDuplicateProfiles": "Empêcher les abonnements en double",
+  "preventDuplicateProfilesDesc": "Refuser un lien d'abonnement déjà utilisé par un profil existant",
+  "profileImportDuplicate": "Un profil avec cette URL d'abonnement existe déjà"
 }

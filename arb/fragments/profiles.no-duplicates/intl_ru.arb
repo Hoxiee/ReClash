@@ -1,0 +1,5 @@
+{
+  "preventDuplicateProfiles": "Запрет дубликатов подписок",
+  "preventDuplicateProfilesDesc": "Отклонять ссылку подписки, которую уже использует существующий профиль",
+  "profileImportDuplicate": "Профиль с этим URL подписки уже добавлен"
+}
