@@ -939,5 +939,17 @@
   "customImportDroppedSubRules": "{count, plural, one{Пользовательские профили не поддерживают подправила, поэтому отброшено {label} правило SUB-RULE} few{Пользовательские профили не поддерживают подправила, поэтому отброшено {label} правила SUB-RULE} many{Пользовательские профили не поддерживают подправила, поэтому отброшено {label} правил SUB-RULE} other{Пользовательские профили не поддерживают подправила, поэтому отброшено {label} правила SUB-RULE}}",
   "autoInclude": "Автоматическое включение",
   "allReferencedProxies": "Все используемые прокси",
-  "allReferencedProxyProviders": "Все используемые провайдеры прокси"
+  "allReferencedProxyProviders": "Все используемые провайдеры прокси",
+  "madeBy": "Автор",
+  "roleAuthor": "Автор и мейнтейнер",
+  "gratitude": "Благодарности",
+  "gratitudeDesc": "ReClash существует благодаря их работе",
+  "creditFlClash": "FlClash — клиент, на котором всё построено",
+  "creditFlClashX": "FlClashX — функции и идеи для работы с провайдерами",
+  "creditFlClashPatched": "FlClash-Patched — дополнительные функции",
+  "creditMihomo": "mihomo — прокси-ядро",
+  "creditByeDpi": "ByeDPI — инструмент обхода DPI",
+  "license": "Лицензия",
+  "licenses": "Лицензии",
+  "licensesDesc": "Пакеты, входящие в приложение"
 }

@@ -1,0 +1,14 @@
+{
+  "madeBy": "Réalisé par",
+  "roleAuthor": "Auteur et mainteneur",
+  "gratitude": "Remerciements",
+  "gratitudeDesc": "ReClash existe grâce à leur travail",
+  "creditFlClash": "FlClash — le client sur lequel ceci est construit",
+  "creditFlClashX": "FlClashX — fonctions et idées pour les fournisseurs",
+  "creditFlClashPatched": "FlClash-Patched — fonctions supplémentaires",
+  "creditMihomo": "mihomo — le cœur du proxy",
+  "creditByeDpi": "ByeDPI — l'outil de contournement DPI",
+  "license": "Licence",
+  "licenses": "Licences",
+  "licensesDesc": "Paquets inclus dans l'application"
+}

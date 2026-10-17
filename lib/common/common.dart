@@ -23,6 +23,7 @@ export 'javascript.dart';
 export 'keyboard.dart';
 export 'l10n_labels.dart';
 export 'layout.dart';
+export 'licenses.dart';
 export 'link.dart';
 export 'link_receiver.dart';
 export 'linux_elevation.dart';

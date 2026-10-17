@@ -939,5 +939,17 @@
   "customImportDroppedSubRules": "{count, plural, other{カスタム設定はサブルールに対応していないため、SUB-RULE ルール {label} 件を破棄しました}}",
   "autoInclude": "自動で含める",
   "allReferencedProxies": "参照されているすべてのプロキシ",
-  "allReferencedProxyProviders": "参照されているすべてのプロキシプロバイダー"
+  "allReferencedProxyProviders": "参照されているすべてのプロキシプロバイダー",
+  "madeBy": "制作",
+  "roleAuthor": "作者・メンテナー",
+  "gratitude": "感謝",
+  "gratitudeDesc": "彼らの成果の上に ReClash があります",
+  "creditFlClash": "FlClash — 本アプリの基盤クライアント",
+  "creditFlClashX": "FlClashX — プロバイダ機能とアイデア",
+  "creditFlClashPatched": "FlClash-Patched — 追加機能",
+  "creditMihomo": "mihomo — プロキシコア",
+  "creditByeDpi": "ByeDPI — DPI 回避ツール",
+  "license": "ライセンス",
+  "licenses": "ライセンス一覧",
+  "licensesDesc": "アプリに同棑されているパッケージ"
 }

@@ -538,6 +538,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — инструмент обхода DPI",
+    ),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — клиент, на котором всё построено",
+    ),
+    "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
+      "FlClash-Patched — дополнительные функции",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — функции и идеи для работы с провайдерами",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage(
+      "mihomo — прокси-ядро",
+    ),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Содержит кнопку запуска, удалить нельзя",
     ),
@@ -889,6 +904,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Перейти к настройке скрипта",
     ),
+    "gratitude": MessageLookupByLibrary.simpleMessage("Благодарности"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash существует благодаря их работе",
+    ),
     "grid": MessageLookupByLibrary.simpleMessage("Сетка"),
     "groupCount": m29,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("групп"),
@@ -1110,6 +1129,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "В прошлый раз приложение неожиданно завершилось во время запуска. Автоматическая настройка для этого запуска пропущена; вы можете запустить её вручную.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
+    "license": MessageLookupByLibrary.simpleMessage("Лицензия"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Лицензии"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Пакеты, входящие в приложение",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Светлая"),
     "lineIssueTip": m41,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Перенос строк"),
@@ -1164,6 +1188,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Снятие ограничения loopback для UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Свободный"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("Автор"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Учитывать регистр"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage(
       "Сопоставлять IP источника",
@@ -1505,6 +1530,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Результат"),
     "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("Автор и мейнтейнер"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Адреса маршрутов"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Исключённые адреса маршрутов",

@@ -558,6 +558,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Crear"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Fecha de creación"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — la herramienta anti-DPI",
+    ),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — el cliente sobre el que está construido",
+    ),
+    "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
+      "FlClash-Patched — funciones adicionales",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — funciones e ideas para proveedores",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage(
+      "mihomo — el núcleo del proxy",
+    ),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Contiene el botón de inicio y no se puede quitar",
     ),
@@ -907,6 +922,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Ir a la configuración del script",
     ),
+    "gratitude": MessageLookupByLibrary.simpleMessage("Agradecimientos"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash existe gracias a su trabajo",
+    ),
     "grid": MessageLookupByLibrary.simpleMessage("Cuadrícula"),
     "groupCount": m29,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("grupos"),
@@ -1144,6 +1163,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "La última vez, la app se cerró inesperadamente mientras se iniciaba. En este inicio se ha omitido la configuración automática; puedes iniciarla manualmente para reintentarlo.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Diseño"),
+    "license": MessageLookupByLibrary.simpleMessage("Licencia"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Licencias"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Paquetes incluidos en la aplicación",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Claro"),
     "lineIssueTip": m41,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Ajuste de línea"),
@@ -1198,6 +1222,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Exención de loopback de UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Amplio"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("Hecho por"),
     "matchCase": MessageLookupByLibrary.simpleMessage(
       "Coincidir mayúsculas y minúsculas",
     ),
@@ -1545,6 +1570,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Resultado"),
     "retry": MessageLookupByLibrary.simpleMessage("Reintentar"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("Autor y mantenedor"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Direcciones de ruta"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Direcciones excluidas de la ruta",

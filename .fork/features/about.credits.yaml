@@ -1,0 +1,11 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  attribution: About credits retain upstream project attribution and bundled license disclosures.
+  localization: About messages are owned by feature fragments and remain translated.
+watch: [assets/data/licenses/**, 'assets/images/avatar/**', lib/views/about.dart, lib/common/licenses.dart, lib/bootstrap.dart, lib/common/common.dart, arb/fragments/about.credits/**, arb/intl_*.arb, lib/l10n/**, test/views/about_test.dart]
+checks:
+  identity: [attribution]
+  localization: [localization]
