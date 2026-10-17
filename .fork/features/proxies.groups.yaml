@@ -1,0 +1,12 @@
+v: 1
+kind: fix
+state: active
+risk: routine
+must:
+  refresh: A superseded proxy-group refresh cannot overwrite newer profile or runtime state.
+  dashboard: Opening a dashboard group selects that group in the proxy picker and preserves independent page search.
+watch: [lib/providers/actions/proxies.dart, lib/views/dashboard/widgets/proxy_groups.dart, lib/views/proxies/list.dart, test/providers/proxies_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
+checks:
+  proxies-groups: [refresh, dashboard]
+deps: [core.integration]
+drop: Upstream prevents stale group results from overwriting the current runtime state.

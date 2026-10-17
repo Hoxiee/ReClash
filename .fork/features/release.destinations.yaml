@@ -1,0 +1,13 @@
+v: 1
+kind: identity
+state: active
+risk: critical
+must:
+  repository: Runtime updates, issue templates and release jobs target Hoxiee/ReClash while upstream credits remain intact.
+  markers: ReClash changelog envelope markers and the existing release parser remain mutually compatible.
+  ownership: Vendor integration preserves our changelog files and version field without freezing dependency updates.
+watch: ['.github/**', release_telegram.py, tool/build_site.sh, tool/render_site.mjs, tool/changelog.dart, 'tool/src/changelog/**', 'site/**', lib/common/changelog.dart, lib/common/package.dart, 'test/tool/changelog*', test/common/changelog_test.dart]
+checks:
+  identity: [repository]
+  releases: [markers]
+  fork-tests: [ownership]

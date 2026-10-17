@@ -1,0 +1,14 @@
+v: 1
+kind: integration
+state: active
+risk: critical
+must:
+  latest-intent: Desktop stop or close supersedes pending start and releases its lease.
+  protocol: Structured requests and events remain compatible with the shared protocol fixtures.
+  source: The ReClash engine fork and pin are changed only after explicit compatibility review.
+  controller: Typed controller requests retain validation and delegation behavior.
+watch: ['core/**', '.gitmodules', 'lib/core/**', 'android/service/**', 'plugins/rust_api/**', test/providers/state_derived_test.dart, test/core/controller_test.dart, lib/common/http.dart, 'test/models/*override_test.dart', test/models/tun_test.dart, test/providers/custom_state_test.dart]
+checks:
+  core-contracts: [latest-intent, protocol, controller]
+  fork-tests: [source]
+drop: An approved upstream engine supplies all required ReClash hooks.

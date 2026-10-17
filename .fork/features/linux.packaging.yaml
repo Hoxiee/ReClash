@@ -1,0 +1,9 @@
+v: 1
+kind: integration
+state: active
+risk: routine
+must:
+  package: Linux package output and version metadata remain internally consistent.
+watch: ['tool/linux_package.dart', 'linux/**', 'setup.dart', 'distribute_options.yaml', plugins/tray/linux/CMakeLists.txt, tool/src/release_version.dart, test/setup_test.dart, test/tool/packaging_config_test.dart, test/tool/release_version_test.dart]
+checks:
+  packaging: [package]

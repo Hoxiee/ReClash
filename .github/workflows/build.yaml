@@ -54,8 +54,15 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check localization sources and generated output
+        run: |
+          dart run tool/assemble_l10n.dart --check
+          dart run intl_utils:generate
+          git diff --exit-code -- 'arb/intl_*.arb' lib/l10n
+          test -z "$(git ls-files --others --exclude-standard -- 'arb/intl_*.arb' lib/l10n)"
+
       - name: Check format
-        run: dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
+        run: dart tool/check_format.dart
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos

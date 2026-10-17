@@ -1,0 +1,12 @@
+v: 1
+kind: integration
+state: active
+risk: critical
+must:
+  termination: Window close, quit and termination signals delegate to system actions.
+  geometry: Only current normal-window geometry is persisted; stale captures cannot overwrite newer geometry.
+  applied-state: Window blur and caption state mirror platform-confirmed results.
+watch: [lib/manager/window_manager.dart, lib/common/window.dart, test/manager/window_manager_test.dart, test/manager/window_header_test.dart, test/common/window_test.dart, test/common/window_visibility_test.dart]
+checks:
+  desktop-window: [termination, geometry, applied-state]
+deps: [core.integration]

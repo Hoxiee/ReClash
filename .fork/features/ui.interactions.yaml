@@ -1,0 +1,14 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  replay: Empty-state feedback retains its tested replay behavior.
+  rail: Sidebar selection and navigation retain their tested interactions.
+  tooltip: Hover hints wait for the shared delay and pending hints cannot appear after their control is disposed.
+  text-input: Only secret fields request password-style keyboards; non-secret fields retain suggestions and clipboard input.
+watch: ['lib/ui/**', 'lib/widgets/**', 'lib/features/form/**', 'test/widgets/**', lib/manager/app_manager.dart, lib/manager/theme_manager.dart, lib/pages/error.dart, lib/views/access.dart, lib/views/profiles/edit.dart, test/common/dialog_test.dart, test/lint/text_field_suggestions_test.dart, test/views/access_test.dart]
+checks:
+  interactions: [replay, rail]
+  tooltip: [tooltip]
+  tests: [text-input]

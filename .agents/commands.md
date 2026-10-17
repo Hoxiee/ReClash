@@ -77,8 +77,8 @@ Use `flutter test`, not `dart test`, because models pull in Flutter types.
 
 A development build takes over the host exactly like a release: it creates the TUN device, sets the system proxy, on
 macOS rewrites the system DNS, registers itself as the login item, and on Windows and Linux starts its Core through the
-shared privileged Helper, which stops the Core an installed FlClash is running. Only the data directory is kept apart,
-and only for some builds: a macOS debug build is `com.follow.clash.debug` and an Android debug build `com.follow.clash.dev`,
+shared privileged Helper, which stops the Core an installed ReClash is running. Only the data directory is kept apart,
+and only for some builds: a macOS debug build is `com.reclash.debug` and an Android debug build `com.reclash.dev`,
 while profile and release builds, and every build on Windows and Linux, share the directory and preferences of the
 installed app. Safe mode keeps all of the host changes off and never opens the Core's listeners or external
 controller, so it does not compete with the installed app for the mixed, DNS, RESTful API and other loopback ports:
@@ -121,6 +121,17 @@ Generated output paths, configured in `build.yaml`:
 - `lib/providers/generated/*.g.dart`.
 - `lib/database/generated/*.g.dart`.
 - `lib/ui/generated/*.freezed.dart`.
+
+Localization uses feature-owned ARB fragments. After editing a fragment, assemble the flat ARB inputs before regenerating
+localization code:
+
+```bash
+dart run tool/assemble_l10n.dart
+dart run intl_utils:generate
+dart run tool/assemble_l10n.dart --check
+```
+
+`arb/intl_<locale>.arb` is generated output. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
 
 Tray and Windows app icons are generated, not hand-edited. `assets_source/images/icon/*.svg` is
 the source of truth; the script needs `rsvg-convert` (librsvg) on `PATH`:
@@ -248,7 +259,7 @@ The changelog is derived from Conventional Commits by `tool/changelog.dart` and 
 that decide the wording.
 
 The app ships no changelog of its own. `render release` appends the released version as JSON inside an HTML comment
-(`<!-- flclash:changelog:json … -->`), so the release body GitHub already returns to `checkForUpdate` carries the
+(`<!-- reclash:changelog:json … -->`), so the release body GitHub already returns to `checkForUpdate` carries the
 notes shown in the update dialog. `parseReleaseChangelog` reads that block and falls back to the English
 bullets when a release predates it.
 
@@ -389,3 +400,35 @@ evict everything `dev` had saved. Release builds therefore start cold; branch ru
 bash tool/worktrees.sh list       # every worktree with owner tool and dirty/clean state
 bash tool/worktrees.sh prune      # remove clean worktrees; add --force to drop dirty ones too
 ```
+
+## Feature Development Worktrees
+
+Use one isolated worktree per active feature; keep parallel agents off the same branch/index:
+
+```bash
+git worktree add ../ReClash-tools -b feature/tools-workspace dev
+bash tool/worktrees.sh list
+```
+
+Keep private work as one amendable feature commit. When it is ready, return to the integration checkout and fast-forward
+it; then explicitly push to ReClash's remote and remove the clean worktree/branch:
+
+```bash
+git switch dev
+git merge --ff-only feature/tools-workspace
+git push origin dev
+git worktree remove ../ReClash-tools
+git branch -d feature/tools-workspace
+```
+
+For a pushed review branch with multiple commits, squash-merge it instead of rewriting shared history. Never use bare
+`git push` on this checkout: `dev` can track `flclash/dev`.
+
+## Fork Maintenance
+
+- `dart tool/check_format.dart`: verify handwritten source formatting, excluding compiler-owned generated files.
+
+- `dart run tool/fork.dart check`: validate feature contracts and show coverage gaps.
+- `dart run tool/fork.dart context --paths <path>`: bounded intent packet; use `--changed` or `--staged` for existing edits.
+- `dart run tool/fork.dart --json bootstrap --inspect --source <local-oid>`: read-only baseline audit.
+- Vendor preparation/verification/acceptance and authority: [fork-maintenance.md](fork-maintenance.md).

@@ -6,6 +6,7 @@ repos:
         entry: dart format
         language: system
         files: \.dart$
+        exclude: '(^|/)(build|generated|upstream_l10n)/|(^|/)lib/l10n/intl/|(^|/)lib/l10n/l10n\.dart$|\.g\.dart$|\.freezed\.dart$|(^|/)frb_generated[^/]*\.dart$|(^|/)open_container\.dart$'
         stages: [pre-commit]
       - id: comment-density
         name: comment density
