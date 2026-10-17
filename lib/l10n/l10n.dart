@@ -7965,6 +7965,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Read to the end`
+  String get disclaimerReadToEnd {
+    return Intl.message(
+      'Read to the end',
+      name: 'disclaimerReadToEnd',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

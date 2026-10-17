@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -21,27 +24,28 @@ class ThemeView extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return BaseScaffold(
       title: appLocalizations.theme,
-      body: ListView(
-        padding: EdgeInsets.only(top: context.appBarInset, bottom: 32),
-        children: const [
-          ThemeLivePreview(),
-          SizedBox(height: 16),
-          _ThemeModeItem(),
-          SizedBox(height: 16),
-          _PureBlackItem(),
-          SizedBox(height: 16),
-          _PrimaryColorItem(),
-          SizedBox(height: 16),
-          _NavigationBarItem(),
-          SizedBox(height: 16),
-          _TabAnimationItem(),
-          SizedBox(height: 16),
-          _LiquidGlassItem(),
-          SizedBox(height: 16),
-          _SidebarBlurItem(),
-          _FontFamilyItem(),
-          SizedBox(height: 16),
-          _TextScaleFactorItem(),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
+          const SliverToBoxAdapter(child: ThemeLivePreview()),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _ThemeModeItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _PureBlackItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _PrimaryColorItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _NavigationBarItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _TabAnimationItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _LiquidGlassItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _SidebarBlurItem(),
+          const _FontFamilyItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _TextScaleFactorItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
     );
@@ -69,36 +73,53 @@ class _ThemeModeItem extends ConsumerWidget {
       floatingBar: floatingBar,
       liquidGlass: liquidGlass,
     );
-    return PreviewChoiceGroup<ThemeMode>(
-      info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
-      value: themeMode,
-      choices: [
-        PreviewChoice(
-          value: ThemeMode.system,
-          label: appLocalizations.auto,
-          pictogram: MiniScreenThumb(
-            screen: MiniSplitScreen(light: light, dark: dark),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[0],
+        child: PreviewChoiceGroup<ThemeMode>(
+          info: Info(
+            label: themeToolSettings[0].title(appLocalizations),
+            glyph: AppGlyphs.sun,
           ),
+          value: themeMode,
+          choices: [
+            PreviewChoice(
+              value: ThemeMode.system,
+              label: appLocalizations.auto,
+              pictogram: MiniScreenThumb(
+                screen: MiniSplitScreen(light: light, dark: dark),
+              ),
+            ),
+            PreviewChoice(
+              value: ThemeMode.light,
+              label: appLocalizations.light,
+              pictogram: MiniScreenThumb(screen: light),
+            ),
+            PreviewChoice(
+              value: ThemeMode.dark,
+              label: appLocalizations.dark,
+              pictogram: MiniScreenThumb(screen: dark),
+            ),
+          ],
+          onChanged: (value) {
+            ref
+                .read(themeSettingProvider.notifier)
+                .update((state) => state.copyWith(themeMode: value));
+          },
         ),
-        PreviewChoice(
-          value: ThemeMode.light,
-          label: appLocalizations.light,
-          pictogram: MiniScreenThumb(screen: light),
-        ),
-        PreviewChoice(
-          value: ThemeMode.dark,
-          label: appLocalizations.dark,
-          pictogram: MiniScreenThumb(screen: dark),
-        ),
-      ],
-      onChanged: (value) {
-        ref
-            .read(themeSettingProvider.notifier)
-            .update((state) => state.copyWith(themeMode: value));
-      },
+      ),
     );
   }
 }
+
+const double _headerButtonHeight = 32;
+
+final _headerButtonStyle = FilledButton.styleFrom(
+  minimumSize: const Size(0, _headerButtonHeight),
+  padding: const EdgeInsets.symmetric(horizontal: 14),
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  visualDensity: VisualDensity.standard,
+);
 
 class _PrimaryColorItem extends ConsumerWidget {
   const _PrimaryColorItem();
@@ -238,54 +259,59 @@ class _PrimaryColorItem extends ConsumerWidget {
         ),
       ),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InfoHeader(
-          info: Info(
-            label: appLocalizations.themeColor,
-            glyph: AppGlyphs.palette,
-          ),
-          actions: [
-            if (!themeColors.isDefault)
-              _ResetButton(onPressed: () => _handleReset(context, ref)),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              _ColorSwatches(
-                colors: [null, ...themeColors.primaryColors],
-                selected: themeColors.primaryColor,
-                onSelect: (color) => _update(
-                  ref,
-                  (state) => state.copyWith(primaryColor: color),
-                ),
-                onEdit: (color) => _handleEdit(context, ref, color),
-                onDelete: (color) => _handleDelete(context, ref, color),
-                onAdd: () => _handleAdd(context, ref),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[1],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InfoHeader(
+              info: Info(
+                label: appLocalizations.themeColor,
+                glyph: AppGlyphs.palette,
               ),
-              generateSection(
-                items: [
-                  ListItem<ColorStyle>.options(
-                    title: Text(appLocalizations.colorStyle),
-                    options: ColorStyle.values,
-                    value: themeColors.colorStyle,
-                    textBuilder: (style) => style.label,
-                    onChanged: (style) => _update(
+              actions: [
+                if (!themeColors.isDefault)
+                  _ResetButton(onPressed: () => _handleReset(context, ref)),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 8,
+                children: [
+                  _ColorSwatches(
+                    colors: [null, ...themeColors.primaryColors],
+                    selected: themeColors.primaryColor,
+                    onSelect: (color) => _update(
                       ref,
-                      (state) => state.copyWith(colorStyle: style),
+                      (state) => state.copyWith(primaryColor: color),
                     ),
+                    onEdit: (color) => _handleEdit(context, ref, color),
+                    onDelete: (color) => _handleDelete(context, ref, color),
+                    onAdd: () => _handleAdd(context, ref),
+                  ),
+                  generateSection(
+                    items: [
+                      ListItem<ColorStyle>.options(
+                        title: Text(appLocalizations.colorStyle),
+                        options: ColorStyle.values,
+                        value: themeColors.colorStyle,
+                        textBuilder: (style) => style.label,
+                        onChanged: (style) => _update(
+                          ref,
+                          (state) => state.copyWith(colorStyle: style),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -597,29 +623,34 @@ class _PureBlackItem extends ConsumerWidget {
         liquidGlass: liquidGlass,
       ),
     );
-    return PreviewChoiceGroup<bool>(
-      info: Info(
-        label: appLocalizations.pureBlackMode,
-        glyph: AppGlyphs.pureBlack,
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[2],
+        child: PreviewChoiceGroup<bool>(
+          info: Info(
+            label: themeToolSettings[2].title(appLocalizations),
+            glyph: AppGlyphs.pureBlack,
+          ),
+          value: pureBlack,
+          choices: [
+            PreviewChoice(
+              value: false,
+              label: appLocalizations.standard,
+              pictogram: preview(false),
+            ),
+            PreviewChoice(
+              value: true,
+              label: appLocalizations.pureBlack,
+              pictogram: preview(true),
+            ),
+          ],
+          onChanged: (value) {
+            ref
+                .read(themeSettingProvider.notifier)
+                .update((state) => state.copyWith(pureBlack: value));
+          },
+        ),
       ),
-      value: pureBlack,
-      choices: [
-        PreviewChoice(
-          value: false,
-          label: appLocalizations.standard,
-          pictogram: preview(false),
-        ),
-        PreviewChoice(
-          value: true,
-          label: appLocalizations.pureBlack,
-          pictogram: preview(true),
-        ),
-      ],
-      onChanged: (value) {
-        ref
-            .read(themeSettingProvider.notifier)
-            .update((state) => state.copyWith(pureBlack: value));
-      },
     );
   }
 }
@@ -633,37 +664,47 @@ class _NavigationBarItem extends ConsumerWidget {
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
     final colorScheme = context.colorScheme;
-    return PreviewChoiceGroup<bool>(
-      info: Info(
-        label: appLocalizations.navigationBarStyle,
-        glyph: AppGlyphs.layers,
-      ),
-      value: floatingBar,
-      choices: [
-        PreviewChoice(
-          value: true,
-          label: appLocalizations.floating,
-          pictogram: MiniScreenThumb(
-            screen: MiniScreen(
-              colorScheme: colorScheme,
-              floatingBar: true,
-              liquidGlass: liquidGlass,
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[3],
+        child: PreviewChoiceGroup<bool>(
+          info: Info(
+            label: themeToolSettings[3].title(appLocalizations),
+            glyph: AppGlyphs.layers,
+          ),
+          value: floatingBar,
+          choices: [
+            PreviewChoice(
+              value: true,
+              label: appLocalizations.floating,
+              pictogram: MiniScreenThumb(
+                screen: MiniScreen(
+                  colorScheme: colorScheme,
+                  floatingBar: true,
+                  liquidGlass: liquidGlass,
+                ),
+              ),
             ),
-          ),
+            PreviewChoice(
+              value: false,
+              label: appLocalizations.docked,
+              pictogram: MiniScreenThumb(
+                screen: MiniScreen(
+                  colorScheme: colorScheme,
+                  floatingBar: false,
+                ),
+              ),
+            ),
+          ],
+          onChanged: (value) {
+            ref
+                .read(appSettingProvider.notifier)
+                .update(
+                  (state) => state.copyWith(floatingNavigationBar: value),
+                );
+          },
         ),
-        PreviewChoice(
-          value: false,
-          label: appLocalizations.docked,
-          pictogram: MiniScreenThumb(
-            screen: MiniScreen(colorScheme: colorScheme, floatingBar: false),
-          ),
-        ),
-      ],
-      onChanged: (value) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(floatingNavigationBar: value));
-      },
+      ),
     );
   }
 }
@@ -691,26 +732,34 @@ class _TabAnimationItem extends ConsumerWidget {
         tabAnimation: tabAnimation,
       ),
     );
-    return PreviewChoiceGroup<TabAnimation>(
-      info: Info(label: appLocalizations.tabAnimation, glyph: AppGlyphs.motion),
-      value: tabAnimation,
-      choices: [
-        PreviewChoice(
-          value: TabAnimation.slide,
-          label: appLocalizations.slide,
-          pictogram: switching(TabAnimation.slide),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[4],
+        child: PreviewChoiceGroup<TabAnimation>(
+          info: Info(
+            label: themeToolSettings[4].title(appLocalizations),
+            glyph: AppGlyphs.motion,
+          ),
+          value: tabAnimation,
+          choices: [
+            PreviewChoice(
+              value: TabAnimation.slide,
+              label: appLocalizations.slide,
+              pictogram: switching(TabAnimation.slide),
+            ),
+            PreviewChoice(
+              value: TabAnimation.fade,
+              label: appLocalizations.fade,
+              pictogram: switching(TabAnimation.fade),
+            ),
+          ],
+          onChanged: (value) {
+            ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(tabAnimation: value));
+          },
         ),
-        PreviewChoice(
-          value: TabAnimation.fade,
-          label: appLocalizations.fade,
-          pictogram: switching(TabAnimation.fade),
-        ),
-      ],
-      onChanged: (value) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(tabAnimation: value));
-      },
+      ),
     );
   }
 }
@@ -735,34 +784,39 @@ class _LiquidGlassItem extends ConsumerWidget {
         selected: 1,
       ),
     );
-    return PreviewChoiceGroup<LiquidGlassMode>(
-      info: Info(
-        label: appLocalizations.liquidGlass,
-        glyph: AppGlyphs.liquidGlass,
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[5],
+        child: PreviewChoiceGroup<LiquidGlassMode>(
+          info: Info(
+            label: appLocalizations.liquidGlass,
+            glyph: AppGlyphs.liquidGlass,
+          ),
+          value: mode,
+          choices: [
+            PreviewChoice(
+              value: LiquidGlassMode.none,
+              label: appLocalizations.none,
+              pictogram: preview(false),
+            ),
+            PreviewChoice(
+              value: LiquidGlassMode.standard,
+              label: appLocalizations.standard,
+              pictogram: preview(true),
+            ),
+            PreviewChoice(
+              value: LiquidGlassMode.ultra,
+              label: appLocalizations.ultra,
+              pictogram: preview(true),
+            ),
+          ],
+          onChanged: (value) {
+            ref
+                .read(themeSettingProvider.notifier)
+                .update((state) => state.copyWith(liquidGlass: value));
+          },
+        ),
       ),
-      value: mode,
-      choices: [
-        PreviewChoice(
-          value: LiquidGlassMode.none,
-          label: appLocalizations.none,
-          pictogram: preview(false),
-        ),
-        PreviewChoice(
-          value: LiquidGlassMode.standard,
-          label: appLocalizations.standard,
-          pictogram: preview(true),
-        ),
-        PreviewChoice(
-          value: LiquidGlassMode.ultra,
-          label: appLocalizations.ultra,
-          pictogram: preview(true),
-        ),
-      ],
-      onChanged: (value) {
-        ref
-            .read(themeSettingProvider.notifier)
-            .update((state) => state.copyWith(liquidGlass: value));
-      },
     );
   }
 }
@@ -773,28 +827,33 @@ class _SidebarBlurItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!feature.sidebarBlur || (!system.isMacOS && !system.isWindows)) {
-      return const SizedBox.shrink();
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
     final appLocalizations = context.appLocalizations;
     final sidebarBlur = ref.watch(
       themeSettingProvider.select((state) => state.sidebarBlur),
     );
-    return ListItem.toggle(
-      leading: const GlyphIcon(AppGlyphs.blur),
-      horizontalTitleGap: 12,
-      title: Text(
-        appLocalizations.sidebarBlur,
-        style: AppTextStyle.subheadline
-            .of(context, emphasized: true)
-            .copyWith(color: context.colorScheme.onSurfaceVariant),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[6],
+        child: ListItem.toggle(
+          leading: const GlyphIcon(AppGlyphs.blur),
+          horizontalTitleGap: 12,
+          title: Text(
+            themeToolSettings[6].title(appLocalizations),
+            style: AppTextStyle.subheadline
+                .of(context, emphasized: true)
+                .copyWith(color: context.colorScheme.onSurfaceVariant),
+          ),
+          subtitle: Text(appLocalizations.sidebarBlurDesc),
+          value: sidebarBlur,
+          onChanged: (value) {
+            ref
+                .read(themeSettingProvider.notifier)
+                .update((state) => state.copyWith(sidebarBlur: value));
+          },
+        ),
       ),
-      subtitle: Text(appLocalizations.sidebarBlurDesc),
-      value: sidebarBlur,
-      onChanged: (value) {
-        ref
-            .read(themeSettingProvider.notifier)
-            .update((state) => state.copyWith(sidebarBlur: value));
-      },
     );
   }
 }
@@ -848,29 +907,37 @@ class _FontFamilyItem extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(customBorder: AppShape.lg, onTap: onTap, child: preview),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InfoHeader(
-          info: Info(label: appLocalizations.fontFamily, glyph: AppGlyphs.font),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[7],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InfoHeader(
+              info: Info(
+                label: themeToolSettings[7].title(appLocalizations),
+                glyph: AppGlyphs.font,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: context.isMobileView
+                  ? OpenContainer<void>(
+                      closedShape: AppShape.lg,
+                      closedColor: cardColor,
+                      closedBuilder: (_, open) => card(open),
+                      openBuilder: (_, _) => const FontFamilyView(),
+                    )
+                  : card(
+                      () => showSheet<void>(
+                        context: context,
+                        builder: (_) => const FontFamilyView(),
+                      ),
+                    ),
+            ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: context.isMobileView
-              ? OpenContainer<void>(
-                  closedShape: AppShape.lg,
-                  closedColor: cardColor,
-                  closedBuilder: (_, open) => card(open),
-                  openBuilder: (_, _) => const FontFamilyView(),
-                )
-              : card(
-                  () => showSheet<void>(
-                    context: context,
-                    builder: (_) => const FontFamilyView(),
-                  ),
-                ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -910,155 +977,164 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
     final level = context.raisedSurfaceLevel;
     final divisions =
         ((maxTextScale - minTextScale) / _TextScaleFactorItem._step).round();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InfoHeader(
-          info: Info(
-            label: appLocalizations.textScale,
-            glyph: AppGlyphs.textSize,
-          ),
-          actions: [
-            if (textScale.enable && textScale.scale != 1)
-              _ResetButton(
-                onPressed: () => _update((state) => state.copyWith(scale: 1)),
+    return SliverToBoxAdapter(
+      child: SettingTarget(
+        spec: themeToolSettings[8],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InfoHeader(
+              info: Info(
+                label: appLocalizations.textScale,
+                glyph: AppGlyphs.textSize,
               ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Column(
-            spacing: 8,
-            children: [
-              SegmentedControl<bool>(
-                segments: [
-                  (false, appLocalizations.followSystem),
-                  (true, appLocalizations.custom),
-                ],
-                value: textScale.enable,
-                onChanged: (value) =>
-                    _update((state) => state.copyWith(enable: value)),
-              ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                decoration: ShapeDecoration(
-                  color: level.colorOf(colorScheme),
-                  shape: AppShape.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 12,
+              actions: [
+                if (textScale.enable && textScale.scale != 1)
+                  _ResetButton(
+                    onPressed: () =>
+                        _update((state) => state.copyWith(scale: 1)),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                spacing: 8,
+                children: [
+                  SegmentedControl<bool>(
+                    segments: [
+                      (false, appLocalizations.followSystem),
+                      (true, appLocalizations.custom),
+                    ],
+                    value: textScale.enable,
+                    onChanged: (value) =>
+                        _update((state) => state.copyWith(enable: value)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    decoration: ShapeDecoration(
+                      color: level.colorOf(colorScheme),
+                      shape: AppShape.lg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: AnimatedSize(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            alignment: Alignment.topLeft,
-                            child: MediaQuery(
-                              data: MediaQuery.of(
-                                context,
-                              ).copyWith(textScaler: TextScaler.linear(scale)),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 4,
-                                children: [
-                                  Text(
-                                    'Aa',
-                                    style: AppTextStyle.title3.of(context),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 12,
+                          children: [
+                            Expanded(
+                              child: AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment.topLeft,
+                                child: MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(
+                                    textScaler: TextScaler.linear(scale),
                                   ),
-                                  Text(
-                                    appLocalizations.textScalePreview,
-                                    style: AppTextStyle.subheadline
-                                        .of(context)
-                                        .copyWith(
-                                          color: colorScheme.onSurfaceVariant,
-                                        ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        'Aa',
+                                        style: AppTextStyle.title3.of(context),
+                                      ),
+                                      Text(
+                                        appLocalizations.textScalePreview,
+                                        style: AppTextStyle.subheadline
+                                            .of(context)
+                                            .copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: ShapeDecoration(
+                                color: level.next.colorOf(colorScheme),
+                                shape: AppShape.full,
+                              ),
+                              child: Text(
+                                percent,
+                                style: AppTextStyle.subheadline
+                                    .of(context, emphasized: true)
+                                    .copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: ShapeDecoration(
-                            color: level.next.colorOf(colorScheme),
-                            shape: AppShape.full,
-                          ),
-                          child: Text(
-                            percent,
-                            style: AppTextStyle.subheadline
-                                .of(context, emphasized: true)
-                                .copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
+                        const SizedBox(height: 8),
+                        MediaQuery.withNoTextScaling(
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              ExcludeSemantics(
+                                child: Text(
+                                  'A',
+                                  style: AppTextStyle.footnote
+                                      .of(context)
+                                      .copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
+                              ),
+                              Expanded(
+                                child: SliderTheme(
+                                  data: SliderDefaultsM3(context),
+                                  child: Slider(
+                                    padding: EdgeInsets.zero,
+                                    min: minTextScale,
+                                    max: maxTextScale,
+                                    divisions: divisions,
+                                    value: scale,
+                                    label: percent,
+                                    onChanged: textScale.enable
+                                        ? (value) =>
+                                              setState(() => _draft = value)
+                                        : null,
+                                    onChangeEnd: (value) => _update(
+                                      (state) => state.copyWith(scale: value),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ExcludeSemantics(
+                                child: Text(
+                                  'A',
+                                  style: AppTextStyle.title2
+                                      .of(context)
+                                      .copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    MediaQuery.withNoTextScaling(
-                      child: Row(
-                        spacing: 12,
-                        children: [
-                          ExcludeSemantics(
-                            child: Text(
-                              'A',
-                              style: AppTextStyle.footnote
-                                  .of(context)
-                                  .copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                          Expanded(
-                            child: SliderTheme(
-                              data: SliderDefaultsM3(context),
-                              child: Slider(
-                                padding: EdgeInsets.zero,
-                                min: minTextScale,
-                                max: maxTextScale,
-                                divisions: divisions,
-                                value: scale,
-                                label: percent,
-                                onChanged: textScale.enable
-                                    ? (value) => setState(() => _draft = value)
-                                    : null,
-                                onChangeEnd: (value) => _update(
-                                  (state) => state.copyWith(scale: value),
-                                ),
-                              ),
-                            ),
-                          ),
-                          ExcludeSemantics(
-                            child: Text(
-                              'A',
-                              style: AppTextStyle.title2
-                                  .of(context)
-                                  .copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -1207,3 +1283,61 @@ class _CustomColorPreview extends ConsumerWidget {
     );
   }
 }
+
+final themeToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'theme.themeMode',
+    page: ToolPage.theme,
+    title: (l) => l.themeMode,
+    keywords: ['themeMode'],
+  ),
+  SettingSpec(
+    id: 'theme.themeColor',
+    page: ToolPage.theme,
+    title: (l) => l.themeColor,
+    keywords: ['themeColor'],
+  ),
+  SettingSpec(
+    id: 'theme.pureBlackMode',
+    page: ToolPage.theme,
+    title: (l) => l.pureBlackMode,
+    keywords: ['pureBlackMode'],
+  ),
+  SettingSpec(
+    id: 'theme.navigationBarStyle',
+    page: ToolPage.theme,
+    title: (l) => l.navigationBarStyle,
+    keywords: ['navigationBarStyle'],
+  ),
+  SettingSpec(
+    id: 'theme.tabAnimation',
+    page: ToolPage.theme,
+    title: (l) => l.tabAnimation,
+    keywords: ['tabAnimation'],
+  ),
+  SettingSpec(
+    id: 'theme.liquidGlass',
+    page: ToolPage.theme,
+    title: (l) => l.liquidGlass,
+    keywords: ['liquidGlass'],
+  ),
+  SettingSpec(
+    id: 'theme.sidebarBlur',
+    page: ToolPage.theme,
+    title: (l) => l.sidebarBlur,
+    keywords: ['sidebarBlur'],
+    condition: SettingCondition.sidebarBlur,
+  ),
+  SettingSpec(
+    id: 'theme.fontFamily',
+    page: ToolPage.theme,
+    title: (l) => l.fontFamily,
+    keywords: ['fontFamily'],
+  ),
+  SettingSpec(
+    id: 'theme.textScale',
+    page: ToolPage.theme,
+    title: (l) => l.textScale,
+    keywords: ['textScale'],
+  ),
+];

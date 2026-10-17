@@ -1,3 +1,5 @@
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
@@ -372,6 +374,8 @@ abstract class OverrideSpec<K extends OverrideKey, M> {
 
   OverrideField<M> fieldOf(K key);
 
+  SettingSpec? settingOf(K key) => null;
+
   /// Also resets the values of [keys], so a profile with no keys is untouched.
   OverrideState<K, M> withoutKeys(OverrideState<K, M> state, Set<K> keys) {
     var model = state.model;
@@ -581,41 +585,63 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final keys = ref.watch(spec.target.select((state) => state.keys));
     final entries = spec.values.where(keys.contains);
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ).copyWith(top: context.contentTopPadding, bottom: 16),
-      children: [
-        if (spec.target.issues case final issues?)
-          CustomIssuesBanner(issues: ref.watch(issues)),
-        AnimatedEntries(
+    return SettingsPageScroll(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+        ).copyWith(top: context.contentTopPadding, bottom: 16),
+        child: Column(
           children: [
-            for (final (title, keys) in spec.sectionsOf(
-              appLocalizations,
-              entries,
-            ))
-              KeyedSubtree(
-                key: ValueKey(title),
-                child: generateAnimatedSection(
-                  title: title,
-                  footer: spec.footerOf(keys, appLocalizations),
-                  items: [
-                    for (final key in keys)
-                      OverrideEntry(
-                        key: ValueKey(key),
-                        spec: spec,
-                        overrideKey: key,
-                      ),
-                  ],
-                ),
+            if (spec.target.issues case final issues?)
+              CustomIssuesBanner(issues: ref.watch(issues)),
+            AnimatedEntries(
+              children: [
+                for (final (title, keys) in spec.sectionsOf(
+                  appLocalizations,
+                  entries,
+                ))
+                  KeyedSubtree(
+                    key: ValueKey(title),
+                    child: generateAnimatedSection(
+                      title: title,
+                      footer: spec.footerOf(keys, appLocalizations),
+                      items: [
+                        for (final key in keys)
+                          KeyedSubtree(
+                            key: ValueKey(key),
+                            child: _settingTarget(
+                              spec.settingOf(key),
+                              spec
+                                  .fieldOf(key)
+                                  .build(
+                                    spec.fieldOf(key) is ValueOverrideField &&
+                                            spec.target.emptyCancels
+                                        ? _ListedValue(spec, key)
+                                        : spec.target,
+                                    title:
+                                        spec.settingOf(key)?.title ??
+                                        (l) => spec.label(key, l),
+                                    leading: _RemoveButton(
+                                      spec: spec,
+                                      overrideKey: key,
+                                    ),
+                                  ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 16.mAp(context)),
+              child: ListFooter(
+                text: spec.target.description(appLocalizations),
               ),
+            ),
           ],
         ),
-        Padding(
-          padding: EdgeInsets.only(top: 16.mAp(context)),
-          child: ListFooter(text: spec.target.description(appLocalizations)),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -693,3 +719,6 @@ class _RemoveButton<K extends OverrideKey, M> extends ConsumerWidget {
     );
   }
 }
+
+Widget _settingTarget(SettingSpec? spec, Widget child) =>
+    spec == null ? child : SettingTarget(spec: spec, child: child);

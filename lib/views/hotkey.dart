@@ -1,3 +1,6 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -106,21 +109,25 @@ class HotKeyView extends StatelessWidget {
     final labels = ShortcutLabels.host();
     return BaseScaffold(
       title: appLocalizations.hotkeyManagement,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
-        children: [
-          const _HotKeyIntro(),
-          for (final (title, actions) in _sections(appLocalizations))
-            generateSection(
-              title: title,
-              items: [
-                for (final action in actions)
-                  _HotKeyItem(action: action, labels: labels),
-              ],
-            ),
-        ],
+      body: SettingsPageScroll(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ).copyWith(top: context.contentTopPadding, bottom: 20),
+          child: Column(
+            children: [
+              const _HotKeyIntro(),
+              for (final (title, actions) in _sections(appLocalizations))
+                generateSection(
+                  title: title,
+                  items: [
+                    for (final action in actions)
+                      _HotKeyItem(action: action, labels: labels),
+                  ],
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -171,50 +178,57 @@ class _HotKeyItem extends ConsumerWidget {
       hotKeyFailuresProvider.select((state) => state[action]),
     );
     final key = hotKeyAction.key;
-    return DecorationListItem(
-      contentPadding: EdgeInsets.only(left: 16, right: key == null ? 16 : 6),
-      leading: GlyphIcon(_glyphOf(action)),
-      title: Text(action.label, maxLines: 2, overflow: TextOverflow.ellipsis),
-      subtitle: failure == null
-          ? null
-          : Tooltip(
-              message: failure,
-              child: Text(
-                appLocalizations.hotkeyUnavailable,
-                style: AppTextStyle.footnote
-                    .of(context)
-                    .copyWith(color: colorScheme.error),
+    return SettingTarget(
+      spec: hotkeyToolSettings[action.index],
+      child: DecorationListItem(
+        contentPadding: EdgeInsets.only(left: 16, right: key == null ? 16 : 6),
+        leading: GlyphIcon(_glyphOf(action)),
+        title: Text(
+          hotkeyToolSettings[action.index].title(appLocalizations),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: failure == null
+            ? null
+            : Tooltip(
+                message: failure,
+                child: Text(
+                  appLocalizations.hotkeyUnavailable,
+                  style: AppTextStyle.footnote
+                      .of(context)
+                      .copyWith(color: colorScheme.error),
+                ),
               ),
-            ),
-      trailing: key == null
-          ? Text(
-              appLocalizations.hotkeyNotSet,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: colorScheme.outline),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 4,
-              children: [
-                _KeyCaps(
-                  parts: labels.parts(hotKeyAction.modifiers, key),
-                  isError: failure != null,
-                ),
-                IconButton(
-                  tooltip: appLocalizations.remove,
-                  onPressed: () {
-                    _saveBinding(ref, HotKeyAction(action: action));
-                  },
-                  icon: const GlyphIcon(AppGlyphs.close, size: 20),
-                ),
-              ],
-            ),
-      onPressed: () {
-        dialogs.showCommonDialog(
-          child: HotKeyRecorder(hotKeyAction: hotKeyAction, labels: labels),
-        );
-      },
+        trailing: key == null
+            ? Text(
+                appLocalizations.hotkeyNotSet,
+                style: AppTextStyle.subheadline
+                    .of(context)
+                    .copyWith(color: colorScheme.outline),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 4,
+                children: [
+                  _KeyCaps(
+                    parts: labels.parts(hotKeyAction.modifiers, key),
+                    isError: failure != null,
+                  ),
+                  IconButton(
+                    tooltip: appLocalizations.remove,
+                    onPressed: () {
+                      _saveBinding(ref, HotKeyAction(action: action));
+                    },
+                    icon: const GlyphIcon(AppGlyphs.close, size: 20),
+                  ),
+                ],
+              ),
+        onPressed: () {
+          dialogs.showCommonDialog(
+            child: HotKeyRecorder(hotKeyAction: hotKeyAction, labels: labels),
+          );
+        },
+      ),
     );
   }
 }
@@ -519,3 +533,14 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
     );
   }
 }
+
+final hotkeyToolSettings = <SettingSpec>[
+  for (final action in HotAction.values)
+    SettingSpec(
+      id: 'hotkey.${action.name}',
+      page: ToolPage.hotkey,
+      title: (_) => action.label,
+      keywords: [action.name],
+      condition: SettingCondition.desktop,
+    ),
+];

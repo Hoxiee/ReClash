@@ -55,23 +55,21 @@ FilledButton _disclaimerAgreeButton(WidgetTester tester) {
   );
 }
 
-String _noServiceStatement(WidgetTester tester) {
-  return tester
-      .element(find.byType(DisclaimerView))
-      .appLocalizations
-      .disclaimerNoServiceStatement;
-}
-
-TextButton _restateConfirmButton(WidgetTester tester) {
-  return tester.widget<TextButton>(find.widgetWithText(TextButton, 'Confirm'));
-}
-
-Future<void> _agreeAndRestate(WidgetTester tester) async {
-  await tester.tap(find.text('Agree'));
+Future<void> _scrollDisclaimerTo(WidgetTester tester, Offset offset) async {
+  await tester.drag(
+    find
+        .descendant(
+          of: find.byType(DisclaimerView),
+          matching: find.byType(Scrollable),
+        )
+        .first,
+    offset,
+  );
   await tester.pumpAndSettle();
-  await tester.enterText(find.byType(TextField), _noServiceStatement(tester));
-  await tester.pump();
-  await tester.tap(find.text('Confirm'));
+}
+
+Future<void> _agree(WidgetTester tester) async {
+  await tester.tap(find.text('Agree'));
   await tester.pumpAndSettle();
 }
 
@@ -307,7 +305,8 @@ void main() {
       final agreed = requestDisclaimerConsent();
       await tester.pumpAndSettle();
       expect(find.text('Data collection and privacy'), findsOneWidget);
-      await _agreeAndRestate(tester);
+      await _scrollDisclaimerTo(tester, const Offset(0, -100000));
+      await _agree(tester);
       expect(await agreed, isTrue);
 
       final declined = requestDisclaimerConsent();
@@ -324,23 +323,46 @@ void main() {
     },
   );
 
-  testWidgets('disclaimer consent on mobile can agree without scrolling', (
+  testWidgets('disclaimer agree unlocks only once the terms reach the end', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+
+    final agreed = requestDisclaimerConsent();
+    await tester.pumpAndSettle();
+    expect(find.text('Read to the end'), findsOneWidget);
+    expect(_disclaimerAgreeButton(tester).onPressed, isNull);
+
+    await _scrollDisclaimerTo(tester, const Offset(0, -300));
+    expect(_disclaimerAgreeButton(tester).onPressed, isNull);
+
+    await _scrollDisclaimerTo(tester, const Offset(0, -100000));
+    await _scrollDisclaimerTo(tester, const Offset(0, 100000));
+    expect(_disclaimerAgreeButton(tester).onPressed, isNotNull);
+    expect(find.text('Read to the end'), findsNothing);
+
+    await _agree(tester);
+    expect(await agreed, isTrue);
+  });
+
+  testWidgets('disclaimer consent on mobile labels the locked button', (
     tester,
   ) async {
     await _pumpHost(tester, size: const Size(400, 800));
 
     final agreed = requestDisclaimerConsent();
     await tester.pumpAndSettle();
+    expect(find.text('Agree'), findsNothing);
     expect(
       find.descendant(
         of: find.byType(FilledButton),
-        matching: find.text('Agree'),
+        matching: find.text('Read to the end'),
       ),
       findsOneWidget,
     );
-    expect(_disclaimerAgreeButton(tester).onPressed, isNotNull);
 
-    await _agreeAndRestate(tester);
+    await _scrollDisclaimerTo(tester, const Offset(0, -100000));
+    await _agree(tester);
     expect(await agreed, isTrue);
   });
 
@@ -382,126 +404,19 @@ void main() {
     },
   );
 
-  testWidgets('disclaimer agree is unlocked before the terms are scrolled', (
+  testWidgets('disclaimer Agree accepts without a restatement dialog', (
     tester,
   ) async {
     await _pumpHost(tester);
 
     final agreed = requestDisclaimerConsent();
     await tester.pumpAndSettle();
-    expect(_disclaimerAgreeButton(tester).onPressed, isNotNull);
+    await _scrollDisclaimerTo(tester, const Offset(0, -100000));
+    await _agree(tester);
 
-    await _agreeAndRestate(tester);
     expect(await agreed, isTrue);
-  });
-
-  testWidgets('disclaimer agree waits for the statement to be restated', (
-    tester,
-  ) async {
-    await _pumpHost(tester);
-
-    final agreed = requestDisclaimerConsent();
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Agree'));
-    await tester.pumpAndSettle();
-    expect(find.text('Restate the statement'), findsOneWidget);
-    expect(_restateConfirmButton(tester).onPressed, isNull);
-
-    final field = find.byType(TextField);
-    await tester.enterText(field, 'The Software itself');
-    await tester.pump();
-    expect(find.text('Does not match the statement'), findsNothing);
-    expect(_restateConfirmButton(tester).onPressed, isNull);
-
-    await tester.enterText(field, 'The Software itself provides');
-    await tester.pump();
-    expect(find.text('Does not match the statement'), findsOneWidget);
-
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(find.text('Restate the statement'), findsNothing);
-    expect(find.byType(DisclaimerView), findsOneWidget);
-
-    await tester.tap(find.text('Agree'));
-    await tester.pumpAndSettle();
-    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
-    await tester.enterText(field, '${_noServiceStatement(tester)}\n');
-    await tester.pump();
-    expect(_restateConfirmButton(tester).onPressed, isNotNull);
-    await tester.tap(find.text('Confirm'));
-    await tester.pumpAndSettle();
-    expect(await agreed, isTrue);
-  });
-
-  testWidgets('on a remote, agree waits for the statement to be checked', (
-    tester,
-  ) async {
-    await _pumpHost(tester, remote: true);
-
-    final agreed = requestDisclaimerConsent();
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Agree'));
-    await tester.pumpAndSettle();
-    expect(find.text('Confirm the statement'), findsOneWidget);
     expect(find.byType(TextField), findsNothing);
-    expect(_restateConfirmButton(tester).onPressed, isNull);
-
-    await tester.tap(find.text('I have read and understand this statement'));
-    await tester.pump();
-    expect(_restateConfirmButton(tester).onPressed, isNotNull);
-    await tester.tap(find.text('Confirm'));
-    await tester.pumpAndSettle();
-    expect(await agreed, isTrue);
-  });
-
-  testWidgets('restating keeps the statement selectable without a shortcut', (
-    tester,
-  ) async {
-    await _pumpHost(tester);
-
-    final agreed = requestDisclaimerConsent();
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Agree'));
-    await tester.pumpAndSettle();
-
-    final statement = _noServiceStatement(tester);
-    expect(
-      find.byWidgetPredicate(
-        (widget) => widget is SelectableText && widget.data == statement,
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(IconButton),
-      ),
-      findsNothing,
-    );
-    final field = find.byType(TextField);
-    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
-
-    await tester.showKeyboard(field);
-    tester.testTextInput.updateEditingValue(
-      const TextEditingValue(
-        text: 'The Softwarexy',
-        composing: TextRange(start: 12, end: 14),
-      ),
-    );
-    await tester.pump();
-    expect(find.text('Does not match the statement'), findsNothing);
-
-    tester.testTextInput.updateEditingValue(
-      const TextEditingValue(text: 'The Softwarexy'),
-    );
-    await tester.pump();
-    expect(find.text('Does not match the statement'), findsOneWidget);
-
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Exit'));
-    await tester.pumpAndSettle();
-    expect(await agreed, isFalse);
+    expect(find.text('Restate the statement'), findsNothing);
   });
 
   testWidgets('DisclaimerView without consent shows no agree or exit', (

@@ -1,3 +1,6 @@
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -185,7 +188,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
       menuItems: [
         CommonPopupMenuItem(
           glyph: AppGlyphs.toggle,
-          label: appLocalizations.autoUpdate,
+          label: resourceToolSettings[0].title(appLocalizations),
           subItems: [
             CommonPopupMenuItem(
               label: appLocalizations.turnOn,
@@ -201,7 +204,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
         ),
         CommonPopupMenuItem(
           glyph: AppGlyphs.clock,
-          label: appLocalizations.resourceUpdateInterval,
+          label: resourceToolSettings[1].title(appLocalizations),
           onPressed: _updateInterval,
         ),
       ],
@@ -215,6 +218,33 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
             horizontal: 16,
           ).copyWith(top: context.appBarInset, bottom: 16),
           children: [
+            generateSection(
+              title: appLocalizations.options,
+              items: [
+                SettingTarget(
+                  spec: resourceToolSettings[0],
+                  child: ListItem.toggle(
+                    title: Text(
+                      resourceToolSettings[0].title(appLocalizations),
+                    ),
+                    value: autoUpdate,
+                    onChanged: _updateAutoUpdate,
+                  ),
+                ),
+                SettingTarget(
+                  spec: resourceToolSettings[1],
+                  child: ListItem(
+                    title: Text(
+                      resourceToolSettings[1].title(appLocalizations),
+                    ),
+                    onTap: _updateInterval,
+                    subtitle: Text(
+                      '${ref.watch(patchClashConfigProvider.select((s) => s.geoUpdateInterval))} ${appLocalizations.hours}',
+                    ),
+                  ),
+                ),
+              ],
+            ),
             generateSection(
               title: appLocalizations.geoResources,
               items: [
@@ -604,3 +634,18 @@ class UpdateGeoUrlFormDialog extends StatelessWidget {
     );
   }
 }
+
+final resourceToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'resources.autoUpdate',
+    page: ToolPage.resources,
+    title: (l) => l.autoUpdate,
+    keywords: ['geo update', 'automatic update'],
+  ),
+  SettingSpec(
+    id: 'resources.updateInterval',
+    page: ToolPage.resources,
+    title: (l) => l.resourceUpdateInterval,
+    keywords: ['geo update interval'],
+  ),
+];

@@ -1,3 +1,6 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -24,6 +27,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   late ScrollController _controller;
   List<String>? _pinedList;
   bool _isInit = false;
+  (String, int)? _handledReveal;
   bool _installedAppsPermissionGranted = true;
 
   final _completer = Completer();
@@ -47,11 +51,30 @@ class _AccessViewState extends ConsumerState<AccessView>
       accessControlStateProvider.select((state) => state.mode),
       (_, _) => _pinList(),
     );
-    _completer.complete(_loadPackages());
   }
 
   @override
-  void didSettleRoute() => setState(() {});
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reveal = SettingsRevealScope.maybeOf(context);
+    final target = reveal?.targetId;
+    if (reveal == null ||
+        !reveal.active ||
+        target == null ||
+        !PageActivityScope.isActiveOf(context) ||
+        !accessToolSettings.any((setting) => setting.id == target) ||
+        _handledReveal == (target, reveal.nonce)) {
+      return;
+    }
+    _handledReveal = (target, reveal.nonce);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !PageActivityScope.isActiveOf(context)) return;
+      unawaited(_handleToSetting(targetId: target, nonce: reveal.nonce));
+    });
+  }
+
+  @override
+  void didSettleRoute() => _completer.complete(_loadPackages());
 
   Future<void> _loadPackages() async {
     final action = ref.read(systemActionProvider.notifier);
@@ -161,13 +184,17 @@ class _AccessViewState extends ConsumerState<AccessView>
         );
   }
 
-  Future<void> _handleToSetting() async {
+  Future<void> _handleToSetting({String? targetId, int nonce = 0}) async {
     await showSheet<int>(
       context: context,
       builder: (context) {
         final appLocalizations = context.appLocalizations;
         return CommonScaffold(
-          body: const AccessControlPanel(),
+          body: SettingsRevealScope(
+            targetId: targetId,
+            nonce: nonce,
+            child: const AccessControlPanel(),
+          ),
           title: appLocalizations.accessControlSettings,
         );
       },
@@ -188,21 +215,19 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  Future<void> _handleBack() async {
+  Future<bool> _handleBack() async {
     final appLocalizations = context.appLocalizations;
     final res = await dialogs.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(text: appLocalizations.saveChanges),
     );
     if (res == null) {
-      return;
+      return false;
     }
     if (res) {
       _handleSave();
     }
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    return mounted;
   }
 
   AccessControlProps _getRealAccessControlProps(
@@ -473,12 +498,7 @@ class _AccessViewState extends ConsumerState<AccessView>
       ),
     );
     return CommonPopScope(
-      onPop: hasChanges
-          ? (_) {
-              _handleBack();
-              return false;
-            }
-          : null,
+      onPop: hasChanges ? (_) => _handleBack() : null,
       child: CommonScaffold(
         isLoading: isLoading,
         searchState: AppBarSearchState(onSearch: _onSearch),
@@ -586,7 +606,8 @@ class AccessControlPanel extends StatelessWidget {
           generateSection(
             items: [
               ConfigOptionsItem<AccessControlMode>(
-                title: (l) => l.mode,
+                setting: accessToolSettings[0],
+                title: accessToolSettings[0].title,
                 options: AccessControlMode.values,
                 textBuilder: (mode) => switch (mode) {
                   AccessControlMode.acceptSelected =>
@@ -602,7 +623,8 @@ class AccessControlPanel extends StatelessWidget {
                 ),
               ),
               ConfigOptionsItem<AccessSortType>(
-                title: (l) => l.sort,
+                setting: accessToolSettings[1],
+                title: accessToolSettings[1].title,
                 options: AccessSortType.values,
                 textBuilder: (type) => switch (type) {
                   AccessSortType.none => appLocalizations.defaultText,
@@ -622,7 +644,8 @@ class AccessControlPanel extends StatelessWidget {
             title: appLocalizations.source,
             items: [
               ConfigToggleItem(
-                title: (l) => l.systemApp,
+                setting: accessToolSettings[2],
+                title: accessToolSettings[2].title,
                 selector: accessControlStateProvider.select(
                   (state) => !state.isFilterSystemApp,
                 ),
@@ -631,7 +654,8 @@ class AccessControlPanel extends StatelessWidget {
                 ),
               ),
               ConfigToggleItem(
-                title: (l) => l.noNetworkApp,
+                setting: accessToolSettings[3],
+                title: accessToolSettings[3].title,
                 selector: accessControlStateProvider.select(
                   (state) => !state.isFilterNonInternetApp,
                 ),
@@ -647,3 +671,34 @@ class AccessControlPanel extends StatelessWidget {
     );
   }
 }
+
+final accessToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'access.mode',
+    page: ToolPage.access,
+    title: (l) => l.mode,
+    keywords: ['mode'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.sort',
+    page: ToolPage.access,
+    title: (l) => l.sort,
+    keywords: ['sort'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.systemApp',
+    page: ToolPage.access,
+    title: (l) => l.systemApp,
+    keywords: ['systemApp'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.noNetworkApp',
+    page: ToolPage.access,
+    title: (l) => l.noNetworkApp,
+    keywords: ['noNetworkApp'],
+    condition: SettingCondition.always,
+  ),
+];

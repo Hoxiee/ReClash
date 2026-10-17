@@ -1,3 +1,6 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -242,23 +245,26 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     final appLocalizations = context.appLocalizations;
     final ignored = ref.watch(batteryOptimizationIgnoredProvider);
     final isLoading = ignored.isLoading;
-    return _buildPrerequisiteItem(
-      title: appLocalizations.ignoreBatteryOptimization,
-      action: Stack(
-        alignment: Alignment.centerRight,
-        children: [
-          Visibility(
-            visible: !isLoading,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: _buildAuthorizeButton(
-              authorized: ignored.value ?? false,
-              onPressed: _handleRequestIgnoreBatteryOptimization,
+    return SettingTarget(
+      spec: onDemandToolSettings[0],
+      child: _buildPrerequisiteItem(
+        title: onDemandToolSettings[0].title(appLocalizations),
+        action: Stack(
+          alignment: Alignment.centerRight,
+          children: [
+            Visibility(
+              visible: !isLoading,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: _buildAuthorizeButton(
+                authorized: ignored.value ?? false,
+                onPressed: _handleRequestIgnoreBatteryOptimization,
+              ),
             ),
-          ),
-          if (isLoading) const CommonCircleLoading(size: 24),
-        ],
+            if (isLoading) const CommonCircleLoading(size: 24),
+          ],
+        ),
       ),
     );
   }
@@ -270,11 +276,14 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
         (state) => state == WifiSsidPermission.granted,
       ),
     );
-    return _buildPrerequisiteItem(
-      title: appLocalizations.locationPermission,
-      action: _buildAuthorizeButton(
-        authorized: granted,
-        onPressed: _handleRequestLocationPermission,
+    return SettingTarget(
+      spec: onDemandToolSettings[1],
+      child: _buildPrerequisiteItem(
+        title: onDemandToolSettings[1].title(appLocalizations),
+        action: _buildAuthorizeButton(
+          authorized: granted,
+          onPressed: _handleRequestLocationPermission,
+        ),
       ),
     );
   }
@@ -298,7 +307,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     final appLocalizations = context.appLocalizations;
     final hasSelection = ref.watch(itemsProvider(key)).isNotEmpty;
     return ListHeader(
-      title: appLocalizations.excludeSsids,
+      title: onDemandToolSettings[2].title(appLocalizations),
       actions: [
         if (hasSelection) ...[
           IconButtonData(
@@ -373,7 +382,12 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(child: _buildExcludeSsidsHeader()),
+            sliver: SliverToBoxAdapter(
+              child: SettingTarget(
+                spec: onDemandToolSettings[2],
+                child: _buildExcludeSsidsHeader(),
+              ),
+            ),
           ),
           _buildExcludeSsidsList(excludeSSIDs, selectedItems),
           SliverPadding(
@@ -392,3 +406,24 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     );
   }
 }
+
+final onDemandToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'onDemand.battery',
+    page: ToolPage.onDemand,
+    title: (l) => l.ignoreBatteryOptimization,
+    condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'onDemand.location',
+    page: ToolPage.onDemand,
+    title: (l) => l.locationPermission,
+    condition: SettingCondition.locationPermission,
+  ),
+  SettingSpec(
+    id: 'onDemand.excludeSSIDs',
+    page: ToolPage.onDemand,
+    title: (l) => l.excludeSsids,
+    keywords: ['wifi', 'ssid'],
+  ),
+];

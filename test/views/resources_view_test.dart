@@ -97,9 +97,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(currentAppLocalizations.geoResources), findsOneWidget);
-    expect(find.byType(DecorationListItem), findsNWidgets(4));
-    expect(find.byType(ItemPositionProvider), findsNWidgets(4));
-    expect(find.byType(Switch), findsNothing);
+    expect(find.byType(DecorationListItem), findsNWidgets(6));
+    final geoRows = find.ancestor(
+      of: find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            GeoResource.values.any((resource) => resource.name == widget.data),
+      ),
+      matching: find.byType(DecorationListItem),
+    );
+    expect(geoRows, findsNWidgets(4));
+    expect(
+      find.descendant(of: geoRows, matching: find.byType(Switch)),
+      findsNothing,
+    );
+    expect(find.byType(Switch), findsOneWidget);
     expect(
       find.descendant(
         of: find.byType(DecorationListItem),

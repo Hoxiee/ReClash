@@ -954,5 +954,6 @@
   "licensesDesc": "应用内置的软件包",
   "preventDuplicateProfiles": "防止重复订阅",
   "preventDuplicateProfilesDesc": "拒绝已有配置使用的订阅链接",
-  "profileImportDuplicate": "已存在使用该订阅链接的配置"
+  "profileImportDuplicate": "已存在使用该订阅链接的配置",
+  "disclaimerReadToEnd": "请阅读至底部"
 }

@@ -334,15 +334,15 @@ void main() {
     testWidgets('picks a sliding or fading tab switch', (tester) async {
       await pumpThemeView(tester);
 
-      expect(readSetting().tabAnimation, TabAnimation.slide);
-
-      await tester.tap(find.text('Fade'));
-      await tester.pumpAndSettle();
       expect(readSetting().tabAnimation, TabAnimation.fade);
 
       await tester.tap(find.text('Slide'));
       await tester.pumpAndSettle();
       expect(readSetting().tabAnimation, TabAnimation.slide);
+
+      await tester.tap(find.text('Fade'));
+      await tester.pumpAndSettle();
+      expect(readSetting().tabAnimation, TabAnimation.fade);
     });
 
     testWidgets('the preview switches to the destination tapped', (

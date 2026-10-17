@@ -1,3 +1,6 @@
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -152,113 +155,154 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     return CommonScaffold(
       isLoading: isLoading,
       title: appLocalizations.backupAndRestore,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.appBarInset, bottom: 16),
-        children: [
-          generateSection(
-            title: appLocalizations.remote,
-            items: [
-              if (dav == null)
-                ListItem(
-                  leading: const GlyphIcon(AppGlyphs.account),
-                  title: Text(appLocalizations.noInfo),
-                  subtitle: Text(appLocalizations.pleaseBindWebDAV),
-                  trailing: TonalButton(
-                    label: appLocalizations.bind,
-                    onPressed: () {
-                      _showAddWebDAV(dav);
-                    },
-                  ),
-                )
-              else ...[
-                ListItem(
-                  leading: const GlyphIcon(AppGlyphs.account),
-                  title: TooltipText(
-                    text: Text(
-                      dav.user,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+      body: SettingsPageScroll(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ).copyWith(top: context.appBarInset, bottom: 16),
+          child: Column(
+            children: [
+              generateSection(
+                title: appLocalizations.remote,
+                items: [
+                  if (dav == null)
+                    SettingTarget(
+                      spec: backupToolSettings[0],
+                      child: ListItem(
+                        leading: const GlyphIcon(AppGlyphs.account),
+                        title: Text(
+                          backupToolSettings[0].title(appLocalizations),
+                        ),
+                        subtitle: Text(appLocalizations.pleaseBindWebDAV),
+                        trailing: ElasticButton(
+                          child: FilledButton.tonal(
+                            onPressed: () {
+                              _showAddWebDAV(dav);
+                            },
+                            child: Text(appLocalizations.bind),
+                          ),
+                        ),
+                      ),
+                    )
+                  else ...[
+                    ListItem(
+                      leading: const GlyphIcon(AppGlyphs.account),
+                      title: TooltipText(
+                        text: Text(
+                          dav.user,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(appLocalizations.connectivity),
+                            _DavConnectionIndicator(connection: _davConnection),
+                          ],
+                        ),
+                      ),
+                      trailing: ElasticButton(
+                        child: FilledButton.tonal(
+                          onPressed: () {
+                            _showAddWebDAV(dav);
+                          },
+                          child: Text(appLocalizations.edit),
+                        ),
+                      ),
+                    ),
+                    SettingTarget(
+                      spec: backupToolSettings[1],
+                      child: ListItem.input(
+                        title: Text(
+                          backupToolSettings[1].title(appLocalizations),
+                        ),
+                        subtitle: Text(dav.fileName),
+                        dialogTitle: appLocalizations.file,
+                        value: dav.fileName,
+                        resetValue: defaultDavFileName,
+                        maxLength: TextInputLimits.fileName,
+                        onChanged: (value) {
+                          _handleChange(value, ref);
+                        },
+                      ),
+                    ),
+                    SettingTarget(
+                      spec: backupToolSettings[2],
+                      child: ListItem(
+                        onTap: () {
+                          _backupOnWebDAV();
+                        },
+                        title: Text(
+                          backupToolSettings[2].title(appLocalizations),
+                        ),
+                      ),
+                    ),
+                    SettingTarget(
+                      spec: backupToolSettings[3],
+                      child: ListItem(
+                        onTap: () {
+                          _restoreOnWebDAV();
+                        },
+                        title: Text(
+                          backupToolSettings[3].title(appLocalizations),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              generateSection(
+                title: appLocalizations.local,
+                items: [
+                  SettingTarget(
+                    spec: backupToolSettings[7],
+                    child: ListItem(
+                      onTap: () {
+                        _backupOnLocal();
+                      },
+                      title: Text(
+                        backupToolSettings[7].title(appLocalizations),
+                      ),
                     ),
                   ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(appLocalizations.connectivity),
-                        _DavConnectionIndicator(connection: _davConnection),
-                      ],
+                  SettingTarget(
+                    spec: backupToolSettings[8],
+                    child: ListItem(
+                      onTap: () {
+                        _restoreOnLocal();
+                      },
+                      title: Text(
+                        backupToolSettings[8].title(appLocalizations),
+                      ),
                     ),
                   ),
-                  trailing: TonalButton(
-                    label: appLocalizations.edit,
-                    onPressed: () {
-                      _showAddWebDAV(dav);
-                    },
+                ],
+              ),
+              generateSection(
+                title: appLocalizations.options,
+                items: [
+                  ConfigOptionsItem<RestoreStrategy>(
+                    setting: backupToolSettings[4],
+                    title: backupToolSettings[4].title,
+                    options: RestoreStrategy.values,
+                    textBuilder: (strategy) => strategy.label,
+                    selector: appSettingProvider.select(
+                      (state) => state.restoreStrategy,
+                    ),
+                    onChanged: (ref, value) => ref
+                        .read(appSettingProvider.notifier)
+                        .update(
+                          (state) => state.copyWith(restoreStrategy: value),
+                        ),
                   ),
-                ),
-                ListItem.input(
-                  title: Text(appLocalizations.file),
-                  subtitle: Text(dav.fileName),
-                  dialogTitle: appLocalizations.file,
-                  value: dav.fileName,
-                  resetValue: defaultDavFileName,
-                  maxLength: TextInputLimits.fileName,
-                  onChanged: (value) {
-                    _handleChange(value, ref);
-                  },
-                ),
-                ListItem(
-                  onTap: () {
-                    _backupOnWebDAV();
-                  },
-                  title: Text(appLocalizations.backup),
-                ),
-                ListItem(
-                  onTap: () {
-                    _restoreOnWebDAV();
-                  },
-                  title: Text(appLocalizations.restore),
-                ),
-              ],
-            ],
-          ),
-          generateSection(
-            title: appLocalizations.local,
-            items: [
-              ListItem(
-                onTap: () {
-                  _backupOnLocal();
-                },
-                title: Text(appLocalizations.backup),
-              ),
-              ListItem(
-                onTap: () {
-                  _restoreOnLocal();
-                },
-                title: Text(appLocalizations.restore),
+                ],
               ),
             ],
           ),
-          generateSection(
-            title: appLocalizations.options,
-            items: [
-              ConfigOptionsItem<RestoreStrategy>(
-                title: (l) => l.restoreStrategy,
-                options: RestoreStrategy.values,
-                textBuilder: (strategy) => strategy.label,
-                selector: appSettingProvider.select(
-                  (state) => state.restoreStrategy,
-                ),
-                onChanged: (ref, value) => ref
-                    .read(appSettingProvider.notifier)
-                    .update((state) => state.copyWith(restoreStrategy: value)),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -316,17 +360,23 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Wrap(
         children: [
-          ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.onlyProfiles);
-            },
-            title: Text(appLocalizations.restoreOnlyConfig),
+          SettingTarget(
+            spec: backupToolSettings[5],
+            child: ListItem(
+              onTap: () {
+                _handleOnTab(RestoreOption.onlyProfiles);
+              },
+              title: Text(backupToolSettings[5].title(appLocalizations)),
+            ),
           ),
-          ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.all);
-            },
-            title: Text(appLocalizations.restoreAllData),
+          SettingTarget(
+            spec: backupToolSettings[6],
+            child: ListItem(
+              onTap: () {
+                _handleOnTab(RestoreOption.all);
+              },
+              title: Text(backupToolSettings[6].title(appLocalizations)),
+            ),
           ),
         ],
       ),
@@ -489,3 +539,67 @@ class _WebDAVFormState extends ConsumerState<WebDAVForm> {
     );
   }
 }
+
+final backupToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'backup.noInfo',
+    page: ToolPage.backup,
+    title: (l) => l.noInfo,
+    keywords: ['noInfo'],
+    condition: SettingCondition.contextual,
+  ),
+  SettingSpec(
+    id: 'backup.file',
+    page: ToolPage.backup,
+    title: (l) => l.file,
+    keywords: ['file'],
+    condition: SettingCondition.remoteBackup,
+  ),
+  SettingSpec(
+    id: 'backup.backup',
+    page: ToolPage.backup,
+    title: (l) => l.backup,
+    keywords: ['backup'],
+    condition: SettingCondition.remoteBackup,
+  ),
+  SettingSpec(
+    id: 'backup.restore',
+    page: ToolPage.backup,
+    title: (l) => l.restore,
+    keywords: ['restore'],
+    condition: SettingCondition.remoteBackup,
+  ),
+  SettingSpec(
+    id: 'backup.restoreStrategy',
+    page: ToolPage.backup,
+    title: (l) => l.restoreStrategy,
+    keywords: ['restoreStrategy'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'backup.restoreOnlyConfig',
+    page: ToolPage.backup,
+    title: (l) => l.restoreOnlyConfig,
+    keywords: ['restoreOnlyConfig'],
+    condition: SettingCondition.contextual,
+  ),
+  SettingSpec(
+    id: 'backup.restoreAllData',
+    page: ToolPage.backup,
+    title: (l) => l.restoreAllData,
+    keywords: ['restoreAllData'],
+    condition: SettingCondition.contextual,
+  ),
+  SettingSpec(
+    id: 'backup.localBackup',
+    page: ToolPage.backup,
+    title: (l) => l.backup,
+    keywords: ['local backup', 'file'],
+  ),
+  SettingSpec(
+    id: 'backup.localRestore',
+    page: ToolPage.backup,
+    title: (l) => l.restore,
+    keywords: ['local restore', 'file'],
+  ),
+];

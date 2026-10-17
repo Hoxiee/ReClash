@@ -1,3 +1,6 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -176,12 +179,15 @@ class _UserAgentsViewState extends ConsumerState<UserAgentsView> {
         buildDefaultDragHandles: false,
         header: ItemPositionProvider(
           position: ItemPosition.get(0, entries.length + 1),
-          child: _UserAgentItem(
-            label: appLocalizations.defaultText,
-            isSelected: selected == null,
-            onSelected: () {
-              _select(null);
-            },
+          child: SettingTarget(
+            spec: userAgentToolSettings[0],
+            child: _UserAgentItem(
+              label: userAgentToolSettings[0].title(appLocalizations),
+              isSelected: selected == null,
+              onSelected: () {
+                _select(null);
+              },
+            ),
           ),
         ),
         itemCount: entries.length,
@@ -233,3 +239,12 @@ class _UserAgentItem extends StatelessWidget {
     );
   }
 }
+
+final userAgentToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'userAgents.default',
+    page: ToolPage.userAgents,
+    title: (l) => l.defaultText,
+    keywords: ['default user agent'],
+  ),
+];

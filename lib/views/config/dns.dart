@@ -1,3 +1,5 @@
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
@@ -173,6 +175,13 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns> {
 
   @override
   String label(DnsOverrideKey key, AppLocalizations l) => key.label(l);
+
+  @override
+  SettingSpec? settingOf(DnsOverrideKey key) => target is PatchOverrideTarget
+      ? dnsToolSettings
+            .where((spec) => spec.id == 'dns.${key.name}')
+            .firstOrNull
+      : null;
 
   @override
   ConfigLabel? description(DnsOverrideKey key) => key.description;
@@ -400,6 +409,7 @@ class _PolicyItem extends ConsumerWidget {
         titleBuilder: (item) => Text(item.key),
         subtitleBuilder: (item) => Text(item.value),
       ),
+      forceFull: false,
       onChanged: (value) {
         if (value is! Map) {
           return;
@@ -412,3 +422,14 @@ class _PolicyItem extends ConsumerWidget {
     );
   }
 }
+
+final dnsToolSettings = <SettingSpec>[
+  for (final key in DnsOverrideKey.normalProfileKeys)
+    SettingSpec(
+      id: 'dns.${key.name}',
+      page: ToolPage.dns,
+      title: key.label,
+      keywords: [key.name],
+      condition: SettingCondition.dnsOverride,
+    ),
+];

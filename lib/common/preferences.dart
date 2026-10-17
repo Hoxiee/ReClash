@@ -36,6 +36,21 @@ class Preferences {
     return _instance!;
   }
 
+  Future<List<String>> getPinnedTools() async {
+    try {
+      final store = await _store.value;
+      return store?.getStringList('tools.pinned')?.toSet().toList() ?? const [];
+    } catch (error) {
+      commonPrint.log('Tools pins: $error', logLevel: LogLevel.warning);
+      return const [];
+    }
+  }
+
+  Future<void> savePinnedTools(List<String> pinned) async {
+    final store = await _store.value;
+    await store?.setStringList('tools.pinned', pinned);
+  }
+
   Future<int> getVersion() async {
     final preferences = await _store.value;
     return preferences?.getInt('version') ?? 0;

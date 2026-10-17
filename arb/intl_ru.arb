@@ -954,5 +954,6 @@
   "licensesDesc": "Пакеты, входящие в приложение",
   "preventDuplicateProfiles": "Запрет дубликатов подписок",
   "preventDuplicateProfilesDesc": "Отклонять ссылку подписки, которую уже использует существующий профиль",
-  "profileImportDuplicate": "Профиль с этим URL подписки уже добавлен"
+  "profileImportDuplicate": "Профиль с этим URL подписки уже добавлен",
+  "disclaimerReadToEnd": "Дочитайте до конца"
 }

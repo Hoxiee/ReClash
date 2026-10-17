@@ -712,6 +712,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "Recopilación de datos y privacidad",
     ),
+    "disclaimerReadToEnd": MessageLookupByLibrary.simpleMessage(
+      "Leer hasta el final",
+    ),
     "disclaimerResponsibilityContent": MessageLookupByLibrary.simpleMessage(
       "Eres responsable de asegurarte de que el uso del Software sea legal donde vives, y asumes tú solo la responsabilidad legal de todo lo que hagas con él y de sus consecuencias.\n\nLas suscripciones, los nodos y las configuraciones que importas son decisión tuya. Que su origen sea legal, su contenido seguro y su servicio fiable es un asunto entre tú y sus proveedores.",
     ),
