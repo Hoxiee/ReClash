@@ -79,3 +79,6 @@ devtools_options.yaml
 .fvm/
 .fvmrc
 /coverage/lcov.info
+
+# Local research docs, never committed.
+/project/
