@@ -383,6 +383,21 @@ void main() {
         .toPage(PageLabel.connections);
     final desktop = container.read(navigationStateProvider);
     expect(desktop.viewMode, ViewMode.desktop);
+    final desktopLabels = desktop.navigationItems
+        .map((item) => item.label)
+        .toList();
+    expect(
+      desktopLabels,
+      containsAll([PageLabel.requests, PageLabel.connections, PageLabel.dns]),
+    );
+    expect(
+      desktopLabels.indexOf(PageLabel.requests),
+      lessThan(desktopLabels.indexOf(PageLabel.connections)),
+    );
+    expect(
+      desktopLabels.indexOf(PageLabel.connections),
+      lessThan(desktopLabels.indexOf(PageLabel.dns)),
+    );
     expect(desktop.currentIndex, greaterThan(0));
     expect(
       desktop.navigationItems[desktop.currentIndex].label,
