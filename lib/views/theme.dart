@@ -112,15 +112,6 @@ class _ThemeModeItem extends ConsumerWidget {
   }
 }
 
-const double _headerButtonHeight = 32;
-
-final _headerButtonStyle = FilledButton.styleFrom(
-  minimumSize: const Size(0, _headerButtonHeight),
-  padding: const EdgeInsets.symmetric(horizontal: 14),
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  visualDensity: VisualDensity.standard,
-);
-
 class _PrimaryColorItem extends ConsumerWidget {
   const _PrimaryColorItem();
 
