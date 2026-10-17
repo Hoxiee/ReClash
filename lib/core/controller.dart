@@ -190,8 +190,12 @@ class CoreController {
     required DelayMap delayMap,
     required Map<String, String> selectedMap,
     required String defaultTestUrl,
+    bool requireData = false,
   }) async {
     final proxiesData = await _interface.getProxies();
+    if (requireData && proxiesData.all.isEmpty && proxiesData.proxies.isEmpty) {
+      throw StateError('Core returned no proxy data');
+    }
     return toGroupsTask(
       ComputeGroupsState(
         proxiesData: proxiesData,

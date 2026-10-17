@@ -41,12 +41,20 @@ class ProxiesAction extends _$ProxiesAction {
 
   final Map<String, String> _pendingSelectedRollback = {};
 
+  int _groupsRevision = 0;
+  int _profileRevision = 0;
+
   @override
   void build() {
     ref.onDispose(() => _delayFlushTimer?.cancel());
     ref.listen(coreStatusProvider, (_, next) {
       if (next != CoreStatus.connected) {
         cancelDelayTests();
+      }
+    });
+    ref.listen(currentProfileIdProvider, (previous, next) {
+      if (previous != next) {
+        _profileRevision++;
       }
     });
   }
@@ -113,8 +121,12 @@ class ProxiesAction extends _$ProxiesAction {
   }
 
   Future<void> updateGroups() async {
+    final revision = ++_groupsRevision;
+    final profileId = ref.read(currentProfileIdProvider);
+    final profileRevision = _profileRevision;
+    final runTime = ref.read(runTimeProvider);
     try {
-      ref.read(groupsProvider.notifier).value = await retry(
+      final result = await retry(
         task: () async {
           final sortType = ref.read(
             proxiesStyleSettingProvider.select((state) => state.sortType),
@@ -127,22 +139,40 @@ class ProxiesAction extends _$ProxiesAction {
             currentProfileProvider.select((state) => state?.selectedMap ?? {}),
           );
           try {
-            return await _core.getProxiesGroups(
-              selectedMap: selectedMap,
-              sortType: sortType,
-              delayMap: delayMap,
-              defaultTestUrl: testUrl,
+            return (
+              groups: await _core.getProxiesGroups(
+                selectedMap: selectedMap,
+                sortType: sortType,
+                delayMap: delayMap,
+                defaultTestUrl: testUrl,
+                requireData: runTime != null,
+              ),
+              failed: false,
             );
           } catch (e) {
             commonPrint.log(
               'updateGroups error: $e',
               logLevel: coreFailureLogLevel(e),
             );
-            return [];
+            return (groups: <Group>[], failed: true);
           }
         },
-        retryIf: (res) => res.isEmpty,
+        retryIf: (result) => result.failed || result.groups.isEmpty,
+        maxAttempts: 5,
+        delay: const Duration(milliseconds: 300),
       );
+      if (revision != _groupsRevision ||
+          profileRevision != _profileRevision ||
+          profileId != ref.read(currentProfileIdProvider) ||
+          runTime != ref.read(runTimeProvider)) {
+        return;
+      }
+      if (result.failed &&
+          runTime != null &&
+          ref.read(groupsProvider).isNotEmpty) {
+        return;
+      }
+      ref.read(groupsProvider.notifier).value = result.groups;
     } catch (e) {
       // The Core failure path already runs inside the retry task above; a
       // throw here only means ref.read hit a disposed container or the

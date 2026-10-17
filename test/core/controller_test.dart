@@ -153,6 +153,39 @@ void main() {
       });
     });
 
+    test('requires nonempty raw proxy data when requested', () async {
+      when(
+        () => mock.getProxies(),
+      ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+
+      await expectLater(
+        controller.getProxiesGroups(
+          sortType: ProxiesSortType.none,
+          delayMap: const {},
+          selectedMap: const {},
+          defaultTestUrl: 'http://x.com',
+          requireData: true,
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('accepts a raw empty proxy response by default', () async {
+      when(
+        () => mock.getProxies(),
+      ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+
+      await expectLater(
+        controller.getProxiesGroups(
+          sortType: ProxiesSortType.none,
+          delayMap: const {},
+          selectedMap: const {},
+          defaultTestUrl: 'http://x.com',
+        ),
+        completion(isEmpty),
+      );
+    });
+
     test('updateConfig delegates to interface', () async {
       const params = UpdateParams(
         tun: Tun(enable: false),

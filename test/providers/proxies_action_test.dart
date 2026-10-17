@@ -172,9 +172,254 @@ void main() {
         await actionOf(container).updateGroups();
 
         expect(container.read(groupsProvider), isEmpty);
-        verify(core.getProxies).called(3);
+        verify(core.getProxies).called(5);
       },
     );
+
+    test(
+      'retains groups after retries fail while the same core session runs',
+      () async {
+        when(
+          core.getProxies,
+        ).thenThrow(StateError('core temporarily unavailable'));
+        final container = runningContainer();
+        container.read(groupsProvider.notifier).value = [
+          _group('Existing', const []),
+        ];
+
+        await actionOf(container).updateGroups();
+
+        expect(container.read(groupsProvider).map((group) => group.name), [
+          'Existing',
+        ]);
+        verify(core.getProxies).called(5);
+      },
+    );
+
+    test('clears groups after retries fail while stopped', () async {
+      when(core.getProxies).thenThrow(StateError('core down'));
+      final container = buildContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Stale', const []),
+      ];
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider), isEmpty);
+      verify(core.getProxies).called(5);
+    });
+
+    test(
+      'clears groups after a successful empty response while stopped',
+      () async {
+        when(
+          core.getProxies,
+        ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+        final container = buildContainer();
+        container.read(groupsProvider.notifier).value = [
+          _group('Removed', const []),
+        ];
+
+        await actionOf(container).updateGroups();
+
+        expect(container.read(groupsProvider), isEmpty);
+        verify(core.getProxies).called(5);
+      },
+    );
+
+    test('retains groups after an empty raw response while running', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+      final container = runningContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Existing', const []),
+      ];
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider).map((group) => group.name), [
+        'Existing',
+      ]);
+      verify(core.getProxies).called(5);
+    });
+
+    test('clears groups for a valid direct-only response', () async {
+      when(core.getProxies).thenAnswer(
+        (_) async => const ProxiesData(
+          all: ['DIRECT'],
+          proxies: {
+            'DIRECT': {'name': 'DIRECT', 'type': 'Direct'},
+          },
+        ),
+      );
+      final container = runningContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Removed', const []),
+      ];
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider), isEmpty);
+      verify(core.getProxies).called(5);
+    });
+
+    test('a successful refresh replaces the previous groups', () async {
+      when(core.getProxies).thenAnswer(
+        (_) async => ProxiesData(
+          all: const ['Proxy', 'Direct'],
+          proxies: Map<String, dynamic>.from({
+            'Proxy': Map<String, dynamic>.from({
+              'name': 'Proxy',
+              'type': 'Selector',
+              'now': 'HK-01',
+              'all': ['HK-01'],
+            }),
+            'Direct': Map<String, dynamic>.from({
+              'name': 'Direct',
+              'type': 'Direct',
+            }),
+            'HK-01': Map<String, dynamic>.from({'name': 'HK-01', 'type': 'ss'}),
+          }),
+        ),
+      );
+      final container = runningContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Stale', const []),
+      ];
+
+      await actionOf(container).updateGroups();
+
+      expect(container.read(groupsProvider).map((group) => group.name), [
+        'Proxy',
+      ]);
+    });
+
+    test('ignores a result from a superseded refresh', () async {
+      final firstResponse = Completer<ProxiesData>();
+      var calls = 0;
+      when(core.getProxies).thenAnswer((_) async {
+        calls++;
+        if (calls == 1) {
+          return firstResponse.future;
+        }
+        return ProxiesData(
+          all: const ['New', 'Direct'],
+          proxies: Map<String, dynamic>.from({
+            'New': Map<String, dynamic>.from({
+              'name': 'New',
+              'type': 'Selector',
+              'now': 'HK-01',
+              'all': ['HK-01'],
+            }),
+            'Direct': Map<String, dynamic>.from({
+              'name': 'Direct',
+              'type': 'Direct',
+            }),
+            'HK-01': Map<String, dynamic>.from({'name': 'HK-01', 'type': 'ss'}),
+          }),
+        );
+      });
+      final container = runningContainer();
+      final action = actionOf(container);
+      final staleRefresh = action.updateGroups();
+      await Future<void>.delayed(Duration.zero);
+      await action.updateGroups();
+      firstResponse.complete(
+        ProxiesData(
+          all: const ['Old', 'Direct'],
+          proxies: Map<String, dynamic>.from({
+            'Old': Map<String, dynamic>.from({
+              'name': 'Old',
+              'type': 'Selector',
+              'now': 'HK-01',
+              'all': ['HK-01'],
+            }),
+            'Direct': Map<String, dynamic>.from({
+              'name': 'Direct',
+              'type': 'Direct',
+            }),
+            'HK-01': Map<String, dynamic>.from({'name': 'HK-01', 'type': 'ss'}),
+          }),
+        ),
+      );
+      await staleRefresh;
+
+      expect(container.read(groupsProvider).map((group) => group.name), [
+        'New',
+      ]);
+    });
+
+    test('ignores a result after the runtime token changes', () async {
+      final response = Completer<ProxiesData>();
+      when(core.getProxies).thenAnswer((_) => response.future);
+      final container = runningContainer();
+      container.read(groupsProvider.notifier).value = [
+        _group('Current', const []),
+      ];
+      final refresh = actionOf(container).updateGroups();
+      await Future<void>.delayed(Duration.zero);
+      container.read(runTimeProvider.notifier).value = 2;
+      response.complete(
+        ProxiesData(
+          all: const ['Stale', 'Direct'],
+          proxies: Map<String, dynamic>.from({
+            'Stale': Map<String, dynamic>.from({
+              'name': 'Stale',
+              'type': 'Selector',
+              'now': 'HK-01',
+              'all': ['HK-01'],
+            }),
+            'Direct': Map<String, dynamic>.from({
+              'name': 'Direct',
+              'type': 'Direct',
+            }),
+            'HK-01': Map<String, dynamic>.from({'name': 'HK-01', 'type': 'ss'}),
+          }),
+        ),
+      );
+      await refresh;
+
+      expect(container.read(groupsProvider).map((group) => group.name), [
+        'Current',
+      ]);
+    });
+
+    test('ignores a result after the current profile changes', () async {
+      final response = Completer<ProxiesData>();
+      when(core.getProxies).thenAnswer((_) => response.future);
+      final container = buildContainer(profile: _selectedProfile('HK-00'));
+      container.read(runTimeProvider.notifier).value = 1;
+      container.read(groupsProvider.notifier).value = [
+        _group('Current', const []),
+      ];
+      final refresh = actionOf(container).updateGroups();
+      await Future<void>.delayed(Duration.zero);
+      container.read(currentProfileIdProvider.notifier).value = 2;
+      response.complete(
+        ProxiesData(
+          all: const ['Stale', 'Direct'],
+          proxies: Map<String, dynamic>.from({
+            'Stale': Map<String, dynamic>.from({
+              'name': 'Stale',
+              'type': 'Selector',
+              'now': 'HK-01',
+              'all': ['HK-01'],
+            }),
+            'Direct': Map<String, dynamic>.from({
+              'name': 'Direct',
+              'type': 'Direct',
+            }),
+            'HK-01': Map<String, dynamic>.from({'name': 'HK-01', 'type': 'ss'}),
+          }),
+        ),
+      );
+      await refresh;
+
+      expect(container.read(groupsProvider).map((group) => group.name), [
+        'Current',
+      ]);
+    });
 
     test('a core status change alone does not clear the groups', () {
       final container = buildContainer();
