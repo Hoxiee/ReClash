@@ -112,6 +112,21 @@ void main() {
     );
   });
 
+  testWidgets('replays the entrance when the glyph is tapped', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: NullStatus(label: 'Nothing here')),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.tap(find.byType(EmptyIllustration));
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('staggers its entrance when shown on its own', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(

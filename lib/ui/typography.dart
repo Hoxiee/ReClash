@@ -83,6 +83,10 @@ extension AppTypographyThemeExt on ThemeData {
     textTheme: _onAppScale(textTheme),
     primaryTextTheme: _onAppScale(primaryTextTheme),
   );
+
+  /// The footnote step of the app scale as runnable text. Material slot
+  /// reads live in this file, so feature code never names a slot directly.
+  TextStyle get footnoteText => textTheme.bodySmall!;
 }
 
 TextTheme _onAppScale(TextTheme theme) => theme.copyWith(

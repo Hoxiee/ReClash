@@ -151,6 +151,17 @@ class _Sidebar extends ConsumerWidget {
   final ViewMode viewMode;
   final void Function(int index) onSelected;
 
+  static int _groupOf(PageLabel label) => switch (label) {
+    PageLabel.dashboard => 0,
+    PageLabel.proxies || PageLabel.profiles => 1,
+    PageLabel.requests ||
+    PageLabel.connections ||
+    PageLabel.dns ||
+    PageLabel.logs ||
+    PageLabel.resources => 2,
+    PageLabel.tools => 3,
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canExpand = canExpandSidebar(viewMode);
@@ -161,7 +172,11 @@ class _Sidebar extends ConsumerWidget {
     return NavigationSidebar(
       destinations: [
         for (final item in items)
-          SidebarDestination(glyph: item.glyph, label: item.label.label),
+          SidebarDestination(
+            glyph: item.glyph,
+            label: item.label.label,
+            group: _groupOf(item.label),
+          ),
       ],
       selectedIndex: currentIndex,
       expanded: canExpand && sidebarExpanded,

@@ -183,7 +183,6 @@ class _NullStatusState extends State<NullStatus> {
     final colorScheme = context.colorScheme;
     final compact = MediaQuery.sizeOf(context).height < _compactHeight;
     return Align(
-      alignment: const Alignment(0.0, -0.2),
       child: SingleChildScrollView(
         controller: _controller,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -337,22 +336,80 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     value: 1,
   );
   final _entrance = _Entrance.values[_random.nextInt(_Entrance.values.length)];
-  var _started = false;
+  bool? _wasVisible;
+  Animation<double>? _routeAnimation;
+  bool _pendingEntrance = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_started) {
+    _syncRouteAnimation();
+    // Kept-alive nav pages use AutomaticKeepAlive, which never mutes their
+    // tickers, so PageActivityScope is the only signal that a page was
+    // reopened; pushed routes additionally mute tickers when covered. Replay
+    // the entrance on the rising edge of either so the glyph animates on every
+    // open, not just the first mount.
+    final visible =
+        TickerMode.valuesOf(context).enabled &&
+        PageActivityScope.isActiveOf(context);
+    final becameVisible = visible && !(_wasVisible ?? false);
+    _wasVisible = visible;
+    if (becameVisible) {
+      _requestEntrance();
+    }
+  }
+
+  // A pushed route animates its whole page in, so its animation is still
+  // running at first mount and the glyph would otherwise settle on its final
+  // frame with no entrance. Hold at the start and let the route's completion
+  // release it, so the glyph draws itself in once the page has landed.
+  void _requestEntrance() {
+    if (context.disableAnimations) {
+      _pendingEntrance = false;
+      _controller.value = 1;
       return;
     }
-    _started = true;
-    if (!_skipsEntrance(context)) {
+    final route = ModalRoute.of(context);
+    final entering =
+        route != null &&
+        (route.offstage || (route.animation?.isAnimating ?? false));
+    if (entering) {
+      _pendingEntrance = true;
+      _controller.value = 0;
+      return;
+    }
+    _pendingEntrance = false;
+    _controller.forward(from: 0);
+  }
+
+  void _syncRouteAnimation() {
+    final animation = ModalRoute.of(context)?.animation;
+    if (identical(animation, _routeAnimation)) {
+      return;
+    }
+    _routeAnimation?.removeStatusListener(_handleRouteStatus);
+    _routeAnimation = animation;
+    _routeAnimation?.addStatusListener(_handleRouteStatus);
+  }
+
+  void _handleRouteStatus(AnimationStatus status) {
+    if (_pendingEntrance && status == AnimationStatus.completed) {
+      _pendingEntrance = false;
       _controller.forward(from: 0);
     }
   }
 
+  void _replay() {
+    if (context.disableAnimations) {
+      return;
+    }
+    _pendingEntrance = false;
+    _controller.forward(from: 0);
+  }
+
   @override
   void dispose() {
+    _routeAnimation?.removeStatusListener(_handleRouteStatus);
     _controller.dispose();
     super.dispose();
   }
@@ -362,19 +419,23 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     final type = widget.type;
     final colorScheme = context.colorScheme;
     final (shape, glyph) = _artOf(type);
-    return RepaintBoundary(
-      child: CustomPaint(
-        key: ValueKey(type),
-        painter: _IllustrationPainter(
-          shape: shape,
-          glyph: glyph,
-          palette: type == NullStatusIllustration.error
-              ? _IllustrationPalette.error(colorScheme)
-              : _IllustrationPalette(colorScheme),
-          entrance: _entrance,
-          progress: _controller,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _replay,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          key: ValueKey(type),
+          painter: _IllustrationPainter(
+            shape: shape,
+            glyph: glyph,
+            palette: type == NullStatusIllustration.error
+                ? _IllustrationPalette.error(colorScheme)
+                : _IllustrationPalette(colorScheme),
+            entrance: _entrance,
+            progress: _controller,
+          ),
+          child: SizedBox.square(dimension: widget.dimension),
         ),
-        child: SizedBox.square(dimension: widget.dimension),
       ),
     );
   }

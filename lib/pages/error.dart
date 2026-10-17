@@ -27,7 +27,7 @@ class InitErrorApp extends StatelessWidget {
         seedColor: const Color(defaultPrimaryColor),
         brightness: brightness,
       ),
-    ).withAppShapes.withAppSurfaces;
+    ).withAppShapes.withAppSurfaces.withAppTooltips;
   }
 
   @override
