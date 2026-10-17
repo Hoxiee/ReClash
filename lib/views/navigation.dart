@@ -40,7 +40,7 @@ class Navigation implements NavigationPort {
         label: PageLabel.requests,
         builder: (_) =>
             const RequestsView(key: GlobalObjectKey(PageLabel.requests)),
-        modes: [NavigationItemMode.moreFull],
+        modes: [NavigationItemMode.desktop, NavigationItemMode.moreFull],
       ),
       NavigationItem(
         glyph: AppGlyphs.connections,
@@ -54,7 +54,7 @@ class Navigation implements NavigationPort {
         label: PageLabel.dns,
         builder: (_) =>
             const DnsQueriesView(key: GlobalObjectKey(PageLabel.dns)),
-        modes: [NavigationItemMode.moreFull],
+        modes: [NavigationItemMode.desktop, NavigationItemMode.moreFull],
       ),
       NavigationItem(
         glyph: AppGlyphs.resources,
