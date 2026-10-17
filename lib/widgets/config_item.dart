@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
+import 'settings/setting_spec.dart';
+import 'settings/setting_target.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 
@@ -90,6 +92,7 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
     required this.onChanged,
     this.subtitle,
     this.leading,
+    this.setting,
   });
 
   final ProviderListenable<T> selector;
@@ -97,6 +100,7 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   final ConfigLabel? subtitle;
   final ConfigWriter<T> onChanged;
   final Widget? leading;
+  final SettingSpec? setting;
 
   Widget buildItem(
     BuildContext context,
@@ -108,7 +112,9 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    return buildItem(context, ref, appLocalizations, ref.watch(selector));
+    final item = buildItem(context, ref, appLocalizations, ref.watch(selector));
+    final setting = this.setting;
+    return setting == null ? item : SettingTarget(spec: setting, child: item);
   }
 
   Widget? buildSubtitle(AppLocalizations appLocalizations) {
@@ -124,6 +130,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     required super.title,
     required super.onChanged,
     super.leading,
+    super.setting,
   });
 
   @override
@@ -152,6 +159,7 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     required this.textBuilder,
     super.subtitle,
     super.leading,
+    super.setting,
   });
 
   final List<T> options;
@@ -188,6 +196,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.normalize,
     this.allowEmpty = false,
     super.leading,
+    super.setting,
   });
 
   final int? maxLength;
@@ -248,6 +257,7 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
     this.itemValidator,
     super.subtitle,
     super.leading,
+    super.setting,
   });
 
   final int? itemMaxLength;

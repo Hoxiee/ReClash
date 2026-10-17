@@ -1,6 +1,11 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
@@ -10,6 +15,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AccessView extends ConsumerStatefulWidget {
@@ -24,6 +30,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   late ScrollController _controller;
   List<String>? _pinedList;
   bool _isInit = false;
+  (String, int)? _handledReveal;
   bool _installedAppsPermissionGranted = true;
 
   final _completer = Completer();
@@ -47,11 +54,30 @@ class _AccessViewState extends ConsumerState<AccessView>
       accessControlStateProvider.select((state) => state.mode),
       (_, _) => _pinList(),
     );
-    _completer.complete(_loadPackages());
   }
 
   @override
-  void didSettleRoute() => setState(() {});
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reveal = SettingsRevealScope.maybeOf(context);
+    final target = reveal?.targetId;
+    if (reveal == null ||
+        !reveal.active ||
+        target == null ||
+        !PageActivityScope.isActiveOf(context) ||
+        !accessToolSettings.any((setting) => setting.id == target) ||
+        _handledReveal == (target, reveal.nonce)) {
+      return;
+    }
+    _handledReveal = (target, reveal.nonce);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !PageActivityScope.isActiveOf(context)) return;
+      unawaited(_handleToSetting(targetId: target, nonce: reveal.nonce));
+    });
+  }
+
+  @override
+  void didSettleRoute() => _completer.complete(_loadPackages());
 
   Future<void> _loadPackages() async {
     final action = ref.read(systemActionProvider.notifier);
@@ -110,14 +136,26 @@ class _AccessViewState extends ConsumerState<AccessView>
   }) {
     void onPressed() {
       ref.read(accessControlStateProvider.notifier).update((state) {
-        final newSet = Set<String>.from(state.currentList);
-        final isSelectedAll = newSet.containsAll(allValueList);
-        if (isSelectedAll) {
-          newSet.removeAll(allValueList);
-        } else {
-          newSet.addAll(allValueList);
+        final provided = _providedApps(state.mode);
+        final released = state.currentReleased.toSet();
+        final selected = _effectiveList(state, provided);
+        final shown = allValueList.toSet();
+        if (selected.containsAll(shown)) {
+          return state
+              .copyWithNewList(
+                state.currentList
+                    .where((name) => !shown.contains(name))
+                    .toList(),
+              )
+              .copyWithReleased(
+                {...released, ...shown.intersection(provided)}.toList()..sort(),
+              );
         }
-        return state.copyWithNewList(newSet.toList());
+        return state
+            .copyWithNewList(
+              {...state.currentList, ...shown.difference(provided)}.toList(),
+            )
+            .copyWithReleased(released.difference(shown).toList()..sort());
       });
     }
 
@@ -136,36 +174,112 @@ class _AccessViewState extends ConsumerState<AccessView>
   }
 
   Future<void> _intelligentSelected() async {
-    final packageNames = ref.read(
-      packagesProvider.select((state) => state.map((item) => item.packageName)),
+    if (!mounted || ref.read(loadingProvider(LoadingTag.access))) return;
+    final regionCode = sanitizeRegionCode(
+      ref.read(appSettingProvider).regionCode,
     );
-    if (packageNames.isEmpty) {
+    final l = context.appLocalizations;
+    if (regionCode == null || !hasProfileForCode(regionCode)) {
+      dialogs.showNotifier(
+        l.regionSelectBeforeApps,
+        level: MessageLevel.warning,
+      );
       return;
     }
-    final selectedPackageNames =
-        (await globalState.loadingRun<List<String>>(() async {
-          return await app?.getChinaPackageNames() ?? [];
-        }, tag: LoadingTag.access))?.toSet() ??
-        {};
-    final acceptList = packageNames
-        .where((item) => !selectedPackageNames.contains(item))
-        .toList();
-    final rejectList = packageNames
-        .where((item) => selectedPackageNames.contains(item))
-        .toList();
+    final initial = ref.read(accessControlStateProvider);
+    final packageSnapshot = ref.read(packagesProvider);
+    final result = await globalState.loadingRun<List<String>>(
+      () => ref
+          .read(systemActionProvider.notifier)
+          .getDomesticPackageNames(regionCode),
+      tag: LoadingTag.access,
+    );
+    if (!mounted || result == null) return;
+    bool isCurrent() =>
+        sanitizeRegionCode(ref.read(appSettingProvider).regionCode) ==
+            regionCode &&
+        ref.read(accessControlStateProvider) == initial &&
+        listEquals(ref.read(packagesProvider), packageSnapshot);
+    if (!isCurrent()) {
+      dialogs.showNotifier(l.regionAppsChanged, level: MessageLevel.warning);
+      return;
+    }
+    final domestic = result.toSet();
+    final packages = packageSnapshot.map((item) => item.packageName).toSet();
+    final rejected = packages.intersection(domestic).toList();
+    if (rejected.isEmpty) {
+      dialogs.showNotifier(l.regionAppsEmpty, level: MessageLevel.warning);
+      return;
+    }
+    final accepted = packages.difference(domestic).toList();
+    final confirmed = await dialogs.showMessage(
+      context: context,
+      title: l.regionAppsPreviewTitle,
+      confirmText: l.regionApply,
+      message: TextSpan(
+        text: l.regionAppsPreview(
+          regionLabel(l, regionCode),
+          rejected.length,
+          accepted.length,
+        ),
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    if (!isCurrent()) {
+      dialogs.showNotifier(l.regionAppsChanged, level: MessageLevel.warning);
+      return;
+    }
     ref
         .read(accessControlStateProvider.notifier)
         .update(
-          (state) =>
-              state.copyWith(acceptList: acceptList, rejectList: rejectList),
+          (state) => state.copyWith(acceptList: accepted, rejectList: rejected),
         );
   }
 
+  Future<void> _handleToSetting({String? targetId, int nonce = 0}) async {
+    await showSheet<int>(
+      context: context,
+      builder: (context) {
+        final appLocalizations = context.appLocalizations;
+        return CommonScaffold(
+          body: SettingsRevealScope(
+            targetId: targetId,
+            nonce: nonce,
+            child: const AccessControlPanel(),
+          ),
+          title: appLocalizations.accessControlSettings,
+        );
+      },
+    );
+  }
+
+  Set<String> _providedApps(AccessControlMode mode) =>
+      ref.read(providerAppsProvider).asData?.value.of(mode) ?? const {};
+
+  static Set<String> _effectiveList(
+    AccessControlProps state,
+    Set<String> provided,
+  ) => {
+    ...state.currentList,
+    ...provided.difference(state.currentReleased.toSet()),
+  };
+
+  /// Unticking one of the provider's apps records that the user wants it the
+  /// other way; ticking it again hands it back.
   void _handleSelected(String packageName) {
     ref.read(accessControlStateProvider.notifier).update((state) {
-      final newSet = Set<String>.from(state.currentList)
+      if (!_providedApps(state.mode).contains(packageName)) {
+        final newSet = Set<String>.from(state.currentList)
+          ..addOrRemove(packageName);
+        return state.copyWithNewList(newSet.toList());
+      }
+      final released = Set<String>.from(state.currentReleased)
         ..addOrRemove(packageName);
-      return state.copyWithNewList(newSet.toList());
+      return state
+          .copyWithNewList(
+            state.currentList.where((name) => name != packageName).toList(),
+          )
+          .copyWithReleased(released.toList()..sort());
     });
   }
 
@@ -173,17 +287,21 @@ class _AccessViewState extends ConsumerState<AccessView>
     ref.read(accessControlStateProvider.notifier).update(update);
   }
 
-  Future<void> _handleBack() async {
+  void _returnToProvider() {
+    ref
+        .read(accessControlStateProvider.notifier)
+        .update((state) => state.copyWithReleased(const []));
+  }
+
+  Future<bool> _handleBack() async {
     final res = await dialogs.showSaveChanges();
     if (res == null) {
-      return;
+      return false;
     }
     if (res) {
       _handleSave();
     }
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
+    return mounted;
   }
 
   AccessControlProps _getRealAccessControlProps(
@@ -242,8 +360,10 @@ class _AccessViewState extends ConsumerState<AccessView>
 
   List<CommonPopupMenuItem> _buildMenuItems(
     BuildContext context,
-    AccessControlProps accessControl,
-  ) {
+    AccessControlProps accessControl, {
+    required bool isLoading,
+    required bool hasReleased,
+  }) {
     final appLocalizations = context.appLocalizations;
     String modeText(AccessControlMode mode) => switch (mode) {
       AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
@@ -315,9 +435,15 @@ class _AccessViewState extends ConsumerState<AccessView>
         subItems: [
           CommonPopupMenuItem(
             glyph: AppGlyphs.sparkle,
-            label: appLocalizations.intelligentSelected,
-            onPressed: _intelligentSelected,
+            label: appLocalizations.regionSelectApps,
+            onPressed: isLoading ? null : _intelligentSelected,
           ),
+          if (hasReleased)
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.undo,
+              label: appLocalizations.accessReturnToProvider,
+              onPressed: _returnToProvider,
+            ),
           CommonPopupMenuItem(
             glyph: AppGlyphs.copy,
             label: appLocalizations.clipboardExport,
@@ -336,6 +462,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   Widget _buildContent({
     required List<Package> packages,
     required Set<String> selected,
+    required Set<String> provided,
     required bool isSearching,
   }) {
     return FutureBuilder(
@@ -369,6 +496,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                   key: Key(package.packageName),
                   package: package,
                   value: selected.contains(package.packageName),
+                  fromProvider: provided.contains(package.packageName),
                   onChanged: (value) {
                     _handleSelected(package.packageName);
                   },
@@ -416,7 +544,11 @@ class _AccessViewState extends ConsumerState<AccessView>
         )
         .whereMatches(query, (package) => [package.label, package.packageName])
         .toList();
-    final currentList = accessControl.currentList;
+    final mode = accessControl.mode;
+    final providerApps =
+        ref.watch(providerAppsProvider).asData?.value ?? const ProviderApps();
+    final provided = providerApps.of(mode);
+    final currentList = _effectiveList(accessControl, provided).toList();
     final viewPackageNameList = viewPackages.map((e) => e.packageName).toList();
     final valueList = currentList.intersection(viewPackageNameList);
     final needsInstalledAppsPermission =
@@ -438,12 +570,7 @@ class _AccessViewState extends ConsumerState<AccessView>
       ),
     );
     return CommonPopScope(
-      onPop: hasChanges
-          ? (_) {
-              _handleBack();
-              return false;
-            }
-          : null,
+      onPop: hasChanges ? (_) => _handleBack() : null,
       child: CommonScaffold(
         isLoading: isLoading,
         searchState: AppBarSearchState(onSearch: _onSearch),
@@ -458,7 +585,12 @@ class _AccessViewState extends ConsumerState<AccessView>
               )
             : null,
         iconActions: [?selectAllAction],
-        menuItems: _buildMenuItems(context, accessControl),
+        menuItems: _buildMenuItems(
+          context,
+          accessControl,
+          isLoading: isLoading,
+          hasReleased: accessControl.currentReleased.any(provided.contains),
+        ),
         body: needsInstalledAppsPermission
             ? _buildInstalledAppsPermissionStatus()
             : FloatingFootBar(
@@ -473,6 +605,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                   child: _buildContent(
                     packages: viewPackages,
                     selected: valueList.toSet(),
+                    provided: provided,
                     isSearching: query.isNotEmpty,
                   ),
                 ),
@@ -547,12 +680,14 @@ class _AccessStatus extends StatelessWidget {
 class PackageListItem extends StatelessWidget {
   final Package package;
   final bool value;
+  final bool fromProvider;
   final void Function(bool?) onChanged;
 
   const PackageListItem({
     super.key,
     required this.package,
     required this.value,
+    this.fromProvider = false,
     required this.onChanged,
   });
 
@@ -565,10 +700,18 @@ class PackageListItem extends StatelessWidget {
         style: const TextStyle(overflow: TextOverflow.ellipsis),
         maxLines: 1,
       ),
-      subtitle: Text(
-        package.packageName,
-        style: const TextStyle(overflow: TextOverflow.ellipsis),
-        maxLines: 1,
+      subtitle: Row(
+        spacing: 6,
+        children: [
+          Flexible(
+            child: Text(
+              package.packageName,
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
+              maxLines: 1,
+            ),
+          ),
+          if (fromProvider) const ProviderTag(),
+        ],
       ),
       value: value,
       onChanged: onChanged,
@@ -595,3 +738,124 @@ List<CommonPopupMenuItem> _optionsSection<T>({
       ),
   ];
 }
+
+class AccessControlPanel extends StatelessWidget {
+  const AccessControlPanel({super.key});
+
+  static ConfigWriter<T> _writer<T>(
+    AccessControlProps Function(AccessControlProps state, T value) update,
+  ) {
+    return (ref, value) => ref
+        .read(accessControlStateProvider.notifier)
+        .update((state) => update(state, value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ).copyWith(top: context.contentTopPadding, bottom: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          generateSection(
+            items: [
+              ConfigOptionsItem<AccessControlMode>(
+                setting: accessToolSettings[0],
+                title: accessToolSettings[0].title,
+                options: AccessControlMode.values,
+                textBuilder: (mode) => switch (mode) {
+                  AccessControlMode.acceptSelected =>
+                    appLocalizations.whitelistMode,
+                  AccessControlMode.rejectSelected =>
+                    appLocalizations.blacklistMode,
+                },
+                selector: accessControlStateProvider.select(
+                  (state) => state.mode,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(mode: value),
+                ),
+              ),
+              ConfigOptionsItem<AccessSortType>(
+                setting: accessToolSettings[1],
+                title: accessToolSettings[1].title,
+                options: AccessSortType.values,
+                textBuilder: (type) => switch (type) {
+                  AccessSortType.none => appLocalizations.defaultText,
+                  AccessSortType.name => appLocalizations.name,
+                  AccessSortType.time => appLocalizations.time,
+                },
+                selector: accessControlStateProvider.select(
+                  (state) => state.sort,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(sort: value),
+                ),
+              ),
+            ],
+          ),
+          generateSection(
+            title: appLocalizations.source,
+            items: [
+              ConfigToggleItem(
+                setting: accessToolSettings[2],
+                title: accessToolSettings[2].title,
+                selector: accessControlStateProvider.select(
+                  (state) => !state.isFilterSystemApp,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(isFilterSystemApp: !value),
+                ),
+              ),
+              ConfigToggleItem(
+                setting: accessToolSettings[3],
+                title: accessToolSettings[3].title,
+                selector: accessControlStateProvider.select(
+                  (state) => !state.isFilterNonInternetApp,
+                ),
+                onChanged: _writer(
+                  (state, value) =>
+                      state.copyWith(isFilterNonInternetApp: !value),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final accessToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'access.mode',
+    page: ToolPage.access,
+    title: (l) => l.mode,
+    keywords: ['mode'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.sort',
+    page: ToolPage.access,
+    title: (l) => l.sort,
+    keywords: ['sort'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.systemApp',
+    page: ToolPage.access,
+    title: (l) => l.systemApp,
+    keywords: ['systemApp'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'access.noNetworkApp',
+    page: ToolPage.access,
+    title: (l) => l.noNetworkApp,
+    keywords: ['noNetworkApp'],
+    condition: SettingCondition.always,
+  ),
+];

@@ -1,3 +1,6 @@
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -65,10 +68,13 @@ class VPNItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _vpnToggle(
-      title: (l) => 'VPN',
-      select: (state) => state.enable,
-      update: (state, value) => state.copyWith(enable: value),
+    return SettingTarget(
+      spec: networkToolSettings[0],
+      child: _vpnToggle(
+        title: networkToolSettings[0].title,
+        select: (state) => state.enable,
+        update: (state, value) => state.copyWith(enable: value),
+      ),
     );
   }
 }
@@ -79,7 +85,8 @@ class TUNItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigToggleItem(
-      title: (l) => l.tun,
+      setting: networkToolSettings[1],
+      title: networkToolSettings[1].title,
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
       onChanged: _tunWriter(
         (state, value) => state.copyWith.tun(enable: value),
@@ -93,10 +100,13 @@ class AllowBypassItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _vpnToggle(
-      title: (l) => l.allowBypass,
-      select: (state) => state.allowBypass,
-      update: (state, value) => state.copyWith(allowBypass: value),
+    return SettingTarget(
+      spec: networkToolSettings[2],
+      child: _vpnToggle(
+        title: networkToolSettings[2].title,
+        select: (state) => state.allowBypass,
+        update: (state, value) => state.copyWith(allowBypass: value),
+      ),
     );
   }
 }
@@ -106,10 +116,13 @@ class VpnSystemProxyItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _vpnToggle(
-      title: (l) => l.systemProxy,
-      select: (state) => state.systemProxy,
-      update: (state, value) => state.copyWith(systemProxy: value),
+    return SettingTarget(
+      spec: networkToolSettings[3],
+      child: _vpnToggle(
+        title: networkToolSettings[3].title,
+        select: (state) => state.systemProxy,
+        update: (state, value) => state.copyWith(systemProxy: value),
+      ),
     );
   }
 }
@@ -119,10 +132,13 @@ class SystemProxyItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _networkToggle(
-      title: (l) => l.systemProxy,
-      select: (state) => state.systemProxy,
-      update: (state, value) => state.copyWith(systemProxy: value),
+    return SettingTarget(
+      spec: networkToolSettings[3],
+      child: _networkToggle(
+        title: networkToolSettings[3].title,
+        select: (state) => state.systemProxy,
+        update: (state, value) => state.copyWith(systemProxy: value),
+      ),
     );
   }
 }
@@ -132,10 +148,13 @@ class Ipv6Item extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _vpnToggle(
-      title: (l) => 'IPv6',
-      select: (state) => state.ipv6,
-      update: (state, value) => state.copyWith(ipv6: value),
+    return SettingTarget(
+      spec: networkToolSettings[4],
+      child: _vpnToggle(
+        title: networkToolSettings[4].title,
+        select: (state) => state.ipv6,
+        update: (state, value) => state.copyWith(ipv6: value),
+      ),
     );
   }
 }
@@ -145,10 +164,13 @@ class AutoSetSystemDnsItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _networkToggle(
-      title: (l) => l.autoSetSystemDns,
-      select: (state) => state.autoSetSystemDns,
-      update: (state, value) => state.copyWith(autoSetSystemDns: value),
+    return SettingTarget(
+      spec: networkToolSettings[5],
+      child: _networkToggle(
+        title: networkToolSettings[5].title,
+        select: (state) => state.autoSetSystemDns,
+        update: (state, value) => state.copyWith(autoSetSystemDns: value),
+      ),
     );
   }
 }
@@ -158,10 +180,13 @@ class DNSHijackingItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _vpnToggle(
-      title: (l) => l.dnsHijacking,
-      select: (state) => state.dnsHijacking,
-      update: (state, value) => state.copyWith(dnsHijacking: value),
+    return SettingTarget(
+      spec: networkToolSettings[6],
+      child: _vpnToggle(
+        title: networkToolSettings[6].title,
+        select: (state) => state.dnsHijacking,
+        update: (state, value) => state.copyWith(dnsHijacking: value),
+      ),
     );
   }
 }
@@ -172,7 +197,8 @@ class TunStackItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigOptionsItem<TunStack>(
-      title: (l) => l.stackMode,
+      setting: networkToolSettings[7],
+      title: networkToolSettings[7].title,
       options: TunStack.values,
       textBuilder: (stack) => stack.name,
       selector: patchClashConfigProvider.select((state) => state.tun.stack),
@@ -188,7 +214,8 @@ class InterfaceNameModeItem extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
     return ConfigOptionsItem<InterfaceNameMode>(
-      title: (l) => l.interfaceNameMode,
+      setting: networkToolSettings[8],
+      title: networkToolSettings[8].title,
       options: InterfaceNameMode.values,
       textBuilder: (mode) => switch (mode) {
         InterfaceNameMode.clear => appLocalizations.interfaceNameModeClear,
@@ -211,7 +238,8 @@ class InterfaceNameItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigTextItem(
-      title: (l) => l.interfaceName,
+      setting: networkToolSettings[9],
+      title: networkToolSettings[9].title,
       maxLength: TextInputLimits.name,
       selector: patchClashConfigProvider.select((state) => state.interfaceName),
       onChanged: _tunWriter(
@@ -226,10 +254,13 @@ class BypassPrivateRouteItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return _networkToggle(
-      title: (l) => l.bypassPrivateRoute,
-      select: (state) => state.bypassPrivateRoute,
-      update: (state, value) => state.copyWith(bypassPrivateRoute: value),
+    return SettingTarget(
+      spec: networkToolSettings[10],
+      child: _networkToggle(
+        title: networkToolSettings[10].title,
+        select: (state) => state.bypassPrivateRoute,
+        update: (state, value) => state.copyWith(bypassPrivateRoute: value),
+      ),
     );
   }
 }
@@ -240,7 +271,8 @@ class BypassDomainItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigListEditItem(
-      title: (l) => l.bypassDomain,
+      setting: networkToolSettings[11],
+      title: networkToolSettings[11].title,
       itemMaxLength: TextInputLimits.domain,
       selector: networkSettingProvider.select((state) => state.bypassDomain),
       onChanged: _networkWriter(
@@ -256,7 +288,8 @@ class RouteAddressItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigListEditItem(
-      title: (l) => l.routeAddress,
+      setting: networkToolSettings[12],
+      title: networkToolSettings[12].title,
       itemMaxLength: TextInputLimits.cidr,
       itemValidator: validateCidr,
       selector: patchClashConfigProvider.select(
@@ -346,16 +379,20 @@ class _NumberItem extends ConsumerWidget {
 // same keys as overrides, so a profile's own values apply unless picked.
 List<Widget> tunItems({required bool isMipsStack}) {
   return [
-    _NumberItem(
-      title: (l) => 'MTU',
-      min: minTunMtu,
-      max: maxTunMtu,
-      select: (state) => state.tun.mtu,
-      update: (state, value) => state.copyWith.tun(mtu: value),
+    SettingTarget(
+      spec: networkToolSettings[13],
+      child: _NumberItem(
+        title: networkToolSettings[13].title,
+        min: minTunMtu,
+        max: maxTunMtu,
+        select: (state) => state.tun.mtu,
+        update: (state, value) => state.copyWith.tun(mtu: value),
+      ),
     ),
     if (isMipsStack)
       ConfigOptionsItem<String>(
-        title: (l) => l.congestionController,
+        setting: networkToolSettings[14],
+        title: networkToolSettings[14].title,
         options: congestionControllers,
         textBuilder: (value) => value,
         selector: patchClashConfigProvider.select(
@@ -368,7 +405,8 @@ List<Widget> tunItems({required bool isMipsStack}) {
     const BypassPrivateRouteItem(),
     const RouteAddressItem(),
     ConfigListEditItem(
-      title: (l) => l.routeExcludeAddress,
+      setting: networkToolSettings[15],
+      title: networkToolSettings[15].title,
       itemMaxLength: TextInputLimits.cidr,
       itemValidator: validateCidr,
       selector: patchClashConfigProvider.select(
@@ -423,7 +461,8 @@ List<Widget> outboundItems({required bool isDesktop, required bool isLinux}) {
   return [
     if (isDesktop) ...[
       ConfigToggleItem(
-        title: (l) => l.disableKeepAlive,
+        setting: networkToolSettings[16],
+        title: networkToolSettings[16].title,
         selector: patchClashConfigProvider.select(
           (state) => state.disableKeepAlive,
         ),
@@ -431,24 +470,33 @@ List<Widget> outboundItems({required bool isDesktop, required bool isLinux}) {
           (state, value) => state.copyWith(disableKeepAlive: value),
         ),
       ),
-      _NumberItem(
-        title: (l) => l.keepAliveIdle,
-        isSeconds: true,
-        select: (state) => state.keepAliveIdle,
-        update: (state, value) => state.copyWith(keepAliveIdle: value),
+      SettingTarget(
+        spec: networkToolSettings[17],
+        child: _NumberItem(
+          title: networkToolSettings[17].title,
+          isSeconds: true,
+          select: (state) => state.keepAliveIdle,
+          update: (state, value) => state.copyWith(keepAliveIdle: value),
+        ),
       ),
-      _NumberItem(
-        title: (l) => l.keepAliveIntervalDesc,
-        isSeconds: true,
-        select: (state) => state.keepAliveInterval,
-        update: (state, value) => state.copyWith(keepAliveInterval: value),
+      SettingTarget(
+        spec: networkToolSettings[18],
+        child: _NumberItem(
+          title: networkToolSettings[18].title,
+          isSeconds: true,
+          select: (state) => state.keepAliveInterval,
+          update: (state, value) => state.copyWith(keepAliveInterval: value),
+        ),
       ),
     ],
     if (isLinux)
-      _NumberItem(
-        title: (l) => l.routingMark,
-        select: (state) => state.routingMark,
-        update: (state, value) => state.copyWith(routingMark: value),
+      SettingTarget(
+        spec: networkToolSettings[19],
+        child: _NumberItem(
+          title: networkToolSettings[19].title,
+          select: (state) => state.routingMark,
+          update: (state, value) => state.copyWith(routingMark: value),
+        ),
       ),
   ];
 }
@@ -585,3 +633,146 @@ class NetworkListView extends StatelessWidget {
     );
   }
 }
+
+final networkToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'network.VPN',
+    page: ToolPage.network,
+    title: (l) => 'VPN',
+    keywords: ['VPN'],
+    condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'network.tun',
+    page: ToolPage.network,
+    title: (l) => l.tun,
+    keywords: ['tun'],
+    condition: SettingCondition.desktop,
+  ),
+  SettingSpec(
+    id: 'network.allowBypass',
+    page: ToolPage.network,
+    title: (l) => l.allowBypass,
+    keywords: ['allowBypass'],
+    condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'network.systemProxy',
+    page: ToolPage.network,
+    title: (l) => l.systemProxy,
+    keywords: ['systemProxy'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.IPv6',
+    page: ToolPage.network,
+    title: (l) => 'IPv6',
+    keywords: ['IPv6'],
+    condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'network.autoSetSystemDns',
+    page: ToolPage.network,
+    title: (l) => l.autoSetSystemDns,
+    keywords: ['autoSetSystemDns'],
+    condition: SettingCondition.macos,
+  ),
+  SettingSpec(
+    id: 'network.dnsHijacking',
+    page: ToolPage.network,
+    title: (l) => l.dnsHijacking,
+    keywords: ['dnsHijacking'],
+    condition: SettingCondition.android,
+  ),
+  SettingSpec(
+    id: 'network.stackMode',
+    page: ToolPage.network,
+    title: (l) => l.stackMode,
+    keywords: ['stackMode'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.interfaceNameMode',
+    page: ToolPage.network,
+    title: (l) => l.interfaceNameMode,
+    keywords: ['interfaceNameMode'],
+    condition: SettingCondition.desktop,
+  ),
+  SettingSpec(
+    id: 'network.interfaceName',
+    page: ToolPage.network,
+    title: (l) => l.interfaceName,
+    keywords: ['interfaceName'],
+    condition: SettingCondition.customInterface,
+  ),
+  SettingSpec(
+    id: 'network.bypassPrivateRoute',
+    page: ToolPage.network,
+    title: (l) => l.bypassPrivateRoute,
+    keywords: ['bypassPrivateRoute'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.bypassDomain',
+    page: ToolPage.network,
+    title: (l) => l.bypassDomain,
+    keywords: ['bypassDomain'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.routeAddress',
+    page: ToolPage.network,
+    title: (l) => l.routeAddress,
+    keywords: ['routeAddress'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.MTU',
+    page: ToolPage.network,
+    title: (l) => 'MTU',
+    keywords: ['MTU'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.congestionController',
+    page: ToolPage.network,
+    title: (l) => l.congestionController,
+    keywords: ['congestionController'],
+    condition: SettingCondition.mipsStack,
+  ),
+  SettingSpec(
+    id: 'network.routeExcludeAddress',
+    page: ToolPage.network,
+    title: (l) => l.routeExcludeAddress,
+    keywords: ['routeExcludeAddress'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'network.disableKeepAlive',
+    page: ToolPage.network,
+    title: (l) => l.disableKeepAlive,
+    keywords: ['disableKeepAlive'],
+    condition: SettingCondition.desktop,
+  ),
+  SettingSpec(
+    id: 'network.keepAliveIdle',
+    page: ToolPage.network,
+    title: (l) => l.keepAliveIdle,
+    keywords: ['keepAliveIdle'],
+    condition: SettingCondition.desktop,
+  ),
+  SettingSpec(
+    id: 'network.keepAliveIntervalDesc',
+    page: ToolPage.network,
+    title: (l) => l.keepAliveIntervalDesc,
+    keywords: ['keepAliveIntervalDesc'],
+    condition: SettingCondition.desktop,
+  ),
+  SettingSpec(
+    id: 'network.routingMark',
+    page: ToolPage.network,
+    title: (l) => l.routingMark,
+    keywords: ['routingMark'],
+    condition: SettingCondition.linux,
+  ),
+];

@@ -1,3 +1,4 @@
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -104,7 +105,7 @@ void main() {
         .copyWith(accessControlProps: props);
   }
 
-  Future<void> pumpAccessView(WidgetTester tester) async {
+  Future<void> pumpAccessView(WidgetTester tester, {String? settingId}) async {
     tester.view.physicalSize = const Size(1400, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -116,7 +117,12 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: AccessView()),
+        child: TestApp(
+          child: SettingsRevealScope(
+            targetId: settingId,
+            child: const AccessView(),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -126,6 +132,27 @@ void main() {
   Future<void> teardownView(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
   }
+
+  testWidgets(
+    'a deep setting opens its existing panel without changing access',
+    (tester) async {
+      seedAccessControl(const AccessControlProps(enable: true));
+      await pumpAccessView(tester, settingId: 'access.noNetworkApp');
+      await tester.pumpAndSettle();
+      expect(find.byType(AccessControlPanel), findsOneWidget);
+      final anchor = find.byWidgetPredicate(
+        (widget) =>
+            widget is SettingTarget && widget.spec.id == 'access.noNetworkApp',
+      );
+      expect(anchor, findsOneWidget);
+      expect(tester.getRect(anchor).bottom, lessThanOrEqualTo(1400));
+      expect(
+        container.read(accessControlStateProvider).isFilterNonInternetApp,
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   group('visible package list', () {
     testWidgets('hides system and offline apps by default', (tester) async {

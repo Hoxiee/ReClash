@@ -40,20 +40,6 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
-  Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final commonAction = ref.read(commonActionProvider.notifier);
-    final result = await globalState.loadingRun(
-      () async => (release: await request.checkForUpdate()),
-      title: context.appLocalizations.checkUpdate,
-      tag: LoadingTag.checkUpdate,
-    );
-    if (result == null) return;
-    unawaited(
-      commonAction.checkUpdateResultHandle(data: result.release, isUser: true),
-    );
-  }
-
   Widget _buildLinkItem({
     required Glyph glyph,
     required String title,
@@ -141,7 +127,9 @@ class AboutView extends ConsumerWidget {
           _AboutHero(
             isCheckingUpdate: isLoading,
             onCheckUpdate: () {
-              _checkUpdate(context, ref);
+              unawaited(
+                ref.read(commonActionProvider.notifier).checkForUpdates(),
+              );
             },
             onEnterDeveloperMode: () {
               ref

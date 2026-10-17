@@ -136,78 +136,65 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('a switch row turns auto update on and reveals its interval', (
-    tester,
-  ) async {
-    const size = Size(1000, 1000);
-    tester.view.physicalSize = size;
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets(
+    'resource auto update is a body switch with a conditional interval',
+    (tester) async {
+      const size = Size(1000, 1000);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    final container = createContainer();
-    container.read(viewSizeProvider.notifier).update((_) => size);
+      final container = createContainer();
+      container.read(viewSizeProvider.notifier).update((_) => size);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: ResourcesView()),
+        ),
+      );
+      final l10n = currentAppLocalizations;
+      await pumpUntilFound(tester, find.text(GeoResource.MMDB.name));
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: ResourcesView()),
-      ),
-    );
-    final l10n = currentAppLocalizations;
-    await pumpUntilFound(tester, find.text(l10n.autoUpdate));
-    await tester.pumpAndSettle();
-
-    bool autoUpdate() => container.read(patchClashConfigProvider).geoAutoUpdate;
-    final interval = find.text(l10n.resourceUpdateInterval);
-
-    expect(find.byTooltip(l10n.update), findsOneWidget);
-    expect(
-      find.descendant(
+      bool autoUpdate() =>
+          container.read(patchClashConfigProvider).geoAutoUpdate;
+      final more = find.descendant(
         of: find.byType(AppBar),
         matching: find.byGlyph(AppGlyphs.more),
-      ),
-      findsNothing,
-    );
-    expect(autoUpdate(), isFalse);
-    expect(interval, findsNothing);
+      );
+      expect(find.byTooltip(l10n.update), findsOneWidget);
+      expect(more, findsNothing);
+      expect(find.text(l10n.autoUpdate), findsOneWidget);
+      expect(find.byType(CommonSwitch), findsOneWidget);
+      expect(find.text(l10n.resourceUpdateInterval), findsNothing);
+      expect(autoUpdate(), isFalse);
 
-    await tester.tap(find.text(l10n.autoUpdate));
-    await tester.pumpAndSettle();
-    expect(autoUpdate(), isTrue);
-    expect(
-      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-      isTrue,
-    );
-    expect(
-      find.text('${defaultClashConfig.geoUpdateInterval} ${l10n.hours}'),
-      findsOneWidget,
-    );
+      await tester.tap(find.text(l10n.autoUpdate));
+      await tester.pumpAndSettle();
+      expect(autoUpdate(), isTrue);
 
-    await tester.tap(interval);
-    await tester.pumpAndSettle();
-    expect(find.byType(InputDialog), findsOneWidget);
-    expect(
-      find.text(defaultClashConfig.geoUpdateInterval.toString()),
-      findsOneWidget,
-    );
+      await tester.tap(find.text(l10n.resourceUpdateInterval));
+      await tester.pumpAndSettle();
+      expect(find.byType(InputDialog), findsOneWidget);
+      expect(
+        find.text(defaultClashConfig.geoUpdateInterval.toString()),
+        findsOneWidget,
+      );
+      await tester.enterText(find.byType(TextFormField), '6');
+      await tester.tap(find.text(l10n.submit));
+      await tester.pumpAndSettle();
+      expect(find.byType(InputDialog), findsNothing);
+      expect(container.read(patchClashConfigProvider).geoUpdateInterval, 6);
 
-    await tester.enterText(find.byType(TextFormField), '6');
-    await tester.tap(find.text(l10n.submit));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(InputDialog), findsNothing);
-    expect(container.read(patchClashConfigProvider).geoUpdateInterval, 6);
-    expect(find.text('6 ${l10n.hours}'), findsOneWidget);
-
-    await tester.tap(find.byType(CommonSwitch));
-    await tester.pumpAndSettle();
-    expect(autoUpdate(), isFalse);
-    expect(interval, findsNothing);
-    expect(tester.takeException(), null);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+      await tester.tap(find.text(l10n.autoUpdate));
+      await tester.pumpAndSettle();
+      expect(autoUpdate(), isFalse);
+      expect(find.text(l10n.resourceUpdateInterval), findsNothing);
+      expect(tester.takeException(), null);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('refreshes the update time once the core finishes updating', (
     tester,

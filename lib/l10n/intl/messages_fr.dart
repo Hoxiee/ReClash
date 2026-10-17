@@ -715,6 +715,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "Collecte de données et confidentialité",
     ),
+    "disclaimerReadToEnd": MessageLookupByLibrary.simpleMessage(
+      "Lire jusqu’à la fin",
+    ),
     "disclaimerResponsibilityContent": MessageLookupByLibrary.simpleMessage(
       "Il vous incombe de vous assurer que l’utilisation du Logiciel est licite là où vous vivez, et vous assumez seul la responsabilité juridique de tout ce que vous faites avec lui et de ses conséquences.\n\nLes abonnements, nœuds et configurations que vous importez relèvent de votre choix. La licéité de leur source, la sécurité de leur contenu et la fiabilité de leur service sont une affaire entre vous et leurs fournisseurs.",
     ),

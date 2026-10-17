@@ -954,5 +954,6 @@
   "licensesDesc": "Paquetes incluidos en la aplicación",
   "preventDuplicateProfiles": "Evitar suscripciones duplicadas",
   "preventDuplicateProfilesDesc": "Rechazar un enlace de suscripción que ya usa un perfil existente",
-  "profileImportDuplicate": "Ya existe un perfil con esta URL de suscripción"
+  "profileImportDuplicate": "Ya existe un perfil con esta URL de suscripción",
+  "disclaimerReadToEnd": "Leer hasta el final"
 }

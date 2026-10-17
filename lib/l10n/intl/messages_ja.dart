@@ -570,6 +570,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "データ収集とプライバシー",
     ),
+    "disclaimerReadToEnd": MessageLookupByLibrary.simpleMessage("最後までお読みください"),
     "disclaimerResponsibilityContent": MessageLookupByLibrary.simpleMessage(
       "お住まいの国または地域で本ソフトウェアの使用が合法であることはご自身で確認する必要があり、本ソフトウェアを使用したすべての行為とその結果について、ご自身が単独で法的責任を負います。\n\nインポートするサブスクリプション、ノード、設定はご自身の判断で選択したものです。その出所の適法性、内容の安全性、サービスの安定性については、利用者と各提供者の間で解決してください。",
     ),

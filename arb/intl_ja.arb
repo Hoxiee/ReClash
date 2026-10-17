@@ -954,5 +954,6 @@
   "licensesDesc": "アプリに同棑されているパッケージ",
   "preventDuplicateProfiles": "サブスクリプションの重複を防ぐ",
   "preventDuplicateProfilesDesc": "既存のプロファイルが使用している購読リンクを拒否します",
-  "profileImportDuplicate": "このサブスクリプションURLのプロファイルは既に存在します"
+  "profileImportDuplicate": "このサブスクリプションURLのプロファイルは既に存在します",
+  "disclaimerReadToEnd": "最後までお読みください"
 }

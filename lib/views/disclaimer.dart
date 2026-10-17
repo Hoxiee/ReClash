@@ -6,7 +6,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// True only after "Agree" and the restatement; any other way out declines.
+/// True only after "Agree"; any other way out declines.
 Future<bool> requestDisclaimerConsent() async {
   return await BaseNavigator.push<bool>(
         rootNavigatorKey.currentContext!,
@@ -17,8 +17,15 @@ Future<bool> requestDisclaimerConsent() async {
 
 class DisclaimerView extends StatelessWidget {
   final bool requireConsent;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
 
-  const DisclaimerView({super.key, this.requireConsent = false});
+  const DisclaimerView({
+    super.key,
+    this.requireConsent = false,
+    this.onAgree,
+    this.onDecline,
+  });
 
   static const _maxContentWidth = 720.0;
 
@@ -93,6 +100,8 @@ class DisclaimerView extends StatelessWidget {
               maxWidth: _maxContentWidth,
               gutter: _mobileGutter,
               compact: true,
+              onAgree: onAgree,
+              onDecline: onDecline,
               child: body,
             ),
           );
@@ -103,6 +112,8 @@ class DisclaimerView extends StatelessWidget {
               maxWidth: _maxContentWidth,
               gutter: _desktopGutter,
               compact: false,
+              onAgree: onAgree,
+              onDecline: onDecline,
               child: _buildBody(
                 padding: const EdgeInsets.fromLTRB(
                   _desktopGutter,
@@ -254,25 +265,78 @@ class _TermParagraphs extends StatelessWidget {
   }
 }
 
-class _ConsentLayout extends StatelessWidget {
+class _ConsentLayout extends StatefulWidget {
   final double maxWidth;
   final double gutter;
   final bool compact;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
   final Widget child;
 
   const _ConsentLayout({
     required this.maxWidth,
     required this.gutter,
     required this.compact,
+    this.onAgree,
+    this.onDecline,
     required this.child,
   });
+
+  @override
+  State<_ConsentLayout> createState() => _ConsentLayoutState();
+}
+
+class _ConsentLayoutState extends State<_ConsentLayout> {
+  Locale? _locale;
+  static const _endTolerance = 1.0;
+
+  bool _readToEnd = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_locale != locale) {
+      _locale = locale;
+      _readToEnd = false;
+    }
+  }
+
+  bool _handleNotification(Notification notification) {
+    if (_readToEnd) {
+      return false;
+    }
+    final metrics = switch (notification) {
+      ScrollNotification(depth: 0, :final metrics) ||
+      ScrollMetricsNotification(depth: 0, :final metrics) => metrics,
+      _ => null,
+    };
+    if (metrics != null && metrics.extentAfter <= _endTolerance) {
+      setState(() {
+        _readToEnd = true;
+      });
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: child),
-        _ConsentBar(maxWidth: maxWidth, gutter: gutter, compact: compact),
+        Expanded(
+          child: NotificationListener<Notification>(
+            onNotification: _handleNotification,
+            child: widget.child,
+          ),
+        ),
+        _ConsentBar(
+          maxWidth: widget.maxWidth,
+          gutter: widget.gutter,
+          compact: widget.compact,
+          readToEnd: _readToEnd,
+          onAgree: widget.onAgree,
+          onDecline: widget.onDecline,
+        ),
       ],
     );
   }
@@ -282,61 +346,87 @@ class _ConsentBar extends StatelessWidget {
   final double maxWidth;
   final double gutter;
   final bool compact;
+  final bool readToEnd;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
 
   const _ConsentBar({
     required this.maxWidth,
     required this.gutter,
     required this.compact,
+    required this.readToEnd,
+    this.onAgree,
+    this.onDecline,
   });
 
   Widget _buildExitButton(BuildContext context) {
     return ElasticButton(
       child: OutlinedButton(
         onPressed: () {
-          Navigator.of(context).pop(false);
+          if (onDecline != null) {
+            onDecline!();
+          } else {
+            Navigator.of(context).pop(false);
+          }
         },
         child: Text(context.appLocalizations.exit),
       ),
     );
   }
 
-  Future<void> _handleAgree(BuildContext context) async {
-    final restated = await dialogs.showCommonDialog<bool>(
-      context: context,
-      dismissible: false,
-      child: const _RestateDialog(),
-    );
-    if (restated == true && context.mounted) {
+  void _handleAgree(BuildContext context) {
+    if (onAgree != null) {
+      onAgree!();
+    } else {
       Navigator.of(context).pop(true);
     }
   }
 
-  Widget _buildAgreeButton(BuildContext context) {
+  Widget _buildAgreeButton(BuildContext context, {required String label}) {
     return ElasticButton(
       child: FilledButton(
-        onPressed: () => _handleAgree(context),
-        child: Text(context.appLocalizations.agree),
+        onPressed: readToEnd ? () => _handleAgree(context) : null,
+        child: Text(label),
       ),
     );
   }
 
   Widget _buildCompactActions(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     return Row(
       children: [
-        Expanded(child: _buildExitButton(context)),
+        _buildExitButton(context),
         const SizedBox(width: 12),
-        Expanded(child: _buildAgreeButton(context)),
+        Expanded(
+          child: _buildAgreeButton(
+            context,
+            label: readToEnd
+                ? appLocalizations.agree
+                : appLocalizations.disclaimerReadToEnd,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildActions(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     return Row(
       children: [
-        const Spacer(),
+        Expanded(
+          child: readToEnd
+              ? const SizedBox.shrink()
+              : Text(
+                  appLocalizations.disclaimerReadToEnd,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: context.colorScheme.onSurfaceVariant),
+                ),
+        ),
+        const SizedBox(width: 12),
         _buildExitButton(context),
         const SizedBox(width: 12),
-        _buildAgreeButton(context),
+        _buildAgreeButton(context, label: appLocalizations.agree),
       ],
     );
   }

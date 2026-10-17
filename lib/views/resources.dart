@@ -1,3 +1,6 @@
+import 'package:reclash/models/tool_route.dart';
+import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -191,23 +194,33 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
           illustration: NullStatusIllustration.data,
         ),
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-            top: context.sectionsTopPadding,
-            bottom: 16 + context.bottomInset,
-          ),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                top: context.sectionsTopPadding,
+                bottom: 16 + context.bottomInset,
+              ) +
+              context.bodyInsets,
           children: [
             generateSection(
               items: [
-                ListItem.toggle(
-                  title: Text(appLocalizations.autoUpdate),
-                  value: autoUpdate,
-                  onChanged: _updateAutoUpdate,
+                SettingTarget(
+                  spec: resourceToolSettings[0],
+                  child: ListItem.toggle(
+                    title: Text(appLocalizations.autoUpdate),
+                    value: autoUpdate,
+                    onChanged: _updateAutoUpdate,
+                  ),
                 ),
                 if (autoUpdate)
-                  ListItem(
-                    title: Text(appLocalizations.resourceUpdateInterval),
-                    subtitle: Text('$updateInterval ${appLocalizations.hours}'),
-                    onTap: _updateInterval,
+                  SettingTarget(
+                    spec: resourceToolSettings[1],
+                    child: ListItem(
+                      title: Text(appLocalizations.resourceUpdateInterval),
+                      subtitle: Text(
+                        '$updateInterval ${appLocalizations.hours}',
+                      ),
+                      onTap: _updateInterval,
+                    ),
                   ),
               ],
             ),
@@ -600,3 +613,18 @@ class UpdateGeoUrlFormDialog extends StatelessWidget {
     );
   }
 }
+
+final resourceToolSettings = <SettingSpec>[
+  SettingSpec(
+    id: 'resources.autoUpdate',
+    page: ToolPage.resources,
+    title: (l) => l.autoUpdate,
+    keywords: ['geo update', 'automatic update'],
+  ),
+  SettingSpec(
+    id: 'resources.updateInterval',
+    page: ToolPage.resources,
+    title: (l) => l.resourceUpdateInterval,
+    keywords: ['geo update interval'],
+  ),
+];
