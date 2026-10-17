@@ -19,9 +19,7 @@ void main() {
     ).firstMatch(source)!.group(1)!;
     final protocols = RegExp(r'List = \[\]Type\{([^}]*)\}')
         .firstMatch(
-          File(
-            'core/mihomo/constant/sniffer/sniffer.go',
-          ).readAsStringSync(),
+          File('core/mihomo/constant/sniffer/sniffer.go').readAsStringSync(),
         )!
         .group(1)!
         .split(',')
