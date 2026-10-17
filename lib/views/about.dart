@@ -17,6 +17,21 @@ class Contributor {
   const Contributor({required this.avatar, required this.name});
 }
 
+@immutable
+class Credit {
+  final String avatar;
+  final String name;
+  final String role;
+  final String link;
+
+  const Credit({
+    required this.avatar,
+    required this.name,
+    required this.role,
+    required this.link,
+  });
+}
+
 class AboutView extends ConsumerWidget {
   const AboutView({super.key});
 
@@ -56,10 +71,64 @@ class AboutView extends ConsumerWidget {
     );
   }
 
+  Widget _buildCreditItem({required Credit credit}) {
+    return ListItem(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: CircleAvatar(foregroundImage: AssetImage(credit.avatar)),
+      ),
+      title: Text(credit.name),
+      subtitle: Text(credit.role),
+      trailing: const GlyphIcon(AppGlyphs.openExternal),
+      onTap: () {
+        dialogs.openUrl(credit.link);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isLoading = ref.watch(loadingProvider(LoadingTag.checkUpdate));
+    final author = Credit(
+      avatar: 'assets/images/avatar/hoxiee.jpg',
+      name: 'Hoxiee',
+      role: appLocalizations.roleAuthor,
+      link: 'https://github.com/Hoxiee',
+    );
+    final gratitude = [
+      Credit(
+        avatar: 'assets/images/avatar/chen08209.jpg',
+        name: 'chen08209',
+        role: appLocalizations.creditFlClash,
+        link: 'https://github.com/chen08209/FlClash',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/pluralplay.jpg',
+        name: 'pluralplay',
+        role: appLocalizations.creditFlClashX,
+        link: 'https://github.com/pluralplay/FlClashX',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/chenx-dust.jpg',
+        name: 'chenx-dust',
+        role: appLocalizations.creditFlClashPatched,
+        link: 'https://github.com/chenx-dust/FlClash-Patched',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/metacubex.jpg',
+        name: 'MetaCubeX',
+        role: appLocalizations.creditMihomo,
+        link: 'https://github.com/MetaCubeX/mihomo',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/hufrea.jpg',
+        name: 'hufrea',
+        role: appLocalizations.creditByeDpi,
+        link: 'https://github.com/hufrea/byedpi',
+      ),
+    ];
     return CommonScaffold(
       isLoading: isLoading,
       title: appLocalizations.about,
@@ -85,6 +154,17 @@ class AboutView extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           generateSection(
+            title: appLocalizations.madeBy,
+            items: [_buildCreditItem(credit: author)],
+          ),
+          generateSection(
+            title: appLocalizations.gratitude,
+            footer: appLocalizations.gratitudeDesc,
+            items: [
+              for (final credit in gratitude) _buildCreditItem(credit: credit),
+            ],
+          ),
+          generateSection(
             title: appLocalizations.more,
             items: [
               _buildLinkItem(
@@ -104,6 +184,39 @@ class AboutView extends ConsumerWidget {
                 title: 'Telegram',
                 url: 'https://t.me/ReClashApp',
                 label: 't.me/ReClashApp',
+              ),
+              ListItem(
+                leading: const _LinkBadge(glyph: AppGlyphs.gavel),
+                title: Text(appLocalizations.license),
+                subtitle: const Text('GPL-3.0'),
+                trailing: const GlyphIcon(AppGlyphs.openExternal),
+                onTap: () {
+                  dialogs.openUrl(
+                    'https://github.com/$repository/blob/main/LICENSE',
+                  );
+                },
+              ),
+              ListItem(
+                leading: const _LinkBadge(glyph: AppGlyphs.info),
+                title: Text(appLocalizations.licenses),
+                subtitle: Text(appLocalizations.licensesDesc),
+                trailing: const GlyphIcon(AppGlyphs.openExternal),
+                onTap: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: appName,
+                    applicationVersion: 'v${globalState.packageInfo.version}',
+                    applicationIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/images/icon.png',
+                        width: 48,
+                        height: 48,
+                      ),
+                    ),
+                    applicationLegalese: 'GPL-3.0',
+                  );
+                },
               ),
             ],
           ),

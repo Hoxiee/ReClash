@@ -939,5 +939,17 @@
   "customImportDroppedSubRules": "{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{label} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}",
   "autoInclude": "Auto-include",
   "allReferencedProxies": "All referenced proxies",
-  "allReferencedProxyProviders": "All referenced proxy providers"
+  "allReferencedProxyProviders": "All referenced proxy providers",
+  "madeBy": "Made by",
+  "roleAuthor": "Author and maintainer",
+  "gratitude": "Gratitude",
+  "gratitudeDesc": "ReClash exists because of their work",
+  "creditFlClash": "FlClash — the client this is built on",
+  "creditFlClashX": "FlClashX — provider features and ideas",
+  "creditFlClashPatched": "FlClash-Patched — extra features",
+  "creditMihomo": "mihomo — the proxy core",
+  "creditByeDpi": "ByeDPI — the DPI-bypass tool",
+  "license": "License",
+  "licenses": "Licenses",
+  "licensesDesc": "Packages bundled into the app"
 }

@@ -7835,6 +7835,106 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Made by`
+  String get madeBy {
+    return Intl.message('Made by', name: 'madeBy', desc: '', args: []);
+  }
+
+  /// `Author and maintainer`
+  String get roleAuthor {
+    return Intl.message(
+      'Author and maintainer',
+      name: 'roleAuthor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gratitude`
+  String get gratitude {
+    return Intl.message('Gratitude', name: 'gratitude', desc: '', args: []);
+  }
+
+  /// `ReClash exists because of their work`
+  String get gratitudeDesc {
+    return Intl.message(
+      'ReClash exists because of their work',
+      name: 'gratitudeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClash — the client this is built on`
+  String get creditFlClash {
+    return Intl.message(
+      'FlClash — the client this is built on',
+      name: 'creditFlClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClashX — provider features and ideas`
+  String get creditFlClashX {
+    return Intl.message(
+      'FlClashX — provider features and ideas',
+      name: 'creditFlClashX',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClash-Patched — extra features`
+  String get creditFlClashPatched {
+    return Intl.message(
+      'FlClash-Patched — extra features',
+      name: 'creditFlClashPatched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `mihomo — the proxy core`
+  String get creditMihomo {
+    return Intl.message(
+      'mihomo — the proxy core',
+      name: 'creditMihomo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ByeDPI — the DPI-bypass tool`
+  String get creditByeDpi {
+    return Intl.message(
+      'ByeDPI — the DPI-bypass tool',
+      name: 'creditByeDpi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `License`
+  String get license {
+    return Intl.message('License', name: 'license', desc: '', args: []);
+  }
+
+  /// `Licenses`
+  String get licenses {
+    return Intl.message('Licenses', name: 'licenses', desc: '', args: []);
+  }
+
+  /// `Packages bundled into the app`
+  String get licensesDesc {
+    return Intl.message(
+      'Packages bundled into the app',
+      name: 'licensesDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

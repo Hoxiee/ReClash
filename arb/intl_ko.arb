@@ -939,5 +939,17 @@
   "customImportDroppedSubRules": "{count, plural, other{사용자 지정 프로필은 하위 규칙을 지원하지 않아 SUB-RULE 규칙 {label}개를 제외했습니다}}",
   "autoInclude": "자동 포함",
   "allReferencedProxies": "참조된 모든 프록시",
-  "allReferencedProxyProviders": "참조된 모든 프록시 공급자"
+  "allReferencedProxyProviders": "참조된 모든 프록시 공급자",
+  "madeBy": "만든 이",
+  "roleAuthor": "개발자 및 Maintainer",
+  "gratitude": "감사의 말",
+  "gratitudeDesc": "ReClash는 그들의 작업 덕분에 존재합니다",
+  "creditFlClash": "FlClash — 기반이 된 클라이언트",
+  "creditFlClashX": "FlClashX — 프로바이더 기능과 아이디어",
+  "creditFlClashPatched": "FlClash-Patched — 추가 기능",
+  "creditMihomo": "mihomo — 프록시 코어",
+  "creditByeDpi": "ByeDPI — DPI 우회 도구",
+  "license": "라이선스",
+  "licenses": "라이선스",
+  "licensesDesc": "앱에 포함된 패키지"
 }

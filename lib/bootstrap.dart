@@ -44,6 +44,7 @@ class Bootstrap {
     trayPort = appTray;
     navigationPort = navigation;
     final dynamicColor = await _initDynamicColor();
+    unawaited(registerAppLicenses());
     return _initData(version, dynamicColor);
   }
 

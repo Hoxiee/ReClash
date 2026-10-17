@@ -1,0 +1,14 @@
+{
+  "madeBy": "Автор",
+  "roleAuthor": "Автор и мейнтейнер",
+  "gratitude": "Благодарности",
+  "gratitudeDesc": "ReClash существует благодаря их работе",
+  "creditFlClash": "FlClash — клиент, на котором всё построено",
+  "creditFlClashX": "FlClashX — функции и идеи для работы с провайдерами",
+  "creditFlClashPatched": "FlClash-Patched — дополнительные функции",
+  "creditMihomo": "mihomo — прокси-ядро",
+  "creditByeDpi": "ByeDPI — инструмент обхода DPI",
+  "license": "Лицензия",
+  "licenses": "Лицензии",
+  "licensesDesc": "Пакеты, входящие в приложение"
+}

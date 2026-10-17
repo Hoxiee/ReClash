@@ -24,6 +24,7 @@ export 'javascript.dart';
 export 'keyboard.dart';
 export 'l10n_labels.dart';
 export 'layout.dart';
+export 'licenses.dart';
 export 'link.dart';
 export 'linux_elevation.dart';
 export 'log_payload.dart';

@@ -557,6 +557,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Créer"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Date de création"),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI — l\'outil de contournement DPI",
+    ),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — le client sur lequel ceci est construit",
+    ),
+    "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
+      "FlClash-Patched — fonctions supplémentaires",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — fonctions et idées pour les fournisseurs",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage(
+      "mihomo — le cœur du proxy",
+    ),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Contient le bouton de démarrage et ne peut pas être retiré",
     ),
@@ -908,6 +923,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Aller à la configuration du script",
     ),
+    "gratitude": MessageLookupByLibrary.simpleMessage("Remerciements"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash existe grâce à leur travail",
+    ),
     "grid": MessageLookupByLibrary.simpleMessage("Grille"),
     "groupCount": m29,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groupes"),
@@ -1147,6 +1166,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "L’app s’est arrêtée de façon inattendue lors de son dernier démarrage. La configuration automatique a été ignorée pour ce lancement ; vous pouvez la démarrer manuellement pour réessayer.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Disposition"),
+    "license": MessageLookupByLibrary.simpleMessage("Licence"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Licences"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Paquets inclus dans l\'application",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Clair"),
     "lineIssueTip": m41,
     "lineWrap": MessageLookupByLibrary.simpleMessage("Retour à la ligne"),
@@ -1203,6 +1227,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Exemption de bouclage UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Aérée"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("Réalisé par"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Respecter la casse"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage(
       "Faire correspondre l’IP source",
@@ -1550,6 +1575,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Résultat"),
     "retry": MessageLookupByLibrary.simpleMessage("Réessayer"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("Auteur et mainteneur"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Adresses de route"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Adresses de route exclues",
