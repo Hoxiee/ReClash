@@ -407,8 +407,8 @@ git worktree add ../ReClash-tools -b feature/tools-workspace dev
 bash tool/worktrees.sh list
 ```
 
-Keep private work as one amendable feature commit. When it is ready, return to the integration checkout and fast-forward
-it; then explicitly push to ReClash's remote and remove the clean worktree/branch:
+Keep private work in one thematic commit. When it is ready, return to the integration checkout and fast-forward it. Publish
+only after the user explicitly authorizes it, and remove the clean worktree/branch when appropriate:
 
 ```bash
 git switch dev
