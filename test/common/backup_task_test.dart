@@ -1,0 +1,705 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
+import 'package:drift/native.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/migration.dart';
+import 'package:reclash/database/database.dart' as db;
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart';
+
+import '../helpers/app_paths.dart';
+
+/// The public entry points hand their work to a background isolate, which
+/// cannot reach the mocked platform channels, so the tests drive the worker
+/// functions the isolate calls. Those take every path as an argument, so each
+/// test runs against its own temporary tree.
+void main() {
+  late Directory root;
+
+  setUpAll(() async {
+    root = Directory.systemTemp.createTempSync('backup_task_test');
+    // File.copy does not create parent directories; in production these are the
+    // already-existing temp and cache dirs the platform hands out.
+    Directory(join(root.path, 'tmp')).createSync(recursive: true);
+    Directory(join(root.path, 'archive')).createSync(recursive: true);
+    await useAppPaths(root);
+  });
+
+  tearDownAll(() {
+    try {
+      root.deleteSync(recursive: true);
+    } catch (_) {}
+  });
+
+  Directory makeDir(String name) =>
+      Directory(join(root.path, name, uniqueId))..createSync(recursive: true);
+
+  File writeFile(String path, String content) => File(path)
+    ..createSync(recursive: true)
+    ..writeAsStringSync(content);
+
+  group('shakeOrphanFiles', () {
+    test('reports only the files whose name is not a live id', () {
+      final profiles = makeDir('profiles');
+      final scripts = makeDir('scripts');
+      final providers = makeDir('providers');
+      writeFile(join(profiles.path, '1.yaml'), 'keep');
+      writeFile(join(profiles.path, '2.yaml'), 'drop');
+      writeFile(join(scripts.path, '10.js'), 'keep');
+      writeFile(join(scripts.path, '20.js'), 'drop');
+      writeFile(join(providers.path, '1', 'proxies', 'abc'), 'keep');
+      writeFile(join(providers.path, '2', 'proxies', 'abc'), 'drop');
+
+      final orphans = shakeOrphanFiles(
+        profileIds: [1],
+        scriptIds: [10],
+        profilesDirPath: profiles.path,
+        providersDirPath: providers.path,
+        scriptsDirPath: scripts.path,
+        providerFileNames: const [],
+        providerCacheDirPath: join(root.path, 'missing'),
+      );
+
+      expect(orphans.map(basename), unorderedEquals(['2.yaml', '20.js', '2']));
+      expect(
+        orphans.singleWhere((path) => basename(path) == '2'),
+        join(providers.path, '2'),
+      );
+    });
+
+    test('reports the whole provider directory a dead profile left behind', () {
+      final providers = makeDir('providers');
+      writeFile(join(providers.path, '3', 'proxies', 'abc'), 'drop');
+      writeFile(join(providers.path, '3', 'rules', 'def'), 'drop');
+      writeFile(join(providers.path, 'stray'), 'drop');
+
+      final orphans = shakeOrphanFiles(
+        profileIds: const [],
+        scriptIds: const [],
+        profilesDirPath: join(root.path, 'missing'),
+        providersDirPath: providers.path,
+        scriptsDirPath: join(root.path, 'missing'),
+        providerFileNames: const [],
+        providerCacheDirPath: join(root.path, 'missing'),
+      );
+
+      expect(
+        orphans,
+        unorderedEquals([
+          join(providers.path, '3'),
+          join(providers.path, 'stray'),
+        ]),
+      );
+    });
+
+    test('treats an unparsable file name as an orphan', () {
+      final profiles = makeDir('profiles');
+      writeFile(join(profiles.path, 'stray.yaml'), 'drop');
+
+      final orphans = shakeOrphanFiles(
+        profileIds: [1],
+        scriptIds: const [],
+        profilesDirPath: profiles.path,
+        providersDirPath: join(root.path, 'missing'),
+        scriptsDirPath: join(root.path, 'missing'),
+        providerFileNames: const [],
+        providerCacheDirPath: join(root.path, 'missing'),
+      );
+
+      expect(orphans.map(basename), ['stray.yaml']);
+    });
+
+    test('does not descend into the nested providers folder', () {
+      final profiles = makeDir('profiles');
+      final nested = Directory(join(profiles.path, 'providers'))
+        ..createSync(recursive: true);
+      writeFile(join(nested.path, '99.yaml'), 'not scanned here');
+
+      final orphans = shakeOrphanFiles(
+        profileIds: [1],
+        scriptIds: const [],
+        profilesDirPath: profiles.path,
+        providersDirPath: join(root.path, 'missing'),
+        scriptsDirPath: join(root.path, 'missing'),
+        providerFileNames: const [],
+        providerCacheDirPath: join(root.path, 'missing'),
+      );
+
+      expect(orphans, isEmpty);
+    });
+
+    test('reports a provider cache file no row names any more', () {
+      final cache = makeDir('provider_cache');
+      writeFile(join(cache.path, 'rules', 'live'), 'keep');
+      writeFile(join(cache.path, 'rules', 'stale'), 'drop');
+
+      final orphans = shakeOrphanFiles(
+        profileIds: const [],
+        scriptIds: const [],
+        providerFileNames: const ['live'],
+        profilesDirPath: join(root.path, 'missing'),
+        providersDirPath: join(root.path, 'missing'),
+        providerCacheDirPath: cache.path,
+        scriptsDirPath: join(root.path, 'missing'),
+      );
+
+      expect(orphans, [join(cache.path, 'rules', 'stale')]);
+    });
+
+    test('ignores directories that do not exist', () {
+      expect(
+        shakeOrphanFiles(
+          profileIds: const [],
+          scriptIds: const [],
+          profilesDirPath: join(root.path, 'nope'),
+          providersDirPath: join(root.path, 'nope'),
+          scriptsDirPath: join(root.path, 'nope'),
+          providerFileNames: const [],
+          providerCacheDirPath: join(root.path, 'missing'),
+        ),
+        isEmpty,
+      );
+    });
+  });
+
+  group('migrateLegacyConfig', () {
+    late Directory source;
+    late Directory target;
+
+    setUp(() {
+      source = makeDir('legacy_source');
+      target = makeDir('legacy_target');
+    });
+
+    Map<String, Object?> legacyConfig({
+      List<Object?> scripts = const [],
+      List<Object?> rules = const [],
+      List<Object?> profiles = const [],
+      Map<String, Object?> extra = const {},
+    }) => {'scripts': scripts, 'rules': rules, 'profiles': profiles, ...extra};
+
+    test(
+      'rewrites script ids and writes the content into the target',
+      () async {
+        final data = await migrateLegacyConfig(
+          configMap: legacyConfig(
+            scripts: [
+              {'id': 'script-a', 'label': 'A', 'content': 'export default 1;'},
+            ],
+          ),
+          sourcePath: source.path,
+          targetPath: target.path,
+        );
+
+        final script = data.scripts.single;
+        expect(script.label, 'A');
+        expect(
+          File(
+            join(target.path, 'scripts', '${script.id}.js'),
+          ).readAsStringSync(),
+          'export default 1;',
+        );
+      },
+    );
+
+    test('skips a script entry that is missing a required field', () async {
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          scripts: [
+            {'id': 'no-content', 'label': 'A'},
+            {'id': 'ok', 'label': 'B', 'content': 'body'},
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.scripts.map((item) => item.label), ['B']);
+    });
+
+    test('falls back to scriptProps when the scripts list is empty', () async {
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          extra: {
+            'scriptProps': {
+              'scripts': [
+                {'id': 'nested', 'label': 'Nested', 'content': 'body'},
+              ],
+            },
+          },
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.scripts.map((item) => item.label), ['Nested']);
+    });
+
+    test('copies the profile file under its new id', () async {
+      writeFile(join(source.path, 'profiles', 'old-1.yaml'), 'proxies: []');
+
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          profiles: [
+            {'id': 'old-1', 'label': 'Legacy', 'autoUpdateDuration': 0},
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      final profile = data.profiles.single;
+      expect(profile.label, 'Legacy');
+      expect(
+        File(
+          join(target.path, 'profiles', '${profile.id}.yaml'),
+        ).readAsStringSync(),
+        'proxies: []',
+      );
+    });
+
+    test('links added rules to the profile that declared them', () async {
+      writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          profiles: [
+            {
+              'id': 'p1',
+              'autoUpdateDuration': 0,
+              'overwrite': {
+                'type': 'standard',
+                'standardOverwrite': {
+                  'addedRules': [
+                    {'id': 'r1', 'value': 'DOMAIN,example.com,DIRECT'},
+                  ],
+                },
+              },
+            },
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      final profile = data.profiles.single;
+      final rule = data.rules.single;
+      expect(rule.content, 'example.com');
+      expect(rule.profileId, profile.id);
+      expect(profile.type, ProfileType.file);
+      expect(data.disabledRules, isEmpty);
+    });
+
+    test(
+      'keeps a disabled rule only for a rule id it has already seen',
+      () async {
+        writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+
+        final data = await migrateLegacyConfig(
+          configMap: legacyConfig(
+            profiles: [
+              {
+                'id': 'p1',
+                'autoUpdateDuration': 0,
+                'overwrite': {
+                  'type': 'standard',
+                  'standardOverwrite': {
+                    'addedRules': [
+                      {'id': 'r1', 'value': 'DOMAIN,example.com,DIRECT'},
+                    ],
+                    'disabledRuleIds': ['r1', 'never-seen'],
+                  },
+                },
+              },
+            ],
+          ),
+          sourcePath: source.path,
+          targetPath: target.path,
+        );
+
+        expect(data.disabledRules, [
+          DisabledRule(
+            profileId: data.profiles.single.id,
+            ruleId: data.rules.single.id,
+          ),
+        ]);
+      },
+    );
+
+    test('gives a profile with a url the url type', () async {
+      writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          profiles: [
+            {
+              'id': 'p1',
+              'url': 'https://example.com/sub',
+              'autoUpdateDuration': 0,
+            },
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.profiles.single.type, ProfileType.url);
+    });
+
+    test('points the profile at its remapped script id', () async {
+      writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          scripts: [
+            {'id': 's1', 'label': 'S', 'content': 'body'},
+          ],
+          profiles: [
+            {
+              'id': 'p1',
+              'autoUpdateDuration': 0,
+              'overwrite': {
+                'type': 'script',
+                'scriptOverwrite': {'scriptId': 's1'},
+              },
+            },
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.profiles.single.scriptId, data.scripts.single.id);
+      expect(data.profiles.single.extendType, ExtendType.script);
+    });
+
+    test('falls a custom overwrite back to a standard one', () async {
+      writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          profiles: [
+            {
+              'id': 'p1',
+              'autoUpdateDuration': 0,
+              'overwrite': {'type': 'custom'},
+            },
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.profiles.single.extendType, ExtendType.standard);
+    });
+
+    test('remaps currentProfileId and nulls it when there is none', () async {
+      writeFile(join(source.path, 'profiles', 'p1.yaml'), '');
+      final configMap = legacyConfig(
+        profiles: [
+          {'id': 'p1', 'autoUpdateDuration': 0},
+        ],
+        extra: {'currentProfileId': 'p1'},
+      );
+
+      final data = await migrateLegacyConfig(
+        configMap: configMap,
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.configMap?['currentProfileId'], data.profiles.single.id);
+
+      final without = await migrateLegacyConfig(
+        configMap: legacyConfig(),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+      expect(without.configMap?['currentProfileId'], isNull);
+    });
+
+    test('renames the config keys the current schema expects', () async {
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          extra: {
+            'accessControl': <String, Object?>{'acceptList': <String>[]},
+            'isAccessControl': true,
+            'vpnProps': <String, Object?>{},
+            'dav': {'uri': 'https://dav.example'},
+            'appSetting': {'recoveryStrategy': 'compatible'},
+            'proxiesStyle': {'cardType': 'expand'},
+          },
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      final configMap = data.configMap!;
+      final vpnProps = configMap['vpnProps']! as Map;
+      expect((vpnProps['accessControl'] as Map)['enable'], isTrue);
+      expect(vpnProps['accessControlProps'], vpnProps['accessControl']);
+      expect((configMap['davProps'] as Map)['uri'], 'https://dav.example');
+      expect(
+        (configMap['appSettingProps'] as Map)['restoreStrategy'],
+        'compatible',
+      );
+      expect(configMap['proxiesStyleProps'], configMap['proxiesStyle']);
+    });
+
+    test('skips a profile entry without an id', () async {
+      final data = await migrateLegacyConfig(
+        configMap: legacyConfig(
+          profiles: [
+            {'label': 'no id', 'autoUpdateDuration': 0},
+          ],
+        ),
+        sourcePath: source.path,
+        targetPath: target.path,
+      );
+
+      expect(data.profiles, isEmpty);
+    });
+  });
+
+  group('backup and restore', () {
+    const localProvider = ClashProvider(
+      id: 4,
+      label: 'Local rules',
+      behavior: RuleProviderBehavior.classical,
+      format: RuleProviderFormat.yaml,
+    );
+    late Directory home;
+    late Directory staging;
+    late String databasePath;
+
+    setUp(() async {
+      home = makeDir('home');
+      staging = makeDir('staging');
+      databasePath = join(home.path, 'database.sqlite');
+    });
+
+    Future<void> seedDatabase() async {
+      final database = db.Database(NativeDatabase(File(databasePath)));
+      await database.profilesDao.putAll([
+        const Profile(
+          id: 1,
+          label: 'Backed up',
+          autoUpdateDuration: Duration.zero,
+        ).toCompanion(),
+      ]);
+      await database.scriptsDao.setAll([
+        Script(id: 2, label: 'Script', lastUpdateTime: DateTime(2026)),
+      ]);
+      await database.rulesDao.putRule(
+        const Rule(id: 3, content: 'example.com', order: 'a'),
+        profileId: 1,
+      );
+      await database.clashProvidersDao.putAll([localProvider.toCompanion()]);
+      await database.close();
+    }
+
+    Future<String> backup({
+      Map<String, Object?> configMap = const {'version': 1},
+      List<String>? entries,
+    }) async {
+      entries ??= BackupEntries.of(
+        profileIds: const [1],
+        scriptIds: const [2],
+        providers: const [localProvider],
+      );
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      await writeBackupArchive(
+        archivePath: archivePath,
+        configMap: configMap,
+        databaseSnapshotPath: databasePath,
+        homeDirPath: home.path,
+        entries: entries,
+      );
+      return archivePath;
+    }
+
+    Future<String> zipOf(Map<String, List<int>> files) async {
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      final encoder = ZipFileEncoder()..create(archivePath);
+      for (final MapEntry(:key, :value) in files.entries) {
+        encoder.addArchiveFile(ArchiveFile.bytes(key, value));
+      }
+      await encoder.close();
+      return archivePath;
+    }
+
+    Future<MigrationData> restore(String archivePath) {
+      return readBackupArchive(
+        archivePath: archivePath,
+        stagingDirPath: staging.path,
+      );
+    }
+
+    Matcher failsWith(BackupFailure failure) => throwsA(
+      isA<BackupException>().having(
+        (error) => error.failure,
+        'failure',
+        failure,
+      ),
+    );
+
+    test('the archive carries the database, the config and only the listed '
+        'files', () async {
+      await seedDatabase();
+      writeFile(join(home.path, 'profiles', '1.yaml'), 'proxies: []');
+      writeFile(join(home.path, 'profiles', '9.yaml'), 'not listed');
+      writeFile(join(home.path, 'scripts', '2.js'), 'body');
+
+      final archivePath = await backup();
+
+      final names = ZipDecoder()
+          .decodeStream(InputFileStream(archivePath))
+          .files
+          .map((file) => file.name)
+          .toSet();
+      expect(names, {
+        backupDatabaseName,
+        configJsonName,
+        'profiles/1.yaml',
+        'scripts/2.js',
+      });
+    });
+
+    test('restoring returns the rows and stages the files', () async {
+      await seedDatabase();
+      writeFile(join(home.path, 'profiles', '1.yaml'), 'proxies: []');
+      writeFile(join(home.path, 'scripts', '2.js'), 'body');
+      writeFile(
+        join(home.path, 'providers', 'rules', localProvider.fileName),
+        'payload: []',
+      );
+      final archivePath = await backup();
+
+      final data = await restore(archivePath);
+
+      expect(data.profiles.single.label, 'Backed up');
+      expect(data.scripts.single.label, 'Script');
+      expect(data.rules.single.content, 'example.com');
+      expect(data.rules.single.profileId, 1);
+      expect(data.clashProviders.single.label, 'Local rules');
+      expect(data.configMap?['version'], 1);
+      expect(
+        BackupEntries.ofData(data).map(
+          (entry) => File(
+            BackupEntries.resolve(staging.path, entry),
+          ).readAsStringSync(),
+        ),
+        ['proxies: []', 'body', 'payload: []'],
+      );
+    });
+
+    test('a version 0 archive goes through the legacy migration', () async {
+      await seedDatabase();
+      writeFile(join(home.path, 'profiles', 'legacy.yaml'), 'proxies: []');
+      final archivePath = await backup(
+        configMap: {
+          'version': 0,
+          'profiles': [
+            {'id': 'legacy', 'label': 'Old', 'autoUpdateDuration': 0},
+          ],
+        },
+        entries: const ['profiles/legacy.yaml'],
+      );
+
+      final data = await restore(archivePath);
+
+      final profile = data.profiles.single;
+      expect(profile.label, 'Old');
+      expect(
+        profile.id,
+        isNot(0),
+        reason: 'the legacy string id must be replaced by a snowflake id',
+      );
+      expect(
+        File(
+          BackupEntries.resolve(
+            staging.path,
+            BackupEntries.profile(profile.id),
+          ),
+        ).readAsStringSync(),
+        'proxies: []',
+      );
+    });
+
+    test(
+      'an entry that climbs out of the staging directory is dropped',
+      () async {
+        final archivePath = await zipOf({
+          configJsonName: utf8.encode(json.encode({'version': 1})),
+          '../escaped.txt': utf8.encode('outside'),
+        });
+
+        await restore(archivePath);
+
+        expect(
+          File(join(staging.parent.path, 'escaped.txt')).existsSync(),
+          isFalse,
+        );
+      },
+    );
+
+    test('an archive without a config document is rejected', () async {
+      final archivePath = await zipOf({'unrelated.txt': utf8.encode('x')});
+
+      await expectLater(restore(archivePath), failsWith(BackupFailure.invalid));
+    });
+
+    test('a file that is not a zip archive is rejected', () async {
+      final archivePath = writeFile(
+        join(root.path, 'archive', '$uniqueId.zip'),
+        'not a zip',
+      ).path;
+
+      await expectLater(restore(archivePath), failsWith(BackupFailure.invalid));
+    });
+
+    test('a config from a newer data version is rejected', () async {
+      final archivePath = await zipOf({
+        configJsonName: utf8.encode(
+          json.encode({'version': Migration.currentVersion + 1}),
+        ),
+      });
+
+      await expectLater(
+        restore(archivePath),
+        failsWith(BackupFailure.newerVersion),
+      );
+    });
+
+    test('a database from a newer schema is rejected', () async {
+      await seedDatabase();
+      final raw = db.Database(NativeDatabase(File(databasePath)));
+      await raw.customStatement(
+        'PRAGMA user_version = ${raw.schemaVersion + 1}',
+      );
+      await raw.close();
+      final archivePath = await backup();
+
+      await expectLater(
+        restore(archivePath),
+        failsWith(BackupFailure.newerVersion),
+      );
+    });
+
+    test('an archive without a database yields just the config', () async {
+      final archivePath = await zipOf({
+        configJsonName: utf8.encode(json.encode({'version': 1})),
+      });
+
+      final data = await restore(archivePath);
+
+      expect(data.configMap?['version'], 1);
+      expect(data.profiles, isEmpty);
+      expect(data.scripts, isEmpty);
+    });
+  });
+}
