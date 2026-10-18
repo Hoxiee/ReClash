@@ -247,20 +247,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label} doit être un seul élément";
 
-  static String m87(count) => "${count} résultats";
+  static String m87(client, format, count) =>
+      "Reçu comme ${client} : ${format}, ${count} nœuds proxy.";
 
-  static String m88(value) => "Pic ${value}";
+  static String m88(sections) =>
+      "Ces sections source ne seront pas transférées : ${sections}.";
 
-  static String m89(value) => "Total ${value}";
+  static String m89(count, format) =>
+      "${count} nœuds proxy peuvent être importés depuis ${format}.";
 
-  static String m90(version) => "Version installée : ${version}";
+  static String m90(count) => "${count} nœuds ne peuvent pas être convertis.";
 
-  static String m91(label) => "${label} doit être une URL";
+  static String m91(count) => "${count} résultats";
 
-  static String m92(count) =>
+  static String m92(value) => "Pic ${value}";
+
+  static String m93(value) => "Total ${value}";
+
+  static String m94(version) => "Version installée : ${version}";
+
+  static String m95(label) => "${label} doit être une URL";
+
+  static String m96(count) =>
       "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
 
-  static String m93(count) =>
+  static String m97(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1072,10 +1083,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Installer la mise à jour",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ce système masque la liste des apps installées tant que l’autorisation n’est pas accordée. Accordez-la pour configurer le proxy par app.",
     ),
@@ -2031,8 +2041,181 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("Style"),
     "submit": MessageLookupByLibrary.simpleMessage("Valider"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage(
+      "Automatiquement",
+    ),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "User-Agent personnalisé",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "Saisissez un User-Agent valide, sans caractères de contrôle.",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "Le choix du client n’envoie pas l’identité de l’appareil.",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "Demander en tant que",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "Ces paramètres s’appliquent aux URL d’abonnement. Les liens proxy sont importés localement.",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "Saisissez la clé AGE pour vérifier cet abonnement.",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("Appliquer le résultat vérifié"),
+    "subscriptionCompatibilityAuthorization": MessageLookupByLibrary.simpleMessage(
+      "Le serveur a refusé l’autorisation. La sélection des clients est arrêtée.",
+    ),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "Vérifier",
+    ),
+    "subscriptionCompatibilityCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible d’obtenir un abonnement compatible. La configuration précédente est inchangée.",
+    ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "Vérifie les valeurs actuelles sans enregistrer ni redémarrer le VPN. Vérifie l’analyse, pas la disponibilité des nœuds.",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage(
+          "Redemander pour les pertes à l’importation",
+        ),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "Masquer l’URL de l’abonnement",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("Dernier client réussi"),
+    "subscriptionCompatibilityNeedsReview": MessageLookupByLibrary.simpleMessage(
+      "L’importation omet des données d’origine. Vérifiez les pertes avant d’appliquer.",
+    ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("Utiliser ce client"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint": MessageLookupByLibrary.simpleMessage(
+      "Core a analysé ce résultat. Il n’est pas encore enregistré ni appliqué.",
+    ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage(
+          "Le serveur a limité les requêtes. Réessayez plus tard.",
+        ),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "Afficher l’URL de l’abonnement",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "Le formulaire ou le profil a changé. Vérifiez à nouveau l’abonnement.",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "La vérification de l’abonnement a expiré.",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "Compatibilité",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "Échec de connexion. La sélection des clients est arrêtée.",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "Envoyer aussi le système et le modèle de l’appareil",
+    ),
+    "subscriptionIdentityDetailsDisclosure": MessageLookupByLibrary.simpleMessage(
+      "La version du système et le modèle de l’appareil seront également envoyés avec l’identifiant.",
+    ),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "Un identifiant pseudonyme stable sera envoyé à cette origine d’abonnement. Il ne s’agit pas d’une attestation matérielle et le consentement reste sur cet appareil.",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "Si cette option est activée, l’identifiant de l’appareil est envoyé avec les requêtes de tous les abonnements URL, sauf si un profil remplace ce réglage. Le système et les informations de l’appareil restent activés séparément pour chaque abonnement.",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "Identité des abonnements",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "Envoyer HWID",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "Utiliser le réglage global",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "Accepter et importer",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "Je comprends que certaines données source ne seront pas conservées.",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "Continuer uniquement avec les nœuds compatibles.",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "Je comprends que les paramètres source seront omis.",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "configuration Clash",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "abonnement chiffré",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "liens proxy",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "format inconnu",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "Aucun nœud proxy compatible ne peut être importé.",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "Mémoriser ce consentement pour l’abonnement",
+    ),
+    "subscriptionImportRememberConsentHint": MessageLookupByLibrary.simpleMessage(
+      "S’applique uniquement à cette source, à ce format et aux pertes acceptées. De nouvelles pertes nécessitent un nouveau consentement.",
+    ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Vérifier l’importation de l’abonnement",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Infos d’abonnement",
+    ),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("Abonnement"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
+      "Compte",
+    ),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "Acheter un forfait",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "Acheter du trafic",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage(
+      "URL du logo",
+    ),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage(
+      "Assistance",
+    ),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
+      "Site web",
+    ),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "Utiliser l’intervalle du fournisseur",
     ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(
       "Saisissez votre mot de passe pour sudo",
@@ -2120,7 +2303,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Redémarrer le noyau",
     ),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Exécuter"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Réglage"),
@@ -2138,8 +2321,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Envoyé"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Port TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafic"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafic utilisé"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash parle votre langue pour que personne ne soit mis de côté. Si une formulation sonne mal à l\'oreille d\'un natif, signalez-la et nous la corrigerons.",
@@ -2194,7 +2377,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Impossible de démarrer l’installateur de paquets.",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Vous utilisez déjà la dernière version.",
     ),
@@ -2219,7 +2402,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bande passante d’envoi",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -2249,8 +2432,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

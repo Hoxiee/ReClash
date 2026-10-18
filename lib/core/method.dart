@@ -51,6 +51,8 @@ enum CoreMethod {
   clearEffect,
   updateDns,
   watchRoute,
+  fetchSubscription,
+  cancelSubscriptionFetch,
 }
 
 class CoreMethodCall {

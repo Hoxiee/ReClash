@@ -34,6 +34,7 @@ class ClashProvidersAction extends _$ClashProvidersAction {
       (final before?, final latest?) => latest.copyWith(
         label: compiled.label == before.label ? latest.label : compiled.label,
         url: compiled.url,
+        headers: compiled.headers,
         behavior: compiled.behavior,
         format: compiled.format,
       ),
@@ -69,6 +70,7 @@ class ClashProvidersAction extends _$ClashProvidersAction {
     final info = await _core.compileRuleSet(
       provider.fileName,
       url: download ? provider.url : '',
+      headers: provider.headers,
     );
     final next = provider.withInfo(info);
     if (!next.isCompiled) {

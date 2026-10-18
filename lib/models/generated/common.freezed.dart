@@ -5409,7 +5409,7 @@ as int?,
 /// @nodoc
 mixin _$ClashProvider {
 
- int get id; String get label; String get url; RuleProviderBehavior get behavior; RuleProviderFormat get format; int? get order;
+ int get id; String get label; String get url;@JsonKey(fromJson: _safeProviderHeaders) Map<String, String> get headers; RuleProviderBehavior get behavior; RuleProviderFormat get format; int? get order;
 /// Create a copy of ClashProvider
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5421,20 +5421,20 @@ $ClashProviderCopyWith<ClashProvider> get copyWith => _$ClashProviderCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as ClashProvider;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClashProvider&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.behavior, _this.behavior) || other.behavior == _this.behavior)&&(identical(other.format, _this.format) || other.format == _this.format)&&(identical(other.order, _this.order) || other.order == _this.order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ClashProvider&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.url, _this.url) || other.url == _this.url)&&const DeepCollectionEquality().equals(other.headers, _this.headers)&&(identical(other.behavior, _this.behavior) || other.behavior == _this.behavior)&&(identical(other.format, _this.format) || other.format == _this.format)&&(identical(other.order, _this.order) || other.order == _this.order));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ClashProvider;
-  return Object.hash(runtimeType,_this.id,_this.label,_this.url,_this.behavior,_this.format,_this.order);
+  return Object.hash(runtimeType,_this.id,_this.label,_this.url,const DeepCollectionEquality().hash(_this.headers),_this.behavior,_this.format,_this.order);
 }
 
 @override
 String toString() {
   final _this = this as ClashProvider;
-  return 'ClashProvider(id: ${_this.id}, label: ${_this.label}, url: ${_this.url}, behavior: ${_this.behavior}, format: ${_this.format}, order: ${_this.order})';
+  return 'ClashProvider(id: ${_this.id}, label: ${_this.label}, url: ${_this.url}, headers: ${_this.headers}, behavior: ${_this.behavior}, format: ${_this.format}, order: ${_this.order})';
 }
 
 
@@ -5445,7 +5445,7 @@ abstract mixin class $ClashProviderCopyWith<$Res>  {
   factory $ClashProviderCopyWith(ClashProvider value, $Res Function(ClashProvider) _then) = _$ClashProviderCopyWithImpl;
 @useResult
 $Res call({
- int id, String label, String url, RuleProviderBehavior behavior, RuleProviderFormat format, int? order
+ int id, String label, String url,@JsonKey(fromJson: _safeProviderHeaders) Map<String, String> headers, RuleProviderBehavior behavior, RuleProviderFormat format, int? order
 });
 
 
@@ -5462,12 +5462,13 @@ class _$ClashProviderCopyWithImpl<$Res>
 
 /// Create a copy of ClashProvider
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? label = null,Object? url = null,Object? behavior = null,Object? format = null,Object? order = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? label = null,Object? url = null,Object? headers = null,Object? behavior = null,Object? format = null,Object? order = freezed,}) {
   return _then(ClashProvider(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
-as String,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
+as String,headers: null == headers ? _self.headers : headers // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
 as RuleProviderBehavior,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
 as RuleProviderFormat,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int?,
@@ -5555,10 +5556,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String label,  String url, @JsonKey(fromJson: _safeProviderHeaders)  Map<String, String> headers,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ClashProvider() when $default != null:
-return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that.order);case _:
+return $default(_that.id,_that.label,_that.url,_that.headers,_that.behavior,_that.format,_that.order);case _:
   return orElse();
 
 }
@@ -5576,10 +5577,10 @@ return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String label,  String url, @JsonKey(fromJson: _safeProviderHeaders)  Map<String, String> headers,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)  $default,) {final _that = this;
 switch (_that) {
 case _ClashProvider():
-return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that.order);case _:
+return $default(_that.id,_that.label,_that.url,_that.headers,_that.behavior,_that.format,_that.order);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5596,10 +5597,10 @@ return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String label,  String url,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String label,  String url, @JsonKey(fromJson: _safeProviderHeaders)  Map<String, String> headers,  RuleProviderBehavior behavior,  RuleProviderFormat format,  int? order)?  $default,) {final _that = this;
 switch (_that) {
 case _ClashProvider() when $default != null:
-return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that.order);case _:
+return $default(_that.id,_that.label,_that.url,_that.headers,_that.behavior,_that.format,_that.order);case _:
   return null;
 
 }
@@ -5611,12 +5612,19 @@ return $default(_that.id,_that.label,_that.url,_that.behavior,_that.format,_that
 
 
 class _ClashProvider implements ClashProvider {
-  const _ClashProvider({required this.id, required this.label, this.url = '', this.behavior = RuleProviderBehavior.classical, this.format = RuleProviderFormat.yaml, this.order});
+  const _ClashProvider({required this.id, required this.label, this.url = '', @JsonKey(fromJson: _safeProviderHeaders)  Map<String, String> headers = const {}, this.behavior = RuleProviderBehavior.classical, this.format = RuleProviderFormat.yaml, this.order}): _headers = headers;
   
 
 @override final  int id;
 @override final  String label;
 @override@JsonKey() final  String url;
+ final  Map<String, String> _headers;
+@override@JsonKey(fromJson: _safeProviderHeaders) Map<String, String> get headers {
+  if (_headers is EqualUnmodifiableMapView) return _headers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_headers);
+}
+
 @override@JsonKey() final  RuleProviderBehavior behavior;
 @override@JsonKey() final  RuleProviderFormat format;
 @override final  int? order;
@@ -5631,18 +5639,18 @@ _$ClashProviderCopyWith<_ClashProvider> get copyWith => __$ClashProviderCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ClashProvider&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.url, url) || other.url == url)&&(identical(other.behavior, behavior) || other.behavior == behavior)&&(identical(other.format, format) || other.format == format)&&(identical(other.order, order) || other.order == order));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ClashProvider&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.url, url) || other.url == url)&&const DeepCollectionEquality().equals(other.headers, _headers)&&(identical(other.behavior, behavior) || other.behavior == behavior)&&(identical(other.format, format) || other.format == format)&&(identical(other.order, order) || other.order == order));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,label,url,behavior,format,order);
+    return Object.hash(runtimeType,id,label,url,const DeepCollectionEquality().hash(_headers),behavior,format,order);
 }
 
 @override
 String toString() {
-    return 'ClashProvider(id: $id, label: $label, url: $url, behavior: $behavior, format: $format, order: $order)';
+    return 'ClashProvider(id: $id, label: $label, url: $url, headers: $headers, behavior: $behavior, format: $format, order: $order)';
 }
 
 
@@ -5653,7 +5661,7 @@ abstract mixin class _$ClashProviderCopyWith<$Res> implements $ClashProviderCopy
   factory _$ClashProviderCopyWith(_ClashProvider value, $Res Function(_ClashProvider) _then) = __$ClashProviderCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String label, String url, RuleProviderBehavior behavior, RuleProviderFormat format, int? order
+ int id, String label, String url,@JsonKey(fromJson: _safeProviderHeaders) Map<String, String> headers, RuleProviderBehavior behavior, RuleProviderFormat format, int? order
 });
 
 
@@ -5670,12 +5678,13 @@ class __$ClashProviderCopyWithImpl<$Res>
 
 /// Create a copy of ClashProvider
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? label = null,Object? url = null,Object? behavior = null,Object? format = null,Object? order = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? label = null,Object? url = null,Object? headers = null,Object? behavior = null,Object? format = null,Object? order = freezed,}) {
   return _then(_ClashProvider(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
-as String,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
+as String,headers: null == headers ? _self._headers : headers // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,behavior: null == behavior ? _self.behavior : behavior // ignore: cast_nullable_to_non_nullable
 as RuleProviderBehavior,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
 as RuleProviderFormat,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int?,

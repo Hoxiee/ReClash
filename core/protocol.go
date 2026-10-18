@@ -63,6 +63,8 @@ const (
 	compileRuleSetMethod           CoreMethod = "compileRuleSet"
 	clearEffectMethod              CoreMethod = "clearEffect"
 	watchRouteMethod               CoreMethod = "watchRoute"
+	fetchSubscriptionMethod        CoreMethod = "fetchSubscription"
+	cancelSubscriptionFetchMethod  CoreMethod = "cancelSubscriptionFetch"
 )
 
 type MessageType string
@@ -158,8 +160,9 @@ type SideLoadParams struct {
 }
 
 type CompileRuleSetParams struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
+	Name    string            `json:"name"`
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers,omitempty"`
 }
 
 type RuleSetInfo struct {

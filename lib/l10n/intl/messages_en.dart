@@ -238,20 +238,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label} must be a single item";
 
-  static String m87(count) => "${count} results";
+  static String m87(client, format, count) =>
+      "Received as ${client}: ${format}, ${count} proxy nodes.";
 
-  static String m88(value) => "Peak ${value}";
+  static String m88(sections) =>
+      "The following source sections will not be transferred: ${sections}.";
 
-  static String m89(value) => "Total ${value}";
+  static String m89(count, format) =>
+      "${count} proxy nodes can be imported from ${format}.";
 
-  static String m90(version) => "Installed: ${version}";
+  static String m90(count) => "${count} nodes cannot be converted.";
 
-  static String m91(label) => "${label} must be a URL";
+  static String m91(count) => "${count} results";
 
-  static String m92(count) =>
+  static String m92(value) => "Peak ${value}";
+
+  static String m93(value) => "Total ${value}";
+
+  static String m94(version) => "Installed: ${version}";
+
+  static String m95(label) => "${label} must be a URL";
+
+  static String m96(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m93(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m97(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1002,10 +1013,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1891,8 +1901,184 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("Style"),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage(
+      "Automatically",
+    ),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "Custom User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "Enter a valid User-Agent without control characters.",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "Client selection does not send device identity.",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "Request as",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "These settings apply to subscription URLs. Share links are imported locally.",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "Enter the AGE key to check this subscription.",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("Apply checked result"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage(
+          "The server rejected authorization. Client negotiation stopped.",
+        ),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "Check",
+    ),
+    "subscriptionCompatibilityCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not obtain a compatible subscription. The existing configuration was not changed.",
+    ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "Checks the current form without saving or restarting VPN. This checks parsing, not node availability.",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage("Ask about import losses again"),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "Hide subscription URL",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("Last successful client"),
+    "subscriptionCompatibilityNeedsReview":
+        MessageLookupByLibrary.simpleMessage(
+          "The import omits source data. Review the losses before applying.",
+        ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("Use this client"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage(
+          "Core parsed this result. It has not been saved or applied.",
+        ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage(
+          "The server limited requests. Try again later.",
+        ),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "Show subscription URL",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "The form or profile changed. Check the subscription again.",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "The subscription check timed out.",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "Compatibility",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "Connection failed. Client negotiation stopped.",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "Also send operating system and device model",
+    ),
+    "subscriptionIdentityDetailsDisclosure": MessageLookupByLibrary.simpleMessage(
+      "This also sends the operating system version and device model with the identifier.",
+    ),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "A stable pseudonymous device ID will be sent to this subscription origin. It is not hardware attestation and consent stays on this device.",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "Subscription identity",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "Send HWID",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "Use global",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "Accept and import",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "I understand that some source data will not be preserved.",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "Continue with only the supported nodes.",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "I understand that source settings will be omitted.",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "Clash configuration",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "encrypted subscription",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "proxy links",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "unknown format",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "No supported proxy nodes can be imported.",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "Remember this consent for this subscription",
+    ),
+    "subscriptionImportRememberConsentHint": MessageLookupByLibrary.simpleMessage(
+      "Applies only to this source, format and the accepted loss types. New losses require consent again.",
+    ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Review subscription import",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
+    ),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage(
+      "Subscription",
+    ),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
+      "Account",
+    ),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "Buy plan",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "Buy traffic",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage(
+      "Logo URL",
+    ),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage(
+      "Support",
+    ),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
+      "Website",
+    ),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "Use provider update interval",
     ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(
       "Enter your password for sudo",
@@ -1972,7 +2158,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("Pin"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Run"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Setting"),
@@ -1990,8 +2176,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -2040,7 +2226,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Couldn\'t start the package installer.",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "You\'re already using the latest version.",
     ),
@@ -2063,7 +2249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -2089,8 +2275,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

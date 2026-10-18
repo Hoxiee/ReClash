@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
@@ -122,6 +123,12 @@ void main() {
   setUpAll(() async {
     tempDir = Directory.systemTemp.createTempSync('edit_profile_focus_test');
     await useAppPaths(tempDir);
+    globalState.packageInfo = PackageInfo(
+      appName: 'ReClash',
+      packageName: 'com.reclash',
+      version: '1.0.0',
+      buildNumber: '1',
+    );
   });
 
   tearDownAll(() {
@@ -156,11 +163,19 @@ void main() {
         DecorationListItem,
         currentAppLocalizations.profile,
       );
-      for (var i = 0; i < 20 && row.evaluate().isEmpty; i++) {
+      final listView = find
+          .descendant(
+            of: find.byType(EditProfileView),
+            matching: find.byType(ListView),
+          )
+          .first;
+      for (var scroll = 0; scroll < 20 && row.evaluate().isEmpty; scroll++) {
+        await tester.drag(listView, const Offset(0, -300));
+        await tester.pump();
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 20)),
         );
-        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
       }
       expect(row, findsOneWidget);
       expect(
@@ -193,7 +208,7 @@ void main() {
     );
 
     await tester.enterText(interval, '');
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     await tester.tap(find.byTooltip('Save'));
     await tester.pump();

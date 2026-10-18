@@ -47,11 +47,17 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
     _isUpdating = true;
     final appLocalizations = context.appLocalizations;
     final profilesAction = ref.read(profilesActionProvider.notifier);
+    final reviewContext = Navigator.of(context).context;
     final List<UpdatingMessage> messages = [];
     final updateProfiles = profiles.map<Future>((profile) async {
       if (profile.type != ProfileType.url) return;
       try {
-        await profilesAction.updateProfile(profile, showLoading: true);
+        await profilesAction.updateProfile(
+          profile,
+          showLoading: true,
+          allowLossReview: true,
+          reviewContext: reviewContext,
+        );
       } catch (e) {
         messages.add(
           UpdatingMessage(
@@ -303,10 +309,16 @@ class ProfileItem extends ConsumerWidget {
 
   Future updateProfile(WidgetRef ref) async {
     if (profile.type != ProfileType.url) return;
+    final reviewContext = Navigator.of(ref.context).context;
     await globalState.loadingRun(() async {
       await ref
           .read(profilesActionProvider.notifier)
-          .updateProfile(profile, showLoading: true);
+          .updateProfile(
+            profile,
+            showLoading: true,
+            allowLossReview: true,
+            reviewContext: reviewContext,
+          );
     }, tag: LoadingTag.profiles);
   }
 

@@ -12,8 +12,10 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -29,11 +31,20 @@ void main() {
         label: 'new label',
         url: 'still-bad-url',
       );
+      final core = _MockCoreHandlerInterface();
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
           currentProfileIdProvider.overrideWithBuild((_, _) => null),
           profilesProvider.overrideWith(() => TestProfiles([original])),
         ],
+      );
+      globalState.container = container;
+      globalState.packageInfo = PackageInfo(
+        appName: 'ReClash',
+        packageName: 'com.reclash',
+        version: '1.0.0',
+        buildNumber: '1',
       );
       addTearDown(container.dispose);
 
@@ -43,7 +54,9 @@ void main() {
       );
 
       await expectLater(
-        container.read(profilesActionProvider.notifier).updateProfile(edited),
+        container
+            .read(profilesActionProvider.notifier)
+            .updateProfile(edited, persistProfileSettings: true),
         throwsA(anything),
       );
 

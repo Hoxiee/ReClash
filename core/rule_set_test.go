@@ -195,16 +195,23 @@ func TestHandleCompileRuleSetTakesOnlyAFileName(t *testing.T) {
 func TestHandleCompileRuleSetKeepsTheLastDownloadOnFailure(t *testing.T) {
 	dir := withRuleSetHome(t)
 	body := "example.com\n"
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer rule-source" || r.Header.Get("X-HWID") != "" {
+			t.Errorf("source headers = %v", r.Header)
+		}
+		if r.Header.Get("X-App-Identity") != "" {
+			t.Errorf("app identity leaked into source request")
+		}
 		_, _ = w.Write([]byte(body))
 	}))
 	defer server.Close()
+	headers := map[string]string{"Authorization": "Bearer rule-source"}
 
-	if _, err := handleCompileRuleSet(CompileRuleSetParams{Name: "remote", URL: server.URL}); err != nil {
+	if _, err := handleCompileRuleSet(CompileRuleSetParams{Name: "remote", URL: server.URL, Headers: headers}); err != nil {
 		t.Fatalf("first download: %v", err)
 	}
 	body = "example.com\n10.0.0.0/8\n"
-	if _, err := handleCompileRuleSet(CompileRuleSetParams{Name: "remote", URL: server.URL}); err != errRuleSetMixed {
+	if _, err := handleCompileRuleSet(CompileRuleSetParams{Name: "remote", URL: server.URL, Headers: headers}); err != errRuleSetMixed {
 		t.Fatalf("second download: err = %v, want %v", err, errRuleSetMixed)
 	}
 	source, err := os.ReadFile(filepath.Join(dir, "remote"))
@@ -213,6 +220,20 @@ func TestHandleCompileRuleSetKeepsTheLastDownloadOnFailure(t *testing.T) {
 	}
 	if dump, err := handleDumpRuleSet(filepath.Join(dir, "remote.mrs")); err != nil || dump != "example.com\n" {
 		t.Fatalf("mrs dump = %q, %v; want the first download", dump, err)
+	}
+}
+
+func TestDownloadRuleSetRejectsDeviceIdentityHeaders(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		t.Fatal("request with device identity should not be sent")
+	}))
+	defer server.Close()
+	_, err := downloadRuleSet(server.URL, filepath.Join(t.TempDir(), "rules"), map[string]string{
+		"Authorization": "Bearer source-token",
+		"X-HWID":        "device-id",
+	})
+	if err == nil {
+		t.Fatal("accepted device identity on a resource provider request")
 	}
 }
 

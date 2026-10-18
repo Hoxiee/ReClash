@@ -41,6 +41,8 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   FormFieldValidator<String>? urlValidator,
   Set<String> existingUrls = const {},
   bool withAgeSecretKey = false,
+  Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder,
+  String? Function()? additionalValidator,
 }) {
   return showFormSheet<List<NamedUrl>>(
     context: context,
@@ -53,6 +55,8 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
       batch: true,
       existingUrls: existingUrls,
       withAgeSecretKey: withAgeSecretKey,
+      additionalSectionsBuilder: additionalSectionsBuilder,
+      additionalValidator: additionalValidator,
     ),
   );
 }
@@ -72,6 +76,8 @@ class NamedUrlForm extends StatefulWidget {
   final bool batch;
   final Set<String> existingUrls;
   final bool withAgeSecretKey;
+  final Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder;
+  final String? Function()? additionalValidator;
 
   const NamedUrlForm({
     super.key,
@@ -85,6 +91,8 @@ class NamedUrlForm extends StatefulWidget {
     this.batch = false,
     this.existingUrls = const {},
     this.withAgeSecretKey = false,
+    this.additionalSectionsBuilder,
+    this.additionalValidator,
   });
 
   @override
@@ -169,6 +177,10 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
     if (urlError != null) {
       return (field: _NamedUrlField.url, message: urlError);
     }
+    final additionalError = widget.additionalValidator?.call();
+    if (additionalError != null) {
+      return (field: _NamedUrlField.url, message: additionalError);
+    }
     return null;
   }
 
@@ -200,7 +212,10 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
   void _handleSubmit() {
     if (_isBatch) {
       final parsed = _parsed;
-      if (parsed == null || !parsed.isValid || parsed.entries.isEmpty) {
+      if (widget.additionalValidator?.call() != null ||
+          parsed == null ||
+          !parsed.isValid ||
+          parsed.entries.isEmpty) {
         setState(() {
           _attempted = true;
         });
@@ -231,17 +246,22 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final issue = _attempted && !_isBatch ? _issue() : null;
+    final additionalError = _attempted
+        ? widget.additionalValidator?.call()
+        : null;
     return FormPage(
       title: _isBatch ? appLocalizations.batchImport : widget.title,
       saveLabel: appLocalizations.submit,
       onSave: _handleSubmit,
-      error: _isBatch
-          ? _batchInput.errorOf(
-              appLocalizations,
-              _parsed,
-              attempted: _attempted,
-            )
-          : issue?.message,
+      error:
+          additionalError ??
+          (_isBatch
+              ? _batchInput.errorOf(
+                  appLocalizations,
+                  _parsed,
+                  attempted: _attempted,
+                )
+              : issue?.message),
       actions: [
         if (widget.batch)
           IconButtonData(
@@ -261,6 +281,8 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
                 onChanged: _handleBatchChanged,
               )
             : _buildFields(appLocalizations, issue?.field),
+        if (widget.additionalSectionsBuilder case final builder?)
+          builder(context, () => _handleChanged('')),
       ],
     );
   }

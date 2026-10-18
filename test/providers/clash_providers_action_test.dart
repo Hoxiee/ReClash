@@ -56,6 +56,7 @@ void main() {
   late Exception? compileError;
   late Completer<void>? compileGate;
   late List<({String name, String url})> compiles;
+  late List<Map<String, String>> compileHeaders;
 
   setUpAll(() async {
     home = Directory.systemTemp.createTempSync('reclash-providers-action-');
@@ -97,14 +98,22 @@ void main() {
     compileError = null;
     compileGate = null;
     compiles = [];
+    compileHeaders = [];
     final cacheRoot = Directory(await appPath.providerCacheRootPath);
     if (cacheRoot.existsSync()) cacheRoot.deleteSync(recursive: true);
     final core = _MockCoreHandlerInterface();
-    when(() => core.compileRuleSet(any(), url: any(named: 'url'))).thenAnswer((
-      invocation,
-    ) async {
+    when(
+      () => core.compileRuleSet(
+        any(),
+        url: any(named: 'url'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer((invocation) async {
       final name = invocation.positionalArguments.single as String;
       final url = invocation.namedArguments[#url] as String;
+      compileHeaders.add(
+        Map<String, String>.from(invocation.namedArguments[#headers] as Map),
+      );
       await compileGate?.future;
       compiles.add((name: name, url: url));
       if (compileError case final error?) throw error;
@@ -447,6 +456,19 @@ void main() {
 
     expect(await read(rules.path), 'DOMAIN-KEYWORD,ad');
     expect(File(await rules.compiledPath).existsSync(), isFalse);
+  });
+
+  test('a remote source compiles with only its own request headers', () async {
+    const remote = ClashProvider(
+      id: 42,
+      label: 'Header source',
+      url: 'https://example.com/r.list',
+      headers: {'Authorization': 'Bearer source-token'},
+    );
+
+    await action().putProvider(remote);
+
+    expect(compileHeaders.single, {'Authorization': 'Bearer source-token'});
   });
 
   test('a new remote set downloads, and a rename alone does not', () async {

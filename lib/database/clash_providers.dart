@@ -13,6 +13,9 @@ class ClashProviders extends Table {
 
   TextColumn get url => text()();
 
+  TextColumn get requestHeaders =>
+      text().map(const ProviderHeadersConverter()).nullable()();
+
   TextColumn get behavior => textEnum<RuleProviderBehavior>().nullable()();
 
   TextColumn get format => textEnum<RuleProviderFormat>().nullable()();
@@ -21,6 +24,27 @@ class ClashProviders extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+}
+
+class ProviderHeadersConverter
+    extends TypeConverter<Map<String, String>?, String?> {
+  const ProviderHeadersConverter();
+
+  @override
+  Map<String, String>? fromSql(String? value) {
+    if (value == null) return const {};
+    return decodeOrRestoreDefault(
+      'provider request headers',
+      () => validateResourceHeaders(
+        Map<String, String>.from(json.decode(value) as Map),
+      ),
+      () => const {},
+    );
+  }
+
+  @override
+  String? toSql(Map<String, String>? value) =>
+      value == null ? null : json.encode(validateResourceHeaders(value));
 }
 
 @DriftAccessor(tables: [ClashProviders])
@@ -47,13 +71,22 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
 
   Selectable<String> fileNames() {
     final query = selectOnly(clashProviders)
-      ..addColumns([clashProviders.id, clashProviders.url])
+      ..addColumns([
+        clashProviders.id,
+        clashProviders.url,
+        clashProviders.requestHeaders,
+      ])
       ..where(_isRuleProvider(clashProviders));
     return query.map(
       (row) => ClashProvider(
         id: row.read(clashProviders.id)!,
         label: '',
         url: row.read(clashProviders.url)!,
+        headers:
+            row.readWithConverter<Map<String, String>?, String>(
+              clashProviders.requestHeaders,
+            ) ??
+            const <String, String>{},
       ).fileName,
     );
   }
@@ -87,6 +120,7 @@ extension RawClashProviderExt on RawClashProvider {
       id: id,
       label: label,
       url: url,
+      headers: requestHeaders ?? const {},
       behavior: behavior ?? RuleProviderBehavior.classical,
       format: format ?? RuleProviderFormat.yaml,
       order: order,
@@ -101,6 +135,7 @@ extension ClashProvidersCompanionExt on ClashProvider {
       kind: ProviderKind.rule,
       label: label,
       url: url,
+      requestHeaders: Value(headers),
       behavior: Value(behavior),
       format: Value(format),
       order: Value(order ?? this.order),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -7,6 +8,8 @@ import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/spill.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/protocol/registry.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -94,6 +97,34 @@ class CoreController {
   Future<String> validateConfig(String path) async {
     final res = await _interface.validateConfig(path);
     return res;
+  }
+
+  Future<Uint8List> decryptProfilePayload(
+    Uint8List bytes,
+    String ageSecretKey,
+  ) async {
+    const prefix = '-----BEGIN AGE ENCRYPTED FILE-----';
+    if (bytes.length < prefix.length ||
+        String.fromCharCodes(bytes.take(prefix.length)) != prefix) {
+      return bytes;
+    }
+    if (ageSecretKey.isEmpty) {
+      throw const AgeSecretKeyRequiredException();
+    }
+    final path = await appPath.tempFilePath;
+    final file = File('$path.decrypt.${DateTime.now().microsecondsSinceEpoch}');
+    await file.safeWriteAsBytes(bytes);
+    try {
+      final plain = Uint8List.fromList(
+        utf8.encode(await _interface.decryptConfig(file.path, ageSecretKey)),
+      );
+      if (plain.length > subscriptionPayloadLimit) {
+        throw const SubscriptionException(SubscriptionFailure.oversized);
+      }
+      return plain;
+    } finally {
+      await file.safeDelete();
+    }
   }
 
   /// An age-encrypted config is rewritten in place into its plaintext, and a
@@ -263,9 +294,32 @@ class CoreController {
     return _interface.dumpRuleSet(path);
   }
 
-  Future<RuleSetInfo> compileRuleSet(String name, {String url = ''}) {
-    return _interface.compileRuleSet(name, url: url);
+  Future<RuleSetInfo> compileRuleSet(
+    String name, {
+    String url = '',
+    Map<String, String> headers = const {},
+  }) {
+    return _interface.compileRuleSet(name, url: url, headers: headers);
   }
+
+  Future<SubscriptionResponse> fetchSubscription(
+    String requestId,
+    Uri url, {
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 20),
+    int maxBytes = subscriptionWireLimit,
+    bool protected = false,
+  }) => _interface.fetchSubscription(
+    requestId,
+    url,
+    headers: headers,
+    timeout: timeout,
+    maxBytes: maxBytes,
+    protected: protected,
+  );
+
+  Future<bool> cancelSubscriptionFetch(String requestId) =>
+      _interface.cancelSubscriptionFetch(requestId);
 
   Future<String> updateExternalProvider({required String providerName}) async {
     return _interface.updateExternalProvider(providerName);

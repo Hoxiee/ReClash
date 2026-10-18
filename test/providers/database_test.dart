@@ -128,6 +128,78 @@ void main() {
       expect(read().single.label, 'First');
     });
 
+    test('putAndWait rejects a stale owner before changing state', () async {
+      await notifier.putAndWait(profile(1, label: 'Kept'));
+      await expectLater(
+        notifier.putAndWait(
+          profile(1, label: 'Obsolete'),
+          isCurrent: () => false,
+        ),
+        throwsA(isA<SubscriptionUpdateSuperseded>()),
+      );
+      expect(read().single.label, 'Kept');
+      expect(
+        (await testDatabase.profilesDao.query().get()).single.label,
+        'Kept',
+      );
+    });
+
+    test(
+      'putAndWait rolls back a queued write after its owner changes',
+      () async {
+        await notifier.putAndWait(profile(1, label: 'Kept'));
+        final entered = Completer<void>();
+        final landing = Completer<void>();
+        var current = true;
+        addTearDown(() {
+          if (!landing.isCompleted) landing.complete();
+        });
+        final held = testDatabase.transaction(() async {
+          entered.complete();
+          await landing.future;
+        });
+        await entered.future;
+        final pending = notifier.putAndWait(
+          profile(1, label: 'Obsolete'),
+          isCurrent: () => current,
+        );
+        final rejected = expectLater(
+          pending,
+          throwsA(isA<SubscriptionUpdateSuperseded>()),
+        );
+        await pumpEventQueue();
+        expect(read().single.label, 'Obsolete');
+        current = false;
+        landing.complete();
+        await held;
+        await rejected;
+        await pumpEventQueue();
+        expect(read().single.label, 'Kept');
+        expect(
+          (await testDatabase.profilesDao.query().get()).single.label,
+          'Kept',
+        );
+      },
+    );
+
+    test(
+      'putAndWait rolls back rows when superseded inside the transaction',
+      () async {
+        var checks = 0;
+        await expectLater(
+          notifier.putAndWait(
+            profile(1, label: 'Obsolete'),
+            isCurrent: () => ++checks < 3,
+          ),
+          throwsA(isA<SubscriptionUpdateSuperseded>()),
+        );
+        await pumpEventQueue();
+        expect(checks, 3);
+        expect(read(), isEmpty);
+        expect(await testDatabase.profilesDao.query().get(), isEmpty);
+      },
+    );
+
     test(
       'put de-duplicates a label already taken by another profile',
       () async {

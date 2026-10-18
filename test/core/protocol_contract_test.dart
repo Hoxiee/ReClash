@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/core/event.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
@@ -110,6 +111,16 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
       },
       CoreMethod.changeProxy => {'message': '', 'changed': true},
       CoreMethod.compileRuleSet => {'behavior': 'ipcidr', 'format': 'text'},
+      CoreMethod.fetchSubscription => {
+        'status': 200,
+        'headers': {
+          'x-test': ['ok'],
+        },
+        'bodyBase64': base64.encode(utf8.encode('profile bytes')),
+        'finalUrl': 'https://example.com/profile',
+        'protected': false,
+      },
+      CoreMethod.cancelSubscriptionFetch => true,
       CoreMethod.getConnectionCount => 3,
       CoreMethod.validateFilters => ['', 'missing closing )'],
       CoreMethod.watchRoute => {
@@ -256,25 +267,52 @@ void main() {
   });
 
   test(
-    'compileRuleSet names a cached file and reads what the Core found',
+    'subscription fetch encodes request headers and decodes raw response bytes',
     () async {
       final handler = _RecordingCoreHandler();
-
-      final info = await handler.compileRuleSet(
-        'abc',
-        url: 'https://example.com/r.list',
+      final response = await handler.fetchSubscription(
+        'request-1',
+        Uri.parse('https://example.com/profile'),
+        headers: const {'X-Subscription': 'token'},
+        timeout: const Duration(seconds: 20),
       );
 
-      expect(handler.calls[CoreMethod.compileRuleSet], {
-        'name': 'abc',
-        'url': 'https://example.com/r.list',
+      expect(handler.calls[CoreMethod.fetchSubscription], {
+        'requestId': 'request-1',
+        'url': 'https://example.com/profile',
+        'headers': {'x-subscription': 'token'},
+        'timeoutMillis': 20000,
+        'maxBytes': subscriptionWireLimit,
+        'protected': false,
       });
-      expect(info, (
-        behavior: RuleProviderBehavior.ipcidr,
-        format: RuleProviderFormat.text,
-      ));
+      expect(response.status, 200);
+      expect(response.headers, {
+        'x-test': ['ok'],
+      });
+      expect(utf8.decode(response.bytes), 'profile bytes');
+      expect(await handler.cancelSubscriptionFetch('request-1'), isTrue);
     },
   );
+
+  test('compileRuleSet sends only validated resource headers', () async {
+    final handler = _RecordingCoreHandler();
+
+    final info = await handler.compileRuleSet(
+      'abc',
+      url: 'https://example.com/r.list',
+      headers: const {'Authorization': 'Bearer source-token'},
+    );
+
+    expect(handler.calls[CoreMethod.compileRuleSet], {
+      'name': 'abc',
+      'url': 'https://example.com/r.list',
+      'headers': {'authorization': 'Bearer source-token'},
+    });
+    expect(info, (
+      behavior: RuleProviderBehavior.ipcidr,
+      format: RuleProviderFormat.text,
+    ));
+  });
 
   test('event contract accepts batches and legacy single events', () async {
     final fixture =

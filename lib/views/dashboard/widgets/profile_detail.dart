@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/profiles/preview.dart';
 import 'package:reclash/views/profiles/profiles.dart';
@@ -18,11 +19,21 @@ import 'package:yaml/yaml.dart';
 
 const _statSpacing = 8.0;
 
-Future<void> syncProfile(WidgetRef ref, Profile profile) async {
+Future<void> syncProfile(
+  BuildContext context,
+  WidgetRef ref,
+  Profile profile,
+) async {
+  final reviewContext = Navigator.of(context).context;
   await globalState.loadingRun(() async {
     await ref
         .read(profilesActionProvider.notifier)
-        .updateProfile(profile, showLoading: true);
+        .updateProfile(
+          profile,
+          showLoading: true,
+          allowLossReview: true,
+          reviewContext: reviewContext,
+        );
   }, tag: LoadingTag.profiles);
 }
 
@@ -173,7 +184,7 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
             glyph: AppGlyphs.sync,
             tooltip: appLocalizations.sync,
             isLoading: isUpdating,
-            onPressed: () => syncProfile(ref, profile),
+            onPressed: () => syncProfile(context, ref, profile),
           ),
         IconButtonData(
           glyph: AppGlyphs.eye,
@@ -209,6 +220,9 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
                           ),
                         ],
                       ),
+                    if (profile.subscriptionSnapshot?.metadata
+                        case final metadata?)
+                      ..._providerMetadataSections(context, metadata),
                     generateSection(
                       title: appLocalizations.profile,
                       items: [
@@ -238,6 +252,43 @@ class _ProfileDetailSheetState extends ConsumerState<ProfileDetailSheet>
       ),
     );
   }
+}
+
+List<Widget> _providerMetadataSections(
+  BuildContext context,
+  SubscriptionMetadata metadata,
+) {
+  final l10n = context.appLocalizations;
+  final items = <Widget>[
+    if (metadata.accountTitle case final title? when title.isNotEmpty)
+      _InfoRow(label: l10n.subscriptionProviderAccount, value: Text(title)),
+  ];
+  for (final (path, label) in [
+    ('provider.webUrl', l10n.subscriptionProviderWebsite),
+    ('provider.supportUrl', l10n.subscriptionProviderSupport),
+    ('provider.buyPlanUrl', l10n.subscriptionProviderBuyPlan),
+    ('provider.buyTrafficUrl', l10n.subscriptionProviderBuyTraffic),
+    ('provider.logo', l10n.subscriptionProviderLogo),
+  ]) {
+    final value = metadata.text(path);
+    final uri = value == null ? null : safeSubscriptionLink(value);
+    if (uri == null) continue;
+    items.add(
+      ListItem(
+        title: Text(label),
+        subtitle: Text(uri.host),
+        trailing: const GlyphIcon(AppGlyphs.openExternal),
+        onTap: () => unawaited(dialogs.openUrl(uri.toString())),
+      ),
+    );
+  }
+  if (items.isEmpty) return const [];
+  return [
+    generateSection(
+      title: metadata.name ?? l10n.subscriptionProvider,
+      items: items,
+    ),
+  ];
 }
 
 String _extendLabel(BuildContext context, ExtendType type) {

@@ -236,7 +236,7 @@ class _SyncButton extends ConsumerWidget {
     return DashboardIconButton(
       glyph: AppGlyphs.sync,
       tooltip: context.appLocalizations.update,
-      onPressed: () => syncProfile(ref, profile),
+      onPressed: () => syncProfile(context, ref, profile),
     );
   }
 }

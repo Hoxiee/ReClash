@@ -4,7 +4,9 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/views/config/user_agents.dart';
+import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
@@ -110,6 +112,12 @@ class GeneralSettings {
       id: 'general.logLevel',
       page: ToolPage.general,
       title: (l) => l.logLevel,
+    ),
+    SettingSpec(
+      id: 'general.subscriptionIdentity',
+      keywords: ['subscription', 'hwid', 'device identifier'],
+      page: ToolPage.general,
+      title: (l) => l.subscriptionIdentityTitle,
     ),
   ];
 
@@ -378,6 +386,64 @@ ConfigToggleItem _appSettingToggle({
   );
 }
 
+class _SubscriptionIdentityItem extends StatefulWidget {
+  const _SubscriptionIdentityItem();
+
+  @override
+  State<_SubscriptionIdentityItem> createState() =>
+      _SubscriptionIdentityItemState();
+}
+
+class _SubscriptionIdentityItemState extends State<_SubscriptionIdentityItem> {
+  bool _enabled = false;
+  bool _loading = true;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final enabled = await (await DeviceIdentityStore.create())
+          .globalSendEnabled();
+      if (mounted) setState(() => _enabled = enabled);
+    } on Object {
+      if (mounted) setState(() => _enabled = false);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _setEnabled(bool value) async {
+    if (_loading || _saving) return;
+    setState(() => _saving = true);
+    try {
+      await (await DeviceIdentityStore.create()).setGlobalSendEnabled(value);
+      if (mounted) setState(() => _enabled = value);
+    } on Object catch (error) {
+      await globalState.safeRun<void>(() async => throw error);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    return SettingTarget(
+      spec: GeneralSettings.spec('general.subscriptionIdentity'),
+      child: ListItem.toggle(
+        title: Text(l10n.subscriptionIdentityTitle),
+        value: _enabled,
+        onChanged: _loading || _saving ? null : _setEnabled,
+      ),
+    );
+  }
+}
+
 class GeneralView extends ConsumerWidget {
   const GeneralView({super.key});
 
@@ -512,6 +578,11 @@ class GeneralView extends ConsumerWidget {
               generateSection(
                 title: appLocalizations.connection,
                 items: _connectionItems(),
+              ),
+              generateSection(
+                title: appLocalizations.subscriptionIdentitySettingsTitle,
+                items: const [_SubscriptionIdentityItem()],
+                footer: appLocalizations.subscriptionIdentityGlobalHint,
               ),
               generateSection(
                 title: appLocalizations.core,

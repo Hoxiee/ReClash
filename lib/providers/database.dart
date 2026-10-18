@@ -199,6 +199,68 @@ class Profiles extends _$Profiles {
 
   Profile labeled(Profile profile) => state.optimizeLabel(profile);
 
+  Future<void> putAndWait(Profile profile, {bool Function()? isCurrent}) =>
+      _writes.track(() async {
+        void ensureCurrent() {
+          if (isCurrent != null && !isCurrent()) {
+            throw const SubscriptionUpdateSuperseded();
+          }
+        }
+
+        ensureCurrent();
+        final newProfile = labeled(profile);
+        final previous = state;
+        final previousLabel = previous.getProfile(profile.id)?.realLabel;
+        var next = previous.copyAndPut(
+          newProfile,
+          (item) => item.id == newProfile.id,
+        );
+        final users = <Profile>[
+          if (newProfile.type != ProfileType.custom &&
+              previousLabel != null &&
+              previousLabel != newProfile.realLabel)
+            for (final item in next)
+              if (item.type == ProfileType.custom)
+                if (item.copyWith(
+                      overrides: item.overrides.renamedProxyProviders({
+                        previousLabel: newProfile.realLabel,
+                      }),
+                    )
+                    case final user when user != item)
+                  user,
+        ];
+        for (final user in users) {
+          next = next.copyAndPut(user, (item) => item.id == user.id);
+        }
+        state = next;
+        try {
+          await _serial(
+            () => database.transaction(() async {
+              ensureCurrent();
+              if (previousLabel != null &&
+                  previousLabel != newProfile.realLabel) {
+                await database.proxyGroupsDao.renameUse(
+                  await database.profilesDao.customIds().get(),
+                  oldName: previousLabel,
+                  newName: newProfile.realLabel,
+                );
+                ensureCurrent();
+                await _putLatest([
+                  for (final user in users) user.id,
+                  newProfile.id,
+                ]);
+              } else {
+                await _putLatest([newProfile.id]);
+              }
+              ensureCurrent();
+            }),
+          );
+        } catch (error, stack) {
+          if (identical(state, next)) state = previous;
+          Error.throwWithStackTrace(error, stack);
+        }
+      });
+
   /// A new provider label follows into custom profiles whatever path set it.
   void put(Profile profile) {
     final newProfile = labeled(profile);

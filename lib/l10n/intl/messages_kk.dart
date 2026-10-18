@@ -240,20 +240,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label} жалғыз жазба болуы керек";
 
-  static String m87(count) => "${count} нәтиже";
+  static String m87(client, format, count) =>
+      "${client} ретінде алынды: ${format}, прокси түйіндер саны: ${count}.";
 
-  static String m88(value) => "Шың: ${value}";
+  static String m88(sections) =>
+      "Мына бастапқы бөлімдер тасымалданбайды: ${sections}.";
 
-  static String m89(value) => "Барлығы: ${value}";
+  static String m89(count, format) =>
+      "${format} пішімінен ${count} прокси түйінін импорттауға болады.";
 
-  static String m90(version) => "Орнатылған нұсқа: ${version}";
+  static String m90(count) => "Түрлендірілмейтін түйіндер саны: ${count}.";
 
-  static String m91(label) => "${label} URL болуы керек";
+  static String m91(count) => "${count} нәтиже";
 
-  static String m92(count) =>
+  static String m92(value) => "Шың: ${value}";
+
+  static String m93(value) => "Барлығы: ${value}";
+
+  static String m94(version) => "Орнатылған нұсқа: ${version}";
+
+  static String m95(label) => "${label} URL болуы керек";
+
+  static String m96(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
-  static String m93(count) =>
+  static String m97(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1041,10 +1052,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -1976,8 +1986,181 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
     "submit": MessageLookupByLibrary.simpleMessage("Жіберу"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Автоматты"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "Таңдамалы User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "Басқару таңбаларынсыз жарамды User-Agent енгізіңіз.",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "Клиентті таңдау құрылғы идентификаторын жібермейді.",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "Сұрау клиенті",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "Бұл параметрлер жазылым URL мекенжайларына қолданылады. Прокси сілтемелері жергілікті түрде импортталады.",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "Бұл жазылымды тексеру үшін AGE кілтін енгізіңіз.",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("Тексерілген нәтижені қолдану"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage(
+          "Сервер авторизацияны қабылдамады. Клиент таңдау тоқтатылды.",
+        ),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "Тексеру",
+    ),
+    "subscriptionCompatibilityCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Үйлесімді жазылымды алу мүмкін болмады. Бұрынғы конфигурация өзгерген жоқ.",
+    ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "Ағымдағы мәндерді сақтамай және VPN-ді қайта іске қоспай тексереді. Түйіндердің қолжетімділігі емес, конфигурацияның талдануы тексеріледі.",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage(
+          "Импорттағы деректер жоғалуы туралы қайта сұрау",
+        ),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "Жазылым URL мекенжайын жасыру",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("Соңғы сәтті клиент"),
+    "subscriptionCompatibilityNeedsReview": MessageLookupByLibrary.simpleMessage(
+      "Импорт кезінде бастапқы деректердің бір бөлігі тасымалданбайды. Қолданар алдында жоғалатын деректерді тексеріңіз.",
+    ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("Осы клиентті пайдалану"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage(
+          "Core бұл нәтижені талдады. Ол әлі сақталған да, қолданылған да жоқ.",
+        ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage(
+          "Сервер сұрауларды шектеді. Кейінірек қайталаңыз.",
+        ),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "Жазылым URL мекенжайын көрсету",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "Пішін немесе профиль өзгерді. Жазылымды қайта тексеріңіз.",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "Жазылымды тексеру уақыты аяқталды.",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "Үйлесімділік",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "Қосылу мүмкін болмады. Клиент таңдау тоқтатылды.",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "Операциялық жүйе мен құрылғы моделін де жіберу",
+    ),
+    "subscriptionIdentityDetailsDisclosure": MessageLookupByLibrary.simpleMessage(
+      "Идентификатормен бірге операциялық жүйе нұсқасы мен құрылғы моделі жіберіледі.",
+    ),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "Осы жазылым көзіне тұрақты бүркеншік құрылғы идентификаторы жіберіледі. Бұл аппараттық аттестаттау емес, келісім тек осы құрылғыда сақталады.",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "Қосылғанда, профиль бұл параметрді өзгертпесе, құрылғы идентификаторы барлық URL жазылымдарының сұрауларымен жіберіледі. Операциялық жүйе мен құрылғы мәліметтерін әр жазылым үшін бөлек қосуға болады.",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "Жазылым идентификаторы",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "HWID жіберу",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "Жалпы параметрді қолдану",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "Қабылдау және импорттау",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "Бастапқы деректердің бір бөлігі сақталмайтынын түсінемін.",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "Тек қолдау көрсетілетін түйіндермен жалғастыру.",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "Бастапқы клиент параметрлері тасымалданбайтынын түсінемін.",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "Clash конфигурациясы",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "шифрланған жазылым",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "прокси сілтемелері",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "белгісіз пішім",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "Импорттауға болатын қолдау көрсетілетін прокси түйіндері жоқ.",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "Осы жазылым үшін келісімді есте сақтау",
+    ),
+    "subscriptionImportRememberConsentHint": MessageLookupByLibrary.simpleMessage(
+      "Тек осы дереккөзге, форматқа және қабылданған жоғалту түрлеріне қолданылады. Жаңа жоғалтуларға қайта келісу қажет.",
+    ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Жазылым импортын тексеру",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Жазылыс туралы ақпарат",
+    ),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("Жазылым"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
+      "Тіркелгі",
+    ),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "Жоспар сатып алу",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "Трафик сатып алу",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage(
+      "Логотип сілтемесі",
+    ),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage(
+      "Қолдау",
+    ),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
+      "Веб-сайт",
+    ),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "Провайдердің жаңарту аралығын пайдалану",
     ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(
       "sudo үшін құпиясөзіңізді енгізіңіз",
@@ -2067,7 +2250,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Ядроны қайта іске қосу",
     ),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Іске қосу"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Бөлім"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Баптау"),
@@ -2085,8 +2268,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Жүктеп салынған"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash әртүрлі елдердің адамдары пайдалана алатындай сіздің тіліңізде сөйлейді. Қандай да бір сөз тіркесі көзге оғаш көрінсе — жазыңыз, түзетеміз.",
@@ -2141,7 +2324,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Пакет орнатқышын іске қосу мүмкін болмады.",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Сізде соңғы нұсқа орнатылған.",
     ),
@@ -2166,7 +2349,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жүктеп салу жолағы",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -2194,8 +2377,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

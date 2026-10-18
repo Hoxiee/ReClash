@@ -7797,7 +7797,8 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one:
+          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8499,6 +8500,640 @@ class AppLocalizations {
   /// `Uzbek`
   String get uz {
     return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
+  }
+
+  /// `Request as`
+  String get subscriptionClientRequestAs {
+    return Intl.message(
+      'Request as',
+      name: 'subscriptionClientRequestAs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatically`
+  String get subscriptionClientAuto {
+    return Intl.message(
+      'Automatically',
+      name: 'subscriptionClientAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash`
+  String get subscriptionClientReclash {
+    return Intl.message(
+      'ReClash',
+      name: 'subscriptionClientReclash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash Meta`
+  String get subscriptionClientClashMeta {
+    return Intl.message(
+      'Clash Meta',
+      name: 'subscriptionClientClashMeta',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash`
+  String get subscriptionClientClash {
+    return Intl.message(
+      'Clash',
+      name: 'subscriptionClientClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happ`
+  String get subscriptionClientHapp {
+    return Intl.message(
+      'Happ',
+      name: 'subscriptionClientHapp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `INCY`
+  String get subscriptionClientIncy {
+    return Intl.message(
+      'INCY',
+      name: 'subscriptionClientIncy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `sing-box / Karing`
+  String get subscriptionClientSingbox {
+    return Intl.message(
+      'sing-box / Karing',
+      name: 'subscriptionClientSingbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `v2rayNG`
+  String get subscriptionClientV2rayng {
+    return Intl.message(
+      'v2rayNG',
+      name: 'subscriptionClientV2rayng',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom User-Agent`
+  String get subscriptionClientCustom {
+    return Intl.message(
+      'Custom User-Agent',
+      name: 'subscriptionClientCustom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `User-Agent`
+  String get subscriptionClientCustomUserAgent {
+    return Intl.message(
+      'User-Agent',
+      name: 'subscriptionClientCustomUserAgent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid User-Agent without control characters.`
+  String get subscriptionClientCustomUserAgentInvalid {
+    return Intl.message(
+      'Enter a valid User-Agent without control characters.',
+      name: 'subscriptionClientCustomUserAgentInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Client selection does not send device identity.`
+  String get subscriptionClientDeviceDataHint {
+    return Intl.message(
+      'Client selection does not send device identity.',
+      name: 'subscriptionClientDeviceDataHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review subscription import`
+  String get subscriptionImportReviewTitle {
+    return Intl.message(
+      'Review subscription import',
+      name: 'subscriptionImportReviewTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} proxy nodes can be imported from {format}.`
+  String subscriptionImportReviewSummary(Object count, Object format) {
+    return Intl.message(
+      '$count proxy nodes can be imported from $format.',
+      name: 'subscriptionImportReviewSummary',
+      desc: '',
+      args: [count, format],
+    );
+  }
+
+  /// `No supported proxy nodes can be imported.`
+  String get subscriptionImportNoNodes {
+    return Intl.message(
+      'No supported proxy nodes can be imported.',
+      name: 'subscriptionImportNoNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The following source sections will not be transferred: {sections}.`
+  String subscriptionImportIgnoredSections(Object sections) {
+    return Intl.message(
+      'The following source sections will not be transferred: $sections.',
+      name: 'subscriptionImportIgnoredSections',
+      desc: '',
+      args: [sections],
+    );
+  }
+
+  /// `{count} nodes cannot be converted.`
+  String subscriptionImportSkippedNodes(Object count) {
+    return Intl.message(
+      '$count nodes cannot be converted.',
+      name: 'subscriptionImportSkippedNodes',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `I understand that source settings will be omitted.`
+  String get subscriptionImportAcceptSections {
+    return Intl.message(
+      'I understand that source settings will be omitted.',
+      name: 'subscriptionImportAcceptSections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue with only the supported nodes.`
+  String get subscriptionImportAcceptPartial {
+    return Intl.message(
+      'Continue with only the supported nodes.',
+      name: 'subscriptionImportAcceptPartial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand that some source data will not be preserved.`
+  String get subscriptionImportAcceptOtherLosses {
+    return Intl.message(
+      'I understand that some source data will not be preserved.',
+      name: 'subscriptionImportAcceptOtherLosses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accept and import`
+  String get subscriptionImportAccept {
+    return Intl.message(
+      'Accept and import',
+      name: 'subscriptionImportAccept',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash configuration`
+  String get subscriptionImportFormatClash {
+    return Intl.message(
+      'Clash configuration',
+      name: 'subscriptionImportFormatClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `proxy links`
+  String get subscriptionImportFormatShareLinks {
+    return Intl.message(
+      'proxy links',
+      name: 'subscriptionImportFormatShareLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `encrypted subscription`
+  String get subscriptionImportFormatEncrypted {
+    return Intl.message(
+      'encrypted subscription',
+      name: 'subscriptionImportFormatEncrypted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `unknown format`
+  String get subscriptionImportFormatUnknown {
+    return Intl.message(
+      'unknown format',
+      name: 'subscriptionImportFormatUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These settings apply to subscription URLs. Share links are imported locally.`
+  String get subscriptionClientUrlOnly {
+    return Intl.message(
+      'These settings apply to subscription URLs. Share links are imported locally.',
+      name: 'subscriptionClientUrlOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compatibility`
+  String get subscriptionCompatibilityTitle {
+    return Intl.message(
+      'Compatibility',
+      name: 'subscriptionCompatibilityTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check`
+  String get subscriptionCompatibilityCheck {
+    return Intl.message(
+      'Check',
+      name: 'subscriptionCompatibilityCheck',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checks the current form without saving or restarting VPN. This checks parsing, not node availability.`
+  String get subscriptionCompatibilityCheckHint {
+    return Intl.message(
+      'Checks the current form without saving or restarting VPN. This checks parsing, not node availability.',
+      name: 'subscriptionCompatibilityCheckHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Received as {client}: {format}, {count} proxy nodes.`
+  String subscriptionCompatibilityPrepared(
+    String client,
+    String format,
+    int count,
+  ) {
+    return Intl.message(
+      'Received as $client: $format, $count proxy nodes.',
+      name: 'subscriptionCompatibilityPrepared',
+      desc: '',
+      args: [client, format, count],
+    );
+  }
+
+  /// `Apply checked result`
+  String get subscriptionCompatibilityApplyPrepared {
+    return Intl.message(
+      'Apply checked result',
+      name: 'subscriptionCompatibilityApplyPrepared',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core parsed this result. It has not been saved or applied.`
+  String get subscriptionCompatibilityPreparedHint {
+    return Intl.message(
+      'Core parsed this result. It has not been saved or applied.',
+      name: 'subscriptionCompatibilityPreparedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The import omits source data. Review the losses before applying.`
+  String get subscriptionCompatibilityNeedsReview {
+    return Intl.message(
+      'The import omits source data. Review the losses before applying.',
+      name: 'subscriptionCompatibilityNeedsReview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last successful client`
+  String get subscriptionCompatibilityLastSuccessful {
+    return Intl.message(
+      'Last successful client',
+      name: 'subscriptionCompatibilityLastSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use this client`
+  String get subscriptionCompatibilityPinSuccessful {
+    return Intl.message(
+      'Use this client',
+      name: 'subscriptionCompatibilityPinSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ask about import losses again`
+  String get subscriptionCompatibilityForgetConsent {
+    return Intl.message(
+      'Ask about import losses again',
+      name: 'subscriptionCompatibilityForgetConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not obtain a compatible subscription. The existing configuration was not changed.`
+  String get subscriptionCompatibilityCheckFailed {
+    return Intl.message(
+      'Could not obtain a compatible subscription. The existing configuration was not changed.',
+      name: 'subscriptionCompatibilityCheckFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription check timed out.`
+  String get subscriptionCompatibilityTimeout {
+    return Intl.message(
+      'The subscription check timed out.',
+      name: 'subscriptionCompatibilityTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server rejected authorization. Client negotiation stopped.`
+  String get subscriptionCompatibilityAuthorization {
+    return Intl.message(
+      'The server rejected authorization. Client negotiation stopped.',
+      name: 'subscriptionCompatibilityAuthorization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server limited requests. Try again later.`
+  String get subscriptionCompatibilityRateLimited {
+    return Intl.message(
+      'The server limited requests. Try again later.',
+      name: 'subscriptionCompatibilityRateLimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection failed. Client negotiation stopped.`
+  String get subscriptionCompatibilityTransport {
+    return Intl.message(
+      'Connection failed. Client negotiation stopped.',
+      name: 'subscriptionCompatibilityTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The form or profile changed. Check the subscription again.`
+  String get subscriptionCompatibilitySuperseded {
+    return Intl.message(
+      'The form or profile changed. Check the subscription again.',
+      name: 'subscriptionCompatibilitySuperseded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the AGE key to check this subscription.`
+  String get subscriptionCompatibilityAgeKey {
+    return Intl.message(
+      'Enter the AGE key to check this subscription.',
+      name: 'subscriptionCompatibilityAgeKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remember this consent for this subscription`
+  String get subscriptionImportRememberConsent {
+    return Intl.message(
+      'Remember this consent for this subscription',
+      name: 'subscriptionImportRememberConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applies only to this source, format and the accepted loss types. New losses require consent again.`
+  String get subscriptionImportRememberConsentHint {
+    return Intl.message(
+      'Applies only to this source, format and the accepted loss types. New losses require consent again.',
+      name: 'subscriptionImportRememberConsentHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show subscription URL`
+  String get subscriptionCompatibilityShowUrl {
+    return Intl.message(
+      'Show subscription URL',
+      name: 'subscriptionCompatibilityShowUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide subscription URL`
+  String get subscriptionCompatibilityHideUrl {
+    return Intl.message(
+      'Hide subscription URL',
+      name: 'subscriptionCompatibilityHideUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send HWID`
+  String get subscriptionIdentityTitle {
+    return Intl.message(
+      'Send HWID',
+      name: 'subscriptionIdentityTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A stable pseudonymous device ID will be sent to this subscription origin. It is not hardware attestation and consent stays on this device.`
+  String get subscriptionIdentityDisclosure {
+    return Intl.message(
+      'A stable pseudonymous device ID will be sent to this subscription origin. It is not hardware attestation and consent stays on this device.',
+      name: 'subscriptionIdentityDisclosure',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also send operating system and device model`
+  String get subscriptionIdentityDetails {
+    return Intl.message(
+      'Also send operating system and device model',
+      name: 'subscriptionIdentityDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This also sends the operating system version and device model with the identifier.`
+  String get subscriptionIdentityDetailsDisclosure {
+    return Intl.message(
+      'This also sends the operating system version and device model with the identifier.',
+      name: 'subscriptionIdentityDetailsDisclosure',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription identity`
+  String get subscriptionIdentitySettingsTitle {
+    return Intl.message(
+      'Subscription identity',
+      name: 'subscriptionIdentitySettingsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.`
+  String get subscriptionIdentityGlobalHint {
+    return Intl.message(
+      'When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.',
+      name: 'subscriptionIdentityGlobalHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use global`
+  String get subscriptionIdentityUseGlobal {
+    return Intl.message(
+      'Use global',
+      name: 'subscriptionIdentityUseGlobal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription`
+  String get subscriptionProvider {
+    return Intl.message(
+      'Subscription',
+      name: 'subscriptionProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Website`
+  String get subscriptionProviderWebsite {
+    return Intl.message(
+      'Website',
+      name: 'subscriptionProviderWebsite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Support`
+  String get subscriptionProviderSupport {
+    return Intl.message(
+      'Support',
+      name: 'subscriptionProviderSupport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy plan`
+  String get subscriptionProviderBuyPlan {
+    return Intl.message(
+      'Buy plan',
+      name: 'subscriptionProviderBuyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy traffic`
+  String get subscriptionProviderBuyTraffic {
+    return Intl.message(
+      'Buy traffic',
+      name: 'subscriptionProviderBuyTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account`
+  String get subscriptionProviderAccount {
+    return Intl.message(
+      'Account',
+      name: 'subscriptionProviderAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logo URL`
+  String get subscriptionProviderLogo {
+    return Intl.message(
+      'Logo URL',
+      name: 'subscriptionProviderLogo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use provider update interval`
+  String get subscriptionUseProviderInterval {
+    return Intl.message(
+      'Use provider update interval',
+      name: 'subscriptionUseProviderInterval',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Prevent duplicate subscriptions`

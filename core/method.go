@@ -181,7 +181,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	initClashMethod:                withArguments(handleInitClash),
 	getIsInitMethod:                withoutArguments(handleGetIsInit),
 	forceGcMethod:                  acknowledged(handleForceGC),
-	shutdownMethod:                 withoutArguments(handleShutdown),
+	shutdownMethod:                 withoutArguments(func() bool { result := handleShutdown(); cancelSubscriptionFetches(); return result }),
 	startListenerMethod:            withoutArguments(handleStartListener),
 	stopListenerMethod:             withoutArguments(handleStopListener),
 	getMemoryStatsMethod:           withoutArguments(handleGetMemoryStats),
@@ -223,6 +223,10 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	dumpRuleSetMethod:              withFallible(handleDumpRuleSet),
 	compileRuleSetMethod:           withFallible(handleCompileRuleSet),
 	clearEffectMethod:              withMessage(handleClearEffect),
+	fetchSubscriptionMethod:        withFallible(handleFetchSubscription),
+	cancelSubscriptionFetchMethod: withArguments(func(params CancelSubscriptionFetchParams) bool {
+		return handleCancelSubscriptionFetch(params.RequestID)
+	}),
 }
 
 func watchRouteHandler(call *MethodCall) (any, error) {

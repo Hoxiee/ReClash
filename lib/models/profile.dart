@@ -1,9 +1,22 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:async';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/compatibility/cache.dart';
+import 'package:reclash/subscriptions/compatibility/import_policy.dart';
+import 'package:reclash/subscriptions/compatibility/prepare.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
+import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/subscriptions/transport/header_policy.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 
 import 'clash_config.dart';
 
@@ -12,6 +25,29 @@ part 'generated/profile.g.dart';
 
 typedef ValidateConfig =
     Future<String> Function(String path, String ageSecretKey);
+
+typedef DecryptProfilePayload =
+    Future<Uint8List> Function(Uint8List bytes, String ageSecretKey);
+
+final _profileMutationQueue = <int, Future<void>>{};
+
+Future<T> serializeProfileMutation<T>(
+  int profileId,
+  Future<T> Function() action,
+) {
+  final previous = _profileMutationQueue[profileId] ?? Future<void>.value();
+  final run = previous.then((_) => action());
+  final release = run.then<void>((_) {}, onError: (Object _) {});
+  _profileMutationQueue[profileId] = release;
+  unawaited(
+    release.then((_) {
+      if (identical(_profileMutationQueue[profileId], release)) {
+        _profileMutationQueue.remove(profileId);
+      }
+    }),
+  );
+  return run;
+}
 
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
@@ -72,6 +108,11 @@ abstract class Profile with _$Profile {
     DateTime? lastUpdateDate,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
+    @Default(SubscriptionPreferences())
+    @JsonKey(fromJson: SubscriptionPreferences.safeFromJson)
+    SubscriptionPreferences subscriptionPreferences,
+    @JsonKey(fromJson: SubscriptionSnapshot.safeFromJson)
+    SubscriptionSnapshot? subscriptionSnapshot,
     @Default(true) bool autoUpdate,
     @Default({}) Map<String, String> selectedMap,
     @Default({}) Set<String> unfoldSet,
@@ -95,6 +136,9 @@ abstract class Profile with _$Profile {
       url: url,
       id: id,
       autoUpdateDuration: defaultUpdateDuration,
+      subscriptionPreferences: const SubscriptionPreferences(
+        client: SubscriptionClientSettings.forNewProfile(),
+      ),
     );
   }
 
@@ -135,6 +179,116 @@ extension ProfilesExt on List<Profile> {
   }
 }
 
+class PreparedSubscriptionUpdate {
+  const PreparedSubscriptionUpdate({
+    required this.profileId,
+    required this.sourceUrl,
+    required this.sourceAgeSecretKey,
+    required this.sourcePreferences,
+    required this.payload,
+    required this.metadata,
+    required this.subscriptionInfo,
+    required this.snapshot,
+    required this.label,
+    required this.client,
+    this.clientFingerprint = '',
+  });
+
+  final int profileId;
+  final String sourceUrl;
+  final String sourceAgeSecretKey;
+  final SubscriptionPreferences sourcePreferences;
+  final SubscriptionImportResult payload;
+  final SubscriptionMetadataResult metadata;
+  final SubscriptionInfo? subscriptionInfo;
+  final SubscriptionSnapshot snapshot;
+  final String label;
+  final SubscriptionClientPreset client;
+  final String clientFingerprint;
+
+  SubscriptionImportSummary get summary => payload.summary;
+}
+
+class SubscriptionUpdateCancelled implements Exception {
+  const SubscriptionUpdateCancelled();
+
+  @override
+  String toString() => 'Subscription update cancelled';
+}
+
+class SubscriptionUpdateSuperseded implements Exception {
+  const SubscriptionUpdateSuperseded();
+
+  @override
+  String toString() =>
+      'Profile changed before the subscription update committed';
+}
+
+class SubscriptionUpdateRejected implements Exception {
+  const SubscriptionUpdateRejected(this.reason);
+  final SubscriptionRetryReason reason;
+
+  @override
+  String toString() => 'Subscription update failed (${reason.name})';
+}
+
+bool _looksLikeAgeEncrypted(Uint8List bytes) {
+  const prefix = '-----BEGIN AGE ENCRYPTED FILE-----';
+  if (bytes.length < prefix.length) return false;
+  for (var index = 0; index < prefix.length; index++) {
+    if (bytes[index] != prefix.codeUnitAt(index)) return false;
+  }
+  return true;
+}
+
+SubscriptionInfo? _mergeSubscriptionInfo(
+  SubscriptionInfo? previous,
+  SubscriptionMetadata incoming,
+) {
+  const usageFields = {
+    'subscription.upload',
+    'subscription.download',
+    'subscription.total',
+    'subscription.expire',
+  };
+  if (!incoming.fields.keys.any(usageFields.contains)) return previous;
+  return SubscriptionInfo(
+    upload: incoming.count('subscription.upload') ?? previous?.upload ?? 0,
+    download:
+        incoming.count('subscription.download') ?? previous?.download ?? 0,
+    total: incoming.count('subscription.total') ?? previous?.total ?? 0,
+    expire: incoming.count('subscription.expire') ?? previous?.expire ?? 0,
+  );
+}
+
+SubscriptionRetryReason _retryReason(SubscriptionException error) {
+  if (error.failure == SubscriptionFailure.http &&
+      (error.status == 406 || error.status == 415)) {
+    return SubscriptionRetryReason.unsupportedMediaType;
+  }
+  return switch (error.failure) {
+    SubscriptionFailure.cancelled ||
+    SubscriptionFailure.superseded => SubscriptionRetryReason.cancelled,
+    SubscriptionFailure.timeout => SubscriptionRetryReason.timeout,
+    SubscriptionFailure.transport => SubscriptionRetryReason.transport,
+    SubscriptionFailure.tls => SubscriptionRetryReason.tls,
+    SubscriptionFailure.unauthorized =>
+      error.status == 403
+          ? SubscriptionRetryReason.forbidden
+          : SubscriptionRetryReason.unauthorized,
+    SubscriptionFailure.rateLimited => SubscriptionRetryReason.rateLimited,
+    SubscriptionFailure.deviceRequired =>
+      SubscriptionRetryReason.deviceConsentRequired,
+    SubscriptionFailure.deviceLimit =>
+      SubscriptionRetryReason.deviceLimitReached,
+    SubscriptionFailure.http ||
+    SubscriptionFailure.redirect ||
+    SubscriptionFailure.oversized ||
+    SubscriptionFailure.invalid ||
+    SubscriptionFailure.empty => SubscriptionRetryReason.invalidResponse,
+  };
+}
+
 extension ProfileExtension on Profile {
   bool get realAutoUpdate => type == ProfileType.url && autoUpdate;
 
@@ -157,6 +311,8 @@ extension ProfileExtension on Profile {
 
   Future<Profile?> checkAndUpdateAndCopy({
     required ValidateConfig validate,
+    required String defaultUserAgent,
+    DecryptProfilePayload? decrypt,
   }) async {
     if (type != ProfileType.url) {
       return null;
@@ -165,7 +321,11 @@ extension ProfileExtension on Profile {
     if (await mFile.exists()) {
       return null;
     }
-    return update(validate: validate);
+    return update(
+      validate: validate,
+      defaultUserAgent: defaultUserAgent,
+      decrypt: decrypt,
+    );
   }
 
   Future<File> _getFile([bool autoCreate = true]) async {
@@ -178,40 +338,384 @@ extension ProfileExtension on Profile {
     return file;
   }
 
-  Future<File> get file async {
-    return _getFile();
+  Future<File> get file async => _getFile();
+
+  Future<PreparedSubscriptionUpdate> prepareUpdate({
+    required String defaultUserAgent,
+    SubscriptionTransport? transport,
+    SubscriptionCancellation? cancellation,
+    Map<String, String> identityHeaders = const {},
+    DecryptProfilePayload? decrypt,
+    ValidateConfig? validate,
+    String? locale,
+  }) async {
+    if (type != ProfileType.url) {
+      throw StateError('Only URL profiles can be updated');
+    }
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        uri.host.isEmpty ||
+        !const {'http', 'https'}.contains(uri.scheme.toLowerCase())) {
+      throw const SubscriptionException(SubscriptionFailure.invalid);
+    }
+    final preferences = subscriptionPreferences;
+    if (!preferences.client.isValid) {
+      throw const SubscriptionUpdateRejected(
+        SubscriptionRetryReason.invalidResponse,
+      );
+    }
+    final requestFingerprint = subscriptionClientRequestFingerprint(
+      url: url,
+      ageSecretKey: ageSecretKey,
+      preferences: preferences.toJson(),
+      defaultUserAgent: defaultUserAgent,
+      managedHeaders: identityHeaders,
+      locale: locale,
+    );
+    final lastSuccessful = await const SubscriptionClientCache().read(
+      id,
+      subscriptionClientCacheKey(
+        requestFingerprint,
+        preferences.client.importPolicy.toJson(),
+      ),
+    );
+    final attempts = subscriptionClientAttempts(
+      selected: preferences.client.preset,
+      defaultUserAgent: defaultUserAgent,
+      lastSuccessful: lastSuccessful,
+      locale: locale,
+    );
+    final fetcher = transport ?? SubscriptionTransport();
+    final negotiation =
+        await negotiateSubscriptionClients<PreparedSubscriptionUpdate>(
+          attempts: attempts,
+          isCancelled: () => cancellation?.cancelled ?? false,
+          cancellationSignal: cancellation?.whenCancelled,
+          runAttempt: (preset, timeout, attemptCancellation) async {
+            final requestCancellation = SubscriptionCancellation();
+            unawaited(
+              attemptCancellation.whenCancelled.then(
+                (_) => requestCancellation.cancel(),
+              ),
+            );
+            if (cancellation != null) {
+              unawaited(
+                cancellation.whenCancelled.then(
+                  (_) => requestCancellation.cancel(),
+                ),
+              );
+            }
+            try {
+              final clientHeaders = subscriptionClientRequestHeaders(
+                preset,
+                defaultUserAgent: defaultUserAgent,
+                customUserAgent: preferences.client.customUserAgent,
+                locale: locale,
+              );
+              final headers = overlaySubscriptionHeaders(clientHeaders, {
+                ...preferences.headers,
+                ...identityHeaders,
+              }, allowManaged: true);
+              final response = await fetcher.fetch(
+                uri,
+                headers: headers,
+                timeout: timeout,
+                cancellation: requestCancellation,
+              );
+              var content = response.bytes;
+              if (_looksLikeAgeEncrypted(content)) {
+                if (ageSecretKey.isEmpty) {
+                  throw const AgeSecretKeyRequiredException();
+                }
+                if (decrypt == null) {
+                  throw const SubscriptionUpdateRejected(
+                    SubscriptionRetryReason.invalidResponse,
+                  );
+                }
+                content = await decrypt(content, ageSecretKey);
+              }
+              if (requestCancellation.cancelled) {
+                throw const SubscriptionUpdateCancelled();
+              }
+              final body = utf8.decode(content, allowMalformed: true);
+              if (body.trim().isEmpty) {
+                return const SubscriptionClientRejected(
+                  SubscriptionRetryReason.invalidResponse,
+                );
+              }
+              final decodedMetadata = readSubscriptionMetadata(
+                response.headers,
+                body: body,
+                clientPreset: preset,
+              );
+              final payload = await prepareSubscriptionImport(content);
+              if (payload.summary.rejectCoreFallback ||
+                  payload.format == SubscriptionFormat.unknown) {
+                return const SubscriptionClientRejected(
+                  SubscriptionRetryReason.incompatibleResponse,
+                );
+              }
+              if (payload.summary.nodes == 0 &&
+                  payload.summary.groups == 0 &&
+                  payload.summary.remoteProviders == 0) {
+                return const SubscriptionClientRejected(
+                  SubscriptionRetryReason.invalidResponse,
+                );
+              }
+              if (validate != null) {
+                await validateSubscriptionImport(
+                  payload,
+                  validate: validate,
+                  isCancelled: () => requestCancellation.cancelled,
+                );
+              }
+              final previous = subscriptionSnapshot;
+              final staleFields = [
+                for (final key
+                    in previous?.metadata.fields.keys ?? const <String>[])
+                  if (!decodedMetadata.metadata.fields.containsKey(key)) key,
+              ];
+              final mergedMetadata =
+                  (previous?.metadata ?? const SubscriptionMetadata()).merge(
+                    decodedMetadata.metadata,
+                  );
+              final snapshot = SubscriptionSnapshot(
+                metadata: mergedMetadata,
+                receivedAt: DateTime.now().toUtc(),
+                stale: staleFields.isNotEmpty,
+                staleFields: staleFields,
+                source: decodedMetadata.source,
+                deviceStatus: decodedMetadata.deviceStatus,
+                warnings: decodedMetadata.warnings,
+              );
+              final info = _mergeSubscriptionInfo(
+                subscriptionInfo,
+                decodedMetadata.metadata,
+              );
+              final disposition =
+                  response.headers['content-disposition']?.singleOrNull;
+              final resolvedLabel = label.takeFirstValid([
+                getFileNameForDisposition(disposition),
+                decodedMetadata.metadata.accountTitle,
+                decodedMetadata.metadata.name,
+                defaultLabel,
+              ]);
+              return SubscriptionClientReady(
+                PreparedSubscriptionUpdate(
+                  profileId: id,
+                  sourceUrl: url,
+                  sourceAgeSecretKey: ageSecretKey,
+                  sourcePreferences: preferences,
+                  payload: payload,
+                  metadata: decodedMetadata,
+                  subscriptionInfo: info,
+                  snapshot: snapshot,
+                  label: resolvedLabel,
+                  client: preset,
+                  clientFingerprint: requestFingerprint,
+                ),
+                requiresReview:
+                    payload.summary.hasLosses &&
+                    !preferences.client.importPolicy.allows(
+                      payload.format,
+                      payload.summary,
+                      sourceScope: subscriptionImportScope(url, ageSecretKey),
+                    ),
+              );
+            } on SubscriptionException catch (error) {
+              return SubscriptionClientRejected(_retryReason(error));
+            } on SubscriptionImportException {
+              return const SubscriptionClientRejected(
+                SubscriptionRetryReason.invalidResponse,
+              );
+            } on SubscriptionHeaderException {
+              return const SubscriptionClientRejected(
+                SubscriptionRetryReason.invalidResponse,
+              );
+            } on FormatException {
+              return const SubscriptionClientRejected(
+                SubscriptionRetryReason.invalidResponse,
+              );
+            }
+          },
+        );
+    return switch (negotiation) {
+      SubscriptionNegotiationReady(:final value) => value,
+      SubscriptionNegotiationFailed(:final reason)
+          when reason == SubscriptionRetryReason.cancelled =>
+        throw const SubscriptionUpdateCancelled(),
+      SubscriptionNegotiationFailed(:final reason) =>
+        throw SubscriptionUpdateRejected(reason),
+    };
   }
 
-  Future<Profile> update({required ValidateConfig validate}) async {
-    final response = await request.getFileResponseForUrl(url);
-    final disposition = response.headers.value('content-disposition');
-    final userinfo = response.headers.value('subscription-userinfo');
-    return copyWith(
-      label: label.takeFirstValid([
-        getFileNameForDisposition(disposition),
-        defaultLabel,
-      ]),
-      subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-    ).saveFile(
-      decompressUnlabeled(response.data ?? Uint8List(0)),
+  Future<Profile> commitPreparedUpdate(
+    PreparedSubscriptionUpdate prepared, {
+    required ValidateConfig validate,
+    bool acceptLosses = false,
+    bool allowProviderLabel = false,
+    SubscriptionImportPolicy? importPolicy,
+    bool Function()? isCurrent,
+    Future<void> Function(Profile saved)? onCommitted,
+  }) async {
+    if (prepared.profileId != id ||
+        prepared.sourceUrl != url ||
+        prepared.sourceAgeSecretKey != ageSecretKey ||
+        jsonEncode(prepared.sourcePreferences.toJson()) !=
+            jsonEncode(subscriptionPreferences.toJson())) {
+      throw const SubscriptionUpdateSuperseded();
+    }
+    final policy = importPolicy ?? subscriptionPreferences.client.importPolicy;
+    if (prepared.summary.hasLosses &&
+        !acceptLosses &&
+        !policy.allows(
+          prepared.payload.format,
+          prepared.summary,
+          sourceScope: subscriptionImportScope(url, ageSecretKey),
+        )) {
+      throw const SubscriptionUpdateCancelled();
+    }
+    final hintedInterval = subscriptionPreferences.intervalOverride
+        ? null
+        : prepared.metadata.metadata.count('update.intervalMinutes');
+    final saved =
+        await copyWith(
+          subscriptionPreferences: importPolicy == null
+              ? subscriptionPreferences
+              : subscriptionPreferences.copyWith(
+                  client: subscriptionPreferences.client.copyWith(
+                    importPolicy: importPolicy,
+                  ),
+                ),
+          label: allowProviderLabel
+              ? label.takeFirstValid([prepared.label])
+              : label,
+          subscriptionInfo: prepared.subscriptionInfo,
+          subscriptionSnapshot: prepared.snapshot,
+          autoUpdateDuration: hintedInterval == null
+              ? autoUpdateDuration
+              : Duration(minutes: hintedInterval),
+        ).saveFile(
+          prepared.payload.bytes,
+          validate: validate,
+          isCurrent: isCurrent,
+          onCommitted: (saved) async {
+            await onCommitted?.call(saved);
+            if (prepared.clientFingerprint.isNotEmpty) {
+              await const SubscriptionClientCache().remember(
+                id,
+                subscriptionClientCacheKey(
+                  prepared.clientFingerprint,
+                  saved.subscriptionPreferences.client.importPolicy.toJson(),
+                ),
+                prepared.client,
+              );
+            }
+          },
+        );
+    return saved;
+  }
+
+  Future<Profile> update({
+    required ValidateConfig validate,
+    required String defaultUserAgent,
+    Future<bool> Function(PreparedSubscriptionUpdate prepared)? approveLosses,
+    SubscriptionTransport? transport,
+    SubscriptionCancellation? cancellation,
+    Map<String, String> identityHeaders = const {},
+    DecryptProfilePayload? decrypt,
+  }) async {
+    final prepared = await prepareUpdate(
+      defaultUserAgent: defaultUserAgent,
+      transport: transport,
+      cancellation: cancellation,
+      identityHeaders: identityHeaders,
+      decrypt: decrypt,
       validate: validate,
+    );
+    final accepted =
+        !prepared.summary.hasLosses ||
+        subscriptionPreferences.client.importPolicy.allows(
+          prepared.payload.format,
+          prepared.summary,
+          sourceScope: subscriptionImportScope(url, ageSecretKey),
+        ) ||
+        approveLosses != null && await approveLosses(prepared);
+    if (!accepted) throw const SubscriptionUpdateCancelled();
+    return commitPreparedUpdate(
+      prepared,
+      validate: validate,
+      acceptLosses: prepared.summary.hasLosses,
+      allowProviderLabel: true,
     );
   }
 
   Future<Profile> saveFile(
     Uint8List bytes, {
     required ValidateConfig validate,
+    bool Function()? isCurrent,
+    Future<void> Function(Profile saved)? onCommitted,
   }) async {
     final path = await appPath.tempFilePath;
-    final tempFile = File(path);
+    final tempFile = File('$path.$id.${DateTime.now().microsecondsSinceEpoch}');
     await tempFile.safeWriteAsBytes(bytes);
-    final message = await validate(path, ageSecretKey);
-    if (message.isNotEmpty) {
-      throw MessageException(message);
+    try {
+      final message = await validate(tempFile.path, ageSecretKey);
+      if (message.isNotEmpty) throw MessageException(message);
+      final candidate = await tempFile.readAsBytes();
+      return await serializeProfileMutation(id, () async {
+        void ensureCurrent() {
+          if (isCurrent != null && !isCurrent()) {
+            throw const SubscriptionUpdateSuperseded();
+          }
+        }
+
+        ensureCurrent();
+        final target = await _getFile(false);
+        final staged = File('${target.path}.staged');
+        final backup = File('${target.path}.previous');
+        ensureCurrent();
+        await target.parent.create(recursive: true);
+        if (!await target.exists() && await backup.exists()) {
+          await backup.rename(target.path);
+        } else if (await target.exists() && await backup.exists()) {
+          await backup.safeDelete();
+        }
+        await staged.safeDelete();
+        try {
+          await staged.safeWriteAsBytes(candidate);
+          final hadTarget = await target.exists();
+          ensureCurrent();
+          if (hadTarget) await target.rename(backup.path);
+          final saved = copyWith(lastUpdateDate: DateTime.now());
+          try {
+            ensureCurrent();
+            await staged.rename(target.path);
+            ensureCurrent();
+            await onCommitted?.call(saved);
+          } on Object {
+            if (await backup.exists()) {
+              await target.safeDelete();
+              await backup.rename(target.path);
+            } else {
+              await target.safeDelete();
+            }
+            rethrow;
+          }
+          if (hadTarget) {
+            try {
+              await backup.safeDelete();
+            } on FileSystemException {
+              commonPrint.log('Could not remove the previous profile file');
+            }
+          }
+          return saved;
+        } finally {
+          await staged.safeDelete();
+        }
+      });
+    } finally {
+      await tempFile.safeDelete();
     }
-    final mFile = await file;
-    await tempFile.copy(mFile.path);
-    await tempFile.safeDelete();
-    return copyWith(lastUpdateDate: DateTime.now());
   }
 }

@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/netip"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/common/yaml"
 	"github.com/metacubex/mihomo/component/resource"
@@ -51,7 +53,7 @@ func handleCompileRuleSet(params CompileRuleSetParams) (*RuleSetInfo, error) {
 	var buf []byte
 	var err error
 	if params.URL != "" {
-		buf, err = downloadRuleSet(params.URL, source)
+		buf, err = downloadRuleSet(params.URL, source, params.Headers)
 	} else {
 		buf, err = os.ReadFile(source)
 	}
@@ -75,14 +77,25 @@ func handleCompileRuleSet(params CompileRuleSetParams) (*RuleSetInfo, error) {
 	return info, nil
 }
 
-func downloadRuleSet(url string, path string) ([]byte, error) {
-	buf, _, err := resource.NewHTTPVehicle(url, path, "", nil, resource.DefaultHttpTimeout, 0).
+func downloadRuleSet(rawURL, path string, headers map[string]string) ([]byte, error) {
+	if err := validateResourceHeaders(headers); err != nil {
+		return nil, &MethodError{Code: "invalid_arguments", Message: "invalid rule set request headers"}
+	}
+	requestHeaders := make(http.Header, len(headers))
+	for name, value := range headers {
+		requestHeaders.Set(name, value)
+	}
+	buf, _, err := resource.NewHTTPVehicle(rawURL, path, "", requestHeaders, resource.DefaultHttpTimeout, subscriptionFetchWireLimit+1).
 		Read(context.Background(), utils.HashType{})
 	if err != nil {
 		if methodErr := requestMethodError(err, map[string]any{}); methodErr != nil {
+			methodErr.Message = "rule set download failed"
 			return nil, methodErr
 		}
-		return nil, err
+		return nil, errors.New("rule set download failed")
+	}
+	if int64(len(buf)) > subscriptionFetchWireLimit {
+		return nil, errSubscriptionTooLarge
 	}
 	return buf, nil
 }

@@ -214,19 +214,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label}は1項目のみ指定できます";
 
-  static String m87(count) => "${count} 件の結果";
+  static String m87(client, format, count) =>
+      "${client} として取得：${format}、プロキシノード ${count} 件。";
 
-  static String m88(value) => "ピーク ${value}";
+  static String m88(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
 
-  static String m89(value) => "累計 ${value}";
+  static String m89(count, format) =>
+      "${format} から ${count} 個のプロキシノードをインポートできます。";
 
-  static String m90(version) => "インストール済み: ${version}";
+  static String m90(count) => "変換できないノード: ${count} 個。";
 
-  static String m91(label) => "${label}はURLである必要があります";
+  static String m91(count) => "${count} 件の結果";
 
-  static String m92(count) => "${count} 年前";
+  static String m92(value) => "ピーク ${value}";
 
-  static String m93(count) => "${count} 年前";
+  static String m93(value) => "累計 ${value}";
+
+  static String m94(version) => "インストール済み: ${version}";
+
+  static String m95(label) => "${label}はURLである必要があります";
+
+  static String m96(count) => "${count} 年前";
+
+  static String m97(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1620,7 +1630,174 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("スタイル"),
     "submit": MessageLookupByLibrary.simpleMessage("送信"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("自動"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "カスタム User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "制御文字を含まない有効な User-Agent を入力してください。",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "クライアントの選択で端末識別情報は送信されません。",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "クライアントとして要求",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "この設定はサブスクリプション URL に適用されます。プロキシリンクはローカルでインポートされます。",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションの確認には AGE キーを入力してください。",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("確認済みの結果を適用"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage(
+          "サーバーが認証を拒否したため、クライアントの選択を停止しました。",
+        ),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "確認",
+    ),
+    "subscriptionCompatibilityCheckFailed":
+        MessageLookupByLibrary.simpleMessage(
+          "互換性のあるサブスクリプションを取得できませんでした。以前の設定は変更されていません。",
+        ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "現在の入力を保存や VPN の再起動なしで確認します。ノードの接続可否ではなく、設定の解析を確認します。",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage("インポート時の省略を再確認する"),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションURLを非表示",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("前回成功したクライアント"),
+    "subscriptionCompatibilityNeedsReview":
+        MessageLookupByLibrary.simpleMessage(
+          "インポートでは元のデータの一部が省略されます。適用前に省略内容を確認してください。",
+        ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("このクライアントを使用"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage(
+          "Core がこの結果を解析しました。まだ保存も適用もされていません。",
+        ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage("サーバーがリクエストを制限しました。後で再試行してください。"),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションURLを表示",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "入力またはプロファイルが変更されました。もう一度確認してください。",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの確認がタイムアウトしました。",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "互換性",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "接続に失敗したため、クライアントの選択を停止しました。",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "OSと端末モデルも送信",
+    ),
+    "subscriptionIdentityDetailsDisclosure":
+        MessageLookupByLibrary.simpleMessage("識別子とともにOSバージョンと端末モデルを送信します。"),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションのオリジンに、安定した仮名化端末IDを送信します。ハードウェア認証ではなく、同意はこの端末内だけに保存されます。",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "有効にすると、プロファイルで上書きされない限り、すべてのURLサブスクリプションのリクエストで端末識別子を送信します。OSと端末情報はサブスクリプションごとに個別に許可します。",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの識別情報",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "HWIDを送信",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "全体設定を使用",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "承認してインポート",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "一部の元データが保持されないことを理解しました。",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "対応ノードのみをインポートする。",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "元クライアントの設定が省略されることを理解しました。",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "Clash 設定",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "暗号化されたサブスクリプション",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "プロキシリンク",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "不明な形式",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "インポートできる対応プロキシノードがありません。",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションの同意を記憶",
+    ),
+    "subscriptionImportRememberConsentHint":
+        MessageLookupByLibrary.simpleMessage(
+          "この取得元、形式、同意した省略内容にのみ適用されます。新たな省略には再度の同意が必要です。",
+        ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションのインポートを確認",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("サブスクリプション"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
+      "アカウント",
+    ),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "プランを購入",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "通信量を購入",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage("ロゴのURL"),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage("サポート"),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
+      "ウェブサイト",
+    ),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "プロバイダーの更新間隔を使う",
+    ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage("sudo のパスワードを入力"),
     "suspended": MessageLookupByLibrary.simpleMessage("一時停止中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("プロファイルを切り替え"),
@@ -1687,7 +1864,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
@@ -1703,8 +1880,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -1745,7 +1922,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "パッケージインストーラーを起動できませんでした。",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -1764,7 +1941,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -1788,8 +1965,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

@@ -5,6 +5,7 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,20 +18,29 @@ class _RecordingProfilesAction extends ProfilesAction {
   final batches = <List<String>>[];
   final singles = <String>[];
   final ageSecretKeys = <String>[];
+  final singleSettings = <SubscriptionClientSettings?>[];
+  final batchSettings = <SubscriptionClientSettings?>[];
 
   @override
   Future<void> addProfileFromLink(
     String link, {
     String? label,
     String ageSecretKey = '',
+    SubscriptionClientSettings? clientSettings,
   }) async {
     singles.add(link);
     ageSecretKeys.add(ageSecretKey);
+    singleSettings.add(clientSettings);
   }
 
   @override
-  Future<void> addProfilesFromLinks(List<String> links) async =>
-      batches.add(links);
+  Future<void> addProfilesFromLinks(
+    List<String> links, {
+    SubscriptionClientSettings? clientSettings,
+  }) async {
+    batches.add(links);
+    batchSettings.add(clientSettings);
+  }
 }
 
 Finder _field(String title) => find.descendant(
@@ -132,6 +142,7 @@ void main() {
     expect(action.batches, [
       ['https://example.com/a', 'https://example.com/b'],
     ]);
+    expect(action.batchSettings.single?.preset, SubscriptionClientPreset.auto);
     expect(tester.takeException(), null);
   });
 
@@ -166,6 +177,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(action.singles, ['trojan://pass@example.com:443#HK']);
+    expect(action.singleSettings.single, isNull);
     expect(tester.takeException(), null);
   });
 
@@ -201,7 +213,54 @@ void main() {
 
     expect(action.singles, ['https://example.com/sub']);
     expect(action.ageSecretKeys, ['AGE-SECRET-KEY-1A']);
+    expect(action.singleSettings.single?.preset, SubscriptionClientPreset.auto);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('the link import stores a chosen custom client identity', (
+    tester,
+  ) async {
+    final action = _RecordingProfilesAction();
+    final container = _containerFor(tester, profilesAction: action);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) =>
+                  AddProfileView(context: context, origin: context),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = currentAppLocalizations;
+    await tester.tap(find.text(l10n.link));
+    await tester.pumpAndSettle();
+    await tester.enterText(_field(l10n.link), 'https://example.com/sub');
+    await tester.tap(find.text(l10n.subscriptionClientRequestAs));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(l10n.subscriptionClientCustom));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.subscriptionClientCustom));
+    await tester.pumpAndSettle();
+    final customUserAgentField = _field(l10n.subscriptionClientCustomUserAgent);
+    await tester.ensureVisible(customUserAgentField);
+    await tester.pumpAndSettle();
+    await tester.enterText(customUserAgentField, 'ExamplePanel/4');
+    await tester.tap(find.text(l10n.submit));
+    await tester.pumpAndSettle();
+
+    expect(action.singles, ['https://example.com/sub']);
+    expect(
+      action.singleSettings.single?.preset,
+      SubscriptionClientPreset.custom,
+    );
+    expect(action.singleSettings.single?.customUserAgent, 'ExamplePanel/4');
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('the link import rejects what is neither kind of link', (

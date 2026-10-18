@@ -209,19 +209,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label}只能是一项";
 
-  static String m87(count) => "${count} 个结果";
+  static String m87(client, format, count) =>
+      "以 ${client} 获取：${format}，代理节点 ${count} 个。";
 
-  static String m88(value) => "峰值 ${value}";
+  static String m88(sections) => "以下源配置部分不会迁移：${sections}。";
 
-  static String m89(value) => "累计 ${value}";
+  static String m89(count, format) => "可从 ${format} 导入 ${count} 个代理节点。";
 
-  static String m90(version) => "已安装版本：${version}";
+  static String m90(count) => "无法转换的节点数：${count}。";
 
-  static String m91(label) => "${label}必须为URL";
+  static String m91(count) => "${count} 个结果";
 
-  static String m92(count) => "${count} 年前";
+  static String m92(value) => "峰值 ${value}";
 
-  static String m93(count) => "${count} 年前";
+  static String m93(value) => "累计 ${value}";
+
+  static String m94(version) => "已安装版本：${version}";
+
+  static String m95(label) => "${label}必须为URL";
+
+  static String m96(count) => "${count} 年前";
+
+  static String m97(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1461,7 +1470,154 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("风格"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("自动"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "自定义 User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage("请输入不含控制字符的有效 User-Agent。"),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "选择客户端不会发送设备身份信息。",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "请求客户端",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "这些设置适用于订阅 URL。代理链接将在本地导入。",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "请输入 AGE 密钥以检查此订阅。",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("应用已检查的结果"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage("服务器拒绝授权，已停止客户端选择。"),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "检查",
+    ),
+    "subscriptionCompatibilityCheckFailed":
+        MessageLookupByLibrary.simpleMessage("无法获取兼容的订阅。原有配置未更改。"),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "使用当前表单值检查，不保存或重启 VPN。检查的是配置解析，而不是节点可用性。",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage("重新询问导入损失"),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "隐藏订阅URL",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("上次成功的客户端"),
+    "subscriptionCompatibilityNeedsReview":
+        MessageLookupByLibrary.simpleMessage("导入会忽略部分源数据。应用前请检查损失内容。"),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("使用此客户端"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage("Core 已解析此结果，但尚未保存或应用。"),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage("服务器限制了请求，请稍后重试。"),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "显示订阅URL",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "表单或配置已更改，请重新检查订阅。",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "订阅检查超时。",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "兼容性",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "连接失败，已停止客户端选择。",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "同时发送操作系统和设备型号",
+    ),
+    "subscriptionIdentityDetailsDisclosure":
+        MessageLookupByLibrary.simpleMessage("设备标识符还会附带操作系统版本和设备型号。"),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "会向此订阅源发送稳定的假名设备 ID。这不是硬件证明，且同意仅保存在此设备上。",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "启用后，除非某个配置文件覆盖此设置，否则所有 URL 订阅请求都会发送设备标识符。操作系统和设备信息仍需按订阅单独授权。",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "订阅身份信息",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "发送 HWID",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "使用全局设置",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage("接受并导入"),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "我了解部分源数据不会保留。",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "仅继续导入受支持的节点。",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "我了解源客户端设置不会迁移。",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "Clash 配置",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "加密订阅",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "代理链接",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "未知格式",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "没有可导入的受支持代理节点。",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "记住对此订阅的同意",
+    ),
+    "subscriptionImportRememberConsentHint":
+        MessageLookupByLibrary.simpleMessage("仅适用于此来源、格式及已同意的损失类型。新的损失需要再次确认。"),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "检查订阅导入",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("订阅"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("账户"),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage("购买套餐"),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "购买流量",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage("徽标链接"),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage("支持"),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("网站"),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "使用服务提供方的更新间隔",
+    ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage("输入 sudo 密码"),
     "suspended": MessageLookupByLibrary.simpleMessage("挂起中…"),
     "switchProfile": MessageLookupByLibrary.simpleMessage("切换配置"),
@@ -1522,7 +1678,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("固定"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("已固定"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("重启内核"),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("执行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("分区"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("设置"),
@@ -1538,8 +1694,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("上传总量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "traffic": MessageLookupByLibrary.simpleMessage("流量"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
@@ -1576,7 +1732,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新。"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序。"),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("当前已是最新版本。"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("更新内容"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage("暂无发布说明。"),
@@ -1591,7 +1747,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1615,8 +1771,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

@@ -6,9 +6,14 @@ typedef ImportedProvider = ({
   String url,
   String ageSecretKey,
   String content,
+  Map<String, String> headers,
 });
 
-typedef ProviderSource = ({String url, String ageSecretKey});
+typedef ProviderSource = ({
+  String url,
+  String ageSecretKey,
+  Map<String, String> headers,
+});
 
 typedef CustomImportApp = ({
   Set<String> profileLabels,
@@ -160,6 +165,32 @@ Map<String, Object?>? _mapOf(Object? value) =>
 
 String _nameOf(Map<String, Object?> item) => item['name']?.toString() ?? '';
 
+String _providerSourceKey(ProviderSource source) {
+  final entries = source.headers.entries.toList()
+    ..sort((a, b) => a.key.compareTo(b.key));
+  return json.encode([
+    source.url,
+    source.ageSecretKey,
+    {for (final entry in entries) entry.key: entry.value},
+  ]);
+}
+
+Map<String, String> _sourceHeaders(String item, Object? value) {
+  if (value == null) return const {};
+  final map = _mapOf(value);
+  if (map == null) {
+    throw CustomImportException(CustomImportIssue.entry, item: item);
+  }
+  return _decodeEntry(item, () {
+    final headers = <String, String>{};
+    for (final MapEntry(:key, :value) in map.entries) {
+      if (value is! String) throw const FormatException();
+      headers[key] = value;
+    }
+    return validateResourceHeaders(headers);
+  });
+}
+
 ({Map<String, String> names, List<ImportedProvider> added}) _importProviders(
   Object? section, {
   required Set<String> labels,
@@ -168,11 +199,18 @@ String _nameOf(Map<String, Object?> item) => item['name']?.toString() ?? '';
   required bool readsAgeSecretKey,
 }) {
   final taken = {...labels};
-  final bySource = {...sources};
-  final byUrl = <String, String>{};
-  for (final MapEntry(:key, :value) in sources.entries) {
-    byUrl.putIfAbsent(key.url, () => value);
-  }
+  final bySource = {
+    for (final MapEntry(:key, :value) in sources.entries)
+      _providerSourceKey(key): value,
+  };
+  final byUrlAndHeaders = {
+    for (final MapEntry(:key, :value) in sources.entries)
+      _providerSourceKey((
+        url: key.url,
+        ageSecretKey: '',
+        headers: key.headers,
+      )): value,
+  };
   final names = <String, String>{};
   final added = <ImportedProvider>[];
   for (final MapEntry(:key, :value) in (_mapOf(section) ?? const {}).entries) {
@@ -182,23 +220,31 @@ String _nameOf(Map<String, Object?> item) => item['name']?.toString() ?? '';
     }
     final type = provider['type']?.toString();
     final url = type == 'http' ? provider['url']?.toString().trim() ?? '' : '';
+    final ageSecretKey = readsAgeSecretKey && url.isNotEmpty
+        ? provider['age-secret-key']?.toString().trim() ?? ''
+        : '';
+    final headers = url.isNotEmpty
+        ? _sourceHeaders(key, provider['headers'])
+        : const <String, String>{};
     final ProviderSource source = (
       url: url,
-      ageSecretKey: readsAgeSecretKey && url.isNotEmpty
-          ? provider['age-secret-key']?.toString().trim() ?? ''
-          : '',
+      ageSecretKey: ageSecretKey,
+      headers: headers,
     );
     var label = url.isEmpty
         ? null
         : source.ageSecretKey.isEmpty
-        ? byUrl[url]
-        : bySource[source];
+        ? byUrlAndHeaders[_providerSourceKey(source)]
+        : bySource[_providerSourceKey(source)];
     if (label == null) {
       label = uniqueLabelFor(key, fallback: key, taken: taken.contains);
       taken.add(label);
       if (url.isNotEmpty) {
-        bySource[source] = label;
-        byUrl[url] ??= label;
+        bySource[_providerSourceKey(source)] = label;
+        byUrlAndHeaders.putIfAbsent(
+          _providerSourceKey((url: url, ageSecretKey: '', headers: headers)),
+          () => label!,
+        );
       }
       final payload = provider['payload'];
       added.add((
@@ -208,6 +254,7 @@ String _nameOf(Map<String, Object?> item) => item['name']?.toString() ?? '';
         content: type == 'inline' && payload is List
             ? yaml.encode({payloadKey: payload})
             : '',
+        headers: source.headers,
       ));
     }
     names[key] = label;

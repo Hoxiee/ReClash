@@ -236,20 +236,31 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "«${label}» — только одно значение";
 
-  static String m87(count) => "Результатов: ${count}";
+  static String m87(client, format, count) =>
+      "Получено как ${client}: ${format}, узлов: ${count}.";
 
-  static String m88(value) => "Пик ${value}";
+  static String m88(sections) =>
+      "Не будут перенесены разделы исходной конфигурации: ${sections}.";
 
-  static String m89(value) => "Всего ${value}";
+  static String m89(count, format) =>
+      "Из формата ${format} можно импортировать узлов: ${count}.";
 
-  static String m90(version) => "Установлена версия ${version}";
+  static String m90(count) => "Не удалось преобразовать узлов: ${count}.";
 
-  static String m91(label) => "Значение «${label}» должно быть URL";
+  static String m91(count) => "Результатов: ${count}";
 
-  static String m92(count) =>
+  static String m92(value) => "Пик ${value}";
+
+  static String m93(value) => "Всего ${value}";
+
+  static String m94(version) => "Установлена версия ${version}";
+
+  static String m95(label) => "Значение «${label}» должно быть URL";
+
+  static String m96(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m93(count) =>
+  static String m97(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1041,10 +1052,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1978,8 +1988,181 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("Стиль"),
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage(
+      "Автоматически",
+    ),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "Свой User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "Укажите корректный User-Agent без управляющих символов.",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "Выбор клиента не отправляет идентификаторы устройства.",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "Запрашивать как",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "Эти параметры действуют для URL подписок. Ссылки прокси импортируются локально.",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "Укажите ключ AGE для проверки этой подписки.",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("Применить проверенный результат"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage(
+          "Сервер отклонил авторизацию. Подбор клиентов остановлен.",
+        ),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "Проверить",
+    ),
+    "subscriptionCompatibilityCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось получить совместимую подписку. Прежняя конфигурация не изменена.",
+    ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "Проверяет текущие значения формы без сохранения и перезапуска VPN. Проверяется разбор, а не доступность узлов.",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage(
+          "Снова спрашивать о потерях при импорте",
+        ),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "Скрыть URL подписки",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("Последний успешный клиент"),
+    "subscriptionCompatibilityNeedsReview": MessageLookupByLibrary.simpleMessage(
+      "При импорте часть исходных данных не переносится. Проверьте потери перед применением.",
+    ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("Использовать этот клиент"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage(
+          "Core разобрал результат. Он ещё не сохранён и не применён.",
+        ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage(
+          "Сервер ограничил запросы. Повторите позже.",
+        ),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "Показать URL подписки",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "Форма или профиль изменились. Проверьте подписку ещё раз.",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "Время проверки подписки истекло.",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "Совместимость",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "Не удалось подключиться. Подбор клиентов остановлен.",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "Также отправлять ОС и модель устройства",
+    ),
+    "subscriptionIdentityDetailsDisclosure": MessageLookupByLibrary.simpleMessage(
+      "Вместе с идентификатором будут отправляться версия ОС и модель устройства.",
+    ),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "Этому источнику подписки будет отправляться стабильный псевдонимный идентификатор устройства. Это не аппаратная аттестация; согласие хранится только на этом устройстве.",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "Если включено, идентификатор устройства отправляется в запросах всех URL-подписок, кроме профилей с переопределением. Отправка ОС и сведений об устройстве отдельно включается для каждой подписки.",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "Идентификатор устройства",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "Отправлять HWID",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "Как в настройках",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "Принять и импортировать",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "Понимаю, что часть исходных данных не сохранится.",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "Продолжить только с поддерживаемыми узлами.",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "Понимаю, что параметры исходного клиента не будут перенесены.",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "конфигурация Clash",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "зашифрованная подписка",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "ссылки прокси",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "неизвестный формат",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "Нет поддерживаемых прокси-узлов для импорта.",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "Запомнить это согласие для подписки",
+    ),
+    "subscriptionImportRememberConsentHint": MessageLookupByLibrary.simpleMessage(
+      "Действует только для этого источника, формата и принятых видов потерь. Новые потери требуют повторного согласия.",
+    ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Проверка импорта подписки",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
+    ),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("Подписка"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
+      "Аккаунт",
+    ),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "Купить тариф",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "Купить трафик",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage(
+      "Ссылка на логотип",
+    ),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage(
+      "Поддержка",
+    ),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("Сайт"),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "Использовать интервал провайдера",
     ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(
       "Введите пароль для sudo",
@@ -2071,7 +2254,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро",
     ),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
@@ -2089,8 +2272,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -2141,7 +2324,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось запустить установщик пакетов.",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "У вас уже установлена последняя версия.",
     ),
@@ -2164,7 +2347,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2198,8 +2381,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

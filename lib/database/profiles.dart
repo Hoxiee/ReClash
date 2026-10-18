@@ -30,6 +30,12 @@ class Profiles extends Table {
   TextColumn get subscriptionInfo =>
       text().map(const SubscriptionInfoConverter()).nullable()();
 
+  TextColumn get subscriptionPreferences =>
+      text().map(const SubscriptionPreferencesConverter()).nullable()();
+
+  TextColumn get subscriptionSnapshot =>
+      text().map(const SubscriptionSnapshotConverter()).nullable()();
+
   BoolColumn get autoUpdate => boolean()();
 
   TextColumn get selectedMap => text().map(const StringMapConverter())();
@@ -64,6 +70,44 @@ class ProfileOverridesConverter
     if (value == null || value == const ProfileOverrides()) return null;
     return json.encode(value.toJson());
   }
+}
+
+class SubscriptionPreferencesConverter
+    extends TypeConverter<SubscriptionPreferences?, String?> {
+  const SubscriptionPreferencesConverter();
+
+  @override
+  SubscriptionPreferences? fromSql(String? fromDb) {
+    if (fromDb == null) return const SubscriptionPreferences();
+    return decodeOrRestoreDefault(
+      'subscription preferences',
+      () => SubscriptionPreferences.safeFromJson(json.decode(fromDb)),
+      () => const SubscriptionPreferences(),
+    );
+  }
+
+  @override
+  String? toSql(SubscriptionPreferences? value) =>
+      value == null ? null : json.encode(value.toJson());
+}
+
+class SubscriptionSnapshotConverter
+    extends TypeConverter<SubscriptionSnapshot?, String?> {
+  const SubscriptionSnapshotConverter();
+
+  @override
+  SubscriptionSnapshot? fromSql(String? fromDb) {
+    if (fromDb == null) return null;
+    return decodeOrRestoreDefault(
+      'subscription snapshot',
+      () => SubscriptionSnapshot.safeFromJson(json.decode(fromDb)),
+      () => null,
+    );
+  }
+
+  @override
+  String? toSql(SubscriptionSnapshot? value) =>
+      value == null ? null : json.encode(value.toJson());
 }
 
 class SubscriptionInfoConverter
@@ -164,6 +208,9 @@ extension RawProfilExt on RawProfile {
       lastUpdateDate: lastUpdateDate,
       autoUpdateDuration: Duration(milliseconds: autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo,
+      subscriptionPreferences:
+          subscriptionPreferences ?? const SubscriptionPreferences(),
+      subscriptionSnapshot: subscriptionSnapshot,
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
@@ -188,6 +235,8 @@ extension ProfilesCompanionExt on Profile {
       lastUpdateDate: Value(lastUpdateDate),
       autoUpdateDurationMillis: autoUpdateDuration.inMilliseconds,
       subscriptionInfo: Value(subscriptionInfo),
+      subscriptionPreferences: Value(subscriptionPreferences),
+      subscriptionSnapshot: Value(subscriptionSnapshot),
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,

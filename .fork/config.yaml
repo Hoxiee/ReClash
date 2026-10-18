@@ -22,8 +22,14 @@ checks:
     argv: [flutter, test, test/widgets/fork_tooltip_contract_test.dart, test/lint/icon_button_tooltip_test.dart]
   identity:
     argv: [flutter, test, test/tool/fork_identity_test.dart]
+  subscription-compatibility:
+    argv: [flutter, test, test/subscriptions/compatibility, test/subscriptions/protocol_transport_test.dart]
+  subscription-foundation:
+    argv: [flutter, test, test/subscriptions]
+  subscription-standard:
+    argv: [dart, run, tool/gen_provider_standard.dart, --check]
   profiles:
-    argv: [flutter, test, test/providers/profiles_action_test.dart]
+    argv: [flutter, test, test/providers/profiles_action_test.dart, test/models/profile_test.dart, test/models/profile_save_test.dart]
   config:
     argv: [flutter, test, test/models/config_test.dart, test/providers/config_test.dart]
   tools:
@@ -73,6 +79,9 @@ sentinels:
   build.yaml: [settings.specs, tools.catalog]
   'lib/manager/window_manager.dart': [desktop.window]
   'lib/providers/actions/proxies.dart': [proxies.groups]
+  'lib/subscriptions/**': [subscriptions.providers, subscription.compatibility]
+  'test/subscriptions/**': [subscriptions.providers, subscription.compatibility]
+  'arb/fragments/profiles.compatibility/**': [subscription.compatibility]
   '.gitmodules': [core.integration]
   'lib/models/**': [settings.specs]
   'lib/providers/**': [settings.specs]

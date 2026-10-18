@@ -3,9 +3,21 @@ part of '../action.dart';
 @Riverpod(keepAlive: true)
 class ProfilesAction extends _$ProfilesAction {
   CoreController get _core => ref.read(coreHandlerProvider);
+  final Map<int, int> _subscriptionUpdateIntents = {};
+  final _profileUpdateCancellations = <int, SubscriptionCancellation>{};
+  Future<void> _lossReviewQueue = Future<void>.value();
 
   @override
   void build() {}
+
+  Future<PreparedSubscriptionUpdate> prepareProfileCompatibility(
+    Profile candidate, {
+    SubscriptionCancellation? cancellation,
+  }) => _prepareProfileCompatibility(candidate, cancellation: cancellation);
+
+  Future<SubscriptionClientPreset?> lastSuccessfulProfileClient(
+    Profile candidate,
+  ) => _lastSuccessfulProfileClient(candidate);
 
   void updateCurrentSelectedMap(String groupName, String proxyName) {
     final currentProfile = ref.read(currentProfileProvider);
@@ -20,8 +32,18 @@ class ProfilesAction extends _$ProfilesAction {
   }
 
   Future<void> deleteProfile(int id) async {
-    await ref.read(profilesProvider.notifier).del(id);
-    await clearEffect(id);
+    _subscriptionUpdateIntents[id] = (_subscriptionUpdateIntents[id] ?? 0) + 1;
+    _profileUpdateCancellations.remove(id)?.cancel();
+    await serializeProfileMutation(id, () async {
+      await ref.read(profilesProvider.notifier).del(id);
+      await clearEffect(id);
+      await const SubscriptionClientCache().forget(id);
+    });
+    try {
+      await (await DeviceIdentityStore.create()).revoke(id);
+    } on Object {
+      commonPrint.log('Could not clear local subscription consent');
+    }
     final currentProfileId = ref.read(currentProfileIdProvider);
     if (currentProfileId == id) {
       final profiles = ref.read(profilesProvider);
@@ -131,34 +153,211 @@ class ProfilesAction extends _$ProfilesAction {
     ]) {
       final profile = ref.read(profilesProvider).getProfile(id);
       if (profile == null || profile.type != ProfileType.url) continue;
-      await updateProfile(profile, showLoading: true);
+      await updateProfile(profile, showLoading: true, allowLossReview: true);
     }
   }
 
-  Future<void> updateProfile(
+  Future<Map<String, String>> _subscriptionIdentityHeaders(
+    Profile profile,
+  ) async {
+    final origin = Uri.tryParse(profile.url);
+    if (origin == null ||
+        origin.host.isEmpty ||
+        !const {'http', 'https'}.contains(origin.scheme.toLowerCase())) {
+      return const {};
+    }
+    try {
+      final store = await DeviceIdentityStore.create();
+      return await store.requestFields(profile.id, origin) ?? const {};
+    } on Object {
+      return const {};
+    }
+  }
+
+  SubscriptionTransport _subscriptionTransport() {
+    if (!system.isAndroid) return SubscriptionTransport();
+    return SubscriptionTransport(
+      protectedFetcher: (uri, headers, timeout, cancellation) async {
+        final requestId = snowflake.id.toString();
+        unawaited(
+          cancellation.whenCancelled.then(
+            (_) => _core.cancelSubscriptionFetch(requestId),
+          ),
+        );
+        try {
+          return await _core.fetchSubscription(
+            requestId,
+            uri,
+            headers: headers,
+            timeout: timeout,
+            maxBytes: subscriptionWireLimit,
+            protected: true,
+          );
+        } on CoreMethodException catch (error) {
+          throw SubscriptionException(
+            error.code == 'subscription_timeout'
+                ? SubscriptionFailure.timeout
+                : SubscriptionFailure.transport,
+          );
+        }
+      },
+    );
+  }
+
+  Future<SubscriptionImportApproval?> _approveImportLosses(
+    PreparedSubscriptionUpdate prepared, {
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) {
+    final context =
+        reviewContext ?? globalState.navigatorKey.currentState?.context;
+    if (context == null || !context.mounted) return Future.value(null);
+    final route = SubscriptionImportReviewRoute.fromContext(context);
+    final queued = _lossReviewQueue.then<SubscriptionImportApproval?>((
+      _,
+    ) async {
+      if ((cancellation?.cancelled ?? false) || !route.navigator.mounted) {
+        return null;
+      }
+      final approval = await approveSubscriptionImportAt(
+        route,
+        format: prepared.payload.format,
+        summary: prepared.summary,
+        sourceScope: subscriptionImportScope(
+          prepared.sourceUrl,
+          prepared.sourceAgeSecretKey,
+        ),
+      );
+      return cancellation?.cancelled == true ? null : approval;
+    });
+    _lossReviewQueue = queued.then<void>((_) {}, onError: (_, _) {});
+    return queued;
+  }
+
+  Future<Profile?> updateProfile(
     Profile profile, {
     bool showLoading = false,
+    bool allowLossReview = false,
+    bool persistProfileSettings = false,
+    PreparedSubscriptionUpdate? preparedUpdate,
+    SubscriptionImportPolicy? importPolicy,
+    bool acceptLosses = false,
+    BuildContext? reviewContext,
   }) async {
+    final intent = (_subscriptionUpdateIntents[profile.id] ?? 0) + 1;
+    _subscriptionUpdateIntents[profile.id] = intent;
+    _profileUpdateCancellations[profile.id]?.cancel();
+    final cancellation = SubscriptionCancellation();
+    _profileUpdateCancellations[profile.id] = cancellation;
+    bool hasIntent() =>
+        !cancellation.cancelled &&
+        _subscriptionUpdateIntents[profile.id] == intent &&
+        identical(_profileUpdateCancellations[profile.id], cancellation);
     final operation = showLoading
         ? ref.read(updatingKeysProvider.notifier).start(profile.updatingKey)
         : null;
     try {
-      ref.read(profilesProvider.notifier).put(profile);
-      final updated = await profile.update(
-        validate: (path, key) => _core.validateProfile(path, key),
-      );
-      // The download can take minutes; edits and deletes made meanwhile win.
-      final latest = ref.read(profilesProvider).getProfile(profile.id);
-      if (latest == null) {
-        await clearEffect(profile.id);
-        return;
+      final original = ref.read(profilesProvider).getProfile(profile.id);
+      if (original == null || !hasIntent()) return null;
+      final candidate = persistProfileSettings ? profile : original;
+      final request = await _subscriptionRequestInputs(candidate);
+      if (!hasIntent() ||
+          ref.read(profilesProvider).getProfile(profile.id) != original) {
+        throw const SubscriptionUpdateSuperseded();
       }
-      final newProfile = latest.copyWith(
-        label: latest.label.takeFirstValid([updated.label]),
-        subscriptionInfo: updated.subscriptionInfo,
-        lastUpdateDate: updated.lastUpdateDate,
+      if (preparedUpdate != null) {
+        _ensurePreparedSubscriptionCurrent(candidate, preparedUpdate, request);
+      }
+      if (persistProfileSettings) {
+        await serializeProfileMutation(profile.id, () async {
+          if (!hasIntent() ||
+              ref.read(profilesProvider).getProfile(profile.id) != original) {
+            throw const SubscriptionUpdateSuperseded();
+          }
+          final profiles = ref.read(profilesProvider.notifier);
+          final edited = profiles.labeled(profile);
+          await profiles.putAndWait(
+            edited,
+            isCurrent: () {
+              final current = ref.read(profilesProvider).getProfile(profile.id);
+              return hasIntent() &&
+                  current != null &&
+                  (current == original || current == edited);
+            },
+          );
+        });
+      }
+      final sourceProfile = ref.read(profilesProvider).getProfile(profile.id);
+      if (sourceProfile == null || !hasIntent()) return null;
+      final prepared =
+          preparedUpdate ??
+          await _prepareProfileCompatibility(
+            sourceProfile,
+            cancellation: cancellation,
+            request: request,
+          );
+      _ensurePreparedSubscriptionCurrent(sourceProfile, prepared, request);
+      var policy = importPolicy;
+      var acceptedLosses =
+          acceptLosses ||
+          (policy ?? sourceProfile.subscriptionPreferences.client.importPolicy)
+              .allows(
+                prepared.payload.format,
+                prepared.summary,
+                sourceScope: subscriptionImportScope(
+                  sourceProfile.url,
+                  sourceProfile.ageSecretKey,
+                ),
+              );
+      if (prepared.summary.hasLosses && !acceptedLosses && allowLossReview) {
+        if (!hasIntent() || reviewContext != null && !reviewContext.mounted) {
+          return null;
+        }
+        final approval = await _approveImportLosses(
+          prepared,
+          reviewContext: reviewContext,
+          cancellation: cancellation,
+        );
+        if (approval == null) return null;
+        acceptedLosses = true;
+        policy = approval.rememberedPolicy;
+      }
+      if (prepared.summary.hasLosses && !acceptedLosses) {
+        throw const SubscriptionUpdateCancelled();
+      }
+      final latest = ref.read(profilesProvider).getProfile(profile.id);
+      if (latest == null || !hasIntent()) return null;
+      final latestRequest = await _subscriptionRequestInputs(latest);
+      if (!hasIntent() ||
+          ref.read(profilesProvider).getProfile(profile.id) != latest) {
+        throw const SubscriptionUpdateSuperseded();
+      }
+      _ensurePreparedSubscriptionCurrent(latest, prepared, latestRequest);
+      bool isCurrent() {
+        final current = ref
+            .read(profilesProvider)
+            .getProfile(prepared.profileId);
+        return hasIntent() && current == latest;
+      }
+
+      final updated = await latest.commitPreparedUpdate(
+        prepared,
+        validate: (path, _) => _core.validateConfig(path),
+        acceptLosses: acceptedLosses,
+        importPolicy: policy,
+        isCurrent: isCurrent,
+        onCommitted: (saved) => ref
+            .read(profilesProvider.notifier)
+            .putAndWait(
+              saved,
+              isCurrent: () {
+                final current = ref.read(profilesProvider).getProfile(saved.id);
+                return hasIntent() &&
+                    current != null &&
+                    (current == latest || current == saved);
+              },
+            ),
       );
-      ref.read(profilesProvider.notifier).put(newProfile);
       if (profile.id == ref.read(currentProfileIdProvider)) {
         ref
             .read(setupActionProvider.notifier)
@@ -166,7 +365,7 @@ class ProfilesAction extends _$ProfilesAction {
       } else {
         final label = ref
             .read(profilesProvider.notifier)
-            .labeled(newProfile)
+            .labeled(updated)
             .realLabel;
         unawaited(
           ref.read(clashProvidersActionProvider.notifier).applyIfReferenced(
@@ -176,7 +375,16 @@ class ProfilesAction extends _$ProfilesAction {
           ),
         );
       }
+      return updated;
+    } on SubscriptionUpdateCancelled {
+      return null;
+    } on SubscriptionUpdateSuperseded {
+      return null;
     } finally {
+      if (identical(_profileUpdateCancellations[profile.id], cancellation)) {
+        _profileUpdateCancellations.remove(profile.id);
+      }
+      cancellation.cancel();
       if (operation != null) {
         ref
             .read(updatingKeysProvider.notifier)
@@ -184,6 +392,39 @@ class ProfilesAction extends _$ProfilesAction {
       }
     }
   }
+
+  Future<Profile?> saveImportedProfileFile(
+    Profile profile,
+    Uint8List bytes, {
+    BuildContext? reviewContext,
+  }) => _withAgeSecretKey(profile, (candidate) async {
+    final content = await _core.decryptProfilePayload(
+      bytes,
+      candidate.ageSecretKey,
+    );
+    final imported = await prepareSubscriptionImport(content);
+    if (imported.summary.rejectCoreFallback) {
+      throw MessageException(currentAppLocalizations.importConfigInvalid);
+    }
+    if (imported.summary.hasLosses) {
+      final context =
+          reviewContext ?? globalState.navigatorKey.currentState?.context;
+      if (context == null ||
+          !context.mounted ||
+          await reviewSubscriptionImport(
+                context,
+                format: imported.format,
+                summary: imported.summary,
+              ) !=
+              true) {
+        return null;
+      }
+    }
+    return candidate.saveFile(
+      imported.bytes,
+      validate: (path, _) => _core.validateConfig(path),
+    );
+  });
 
   Future<void> addProfileFormFile() async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
@@ -193,12 +434,9 @@ class ProfilesAction extends _$ProfilesAction {
     ref.read(currentPageLabelProvider.notifier).toProfiles();
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
-      () => _withAgeSecretKey(
+      () => saveImportedProfileFile(
         Profile.normal(label: platformFile.name),
-        (profile) => profile.saveFile(
-          bytes,
-          validate: (path, key) => _core.validateProfile(path, key),
-        ),
+        bytes,
       ),
       title: currentAppLocalizations.addProfile,
     );
@@ -238,8 +476,11 @@ class ProfilesAction extends _$ProfilesAction {
       profileSources: {
         for (final profile in profiles)
           if (profile.type == ProfileType.url)
-            (url: profile.url, ageSecretKey: profile.ageSecretKey):
-                profile.realLabel,
+            (
+              url: profile.url,
+              ageSecretKey: profile.ageSecretKey,
+              headers: profile.subscriptionPreferences.headers,
+            ): profile.realLabel,
       },
       ruleProviderLabels: {
         for (final provider in ruleProviders) provider.label,
@@ -247,7 +488,8 @@ class ProfilesAction extends _$ProfilesAction {
       ruleProviderSources: {
         for (final provider in ruleProviders)
           if (provider.isRemote)
-            (url: provider.url, ageSecretKey: ''): provider.label,
+            (url: provider.url, ageSecretKey: '', headers: provider.headers):
+                provider.label,
       },
       proxies: [for (final proxy in proxies) proxy.definition],
       groupNames: groupNames.toSet(),
@@ -277,17 +519,24 @@ class ProfilesAction extends _$ProfilesAction {
     final profiles = ref.read(profilesProvider.notifier);
     final clashProviders = ref.read(clashProvidersProvider.notifier);
     final loads = <({String label, Future<void> Function() load})>[];
-    for (final (:label, :url, :ageSecretKey, :content)
+    for (final (:label, :url, :ageSecretKey, :content, :headers)
         in config.proxyProviders) {
-      final profile = Profile.normal(
-        label: label,
-        url: url,
-      ).copyWith(ageSecretKey: ageSecretKey);
+      final baseProfile = Profile.normal(label: label, url: url);
+      final profile = baseProfile.copyWith(
+        ageSecretKey: ageSecretKey,
+        subscriptionPreferences: baseProfile.subscriptionPreferences.copyWith(
+          headers: headers,
+        ),
+      );
       profiles.put(profile);
       loads.add((
         label: label,
         load: url.isNotEmpty
-            ? () => updateProfile(profile, showLoading: true)
+            ? () => updateProfile(
+                profile,
+                showLoading: true,
+                allowLossReview: true,
+              )
             : () async => profiles.put(
                 await profile.saveFile(
                   utf8.encode(content),
@@ -296,9 +545,12 @@ class ProfilesAction extends _$ProfilesAction {
               ),
       ));
     }
-    for (final (:label, :url, ageSecretKey: _, :content)
+    for (final (:label, :url, ageSecretKey: _, :content, :headers)
         in config.ruleProviders) {
-      final provider = ClashProvider.create(label: label, url: url);
+      final provider = ClashProvider.create(
+        label: label,
+        url: url,
+      ).copyWith(headers: headers);
       clashProviders.put(provider);
       loads.add((
         label: label,
@@ -342,6 +594,17 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
+  Profile _withClientSettings(
+    Profile profile,
+    SubscriptionClientSettings? settings,
+  ) => settings == null
+      ? profile
+      : profile.copyWith(
+          subscriptionPreferences: profile.subscriptionPreferences.copyWith(
+            client: settings,
+          ),
+        );
+
   void _showProfiles() {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
@@ -353,6 +616,7 @@ class ProfilesAction extends _$ProfilesAction {
     String link, {
     String? label,
     String ageSecretKey = '',
+    SubscriptionClientSettings? clientSettings,
   }) async {
     _showProfiles();
     final profile = await globalState.loadingRun(tag: LoadingTag.profiles, () {
@@ -362,10 +626,13 @@ class ProfilesAction extends _$ProfilesAction {
       return link.isShareLink
           ? _fromShareLinks(Profile.normal(label: label), [link])
           : _withAgeSecretKey(
-              Profile.normal(
-                label: label,
-                url: link,
-              ).copyWith(ageSecretKey: ageSecretKey),
+              _withClientSettings(
+                Profile.normal(
+                  label: label,
+                  url: link,
+                ).copyWith(ageSecretKey: ageSecretKey),
+                clientSettings,
+              ),
               _download,
             );
     }, title: currentAppLocalizations.addProfile);
@@ -376,7 +643,10 @@ class ProfilesAction extends _$ProfilesAction {
 
   /// Ids are taken up front so the list keeps the order of [links]; the share
   /// links among them make up one profile, in the place of the first.
-  Future<void> addProfilesFromLinks(List<String> links) async {
+  Future<void> addProfilesFromLinks(
+    List<String> links, {
+    SubscriptionClientSettings? clientSettings,
+  }) async {
     _showProfiles();
     final shareLinks = [
       for (final link in links)
@@ -386,7 +656,13 @@ class ProfilesAction extends _$ProfilesAction {
       [
         for (final link in links)
           if (!link.isShareLink)
-            (profile: Profile.normal(url: link), shareLinks: const <String>[])
+            (
+              profile: _withClientSettings(
+                Profile.normal(url: link),
+                clientSettings,
+              ),
+              shareLinks: const <String>[],
+            )
           else if (link == shareLinks.first)
             (profile: Profile.normal(), shareLinks: shareLinks),
       ],
@@ -420,15 +696,38 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<Profile> _download(Profile profile) {
-    return profile.update(
-      validate: (path, key) => _core.validateProfile(path, key),
+  Future<Profile> _download(Profile profile) async {
+    final request = await _subscriptionRequestInputs(profile);
+    final prepared = await _prepareProfileCompatibility(
+      profile,
+      request: request,
+    );
+    SubscriptionImportApproval? approval = const SubscriptionImportApproval();
+    if (!profile.subscriptionPreferences.client.importPolicy.allows(
+      prepared.payload.format,
+      prepared.summary,
+      sourceScope: subscriptionImportScope(profile.url, profile.ageSecretKey),
+    )) {
+      approval = await _approveImportLosses(prepared);
+      if (approval == null) throw const SubscriptionUpdateCancelled();
+    }
+    _ensurePreparedSubscriptionCurrent(
+      profile,
+      prepared,
+      await _subscriptionRequestInputs(profile),
+    );
+    return profile.commitPreparedUpdate(
+      prepared,
+      validate: (path, _) => _core.validateConfig(path),
+      acceptLosses: true,
+      allowProviderLabel: true,
+      importPolicy: approval.rememberedPolicy,
     );
   }
 
-  Future<Profile> _withAgeSecretKey(
+  Future<T> _withAgeSecretKey<T>(
     Profile profile,
-    Future<Profile> Function(Profile profile) save,
+    Future<T> Function(Profile profile) save,
   ) async {
     try {
       return await save(profile);

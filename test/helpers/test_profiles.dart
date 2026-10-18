@@ -22,6 +22,14 @@ class TestProfiles extends Profiles {
   }
 
   @override
+  Future<void> putAndWait(Profile profile, {bool Function()? isCurrent}) async {
+    if (isCurrent != null && !isCurrent()) {
+      throw const SubscriptionUpdateSuperseded();
+    }
+    put(profile);
+  }
+
+  @override
   Future<void> del(int id) async {
     state = state.where((profile) => profile.id != id).toList();
   }
