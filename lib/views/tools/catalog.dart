@@ -180,6 +180,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     available: env.desktop,
   );
   page(
+    ToolPage.hotkeyDesktop,
+    l.hotkeyDesktopCommands,
+    ToolCategory.application,
+    AppGlyphs.code,
+    available: env.desktop,
+    root: false,
+  );
+  page(
     ToolPage.general,
     l.general,
     ToolCategory.configuration,

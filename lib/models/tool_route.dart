@@ -12,6 +12,7 @@ enum ToolPage {
   theme,
   locale,
   hotkey,
+  hotkeyDesktop,
   access,
   resources,
   customResources,
@@ -38,6 +39,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.userAgents => ToolPage.general,
     ToolPage.onDemand || ToolPage.appRegion => ToolPage.application,
     ToolPage.coreRuntimeConfig => ToolPage.coreDetails,
+    ToolPage.hotkeyDesktop => ToolPage.hotkey,
     _ => null,
   };
 

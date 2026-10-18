@@ -92,152 +92,154 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(action) => "이미 “${action}”에서 사용 중입니다. 저장하면 이쪽으로 옮겨집니다.";
 
-  static String m33(modifiers) => "${modifiers} 중 하나 이상을 포함하세요";
+  static String m33(actions) => "내보내지 않은 동작: ${actions}";
 
-  static String m34(count) => "${Intl.plural(count, other: '${count}시간 전')}";
+  static String m34(modifiers) => "${modifiers} 중 하나 이상을 포함하세요";
 
   static String m35(count) => "${Intl.plural(count, other: '${count}시간 전')}";
 
-  static String m36(target) => "올바르지 않은 정책: ${target}";
+  static String m36(count) => "${Intl.plural(count, other: '${count}시간 전')}";
 
-  static String m37(proxyName) => "올바르지 않은 프록시: ${proxyName}";
+  static String m37(target) => "올바르지 않은 정책: ${target}";
 
-  static String m38(providerName) => "올바르지 않은 프록시 공급자: ${providerName}";
+  static String m38(proxyName) => "올바르지 않은 프록시: ${proxyName}";
 
-  static String m39(ruleSet) => "올바르지 않은 규칙 세트: ${ruleSet}";
+  static String m39(providerName) => "올바르지 않은 프록시 공급자: ${providerName}";
 
-  static String m40(subRule) => "올바르지 않은 SUB_RULE: ${subRule}";
+  static String m40(ruleSet) => "올바르지 않은 규칙 세트: ${ruleSet}";
 
-  static String m41(count) => "${Intl.plural(count, other: '항목 ${count}개')}";
+  static String m41(subRule) => "올바르지 않은 SUB_RULE: ${subRule}";
 
-  static String m42(line, message) => "${line}행: ${message}";
+  static String m42(count) => "${Intl.plural(count, other: '항목 ${count}개')}";
 
-  static String m43(appName) =>
+  static String m43(line, message) => "${line}행: ${message}";
+
+  static String m44(appName) =>
       "1. 시스템 설정 > 개인정보 보호 및 보안을 엽니다\n2. 위치 서비스를 선택합니다\n3. 목록에서 ${appName}을(를) 찾아 체크합니다\n\n완료되면 앱으로 돌아와 계속하세요. 협조해 주셔서 감사합니다.";
 
-  static String m44(label, max) => "${label}은(는) 최대 ${max}자까지 입력할 수 있습니다";
+  static String m45(label, max) => "${label}은(는) 최대 ${max}자까지 입력할 수 있습니다";
 
-  static String m45(size) => "${size} 해제됨";
-
-  static String m46(count) => "${Intl.plural(count, other: '${count}분 전')}";
+  static String m46(size) => "${size} 해제됨";
 
   static String m47(count) => "${Intl.plural(count, other: '${count}분 전')}";
 
-  static String m48(count) => "${Intl.plural(count, other: '${count}개월 전')}";
+  static String m48(count) => "${Intl.plural(count, other: '${count}분 전')}";
 
   static String m49(count) => "${Intl.plural(count, other: '${count}개월 전')}";
 
-  static String m50(code) =>
+  static String m50(count) => "${Intl.plural(count, other: '${count}개월 전')}";
+
+  static String m51(code) =>
       "서버가 접근을 거부했습니다(HTTP ${code}). 링크가 만료되었거나 자격 증명이 잘못되었을 수 있습니다";
 
-  static String m51(code) => "서버가 요청을 거부했습니다(HTTP ${code})";
+  static String m52(code) => "서버가 요청을 거부했습니다(HTTP ${code})";
 
-  static String m52(code) =>
+  static String m53(code) =>
       "이 주소에서 아무것도 찾지 못했습니다(HTTP ${code}). URL이 올바른지 확인하세요";
 
-  static String m53(detail) => "네트워크 요청 실패: ${detail}";
+  static String m54(detail) => "네트워크 요청 실패: ${detail}";
 
-  static String m54(code) => "서버에 문제가 발생했습니다(HTTP ${code}). 나중에 다시 시도하세요";
+  static String m55(code) => "서버에 문제가 발생했습니다(HTTP ${code}). 나중에 다시 시도하세요";
 
-  static String m55(label) => "${label}이(가) 아직 없습니다";
+  static String m56(label) => "${label}이(가) 아직 없습니다";
 
-  static String m56(label, min, max) => "${label}은(는) ${min}에서 ${max} 사이여야 합니다";
+  static String m57(label, min, max) => "${label}은(는) ${min}에서 ${max} 사이여야 합니다";
 
-  static String m57(label) => "${label}은(는) 숫자여야 합니다";
+  static String m58(label) => "${label}은(는) 숫자여야 합니다";
 
-  static String m58(label) => "${label}은(는) 1024에서 49151 사이여야 합니다";
+  static String m59(label) => "${label}은(는) 1024에서 49151 사이여야 합니다";
 
-  static String m59(port) => "포트 ${port}";
+  static String m60(port) => "포트 ${port}";
 
-  static String m60(days) => "${Intl.plural(days, other: '${days}일 남음')}";
+  static String m61(days) => "${Intl.plural(days, other: '${days}일 남음')}";
 
-  static String m61(date, days) =>
+  static String m62(date, days) =>
       "${date} 만료, ${Intl.plural(days, other: '${days}일')} 남음";
 
-  static String m62(time) => "${time} 업데이트";
+  static String m63(time) => "${time} 업데이트";
 
-  static String m63(label, profiles) =>
+  static String m64(label, profiles) =>
       "${label}은(는) 아직 ${profiles}에서 사용 중이며, 삭제하면 해당 프로필이 제대로 작동하지 않습니다. 삭제하시겠습니까?";
 
-  static String m64(count, label) =>
+  static String m65(count, label) =>
       "${Intl.plural(count, other: '프록시 ${label}개')}";
 
-  static String m65(name, count) => "${name} 외 (프록시 ${count}개)";
+  static String m66(name, count) => "${name} 외 (프록시 ${count}개)";
 
-  static String m66(removed) =>
+  static String m67(removed) =>
       "다음 프록시가 삭제됩니다: ${removed}. 이름이 바뀐 줄은 새 프록시로 간주되며, 삭제된 프록시를 지정한 사용자 지정 프로필에는 누락으로 표시됩니다. 그래도 적용하시겠습니까?";
 
-  static String m67(removed, added) =>
+  static String m68(removed, added) =>
       "다음 프록시가 삭제됩니다: ${removed}. 다음 프록시가 추가됩니다: ${added}. 이름이 바뀐 줄은 새 프록시로 간주되며, 삭제된 프록시를 지정한 사용자 지정 프로필에는 누락으로 표시됩니다. 그래도 적용하시겠습니까?";
 
-  static String m68(label) =>
+  static String m69(label) =>
       "${label}은(는) 이 프로필의 규칙, 프록시 그룹, 다이얼러 프록시, DNS 또는 NTP에서 아직 참조 중이며, 삭제하면 작동하지 않게 됩니다. 삭제하시겠습니까?";
 
-  static String m69(count, label) =>
+  static String m70(count, label) =>
       "${Intl.plural(count, other: '프록시 그룹 ${label}개')}";
 
-  static String m70(region, bypassed, proxied) =>
+  static String m71(region, bypassed, proxied) =>
       "${region}: VPN 우회 목록에 앱 ${bypassed}개, VPN 목록에 ${proxied}개가 들어갑니다. 두 목록이 교체되며 모드와 다른 설정은 유지됩니다. 패키지와 SDK 일치는 추천일 뿐이므로 적용 후 결과를 확인하세요.";
 
-  static String m71(region, value) =>
+  static String m72(region, value) =>
       "지역 ${region}의 목록: ${value}. 사용자 목록은 지역 기본값을 대체합니다.";
 
-  static String m72(region, source) => "추천: ${region} · ${source}";
+  static String m73(region, source) => "추천: ${region} · ${source}";
 
-  static String m73(region, value) =>
+  static String m74(region, value) =>
       "지역 ${region}의 기본 DNS: ${value}. 이 화면의 수동 설정이 우선합니다.";
 
-  static String m74(region) => "국가 프로필: ${region}";
+  static String m75(region) => "국가 프로필: ${region}";
 
-  static String m75(value) => "TUN MTU: ${value}";
+  static String m76(value) => "TUN MTU: ${value}";
 
-  static String m76(value) => "기본 서비스 확인: ${value}";
+  static String m77(value) => "기본 서비스 확인: ${value}";
 
-  static String m77(region, value) =>
+  static String m78(region, value) =>
       "지역 ${region}의 MTU는 ${value}입니다. 직접 값을 지정하려면 MTU 설정을 추가하세요.";
 
-  static String m78(count, label) =>
+  static String m79(count, label) =>
       "${Intl.plural(count, other: '규칙 ${label}개')}";
 
-  static String m79(appName) => "${appName} (안전 모드)";
+  static String m80(appName) => "${appName} (안전 모드)";
 
-  static String m80(count) => "${Intl.plural(count, other: '${count}초')}";
+  static String m81(count) => "${Intl.plural(count, other: '${count}초')}";
 
-  static String m81(count) => "${count}개 적용 중";
+  static String m82(count) => "${count}개 적용 중";
 
-  static String m82(count) => "${Intl.plural(count, other: '문제 ${count}건')}";
+  static String m83(count) => "${Intl.plural(count, other: '문제 ${count}건')}";
 
-  static String m83(time) => "확인 시각: ${time}";
+  static String m84(time) => "확인 시각: ${time}";
 
-  static String m84(count) => "${Intl.plural(count, other: '설정 ${count}개')}";
+  static String m85(count) => "${Intl.plural(count, other: '설정 ${count}개')}";
 
-  static String m85(link) => "읽을 수 있는 프록시가 없습니다: ${link}";
+  static String m86(link) => "읽을 수 있는 프록시가 없습니다: ${link}";
 
-  static String m86(label) => "${label}은(는) 하나만 입력해야 합니다";
+  static String m87(label) => "${label}은(는) 하나만 입력해야 합니다";
 
-  static String m87(client, format, count) =>
+  static String m88(client, format, count) =>
       "${client}로 수신: ${format}, 프록시 노드 ${count}개.";
 
-  static String m88(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
+  static String m89(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
 
-  static String m89(count, format) =>
+  static String m90(count, format) =>
       "${format}에서 프록시 노드 ${count}개를 가져올 수 있습니다.";
 
-  static String m90(count) => "변환할 수 없는 노드: ${count}개.";
+  static String m91(count) => "변환할 수 없는 노드: ${count}개.";
 
-  static String m91(count) => "결과 ${count}개";
+  static String m92(count) => "결과 ${count}개";
 
-  static String m92(value) => "최고 ${value}";
+  static String m93(value) => "최고 ${value}";
 
-  static String m93(value) => "합계 ${value}";
+  static String m94(value) => "합계 ${value}";
 
-  static String m94(version) => "설치된 버전: ${version}";
+  static String m95(version) => "설치된 버전: ${version}";
 
-  static String m95(label) => "${label}은(는) URL이어야 합니다";
-
-  static String m96(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m96(label) => "${label}은(는) URL이어야 합니다";
 
   static String m97(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m98(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -816,19 +818,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "hopInterval": MessageLookupByLibrary.simpleMessage("호핑 간격"),
     "host": MessageLookupByLibrary.simpleMessage("호스트"),
     "hostname": MessageLookupByLibrary.simpleMessage("호스트 이름"),
+    "hotkeyClearAll": MessageLookupByLibrary.simpleMessage("모두 지우기"),
+    "hotkeyClearAllTip": MessageLookupByLibrary.simpleMessage(
+      "모든 단축키 조합을 삭제할까요?",
+    ),
+    "hotkeyCompositorConfig": MessageLookupByLibrary.simpleMessage("컴포지터 설정"),
+    "hotkeyCompositorConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "컴포지터 설정에 파일 포함 구문을 추가할 수도 있습니다. 이 파일은 ReClash의 키 조합 설정에 맞춰 갱신되며 키 기록 중에는 일시적으로 비워집니다. 데스크톱 설정은 자동으로 변경되지 않습니다. 충돌하는 키 바인딩은 해당 설정에서 해결하세요.",
+    ),
     "hotkeyConflictWith": m32,
     "hotkeyDesc": MessageLookupByLibrary.simpleMessage(
       "전역 단축키는 창이 숨겨져 있어도 작동합니다. 동작을 눌러 키 조합을 기록하세요.",
     ),
+    "hotkeyDesktopCommands": MessageLookupByLibrary.simpleMessage("데스크톱 단축키"),
+    "hotkeyDesktopCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "데스크톱 설정에서 명령을 사용자 지정 단축키에 할당하세요. ReClash가 실행 중이어야 하지만 창은 숨겨져 있어도 됩니다. 이 전역 키 바인딩은 데스크톱 설정에서 관리합니다.",
+    ),
+    "hotkeyExportSkipped": m33,
+    "hotkeyExportUnavailable": MessageLookupByLibrary.simpleMessage(
+      "컴포지터 설정 파일을 사용할 수 없습니다. 위의 데스크톱 명령은 계속 사용할 수 있습니다.",
+    ),
+    "hotkeyLocalDesc": MessageLookupByLibrary.simpleMessage(
+      "이 조합은 앱 창이 포커스된 동안 작동합니다. 전역 단축키를 사용하려면 아래 데스크톱 명령을 연결하세요.",
+    ),
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage("단축키 관리"),
-    "hotkeyNeedsModifier": m33,
+    "hotkeyNeedsModifier": m34,
     "hotkeyNotSet": MessageLookupByLibrary.simpleMessage("설정 안 됨"),
+    "hotkeyRestoreDefaults": MessageLookupByLibrary.simpleMessage("기본값 복원"),
+    "hotkeyRestoreDefaultsTip": MessageLookupByLibrary.simpleMessage(
+      "모든 조합을 기본값으로 바꿀까요?",
+    ),
+    "hotkeySafeModeDesc": MessageLookupByLibrary.simpleMessage(
+      "안전 모드에서는 단축키 동작이 비활성화되지만 키 조합은 편집할 수 있습니다.",
+    ),
     "hotkeyUnavailable": MessageLookupByLibrary.simpleMessage(
       "등록되지 않음: 다른 앱이 사용 중일 수 있습니다",
     ),
     "hours": MessageLookupByLibrary.simpleMessage("시간"),
-    "hoursAgo": m34,
-    "hoursAgoShort": m35,
+    "hoursAgo": m35,
+    "hoursAgoShort": m36,
     "hue": MessageLookupByLibrary.simpleMessage("색조"),
     "icon": MessageLookupByLibrary.simpleMessage("아이콘"),
     "iconRecords": MessageLookupByLibrary.simpleMessage("아이콘 기록"),
@@ -919,20 +947,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidNetworkContent": MessageLookupByLibrary.simpleMessage(
       "tcp 또는 udp만 지원합니다",
     ),
-    "invalidPolicy": m36,
+    "invalidPolicy": m37,
     "invalidPortRangeContent": MessageLookupByLibrary.simpleMessage(
       "443 또는 8000-9000과 같은 포트나 범위를 입력하세요",
     ),
     "invalidProfileQrcode": MessageLookupByLibrary.simpleMessage(
       "이 QR 코드에는 프로필 링크가 없습니다",
     ),
-    "invalidProxy": m37,
-    "invalidProxyProvider": m38,
+    "invalidProxy": m38,
+    "invalidProxyProvider": m39,
     "invalidRangeContent": MessageLookupByLibrary.simpleMessage(
       "80 또는 8000-9000과 같은 숫자나 범위를 /로 구분하여 입력하세요",
     ),
-    "invalidRuleSet": m39,
-    "invalidSubRule": m40,
+    "invalidRuleSet": m40,
+    "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP 주소"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
     "ipFlagAbuser": MessageLookupByLibrary.simpleMessage("악용 이력"),
@@ -969,7 +997,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "IPv6를 켜면 VPN이 IPv6 인바운드를 허용합니다.",
     ),
     "ipv6Timeout": MessageLookupByLibrary.simpleMessage("IPv6 타임아웃(ms)"),
-    "itemsCount": m41,
+    "itemsCount": m42,
     "ja": MessageLookupByLibrary.simpleMessage("일본어"),
     "justNow": MessageLookupByLibrary.simpleMessage("방금"),
     "keepAliveIdle": MessageLookupByLibrary.simpleMessage("TCP 킵얼라이브 유휴 시간"),
@@ -992,7 +1020,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "licenses": MessageLookupByLibrary.simpleMessage("라이선스"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage("앱에 포함된 패키지"),
     "light": MessageLookupByLibrary.simpleMessage("라이트"),
-    "lineIssueTip": m42,
+    "lineIssueTip": m43,
     "lineWrap": MessageLookupByLibrary.simpleMessage("자동 줄 바꿈"),
     "link": MessageLookupByLibrary.simpleMessage("링크"),
     "linkDesc": MessageLookupByLibrary.simpleMessage(
@@ -1020,7 +1048,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locationPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에서 Wi-Fi 이름을 읽으려면 위치 권한이 필요합니다. Android에서는 “항상 허용”을 선택해야 하며, 그렇지 않으면 앱이 백그라운드에 있을 때 Wi-Fi 이름을 읽을 수 없습니다.",
     ),
-    "locationPermissionGuide": m43,
+    "locationPermissionGuide": m44,
     "locationPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "위치 권한 필요",
     ),
@@ -1040,7 +1068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "matchSourceIp": MessageLookupByLibrary.simpleMessage("출발지 IP 일치"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage("최대 실패 횟수"),
-    "maxLengthTip": m44,
+    "maxLengthTip": m45,
     "maximize": MessageLookupByLibrary.simpleMessage("최대화"),
     "memoryAppResident": MessageLookupByLibrary.simpleMessage("상주 메모리"),
     "memoryAppShared": MessageLookupByLibrary.simpleMessage("앱 및 공유"),
@@ -1060,25 +1088,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "memoryInfo": MessageLookupByLibrary.simpleMessage("메모리 정보"),
     "memoryInfoDesc": MessageLookupByLibrary.simpleMessage("앱과 코어가 사용하는 메모리"),
     "memoryReleased": MessageLookupByLibrary.simpleMessage("메모리를 해제했습니다"),
-    "memoryReleasedSize": m45,
+    "memoryReleasedSize": m46,
     "messageTest": MessageLookupByLibrary.simpleMessage("메시지 테스트"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("이것은 메시지입니다."),
     "minimize": MessageLookupByLibrary.simpleMessage("최소화"),
     "minimizeOnExit": MessageLookupByLibrary.simpleMessage("종료 시 최소화"),
     "minutes": MessageLookupByLibrary.simpleMessage("분"),
-    "minutesAgo": m46,
-    "minutesAgoShort": m47,
+    "minutesAgo": m47,
+    "minutesAgoShort": m48,
     "mixedPort": MessageLookupByLibrary.simpleMessage("혼합 포트"),
     "mode": MessageLookupByLibrary.simpleMessage("모드"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("모노크롬"),
-    "monthsAgo": m48,
-    "monthsAgoShort": m49,
+    "monthsAgo": m49,
+    "monthsAgoShort": m50,
     "more": MessageLookupByLibrary.simpleMessage("더 보기"),
     "name": MessageLookupByLibrary.simpleMessage("이름"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("하단 바"),
     "network": MessageLookupByLibrary.simpleMessage("네트워크"),
-    "networkAccessDeniedError": m50,
-    "networkBadResponseError": m51,
+    "networkAccessDeniedError": m51,
+    "networkBadResponseError": m52,
     "networkCancelledError": MessageLookupByLibrary.simpleMessage(
       "요청이 취소되었습니다",
     ),
@@ -1089,13 +1117,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "서버 주소를 확인할 수 없습니다. URL이 올바른지, DNS가 정상인지 확인하세요",
     ),
     "networkName": MessageLookupByLibrary.simpleMessage("네트워크 이름"),
-    "networkNotFoundError": m52,
+    "networkNotFoundError": m53,
     "networkRateLimitedError": MessageLookupByLibrary.simpleMessage(
       "요청이 너무 많습니다(HTTP 429). 잠시 후 다시 시도하세요",
     ),
-    "networkRequestFailed": m53,
+    "networkRequestFailed": m54,
     "networkSecret": MessageLookupByLibrary.simpleMessage("네트워크 시크릿"),
-    "networkServerError": m54,
+    "networkServerError": m55,
     "networkSpeed": MessageLookupByLibrary.simpleMessage("네트워크 속도"),
     "networkTakeover": MessageLookupByLibrary.simpleMessage("트래픽 가로채기"),
     "networkTimeoutError": MessageLookupByLibrary.simpleMessage(
@@ -1129,9 +1157,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "NTP는 시스템 시계 대신 NTP 서버에서 시간을 가져옵니다.",
     ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage("프로필을 추가하여 시작하세요"),
-    "nullTip": m55,
-    "numberRangeTip": m56,
-    "numberTip": m57,
+    "nullTip": m56,
+    "numberRangeTip": m57,
+    "numberTip": m58,
     "obfs": MessageLookupByLibrary.simpleMessage("난독화"),
     "obfsHost": MessageLookupByLibrary.simpleMessage("난독화 호스트"),
     "obfsMode": MessageLookupByLibrary.simpleMessage("난독화 모드"),
@@ -1177,8 +1205,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "port": MessageLookupByLibrary.simpleMessage("포트"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("다른 포트를 입력하세요"),
     "portHopping": MessageLookupByLibrary.simpleMessage("포트 호핑"),
-    "portTip": m58,
-    "portValue": m59,
+    "portTip": m59,
+    "portValue": m60,
     "ports": MessageLookupByLibrary.simpleMessage("포트"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("사전 공유 키"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("사전 요건"),
@@ -1199,8 +1227,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("올바른 간격을 입력하세요"),
     "profileAutoUpdateIntervalNullValidationDesc":
         MessageLookupByLibrary.simpleMessage("자동 업데이트 간격을 입력하세요"),
-    "profileDaysLeft": m60,
-    "profileExpiresIn": m61,
+    "profileDaysLeft": m61,
+    "profileExpiresIn": m62,
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "프로필이 수정되었습니다. 자동 업데이트를 끄시겠습니까?",
     ),
@@ -1216,7 +1244,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileTunSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "이 프로필에만 적용되며 네트워크 설정의 TUN 덮어쓰기 항목보다 우선합니다.",
     ),
-    "profileUpdatedAt": m62,
+    "profileUpdatedAt": m63,
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "올바른 프로필 URL을 입력하세요",
     ),
@@ -1229,22 +1257,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "protocol": MessageLookupByLibrary.simpleMessage("프로토콜"),
     "protocolParam": MessageLookupByLibrary.simpleMessage("프로토콜 매개변수"),
     "protocolVersion": MessageLookupByLibrary.simpleMessage("프로토콜 버전"),
-    "providerInUse": m63,
+    "providerInUse": m64,
     "providerUrlTip": MessageLookupByLibrary.simpleMessage("원격 공급자만 지원합니다"),
     "providers": MessageLookupByLibrary.simpleMessage("외부 리소스"),
     "proxies": MessageLookupByLibrary.simpleMessage("프록시"),
-    "proxiesCount": m64,
-    "proxiesProfileLabel": m65,
-    "proxiesRemovedTip": m66,
-    "proxiesReplacedTip": m67,
+    "proxiesCount": m65,
+    "proxiesProfileLabel": m66,
+    "proxiesRemovedTip": m67,
+    "proxiesReplacedTip": m68,
     "proxyChains": MessageLookupByLibrary.simpleMessage("프록시 체인"),
     "proxyGroup": MessageLookupByLibrary.simpleMessage("프록시 그룹"),
     "proxyGroupEmpty": MessageLookupByLibrary.simpleMessage("프록시 그룹이 비어 있습니다"),
-    "proxyGroupInUse": m68,
+    "proxyGroupInUse": m69,
     "proxyGroupsAfterStart": MessageLookupByLibrary.simpleMessage(
       "코어가 시작되면 그룹이 여기에 표시됩니다",
     ),
-    "proxyGroupsCount": m69,
+    "proxyGroupsCount": m70,
     "proxyProviders": MessageLookupByLibrary.simpleMessage("프록시 공급자"),
     "proxyType": MessageLookupByLibrary.simpleMessage("프록시 유형"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("캐시 정리"),
@@ -1268,20 +1296,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
       "이 지역에 일치하는 앱이 없습니다. 목록은 변경되지 않습니다.",
     ),
-    "regionAppsPreview": m70,
+    "regionAppsPreview": m71,
     "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
       "앱 선택 미리 보기",
     ),
-    "regionBypassSettings": m71,
+    "regionBypassSettings": m72,
     "regionChina": MessageLookupByLibrary.simpleMessage("중국"),
     "regionChoose": MessageLookupByLibrary.simpleMessage("국가 선택"),
     "regionCurrent": MessageLookupByLibrary.simpleMessage("현재 지역"),
     "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
       "수동 DNS 및 MTU 설정, 우회 목록, 라우팅 규칙, 서비스 선택은 유지됩니다.",
     ),
-    "regionDetected": m72,
+    "regionDetected": m73,
     "regionDetectionTitle": MessageLookupByLibrary.simpleMessage("기기 추천"),
-    "regionDnsSettings": m73,
+    "regionDnsSettings": m74,
     "regionEgypt": MessageLookupByLibrary.simpleMessage("이집트"),
     "regionIntro": MessageLookupByLibrary.simpleMessage(
       "인터페이스 언어와 별도로 지역 네트워크 기본값과 서비스 확인을 설정합니다.",
@@ -1299,12 +1327,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
       "Android에서는 MTU나 우회 변경 시 VPN 재시작 확인이 필요할 수 있습니다. 앱 선택은 별도로 실행합니다.",
     ),
-    "regionPreviewBase": m74,
-    "regionPreviewMtu": m75,
+    "regionPreviewBase": m75,
+    "regionPreviewMtu": m76,
     "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
       "프록시 선택과 라우팅 규칙은 변경되지 않습니다.",
     ),
-    "regionPreviewServices": m76,
+    "regionPreviewServices": m77,
     "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("미리보기"),
     "regionProfileDefaults": MessageLookupByLibrary.simpleMessage("프로필 기본값"),
     "regionRussia": MessageLookupByLibrary.simpleMessage("러시아"),
@@ -1320,7 +1348,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regionSourceTimeZone": MessageLookupByLibrary.simpleMessage("시간대"),
     "regionTitle": MessageLookupByLibrary.simpleMessage("지역 프로필"),
-    "regionTunSettings": m77,
+    "regionTunSettings": m78,
     "regionUseDetected": MessageLookupByLibrary.simpleMessage("감지된 지역 선택"),
     "regionWarning": MessageLookupByLibrary.simpleMessage(
       "국가를 선택하면 미리 보기만 바뀝니다. 적용한 뒤에 지역 기본값이 변경됩니다.",
@@ -1501,12 +1529,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "규칙은 DOMAIN,example.com,DIRECT처럼 지원하는 유형으로 시작해야 합니다",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("규칙"),
-    "rulesCount": m78,
+    "rulesCount": m79,
     "runTime": MessageLookupByLibrary.simpleMessage("실행 시간"),
     "running": MessageLookupByLibrary.simpleMessage("실행 중"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage("런타임 구성"),
     "safeMode": MessageLookupByLibrary.simpleMessage("안전 모드"),
-    "safeModeAppTitle": m79,
+    "safeModeAppTitle": m80,
     "saturation": MessageLookupByLibrary.simpleMessage("채도"),
     "save": MessageLookupByLibrary.simpleMessage("저장"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("변경 사항을 저장하시겠습니까?"),
@@ -1517,21 +1545,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "scrollToSelected": MessageLookupByLibrary.simpleMessage("선택 항목으로 스크롤"),
     "search": MessageLookupByLibrary.simpleMessage("검색"),
     "seconds": MessageLookupByLibrary.simpleMessage("초"),
-    "secondsCount": m80,
+    "secondsCount": m81,
     "secretKey": MessageLookupByLibrary.simpleMessage("키"),
-    "sectionsInEffect": m81,
+    "sectionsInEffect": m82,
     "selectAll": MessageLookupByLibrary.simpleMessage("모두 선택"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage("규칙 세트를 선택하세요"),
     "selectSplitStrategy": MessageLookupByLibrary.simpleMessage("분할 전략을 선택하세요"),
     "selected": MessageLookupByLibrary.simpleMessage("선택됨"),
     "server": MessageLookupByLibrary.simpleMessage("서버"),
-    "serviceAbnormalCount": m82,
+    "serviceAbnormalCount": m83,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage("모두 사용 가능"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("사용 가능"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("차단됨"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("확인"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("모두 확인"),
-    "serviceCheckedAt": m83,
+    "serviceCheckedAt": m84,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("출시 예정"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage("허용되지 않는 ISP"),
     "serviceFailed": MessageLookupByLibrary.simpleMessage("확인 실패"),
@@ -1549,8 +1577,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("설정"),
     "settings": MessageLookupByLibrary.simpleMessage("설정"),
-    "settingsCount": m84,
-    "shareLinkUnreadable": m85,
+    "settingsCount": m85,
+    "shareLinkUnreadable": m86,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "링크에서 읽을 수 있는 프록시가 없습니다",
     ),
@@ -1574,7 +1602,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "여기에는 링크를 하나만 입력하세요. 여러 개는 목록의 빠른 편집에서 편집하세요",
     ),
-    "singleValueTip": m86,
+    "singleValueTip": m87,
     "size": MessageLookupByLibrary.simpleMessage("크기"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("인증서 검증 건너뛰기"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("건너뛸 도메인"),
@@ -1692,7 +1720,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("이 클라이언트 사용"),
-    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPrepared": m88,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core가 이 결과를 분석했습니다. 아직 저장하거나 적용하지 않았습니다.",
@@ -1758,7 +1786,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "알 수 없는 형식",
     ),
-    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportIgnoredSections": m89,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "가져올 수 있는 지원 프록시 노드가 없습니다.",
     ),
@@ -1769,11 +1797,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "이 소스, 형식 및 동의한 손실 유형에만 적용됩니다. 새로운 손실에는 다시 동의해야 합니다.",
         ),
-    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewSummary": m90,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "구독 가져오기 검토",
     ),
-    "subscriptionImportSkippedNodes": m90,
+    "subscriptionImportSkippedNodes": m91,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("구독"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("계정"),
@@ -1859,7 +1887,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
-    "toolsResults": m91,
+    "toolsResults": m92,
     "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
@@ -1875,8 +1903,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m92,
-    "trafficTotal": m93,
+    "trafficPeak": m93,
+    "trafficTotal": m94,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -1921,7 +1949,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "패키지 설치 프로그램을 시작할 수 없습니다.",
     ),
-    "updateInstalledVersion": m94,
+    "updateInstalledVersion": m95,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "이미 최신 버전을 사용 중입니다.",
     ),
@@ -1942,7 +1970,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m95,
+    "urlTip": m96,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1966,8 +1994,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m96,
-    "yearsAgoShort": m97,
+    "yearsAgo": m97,
+    "yearsAgoShort": m98,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

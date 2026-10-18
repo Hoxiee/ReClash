@@ -9,6 +9,8 @@ export 'constant.dart';
 export 'context.dart';
 export 'converter.dart';
 export 'datetime.dart';
+export 'desktop/hotkey_export.dart';
+export 'desktop/hotkeys.dart';
 export 'dialog.dart';
 export 'exception.dart';
 export 'feature.dart';

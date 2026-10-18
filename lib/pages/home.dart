@@ -8,13 +8,66 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  static const _pageKeys = [
+    LogicalKeyboardKey.digit1,
+    LogicalKeyboardKey.digit2,
+    LogicalKeyboardKey.digit3,
+    LogicalKeyboardKey.digit4,
+    LogicalKeyboardKey.digit5,
+    LogicalKeyboardKey.digit6,
+    LogicalKeyboardKey.digit7,
+    LogicalKeyboardKey.digit8,
+    LogicalKeyboardKey.digit9,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_handlePageShortcut);
+  }
+
+  bool _handlePageShortcut(KeyEvent event) {
+    if (!system.isDesktop || event is! KeyDownEvent) return false;
+    final focusContext = FocusManager.instance.primaryFocus?.context;
+    if (focusContext?.findAncestorWidgetOfExactType<EditableText>() != null) {
+      return false;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    final macOS = system.isMacOS;
+    if (!(macOS ? keyboard.isMetaPressed : keyboard.isControlPressed) ||
+        keyboard.isAltPressed ||
+        keyboard.isShiftPressed ||
+        (macOS ? keyboard.isControlPressed : keyboard.isMetaPressed)) {
+      return false;
+    }
+    final index = _pageKeys.indexOf(event.logicalKey);
+    final navigationItems = ref.read(currentNavigationItemsStateProvider).value;
+    if (index < 0 || index >= navigationItems.length) return false;
+    ref
+        .read(currentPageLabelProvider.notifier)
+        .toPage(navigationItems[index].label);
+    return true;
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handlePageShortcut);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hasViewSize = ref.watch(
       viewSizeProvider.select((size) => !size.isEmpty),
     );

@@ -20,6 +20,7 @@ import 'package:reclash/views/developer.dart';
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/views/dns_queries.dart';
 import 'package:reclash/views/hotkey.dart';
+import 'package:reclash/views/hotkey_desktop.dart';
 import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
 import 'package:reclash/views/region.dart';
@@ -43,6 +44,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   ThemeView() => ToolPage.theme,
   LanguageView() => ToolPage.locale,
   HotKeyView() => ToolPage.hotkey,
+  HotkeyDesktopView() => ToolPage.hotkeyDesktop,
   AccessView() => ToolPage.access,
   ResourcesView() => ToolPage.resources,
   CustomResourcesView() => ToolPage.customResources,
@@ -76,6 +78,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.theme => const ThemeView(),
   ToolPage.locale => const LanguageView(),
   ToolPage.hotkey => const HotKeyView(),
+  ToolPage.hotkeyDesktop => const HotkeyDesktopView(),
   ToolPage.access => const AccessView(),
   ToolPage.resources => const ResourcesView(),
   ToolPage.customResources => const CustomResourcesView(),

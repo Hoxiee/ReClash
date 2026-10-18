@@ -1,0 +1,15 @@
+{
+  "hotkeyLocalDesc": "These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.",
+  "hotkeySafeModeDesc": "Safe mode disables shortcut actions; bindings remain editable.",
+  "hotkeyDesktopCommands": "Desktop shortcuts",
+  "hotkeyDesktopCommandsDesc": "Assign a command to a custom shortcut in your desktop settings. ReClash must be running, but its window can stay hidden. Manage these global bindings in your desktop settings.",
+  "hotkeyCompositorConfig": "Compositor configuration",
+  "hotkeyCompositorConfigDesc": "Alternatively, add an include line to your compositor configuration. These files follow the combinations set in ReClash and temporarily clear them during recording. Your desktop configuration is never modified automatically; resolve any conflicting bindings there.",
+  "hotkeyExportSkipped": "Not exported: {actions}",
+  "@hotkeyExportSkipped": {"placeholders": {"actions": {"type": "String"}}},
+  "hotkeyExportUnavailable": "Compositor configuration files are unavailable. You can still use the desktop commands above.",
+  "hotkeyRestoreDefaults": "Restore defaults",
+  "hotkeyRestoreDefaultsTip": "Replace all combinations with the defaults?",
+  "hotkeyClearAll": "Clear all",
+  "hotkeyClearAllTip": "Remove all hotkey combinations?"
+}

@@ -1097,6 +1097,25 @@
   "coreOpenRuntimeConfig": "Ishlash konfiguratsiyasini ochish",
   "coreRuntimeConfigDescription": "Sozlamalar va skriptlardan keyingi yakuniy konfiguratsiya. Faqat oʻqish uchun.",
   "coreRuntimeConfigReadFailed": "Ishlash konfiguratsiyasini oʻqib boʻlmadi",
+  "hotkeyLocalDesc": "Bu birikmalar ilova oynasi fokusda boʻlganda ishlaydi. Global tezkor tugmalar uchun quyidagi boʻlimda ish stoli buyruqlarini sozlang.",
+  "hotkeySafeModeDesc": "Xavfsiz rejim tezkor tugma amallarini o‘chiradi, ammo birikmalarni tahrirlash mumkin.",
+  "hotkeyDesktopCommands": "Ish stoli tezkor tugmalari",
+  "hotkeyDesktopCommandsDesc": "Ish stoli sozlamalarida buyruqni maxsus tugmalar birikmasiga tayinlang. ReClash ishlayotgan boʻlishi kerak, lekin oynasi yashirin qolishi mumkin. Bu global birikmalar ish stoli sozlamalarida boshqariladi.",
+  "hotkeyCompositorConfig": "Kompozitor konfiguratsiyasi",
+  "hotkeyCompositorConfigDesc": "Kompozitor konfiguratsiyasiga faylni ulash qatorini ham qoʻshishingiz mumkin. Bu fayllar ReClash birikmalari bilan birga yangilanadi va tugmalarni yozib olish paytida vaqtincha tozalanadi. Ish stoli konfiguratsiyasi avtomatik oʻzgartirilmaydi; birikmalar ziddiyatini oʻsha yerda hal qiling.",
+  "hotkeyExportSkipped": "Eksport qilinmadi: {actions}",
+  "hotkeyExportUnavailable": "Kompozitor konfiguratsiyasi fayllari mavjud emas. Yuqoridagi ish stoli buyruqlaridan foydalanishingiz mumkin.",
+  "hotkeyRestoreDefaults": "Standartlarni tiklash",
+  "hotkeyRestoreDefaultsTip": "Barcha birikmalar standartlar bilan almashtirilsinmi?",
+  "hotkeyClearAll": "Hammasini tozalash",
+  "hotkeyClearAllTip": "Barcha tezkor tugma birikmalari olib tashlansinmi?",
+  "@hotkeyExportSkipped": {
+    "placeholders": {
+      "actions": {
+        "type": "String"
+      }
+    }
+  },
   "coreBlockedByPolicyTip": "Windows ReClashCore.exe dasturini ishga tushirishni rad etdi (xato kodi {code}). Smart App Control yoki AppLocker kabi dasturlarni boshqarish siyosati imzosiz dasturlarni bloklaydi. ReClashga oʻsha siyosatda ruxsat bering yoki siyosatni oʻchirib qoʻying, soʻng qayta urinib koʻring.",
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control ReClashCore.exe dasturini imzo yoʻqligi sababli blokladi. Windows Security → App & browser control → Smart App Control sozlamalariga oʻting, Off ni tanlang va ReClashni qayta ishga tushiring. Smart App Controlni Windowsni qayta oʻrnatmasdan qayta yoqib boʻlmaydi.",
   "disclaimerDesc": "ReClash («Dastur»)dan foydalanishdan avval ushbu bayonni sinchkovlik bilan oʻqing va barcha mazmunini tushunib yetganingizga ishonch hosil qiling. «Rozi boʻlaman»ni bosish — quyidagi barcha shartlarni oʻqiganingiz, tushunganingiz va qabul qilganingizni bildiradi. Agar rozi boʻlmasangiz, «Chiqish»ni bosing va Dasturdan foydalanishni toʻxtating.",

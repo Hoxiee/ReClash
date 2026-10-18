@@ -1102,6 +1102,25 @@
   "coreOpenRuntimeConfig": "実行時設定を開く",
   "coreRuntimeConfigDescription": "設定とスクリプトを適用して生成された設定です。読み取り専用。",
   "coreRuntimeConfigReadFailed": "実行時設定を読み込めませんでした",
+  "hotkeyLocalDesc": "これらのキー操作はアプリのウィンドウにフォーカスがある場合に動作します。グローバルショートカットは、以下の項目でデスクトップコマンドを設定してください。",
+  "hotkeySafeModeDesc": "セーフモードではショートカットの操作は無効ですが、割り当ては編集できます。",
+  "hotkeyDesktopCommands": "デスクトップのショートカット",
+  "hotkeyDesktopCommandsDesc": "デスクトップ設定で、コマンドをカスタムショートカットに割り当ててください。ReClash が起動していれば、ウィンドウは非表示でも使用できます。これらのグローバル割り当てはデスクトップ設定で管理します。",
+  "hotkeyCompositorConfig": "コンポジター設定",
+  "hotkeyCompositorConfigDesc": "コンポジターの設定に読み込み行を追加する方法もあります。これらのファイルは ReClash のキー設定に合わせて更新され、キー記録中は一時的に空になります。デスクトップ設定は自動変更されません。割り当ての競合はそちらで解消してください。",
+  "hotkeyExportSkipped": "エクスポートされなかった操作: {actions}",
+  "hotkeyExportUnavailable": "コンポジター設定ファイルを利用できません。上記のデスクトップコマンドは使用できます。",
+  "hotkeyRestoreDefaults": "既定に戻す",
+  "hotkeyRestoreDefaultsTip": "すべての組み合わせを既定に置き換えますか?",
+  "hotkeyClearAll": "すべて消去",
+  "hotkeyClearAllTip": "すべてのホットキーの組み合わせを削除しますか?",
+  "@hotkeyExportSkipped": {
+    "placeholders": {
+      "actions": {
+        "type": "String"
+      }
+    }
+  },
   "translationNotice": "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
   "translationSuggestFix": "翻訳の修正を提案する",
   "kk": "カザフ語",

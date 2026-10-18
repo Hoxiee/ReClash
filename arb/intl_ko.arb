@@ -1102,6 +1102,25 @@
   "coreOpenRuntimeConfig": "런타임 설정 열기",
   "coreRuntimeConfigDescription": "설정과 스크립트를 적용한 최종 설정입니다. 읽기 전용입니다.",
   "coreRuntimeConfigReadFailed": "런타임 설정을 읽을 수 없습니다",
+  "hotkeyLocalDesc": "이 조합은 앱 창이 포커스된 동안 작동합니다. 전역 단축키를 사용하려면 아래 데스크톱 명령을 연결하세요.",
+  "hotkeySafeModeDesc": "안전 모드에서는 단축키 동작이 비활성화되지만 키 조합은 편집할 수 있습니다.",
+  "hotkeyDesktopCommands": "데스크톱 단축키",
+  "hotkeyDesktopCommandsDesc": "데스크톱 설정에서 명령을 사용자 지정 단축키에 할당하세요. ReClash가 실행 중이어야 하지만 창은 숨겨져 있어도 됩니다. 이 전역 키 바인딩은 데스크톱 설정에서 관리합니다.",
+  "hotkeyCompositorConfig": "컴포지터 설정",
+  "hotkeyCompositorConfigDesc": "컴포지터 설정에 파일 포함 구문을 추가할 수도 있습니다. 이 파일은 ReClash의 키 조합 설정에 맞춰 갱신되며 키 기록 중에는 일시적으로 비워집니다. 데스크톱 설정은 자동으로 변경되지 않습니다. 충돌하는 키 바인딩은 해당 설정에서 해결하세요.",
+  "hotkeyExportSkipped": "내보내지 않은 동작: {actions}",
+  "hotkeyExportUnavailable": "컴포지터 설정 파일을 사용할 수 없습니다. 위의 데스크톱 명령은 계속 사용할 수 있습니다.",
+  "hotkeyRestoreDefaults": "기본값 복원",
+  "hotkeyRestoreDefaultsTip": "모든 조합을 기본값으로 바꿀까요?",
+  "hotkeyClearAll": "모두 지우기",
+  "hotkeyClearAllTip": "모든 단축키 조합을 삭제할까요?",
+  "@hotkeyExportSkipped": {
+    "placeholders": {
+      "actions": {
+        "type": "String"
+      }
+    }
+  },
   "translationNotice": "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
   "translationSuggestFix": "번역 수정 제안하기",
   "kk": "카자흐어",

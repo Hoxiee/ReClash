@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/home.dart';
+import 'package:reclash/manager/hotkey_manager.dart';
+import 'package:reclash/common/desktop/hotkeys.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -62,6 +67,7 @@ Future<_Harness> _mount(
   required List<NavigationItem> items,
   PageLabel selected = PageLabel.dashboard,
   bool reducedMotion = false,
+  bool withShortcutManager = false,
 }) async {
   tester.view.physicalSize = const Size(500, 800);
   tester.view.devicePixelRatio = 1;
@@ -84,10 +90,18 @@ Future<_Harness> _mount(
   container.read(viewSizeProvider.notifier).value = const Size(500, 800);
   final itemNotifier = container.read(_itemsProvider.notifier)..set(items);
 
+  final Widget home = withShortcutManager
+      ? HotKeyManager(
+          platformState: const HotkeyPlatformState(systemSupported: false),
+          registerHotKeys: ({required specs}) async => const [],
+          hotKeyEventSource: () => const Stream<int>.empty(),
+          child: const HomePage(),
+        )
+      : const HomePage();
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      child: TestApp(includeNavigatorKey: false, child: home),
     ),
   );
   await tester.pump();
@@ -394,6 +408,30 @@ void main() {
     expect(find.text('page:profiles'), findsOneWidget);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Ctrl+number selects the visible page by navigation order', (
+    tester,
+  ) async {
+    final harness = await _mount(
+      tester,
+      items: [dashboard, profiles, tools],
+      withShortcutManager: true,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.digit2);
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.digit2);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+
+    expect(
+      harness.container.read(currentPageLabelProvider),
+      PageLabel.profiles,
+    );
+    expect(find.text('page:profiles'), findsOneWidget);
   });
 
   testWidgets('visited pages mount lazily once and retain state offstage', (

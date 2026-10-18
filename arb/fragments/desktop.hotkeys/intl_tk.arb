@@ -1,0 +1,15 @@
+{
+  "hotkeyLocalDesc": "Bu utgaşmalar programmanyň penjiresi fokusda wagty işleýär. Global çalt klawişalar üçin aşakdaky bölümde iş stoly buýruklaryny sazlaň.",
+  "hotkeySafeModeDesc": "Howpsuz tertip gysga ýol hereketlerini öçürýär, emma utgaşmalary üýtgedip bolýar.",
+  "hotkeyDesktopCommands": "Iş stolunyň çalt klawişalary",
+  "hotkeyDesktopCommandsDesc": "Iş stolunyň sazlamalarynda buýrugy ýörite düýme utgaşmasyna belläň. ReClash işleýän bolmaly, ýöne penjiresi gizlin bolup biler. Bu global utgaşmalar iş stolunyň sazlamalarynda dolandyrylýar.",
+  "hotkeyCompositorConfig": "Kompozitoryň konfigurasiýasy",
+  "hotkeyCompositorConfigDesc": "Kompozitoryň konfigurasiýasyna faýly birikdirýän setiri hem goşup bilersiňiz. Bu faýllar ReClash utgaşmalary bilen bile täzelenýär we düwmeler ýazga alynýarka wagtlaýyn arassalanýar. Iş stolunyň konfigurasiýasy awtomatik üýtgedilmeýär; utgaşma gapma-garşylyklaryny şol ýerde çözüň.",
+  "hotkeyExportSkipped": "Eksport edilmedi: {actions}",
+  "@hotkeyExportSkipped": {"placeholders": {"actions": {"type": "String"}}},
+  "hotkeyExportUnavailable": "Kompozitoryň konfigurasiýa faýllary elýeterli däl. Ýokardaky iş stoly buýruklaryny ulanyp bilersiňiz.",
+  "hotkeyRestoreDefaults": "Deslapkylary dikelt",
+  "hotkeyRestoreDefaultsTip": "Ähli utgaşmalar deslapkylar bilen çalşyrylsynmy?",
+  "hotkeyClearAll": "Ählisini arassala",
+  "hotkeyClearAllTip": "Ähli gysga ýol düwme utgaşmalary aýrylsynmy?"
+}
