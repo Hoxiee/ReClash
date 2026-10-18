@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -49,12 +50,16 @@ typedef HotKeyRegistrar =
 class HotKeyManager extends ConsumerStatefulWidget {
   final HotKeyRegistrar? registerHotKeys;
   final Stream<int> Function()? hotKeyEventSource;
+  final Future<Directory> Function()? exportDirectory;
+  final HotkeyPlatformState? platformState;
   final Widget child;
 
   const HotKeyManager({
     super.key,
     this.registerHotKeys,
     this.hotKeyEventSource,
+    this.exportDirectory,
+    this.platformState,
     required this.child,
   });
 
@@ -65,6 +70,9 @@ class HotKeyManager extends ConsumerStatefulWidget {
 class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   StreamSubscription<int>? _eventSubscription;
   Future<void> _pendingUpdate = Future.value();
+  LinuxHotkeys? _linuxHotkeys;
+  Future<HotkeyPlatformState>? _platform;
+  bool _registered = false;
   late final HotKeyRegistrar _registerHotKeys =
       widget.registerHotKeys ?? setHotKeys;
   late final Stream<int> Function() _hotKeyEvents =
@@ -73,10 +81,10 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   @override
   void initState() {
     super.initState();
-    if (ref.read(safeModeProvider)) {
-      return;
+    final safeMode = ref.read(safeModeProvider);
+    if (!safeMode) {
+      _subscribeHotKeyEvents();
     }
-    _subscribeHotKeyEvents();
     ref.listenManual(hotKeyActionsProvider, (prev, next) {
       if (!hotKeyActionListEquality.equals(prev, next)) {
         _scheduleUpdate();
@@ -91,6 +99,27 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
 
   void _scheduleUpdate() {
     _pendingUpdate = _pendingUpdate.then((_) => _updateHotKeys());
+  }
+
+  Future<HotkeyPlatformState> _initializePlatform() async {
+    if (widget.platformState case final platformState?) {
+      return platformState;
+    }
+    if (widget.registerHotKeys != null || !system.isLinux) {
+      return const HotkeyPlatformState();
+    }
+    _linuxHotkeys = LinuxHotkeys(
+      onAction: (action) => unawaited(_handleHotKeyAction(action)),
+    );
+    try {
+      return await _linuxHotkeys!.initialize();
+    } catch (error) {
+      commonPrint.log(
+        'Desktop hotkey commands unavailable: $error',
+        logLevel: LogLevel.warning,
+      );
+      return const HotkeyPlatformState(systemSupported: false);
+    }
   }
 
   void _subscribeHotKeyEvents() {
@@ -119,6 +148,11 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   }
 
   Future<void> _handleHotKeyAction(HotAction action) async {
+    if (!mounted ||
+        ref.read(safeModeProvider) ||
+        ref.read(hotKeyRecordingProvider)) {
+      return;
+    }
     final commonAction = ref.read(commonActionProvider.notifier);
     final systemAction = ref.read(systemActionProvider.notifier);
     final setupAction = ref.read(setupActionProvider.notifier);
@@ -158,21 +192,64 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     }
   }
 
-  /// While the recorder is open nothing is registered, so the OS hands the
-  /// recorder a combination that is already bound instead of running it.
   Future<void> _updateHotKeys() async {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
+    final platform = await (_platform ??= _initializePlatform());
+    if (!mounted) return;
+    ref.read(hotKeyPlatformProvider.notifier).value = platform;
     final isRecording = ref.read(hotKeyRecordingProvider);
+    final safeMode = ref.read(safeModeProvider);
     final specs = [
-      if (!isRecording)
-        for (final hotKeyAction in ref.read(hotKeyActionsProvider))
-          ?hotKeyAction.toHotKeySpec(),
+      if (platform.systemSupported && !isRecording && !safeMode)
+        for (final action in ref.read(hotKeyActionsProvider))
+          ?action.toHotKeySpec(),
     ];
-    final failed = await _register(specs);
+    final failed = platform.systemSupported && !safeMode
+        ? await _register(specs)
+        : <HotAction, String>{};
+    _registered = platform.systemSupported && !safeMode && specs.isNotEmpty;
     if (!isRecording && mounted) {
       ref.read(hotKeyFailuresProvider.notifier).value = failed;
+    }
+    final linuxHotkeys = _linuxHotkeys;
+    if (platform.applicationId == null || linuxHotkeys == null) return;
+    try {
+      await linuxHotkeys.setEnabled(!isRecording && !safeMode);
+      final bindings = ref.read(hotKeyActionsProvider);
+      final keys = bindings.map((item) => item.key).nonNulls.toSet().toList();
+      final names = await linuxHotkeys.keyNames([
+        for (final key in keys) linuxKeyvalForUsage(key) ?? 0,
+      ]);
+      final keyNames = <int, String>{
+        for (var i = 0; i < keys.length; i++)
+          if (names[i] != null) keys[i]: names[i]!,
+      };
+      final exports = {
+        for (final format in HotkeyExportFormat.values)
+          format: exportHotkeys(
+            format: format,
+            applicationId: platform.applicationId!,
+            bindings: isRecording ? const [] : bindings,
+            keyNames: keyNames,
+          ),
+      };
+      final directory =
+          await (widget.exportDirectory?.call() ??
+              appPath.homeDirPath.then((path) => Directory('$path/hotkeys')));
+      if (!mounted) return;
+      await writeHotkeyExports(directory, exports);
+      if (!mounted) return;
+      ref.read(hotKeyPlatformProvider.notifier).value = HotkeyPlatformState(
+        systemSupported: platform.systemSupported,
+        applicationId: platform.applicationId,
+        exportDirectory: directory.path,
+        exports: exports,
+      );
+    } catch (error) {
+      commonPrint.log(
+        'Desktop hotkey export failed: $error',
+        logLevel: LogLevel.warning,
+      );
     }
   }
 
@@ -200,6 +277,33 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     }
   }
 
+  Widget _buildLocalShortcuts(Widget child) {
+    final platform = ref.watch(hotKeyPlatformProvider);
+    final isRecording = ref.watch(hotKeyRecordingProvider);
+    final bindings = ref.watch(hotKeyActionsProvider);
+    if (ref.watch(safeModeProvider) ||
+        platform.systemSupported ||
+        isRecording) {
+      return child;
+    }
+    return Shortcuts(
+      shortcuts: {
+        for (final binding in bindings)
+          if (isValidHotKey(binding.modifiers, binding.key))
+            PhysicalHotkeyActivator(binding.key!, binding.modifiers):
+                _HotActionIntent(binding.action),
+        for (final binding in bindings)
+          if (isValidHotKey(binding.modifiers, binding.key))
+            PhysicalHotkeyActivator(
+              binding.key!,
+              binding.modifiers,
+              repeatOnly: true,
+            ): const DoNothingIntent(),
+      },
+      child: child,
+    );
+  }
+
   Shortcuts _buildCloseShortcuts(Widget child) {
     return Shortcuts(
       shortcuts: {
@@ -217,6 +321,12 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
           EscapeBackIntent: CallbackAction<EscapeBackIntent>(
             onInvoke: (_) => globalState.navigatorKey.currentState?.maybePop(),
           ),
+          _HotActionIntent: CallbackAction<_HotActionIntent>(
+            onInvoke: (intent) {
+              unawaited(_handleHotKeyAction(intent.action));
+              return null;
+            },
+          ),
           DoNothingIntent: CallbackAction<DoNothingIntent>(
             onInvoke: (_) => null,
           ),
@@ -229,11 +339,27 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   @override
   void dispose() {
     _eventSubscription?.cancel();
+    final linuxHotkeys = _linuxHotkeys;
+    linuxHotkeys?.stopListening();
+    unawaited(
+      _pendingUpdate.then((_) async {
+        if (_registered) {
+          await _register(const []);
+        }
+        await linuxHotkeys?.dispose();
+      }),
+    );
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _buildCloseShortcuts(widget.child);
+    return _buildCloseShortcuts(_buildLocalShortcuts(widget.child));
   }
+}
+
+class _HotActionIntent extends Intent {
+  const _HotActionIntent(this.action);
+
+  final HotAction action;
 }

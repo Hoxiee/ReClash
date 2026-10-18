@@ -204,6 +204,43 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('desktop hotkey commands stay inside the Tools workspace', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester);
+    container
+        .read(hotKeyPlatformProvider.notifier)
+        .value = const HotkeyPlatformState(
+      systemSupported: false,
+      applicationId: 'com.reclash',
+      exportDirectory: '/tmp/reclash-hotkeys',
+    );
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.hotkey));
+    await tester.pumpAndSettle();
+
+    final commands = find.widgetWithText(
+      DecorationListItem,
+      currentAppLocalizations.hotkeyDesktopCommands,
+    );
+    await tester.ensureVisible(commands);
+    await tester.pumpAndSettle();
+    await tester.tap(commands);
+    await tester.pumpAndSettle();
+
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.hotkey),
+      const ToolRoute(ToolPage.hotkeyDesktop),
+    ]);
+    expect(find.byType(ToolsView), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.hotkeyCompositorConfig),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('desktop landing offers recent tools and reopens them', (
     tester,
   ) async {

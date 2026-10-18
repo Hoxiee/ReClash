@@ -1,6 +1,8 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/desktop/hotkeys.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/ui/ui.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
@@ -20,6 +22,7 @@ final _keyB = PhysicalKeyboardKey.keyB.usbHidUsage;
 ProviderContainer _containerFor(
   WidgetTester tester, {
   List<HotKeyAction> hotKeyActions = const [],
+  HotkeyPlatformState? platform,
 }) {
   const size = Size(1400, 1400);
   tester.view.physicalSize = size;
@@ -27,7 +30,11 @@ ProviderContainer _containerFor(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final container = ProviderContainer();
+  final container = ProviderContainer(
+    overrides: [
+      if (platform != null) hotKeyPlatformProvider.overrideWithValue(platform),
+    ],
+  );
   addTearDown(container.dispose);
   globalState.container = container;
   container.read(viewSizeProvider.notifier).update((_) => size);
@@ -145,6 +152,45 @@ void main() {
       );
       expect(tester.takeException(), null);
     });
+
+    testWidgets(
+      'management controls render in the app bar and desktop entry is visible',
+      (tester) async {
+        final container = _containerFor(
+          tester,
+          platform: const HotkeyPlatformState(
+            systemSupported: false,
+            applicationId: 'com.reclash',
+            exportDirectory: '/tmp/reclash-hotkeys',
+          ),
+        );
+        await _pumpView(tester, container);
+
+        expect(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byTooltip(
+              currentAppLocalizations.hotkeyRestoreDefaults,
+            ),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byTooltip(currentAppLocalizations.hotkeyClearAll),
+          ),
+          findsOneWidget,
+        );
+
+        final desktopRow = find.widgetWithText(
+          DecorationListItem,
+          currentAppLocalizations.hotkeyDesktopCommands,
+        );
+        await tester.scrollUntilVisible(desktopRow, 100);
+        expect(desktopRow, findsOneWidget);
+      },
+    );
 
     testWidgets('shows a binding as key caps and clears it in place', (
       tester,

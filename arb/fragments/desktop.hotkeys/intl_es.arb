@@ -1,0 +1,15 @@
+{
+  "hotkeyLocalDesc": "These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.",
+  "hotkeySafeModeDesc": "El modo seguro desactiva las acciones de los atajos; las asignaciones se pueden editar.",
+  "hotkeyDesktopCommands": "Atajos del escritorio",
+  "hotkeyDesktopCommandsDesc": "Asigna un comando a un atajo personalizado en la configuración del escritorio. ReClash debe estar en ejecución, aunque la ventana puede permanecer oculta. Gestiona estos atajos globales desde la configuración del escritorio.",
+  "hotkeyCompositorConfig": "Configuración del compositor",
+  "hotkeyCompositorConfigDesc": "También puedes añadir una línea include a la configuración del compositor. Estos archivos siguen los atajos configurados en ReClash y se vacían temporalmente durante la grabación. La configuración del escritorio nunca se modifica automáticamente; resuelve allí cualquier conflicto.",
+  "hotkeyExportSkipped": "No exportado: {actions}",
+  "@hotkeyExportSkipped": {"placeholders": {"actions": {"type": "String"}}},
+  "hotkeyExportUnavailable": "Los archivos de configuración del compositor no están disponibles. Aún puedes usar los comandos del escritorio anteriores.",
+  "hotkeyRestoreDefaults": "Restaurar valores predeterminados",
+  "hotkeyRestoreDefaultsTip": "¿Reemplazar todas las combinaciones por los valores predeterminados?",
+  "hotkeyClearAll": "Borrar todo",
+  "hotkeyClearAllTip": "¿Eliminar todas las combinaciones de teclas?"
+}

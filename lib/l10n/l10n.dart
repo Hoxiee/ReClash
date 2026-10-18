@@ -7797,8 +7797,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8637,6 +8636,126 @@ class AppLocalizations {
     return Intl.message(
       'Could not read the runtime configuration',
       name: 'coreRuntimeConfigReadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.`
+  String get hotkeyLocalDesc {
+    return Intl.message(
+      'These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.',
+      name: 'hotkeyLocalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Safe mode disables shortcut actions; bindings remain editable.`
+  String get hotkeySafeModeDesc {
+    return Intl.message(
+      'Safe mode disables shortcut actions; bindings remain editable.',
+      name: 'hotkeySafeModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Desktop shortcuts`
+  String get hotkeyDesktopCommands {
+    return Intl.message(
+      'Desktop shortcuts',
+      name: 'hotkeyDesktopCommands',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Assign a command to a custom shortcut in your desktop settings. ReClash must be running, but its window can stay hidden. Manage these global bindings in your desktop settings.`
+  String get hotkeyDesktopCommandsDesc {
+    return Intl.message(
+      'Assign a command to a custom shortcut in your desktop settings. ReClash must be running, but its window can stay hidden. Manage these global bindings in your desktop settings.',
+      name: 'hotkeyDesktopCommandsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compositor configuration`
+  String get hotkeyCompositorConfig {
+    return Intl.message(
+      'Compositor configuration',
+      name: 'hotkeyCompositorConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alternatively, add an include line to your compositor configuration. These files follow the combinations set in ReClash and temporarily clear them during recording. Your desktop configuration is never modified automatically; resolve any conflicting bindings there.`
+  String get hotkeyCompositorConfigDesc {
+    return Intl.message(
+      'Alternatively, add an include line to your compositor configuration. These files follow the combinations set in ReClash and temporarily clear them during recording. Your desktop configuration is never modified automatically; resolve any conflicting bindings there.',
+      name: 'hotkeyCompositorConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not exported: {actions}`
+  String hotkeyExportSkipped(String actions) {
+    return Intl.message(
+      'Not exported: $actions',
+      name: 'hotkeyExportSkipped',
+      desc: '',
+      args: [actions],
+    );
+  }
+
+  /// `Compositor configuration files are unavailable. You can still use the desktop commands above.`
+  String get hotkeyExportUnavailable {
+    return Intl.message(
+      'Compositor configuration files are unavailable. You can still use the desktop commands above.',
+      name: 'hotkeyExportUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore defaults`
+  String get hotkeyRestoreDefaults {
+    return Intl.message(
+      'Restore defaults',
+      name: 'hotkeyRestoreDefaults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace all combinations with the defaults?`
+  String get hotkeyRestoreDefaultsTip {
+    return Intl.message(
+      'Replace all combinations with the defaults?',
+      name: 'hotkeyRestoreDefaultsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear all`
+  String get hotkeyClearAll {
+    return Intl.message(
+      'Clear all',
+      name: 'hotkeyClearAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove all hotkey combinations?`
+  String get hotkeyClearAllTip {
+    return Intl.message(
+      'Remove all hotkey combinations?',
+      name: 'hotkeyClearAllTip',
       desc: '',
       args: [],
     );

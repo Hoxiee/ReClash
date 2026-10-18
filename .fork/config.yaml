@@ -10,6 +10,8 @@ owned: [CHANGELOG.md, changelog.json]
 checks:
   navigation:
     argv: [flutter, test, test/common/layout_test.dart, test/pages/home_dynamic_navigation_test.dart, test/widgets/nav_slots_test.dart, test/widgets/navigation_bar_test.dart]
+  hotkeys:
+    argv: [flutter, test, test/common/desktop_hotkeys_test.dart, test/manager/hotkey_manager_test.dart, test/views/hotkey_view_test.dart, test/pages/home_dynamic_navigation_test.dart]
   localization:
     argv: [flutter, test, test/tool/l10n_assembler_test.dart, test/l10n/app_localizations_test.dart, test/l10n/localization_contract_test.dart, test/lint/dynamic_message_key_test.dart, test/views/language_view_test.dart]
   localization-assembly:
@@ -78,10 +80,17 @@ sentinels:
   pubspec.lock: [core.integration, tools.catalog, settings.specs]
   build.yaml: [settings.specs, tools.catalog]
   'lib/manager/window_manager.dart': [desktop.window]
+  'lib/manager/hotkey_manager.dart': [desktop.hotkeys]
+  'lib/common/desktop/**': [desktop.hotkeys]
+  'lib/views/hotkey.dart': [settings.specs, desktop.hotkeys]
+  'lib/providers/app.dart': [desktop.hotkeys]
+  'lib/pages/home.dart': [ui.navigation, desktop.hotkeys]
+  'lib/models/tool_route.dart': [settings.specs, tools.catalog]
   'lib/providers/actions/proxies.dart': [proxies.groups]
   'lib/subscriptions/**': [subscriptions.providers, subscription.compatibility]
   'test/subscriptions/**': [subscriptions.providers, subscription.compatibility]
   'arb/fragments/profiles.compatibility/**': [subscription.compatibility]
+  'arb/fragments/desktop.hotkeys/**': [desktop.hotkeys, localization.catalog]
   '.gitmodules': [core.integration]
   'lib/models/**': [settings.specs]
   'lib/providers/**': [settings.specs]

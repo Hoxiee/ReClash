@@ -1,0 +1,15 @@
+{
+  "hotkeyLocalDesc": "Ces combinaisons fonctionnent lorsque la fenêtre de l’application est active. Pour les raccourcis globaux, associez les commandes du bureau ci-dessous.",
+  "hotkeySafeModeDesc": "Le mode sans échec désactive les actions des raccourcis ; les combinaisons restent modifiables.",
+  "hotkeyDesktopCommands": "Raccourcis du bureau",
+  "hotkeyDesktopCommandsDesc": "Associez une commande à un raccourci personnalisé dans les paramètres du bureau. ReClash doit être en cours d’exécution, mais sa fenêtre peut rester masquée. Gérez ces raccourcis globaux dans les paramètres du bureau.",
+  "hotkeyCompositorConfig": "Configuration du compositeur",
+  "hotkeyCompositorConfigDesc": "Vous pouvez aussi ajouter une ligne include à la configuration du compositeur. Ces fichiers suivent les combinaisons définies dans ReClash et sont temporairement vidés pendant l’enregistrement. La configuration du bureau n’est jamais modifiée automatiquement ; résolvez-y les conflits éventuels.",
+  "hotkeyExportSkipped": "Non exporté : {actions}",
+  "@hotkeyExportSkipped": {"placeholders": {"actions": {"type": "String"}}},
+  "hotkeyExportUnavailable": "Les fichiers de configuration du compositeur ne sont pas disponibles. Vous pouvez toujours utiliser les commandes du bureau ci-dessus.",
+  "hotkeyRestoreDefaults": "Rétablir les valeurs par défaut",
+  "hotkeyRestoreDefaultsTip": "Remplacer toutes les combinaisons par les valeurs par défaut ?",
+  "hotkeyClearAll": "Tout effacer",
+  "hotkeyClearAllTip": "Supprimer toutes les combinaisons de raccourcis ?"
+}

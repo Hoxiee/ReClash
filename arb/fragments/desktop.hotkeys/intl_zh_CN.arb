@@ -1,0 +1,15 @@
+{
+  "hotkeyLocalDesc": "这些组合键仅在应用窗口获得焦点时生效。要使用全局快捷键，请在下方设置桌面命令。",
+  "hotkeySafeModeDesc": "安全模式会停用快捷键操作，但仍可编辑快捷键绑定。",
+  "hotkeyDesktopCommands": "桌面快捷键",
+  "hotkeyDesktopCommandsDesc": "在桌面设置中将命令分配给自定义快捷键。ReClash 必须处于运行状态，但窗口可以隐藏。这些全局绑定由桌面设置管理。",
+  "hotkeyCompositorConfig": "合成器配置",
+  "hotkeyCompositorConfigDesc": "也可以在合成器配置中添加包含语句。这些文件会随 ReClash 的组合键设置更新，并在录制按键时暂时清空。桌面配置不会被自动修改；如有绑定冲突，请在桌面配置中解决。",
+  "hotkeyExportSkipped": "未导出：{actions}",
+  "@hotkeyExportSkipped": {"placeholders": {"actions": {"type": "String"}}},
+  "hotkeyExportUnavailable": "合成器配置文件不可用。仍可使用上方的桌面命令。",
+  "hotkeyRestoreDefaults": "恢复默认",
+  "hotkeyRestoreDefaultsTip": "用默认值替换所有组合？",
+  "hotkeyClearAll": "全部清除",
+  "hotkeyClearAllTip": "移除所有快捷键组合？"
+}

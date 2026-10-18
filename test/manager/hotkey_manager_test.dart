@@ -1,5 +1,7 @@
+import 'package:reclash/common/desktop/hotkeys.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/models/common.dart';
@@ -8,6 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rust_api/rust_api.dart';
+
+class _CommonAction extends CommonAction {
+  int toggles = 0;
+
+  @override
+  void toggleRunning() => toggles++;
+}
 
 void main() {
   group('KeyboardModifierExt', () {
@@ -77,13 +86,16 @@ void main() {
     Future<(ProviderContainer, List<List<HotKeySpec>>)> pump(
       WidgetTester tester, {
       bool safeMode = false,
+      bool systemSupported = true,
+      HotKeyAction? configuredAction,
       Future<List<HotKeyFailure>> Function()? respond,
     }) async {
       final registrations = <List<HotKeySpec>>[];
       final container = ProviderContainer(
         overrides: [
           safeModeProvider.overrideWithValue(safeMode),
-          hotKeyActionsProvider.overrideWithValue([action]),
+          hotKeyActionsProvider.overrideWithValue([configuredAction ?? action]),
+          commonActionProvider.overrideWith(_CommonAction.new),
         ],
       );
       addTearDown(container.dispose);
@@ -91,12 +103,15 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: HotKeyManager(
+            platformState: HotkeyPlatformState(
+              systemSupported: systemSupported,
+            ),
             registerHotKeys: ({required specs}) async {
               registrations.add(specs);
               return respond?.call() ?? const [];
             },
             hotKeyEventSource: () => const Stream<int>.empty(),
-            child: const SizedBox.shrink(),
+            child: const Focus(autofocus: true, child: SizedBox.shrink()),
           ),
         ),
       );
@@ -119,6 +134,36 @@ void main() {
 
       expect(registrations, isEmpty);
     });
+
+    testWidgets(
+      'runs configured shortcuts locally when global hooks are absent',
+      (tester) async {
+        final (container, registrations) = await pump(
+          tester,
+          systemSupported: false,
+          configuredAction: HotKeyAction(
+            action: HotAction.start,
+            key: PhysicalKeyboardKey.keyS.usbHidUsage,
+            modifiers: const {KeyboardModifier.control, KeyboardModifier.alt},
+          ),
+        );
+
+        expect(registrations, isEmpty);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pump();
+
+        expect(
+          (container.read(commonActionProvider.notifier) as _CommonAction)
+              .toggles,
+          1,
+        );
+      },
+    );
 
     testWidgets('publishes the shortcuts the OS refused', (tester) async {
       final (container, _) = await pump(

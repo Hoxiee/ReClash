@@ -486,6 +486,14 @@ class HotKeyFailures extends _$HotKeyFailures with AutoDisposeNotifierMixin {
 }
 
 @Riverpod(keepAlive: true)
+class HotKeyPlatform extends _$HotKeyPlatform with AutoDisposeNotifierMixin {
+  @override
+  HotkeyPlatformState build() {
+    return const HotkeyPlatformState();
+  }
+}
+
+@Riverpod(keepAlive: true)
 class HotKeyRecording extends _$HotKeyRecording with AutoDisposeNotifierMixin {
   @override
   bool build() {
