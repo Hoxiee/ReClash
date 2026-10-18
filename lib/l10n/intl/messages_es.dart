@@ -229,12 +229,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Total: ${value}";
 
-  static String m82(label) => "${label} debe ser una URL";
+  static String m82(version) => "Versión instalada: ${version}";
 
-  static String m83(count) =>
+  static String m83(label) => "${label} debe ser una URL";
+
+  static String m84(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m84(count) => "${Intl.plural(count, other: 'hace ${count} a')}";
+  static String m85(count) => "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -786,6 +788,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Ancho de banda de descarga",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Descargando actualización",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Duración"),
     "edit": MessageLookupByLibrary.simpleMessage("Editar"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("Editar panel"),
@@ -1037,6 +1042,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Introduce el contenido de la regla",
+    ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage(
+      "Instalar actualización",
     ),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
@@ -2065,12 +2073,50 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Sin nombre"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Desfijar ventana"),
     "update": MessageLookupByLibrary.simpleMessage("Actualizar"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage(
+      "Canal de actualización",
+    ),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage(
+      "Versión preliminar",
+    ),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
+      "Versión estable",
+    ),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudieron buscar actualizaciones.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo descargar la actualización.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo iniciar el instalador de paquetes.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "Ya tienes la versión más reciente.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Novedades"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "No hay notas de la versión disponibles.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Permite que ReClash instale aplicaciones desde esta fuente y vuelve para continuar.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "Ver todas las notas de la versión",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Mostrar todos los cambios",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo verificar la integridad de la actualización descargada.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Subida"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Ancho de banda de subida",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -2100,8 +2146,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

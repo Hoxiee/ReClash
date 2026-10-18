@@ -7936,6 +7936,166 @@ class AppLocalizations {
     );
   }
 
+  /// `Update channel`
+  String get updateChannel {
+    return Intl.message(
+      'Update channel',
+      name: 'updateChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Release`
+  String get updateChannelRelease {
+    return Intl.message(
+      'Release',
+      name: 'updateChannelRelease',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pre-release`
+  String get updateChannelPre {
+    return Intl.message(
+      'Pre-release',
+      name: 'updateChannelPre',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You're already using the latest version.`
+  String get updateNoUpdates {
+    return Intl.message(
+      'You\'re already using the latest version.',
+      name: 'updateNoUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't check for updates.`
+  String get updateCheckFailed {
+    return Intl.message(
+      'Couldn\'t check for updates.',
+      name: 'updateCheckFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't download the update.`
+  String get updateDownloadFailed {
+    return Intl.message(
+      'Couldn\'t download the update.',
+      name: 'updateDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The downloaded update failed integrity verification.`
+  String get updateVerifyFailed {
+    return Intl.message(
+      'The downloaded update failed integrity verification.',
+      name: 'updateVerifyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't start the package installer.`
+  String get updateInstallFailed {
+    return Intl.message(
+      'Couldn\'t start the package installer.',
+      name: 'updateInstallFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow ReClash to install apps from this source, then return to continue.`
+  String get updatePermissionRequired {
+    return Intl.message(
+      'Allow ReClash to install apps from this source, then return to continue.',
+      name: 'updatePermissionRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install update`
+  String get installUpdate {
+    return Intl.message(
+      'Install update',
+      name: 'installUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading update`
+  String get downloadingUpdate {
+    return Intl.message(
+      'Downloading update',
+      name: 'downloadingUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What's new`
+  String get updateNotesHeading {
+    return Intl.message(
+      'What\'s new',
+      name: 'updateNotesHeading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No release notes are available.`
+  String get updateNotesUnavailable {
+    return Intl.message(
+      'No release notes are available.',
+      name: 'updateNotesUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `See full release notes`
+  String get updateSeeFullReleaseNotes {
+    return Intl.message(
+      'See full release notes',
+      name: 'updateSeeFullReleaseNotes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show all changes`
+  String get updateShowAllNotes {
+    return Intl.message(
+      'Show all changes',
+      name: 'updateShowAllNotes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installed: {version}`
+  String updateInstalledVersion(String version) {
+    return Intl.message(
+      'Installed: $version',
+      name: 'updateInstalledVersion',
+      desc: '',
+      args: [version],
+    );
+  }
+
   /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
   String get translationNotice {
     return Intl.message(

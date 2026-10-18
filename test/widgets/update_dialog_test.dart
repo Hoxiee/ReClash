@@ -1,7 +1,13 @@
+import 'dart:convert';
+
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/update.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/update_offer_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,10 +33,33 @@ const _bulletsOnly =
 String _bodyWith(String payload) =>
     '$_bulletsOnly\n<!-- reclash:changelog:json\n$payload\n-->\n';
 
-Map<String, dynamic> release(String? body) => <String, dynamic>{
-  'tag_name': 'v0.8.96',
-  'body': body,
-};
+class _UpdateSource implements AppUpdateSource {
+  const _UpdateSource({this.failure});
+
+  final Exception? failure;
+
+  @override
+  String get id => 'test';
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchReleases({
+    required UpdateChannel channel,
+  }) async {
+    if (failure case final error?) throw error;
+    return const [];
+  }
+
+  @override
+  Uri releasePage(String tag) => Uri.https('updates.example', '/$tag');
+
+  @override
+  Uri assetUri(String url) => Uri.parse(url);
+}
+
+AppUpdateRelease release(String? body) => AppUpdateRelease(
+  data: <String, dynamic>{'tag_name': 'v0.8.96', 'body': body},
+  source: const _UpdateSource(),
+);
 
 Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
   final container = ProviderContainer();
@@ -59,11 +88,25 @@ Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
 /// The dialog blocks until the user answers, so tests must close it before
 /// awaiting the call that opened it.
 Future<void> tapCancel(WidgetTester tester) async {
-  await tester.tap(find.byType(TextButton).first);
+  final dismiss = find.byKey(const ValueKey('update-offer-dismiss'));
+  await tester.tap(
+    dismiss.evaluate().isNotEmpty ? dismiss : find.byType(TextButton).first,
+  );
   await tester.pumpAndSettle();
 }
 
 void main() {
+  late String previousAppEnv;
+
+  setUp(() {
+    previousAppEnv = globalState.appEnv;
+    globalState.appEnv = 'stable';
+  });
+
+  tearDown(() {
+    globalState.appEnv = previousAppEnv;
+  });
+
   setUpAll(() {
     globalState.packageInfo = PackageInfo(
       appName: 'ReClash',
@@ -119,7 +162,7 @@ void main() {
         .checkUpdateResultHandle(data: release(_bulletsOnly));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('- Override scripts'), findsOneWidget);
+    expect(find.textContaining('Override scripts'), findsOneWidget);
 
     await tapCancel(tester);
     await shown;
@@ -140,6 +183,38 @@ void main() {
     expect(container.read(appSettingProvider).autoCheckUpdate, isFalse);
   });
 
+  testWidgets('a failed manual request is not reported as up to date', (
+    tester,
+  ) async {
+    final container = await pumpApp(tester);
+    final oldSources = request.updateSources.toList();
+    addTearDown(() {
+      request.updateSources
+        ..clear()
+        ..addAll(oldSources);
+    });
+    request.updateSources
+      ..clear()
+      ..add(const _UpdateSource(failure: FormatException('offline')));
+
+    final checking = container
+        .read(commonActionProvider.notifier)
+        .checkForUpdates();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(currentAppLocalizations.updateCheckFailed),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(currentAppLocalizations.updateNoUpdates),
+      findsNothing,
+    );
+
+    await tapCancel(tester);
+    await checking;
+  });
+
   testWidgets('a manual check keeps the setting and reports a failure', (
     tester,
   ) async {
@@ -151,9 +226,360 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Check for updates'), findsOneWidget);
+    expect(find.textContaining('latest version'), findsOneWidget);
 
     await tapCancel(tester);
     await shown;
     expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
   });
+
+  testWidgets('fits the update offer on a phone-width surface', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final container = await pumpApp(tester);
+    final shown = container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(
+          data: release(
+            '## Changes\n\n'
+            '- A long release note that wraps without pushing the actions offscreen\n'
+            '- A second useful fix\n'
+            '- A third useful fix\n'
+            '- A fourth useful fix',
+          ),
+          isUser: true,
+        );
+    await tester.pumpAndSettle();
+
+    expect(find.text(currentAppLocalizations.goDownload), findsOneWidget);
+    expect(find.text('Changes'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tapCancel(tester);
+    await shown;
+  });
+
+  testWidgets('filters download boilerplate from release notes', (
+    tester,
+  ) async {
+    final container = await pumpApp(tester);
+    final shown = container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(
+          data: release(
+            '## Changes\n\n- Fixed *routing*\n\n'
+            '## Downloads\n\n- Android APK\n'
+            '<table><tr><td>mirror</td></tr></table>',
+          ),
+          isUser: true,
+        );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Fixed'), findsOneWidget);
+    expect(find.textContaining('Android APK'), findsNothing);
+    expect(find.textContaining('mirror'), findsNothing);
+
+    await tapCancel(tester);
+    await shown;
+  });
+
+  testWidgets('renders basic Markdown release notes', (tester) async {
+    final container = await pumpApp(tester);
+    final shown = container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(
+          data: release(
+            '## Highlights\n\n- **Fast** routing\n\nUse `safe mode`.',
+          ),
+          isUser: true,
+        );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Highlights'), findsOneWidget);
+    expect(find.textContaining('Fast'), findsOneWidget);
+    expect(find.textContaining('safe mode'), findsOneWidget);
+
+    await tapCancel(tester);
+    await shown;
+  });
+
+  testWidgets('presents alpha warnings without GitHub download chrome', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    final shown = UpdateOfferDialog.show(
+      tester.element(find.byType(Scaffold)),
+      release: release(
+        '> [!WARNING]\n'
+        '> **Pre-release — for personal testing only.** Stability is still poor.\n\n'
+        'Third ReClash pre-release.\n\n'
+        "## What's new since pre.2\n\n"
+        '- In-app updates: the client finds new builds.\n\n'
+        '## Fixes since pre.2\n\n'
+        '- Layout: resizing keeps dialogs open.\n\n'
+        '## Notice\n\n'
+        'Subscription compatibility is unchanged.\n\n'
+        '<div align="center">\n\n'
+        '[![Downloads](https://img.shields.io/badge/downloads)](https://example.com)\n\n'
+        '**Grab the build for your operating system.**\n\n'
+        '</div>\n\n'
+        '| OS | Packages |\n| Linux | AppImage |\n',
+      ),
+      primaryLabel: 'Download',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('for personal testing only'), findsOneWidget);
+    expect(find.textContaining('[!WARNING]'), findsNothing);
+    expect(find.textContaining('In-app updates:'), findsOneWidget);
+    expect(find.textContaining('Grab the build'), findsNothing);
+    expect(find.textContaining('AppImage'), findsNothing);
+    final expand = find.byKey(const ValueKey('update-notes-expand'));
+    await tester.ensureVisible(expand);
+    await tester.tap(expand);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Subscription compatibility'), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.updateSeeFullReleaseNotes),
+      findsOneWidget,
+    );
+    await tapCancel(tester);
+    expect(await shown, isFalse);
+  });
+
+  testWidgets('expands complete Markdown blocks without destroying code', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    final shown = UpdateOfferDialog.show(
+      tester.element(find.byType(Scaffold)),
+      release: release(
+        '## Changes\n\n'
+        '${List.generate(5, (index) => '- Change $index').join('\n')}\n\n'
+        '~~~yaml\n# Keep this heading\n  <value>\n| keep this line |\n~~~\n\n'
+        '- Last change\n',
+      ),
+      primaryLabel: 'Download',
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Keep this heading'), findsNothing);
+    final expand = find.byKey(const ValueKey('update-notes-expand'));
+    await tester.ensureVisible(expand);
+    await tester.tap(expand);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('# Keep this heading\n  <value>\n| keep this line |'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Last change'), findsOneWidget);
+    expect(expand, findsNothing);
+    await tapCancel(tester);
+    await shown;
+  });
+
+  testWidgets(
+    'keeps all breaking changes first and expands other groups in place',
+    (tester) async {
+      await pumpApp(tester);
+      final payload = jsonEncode({
+        'schemaVersion': 2,
+        'versions': [
+          {
+            'version': '0.8.96',
+            'tag': 'v0.8.96',
+            'groups': [
+              {
+                'type': 'feat',
+                'entries': [
+                  {'id': 'f', 'text': 'New feature'},
+                ],
+              },
+              {
+                'type': 'fix',
+                'entries': [
+                  {'id': 'x', 'text': 'Last fix'},
+                ],
+              },
+              {
+                'type': 'breaking',
+                'entries': List.generate(
+                  7,
+                  (index) => {'id': '$index', 'text': 'Migration $index'},
+                ),
+              },
+            ],
+          },
+        ],
+      });
+      final shown = UpdateOfferDialog.show(
+        tester.element(find.byType(Scaffold)),
+        release: release(_bodyWith(payload)),
+        primaryLabel: 'Download',
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Migration 6'), findsOneWidget);
+      expect(find.textContaining('Last fix'), findsNothing);
+      final expand = find.byKey(const ValueKey('update-notes-expand'));
+      await tester.ensureVisible(expand);
+      await tester.tap(expand);
+      await tester.pumpAndSettle();
+      expect(find.text('New feature'), findsOneWidget);
+      expect(find.textContaining('Last fix'), findsOneWidget);
+      final headings = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((text) => text.data)
+          .toList();
+      expect(
+        headings.indexOf(currentAppLocalizations.changelogFeatures),
+        lessThan(headings.indexOf(currentAppLocalizations.changelogFixes)),
+      );
+      await tapCancel(tester);
+      await shown;
+    },
+  );
+
+  testWidgets(
+    'keeps actions visible while scrolling in a short landscape window',
+    (tester) async {
+      tester.view.physicalSize = const Size(740, 320);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await pumpApp(tester);
+      final shown = UpdateOfferDialog.show(
+        tester.element(find.byType(Scaffold)),
+        release: release(
+          List.generate(20, (index) => '- Change $index').join('\n'),
+        ),
+        primaryLabel: 'Download',
+      );
+      await tester.pumpAndSettle();
+      final accept = find.byKey(const ValueKey('update-offer-accept'));
+      final dismiss = find.byKey(const ValueKey('update-offer-dismiss'));
+      expect(accept.hitTestable(), findsOneWidget);
+      expect(dismiss.hitTestable(), findsOneWidget);
+      await tester.drag(
+        find.byKey(const ValueKey('update-offer-scroll')),
+        const Offset(0, -400),
+      );
+      await tester.pumpAndSettle();
+      expect(accept.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.tap(accept);
+      await tester.pumpAndSettle();
+      expect(await shown, isTrue);
+    },
+  );
+
+  testWidgets(
+    'fits large text, long versions and automatic-dismiss labels on a phone',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpApp(tester, locale: const Locale('ru'));
+      final shown = UpdateOfferDialog.show(
+        tester.element(find.byType(Scaffold)),
+        release: const AppUpdateRelease(
+          data: {
+            'tag_name': 'v0.1.0-pre.123+very-long-build-identifier',
+            'body': '## Changes\n\n- Improved routing',
+          },
+          source: _UpdateSource(),
+        ),
+        currentVersion: '0.1.0-pre.2',
+        primaryLabel: currentAppLocalizations.goDownload,
+        skipLabel: currentAppLocalizations.noLongerRemind,
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Установлена версия'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('update-offer-accept')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('update-offer-dismiss')).hitTestable(),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tapCancel(tester);
+      await shown;
+    },
+  );
+
+  testWidgets(
+    'opens formatted release links only through external-link confirmation',
+    (tester) async {
+      await pumpApp(tester);
+      final shown = UpdateOfferDialog.show(
+        tester.element(find.byType(Scaffold)),
+        release: release('[**Read `docs`**](https://example.com/notes)'),
+        primaryLabel: 'Download',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Read docs'), findsOneWidget);
+      await tester.tap(find.text('Read docs'));
+      await tester.pumpAndSettle();
+      expect(find.text(currentAppLocalizations.externalLink), findsOneWidget);
+      expect(find.text('https://example.com/notes'), findsOneWidget);
+      await tester.tap(find.text(currentAppLocalizations.cancel).last);
+      await tester.pumpAndSettle();
+      expect(find.text(currentAppLocalizations.externalLink), findsNothing);
+      await tapCancel(tester);
+      await shown;
+    },
+  );
+
+  for (final locale in [
+    'en',
+    'ru',
+    'ja',
+    'zh_CN',
+    'kk',
+    'tk',
+    'uz',
+    'ko',
+    'es',
+    'fr',
+  ]) {
+    testWidgets(
+      'renders publication metadata and an empty release in $locale',
+      (tester) async {
+        final parts = locale.split('_');
+        await pumpApp(
+          tester,
+          locale: Locale(parts.first, parts.length > 1 ? parts.last : null),
+        );
+        final shown = UpdateOfferDialog.show(
+          tester.element(find.byType(Scaffold)),
+          release: const AppUpdateRelease(
+            data: {
+              'tag_name': 'v0.8.96',
+              'published_at': '2026-10-18T10:00:00Z',
+            },
+            source: _UpdateSource(),
+          ),
+          primaryLabel: 'Download',
+        );
+        await tester.pumpAndSettle();
+        expect(find.textContaining('2026'), findsOneWidget);
+        expect(
+          find.text(currentAppLocalizations.updateNotesUnavailable),
+          findsOneWidget,
+        );
+        expect(
+          find.text(currentAppLocalizations.updateSeeFullReleaseNotes),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        await tapCancel(tester);
+        await shown;
+      },
+    );
+  }
 }

@@ -226,12 +226,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Барлығы: ${value}";
 
-  static String m82(label) => "${label} URL болуы керек";
+  static String m82(version) => "Орнатылған нұсқа: ${version}";
 
-  static String m83(count) =>
-      "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
+  static String m83(label) => "${label} URL болуы керек";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
+
+  static String m85(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -762,6 +764,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("Дайын"),
     "download": MessageLookupByLibrary.simpleMessage("Жүктеу"),
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage("Жүктеу жолағы"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту жүктелуде",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Ұзақтығы"),
     "edit": MessageLookupByLibrary.simpleMessage("Өңдеу"),
     "editDashboard": MessageLookupByLibrary.simpleMessage(
@@ -1014,6 +1019,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Ереже мазмұнын енгізіңіз",
     ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
@@ -2017,12 +2023,48 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Атаусыз"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Терезені босату"),
     "update": MessageLookupByLibrary.simpleMessage("Жаңарту"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("Жаңарту арнасы"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage(
+      "Алдын ала шығарылым",
+    ),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
+      "Тұрақты релиз",
+    ),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Жаңартуларды тексеру мүмкін болмады.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Жаңартуды жүктеу мүмкін болмады.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Пакет орнатқышын іске қосу мүмкін болмады.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "Сізде соңғы нұсқа орнатылған.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Не жаңалық"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Релиз ескертпелері қолжетімсіз.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "ReClash қолданбасына осы көзден қолданбалар орнатуға рұқсат беріп, жалғастыру үшін қайта оралыңыз.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "Толық релиз ескертпелерін көру",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Барлық өзгерістерді көрсету",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "Жүктелген жаңартудың тұтастығын тексеру мүмкін болмады.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Жүктеп салу"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Жүктеп салу жолағы",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -2050,8 +2092,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

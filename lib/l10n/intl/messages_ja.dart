@@ -200,11 +200,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "累計 ${value}";
 
-  static String m82(label) => "${label}はURLである必要があります";
+  static String m82(version) => "インストール済み: ${version}";
 
-  static String m83(count) => "${count} 年前";
+  static String m83(label) => "${label}はURLである必要があります";
 
   static String m84(count) => "${count} 年前";
+
+  static String m85(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -630,6 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("完了"),
     "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage("ダウンロード帯域幅"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage("更新をダウンロード中"),
     "duration": MessageLookupByLibrary.simpleMessage("経過時間"),
     "edit": MessageLookupByLibrary.simpleMessage("編集"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("ダッシュボードを編集"),
@@ -826,6 +829,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "プロキシグループ名を入力してください",
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage("ルールの内容を入力してください"),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("更新をインストール"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "アプリ一覧の権限が拒否されたため、インストール済みアプリを取得できません。システム設定から手動で許可してください。",
@@ -1645,10 +1649,36 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("名称未設定"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("更新チャンネル"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("プレリリース"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage("リリース"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("更新を確認できませんでした。"),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "更新をダウンロードできませんでした。",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "パッケージインストーラーを起動できませんでした。",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "リリースノートはありません。",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "ReClash にこの提供元からのアプリのインストールを許可してから、戻って続行してください。",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "リリースノート全文を見る",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("すべての変更を表示"),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "ダウンロードした更新の整合性を確認できませんでした。",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -1672,8 +1702,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

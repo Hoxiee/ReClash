@@ -1,0 +1,18 @@
+{
+  "updateChannel": "Канал обновлений",
+  "updateChannelRelease": "Релиз",
+  "updateChannelPre": "Предрелиз",
+  "updateNoUpdates": "У вас уже установлена последняя версия.",
+  "updateCheckFailed": "Не удалось проверить обновления.",
+  "updateDownloadFailed": "Не удалось загрузить обновление.",
+  "updateVerifyFailed": "Не удалось проверить целостность загруженного обновления.",
+  "updateInstallFailed": "Не удалось запустить установщик пакетов.",
+  "updatePermissionRequired": "Разрешите ReClash устанавливать приложения из этого источника и вернитесь, чтобы продолжить.",
+  "installUpdate": "Установить обновление",
+  "downloadingUpdate": "Загрузка обновления",
+  "updateNotesHeading": "Что нового",
+  "updateNotesUnavailable": "Описание изменений не опубликовано.",
+  "updateSeeFullReleaseNotes": "Все примечания к релизу",
+  "updateShowAllNotes": "Показать все изменения",
+  "updateInstalledVersion": "Установлена версия {version}"
+}

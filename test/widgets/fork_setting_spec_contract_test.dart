@@ -7,9 +7,11 @@ import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/views/config/user_agents.dart';
+import 'package:reclash/views/application_setting.dart';
 
 void main() {
   final specs = [
+    ...ApplicationSettings.all,
     ...GeneralSettings.all,
     ...advancedToolSettings,
     ...networkToolSettings,

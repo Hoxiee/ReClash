@@ -3,19 +3,29 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+
+const _updateDownloadTimeout = Duration(minutes: 10);
 
 class Request {
   late final Dio dio;
   late final Dio _clashDio;
   String? userAgent;
+  late final List<AppUpdateSource> updateSources;
 
   ProviderReader? _read;
+
+  @visibleForTesting
+  set updateDownloadAdapter(HttpClientAdapter adapter) {
+    _clashDio.httpClientAdapter = adapter;
+  }
 
   void attach(ProviderReader read) {
     _read = read;
@@ -38,6 +48,7 @@ class Request {
         return client;
       },
     );
+    updateSources = [GitHubUpdateSource(dio)];
   }
 
   Future<Response<T>> _download<T>(String url, ResponseType responseType) {
@@ -85,14 +96,80 @@ class Request {
     }
   }
 
-  /// Null when this build is current; throws when GitHub cannot be asked.
-  Future<Map<String, dynamic>?> checkForUpdate() async {
-    final release = await latestRelease();
-    final remoteVersion = release['tag_name'] as String;
-    final version = globalState.packageInfo.version;
-    final hasUpdate =
-        compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
-    return hasUpdate ? release : null;
+  /// Returns null only when a source answered and found no eligible release.
+  Future<AppUpdateRelease?> checkForUpdate({
+    required UpdateChannel channel,
+  }) async {
+    Object? lastError;
+    StackTrace? lastStack;
+    for (final source in updateSources) {
+      try {
+        final releases = await source.fetchReleases(channel: channel);
+        final selected = selectUpdateRelease(
+          releases,
+          installedVersion: globalState.packageInfo.version,
+          channel: channel,
+        );
+        return selected == null
+            ? null
+            : AppUpdateRelease(data: selected, source: source);
+      } catch (error, stack) {
+        lastError = error;
+        lastStack = stack;
+        commonPrint.log(
+          'update source ${source.id} failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+      }
+    }
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStack!);
+    }
+    throw StateError('No app update sources configured');
+  }
+
+  Future<String?> downloadUpdateFile(
+    Uri uri,
+    String targetPath, {
+    required ProgressCallback onProgress,
+    required CancelToken cancelToken,
+  }) async {
+    final tempPath = '$targetPath.tmp';
+    await File(tempPath).safeDelete();
+    try {
+      await _clashDio
+          .download(
+            uri.toString(),
+            tempPath,
+            cancelToken: cancelToken,
+            onReceiveProgress: onProgress,
+          )
+          .timeout(
+            _updateDownloadTimeout,
+            onTimeout: () {
+              cancelToken.cancel();
+              throw DioException.receiveTimeout(
+                timeout: _updateDownloadTimeout,
+                requestOptions: RequestOptions(path: uri.toString()),
+              );
+            },
+          );
+      final tempFile = File(tempPath);
+      if (!await tempFile.exists()) {
+        throw FileSystemException('Update download produced no file', tempPath);
+      }
+      await File(targetPath).safeDelete();
+      await tempFile.rename(targetPath);
+      return null;
+    } catch (error) {
+      await File(tempPath).safeDelete();
+      if (error is DioException && CancelToken.isCancel(error)) return '';
+      commonPrint.log(
+        'downloadUpdateFile failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return compactError(error);
+    }
   }
 
   /// The release page redirect still answers once the hourly API quota is spent.

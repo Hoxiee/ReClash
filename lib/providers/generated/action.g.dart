@@ -40,9 +40,61 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'189200fbe44ffbc6b8f587ee32b30f57f1d478df';
+String _$commonActionHash() => r'6eb7982f7a1f415b9fecaa849c483ab943f390d1';
 
 abstract class _$CommonAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(AppUpdateAction)
+final appUpdateActionProvider = AppUpdateActionProvider._();
+
+final class AppUpdateActionProvider
+    extends $NotifierProvider<AppUpdateAction, void> {
+  AppUpdateActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appUpdateActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appUpdateActionHash();
+
+  @$internal
+  @override
+  AppUpdateAction create() => AppUpdateAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$appUpdateActionHash() => r'1c8ee07f15db47c9cd28ebebe8ec74a28b4c3633';
+
+abstract class _$AppUpdateAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

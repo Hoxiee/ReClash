@@ -132,6 +132,7 @@ void main() {
       expect(restored.tabAnimation, TabAnimation.fade);
       expect(restored.preventDuplicateProfiles, true);
       expect(restored.autoCheckUpdate, true);
+      expect(restored.updateChannel, isNull);
       expect(restored.sidebarExpanded, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
@@ -139,6 +140,25 @@ void main() {
       expect(restored.filters, defaultFilters);
       expect(restored.testUrl, defaultTestUrl);
     });
+
+    test(
+      'saved update channel round-trips and missing channel stays unset',
+      () {
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'pre'}).updateChannel,
+          UpdateChannel.pre,
+        );
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'release'}).updateChannel,
+          UpdateChannel.release,
+        );
+        expect(AppSettingProps.fromJson({}).updateChannel, isNull);
+        expect(
+          AppSettingProps.fromJson({'updateChannel': 'unknown'}).updateChannel,
+          isNull,
+        );
+      },
+    );
 
     test('a saved outboundModeV2 card folds into outboundMode', () {
       final restored = AppSettingProps.fromJson({

@@ -199,6 +199,12 @@ Object? _readTabAnimation(Map<dynamic, dynamic> json, String key) {
   };
 }
 
+UpdateChannel? updateChannelFromJson(Object? value) => switch (value) {
+  'release' => UpdateChannel.release,
+  'pre' => UpdateChannel.pre,
+  _ => null,
+};
+
 Object? _readUserAgents(Map<dynamic, dynamic> json, String key) {
   if (json.containsKey(key)) {
     return json[key];
@@ -242,6 +248,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
     @Default(true) bool autoCheckUpdate,
+    @JsonKey(fromJson: updateChannelFromJson) UpdateChannel? updateChannel,
     @Default(true)
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,

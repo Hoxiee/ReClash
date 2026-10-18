@@ -6,7 +6,34 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/request.dart';
+import 'package:reclash/common/update.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/state.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _TestUpdateSource implements AppUpdateSource {
+  _TestUpdateSource(this.id, this.releases, {this.failure});
+
+  @override
+  final String id;
+  final List<Map<String, dynamic>> releases;
+  final Exception? failure;
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchReleases({
+    required UpdateChannel channel,
+  }) async {
+    if (failure case final error?) throw error;
+    return releases;
+  }
+
+  @override
+  Uri assetUri(String url) => Uri.parse(url);
+
+  @override
+  Uri releasePage(String tag) => Uri.https('updates.example', '/$tag');
+}
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -67,6 +94,125 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('checkForUpdate', () {
+    setUp(() {
+      globalState.packageInfo = PackageInfo(
+        appName: 'ReClash',
+        packageName: 'com.reclash',
+        version: '0.1.0',
+        buildNumber: '1',
+      );
+    });
+
+    test(
+      'returns null only after a source answers without a newer release',
+      () async {
+        final client = Request();
+        client.updateSources
+          ..clear()
+          ..add(_TestUpdateSource('empty', const []));
+        expect(
+          await client.checkForUpdate(channel: UpdateChannel.release),
+          isNull,
+        );
+      },
+    );
+
+    test(
+      'falls through a failed source and retains the answering source',
+      () async {
+        final client = Request();
+        client.updateSources
+          ..clear()
+          ..addAll([
+            _TestUpdateSource(
+              'offline',
+              const [],
+              failure: Exception('offline'),
+            ),
+            _TestUpdateSource('mirror', [
+              {'tag_name': '0.2.0', 'body': 'notes'},
+            ]),
+          ]);
+        final release = await client.checkForUpdate(
+          channel: UpdateChannel.release,
+        );
+        expect(release?.tag, '0.2.0');
+        expect(release?.source.id, 'mirror');
+      },
+    );
+
+    test(
+      'throws when every source fails instead of reporting no updates',
+      () async {
+        final client = Request();
+        client.updateSources
+          ..clear()
+          ..add(
+            _TestUpdateSource(
+              'offline',
+              const [],
+              failure: Exception('offline'),
+            ),
+          );
+        await expectLater(
+          client.checkForUpdate(channel: UpdateChannel.release),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
+  });
+
+  group('downloadUpdateFile', () {
+    late Directory directory;
+
+    setUp(() async {
+      directory = await Directory.systemTemp.createTemp(
+        'reclash-update-download-',
+      );
+    });
+
+    tearDown(() async {
+      if (await directory.exists()) await directory.delete(recursive: true);
+    });
+
+    test('renames the completed temporary download into place', () async {
+      final client = Request()
+        ..updateDownloadAdapter = _HostAdapter({
+          'updates.example': () => ResponseBody.fromString('apk-bytes', 200),
+        });
+      final target = '${directory.path}/update-v1.apk';
+      final error = await client.downloadUpdateFile(
+        Uri.https('updates.example', '/update.apk'),
+        target,
+        onProgress: (_, _) {},
+        cancelToken: CancelToken(),
+      );
+
+      expect(error, isNull);
+      expect(await File(target).readAsString(), 'apk-bytes');
+      expect(await File('$target.tmp').exists(), isFalse);
+    });
+
+    test('removes a partial temporary file after a failed download', () async {
+      final client = Request()
+        ..updateDownloadAdapter = _HostAdapter({
+          'updates.example': () => ResponseBody.fromString('error', 503),
+        });
+      final target = '${directory.path}/update-v1.apk';
+      final error = await client.downloadUpdateFile(
+        Uri.https('updates.example', '/update.apk'),
+        target,
+        onProgress: (_, _) {},
+        cancelToken: CancelToken(),
+      );
+
+      expect(error, isNotNull);
+      expect(await File(target).exists(), isFalse);
+      expect(await File('$target.tmp').exists(), isFalse);
+    });
   });
 
   group('latestRelease', () {

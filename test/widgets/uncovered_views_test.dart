@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:reclash/common/l10n_labels.dart';
+import 'package:reclash/common/app_localizations.dart';
 import 'package:reclash/common/request.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
@@ -249,7 +250,7 @@ void main() {
 
     adapter.response.complete(
       ResponseBody.fromString(
-        jsonEncode({'tag_name': 'v0.0.0'}),
+        jsonEncode(<Map<String, dynamic>>[]),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
@@ -261,8 +262,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LinearProgressIndicator), findsNothing);
-    expect(find.text('The app is already up to date'), findsOneWidget);
+    expect(find.text(currentAppLocalizations.updateNoUpdates), findsOneWidget);
     expect(tester.takeException(), null);
+    await tester.tap(find.byType(TextButton).first);
+    await tester.pumpAndSettle();
   });
 
   testWidgets('scripts view lists scripts and offers the add menu', (

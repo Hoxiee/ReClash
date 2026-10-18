@@ -952,6 +952,29 @@
   "license": "License",
   "licenses": "Licenses",
   "licensesDesc": "Packages bundled into the app",
+  "updateChannel": "Update channel",
+  "updateChannelRelease": "Release",
+  "updateChannelPre": "Pre-release",
+  "updateNoUpdates": "You're already using the latest version.",
+  "updateCheckFailed": "Couldn't check for updates.",
+  "updateDownloadFailed": "Couldn't download the update.",
+  "updateVerifyFailed": "The downloaded update failed integrity verification.",
+  "updateInstallFailed": "Couldn't start the package installer.",
+  "updatePermissionRequired": "Allow ReClash to install apps from this source, then return to continue.",
+  "installUpdate": "Install update",
+  "downloadingUpdate": "Downloading update",
+  "updateNotesHeading": "What's new",
+  "updateNotesUnavailable": "No release notes are available.",
+  "updateSeeFullReleaseNotes": "See full release notes",
+  "updateShowAllNotes": "Show all changes",
+  "updateInstalledVersion": "Installed: {version}",
+  "@updateInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "translationNotice": "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
   "translationSuggestFix": "Suggest a translation fix",
   "kk": "Kazakh",
