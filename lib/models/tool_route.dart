@@ -25,6 +25,8 @@ enum ToolPage {
   logs,
   rules,
   scripts,
+  coreDetails,
+  coreRuntimeConfig,
 }
 
 extension ToolPageHierarchy on ToolPage {
@@ -35,6 +37,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.scripts => ToolPage.advanced,
     ToolPage.userAgents => ToolPage.general,
     ToolPage.onDemand || ToolPage.appRegion => ToolPage.application,
+    ToolPage.coreRuntimeConfig => ToolPage.coreDetails,
     _ => null,
   };
 

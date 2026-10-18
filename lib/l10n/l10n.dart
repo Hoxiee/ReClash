@@ -8467,6 +8467,181 @@ class AppLocalizations {
     );
   }
 
+  /// `Running`
+  String get coreRunning {
+    return Intl.message('Running', name: 'coreRunning', desc: '', args: []);
+  }
+
+  /// `Starting…`
+  String get coreStarting {
+    return Intl.message('Starting…', name: 'coreStarting', desc: '', args: []);
+  }
+
+  /// `Stopped`
+  String get coreStopped {
+    return Intl.message('Stopped', name: 'coreStopped', desc: '', args: []);
+  }
+
+  /// `Build time`
+  String get coreBuildTime {
+    return Intl.message(
+      'Build time',
+      name: 'coreBuildTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Environment`
+  String get coreEnvironment {
+    return Intl.message(
+      'Environment',
+      name: 'coreEnvironment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get coreLocation {
+    return Intl.message('Location', name: 'coreLocation', desc: '', args: []);
+  }
+
+  /// `Platform`
+  String get corePlatform {
+    return Intl.message('Platform', name: 'corePlatform', desc: '', args: []);
+  }
+
+  /// `Architecture`
+  String get coreArchitecture {
+    return Intl.message(
+      'Architecture',
+      name: 'coreArchitecture',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build flags`
+  String get coreBuildTags {
+    return Intl.message(
+      'Build flags',
+      name: 'coreBuildTags',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Execution mode`
+  String get coreLaunchMode {
+    return Intl.message(
+      'Execution mode',
+      name: 'coreLaunchMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In-process library`
+  String get coreModeLibrary {
+    return Intl.message(
+      'In-process library',
+      name: 'coreModeLibrary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Separate process`
+  String get coreModeProcess {
+    return Intl.message(
+      'Separate process',
+      name: 'coreModeProcess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Process via Helper`
+  String get coreModeHelper {
+    return Intl.message(
+      'Process via Helper',
+      name: 'coreModeHelper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data directory`
+  String get coreWorkingDirectory {
+    return Intl.message(
+      'Data directory',
+      name: 'coreWorkingDirectory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core binary`
+  String get coreExecutable {
+    return Intl.message(
+      'Core binary',
+      name: 'coreExecutable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read core information`
+  String get coreInfoUnavailable {
+    return Intl.message(
+      'Could not read core information',
+      name: 'coreInfoUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Runtime configuration`
+  String get coreRuntimeConfig {
+    return Intl.message(
+      'Runtime configuration',
+      name: 'coreRuntimeConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open runtime configuration`
+  String get coreOpenRuntimeConfig {
+    return Intl.message(
+      'Open runtime configuration',
+      name: 'coreOpenRuntimeConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Generated configuration after settings and scripts. Read-only.`
+  String get coreRuntimeConfigDescription {
+    return Intl.message(
+      'Generated configuration after settings and scripts. Read-only.',
+      name: 'coreRuntimeConfigDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read the runtime configuration`
+  String get coreRuntimeConfigReadFailed {
+    return Intl.message(
+      'Could not read the runtime configuration',
+      name: 'coreRuntimeConfigReadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
   String get translationNotice {
     return Intl.message(

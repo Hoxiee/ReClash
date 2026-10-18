@@ -313,6 +313,23 @@ abstract class ServiceCheckItem with _$ServiceCheckItem {
 }
 
 @freezed
+abstract class CoreInfo with _$CoreInfo {
+  const factory CoreInfo({
+    @Default('') String version,
+    @Default('') String goVersion,
+    @Default('') String platform,
+    @Default('') String architecture,
+    DateTime? buildTime,
+    @Default([]) List<String> tags,
+    @Default('') String workingDirectory,
+    @Default('') String executablePath,
+  }) = _CoreInfo;
+
+  factory CoreInfo.fromJson(Map<String, Object?> json) =>
+      _$CoreInfoFromJson(json);
+}
+
+@freezed
 abstract class CoreMemoryStats with _$CoreMemoryStats {
   const factory CoreMemoryStats({
     @Default(0) int rss,

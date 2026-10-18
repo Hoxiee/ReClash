@@ -1,0 +1,22 @@
+{
+  "coreRunning": "실행 중",
+  "coreStarting": "시작 중…",
+  "coreStopped": "중지됨",
+  "coreBuildTime": "빌드 시간",
+  "coreEnvironment": "환경",
+  "coreLocation": "위치",
+  "corePlatform": "플랫폼",
+  "coreArchitecture": "아키텍처",
+  "coreBuildTags": "빌드 플래그",
+  "coreLaunchMode": "실행 방식",
+  "coreModeLibrary": "프로세스 내 라이브러리",
+  "coreModeProcess": "별도 프로세스",
+  "coreModeHelper": "Helper를 통한 프로세스",
+  "coreWorkingDirectory": "데이터 폴더",
+  "coreExecutable": "코어 실행 파일",
+  "coreInfoUnavailable": "코어 정보를 읽을 수 없습니다",
+  "coreRuntimeConfig": "런타임 설정",
+  "coreOpenRuntimeConfig": "런타임 설정 열기",
+  "coreRuntimeConfigDescription": "설정과 스크립트를 적용한 최종 설정입니다. 읽기 전용입니다.",
+  "coreRuntimeConfigReadFailed": "런타임 설정을 읽을 수 없습니다"
+}

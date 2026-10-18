@@ -13,6 +13,8 @@ import 'desktop/model.dart';
 import 'method.dart';
 
 mixin CoreInterface {
+  CoreProcessOwner? get processOwner => null;
+
   Future<CoreLifecycleResult> start();
 
   Future<CoreLifecycleResult> restart();
@@ -24,6 +26,8 @@ mixin CoreInterface {
   Future<bool> init(InitParams params);
 
   Future<bool> get isInit;
+
+  Future<CoreInfo?> getCoreInfo();
 
   Future<bool> forceGc();
 
@@ -200,6 +204,14 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> get isInit async {
     return await _invokeMethod<bool>(method: CoreMethod.getIsInit) ?? false;
+  }
+
+  @override
+  Future<CoreInfo?> getCoreInfo() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getCoreInfo,
+    );
+    return data == null ? null : CoreInfo.fromJson(data);
   }
 
   @override

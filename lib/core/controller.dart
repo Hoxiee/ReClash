@@ -52,6 +52,8 @@ class CoreController {
 
   Future<CoreLifecycleResult> close() => _interface.close();
 
+  CoreProcessOwner? get processOwner => _interface.processOwner;
+
   static Future<void> ensureHomeDir() async {
     final homePath = await appPath.homeDirPath;
     final homeDir = Directory(homePath);
@@ -93,6 +95,12 @@ class CoreController {
   }
 
   FutureOr<bool> get isInit => _interface.isInit;
+
+  Future<CoreInfo?> getCoreInfo() => _interface.getCoreInfo();
+
+  Future<String> getAppliedConfigContent() async {
+    return File(await appPath.configFilePath).readAsString();
+  }
 
   Future<String> validateConfig(String path) async {
     final res = await _interface.validateConfig(path);

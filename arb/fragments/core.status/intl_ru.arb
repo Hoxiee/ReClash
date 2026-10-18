@@ -1,0 +1,22 @@
+{
+  "coreRunning": "Работает",
+  "coreStarting": "Запускается…",
+  "coreStopped": "Остановлено",
+  "coreBuildTime": "Время сборки",
+  "coreEnvironment": "Среда",
+  "coreLocation": "Расположение",
+  "corePlatform": "Платформа",
+  "coreArchitecture": "Архитектура",
+  "coreBuildTags": "Флаги сборки",
+  "coreLaunchMode": "Способ запуска",
+  "coreModeLibrary": "Встроенная библиотека",
+  "coreModeProcess": "Отдельный процесс",
+  "coreModeHelper": "Процесс через Helper",
+  "coreWorkingDirectory": "Каталог данных",
+  "coreExecutable": "Файл ядра",
+  "coreInfoUnavailable": "Не удалось получить сведения о ядре",
+  "coreRuntimeConfig": "Runtime-конфиг",
+  "coreOpenRuntimeConfig": "Открыть runtime-конфиг",
+  "coreRuntimeConfigDescription": "Итоговая конфигурация после настроек и скриптов. Только просмотр.",
+  "coreRuntimeConfigReadFailed": "Не удалось прочитать runtime-конфиг"
+}

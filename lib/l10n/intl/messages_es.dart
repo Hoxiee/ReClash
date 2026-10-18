@@ -591,11 +591,55 @@ class MessageLookup extends MessageLookupByLibrary {
       "Copiado correctamente",
     ),
     "core": MessageLookupByLibrary.simpleMessage("Núcleo"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Arquitectura"),
     "coreBlockedByPolicyTip": m2,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Smart App Control de Windows bloqueó ReClashCore.exe porque no está firmado. Abre Seguridad de Windows → Control de aplicaciones y navegador → Configuración de Smart App Control, elige Desactivado y vuelve a iniciar ReClash. Smart App Control no se puede volver a activar sin reinstalar Windows.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage(
+      "Etiquetas de compilación",
+    ),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage(
+      "Hora de compilación",
+    ),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Entorno"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage(
+      "Ejecutable del Core",
+    ),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "No se pudo leer la información del Core",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Modo de ejecución"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Ubicación"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Proceso mediante Helper",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Biblioteca en el proceso",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage(
+      "Proceso independiente",
+    ),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Abrir configuración en tiempo de ejecución",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Plataforma"),
+    "coreRunning": MessageLookupByLibrary.simpleMessage("En ejecución"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Configuración en tiempo de ejecución",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Configuración generada tras aplicar los ajustes y scripts. Solo lectura.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo leer la configuración en tiempo de ejecución",
+    ),
+    "coreStarting": MessageLookupByLibrary.simpleMessage("Iniciando…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Estado del núcleo"),
+    "coreStopped": MessageLookupByLibrary.simpleMessage("Detenido"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Directorio de datos",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Región"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Fallo detectado"),
     "crashDetectedTip": m3,

@@ -180,6 +180,7 @@ func acknowledged(run func()) methodHandler {
 var methodHandlers = map[CoreMethod]methodHandler{
 	initClashMethod:                withArguments(handleInitClash),
 	getIsInitMethod:                withoutArguments(handleGetIsInit),
+	getCoreInfoMethod:              withoutArguments(handleGetCoreInfo),
 	forceGcMethod:                  acknowledged(handleForceGC),
 	shutdownMethod:                 withoutArguments(func() bool { result := handleShutdown(); cancelSubscriptionFetches(); return result }),
 	startListenerMethod:            withoutArguments(handleStartListener),

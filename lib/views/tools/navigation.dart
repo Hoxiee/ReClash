@@ -25,6 +25,7 @@ import 'package:reclash/views/logs.dart';
 import 'package:reclash/views/region.dart';
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/views/theme.dart';
+import 'package:reclash/views/tools/core.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -55,6 +56,8 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   LogsView() => ToolPage.logs,
   AddedRulesView() => ToolPage.rules,
   ScriptsView() => ToolPage.scripts,
+  CoreDetailView() => ToolPage.coreDetails,
+  CoreRuntimeConfigView() => ToolPage.coreRuntimeConfig,
   _ => null,
 };
 
@@ -86,4 +89,6 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.logs => const LogsView(),
   ToolPage.rules => const AddedRulesView(),
   ToolPage.scripts => const ScriptsView(),
+  ToolPage.coreDetails => const CoreDetailView(),
+  ToolPage.coreRuntimeConfig => const CoreRuntimeConfigView(),
 };

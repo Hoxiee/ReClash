@@ -1,0 +1,22 @@
+{
+  "coreRunning": "Ishlamoqda",
+  "coreStarting": "Ishga tushmoqda…",
+  "coreStopped": "Toʻxtatilgan",
+  "coreBuildTime": "Yigʻilgan vaqt",
+  "coreEnvironment": "Muhit",
+  "coreLocation": "Joylashuv",
+  "corePlatform": "Platforma",
+  "coreArchitecture": "Arxitektura",
+  "coreBuildTags": "Yigʻish bayroqlari",
+  "coreLaunchMode": "Ishga tushirish usuli",
+  "coreModeLibrary": "Jarayon ichidagi kutubxona",
+  "coreModeProcess": "Alohida jarayon",
+  "coreModeHelper": "Helper orqali jarayon",
+  "coreWorkingDirectory": "Maʼlumotlar katalogi",
+  "coreExecutable": "Yadro fayli",
+  "coreInfoUnavailable": "Yadro maʼlumotlarini olib boʻlmadi",
+  "coreRuntimeConfig": "Ishlash konfiguratsiyasi",
+  "coreOpenRuntimeConfig": "Ishlash konfiguratsiyasini ochish",
+  "coreRuntimeConfigDescription": "Sozlamalar va skriptlardan keyingi yakuniy konfiguratsiya. Faqat oʻqish uchun.",
+  "coreRuntimeConfigReadFailed": "Ishlash konfiguratsiyasini oʻqib boʻlmadi"
+}
