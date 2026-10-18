@@ -39,6 +39,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
+  updateChannel: updateChannelFromJson(json['updateChannel']),
   sidebarExpanded:
       _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? true,
   acceptedDisclaimerVersion:
@@ -107,6 +108,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'autoCheckUpdate': instance.autoCheckUpdate,
+      'updateChannel': _$UpdateChannelEnumMap[instance.updateChannel],
       'sidebarExpanded': instance.sidebarExpanded,
       'acceptedDisclaimerVersion': instance.acceptedDisclaimerVersion,
       'minimizeOnExit': instance.minimizeOnExit,
@@ -155,6 +157,11 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.connectionStats: 'connectionStats',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
+};
+
+const _$UpdateChannelEnumMap = {
+  UpdateChannel.release: 'release',
+  UpdateChannel.pre: 'pre',
 };
 
 _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>

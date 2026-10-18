@@ -37,6 +37,8 @@ const desktopPlatforms = [
   SupportPlatform.Windows,
 ];
 
+enum UpdateChannel { release, pre }
+
 enum GroupName { GLOBAL }
 
 enum GroupType {

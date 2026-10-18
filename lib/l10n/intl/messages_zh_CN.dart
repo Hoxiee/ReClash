@@ -196,11 +196,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "累计 ${value}";
 
-  static String m82(label) => "${label}必须为URL";
+  static String m82(version) => "已安装版本：${version}";
 
-  static String m83(count) => "${count} 年前";
+  static String m83(label) => "${label}必须为URL";
 
   static String m84(count) => "${count} 年前";
+
+  static String m85(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -576,6 +578,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("完成"),
     "download": MessageLookupByLibrary.simpleMessage("下载"),
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage("下行带宽"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage("正在下载更新"),
     "duration": MessageLookupByLibrary.simpleMessage("时长"),
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("编辑仪表盘"),
@@ -754,6 +757,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "initiatorShort": MessageLookupByLibrary.simpleMessage("发起"),
     "inputProxyGroupName": MessageLookupByLibrary.simpleMessage("输入策略组名称"),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage("输入规则内容"),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("安装更新"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "读取应用列表权限已被拒绝，无法获取已安装的应用。请前往系统设置手动开启。",
@@ -1487,10 +1491,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("更新通道"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("预发布版"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage("正式版"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新。"),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序。"),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage("当前已是最新版本。"),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("更新内容"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage("暂无发布说明。"),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "请允许 ReClash 安装来自此来源的应用，然后返回继续。",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "查看完整发布说明",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("显示所有更改"),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage("无法验证下载更新的完整性。"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1514,8 +1536,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

@@ -1,0 +1,18 @@
+{
+  "updateChannel": "Täzelenme kanaly",
+  "updateChannelRelease": "Durnukly reliz",
+  "updateChannelPre": "Deslapky reliz",
+  "updateNoUpdates": "Sizde eýýäm iň täze wersiýa bar.",
+  "updateCheckFailed": "Täzelenmeleri barlap bolmady.",
+  "updateDownloadFailed": "Täzelenmäni ýükläp bolmady.",
+  "updateVerifyFailed": "Ýüklenen täzelenmäniň bitewüligini barlap bolmady.",
+  "updateInstallFailed": "Bukja gurnaýjysyny başlap bolmady.",
+  "updatePermissionRequired": "ReClash-a şu çeşmeden programmalar gurnamaga rugsat beriň we dowam etmek üçin gaýdyp geliň.",
+  "installUpdate": "Täzelenmäni gurnamak",
+  "downloadingUpdate": "Täzelenme ýüklenýär",
+  "updateNotesHeading": "Näme täzelik",
+  "updateNotesUnavailable": "Reliz bellikleri ýok.",
+  "updateSeeFullReleaseNotes": "Doly reliz belliklerini gör",
+  "updateShowAllNotes": "Ähli üýtgeşmeleri görkez",
+  "updateInstalledVersion": "Gurnalan wersiýa: {version}"
+}

@@ -222,12 +222,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Jemi ${value}";
 
-  static String m82(label) => "${label} URL bolmaly";
+  static String m82(version) => "Gurnalan wersiýa: ${version}";
 
-  static String m83(count) =>
+  static String m83(label) => "${label} URL bolmaly";
+
+  static String m84(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m84(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m85(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -769,6 +771,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Göçürme kuwwaty",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme ýüklenýär",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Möhlet"),
     "edit": MessageLookupByLibrary.simpleMessage("Düzet"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("Paneli düzet"),
@@ -1008,6 +1013,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Düzgüniň mazmunyny giriziň",
+    ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmäni gurnamak",
     ),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
@@ -2002,10 +2010,44 @@ class MessageLookup extends MessageLookupByLibrary {
       "Penjireni berkitmegi aýyr",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Täzele"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("Täzelenme kanaly"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("Deslapky reliz"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
+      "Durnukly reliz",
+    ),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmeleri barlap bolmady.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmäni ýükläp bolmady.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Bukja gurnaýjysyny başlap bolmady.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "Sizde eýýäm iň täze wersiýa bar.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Näme täzelik"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Reliz bellikleri ýok.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "ReClash-a şu çeşmeden programmalar gurnamaga rugsat beriň we dowam etmek üçin gaýdyp geliň.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "Doly reliz belliklerini gör",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Ähli üýtgeşmeleri görkez",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "Ýüklenen täzelenmäniň bitewüligini barlap bolmady.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Ýükle"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Ýükleme kuwwaty"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -2033,8 +2075,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

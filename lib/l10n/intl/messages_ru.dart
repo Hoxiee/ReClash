@@ -222,12 +222,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Всего ${value}";
 
-  static String m82(label) => "Значение «${label}» должно быть URL";
+  static String m82(version) => "Установлена версия ${version}";
 
-  static String m83(count) =>
-      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+  static String m83(label) => "Значение «${label}» должно быть URL";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+
+  static String m85(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -772,6 +774,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Скорость загрузки",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Загрузка обновления",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Длительность"),
     "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("Изменить панель"),
@@ -1011,6 +1016,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Введите содержимое правила",
+    ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage(
+      "Установить обновление",
     ),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
@@ -2021,10 +2029,42 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Без названия"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Открепить окно"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("Канал обновлений"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("Предрелиз"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage("Релиз"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось проверить обновления.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить обновление.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось запустить установщик пакетов.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "У вас уже установлена последняя версия.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Что нового"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Описание изменений не опубликовано.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Разрешите ReClash устанавливать приложения из этого источника и вернитесь, чтобы продолжить.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "Все примечания к релизу",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Показать все изменения",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось проверить целостность загруженного обновления.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2058,8 +2098,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

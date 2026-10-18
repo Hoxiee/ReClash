@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
@@ -132,6 +133,73 @@ void main() {
 
     test('handles missing minor/patch', () {
       expect(compareVersions('1', '1.0.0'), 0);
+    });
+
+    test('orders prerelease identifiers by SemVer rules', () {
+      expect(compareVersions('1.0.0-pre.10', '1.0.0-pre.2'), greaterThan(0));
+      expect(compareVersions('1.0.0', '1.0.0-pre.10'), greaterThan(0));
+      expect(compareVersions('1.0.0-alpha', '1.0.0-1'), greaterThan(0));
+    });
+
+    test('rejects invalid versions', () {
+      expect(
+        () => compareVersions('1.0.0-pre.01', '1.0.0'),
+        throwsFormatException,
+      );
+    });
+
+    test(
+      'defaults the update channel from the build and honors saved choices',
+      () {
+        expect(defaultUpdateChannel(isPreBuild: true), UpdateChannel.pre);
+        expect(defaultUpdateChannel(isPreBuild: false), UpdateChannel.release);
+        expect(
+          effectiveUpdateChannel(
+            configured: UpdateChannel.release,
+            isPreBuild: true,
+          ),
+          UpdateChannel.release,
+        );
+      },
+    );
+
+    test('release selection filters channels and sorts prereleases', () {
+      final prerelease = {'tag_name': 'v0.2.0-pre.10', 'prerelease': true};
+      final lowerPrerelease = {'tag_name': 'v0.2.0-pre.2', 'prerelease': true};
+      final stable = {'tag_name': 'v0.2.0', 'prerelease': false};
+      expect(
+        selectUpdateRelease(
+          [prerelease, lowerPrerelease],
+          installedVersion: '0.1.0',
+          channel: UpdateChannel.release,
+        ),
+        isNull,
+      );
+      expect(
+        selectUpdateRelease(
+          [lowerPrerelease, prerelease],
+          installedVersion: '0.1.0',
+          channel: UpdateChannel.pre,
+        ),
+        same(prerelease),
+      );
+      expect(
+        selectUpdateRelease(
+          [prerelease, stable],
+          installedVersion: '0.1.0-pre.1',
+          channel: UpdateChannel.pre,
+        ),
+        same(stable),
+      );
+      final legacyTag = {'tag_name': 'v0.9.1-pre.3', 'prerelease': true};
+      expect(
+        selectUpdateRelease(
+          [legacyTag],
+          installedVersion: '0.1.0-pre.1',
+          channel: UpdateChannel.pre,
+        ),
+        same(legacyTag),
+      );
     });
   });
 

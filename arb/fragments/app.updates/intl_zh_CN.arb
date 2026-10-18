@@ -1,0 +1,18 @@
+{
+  "updateChannel": "更新通道",
+  "updateChannelRelease": "正式版",
+  "updateChannelPre": "预发布版",
+  "updateNoUpdates": "当前已是最新版本。",
+  "updateCheckFailed": "无法检查更新。",
+  "updateDownloadFailed": "无法下载更新。",
+  "updateVerifyFailed": "无法验证下载更新的完整性。",
+  "updateInstallFailed": "无法启动软件包安装程序。",
+  "updatePermissionRequired": "请允许 ReClash 安装来自此来源的应用，然后返回继续。",
+  "installUpdate": "安装更新",
+  "downloadingUpdate": "正在下载更新",
+  "updateNotesHeading": "更新内容",
+  "updateNotesUnavailable": "暂无发布说明。",
+  "updateSeeFullReleaseNotes": "查看完整发布说明",
+  "updateShowAllNotes": "显示所有更改",
+  "updateInstalledVersion": "已安装版本：{version}"
+}

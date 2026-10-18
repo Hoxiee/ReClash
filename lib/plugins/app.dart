@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 
 const _platformProbeTimeout = Duration(seconds: 2);
 
+enum ApkInstallResult { started, permissionRequired }
+
 class App {
   static App? _instance;
   late MethodChannel methodChannel;
@@ -154,6 +156,32 @@ class App {
   Future<bool?> openAppSettings() async {
     if (!Platform.isAndroid) return false;
     return methodChannel.invokeMethod<bool>('openAppSettings');
+  }
+
+  Future<bool> canRequestPackageInstalls() async {
+    if (!Platform.isAndroid) return false;
+    return await methodChannel.invokeMethod<bool>(
+          'canRequestPackageInstalls',
+        ) ??
+        false;
+  }
+
+  Future<ApkInstallResult> installApk(
+    String path, {
+    required String expectedVersion,
+  }) async {
+    final result = await methodChannel.invokeMethod<String>('installApk', {
+      'path': path,
+      'version': expectedVersion,
+    });
+    return switch (result) {
+      'started' => ApkInstallResult.started,
+      'permissionRequired' => ApkInstallResult.permissionRequired,
+      _ => throw PlatformException(
+        code: 'INVALID_INSTALL_RESULT',
+        message: 'Android returned an invalid APK install result',
+      ),
+    };
   }
 
   Future<AppExitInfo?> getLastExitInfo() async {

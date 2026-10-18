@@ -4,22 +4,63 @@ part of '../action.dart';
 class CommonAction extends _$CommonAction {
   CoreController get _core => ref.read(coreHandlerProvider);
   bool _isUpdatingTraffic = false;
+  int _toggleRequestRevision = 0;
+  bool? _pendingToggleRunning;
 
   @override
   void build() {}
 
   void toggleRunning() {
-    final running = !ref.read(isStartProvider);
+    if (ref.read(isStartProvider) && ref.read(suspendProvider)) {
+      unawaited(ref.read(onDemandOverrideProvider.notifier).setPaused(false));
+      return;
+    }
     unawaited(
-      globalState.safeRun(
-        () => ref
-            .read(setupActionProvider.notifier)
-            .setRunning(
-              running,
-              initialize: running && !ref.read(initProvider),
-            ),
-      ),
+      setRunning(!(_pendingToggleRunning ?? ref.read(isStartProvider))),
     );
+  }
+
+  Future<void> setRunning(bool running) async {
+    _pendingToggleRunning = running;
+    final requestRevision = ++_toggleRequestRevision;
+    if (!running &&
+        system.isDesktop &&
+        ref.read(coreStatusProvider) == CoreStatus.connecting) {
+      unawaited(ref.read(coreActionProvider.notifier).cancelCoreStart());
+    }
+    final setupAction = ref.read(setupActionProvider.notifier);
+    final runIntentRevision = setupAction.runIntentRevision;
+    await globalState.safeRun(() async {
+      try {
+        if (running && ref.read(coreStatusProvider) != CoreStatus.connected) {
+          final started = await ref
+              .read(coreActionProvider.notifier)
+              .startCore(allowPrompt: true);
+          if (!started ||
+              requestRevision != _toggleRequestRevision ||
+              setupAction.runIntentRevision != runIntentRevision) {
+            return;
+          }
+        }
+        if (requestRevision != _toggleRequestRevision) return;
+        final initialize = running && !ref.read(initProvider);
+        final applied = await setupAction.setRunning(
+          running,
+          initialize: initialize,
+          allowPrompt: running,
+        );
+        if (applied &&
+            running &&
+            initialize &&
+            requestRevision == _toggleRequestRevision) {
+          ref.read(initProvider.notifier).value = true;
+        }
+      } finally {
+        if (requestRevision == _toggleRequestRevision) {
+          _pendingToggleRunning = null;
+        }
+      }
+    });
   }
 
   void updateSpeedStatistics() {
@@ -38,12 +79,11 @@ class CommonAction extends _$CommonAction {
   }
 
   void updateMode() {
-    ref.read(patchClashConfigProvider.notifier).update((state) {
-      final index = Mode.values.indexWhere((item) => item == state.mode);
-      if (index == -1) return state;
-      final nextIndex = index + 1 > Mode.values.length - 1 ? 0 : index + 1;
-      return state.copyWith(mode: Mode.values[nextIndex]);
-    });
+    final mode = ref.read(effectiveModeProvider);
+    final modes = ref.read(availableModesProvider);
+    ref
+        .read(setupActionProvider.notifier)
+        .changeMode(modes[(modes.indexOf(mode) + 1) % modes.length]);
   }
 
   Future<void> updateTraffic() async {
@@ -82,111 +122,36 @@ class CommonAction extends _$CommonAction {
     }
   }
 
-  Future<void> checkForUpdates() async {
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final result = await globalState.loadingRun(
-      () async => (release: await request.checkForUpdate()),
-      title: currentAppLocalizations.checkUpdate,
-      tag: LoadingTag.checkUpdate,
-    );
-    if (result == null || !ref.mounted) return;
-    await checkUpdateResultHandle(data: result.release, isUser: true);
+  /// Opens the sheet on [context]'s navigator, the root's when the check
+  /// starts with no page behind it, and completes with the check itself.
+  Future<void> checkForUpdates([BuildContext? context]) async {
+    final checking = ref.read(appUpdateActionProvider.notifier).check();
+    final origin = context ?? globalState.navigatorKey.currentContext;
+    if (origin != null && origin.mounted) {
+      unawaited(UpdateSheet.show(origin));
+    }
+    await checking;
   }
 
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
-    final Map<String, dynamic>? res;
-    try {
-      res = await request.checkForUpdate();
-    } catch (error) {
-      commonPrint.log(
-        'checkForUpdate failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
-      return false;
-    }
-    await checkUpdateResultHandle(data: res);
-    return res != null;
-  }
-
-  TextSpan _releaseSpan(BuildContext context, String tagName, String? body) {
-    final version = parseReleaseChangelog(body);
-    return TextSpan(
-      text: '$tagName \n',
-      style: AppTextStyle.title2.of(context),
-      children: version == null
-          ? [
-              TextSpan(text: '\n', style: AppTextStyle.subheadline.of(context)),
-              for (final submit in parseReleaseBody(body))
-                TextSpan(
-                  text: '- $submit \n',
-                  style: AppTextStyle.subheadline.of(context),
-                ),
-            ]
-          : _changelogSpans(context, version),
-    );
-  }
-
-  List<TextSpan> _changelogSpans(
-    BuildContext context,
-    ChangelogVersion version,
-  ) {
-    return [
-      for (final group in version.visibleGroups) ...[
-        TextSpan(
-          text:
-              '\n${changelogGroupTitle(currentAppLocalizations, group.type)}\n',
-          style: AppTextStyle.subheadline
-              .of(context, emphasized: true)
-              .copyWith(
-                color: group.type == ChangelogType.breaking
-                    ? context.colorScheme.error
-                    : context.colorScheme.primary,
-              ),
-        ),
-        for (final entry in group.entries)
-          TextSpan(
-            text: '• ${entry.text}\n',
-            style: AppTextStyle.subheadline.of(context),
-          ),
-      ],
-    ];
+    await ref.read(appUpdateActionProvider.notifier).check(automatic: true);
+    return ref.read(appUpdateActionProvider).hasUpdate;
   }
 
   Future<void> checkUpdateResultHandle({
-    Map<String, dynamic>? data,
+    AppUpdateRelease? data,
     bool isUser = false,
   }) async {
-    if (data != null) {
-      final context = globalState.navigatorKey.currentContext!;
-      final res = await dialogs.showMessage(
-        title: currentAppLocalizations.discoverNewVersion,
-        message: _releaseSpan(
-          context,
-          data['tag_name'] as String,
-          data['body'] as String?,
-        ),
-        confirmText: currentAppLocalizations.goDownload,
-        cancelText: isUser ? null : currentAppLocalizations.noLongerRemind,
-      );
-      if (res == true) {
-        unawaited(
-          launchUrl(
-            Uri.parse('https://github.com/$repository/releases/latest'),
-          ),
-        );
-      } else if (!isUser && res == false) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(autoCheckUpdate: false));
-      }
-    } else if (isUser) {
-      unawaited(
-        dialogs.showAlert(
-          title: currentAppLocalizations.checkUpdate,
-          message: TextSpan(text: currentAppLocalizations.checkUpdateError),
-        ),
-      );
+    final action = ref.read(appUpdateActionProvider.notifier);
+    if (data == null) {
+      if (!isUser) return;
+      action.noUpdates();
+    } else {
+      await action.offer(data, automatic: !isUser);
     }
+    if (!isUser) return;
+    final context = globalState.navigatorKey.currentContext;
+    if (context != null && context.mounted) await UpdateSheet.show(context);
   }
 }

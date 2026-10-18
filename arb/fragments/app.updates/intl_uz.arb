@@ -1,0 +1,18 @@
+{
+  "updateChannel": "Yangilanish kanali",
+  "updateChannelRelease": "Barqaror reliz",
+  "updateChannelPre": "Dastlabki reliz",
+  "updateNoUpdates": "Sizda allaqachon eng yangi versiya o‘rnatilgan.",
+  "updateCheckFailed": "Yangilanishlarni tekshirib bo‘lmadi.",
+  "updateDownloadFailed": "Yangilanishni yuklab bo‘lmadi.",
+  "updateVerifyFailed": "Yuklab olingan yangilanish yaxlitligini tekshirib bo‘lmadi.",
+  "updateInstallFailed": "Paket o‘rnatuvchisini ishga tushirib bo‘lmadi.",
+  "updatePermissionRequired": "ReClash’ga ushbu manbadan ilovalarni o‘rnatishga ruxsat bering va davom etish uchun qayting.",
+  "installUpdate": "Yangilanishni o‘rnatish",
+  "downloadingUpdate": "Yangilanish yuklanmoqda",
+  "updateNotesHeading": "Nimalar yangilandi",
+  "updateNotesUnavailable": "Reliz qaydlari mavjud emas.",
+  "updateSeeFullReleaseNotes": "To‘liq reliz qaydlarini ko‘rish",
+  "updateShowAllNotes": "Barcha oʻzgarishlarni koʻrsatish",
+  "updateInstalledVersion": "Oʻrnatilgan versiya: {version}"
+}

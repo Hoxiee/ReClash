@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/update.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/views/config/on_demand.dart';
@@ -74,6 +77,11 @@ class ApplicationSettings {
       id: 'application.autoCheckUpdate',
       page: ToolPage.application,
       title: (l) => l.autoCheckUpdate,
+    ),
+    SettingSpec(
+      id: 'application.updateChannel',
+      page: ToolPage.application,
+      title: (l) => l.updateChannel,
     ),
     SettingSpec(
       id: 'application.openLogs',
@@ -178,6 +186,25 @@ class ApplicationSettingView extends ConsumerWidget {
         select: (s) => s.autoCheckUpdate,
         update: (s, v) => s.copyWith(autoCheckUpdate: v),
       ),
+      SettingTarget(
+        spec: ApplicationSettings.spec('application.updateChannel'),
+        child: ListItem<UpdateChannel>.options(
+          title: Text(l.updateChannel),
+          options: UpdateChannel.values,
+          value: effectiveUpdateChannel(
+            configured: ref.watch(
+              appSettingProvider.select((state) => state.updateChannel),
+            ),
+            isPreBuild: globalState.isPre,
+          ),
+          textBuilder: (value) => value == UpdateChannel.release
+              ? l.updateChannelRelease
+              : l.updateChannelPre,
+          onChanged: (value) => ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(updateChannel: value)),
+        ),
+      ),
       _toggle(
         id: 'application.openLogs',
         select: (s) => s.openLogs,
@@ -209,12 +236,12 @@ class ApplicationSettingView extends ConsumerWidget {
               ),
               generateSection(
                 title: l.requestsAndUpdates,
-                items: appOptions.skip(3).take(2),
+                items: appOptions.skip(3).take(3),
                 footer: l.checkCertificateDesc,
               ),
               generateSection(
                 title: l.logsAndDiagnostics,
-                items: appOptions.skip(5),
+                items: appOptions.skip(6),
                 footer: [l.logcatDesc].join('\n'),
               ),
             ],

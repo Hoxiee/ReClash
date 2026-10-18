@@ -1,0 +1,25 @@
+{
+  "updateChannel": "Update channel",
+  "updateChannelRelease": "Release",
+  "updateChannelPre": "Pre-release",
+  "updateNoUpdates": "You're already using the latest version.",
+  "updateCheckFailed": "Couldn't check for updates.",
+  "updateDownloadFailed": "Couldn't download the update.",
+  "updateVerifyFailed": "The downloaded update failed integrity verification.",
+  "updateInstallFailed": "Couldn't start the package installer.",
+  "updatePermissionRequired": "Allow ReClash to install apps from this source, then return to continue.",
+  "installUpdate": "Install update",
+  "downloadingUpdate": "Downloading update",
+  "updateNotesHeading": "What's new",
+  "updateNotesUnavailable": "No release notes are available.",
+  "updateSeeFullReleaseNotes": "See full release notes",
+  "updateShowAllNotes": "Show all changes",
+  "updateInstalledVersion": "Installed: {version}",
+  "@updateInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
+}

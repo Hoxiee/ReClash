@@ -1,0 +1,18 @@
+{
+  "updateChannel": "Canal de actualización",
+  "updateChannelRelease": "Versión estable",
+  "updateChannelPre": "Versión preliminar",
+  "updateNoUpdates": "Ya tienes la versión más reciente.",
+  "updateCheckFailed": "No se pudieron buscar actualizaciones.",
+  "updateDownloadFailed": "No se pudo descargar la actualización.",
+  "updateVerifyFailed": "No se pudo verificar la integridad de la actualización descargada.",
+  "updateInstallFailed": "No se pudo iniciar el instalador de paquetes.",
+  "updatePermissionRequired": "Permite que ReClash instale aplicaciones desde esta fuente y vuelve para continuar.",
+  "installUpdate": "Instalar actualización",
+  "downloadingUpdate": "Descargando actualización",
+  "updateNotesHeading": "Novedades",
+  "updateNotesUnavailable": "No hay notas de la versión disponibles.",
+  "updateSeeFullReleaseNotes": "Ver todas las notas de la versión",
+  "updateShowAllNotes": "Mostrar todos los cambios",
+  "updateInstalledVersion": "Versión instalada: {version}"
+}

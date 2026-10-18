@@ -201,11 +201,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "합계 ${value}";
 
-  static String m82(label) => "${label}은(는) URL이어야 합니다";
+  static String m82(version) => "설치된 버전: ${version}";
 
-  static String m83(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m83(label) => "${label}은(는) URL이어야 합니다";
 
   static String m84(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m85(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -619,6 +621,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "done": MessageLookupByLibrary.simpleMessage("완료"),
     "download": MessageLookupByLibrary.simpleMessage("다운로드"),
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage("다운로드 대역폭"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage("업데이트 다운로드 중"),
     "duration": MessageLookupByLibrary.simpleMessage("소요 시간"),
     "edit": MessageLookupByLibrary.simpleMessage("편집"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("대시보드 편집"),
@@ -815,6 +818,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "프록시 그룹 이름을 입력하세요",
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage("규칙 내용을 입력하세요"),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("업데이트 설치"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "앱 목록 권한이 거부되어 설치된 앱을 표시할 수 없습니다. 시스템 설정에서 직접 허용해 주세요.",
@@ -1622,10 +1626,40 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("이름 없음"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("창 고정 해제"),
     "update": MessageLookupByLibrary.simpleMessage("업데이트"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("업데이트 채널"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("사전 릴리스"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage("정식 릴리스"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "업데이트를 확인할 수 없습니다.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "업데이트를 다운로드할 수 없습니다.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "패키지 설치 프로그램을 시작할 수 없습니다.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "이미 최신 버전을 사용 중입니다.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("새로운 기능"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "릴리스 노트가 없습니다.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 이 출처의 앱을 설치하도록 허용한 다음 돌아와 계속하세요.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "전체 릴리스 노트 보기",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("모든 변경 사항 보기"),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "다운로드한 업데이트의 무결성을 확인할 수 없습니다.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1649,8 +1683,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

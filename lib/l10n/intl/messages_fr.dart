@@ -233,12 +233,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Total ${value}";
 
-  static String m82(label) => "${label} doit être une URL";
+  static String m82(version) => "Version installée : ${version}";
 
-  static String m83(count) =>
-      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+  static String m83(label) => "${label} doit être une URL";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+
+  static String m85(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -789,6 +791,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Bande passante de réception",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Téléchargement de la mise à jour",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Durée"),
     "edit": MessageLookupByLibrary.simpleMessage("Modifier"),
     "editDashboard": MessageLookupByLibrary.simpleMessage(
@@ -1040,6 +1045,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Saisissez le contenu de la règle",
+    ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage(
+      "Installer la mise à jour",
     ),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
@@ -2068,12 +2076,48 @@ class MessageLookup extends MessageLookupByLibrary {
       "Désépingler la fenêtre",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Mettre à jour"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage(
+      "Canal de mise à jour",
+    ),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("Préversion"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
+      "Version stable",
+    ),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de rechercher des mises à jour.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de télécharger la mise à jour.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de démarrer l’installateur de paquets.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "Vous utilisez déjà la dernière version.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Nouveautés"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Aucune note de version disponible.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Autorisez ReClash à installer des applications depuis cette source, puis revenez pour continuer.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "Voir toutes les notes de version",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Afficher toutes les modifications",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "L’intégrité de la mise à jour téléchargée n’a pas pu être vérifiée.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Envoi"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Bande passante d’envoi",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -2103,8 +2147,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

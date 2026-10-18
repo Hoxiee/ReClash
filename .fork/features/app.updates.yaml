@@ -1,0 +1,19 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  channels: Release excludes prereleases; Pre includes eligible stable and prerelease updates, with build-aware defaults.
+  outcomes: Manual checks distinguish no update from request failures.
+  installation: Android installs only a checksum-verified app asset and retains pending permission state.
+  recovery: Pending permission installs resume from bootstrap without downloading the APK again.
+  cleanup: Update cleanup never deletes the APK named by a pending installation.
+  notes: Release notes preserve warnings and complete Markdown blocks, expand in place, and keep update actions reachable.
+  localization: All update labels and installer errors are owned by feature ARB fragments.
+watch: [lib/common/request.dart, lib/common/package.dart, lib/common/update.dart, lib/common/app_update.dart, lib/providers/actions/common.dart, lib/providers/actions/app_update.dart, lib/providers/action.dart, lib/state.dart, lib/bootstrap.dart, lib/common/common.dart, lib/models/config.dart, lib/views/application_setting.dart, lib/widgets/update_offer_dialog.dart, lib/widgets/release_notes.dart, lib/plugins/app.dart, android/app/src/main/kotlin/com/reclash/plugins/AppPlugin.kt, android/app/src/main/AndroidManifest.xml, android/app/src/main/res/xml/file_paths.xml, 'arb/fragments/app.updates/**', test/common/helpers_test.dart, test/common/request_test.dart, test/common/app_update_test.dart, test/models/config_test.dart, test/widgets/update_dialog_test.dart, test/views/application_setting_test.dart, test/widgets/uncovered_views_test.dart]
+checks:
+  releases: [channels, outcomes]
+  config: [channels]
+  android-build: [installation, cleanup, recovery]
+  localization: [localization]
+  tests: [notes, outcomes, installation, recovery]

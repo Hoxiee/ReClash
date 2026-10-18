@@ -224,12 +224,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Total ${value}";
 
-  static String m82(label) => "${label} must be a URL";
+  static String m82(version) => "Installed: ${version}";
 
-  static String m83(count) =>
+  static String m83(label) => "${label} must be a URL";
+
+  static String m84(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m84(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m85(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -745,6 +747,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Download bandwidth",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Downloading update",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Duration"),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("Edit dashboard"),
@@ -975,6 +980,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Enter the rule content",
     ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
@@ -1924,10 +1930,42 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("Update channel"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("Pre-release"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage("Release"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t check for updates.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t download the update.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t start the package installer.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "You\'re already using the latest version.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("What\'s new"),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "No release notes are available.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Allow ReClash to install apps from this source, then return to continue.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "See full release notes",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Show all changes",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "The downloaded update failed integrity verification.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -1953,8 +1991,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

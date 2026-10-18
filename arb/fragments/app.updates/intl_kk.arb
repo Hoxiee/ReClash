@@ -1,0 +1,18 @@
+{
+  "updateChannel": "Жаңарту арнасы",
+  "updateChannelRelease": "Тұрақты релиз",
+  "updateChannelPre": "Алдын ала шығарылым",
+  "updateNoUpdates": "Сізде соңғы нұсқа орнатылған.",
+  "updateCheckFailed": "Жаңартуларды тексеру мүмкін болмады.",
+  "updateDownloadFailed": "Жаңартуды жүктеу мүмкін болмады.",
+  "updateVerifyFailed": "Жүктелген жаңартудың тұтастығын тексеру мүмкін болмады.",
+  "updateInstallFailed": "Пакет орнатқышын іске қосу мүмкін болмады.",
+  "updatePermissionRequired": "ReClash қолданбасына осы көзден қолданбалар орнатуға рұқсат беріп, жалғастыру үшін қайта оралыңыз.",
+  "installUpdate": "Жаңартуды орнату",
+  "downloadingUpdate": "Жаңарту жүктелуде",
+  "updateNotesHeading": "Не жаңалық",
+  "updateNotesUnavailable": "Релиз ескертпелері қолжетімсіз.",
+  "updateSeeFullReleaseNotes": "Толық релиз ескертпелерін көру",
+  "updateShowAllNotes": "Барлық өзгерістерді көрсету",
+  "updateInstalledVersion": "Орнатылған нұсқа: {version}"
+}

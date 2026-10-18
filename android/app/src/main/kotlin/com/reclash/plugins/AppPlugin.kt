@@ -15,6 +15,7 @@ import android.os.Looper
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -35,6 +36,7 @@ import com.reclash.getPackageIconPath
 import com.reclash.packages.PackageResolver
 import com.reclash.showToast
 import com.google.gson.Gson
+import java.io.File
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -47,6 +49,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+
+private class InvalidUpdateApkException(message: String) : Exception(message)
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -203,6 +207,28 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(openAppSettings())
             }
 
+            "canRequestPackageInstalls" -> {
+                result.success(canRequestPackageInstalls())
+            }
+
+            "installApk" -> {
+                val path = call.argument<String>("path")
+                val version = call.argument<String>("version")
+                if (path.isNullOrEmpty() || version.isNullOrEmpty()) {
+                    result.error("INVALID_ARGUMENT", "APK path and version are required", null)
+                } else {
+                    try {
+                        result.success(installApk(path, version))
+                    } catch (error: InvalidUpdateApkException) {
+                        GlobalState.log("installApk validation failed: $error")
+                        result.error("APK_INVALID", error.message, null)
+                    } catch (error: Exception) {
+                        GlobalState.log("installApk failed: $error")
+                        result.error("APK_INSTALL_FAILED", error.toString(), null)
+                    }
+                }
+            }
+
             "getLastExitInfo" -> reply(result) {
                 GlobalState.lastExitInfo()
             }
@@ -259,6 +285,101 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             QuickAction.STOP -> R.drawable.ic_shortcut_stop
             QuickAction.TOGGLE -> R.drawable.ic_shortcut_toggle
         }
+
+    private fun canRequestPackageInstalls(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+            GlobalState.application.packageManager.canRequestPackageInstalls()
+
+    private fun installApk(path: String, expectedVersion: String): String {
+        val context = GlobalState.application
+        val activity = activity ?: throw IllegalStateException("Activity is unavailable")
+        val updateDirectory = File(context.filesDir, "app-updates").canonicalFile
+        val apkFile = File(path).canonicalFile
+        if (apkFile.parentFile != updateDirectory || !apkFile.isFile) {
+            throw InvalidUpdateApkException("APK path is outside the update directory")
+        }
+        verifyUpdateApk(context, apkFile, expectedVersion)
+        if (!canRequestPackageInstalls()) {
+            activity.startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    "package:${context.packageName}".toUri(),
+                ),
+            )
+            return "permissionRequired"
+        }
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileProvider",
+            apkFile,
+        )
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setDataAndType(uri, "application/vnd.android.package-archive")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        val installers = context.packageManager.queryIntentActivities(
+            intent,
+            PackageManager.MATCH_DEFAULT_ONLY,
+        )
+        for (installer in installers) {
+            context.grantUriPermission(
+                installer.activityInfo.packageName,
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+            )
+        }
+        activity.startActivity(intent)
+        return "started"
+    }
+
+    @Suppress("DEPRECATION")
+    private fun verifyUpdateApk(context: Context, file: File, expectedVersion: String) {
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            PackageManager.GET_SIGNING_CERTIFICATES
+        } else {
+            PackageManager.GET_SIGNATURES
+        }
+        val update = context.packageManager.getPackageArchiveInfo(file.path, flags)
+            ?: throw InvalidUpdateApkException("APK metadata is invalid")
+        val installed = context.packageManager.getPackageInfo(context.packageName, flags)
+        val updateVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            update.longVersionCode
+        } else {
+            update.versionCode.toLong()
+        }
+        val installedVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            installed.longVersionCode
+        } else {
+            installed.versionCode.toLong()
+        }
+        if (update.packageName != context.packageName ||
+            update.versionName?.removePrefix("v") != expectedVersion.removePrefix("v") ||
+            updateVersionCode <= installedVersionCode
+        ) {
+            throw InvalidUpdateApkException("APK package identity or version does not match")
+        }
+        val trusted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val updateSigning = update.signingInfo
+                ?: throw InvalidUpdateApkException("APK signing metadata is missing")
+            val installedSigning = installed.signingInfo
+                ?: throw InvalidUpdateApkException("Installed signing metadata is missing")
+            if (updateSigning.hasMultipleSigners() || installedSigning.hasMultipleSigners()) {
+                updateSigning.apkContentsSigners.map { it.toCharsString() }.toSet() ==
+                    installedSigning.apkContentsSigners.map { it.toCharsString() }.toSet()
+            } else {
+                val installedSigner = installedSigning.apkContentsSigners
+                    .map { it.toCharsString() }.toSet()
+                installedSigner.isNotEmpty() && installedSigner.all { signer ->
+                    updateSigning.signingCertificateHistory.any {
+                        it.toCharsString() == signer
+                    }
+                }
+            }
+        } else {
+            update.signatures?.map { it.toCharsString() }?.toSet() ==
+                installed.signatures?.map { it.toCharsString() }?.toSet()
+        }
+        if (!trusted) throw InvalidUpdateApkException("APK signing certificate does not match")
+    }
 
     private fun openAppSettings(): Boolean {
         val activity = activity ?: return false

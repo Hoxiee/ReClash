@@ -1,0 +1,18 @@
+{
+  "updateChannel": "更新チャンネル",
+  "updateChannelRelease": "リリース",
+  "updateChannelPre": "プレリリース",
+  "updateNoUpdates": "すでに最新バージョンです。",
+  "updateCheckFailed": "更新を確認できませんでした。",
+  "updateDownloadFailed": "更新をダウンロードできませんでした。",
+  "updateVerifyFailed": "ダウンロードした更新の整合性を確認できませんでした。",
+  "updateInstallFailed": "パッケージインストーラーを起動できませんでした。",
+  "updatePermissionRequired": "ReClash にこの提供元からのアプリのインストールを許可してから、戻って続行してください。",
+  "installUpdate": "更新をインストール",
+  "downloadingUpdate": "更新をダウンロード中",
+  "updateNotesHeading": "主な変更点",
+  "updateNotesUnavailable": "リリースノートはありません。",
+  "updateSeeFullReleaseNotes": "リリースノート全文を見る",
+  "updateShowAllNotes": "すべての変更を表示",
+  "updateInstalledVersion": "インストール済み: {version}"
+}

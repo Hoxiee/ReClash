@@ -227,12 +227,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m81(value) => "Jami ${value}";
 
-  static String m82(label) => "${label} URL boʻlishi kerak";
+  static String m82(version) => "Oʻrnatilgan versiya: ${version}";
 
-  static String m83(count) =>
-      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+  static String m83(label) => "${label} URL boʻlishi kerak";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+
+  static String m85(count) =>
       "${Intl.plural(count, other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -777,6 +779,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "downloadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Yuklab olish oʻtkazish qobiliyati",
     ),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish yuklanmoqda",
+    ),
     "duration": MessageLookupByLibrary.simpleMessage("Davomiyligi"),
     "edit": MessageLookupByLibrary.simpleMessage("Tahrirlash"),
     "editDashboard": MessageLookupByLibrary.simpleMessage(
@@ -1032,6 +1037,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Qoida matnini kiriting",
+    ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage(
+      "Yangilanishni o‘rnatish",
     ),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
@@ -2068,12 +2076,48 @@ class MessageLookup extends MessageLookupByLibrary {
       "Oynani doim yuqorida tutishni oʻchirish",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Yangilash"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("Yangilanish kanali"),
+    "updateChannelPre": MessageLookupByLibrary.simpleMessage("Dastlabki reliz"),
+    "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
+      "Barqaror reliz",
+    ),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
+      "Yangilanishlarni tekshirib bo‘lmadi.",
+    ),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Yangilanishni yuklab bo‘lmadi.",
+    ),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
+      "Paket o‘rnatuvchisini ishga tushirib bo‘lmadi.",
+    ),
+    "updateInstalledVersion": m82,
+    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
+      "Sizda allaqachon eng yangi versiya o‘rnatilgan.",
+    ),
+    "updateNotesHeading": MessageLookupByLibrary.simpleMessage(
+      "Nimalar yangilandi",
+    ),
+    "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Reliz qaydlari mavjud emas.",
+    ),
+    "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "ReClash’ga ushbu manbadan ilovalarni o‘rnatishga ruxsat bering va davom etish uchun qayting.",
+    ),
+    "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
+      "To‘liq reliz qaydlarini ko‘rish",
+    ),
+    "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
+      "Barcha oʻzgarishlarni koʻrsatish",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "Yuklab olingan yangilanish yaxlitligini tekshirib bo‘lmadi.",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Yuklab yuborish"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Yuklab yuborish oʻtkazish qobiliyati",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m82,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -2101,8 +2145,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Tizimga yozish tizim soatini ham oʻrnatadi; Android bunga eʼtibor bermaydi.",
     ),
-    "yearsAgo": m83,
-    "yearsAgoShort": m84,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Ha"),
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",
