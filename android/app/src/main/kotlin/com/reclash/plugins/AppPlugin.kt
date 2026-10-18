@@ -177,8 +177,15 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 gson.toJson(packageResolver.installedPackages)
             }
 
-            "getChinaPackageNames" -> reply(result) {
-                gson.toJson(packageResolver.getChinaPackageNames())
+            "getDomesticPackageNames" -> {
+                val regionCode = call.argument<String>("regionCode")
+                if (regionCode.isNullOrBlank()) {
+                    result.error("INVALID_ARGUMENT", "Region code is required", null)
+                } else {
+                    reply(result) {
+                        gson.toJson(packageResolver.getDomesticPackageNames(regionCode))
+                    }
+                }
             }
 
             "isInstalledAppsPermissionGranted" -> reply(result) {

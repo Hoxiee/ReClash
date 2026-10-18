@@ -9,6 +9,100 @@ part of '../state.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(detectedRegion)
+final detectedRegionProvider = DetectedRegionProvider._();
+
+final class DetectedRegionProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<RegionDetectionResult?>,
+          RegionDetectionResult?,
+          FutureOr<RegionDetectionResult?>
+        >
+    with
+        $FutureModifier<RegionDetectionResult?>,
+        $FutureProvider<RegionDetectionResult?> {
+  DetectedRegionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'detectedRegionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$detectedRegionHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<RegionDetectionResult?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<RegionDetectionResult?> create(Ref ref) {
+    return detectedRegion(ref);
+  }
+}
+
+String _$detectedRegionHash() => r'1fb79ec4e3e3c88a3dd1865a6f73ae000b9471e6';
+
+@ProviderFor(regionalNetworkConfig)
+final regionalNetworkConfigProvider = RegionalNetworkConfigProvider._();
+
+final class RegionalNetworkConfigProvider
+    extends
+        $FunctionalProvider<
+          ({List<String> bypassDomain, PatchClashConfig patchConfig}),
+          ({List<String> bypassDomain, PatchClashConfig patchConfig}),
+          ({List<String> bypassDomain, PatchClashConfig patchConfig})
+        >
+    with
+        $Provider<({List<String> bypassDomain, PatchClashConfig patchConfig})> {
+  RegionalNetworkConfigProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'regionalNetworkConfigProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$regionalNetworkConfigHash();
+
+  @$internal
+  @override
+  $ProviderElement<({List<String> bypassDomain, PatchClashConfig patchConfig})>
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  ({List<String> bypassDomain, PatchClashConfig patchConfig}) create(Ref ref) {
+    return regionalNetworkConfig(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    ({List<String> bypassDomain, PatchClashConfig patchConfig}) value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<
+            ({List<String> bypassDomain, PatchClashConfig patchConfig})
+          >(value),
+    );
+  }
+}
+
+String _$regionalNetworkConfigHash() =>
+    r'7406efaf365a1005672fe1fe2a797c3661978f08';
+
 @ProviderFor(updateParams)
 final updateParamsProvider = UpdateParamsProvider._();
 
@@ -138,7 +232,7 @@ final class SetupPatchProvider
   }
 }
 
-String _$setupPatchHash() => r'd09fb41d40ced4cd47c9131fe55e983e35128724';
+String _$setupPatchHash() => r'9818c8f9a04e270c7b9a545e91282e4b85a1f7ce';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -514,7 +608,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'c00e87278b32dd8977ed136aace10dccfe05508d';
+String _$vpnOptionsHash() => r'e305f3aaff2bef3b9f317bec875e453d351cb6e5';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1793,7 +1887,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'76a71ab5da07dca9aeb351282c5c03ab222d0760';
+String _$proxyStateHash() => r'4675bf02e6357535dd1232f7cb65dd113b43b5ee';
 
 /// Watching the delay map instead would drop nodes one probe at a time, and
 /// reading it on any other rebuild would drop them whenever something
@@ -3456,7 +3550,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'eef9f0d2ec0ecb6196c699b1e2c2a73d922f8964';
+String _$setupStateHash() => r'a511dfc7b8efe2348718c313a5085106c899e3e6';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

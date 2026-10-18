@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -10,6 +11,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/views/region.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 
 class ApplicationSettings {
@@ -35,6 +37,11 @@ class ApplicationSettings {
       id: 'application.onDemand',
       page: ToolPage.application,
       title: (l) => l.onDemand,
+    ),
+    SettingSpec(
+      id: 'application.region',
+      page: ToolPage.application,
+      title: (l) => l.appRegion,
     ),
     SettingSpec(
       id: 'application.minimizeOnExit',
@@ -220,6 +227,29 @@ class ApplicationSettingView extends ConsumerWidget {
           ).copyWith(top: context.appBarInset, bottom: 20),
           child: Column(
             children: [
+              generateSection(
+                title: l.regionalAdaptation,
+                items: [
+                  SettingTarget(
+                    spec: ApplicationSettings.spec('application.region'),
+                    child: ListItem.open(
+                      title: Text(l.appRegion),
+                      subtitle: Text(
+                        regionLabel(
+                          l,
+                          ref.watch(
+                            appSettingProvider.select(
+                              (state) => state.regionCode,
+                            ),
+                          ),
+                        ),
+                      ),
+                      widget: const RegionView(),
+                    ),
+                  ),
+                ],
+                footer: l.regionIntro,
+              ),
               generateSection(
                 title: l.startupAndBackground,
                 items: startup,

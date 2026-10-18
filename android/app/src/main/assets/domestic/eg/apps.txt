@@ -1,0 +1,9 @@
+# domestic app id list (layer B, exact match) — region eg
+# VERIFY every id on the Play Store before ship; best-effort scaffold, not curated
+com.cibeg.app
+com.banquemisr.retailapp
+com.nbe.mobile
+com.fawry.plus
+com.vodafone.selfservis.egypt
+com.orange.myorange.eg
+com.etisalat.myetisalat

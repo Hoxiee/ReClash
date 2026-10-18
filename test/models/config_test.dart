@@ -18,6 +18,21 @@ T roundTrip<T>(
 }
 
 void main() {
+  test('region JSON keeps supported codes and rejects unknown values', () {
+    expect(AppSettingProps.fromJson({'regionCode': ' ru '}).regionCode, 'RU');
+    for (final value in [null, '', 'US', 'UNKNOWN', 7]) {
+      expect(
+        AppSettingProps.fromJson({'regionCode': value}).regionCode,
+        isNull,
+      );
+    }
+    const settings = AppSettingProps(
+      regionCode: 'EG',
+      enabledServices: ['netflix'],
+    );
+    expect(roundTrip(settings.toJson, AppSettingProps.fromJson), settings);
+  });
+
   group('GeoResource JSON', () {
     test('exposes mihomo raw config keys', () {
       expect(GeoResource.MMDB.configKey, 'mmdb');
@@ -133,6 +148,7 @@ void main() {
       expect(restored.preventDuplicateProfiles, true);
       expect(restored.autoCheckUpdate, true);
       expect(restored.updateChannel, isNull);
+      expect(restored.regionCode, isNull);
       expect(restored.sidebarExpanded, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
@@ -276,24 +292,32 @@ void main() {
     test('custom values survive round-trip', () {
       const props = AppSettingProps(
         locale: 'zh_CN',
+        regionCode: 'RU',
         onlyStatisticsProxy: true,
         autoLaunch: true,
         closeConnections: false,
         testUrl: 'https://custom.test',
         userAgents: ['CustomUA/1.0'],
         filters: [Filter(label: 'Asia', regex: 'hk`jp')],
+        serviceOrder: ['youtube', 'google'],
+        enabledServices: ['netflix'],
+        disabledServices: ['discord'],
       );
       final restored = roundTrip(
         () => props.toJson(),
         AppSettingProps.fromJson,
       );
       expect(restored.locale, 'zh_CN');
+      expect(restored.regionCode, 'RU');
       expect(restored.onlyStatisticsProxy, true);
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
       expect(restored.testUrl, 'https://custom.test');
       expect(restored.userAgents, ['CustomUA/1.0']);
       expect(restored.filters, [const Filter(label: 'Asia', regex: 'hk`jp')]);
+      expect(restored.serviceOrder, ['youtube', 'google']);
+      expect(restored.enabledServices, ['netflix']);
+      expect(restored.disabledServices, ['discord']);
     });
 
     test('a legacy custom user agent joins the presets', () {

@@ -146,14 +146,6 @@ abstract class ThemeColorsSelectorState with _$ThemeColorsSelectorState {
 }
 
 @freezed
-abstract class SystemProxySelectorState with _$SystemProxySelectorState {
-  const factory SystemProxySelectorState({
-    required bool systemProxy,
-    required List<String> bypassDomain,
-  }) = _SystemProxySelectorState;
-}
-
-@freezed
 abstract class CurrentProfileSelectorState with _$CurrentProfileSelectorState {
   const factory CurrentProfileSelectorState({
     required String label,

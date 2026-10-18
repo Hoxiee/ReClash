@@ -30,21 +30,19 @@ bool _hasSelection(Proxy proxy) => proxy.now?.isNotEmpty ?? false;
 ProxyState proxyState(Ref ref) {
   final suspend = ref.watch(suspendProvider);
   final isStart = ref.watch(runTimeProvider.select((state) => state != null));
-  final systemProxySelector = ref.watch(
-    networkSettingProvider.select(
-      (state) => SystemProxySelectorState(
-        systemProxy: state.systemProxy,
-        bypassDomain: state.bypassDomain,
-      ),
-    ),
+  final systemProxy = ref.watch(
+    networkSettingProvider.select((state) => state.systemProxy),
+  );
+  final bypassDomain = ref.watch(
+    regionalNetworkConfigProvider.select((state) => state.bypassDomain),
   );
   final mixedPort = ref.watch(
     patchClashConfigProvider.select((state) => state.mixedPort),
   );
   return ProxyState(
     isStart: suspend ? false : isStart,
-    systemProxy: systemProxySelector.systemProxy,
-    bassDomain: systemProxySelector.bypassDomain,
+    systemProxy: systemProxy,
+    bassDomain: bypassDomain,
     port: mixedPort,
   );
 }

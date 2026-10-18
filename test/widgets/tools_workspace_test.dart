@@ -13,6 +13,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/region.dart';
 import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/views/tools/search.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
@@ -66,6 +67,7 @@ void main() {
               ],
             ),
           ),
+        detectedRegionProvider.overrideWith((ref) async => null),
         profilesProvider.overrideWith(TestProfiles.new),
         scriptsProvider.overrideWith(TestScripts.new),
         globalRulesProvider.overrideWith(TestGlobalRules.new),
@@ -244,6 +246,69 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  for (final size in [const Size(1800, 1000), const Size(390, 844)]) {
+    testWidgets('regional settings share workspace width and back at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size);
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.application));
+      await tester.pumpAndSettle();
+      final applicationRect = tester.getRect(find.byType(SettingsPageScroll));
+      final initialRegion = container.read(appSettingProvider).regionCode;
+      final target = find.byWidgetPredicate(
+        (widget) =>
+            widget is SettingTarget && widget.spec.id == 'application.region',
+      );
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path.map((r) => r.page), [
+        ToolPage.application,
+        ToolPage.appRegion,
+      ]);
+      final regionScroll = find.descendant(
+        of: find.byType(RegionView),
+        matching: find.byType(SettingsPageScroll),
+      );
+      final regionRect = tester.getRect(regionScroll);
+      expect(regionRect.width, closeTo(applicationRect.width, 0.5));
+      expect(regionRect.center.dx, closeTo(applicationRect.center.dx, 0.5));
+      if (size.width >= 960) {
+        expect(regionRect.width, lessThanOrEqualTo(840));
+      }
+      await tester.tap(find.text('Choose a country'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Iran').last);
+      await tester.pumpAndSettle();
+      expect(container.read(appSettingProvider).regionCode, initialRegion);
+      await tester.ensureVisible(find.text('Cancel'));
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.application),
+      ]);
+      expect(container.read(appSettingProvider).regionCode, initialRegion);
+      await Scrollable.ensureVisible(tester.element(target), alignment: 0.5);
+      await tester.pumpAndSettle();
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choose a country'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Iran').last);
+      await tester.pumpAndSettle();
+      final apply = find.widgetWithText(FilledButton, 'Apply region');
+      await tester.ensureVisible(apply);
+      await tester.tap(apply);
+      await tester.pumpAndSettle();
+      expect(container.read(appSettingProvider).regionCode, 'IR');
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.application),
+      ]);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets(
     'deep search reconstructs ancestry and breadcrumbs return safely',

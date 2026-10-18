@@ -18,6 +18,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   Map<String, dynamic> json,
 ) => _AppSettingProps(
   locale: json['locale'] as String?,
+  regionCode: sanitizeRegionCode(json['regionCode']),
   dashboardWidgets: json['dashboardWidgets'] == null
       ? defaultDashboardWidgets
       : dashboardWidgetsFromJson(json['dashboardWidgets'] as List?),
@@ -72,6 +73,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  enabledServices:
+      (json['enabledServices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   disabledServices:
       (json['disabledServices'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -92,6 +98,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
+      'regionCode': instance.regionCode,
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
@@ -122,6 +129,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
       'preventDuplicateProfiles': instance.preventDuplicateProfiles,
       'serviceOrder': instance.serviceOrder,
+      'enabledServices': instance.enabledServices,
       'disabledServices': instance.disabledServices,
       'tableColumnWidths': instance.tableColumnWidths,
     };

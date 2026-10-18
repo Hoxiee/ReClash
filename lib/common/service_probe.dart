@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter/foundation.dart';
@@ -36,6 +37,29 @@ enum ServiceTarget {
     }
     return null;
   }
+}
+
+List<ServiceTarget> defaultServiceTargetsForRegion(String? regionCode) =>
+    sanitizeRegionCode(regionCode) == null
+    ? ServiceTarget.values
+    : [
+        for (final id in profileForCode(regionCode).defaultServiceIds)
+          ?ServiceTarget.byId(id),
+      ];
+
+List<ServiceTarget> enabledServiceTargetsForRegion({
+  required String? regionCode,
+  required List<String> order,
+  required Set<String> enabled,
+  required Set<String> disabled,
+}) {
+  final defaults = defaultServiceTargetsForRegion(regionCode).toSet();
+  return [
+    for (final target in orderServiceTargets(order))
+      if (!disabled.contains(target.id) &&
+          (enabled.contains(target.id) || defaults.contains(target)))
+        target,
+  ];
 }
 
 enum ServiceProbeStatus {

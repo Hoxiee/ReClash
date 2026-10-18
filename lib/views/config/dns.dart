@@ -1,6 +1,9 @@
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/regional/region_labels.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -156,6 +159,19 @@ class _DnsOverrideSpec extends OverrideSpec<DnsOverrideKey, Dns> {
   final OverrideTarget<DnsOverrideKey, Dns> target;
 
   final Set<DnsOverrideKey>? keys;
+
+  @override
+  String? noticeOf(WidgetRef ref, AppLocalizations l) {
+    if (target is! PatchOverrideTarget) return null;
+    final code = sanitizeRegionCode(
+      ref.watch(appSettingProvider.select((state) => state.regionCode)),
+    );
+    if (code == null || !hasProfileForCode(code)) return null;
+    return l.regionDnsSettings(
+      regionLabel(l, code),
+      profileForCode(code).dns.nameserver.join(', '),
+    );
+  }
 
   @override
   String title(AppLocalizations l) => 'DNS';

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -12,6 +14,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/access.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -48,6 +51,14 @@ class _TestSystemAction extends SystemAction {
   int requestCount = 0;
   int loadCount = 0;
   List<Package> grantedPackages = const [];
+  Future<List<String>> Function(String region) match = (_) async => [];
+  int matchCount = 0;
+
+  @override
+  Future<List<String>> getDomesticPackageNames(String regionCode) {
+    matchCount++;
+    return match(regionCode);
+  }
 
   @override
   Future<List<Package>> getPackages() async {
@@ -95,6 +106,14 @@ void main() {
       ],
     );
     globalState.container = container;
+    container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
+    container.listen(vpnSettingProvider, (_, _) {}, fireImmediately: true);
+    container.listen(
+      accessControlStateProvider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+    container.listen(packagesProvider, (_, _) {}, fireImmediately: true);
     container.read(packagesProvider.notifier).value = _packages;
   });
 
@@ -340,6 +359,29 @@ void main() {
       await teardownView(tester);
     });
 
+    testWidgets('regional app suggestions require a selected country', (
+      tester,
+    ) async {
+      const initial = AccessControlProps(
+        enable: true,
+        rejectList: ['com.example.chat'],
+      );
+      seedAccessControl(initial);
+      await pumpAccessView(tester);
+
+      await openBarMenu(tester);
+      await tester.tap(find.text('Action'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.regionSelectApps));
+      await tester.pumpAndSettle();
+
+      expect(container.read(appSettingProvider).regionCode, isNull);
+      expect(container.read(accessControlStateProvider).currentList, [
+        'com.example.chat',
+      ]);
+      await teardownView(tester);
+    });
+
     testWidgets('the bar menu turns access control off and on', (tester) async {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
@@ -429,6 +471,201 @@ void main() {
     expect(find.text('Fresh'), findsOneWidget);
 
     await teardownView(tester);
+  });
+
+  group('regional app selection', () {
+    const initial = AccessControlProps(
+      enable: true,
+      mode: AccessControlMode.acceptSelected,
+      acceptList: ['com.example.chat'],
+      rejectList: ['com.example.browser'],
+    );
+
+    Future<void> openSelection(WidgetTester tester) async {
+      await openBarMenu(tester);
+      await tester.tap(find.text('Action'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.regionSelectApps));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+    }
+
+    Future<void> start(WidgetTester tester) async {
+      seedAccessControl(initial);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      await pumpAccessView(tester);
+      await openSelection(tester);
+    }
+
+    testWidgets('replaces both draft lists only after confirmation', (
+      tester,
+    ) async {
+      systemAction.match = (region) async {
+        expect(region, 'RU');
+        return ['com.example.browser', 'not.installed', 'com.example.browser'];
+      };
+      await start(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('App selection preview'), findsOneWidget);
+      expect(container.read(accessControlStateProvider), initial);
+      expect(container.read(vpnSettingProvider).accessControlProps, initial);
+      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.pumpAndSettle();
+      final selected = container.read(accessControlStateProvider);
+      expect(selected.rejectList, ['com.example.browser']);
+      expect(selected.acceptList, [
+        'com.example.chat',
+        'com.android.settings',
+        'com.example.offline',
+      ]);
+      expect(selected.mode, initial.mode);
+      expect(selected.isFilterSystemApp, initial.isFilterSystemApp);
+      expect(selected.isFilterNonInternetApp, initial.isFilterNonInternetApp);
+      expect(container.read(vpnSettingProvider).accessControlProps, initial);
+      expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+      await teardownView(tester);
+    });
+
+    testWidgets('cancelling the preview preserves both lists', (tester) async {
+      systemAction.match = (_) async => ['com.example.chat'];
+      await start(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider), initial);
+      expect(container.read(vpnSettingProvider).accessControlProps, initial);
+      await teardownView(tester);
+    });
+
+    for (final matches in <List<String>>[
+      [],
+      ['not.installed'],
+    ]) {
+      testWidgets('no installed matches preserve lists: $matches', (
+        tester,
+      ) async {
+        systemAction.match = (_) async => matches;
+        await start(tester);
+        await tester.pumpAndSettle();
+        expect(find.text('App selection preview'), findsNothing);
+        expect(container.read(accessControlStateProvider), initial);
+        expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+        await teardownView(tester);
+      });
+    }
+
+    testWidgets('a native error preserves lists and releases loading', (
+      tester,
+    ) async {
+      systemAction.match = (_) async =>
+          throw PlatformException(code: 'unavailable');
+      await start(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('App selection preview'), findsNothing);
+      expect(container.read(accessControlStateProvider), initial);
+      expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+      await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+      await tester.pumpAndSettle();
+      await teardownView(tester);
+    });
+
+    testWidgets('changing region while scanning discards the old result', (
+      tester,
+    ) async {
+      final gate = Completer<List<String>>();
+      systemAction.match = (_) => gate.future;
+      await start(tester);
+      expect(container.read(loadingProvider(LoadingTag.access)), isTrue);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'IR'));
+      gate.complete(['com.example.chat']);
+      await tester.pumpAndSettle();
+      expect(find.text('App selection preview'), findsNothing);
+      expect(container.read(accessControlStateProvider), initial);
+      expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+      await teardownView(tester);
+    });
+
+    testWidgets('changed access settings win over the pending preview', (
+      tester,
+    ) async {
+      systemAction.match = (_) async => ['com.example.chat'];
+      await start(tester);
+      await tester.pumpAndSettle();
+      final updated = initial.copyWith(rejectList: ['manual.app']);
+      container.read(accessControlStateProvider.notifier).value = updated;
+      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider), updated);
+      await teardownView(tester);
+    });
+
+    testWidgets('an installed-package change invalidates the preview', (
+      tester,
+    ) async {
+      systemAction.match = (_) async => ['com.example.chat'];
+      await start(tester);
+      await tester.pumpAndSettle();
+      container.read(packagesProvider.notifier).value = [
+        ..._packages,
+        _package('new.app'),
+      ];
+      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider), initial);
+      await teardownView(tester);
+    });
+
+    testWidgets('a repeated action does not start a second scan', (
+      tester,
+    ) async {
+      final gate = Completer<List<String>>();
+      systemAction.match = (_) => gate.future;
+      seedAccessControl(initial);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      await pumpAccessView(tester);
+      CommonPopupMenuItem selection() => tester
+          .widget<CommonScaffold>(find.byType(CommonScaffold))
+          .menuItems
+          .firstWhere((item) => item.label == 'Action')
+          .subItems
+          .firstWhere(
+            (item) => item.label == AppLocalizations.current.regionSelectApps,
+          );
+      final picked = selection().onPressed;
+      await openSelection(tester);
+      expect(container.read(loadingProvider(LoadingTag.access)), isTrue);
+      expect(selection().onPressed, isNull);
+      picked!();
+      expect(systemAction.matchCount, 1);
+      gate.complete([]);
+      await tester.pumpAndSettle();
+      await teardownView(tester);
+    });
+
+    testWidgets(
+      'leaving during a scan cannot mutate lists or reopen a dialog',
+      (tester) async {
+        final gate = Completer<List<String>>();
+        systemAction.match = (_) => gate.future;
+        await start(tester);
+        await teardownView(tester);
+        gate.complete(['com.example.chat']);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+        expect(container.read(accessControlStateProvider), initial);
+        expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+        expect(find.text('App selection preview'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 
   group('installed apps permission', () {

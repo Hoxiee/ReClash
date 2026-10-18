@@ -5,6 +5,10 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/state.dart';
+
+import '../helpers/test_profiles.dart';
 import 'package:reclash/views/application_setting.dart';
 
 import '../helpers/test_app.dart';
@@ -18,7 +22,12 @@ void main() {
   setUp(() {
     previousAppEnv = globalState.appEnv;
     globalState.appEnv = 'stable';
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        detectedRegionProvider.overrideWith((ref) async => null),
+      ],
+    );
     container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
     container
         .read(viewSizeProvider.notifier)
@@ -47,7 +56,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Pre'), findsOneWidget);
+    expect(find.text('Pre-release'), findsOneWidget);
     expect(container.read(appSettingProvider).updateChannel, isNull);
   });
 
@@ -73,9 +82,33 @@ void main() {
 
     await tester.tap(find.text('Update channel'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Pre').last);
+    await tester.tap(find.text('Pre-release').last);
     await tester.pumpAndSettle();
 
     expect(container.read(appSettingProvider).updateChannel, UpdateChannel.pre);
+  });
+
+  testWidgets('opens regional adaptation from application settings', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: ApplicationSettingView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final regionRow = find.text('App region');
+    await tester.ensureVisible(regionRow);
+    await tester.tap(regionRow);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Region profile'), findsOneWidget);
   });
 }

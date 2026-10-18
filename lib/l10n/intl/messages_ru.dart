@@ -195,41 +195,61 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m69(count, label) =>
       "${Intl.plural(count, one: '${label} группа прокси', few: '${label} группы прокси', many: '${label} групп прокси', other: '${label} группы прокси')}";
 
-  static String m70(count, label) =>
+  static String m70(region, bypassed, proxied) =>
+      "${region}: в список обхода VPN попадут ${bypassed} приложений, в список VPN — ${proxied}. Оба списка будут заменены; режим и остальные параметры не изменятся. Совпадения пакетов и SDK — лишь подсказки: проверьте результат после применения.";
+
+  static String m71(region, value) =>
+      "Регион ${region}: список обхода — ${value}. Ручной список заменяет региональные значения.";
+
+  static String m72(region, source) => "Рекомендуется: ${region} · ${source}";
+
+  static String m73(region, value) =>
+      "Регион ${region}: базовые DNS — ${value}. Ручные переопределения на этом экране имеют приоритет.";
+
+  static String m74(region) => "Профиль страны: ${region}";
+
+  static String m75(value) => "MTU TUN: ${value}";
+
+  static String m76(value) => "Проверки сервисов по умолчанию: ${value}";
+
+  static String m77(region, value) =>
+      "Регион ${region}: MTU ${value}. Добавьте переопределение MTU, чтобы задать своё значение.";
+
+  static String m78(count, label) =>
       "${Intl.plural(count, one: '${label} правило', few: '${label} правила', many: '${label} правил', other: '${label} правила')}";
 
-  static String m71(appName) => "${appName} (Безопасный режим)";
+  static String m79(appName) => "${appName} (Безопасный режим)";
 
-  static String m72(count) =>
+  static String m80(count) =>
       "${Intl.plural(count, one: '${count} секунда', few: '${count} секунды', many: '${count} секунд', other: '${count} секунды')}";
 
-  static String m73(count) => "Действуют: ${count}";
+  static String m81(count) => "Действуют: ${count}";
 
-  static String m74(count) => "Проблем: ${count}";
+  static String m82(count) => "Проблем: ${count}";
 
-  static String m75(time) => "Проверено в ${time}";
-
-  static String m76(count) =>
-      "${Intl.plural(count, one: '${count} настройка', few: '${count} настройки', many: '${count} настроек', other: '${count} настройки')}";
-
-  static String m77(link) => "Не удалось прочитать прокси из ${link}";
-
-  static String m78(label) => "«${label}» — только одно значение";
-
-  static String m79(count) => "Результатов: ${count}";
-
-  static String m80(value) => "Пик ${value}";
-
-  static String m81(value) => "Всего ${value}";
-
-  static String m82(version) => "Установлена версия ${version}";
-
-  static String m83(label) => "Значение «${label}» должно быть URL";
+  static String m83(time) => "Проверено в ${time}";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: '${count} настройка', few: '${count} настройки', many: '${count} настроек', other: '${count} настройки')}";
+
+  static String m85(link) => "Не удалось прочитать прокси из ${link}";
+
+  static String m86(label) => "«${label}» — только одно значение";
+
+  static String m87(count) => "Результатов: ${count}";
+
+  static String m88(value) => "Пик ${value}";
+
+  static String m89(value) => "Всего ${value}";
+
+  static String m90(version) => "Установлена версия ${version}";
+
+  static String m91(label) => "Значение «${label}» должно быть URL";
+
+  static String m92(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m85(count) =>
+  static String m93(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -332,6 +352,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage(
       "Нет локальных прокси",
     ),
+    "appRegion": MessageLookupByLibrary.simpleMessage("Регион приложения"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Добавлять системный DNS",
     ),
@@ -1495,6 +1516,85 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Порт Redir"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "regex": MessageLookupByLibrary.simpleMessage("Регулярное выражение"),
+    "regionApply": MessageLookupByLibrary.simpleMessage("Применить регион"),
+    "regionAppsChanged": MessageLookupByLibrary.simpleMessage(
+      "Регион или списки приложений изменились. Повторите подбор для актуальных настроек.",
+    ),
+    "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Приложения для этого региона не найдены. Ваши списки не изменены.",
+    ),
+    "regionAppsPreview": m70,
+    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Предпросмотр подбора",
+    ),
+    "regionBypassSettings": m71,
+    "regionChina": MessageLookupByLibrary.simpleMessage("Китай"),
+    "regionChoose": MessageLookupByLibrary.simpleMessage("Выберите страну"),
+    "regionCurrent": MessageLookupByLibrary.simpleMessage("Текущий регион"),
+    "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
+      "Ручные DNS и MTU, список обхода, правила маршрутизации и выбор сервисов сохраняются.",
+    ),
+    "regionDetected": m72,
+    "regionDetectionTitle": MessageLookupByLibrary.simpleMessage(
+      "Подсказка устройства",
+    ),
+    "regionDnsSettings": m73,
+    "regionEgypt": MessageLookupByLibrary.simpleMessage("Египет"),
+    "regionIntro": MessageLookupByLibrary.simpleMessage(
+      "Базовые сетевые параметры и проверки сервисов для региона — независимо от языка интерфейса.",
+    ),
+    "regionIran": MessageLookupByLibrary.simpleMessage("Иран"),
+    "regionNoChanges": MessageLookupByLibrary.simpleMessage(
+      "Сетевые значения и набор проверок не изменятся.",
+    ),
+    "regionNoDetected": MessageLookupByLibrary.simpleMessage(
+      "Подходящая подсказка не найдена. Используются только часовой пояс и системная локаль.",
+    ),
+    "regionNoServices": MessageLookupByLibrary.simpleMessage(
+      "Проверки сервисов отключены",
+    ),
+    "regionNotSet": MessageLookupByLibrary.simpleMessage("Отключён"),
+    "regionOther": MessageLookupByLibrary.simpleMessage("Другой / общий"),
+    "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
+      "На Android изменения MTU или обхода могут потребовать подтверждённого перезапуска VPN. Подбор приложений запускается отдельно.",
+    ),
+    "regionPreviewBase": m74,
+    "regionPreviewMtu": m75,
+    "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
+      "Выбор прокси и ваши правила маршрутизации не изменятся.",
+    ),
+    "regionPreviewServices": m76,
+    "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
+    "regionProfileDefaults": MessageLookupByLibrary.simpleMessage(
+      "Настройки профиля",
+    ),
+    "regionRussia": MessageLookupByLibrary.simpleMessage("Россия"),
+    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
+      "Подбор приложений по региону",
+    ),
+    "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
+      "Сначала выберите поддерживаемый регион, чтобы использовать региональный подбор приложений.",
+    ),
+    "regionSourceLocaleCountry": MessageLookupByLibrary.simpleMessage(
+      "страна системной локали",
+    ),
+    "regionSourceLocaleLanguage": MessageLookupByLibrary.simpleMessage(
+      "язык системы",
+    ),
+    "regionSourceTimeZone": MessageLookupByLibrary.simpleMessage(
+      "часовой пояс",
+    ),
+    "regionTitle": MessageLookupByLibrary.simpleMessage("Региональный профиль"),
+    "regionTunSettings": m77,
+    "regionUseDetected": MessageLookupByLibrary.simpleMessage(
+      "Выбрать определённый регион",
+    ),
+    "regionWarning": MessageLookupByLibrary.simpleMessage(
+      "Выбор страны обновляет только предпросмотр. Региональные значения изменятся после применения.",
+    ),
+    "regionalAdaptation": MessageLookupByLibrary.simpleMessage(
+      "Региональная адаптация",
+    ),
     "releaseMemory": MessageLookupByLibrary.simpleMessage("Освободить память"),
     "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось освободить память",
@@ -1720,14 +1820,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Правило должно начинаться с поддерживаемого типа, например DOMAIN,example.com,DIRECT",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("Правила"),
-    "rulesCount": m70,
+    "rulesCount": m78,
     "runTime": MessageLookupByLibrary.simpleMessage("Время работы"),
     "running": MessageLookupByLibrary.simpleMessage("Работает"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage(
       "Конфигурация выполнения",
     ),
     "safeMode": MessageLookupByLibrary.simpleMessage("Безопасный режим"),
-    "safeModeAppTitle": m71,
+    "safeModeAppTitle": m79,
     "saturation": MessageLookupByLibrary.simpleMessage("Насыщенность"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Сохранить изменения?"),
@@ -1740,9 +1840,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "seconds": MessageLookupByLibrary.simpleMessage("секунд"),
-    "secondsCount": m72,
+    "secondsCount": m80,
     "secretKey": MessageLookupByLibrary.simpleMessage("Ключ"),
-    "sectionsInEffect": m73,
+    "sectionsInEffect": m81,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать всё"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage(
       "Выберите набор правил",
@@ -1752,13 +1852,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
     "server": MessageLookupByLibrary.simpleMessage("Сервер"),
-    "serviceAbnormalCount": m74,
+    "serviceAbnormalCount": m82,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage("Все доступны"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокировано"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Проверить"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Проверить все"),
-    "serviceCheckedAt": m75,
+    "serviceCheckedAt": m83,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Скоро появится"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
       "Недопустимый провайдер",
@@ -1784,8 +1884,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("параметры"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
-    "settingsCount": m76,
-    "shareLinkUnreadable": m77,
+    "settingsCount": m84,
+    "shareLinkUnreadable": m85,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "Не удалось прочитать прокси из ссылок",
     ),
@@ -1811,7 +1911,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Здесь укажите одну ссылку, несколько можно задать в быстром редактировании списка",
     ),
-    "singleValueTip": m78,
+    "singleValueTip": m86,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Пропускать проверку сертификата",
@@ -1971,7 +2071,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро",
     ),
-    "toolsResults": m79,
+    "toolsResults": m87,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
@@ -1989,8 +2089,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m80,
-    "trafficTotal": m81,
+    "trafficPeak": m88,
+    "trafficTotal": m89,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -2041,7 +2141,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось запустить установщик пакетов.",
     ),
-    "updateInstalledVersion": m82,
+    "updateInstalledVersion": m90,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "У вас уже установлена последняя версия.",
     ),
@@ -2064,7 +2164,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m91,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2098,8 +2198,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m92,
+    "yearsAgoShort": m93,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

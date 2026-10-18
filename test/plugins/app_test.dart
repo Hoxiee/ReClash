@@ -22,6 +22,48 @@ void main() {
     App().clearPackageIconCache();
   });
 
+  test(
+    'passes normalized region to Android and keeps unique package IDs',
+    () async {
+      MethodCall? received;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            received = call;
+            return '["com.example.one", "", "com.example.one", "com.example.two"]';
+          });
+      expect(await App().getDomesticPackageNames(' ru '), [
+        'com.example.one',
+        'com.example.two',
+      ]);
+      expect(received?.method, 'getDomesticPackageNames');
+      expect(received?.arguments, {'regionCode': 'RU'});
+    },
+  );
+
+  test('unknown regions never invoke Android app matching', () async {
+    var calls = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async {
+          calls++;
+          return '[]';
+        });
+    expect(await App().getDomesticPackageNames('OTHER'), isEmpty);
+    expect(await App().getDomesticPackageNames('US'), isEmpty);
+    expect(calls, 0);
+  });
+
+  test(
+    'invalid native matching results fail rather than inventing packages',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (_) async => '[17]');
+      await expectLater(
+        App().getDomesticPackageNames('RU'),
+        throwsA(isA<TypeError>()),
+      );
+    },
+  );
+
   test('requests every package icon from Android only once', () async {
     var iconCallCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

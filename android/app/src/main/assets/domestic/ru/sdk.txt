@@ -1,0 +1,24 @@
+# layer C: RU SDK class prefixes matched against normalized dex/component names
+io.appmetrica.analytics
+com.yandex.metrica
+com.yandex.mobile.ads
+com.yandex.mapkit
+com.yandex.runtime
+com.yandex.authsdk
+com.vk.id
+com.vk.api.sdk
+com.vk.sdk
+com.vk.superapp
+com.my.target
+com.my.tracker
+ru.mail.mrgservice
+ru.rustore.sdk
+ru.sberdevices.services
+ru.sberbank.sdakit
+ru.tinkoff.acquiring
+ru.tinkoff.core
+ru.yoomoney.sdk
+cloud.mindbox
+com.flocktory
+ru.tachos.admitadstatisticsdk
+ru.wapstart.plus1.sdk

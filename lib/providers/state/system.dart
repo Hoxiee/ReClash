@@ -1,6 +1,26 @@
 part of '../state.dart';
 
 @riverpod
+Future<RegionDetectionResult?> detectedRegion(Ref ref) async {
+  final signals = await readDeviceRegionSignals();
+  return detectRegionWithSource(
+    signals,
+    WidgetsBinding.instance.platformDispatcher.locale,
+  );
+}
+
+@riverpod
+({PatchClashConfig patchConfig, List<String> bypassDomain})
+regionalNetworkConfig(Ref ref) => regionalNetworkConfigFor(
+  regionCode: ref.watch(appSettingProvider.select((state) => state.regionCode)),
+  base: ref.watch(patchClashConfigProvider),
+  defaultBypassDomains: defaultBypassDomain,
+  bypassDomains: ref.watch(
+    networkSettingProvider.select((state) => state.bypassDomain),
+  ),
+);
+
+@riverpod
 UpdateParams updateParams(Ref ref) {
   final authentication = ref.watch(
     networkSettingProvider.select((state) => state.authentication),
@@ -22,9 +42,7 @@ UpdateParams updateParams(Ref ref) {
 ({PatchClashConfig patchConfig, bool appendSystemDns, bool bypassPrivateRoute})
 setupPatch(Ref ref) {
   return (
-    patchConfig: ref.watch(
-      patchClashConfigProvider.select((state) => state.setupOnly),
-    ),
+    patchConfig: ref.watch(regionalNetworkConfigProvider).patchConfig.setupOnly,
     appendSystemDns: ref.watch(
       networkSettingProvider.select((state) => state.appendSystemDns),
     ),
@@ -226,19 +244,13 @@ Future<List<String>> vpnRouteAddress(Ref ref) {
 
 @Riverpod(keepAlive: true)
 Future<VpnOptions> vpnOptions(Ref ref) async {
-  final networkSetting = ref.watch(
+  final authenticated = ref.watch(
     networkSettingProvider.select(
-      (state) => (
-        bypassDomain: state.bypassDomain,
-        authenticated: state.authentication.credentials.isNotEmpty,
-      ),
+      (state) => state.authentication.credentials.isNotEmpty,
     ),
   );
-  final clashConfig = ref.watch(
-    patchClashConfigProvider.select(
-      (state) => (tun: state.tun, mixedPort: state.mixedPort),
-    ),
-  );
+  final regionalNetwork = ref.watch(regionalNetworkConfigProvider);
+  final clashConfig = regionalNetwork.patchConfig;
   final vpnSetting = ref.watch(vpnSettingProvider);
   final safeMode = ref.watch(safeModeProvider);
   final routeAddress = ref.watch(vpnRouteAddressProvider.future);
@@ -248,14 +260,13 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
     stack: tun.stack.name,
     // VpnService.setHttpProxy cannot carry credentials, so an authenticated
     // mixed port is left to TUN instead of declared as the system proxy.
-    systemProxy:
-        vpnSetting.systemProxy && !networkSetting.authenticated && !safeMode,
+    systemProxy: vpnSetting.systemProxy && !authenticated && !safeMode,
     port: clashConfig.mixedPort,
     ipv6: vpnSetting.ipv6,
     dnsHijacking: vpnSetting.dnsHijacking,
     accessControlProps: vpnSetting.accessControlProps,
     allowBypass: vpnSetting.allowBypass,
-    bypassDomain: networkSetting.bypassDomain,
+    bypassDomain: regionalNetwork.bypassDomain,
     routeAddress: await routeAddress,
     mtu: tun.mtu,
     congestionController: tun.congestionController,

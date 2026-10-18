@@ -952,6 +952,120 @@
   "license": "ライセンス",
   "licenses": "ライセンス一覧",
   "licensesDesc": "アプリに同棑されているパッケージ",
+  "appRegion": "アプリの地域",
+  "regionalAdaptation": "地域設定",
+  "regionTitle": "地域プロファイル",
+  "regionIntro": "表示言語とは別に、地域のネットワーク既定値とサービス確認を設定します。",
+  "regionWarning": "国の選択はプレビューだけを更新します。地域の既定値は適用後に変更されます。",
+  "regionChoose": "国を選択",
+  "regionDetected": "候補: {region} · {source}",
+  "regionUseDetected": "検出した地域を選択",
+  "regionPreviewTitle": "プレビュー",
+  "regionPreviewBase": "国のプロファイル: {region}",
+  "regionPreviewMtu": "TUN MTU: {value}",
+  "regionPreviewServices": "既定のサービス確認: {value}",
+  "regionPreviewRules": "プロキシの選択とルーティングルールは変更されません。",
+  "regionPreviewAndroid": "Android では MTU やバイパスの変更に VPN の再起動確認が必要な場合があります。アプリの選択は別途実行します。",
+  "regionCustomPreserved": "手動の DNS・MTU 設定、バイパス一覧、ルーティングルール、サービスの選択は保持されます。",
+  "regionNoChanges": "ネットワーク既定値とサービス確認は変更されません。",
+  "regionApply": "地域を適用",
+  "regionNoDetected": "一致する候補がありません。タイムゾーンとシステムロケールのみを使用します。",
+  "regionSelectBeforeApps": "地域別アプリ候補を使うには、対応する地域を選択してください。",
+  "regionNotSet": "オフ",
+  "regionOther": "その他 / 共通",
+  "regionRussia": "ロシア",
+  "regionIran": "イラン",
+  "regionChina": "中国",
+  "regionEgypt": "エジプト",
+  "regionSourceTimeZone": "タイムゾーン",
+  "regionSourceLocaleCountry": "システムロケールの国",
+  "regionSourceLocaleLanguage": "システム言語",
+  "regionCurrent": "現在の地域",
+  "regionDetectionTitle": "デバイスからの候補",
+  "regionProfileDefaults": "プロファイルの既定値",
+  "regionNoServices": "サービス確認はオフです",
+  "regionDnsSettings": "地域 {region} の既定 DNS: {value}。この画面の手動設定が優先されます。",
+  "regionTunSettings": "地域 {region} の MTU は {value} です。独自の値を使うには MTU 設定を追加してください。",
+  "regionBypassSettings": "地域 {region} の一覧: {value}。カスタム一覧は地域の既定値を置き換えます。",
+  "regionSelectApps": "地域別にアプリを選択",
+  "regionAppsPreviewTitle": "アプリ選択のプレビュー",
+  "regionAppsPreview": "{region}: VPN バイパス一覧に {bypassed} 個、VPN 一覧に {proxied} 個のアプリを追加します。両方の一覧が置き換わり、モードや他の設定は変更されません。パッケージと SDK の一致は候補にすぎません。適用後に結果を確認してください。",
+  "regionAppsEmpty": "この地域に一致するアプリはありません。一覧は変更されません。",
+  "regionAppsChanged": "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "更新チャンネル",
   "updateChannelRelease": "リリース",
   "updateChannelPre": "プレリリース",

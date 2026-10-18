@@ -376,6 +376,8 @@ abstract class OverrideSpec<K extends OverrideKey, M> {
 
   SettingSpec? settingOf(K key) => null;
 
+  String? noticeOf(WidgetRef ref, AppLocalizations l) => null;
+
   /// Also resets the values of [keys], so a profile with no keys is untouched.
   OverrideState<K, M> withoutKeys(OverrideState<K, M> state, Set<K> keys) {
     var model = state.model;
@@ -540,6 +542,7 @@ class OverrideView<K extends OverrideKey, M> extends ConsumerWidget {
       ),
     );
     final addEntry = target.addEntry(appLocalizations);
+    final notice = spec.noticeOf(ref, appLocalizations);
     return CommonScaffold(
       title: spec.title(appLocalizations),
       iconActions: [
@@ -560,7 +563,10 @@ class OverrideView<K extends OverrideKey, M> extends ConsumerWidget {
         isEmpty: isEmpty,
         nullStatus: NullStatus(
           label: appLocalizations.nullTip(target.entries(appLocalizations)),
-          description: target.description(appLocalizations),
+          description: [
+            target.description(appLocalizations),
+            ?notice,
+          ].join('\n\n'),
           illustration: spec.illustration,
           action: TonalButton(
             size: TonalButtonSize.bar,
@@ -585,6 +591,7 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final keys = ref.watch(spec.target.select((state) => state.keys));
     final entries = spec.values.where(keys.contains);
+    final notice = spec.noticeOf(ref, appLocalizations);
     return SettingsPageScroll(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -639,6 +646,7 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
                 text: spec.target.description(appLocalizations),
               ),
             ),
+            if (notice != null) ListFooter(text: notice),
           ],
         ),
       ),

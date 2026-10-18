@@ -4,10 +4,13 @@ import 'package:reclash/widgets/settings/setting_target.dart';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/state.dart';
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/views/config/tun.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -320,6 +323,49 @@ class LoopbackItem extends StatelessWidget {
   }
 }
 
+class _MtuItem extends ConsumerWidget {
+  const _MtuItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final value = ref.watch(
+      regionalNetworkConfigProvider.select(
+        (state) => state.patchConfig.tun.mtu,
+      ),
+    );
+    return ListItem.input(
+      title: Text(networkToolSettings[13].title(l)),
+      subtitle: Text('$value'),
+      dialogTitle: networkToolSettings[13].title(l),
+      value: '$value',
+      resetValue: '$defaultTunMtu',
+      maxLength: TextInputLimits.number,
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        final mtu = int.tryParse(value?.trim() ?? '');
+        if (mtu == null) return l.numberTip('MTU');
+        return mtu < minTunMtu || mtu > maxTunMtu
+            ? l.numberRangeTip('MTU', '$minTunMtu', '$maxTunMtu')
+            : null;
+      },
+      onChanged: (value) {
+        if (value == null) return;
+        final mtu = int.parse(value.trim());
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                tun: state.tun.copyWith(mtu: mtu),
+                tunOverride: state.tunOverride.copyWith(mtu: mtu),
+                tunOverrideKeys: {...state.tunOverrideKeys, TunOverrideKey.mtu},
+              ),
+            );
+      },
+    );
+  }
+}
+
 const _maxUint32 = 0xFFFFFFFF;
 
 class _NumberItem extends ConsumerWidget {
@@ -328,16 +374,12 @@ class _NumberItem extends ConsumerWidget {
     required this.select,
     required this.update,
     this.isSeconds = false,
-    this.min = 0,
-    this.max = _maxUint32,
   });
 
   final ConfigLabel title;
   final int Function(PatchClashConfig state) select;
   final _TunUpdate<int> update;
   final bool isSeconds;
-  final int min;
-  final int max;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -360,8 +402,8 @@ class _NumberItem extends ConsumerWidget {
         if (number == null) {
           return appLocalizations.numberTip(label);
         }
-        return number < min || number > max
-            ? appLocalizations.numberRangeTip(label, '$min', '$max')
+        return number < 0 || number > _maxUint32
+            ? appLocalizations.numberRangeTip(label, '0', '$_maxUint32')
             : null;
       },
       onChanged: (value) {
@@ -380,16 +422,7 @@ class _NumberItem extends ConsumerWidget {
 // same keys as overrides, so a profile's own values apply unless picked.
 List<Widget> tunItems({required bool isMipsStack}) {
   return [
-    SettingTarget(
-      spec: networkToolSettings[13],
-      child: _NumberItem(
-        title: networkToolSettings[13].title,
-        min: minTunMtu,
-        max: maxTunMtu,
-        select: (state) => state.tun.mtu,
-        update: (state, value) => state.copyWith.tun(mtu: value),
-      ),
-    ),
+    SettingTarget(spec: networkToolSettings[13], child: const _MtuItem()),
     if (isMipsStack)
       ConfigOptionsItem<String>(
         setting: networkToolSettings[14],
@@ -474,6 +507,19 @@ class TunSection extends ConsumerWidget {
       footer: [
         appLocalizations.bypassPrivateRouteDesc,
         appLocalizations.tunOverrideDesc,
+        if (!picked.contains(TunOverrideKey.mtu) &&
+            ref
+                .watch(regionalNetworkConfigProvider)
+                .patchConfig
+                .tunOverrideKeys
+                .contains(TunOverrideKey.mtu))
+          appLocalizations.regionTunSettings(
+            regionLabel(
+              appLocalizations,
+              ref.watch(appSettingProvider).regionCode,
+            ),
+            '${ref.watch(regionalNetworkConfigProvider).patchConfig.tunOverride.mtu}',
+          ),
         ?spec.footerOf(listed, appLocalizations),
       ].join('\n'),
     );
@@ -554,6 +600,7 @@ class VpnSections extends ConsumerWidget {
     final authenticationEnable = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
+    final bypass = ref.watch(regionalNetworkConfigProvider).bypassDomain;
     return Column(
       children: [
         generateSection(
@@ -573,6 +620,12 @@ class VpnSections extends ConsumerWidget {
             if (authenticationEnable)
               appLocalizations.authenticationSystemProxyDesc,
             appLocalizations.bypassDomainDesc,
+            if (sanitizeRegionCode(ref.watch(appSettingProvider).regionCode)
+                case final code?)
+              appLocalizations.regionBypassSettings(
+                regionLabel(appLocalizations, code),
+                bypass.isEmpty ? appLocalizations.none : bypass.join(', '),
+              ),
             appLocalizations.ipv6InboundDesc,
           ].join('\n'),
         ),
@@ -581,12 +634,13 @@ class VpnSections extends ConsumerWidget {
   }
 }
 
-class SystemProxySection extends StatelessWidget {
+class SystemProxySection extends ConsumerWidget {
   const SystemProxySection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final bypass = ref.watch(regionalNetworkConfigProvider).bypassDomain;
     return generateSection(
       title: appLocalizations.system,
       items: [
@@ -594,7 +648,15 @@ class SystemProxySection extends StatelessWidget {
         const BypassDomainItem(),
         if (system.isWindows) const LoopbackItem(),
       ],
-      footer: appLocalizations.bypassDomainDesc,
+      footer: [
+        appLocalizations.bypassDomainDesc,
+        if (sanitizeRegionCode(ref.watch(appSettingProvider).regionCode)
+            case final code?)
+          appLocalizations.regionBypassSettings(
+            regionLabel(appLocalizations, code),
+            bypass.isEmpty ? appLocalizations.none : bypass.join(', '),
+          ),
+      ].join('\n'),
     );
   }
 }

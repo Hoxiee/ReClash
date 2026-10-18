@@ -123,6 +123,11 @@ void main() {
     () async {
       final l = await AppLocalizations.load(const Locale('en'));
       final catalog = buildToolCatalog(l, _environment());
+      final region = catalog.singleWhere((e) => e.id == 'page.appRegion');
+      expect(region.route, const ToolRoute(ToolPage.appRegion));
+      expect(region.path, contains(l.applicationSettings));
+      expect(region.showInCatalog, isFalse);
+      expect(ToolPage.appRegion.ancestors, [ToolPage.application]);
       expect(
         catalog.singleWhere((e) => e.id == 'page.network').path,
         contains(l.advancedConfig),

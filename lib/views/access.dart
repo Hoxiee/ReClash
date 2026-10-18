@@ -4,6 +4,8 @@ import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
@@ -13,6 +15,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AccessView extends ConsumerStatefulWidget {
@@ -159,28 +162,65 @@ class _AccessViewState extends ConsumerState<AccessView>
   }
 
   Future<void> _intelligentSelected() async {
-    final packageNames = ref.read(
-      packagesProvider.select((state) => state.map((item) => item.packageName)),
+    if (!mounted || ref.read(loadingProvider(LoadingTag.access))) return;
+    final regionCode = sanitizeRegionCode(
+      ref.read(appSettingProvider).regionCode,
     );
-    if (packageNames.isEmpty) {
+    final l = context.appLocalizations;
+    if (regionCode == null || !hasProfileForCode(regionCode)) {
+      dialogs.showNotifier(
+        l.regionSelectBeforeApps,
+        level: MessageLevel.warning,
+      );
       return;
     }
-    final selectedPackageNames =
-        (await globalState.loadingRun<List<String>>(() async {
-          return await app?.getChinaPackageNames() ?? [];
-        }, tag: LoadingTag.access))?.toSet() ??
-        {};
-    final acceptList = packageNames
-        .where((item) => !selectedPackageNames.contains(item))
-        .toList();
-    final rejectList = packageNames
-        .where((item) => selectedPackageNames.contains(item))
-        .toList();
+    final initial = ref.read(accessControlStateProvider);
+    final packageSnapshot = ref.read(packagesProvider);
+    final result = await globalState.loadingRun<List<String>>(
+      () => ref
+          .read(systemActionProvider.notifier)
+          .getDomesticPackageNames(regionCode),
+      tag: LoadingTag.access,
+    );
+    if (!mounted || result == null) return;
+    bool isCurrent() =>
+        sanitizeRegionCode(ref.read(appSettingProvider).regionCode) ==
+            regionCode &&
+        ref.read(accessControlStateProvider) == initial &&
+        listEquals(ref.read(packagesProvider), packageSnapshot);
+    if (!isCurrent()) {
+      dialogs.showNotifier(l.regionAppsChanged, level: MessageLevel.warning);
+      return;
+    }
+    final domestic = result.toSet();
+    final packages = packageSnapshot.map((item) => item.packageName).toSet();
+    final rejected = packages.intersection(domestic).toList();
+    if (rejected.isEmpty) {
+      dialogs.showNotifier(l.regionAppsEmpty, level: MessageLevel.warning);
+      return;
+    }
+    final accepted = packages.difference(domestic).toList();
+    final confirmed = await dialogs.showMessage(
+      context: context,
+      title: l.regionAppsPreviewTitle,
+      confirmText: l.regionApply,
+      message: TextSpan(
+        text: l.regionAppsPreview(
+          regionLabel(l, regionCode),
+          rejected.length,
+          accepted.length,
+        ),
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    if (!isCurrent()) {
+      dialogs.showNotifier(l.regionAppsChanged, level: MessageLevel.warning);
+      return;
+    }
     ref
         .read(accessControlStateProvider.notifier)
         .update(
-          (state) =>
-              state.copyWith(acceptList: acceptList, rejectList: rejectList),
+          (state) => state.copyWith(acceptList: accepted, rejectList: rejected),
         );
   }
 
@@ -287,6 +327,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   List<CommonPopupMenuItem> _buildMenuItems(
     BuildContext context, {
     required bool enable,
+    required bool isLoading,
   }) {
     final appLocalizations = context.appLocalizations;
     return [
@@ -317,8 +358,8 @@ class _AccessViewState extends ConsumerState<AccessView>
         subItems: [
           CommonPopupMenuItem(
             glyph: AppGlyphs.sparkle,
-            label: appLocalizations.intelligentSelected,
-            onPressed: _intelligentSelected,
+            label: appLocalizations.regionSelectApps,
+            onPressed: isLoading ? null : _intelligentSelected,
           ),
           CommonPopupMenuItem(
             glyph: AppGlyphs.copy,
@@ -512,7 +553,11 @@ class _AccessViewState extends ConsumerState<AccessView>
               )
             : null,
         menuItems: [
-          ..._buildMenuItems(context, enable: accessControl.enable),
+          ..._buildMenuItems(
+            context,
+            enable: accessControl.enable,
+            isLoading: isLoading,
+          ),
           if (selectAllAction != null)
             CommonPopupMenuItem(
               glyph: selectAllAction.glyph,

@@ -196,42 +196,62 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m69(count, label) =>
       "${Intl.plural(count, one: '1 proxy group', other: '${label} proxy groups')}";
 
-  static String m70(count, label) =>
+  static String m70(region, bypassed, proxied) =>
+      "${region}: ${bypassed} apps in the VPN bypass list, ${proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.";
+
+  static String m71(region, value) =>
+      "Region ${region} uses: ${value}. A custom list replaces the regional defaults.";
+
+  static String m72(region, source) => "Suggested: ${region} · ${source}";
+
+  static String m73(region, value) =>
+      "Region ${region} supplies DNS defaults: ${value}. Manual overrides here take priority.";
+
+  static String m74(region) => "Country profile: ${region}";
+
+  static String m75(value) => "TUN MTU: ${value}";
+
+  static String m76(value) => "Default service checks: ${value}";
+
+  static String m77(region, value) =>
+      "Region ${region} supplies MTU ${value}. Add an MTU override to use your own value.";
+
+  static String m78(count, label) =>
       "${Intl.plural(count, one: '1 rule', other: '${label} rules')}";
 
-  static String m71(appName) => "${appName} (Safe mode)";
+  static String m79(appName) => "${appName} (Safe mode)";
 
-  static String m72(count) =>
+  static String m80(count) =>
       "${Intl.plural(count, one: '1 second', other: '${count} seconds')}";
 
-  static String m73(count) => "${count} in effect";
+  static String m81(count) => "${count} in effect";
 
-  static String m74(count) =>
+  static String m82(count) =>
       "${Intl.plural(count, one: '1 issue', other: '${count} issues')}";
 
-  static String m75(time) => "Checked at ${time}";
-
-  static String m76(count) =>
-      "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
-
-  static String m77(link) => "No proxy could be read from ${link}";
-
-  static String m78(label) => "${label} must be a single item";
-
-  static String m79(count) => "${count} results";
-
-  static String m80(value) => "Peak ${value}";
-
-  static String m81(value) => "Total ${value}";
-
-  static String m82(version) => "Installed: ${version}";
-
-  static String m83(label) => "${label} must be a URL";
+  static String m83(time) => "Checked at ${time}";
 
   static String m84(count) =>
+      "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
+
+  static String m85(link) => "No proxy could be read from ${link}";
+
+  static String m86(label) => "${label} must be a single item";
+
+  static String m87(count) => "${count} results";
+
+  static String m88(value) => "Peak ${value}";
+
+  static String m89(value) => "Total ${value}";
+
+  static String m90(version) => "Installed: ${version}";
+
+  static String m91(label) => "${label} must be a URL";
+
+  static String m92(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m85(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m93(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -323,6 +343,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconDesign": MessageLookupByLibrary.simpleMessage("App icon design"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("No local proxies"),
+    "appRegion": MessageLookupByLibrary.simpleMessage("App region"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Append system DNS",
     ),
@@ -1432,6 +1453,83 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir port"),
     "redo": MessageLookupByLibrary.simpleMessage("Redo"),
     "regex": MessageLookupByLibrary.simpleMessage("Regex"),
+    "regionApply": MessageLookupByLibrary.simpleMessage("Apply region"),
+    "regionAppsChanged": MessageLookupByLibrary.simpleMessage(
+      "The region or app lists changed. Run selection again for the current settings.",
+    ),
+    "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
+      "No apps matched this region. Your lists are unchanged.",
+    ),
+    "regionAppsPreview": m70,
+    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
+      "App selection preview",
+    ),
+    "regionBypassSettings": m71,
+    "regionChina": MessageLookupByLibrary.simpleMessage("China"),
+    "regionChoose": MessageLookupByLibrary.simpleMessage("Choose a country"),
+    "regionCurrent": MessageLookupByLibrary.simpleMessage("Current region"),
+    "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
+      "Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.",
+    ),
+    "regionDetected": m72,
+    "regionDetectionTitle": MessageLookupByLibrary.simpleMessage(
+      "Device suggestion",
+    ),
+    "regionDnsSettings": m73,
+    "regionEgypt": MessageLookupByLibrary.simpleMessage("Egypt"),
+    "regionIntro": MessageLookupByLibrary.simpleMessage(
+      "Regional network defaults and service checks, independent of the interface language.",
+    ),
+    "regionIran": MessageLookupByLibrary.simpleMessage("Iran"),
+    "regionNoChanges": MessageLookupByLibrary.simpleMessage(
+      "Network defaults and service checks stay unchanged.",
+    ),
+    "regionNoDetected": MessageLookupByLibrary.simpleMessage(
+      "No matching suggestion. Only the time zone and system locale are used.",
+    ),
+    "regionNoServices": MessageLookupByLibrary.simpleMessage(
+      "Service checks are off",
+    ),
+    "regionNotSet": MessageLookupByLibrary.simpleMessage("Off"),
+    "regionOther": MessageLookupByLibrary.simpleMessage("Other / general"),
+    "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
+      "On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.",
+    ),
+    "regionPreviewBase": m74,
+    "regionPreviewMtu": m75,
+    "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
+      "Proxy selection and your routing rules stay unchanged.",
+    ),
+    "regionPreviewServices": m76,
+    "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("Preview"),
+    "regionProfileDefaults": MessageLookupByLibrary.simpleMessage(
+      "Profile defaults",
+    ),
+    "regionRussia": MessageLookupByLibrary.simpleMessage("Russia"),
+    "regionSelectApps": MessageLookupByLibrary.simpleMessage(
+      "Select apps by region",
+    ),
+    "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
+      "Choose a supported region before using regional app suggestions.",
+    ),
+    "regionSourceLocaleCountry": MessageLookupByLibrary.simpleMessage(
+      "system locale country",
+    ),
+    "regionSourceLocaleLanguage": MessageLookupByLibrary.simpleMessage(
+      "system language",
+    ),
+    "regionSourceTimeZone": MessageLookupByLibrary.simpleMessage("time zone"),
+    "regionTitle": MessageLookupByLibrary.simpleMessage("Region profile"),
+    "regionTunSettings": m77,
+    "regionUseDetected": MessageLookupByLibrary.simpleMessage(
+      "Use detected region",
+    ),
+    "regionWarning": MessageLookupByLibrary.simpleMessage(
+      "Choosing a country only updates this preview. Regional defaults change when you apply it.",
+    ),
+    "regionalAdaptation": MessageLookupByLibrary.simpleMessage(
+      "Regional adaptation",
+    ),
     "releaseMemory": MessageLookupByLibrary.simpleMessage("Release memory"),
     "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
       "Failed to release memory",
@@ -1643,12 +1741,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "The rule must start with a supported type, such as DOMAIN,example.com,DIRECT",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),
-    "rulesCount": m70,
+    "rulesCount": m78,
     "runTime": MessageLookupByLibrary.simpleMessage("Run time"),
     "running": MessageLookupByLibrary.simpleMessage("Running"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage("Runtime config"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Safe mode"),
-    "safeModeAppTitle": m71,
+    "safeModeAppTitle": m79,
     "saturation": MessageLookupByLibrary.simpleMessage("Saturation"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save the changes?"),
@@ -1661,9 +1759,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("seconds"),
-    "secondsCount": m72,
+    "secondsCount": m80,
     "secretKey": MessageLookupByLibrary.simpleMessage("Key"),
-    "sectionsInEffect": m73,
+    "sectionsInEffect": m81,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage(
       "Please select a rule set",
@@ -1673,7 +1771,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
-    "serviceAbnormalCount": m74,
+    "serviceAbnormalCount": m82,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage(
       "All available",
     ),
@@ -1681,7 +1779,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Check"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Check all"),
-    "serviceCheckedAt": m75,
+    "serviceCheckedAt": m83,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Coming soon"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
       "Disallowed ISP",
@@ -1705,8 +1803,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-    "settingsCount": m76,
-    "shareLinkUnreadable": m77,
+    "settingsCount": m84,
+    "shareLinkUnreadable": m85,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "No proxy could be read from the links",
     ),
@@ -1730,7 +1828,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Enter one link here; edit several from the quick edit of the list",
     ),
-    "singleValueTip": m78,
+    "singleValueTip": m86,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Skip certificate verification",
@@ -1874,7 +1972,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("Pin"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
-    "toolsResults": m79,
+    "toolsResults": m87,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Run"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Setting"),
@@ -1892,8 +1990,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m80,
-    "trafficTotal": m81,
+    "trafficPeak": m88,
+    "trafficTotal": m89,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -1942,7 +2040,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Couldn\'t start the package installer.",
     ),
-    "updateInstalledVersion": m82,
+    "updateInstalledVersion": m90,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "You\'re already using the latest version.",
     ),
@@ -1965,7 +2063,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m91,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -1991,8 +2089,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m92,
+    "yearsAgoShort": m93,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

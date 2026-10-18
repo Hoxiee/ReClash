@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:reclash/common/boot_record.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
@@ -69,13 +70,20 @@ class App {
         false;
   }
 
-  Future<List<String>> getChinaPackageNames() async {
+  Future<List<String>> getDomesticPackageNames(String regionCode) async {
+    final code = sanitizeRegionCode(regionCode);
+    if (code == null || !hasProfileForCode(code)) return [];
     final packageNamesString = await methodChannel.invokeMethod<String>(
-      'getChinaPackageNames',
+      'getDomesticPackageNames',
+      {'regionCode': code},
     );
     final List<dynamic> packageNamesRaw =
         await packageNamesString?.decodeJson<List<dynamic>>() ?? [];
-    return packageNamesRaw.map((e) => e.toString()).toList();
+    return packageNamesRaw
+        .cast<String>()
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList();
   }
 
   final Map<String, ImageProvider?> _packageIcons = {};

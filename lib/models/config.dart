@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:flutter/services.dart';
@@ -232,6 +233,7 @@ abstract class Filter with _$Filter {
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
+    @JsonKey(fromJson: sanitizeRegionCode) String? regionCode,
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsFromJson)
     List<DashboardWidget> dashboardWidgets,
@@ -268,6 +270,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(EditorFontSize.standard) EditorFontSize editorFontSize,
     @Default(true) bool preventDuplicateProfiles,
     @Default([]) List<String> serviceOrder,
+    @Default([]) List<String> enabledServices,
     @Default([]) List<String> disabledServices,
     @Default({}) Map<String, Map<String, double>> tableColumnWidths,
   }) = _AppSettingProps;

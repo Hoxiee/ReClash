@@ -952,6 +952,120 @@
   "license": "Licence",
   "licenses": "Licences",
   "licensesDesc": "Paquets inclus dans l'application",
+  "appRegion": "Région de l’application",
+  "regionalAdaptation": "Adaptation régionale",
+  "regionTitle": "Profil régional",
+  "regionIntro": "Paramètres réseau et vérifications des services régionaux, indépendants de la langue de l’interface.",
+  "regionWarning": "Choisir un pays ne modifie que l’aperçu. Les paramètres régionaux changent après application.",
+  "regionChoose": "Choisir un pays",
+  "regionDetected": "Suggestion : {region} · {source}",
+  "regionUseDetected": "Utiliser la région détectée",
+  "regionPreviewTitle": "Aperçu",
+  "regionPreviewBase": "Profil du pays : {region}",
+  "regionPreviewMtu": "MTU du TUN : {value}",
+  "regionPreviewServices": "Vérifications de services par défaut : {value}",
+  "regionPreviewRules": "Le choix du proxy et vos règles de routage restent inchangés.",
+  "regionPreviewAndroid": "Sur Android, modifier le MTU ou les exclusions peut nécessiter un redémarrage confirmé du VPN. Les applications se sélectionnent séparément.",
+  "regionCustomPreserved": "Vos DNS et MTU manuels, exclusions, règles de routage et choix de services sont conservés.",
+  "regionNoChanges": "Les paramètres réseau et les vérifications restent inchangés.",
+  "regionApply": "Appliquer la région",
+  "regionNoDetected": "Aucune suggestion correspondante. Seuls le fuseau horaire et les paramètres régionaux du système sont utilisés.",
+  "regionSelectBeforeApps": "Choisissez une région prise en charge avant d’utiliser les suggestions d’applications régionales.",
+  "regionNotSet": "Désactivée",
+  "regionOther": "Autre / général",
+  "regionRussia": "Russie",
+  "regionIran": "Iran",
+  "regionChina": "Chine",
+  "regionEgypt": "Égypte",
+  "regionSourceTimeZone": "fuseau horaire",
+  "regionSourceLocaleCountry": "pays de la langue du système",
+  "regionSourceLocaleLanguage": "langue du système",
+  "regionCurrent": "Région actuelle",
+  "regionDetectionTitle": "Suggestion de l’appareil",
+  "regionProfileDefaults": "Paramètres du profil",
+  "regionNoServices": "Vérifications des services désactivées",
+  "regionDnsSettings": "La région {region} fournit ces DNS : {value}. Les réglages manuels ici sont prioritaires.",
+  "regionTunSettings": "La région {region} fournit le MTU {value}. Ajoutez un réglage MTU pour utiliser votre propre valeur.",
+  "regionBypassSettings": "La région {region} utilise : {value}. Une liste personnalisée remplace les valeurs régionales.",
+  "regionSelectApps": "Sélectionner les applications par région",
+  "regionAppsPreviewTitle": "Aperçu de la sélection",
+  "regionAppsPreview": "{region} : {bypassed} applications dans la liste d’exclusion du VPN, {proxied} dans la liste VPN. Les deux listes seront remplacées ; le mode et les autres réglages restent inchangés. Les correspondances de paquets et SDK sont des suggestions : vérifiez le résultat après application.",
+  "regionAppsEmpty": "Aucune application ne correspond à cette région. Vos listes restent inchangées.",
+  "regionAppsChanged": "La région ou les listes ont changé. Relancez la sélection avec les réglages actuels.",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "Canal de mise à jour",
   "updateChannelRelease": "Version stable",
   "updateChannelPre": "Préversion",

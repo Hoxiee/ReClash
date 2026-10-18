@@ -1,0 +1,7 @@
+# layer A: EG namespace zone + best-effort vendor routes — VERIFY on Play before ship
+eg.
+com.cibeg
+com.banquemisr
+com.nbe
+com.fawry
+com.instapay

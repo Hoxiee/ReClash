@@ -7,6 +7,7 @@ enum ToolPage {
   network,
   dns,
   onDemand,
+  appRegion,
   userAgents,
   theme,
   locale,
@@ -33,7 +34,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.rules ||
     ToolPage.scripts => ToolPage.advanced,
     ToolPage.userAgents => ToolPage.general,
-    ToolPage.onDemand => ToolPage.application,
+    ToolPage.onDemand || ToolPage.appRegion => ToolPage.application,
     _ => null,
   };
 
