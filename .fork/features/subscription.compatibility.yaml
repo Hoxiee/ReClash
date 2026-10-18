@@ -1,0 +1,17 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  bounded: Auto requests a bounded number of unique client identities; a fixed client makes one attempt.
+  no-device-identity: Client presets never attach device identity headers, and custom User-Agent rejects controls.
+  client-adapters: Response metadata aliases are normalized only by the selected client's compatibility adapter.
+  safe-retries: Automatic negotiation retries only response-format incompatibility and stops on transport, authorization, consent, timeout, and rate-limit failures.
+  lossy-preview: Imports with omitted sections or skipped nodes are staged and cannot commit without explicit acceptance.
+  preserve-old-profile: Failed, cancelled, or rejected updates leave the stored config and metadata unchanged.
+  defaults: Existing profiles retain the ReClash request identity while newly added URL profiles default to Auto.
+  unknown-format: Unknown payloads are not treated as valid empty Clash configurations or silently imported.
+watch: [lib/subscriptions/**, lib/models/profile.dart, lib/database/profiles.dart, lib/database/database.dart, lib/database/generated/database.g.dart, lib/models/generated/profile.freezed.dart, lib/models/generated/profile.g.dart, lib/providers/actions/profiles.dart, lib/views/profiles/add.dart, lib/views/profiles/edit.dart, lib/views/dashboard/widgets/profile_detail.dart, 'arb/fragments/profiles.compatibility/**', test/subscriptions/**, test/models/profile_test.dart, test/database/**, test/providers/profiles_action_test.dart]
+checks:
+  subscription-compatibility: [bounded, no-device-identity, client-adapters, safe-retries, lossy-preview, preserve-old-profile, defaults, unknown-format]
+drop: The FlClash base preserves profile request, import, and confirmation behavior without identity leakage.

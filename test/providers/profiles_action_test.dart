@@ -188,7 +188,9 @@ void main() {
         var downloads = 0;
         server.listen((request) async {
           downloads++;
-          request.response.write('proxies: []\n');
+          request.response.write(
+            'proxies:\n  - name: test\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n',
+          );
           await request.response.close();
         });
         try {
@@ -206,7 +208,7 @@ void main() {
               .addProfileFromLink(url);
           expect(downloads, 1);
           expect(container.read(profilesProvider), hasLength(2));
-          verify(() => core.validateConfig(any())).called(1);
+          verify(() => core.validateConfig(any())).called(2);
         } finally {
           await server.close(force: true);
           HttpOverrides.global = overrides;

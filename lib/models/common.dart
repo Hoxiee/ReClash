@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:reclash/ui/icons/glyph.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -742,12 +743,24 @@ extension ScriptExt on Script {
   }
 }
 
+Map<String, String> _safeProviderHeaders(Object? value) {
+  if (value is! Map) return const {};
+  try {
+    return validateResourceHeaders(Map<String, String>.from(value));
+  } on Object {
+    return const {};
+  }
+}
+
 @freezed
 abstract class ClashProvider with _$ClashProvider {
   const factory ClashProvider({
     required int id,
     required String label,
     @Default('') String url,
+    @Default({})
+    @JsonKey(fromJson: _safeProviderHeaders)
+    Map<String, String> headers,
     @Default(RuleProviderBehavior.classical) RuleProviderBehavior behavior,
     @Default(RuleProviderFormat.yaml) RuleProviderFormat format,
     int? order,
@@ -764,9 +777,13 @@ typedef RuleSetInfo = ({
 });
 
 extension ClashProviderExt on ClashProvider {
-  /// Keyed by url so an edited url downloads afresh instead of reusing the
-  /// cached body the old one left behind.
-  String get fileName => '$id@$url'.toMd5();
+  /// Request headers are part of source identity but never appear in the path.
+  String get fileName {
+    final entries = headers.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return '$id@$url@${jsonEncode({for (final entry in entries) entry.key: entry.value})}'
+        .toMd5();
+  }
 
   bool get isRemote => url.isNotEmpty;
 

@@ -130,6 +130,30 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   ).withConverter<SubscriptionInfo?>($ProfilesTable.$convertersubscriptionInfo);
+  @override
+  late final GeneratedColumnWithTypeConverter<SubscriptionPreferences?, String>
+  subscriptionPreferences =
+      GeneratedColumn<String>(
+        'subscription_preferences',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<SubscriptionPreferences?>(
+        $ProfilesTable.$convertersubscriptionPreferences,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<SubscriptionSnapshot?, String>
+  subscriptionSnapshot =
+      GeneratedColumn<String>(
+        'subscription_snapshot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<SubscriptionSnapshot?>(
+        $ProfilesTable.$convertersubscriptionSnapshot,
+      );
   static const VerificationMeta _autoUpdateMeta = const VerificationMeta(
     'autoUpdate',
   );
@@ -194,6 +218,8 @@ class $ProfilesTable extends Profiles
     matchTarget,
     autoUpdateDurationMillis,
     subscriptionInfo,
+    subscriptionPreferences,
+    subscriptionSnapshot,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -361,6 +387,20 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}subscription_info'],
         ),
       ),
+      subscriptionPreferences: $ProfilesTable.$convertersubscriptionPreferences
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}subscription_preferences'],
+            ),
+          ),
+      subscriptionSnapshot: $ProfilesTable.$convertersubscriptionSnapshot
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}subscription_snapshot'],
+            ),
+          ),
       autoUpdate: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}auto_update'],
@@ -401,6 +441,10 @@ class $ProfilesTable extends Profiles
       const EnumNameConverter<ExtendType>(ExtendType.values);
   static TypeConverter<SubscriptionInfo?, String?> $convertersubscriptionInfo =
       const SubscriptionInfoConverter();
+  static TypeConverter<SubscriptionPreferences?, String?>
+  $convertersubscriptionPreferences = const SubscriptionPreferencesConverter();
+  static TypeConverter<SubscriptionSnapshot?, String?>
+  $convertersubscriptionSnapshot = const SubscriptionSnapshotConverter();
   static TypeConverter<Map<String, String>, String> $converterselectedMap =
       const StringMapConverter();
   static TypeConverter<Set<String>, String> $converterunfoldSet =
@@ -422,6 +466,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final String? matchTarget;
   final int autoUpdateDurationMillis;
   final SubscriptionInfo? subscriptionInfo;
+  final SubscriptionPreferences? subscriptionPreferences;
+  final SubscriptionSnapshot? subscriptionSnapshot;
   final bool autoUpdate;
   final Map<String, String> selectedMap;
   final Set<String> unfoldSet;
@@ -440,6 +486,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     this.matchTarget,
     required this.autoUpdateDurationMillis,
     this.subscriptionInfo,
+    this.subscriptionPreferences,
+    this.subscriptionSnapshot,
     required this.autoUpdate,
     required this.selectedMap,
     required this.unfoldSet,
@@ -481,6 +529,20 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     if (!nullToAbsent || subscriptionInfo != null) {
       map['subscription_info'] = Variable<String>(
         $ProfilesTable.$convertersubscriptionInfo.toSql(subscriptionInfo),
+      );
+    }
+    if (!nullToAbsent || subscriptionPreferences != null) {
+      map['subscription_preferences'] = Variable<String>(
+        $ProfilesTable.$convertersubscriptionPreferences.toSql(
+          subscriptionPreferences,
+        ),
+      );
+    }
+    if (!nullToAbsent || subscriptionSnapshot != null) {
+      map['subscription_snapshot'] = Variable<String>(
+        $ProfilesTable.$convertersubscriptionSnapshot.toSql(
+          subscriptionSnapshot,
+        ),
       );
     }
     map['auto_update'] = Variable<bool>(autoUpdate);
@@ -531,6 +593,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: subscriptionInfo == null && nullToAbsent
           ? const Value.absent()
           : Value(subscriptionInfo),
+      subscriptionPreferences: subscriptionPreferences == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subscriptionPreferences),
+      subscriptionSnapshot: subscriptionSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subscriptionSnapshot),
       autoUpdate: Value(autoUpdate),
       selectedMap: Value(selectedMap),
       unfoldSet: Value(unfoldSet),
@@ -569,6 +637,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: serializer.fromJson<SubscriptionInfo?>(
         json['subscriptionInfo'],
       ),
+      subscriptionPreferences: serializer.fromJson<SubscriptionPreferences?>(
+        json['subscriptionPreferences'],
+      ),
+      subscriptionSnapshot: serializer.fromJson<SubscriptionSnapshot?>(
+        json['subscriptionSnapshot'],
+      ),
       autoUpdate: serializer.fromJson<bool>(json['autoUpdate']),
       selectedMap: serializer.fromJson<Map<String, String>>(
         json['selectedMap'],
@@ -602,6 +676,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       'subscriptionInfo': serializer.toJson<SubscriptionInfo?>(
         subscriptionInfo,
       ),
+      'subscriptionPreferences': serializer.toJson<SubscriptionPreferences?>(
+        subscriptionPreferences,
+      ),
+      'subscriptionSnapshot': serializer.toJson<SubscriptionSnapshot?>(
+        subscriptionSnapshot,
+      ),
       'autoUpdate': serializer.toJson<bool>(autoUpdate),
       'selectedMap': serializer.toJson<Map<String, String>>(selectedMap),
       'unfoldSet': serializer.toJson<Set<String>>(unfoldSet),
@@ -623,6 +703,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     Value<String?> matchTarget = const Value.absent(),
     int? autoUpdateDurationMillis,
     Value<SubscriptionInfo?> subscriptionInfo = const Value.absent(),
+    Value<SubscriptionPreferences?> subscriptionPreferences =
+        const Value.absent(),
+    Value<SubscriptionSnapshot?> subscriptionSnapshot = const Value.absent(),
     bool? autoUpdate,
     Map<String, String>? selectedMap,
     Set<String>? unfoldSet,
@@ -648,6 +731,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     subscriptionInfo: subscriptionInfo.present
         ? subscriptionInfo.value
         : this.subscriptionInfo,
+    subscriptionPreferences: subscriptionPreferences.present
+        ? subscriptionPreferences.value
+        : this.subscriptionPreferences,
+    subscriptionSnapshot: subscriptionSnapshot.present
+        ? subscriptionSnapshot.value
+        : this.subscriptionSnapshot,
     autoUpdate: autoUpdate ?? this.autoUpdate,
     selectedMap: selectedMap ?? this.selectedMap,
     unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -682,6 +771,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: data.subscriptionInfo.present
           ? data.subscriptionInfo.value
           : this.subscriptionInfo,
+      subscriptionPreferences: data.subscriptionPreferences.present
+          ? data.subscriptionPreferences.value
+          : this.subscriptionPreferences,
+      subscriptionSnapshot: data.subscriptionSnapshot.present
+          ? data.subscriptionSnapshot.value
+          : this.subscriptionSnapshot,
       autoUpdate: data.autoUpdate.present
           ? data.autoUpdate.value
           : this.autoUpdate,
@@ -709,6 +804,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('matchTarget: $matchTarget, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
+          ..write('subscriptionPreferences: $subscriptionPreferences, ')
+          ..write('subscriptionSnapshot: $subscriptionSnapshot, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
@@ -732,6 +829,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     matchTarget,
     autoUpdateDurationMillis,
     subscriptionInfo,
+    subscriptionPreferences,
+    subscriptionSnapshot,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -754,6 +853,8 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.matchTarget == this.matchTarget &&
           other.autoUpdateDurationMillis == this.autoUpdateDurationMillis &&
           other.subscriptionInfo == this.subscriptionInfo &&
+          other.subscriptionPreferences == this.subscriptionPreferences &&
+          other.subscriptionSnapshot == this.subscriptionSnapshot &&
           other.autoUpdate == this.autoUpdate &&
           other.selectedMap == this.selectedMap &&
           other.unfoldSet == this.unfoldSet &&
@@ -774,6 +875,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<String?> matchTarget;
   final Value<int> autoUpdateDurationMillis;
   final Value<SubscriptionInfo?> subscriptionInfo;
+  final Value<SubscriptionPreferences?> subscriptionPreferences;
+  final Value<SubscriptionSnapshot?> subscriptionSnapshot;
   final Value<bool> autoUpdate;
   final Value<Map<String, String>> selectedMap;
   final Value<Set<String>> unfoldSet;
@@ -792,6 +895,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.matchTarget = const Value.absent(),
     this.autoUpdateDurationMillis = const Value.absent(),
     this.subscriptionInfo = const Value.absent(),
+    this.subscriptionPreferences = const Value.absent(),
+    this.subscriptionSnapshot = const Value.absent(),
     this.autoUpdate = const Value.absent(),
     this.selectedMap = const Value.absent(),
     this.unfoldSet = const Value.absent(),
@@ -811,6 +916,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.matchTarget = const Value.absent(),
     required int autoUpdateDurationMillis,
     this.subscriptionInfo = const Value.absent(),
+    this.subscriptionPreferences = const Value.absent(),
+    this.subscriptionSnapshot = const Value.absent(),
     required bool autoUpdate,
     required Map<String, String> selectedMap,
     required Set<String> unfoldSet,
@@ -837,6 +944,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? matchTarget,
     Expression<int>? autoUpdateDurationMillis,
     Expression<String>? subscriptionInfo,
+    Expression<String>? subscriptionPreferences,
+    Expression<String>? subscriptionSnapshot,
     Expression<bool>? autoUpdate,
     Expression<String>? selectedMap,
     Expression<String>? unfoldSet,
@@ -857,6 +966,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (autoUpdateDurationMillis != null)
         'auto_update_duration_millis': autoUpdateDurationMillis,
       if (subscriptionInfo != null) 'subscription_info': subscriptionInfo,
+      if (subscriptionPreferences != null)
+        'subscription_preferences': subscriptionPreferences,
+      if (subscriptionSnapshot != null)
+        'subscription_snapshot': subscriptionSnapshot,
       if (autoUpdate != null) 'auto_update': autoUpdate,
       if (selectedMap != null) 'selected_map': selectedMap,
       if (unfoldSet != null) 'unfold_set': unfoldSet,
@@ -878,6 +991,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<String?>? matchTarget,
     Value<int>? autoUpdateDurationMillis,
     Value<SubscriptionInfo?>? subscriptionInfo,
+    Value<SubscriptionPreferences?>? subscriptionPreferences,
+    Value<SubscriptionSnapshot?>? subscriptionSnapshot,
     Value<bool>? autoUpdate,
     Value<Map<String, String>>? selectedMap,
     Value<Set<String>>? unfoldSet,
@@ -898,6 +1013,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       autoUpdateDurationMillis:
           autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
+      subscriptionPreferences:
+          subscriptionPreferences ?? this.subscriptionPreferences,
+      subscriptionSnapshot: subscriptionSnapshot ?? this.subscriptionSnapshot,
       autoUpdate: autoUpdate ?? this.autoUpdate,
       selectedMap: selectedMap ?? this.selectedMap,
       unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -953,6 +1071,20 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         $ProfilesTable.$convertersubscriptionInfo.toSql(subscriptionInfo.value),
       );
     }
+    if (subscriptionPreferences.present) {
+      map['subscription_preferences'] = Variable<String>(
+        $ProfilesTable.$convertersubscriptionPreferences.toSql(
+          subscriptionPreferences.value,
+        ),
+      );
+    }
+    if (subscriptionSnapshot.present) {
+      map['subscription_snapshot'] = Variable<String>(
+        $ProfilesTable.$convertersubscriptionSnapshot.toSql(
+          subscriptionSnapshot.value,
+        ),
+      );
+    }
     if (autoUpdate.present) {
       map['auto_update'] = Variable<bool>(autoUpdate.value);
     }
@@ -992,6 +1124,8 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('matchTarget: $matchTarget, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
+          ..write('subscriptionPreferences: $subscriptionPreferences, ')
+          ..write('subscriptionSnapshot: $subscriptionSnapshot, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
@@ -3334,6 +3468,18 @@ class $ClashProvidersTable extends ClashProviders
     requiredDuringInsert: true,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+  requestHeaders =
+      GeneratedColumn<String>(
+        'request_headers',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Map<String, String>?>(
+        $ClashProvidersTable.$converterrequestHeaders,
+      );
+  @override
   late final GeneratedColumnWithTypeConverter<RuleProviderBehavior?, String>
   behavior =
       GeneratedColumn<String>(
@@ -3369,6 +3515,7 @@ class $ClashProvidersTable extends ClashProviders
     kind,
     label,
     url,
+    requestHeaders,
     behavior,
     format,
     order,
@@ -3437,6 +3584,12 @@ class $ClashProvidersTable extends ClashProviders
         DriftSqlType.string,
         data['${effectivePrefix}url'],
       )!,
+      requestHeaders: $ClashProvidersTable.$converterrequestHeaders.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}request_headers'],
+        ),
+      ),
       behavior: $ClashProvidersTable.$converterbehaviorn.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -3463,6 +3616,8 @@ class $ClashProvidersTable extends ClashProviders
 
   static JsonTypeConverter2<ProviderKind, String, String> $converterkind =
       const EnumNameConverter<ProviderKind>(ProviderKind.values);
+  static TypeConverter<Map<String, String>?, String?> $converterrequestHeaders =
+      const ProviderHeadersConverter();
   static JsonTypeConverter2<RuleProviderBehavior, String, String>
   $converterbehavior = const EnumNameConverter<RuleProviderBehavior>(
     RuleProviderBehavior.values,
@@ -3483,6 +3638,7 @@ class RawClashProvider extends DataClass
   final ProviderKind kind;
   final String label;
   final String url;
+  final Map<String, String>? requestHeaders;
   final RuleProviderBehavior? behavior;
   final RuleProviderFormat? format;
   final int? order;
@@ -3491,6 +3647,7 @@ class RawClashProvider extends DataClass
     required this.kind,
     required this.label,
     required this.url,
+    this.requestHeaders,
     this.behavior,
     this.format,
     this.order,
@@ -3506,6 +3663,11 @@ class RawClashProvider extends DataClass
     }
     map['label'] = Variable<String>(label);
     map['url'] = Variable<String>(url);
+    if (!nullToAbsent || requestHeaders != null) {
+      map['request_headers'] = Variable<String>(
+        $ClashProvidersTable.$converterrequestHeaders.toSql(requestHeaders),
+      );
+    }
     if (!nullToAbsent || behavior != null) {
       map['behavior'] = Variable<String>(
         $ClashProvidersTable.$converterbehaviorn.toSql(behavior),
@@ -3528,6 +3690,9 @@ class RawClashProvider extends DataClass
       kind: Value(kind),
       label: Value(label),
       url: Value(url),
+      requestHeaders: requestHeaders == null && nullToAbsent
+          ? const Value.absent()
+          : Value(requestHeaders),
       behavior: behavior == null && nullToAbsent
           ? const Value.absent()
           : Value(behavior),
@@ -3552,6 +3717,9 @@ class RawClashProvider extends DataClass
       ),
       label: serializer.fromJson<String>(json['label']),
       url: serializer.fromJson<String>(json['url']),
+      requestHeaders: serializer.fromJson<Map<String, String>?>(
+        json['requestHeaders'],
+      ),
       behavior: $ClashProvidersTable.$converterbehaviorn.fromJson(
         serializer.fromJson<String?>(json['behavior']),
       ),
@@ -3571,6 +3739,7 @@ class RawClashProvider extends DataClass
       ),
       'label': serializer.toJson<String>(label),
       'url': serializer.toJson<String>(url),
+      'requestHeaders': serializer.toJson<Map<String, String>?>(requestHeaders),
       'behavior': serializer.toJson<String?>(
         $ClashProvidersTable.$converterbehaviorn.toJson(behavior),
       ),
@@ -3586,6 +3755,7 @@ class RawClashProvider extends DataClass
     ProviderKind? kind,
     String? label,
     String? url,
+    Value<Map<String, String>?> requestHeaders = const Value.absent(),
     Value<RuleProviderBehavior?> behavior = const Value.absent(),
     Value<RuleProviderFormat?> format = const Value.absent(),
     Value<int?> order = const Value.absent(),
@@ -3594,6 +3764,9 @@ class RawClashProvider extends DataClass
     kind: kind ?? this.kind,
     label: label ?? this.label,
     url: url ?? this.url,
+    requestHeaders: requestHeaders.present
+        ? requestHeaders.value
+        : this.requestHeaders,
     behavior: behavior.present ? behavior.value : this.behavior,
     format: format.present ? format.value : this.format,
     order: order.present ? order.value : this.order,
@@ -3604,6 +3777,9 @@ class RawClashProvider extends DataClass
       kind: data.kind.present ? data.kind.value : this.kind,
       label: data.label.present ? data.label.value : this.label,
       url: data.url.present ? data.url.value : this.url,
+      requestHeaders: data.requestHeaders.present
+          ? data.requestHeaders.value
+          : this.requestHeaders,
       behavior: data.behavior.present ? data.behavior.value : this.behavior,
       format: data.format.present ? data.format.value : this.format,
       order: data.order.present ? data.order.value : this.order,
@@ -3617,6 +3793,7 @@ class RawClashProvider extends DataClass
           ..write('kind: $kind, ')
           ..write('label: $label, ')
           ..write('url: $url, ')
+          ..write('requestHeaders: $requestHeaders, ')
           ..write('behavior: $behavior, ')
           ..write('format: $format, ')
           ..write('order: $order')
@@ -3625,8 +3802,16 @@ class RawClashProvider extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, kind, label, url, behavior, format, order);
+  int get hashCode => Object.hash(
+    id,
+    kind,
+    label,
+    url,
+    requestHeaders,
+    behavior,
+    format,
+    order,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3635,6 +3820,7 @@ class RawClashProvider extends DataClass
           other.kind == this.kind &&
           other.label == this.label &&
           other.url == this.url &&
+          other.requestHeaders == this.requestHeaders &&
           other.behavior == this.behavior &&
           other.format == this.format &&
           other.order == this.order);
@@ -3645,6 +3831,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
   final Value<ProviderKind> kind;
   final Value<String> label;
   final Value<String> url;
+  final Value<Map<String, String>?> requestHeaders;
   final Value<RuleProviderBehavior?> behavior;
   final Value<RuleProviderFormat?> format;
   final Value<int?> order;
@@ -3653,6 +3840,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
     this.kind = const Value.absent(),
     this.label = const Value.absent(),
     this.url = const Value.absent(),
+    this.requestHeaders = const Value.absent(),
     this.behavior = const Value.absent(),
     this.format = const Value.absent(),
     this.order = const Value.absent(),
@@ -3662,6 +3850,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
     required ProviderKind kind,
     required String label,
     required String url,
+    this.requestHeaders = const Value.absent(),
     this.behavior = const Value.absent(),
     this.format = const Value.absent(),
     this.order = const Value.absent(),
@@ -3673,6 +3862,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
     Expression<String>? kind,
     Expression<String>? label,
     Expression<String>? url,
+    Expression<String>? requestHeaders,
     Expression<String>? behavior,
     Expression<String>? format,
     Expression<int>? order,
@@ -3682,6 +3872,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
       if (kind != null) 'kind': kind,
       if (label != null) 'label': label,
       if (url != null) 'url': url,
+      if (requestHeaders != null) 'request_headers': requestHeaders,
       if (behavior != null) 'behavior': behavior,
       if (format != null) 'format': format,
       if (order != null) 'order': order,
@@ -3693,6 +3884,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
     Value<ProviderKind>? kind,
     Value<String>? label,
     Value<String>? url,
+    Value<Map<String, String>?>? requestHeaders,
     Value<RuleProviderBehavior?>? behavior,
     Value<RuleProviderFormat?>? format,
     Value<int?>? order,
@@ -3702,6 +3894,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
       kind: kind ?? this.kind,
       label: label ?? this.label,
       url: url ?? this.url,
+      requestHeaders: requestHeaders ?? this.requestHeaders,
       behavior: behavior ?? this.behavior,
       format: format ?? this.format,
       order: order ?? this.order,
@@ -3724,6 +3917,13 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
     }
     if (url.present) {
       map['url'] = Variable<String>(url.value);
+    }
+    if (requestHeaders.present) {
+      map['request_headers'] = Variable<String>(
+        $ClashProvidersTable.$converterrequestHeaders.toSql(
+          requestHeaders.value,
+        ),
+      );
     }
     if (behavior.present) {
       map['behavior'] = Variable<String>(
@@ -3748,6 +3948,7 @@ class ClashProvidersCompanion extends UpdateCompanion<RawClashProvider> {
           ..write('kind: $kind, ')
           ..write('label: $label, ')
           ..write('url: $url, ')
+          ..write('requestHeaders: $requestHeaders, ')
           ..write('behavior: $behavior, ')
           ..write('format: $format, ')
           ..write('order: $order')
@@ -4725,6 +4926,8 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<String?> matchTarget,
       required int autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
+      Value<SubscriptionPreferences?> subscriptionPreferences,
+      Value<SubscriptionSnapshot?> subscriptionSnapshot,
       required bool autoUpdate,
       required Map<String, String> selectedMap,
       required Set<String> unfoldSet,
@@ -4745,6 +4948,8 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<String?> matchTarget,
       Value<int> autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
+      Value<SubscriptionPreferences?> subscriptionPreferences,
+      Value<SubscriptionSnapshot?> subscriptionSnapshot,
       Value<bool> autoUpdate,
       Value<Map<String, String>> selectedMap,
       Value<Set<String>> unfoldSet,
@@ -4899,6 +5104,26 @@ class $$ProfilesTableFilterComposer
   ColumnWithTypeConverterFilters<SubscriptionInfo?, SubscriptionInfo, String>
   get subscriptionInfo => $composableBuilder(
     column: $table.subscriptionInfo,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    SubscriptionPreferences?,
+    SubscriptionPreferences,
+    String
+  >
+  get subscriptionPreferences => $composableBuilder(
+    column: $table.subscriptionPreferences,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    SubscriptionSnapshot?,
+    SubscriptionSnapshot,
+    String
+  >
+  get subscriptionSnapshot => $composableBuilder(
+    column: $table.subscriptionSnapshot,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -5104,6 +5329,16 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get subscriptionPreferences => $composableBuilder(
+    column: $table.subscriptionPreferences,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subscriptionSnapshot => $composableBuilder(
+    column: $table.subscriptionSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
     builder: (column) => ColumnOrderings(column),
@@ -5188,6 +5423,18 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<SubscriptionInfo?, String>
   get subscriptionInfo => $composableBuilder(
     column: $table.subscriptionInfo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SubscriptionPreferences?, String>
+  get subscriptionPreferences => $composableBuilder(
+    column: $table.subscriptionPreferences,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SubscriptionSnapshot?, String>
+  get subscriptionSnapshot => $composableBuilder(
+    column: $table.subscriptionSnapshot,
     builder: (column) => column,
   );
 
@@ -5358,6 +5605,10 @@ class $$ProfilesTableTableManager
                 Value<int> autoUpdateDurationMillis = const Value.absent(),
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
+                Value<SubscriptionPreferences?> subscriptionPreferences =
+                    const Value.absent(),
+                Value<SubscriptionSnapshot?> subscriptionSnapshot =
+                    const Value.absent(),
                 Value<bool> autoUpdate = const Value.absent(),
                 Value<Map<String, String>> selectedMap = const Value.absent(),
                 Value<Set<String>> unfoldSet = const Value.absent(),
@@ -5376,6 +5627,8 @@ class $$ProfilesTableTableManager
                 matchTarget: matchTarget,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
+                subscriptionPreferences: subscriptionPreferences,
+                subscriptionSnapshot: subscriptionSnapshot,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
@@ -5397,6 +5650,10 @@ class $$ProfilesTableTableManager
                 required int autoUpdateDurationMillis,
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
+                Value<SubscriptionPreferences?> subscriptionPreferences =
+                    const Value.absent(),
+                Value<SubscriptionSnapshot?> subscriptionSnapshot =
+                    const Value.absent(),
                 required bool autoUpdate,
                 required Map<String, String> selectedMap,
                 required Set<String> unfoldSet,
@@ -5415,6 +5672,8 @@ class $$ProfilesTableTableManager
                 matchTarget: matchTarget,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
+                subscriptionPreferences: subscriptionPreferences,
+                subscriptionSnapshot: subscriptionSnapshot,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
@@ -7358,6 +7617,7 @@ typedef $$ClashProvidersTableCreateCompanionBuilder =
       required ProviderKind kind,
       required String label,
       required String url,
+      Value<Map<String, String>?> requestHeaders,
       Value<RuleProviderBehavior?> behavior,
       Value<RuleProviderFormat?> format,
       Value<int?> order,
@@ -7368,6 +7628,7 @@ typedef $$ClashProvidersTableUpdateCompanionBuilder =
       Value<ProviderKind> kind,
       Value<String> label,
       Value<String> url,
+      Value<Map<String, String>?> requestHeaders,
       Value<RuleProviderBehavior?> behavior,
       Value<RuleProviderFormat?> format,
       Value<int?> order,
@@ -7401,6 +7662,16 @@ class $$ClashProvidersTableFilterComposer
   ColumnFilters<String> get url => $composableBuilder(
     column: $table.url,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, String>?,
+    Map<String, String>,
+    String
+  >
+  get requestHeaders => $composableBuilder(
+    column: $table.requestHeaders,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnWithTypeConverterFilters<
@@ -7458,6 +7729,11 @@ class $$ClashProvidersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get requestHeaders => $composableBuilder(
+    column: $table.requestHeaders,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get behavior => $composableBuilder(
     column: $table.behavior,
     builder: (column) => ColumnOrderings(column),
@@ -7494,6 +7770,12 @@ class $$ClashProvidersTableAnnotationComposer
 
   GeneratedColumn<String> get url =>
       $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, String>?, String>
+  get requestHeaders => $composableBuilder(
+    column: $table.requestHeaders,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<RuleProviderBehavior?, String>
   get behavior =>
@@ -7541,6 +7823,8 @@ class $$ClashProvidersTableTableManager
                 Value<ProviderKind> kind = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<String> url = const Value.absent(),
+                Value<Map<String, String>?> requestHeaders =
+                    const Value.absent(),
                 Value<RuleProviderBehavior?> behavior = const Value.absent(),
                 Value<RuleProviderFormat?> format = const Value.absent(),
                 Value<int?> order = const Value.absent(),
@@ -7549,6 +7833,7 @@ class $$ClashProvidersTableTableManager
                 kind: kind,
                 label: label,
                 url: url,
+                requestHeaders: requestHeaders,
                 behavior: behavior,
                 format: format,
                 order: order,
@@ -7559,6 +7844,8 @@ class $$ClashProvidersTableTableManager
                 required ProviderKind kind,
                 required String label,
                 required String url,
+                Value<Map<String, String>?> requestHeaders =
+                    const Value.absent(),
                 Value<RuleProviderBehavior?> behavior = const Value.absent(),
                 Value<RuleProviderFormat?> format = const Value.absent(),
                 Value<int?> order = const Value.absent(),
@@ -7567,6 +7854,7 @@ class $$ClashProvidersTableTableManager
                 kind: kind,
                 label: label,
                 url: url,
+                requestHeaders: requestHeaders,
                 behavior: behavior,
                 format: format,
                 order: order,

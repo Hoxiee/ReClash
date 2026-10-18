@@ -7,6 +7,8 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/profiles/custom/custom.dart';
 import 'package:reclash/features/form/form.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/compatibility/settings_form.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +44,7 @@ class AddProfileMenu extends ConsumerWidget {
   Future<void> _toAdd(BuildContext context, WidgetRef ref) async {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     final appLocalizations = context.appLocalizations;
+    var clientSettings = const SubscriptionClientSettings.forNewProfile();
     final res = await showNamedUrlsForm(
       context,
       title: appLocalizations.importFromLink,
@@ -61,6 +64,15 @@ class AddProfileMenu extends ConsumerWidget {
           if (profile.url.isNotEmpty) profile.url,
       },
       withAgeSecretKey: true,
+      additionalValidator: () => clientSettings.isValid
+          ? null
+          : appLocalizations.subscriptionClientCustomUserAgentInvalid,
+      additionalSectionsBuilder: (context, onChanged) =>
+          SubscriptionClientSettingsSection(
+            initial: clientSettings,
+            onChanged: (value) => clientSettings = value,
+            onFormChanged: onChanged,
+          ),
     );
     switch (res) {
       case null:
@@ -71,13 +83,14 @@ class AddProfileMenu extends ConsumerWidget {
             single.url,
             label: single.label,
             ageSecretKey: single.ageSecretKey,
+            clientSettings: single.url.isShareLink ? null : clientSettings,
           ),
         );
       default:
         unawaited(
           profilesAction.addProfilesFromLinks([
             for (final item in res) item.url,
-          ]),
+          ], clientSettings: clientSettings),
         );
     }
   }

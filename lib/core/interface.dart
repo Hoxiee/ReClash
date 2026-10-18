@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/transport/header_policy.dart';
+import 'package:reclash/subscriptions/protocol/registry.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 
 import 'desktop/model.dart';
 import 'method.dart';
@@ -48,7 +53,22 @@ mixin CoreInterface {
 
   Future<String> dumpRuleSet(String path);
 
-  Future<RuleSetInfo> compileRuleSet(String name, {String url = ''});
+  Future<RuleSetInfo> compileRuleSet(
+    String name, {
+    String url = '',
+    Map<String, String> headers = const {},
+  });
+
+  Future<SubscriptionResponse> fetchSubscription(
+    String requestId,
+    Uri url, {
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 20),
+    int maxBytes = subscriptionWireLimit,
+    bool protected = false,
+  });
+
+  Future<bool> cancelSubscriptionFetch(String requestId);
 
   Future<Delay?> asyncTestDelay(String url, String proxyName, Duration timeout);
 
@@ -374,10 +394,18 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<RuleSetInfo> compileRuleSet(String name, {String url = ''}) async {
+  Future<RuleSetInfo> compileRuleSet(
+    String name, {
+    String url = '',
+    Map<String, String> headers = const {},
+  }) async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.compileRuleSet,
-      arguments: {'name': name, 'url': url},
+      arguments: {
+        'name': name,
+        'url': url,
+        'headers': validateResourceHeaders(headers),
+      },
     );
     if (data == null) {
       throw const CoreMethodException(
@@ -390,6 +418,56 @@ abstract class CoreHandlerInterface with CoreInterface {
       format: RuleProviderFormat.values.byName(data['format'] as String),
     );
   }
+
+  @override
+  Future<SubscriptionResponse> fetchSubscription(
+    String requestId,
+    Uri url, {
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 20),
+    int maxBytes = subscriptionWireLimit,
+    bool protected = false,
+  }) async {
+    final validated = validateSubscriptionHeaders(headers, allowManaged: true);
+    final result = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.fetchSubscription,
+      arguments: {
+        'requestId': requestId,
+        'url': url.toString(),
+        'headers': validated,
+        'timeoutMillis': timeout.inMilliseconds,
+        'maxBytes': maxBytes,
+        'protected': protected,
+      },
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'no_response',
+        message: 'Core did not answer fetchSubscription',
+      );
+    }
+    final rawHeaders = result['headers'] as Map? ?? const {};
+    return SubscriptionResponse(
+      status: result['status'] as int,
+      headers: {
+        for (final MapEntry(:key, :value) in Map<String, dynamic>.from(
+          rawHeaders,
+        ).entries)
+          key.toString().toLowerCase(): List<String>.from(value as List),
+      },
+      bytes: Uint8List.fromList(base64.decode(result['bodyBase64'] as String)),
+      uri: Uri.parse(result['finalUrl'] as String),
+      protected: result['protected'] as bool? ?? false,
+    );
+  }
+
+  @override
+  Future<bool> cancelSubscriptionFetch(String requestId) async =>
+      await _invokeMethod<bool>(
+        method: CoreMethod.cancelSubscriptionFetch,
+        arguments: {'requestId': requestId},
+      ) ??
+      false;
 
   @override
   Future<bool> crash() async {

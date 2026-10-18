@@ -8,6 +8,9 @@ import 'package:reclash/common/migration.dart';
 import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 
@@ -482,14 +485,19 @@ void main() {
       databasePath = join(home.path, 'database.sqlite');
     });
 
-    Future<void> seedDatabase() async {
+    Future<void> seedDatabase({
+      Profile? profile,
+      ClashProvider? provider,
+    }) async {
       final database = db.Database(NativeDatabase(File(databasePath)));
       await database.profilesDao.putAll([
-        const Profile(
-          id: 1,
-          label: 'Backed up',
-          autoUpdateDuration: Duration.zero,
-        ).toCompanion(),
+        (profile ??
+                const Profile(
+                  id: 1,
+                  label: 'Backed up',
+                  autoUpdateDuration: Duration.zero,
+                ))
+            .toCompanion(),
       ]);
       await database.scriptsDao.setAll([
         Script(id: 2, label: 'Script', lastUpdateTime: DateTime(2026)),
@@ -498,7 +506,9 @@ void main() {
         const Rule(id: 3, content: 'example.com', order: 'a'),
         profileId: 1,
       );
-      await database.clashProvidersDao.putAll([localProvider.toCompanion()]);
+      await database.clashProvidersDao.putAll([
+        (provider ?? localProvider).toCompanion(),
+      ]);
       await database.close();
     }
 
@@ -596,6 +606,140 @@ void main() {
         ['proxies: []', 'body', 'payload: []'],
       );
     });
+
+    test(
+      'portable archives round-trip subscription data but omit device identity',
+      () async {
+        const provider = ClashProvider(
+          id: 4,
+          label: 'Remote rules',
+          url: 'https://rules.example/list',
+          headers: {'authorization': 'Bearer fake-rule-provider-header'},
+          behavior: RuleProviderBehavior.classical,
+          format: RuleProviderFormat.yaml,
+        );
+        final preferences = SubscriptionPreferences(
+          headers: const {'x-fake-subscription': 'fake-subscription-header'},
+          intervalOverride: false,
+          trustedOrigins: const ['https://consent.example'],
+          client: const SubscriptionClientSettings(
+            preset: SubscriptionClientPreset.custom,
+            customUserAgent: 'FakePortableClient/1.0',
+          ),
+        );
+        final snapshot = SubscriptionSnapshot(
+          metadata: const SubscriptionMetadata({
+            'account.title': 'Fake account',
+            'subscription.total': 9000,
+            'subscription.upload': 100,
+            'subscription.download': 200,
+            'subscription.unlimited': false,
+          }),
+          receivedAt: DateTime.utc(2026, 1, 2, 3, 4),
+          stale: true,
+          staleFields: const ['subscription.upload'],
+          warnings: const ['fake snapshot warning'],
+        );
+        await seedDatabase(
+          profile: Profile(
+            id: 1,
+            type: ProfileType.url,
+            label: 'Portable subscription',
+            url: 'https://subscription.example/fake',
+            autoUpdateDuration: const Duration(hours: 6),
+            subscriptionPreferences: preferences,
+            subscriptionSnapshot: snapshot,
+          ),
+          provider: provider,
+        );
+
+        final identityFile = File(join(root.path, 'subscription-device.json'));
+        await identityFile.writeAsString(
+          json.encode({
+            'version': 1,
+            'identity': {
+              'hwid': '0123456789abcdef0123456789abcdef',
+              'source': 'fake-system-source-marker',
+              'os': 'FakeOS',
+              'osVersion': '0.0-test',
+              'model': 'FakeModel',
+            },
+            'consents': [
+              {
+                'profileId': 1,
+                'origin': 'https://consent.example',
+                'sendDetails': true,
+              },
+            ],
+          }),
+        );
+
+        final archivePath = await backup(
+          configMap: const {
+            'version': 1,
+            'settings': {'portable': true},
+          },
+          entries: BackupEntries.of(
+            profileIds: const [1],
+            scriptIds: const [],
+            providers: const [provider],
+          ),
+        );
+        final archive = ZipDecoder().decodeStream(InputFileStream(archivePath));
+        final names = archive.files.map((file) => file.name).toSet();
+        expect(names, {backupDatabaseName, configJsonName});
+        expect(names, isNot(contains('subscription-device.json')));
+        final configContents = utf8.decode(
+          archive.files
+                  .singleWhere((file) => file.name == configJsonName)
+                  .content
+              as List<int>,
+        );
+        final databaseContents = utf8.decode(
+          archive.files
+                  .singleWhere((file) => file.name == backupDatabaseName)
+                  .content
+              as List<int>,
+          allowMalformed: true,
+        );
+        expect(configContents, isNot(contains('fake-system-source-marker')));
+        expect(
+          configContents,
+          isNot(contains('0123456789abcdef0123456789abcdef')),
+        );
+        expect(databaseContents, isNot(contains('fake-system-source-marker')));
+        expect(
+          databaseContents,
+          isNot(contains('0123456789abcdef0123456789abcdef')),
+        );
+        expect(databaseContents, isNot(contains('FakeModel')));
+        expect(databaseContents, isNot(contains('sendDetails')));
+
+        final restored = await restore(archivePath);
+        final restoredProfile = restored.profiles.single;
+        expect(
+          restoredProfile.subscriptionPreferences.toJson(),
+          preferences.toJson(),
+        );
+        expect(
+          restoredProfile.subscriptionSnapshot?.toJson(),
+          snapshot.toJson(),
+        );
+        expect(restored.clashProviders.single.headers, provider.headers);
+        expect(restored.configMap, {
+          'version': 1,
+          'settings': {'portable': true},
+        });
+        expect(
+          identityFile.readAsStringSync(),
+          contains('fake-system-source-marker'),
+        );
+        expect(
+          File(join(staging.path, 'subscription-device.json')).existsSync(),
+          isFalse,
+        );
+      },
+    );
 
     test('a version 0 archive goes through the legacy migration', () async {
       await seedDatabase();

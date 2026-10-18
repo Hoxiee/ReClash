@@ -41,13 +41,13 @@ CustomImportApp _app({
   },
   profileSources: {
     for (final MapEntry(:key, :value) in profiles.entries)
-      (url: key, ageSecretKey: ''): value,
+      (url: key, ageSecretKey: '', headers: const {}): value,
     ...keyedProfiles,
   },
   ruleProviderLabels: {...ruleProviderLabels, ...ruleProviders.values},
   ruleProviderSources: {
     for (final MapEntry(:key, :value) in ruleProviders.entries)
-      (url: key, ageSecretKey: ''): value,
+      (url: key, ageSecretKey: '', headers: const {}): value,
   },
   proxies: proxies,
   groupNames: groupNames,
@@ -114,6 +114,7 @@ proxy-groups:
           url: 'https://example.com/new',
           ageSecretKey: '',
           content: '',
+          headers: const <String, String>{},
         ),
       ]);
       expect(config.proxyGroups.single.use, ['sub(1)', 'other']);
@@ -126,6 +127,41 @@ proxy-groups:
           proxyOverride: ProviderOverride(additionalPrefix: '[sub] '),
         ),
       });
+    });
+
+    test('keeps request headers as part of remote provider identity', () {
+      final config = _read('''
+proxy-providers:
+  first:
+    type: http
+    url: https://example.com/sub
+    headers: {Authorization: 'Bearer first'}
+  second:
+    type: http
+    url: https://example.com/sub
+    headers: {Authorization: 'Bearer second'}
+''');
+
+      expect(config.proxyProviders, hasLength(2));
+      expect(config.proxyProviders[0].headers, {
+        'authorization': 'Bearer first',
+      });
+      expect(config.proxyProviders[1].headers, {
+        'authorization': 'Bearer second',
+      });
+    });
+
+    test('rejects device identity headers on resource providers', () {
+      expect(
+        () => _read('''
+rule-providers:
+  rules:
+    type: http
+    url: https://example.com/rules
+    headers: {X-HWID: device-id}
+'''),
+        throwsA(_issue(CustomImportIssue.entry, item: 'rules')),
+      );
     });
 
     test('adds file providers empty and inline ones with their proxies', () {
@@ -143,6 +179,7 @@ proxy-providers:
         url: '',
         ageSecretKey: '',
         content: '',
+        headers: const <String, String>{},
       ));
       final inline = config.proxyProviders.last;
       expect(inline.label, 'inline');
@@ -164,8 +201,11 @@ proxy-groups:
 ''',
         _app(
           keyedProfiles: {
-            (url: 'https://example.com/sub', ageSecretKey: 'AGE-SECRET-KEY-1A'):
-                'Keyed',
+            (
+              url: 'https://example.com/sub',
+              ageSecretKey: 'AGE-SECRET-KEY-1A',
+              headers: const <String, String>{},
+            ): 'Keyed',
           },
         ),
       );
@@ -192,8 +232,11 @@ proxy-groups:
         _app(
           profiles: {'https://example.com/sub': 'Plain'},
           keyedProfiles: {
-            (url: 'https://example.com/sub', ageSecretKey: 'AGE-SECRET-KEY-1A'):
-                'Keyed',
+            (
+              url: 'https://example.com/sub',
+              ageSecretKey: 'AGE-SECRET-KEY-1A',
+              headers: const <String, String>{},
+            ): 'Keyed',
           },
         ),
       );
@@ -204,6 +247,7 @@ proxy-groups:
           url: 'https://example.com/sub',
           ageSecretKey: 'AGE-SECRET-KEY-1B',
           content: '',
+          headers: const <String, String>{},
         ),
       ]);
       expect(config.proxyGroups.single.use, ['Keyed', 'other']);
@@ -268,6 +312,7 @@ sniffer:
           url: 'https://example.com/ads.yaml',
           ageSecretKey: '',
           content: '',
+          headers: const <String, String>{},
         ),
       ]);
       expect(
@@ -713,15 +758,19 @@ tun:
       compiledUrls = [];
       final core = _MockCoreHandlerInterface();
       when(() => core.validateConfig(any())).thenAnswer((_) async => '');
-      when(() => core.compileRuleSet(any(), url: any(named: 'url'))).thenAnswer(
-        (invocation) async {
-          compiledUrls.add(invocation.namedArguments[#url] as String);
-          return (
-            behavior: RuleProviderBehavior.classical,
-            format: RuleProviderFormat.text,
-          );
-        },
-      );
+      when(
+        () => core.compileRuleSet(
+          any(),
+          url: any(named: 'url'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((invocation) async {
+        compiledUrls.add(invocation.namedArguments[#url] as String);
+        return (
+          behavior: RuleProviderBehavior.classical,
+          format: RuleProviderFormat.text,
+        );
+      });
       container = ProviderContainer(
         overrides: [
           profilesProvider.overrideWith(() => TestProfiles([custom])),

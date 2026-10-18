@@ -3,6 +3,8 @@ package core
 import (
 	"time"
 
+	"core/rcx"
+
 	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/adapter/provider"
 	P "github.com/metacubex/mihomo/component/process"
@@ -18,6 +20,7 @@ const (
 	messageMethod                  CoreMethod = "message"
 	initClashMethod                CoreMethod = "initClash"
 	getIsInitMethod                CoreMethod = "getIsInit"
+	getCoreInfoMethod              CoreMethod = "getCoreInfo"
 	forceGcMethod                  CoreMethod = "forceGc"
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigMethod           CoreMethod = "validateConfig"
@@ -53,6 +56,7 @@ const (
 	stopLogMethod                  CoreMethod = "stopLog"
 	startListenerMethod            CoreMethod = "startListener"
 	stopListenerMethod             CoreMethod = "stopListener"
+	setOnDemandPausedMethod        CoreMethod = "setOnDemandPaused"
 	updateDnsMethod                CoreMethod = "updateDns"
 	crashMethod                    CoreMethod = "crash"
 	setupConfigMethod              CoreMethod = "setupConfig"
@@ -66,6 +70,16 @@ const (
 	clearEffectMethod              CoreMethod = "clearEffect"
 	watchRouteMethod               CoreMethod = "watchRoute"
 	checkRoutesMethod              CoreMethod = "checkRoutes"
+	fetchSubscriptionMethod        CoreMethod = "fetchSubscription"
+	cancelSubscriptionFetchMethod  CoreMethod = "cancelSubscriptionFetch"
+	rcxSetPolicyMethod             CoreMethod = "rcxSetPolicy"
+	rcxStatusMethod                CoreMethod = "rcxStatus"
+	rcxExplainMethod               CoreMethod = "rcxExplain"
+	rcxJournalMethod               CoreMethod = "rcxJournal"
+	rcxActionMethod                CoreMethod = "rcxAction"
+	rcxHintsMethod                 CoreMethod = "rcxHints"
+	rcxProfilesMethod              CoreMethod = "rcxProfiles"
+	rcxStudioMethod                CoreMethod = "rcxStudio"
 )
 
 type MessageType string
@@ -81,6 +95,7 @@ const (
 	RouteChangedMessage   MessageType = "routeChanged"
 	DialerLoopMessage     MessageType = "dialerLoop"
 	RequestTrafficMessage MessageType = "requestTraffic"
+	RcxStatusMessage      MessageType = "rcxStatus"
 )
 
 type Message struct {
@@ -103,6 +118,8 @@ type SetupParams struct {
 	TestURL        string            `json:"test-url"`
 	SkipCertVerify bool              `json:"skip-cert-verify"`
 	Base           *SetupBase        `json:"base,omitempty"`
+	// The host's routing choices; absent keeps the ones last sent.
+	Rcx *rcx.UserLayer `json:"rcx,omitempty"`
 }
 
 type SetupBase struct {
@@ -161,8 +178,9 @@ type SideLoadParams struct {
 }
 
 type CompileRuleSetParams struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
+	Name    string            `json:"name"`
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers,omitempty"`
 }
 
 type RuleSetInfo struct {
@@ -216,14 +234,14 @@ type ProbeResult struct {
 	Error       string   `json:"error,omitempty"`
 	Message     string   `json:"message,omitempty"`
 
-	CoreEpoch    uint64 `json:"core-epoch"`
-	RouteVersion uint64 `json:"route-version"`
+	CoreEpoch    uint64     `json:"core-epoch"`
+	RouteVersion uint64     `json:"route-version"`
+	Hits         []RouteHit `json:"hits,omitempty"`
 
 	// Unexported, so it never reaches Dart: only the in-core checks read
 	// response headers, and ProbeResult is the shape the Dart side decodes.
 	header    http.Header
 	lowerBody string
-	hits      []RouteHit
 }
 
 type Traffic struct {

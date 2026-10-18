@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -59,6 +64,77 @@ void main() {
         ProfileType.url,
       );
     });
+
+    test(
+      'new URL profiles select Auto while old stored rows default native',
+      () {
+        final created = Profile.normal(url: 'https://example.test/sub');
+        expect(
+          created.subscriptionPreferences.client.preset,
+          SubscriptionClientPreset.auto,
+        );
+
+        final old = Map<String, Object?>.from(
+          jsonDecode(
+                jsonEncode(
+                  const Profile(
+                    id: 9,
+                    type: ProfileType.url,
+                    url: 'https://example.test/sub',
+                    autoUpdateDuration: defaultUpdateDuration,
+                  ).toJson(),
+                ),
+              )
+              as Map,
+        )..remove('subscriptionPreferences');
+        final restored = Profile.fromJson(old);
+        expect(
+          restored.subscriptionPreferences.client.preset,
+          SubscriptionClientPreset.reclash,
+        );
+        expect(restored.subscriptionPreferences.intervalOverride, isTrue);
+      },
+    );
+
+    test(
+      'profile JSON retains custom request preferences and provider snapshot',
+      () {
+        final profile = Profile.normal(url: 'https://example.test/sub')
+            .copyWith(
+              subscriptionPreferences: const SubscriptionPreferences(
+                headers: {'authorization': 'Bearer user-token'},
+                client: SubscriptionClientSettings(
+                  preset: SubscriptionClientPreset.custom,
+                  customUserAgent: 'Custom/1',
+                ),
+              ),
+              subscriptionSnapshot: SubscriptionSnapshot(
+                metadata: const SubscriptionMetadata({
+                  'provider.name': 'Example',
+                }),
+                receivedAt: DateTime.utc(2026),
+                stale: true,
+                staleFields: const ['subscription.total'],
+              ),
+            );
+        final restored = Profile.fromJson(
+          Map<String, Object?>.from(
+            jsonDecode(jsonEncode(profile.toJson())) as Map,
+          ),
+        );
+
+        expect(
+          restored.subscriptionPreferences.headers,
+          profile.subscriptionPreferences.headers,
+        );
+        expect(
+          restored.subscriptionPreferences.client.preset,
+          SubscriptionClientPreset.custom,
+        );
+        expect(restored.subscriptionSnapshot?.metadata.name, 'Example');
+        expect(restored.subscriptionSnapshot?.usageStale, isTrue);
+      },
+    );
 
     test('custom never updates itself', () {
       final profile = Profile.custom(label: 'Mine');

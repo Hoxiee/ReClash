@@ -6,6 +6,7 @@ enum CoreMethod {
   message,
   initClash,
   getIsInit,
+  getCoreInfo,
   forceGc,
   shutdown,
   validateConfig,
@@ -47,6 +48,7 @@ enum CoreMethod {
   stopLog,
   startListener,
   stopListener,
+  setOnDemandPaused,
   getMemoryStats,
   crash,
   setupConfig,
@@ -54,6 +56,16 @@ enum CoreMethod {
   updateDns,
   watchRoute,
   checkRoutes,
+  fetchSubscription,
+  cancelSubscriptionFetch,
+  rcxSetPolicy,
+  rcxStatus,
+  rcxExplain,
+  rcxJournal,
+  rcxAction,
+  rcxHints,
+  rcxProfiles,
+  rcxStudio,
 }
 
 class CoreMethodCall {

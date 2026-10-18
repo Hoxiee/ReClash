@@ -42,6 +42,12 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
       : SubscriptionInfo.fromJson(
           json['subscriptionInfo'] as Map<String, dynamic>,
         ),
+  subscriptionPreferences: json['subscriptionPreferences'] == null
+      ? const SubscriptionPreferences()
+      : SubscriptionPreferences.safeFromJson(json['subscriptionPreferences']),
+  subscriptionSnapshot: SubscriptionSnapshot.safeFromJson(
+    json['subscriptionSnapshot'],
+  ),
   autoUpdate: json['autoUpdate'] as bool? ?? true,
   selectedMap:
       (json['selectedMap'] as Map<String, dynamic>?)?.map(
@@ -74,6 +80,8 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'lastUpdateDate': instance.lastUpdateDate?.toIso8601String(),
   'autoUpdateDuration': instance.autoUpdateDuration.inMicroseconds,
   'subscriptionInfo': instance.subscriptionInfo,
+  'subscriptionPreferences': instance.subscriptionPreferences,
+  'subscriptionSnapshot': instance.subscriptionSnapshot,
   'autoUpdate': instance.autoUpdate,
   'selectedMap': instance.selectedMap,
   'unfoldSet': instance.unfoldSet.toList(),

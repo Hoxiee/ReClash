@@ -8,6 +8,9 @@ import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/metadata/preferences.dart';
+import 'package:reclash/subscriptions/transport/header_policy.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
 part 'clash_providers.dart';
@@ -53,7 +56,7 @@ class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -83,7 +86,16 @@ class Database extends _$Database {
           await _createTableIfMissing(m, clashProviders);
         }
         if (from < 8) {
-          await m.alterTable(TableMigration(clashProviders));
+          final columns = await _columnsOf(clashProviders.actualTableName);
+          await m.alterTable(
+            TableMigration(
+              clashProviders,
+              newColumns: [
+                if (!columns.contains(clashProviders.requestHeaders.name))
+                  clashProviders.requestHeaders,
+              ],
+            ),
+          );
         }
         if (from < 10) {
           await _createTableIfMissing(m, customProxies);
@@ -114,8 +126,19 @@ class Database extends _$Database {
             customProxies.emptyOptions,
           );
         }
-        if (from < 21) {
+        if (from < 22) {
           await _createTableIfMissing(m, ipQualities);
+          await _addColumnIfMissing(
+            m,
+            profiles,
+            profiles.subscriptionPreferences,
+          );
+          await _addColumnIfMissing(m, profiles, profiles.subscriptionSnapshot);
+          await _addColumnIfMissing(
+            m,
+            clashProviders,
+            clashProviders.requestHeaders,
+          );
         }
       }),
       beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),

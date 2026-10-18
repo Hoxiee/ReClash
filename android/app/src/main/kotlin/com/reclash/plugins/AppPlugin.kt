@@ -148,6 +148,27 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "deviceIdentityStoragePath" -> {
+                result.success(File(GlobalState.application.noBackupFilesDir, "subscription-device.json").absolutePath)
+            }
+
+            "deviceIdentity" -> {
+                val id = Settings.Secure.getString(
+                    GlobalState.application.contentResolver,
+                    Settings.Secure.ANDROID_ID,
+                )
+                result.success(
+                    mapOf(
+                        "id" to id,
+                        "osVersion" to Build.VERSION.RELEASE,
+                        "model" to listOf(Build.MANUFACTURER, Build.MODEL)
+                            .filter { it.isNotBlank() }
+                            .distinct()
+                            .joinToString(" "),
+                    ),
+                )
+            }
+
             "moveTaskToBack" -> {
                 activity?.moveTaskToBack(true)
                 result.success(true)

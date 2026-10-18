@@ -215,19 +215,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m86(label) => "${label}은(는) 하나만 입력해야 합니다";
 
-  static String m87(count) => "결과 ${count}개";
+  static String m87(client, format, count) =>
+      "${client}로 수신: ${format}, 프록시 노드 ${count}개.";
 
-  static String m88(value) => "최고 ${value}";
+  static String m88(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
 
-  static String m89(value) => "합계 ${value}";
+  static String m89(count, format) =>
+      "${format}에서 프록시 노드 ${count}개를 가져올 수 있습니다.";
 
-  static String m90(version) => "설치된 버전: ${version}";
+  static String m90(count) => "변환할 수 없는 노드: ${count}개.";
 
-  static String m91(label) => "${label}은(는) URL이어야 합니다";
+  static String m91(count) => "결과 ${count}개";
 
-  static String m92(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m92(value) => "최고 ${value}";
 
-  static String m93(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m93(value) => "합계 ${value}";
+
+  static String m94(version) => "설치된 버전: ${version}";
+
+  static String m95(label) => "${label}은(는) URL이어야 합니다";
+
+  static String m96(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m97(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1591,7 +1601,168 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "style": MessageLookupByLibrary.simpleMessage("스타일"),
     "submit": MessageLookupByLibrary.simpleMessage("제출"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("자동"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientClashMeta": MessageLookupByLibrary.simpleMessage(
+      "Clash Meta",
+    ),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage(
+      "사용자 지정 User-Agent",
+    ),
+    "subscriptionClientCustomUserAgent": MessageLookupByLibrary.simpleMessage(
+      "User-Agent",
+    ),
+    "subscriptionClientCustomUserAgentInvalid":
+        MessageLookupByLibrary.simpleMessage(
+          "제어 문자가 없는 올바른 User-Agent를 입력하세요.",
+        ),
+    "subscriptionClientDeviceDataHint": MessageLookupByLibrary.simpleMessage(
+      "클라이언트 선택은 기기 식별 정보를 보내지 않습니다.",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientReclash": MessageLookupByLibrary.simpleMessage(
+      "ReClash",
+    ),
+    "subscriptionClientRequestAs": MessageLookupByLibrary.simpleMessage(
+      "요청 클라이언트",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box / Karing",
+    ),
+    "subscriptionClientUrlOnly": MessageLookupByLibrary.simpleMessage(
+      "이 설정은 구독 URL에 적용됩니다. 프록시 링크는 로컬에서 가져옵니다.",
+    ),
+    "subscriptionClientV2rayng": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
+    "subscriptionCompatibilityAgeKey": MessageLookupByLibrary.simpleMessage(
+      "이 구독을 확인하려면 AGE 키를 입력하세요.",
+    ),
+    "subscriptionCompatibilityApplyPrepared":
+        MessageLookupByLibrary.simpleMessage("확인된 결과 적용"),
+    "subscriptionCompatibilityAuthorization":
+        MessageLookupByLibrary.simpleMessage("서버가 인증을 거부하여 클라이언트 선택을 중단했습니다."),
+    "subscriptionCompatibilityCheck": MessageLookupByLibrary.simpleMessage(
+      "확인",
+    ),
+    "subscriptionCompatibilityCheckFailed":
+        MessageLookupByLibrary.simpleMessage(
+          "호환되는 구독을 가져오지 못했습니다. 기존 설정은 변경되지 않았습니다.",
+        ),
+    "subscriptionCompatibilityCheckHint": MessageLookupByLibrary.simpleMessage(
+      "현재 입력값을 저장하거나 VPN을 재시작하지 않고 확인합니다. 노드의 연결 가능 여부가 아닌 설정 분석을 확인합니다.",
+    ),
+    "subscriptionCompatibilityForgetConsent":
+        MessageLookupByLibrary.simpleMessage("가져오기 손실에 대해 다시 묻기"),
+    "subscriptionCompatibilityHideUrl": MessageLookupByLibrary.simpleMessage(
+      "구독 URL 숨기기",
+    ),
+    "subscriptionCompatibilityLastSuccessful":
+        MessageLookupByLibrary.simpleMessage("마지막으로 성공한 클라이언트"),
+    "subscriptionCompatibilityNeedsReview":
+        MessageLookupByLibrary.simpleMessage(
+          "가져오기 과정에서 원본 데이터 일부가 생략됩니다. 적용 전에 손실 내용을 확인하세요.",
+        ),
+    "subscriptionCompatibilityPinSuccessful":
+        MessageLookupByLibrary.simpleMessage("이 클라이언트 사용"),
+    "subscriptionCompatibilityPrepared": m87,
+    "subscriptionCompatibilityPreparedHint":
+        MessageLookupByLibrary.simpleMessage(
+          "Core가 이 결과를 분석했습니다. 아직 저장하거나 적용하지 않았습니다.",
+        ),
+    "subscriptionCompatibilityRateLimited":
+        MessageLookupByLibrary.simpleMessage("서버가 요청을 제한했습니다. 나중에 다시 시도하세요."),
+    "subscriptionCompatibilityShowUrl": MessageLookupByLibrary.simpleMessage(
+      "구독 URL 표시",
+    ),
+    "subscriptionCompatibilitySuperseded": MessageLookupByLibrary.simpleMessage(
+      "입력 또는 프로필이 변경되었습니다. 구독을 다시 확인하세요.",
+    ),
+    "subscriptionCompatibilityTimeout": MessageLookupByLibrary.simpleMessage(
+      "구독 확인 시간이 초과되었습니다.",
+    ),
+    "subscriptionCompatibilityTitle": MessageLookupByLibrary.simpleMessage(
+      "호환성",
+    ),
+    "subscriptionCompatibilityTransport": MessageLookupByLibrary.simpleMessage(
+      "연결에 실패하여 클라이언트 선택을 중단했습니다.",
+    ),
+    "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
+      "운영 체제와 기기 모델도 보내기",
+    ),
+    "subscriptionIdentityDetailsDisclosure":
+        MessageLookupByLibrary.simpleMessage("식별자와 함께 운영 체제 버전과 기기 모델도 보냅니다."),
+    "subscriptionIdentityDisclosure": MessageLookupByLibrary.simpleMessage(
+      "이 구독 origin으로 안정적인 가명 기기 ID를 보냅니다. 하드웨어 증명이 아니며 동의는 이 기기에만 저장됩니다.",
+    ),
+    "subscriptionIdentityGlobalHint": MessageLookupByLibrary.simpleMessage(
+      "활성화하면 프로필에서 재정의하지 않는 한 모든 URL 구독 요청에 기기 식별자를 보냅니다. 운영 체제와 기기 정보는 구독별로 별도 동의가 필요합니다.",
+    ),
+    "subscriptionIdentitySettingsTitle": MessageLookupByLibrary.simpleMessage(
+      "구독 식별 정보",
+    ),
+    "subscriptionIdentityTitle": MessageLookupByLibrary.simpleMessage(
+      "HWID 보내기",
+    ),
+    "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
+      "전역 설정 사용",
+    ),
+    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
+      "동의하고 가져오기",
+    ),
+    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "일부 원본 데이터가 보존되지 않음을 이해합니다.",
+    ),
+    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
+      "지원되는 노드만 계속 가져오기.",
+    ),
+    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
+      "원본 클라이언트 설정이 생략됨을 이해합니다.",
+    ),
+    "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
+      "Clash 구성",
+    ),
+    "subscriptionImportFormatEncrypted": MessageLookupByLibrary.simpleMessage(
+      "암호화된 구독",
+    ),
+    "subscriptionImportFormatShareLinks": MessageLookupByLibrary.simpleMessage(
+      "프록시 링크",
+    ),
+    "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "알 수 없는 형식",
+    ),
+    "subscriptionImportIgnoredSections": m88,
+    "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
+      "가져올 수 있는 지원 프록시 노드가 없습니다.",
+    ),
+    "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
+      "이 구독에 대한 동의 기억",
+    ),
+    "subscriptionImportRememberConsentHint":
+        MessageLookupByLibrary.simpleMessage(
+          "이 소스, 형식 및 동의한 손실 유형에만 적용됩니다. 새로운 손실에는 다시 동의해야 합니다.",
+        ),
+    "subscriptionImportReviewSummary": m89,
+    "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
+      "구독 가져오기 검토",
+    ),
+    "subscriptionImportSkippedNodes": m90,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
+    "subscriptionProvider": MessageLookupByLibrary.simpleMessage("구독"),
+    "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("계정"),
+    "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
+      "요금제 구매",
+    ),
+    "subscriptionProviderBuyTraffic": MessageLookupByLibrary.simpleMessage(
+      "트래픽 구매",
+    ),
+    "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage("로고 URL"),
+    "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage("지원"),
+    "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("웹사이트"),
+    "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
+      "제공자 업데이트 간격 사용",
+    ),
     "sudoPasswordTitle": MessageLookupByLibrary.simpleMessage(
       "sudo 비밀번호를 입력하세요",
     ),
@@ -1662,7 +1833,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
-    "toolsResults": m87,
+    "toolsResults": m91,
     "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
@@ -1678,8 +1849,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m88,
-    "trafficTotal": m89,
+    "trafficPeak": m92,
+    "trafficTotal": m93,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -1724,7 +1895,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "패키지 설치 프로그램을 시작할 수 없습니다.",
     ),
-    "updateInstalledVersion": m90,
+    "updateInstalledVersion": m94,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "이미 최신 버전을 사용 중입니다.",
     ),
@@ -1745,7 +1916,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m91,
+    "urlTip": m95,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1769,8 +1940,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m92,
-    "yearsAgoShort": m93,
+    "yearsAgo": m96,
+    "yearsAgoShort": m97,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };
