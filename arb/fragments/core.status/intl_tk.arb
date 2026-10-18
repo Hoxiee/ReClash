@@ -1,0 +1,22 @@
+{
+  "coreRunning": "Çekirdek işleýär",
+  "coreStarting": "Işe başlaýar…",
+  "coreStopped": "Saklandy",
+  "coreBuildTime": "Ýygnalan wagty",
+  "coreEnvironment": "Gurşaw",
+  "coreLocation": "Ýerleşiş",
+  "corePlatform": "Platforma",
+  "coreArchitecture": "Arhitektura",
+  "coreBuildTags": "Ýygnama baýdaklary",
+  "coreLaunchMode": "Işlediş usuly",
+  "coreModeLibrary": "Prosesiň içindäki kitaphana",
+  "coreModeProcess": "Aýratyn proses",
+  "coreModeHelper": "Helper arkaly proses",
+  "coreWorkingDirectory": "Maglumat katalogy",
+  "coreExecutable": "Ýadro faýly",
+  "coreInfoUnavailable": "Ýadro maglumatlaryny okap bolmady",
+  "coreRuntimeConfig": "Iş wagty konfigurasiýasy",
+  "coreOpenRuntimeConfig": "Iş wagty konfigurasiýasyny açmak",
+  "coreRuntimeConfigDescription": "Sazlamalar we skriptler ulanylandan soňky jemleýji konfigurasiýa. Diňe okamak üçin.",
+  "coreRuntimeConfigReadFailed": "Iş wagty konfigurasiýasyny okap bolmady"
+}

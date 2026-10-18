@@ -1,0 +1,22 @@
+{
+  "coreRunning": "运行中",
+  "coreStarting": "启动中…",
+  "coreStopped": "已停止",
+  "coreBuildTime": "构建时间",
+  "coreEnvironment": "环境",
+  "coreLocation": "位置",
+  "corePlatform": "平台",
+  "coreArchitecture": "架构",
+  "coreBuildTags": "构建标志",
+  "coreLaunchMode": "运行方式",
+  "coreModeLibrary": "进程内动态库",
+  "coreModeProcess": "独立进程",
+  "coreModeHelper": "通过 Helper 运行",
+  "coreWorkingDirectory": "数据目录",
+  "coreExecutable": "内核可执行文件",
+  "coreInfoUnavailable": "无法读取内核信息",
+  "coreRuntimeConfig": "运行时配置",
+  "coreOpenRuntimeConfig": "打开运行时配置",
+  "coreRuntimeConfigDescription": "应用设置和脚本后生成的配置。只读。",
+  "coreRuntimeConfigReadFailed": "无法读取运行时配置"
+}

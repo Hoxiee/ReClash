@@ -75,6 +75,13 @@ class CoreService extends CoreHandlerInterface {
   }
 
   @override
+  CoreProcessOwner? get processOwner => switch (_lifecycle.state) {
+    DesktopCoreRunning(:final session) => session.owner,
+    DesktopCoreStopping(:final session) => session.owner,
+    _ => null,
+  };
+
+  @override
   Future<CoreLifecycleResult> start() => _lifecycle.start();
 
   @override

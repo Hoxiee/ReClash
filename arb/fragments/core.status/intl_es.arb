@@ -1,0 +1,22 @@
+{
+  "coreRunning": "En ejecución",
+  "coreStarting": "Iniciando…",
+  "coreStopped": "Detenido",
+  "coreBuildTime": "Hora de compilación",
+  "coreEnvironment": "Entorno",
+  "coreLocation": "Ubicación",
+  "corePlatform": "Plataforma",
+  "coreArchitecture": "Arquitectura",
+  "coreBuildTags": "Etiquetas de compilación",
+  "coreLaunchMode": "Modo de ejecución",
+  "coreModeLibrary": "Biblioteca en el proceso",
+  "coreModeProcess": "Proceso independiente",
+  "coreModeHelper": "Proceso mediante Helper",
+  "coreWorkingDirectory": "Directorio de datos",
+  "coreExecutable": "Ejecutable del Core",
+  "coreInfoUnavailable": "No se pudo leer la información del Core",
+  "coreRuntimeConfig": "Configuración en tiempo de ejecución",
+  "coreOpenRuntimeConfig": "Abrir configuración en tiempo de ejecución",
+  "coreRuntimeConfigDescription": "Configuración generada tras aplicar los ajustes y scripts. Solo lectura.",
+  "coreRuntimeConfigReadFailed": "No se pudo leer la configuración en tiempo de ejecución"
+}

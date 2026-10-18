@@ -383,7 +383,11 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                                     pages,
                                   )
                                 : null,
-                            maxBodyWidth: split ? 840 : double.infinity,
+                            maxBodyWidth:
+                                split &&
+                                    route.page != ToolPage.coreRuntimeConfig
+                                ? 840
+                                : double.infinity,
                             child: PageNavigationScope(
                               canOpen: (widget) => toolPageOf(widget) != null,
                               open: _openWidget,

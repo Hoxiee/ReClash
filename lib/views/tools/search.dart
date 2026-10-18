@@ -13,6 +13,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:reclash/providers/tool_commands.dart';
 import 'catalog.dart';
+import 'core.dart';
 
 ToolEnvironment watchToolEnvironment(WidgetRef ref) {
   final settings = ref.watch(
@@ -351,6 +352,16 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                                       row(entry),
                                   ],
                                 ),
+                            generateSection(
+                              title: l.core,
+                              items: [
+                                CoreSection(
+                                  onOpen: () => unawaited(
+                                    _select(byId['page.coreDetails']!),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                   ),
                 ),

@@ -1,0 +1,22 @@
+{
+  "coreRunning": "Running",
+  "coreStarting": "Starting…",
+  "coreStopped": "Stopped",
+  "coreBuildTime": "Build time",
+  "coreEnvironment": "Environment",
+  "coreLocation": "Location",
+  "corePlatform": "Platform",
+  "coreArchitecture": "Architecture",
+  "coreBuildTags": "Build flags",
+  "coreLaunchMode": "Execution mode",
+  "coreModeLibrary": "In-process library",
+  "coreModeProcess": "Separate process",
+  "coreModeHelper": "Process via Helper",
+  "coreWorkingDirectory": "Data directory",
+  "coreExecutable": "Core binary",
+  "coreInfoUnavailable": "Could not read core information",
+  "coreRuntimeConfig": "Runtime configuration",
+  "coreOpenRuntimeConfig": "Open runtime configuration",
+  "coreRuntimeConfigDescription": "Generated configuration after settings and scripts. Read-only.",
+  "coreRuntimeConfigReadFailed": "Could not read the runtime configuration"
+}

@@ -37,6 +37,16 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
     calls[method] = arguments;
     final result = switch (method) {
       CoreMethod.initClash => true as T,
+      CoreMethod.getCoreInfo => {
+        'version': '1.19.31-2-gf77b7475',
+        'goVersion': 'go1.27.0',
+        'platform': 'linux',
+        'architecture': 'amd64',
+        'buildTime': '2026-10-02T08:05:06.123Z',
+        'tags': ['with_gvisor'],
+        'workingDirectory': '/home/reclash/.config',
+        'executablePath': '/usr/bin/ReClashCore',
+      },
       CoreMethod.getTraffic ||
       CoreMethod.getTotalTraffic => {'up': 12, 'down': 34},
       CoreMethod.asyncTestDelay => {
@@ -190,6 +200,18 @@ void main() {
     expect((call.arguments as Map)['mixed-port'], 7890);
     expect(call.toJson(), containsPair('arguments', call.arguments));
     expect(call.toJson(), isNot(contains('data')));
+  });
+
+  test('CoreInfo matches the shared wire fixture', () async {
+    final fixture =
+        json.decode(await File('test/fixtures/core_info.json').readAsString())
+            as Map<String, dynamic>;
+    final info = CoreInfo.fromJson(Map<String, Object?>.from(fixture));
+    final handler = _RecordingCoreHandler();
+
+    expect(info.toJson(), fixture);
+    expect(await handler.getCoreInfo(), info);
+    expect(handler.calls.keys, contains(CoreMethod.getCoreInfo));
   });
 
   test('core interface sends structured request parameters', () async {

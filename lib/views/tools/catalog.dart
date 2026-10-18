@@ -289,6 +289,21 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     root: env.morePages.contains(ToolPage.logs),
   );
   page(
+    ToolPage.coreDetails,
+    l.core,
+    ToolCategory.information,
+    AppGlyphs.cpu,
+    root: false,
+    keywords: ['mihomo', 'proxy', 'ядро'],
+  );
+  page(
+    ToolPage.coreRuntimeConfig,
+    l.coreRuntimeConfig,
+    ToolCategory.information,
+    AppGlyphs.code,
+    root: false,
+  );
+  page(
     ToolPage.disclaimer,
     l.disclaimer,
     ToolCategory.information,

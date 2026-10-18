@@ -1,0 +1,22 @@
+{
+  "coreRunning": "Жұмыс істеп тұр",
+  "coreStarting": "Іске қосылуда…",
+  "coreStopped": "Тоқтатылған",
+  "coreBuildTime": "Жиналған уақыты",
+  "coreEnvironment": "Орта",
+  "coreLocation": "Орналасуы",
+  "corePlatform": "Платформа",
+  "coreArchitecture": "Архитектура",
+  "coreBuildTags": "Жинақтау жалаушалары",
+  "coreLaunchMode": "Іске қосу тәсілі",
+  "coreModeLibrary": "Кірістірілген кітапхана",
+  "coreModeProcess": "Бөлек процесс",
+  "coreModeHelper": "Helper арқылы процесс",
+  "coreWorkingDirectory": "Деректер каталогы",
+  "coreExecutable": "Ядро файлы",
+  "coreInfoUnavailable": "Ядро туралы ақпаратты алу мүмкін болмады",
+  "coreRuntimeConfig": "Орындалу конфигурациясы",
+  "coreOpenRuntimeConfig": "Орындалу конфигурациясын ашу",
+  "coreRuntimeConfigDescription": "Баптаулар мен скрипттерден кейінгі қорытынды конфигурация. Тек оқуға арналған.",
+  "coreRuntimeConfigReadFailed": "Орындалу конфигурациясын оқу мүмкін болмады"
+}

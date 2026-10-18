@@ -589,11 +589,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyLink": MessageLookupByLibrary.simpleMessage("Copier le lien"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copié avec succès"),
     "core": MessageLookupByLibrary.simpleMessage("Cœur"),
+    "coreArchitecture": MessageLookupByLibrary.simpleMessage("Architecture"),
     "coreBlockedByPolicyTip": m2,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
       "Windows Smart App Control a bloqué ReClashCore.exe car il n’est pas signé. Ouvrez Sécurité Windows → Contrôle des applications et du navigateur → Paramètres de Smart App Control, choisissez Désactivé, puis relancez ReClash. Smart App Control ne peut pas être réactivé sans réinstaller Windows.",
     ),
+    "coreBuildTags": MessageLookupByLibrary.simpleMessage(
+      "Options de compilation",
+    ),
+    "coreBuildTime": MessageLookupByLibrary.simpleMessage(
+      "Date de compilation",
+    ),
+    "coreEnvironment": MessageLookupByLibrary.simpleMessage("Environnement"),
+    "coreExecutable": MessageLookupByLibrary.simpleMessage(
+      "Exécutable du Core",
+    ),
+    "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire les informations du Core",
+    ),
+    "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Mode d’exécution"),
+    "coreLocation": MessageLookupByLibrary.simpleMessage("Emplacement"),
+    "coreModeHelper": MessageLookupByLibrary.simpleMessage(
+      "Processus via Helper",
+    ),
+    "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
+      "Bibliothèque intégrée au processus",
+    ),
+    "coreModeProcess": MessageLookupByLibrary.simpleMessage("Processus séparé"),
+    "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Ouvrir la configuration d’exécution",
+    ),
+    "corePlatform": MessageLookupByLibrary.simpleMessage("Plateforme"),
+    "coreRunning": MessageLookupByLibrary.simpleMessage("En cours d’exécution"),
+    "coreRuntimeConfig": MessageLookupByLibrary.simpleMessage(
+      "Configuration d’exécution",
+    ),
+    "coreRuntimeConfigDescription": MessageLookupByLibrary.simpleMessage(
+      "Configuration générée après application des paramètres et scripts. Lecture seule.",
+    ),
+    "coreRuntimeConfigReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire la configuration d’exécution",
+    ),
+    "coreStarting": MessageLookupByLibrary.simpleMessage("Démarrage…"),
     "coreStatus": MessageLookupByLibrary.simpleMessage("État du cœur"),
+    "coreStopped": MessageLookupByLibrary.simpleMessage("Arrêté"),
+    "coreWorkingDirectory": MessageLookupByLibrary.simpleMessage(
+      "Dossier de données",
+    ),
     "country": MessageLookupByLibrary.simpleMessage("Région"),
     "crashDetected": MessageLookupByLibrary.simpleMessage("Plantage détecté"),
     "crashDetectedTip": m3,
