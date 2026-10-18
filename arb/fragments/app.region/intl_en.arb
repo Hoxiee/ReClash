@@ -1,0 +1,116 @@
+{
+  "appRegion": "App region",
+  "regionalAdaptation": "Regional adaptation",
+  "regionTitle": "Region profile",
+  "regionIntro": "Regional network defaults and service checks, independent of the interface language.",
+  "regionWarning": "Choosing a country only updates this preview. Regional defaults change when you apply it.",
+  "regionChoose": "Choose a country",
+  "regionDetected": "Suggested: {region} · {source}",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "regionUseDetected": "Use detected region",
+  "regionPreviewTitle": "Preview",
+  "regionPreviewBase": "Country profile: {region}",
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewMtu": "TUN MTU: {value}",
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewServices": "Default service checks: {value}",
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewRules": "Proxy selection and your routing rules stay unchanged.",
+  "regionPreviewAndroid": "On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.",
+  "regionCustomPreserved": "Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.",
+  "regionNoChanges": "Network defaults and service checks stay unchanged.",
+  "regionApply": "Apply region",
+  "regionNoDetected": "No matching suggestion. Only the time zone and system locale are used.",
+  "regionSelectBeforeApps": "Choose a supported region before using regional app suggestions.",
+  "regionNotSet": "Off",
+  "regionOther": "Other / general",
+  "regionRussia": "Russia",
+  "regionIran": "Iran",
+  "regionChina": "China",
+  "regionEgypt": "Egypt",
+  "regionSourceTimeZone": "time zone",
+  "regionSourceLocaleCountry": "system locale country",
+  "regionSourceLocaleLanguage": "system language",
+  "regionCurrent": "Current region",
+  "regionDetectionTitle": "Device suggestion",
+  "regionProfileDefaults": "Profile defaults",
+  "regionNoServices": "Service checks are off",
+  "regionDnsSettings": "Region {region} supplies DNS defaults: {value}. Manual overrides here take priority.",
+  "regionTunSettings": "Region {region} supplies MTU {value}. Add an MTU override to use your own value.",
+  "regionBypassSettings": "Region {region} uses: {value}. A custom list replaces the regional defaults.",
+  "regionSelectApps": "Select apps by region",
+  "regionAppsPreviewTitle": "App selection preview",
+  "regionAppsPreview": "{region}: {bypassed} apps in the VPN bypass list, {proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.",
+  "regionAppsEmpty": "No apps matched this region. Your lists are unchanged.",
+  "regionAppsChanged": "The region or app lists changed. Run selection again for the current settings.",
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  }
+}

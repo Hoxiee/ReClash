@@ -50,25 +50,20 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
   final profileType = profile?.type ?? ProfileType.file;
   final extendType = profile?.extendType ?? ExtendType.standard;
-  final overrides = profileType == ProfileType.custom
-      ? ref.watch(
-          patchClashConfigProvider.select(
-            (state) => (profile?.overrides ?? const ProfileOverrides())
-                .overAppTun(state.tunOverride, state.tunOverrideKeys),
-          ),
-        )
-      : ref.watch(
-          patchClashConfigProvider.select(
-            (state) => ProfileOverrides(
-              dns: state.dns,
-              dnsOverrideKeys: state.dnsOverrideKeys.intersection(
-                DnsOverrideKey.normalProfileKeys,
-              ),
-              tun: state.tunOverride,
-              tunOverrideKeys: state.tunOverrideKeys,
-            ),
-          ),
-        );
+  final appDnsOverrideKeys = ref.watch(
+    patchClashConfigProvider.select((state) => state.dnsOverrideKeys),
+  );
+  final overrides = ref.watch(
+    regionalNetworkConfigProvider.select(
+      (state) => regionalProfileOverridesFor(
+        patchConfig: state.patchConfig,
+        appDnsOverrideKeys: appDnsOverrideKeys,
+        customOverrides: profileType == ProfileType.custom
+            ? profile?.overrides ?? const ProfileOverrides()
+            : null,
+      ),
+    ),
+  );
   final allProfileProviders = ref.watch(profileProvidersProvider);
   List<ProxyGroup> proxyGroups = [];
   List<Rule> rules = [];

@@ -196,7 +196,8 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
             label: appLocalizations.serviceAbnormalCount(problems),
             tone: DashboardChipTone.warn,
           )
-        : services.every((service) => service.check != null)
+        : services.isNotEmpty &&
+              services.every((service) => service.check != null)
         ? DashboardChip(
             label: appLocalizations.serviceAllAvailable,
             tone: DashboardChipTone.ok,
@@ -252,7 +253,13 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
             ],
           ),
           if (mobile) const SizedBox(height: 12) else const Spacer(),
-          grid,
+          if (services.isEmpty)
+            Text(
+              appLocalizations.regionNoServices,
+              style: AppTextStyle.footnote.of(context).toLight,
+            )
+          else
+            grid,
         ],
       ),
     );
@@ -665,7 +672,7 @@ class ServiceStatusSheet extends ConsumerWidget {
           glyph: AppGlyphs.bolt,
           tooltip: localizations.serviceCheckAll,
           isLoading: targets.any(state.isLoading),
-          onPressed: () => services.refresh(targets),
+          onPressed: targets.isEmpty ? null : () => services.refresh(targets),
         ),
         IconButtonData(
           glyph: AppGlyphs.sliders,
@@ -681,6 +688,13 @@ class ServiceStatusSheet extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SizedBox(height: context.contentTopPadding),
           ),
+          if (targets.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Text(localizations.regionNoServices),
+              ),
+            ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + context.bottomInset),
             sliver: SliverList.builder(
@@ -727,12 +741,18 @@ class ServiceManageView extends ConsumerWidget {
     void toggle(ServiceTarget target, bool value) {
       settings.update((state) {
         final disabled = {...state.disabledServices};
+        final enabled = {...state.enabledServices};
         if (value) {
           disabled.remove(target.id);
+          enabled.add(target.id);
         } else {
           disabled.add(target.id);
+          enabled.remove(target.id);
         }
-        return state.copyWith(disabledServices: disabled.toList());
+        return state.copyWith(
+          enabledServices: enabled.toList(),
+          disabledServices: disabled.toList(),
+        );
       });
     }
 

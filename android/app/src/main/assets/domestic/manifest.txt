@@ -1,0 +1,5 @@
+# domestic matcher regions — presence here enables Smart-Select for a code
+ru
+ir
+cn
+eg

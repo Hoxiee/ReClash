@@ -22,6 +22,7 @@ import 'package:reclash/views/dns_queries.dart';
 import 'package:reclash/views/hotkey.dart';
 import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
+import 'package:reclash/views/region.dart';
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -36,6 +37,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   DnsView(spec: final spec) when spec.target is PatchOverrideTarget =>
     ToolPage.dns,
   OnDemandView() => ToolPage.onDemand,
+  RegionView() => ToolPage.appRegion,
   UserAgentsView() => ToolPage.userAgents,
   ThemeView() => ToolPage.theme,
   LanguageView() => ToolPage.locale,
@@ -66,6 +68,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ),
   ToolPage.dns => const DnsView(),
   ToolPage.onDemand => const OnDemandView(),
+  ToolPage.appRegion => const RegionView(),
   ToolPage.userAgents => const UserAgentsView(),
   ToolPage.theme => const ThemeView(),
   ToolPage.locale => const LanguageView(),

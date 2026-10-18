@@ -952,6 +952,120 @@
   "license": "许可证",
   "licenses": "开源许可",
   "licensesDesc": "应用内置的软件包",
+  "appRegion": "应用地区",
+  "regionalAdaptation": "地区适配",
+  "regionTitle": "地区配置",
+  "regionIntro": "地区网络默认值和服务检查，与界面语言无关。",
+  "regionWarning": "选择国家仅更新预览。应用后才会更改地区默认值。",
+  "regionChoose": "选择国家或地区",
+  "regionDetected": "建议：{region} · {source}",
+  "regionUseDetected": "使用检测到的地区",
+  "regionPreviewTitle": "预览",
+  "regionPreviewBase": "国家配置：{region}",
+  "regionPreviewMtu": "TUN MTU：{value}",
+  "regionPreviewServices": "默认服务检查：{value}",
+  "regionPreviewRules": "代理选择和你的路由规则保持不变。",
+  "regionPreviewAndroid": "在 Android 上，更改 MTU 或绕过设置可能需要确认重启 VPN。应用选择是单独的操作。",
+  "regionCustomPreserved": "保留手动 DNS 和 MTU 设置、绕过列表、路由规则及服务选择。",
+  "regionNoChanges": "网络默认值和服务检查保持不变。",
+  "regionApply": "应用地区配置",
+  "regionNoDetected": "未找到匹配建议。仅使用时区和系统区域设置。",
+  "regionSelectBeforeApps": "请先选择受支持的地区，再使用地区应用建议。",
+  "regionNotSet": "关闭",
+  "regionOther": "其他 / 通用",
+  "regionRussia": "俄罗斯",
+  "regionIran": "伊朗",
+  "regionChina": "中国",
+  "regionEgypt": "埃及",
+  "regionSourceTimeZone": "时区",
+  "regionSourceLocaleCountry": "系统区域设置中的国家",
+  "regionSourceLocaleLanguage": "系统语言",
+  "regionCurrent": "当前地区",
+  "regionDetectionTitle": "设备建议",
+  "regionProfileDefaults": "配置文件默认值",
+  "regionNoServices": "服务检查已关闭",
+  "regionDnsSettings": "地区 {region} 的默认 DNS：{value}。此页面的手动覆盖设置优先。",
+  "regionTunSettings": "地区 {region} 的 MTU 为 {value}。添加 MTU 覆盖设置可使用自定义值。",
+  "regionBypassSettings": "地区 {region} 的列表：{value}。自定义列表替换地区默认值。",
+  "regionSelectApps": "按地区选择应用",
+  "regionAppsPreviewTitle": "应用选择预览",
+  "regionAppsPreview": "{region}：VPN 绕过列表将有 {bypassed} 个应用，VPN 列表将有 {proxied} 个应用。两个列表都会被替换，模式及其他设置保持不变。软件包和 SDK 匹配仅为建议，请在应用后检查结果。",
+  "regionAppsEmpty": "没有应用匹配此地区。列表保持不变。",
+  "regionAppsChanged": "地区或应用列表已更改。请根据当前设置重新选择。",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "更新通道",
   "updateChannelRelease": "正式版",
   "updateChannelPre": "预发布版",

@@ -311,12 +311,36 @@ void main() {
     },
   );
 
-  test('a config that turns every service off still offers them all', () {
+  test(
+    'region changes preserve explicit service choices without resurrecting defaults',
+    () {
+      final scope = container();
+      scope.listen(appSettingProvider, (_, _) {});
+      scope.listen(enabledServiceTargetsProvider, (_, _) {});
+      final settings = scope.read(appSettingProvider.notifier);
+      settings.value = const AppSettingProps(
+        regionCode: 'RU',
+        enabledServices: ['netflix'],
+        disabledServices: ['youtube', 'discord', 'chatgpt', 'claude'],
+      );
+      expect(scope.read(enabledServiceTargetsProvider), [
+        ServiceTarget.netflix,
+      ]);
+      settings.update((state) => state.copyWith(regionCode: 'IR'));
+      expect(scope.read(enabledServiceTargetsProvider), [
+        ServiceTarget.netflix,
+      ]);
+      settings.update((state) => state.copyWith(enabledServices: const []));
+      expect(scope.read(enabledServiceTargetsProvider), isEmpty);
+    },
+  );
+
+  test('a config that turns every service off keeps the list empty', () {
     final scope = container();
     scope.read(appSettingProvider.notifier).value = AppSettingProps(
       disabledServices: [for (final target in ServiceTarget.values) target.id],
     );
 
-    expect(scope.read(enabledServiceTargetsProvider), ServiceTarget.values);
+    expect(scope.read(enabledServiceTargetsProvider), isEmpty);
   });
 }

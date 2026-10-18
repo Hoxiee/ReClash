@@ -64,13 +64,20 @@ List<ServiceTarget> serviceTargets(Ref ref) {
 
 @riverpod
 List<ServiceTarget> enabledServiceTargets(Ref ref) {
-  final targets = ref.watch(serviceTargetsProvider);
-  final disabled = ref.watch(
-    appSettingProvider.select((state) => SelectValue(state.disabledServices)),
+  final settings = ref.watch(
+    appSettingProvider.select(
+      (state) => (
+        regionCode: state.regionCode,
+        serviceOrder: state.serviceOrder,
+        enabledServices: state.enabledServices,
+        disabledServices: state.disabledServices,
+      ),
+    ),
   );
-  final enabled = [
-    for (final target in targets)
-      if (!disabled.value.contains(target.id)) target,
-  ];
-  return enabled.isEmpty ? targets : enabled;
+  return enabledServiceTargetsForRegion(
+    regionCode: settings.regionCode,
+    order: settings.serviceOrder,
+    enabled: settings.enabledServices.toSet(),
+    disabled: settings.disabledServices.toSet(),
+  );
 }

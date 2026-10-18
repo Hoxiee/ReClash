@@ -9,6 +9,47 @@ part of '../state.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(detectedRegion)
+final detectedRegionProvider = DetectedRegionProvider._();
+
+final class DetectedRegionProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<RegionDetectionResult?>,
+          RegionDetectionResult?,
+          FutureOr<RegionDetectionResult?>
+        >
+    with
+        $FutureModifier<RegionDetectionResult?>,
+        $FutureProvider<RegionDetectionResult?> {
+  DetectedRegionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'detectedRegionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$detectedRegionHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<RegionDetectionResult?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<RegionDetectionResult?> create(Ref ref) {
+    return detectedRegion(ref);
+  }
+}
+
+String _$detectedRegionHash() => r'1fb79ec4e3e3c88a3dd1865a6f73ae000b9471e6';
+
 @ProviderFor(updateParams)
 final updateParamsProvider = UpdateParamsProvider._();
 
@@ -48,7 +89,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'e46998c222b0902ef6a76c25fe83c094a6369036';
+String _$updateParamsHash() => r'1adfbfee809b66299642073eb87c7b6eb6299fc3';
 
 @ProviderFor(setupPatch)
 final setupPatchProvider = SetupPatchProvider._();
@@ -138,7 +179,7 @@ final class SetupPatchProvider
   }
 }
 
-String _$setupPatchHash() => r'283e94846903bafab1c22985b6f90d4c0e2a4697';
+String _$setupPatchHash() => r'cda57cf7e6b23f495885733db6be67c4969376f5';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -179,7 +220,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'd4fe17e62e479ff316ab5deb11475b4ea533d0bb';
+String _$trayStateHash() => r'5fa4fced66ca54581b2f9ae159933625378aec8e';
 
 /// Measured delays of the proxies the tray lists, by group and then proxy
 /// name. Resolved like a proxy card, so a nested group shows its selection.
@@ -396,7 +437,7 @@ final class ShouldPatchSystemDnsProvider
 }
 
 String _$shouldPatchSystemDnsHash() =>
-    r'f74bcdbae504e9528b2e960b8620d097c27f3ca9';
+    r'5f42e120ad31f5896e37e93e963dfb1851c36aeb';
 
 @ProviderFor(sharedState)
 final sharedStateProvider = SharedStateProvider._();
@@ -437,7 +478,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'98486029d33bd542b933d43e0c92a1f74aaa69a0';
+String _$sharedStateHash() => r'bd4ee24a7f48ac4c2710ebb5b98df4cdb6bf8979';
 
 @ProviderFor(vpnRouteAddress)
 final vpnRouteAddressProvider = VpnRouteAddressProvider._();
@@ -514,7 +555,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'c00e87278b32dd8977ed136aace10dccfe05508d';
+String _$vpnOptionsHash() => r'5735007c7d5b0d394f766aed0e83359bb23588e9';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -607,7 +648,7 @@ final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$suspendHash() => r'9ab9210f4f3c70f63d9858d492a9c09b3fb24bf1';
+String _$suspendHash() => r'bb60a8380275422ce6bd5c7592d791f75e70a52d';
 
 @ProviderFor(DynamicColor)
 final dynamicColorProvider = DynamicColorProvider._();
@@ -669,7 +710,13 @@ final class GenColorSchemeProvider
     with $Provider<ColorScheme> {
   GenColorSchemeProvider._({
     required GenColorSchemeFamily super.from,
-    required (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+    required (
+      Brightness, {
+      Color? color,
+      bool ignoreConfig,
+      bool? pureBlack,
+      ColorContrast? contrast,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -698,13 +745,20 @@ final class GenColorSchemeProvider
   ColorScheme create(Ref ref) {
     final argument =
         this.argument
-            as (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack});
+            as (
+              Brightness, {
+              Color? color,
+              bool ignoreConfig,
+              bool? pureBlack,
+              ColorContrast? contrast,
+            });
     return genColorScheme(
       ref,
       argument.$1,
       color: argument.color,
       ignoreConfig: argument.ignoreConfig,
       pureBlack: argument.pureBlack,
+      contrast: argument.contrast,
     );
   }
 
@@ -727,13 +781,19 @@ final class GenColorSchemeProvider
   }
 }
 
-String _$genColorSchemeHash() => r'c6838e224d41780617f7338c5e56173a7620cd87';
+String _$genColorSchemeHash() => r'05ba832e6914dc15cdf01f2a6d8faf057ed0ded4';
 
 final class GenColorSchemeFamily extends $Family
     with
         $FunctionalFamilyOverride<
           ColorScheme,
-          (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+          (
+            Brightness, {
+            Color? color,
+            bool ignoreConfig,
+            bool? pureBlack,
+            ColorContrast? contrast,
+          })
         > {
   GenColorSchemeFamily._()
     : super(
@@ -749,12 +809,14 @@ final class GenColorSchemeFamily extends $Family
     Color? color,
     bool ignoreConfig = false,
     bool? pureBlack,
+    ColorContrast? contrast,
   }) => GenColorSchemeProvider._(
     argument: (
       brightness,
       color: color,
       ignoreConfig: ignoreConfig,
       pureBlack: pureBlack,
+      contrast: contrast,
     ),
     from: this,
   );
@@ -1752,7 +1814,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'd4ea3c3271a77d8bd791f94c697cc94a41fff38f';
+    r'eff52aa416c0fb9cd5e4984b15732f767d23164b';
 
 @ProviderFor(proxyState)
 final proxyStateProvider = ProxyStateProvider._();
@@ -1793,7 +1855,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'76a71ab5da07dca9aeb351282c5c03ab222d0760';
+String _$proxyStateHash() => r'429190e584a04ddbccce2877830f13935c011729';
 
 /// Watching the delay map instead would drop nodes one probe at a time, and
 /// reading it on any other rebuild would drop them whenever something
@@ -2918,7 +2980,7 @@ final class CurrentNavigationItemsStateProvider
 }
 
 String _$currentNavigationItemsStateHash() =>
-    r'06fbdc194f4527b945695fe3b72b16e0585fa440';
+    r'a60b1e1866d699e8676349e1ebd4ef7f91fc2f15';
 
 @ProviderFor(shownPageLabel)
 final shownPageLabelProvider = ShownPageLabelProvider._();
@@ -3498,7 +3560,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'eef9f0d2ec0ecb6196c699b1e2c2a73d922f8964';
+String _$setupStateHash() => r'f0dae5f50d393c12a348c2eb865bec62ebb212f3';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

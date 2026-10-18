@@ -1,0 +1,116 @@
+{
+  "appRegion": "Қолданба аймағы",
+  "regionalAdaptation": "Аймақтық бейімдеу",
+  "regionTitle": "Аймақ профилі",
+  "regionIntro": "Интерфейс тіліне тәуелсіз аймақтық желі параметрлері мен қызмет тексерістері.",
+  "regionWarning": "Елді таңдау тек алдын ала қарауды жаңартады. Аймақтық параметрлер қолданғаннан кейін өзгереді.",
+  "regionChoose": "Елді таңдаңыз",
+  "regionDetected": "Ұсыныс: {region} · {source}",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "regionUseDetected": "Анықталған аймақты таңдау",
+  "regionPreviewTitle": "Алдын ала қарау",
+  "regionPreviewBase": "Ел профилі: {region}",
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewMtu": "TUN MTU: {value}",
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewServices": "Әдепкі қызмет тексерістері: {value}",
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewRules": "Прокси таңдауы мен бағыттау ережелері өзгермейді.",
+  "regionPreviewAndroid": "Android жүйесінде MTU не айналып өту өзгерістері VPN қайта іске қосылуын растауды талап етуі мүмкін. Қолданбалар бөлек таңдалады.",
+  "regionCustomPreserved": "Қолмен орнатылған DNS пен MTU, айналып өту тізімі, бағыттау ережелері және қызмет таңдауы сақталады.",
+  "regionNoChanges": "Желі параметрлері мен қызмет тексерістері өзгермейді.",
+  "regionApply": "Аймақты қолдану",
+  "regionNoDetected": "Сәйкес ұсыныс табылмады. Тек уақыт белдеуі мен жүйе локалі пайдаланылады.",
+  "regionSelectBeforeApps": "Аймақтық қолданба ұсыныстарын пайдалану үшін алдымен қолдау көрсетілетін аймақты таңдаңыз.",
+  "regionNotSet": "Өшірулі",
+  "regionOther": "Басқа / жалпы",
+  "regionRussia": "Ресей",
+  "regionIran": "Иран",
+  "regionChina": "Қытай",
+  "regionEgypt": "Мысыр",
+  "regionSourceTimeZone": "уақыт белдеуі",
+  "regionSourceLocaleCountry": "жүйелік тіл параметріндегі ел",
+  "regionSourceLocaleLanguage": "жүйе тілі",
+  "regionCurrent": "Ағымдағы аймақ",
+  "regionDetectionTitle": "Құрылғы ұсынысы",
+  "regionProfileDefaults": "Профиль параметрлері",
+  "regionNoServices": "Қызмет тексерістері өшірулі",
+  "regionDnsSettings": "{region} аймағының DNS параметрлері: {value}. Осы экрандағы қолмен орнатылған мәндер басым.",
+  "regionTunSettings": "{region} аймағының MTU мәні: {value}. Өз мәніңізді қолдану үшін MTU параметрін қосыңыз.",
+  "regionBypassSettings": "{region} аймағының тізімі: {value}. Қолмен жасалған тізім аймақтық мәндерді ауыстырады.",
+  "regionSelectApps": "Қолданбаларды аймақ бойынша таңдау",
+  "regionAppsPreviewTitle": "Қолданба таңдауының алдын ала қарауы",
+  "regionAppsPreview": "{region}: VPN айналып өту тізіміне {bypassed} қолданба, VPN тізіміне {proxied} қолданба кіреді. Екі тізім де ауыстырылады; режим мен басқа параметрлер өзгермейді. Пакет пен SDK сәйкестігі — тек ұсыныс: қолданғаннан кейін нәтижені тексеріңіз.",
+  "regionAppsEmpty": "Бұл аймаққа сәйкес қолданбалар табылмады. Тізімдеріңіз өзгермеді.",
+  "regionAppsChanged": "Аймақ немесе қолданба тізімдері өзгерді. Ағымдағы параметрлермен таңдауды қайталаңыз.",
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -175,38 +175,58 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m69(count, label) =>
       "${Intl.plural(count, other: 'プロキシグループ ${label} 件')}";
 
-  static String m70(count, label) =>
+  static String m70(region, bypassed, proxied) =>
+      "${region}: VPN バイパス一覧に ${bypassed} 個、VPN 一覧に ${proxied} 個のアプリを追加します。両方の一覧が置き換わり、モードや他の設定は変更されません。パッケージと SDK の一致は候補にすぎません。適用後に結果を確認してください。";
+
+  static String m71(region, value) =>
+      "地域 ${region} の一覧: ${value}。カスタム一覧は地域の既定値を置き換えます。";
+
+  static String m72(region, source) => "候補: ${region} · ${source}";
+
+  static String m73(region, value) =>
+      "地域 ${region} の既定 DNS: ${value}。この画面の手動設定が優先されます。";
+
+  static String m74(region) => "国のプロファイル: ${region}";
+
+  static String m75(value) => "TUN MTU: ${value}";
+
+  static String m76(value) => "既定のサービス確認: ${value}";
+
+  static String m77(region, value) =>
+      "地域 ${region} の MTU は ${value} です。独自の値を使うには MTU 設定を追加してください。";
+
+  static String m78(count, label) =>
       "${Intl.plural(count, other: 'ルール ${label} 件')}";
 
-  static String m71(appName) => "${appName}（セーフモード）";
+  static String m79(appName) => "${appName}（セーフモード）";
 
-  static String m72(count) => "${count} 秒";
+  static String m80(count) => "${count} 秒";
 
-  static String m73(count) => "${count} 件が有効";
+  static String m81(count) => "${count} 件が有効";
 
-  static String m74(count) => "${count} 件に問題";
+  static String m82(count) => "${count} 件に問題";
 
-  static String m75(time) => "${time} に検査";
+  static String m83(time) => "${time} に検査";
 
-  static String m76(count) => "設定 ${count} 件";
+  static String m84(count) => "設定 ${count} 件";
 
-  static String m77(link) => "${link} からプロキシを読み取れませんでした";
+  static String m85(link) => "${link} からプロキシを読み取れませんでした";
 
-  static String m78(label) => "${label}は1項目のみ指定できます";
+  static String m86(label) => "${label}は1項目のみ指定できます";
 
-  static String m79(count) => "${count} 件の結果";
+  static String m87(count) => "${count} 件の結果";
 
-  static String m80(value) => "ピーク ${value}";
+  static String m88(value) => "ピーク ${value}";
 
-  static String m81(value) => "累計 ${value}";
+  static String m89(value) => "累計 ${value}";
 
-  static String m82(version) => "インストール済み: ${version}";
+  static String m90(version) => "インストール済み: ${version}";
 
-  static String m83(label) => "${label}はURLである必要があります";
+  static String m91(label) => "${label}はURLである必要があります";
 
-  static String m84(count) => "${count} 年前";
+  static String m92(count) => "${count} 年前";
 
-  static String m85(count) => "${count} 年前";
+  static String m93(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -280,6 +300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
     "appIconDesign": MessageLookupByLibrary.simpleMessage("アプリアイコンのデザイン"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("ローカルプロキシがありません"),
+    "appRegion": MessageLookupByLibrary.simpleMessage("アプリの地域"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
     "applicationSettings": MessageLookupByLibrary.simpleMessage("アプリの設定"),
     "authentication": MessageLookupByLibrary.simpleMessage("認証"),
@@ -1225,6 +1246,71 @@ class MessageLookup extends MessageLookupByLibrary {
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "regex": MessageLookupByLibrary.simpleMessage("正規表現"),
+    "regionApply": MessageLookupByLibrary.simpleMessage("地域を適用"),
+    "regionAppsChanged": MessageLookupByLibrary.simpleMessage(
+      "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
+    ),
+    "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
+      "この地域に一致するアプリはありません。一覧は変更されません。",
+    ),
+    "regionAppsPreview": m70,
+    "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
+      "アプリ選択のプレビュー",
+    ),
+    "regionBypassSettings": m71,
+    "regionChina": MessageLookupByLibrary.simpleMessage("中国"),
+    "regionChoose": MessageLookupByLibrary.simpleMessage("国を選択"),
+    "regionCurrent": MessageLookupByLibrary.simpleMessage("現在の地域"),
+    "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
+      "手動の DNS・MTU 設定、バイパス一覧、ルーティングルール、サービスの選択は保持されます。",
+    ),
+    "regionDetected": m72,
+    "regionDetectionTitle": MessageLookupByLibrary.simpleMessage("デバイスからの候補"),
+    "regionDnsSettings": m73,
+    "regionEgypt": MessageLookupByLibrary.simpleMessage("エジプト"),
+    "regionIntro": MessageLookupByLibrary.simpleMessage(
+      "表示言語とは別に、地域のネットワーク既定値とサービス確認を設定します。",
+    ),
+    "regionIran": MessageLookupByLibrary.simpleMessage("イラン"),
+    "regionNoChanges": MessageLookupByLibrary.simpleMessage(
+      "ネットワーク既定値とサービス確認は変更されません。",
+    ),
+    "regionNoDetected": MessageLookupByLibrary.simpleMessage(
+      "一致する候補がありません。タイムゾーンとシステムロケールのみを使用します。",
+    ),
+    "regionNoServices": MessageLookupByLibrary.simpleMessage("サービス確認はオフです"),
+    "regionNotSet": MessageLookupByLibrary.simpleMessage("オフ"),
+    "regionOther": MessageLookupByLibrary.simpleMessage("その他 / 共通"),
+    "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
+      "Android では MTU やバイパスの変更に VPN の再起動確認が必要な場合があります。アプリの選択は別途実行します。",
+    ),
+    "regionPreviewBase": m74,
+    "regionPreviewMtu": m75,
+    "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
+      "プロキシの選択とルーティングルールは変更されません。",
+    ),
+    "regionPreviewServices": m76,
+    "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("プレビュー"),
+    "regionProfileDefaults": MessageLookupByLibrary.simpleMessage("プロファイルの既定値"),
+    "regionRussia": MessageLookupByLibrary.simpleMessage("ロシア"),
+    "regionSelectApps": MessageLookupByLibrary.simpleMessage("地域別にアプリを選択"),
+    "regionSelectBeforeApps": MessageLookupByLibrary.simpleMessage(
+      "地域別アプリ候補を使うには、対応する地域を選択してください。",
+    ),
+    "regionSourceLocaleCountry": MessageLookupByLibrary.simpleMessage(
+      "システムロケールの国",
+    ),
+    "regionSourceLocaleLanguage": MessageLookupByLibrary.simpleMessage(
+      "システム言語",
+    ),
+    "regionSourceTimeZone": MessageLookupByLibrary.simpleMessage("タイムゾーン"),
+    "regionTitle": MessageLookupByLibrary.simpleMessage("地域プロファイル"),
+    "regionTunSettings": m77,
+    "regionUseDetected": MessageLookupByLibrary.simpleMessage("検出した地域を選択"),
+    "regionWarning": MessageLookupByLibrary.simpleMessage(
+      "国の選択はプレビューだけを更新します。地域の既定値は適用後に変更されます。",
+    ),
+    "regionalAdaptation": MessageLookupByLibrary.simpleMessage("地域設定"),
     "releaseMemory": MessageLookupByLibrary.simpleMessage("メモリを解放"),
     "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
       "メモリの解放に失敗しました",
@@ -1406,12 +1492,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "ルールは対応する種類で始めてください。例：DOMAIN,example.com,DIRECT",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("ルール"),
-    "rulesCount": m70,
+    "rulesCount": m78,
     "runTime": MessageLookupByLibrary.simpleMessage("稼働時間"),
     "running": MessageLookupByLibrary.simpleMessage("実行中"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage("ランタイム設定"),
     "safeMode": MessageLookupByLibrary.simpleMessage("セーフモード"),
-    "safeModeAppTitle": m71,
+    "safeModeAppTitle": m79,
     "saturation": MessageLookupByLibrary.simpleMessage("彩度"),
     "save": MessageLookupByLibrary.simpleMessage("保存"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("変更を保存しますか？"),
@@ -1422,9 +1508,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "scrollToSelected": MessageLookupByLibrary.simpleMessage("選択項目へスクロール"),
     "search": MessageLookupByLibrary.simpleMessage("検索"),
     "seconds": MessageLookupByLibrary.simpleMessage("秒"),
-    "secondsCount": m72,
+    "secondsCount": m80,
     "secretKey": MessageLookupByLibrary.simpleMessage("キー"),
-    "sectionsInEffect": m73,
+    "sectionsInEffect": m81,
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage("ルールセットを選択してください"),
     "selectSplitStrategy": MessageLookupByLibrary.simpleMessage(
@@ -1432,13 +1518,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
-    "serviceAbnormalCount": m74,
+    "serviceAbnormalCount": m82,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage("すべて利用可能"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("利用可能"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("ブロック済み"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("検査"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("すべて検査"),
-    "serviceCheckedAt": m75,
+    "serviceCheckedAt": m83,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("近日提供予定"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
       "許可されていない ISP",
@@ -1456,8 +1542,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceUnsupportedRegion": MessageLookupByLibrary.simpleMessage("対象外の地域"),
     "settingEntries": MessageLookupByLibrary.simpleMessage("設定項目"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
-    "settingsCount": m76,
-    "shareLinkUnreadable": m77,
+    "settingsCount": m84,
+    "shareLinkUnreadable": m85,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "リンクからプロキシを読み取れませんでした",
     ),
@@ -1481,7 +1567,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "ここにはリンクを 1 つだけ入力してください。複数の場合は一覧のクイック編集を使ってください",
     ),
-    "singleValueTip": m78,
+    "singleValueTip": m86,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("証明書の検証をスキップ"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("スキップするドメイン"),
@@ -1601,7 +1687,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
-    "toolsResults": m79,
+    "toolsResults": m87,
     "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
@@ -1617,8 +1703,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m80,
-    "trafficTotal": m81,
+    "trafficPeak": m88,
+    "trafficTotal": m89,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -1659,7 +1745,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "パッケージインストーラーを起動できませんでした。",
     ),
-    "updateInstalledVersion": m82,
+    "updateInstalledVersion": m90,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -1678,7 +1764,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m91,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -1702,8 +1788,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m92,
+    "yearsAgoShort": m93,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

@@ -819,6 +819,46 @@ void main() {
     matching: find.byType(CommonSwitch),
   );
 
+  testWidgets(
+    'an empty regional selection stays off and can be enabled from manage',
+    (tester) async {
+      final asked = <String>[];
+      answer((params) {
+        asked.addAll(params.names);
+        return [
+          for (final name in params.names)
+            _item(name, ServiceProbeStatus.available),
+        ];
+      });
+      await tester.pumpWidget(
+        app(
+          settings: AppSettingProps(
+            regionCode: 'RU',
+            disabledServices: [
+              for (final target in ServiceTarget.values) target.id,
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Service checks are off'), findsOneWidget);
+      expect(find.text('All available'), findsNothing);
+      expect(asked, isEmpty);
+      await tester.tap(find.byType(ServiceStatusCard));
+      await tester.pumpAndSettle();
+      expect(find.text('Service checks are off'), findsNWidgets(2));
+      expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNull);
+      await tester.tap(find.byTooltip('Manage services'));
+      await tester.pumpAndSettle();
+      await tester.tap(switchOf(ServiceTarget.google));
+      await tester.pumpAndSettle();
+      final settings = settingsOf(tester);
+      expect(settings.enabledServices, ['google']);
+      expect(settings.disabledServices, isNot(contains('google')));
+      expect(find.text('Service checks are off'), findsNothing);
+    },
+  );
+
   testWidgets('the tile and the sheet follow the saved order', (tester) async {
     final asked = <String>[];
     answer((params) {

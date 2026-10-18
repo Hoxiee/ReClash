@@ -1,15 +1,21 @@
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
+
+import 'dart:async';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/views/config/tun.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
@@ -88,9 +94,8 @@ class TUNItem extends ConsumerWidget {
       setting: networkToolSettings[1],
       title: networkToolSettings[1].title,
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
-      onChanged: _tunWriter(
-        (state, value) => state.copyWith.tun(enable: value),
-      ),
+      onChanged: (ref, value) =>
+          ref.read(setupActionProvider.notifier).setTunEnabled(value),
     );
   }
 }
@@ -319,6 +324,50 @@ class LoopbackItem extends StatelessWidget {
   }
 }
 
+class _MtuItem extends ConsumerWidget {
+  const _MtuItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final value = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.mtu),
+    );
+    final regionMtu = regionTunMtu(
+      ref.watch(appSettingProvider.select((state) => state.regionCode)),
+    );
+    return ListItem.input(
+      title: Text(networkToolSettings[13].title(l)),
+      subtitle: Text('$value'),
+      dialogTitle: networkToolSettings[13].title(l),
+      value: '$value',
+      resetValue: '$regionMtu',
+      maxLength: TextInputLimits.number,
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        final mtu = int.tryParse(value?.trim() ?? '');
+        if (mtu == null) return l.numberTip('MTU');
+        return mtu < minTunMtu || mtu > maxTunMtu
+            ? l.numberRangeTip('MTU', '$minTunMtu', '$maxTunMtu')
+            : null;
+      },
+      onChanged: (value) {
+        if (value == null) return;
+        final mtu = int.parse(value.trim());
+        ref
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                tun: state.tun.copyWith(mtu: mtu),
+                tunOverride: state.tunOverride.copyWith(mtu: mtu),
+                tunOverrideKeys: {...state.tunOverrideKeys, TunOverrideKey.mtu},
+              ),
+            );
+      },
+    );
+  }
+}
+
 const _maxUint32 = 0xFFFFFFFF;
 
 class _NumberItem extends ConsumerWidget {
@@ -327,16 +376,12 @@ class _NumberItem extends ConsumerWidget {
     required this.select,
     required this.update,
     this.isSeconds = false,
-    this.min = 0,
-    this.max = _maxUint32,
   });
 
   final ConfigLabel title;
   final int Function(PatchClashConfig state) select;
   final _TunUpdate<int> update;
   final bool isSeconds;
-  final int min;
-  final int max;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -359,8 +404,8 @@ class _NumberItem extends ConsumerWidget {
         if (number == null) {
           return appLocalizations.numberTip(label);
         }
-        return number < min || number > max
-            ? appLocalizations.numberRangeTip(label, '$min', '$max')
+        return number < 0 || number > _maxUint32
+            ? appLocalizations.numberRangeTip(label, '0', '$_maxUint32')
             : null;
       },
       onChanged: (value) {
@@ -379,16 +424,7 @@ class _NumberItem extends ConsumerWidget {
 // same keys as overrides, so a profile's own values apply unless picked.
 List<Widget> tunItems({required bool isMipsStack}) {
   return [
-    SettingTarget(
-      spec: networkToolSettings[13],
-      child: _NumberItem(
-        title: networkToolSettings[13].title,
-        min: minTunMtu,
-        max: maxTunMtu,
-        select: (state) => state.tun.mtu,
-        update: (state, value) => state.copyWith.tun(mtu: value),
-      ),
-    ),
+    SettingTarget(spec: networkToolSettings[13], child: const _MtuItem()),
     if (isMipsStack)
       ConfigOptionsItem<String>(
         setting: networkToolSettings[14],
@@ -556,11 +592,11 @@ class VpnSections extends ConsumerWidget {
   }
 }
 
-class SystemProxySection extends StatelessWidget {
+class SystemProxySection extends ConsumerWidget {
   const SystemProxySection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     return generateSection(
       title: appLocalizations.system,
@@ -603,16 +639,69 @@ class NetworkOptionsSection extends ConsumerWidget {
   }
 }
 
+class NetworkView extends ConsumerWidget {
+  const NetworkView({super.key});
+
+  Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {
+    final l = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      title: l.restoreDefaults,
+      message: TextSpan(text: l.networkRestoreDefaultsTip),
+      confirmText: l.restore,
+    );
+    if (confirmed != true || !context.mounted) return;
+    final defaults = regionNetworkDefaults(
+      ref.read(appSettingProvider).regionCode,
+      ref.read(patchClashConfigProvider),
+    );
+    ref.read(patchClashConfigProvider.notifier).value = defaults.patchConfig;
+    ref
+        .read(networkSettingProvider.notifier)
+        .update((state) => state.copyWith(bypassDomain: defaults.bypassDomain));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final regionCode = ref.watch(
+      appSettingProvider.select((state) => state.regionCode),
+    );
+    final patchConfig = ref.watch(patchClashConfigProvider);
+    final bypassDomain = ref.watch(
+      networkSettingProvider.select((state) => state.bypassDomain),
+    );
+    final defaults = regionNetworkDefaults(regionCode, patchConfig);
+    final isDefault =
+        defaults.patchConfig == patchConfig &&
+        listEquals(defaults.bypassDomain, bypassDomain);
+    return CommonScaffold(
+      title: l.network,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.reset,
+          tooltip: l.restoreDefaults,
+          onPressed: isDefault
+              ? null
+              : () => unawaited(_restoreDefaults(context, ref)),
+        ),
+      ],
+      body: const NetworkListView(),
+    );
+  }
+}
+
 class NetworkListView extends StatelessWidget {
   const NetworkListView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-        top: context.sectionsTopPadding,
-        bottom: 16 + context.bottomInset,
-      ),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: context.sectionsTopPadding,
+            bottom: 16 + context.bottomInset,
+          ) +
+          context.bodyInsets,
       children: [
         if (system.isAndroid) const VpnSections(),
         if (system.isDesktop) const SystemProxySection(),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:reclash/common/boot_record.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
@@ -10,7 +11,17 @@ import 'package:flutter/services.dart';
 
 const _platformProbeTimeout = Duration(seconds: 2);
 
-enum ApkInstallResult { started, permissionRequired }
+enum ApkInstallResult { started, permissionRequired, vpnActive }
+
+enum ApkInstallStatus {
+  none,
+  preparing,
+  awaitingConfirmation,
+  installing,
+  success,
+  failed,
+  cancelled,
+}
 
 class App {
   static App? _instance;
@@ -18,6 +29,10 @@ class App {
   Function()? onExit;
   Function()? onPackagesChanged;
   final floatingKeyboard = ValueNotifier(false);
+  final _updateInstallChanges = StreamController<ApkInstallStatus>.broadcast();
+
+  Stream<ApkInstallStatus> get updateInstallChanges =>
+      _updateInstallChanges.stream;
 
   App._internal() {
     methodChannel = const MethodChannel('$packageName/app');
@@ -31,6 +46,8 @@ class App {
           onPackagesChanged?.call();
         case 'floatingImeChanged':
           floatingKeyboard.value = call.arguments as bool;
+        case 'updateInstallChanged':
+          _updateInstallChanges.add(_installStatus(call.arguments));
         default:
           throw MissingPluginException();
       }
@@ -44,6 +61,10 @@ class App {
 
   Future<bool?> moveTaskToBack() async {
     return methodChannel.invokeMethod<bool>('moveTaskToBack');
+  }
+
+  Future<bool?> setAppIcon(AppIcon icon) async {
+    return methodChannel.invokeMethod<bool>('setAppIcon', icon.name);
   }
 
   Future<List<Package>> getPackages() async {
@@ -78,13 +99,20 @@ class App {
         false;
   }
 
-  Future<List<String>> getChinaPackageNames() async {
+  Future<List<String>> getDomesticPackageNames(String regionCode) async {
+    final code = sanitizeRegionCode(regionCode);
+    if (code == null || !hasProfileForCode(code)) return [];
     final packageNamesString = await methodChannel.invokeMethod<String>(
-      'getChinaPackageNames',
+      'getDomesticPackageNames',
+      {'regionCode': code},
     );
     final List<dynamic> packageNamesRaw =
         await packageNamesString?.decodeJson<List<dynamic>>() ?? [];
-    return packageNamesRaw.map((e) => e.toString()).toList();
+    return packageNamesRaw
+        .cast<String>()
+        .where((name) => name.isNotEmpty)
+        .toSet()
+        .toList();
   }
 
   final Map<String, ImageProvider?> _packageIcons = {};
@@ -158,31 +186,81 @@ class App {
     return methodChannel.invokeMethod<bool>('openAppSettings');
   }
 
-  Future<bool> canRequestPackageInstalls() async {
-    if (!Platform.isAndroid) return false;
-    return await methodChannel.invokeMethod<bool>(
-          'canRequestPackageInstalls',
-        ) ??
-        false;
-  }
+  Future<bool> canRequestPackageInstalls() async =>
+      await methodChannel.invokeMethod<bool>('canRequestPackageInstalls') ??
+      false;
+
+  Future<bool> updateInstallBlockedByVpn() async =>
+      await methodChannel.invokeMethod<bool>('updateInstallBlockedByVpn') ??
+      true;
+
+  Future<bool> openUpdateInstallPermission() async =>
+      await methodChannel.invokeMethod<bool>('openUpdateInstallPermission') ??
+      false;
+
+  Future<void> verifyUpdateApk(
+    String path, {
+    required String expectedVersion,
+    required String expectedSha256,
+  }) => methodChannel.invokeMethod<void>('verifyUpdateApk', {
+    'path': path,
+    'version': expectedVersion,
+    'sha256': expectedSha256,
+  });
 
   Future<ApkInstallResult> installApk(
     String path, {
     required String expectedVersion,
+    required String expectedSha256,
+    bool automatic = false,
   }) async {
     final result = await methodChannel.invokeMethod<String>('installApk', {
       'path': path,
       'version': expectedVersion,
+      'sha256': expectedSha256,
+      'automatic': automatic,
     });
     return switch (result) {
       'started' => ApkInstallResult.started,
       'permissionRequired' => ApkInstallResult.permissionRequired,
+      'vpnActive' => ApkInstallResult.vpnActive,
       _ => throw PlatformException(
         code: 'INVALID_INSTALL_RESULT',
         message: 'Android returned an invalid APK install result',
       ),
     };
   }
+
+  Future<String> updateInstalledVersion() async {
+    final version = await methodChannel.invokeMethod<String>(
+      'updateInstalledVersion',
+    );
+    if (version == null || version.isEmpty) {
+      throw PlatformException(code: 'INVALID_INSTALLED_VERSION');
+    }
+    return version;
+  }
+
+  Future<ApkInstallStatus> updateInstallStatus() async => _installStatus(
+    await methodChannel.invokeMethod<String>('updateInstallStatus'),
+  );
+
+  Future<bool> continueUpdateInstall() async =>
+      await methodChannel.invokeMethod<bool>('continueUpdateInstall') ?? false;
+
+  ApkInstallStatus _installStatus(Object? value) => switch (value) {
+    'none' => ApkInstallStatus.none,
+    'preparing' => ApkInstallStatus.preparing,
+    'awaitingConfirmation' => ApkInstallStatus.awaitingConfirmation,
+    'installing' => ApkInstallStatus.installing,
+    'success' => ApkInstallStatus.success,
+    'failed' => ApkInstallStatus.failed,
+    'cancelled' => ApkInstallStatus.cancelled,
+    _ => throw PlatformException(
+      code: 'INVALID_INSTALL_STATUS',
+      message: 'Android returned an invalid APK install status',
+    ),
+  };
 
   Future<AppExitInfo?> getLastExitInfo() async {
     try {

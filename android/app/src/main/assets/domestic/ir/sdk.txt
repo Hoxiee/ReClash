@@ -1,0 +1,9 @@
+# layer C: IR SDK class prefixes matched against normalized dex/component names
+ir.tapsell
+ir.metrix
+com.adivery.sdk
+co.pushe.plus
+io.adtrace
+ir.cafebazaar.poolakey
+ir.myket.billingclient
+com.adpdigital

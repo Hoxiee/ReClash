@@ -7936,6 +7936,376 @@ class AppLocalizations {
     );
   }
 
+  /// `App region`
+  String get appRegion {
+    return Intl.message('App region', name: 'appRegion', desc: '', args: []);
+  }
+
+  /// `Regional adaptation`
+  String get regionalAdaptation {
+    return Intl.message(
+      'Regional adaptation',
+      name: 'regionalAdaptation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region profile`
+  String get regionTitle {
+    return Intl.message(
+      'Region profile',
+      name: 'regionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Regional network defaults and service checks, independent of the interface language.`
+  String get regionIntro {
+    return Intl.message(
+      'Regional network defaults and service checks, independent of the interface language.',
+      name: 'regionIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choosing a country only updates this preview. Regional defaults change when you apply it.`
+  String get regionWarning {
+    return Intl.message(
+      'Choosing a country only updates this preview. Regional defaults change when you apply it.',
+      name: 'regionWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a country`
+  String get regionChoose {
+    return Intl.message(
+      'Choose a country',
+      name: 'regionChoose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggested: {region} · {source}`
+  String regionDetected(String region, String source) {
+    return Intl.message(
+      'Suggested: $region · $source',
+      name: 'regionDetected',
+      desc: '',
+      args: [region, source],
+    );
+  }
+
+  /// `Use detected region`
+  String get regionUseDetected {
+    return Intl.message(
+      'Use detected region',
+      name: 'regionUseDetected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview`
+  String get regionPreviewTitle {
+    return Intl.message(
+      'Preview',
+      name: 'regionPreviewTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Country profile: {region}`
+  String regionPreviewBase(String region) {
+    return Intl.message(
+      'Country profile: $region',
+      name: 'regionPreviewBase',
+      desc: '',
+      args: [region],
+    );
+  }
+
+  /// `TUN MTU: {value}`
+  String regionPreviewMtu(String value) {
+    return Intl.message(
+      'TUN MTU: $value',
+      name: 'regionPreviewMtu',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `Default service checks: {value}`
+  String regionPreviewServices(String value) {
+    return Intl.message(
+      'Default service checks: $value',
+      name: 'regionPreviewServices',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `Proxy selection and your routing rules stay unchanged.`
+  String get regionPreviewRules {
+    return Intl.message(
+      'Proxy selection and your routing rules stay unchanged.',
+      name: 'regionPreviewRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.`
+  String get regionPreviewAndroid {
+    return Intl.message(
+      'On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.',
+      name: 'regionPreviewAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.`
+  String get regionCustomPreserved {
+    return Intl.message(
+      'Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.',
+      name: 'regionCustomPreserved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network defaults and service checks stay unchanged.`
+  String get regionNoChanges {
+    return Intl.message(
+      'Network defaults and service checks stay unchanged.',
+      name: 'regionNoChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply region`
+  String get regionApply {
+    return Intl.message(
+      'Apply region',
+      name: 'regionApply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No matching suggestion. Only the time zone and system locale are used.`
+  String get regionNoDetected {
+    return Intl.message(
+      'No matching suggestion. Only the time zone and system locale are used.',
+      name: 'regionNoDetected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a supported region before using regional app suggestions.`
+  String get regionSelectBeforeApps {
+    return Intl.message(
+      'Choose a supported region before using regional app suggestions.',
+      name: 'regionSelectBeforeApps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get regionNotSet {
+    return Intl.message('Off', name: 'regionNotSet', desc: '', args: []);
+  }
+
+  /// `Other / general`
+  String get regionOther {
+    return Intl.message(
+      'Other / general',
+      name: 'regionOther',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Russia`
+  String get regionRussia {
+    return Intl.message('Russia', name: 'regionRussia', desc: '', args: []);
+  }
+
+  /// `Iran`
+  String get regionIran {
+    return Intl.message('Iran', name: 'regionIran', desc: '', args: []);
+  }
+
+  /// `China`
+  String get regionChina {
+    return Intl.message('China', name: 'regionChina', desc: '', args: []);
+  }
+
+  /// `Egypt`
+  String get regionEgypt {
+    return Intl.message('Egypt', name: 'regionEgypt', desc: '', args: []);
+  }
+
+  /// `time zone`
+  String get regionSourceTimeZone {
+    return Intl.message(
+      'time zone',
+      name: 'regionSourceTimeZone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `system locale country`
+  String get regionSourceLocaleCountry {
+    return Intl.message(
+      'system locale country',
+      name: 'regionSourceLocaleCountry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `system language`
+  String get regionSourceLocaleLanguage {
+    return Intl.message(
+      'system language',
+      name: 'regionSourceLocaleLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current region`
+  String get regionCurrent {
+    return Intl.message(
+      'Current region',
+      name: 'regionCurrent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device suggestion`
+  String get regionDetectionTitle {
+    return Intl.message(
+      'Device suggestion',
+      name: 'regionDetectionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile defaults`
+  String get regionProfileDefaults {
+    return Intl.message(
+      'Profile defaults',
+      name: 'regionProfileDefaults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service checks are off`
+  String get regionNoServices {
+    return Intl.message(
+      'Service checks are off',
+      name: 'regionNoServices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region {region} supplies DNS defaults: {value}. Manual overrides here take priority.`
+  String regionDnsSettings(String region, String value) {
+    return Intl.message(
+      'Region $region supplies DNS defaults: $value. Manual overrides here take priority.',
+      name: 'regionDnsSettings',
+      desc: '',
+      args: [region, value],
+    );
+  }
+
+  /// `Region {region} supplies MTU {value}. Add an MTU override to use your own value.`
+  String regionTunSettings(String region, String value) {
+    return Intl.message(
+      'Region $region supplies MTU $value. Add an MTU override to use your own value.',
+      name: 'regionTunSettings',
+      desc: '',
+      args: [region, value],
+    );
+  }
+
+  /// `Region {region} uses: {value}. A custom list replaces the regional defaults.`
+  String regionBypassSettings(String region, String value) {
+    return Intl.message(
+      'Region $region uses: $value. A custom list replaces the regional defaults.',
+      name: 'regionBypassSettings',
+      desc: '',
+      args: [region, value],
+    );
+  }
+
+  /// `Select apps by region`
+  String get regionSelectApps {
+    return Intl.message(
+      'Select apps by region',
+      name: 'regionSelectApps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App selection preview`
+  String get regionAppsPreviewTitle {
+    return Intl.message(
+      'App selection preview',
+      name: 'regionAppsPreviewTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{region}: {bypassed} apps in the VPN bypass list, {proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.`
+  String regionAppsPreview(String region, int bypassed, int proxied) {
+    return Intl.message(
+      '$region: $bypassed apps in the VPN bypass list, $proxied in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.',
+      name: 'regionAppsPreview',
+      desc: '',
+      args: [region, bypassed, proxied],
+    );
+  }
+
+  /// `No apps matched this region. Your lists are unchanged.`
+  String get regionAppsEmpty {
+    return Intl.message(
+      'No apps matched this region. Your lists are unchanged.',
+      name: 'regionAppsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The region or app lists changed. Run selection again for the current settings.`
+  String get regionAppsChanged {
+    return Intl.message(
+      'The region or app lists changed. Run selection again for the current settings.',
+      name: 'regionAppsChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Update channel`
   String get updateChannel {
     return Intl.message(

@@ -1,0 +1,16 @@
+# never treated as domestic, whatever the region (dot-boundary match)
+org.telegram
+com.google
+com.android.chrome
+com.android.vending
+com.microsoft
+com.apple
+com.facebook.katana
+com.instagram.android
+com.whatsapp
+com.zhiliaoapp.musically
+com.spotify.music
+com.netflix.mediaclient
+# neutralize the loose CN prefixes com.mx (Maxthon) and com.stub (StubApp packer)
+com.mxtech
+com.stubhub

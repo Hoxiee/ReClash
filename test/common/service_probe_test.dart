@@ -70,6 +70,81 @@ void main() {
     });
   });
 
+  group('defaultServiceTargetsForRegion', () {
+    test('returns every service until a region is explicitly selected', () {
+      expect(defaultServiceTargetsForRegion(null), ServiceTarget.values);
+      expect(defaultServiceTargetsForRegion(' US '), ServiceTarget.values);
+      expect(defaultServiceTargetsForRegion(''), ServiceTarget.values);
+    });
+
+    test('uses the country profile services available in this app', () {
+      expect(defaultServiceTargetsForRegion('RU'), [
+        ServiceTarget.youtube,
+        ServiceTarget.discord,
+        ServiceTarget.chatgpt,
+        ServiceTarget.claude,
+      ]);
+      expect(defaultServiceTargetsForRegion('CN'), [
+        ServiceTarget.google,
+        ServiceTarget.youtube,
+        ServiceTarget.chatgpt,
+        ServiceTarget.claude,
+        ServiceTarget.bilibili,
+      ]);
+      expect(defaultServiceTargetsForRegion('OTHER'), [
+        ServiceTarget.google,
+        ServiceTarget.youtube,
+        ServiceTarget.chatgpt,
+        ServiceTarget.claude,
+        ServiceTarget.netflix,
+      ]);
+    });
+  });
+
+  group('enabledServiceTargetsForRegion', () {
+    test('uses regional defaults while retaining explicit user choices', () {
+      expect(
+        enabledServiceTargetsForRegion(
+          regionCode: 'RU',
+          order: const ['netflix', 'youtube'],
+          enabled: const {'netflix'},
+          disabled: const {'youtube'},
+        ),
+        [
+          ServiceTarget.netflix,
+          ServiceTarget.chatgpt,
+          ServiceTarget.claude,
+          ServiceTarget.discord,
+        ],
+      );
+    });
+
+    test(
+      'retains services the user explicitly enabled outside the defaults',
+      () {
+        final enabled = enabledServiceTargetsForRegion(
+          regionCode: 'CN',
+          order: const [],
+          enabled: const {'discord'},
+          disabled: const {},
+        );
+        expect(enabled, contains(ServiceTarget.discord));
+      },
+    );
+
+    test('keeps the existing all-services default when region is unset', () {
+      expect(
+        enabledServiceTargetsForRegion(
+          regionCode: null,
+          order: const [],
+          enabled: const <String>{},
+          disabled: const {'netflix'},
+        ),
+        ServiceTarget.values.where((target) => target != ServiceTarget.netflix),
+      );
+    });
+  });
+
   group('ServiceCheck.of', () {
     test('carries the region, node and check time across', () {
       final check = ServiceCheck.of(

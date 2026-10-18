@@ -1,0 +1,116 @@
+{
+  "appRegion": "Регион приложения",
+  "regionalAdaptation": "Региональная адаптация",
+  "regionTitle": "Региональный профиль",
+  "regionIntro": "Базовые сетевые параметры и проверки сервисов для региона — независимо от языка интерфейса.",
+  "regionWarning": "Выбор страны обновляет только предпросмотр. Региональные значения изменятся после применения.",
+  "regionChoose": "Выберите страну",
+  "regionDetected": "Рекомендуется: {region} · {source}",
+  "@regionDetected": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "regionUseDetected": "Выбрать определённый регион",
+  "regionPreviewTitle": "Предпросмотр",
+  "regionPreviewBase": "Профиль страны: {region}",
+  "@regionPreviewBase": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewMtu": "MTU TUN: {value}",
+  "@regionPreviewMtu": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewServices": "Проверки сервисов по умолчанию: {value}",
+  "@regionPreviewServices": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "regionPreviewRules": "Выбор прокси и ваши правила маршрутизации не изменятся.",
+  "regionPreviewAndroid": "На Android изменения MTU или обхода могут потребовать подтверждённого перезапуска VPN. Подбор приложений запускается отдельно.",
+  "regionCustomPreserved": "Ручные DNS и MTU, список обхода, правила маршрутизации и выбор сервисов сохраняются.",
+  "regionNoChanges": "Сетевые значения и набор проверок не изменятся.",
+  "regionApply": "Применить регион",
+  "regionNoDetected": "Подходящая подсказка не найдена. Используются только часовой пояс и системная локаль.",
+  "regionSelectBeforeApps": "Сначала выберите поддерживаемый регион, чтобы использовать региональный подбор приложений.",
+  "regionNotSet": "Отключён",
+  "regionOther": "Другой / общий",
+  "regionRussia": "Россия",
+  "regionIran": "Иран",
+  "regionChina": "Китай",
+  "regionEgypt": "Египет",
+  "regionSourceTimeZone": "часовой пояс",
+  "regionSourceLocaleCountry": "страна системной локали",
+  "regionSourceLocaleLanguage": "язык системы",
+  "regionCurrent": "Текущий регион",
+  "regionDetectionTitle": "Подсказка устройства",
+  "regionProfileDefaults": "Настройки профиля",
+  "regionNoServices": "Проверки сервисов отключены",
+  "regionDnsSettings": "Регион {region}: базовые DNS — {value}. Ручные переопределения на этом экране имеют приоритет.",
+  "regionTunSettings": "Регион {region}: MTU {value}. Добавьте переопределение MTU, чтобы задать своё значение.",
+  "regionBypassSettings": "Регион {region}: список обхода — {value}. Ручной список заменяет региональные значения.",
+  "regionSelectApps": "Подбор приложений по региону",
+  "regionAppsPreviewTitle": "Предпросмотр подбора",
+  "regionAppsPreview": "{region}: в список обхода VPN попадут {bypassed} приложений, в список VPN — {proxied}. Оба списка будут заменены; режим и остальные параметры не изменятся. Совпадения пакетов и SDK — лишь подсказки: проверьте результат после применения.",
+  "regionAppsEmpty": "Приложения для этого региона не найдены. Ваши списки не изменены.",
+  "regionAppsChanged": "Регион или списки приложений изменились. Повторите подбор для актуальных настроек.",
+  "@regionDnsSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionTunSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionBypassSettings": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@regionAppsPreview": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "bypassed": {
+        "type": "int"
+      },
+      "proxied": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -14,6 +14,10 @@ class SystemAction extends _$SystemAction {
     return ref.read(packagesProvider);
   }
 
+  Future<List<String>> getDomesticPackageNames(String regionCode) async {
+    return await app?.getDomesticPackageNames(regionCode) ?? [];
+  }
+
   Future<bool> isInstalledAppsPermissionGranted() async {
     return await app?.isInstalledAppsPermissionGranted() ?? true;
   }

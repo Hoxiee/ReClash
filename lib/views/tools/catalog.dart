@@ -152,6 +152,13 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     keywords: ['application', 'startup', 'приложение'],
   );
   page(
+    ToolPage.appRegion,
+    l.regionTitle,
+    ToolCategory.application,
+    AppGlyphs.language,
+    root: false,
+  );
+  page(
     ToolPage.theme,
     l.theme,
     ToolCategory.application,
