@@ -6,6 +6,7 @@ class CoreAction extends _$CoreAction {
 
   int _requestedRestartRevision = 0;
   Future<bool>? _restartOperation;
+  bool _restartSilence = false;
 
   @override
   void build() {}
@@ -23,14 +24,18 @@ class CoreAction extends _$CoreAction {
     }
   }
 
-  Future<void> startCore() async {
+  Future<bool> startCore({bool silence = false}) async {
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     try {
       final result = await startLifecycle();
-      await _applyLifecycleResult(result);
+      return await _applyLifecycleResult(result);
     } catch (error) {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-      dialogs.showNotifier(error.toString(), level: MessageLevel.error);
+      if (!silence) {
+        dialogs.showNotifier(error.toString(), level: MessageLevel.error);
+      }
+      if (silence) rethrow;
+      return false;
     }
   }
 
@@ -94,7 +99,8 @@ class CoreAction extends _$CoreAction {
     await _core.crash();
   }
 
-  Future<bool> restartCore() {
+  Future<bool> restartCore({bool silence = false}) {
+    _restartSilence |= silence;
     _requestedRestartRevision++;
     final activeOperation = _restartOperation;
     if (activeOperation != null) {
@@ -118,14 +124,20 @@ class CoreAction extends _$CoreAction {
       var applied = true;
       while (appliedRevision < _requestedRestartRevision) {
         final revision = _requestedRestartRevision;
+        final setupAction = ref.read(setupActionProvider.notifier);
         if (ref.read(isStartProvider)) {
-          applied = await ref
-              .read(setupActionProvider.notifier)
-              .setRunning(true, initialize: true);
+          applied = await setupAction.setRunning(
+            true,
+            initialize: true,
+            silence: _restartSilence,
+            owner: setupAction.runIntentOwner,
+          );
         } else {
-          applied = await ref
-              .read(setupActionProvider.notifier)
-              .applyProfile(force: true);
+          applied = await setupAction.applyProfile(
+            force: true,
+            silence: _restartSilence,
+            suppressErrors: _restartSilence,
+          );
         }
         appliedRevision = revision;
       }
@@ -135,6 +147,7 @@ class CoreAction extends _$CoreAction {
       rethrow;
     } finally {
       _restartOperation = null;
+      _restartSilence = false;
     }
   }
 }

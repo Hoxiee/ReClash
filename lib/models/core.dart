@@ -246,6 +246,8 @@ abstract class ProbeResult with _$ProbeResult {
     @JsonKey(name: 'rule-payload') @Default('') String rulePayload,
     String? error,
     String? message,
+    @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
+    @JsonKey(name: 'picks-version') @Default(0) int picksVersion,
   }) = _ProbeResult;
 
   factory ProbeResult.fromJson(Map<String, Object?> json) =>

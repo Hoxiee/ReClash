@@ -1061,6 +1061,107 @@
       }
     }
   },
+  "setupTitle": "Ilkinji birikme",
+  "setupLanguageTitle": "Diliňizi saýlaň",
+  "setupLanguageDescription": "Şertleri okamazdan öň dil saýlaň. Ony soňra üýtgedip bilersiňiz.",
+  "setupLanguageContinue": "Dowam et",
+  "setupProfileTitle": "Birikme profilini goşuň",
+  "setupProfileDescription": "ReClash serwerleri üpjün etmeýär. Üpjün edijiňiziň abunasyny ýa-da konfigurasiýasyny import ediň.",
+  "setupProfileReady": "Profil taýýar",
+  "setupProfileImport": "Profili import et",
+  "setupProfileLinkHint": "Abuna ýa-da paýlaşma baglanyşygy",
+  "setupProfileSkip": "Soňra sazla",
+  "setupCoverageTitle": "Haýsy programmalar birikmeli?",
+  "setupCoverageDescription": "ReClash ulanýan programmalaryňyzy saýlaň. Haýsy birikmeleriň serwerden geçýändigini profil düzgünleri kesgitleýär.",
+  "setupCoverageAll": "Ähli programmalar",
+  "setupCoverageAllDescription": "TUN enjamyň traffigini tutýar. Ulgam rugsat sorap biler.",
+  "setupCoverageSystem": "Ulgam proksisi",
+  "setupCoverageSystemDescription": "Ulgam proksisini goldamaýan programmalar göni birigýär.",
+  "setupCoverageLocal": "Programmalary özüm el bilen sazlaryn",
+  "setupCoverageLocalDescription": "Birikdirmek isleýän her programmaňyzda ýerli proksi salgysyny görkeziň.",
+  "setupCoverageAndroidDescription": "Android VPN birikmesini döretmäge rugsat sorar. Programmalary elýeterlilik sazlamalarynda saýlap bolýar.",
+  "setupCoverageNote": "Ähli traffigi tutmak onuň hemmesini serwer arkaly ibermek diýmek däldir. Göni ugurlar saklanýar.",
+  "setupRegionConfirm": "Şu sebit sazlamalaryny ulan",
+  "setupRegionDescription": "Teklip edilýän sebit interfeýs diline däl-de, şu enjama esaslanýar. Diňe toruňyza laýyk bolsa ulanyň.",
+  "setupRegionNeutral": "Profiliň başlangyç sazlamalaryny sakla",
+  "setupCheckAction": "Birikmäni barla",
+  "setupCheckingTitle": "Birikme barlanýar",
+  "setupCheckingDescription": "Saýlanan bir ugry barlaýarys. Ulgamyň rugsat soraglary aýratyn açylýar.",
+  "setupPhaseCore": "Esasy modul işe girizilýär",
+  "setupPhaseProfile": "Profil ulanylýar",
+  "setupPhaseConnection": "Birikme işe girizilýär",
+  "setupPhaseRoute": "Ugur barlanýar",
+  "setupPhaseExit": "Çykyş tassyklanýar",
+  "setupPhaseServices": "Hyzmatlar barlanýar",
+  "setupPhaseAlternatives": "Başga serwer gözlenýär",
+  "setupStepStatus": "{step} / {total}",
+  "setupCheckLimit": "Netije ähli programma ýa-da web sahypasyna däl-de, şu ugra degişlidir.",
+  "setupConnectedTitle": "Birikme işleýär",
+  "setupConnectedDescription": "Saýlanan ugur jogap berdi. Traffik profil düzgünlerine eýerýär.",
+  "setupPartialTitle": "Birigen, ýöne çäklendirmeler bar",
+  "setupPartialDescription": "Ugur jogap berdi, ýöne käbir barlaglary tassyklap bolmady.",
+  "setupUnconfirmedTitle": "Birikme tassyklanmady",
+  "setupUnconfirmedDescription": "Birikme başlady, ýöne saýlanan ugur ýeterlik netije bermedi.",
+  "setupFailedTitle": "Birikmä üns bermeli",
+  "setupSavedTitle": "Soňra birik",
+  "setupSavedDescription": "Saýlawlaryňyz saklandy. Taýýar bolanyňyzda dolandyryş panelinden birigip bilersiňiz.",
+  "setupAutoConnect": "ReClash açylanda birik",
+  "setupAutoConnectDescription": "Bu birikmäni programma bilen bile işe giriz.",
+  "setupSaveWithoutConnection": "Birikmän sakla",
+  "setupRepeat": "Gaýtadan barla",
+  "setupTryServer": "{server} serwerini syna",
+  "setupAlternativeDescription": "Bu serwer aýratyn synaga jogap berdi. Oňa geçip, tutuş ugry täzeden barlaň.",
+  "setupReport": "Barlag hasabaty",
+  "setupReceipt": "Birikmäňiz",
+  "setupReceiptProfile": "Profil",
+  "setupReceiptCoverage": "Örtük",
+  "setupReceiptCheck": "Barlag",
+  "setupNotChecked": "Barlanmady",
+  "setupConfirmed": "Tassyklanyldy",
+  "setupUnavailable": "Jogap ýok",
+  "setupStoppedTitle": "Barlag saklandy",
+  "setupStoppedDescription": "Saýlawlaryňyz saklandy. Öňki birikme saklanmady.",
+  "setupPermissionTitle": "Rugsat gerek",
+  "setupPermissionDescription": "Ulgamyň soragynda birikmä rugsat beriň, gaýtadan synanyşyň ýa-da başga çäk saýlaň.",
+  "setupLocalTitle": "Ýerli proksi taýýar",
+  "setupLocalDescription": "Bu salgyny birikdirmek isleýän programmalaryňyzda belläň. Bu barlag programmalaryň sazlanandygyny tassyklamaýar.",
+  "setupCopyProxy": "Proksi salgysyny göçür",
+  "setupErrorDetails": "Maglumatlar",
+  "setupSaveError": "Saýlawlaryňyzy saklap bolmady. Gaýtadan synanyşyň.",
+  "setupSafeMode": "Howpsuz tertip hakyky birikmäni başlatmaýar. Sazlamany saklaň ýa-da adaty ýygyndyda synaň.",
+  "setupResume": "Sazlamagy dowam et",
+  "setupRestart": "Birikmäni sazla",
+  "setupLaterNote": "Sazlama tamamlanmady; birikme barlanmady.",
+  "setupProfileCount": "Elýeterli profiller: {count}",
+  "setupAgeKeyDescription": "Bu profil şifrlenen. Dowam etmek üçin age açaryny giriziň.",
+  "setupFinishDescription": "Islendik saýlawy sazlamalarda üýtgedip bilersiňiz.",
+  "setupRouteChanged": "Barlag wagtynda ugur üýtgedi. Häzirki birikmäni täzeden barlaň.",
+  "setupUnknownError": "Amal tamamlanmady. Gaýtadan synanyşyň ýa-da maglumatlary açyň.",
+  "setupRequestPermission": "Birikmä rugsat ber",
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "Täzelenme kanaly",
   "updateChannelRelease": "Durnukly reliz",
   "updateChannelPre": "Deslapky reliz",

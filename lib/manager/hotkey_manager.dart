@@ -7,6 +7,7 @@ import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
@@ -95,6 +96,14 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
         _scheduleUpdate();
       }
     });
+    ref.listenManual(setupSessionProvider.select((state) => state.active), (
+      prev,
+      next,
+    ) {
+      if (prev != next) {
+        _scheduleUpdate();
+      }
+    });
   }
 
   void _scheduleUpdate() {
@@ -147,10 +156,16 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     _handleHotKeyAction(HotAction.values[id]);
   }
 
+  bool _allowsAction(HotAction action) =>
+      !ref.read(setupSessionProvider).active ||
+      action == HotAction.view ||
+      action == HotAction.exit;
+
   Future<void> _handleHotKeyAction(HotAction action) async {
     if (!mounted ||
         ref.read(safeModeProvider) ||
-        ref.read(hotKeyRecordingProvider)) {
+        ref.read(hotKeyRecordingProvider) ||
+        !_allowsAction(action)) {
       return;
     }
     final commonAction = ref.read(commonActionProvider.notifier);
@@ -202,7 +217,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     final specs = [
       if (platform.systemSupported && !isRecording && !safeMode)
         for (final action in ref.read(hotKeyActionsProvider))
-          ?action.toHotKeySpec(),
+          if (_allowsAction(action.action)) ?action.toHotKeySpec(),
     ];
     final failed = platform.systemSupported && !safeMode
         ? await _register(specs)
@@ -215,7 +230,10 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     if (platform.applicationId == null || linuxHotkeys == null) return;
     try {
       await linuxHotkeys.setEnabled(!isRecording && !safeMode);
-      final bindings = ref.read(hotKeyActionsProvider);
+      final bindings = ref
+          .read(hotKeyActionsProvider)
+          .where((binding) => _allowsAction(binding.action))
+          .toList();
       final keys = bindings.map((item) => item.key).nonNulls.toSet().toList();
       final names = await linuxHotkeys.keyNames([
         for (final key in keys) linuxKeyvalForUsage(key) ?? 0,
@@ -289,11 +307,13 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     return Shortcuts(
       shortcuts: {
         for (final binding in bindings)
-          if (isValidHotKey(binding.modifiers, binding.key))
+          if (_allowsAction(binding.action) &&
+              isValidHotKey(binding.modifiers, binding.key))
             PhysicalHotkeyActivator(binding.key!, binding.modifiers):
                 _HotActionIntent(binding.action),
         for (final binding in bindings)
-          if (isValidHotKey(binding.modifiers, binding.key))
+          if (_allowsAction(binding.action) &&
+              isValidHotKey(binding.modifiers, binding.key))
             PhysicalHotkeyActivator(
               binding.key!,
               binding.modifiers,
@@ -354,6 +374,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(setupSessionProvider.select((state) => state.active));
     return _buildCloseShortcuts(_buildLocalShortcuts(widget.child));
   }
 }

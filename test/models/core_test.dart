@@ -241,6 +241,23 @@ void main() {
     });
   });
 
+  group('ProbeResult', () {
+    test('round-trips Core epoch and proxy picks version', () {
+      const result = ProbeResult(
+        statusCode: 204,
+        coreEpoch: 2,
+        picksVersion: 5,
+      );
+      final json = jsonDecode(jsonEncode(result.toJson()));
+      final restored = ProbeResult.fromJson(json);
+
+      expect(json['core-epoch'], 2);
+      expect(json['picks-version'], 5);
+      expect(restored.coreEpoch, 2);
+      expect(restored.picksVersion, 5);
+    });
+  });
+
   group('CoreEvent', () {
     test('fromJson with type and data', () {
       final event = CoreEvent.fromJson({'type': 'log', 'data': 'test log'});

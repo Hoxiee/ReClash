@@ -212,33 +212,39 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m85(count) => "設定 ${count} 件";
 
-  static String m86(link) => "${link} からプロキシを読み取れませんでした";
+  static String m86(count) => "利用可能なプロファイル: ${count}";
 
-  static String m87(label) => "${label}は1項目のみ指定できます";
+  static String m87(step, total) => "${total} 件中 ${step} 件目";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "${server} を試す";
+
+  static String m89(link) => "${link} からプロキシを読み取れませんでした";
+
+  static String m90(label) => "${label}は1項目のみ指定できます";
+
+  static String m91(client, format, count) =>
       "${client} として取得：${format}、プロキシノード ${count} 件。";
 
-  static String m89(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
+  static String m92(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
 
-  static String m90(count, format) =>
+  static String m93(count, format) =>
       "${format} から ${count} 個のプロキシノードをインポートできます。";
 
-  static String m91(count) => "変換できないノード: ${count} 個。";
+  static String m94(count) => "変換できないノード: ${count} 個。";
 
-  static String m92(count) => "${count} 件の結果";
+  static String m95(count) => "${count} 件の結果";
 
-  static String m93(value) => "ピーク ${value}";
+  static String m96(value) => "ピーク ${value}";
 
-  static String m94(value) => "累計 ${value}";
+  static String m97(value) => "累計 ${value}";
 
-  static String m95(version) => "インストール済み: ${version}";
+  static String m98(version) => "インストール済み: ${version}";
 
-  static String m96(label) => "${label}はURLである必要があります";
+  static String m99(label) => "${label}はURLである必要があります";
 
-  static String m97(count) => "${count} 年前";
+  static String m100(count) => "${count} 年前";
 
-  static String m98(count) => "${count} 年前";
+  static String m101(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1609,7 +1615,144 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("設定項目"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルは暗号化されています。続行するには age キーを入力してください。",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "このサーバーは個別の確認に応答しました。切り替えてルート全体を再確認してください。",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage("ReClash の起動時に接続"),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "アプリと一緒にこの接続を開始します。",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage("接続を確認"),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "結果はこのルートに対するもので、すべてのアプリやサイトを対象としません。",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "選択したルートを1つ確認します。システムの許可要求は別に表示されます。",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage("接続と確認中"),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("確認済み"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "選択したルートから応答がありました。通信はプロファイルのルールに従います。",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage("接続できました"),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage("プロキシアドレスをコピー"),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage("すべてのアプリ"),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN は端末の通信を取得します。システムから許可を求められる場合があります。",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android は VPN 接続の作成許可を求めます。アプリの選択はアクセス設定で行います。",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash を使うアプリを選択します。サーバーを使う接続はプロファイルのルールで決まります。",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage("アプリを手動で設定する"),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "接続したい各アプリにローカルプロキシのアドレスを設定します。",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "すべての通信を取得しても、すべてをサーバー経由で送るわけではありません。直接ルートは維持されます。",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage("システムプロキシ"),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "システムプロキシに対応していないアプリは直接接続します。",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage("どのアプリを接続しますか？"),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("詳細"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage("接続に問題があります"),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "設定は後から変更できます。",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("続行"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "利用条件を読む前に言語を選択してください。後から変更できます。",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage("言語を選択"),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage(
+      "設定は未完了です。接続は確認されていません。",
+    ),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "接続したいアプリにこのアドレスを設定してください。この確認ではアプリの設定状況は確認できません。",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage("ローカルプロキシの準備完了"),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("未確認"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "ルートから応答がありましたが、一部の確認ができませんでした。",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage("接続済み（一部制限あり）"),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "システムの確認画面で接続を許可して再試行するか、対象範囲を変更してください。",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage("権限が必要です"),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage(
+      "別のサーバーを検索中",
+    ),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage("接続を開始中"),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage("コアを起動中"),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage("出口を確認中"),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage("プロファイルを適用中"),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage("ルートを確認中"),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage("サービスを確認中"),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash はサーバーを提供していません。プロバイダーのサブスクリプションまたは設定を読み込んでください。",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage("プロファイルを読み込む"),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションまたは共有リンク",
+    ),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("プロファイルの準備完了"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage("後で設定"),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage("接続プロファイルを追加"),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("接続設定"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("確認結果"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("対象範囲"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("プロファイル"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage("この地域設定を使う"),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "地域の候補は表示言語ではなく端末情報に基づきます。ネットワークに合う場合のみ適用してください。",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage("プロファイルの既定値を維持"),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("もう一度確認"),
+    "setupReport": MessageLookupByLibrary.simpleMessage("確認レポート"),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage("接続を許可"),
+    "setupRestart": MessageLookupByLibrary.simpleMessage("接続を設定"),
+    "setupResume": MessageLookupByLibrary.simpleMessage("設定を続ける"),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "確認中にルートが変更されました。現在の接続をもう一度確認してください。",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "セーフモードでは実際の接続を開始しません。設定を保存するか通常ビルドでお試しください。",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage(
+      "設定を保存できませんでした。もう一度お試しください。",
+    ),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "接続せずに保存",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "設定を保存しました。準備ができたらダッシュボードから接続できます。",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage("後で接続"),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "設定を保存しました。以前の接続は停止していません。",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage("確認を停止しました"),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("初回接続"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("応答なし"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "接続は開始しましたが、選択したルートから十分な結果を得られませんでした。",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage("接続を確認できません"),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "処理が完了しませんでした。再試行するか詳細を開いてください。",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "リンクからプロキシを読み取れませんでした",
     ),
@@ -1633,7 +1776,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "ここにはリンクを 1 つだけ入力してください。複数の場合は一覧のクイック編集を使ってください",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("サイズ"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("証明書の検証をスキップ"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("スキップするドメイン"),
@@ -1753,7 +1896,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("このクライアントを使用"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core がこの結果を解析しました。まだ保存も適用もされていません。",
@@ -1819,7 +1962,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "不明な形式",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "インポートできる対応プロキシノードがありません。",
     ),
@@ -1830,11 +1973,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "この取得元、形式、同意した省略内容にのみ適用されます。新たな省略には再度の同意が必要です。",
         ),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのインポートを確認",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("サブスクリプション"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
@@ -1920,7 +2063,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
@@ -1936,8 +2079,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -1978,7 +2121,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "パッケージインストーラーを起動できませんでした。",
     ),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
@@ -1997,7 +2140,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2021,8 +2164,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

@@ -236,35 +236,41 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m85(count) =>
       "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
 
-  static String m86(link) => "No proxy could be read from ${link}";
+  static String m86(count) => "${count} profiles available";
 
-  static String m87(label) => "${label} must be a single item";
+  static String m87(step, total) => "${step} of ${total}";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "Try ${server}";
+
+  static String m89(link) => "No proxy could be read from ${link}";
+
+  static String m90(label) => "${label} must be a single item";
+
+  static String m91(client, format, count) =>
       "Received as ${client}: ${format}, ${count} proxy nodes.";
 
-  static String m89(sections) =>
+  static String m92(sections) =>
       "The following source sections will not be transferred: ${sections}.";
 
-  static String m90(count, format) =>
+  static String m93(count, format) =>
       "${count} proxy nodes can be imported from ${format}.";
 
-  static String m91(count) => "${count} nodes cannot be converted.";
+  static String m94(count) => "${count} nodes cannot be converted.";
 
-  static String m92(count) => "${count} results";
+  static String m95(count) => "${count} results";
 
-  static String m93(value) => "Peak ${value}";
+  static String m96(value) => "Peak ${value}";
 
-  static String m94(value) => "Total ${value}";
+  static String m97(value) => "Total ${value}";
 
-  static String m95(version) => "Installed: ${version}";
+  static String m98(version) => "Installed: ${version}";
 
-  static String m96(label) => "${label} must be a URL";
+  static String m99(label) => "${label} must be a URL";
 
-  static String m97(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m98(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m101(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1885,7 +1891,190 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "This profile is encrypted. Enter its age key to continue.",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "This server responded to a separate probe. Switch and check the full route again.",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage(
+      "Connect when opening ReClash",
+    ),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "Start this connection together with the app.",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage(
+      "Check connection",
+    ),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "The result applies to this route, not every app or website.",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "We check one selected route. System permission requests open separately.",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Connecting and checking",
+    ),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("Confirmed"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "The selected route responded. Traffic follows your profile rules.",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage(
+      "Connection works",
+    ),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage(
+      "Copy proxy address",
+    ),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage("All apps"),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN captures device traffic. The system may ask for permission.",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android will ask to create a VPN connection. App selection stays in access settings.",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "Choose which apps use ReClash. Your profile rules decide which connections use a server.",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage(
+      "I will configure apps manually",
+    ),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Set the local proxy address in each app you want to connect.",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "Capturing all traffic does not mean sending all of it through a server. Direct routes remain in place.",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage("System proxy"),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "Apps without system proxy support connect directly.",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage(
+      "Which apps should connect?",
+    ),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("Details"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Connection needs attention",
+    ),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "You can change any choice in settings.",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("Continue"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "Select a language before reading the terms. You can change it later.",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage(
+      "Choose your language",
+    ),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage(
+      "Setup is incomplete; connection has not been checked.",
+    ),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Set this address in the apps you want to connect. This check does not prove those apps are configured.",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage(
+      "Local proxy is ready",
+    ),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("Not checked"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "The route responded, but some checks could not be confirmed.",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage(
+      "Connected, with limits",
+    ),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "Allow the connection in the system prompt, retry, or choose a different scope.",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Permission is needed",
+    ),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage(
+      "Looking for another server",
+    ),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage(
+      "Starting the connection",
+    ),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage("Starting the core"),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage(
+      "Confirming the exit",
+    ),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage(
+      "Applying the profile",
+    ),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage(
+      "Checking the route",
+    ),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage(
+      "Checking services",
+    ),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash does not provide servers. Import a subscription or a configuration from your provider.",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage(
+      "Import profile",
+    ),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage(
+      "Subscription or share link",
+    ),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("Profile ready"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage("Set up later"),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage(
+      "Add a connection profile",
+    ),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("Your connection"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("Check"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("Coverage"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("Profile"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage(
+      "Use these regional settings",
+    ),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "The suggested region comes from this device, not the interface language. Apply it only if it matches your network.",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage(
+      "Keep profile defaults",
+    ),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("Check again"),
+    "setupReport": MessageLookupByLibrary.simpleMessage("Check report"),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage(
+      "Allow connection",
+    ),
+    "setupRestart": MessageLookupByLibrary.simpleMessage("Set up connection"),
+    "setupResume": MessageLookupByLibrary.simpleMessage("Continue setup"),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "The route changed during the check. Check the current connection again.",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "Safe mode does not start a real connection. Save the setup or test it in a normal build.",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage(
+      "Could not save your choices. Try again.",
+    ),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "Save without connecting",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "Your choices are saved. You can connect from the dashboard when you are ready.",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage("Connect later"),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "Your choices are saved. The previous connection was not stopped.",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage("Check stopped"),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("First connection"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("No response"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "The connection started, but the selected route did not provide enough results.",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage(
+      "Connection not confirmed",
+    ),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "The operation did not finish. Try again or open the details.",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "No proxy could be read from the links",
     ),
@@ -1909,7 +2098,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Enter one link here; edit several from the quick edit of the list",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Skip certificate verification",
@@ -2041,7 +2230,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Use this client"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core parsed this result. It has not been saved or applied.",
@@ -2111,7 +2300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "unknown format",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "No supported proxy nodes can be imported.",
     ),
@@ -2122,11 +2311,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Applies only to this source, format and the accepted loss types. New losses require consent again.",
         ),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Review subscription import",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
@@ -2232,7 +2421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("Pin"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Run"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Setting"),
@@ -2250,8 +2439,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -2300,7 +2489,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Couldn\'t start the package installer.",
     ),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "You\'re already using the latest version.",
     ),
@@ -2323,7 +2512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -2349,8 +2538,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

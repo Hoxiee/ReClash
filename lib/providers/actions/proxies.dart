@@ -205,9 +205,10 @@ class ProxiesAction extends _$ProxiesAction {
     _scheduleDelayFlush();
   }
 
-  Future<void> changeProxy({
+  Future<bool> changeProxy({
     required String groupName,
     required String proxyName,
+    bool silence = false,
   }) async {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     final rollbackName =
@@ -228,14 +229,17 @@ class ProxiesAction extends _$ProxiesAction {
         logLevel: coreFailureLogLevel(error),
       );
       profilesAction.updateCurrentSelectedMap(groupName, rollbackName);
-      dialogs.showNotifier(
-        currentAppLocalizations.changeProxyFailedTip,
-        level: MessageLevel.error,
-      );
-      return;
+      if (!silence) {
+        dialogs.showNotifier(
+          currentAppLocalizations.changeProxyFailedTip,
+          level: MessageLevel.error,
+        );
+        return false;
+      }
+      rethrow;
     }
     if (!result.changed) {
-      return;
+      return true;
     }
     try {
       if (ref.read(appSettingProvider).closeConnections) {
@@ -249,6 +253,7 @@ class ProxiesAction extends _$ProxiesAction {
         logLevel: coreFailureLogLevel(error),
       );
     }
+    return true;
   }
 
   Future<String> updateProvider(

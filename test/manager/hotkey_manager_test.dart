@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:reclash/common/desktop/hotkeys.dart';
+import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/models/common.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,11 +15,37 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rust_api/rust_api.dart';
 
+class _HotkeySetupSession extends SetupSession {
+  _HotkeySetupSession({required this.initiallyActive});
+
+  final bool initiallyActive;
+
+  @override
+  SetupSessionState build() => SetupSessionState(
+    active: initiallyActive,
+    step: SetupStep.profile,
+    draft: const SetupDraft(coverage: SetupCoverage.tun),
+  );
+
+  void setActive(bool active) => state = state.copyWith(active: active);
+}
+
 class _CommonAction extends CommonAction {
   int toggles = 0;
 
   @override
   void toggleRunning() => toggles++;
+}
+
+class _SystemAction extends SystemAction {
+  int reveals = 0;
+  int exits = 0;
+
+  @override
+  Future<void> updateVisible() async => reveals++;
+
+  @override
+  Future<void> handleExit([bool needSave = true]) async => exits++;
 }
 
 void main() {
@@ -88,14 +118,23 @@ void main() {
       bool safeMode = false,
       bool systemSupported = true,
       HotKeyAction? configuredAction,
+      List<HotKeyAction>? configuredActions,
+      Stream<int>? events,
       Future<List<HotKeyFailure>> Function()? respond,
+      bool setupActive = false,
     }) async {
       final registrations = <List<HotKeySpec>>[];
       final container = ProviderContainer(
         overrides: [
           safeModeProvider.overrideWithValue(safeMode),
-          hotKeyActionsProvider.overrideWithValue([configuredAction ?? action]),
+          hotKeyActionsProvider.overrideWithValue(
+            configuredActions ?? [configuredAction ?? action],
+          ),
           commonActionProvider.overrideWith(_CommonAction.new),
+          systemActionProvider.overrideWith(_SystemAction.new),
+          setupSessionProvider.overrideWith(
+            () => _HotkeySetupSession(initiallyActive: setupActive),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -110,7 +149,7 @@ void main() {
               registrations.add(specs);
               return respond?.call() ?? const [];
             },
-            hotKeyEventSource: () => const Stream<int>.empty(),
+            hotKeyEventSource: () => events ?? const Stream<int>.empty(),
             child: const Focus(autofocus: true, child: SizedBox.shrink()),
           ),
         ),
@@ -127,6 +166,123 @@ void main() {
       expect(registrations, hasLength(1));
       expect(registrations.single.single.id, HotAction.view.index);
       expect(container.read(hotKeyFailuresProvider), isEmpty);
+    });
+
+    testWidgets('setup registers only view and exit shortcuts', (tester) async {
+      final (container, registrations) = await pump(
+        tester,
+        setupActive: true,
+        configuredActions: [
+          action,
+          HotKeyAction(
+            action: HotAction.exit,
+            key: PhysicalKeyboardKey.keyQ.usbHidUsage,
+            modifiers: const {KeyboardModifier.control},
+          ),
+          HotKeyAction(
+            action: HotAction.start,
+            key: PhysicalKeyboardKey.keyS.usbHidUsage,
+            modifiers: const {KeyboardModifier.control},
+          ),
+        ],
+      );
+
+      expect(registrations.single.map((spec) => spec.id), [
+        HotAction.view.index,
+        HotAction.exit.index,
+      ]);
+      expect(
+        (container.read(setupSessionProvider.notifier) as _HotkeySetupSession)
+            .state
+            .active,
+        isTrue,
+      );
+    });
+
+    testWidgets('registers network shortcuts after setup completes', (
+      tester,
+    ) async {
+      final (container, registrations) = await pump(
+        tester,
+        setupActive: true,
+        configuredAction: HotKeyAction(
+          action: HotAction.start,
+          key: PhysicalKeyboardKey.keyS.usbHidUsage,
+          modifiers: const {KeyboardModifier.control},
+        ),
+      );
+      expect(registrations.last, isEmpty);
+
+      (container.read(setupSessionProvider.notifier) as _HotkeySetupSession)
+          .setActive(false);
+      await tester.pumpAndSettle();
+
+      expect(registrations.last.single.id, HotAction.start.index);
+    });
+
+    testWidgets(
+      'setup blocks stale native start events but allows view and exit',
+      (tester) async {
+        final events = StreamController<int>(sync: true);
+        addTearDown(events.close);
+        final (container, _) = await pump(
+          tester,
+          setupActive: true,
+          events: events.stream,
+        );
+        events.add(HotAction.start.index);
+        events.add(HotAction.view.index);
+        events.add(HotAction.exit.index);
+        await tester.pump();
+        final common =
+            container.read(commonActionProvider.notifier) as _CommonAction;
+        final system =
+            container.read(systemActionProvider.notifier) as _SystemAction;
+        expect(common.toggles, 0);
+        expect(system.reveals, 1);
+        expect(system.exits, 1);
+
+        (container.read(setupSessionProvider.notifier) as _HotkeySetupSession)
+            .setActive(false);
+        await tester.pumpAndSettle();
+        events.add(HotAction.start.index);
+        await tester.pump();
+        expect(common.toggles, 1);
+      },
+    );
+
+    testWidgets('setup blocks local start until the wizard completes', (
+      tester,
+    ) async {
+      final (container, _) = await pump(
+        tester,
+        setupActive: true,
+        systemSupported: false,
+        configuredAction: HotKeyAction(
+          action: HotAction.start,
+          key: PhysicalKeyboardKey.keyS.usbHidUsage,
+          modifiers: const {KeyboardModifier.control, KeyboardModifier.alt},
+        ),
+      );
+      Future<void> startShortcut() async {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyS);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyS);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pump();
+      }
+
+      final common =
+          container.read(commonActionProvider.notifier) as _CommonAction;
+      await startShortcut();
+      expect(common.toggles, 0);
+      (container.read(setupSessionProvider.notifier) as _HotkeySetupSession)
+          .setActive(false);
+      await tester.pumpAndSettle();
+      await startShortcut();
+      expect(common.toggles, 1);
     });
 
     testWidgets('a safe mode build registers nothing', (tester) async {

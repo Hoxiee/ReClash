@@ -1,6 +1,10 @@
 import 'dart:io';
 
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/setup_check.dart';
+
 import 'package:reclash/core/core.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -14,6 +18,7 @@ import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/route_state.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -26,7 +31,26 @@ import '../helpers/app_paths.dart';
 import '../helpers/test_database_providers.dart';
 import '../helpers/test_profiles.dart';
 
-class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async => DesktopPrivilegeDecision.notRequired;
+}
+
+class _TestSetupSession extends SetupSession {
+  _TestSetupSession(this.active);
+
+  final bool active;
+
+  @override
+  SetupSessionState build() => SetupSessionState(
+    active: active,
+    step: SetupStep.profile,
+    draft: const SetupDraft(coverage: SetupCoverage.local),
+  );
+}
 
 const _nullProfileSetupState = SetupState(
   profileId: null,
@@ -66,6 +90,13 @@ class _ApplyRecordingSetupAction extends SetupAction {
 
   @override
   void applyIfGlobalRulesUsed() => globalRulesApplies++;
+  int fullSetups = 0;
+
+  @override
+  Future<bool> fullSetup() async {
+    fullSetups++;
+    return true;
+  }
 
   @override
   Future<void> updateConfigDebounce() async {
@@ -90,12 +121,14 @@ Future<ProviderContainer> _pumpCoreManager(
   WidgetTester tester,
   CoreHandlerInterface coreInterface, {
   List<Override> overrides = const [],
+  bool setupActive = false,
 }) async {
   final container = ProviderContainer(
     overrides: [
       coreHandlerProvider.overrideWithValue(
         CoreController.scoped(coreInterface),
       ),
+      setupSessionProvider.overrideWith(() => _TestSetupSession(setupActive)),
       ...overrides,
     ],
   );
@@ -170,6 +203,7 @@ void main() {
         coreHandlerProvider.overrideWithValue(
           CoreController.scoped(coreInterface),
         ),
+        setupSessionProvider.overrideWith(() => _TestSetupSession(false)),
       ],
     );
     addTearDown(container.dispose);
@@ -509,6 +543,50 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('setup mode suppresses notifiers but keeps Core event data', (
+    tester,
+  ) async {
+    final container = await _pumpCoreManager(
+      tester,
+      _coreInterface(),
+      setupActive: true,
+    );
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+    coreEventManager.sendEvent(
+      const CoreEvent(
+        type: CoreEventType.log,
+        data: {'LogLevel': 'error', 'Payload': 'core failure'},
+      ),
+    );
+    coreEventManager.sendEvent(
+      const CoreEvent(
+        type: CoreEventType.routeChanged,
+        data: {'core-epoch': 17, 'route-version': 8},
+      ),
+    );
+    coreEventManager.sendEvent(_crash);
+    coreEventManager.sendEvent(
+      const CoreEvent(type: CoreEventType.dialerLoop, data: 'HK-02'),
+    );
+    await tester.pump();
+
+    expect(container.read(logsProvider).list.last.payload, 'core failure');
+    expect(container.read(routeTrackerProvider).coreEpoch, 17);
+    expect(container.read(routeTrackerProvider).routeVersion, 8);
+    expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+    expect(find.text('core failure'), findsNothing);
+    expect(find.text('boom'), findsNothing);
+    expect(
+      find.text(currentAppLocalizations.dialerProxyLoopStopped('HK-02')),
+      findsNothing,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
+
   group('profile switch failure', () {
     late Profile previous;
     late Profile next;
@@ -522,6 +600,61 @@ void main() {
     setUp(() {
       previous = Profile.normal(label: 'previous');
       next = Profile.normal(label: 'next');
+    });
+
+    testWidgets('setup mode skips automatic profile and settings setup', (
+      tester,
+    ) async {
+      final setupAction = _ApplyRecordingSetupAction();
+      final container = await _pumpCoreManager(
+        tester,
+        _coreInterface(),
+        overrides: [
+          ...profileOverrides(),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+        setupActive: true,
+      );
+
+      container.read(currentProfileIdProvider.notifier).value = next.id;
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(mixedPort: state.mixedPort + 1));
+      container
+          .read(networkSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(appendSystemDns: !state.appendSystemDns),
+          );
+      await tester.pump();
+      await tester.pump();
+
+      expect(container.read(currentProfileIdProvider), next.id);
+      expect(setupAction.applies, 0);
+      expect(setupAction.updates, 0);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('a queued profile setup is skipped if setup starts first', (
+      tester,
+    ) async {
+      final setupAction = _ApplyRecordingSetupAction();
+      final container = await _pumpCoreManager(
+        tester,
+        _coreInterface(),
+        overrides: [
+          ...profileOverrides(),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+
+      container.read(currentProfileIdProvider.notifier).value = next.id;
+      final setupSession = container.read(setupSessionProvider.notifier);
+      setupSession.state = setupSession.state.copyWith(active: true);
+      await tester.pump();
+
+      expect(setupAction.fullSetups, 0);
+      await tester.pumpWidget(const SizedBox.shrink());
     });
 
     testWidgets('keeps the selected profile when Core rejects it', (

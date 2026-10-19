@@ -5,10 +5,11 @@ risk: routine
 must:
   lifecycle: Configured desktop hotkeys are replaced atomically and removed while recording or on disposal.
   dispatch: Native application actions and local fallback dispatch only known actions while recording is inactive.
+  setup: While setup is active, registration, native dispatch, local fallback and compositor actions permit only view and exit; completing setup restores configured network actions.
   capability: Global registration support is reported separately from focused-window fallback and compositor exports.
   export: Sway, Hyprland and niri exports preserve only supported key/modifier combinations and write only owned files.
   conflicts: A conflicting saved binding is transferred to the newly selected action and registration failures remain visible.
-watch: [lib/manager/hotkey_manager.dart, lib/common/desktop/**, lib/common/keyboard.dart, lib/models/config.dart, lib/models/tool_route.dart, lib/providers/app.dart, lib/providers/config.dart, lib/providers/state/system.dart, lib/views/hotkey.dart, lib/views/hotkey_desktop.dart, lib/views/tools/catalog.dart, lib/views/tools/navigation.dart, lib/pages/home.dart, linux/runner/**, arb/fragments/desktop.hotkeys/**, test/common/desktop_hotkeys_test.dart, test/manager/hotkey_manager_test.dart, test/views/hotkey_view_test.dart, test/pages/home_dynamic_navigation_test.dart, test/widgets/tools_workspace_test.dart]
+watch: [lib/manager/hotkey_manager.dart, lib/common/desktop/**, lib/common/keyboard.dart, lib/models/config.dart, lib/models/tool_route.dart, lib/providers/app.dart, lib/providers/setup.dart, lib/providers/config.dart, lib/providers/state/system.dart, lib/views/hotkey.dart, lib/views/hotkey_desktop.dart, lib/views/tools/catalog.dart, lib/views/tools/navigation.dart, lib/pages/home.dart, linux/runner/**, arb/fragments/desktop.hotkeys/**, test/common/desktop_hotkeys_test.dart, test/manager/hotkey_manager_test.dart, test/views/hotkey_view_test.dart, test/pages/home_dynamic_navigation_test.dart, test/widgets/tools_workspace_test.dart]
 checks:
-  hotkeys: [lifecycle, dispatch, capability, export, conflicts]
+  hotkeys: [lifecycle, dispatch, setup, capability, export, conflicts]
 drop: Remove only if native registration, local fallback, compositor exports and conflict feedback are all preserved upstream.

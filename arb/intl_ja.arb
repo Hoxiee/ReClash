@@ -1066,6 +1066,107 @@
       }
     }
   },
+  "setupTitle": "初回接続",
+  "setupLanguageTitle": "言語を選択",
+  "setupLanguageDescription": "利用条件を読む前に言語を選択してください。後から変更できます。",
+  "setupLanguageContinue": "続行",
+  "setupProfileTitle": "接続プロファイルを追加",
+  "setupProfileDescription": "ReClash はサーバーを提供していません。プロバイダーのサブスクリプションまたは設定を読み込んでください。",
+  "setupProfileReady": "プロファイルの準備完了",
+  "setupProfileImport": "プロファイルを読み込む",
+  "setupProfileLinkHint": "サブスクリプションまたは共有リンク",
+  "setupProfileSkip": "後で設定",
+  "setupCoverageTitle": "どのアプリを接続しますか？",
+  "setupCoverageDescription": "ReClash を使うアプリを選択します。サーバーを使う接続はプロファイルのルールで決まります。",
+  "setupCoverageAll": "すべてのアプリ",
+  "setupCoverageAllDescription": "TUN は端末の通信を取得します。システムから許可を求められる場合があります。",
+  "setupCoverageSystem": "システムプロキシ",
+  "setupCoverageSystemDescription": "システムプロキシに対応していないアプリは直接接続します。",
+  "setupCoverageLocal": "アプリを手動で設定する",
+  "setupCoverageLocalDescription": "接続したい各アプリにローカルプロキシのアドレスを設定します。",
+  "setupCoverageAndroidDescription": "Android は VPN 接続の作成許可を求めます。アプリの選択はアクセス設定で行います。",
+  "setupCoverageNote": "すべての通信を取得しても、すべてをサーバー経由で送るわけではありません。直接ルートは維持されます。",
+  "setupRegionConfirm": "この地域設定を使う",
+  "setupRegionDescription": "地域の候補は表示言語ではなく端末情報に基づきます。ネットワークに合う場合のみ適用してください。",
+  "setupRegionNeutral": "プロファイルの既定値を維持",
+  "setupCheckAction": "接続を確認",
+  "setupCheckingTitle": "接続と確認中",
+  "setupCheckingDescription": "選択したルートを1つ確認します。システムの許可要求は別に表示されます。",
+  "setupPhaseCore": "コアを起動中",
+  "setupPhaseProfile": "プロファイルを適用中",
+  "setupPhaseConnection": "接続を開始中",
+  "setupPhaseRoute": "ルートを確認中",
+  "setupPhaseExit": "出口を確認中",
+  "setupPhaseServices": "サービスを確認中",
+  "setupPhaseAlternatives": "別のサーバーを検索中",
+  "setupStepStatus": "{total} 件中 {step} 件目",
+  "setupCheckLimit": "結果はこのルートに対するもので、すべてのアプリやサイトを対象としません。",
+  "setupConnectedTitle": "接続できました",
+  "setupConnectedDescription": "選択したルートから応答がありました。通信はプロファイルのルールに従います。",
+  "setupPartialTitle": "接続済み（一部制限あり）",
+  "setupPartialDescription": "ルートから応答がありましたが、一部の確認ができませんでした。",
+  "setupUnconfirmedTitle": "接続を確認できません",
+  "setupUnconfirmedDescription": "接続は開始しましたが、選択したルートから十分な結果を得られませんでした。",
+  "setupFailedTitle": "接続に問題があります",
+  "setupSavedTitle": "後で接続",
+  "setupSavedDescription": "設定を保存しました。準備ができたらダッシュボードから接続できます。",
+  "setupAutoConnect": "ReClash の起動時に接続",
+  "setupAutoConnectDescription": "アプリと一緒にこの接続を開始します。",
+  "setupSaveWithoutConnection": "接続せずに保存",
+  "setupRepeat": "もう一度確認",
+  "setupTryServer": "{server} を試す",
+  "setupAlternativeDescription": "このサーバーは個別の確認に応答しました。切り替えてルート全体を再確認してください。",
+  "setupReport": "確認レポート",
+  "setupReceipt": "接続設定",
+  "setupReceiptProfile": "プロファイル",
+  "setupReceiptCoverage": "対象範囲",
+  "setupReceiptCheck": "確認結果",
+  "setupNotChecked": "未確認",
+  "setupConfirmed": "確認済み",
+  "setupUnavailable": "応答なし",
+  "setupStoppedTitle": "確認を停止しました",
+  "setupStoppedDescription": "設定を保存しました。以前の接続は停止していません。",
+  "setupPermissionTitle": "権限が必要です",
+  "setupPermissionDescription": "システムの確認画面で接続を許可して再試行するか、対象範囲を変更してください。",
+  "setupLocalTitle": "ローカルプロキシの準備完了",
+  "setupLocalDescription": "接続したいアプリにこのアドレスを設定してください。この確認ではアプリの設定状況は確認できません。",
+  "setupCopyProxy": "プロキシアドレスをコピー",
+  "setupErrorDetails": "詳細",
+  "setupSaveError": "設定を保存できませんでした。もう一度お試しください。",
+  "setupSafeMode": "セーフモードでは実際の接続を開始しません。設定を保存するか通常ビルドでお試しください。",
+  "setupResume": "設定を続ける",
+  "setupRestart": "接続を設定",
+  "setupLaterNote": "設定は未完了です。接続は確認されていません。",
+  "setupProfileCount": "利用可能なプロファイル: {count}",
+  "setupAgeKeyDescription": "このプロファイルは暗号化されています。続行するには age キーを入力してください。",
+  "setupFinishDescription": "設定は後から変更できます。",
+  "setupRouteChanged": "確認中にルートが変更されました。現在の接続をもう一度確認してください。",
+  "setupUnknownError": "処理が完了しませんでした。再試行するか詳細を開いてください。",
+  "setupRequestPermission": "接続を許可",
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "更新チャンネル",
   "updateChannelRelease": "リリース",
   "updateChannelPre": "プレリリース",

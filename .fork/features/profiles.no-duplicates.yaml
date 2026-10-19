@@ -6,7 +6,8 @@ must:
   enabled: With duplicate prevention enabled, an existing subscription URL cannot create another profile.
   disabled: Disabling duplicate prevention permits repeated subscription import.
   trimmed: Leading and trailing whitespace in stored URLs does not bypass prevention.
-watch: [lib/providers/actions/profiles.dart, lib/models/config.dart, 'arb/fragments/profiles.no-duplicates/**', test/providers/profiles_action_test.dart]
+  persistence: Silent import completes only after durable storage; failed writes roll back without a global notifier.
+watch: [lib/providers/actions/profiles.dart, lib/models/config.dart, 'arb/fragments/profiles.no-duplicates/**', test/providers/profiles_action_test.dart, lib/providers/database.dart, test/helpers/test_profiles.dart]
 checks:
-  profiles: [enabled, disabled, trimmed]
+  profiles: [enabled, disabled, trimmed, persistence]
 drop: Upstream preserves all invariants, including the preference and import paths.

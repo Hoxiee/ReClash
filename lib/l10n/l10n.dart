@@ -8306,6 +8306,766 @@ class AppLocalizations {
     );
   }
 
+  /// `First connection`
+  String get setupTitle {
+    return Intl.message(
+      'First connection',
+      name: 'setupTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose your language`
+  String get setupLanguageTitle {
+    return Intl.message(
+      'Choose your language',
+      name: 'setupLanguageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a language before reading the terms. You can change it later.`
+  String get setupLanguageDescription {
+    return Intl.message(
+      'Select a language before reading the terms. You can change it later.',
+      name: 'setupLanguageDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get setupLanguageContinue {
+    return Intl.message(
+      'Continue',
+      name: 'setupLanguageContinue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a connection profile`
+  String get setupProfileTitle {
+    return Intl.message(
+      'Add a connection profile',
+      name: 'setupProfileTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash does not provide servers. Import a subscription or a configuration from your provider.`
+  String get setupProfileDescription {
+    return Intl.message(
+      'ReClash does not provide servers. Import a subscription or a configuration from your provider.',
+      name: 'setupProfileDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile ready`
+  String get setupProfileReady {
+    return Intl.message(
+      'Profile ready',
+      name: 'setupProfileReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import profile`
+  String get setupProfileImport {
+    return Intl.message(
+      'Import profile',
+      name: 'setupProfileImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription or share link`
+  String get setupProfileLinkHint {
+    return Intl.message(
+      'Subscription or share link',
+      name: 'setupProfileLinkHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set up later`
+  String get setupProfileSkip {
+    return Intl.message(
+      'Set up later',
+      name: 'setupProfileSkip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Which apps should connect?`
+  String get setupCoverageTitle {
+    return Intl.message(
+      'Which apps should connect?',
+      name: 'setupCoverageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose which apps use ReClash. Your profile rules decide which connections use a server.`
+  String get setupCoverageDescription {
+    return Intl.message(
+      'Choose which apps use ReClash. Your profile rules decide which connections use a server.',
+      name: 'setupCoverageDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All apps`
+  String get setupCoverageAll {
+    return Intl.message(
+      'All apps',
+      name: 'setupCoverageAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN captures device traffic. The system may ask for permission.`
+  String get setupCoverageAllDescription {
+    return Intl.message(
+      'TUN captures device traffic. The system may ask for permission.',
+      name: 'setupCoverageAllDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System proxy`
+  String get setupCoverageSystem {
+    return Intl.message(
+      'System proxy',
+      name: 'setupCoverageSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apps without system proxy support connect directly.`
+  String get setupCoverageSystemDescription {
+    return Intl.message(
+      'Apps without system proxy support connect directly.',
+      name: 'setupCoverageSystemDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I will configure apps manually`
+  String get setupCoverageLocal {
+    return Intl.message(
+      'I will configure apps manually',
+      name: 'setupCoverageLocal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set the local proxy address in each app you want to connect.`
+  String get setupCoverageLocalDescription {
+    return Intl.message(
+      'Set the local proxy address in each app you want to connect.',
+      name: 'setupCoverageLocalDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android will ask to create a VPN connection. App selection stays in access settings.`
+  String get setupCoverageAndroidDescription {
+    return Intl.message(
+      'Android will ask to create a VPN connection. App selection stays in access settings.',
+      name: 'setupCoverageAndroidDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Capturing all traffic does not mean sending all of it through a server. Direct routes remain in place.`
+  String get setupCoverageNote {
+    return Intl.message(
+      'Capturing all traffic does not mean sending all of it through a server. Direct routes remain in place.',
+      name: 'setupCoverageNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use these regional settings`
+  String get setupRegionConfirm {
+    return Intl.message(
+      'Use these regional settings',
+      name: 'setupRegionConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The suggested region comes from this device, not the interface language. Apply it only if it matches your network.`
+  String get setupRegionDescription {
+    return Intl.message(
+      'The suggested region comes from this device, not the interface language. Apply it only if it matches your network.',
+      name: 'setupRegionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep profile defaults`
+  String get setupRegionNeutral {
+    return Intl.message(
+      'Keep profile defaults',
+      name: 'setupRegionNeutral',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check connection`
+  String get setupCheckAction {
+    return Intl.message(
+      'Check connection',
+      name: 'setupCheckAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connecting and checking`
+  String get setupCheckingTitle {
+    return Intl.message(
+      'Connecting and checking',
+      name: 'setupCheckingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We check one selected route. System permission requests open separately.`
+  String get setupCheckingDescription {
+    return Intl.message(
+      'We check one selected route. System permission requests open separately.',
+      name: 'setupCheckingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Starting the core`
+  String get setupPhaseCore {
+    return Intl.message(
+      'Starting the core',
+      name: 'setupPhaseCore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applying the profile`
+  String get setupPhaseProfile {
+    return Intl.message(
+      'Applying the profile',
+      name: 'setupPhaseProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Starting the connection`
+  String get setupPhaseConnection {
+    return Intl.message(
+      'Starting the connection',
+      name: 'setupPhaseConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the route`
+  String get setupPhaseRoute {
+    return Intl.message(
+      'Checking the route',
+      name: 'setupPhaseRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirming the exit`
+  String get setupPhaseExit {
+    return Intl.message(
+      'Confirming the exit',
+      name: 'setupPhaseExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking services`
+  String get setupPhaseServices {
+    return Intl.message(
+      'Checking services',
+      name: 'setupPhaseServices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for another server`
+  String get setupPhaseAlternatives {
+    return Intl.message(
+      'Looking for another server',
+      name: 'setupPhaseAlternatives',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{step} of {total}`
+  String setupStepStatus(int step, int total) {
+    return Intl.message(
+      '$step of $total',
+      name: 'setupStepStatus',
+      desc: '',
+      args: [step, total],
+    );
+  }
+
+  /// `The result applies to this route, not every app or website.`
+  String get setupCheckLimit {
+    return Intl.message(
+      'The result applies to this route, not every app or website.',
+      name: 'setupCheckLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection works`
+  String get setupConnectedTitle {
+    return Intl.message(
+      'Connection works',
+      name: 'setupConnectedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The selected route responded. Traffic follows your profile rules.`
+  String get setupConnectedDescription {
+    return Intl.message(
+      'The selected route responded. Traffic follows your profile rules.',
+      name: 'setupConnectedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected, with limits`
+  String get setupPartialTitle {
+    return Intl.message(
+      'Connected, with limits',
+      name: 'setupPartialTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The route responded, but some checks could not be confirmed.`
+  String get setupPartialDescription {
+    return Intl.message(
+      'The route responded, but some checks could not be confirmed.',
+      name: 'setupPartialDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection not confirmed`
+  String get setupUnconfirmedTitle {
+    return Intl.message(
+      'Connection not confirmed',
+      name: 'setupUnconfirmedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The connection started, but the selected route did not provide enough results.`
+  String get setupUnconfirmedDescription {
+    return Intl.message(
+      'The connection started, but the selected route did not provide enough results.',
+      name: 'setupUnconfirmedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection needs attention`
+  String get setupFailedTitle {
+    return Intl.message(
+      'Connection needs attention',
+      name: 'setupFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect later`
+  String get setupSavedTitle {
+    return Intl.message(
+      'Connect later',
+      name: 'setupSavedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your choices are saved. You can connect from the dashboard when you are ready.`
+  String get setupSavedDescription {
+    return Intl.message(
+      'Your choices are saved. You can connect from the dashboard when you are ready.',
+      name: 'setupSavedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect when opening ReClash`
+  String get setupAutoConnect {
+    return Intl.message(
+      'Connect when opening ReClash',
+      name: 'setupAutoConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start this connection together with the app.`
+  String get setupAutoConnectDescription {
+    return Intl.message(
+      'Start this connection together with the app.',
+      name: 'setupAutoConnectDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save without connecting`
+  String get setupSaveWithoutConnection {
+    return Intl.message(
+      'Save without connecting',
+      name: 'setupSaveWithoutConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again`
+  String get setupRepeat {
+    return Intl.message('Check again', name: 'setupRepeat', desc: '', args: []);
+  }
+
+  /// `Try {server}`
+  String setupTryServer(String server) {
+    return Intl.message(
+      'Try $server',
+      name: 'setupTryServer',
+      desc: '',
+      args: [server],
+    );
+  }
+
+  /// `This server responded to a separate probe. Switch and check the full route again.`
+  String get setupAlternativeDescription {
+    return Intl.message(
+      'This server responded to a separate probe. Switch and check the full route again.',
+      name: 'setupAlternativeDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check report`
+  String get setupReport {
+    return Intl.message(
+      'Check report',
+      name: 'setupReport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your connection`
+  String get setupReceipt {
+    return Intl.message(
+      'Your connection',
+      name: 'setupReceipt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile`
+  String get setupReceiptProfile {
+    return Intl.message(
+      'Profile',
+      name: 'setupReceiptProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coverage`
+  String get setupReceiptCoverage {
+    return Intl.message(
+      'Coverage',
+      name: 'setupReceiptCoverage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check`
+  String get setupReceiptCheck {
+    return Intl.message('Check', name: 'setupReceiptCheck', desc: '', args: []);
+  }
+
+  /// `Not checked`
+  String get setupNotChecked {
+    return Intl.message(
+      'Not checked',
+      name: 'setupNotChecked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirmed`
+  String get setupConfirmed {
+    return Intl.message(
+      'Confirmed',
+      name: 'setupConfirmed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No response`
+  String get setupUnavailable {
+    return Intl.message(
+      'No response',
+      name: 'setupUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check stopped`
+  String get setupStoppedTitle {
+    return Intl.message(
+      'Check stopped',
+      name: 'setupStoppedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your choices are saved. The previous connection was not stopped.`
+  String get setupStoppedDescription {
+    return Intl.message(
+      'Your choices are saved. The previous connection was not stopped.',
+      name: 'setupStoppedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Permission is needed`
+  String get setupPermissionTitle {
+    return Intl.message(
+      'Permission is needed',
+      name: 'setupPermissionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow the connection in the system prompt, retry, or choose a different scope.`
+  String get setupPermissionDescription {
+    return Intl.message(
+      'Allow the connection in the system prompt, retry, or choose a different scope.',
+      name: 'setupPermissionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local proxy is ready`
+  String get setupLocalTitle {
+    return Intl.message(
+      'Local proxy is ready',
+      name: 'setupLocalTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set this address in the apps you want to connect. This check does not prove those apps are configured.`
+  String get setupLocalDescription {
+    return Intl.message(
+      'Set this address in the apps you want to connect. This check does not prove those apps are configured.',
+      name: 'setupLocalDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy proxy address`
+  String get setupCopyProxy {
+    return Intl.message(
+      'Copy proxy address',
+      name: 'setupCopyProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Details`
+  String get setupErrorDetails {
+    return Intl.message(
+      'Details',
+      name: 'setupErrorDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not save your choices. Try again.`
+  String get setupSaveError {
+    return Intl.message(
+      'Could not save your choices. Try again.',
+      name: 'setupSaveError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Safe mode does not start a real connection. Save the setup or test it in a normal build.`
+  String get setupSafeMode {
+    return Intl.message(
+      'Safe mode does not start a real connection. Save the setup or test it in a normal build.',
+      name: 'setupSafeMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue setup`
+  String get setupResume {
+    return Intl.message(
+      'Continue setup',
+      name: 'setupResume',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set up connection`
+  String get setupRestart {
+    return Intl.message(
+      'Set up connection',
+      name: 'setupRestart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setup is incomplete; connection has not been checked.`
+  String get setupLaterNote {
+    return Intl.message(
+      'Setup is incomplete; connection has not been checked.',
+      name: 'setupLaterNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} profiles available`
+  String setupProfileCount(int count) {
+    return Intl.message(
+      '$count profiles available',
+      name: 'setupProfileCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `This profile is encrypted. Enter its age key to continue.`
+  String get setupAgeKeyDescription {
+    return Intl.message(
+      'This profile is encrypted. Enter its age key to continue.',
+      name: 'setupAgeKeyDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can change any choice in settings.`
+  String get setupFinishDescription {
+    return Intl.message(
+      'You can change any choice in settings.',
+      name: 'setupFinishDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The route changed during the check. Check the current connection again.`
+  String get setupRouteChanged {
+    return Intl.message(
+      'The route changed during the check. Check the current connection again.',
+      name: 'setupRouteChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The operation did not finish. Try again or open the details.`
+  String get setupUnknownError {
+    return Intl.message(
+      'The operation did not finish. Try again or open the details.',
+      name: 'setupUnknownError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow connection`
+  String get setupRequestPermission {
+    return Intl.message(
+      'Allow connection',
+      name: 'setupRequestPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Update channel`
   String get updateChannel {
     return Intl.message(

@@ -1066,6 +1066,107 @@
       }
     }
   },
+  "setupTitle": "Primera conexión",
+  "setupLanguageTitle": "Elige tu idioma",
+  "setupLanguageDescription": "Selecciona un idioma antes de leer las condiciones. Puedes cambiarlo más tarde.",
+  "setupLanguageContinue": "Continuar",
+  "setupProfileTitle": "Añadir un perfil de conexión",
+  "setupProfileDescription": "ReClash no proporciona servidores. Importa una suscripción o una configuración de tu proveedor.",
+  "setupProfileReady": "Perfil listo",
+  "setupProfileImport": "Importar perfil",
+  "setupProfileLinkHint": "Enlace de suscripción o para compartir",
+  "setupProfileSkip": "Configurar más tarde",
+  "setupCoverageTitle": "¿Qué aplicaciones deben conectarse?",
+  "setupCoverageDescription": "Elige qué aplicaciones usan ReClash. Las reglas de tu perfil determinan qué conexiones usan un servidor.",
+  "setupCoverageAll": "Todas las aplicaciones",
+  "setupCoverageAllDescription": "TUN captura el tráfico del dispositivo. Es posible que el sistema solicite permiso.",
+  "setupCoverageSystem": "Proxy del sistema",
+  "setupCoverageSystemDescription": "Las aplicaciones que no admiten el proxy del sistema se conectan directamente.",
+  "setupCoverageLocal": "Configuraré las aplicaciones manualmente",
+  "setupCoverageLocalDescription": "Configura la dirección del proxy local en cada aplicación que quieras conectar.",
+  "setupCoverageAndroidDescription": "Android solicitará permiso para crear una conexión VPN. La selección de aplicaciones está en los ajustes de acceso.",
+  "setupCoverageNote": "Capturar todo el tráfico no significa enviarlo todo a través de un servidor. Las rutas directas se mantienen.",
+  "setupRegionConfirm": "Usar estos ajustes regionales",
+  "setupRegionDescription": "La región sugerida se basa en este dispositivo, no en el idioma de la interfaz. Aplícala solo si coincide con tu red.",
+  "setupRegionNeutral": "Mantener los valores del perfil",
+  "setupCheckAction": "Comprobar conexión",
+  "setupCheckingTitle": "Conectando y comprobando",
+  "setupCheckingDescription": "Comprobamos una ruta seleccionada. Las solicitudes de permiso del sistema se abren por separado.",
+  "setupPhaseCore": "Iniciando el núcleo",
+  "setupPhaseProfile": "Aplicando el perfil",
+  "setupPhaseConnection": "Iniciando la conexión",
+  "setupPhaseRoute": "Comprobando la ruta",
+  "setupPhaseExit": "Confirmando la salida",
+  "setupPhaseServices": "Comprobando los servicios",
+  "setupPhaseAlternatives": "Buscando otro servidor",
+  "setupStepStatus": "{step} de {total}",
+  "setupCheckLimit": "El resultado corresponde a esta ruta, no a todas las aplicaciones o sitios web.",
+  "setupConnectedTitle": "La conexión funciona",
+  "setupConnectedDescription": "La ruta seleccionada respondió. El tráfico sigue las reglas de tu perfil.",
+  "setupPartialTitle": "Conectado, con limitaciones",
+  "setupPartialDescription": "La ruta respondió, pero no se pudieron confirmar algunas comprobaciones.",
+  "setupUnconfirmedTitle": "No se pudo confirmar la conexión",
+  "setupUnconfirmedDescription": "La conexión se inició, pero la ruta seleccionada no ofreció resultados suficientes.",
+  "setupFailedTitle": "La conexión requiere atención",
+  "setupSavedTitle": "Conectar más tarde",
+  "setupSavedDescription": "Tus opciones están guardadas. Puedes conectarte desde el panel cuando quieras.",
+  "setupAutoConnect": "Conectar al abrir ReClash",
+  "setupAutoConnectDescription": "Iniciar esta conexión junto con la aplicación.",
+  "setupSaveWithoutConnection": "Guardar sin conectarse",
+  "setupRepeat": "Comprobar de nuevo",
+  "setupTryServer": "Probar {server}",
+  "setupAlternativeDescription": "Este servidor respondió a una prueba independiente. Cambia a él y vuelve a comprobar la ruta completa.",
+  "setupReport": "Informe de comprobación",
+  "setupReceipt": "Tu conexión",
+  "setupReceiptProfile": "Perfil",
+  "setupReceiptCoverage": "Cobertura",
+  "setupReceiptCheck": "Comprobación",
+  "setupNotChecked": "Sin comprobar",
+  "setupConfirmed": "Confirmado",
+  "setupUnavailable": "Sin respuesta",
+  "setupStoppedTitle": "Comprobación detenida",
+  "setupStoppedDescription": "Tus opciones están guardadas. La conexión anterior no se ha detenido.",
+  "setupPermissionTitle": "Se necesita permiso",
+  "setupPermissionDescription": "Permite la conexión en el aviso del sistema, vuelve a intentarlo o elige otro alcance.",
+  "setupLocalTitle": "El proxy local está listo",
+  "setupLocalDescription": "Configura esta dirección en las aplicaciones que quieras conectar. Esta comprobación no confirma que estén configuradas.",
+  "setupCopyProxy": "Copiar dirección del proxy",
+  "setupErrorDetails": "Detalles",
+  "setupSaveError": "No se pudieron guardar tus opciones. Inténtalo de nuevo.",
+  "setupSafeMode": "El modo seguro no inicia una conexión real. Guarda la configuración o pruébala en una versión normal.",
+  "setupResume": "Continuar configuración",
+  "setupRestart": "Configurar conexión",
+  "setupLaterNote": "La configuración está incompleta; no se ha comprobado la conexión.",
+  "setupProfileCount": "Perfiles disponibles: {count}",
+  "setupAgeKeyDescription": "Este perfil está cifrado. Introduce su clave age para continuar.",
+  "setupFinishDescription": "Puedes cambiar cualquier opción en los ajustes.",
+  "setupRouteChanged": "La ruta cambió durante la comprobación. Vuelve a comprobar la conexión actual.",
+  "setupUnknownError": "La operación no se completó. Inténtalo de nuevo o consulta los detalles.",
+  "setupRequestPermission": "Permitir conexión",
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "Canal de actualización",
   "updateChannelRelease": "Versión estable",
   "updateChannelPre": "Versión preliminar",

@@ -1,0 +1,72 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+why: First connection setup stays in one wizard without background autostart or global setup errors.
+deps: [app.region, desktop.hotkeys, localization.catalog, profiles.no-duplicates, settings.specs, subscription.compatibility]
+must:
+  first-run: Incomplete first-run setup shows the wizard from the first frame without a dashboard flash; a ready wizard counts as a launched app even before setup completes, and existing installations keep their startup behavior.
+  language: Language selection precedes consent and updates the interface reactively; Core and connection checks cannot start before consent.
+  consent: Consent requires reading to the end; declining or abandoning an import never completes setup.
+  draft: Step, profile, coverage and an explicitly neutral region persist separately from active configuration; an interrupted check resumes at coverage.
+  imports: Link, file and QR imports reuse client presets, conversion, explicit loss approval, validation and duplicate prevention; age-key retry, cancellation and errors remain inside the wizard, rejected or failed imports leave no profile files, and imports do not change active selection.
+  coverage: Desktop offers TUN, system proxy and local proxy; Android offers VPN and local proxy; coverage never promises to proxy all traffic.
+  region: Region is independent of UI locale; detection only suggests a preview, manual choices win, and cancelling preview leaves active settings unchanged.
+  foundation: Checks use the existing Core and connection owners with one Core-stamped route probe; success does not certify every app or website.
+  cancellation: Cancellation immediately settles progress; late responses cannot overwrite the report, and retry cannot accept a cancelled run's answer.
+  freshness: Profile, profile-content, coverage, region, check-setting and route changes invalidate an outdated confirmed result.
+  ownership: Cancellation and save-without-connecting preserve pre-existing runs; Android runtime restoration stays in SetupAction without a new start or stop, and newer intents supersede late observations.
+  finish: Failed persistence keeps setup incomplete; autostart requires a confirmed active connection, and an unstarted profile can be saved for later.
+  errors: Import, startup and profile-apply failures stay inside the wizard without global notifiers or unrelated navigation.
+  shortcuts: Active setup permits only window visibility and exit actions; network-changing native events and local shortcuts remain blocked until setup completes.
+  presentation: The wizard uses app components, typography, superellipses and primary selection checks without selected-row fills; a divided action bar stays visible, the receipt stays outside the content scroll and opens as compact details on small layouts, real check phases remain expanded, and phone or long text layouts do not overflow.
+  localization: All wizard messages belong to app.setup fragments with matching keys and placeholders across supported locales.
+watch:
+  - lib/common/setup_check.dart
+  - lib/providers/setup.dart
+  - lib/views/setup.dart
+  - lib/application.dart
+  - lib/bootstrap.dart
+  - lib/models/config.dart
+  - lib/models/core.dart
+  - lib/models/generated/config.freezed.dart
+  - lib/models/generated/config.g.dart
+  - lib/models/generated/core.freezed.dart
+  - lib/models/generated/core.g.dart
+  - lib/providers/database.dart
+  - lib/providers/generated/database.g.dart
+  - lib/providers/generated/action.g.dart
+  - lib/providers/actions/setup.dart
+  - lib/providers/actions/core.dart
+  - lib/providers/actions/common.dart
+  - lib/providers/actions/profiles.dart
+  - lib/providers/actions/proxies.dart
+  - lib/manager/hotkey_manager.dart
+  - lib/manager/core_manager.dart
+  - lib/manager/vpn_manager.dart
+  - lib/views/disclaimer.dart
+  - lib/views/region.dart
+  - lib/views/application_setting.dart
+  - arb/fragments/app.setup/**
+  - test/common/setup_check_test.dart
+  - test/common/boot_guard_test.dart
+  - test/providers/setup_session_test.dart
+  - test/views/setup_wizard_test.dart
+  - test/application_test.dart
+  - test/providers/setup_action_test.dart
+  - test/providers/profiles_action_test.dart
+  - test/providers/common_action_test.dart
+  - test/providers/action_test.dart
+  - test/providers/proxies_action_test.dart
+  - test/manager/*manager_test.dart
+  - test/views/region_view_test.dart
+  - test/views/application_setting_test.dart
+  - test/helpers/test_profiles.dart
+checks:
+  tests: [first-run, language, consent, draft, imports, coverage, region, foundation, cancellation, freshness, ownership, finish, errors, shortcuts, presentation]
+  localization: [localization]
+  localization-assembly: [localization]
+  config: [draft, finish]
+  profiles: [imports]
+  hotkeys: [shortcuts]
+drop: Upstream supplies a setup flow preserving every scenario and lifecycle owner above.

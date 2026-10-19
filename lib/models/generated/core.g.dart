@@ -328,6 +328,8 @@ _ProbeResult _$ProbeResultFromJson(Map<String, dynamic> json) => _ProbeResult(
   rulePayload: json['rule-payload'] as String? ?? '',
   error: json['error'] as String?,
   message: json['message'] as String?,
+  coreEpoch: (json['core-epoch'] as num?)?.toInt() ?? 0,
+  picksVersion: (json['picks-version'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$ProbeResultToJson(_ProbeResult instance) =>
@@ -341,6 +343,8 @@ Map<String, dynamic> _$ProbeResultToJson(_ProbeResult instance) =>
       'rule-payload': instance.rulePayload,
       'error': instance.error,
       'message': instance.message,
+      'core-epoch': instance.coreEpoch,
+      'picks-version': instance.picksVersion,
     };
 
 _OutboundIpParams _$OutboundIpParamsFromJson(Map<String, dynamic> json) =>

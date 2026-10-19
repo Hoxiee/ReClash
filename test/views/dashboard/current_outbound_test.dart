@@ -46,7 +46,12 @@ class _RecordingSetupAction extends SetupAction {
   final requests = <bool>[];
 
   @override
-  Future<bool> setRunning(bool running, {bool initialize = false}) {
+  Future<bool> setRunning(
+    bool running, {
+    bool initialize = false,
+    bool silence = false,
+    Object? owner,
+  }) {
     requests.add(running);
     ref.read(runTimeProvider.notifier).value = running ? 1 : null;
     return Future.value(true);
@@ -520,6 +525,7 @@ void main() {
       tester,
     ) async {
       container = containerWith();
+      container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
       container.read(runTimeProvider.notifier).value = 1;
       await pumpCard(tester);
       final action =

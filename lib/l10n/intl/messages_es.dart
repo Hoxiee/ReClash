@@ -242,35 +242,42 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m85(count) =>
       "${Intl.plural(count, one: '1 ajuste', other: '${count} ajustes')}";
 
-  static String m86(link) => "No se pudo leer ningún proxy de ${link}";
+  static String m86(count) => "Perfiles disponibles: ${count}";
 
-  static String m87(label) => "${label} debe ser un solo elemento";
+  static String m87(step, total) => "${step} de ${total}";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "Probar ${server}";
+
+  static String m89(link) => "No se pudo leer ningún proxy de ${link}";
+
+  static String m90(label) => "${label} debe ser un solo elemento";
+
+  static String m91(client, format, count) =>
       "Recibido como ${client}: ${format}, ${count} nodos proxy.";
 
-  static String m89(sections) =>
+  static String m92(sections) =>
       "No se transferirán estas secciones de origen: ${sections}.";
 
-  static String m90(count, format) =>
+  static String m93(count, format) =>
       "Se pueden importar ${count} nodos proxy de ${format}.";
 
-  static String m91(count) => "No se pueden convertir ${count} nodos.";
+  static String m94(count) => "No se pueden convertir ${count} nodos.";
 
-  static String m92(count) => "${count} resultados";
+  static String m95(count) => "${count} resultados";
 
-  static String m93(value) => "Pico: ${value}";
+  static String m96(value) => "Pico: ${value}";
 
-  static String m94(value) => "Total: ${value}";
+  static String m97(value) => "Total: ${value}";
 
-  static String m95(version) => "Versión instalada: ${version}";
+  static String m98(version) => "Versión instalada: ${version}";
 
-  static String m96(label) => "${label} debe ser una URL";
+  static String m99(label) => "${label} debe ser una URL";
 
-  static String m97(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m98(count) => "${Intl.plural(count, other: 'hace ${count} a')}";
+  static String m101(count) =>
+      "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2025,7 +2032,206 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("ajustes"),
     "settings": MessageLookupByLibrary.simpleMessage("Ajustes"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "Este perfil está cifrado. Introduce su clave age para continuar.",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "Este servidor respondió a una prueba independiente. Cambia a él y vuelve a comprobar la ruta completa.",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage(
+      "Conectar al abrir ReClash",
+    ),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "Iniciar esta conexión junto con la aplicación.",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage(
+      "Comprobar conexión",
+    ),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "El resultado corresponde a esta ruta, no a todas las aplicaciones o sitios web.",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Comprobamos una ruta seleccionada. Las solicitudes de permiso del sistema se abren por separado.",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Conectando y comprobando",
+    ),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("Confirmado"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "La ruta seleccionada respondió. El tráfico sigue las reglas de tu perfil.",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage(
+      "La conexión funciona",
+    ),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage(
+      "Copiar dirección del proxy",
+    ),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage(
+      "Todas las aplicaciones",
+    ),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN captura el tráfico del dispositivo. Es posible que el sistema solicite permiso.",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android solicitará permiso para crear una conexión VPN. La selección de aplicaciones está en los ajustes de acceso.",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "Elige qué aplicaciones usan ReClash. Las reglas de tu perfil determinan qué conexiones usan un servidor.",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage(
+      "Configuraré las aplicaciones manualmente",
+    ),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Configura la dirección del proxy local en cada aplicación que quieras conectar.",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "Capturar todo el tráfico no significa enviarlo todo a través de un servidor. Las rutas directas se mantienen.",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage(
+      "Proxy del sistema",
+    ),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "Las aplicaciones que no admiten el proxy del sistema se conectan directamente.",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage(
+      "¿Qué aplicaciones deben conectarse?",
+    ),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("Detalles"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "La conexión requiere atención",
+    ),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "Puedes cambiar cualquier opción en los ajustes.",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("Continuar"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "Selecciona un idioma antes de leer las condiciones. Puedes cambiarlo más tarde.",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage(
+      "Elige tu idioma",
+    ),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage(
+      "La configuración está incompleta; no se ha comprobado la conexión.",
+    ),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Configura esta dirección en las aplicaciones que quieras conectar. Esta comprobación no confirma que estén configuradas.",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage(
+      "El proxy local está listo",
+    ),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("Sin comprobar"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "La ruta respondió, pero no se pudieron confirmar algunas comprobaciones.",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage(
+      "Conectado, con limitaciones",
+    ),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "Permite la conexión en el aviso del sistema, vuelve a intentarlo o elige otro alcance.",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Se necesita permiso",
+    ),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage(
+      "Buscando otro servidor",
+    ),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage(
+      "Iniciando la conexión",
+    ),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage(
+      "Iniciando el núcleo",
+    ),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage(
+      "Confirmando la salida",
+    ),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage(
+      "Aplicando el perfil",
+    ),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage(
+      "Comprobando la ruta",
+    ),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage(
+      "Comprobando los servicios",
+    ),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash no proporciona servidores. Importa una suscripción o una configuración de tu proveedor.",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage(
+      "Importar perfil",
+    ),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage(
+      "Enlace de suscripción o para compartir",
+    ),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("Perfil listo"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage(
+      "Configurar más tarde",
+    ),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage(
+      "Añadir un perfil de conexión",
+    ),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("Tu conexión"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("Comprobación"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("Cobertura"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("Perfil"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage(
+      "Usar estos ajustes regionales",
+    ),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "La región sugerida se basa en este dispositivo, no en el idioma de la interfaz. Aplícala solo si coincide con tu red.",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage(
+      "Mantener los valores del perfil",
+    ),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("Comprobar de nuevo"),
+    "setupReport": MessageLookupByLibrary.simpleMessage(
+      "Informe de comprobación",
+    ),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage(
+      "Permitir conexión",
+    ),
+    "setupRestart": MessageLookupByLibrary.simpleMessage("Configurar conexión"),
+    "setupResume": MessageLookupByLibrary.simpleMessage(
+      "Continuar configuración",
+    ),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "La ruta cambió durante la comprobación. Vuelve a comprobar la conexión actual.",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "El modo seguro no inicia una conexión real. Guarda la configuración o pruébala en una versión normal.",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage(
+      "No se pudieron guardar tus opciones. Inténtalo de nuevo.",
+    ),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "Guardar sin conectarse",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "Tus opciones están guardadas. Puedes conectarte desde el panel cuando quieras.",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage(
+      "Conectar más tarde",
+    ),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "Tus opciones están guardadas. La conexión anterior no se ha detenido.",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage(
+      "Comprobación detenida",
+    ),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("Primera conexión"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("Sin respuesta"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "La conexión se inició, pero la ruta seleccionada no ofreció resultados suficientes.",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage(
+      "No se pudo confirmar la conexión",
+    ),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "La operación no se completó. Inténtalo de nuevo o consulta los detalles.",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "No se pudo leer ningún proxy de los enlaces",
     ),
@@ -2051,7 +2257,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Introduce aquí un solo enlace; para varios, usa la edición rápida de la lista",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("Tamaño"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Omitir verificación de certificado",
@@ -2189,7 +2395,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Usar este cliente"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core analizó este resultado. Aún no se ha guardado ni aplicado.",
@@ -2259,7 +2465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "formato desconocido",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "No hay nodos proxy compatibles para importar.",
     ),
@@ -2270,11 +2476,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Solo se aplica a este origen, formato y tipos de pérdida aceptados. Las nuevas pérdidas requieren otro consentimiento.",
         ),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Revisar importación de suscripción",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Información de la suscripción",
     ),
@@ -2386,7 +2592,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Reiniciar el núcleo",
     ),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Ejecutar"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Sección"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Ajuste"),
@@ -2404,8 +2610,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Subido"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Puerto TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Tráfico"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Uso de tráfico"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash habla tu idioma para que nadie se quede fuera. Si alguna frase suena rara a oído nativo, dínoslo y la corregiremos.",
@@ -2462,7 +2668,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo iniciar el instalador de paquetes.",
     ),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Ya tienes la versión más reciente.",
     ),
@@ -2487,7 +2693,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ancho de banda de subida",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -2517,8 +2723,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

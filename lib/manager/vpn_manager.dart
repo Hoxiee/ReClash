@@ -4,6 +4,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +28,8 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
         if (next != null &&
             prev != next &&
             running != null &&
-            running != next) {
+            running != next &&
+            !ref.read(setupSessionProvider).active) {
           _showRestartTip();
         }
       },
