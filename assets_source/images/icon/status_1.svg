@@ -1,24 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- glyph.svg's geometry; the state shows only in the colors. -->
-<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
-  <title>status_1</title>
-  <defs>
-    <linearGradient id="top" x1="0" y1="8.31" x2="0" y2="124.11" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#737D90"/>
-      <stop offset="1" stop-color="#656F81"/>
-    </linearGradient>
-    <linearGradient id="mid" x1="0" y1="96.53" x2="0" y2="177.59" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#8893A5"/>
-      <stop offset="1" stop-color="#7A8495"/>
-    </linearGradient>
-    <linearGradient id="dot" x1="0" y1="184.76" x2="0" y2="231.08" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#A2ADC0"/>
-      <stop offset="1" stop-color="#929DB0"/>
-    </linearGradient>
-  </defs>
-  <g stroke-width="46.32" stroke-linecap="round">
-    <line x1="59.68" y1="100.95" x2="180.02" y2="31.47" stroke="url(#top)"/>
-    <line x1="90.56" y1="154.43" x2="150.74" y2="119.69" stroke="url(#mid)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs xmlns="http://www.w3.org/2000/svg"><linearGradient id="mp" gradientUnits="userSpaceOnUse" x1="-57.61" y1="-174.12" x2="68.25" y2="171.68"><stop offset="0" stop-color="#A78BFF" /><stop offset="1" stop-color="#6E55F5" /></linearGradient><linearGradient id="mb" gradientUnits="userSpaceOnUse" x1="-57.61" y1="-174.12" x2="68.25" y2="171.68"><stop offset="0" stop-color="#5C9DFF" /><stop offset="1" stop-color="#2F6FF0" /></linearGradient><linearGradient id="mc" gradientUnits="userSpaceOnUse" x1="-57.61" y1="-174.12" x2="68.25" y2="171.68"><stop offset="0" stop-color="#62D6FF" /><stop offset="1" stop-color="#1FB3F0" /></linearGradient></defs>
+  <defs></defs>
+  <g>
+    <g transform="translate(11.91 12.075) scale(0.062)">
+      <path d="M-142.55 -20.83 A31.05 31.05 0 0 1 -84.20 -42.07 L-37.00 87.61 A31.05 31.05 0 0 1 -95.36 108.85 Z" fill="#8994A8"/>
+      <path d="M-71.06 -120.28 A31.05 31.05 0 0 1 -12.70 -141.52 L81.70 117.84 A31.05 31.05 0 0 1 23.34 139.08 Z" fill="#8994A8"/>
+      <path d="M55.51 -68.44 A31.05 31.05 0 0 1 113.86 -89.68 L145.33 -3.23 A31.05 31.05 0 0 1 86.97 18.01 Z" fill="#8994A8"/>
+    </g>
   </g>
-  <circle cx="121.44" cy="207.92" r="23.16" fill="url(#dot)"/>
 </svg>

@@ -17,6 +17,17 @@ dart setup.dart windows
 dart setup.dart android
 ```
 
+On Windows, `setup.dart` checks the staged native dependencies and the final ZIP. Release CI also installs, launches,
+upgrades and uninstalls both architectures before publishing. To repeat that check in a disposable Windows account:
+
+```powershell
+./tool/check_windows_package.ps1 -ZipPath <archive.zip> -SetupPath <setup.exe> -Arch amd64 -AllowInstall
+```
+
+Omit `-AllowInstall` for payload/signature inspection alone; add `-RequireSigned` to require valid Authenticode signatures.
+The installation check refuses an existing installation or user data and seeds its own settings with TUN, proxy and
+autostart disabled. It exercises the shipped GUI and Core; UAC, TUN and clean-OS dependencies still need native acceptance.
+
 The desktop Go core and the Rust helper build automatically: Flutter runs
 `plugins/setup/hook/build.dart` on every `flutter build` and `flutter test`,
 and the hook drives `CoreBuilder` from the `setup_hooks` package in
@@ -92,6 +103,19 @@ flutter run --dart-define-from-file=env.json --dart-define=SAFE_MODE=true
 `status_4` bug icon with a menu of only show and exit and no traffic title, and the settings keep their values, so
 nothing has to be flipped back before a normal run. See the safe mode section of `architecture.md` for the owners that consult the flag.
 
+To look at a screen without launching the app, render it headless inside `flutter_test` with the app theme and real
+fonts, then open the PNG:
+
+```bash
+dart run tool/preview.dart <scenario.dart> [--size 412x915,1280x800] [--theme light,dark] [--locale en,ru]
+```
+
+A scenario defines `Widget preview()` and optionally `previewOverrides()`, `previewSetUp()`, and
+`previewAct(WidgetTester)`; `tool/preview/examples/about_preview.dart` is a template, and `--help` lists the rest.
+Images land in `.dart_tool/preview/out/`; a warm run takes about 4 s. Text painted without a theme or `fontFamily`
+still renders as boxes, and `system.isDesktop` reflects the host. Do not run it alongside another `flutter test` in the
+same checkout.
+
 ## Code Generation
 
 Run code generation after modifying models, providers, or database schema:
@@ -131,26 +155,49 @@ dart run intl_utils:generate
 dart run tool/assemble_l10n.dart --check
 ```
 
-`arb/intl_<locale>.arb` is generated output. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
+`tool/l10n.dart` does the fragment edit and both steps in one call, and refuses a spec that misses a locale, mismatches
+placeholders, or claims a key another fragment owns:
 
-Tray and Windows app icons are generated, not hand-edited. `assets_source/images/icon/*.svg` is
-the source of truth; the script needs `rsvg-convert` (librsvg) on `PATH`:
+```bash
+dart run tool/l10n.dart apply spec.json            # {"fragment", "set": {key: {locale: text, "@": metadata}}, "remove"}
+dart run tool/l10n.dart apply spec.json --dry-run
+dart run tool/l10n.dart get <key>...               # owner and value per locale
+dart run tool/l10n.dart find '<text>'              # reuse an existing key before adding one
+dart run tool/l10n.dart audit [--fragment <f>]     # locale gaps, placeholders, Han text; exit 1 on errors
+```
+
+Metadata (`@key`) lives in the English fragment only; `intl_utils` reads it from the main ARB alone.
+
+`arb/intl_<locale>.arb` is ignored generated output, assembled automatically in CI before localization checks.
+After a fresh checkout, run the assembly command above before running localization tests locally.
+`lib/l10n/` remains tracked, and CI verifies that regenerating it produces no changes. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
+
+Application and tray icons are generated from `assets_source/images/icon/`; the
+script requires `rsvg-convert` (librsvg) and ImageMagick 7 (`magick`) on `PATH`:
 
 ```bash
 dart run tool/generate_status_icons.dart
 ```
 
-It writes the tray PNGs with Flutter `2.0x/`–`4.0x/` resolution variants to `assets/images/tray/unix/`,
-multi-size tray `.ico` files to `assets/images/tray/windows/`, and `windows/runner/resources/app_icon.ico`
-from `assets/images/icon.png`. `status_1`–`status_3` are the logo glyph alone and tell stopped, running and TUN
-apart only by color, so they carry no rings or shadow. macOS draws its menu bar icon as a template by default,
-where color is lost: `status_1` renders the bare logo from `assets_source/images/icon/glyph.svg` and `status_4`
-reuses `status_4.svg`, both recolored to black into `assets/images/tray/macos/`; the sources keep their colors.
-With the tray menu's monochrome icon turned off, macOS loads the color PNGs from `assets/images/tray/unix/`.
-`glyph.svg` is also the geometry of the Android notification drawables
-`android/service/src/main/res/drawable/ic.xml` and `ic_service.xml`; change them together. `pubspec.yaml` declares the three tray directories with `platforms:` so each
-build only bundles the formats its tray loads; a new status icon needs a source SVG and an entry in the
-script's `statusIconNames`, nothing in `pubspec.yaml`.
+`glyph.svg` produces the transparent `assets/images/icon.png` used by About,
+the setup wizard, Linux packages and the website, and the background-free
+Windows ICOs. It also
+supplies the monochrome macOS tray icon and Android VectorDrawables for the
+launcher, notifications and Quick Settings. `app.svg` and `app_fullbleed.svg`
+provide backgrounds for Android legacy icons, circular masks, TV and Play Store.
+Android rasters retain density-specific dimensions and lossless WebP; adaptive
+icons have a separate monochrome layer for themed icons. `macos.png` supplies
+the macOS AppIcon sizes.
+
+`tv_banner.svg` produces the opaque 320x180 Android TV banner. Its dark diagonal
+composition uses the shared glyph and outlined Noto Sans Bold lettering, with
+no external images or installed fonts required at render time.
+
+`status_1.svg`–`status_3.svg` represent stopped, running and TUN tray states;
+`status_4.svg` retains the safe-mode icon. The generator writes PNGs with
+`2.0x/`–`4.0x/` variants and multi-size Windows ICOs. macOS uses the black template
+glyph and the safe-mode icon. Tray directories in `pubspec.yaml` remain
+platform-scoped; add new states to `statusIconNames`.
 
 ## Testing
 
@@ -183,6 +230,23 @@ core: about 60 s for the same run, and 67 s instead of 180–213 s with `--cover
 isolate, so a test can see state a file before it left behind; the script runs every file that failed there again on
 its own, lets that run decide, and names the files that only failed together. See the Shared Test Isolate section of
 `rules.md` before fixing one.
+
+To run only what a change can break, let the script select the tests from the import graph:
+
+```bash
+dart run tool/test.dart --changed --summary-only         # working tree against HEAD, staged and untracked
+dart run tool/test.dart --affected lib/views/about.dart  # explicit changed paths
+dart run tool/test.dart --changed --list                 # print the selection with a reason per file, run nothing
+```
+
+A barrel's export counts only when the dependent names a declaration the change reaches, so a leaf file selects a
+few dozen files while `lib/ui/shape.dart` or `lib/models/config.dart` still selects most of the suite. Any `lib/`
+change adds `test/lint/`, ARB changes add the l10n tests, a `pubspec` change selects everything, and paths no rule
+covers print as `unmapped:`; tests that read non-Dart fixtures are not traced. `--summary-only` prints only the counts
+and each failed test's `file:line`, name, and first error lines, after the shared-isolate rerun has decided.
+
+An agent reading `flutter test` output directly passes `-r failures-only`: passing tests then print nothing, while the
+default reporter writes a line per test once output is not a terminal.
 
 `plugins/setup/setup_hooks/` is a pure Dart package and is tested with `dart test` from its own directory, which is
 also what CI runs; `tool/check_plugins.sh` does not descend into it. It must stay out of `flutter test`, because a test
@@ -254,6 +318,20 @@ emulator validation; Kotlin compilation cannot prove those system callbacks.
 
 ## Changelog And Release
 
+CI validates the pubspec version against a release tag with `tool/check_release_version.dart` and rejects missing,
+empty, or unexpected packages with `tool/check_release_assets.dart`. Linux pacman packages are queried and the x64
+package is installed in an isolated Arch container; Windows packages retain the install/upgrade/launch checks on both
+architectures. Every tag run produces `SHA256SUMS`, available as a separate Actions artifact. Stable tags publish a
+GitHub release; prerelease tags publish a GitHub prerelease without changing the latest stable release.
+Homebrew and F-Droid publishing require their configured secrets and remain stable-only; manual builds never publish.
+Telegram announcements use the public Bot API with `TELEGRAM_BOT_TOKEN` only. The bot must be a channel administrator
+with permission to post. `TELEGRAM_CHAT_ID` is an optional Actions variable (default `@ReClashApp`). No API ID, API hash,
+local Bot API container, Python dependencies, or file uploads are needed. Each announcement includes versioned direct
+asset buttons, full release notes, and SHA256SUMS, and runs only after GitHub release assets have been published.
+Preview without sending: `TAG=v0.1.0-pre.1 python3 -I release_telegram.py --dry-run` (requires `telegram.md` and the
+complete release asset set plus SHA256SUMS in `dist/`). Offline tests run with
+`python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py`.
+
 The changelog is derived from Conventional Commits by `tool/changelog.dart` and written to two committed files:
 `CHANGELOG.md` for readers and `changelog.json` for the renderers. See `.agents/rules.md` for the `Changelog:` trailers
 that decide the wording.
@@ -308,7 +386,7 @@ skipped and moves on instead of reporting drift that does not exist. Checking me
 branch fail on an unrelated release.
 
 Prerelease tags (`v0.8.96-pre.N`) skip the release commit, and CI renders their notes with `build --unreleased` for the
-Telegram post. They publish no GitHub release, so the update dialog never sees them. `build --unreleased` reads the
+Telegram post. GitHub marks them as prereleases, not latest stable releases. `build --unreleased` reads the
 version from `pubspec.yaml` rather than the tag, so the patch has to be bumped before the first `-pre.N` of a cycle:
 while `v<pubspec version>` is still tagged it refuses to collect anything and the release job fails.
 
@@ -333,8 +411,8 @@ tool/build_site.sh && python3 -m http.server -d build/site
 ```
 
 The page's look is deliberate: low-saturation flat colour, no blur, glow, glass or soft shadow, and motion that follows
-the logo's 30° lattice. `site/assets/field.js` draws the hero's capsules on that lattice with the glyph's own
-proportions, and the slanted wipes, the dot-to-bar marks and the theme transition reuse the same angle. Text that sits
+the logo's parallel bars, tilted 20° from vertical. `site/assets/field.js` draws the hero's capsules on that lattice
+with the glyph's own proportions. Text that sits
 inside the hero has to be listed in `wireField` in `app.js`, or the capsules run behind it.
 
 `.github/workflows/pages.yaml` deploys it after every successful stable tag build and on pushes to `main` that touch the
@@ -350,7 +428,10 @@ The `dart` job performs these root-package checks in order:
 ```bash
 bash tool/hooks/test.sh
 flutter pub get
-dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
+dart run tool/assemble_l10n.dart
+dart run intl_utils:generate
+dart run tool/check_release_version.dart
+dart tool/check_format.dart
 flutter analyze --no-fatal-infos
 dart run tool/changelog.dart verify   # main and tags only
 dart run tool/test.dart -- --reporter expanded --coverage
@@ -362,7 +443,10 @@ new hook script needs only its test file next to it, not a workflow step.
 
 Run `flutter analyze --no-fatal-infos` before committing; CI runs the same command and fails on a warning or error.
 
-Release builds run only for `v*` tag pushes; pull requests trigger nothing.
+Release builds run for `v*` tag pushes. Pull requests to `main` and `dev` run the checks.
+A manual run checks the repository by default; enable `build_packages` to also build the complete package matrix
+without publishing. Manual package artifacts are retained for seven days. Android packages without signing secrets
+use the debug signing key and `com.reclash.dev`; tag builds require release signing secrets.
 Root analysis excludes `plugins/**`, and root tests do not discover nested
 plugin packages, so parallel jobs validate the rest from their own package
 directories: `plugins` (local Flutter packages and the setup build tool), `go`
@@ -371,9 +455,9 @@ for `:common`, `:service` and `:app`, with the Flutter compile tasks excluded
 and the gomobile AAR built for one ABI), `rust` (both crates), and a
 Windows runner for the helper's `windows-service` feature. On branch pushes a
 `desktop` job also compiles a debug build per desktop platform; a tag skips it,
-since its release matrix compiles the same native code. Release builds run only
-in the public repository and start alongside the checks; `upload` publishes
-only once every build and every check job passes.
+since its release matrix compiles the same native code. Automatic release builds run only in the public repository,
+after the checks pass.
+`upload` runs only on public release-tag pushes and waits for package validation as well.
 
 `bash tool/check_plugins.sh` is that plugin gate, and CI runs the same script.
 It discovers every `plugins/*/pubspec.yaml`, analyzes each package, and runs
@@ -428,7 +512,16 @@ For a pushed review branch with multiple commits, squash-merge it instead of rew
 
 - `dart tool/check_format.dart`: verify handwritten source formatting, excluding compiler-owned generated files.
 
-- `dart run tool/fork.dart check`: validate feature contracts and show coverage gaps.
+- `dart run tool/fork.dart check`: validate contract/maintenance schema and show gaps; not readiness.
+- `dart run tool/fork.dart --json report --changed`: owners, invariants, dependencies and check commands.
+- `dart run tool/fork.dart --json status --id <id>`: read-only candidate blockers and evidence freshness.
+- `dart run tool/fork.dart --json lineage --id <id>`: captured observation ancestry.
+- `dart run tool/database_schema.dart inspect <db>` / `diff <before> <after>`: read-only SQLite shape inspection.
+- `dart run tool/check_generated_contracts.dart`: check FRB generation hashes, versions and sibling outputs.
 - `dart run tool/fork.dart context --paths <path>`: bounded intent packet; use `--changed` or `--staged` for existing edits.
 - `dart run tool/fork.dart --json bootstrap --inspect --source <local-oid>`: read-only baseline audit.
 - Vendor preparation/verification/acceptance and authority: [fork-maintenance.md](fork-maintenance.md).
+
+## Nix Development Shell
+
+See [nix.md](nix.md) for the separate Linux flake, toolchain pins, preparation command, and packaging limitations.

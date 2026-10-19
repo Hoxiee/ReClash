@@ -94,7 +94,7 @@ internal class NotificationModule(
             service,
             GlobalState.NOTIFICATION_CHANNEL,
         ).apply {
-            setSmallIcon(R.drawable.ic_service)
+            setSmallIcon(R.drawable.ic)
             setContentTitle("ReClash")
             setContentIntent(intent.toPendingIntent)
             setPriority(NotificationCompat.PRIORITY_LOW)
