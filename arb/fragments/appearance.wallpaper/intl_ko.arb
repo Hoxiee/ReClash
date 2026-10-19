@@ -1,0 +1,48 @@
+{
+  "appearanceTheme": "테마",
+  "appearanceBackground": "배경",
+  "wallpaperTitle": "사용자 지정 배경",
+  "wallpaperGalleryHint": "저장된 배경을 탭하여 적용하거나 새 배경을 추가하세요.",
+  "wallpaperChoose": "이미지 선택",
+  "wallpaperRemove": "이미지 삭제",
+  "wallpaperEnabled": "사용자 지정 배경 사용",
+  "wallpaperFit": "이미지 맞춤",
+  "wallpaperFitCover": "채우기",
+  "wallpaperFitContain": "맞추기",
+  "wallpaperFitFill": "늘이기",
+  "wallpaperScale": "배율",
+  "wallpaperHorizontalPosition": "가로 위치",
+  "wallpaperVerticalPosition": "세로 위치",
+  "wallpaperOpacity": "이미지 불투명도",
+  "wallpaperDimming": "어둡게",
+  "wallpaperBlur": "흐림 효과",
+  "wallpaperCardOpacity": "카드 불투명도",
+  "wallpaperImageError": "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
+  "wallpaperTooLarge": "20 MB 이하, 5,000만 화소 이하의 이미지를 선택하세요.",
+  "wallpaperSaveError": "배경을 저장하지 못했습니다. 이전 배경은 유지됩니다.",
+  "wallpaperSelectHint": "PNG, JPEG 또는 WebP · 최대 20 MB",
+  "wallpaperLayout": "구도",
+  "wallpaperEffects": "이미지 조정",
+  "wallpaperReadability": "가독성",
+  "wallpaperLibraryFull": "배경은 최대 {count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.",
+  "appearanceInterface": "인터페이스",
+  "wallpaperDescription": "최대 3개의 이미지를 저장하고 앱 배경을 조정하세요.",
+  "wallpaperReset": "효과 초기화",
+  "wallpaperResetLayout": "구도 초기화",
+  "wallpaperImageLabel": "배경 {index}",
+  "wallpaperUnavailable": "이미지를 사용할 수 없음",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+}

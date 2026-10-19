@@ -1,0 +1,48 @@
+{
+  "appearanceTheme": "Tema",
+  "appearanceBackground": "Fon",
+  "wallpaperTitle": "Ýörite fon",
+  "wallpaperGalleryHint": "Ulanmak üçin ýatda saklanan fona basyň ýa-da täzesini goşuň.",
+  "wallpaperChoose": "Surat saýla",
+  "wallpaperRemove": "Suraty aýyr",
+  "wallpaperEnabled": "Ýörite fony ulan",
+  "wallpaperFit": "Suraty ýerleşdirmek",
+  "wallpaperFitCover": "Doldur",
+  "wallpaperFitContain": "Sygdyr",
+  "wallpaperFitFill": "Süýndür",
+  "wallpaperScale": "Masştab",
+  "wallpaperHorizontalPosition": "Keseligine ýerleşiş",
+  "wallpaperVerticalPosition": "Dikligine ýerleşiş",
+  "wallpaperOpacity": "Suratyň dury dälligi",
+  "wallpaperDimming": "Garaňkylatmak",
+  "wallpaperBlur": "Bulaňňylaşdyrmak",
+  "wallpaperCardOpacity": "Kartoçkalaryň dury dälligi",
+  "wallpaperImageError": "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
+  "wallpaperTooLarge": "Ölçegi 20 MB-dan we piksel sany 50 milliondan geçmeýän suraty saýlaň.",
+  "wallpaperSaveError": "Fony ýatda saklap bolmady. Öňki fon saklandy.",
+  "wallpaperSelectHint": "PNG, JPEG ýa-da WebP · 20 MB-a çenli",
+  "wallpaperLayout": "Kadr sazlamalary",
+  "wallpaperEffects": "Surat sazlamalary",
+  "wallpaperReadability": "Okamak aňsatlygy",
+  "wallpaperLibraryFull": "Iň köp {count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.",
+  "appearanceInterface": "Interfeýs",
+  "wallpaperDescription": "Üç surata çenli saklaň we programmanyň fonuny sazlaň.",
+  "wallpaperReset": "Täsirleri başlangyja getir",
+  "wallpaperResetLayout": "Kadry başlangyja getir",
+  "wallpaperImageLabel": "Fon {index}",
+  "wallpaperUnavailable": "Surat elýeterli däl",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+}

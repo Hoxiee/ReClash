@@ -9876,6 +9876,291 @@ class AppLocalizations {
     );
   }
 
+  /// `Theme`
+  String get appearanceTheme {
+    return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
+  }
+
+  /// `Background`
+  String get appearanceBackground {
+    return Intl.message(
+      'Background',
+      name: 'appearanceBackground',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom background`
+  String get wallpaperTitle {
+    return Intl.message(
+      'Custom background',
+      name: 'wallpaperTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap a saved background to use it, or add a new one.`
+  String get wallpaperGalleryHint {
+    return Intl.message(
+      'Tap a saved background to use it, or add a new one.',
+      name: 'wallpaperGalleryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose image`
+  String get wallpaperChoose {
+    return Intl.message(
+      'Choose image',
+      name: 'wallpaperChoose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove image`
+  String get wallpaperRemove {
+    return Intl.message(
+      'Remove image',
+      name: 'wallpaperRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use custom background`
+  String get wallpaperEnabled {
+    return Intl.message(
+      'Use custom background',
+      name: 'wallpaperEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image fit`
+  String get wallpaperFit {
+    return Intl.message('Image fit', name: 'wallpaperFit', desc: '', args: []);
+  }
+
+  /// `Fill`
+  String get wallpaperFitCover {
+    return Intl.message('Fill', name: 'wallpaperFitCover', desc: '', args: []);
+  }
+
+  /// `Fit`
+  String get wallpaperFitContain {
+    return Intl.message('Fit', name: 'wallpaperFitContain', desc: '', args: []);
+  }
+
+  /// `Stretch`
+  String get wallpaperFitFill {
+    return Intl.message(
+      'Stretch',
+      name: 'wallpaperFitFill',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scale`
+  String get wallpaperScale {
+    return Intl.message('Scale', name: 'wallpaperScale', desc: '', args: []);
+  }
+
+  /// `Horizontal position`
+  String get wallpaperHorizontalPosition {
+    return Intl.message(
+      'Horizontal position',
+      name: 'wallpaperHorizontalPosition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vertical position`
+  String get wallpaperVerticalPosition {
+    return Intl.message(
+      'Vertical position',
+      name: 'wallpaperVerticalPosition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image opacity`
+  String get wallpaperOpacity {
+    return Intl.message(
+      'Image opacity',
+      name: 'wallpaperOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dimming`
+  String get wallpaperDimming {
+    return Intl.message(
+      'Dimming',
+      name: 'wallpaperDimming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blur`
+  String get wallpaperBlur {
+    return Intl.message('Blur', name: 'wallpaperBlur', desc: '', args: []);
+  }
+
+  /// `Card opacity`
+  String get wallpaperCardOpacity {
+    return Intl.message(
+      'Card opacity',
+      name: 'wallpaperCardOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a valid PNG, JPEG or WebP image.`
+  String get wallpaperImageError {
+    return Intl.message(
+      'Choose a valid PNG, JPEG or WebP image.',
+      name: 'wallpaperImageError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose an image up to 20 MB and 50 megapixels.`
+  String get wallpaperTooLarge {
+    return Intl.message(
+      'Choose an image up to 20 MB and 50 megapixels.',
+      name: 'wallpaperTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not save the background. Your previous background has been kept.`
+  String get wallpaperSaveError {
+    return Intl.message(
+      'Could not save the background. Your previous background has been kept.',
+      name: 'wallpaperSaveError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PNG, JPEG or WebP · up to 20 MB`
+  String get wallpaperSelectHint {
+    return Intl.message(
+      'PNG, JPEG or WebP · up to 20 MB',
+      name: 'wallpaperSelectHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Framing`
+  String get wallpaperLayout {
+    return Intl.message('Framing', name: 'wallpaperLayout', desc: '', args: []);
+  }
+
+  /// `Image adjustments`
+  String get wallpaperEffects {
+    return Intl.message(
+      'Image adjustments',
+      name: 'wallpaperEffects',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Readability`
+  String get wallpaperReadability {
+    return Intl.message(
+      'Readability',
+      name: 'wallpaperReadability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can keep up to {count} backgrounds. Remove one to add another.`
+  String wallpaperLibraryFull(int count) {
+    return Intl.message(
+      'You can keep up to $count backgrounds. Remove one to add another.',
+      name: 'wallpaperLibraryFull',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Interface`
+  String get appearanceInterface {
+    return Intl.message(
+      'Interface',
+      name: 'appearanceInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep up to three images and adjust how the background looks across the app.`
+  String get wallpaperDescription {
+    return Intl.message(
+      'Keep up to three images and adjust how the background looks across the app.',
+      name: 'wallpaperDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset effects`
+  String get wallpaperReset {
+    return Intl.message(
+      'Reset effects',
+      name: 'wallpaperReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset framing`
+  String get wallpaperResetLayout {
+    return Intl.message(
+      'Reset framing',
+      name: 'wallpaperResetLayout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Background {index}`
+  String wallpaperImageLabel(int index) {
+    return Intl.message(
+      'Background $index',
+      name: 'wallpaperImageLabel',
+      desc: '',
+      args: [index],
+    );
+  }
+
+  /// `Image unavailable`
+  String get wallpaperUnavailable {
+    return Intl.message(
+      'Image unavailable',
+      name: 'wallpaperUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Running`
   String get coreRunning {
     return Intl.message('Running', name: 'coreRunning', desc: '', args: []);

@@ -1,3 +1,4 @@
+import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -120,7 +121,10 @@ class ElevatedSurfaceTheme extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ElevatedSurfaceScope(
-      child: Theme(data: Theme.of(context).elevated, child: child),
+      child: PageBackgroundScope(
+        cardOpacity: 1,
+        child: Theme(data: Theme.of(context).elevated, child: child),
+      ),
     );
   }
 }

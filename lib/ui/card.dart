@@ -5,6 +5,7 @@ import 'package:reclash/ui/focus.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/measure.dart';
 import 'package:reclash/ui/metrics.dart';
+import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
@@ -157,9 +158,13 @@ class CommonCard extends StatelessWidget {
     if (_filled) {
       return colorScheme.primary;
     }
-    return isSelected && holdsSelection
-        ? colorScheme.secondaryContainer.withValues(alpha: 0.8)
-        : level.colorOf(colorScheme);
+    if (isSelected && holdsSelection) {
+      return colorScheme.secondaryContainer.withValues(alpha: 0.8);
+    }
+    final fill = level.colorOf(colorScheme);
+    return level == SurfaceLevel.card
+        ? PageBackgroundScope.applyCardOpacity(context, fill)
+        : fill;
   }
 
   Color? _buildOverlayColor(BuildContext context, Set<WidgetState> states) {

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/exception.dart';
+import 'package:archive/archive.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -16,6 +18,10 @@ import 'package:riverpod/riverpod.dart';
 
 import '../helpers/app_paths.dart';
 import '../helpers/preferences.dart';
+
+final _wallpaperPng = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+);
 
 Profile _profile(int id, String label) => Profile(
   id: id,
@@ -86,6 +92,119 @@ void main() {
       expect(delivered, isTrue);
       return keptPath;
     }
+
+    test('restores wallpaper files and removes old library orphans', () async {
+      const name = '0123456789abcdef0123456789abcdef.png';
+      final source = buildContainer()..listen(configProvider, (_, _) {});
+      const oldName = 'fedcba9876543210fedcba9876543210.png';
+      final oldTheme = const ThemeProps(
+        wallpaper: WallpaperProps(
+          enabled: true,
+          fileName: oldName,
+          library: [oldName],
+        ),
+      );
+      source.read(themeSettingProvider.notifier).value = const ThemeProps(
+        wallpaper: WallpaperProps(
+          enabled: true,
+          fileName: name,
+          library: [name],
+        ),
+      );
+      final oldFile =
+          File(
+              join(
+                await appPath.wallpapersDirPath,
+                'fedcba9876543210fedcba9876543210.png',
+              ),
+            )
+            ..createSync(recursive: true)
+            ..writeAsBytesSync([1]);
+      final newFile = File(join(await appPath.wallpapersDirPath, name))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(_wallpaperPng);
+      expect(newFile.existsSync(), isTrue);
+      expect(
+        BackupEntries.of(
+          profileIds: const [],
+          scriptIds: const [],
+          providers: const [],
+          wallpaperLibrary: source
+              .read(configProvider)
+              .themeProps
+              .wallpaper
+              .library,
+        ),
+        contains('wallpapers/$name'),
+      );
+      final archivePath = await backupToKept(actionOf(source));
+      final archiveEntries = ZipDecoder()
+          .decodeBytes(File(archivePath).readAsBytesSync())
+          .files
+          .map((file) => file.name);
+      expect(archiveEntries, contains('wallpapers/$name'));
+      newFile.deleteSync();
+      final target = buildContainer()..listen(configProvider, (_, _) {});
+      target.read(themeSettingProvider.notifier).value = oldTheme;
+
+      await actionOf(
+        target,
+      ).restore(RestoreOption.all, (_) async => archivePath);
+
+      expect(
+        File(join(await appPath.wallpapersDirPath, name)).readAsBytesSync(),
+        _wallpaperPng,
+      );
+      expect(oldFile.existsSync(), isFalse);
+      expect(target.read(themeSettingProvider).wallpaper.fileName, name);
+    });
+
+    test(
+      'onlyProfiles leaves wallpaper settings and files untouched',
+      () async {
+        const name = '0123456789abcdef0123456789abcdef.png';
+        final wallpaper = const WallpaperProps(
+          enabled: true,
+          fileName: name,
+          library: [name],
+        );
+        final original = File(join(await appPath.wallpapersDirPath, name))
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(_wallpaperPng);
+        final container = buildContainer()..listen(configProvider, (_, _) {});
+        container.read(themeSettingProvider.notifier).value = ThemeProps(
+          wallpaper: wallpaper,
+        );
+
+        await actionOf(container).applyRestore(
+          const MigrationData(configMap: {'themeProps': {}}),
+          RestoreOption.onlyProfiles,
+        );
+
+        expect(container.read(themeSettingProvider).wallpaper, wallpaper);
+        expect(original.readAsBytesSync(), _wallpaperPng);
+      },
+    );
+
+    test('a restore with a missing referenced wallpaper is rejected', () async {
+      const name = '0123456789abcdef0123456789abcdef.png';
+      final source = buildContainer()..listen(configProvider, (_, _) {});
+      source.read(themeSettingProvider.notifier).value = const ThemeProps(
+        wallpaper: WallpaperProps(fileName: name, library: [name]),
+      );
+      final configMap = configMapOf(source)..['version'] = 1;
+      final archive = Archive()
+        ..addFile(ArchiveFile.string(configJsonName, jsonEncode(configMap)));
+      final archivePath = join(kept.path, 'missing-wallpaper.zip');
+      File(archivePath).writeAsBytesSync(ZipEncoder().encode(archive));
+      final target = buildContainer()..listen(configProvider, (_, _) {});
+
+      await expectLater(
+        actionOf(target).restore(RestoreOption.all, (_) async => archivePath),
+        throwsA(isA<MessageException>()),
+      );
+      expect(target.read(themeSettingProvider).wallpaper.library, isEmpty);
+    });
 
     test('restores the rows, files and settings a backup carries', () async {
       await testDatabase.profilesDao.putAll([

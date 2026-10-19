@@ -274,12 +274,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label} URL bolmaly";
 
-  static String m103(version) => "Gurnalan wersiýa: ${version}";
+  static String m103(index) => "Fon ${index}";
 
   static String m104(count) =>
+      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
+
+  static String m105(version) => "Gurnalan wersiýa: ${version}";
+
+  static String m106(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m105(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m107(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -384,6 +389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("Ýerli proksi ýok"),
     "appRegion": MessageLookupByLibrary.simpleMessage("Programma sebiti"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Fon"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("Interfeýs"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("Tema"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Ulgam DNS-ini goşmak",
     ),
@@ -2797,6 +2805,67 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN ulgamyň tutuş trafigini awtomatiki VpnService arkaly geçirýär.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Bulaňňylaşdyrmak"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Kartoçkalaryň dury dälligi",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Surat saýla"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Üç surata çenli saklaň we programmanyň fonuny sazlaň.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Garaňkylatmak"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Surat sazlamalary",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Ýörite fony ulan",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Suraty ýerleşdirmek"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Sygdyr"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Doldur"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Süýndür"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Ulanmak üçin ýatda saklanan fona basyň ýa-da täzesini goşuň.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Keseligine ýerleşiş",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Suratyň dury dälligi",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage(
+      "Okamak aňsatlygy",
+    ),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Suraty aýyr"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Täsirleri başlangyja getir",
+    ),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage(
+      "Kadry başlangyja getir",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Fony ýatda saklap bolmady. Öňki fon saklandy.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Masştab"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG ýa-da WebP · 20 MB-a çenli",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Ýörite fon"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Ölçegi 20 MB-dan we piksel sany 50 milliondan geçmeýän suraty saýlaň.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Surat elýeterli däl",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Dikligine ýerleşiş",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV sazlamalary",
     ),
@@ -2855,7 +2924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzeri açyp bolmady.",
     ),
@@ -2893,8 +2962,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

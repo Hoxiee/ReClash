@@ -1,0 +1,48 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a three-image library.
+  lifecycle: Import, select, remove and reset preserve the previous setting on save failure; only unreferenced files are cleaned up.
+  rendering: Wallpaper remains behind page content; modal surfaces, state colors and Liquid Glass retain their established behavior.
+  backup: Full backups carry only referenced wallpaper files; full restore validates and rolls back files and settings, while onlyProfiles leaves both untouched.
+  appearance: Theme, Background and Interface tabs remain at the bottom; search reveal selects the matching tab before focusing its setting.
+  localization: Wallpaper labels belong to this feature fragment in every supported locale.
+watch:
+  - lib/models/wallpaper.dart
+  - lib/models/config.dart
+  - lib/common/wallpaper_store.dart
+  - lib/common/backup.dart
+  - lib/common/path.dart
+  - lib/common/picker.dart
+  - lib/common/l10n_labels.dart
+  - lib/providers/wallpaper.dart
+  - lib/providers/actions/backup.dart
+  - lib/providers/action.dart
+  - lib/ui/page_background.dart
+  - lib/ui/scaffold.dart
+  - lib/ui/surface.dart
+  - lib/ui/card.dart
+  - lib/pages/home.dart
+  - lib/application.dart
+  - lib/views/theme.dart
+  - lib/views/theme_preview.dart
+  - lib/views/wallpaper.dart
+  - lib/widgets/wallpaper.dart
+  - arb/fragments/appearance.wallpaper/**
+  - test/models/wallpaper_test.dart
+  - test/common/wallpaper_store_test.dart
+  - test/common/wallpaper_backup_test.dart
+  - test/providers/wallpaper_test.dart
+  - test/providers/backup_action_test.dart
+  - test/views/theme_test.dart
+  - test/views/wallpaper_view_test.dart
+  - test/widgets/wallpaper_backdrop_test.dart
+  - test/widgets/wallpaper_page_test.dart
+checks:
+  config: [storage]
+  tests: [lifecycle, rendering, backup]
+  specs: [appearance]
+  localization: [localization]
+deps: [settings.specs, localization.catalog, ui.interactions]

@@ -278,12 +278,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label} URL болуы керек";
 
-  static String m103(version) => "Орнатылған нұсқа: ${version}";
+  static String m103(index) => "Фон ${index}";
 
   static String m104(count) =>
+      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+
+  static String m105(version) => "Орнатылған нұсқа: ${version}";
+
+  static String m106(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
-  static String m105(count) =>
+  static String m107(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -385,6 +390,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жергілікті проксилер жоқ",
     ),
     "appRegion": MessageLookupByLibrary.simpleMessage("Қолданба аймағы"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Фон"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("Интерфейс"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("Тақырып"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Жүйелік DNS-ті қосу",
     ),
@@ -2824,6 +2832,65 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN барлық жүйелік трафикті VpnService арқылы автоматты түрде бағыттайды.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Бұлыңғырлау"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Карточкалардың мөлдір еместігі",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Суретті таңдау"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Үш суретке дейін сақтап, қолданба фонын реттеңіз.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Қараңғылату"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("Суретті реттеу"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Жеке фонды пайдалану",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Суретті орналастыру"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Сыйдыру"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Толтыру"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Созу"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Қолдану үшін сақталған фонды түртіңіз немесе жаңасын қосыңыз.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Көлденең орналасуы",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Суреттің мөлдір еместігі",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage(
+      "Оқуға ыңғайлылық",
+    ),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Суретті жою"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Әсерлерді қалпына келтіру",
+    ),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage(
+      "Кадрлауды қалпына келтіру",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Фонды сақтау мүмкін болмады. Алдыңғы фон сақталды.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Масштаб"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG немесе WebP · 20 МБ-қа дейін",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Жеке фон"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Көлемі 20 МБ-тан, ал ажыратымдылығы 50 мегапиксельден аспайтын суретті таңдаңыз.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Сурет қолжетімсіз",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Тік орналасуы",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV баптаулары",
     ),
@@ -2886,7 +2953,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Браузерді ашу мүмкін болмады.",
     ),
@@ -2924,8 +2991,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

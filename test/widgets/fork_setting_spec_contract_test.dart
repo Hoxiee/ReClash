@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/views/config/advanced.dart';
+import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/config/custom_resources.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/general.dart';
@@ -19,6 +20,7 @@ void main() {
     ...onDemandToolSettings,
     ...userAgentToolSettings,
     ...customResourceToolSettings,
+    ...themeToolSettings,
   ];
 
   test('view setting specs have unique IDs and routes preserve identity', () {

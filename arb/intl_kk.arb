@@ -1274,6 +1274,52 @@
       }
     }
   },
+  "appearanceTheme": "Тақырып",
+  "appearanceBackground": "Фон",
+  "wallpaperTitle": "Жеке фон",
+  "wallpaperGalleryHint": "Қолдану үшін сақталған фонды түртіңіз немесе жаңасын қосыңыз.",
+  "wallpaperChoose": "Суретті таңдау",
+  "wallpaperRemove": "Суретті жою",
+  "wallpaperEnabled": "Жеке фонды пайдалану",
+  "wallpaperFit": "Суретті орналастыру",
+  "wallpaperFitCover": "Толтыру",
+  "wallpaperFitContain": "Сыйдыру",
+  "wallpaperFitFill": "Созу",
+  "wallpaperScale": "Масштаб",
+  "wallpaperHorizontalPosition": "Көлденең орналасуы",
+  "wallpaperVerticalPosition": "Тік орналасуы",
+  "wallpaperOpacity": "Суреттің мөлдір еместігі",
+  "wallpaperDimming": "Қараңғылату",
+  "wallpaperBlur": "Бұлыңғырлау",
+  "wallpaperCardOpacity": "Карточкалардың мөлдір еместігі",
+  "wallpaperImageError": "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
+  "wallpaperTooLarge": "Көлемі 20 МБ-тан, ал ажыратымдылығы 50 мегапиксельден аспайтын суретті таңдаңыз.",
+  "wallpaperSaveError": "Фонды сақтау мүмкін болмады. Алдыңғы фон сақталды.",
+  "wallpaperSelectHint": "PNG, JPEG немесе WebP · 20 МБ-қа дейін",
+  "wallpaperLayout": "Кадрлау",
+  "wallpaperEffects": "Суретті реттеу",
+  "wallpaperReadability": "Оқуға ыңғайлылық",
+  "wallpaperLibraryFull": "Ең көбі {count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.",
+  "appearanceInterface": "Интерфейс",
+  "wallpaperDescription": "Үш суретке дейін сақтап, қолданба фонын реттеңіз.",
+  "wallpaperReset": "Әсерлерді қалпына келтіру",
+  "wallpaperResetLayout": "Кадрлауды қалпына келтіру",
+  "wallpaperImageLabel": "Фон {index}",
+  "wallpaperUnavailable": "Сурет қолжетімсіз",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "coreRunning": "Жұмыс істеп тұр",
   "coreStarting": "Іске қосылуда…",
   "coreStopped": "Тоқтатылған",

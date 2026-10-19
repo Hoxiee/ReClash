@@ -81,6 +81,7 @@ class BackupAction extends _$BackupAction {
         profileIds: profileIds,
         scriptIds: scriptIds,
         providers: providers,
+        wallpaperLibrary: ref.read(themeSettingProvider).wallpaper.library,
       ),
     ));
     return archivePath;
@@ -99,52 +100,101 @@ class BackupAction extends _$BackupAction {
     final isOverride =
         ref.read(appSettingProvider).restoreStrategy ==
         RestoreStrategy.override;
+    final previousWallpaper = ref.read(themeSettingProvider).wallpaper;
+    if (config != null) {
+      await _validateWallpapers(config.themeProps.wallpaper, stagingDirPath);
+    }
     final previousProviders = await database.clashProvidersDao.query().get();
     final putBack = stagingDirPath == null
         ? null
-        : await _copyStagedFiles(data, stagingDirPath);
+        : await _copyStagedFiles(
+            data,
+            stagingDirPath,
+            includeWallpapers: config != null,
+          );
+    final previousConfig = ref.read(configProvider);
     try {
-      await database.restore(
-        data.profiles,
-        data.scripts,
-        data.rules,
-        data.disabledRules,
-        data.proxyGroups,
-        clashProviders: data.clashProviders,
-        customProxies: data.customProxies,
-        proxyDialers: data.proxyDialers,
-        isOverride: isOverride,
-      );
+      await database.transaction(() async {
+        await database.restore(
+          data.profiles,
+          data.scripts,
+          data.rules,
+          data.disabledRules,
+          data.proxyGroups,
+          clashProviders: data.clashProviders,
+          customProxies: data.customProxies,
+          proxyDialers: data.proxyDialers,
+          isOverride: isOverride,
+        );
+        if (config == null) return;
+        // A desktop backup carries no package lists; the apps picked here stay.
+        final accessControlProps =
+            config.vpnProps.accessControlProps.hasPackages
+            ? config.vpnProps.accessControlProps
+            : ref.read(vpnSettingProvider).accessControlProps;
+        writeConfig(
+          ref,
+          config.copyWith(
+            davProps: config.davProps ?? ref.read(davSettingProvider),
+            vpnProps: config.vpnProps.copyWith(
+              accessControlProps: accessControlProps,
+            ),
+          ),
+        );
+        if (!await ref.read(wallpaperSaveProvider)()) {
+          throw MessageException(currentAppLocalizations.wallpaperSaveError);
+        }
+      });
     } catch (_) {
+      if (config != null) writeConfig(ref, previousConfig);
       await putBack?.call();
       rethrow;
     }
     await _clearReplacedProviderCaches(previousProviders);
     await _clearOutdatedCompiledRuleSets(data.clashProviders);
-    if (config == null) {
-      return;
+    if (config != null) {
+      final next = config.themeProps.wallpaper;
+      for (final fileName in {...previousWallpaper.library, ...next.library}) {
+        ref.invalidate(wallpaperThumbnailProvider(fileName));
+      }
+      ref.invalidate(wallpaperImageProvider);
+      final store = ref.read(wallpaperStoreProvider);
+      for (final fileName in previousWallpaper.library) {
+        if (next.library.contains(fileName)) continue;
+        try {
+          await store.removeImage(fileName);
+        } on FileSystemException {
+          // File cleanup cannot roll back a completed restore.
+        }
+      }
     }
-    // A desktop backup carries no package lists; the apps picked here stay.
-    final accessControlProps = config.vpnProps.accessControlProps.hasPackages
-        ? config.vpnProps.accessControlProps
-        : ref.read(vpnSettingProvider).accessControlProps;
-    writeConfig(
-      ref,
-      config.copyWith(
-        davProps: config.davProps ?? ref.read(davSettingProvider),
-        vpnProps: config.vpnProps.copyWith(
-          accessControlProps: accessControlProps,
-        ),
-      ),
-    );
+  }
+
+  Future<void> _validateWallpapers(
+    WallpaperProps wallpaper,
+    String? stagingDirPath,
+  ) async {
+    final root = stagingDirPath ?? await appPath.homeDirPath;
+    try {
+      for (final fileName in wallpaper.library) {
+        await WallpaperStore.readStoredImage(
+          File(BackupEntries.resolve(root, BackupEntries.wallpaper(fileName))),
+        );
+      }
+    } on WallpaperImportException {
+      throw MessageException(currentAppLocalizations.wallpaperImageError);
+    } on FileSystemException {
+      throw MessageException(currentAppLocalizations.wallpaperImageError);
+    }
   }
 
   /// The files go in before the rows that name them, so the returned callback
   /// is how a restore whose rows fail takes them back out.
   Future<Future<void> Function()> _copyStagedFiles(
     MigrationData data,
-    String stagingDirPath,
-  ) async {
+    String stagingDirPath, {
+    required bool includeWallpapers,
+  }) async {
     final homeDirPath = await appPath.homeDirPath;
     final replacedDirPath = join(stagingDirPath, 'replaced');
     final copied = <String, bool>{};
@@ -162,12 +212,25 @@ class BackupAction extends _$BackupAction {
     }
 
     try {
-      for (final entry in BackupEntries.ofData(data)) {
+      for (final entry in BackupEntries.ofData(
+        data,
+        includeWallpapers: includeWallpapers,
+      )) {
         final staged = File(BackupEntries.resolve(stagingDirPath, entry));
         if (!await staged.exists()) {
           continue;
         }
         final target = File(BackupEntries.resolve(homeDirPath, entry));
+        if (entry.startsWith('wallpapers/')) {
+          final type = await FileSystemEntity.type(
+            target.path,
+            followLinks: false,
+          );
+          if (type != FileSystemEntityType.notFound &&
+              type != FileSystemEntityType.file) {
+            throw const BackupException(BackupFailure.invalid);
+          }
+        }
         final replaced = await target.exists();
         if (replaced) {
           await target.safeCopy(BackupEntries.resolve(replacedDirPath, entry));

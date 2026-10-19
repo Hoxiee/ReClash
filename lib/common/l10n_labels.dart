@@ -1,3 +1,4 @@
+import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
@@ -201,6 +202,17 @@ extension WebDashboardFailureL10n on WebDashboardFailure {
       WebDashboardFailure.authentication => l.webDashboardAuthenticationFailed,
       WebDashboardFailure.launch => l.webDashboardLaunchFailed,
       WebDashboardFailure.cancelled => l.webDashboardCancelled,
+    };
+  }
+}
+
+extension WallpaperFitL10n on WallpaperFit {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      WallpaperFit.cover => appLocalizations.wallpaperFitCover,
+      WallpaperFit.contain => appLocalizations.wallpaperFitContain,
+      WallpaperFit.fill => appLocalizations.wallpaperFitFill,
     };
   }
 }

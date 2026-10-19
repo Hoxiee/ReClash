@@ -1,0 +1,48 @@
+{
+  "appearanceTheme": "Тема",
+  "appearanceBackground": "Фон",
+  "wallpaperTitle": "Пользовательский фон",
+  "wallpaperGalleryHint": "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
+  "wallpaperChoose": "Выбрать изображение",
+  "wallpaperRemove": "Удалить изображение",
+  "wallpaperEnabled": "Использовать свой фон",
+  "wallpaperFit": "Размещение изображения",
+  "wallpaperFitCover": "Заполнить",
+  "wallpaperFitContain": "Вписать",
+  "wallpaperFitFill": "Растянуть",
+  "wallpaperScale": "Масштаб",
+  "wallpaperHorizontalPosition": "Положение по горизонтали",
+  "wallpaperVerticalPosition": "Положение по вертикали",
+  "wallpaperOpacity": "Непрозрачность изображения",
+  "wallpaperDimming": "Затемнение",
+  "wallpaperBlur": "Размытие",
+  "wallpaperCardOpacity": "Непрозрачность карточек",
+  "wallpaperImageError": "Выберите корректное изображение PNG, JPEG или WebP.",
+  "wallpaperTooLarge": "Выберите изображение размером до 20 МБ и 50 мегапикселей.",
+  "wallpaperSaveError": "Не удалось сохранить фон. Прежний фон сохранён.",
+  "wallpaperSelectHint": "PNG, JPEG или WebP · до 20 МБ",
+  "wallpaperLayout": "Кадрирование",
+  "wallpaperEffects": "Настройки изображения",
+  "wallpaperReadability": "Читаемость",
+  "wallpaperLibraryFull": "Можно хранить до {count} фонов. Удалите один, чтобы добавить новый.",
+  "appearanceInterface": "Интерфейс",
+  "wallpaperDescription": "Сохраните до трёх изображений и настройте фон приложения.",
+  "wallpaperReset": "Сбросить эффекты",
+  "wallpaperResetLayout": "Сбросить кадрирование",
+  "wallpaperImageLabel": "Фон {index}",
+  "wallpaperUnavailable": "Изображение недоступно",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "appearanceTheme": "Mavzu",
+  "appearanceBackground": "Fon",
+  "wallpaperTitle": "Maxsus fon",
+  "wallpaperGalleryHint": "Qoʻllash uchun saqlangan fonni bosing yoki yangisini qoʻshing.",
+  "wallpaperChoose": "Rasm tanlash",
+  "wallpaperRemove": "Rasmni olib tashlash",
+  "wallpaperEnabled": "Maxsus fondan foydalanish",
+  "wallpaperFit": "Rasmni joylashtirish",
+  "wallpaperFitCover": "Toʻldirish",
+  "wallpaperFitContain": "Sigʻdirish",
+  "wallpaperFitFill": "Choʻzish",
+  "wallpaperScale": "Masshtab",
+  "wallpaperHorizontalPosition": "Gorizontal joylashuv",
+  "wallpaperVerticalPosition": "Vertikal joylashuv",
+  "wallpaperOpacity": "Rasmning noshaffofligi",
+  "wallpaperDimming": "Qoraytirish",
+  "wallpaperBlur": "Xiralashtirish",
+  "wallpaperCardOpacity": "Kartochkalarning noshaffofligi",
+  "wallpaperImageError": "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
+  "wallpaperTooLarge": "Hajmi 20 MB dan, aniqligi 50 megapikseldan oshmaydigan rasmni tanlang.",
+  "wallpaperSaveError": "Fonni saqlab boʻlmadi. Oldingi fon saqlab qolindi.",
+  "wallpaperSelectHint": "PNG, JPEG yoki WebP · 20 MB gacha",
+  "wallpaperLayout": "Kadrlash",
+  "wallpaperEffects": "Rasm sozlamalari",
+  "wallpaperReadability": "Oʻqish qulayligi",
+  "wallpaperLibraryFull": "Koʻpi bilan {count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.",
+  "appearanceInterface": "Interfeys",
+  "wallpaperDescription": "Uchtagacha rasmni saqlang va ilova fonini sozlang.",
+  "wallpaperReset": "Effektlarni asliga qaytarish",
+  "wallpaperResetLayout": "Kadrlashni asliga qaytarish",
+  "wallpaperImageLabel": "Fon {index}",
+  "wallpaperUnavailable": "Rasm mavjud emas",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -18,6 +18,8 @@ checks:
     argv: [dart, run, tool/assemble_l10n.dart, --check]
   releases:
     argv: [flutter, test, test/common/changelog_test.dart, test/tool/changelog_parser_test.dart, test/tool/changelog_e2e_test.dart, test/tool/changelog_render_test.dart]
+  wallpaper:
+    argv: [flutter, test, test/models/wallpaper_test.dart, test/common/wallpaper_store_test.dart, test/common/wallpaper_backup_test.dart, test/widgets/wallpaper_backdrop_test.dart, test/widgets/wallpaper_page_test.dart, test/providers/backup_action_test.dart, test/views/theme_test.dart]
   specs:
     argv: [flutter, test, test/widgets/fork_setting_spec_contract_test.dart, test/widgets/tools_workspace_test.dart, test/views/theme_test.dart, test/views/resources_view_test.dart, test/models/config_test.dart, test/providers/config_test.dart]
   tooltip:
