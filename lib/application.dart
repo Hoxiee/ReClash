@@ -11,6 +11,7 @@ import 'package:reclash/manager/manager.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/views/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/url_scheme_labels.dart';
@@ -28,9 +29,10 @@ Widget buildManagerStack({
   Stream<ProcessSignal>? terminateSignals,
   required Widget child,
 }) {
+  final appChild = AppWallpaperScope(child: child);
   final platformApp = isDesktop
-      ? WindowHeaderContainer(child: child)
-      : VpnManager(child: child);
+      ? WindowHeaderContainer(child: appChild)
+      : VpnManager(child: appChild);
   final state = AppStateManager(
     child: CoreManager(
       child: ConnectivityManager(

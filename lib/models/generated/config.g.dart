@@ -410,6 +410,9 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
         _readLiquidGlass(json, 'liquidGlass'),
       ) ??
       LiquidGlassMode.none,
+  wallpaper: json['wallpaper'] == null
+      ? const WallpaperProps()
+      : WallpaperProps.safeFromJson(json['wallpaper']),
   textScale: json['textScale'] == null
       ? const TextScale()
       : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
@@ -425,6 +428,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'pureBlack': instance.pureBlack,
       'sidebarBlur': instance.sidebarBlur,
       'liquidGlass': _$LiquidGlassModeEnumMap[instance.liquidGlass]!,
+      'wallpaper': instance.wallpaper,
       'textScale': instance.textScale,
       'systemFontFamily': instance.fontFamily,
     };

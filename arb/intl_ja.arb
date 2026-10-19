@@ -1279,6 +1279,52 @@
       }
     }
   },
+  "appearanceTheme": "テーマ",
+  "appearanceBackground": "背景",
+  "wallpaperTitle": "カスタム背景",
+  "wallpaperGalleryHint": "保存済みの背景をタップして適用するか、新しい背景を追加します。",
+  "wallpaperChoose": "画像を選択",
+  "wallpaperRemove": "画像を削除",
+  "wallpaperEnabled": "カスタム背景を使用",
+  "wallpaperFit": "画像の配置",
+  "wallpaperFitCover": "画面いっぱいに表示",
+  "wallpaperFitContain": "全体を表示",
+  "wallpaperFitFill": "引き伸ばし",
+  "wallpaperScale": "拡大率",
+  "wallpaperHorizontalPosition": "水平方向の位置",
+  "wallpaperVerticalPosition": "垂直方向の位置",
+  "wallpaperOpacity": "画像の不透明度",
+  "wallpaperDimming": "暗さ",
+  "wallpaperBlur": "ぼかし",
+  "wallpaperCardOpacity": "カードの不透明度",
+  "wallpaperImageError": "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
+  "wallpaperTooLarge": "20 MB 以下、5,000 万画素以下の画像を選択してください。",
+  "wallpaperSaveError": "背景を保存できませんでした。元の背景はそのままです。",
+  "wallpaperSelectHint": "PNG、JPEG、WebP · 20 MB 以下",
+  "wallpaperLayout": "構図",
+  "wallpaperEffects": "画像の調整",
+  "wallpaperReadability": "読みやすさ",
+  "wallpaperLibraryFull": "背景は最大 {count} 件まで保存できます。追加するには 1 件削除してください。",
+  "appearanceInterface": "インターフェース",
+  "wallpaperDescription": "最大3枚の画像を保存して、アプリの背景を調整できます。",
+  "wallpaperReset": "効果をリセット",
+  "wallpaperResetLayout": "構図をリセット",
+  "wallpaperImageLabel": "背景 {index}",
+  "wallpaperUnavailable": "画像を利用できません",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "coreRunning": "稼働中",
   "coreStarting": "起動中…",
   "coreStopped": "停止中",

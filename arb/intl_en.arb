@@ -1286,6 +1286,52 @@
       }
     }
   },
+  "appearanceTheme": "Theme",
+  "appearanceBackground": "Background",
+  "wallpaperTitle": "Custom background",
+  "wallpaperGalleryHint": "Tap a saved background to use it, or add a new one.",
+  "wallpaperChoose": "Choose image",
+  "wallpaperRemove": "Remove image",
+  "wallpaperEnabled": "Use custom background",
+  "wallpaperFit": "Image fit",
+  "wallpaperFitCover": "Fill",
+  "wallpaperFitContain": "Fit",
+  "wallpaperFitFill": "Stretch",
+  "wallpaperScale": "Scale",
+  "wallpaperHorizontalPosition": "Horizontal position",
+  "wallpaperVerticalPosition": "Vertical position",
+  "wallpaperOpacity": "Image opacity",
+  "wallpaperDimming": "Dimming",
+  "wallpaperBlur": "Blur",
+  "wallpaperCardOpacity": "Card opacity",
+  "wallpaperImageError": "Choose a valid PNG, JPEG or WebP image.",
+  "wallpaperTooLarge": "Choose an image up to 20 MB and 50 megapixels.",
+  "wallpaperSaveError": "Could not save the background. Your previous background has been kept.",
+  "wallpaperSelectHint": "PNG, JPEG or WebP · up to 20 MB",
+  "wallpaperLayout": "Framing",
+  "wallpaperEffects": "Image adjustments",
+  "wallpaperReadability": "Readability",
+  "wallpaperLibraryFull": "You can keep up to {count} backgrounds. Remove one to add another.",
+  "appearanceInterface": "Interface",
+  "wallpaperDescription": "Keep up to three images and adjust how the background looks across the app.",
+  "wallpaperReset": "Reset effects",
+  "wallpaperResetLayout": "Reset framing",
+  "wallpaperImageLabel": "Background {index}",
+  "wallpaperUnavailable": "Image unavailable",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "coreRunning": "Running",
   "coreStarting": "Starting…",
   "coreStopped": "Stopped",

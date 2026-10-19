@@ -9,6 +9,7 @@ import 'package:reclash/ui/l10n.dart';
 import 'package:reclash/ui/measure.dart';
 import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/models.dart';
+import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/ui/pop_scope.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
@@ -714,6 +715,30 @@ class CommonScaffoldState extends State<CommonScaffold> {
     );
   }
 
+  bool _hasPageWallpaper(BuildContext context) {
+    final sheet = SheetProvider.of(context);
+    return (sheet == null || sheet.type == SheetType.page) &&
+        !ElevatedSurfaceTheme.isIn(context);
+  }
+
+  Widget _pageBackground(BuildContext context, Widget child) {
+    if (!_hasPageWallpaper(context)) {
+      return PageBackgroundScope(cardOpacity: 1, child: child);
+    }
+    return PageBackground(
+      baseColor:
+          widget.backgroundColor ??
+          SurfaceLevel.page.colorOf(context.colorScheme),
+      child: child,
+    );
+  }
+
+  Color? _scaffoldBackgroundColor(BuildContext context) =>
+      _hasPageWallpaper(context) &&
+          PageBackgroundRegistration.maybeOf(context) != null
+      ? Colors.transparent
+      : widget.backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     assert(widget.title != null || widget.titleWidget != null);
@@ -823,13 +848,16 @@ class CommonScaffoldState extends State<CommonScaffold> {
           )
         : body;
     if (!isCompact) {
-      return AppBarInsetScope(
-        child: Scaffold(
-          appBar: appBar,
-          extendBodyBehindAppBar: barFloats,
-          body: _BodyScope(child: content),
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
+      return _pageBackground(
+        context,
+        AppBarInsetScope(
+          child: Scaffold(
+            appBar: appBar,
+            extendBodyBehindAppBar: barFloats,
+            body: _BodyScope(child: content),
+            resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+            backgroundColor: _scaffoldBackgroundColor(context),
+          ),
         ),
       );
     }
@@ -856,19 +884,30 @@ class CommonScaffoldState extends State<CommonScaffold> {
           )
         : sheetBody;
     if (!hugsContent) {
-      return AppBarInsetScope(
-        child: Scaffold(
-          body: footed,
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
-        ),
-      );
+      return isBottomSheet
+          ? AppBarInsetScope(
+              child: Scaffold(
+                body: footed,
+                resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+                backgroundColor: widget.backgroundColor,
+              ),
+            )
+          : _pageBackground(
+              context,
+              AppBarInsetScope(
+                child: Scaffold(
+                  body: footed,
+                  resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+                  backgroundColor: _scaffoldBackgroundColor(context),
+                ),
+              ),
+            );
     }
     final hugging = Column(
       mainAxisSize: MainAxisSize.min,
       children: [Flexible(child: footed)],
     );
-    return AppBarInsetScope(
+    final page = AppBarInsetScope(
       child: form.hasDragHandle
           ? ClipRSuperellipse(
               borderRadius: AppRadius.top(AppCorner.xxl),
@@ -876,6 +915,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
             )
           : hugging,
     );
+    return isBottomSheet ? page : _pageBackground(context, page);
   }
 }
 

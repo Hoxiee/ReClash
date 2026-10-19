@@ -244,11 +244,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label}必须为URL";
 
-  static String m103(version) => "已安装版本：${version}";
+  static String m103(index) => "背景 ${index}";
 
-  static String m104(count) => "${count} 年前";
+  static String m104(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
 
-  static String m105(count) => "${count} 年前";
+  static String m105(version) => "已安装版本：${version}";
+
+  static String m106(count) => "${count} 年前";
+
+  static String m107(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -319,6 +323,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("应用图标设计"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("暂无本地代理"),
     "appRegion": MessageLookupByLibrary.simpleMessage("应用地区"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("背景"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("界面"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("主题"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
     "applicationSettings": MessageLookupByLibrary.simpleMessage("应用设置"),
     "authentication": MessageLookupByLibrary.simpleMessage("认证"),
@@ -2090,6 +2097,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN 通过 VpnService 自动路由系统所有流量。",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("模糊"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("卡片不透明度"),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("选择图片"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "最多保存三张图片，并调整应用背景。",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("调暗"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("图片调整"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("使用自定义背景"),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("图片适配方式"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("适应"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("填充"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("拉伸"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "点按已保存的背景即可应用，或添加新背景。",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage("水平位置"),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "请选择有效的 PNG、JPEG 或 WebP 图片。",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("移除图片"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("重置效果"),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage("重置构图"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "无法保存背景。已保留原有背景。",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("缩放"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG、JPEG 或 WebP · 不超过 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("自定义背景"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "请选择大小不超过 20 MB、像素总数不超过 5000 万的图片。",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage("图片不可用"),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage("垂直位置"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("网页面板"),
     "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage("面板访问已终止"),
@@ -2132,7 +2180,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "首次打开时下载所选面板。使用固定版本并进行 SHA-256 校验。",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "无法打开浏览器。",
     ),
@@ -2164,8 +2212,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

@@ -276,12 +276,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label} must be a URL";
 
-  static String m103(version) => "Installed version: ${version}";
+  static String m103(index) => "Background ${index}";
 
   static String m104(count) =>
+      "You can keep up to ${count} backgrounds. Remove one to add another.";
+
+  static String m105(version) => "Installed version: ${version}";
+
+  static String m106(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m105(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m107(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -374,6 +379,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("App icon design"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("No local proxies"),
     "appRegion": MessageLookupByLibrary.simpleMessage("App region"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Background"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("Interface"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("Theme"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Append system DNS",
     ),
@@ -2703,6 +2711,61 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN routes all system traffic through VpnService automatically.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Blur"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Card opacity",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Choose image"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Keep up to three images and adjust how the background looks across the app.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Dimming"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Image adjustments",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Use custom background",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Image fit"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Fit"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Fill"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Stretch"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Tap a saved background to use it, or add a new one.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Horizontal position",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "Choose a valid PNG, JPEG or WebP image.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("Reset effects"),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage(
+      "Reset framing",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Could not save the background. Your previous background has been kept.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Scale"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG or WebP · up to 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Custom background"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Choose an image up to 20 MB and 50 megapixels.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Image unavailable",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Vertical position",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",
     ),
@@ -2765,7 +2828,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Could not open the browser.",
     ),
@@ -2803,8 +2866,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

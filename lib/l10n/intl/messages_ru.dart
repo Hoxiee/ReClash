@@ -274,12 +274,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "Значение «${label}» должно быть URL";
 
-  static String m103(version) => "Установленная версия: ${version}";
+  static String m103(index) => "Фон ${index}";
 
   static String m104(count) =>
+      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+
+  static String m105(version) => "Установленная версия: ${version}";
+
+  static String m106(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m105(count) =>
+  static String m107(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -383,6 +388,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Нет локальных прокси",
     ),
     "appRegion": MessageLookupByLibrary.simpleMessage("Регион приложения"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Фон"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("Интерфейс"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("Тема"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Добавлять системный DNS",
     ),
@@ -2824,6 +2832,71 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN автоматически направляет весь системный трафик через VpnService.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Размытие"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность карточек",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage(
+      "Выбрать изображение",
+    ),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Сохраните до трёх изображений и настройте фон приложения.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Затемнение"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Настройки изображения",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Использовать свой фон",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage(
+      "Размещение изображения",
+    ),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Вписать"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Заполнить"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Растянуть"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Положение по горизонтали",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "Выберите корректное изображение PNG, JPEG или WebP.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность изображения",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Читаемость"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
+      "Удалить изображение",
+    ),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("Сбросить эффекты"),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage(
+      "Сбросить кадрирование",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось сохранить фон. Прежний фон сохранён.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Масштаб"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG или WebP · до 20 МБ",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage(
+      "Пользовательский фон",
+    ),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Выберите изображение размером до 20 МБ и 50 мегапикселей.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Изображение недоступно",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Положение по вертикали",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Настройка WebDAV",
     ),
@@ -2884,7 +2957,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось открыть браузер.",
     ),
@@ -2926,8 +2999,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

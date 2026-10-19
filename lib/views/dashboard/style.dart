@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/ui/page_background.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 import 'package:material_ui/material_ui.dart';
 
@@ -22,7 +23,10 @@ class DashboardColors {
 
   factory DashboardColors.of(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final card = SurfaceLevel.card.colorOf(colorScheme);
+    final card = PageBackgroundScope.applyCardOpacity(
+      context,
+      SurfaceLevel.card.colorOf(colorScheme),
+    );
     return DashboardColors._(
       page: SurfaceLevel.page.colorOf(colorScheme),
       card: card,

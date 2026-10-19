@@ -113,6 +113,10 @@ class AppPath {
     return join(await profilesPath, '$fileName.yaml');
   }
 
+  Future<String> get wallpapersDirPath async {
+    return join(await homeDirPath, 'wallpapers');
+  }
+
   Future<String> get scriptsDirPath async {
     final path = await homeDirPath;
     return join(path, 'scripts');

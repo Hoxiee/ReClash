@@ -252,11 +252,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m103(version) => "설치된 버전: ${version}";
+  static String m103(index) => "배경 ${index}";
 
-  static String m104(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m104(count) =>
+      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
 
-  static String m105(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m105(version) => "설치된 버전: ${version}";
+
+  static String m106(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m107(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -327,6 +332,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("앱 아이콘 디자인"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("로컬 프록시 없음"),
     "appRegion": MessageLookupByLibrary.simpleMessage("앱 지역"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("배경"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("인터페이스"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("테마"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("시스템 DNS 추가"),
     "applicationSettings": MessageLookupByLibrary.simpleMessage("앱 설정"),
     "authentication": MessageLookupByLibrary.simpleMessage("인증"),
@@ -2280,6 +2288,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN은 VpnService를 통해 모든 시스템 트래픽을 자동으로 라우팅합니다.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("흐림 효과"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("카드 불투명도"),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("이미지 선택"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "최대 3개의 이미지를 저장하고 앱 배경을 조정하세요.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("어둡게"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("이미지 조정"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("사용자 지정 배경 사용"),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("이미지 맞춤"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("맞추기"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("채우기"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("늘이기"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "저장된 배경을 탭하여 적용하거나 새 배경을 추가하세요.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "가로 위치",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("효과 초기화"),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage("구도 초기화"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "배경을 저장하지 못했습니다. 이전 배경은 유지됩니다.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("배율"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG 또는 WebP · 최대 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("사용자 지정 배경"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "20 MB 이하, 5,000만 화소 이하의 이미지를 선택하세요.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "이미지를 사용할 수 없음",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage("세로 위치"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV 구성"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("웹 패널"),
     "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
@@ -2334,7 +2387,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "브라우저를 열지 못했습니다.",
     ),
@@ -2366,8 +2419,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

@@ -282,12 +282,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label} debe ser una URL";
 
-  static String m103(version) => "Versión instalada: ${version}";
+  static String m103(index) => "Fondo ${index}";
 
   static String m104(count) =>
+      "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
+
+  static String m105(version) => "Versión instalada: ${version}";
+
+  static String m106(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m105(count) =>
+  static String m107(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -397,6 +402,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appRegion": MessageLookupByLibrary.simpleMessage(
       "Región de la aplicación",
     ),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Fondo"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("Interfaz"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("Tema"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Añadir DNS del sistema",
     ),
@@ -2890,6 +2898,67 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "La VPN enruta automáticamente todo el tráfico del sistema a través de VpnService.",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Desenfoque"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Opacidad de tarjetas",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Elegir imagen"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Guarda hasta tres imágenes y ajusta el fondo de la aplicación.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Oscurecimiento"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Ajustes de imagen",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Usar fondo personalizado",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Ajuste de imagen"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Ajustar"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Rellenar"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Estirar"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Toca un fondo guardado para usarlo o añade uno nuevo.",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Posición horizontal",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "Elige una imagen PNG, JPEG o WebP válida.",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Encuadre"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Opacidad de imagen",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Legibilidad"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Eliminar imagen"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Restablecer efectos",
+    ),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage(
+      "Restablecer encuadre",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "No se pudo guardar el fondo. Se ha conservado el anterior.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Escala"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG o WebP · hasta 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage(
+      "Fondo personalizado",
+    ),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Elige una imagen de hasta 20 MB y 50 megapíxeles.",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Imagen no disponible",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Posición vertical",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Configuración de WebDAV",
     ),
@@ -2952,7 +3021,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo abrir el navegador.",
     ),
@@ -2992,8 +3061,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

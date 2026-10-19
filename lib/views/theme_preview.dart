@@ -2,6 +2,9 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/wallpaper.dart';
+import 'package:reclash/providers/wallpaper.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -187,6 +190,10 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
         (state) => state.liquidGlass != LiquidGlassMode.none,
       ),
     );
+    final wallpaper = ref.watch(
+      themeSettingProvider.select((theme) => theme.wallpaper),
+    );
+    final image = ref.watch(effectiveWallpaperImageProvider);
     final corner = AppCorner.fit(_phoneWidth);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -212,6 +219,8 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
                   animation: _slideCurve,
                   builder: (_, _) => MiniScreen(
                     colorScheme: colorScheme,
+                    wallpaper: wallpaper,
+                    wallpaperImage: image,
                     floatingBar: floatingBar,
                     liquidGlass: liquidGlass,
                     selected: _selected,
@@ -242,6 +251,8 @@ class MiniScreen extends StatelessWidget {
     required this.colorScheme,
     required this.floatingBar,
     this.liquidGlass = false,
+    this.wallpaper = const WallpaperProps(),
+    this.wallpaperImage,
     this.selected = 0,
     this.previous,
     this.progress = 1,
@@ -253,6 +264,8 @@ class MiniScreen extends StatelessWidget {
 
   final ColorScheme colorScheme;
   final bool floatingBar;
+  final WallpaperProps wallpaper;
+  final ImageProvider? wallpaperImage;
 
   /// Draws a floating bar as glass; a docked one stays a fill, as the app's
   /// does.
@@ -266,8 +279,11 @@ class MiniScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sketch = SizedBox.expand(
-      child: CustomPaint(
+    final sketch = WallpaperBackdrop(
+      image: wallpaperImage,
+      settings: wallpaper,
+      baseColor: SurfaceLevel.page.colorOf(colorScheme),
+      builder: (_, active) => CustomPaint(
         painter: _MiniScreenPainter(
           colorScheme: colorScheme,
           floatingBar: floatingBar,
@@ -276,7 +292,9 @@ class MiniScreen extends StatelessWidget {
           previous: previous,
           progress: progress,
           tabAnimation: tabAnimation,
+          cardOpacity: active ? wallpaper.cardOpacity : 1,
         ),
+        child: const SizedBox.expand(),
       ),
     );
     final onSelect = this.onSelect;
@@ -382,6 +400,7 @@ class _MiniScreenPainter extends CustomPainter {
     required this.previous,
     required this.progress,
     required this.tabAnimation,
+    required this.cardOpacity,
   });
 
   final ColorScheme colorScheme;
@@ -391,6 +410,7 @@ class _MiniScreenPainter extends CustomPainter {
   final int? previous;
   final double progress;
   final TabAnimation tabAnimation;
+  final double cardOpacity;
 
   bool get _glass => floatingBar && liquidGlass;
 
@@ -432,10 +452,6 @@ class _MiniScreenPainter extends CustomPainter {
 
   void _paintPages(Canvas canvas, _MiniGeometry geometry) {
     final size = geometry.size;
-    canvas.drawRect(
-      Offset.zero & size,
-      Paint()..color = SurfaceLevel.page.colorOf(colorScheme),
-    );
     canvas.save();
     canvas.clipRect(Offset.zero & size, doAntiAlias: false);
     final previous = this.previous;
@@ -544,6 +560,7 @@ class _MiniScreenPainter extends CustomPainter {
       colorScheme,
       geometry.unit,
       content,
+      cardOpacity: cardOpacity,
     ).paint(_pageOf(index));
     canvas.restore();
   }
@@ -606,20 +623,28 @@ class _MiniScreenPainter extends CustomPainter {
         oldDelegate.selected != selected ||
         oldDelegate.previous != previous ||
         oldDelegate.progress != progress ||
-        oldDelegate.tabAnimation != tabAnimation;
+        oldDelegate.tabAnimation != tabAnimation ||
+        oldDelegate.cardOpacity != cardOpacity;
   }
 }
 
 /// One page of a [MiniScreen] after the app's own, laid out in units of a
 /// twentieth of the screen's width from the top left of [content].
 class _PageSketch {
-  _PageSketch(this.canvas, this.colorScheme, this.unit, this.content)
-    : width = content.width / unit,
-      card = SurfaceLevel.card.colorOf(colorScheme),
-      inset = SurfaceLevel.inset.colorOf(colorScheme),
-      text = colorScheme.onSurface.withValues(alpha: 0.72),
-      line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-      faint = colorScheme.onSurfaceVariant.withValues(alpha: 0.16);
+  _PageSketch(
+    this.canvas,
+    this.colorScheme,
+    this.unit,
+    this.content, {
+    required double cardOpacity,
+  }) : width = content.width / unit,
+       card = SurfaceLevel.card
+           .colorOf(colorScheme)
+           .withValues(alpha: cardOpacity),
+       inset = SurfaceLevel.inset.colorOf(colorScheme),
+       text = colorScheme.onSurface.withValues(alpha: 0.72),
+       line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+       faint = colorScheme.onSurfaceVariant.withValues(alpha: 0.16);
 
   static const double _gap = 0.6;
 

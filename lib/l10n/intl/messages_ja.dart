@@ -250,11 +250,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m102(label) => "${label}はURLである必要があります";
 
-  static String m103(version) => "インストール済みバージョン: ${version}";
+  static String m103(index) => "背景 ${index}";
 
-  static String m104(count) => "${count} 年前";
+  static String m104(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
 
-  static String m105(count) => "${count} 年前";
+  static String m105(version) => "インストール済みバージョン: ${version}";
+
+  static String m106(count) => "${count} 年前";
+
+  static String m107(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -329,6 +333,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconDesign": MessageLookupByLibrary.simpleMessage("アプリアイコンのデザイン"),
     "appProxiesEmpty": MessageLookupByLibrary.simpleMessage("ローカルプロキシがありません"),
     "appRegion": MessageLookupByLibrary.simpleMessage("アプリの地域"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("背景"),
+    "appearanceInterface": MessageLookupByLibrary.simpleMessage("インターフェース"),
+    "appearanceTheme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
     "applicationSettings": MessageLookupByLibrary.simpleMessage("アプリの設定"),
     "authentication": MessageLookupByLibrary.simpleMessage("認証"),
@@ -2314,6 +2321,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN は VpnService でシステムの全トラフィックを自動的にルーティングします。",
     ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("ぼかし"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("カードの不透明度"),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("画像を選択"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "最大3枚の画像を保存して、アプリの背景を調整できます。",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("暗さ"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("画像の調整"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("カスタム背景を使用"),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("画像の配置"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("全体を表示"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("画面いっぱいに表示"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("引き伸ばし"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "保存済みの背景をタップして適用するか、新しい背景を追加します。",
+    ),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "水平方向の位置",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
+    ),
+    "wallpaperImageLabel": m103,
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
+    "wallpaperLibraryFull": m104,
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("効果をリセット"),
+    "wallpaperResetLayout": MessageLookupByLibrary.simpleMessage("構図をリセット"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "背景を保存できませんでした。元の背景はそのままです。",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("拡大率"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG、JPEG、WebP · 20 MB 以下",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("カスタム背景"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "20 MB 以下、5,000 万画素以下の画像を選択してください。",
+    ),
+    "wallpaperUnavailable": MessageLookupByLibrary.simpleMessage("画像を利用できません"),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "垂直方向の位置",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("ウェブパネル"),
     "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
@@ -2366,7 +2418,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
     ),
-    "webDashboardInstalledVersion": m103,
+    "webDashboardInstalledVersion": m105,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "ブラウザーを開けませんでした。",
     ),
@@ -2398,8 +2450,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m104,
-    "yearsAgoShort": m105,
+    "yearsAgo": m106,
+    "yearsAgoShort": m107,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

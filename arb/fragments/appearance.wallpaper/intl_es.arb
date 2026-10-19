@@ -1,0 +1,48 @@
+{
+  "appearanceTheme": "Tema",
+  "appearanceBackground": "Fondo",
+  "wallpaperTitle": "Fondo personalizado",
+  "wallpaperGalleryHint": "Toca un fondo guardado para usarlo o añade uno nuevo.",
+  "wallpaperChoose": "Elegir imagen",
+  "wallpaperRemove": "Eliminar imagen",
+  "wallpaperEnabled": "Usar fondo personalizado",
+  "wallpaperFit": "Ajuste de imagen",
+  "wallpaperFitCover": "Rellenar",
+  "wallpaperFitContain": "Ajustar",
+  "wallpaperFitFill": "Estirar",
+  "wallpaperScale": "Escala",
+  "wallpaperHorizontalPosition": "Posición horizontal",
+  "wallpaperVerticalPosition": "Posición vertical",
+  "wallpaperOpacity": "Opacidad de imagen",
+  "wallpaperDimming": "Oscurecimiento",
+  "wallpaperBlur": "Desenfoque",
+  "wallpaperCardOpacity": "Opacidad de tarjetas",
+  "wallpaperImageError": "Elige una imagen PNG, JPEG o WebP válida.",
+  "wallpaperTooLarge": "Elige una imagen de hasta 20 MB y 50 megapíxeles.",
+  "wallpaperSaveError": "No se pudo guardar el fondo. Se ha conservado el anterior.",
+  "wallpaperSelectHint": "PNG, JPEG o WebP · hasta 20 MB",
+  "wallpaperLayout": "Encuadre",
+  "wallpaperEffects": "Ajustes de imagen",
+  "wallpaperReadability": "Legibilidad",
+  "wallpaperLibraryFull": "Puedes guardar hasta {count} fondos. Elimina uno para añadir otro.",
+  "appearanceInterface": "Interfaz",
+  "wallpaperDescription": "Guarda hasta tres imágenes y ajusta el fondo de la aplicación.",
+  "wallpaperReset": "Restablecer efectos",
+  "wallpaperResetLayout": "Restablecer encuadre",
+  "wallpaperImageLabel": "Fondo {index}",
+  "wallpaperUnavailable": "Imagen no disponible",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+}

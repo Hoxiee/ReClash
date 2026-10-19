@@ -29,6 +29,13 @@ abstract final class BackupEntries {
 
   static String script(Object id) => 'scripts/$id.js';
 
+  static String wallpaper(String fileName) {
+    if (!isWallpaperFileName(fileName)) {
+      throw const BackupException(BackupFailure.invalid);
+    }
+    return 'wallpapers/$fileName';
+  }
+
   static String provider(ClashProvider provider) =>
       '$providersDirectoryName/$rulesProviderDirectoryName/${provider.fileName}';
 
@@ -37,19 +44,27 @@ abstract final class BackupEntries {
     required Iterable<int> profileIds,
     required Iterable<int> scriptIds,
     required Iterable<ClashProvider> providers,
+    Iterable<String> wallpaperLibrary = const [],
   }) {
     return [
       ...profileIds.map(profile),
       ...scriptIds.map(script),
       ...providers.where((item) => !item.isRemote).map(provider),
+      ...sanitizeWallpaperLibrary(wallpaperLibrary).map(wallpaper),
     ];
   }
 
-  static List<String> ofData(MigrationData data) {
+  static List<String> ofData(
+    MigrationData data, {
+    bool includeWallpapers = true,
+  }) {
     return of(
       profileIds: data.profiles.map((item) => item.id),
       scriptIds: data.scripts.map((item) => item.id),
       providers: data.clashProviders,
+      wallpaperLibrary: includeWallpapers
+          ? wallpaperLibraryOf(data.configMap)
+          : const [],
     );
   }
 
@@ -109,6 +124,11 @@ Future<void> writeBackupArchive({
     await encoder.addFile(File(databaseSnapshotPath), backupDatabaseName);
     for (final entry in entries) {
       final file = File(BackupEntries.resolve(homeDirPath, entry));
+      if (entry.startsWith('wallpapers/') &&
+          await FileSystemEntity.type(file.path, followLinks: false) !=
+              FileSystemEntityType.file) {
+        throw const BackupException(BackupFailure.invalid);
+      }
       if (await file.exists()) {
         await encoder.addFile(file, entry);
       }
@@ -212,10 +232,21 @@ Future<void> _extract(String archivePath, String stagingDirPath) async {
     } on Exception {
       throw const BackupException(BackupFailure.invalid);
     }
+    var wallpaperEntries = 0;
     for (final file in archive.files) {
-      if (!file.isFile) {
+      if (!file.isFile || file.isSymbolicLink) {
         continue;
       }
+      final name = posix.normalize(file.name.replaceAll('\\', '/'));
+      final isWallpaper = name.startsWith('wallpapers/');
+      if (isWallpaper &&
+          (posix.dirname(name) != 'wallpapers' ||
+              !isWallpaperFileName(posix.basename(name)) ||
+              file.size > 32 * 1024 * 1024 ||
+              wallpaperEntries >= maxWallpaperLibrary)) {
+        continue;
+      }
+      if (isWallpaper) wallpaperEntries++;
       final outPath = _stagedEntryPath(stagingDirPath, file.name);
       if (outPath == null) {
         continue;

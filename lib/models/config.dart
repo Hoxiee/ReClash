@@ -488,6 +488,9 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(LiquidGlassMode.none)
     @JsonKey(readValue: _readLiquidGlass)
     LiquidGlassMode liquidGlass,
+    @Default(WallpaperProps())
+    @JsonKey(fromJson: WallpaperProps.safeFromJson)
+    WallpaperProps wallpaper,
     @Default(TextScale()) TextScale textScale,
     // `fontFamily` held the names of a removed enum, which old configs may
     // still carry.

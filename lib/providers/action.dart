@@ -12,6 +12,8 @@ import 'package:reclash/common/update.dart';
 import 'package:reclash/common/web_dashboard/access.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
+import 'package:reclash/common/wallpaper_store.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/database/database.dart';

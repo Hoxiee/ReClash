@@ -1279,6 +1279,52 @@
       }
     }
   },
+  "appearanceTheme": "Thème",
+  "appearanceBackground": "Fond",
+  "wallpaperTitle": "Fond personnalisé",
+  "wallpaperGalleryHint": "Touchez un fond enregistré pour l’utiliser ou ajoutez-en un nouveau.",
+  "wallpaperChoose": "Choisir une image",
+  "wallpaperRemove": "Supprimer l’image",
+  "wallpaperEnabled": "Utiliser un fond personnalisé",
+  "wallpaperFit": "Ajustement de l’image",
+  "wallpaperFitCover": "Remplir",
+  "wallpaperFitContain": "Adapter",
+  "wallpaperFitFill": "Étirer",
+  "wallpaperScale": "Échelle",
+  "wallpaperHorizontalPosition": "Position horizontale",
+  "wallpaperVerticalPosition": "Position verticale",
+  "wallpaperOpacity": "Opacité de l’image",
+  "wallpaperDimming": "Assombrissement",
+  "wallpaperBlur": "Flou",
+  "wallpaperCardOpacity": "Opacité des cartes",
+  "wallpaperImageError": "Choisissez une image PNG, JPEG ou WebP valide.",
+  "wallpaperTooLarge": "Choisissez une image de 20 Mo et 50 mégapixels maximum.",
+  "wallpaperSaveError": "Impossible d’enregistrer le fond. Le précédent a été conservé.",
+  "wallpaperSelectHint": "PNG, JPEG ou WebP · 20 Mo maximum",
+  "wallpaperLayout": "Cadrage",
+  "wallpaperEffects": "Réglages de l’image",
+  "wallpaperReadability": "Lisibilité",
+  "wallpaperLibraryFull": "Vous pouvez conserver jusqu’à {count} fonds. Supprimez-en un pour en ajouter un autre.",
+  "appearanceInterface": "Interface",
+  "wallpaperDescription": "Conservez jusqu’à trois images et ajustez le fond de l’application.",
+  "wallpaperReset": "Réinitialiser les effets",
+  "wallpaperResetLayout": "Réinitialiser le cadrage",
+  "wallpaperImageLabel": "Fond {index}",
+  "wallpaperUnavailable": "Image indisponible",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperImageLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "coreRunning": "En cours d’exécution",
   "coreStarting": "Démarrage…",
   "coreStopped": "Arrêté",

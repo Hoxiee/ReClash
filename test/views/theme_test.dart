@@ -12,6 +12,8 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/font_family.dart';
 import 'package:reclash/views/theme.dart';
+import 'package:reclash/views/wallpaper.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/views/theme_preview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -36,8 +38,13 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  Future<void> pumpThemeView(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1400, 2400);
+  Future<void> pumpThemeView(
+    WidgetTester tester, {
+    bool interface = false,
+    Size size = const Size(1400, 2400),
+  }) async {
+    container.read(viewSizeProvider.notifier).value = size;
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -49,9 +56,59 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    if (interface) {
+      await tester.tap(find.text('Interface'));
+      await tester.pumpAndSettle();
+    }
   }
 
   ThemeProps readTheme() => container.read(themeSettingProvider);
+
+  group('appearance tabs', () {
+    testWidgets('bottom tabs preserve visited page state', (tester) async {
+      await pumpThemeView(tester);
+      expect(find.text('Theme').last, findsOneWidget);
+      await tester.tap(find.text('Background'));
+      await tester.pumpAndSettle();
+      expect(find.byType(WallpaperView), findsOneWidget);
+      await tester.tap(find.text('Interface'));
+      await tester.pumpAndSettle();
+      expect(find.text('Bottom bar'), findsOneWidget);
+      await tester.tap(find.text('Theme').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Light'), findsOneWidget);
+    });
+
+    testWidgets('wallpaper tab fits a phone-width layout', (tester) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      await tester.tap(find.text('Background'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WallpaperView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('search reveal selects the tab and focuses its setting', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            child: SettingsRevealScope(
+              targetId: 'theme.wallpaper.fit',
+              nonce: 1,
+              child: ThemeView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Image fit'), findsOneWidget);
+      expect(find.text('Background'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+  });
 
   group('theme mode', () {
     testWidgets('defaults to following the system', (tester) async {
@@ -248,7 +305,7 @@ void main() {
 
   group('sidebar blur', () {
     testWidgets('stays hidden while the feature is off', (tester) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(find.text('Sidebar blur'), findsNothing);
     });
@@ -258,7 +315,7 @@ void main() {
     ) async {
       feature = const Feature(sidebarBlur: true);
       addTearDown(() => feature = const Feature());
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
       final toggle = find.text('Sidebar blur');
 
       expect(readTheme().sidebarBlur, isTrue);
@@ -278,7 +335,7 @@ void main() {
     testWidgets('is off until a tier is chosen, and switches back', (
       tester,
     ) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
       final group = find.ancestor(
         of: find.text('Liquid Glass').first,
         matching: find.byType(PreviewChoiceGroup<LiquidGlassMode>),
@@ -318,7 +375,7 @@ void main() {
     AppSettingProps readSetting() => container.read(appSettingProvider);
 
     testWidgets('picks a floating or docked bottom bar', (tester) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(readSetting().floatingNavigationBar, isTrue);
 
@@ -332,7 +389,7 @@ void main() {
     });
 
     testWidgets('picks a sliding or fading tab switch', (tester) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(readSetting().tabAnimation, TabAnimation.fade);
 
@@ -348,7 +405,7 @@ void main() {
     testWidgets('the preview switches to the destination tapped', (
       tester,
     ) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
       Finder inPreview(Type type) => find.descendant(
         of: find.byType(ThemeLivePreview),
         matching: find.byType(type),
@@ -398,7 +455,7 @@ void main() {
     testWidgets('picks an installed font on its page and back to default', (
       tester,
     ) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(readTheme().fontFamily, isNull);
       expect(find.text('Default'), findsOneWidget);
@@ -428,7 +485,7 @@ void main() {
         reads++;
         return ['Arrival Sans'];
       };
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       await tester.tap(find.text('Aa').first);
       await tester.pump();
@@ -452,7 +509,7 @@ void main() {
     ) async {
       final families = Completer<List<String>>();
       systemFontFamiliesReader = () => families.future;
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       await tester.tap(find.text('Aa').first);
       await tester.pump();
@@ -473,7 +530,7 @@ void main() {
       container
           .read(themeSettingProvider.notifier)
           .update((state) => state.copyWith(fontFamily: 'Beta Serif'));
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(
         tester.widget<Text>(find.text('Beta Serif')).style?.fontFamily,
@@ -492,7 +549,7 @@ void main() {
         loaded = true;
         return families;
       };
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
       await tester.tap(find.text('Aa').first);
       for (var i = 0; i < 20 && !loaded; i++) {
         await tester.pump(const Duration(milliseconds: 50));
@@ -523,7 +580,7 @@ void main() {
       tester,
     ) async {
       systemFontFamiliesReader = () async => throw const OSError('fc', 1);
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       await openFonts(tester);
 
@@ -535,7 +592,7 @@ void main() {
 
   group('text scale', () {
     testWidgets('follows the system until custom is picked', (tester) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(readTheme().textScale.enable, isFalse);
       expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
@@ -553,7 +610,7 @@ void main() {
     });
 
     testWidgets('writes the scale only when the drag ends', (tester) async {
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
       await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
       final before = readTheme().textScale.scale;
@@ -576,7 +633,7 @@ void main() {
             (state) => state.copyWith.textScale(enable: true, scale: 1.2),
           );
 
-      await pumpThemeView(tester);
+      await pumpThemeView(tester, interface: true);
 
       expect(find.text('120%'), findsOneWidget);
 
