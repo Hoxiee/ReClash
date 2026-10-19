@@ -19,9 +19,9 @@
   --slate: #98a9b8;
   --lilac: #aca4c1;
 
-  --g1: #7d79b0;
-  --g2: #58738f;
-  --g3: #92b1ca;
+  --g1: #6e55f5;
+  --g2: #2f6ff0;
+  --g3: #1fb3f0;
 
   --field-1: #e7e0d8;
   --field-2: var(--oat);
@@ -90,9 +90,9 @@
     --sage: #5b6958;
     --slate: #546575;
     --lilac: #655e7b;
-    --g1: #9a96cb;
-    --g2: #6f90b4;
-    --g3: #a2c4de;
+    --g1: #a78bff;
+    --g2: #5c9dff;
+    --g3: #62d6ff;
     --field-1: #2a2627;
     --feat: #a9bb9f;
     --fix: #9fb3c5;
@@ -122,9 +122,9 @@
   --sage: #5b6958;
   --slate: #546575;
   --lilac: #655e7b;
-  --g1: #9a96cb;
-  --g2: #6f90b4;
-  --g3: #a2c4de;
+  --g1: #a78bff;
+  --g2: #5c9dff;
+  --g3: #62d6ff;
   --field-1: #2a2627;
   --feat: #a9bb9f;
   --fix: #9fb3c5;
@@ -301,18 +301,6 @@ button {
   height: 24px;
   flex: none;
   overflow: visible;
-}
-
-.sig-3 {
-  stroke: var(--g1);
-}
-
-.sig-2 {
-  stroke: var(--g2);
-}
-
-.sig-1 {
-  fill: var(--g3);
 }
 
 .nav-links,
@@ -1609,8 +1597,6 @@ mark {
   flex: none;
   width: 28px;
   height: 28px;
-  /* The artwork starts 4px inside its box; pull it onto the content edge. */
-  margin-left: -4px;
 }
 
 .foot-name,
@@ -1886,13 +1872,13 @@ mark {
 @keyframes signal-in {
   from {
     opacity: 0;
-    transform: translate(-42px, 24px);
+    transform: translate(-16px, -44px);
   }
 }
 
 @keyframes signal-wave {
   40% {
-    transform: translate(14px, -8px);
+    transform: translate(5px, 14px);
   }
 }
 

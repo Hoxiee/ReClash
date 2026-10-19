@@ -49,6 +49,29 @@ void main() {
     }
   });
 
+  test('TV banner is an opaque 320 by 180 launcher tile', () async {
+    final file = File('android/app/src/main/res/mipmap-xhdpi/ic_banner.png');
+    final codec = await ui.instantiateImageCodec(await file.readAsBytes());
+    final frame = await codec.getNextFrame();
+    try {
+      expect((frame.image.width, frame.image.height), (320, 180));
+      final data = await frame.image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
+      expect(data, isNotNull);
+      final pixels = data!.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      expect([
+        for (var index = 3; index < pixels.length; index += 4) pixels[index],
+      ], everyElement(255));
+    } finally {
+      frame.image.dispose();
+      codec.dispose();
+    }
+  });
+
   test('TV adaptive launcher icon stays centered in the safe zone', () {
     final adaptiveIcon = File(
       'android/app/src/main/res/'
@@ -82,8 +105,8 @@ void main() {
       'viewportHeight',
     );
 
-    // Conservative bounds of the current logo, including the curved caps.
-    const logoBounds = ui.Rect.fromLTRB(54, 33, 179, 206.5);
+    // Conservative bounds include the three bars and their curved caps.
+    const logoBounds = ui.Rect.fromLTRB(-144.31, -161.96, 147.21, 159.52);
     final transformedBounds = ui.Rect.fromLTRB(
       (logoBounds.left * scaleX + translateX) / viewportWidth * 108,
       (logoBounds.top * scaleY + translateY) / viewportHeight * 108,

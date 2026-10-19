@@ -1,12 +1,10 @@
 globalThis.ReClashField = (() => {
   'use strict';
 
-  const COS = Math.cos(Math.PI / 6);
-  const SIN = 0.5;
-  // Bar thickness and bar step of the logo glyph, in lane pitches. Odd lanes sit half a step along, which is what
-  // stacks a two-step bar, a one-step bar and a dot into the logo.
-  const THICKNESS = 0.75;
-  const STEP = 1.125;
+  const COS = Math.cos(Math.PI / 9);
+  const SIN = Math.sin(Math.PI / 9);
+  const THICKNESS = 0.614;
+  const STEP = 0.909;
   const PALETTE = [0, 0, 0, 1, 1, 2, 3, 4, 5];
   const HOPS = [1, 1, 2, 2, 2, 3];
   const LENGTHS = [0, 0, 1, 1, 2];
@@ -40,7 +38,8 @@ globalThis.ReClashField = (() => {
 
     function point(lane, cell) {
       const along = (cell + (lane & 1 ? 0.5 : 0)) * step;
-      return [along * COS, lane * gap - along * SIN];
+      const across = lane * gap - height * SIN;
+      return [along * SIN + across * COS, along * COS - across * SIN];
     }
 
     function measure() {
@@ -53,7 +52,7 @@ globalThis.ReClashField = (() => {
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       pitch = clamp(width * 0.044, 30, 62);
       step = pitch * STEP;
-      gap = pitch / COS;
+      gap = pitch;
     }
 
     function chart() {
@@ -65,8 +64,8 @@ globalThis.ReClashField = (() => {
         top: rect.top - margin,
         bottom: rect.bottom + margin,
       }));
-      const cells = Math.ceil(width / (step * COS)) + 1;
-      const count = Math.ceil((height + (width * SIN) / COS) / gap) + 1;
+      const cells = Math.ceil((width * SIN + height * COS) / step) + 1;
+      const count = Math.ceil((width * COS + height * SIN) / gap) + 1;
       lanes = [];
       for (let lane = 0; lane < count; lane++) {
         const open = [];
@@ -150,7 +149,7 @@ globalThis.ReClashField = (() => {
     function act(capsule) {
       const { open } = lanes[capsule.lane];
       let reach = 0;
-      while (reach < 3 && open[capsule.b + reach + 1] && !claimed(capsule.lane, capsule.b + reach + 1, capsule)) reach++;
+      while (reach < 3 && open[Math.ceil(capsule.b) + reach + 1] && !claimed(capsule.lane, capsule.b + reach + 1, capsule)) reach++;
       if (!reach) {
         begin(capsule, 'sink', 0.24);
         return;
@@ -224,23 +223,25 @@ globalThis.ReClashField = (() => {
       let best = null;
       for (let lane = 0; lane + 2 < lanes.length; lane++) {
         const shift = lane & 1;
-        const [top, middle, bottom] = [lanes[lane].open, lanes[lane + 1].open, lanes[lane + 2].open];
-        for (let cell = 0; cell + 2 < top.length; cell++) {
-          const fits =
-            top[cell] && top[cell + 1] && top[cell + 2] && middle[cell + shift] && middle[cell + shift + 1] && bottom[cell + 1];
+        for (let cell = 0; cell + 3 < lanes[lane + 1].open.length; cell++) {
+          const shapes = [
+            { lane, a: cell + 1.25 - shift, b: cell + 2.75 - shift, keep: 1.5, logo: 1 },
+            { lane: lane + 1, a: cell, b: cell + 3, keep: 3, logo: 2 },
+            { lane: lane + 2, a: cell + 1.5 - shift, b: cell + 2.5 - shift, keep: 1, logo: 3 },
+          ];
+          const fits = shapes.every(({ lane, a, b }) => {
+            for (let cell = Math.floor(a); cell <= Math.ceil(b); cell++) {
+              if (!lanes[lane].open[cell]) return false;
+            }
+            return true;
+          });
           if (!fits) continue;
-          const [x, y] = point(lane + 1, cell + shift + 0.5);
+          const [x, y] = point(lane + 1, cell + 1.5);
           const distance = (x - cx) ** 2 + (y - cy) ** 2;
-          if (!best || distance < best.distance) best = { lane, cell, shift, distance };
+          if (!best || distance < best.distance) best = { shapes, distance };
         }
       }
-      if (!best) return [];
-      const { lane, cell, shift } = best;
-      return [
-        { lane, a: cell, b: cell + 2, keep: 2, logo: 1 },
-        { lane: lane + 1, a: cell + shift, b: cell + shift + 1, keep: 1, logo: 2 },
-        { lane: lane + 2, a: cell + 1, b: cell + 1, keep: 0, logo: 3 },
-      ];
+      return best?.shapes || [];
     }
 
     function seed(intro) {

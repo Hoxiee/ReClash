@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/src/icons/ico.dart';
 
@@ -14,6 +16,7 @@ int _u32(Uint8List bytes, int offset) =>
     _u16(bytes, offset) | (_u16(bytes, offset + 2) << 16);
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('writes one directory entry per size, sorted, with correct offsets', () {
     final ico = buildIco([
       IcoEntry(size: 256, png: _png(3, 7)),
@@ -49,5 +52,39 @@ void main() {
     expect(trayIcoSizes.last, 64);
     expect(icoSizes, containsAll(trayIcoSizes));
     expect(icoSizes.last, 256);
+  });
+
+  test('Windows application icons have no background at every size', () async {
+    final bytes = File(
+      'windows/runner/resources/app_icon.ico',
+    ).readAsBytesSync();
+    for (var index = 0; index < _u16(bytes, 4); index++) {
+      final entry = 6 + index * 16;
+      final length = _u32(bytes, entry + 8);
+      final offset = _u32(bytes, entry + 12);
+      final codec = await ui.instantiateImageCodec(
+        bytes.sublist(offset, offset + length),
+      );
+      final frame = await codec.getNextFrame();
+      try {
+        final data = (await frame.image.toByteData())!;
+        final pixels = data.buffer.asUint8List(
+          data.offsetInBytes,
+          data.lengthInBytes,
+        );
+        var alpha = 0;
+        for (var pixel = 3; pixel < pixels.length; pixel += 4) {
+          alpha += pixels[pixel];
+        }
+        expect(
+          alpha,
+          lessThan(pixels.length ~/ 4 * 255 ~/ 2),
+          reason: '${frame.image.width} by ${frame.image.height}',
+        );
+      } finally {
+        frame.image.dispose();
+        codec.dispose();
+      }
+    }
   });
 }

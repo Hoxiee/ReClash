@@ -1,0 +1,37 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  application: About, setup wizard and desktop integrations use the current glyph on the established icon paths; Windows ICOs have no background.
+  mark: Android vectors and normal tray sources retain the shared three-bar mark, with monochrome themed and notification icons.
+  website: Website header, footer and favicon use the same current glyph as application icon generation.
+  television: TV uses a full-bleed 320x180 launcher banner from self-contained vector artwork with an outlined ReClash wordmark.
+watch:
+  - assets_source/images/icon/**
+  - assets/images/icon.png
+  - assets/images/icon.ico
+  - assets/images/tray/**
+  - lib/views/about.dart
+  - lib/views/setup.dart
+  - tool/generate_status_icons.dart
+  - android/app/src/main/AndroidManifest.xml
+  - android/app/src/main/ic_launcher-playstore.png
+  - android/app/src/main/res/drawable/ic_launcher*.xml
+  - android/app/src/main/res/mipmap*/ic_launcher*
+  - android/app/src/main/res/mipmap-xhdpi/ic_banner.png
+  - android/app/src/main/res/values/ic_launcher_background.xml
+  - android/app/src/main/res/values/colors.xml
+  - android/service/src/main/res/drawable/ic*.xml
+  - android/service/src/main/java/com/reclash/service/modules/NotificationModule.kt
+  - linux/runner/my_application.cc
+  - linux/packaging/*/make_config.yaml
+  - windows/runner/resources/app_icon.ico
+  - macos/Runner/Assets.xcassets/AppIcon.appiconset/**
+  - tool/build_site.sh
+  - site/**
+  - test/android_tv_launcher_icon_test.dart
+  - test/tool/fork_identity_test.dart
+  - test/tool/ico_test.dart
+checks:
+  identity: [application, mark, website, television]

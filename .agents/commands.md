@@ -132,22 +132,32 @@ dart run tool/assemble_l10n.dart --check
 
 `arb/intl_<locale>.arb` is generated output. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
 
-Tray and Windows app icons are generated, not hand-edited. `assets_source/images/icon/*.svg` is
-the source of truth; the script needs `rsvg-convert` (librsvg) on `PATH`:
+Application and tray icons are generated from `assets_source/images/icon/`; the
+script requires `rsvg-convert` (librsvg) and ImageMagick 7 (`magick`) on `PATH`:
 
 ```bash
 dart run tool/generate_status_icons.dart
 ```
 
-It writes the tray PNGs with Flutter `2.0x/`–`4.0x/` resolution variants to `assets/images/tray/unix/`,
-multi-size tray `.ico` files to `assets/images/tray/windows/`, and `windows/runner/resources/app_icon.ico`
-from `assets/images/icon.png`. macOS draws its menu bar icon as a template, so it skips the ringed color
-icons, whose logo shrinks to a small glyph once only alpha shows: `status_1` renders the bare logo from
-`assets_source/images/icon/glyph.svg` and `status_4` reuses `status_4.svg`, both recolored to black into
-`assets/images/tray/macos/`; the sources keep their colors. `glyph.svg` is also the geometry of the Android notification drawables
-`android/service/src/main/res/drawable/ic.xml` and `ic_service.xml`; change them together. `pubspec.yaml` declares the three tray directories with `platforms:` so each
-build only bundles the format its tray loads; a new status icon needs a source SVG and an entry in the
-script's `statusIconNames`, nothing in `pubspec.yaml`.
+`glyph.svg` produces the transparent `assets/images/icon.png` used by About,
+the setup wizard, Linux packages and the website, and the background-free
+Windows ICOs. It also
+supplies the monochrome macOS tray icon and Android VectorDrawables for the
+launcher, notifications and Quick Settings. `app.svg` and `app_fullbleed.svg`
+provide backgrounds for Android legacy icons, circular masks, TV and Play Store.
+Android rasters retain density-specific dimensions and lossless WebP; adaptive
+icons have a separate monochrome layer for themed icons. `macos.png` supplies
+the macOS AppIcon sizes.
+
+`tv_banner.svg` produces the opaque 320x180 Android TV banner. Its dark diagonal
+composition uses the shared glyph and outlined Noto Sans Bold lettering, with
+no external images or installed fonts required at render time.
+
+`status_1.svg`–`status_3.svg` represent stopped, running and TUN tray states;
+`status_4.svg` retains the safe-mode icon. The generator writes PNGs with
+`2.0x/`–`4.0x/` variants and multi-size Windows ICOs. macOS uses the black template
+glyph and the safe-mode icon. Tray directories in `pubspec.yaml` remain
+platform-scoped; add new states to `statusIconNames`.
 
 ## Testing
 
@@ -330,8 +340,8 @@ tool/build_site.sh && python3 -m http.server -d build/site
 ```
 
 The page's look is deliberate: low-saturation flat colour, no blur, glow, glass or soft shadow, and motion that follows
-the logo's 30° lattice. `site/assets/field.js` draws the hero's capsules on that lattice with the glyph's own
-proportions, and the slanted wipes, the dot-to-bar marks and the theme transition reuse the same angle. Text that sits
+the logo's parallel bars, tilted 20° from vertical. `site/assets/field.js` draws the hero's capsules on that lattice
+with the glyph's own proportions. Text that sits
 inside the hero has to be listed in `wireField` in `app.js`, or the capsules run behind it.
 
 `.github/workflows/pages.yaml` deploys it after every successful stable tag build and on pushes to `main` that touch the
