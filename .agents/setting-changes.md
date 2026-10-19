@@ -136,6 +136,23 @@ DNS и MTU desktop проходят через `setupPatchProvider` и `setupSta
 а Android-подбор приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается
 только через существующее подтверждение `VpnManager`.
 
+## Web Dashboard
+
+`AppSettingProps.webDashboardFlavor` is read only by Flutter and takes no update, apply or restart path. The two
+installations share one managed `external-ui` root and select `/ui/<flavor>/` in the URL. Switching flavor neither
+reinstalls a panel nor reloads the profile.
+
+Dashboard access is runtime state in `webDashboardAccessProvider`, not an `AppSettingProps` or `PatchClashConfig`
+mutation. Saved external-controller settings and their secret win; otherwise session ownership supplies a temporary
+loopback controller and secret to both `SetupAction._effectivePatchConfig` and `updateParamsProvider`.
+`syncWebDashboardAccess` sends a live update through the setup scheduler without restarting VPN. Closing embedded
+access, ending browser access or exiting removes the overlay and restores the saved values. Explicit controller
+setting changes revoke the overlay rather than reopening what the user closed. Safe Mode never enables it.
+
+`prepareWebDashboard` applies the profile only when the installed managed root differs from the last successful apply.
+Publishing an updated panel under that same root needs no apply; file-serving sees the replacement directly. The
+profile task clears profile-owned `external-ui-url` and `external-ui-name` even when no dashboard is installed.
+
 ## Choosing The Path
 
 For a new or moved setting, answer each question. More than one answer can be yes.

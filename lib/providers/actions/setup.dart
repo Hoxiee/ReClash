@@ -14,6 +14,7 @@ typedef BuiltProfile = ({
   String md5,
   ConfigCounts counts,
   SetupBase? base,
+  String webDashboardDirectory,
 });
 
 class _RunRequest {
@@ -42,6 +43,7 @@ class SetupAction extends _$SetupAction {
   _SetupInputs? _appliedInputs;
   var _pendingForceApply = false;
   var _runIntentRevision = 0;
+  String _appliedWebDashboardDirectory = '';
 
   int get runIntentRevision => _runIntentRevision;
 
@@ -377,6 +379,48 @@ class SetupAction extends _$SetupAction {
     });
   }
 
+  Future<bool> prepareWebDashboard() async {
+    if (ref.read(safeModeProvider) ||
+        ref.read(coreStatusProvider) != CoreStatus.connected ||
+        ref.read(currentProfileIdProvider) == null) {
+      return false;
+    }
+    final directory = await webDashboardServedDirectory(
+      await appPath.homeDirPath,
+    );
+    if (directory.isEmpty) return false;
+    if (_appliedInputs != null && _appliedWebDashboardDirectory == directory) {
+      return true;
+    }
+    return applyProfile(silence: true);
+  }
+
+  Future<void> syncWebDashboardAccess() async {
+    if (!ref.mounted || ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    final message = await _setupScheduler.run(() async {
+      if (!ref.mounted ||
+          ref.read(coreStatusProvider) != CoreStatus.connected) {
+        return '';
+      }
+      return _core.updateConfig(
+        _effectivePatchConfig(
+          ref.read(patchClashConfigProvider),
+        ).toUpdateParams(
+          authentication: ref
+              .read(networkSettingProvider)
+              .authentication
+              .credentials,
+          skipCertVerify: !ref.read(appSettingProvider).checkCertificate,
+        ),
+      );
+    });
+    if (message.isNotEmpty) {
+      throw const WebDashboardException(WebDashboardFailure.apply);
+    }
+  }
+
   void applyProfileDebounce({bool silence = false, bool force = false}) {
     _pendingForceApply |= force;
     debouncer.call(FunctionTag.applyProfile, (silence) {
@@ -496,7 +540,13 @@ class SetupAction extends _$SetupAction {
   }) async {
     final profileId = setupState.profileId;
     if (profileId == null) {
-      return (yaml: '', md5: '', counts: configCountsOf(const {}), base: null);
+      return (
+        yaml: '',
+        md5: '',
+        counts: configCountsOf(const {}),
+        base: null,
+        webDashboardDirectory: '',
+      );
     }
     final defaultUA = globalState.packageInfo.ua;
     final networkSetting = ref.read(
@@ -533,6 +583,9 @@ class SetupAction extends _$SetupAction {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
     final directory = await appPath.profilesPath;
+    final webDashboardDirectory = await webDashboardServedDirectory(
+      await appPath.homeDirPath,
+    );
     final injected = await _resolveInjectedProviders(
       setupState,
       proxyGroups: proxyGroups,
@@ -561,10 +614,17 @@ class SetupAction extends _$SetupAction {
             ? setupState.matchTarget
             : lastMatchTarget(profileBase.base.matchRules),
         safeMode: ref.read(safeModeProvider),
+        webDashboardDirectory: webDashboardDirectory,
       ),
     );
     if (profileBase == null) {
-      return (yaml: res.yaml, md5: res.md5, counts: res.counts, base: null);
+      return (
+        yaml: res.yaml,
+        md5: res.md5,
+        counts: res.counts,
+        base: null,
+        webDashboardDirectory: webDashboardDirectory,
+      );
     }
     final (:base, :path) = profileBase;
     return (
@@ -576,6 +636,7 @@ class SetupAction extends _$SetupAction {
         rules: res.counts.rules + base.rules,
       ),
       base: SetupBase(path: path, overlay: res.yaml),
+      webDashboardDirectory: webDashboardDirectory,
     );
   }
 
@@ -656,6 +717,11 @@ class SetupAction extends _$SetupAction {
         externalController: ExternalControllerStatus.close,
       );
     }
+    patchConfig = webDashboardEffectiveConfig(
+      patchConfig,
+      temporarySecret: ref.read(webDashboardAccessProvider).temporarySecret,
+      safeMode: false,
+    );
     final authorized =
         ref.read(authorizedTunEnableProvider) ==
         TunAuthorizationState.authorized;
@@ -795,11 +861,13 @@ class SetupAction extends _$SetupAction {
     final yamlMd5 = realProfile?.md5 ?? '';
     if (!profileFailed && yamlMd5 == globalState.lastConfigMd5 && !force) {
       _appliedInputs = inputs;
+      _appliedWebDashboardDirectory = realProfile.webDashboardDirectory;
       return _SetupTaskResult.completed;
     }
     // Go answers a config it rejects by running its built-in default, which
     // has no proxies, so until this push succeeds no applied config is known.
     _appliedInputs = null;
+    _appliedWebDashboardDirectory = '';
     globalState.lastConfigMd5 = null;
     globalState.lastConfigCounts = null;
     if (system.isAndroid) {
@@ -839,6 +907,8 @@ class SetupAction extends _$SetupAction {
         }
         rethrow;
       }
+      _appliedWebDashboardDirectory =
+          realProfile?.webDashboardDirectory ?? '';
       globalState.lastConfigMd5 = yamlMd5;
       globalState.lastConfigCounts =
           realProfile?.counts ?? configCountsOf(const {});

@@ -1,0 +1,43 @@
+{
+  "webDashboard": "Veb panel",
+  "webDashboardDesc": "Yadroni boshqarish uchun mahalliy veb panellar",
+  "webDashboardFlavor": "Panel",
+  "webDashboardOpen": "Panelni ochish",
+  "webDashboardOpenInBrowser": "Brauzerda ochish",
+  "webDashboardReload": "Qayta yuklash",
+  "webDashboardInstall": "Panelni oʻrnatish",
+  "webDashboardFiles": "Panel fayllari",
+  "webDashboardNotInstalled": "Oʻrnatilmagan",
+  "webDashboardInstalledVersion": "Oʻrnatilgan versiya: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "Tanlangan panel birinchi ochishda yuklab olinadi. Belgilangan reliz SHA-256 orqali tekshiriladi.",
+  "webDashboardAccessTip": "Kirish mahalliy va autentifikatsiya bilan himoyalangan. Saqlangan tashqi kontroller sozlamalari oʻzgarmaydi. Brauzerda ishni tugatgach, kirishni shu yerda yakunlang.",
+  "webDashboardNoAccess": "Faol panel seansi yoʻq",
+  "webDashboardEmbeddedAccess": "Panel yopilganda kirish tugaydi",
+  "webDashboardBrowserAccess": "Brauzer kirishi yakunlanguncha yoki ReClash yopilguncha faol qoladi",
+  "webDashboardEndAccess": "Panelga kirishni yakunlash",
+  "webDashboardAccessEnded": "Panelga kirish yakunlandi",
+  "webDashboardDownloading": "Panel yuklab olinmoqda",
+  "webDashboardVerifying": "Yuklama tekshirilmoqda",
+  "webDashboardExtracting": "Panel arxivi ochilmoqda",
+  "webDashboardDownloadFailed": "Panelni yuklab boʻlmadi. Qayta urinib koʻring.",
+  "webDashboardChecksumFailed": "Panel nazorat summasi belgilangan relizga mos emas.",
+  "webDashboardArchiveFailed": "Yuklangan fayl yaroqli panel arxivi emas.",
+  "webDashboardTooLarge": "Panel arxivi ruxsat etilgan hajmdan oshdi.",
+  "webDashboardStorageFailed": "Panel fayllarini xavfsiz oʻqish yoki almashtirish imkonsiz.",
+  "webDashboardBusy": "Boshqa panel amali bajarilmoqda.",
+  "webDashboardSafeMode": "Xavfsiz rejimda panelga kirish oʻchirilgan.",
+  "webDashboardNoProfile": "Panelni ochishdan oldin profilni tanlang.",
+  "webDashboardCoreUnavailable": "Yadro tayyor emas.",
+  "webDashboardApplyFailed": "Panel konfiguratsiyasini qoʻllab boʻlmadi.",
+  "webDashboardUnreachable": "Yadro bu panelni taqdim etmayapti.",
+  "webDashboardAuthenticationFailed": "Yadro kirish maʼlumotlarini rad etdi. Panelni qayta oching.",
+  "webDashboardLaunchFailed": "Brauzerni ochib boʻlmadi.",
+  "webDashboardCancelled": "Panel amali bekor qilindi."
+}

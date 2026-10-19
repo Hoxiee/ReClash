@@ -195,6 +195,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     keywords: ['core', 'ядро'],
   );
   page(
+    ToolPage.webDashboard,
+    l.webDashboard,
+    ToolCategory.configuration,
+    AppGlyphs.dashboard,
+    root: false,
+    keywords: ['web panel', 'web dashboard', 'zashboard', 'metacubexd'],
+  );
+  page(
     ToolPage.advanced,
     l.advancedConfig,
     ToolCategory.configuration,

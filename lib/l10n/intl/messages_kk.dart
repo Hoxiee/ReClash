@@ -269,10 +269,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} URL болуы керек";
 
-  static String m100(count) =>
-      "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
+  static String m100(version) => "Орнатылған нұсқа: ${version}";
 
   static String m101(count) =>
+      "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
+
+  static String m102(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2646,13 +2648,105 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV баптаулары",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Веб-панель"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Панельге қолжетімділік тоқтатылды",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "Қолжетімділік жергілікті және аутентификациямен қорғалған. Сақталған сыртқы контроллер параметрлері өзгермейді. Браузерде жұмысты аяқтаған соң қолжетімділікті осы жерден тоқтатыңыз.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Панель конфигурациясын қолдану мүмкін болмады.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "Жүктелген файл жарамды панель мұрағаты емес.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Ядро тіркелгі деректерін қабылдамады. Панельді қайта ашыңыз.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "Браузердің қолжетімділігі тоқтатылғанға немесе ReClash жабылғанға дейін сақталады",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Басқа панель әрекеті орындалуда.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Панель әрекеті тоқтатылды.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "Бақылау сомасы бекітілген шығарылымға сәйкес келмейді.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ядро дайын емес.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Ядроны басқаруға арналған жергілікті веб-панельдер",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Панельді жүктеу мүмкін болмады. Қайталап көріңіз.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Панель жүктелуде",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "Панель жабылғанда қолжетімділік тоқтайды",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Панельге қолжетімділікті тоқтату",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Панель мұрағаты ашылуда",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage(
+      "Панель файлдары",
+    ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Панель"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Панельді орнату",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Браузерді ашу мүмкін болмады.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Белсенді панель сеансы жоқ",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Панельді ашпас бұрын профильді таңдаңыз.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Орнатылмаған",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Панельді ашу"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Браузерде ашу",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Қайта жүктеу"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "Қауіпсіз режимде панельге қолжетімділік өшірулі.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Панель файлдарын қауіпсіз оқу немесе ауыстыру мүмкін болмады.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Панель мұрағаты рұқсат етілген өлшемнен асады.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "Ядро бұл панельді ұсынбайды.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Жүктеу тексерілуде",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ақ тізім режимі"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Жүйеге жазу"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

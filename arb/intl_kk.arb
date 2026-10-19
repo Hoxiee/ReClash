@@ -1322,5 +1322,46 @@
   "toolsUnpin": "Босату",
   "toolsUpdateResources": "Ресурстарды жаңарту",
   "toolsUpdateResourcesConfirm": "Ережелер мен скрипттерді жаңарту конфигурацияны қайта қолдана алады және қосылымдарға әсер етеді. Жалғастырасыз ба?",
-  "applicationSettings": "Қолданба баптаулары"
+  "applicationSettings": "Қолданба баптаулары",
+  "webDashboard": "Веб-панель",
+  "webDashboardDesc": "Ядроны басқаруға арналған жергілікті веб-панельдер",
+  "webDashboardFlavor": "Панель",
+  "webDashboardOpen": "Панельді ашу",
+  "webDashboardOpenInBrowser": "Браузерде ашу",
+  "webDashboardReload": "Қайта жүктеу",
+  "webDashboardInstall": "Панельді орнату",
+  "webDashboardFiles": "Панель файлдары",
+  "webDashboardNotInstalled": "Орнатылмаған",
+  "webDashboardInstalledVersion": "Орнатылған нұсқа: {version}",
+  "webDashboardInstallTip": "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
+  "webDashboardAccessTip": "Қолжетімділік жергілікті және аутентификациямен қорғалған. Сақталған сыртқы контроллер параметрлері өзгермейді. Браузерде жұмысты аяқтаған соң қолжетімділікті осы жерден тоқтатыңыз.",
+  "webDashboardNoAccess": "Белсенді панель сеансы жоқ",
+  "webDashboardEmbeddedAccess": "Панель жабылғанда қолжетімділік тоқтайды",
+  "webDashboardBrowserAccess": "Браузердің қолжетімділігі тоқтатылғанға немесе ReClash жабылғанға дейін сақталады",
+  "webDashboardEndAccess": "Панельге қолжетімділікті тоқтату",
+  "webDashboardAccessEnded": "Панельге қолжетімділік тоқтатылды",
+  "webDashboardDownloading": "Панель жүктелуде",
+  "webDashboardVerifying": "Жүктеу тексерілуде",
+  "webDashboardExtracting": "Панель мұрағаты ашылуда",
+  "webDashboardDownloadFailed": "Панельді жүктеу мүмкін болмады. Қайталап көріңіз.",
+  "webDashboardChecksumFailed": "Бақылау сомасы бекітілген шығарылымға сәйкес келмейді.",
+  "webDashboardArchiveFailed": "Жүктелген файл жарамды панель мұрағаты емес.",
+  "webDashboardTooLarge": "Панель мұрағаты рұқсат етілген өлшемнен асады.",
+  "webDashboardStorageFailed": "Панель файлдарын қауіпсіз оқу немесе ауыстыру мүмкін болмады.",
+  "webDashboardBusy": "Басқа панель әрекеті орындалуда.",
+  "webDashboardSafeMode": "Қауіпсіз режимде панельге қолжетімділік өшірулі.",
+  "webDashboardNoProfile": "Панельді ашпас бұрын профильді таңдаңыз.",
+  "webDashboardCoreUnavailable": "Ядро дайын емес.",
+  "webDashboardApplyFailed": "Панель конфигурациясын қолдану мүмкін болмады.",
+  "webDashboardUnreachable": "Ядро бұл панельді ұсынбайды.",
+  "webDashboardAuthenticationFailed": "Ядро тіркелгі деректерін қабылдамады. Панельді қайта ашыңыз.",
+  "webDashboardLaunchFailed": "Браузерді ашу мүмкін болмады.",
+  "webDashboardCancelled": "Панель әрекеті тоқтатылды.",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

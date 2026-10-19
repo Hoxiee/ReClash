@@ -1,0 +1,43 @@
+{
+  "webDashboard": "웹 패널",
+  "webDashboardDesc": "코어를 관리하는 로컬 웹 패널",
+  "webDashboardFlavor": "패널",
+  "webDashboardOpen": "패널 열기",
+  "webDashboardOpenInBrowser": "브라우저에서 열기",
+  "webDashboardReload": "새로고침",
+  "webDashboardInstall": "패널 설치",
+  "webDashboardFiles": "패널 파일",
+  "webDashboardNotInstalled": "설치되지 않음",
+  "webDashboardInstalledVersion": "설치된 버전: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
+  "webDashboardAccessTip": "접근은 로컬에서 인증됩니다. 저장된 외부 컨트롤러 설정은 변경되지 않습니다. 브라우저 사용을 마치면 여기에서 접근을 종료하세요.",
+  "webDashboardNoAccess": "활성 패널 세션 없음",
+  "webDashboardEmbeddedAccess": "패널을 닫으면 접근이 종료됩니다",
+  "webDashboardBrowserAccess": "브라우저 접근은 종료하거나 ReClash를 종료할 때까지 유지됩니다",
+  "webDashboardEndAccess": "패널 접근 종료",
+  "webDashboardAccessEnded": "패널 접근 종료됨",
+  "webDashboardDownloading": "패널 다운로드 중",
+  "webDashboardVerifying": "다운로드 검증 중",
+  "webDashboardExtracting": "패널 압축 해제 중",
+  "webDashboardDownloadFailed": "패널을 다운로드하지 못했습니다. 다시 시도하세요.",
+  "webDashboardChecksumFailed": "체크섬이 고정된 릴리스와 일치하지 않습니다.",
+  "webDashboardArchiveFailed": "유효한 패널 압축 파일이 아닙니다.",
+  "webDashboardTooLarge": "패널 압축 파일이 허용 크기를 초과합니다.",
+  "webDashboardStorageFailed": "패널 파일을 안전하게 읽거나 교체하지 못했습니다.",
+  "webDashboardBusy": "다른 패널 작업이 진행 중입니다.",
+  "webDashboardSafeMode": "안전 모드에서는 패널 접근이 비활성화됩니다.",
+  "webDashboardNoProfile": "패널을 열기 전에 프로필을 선택하세요.",
+  "webDashboardCoreUnavailable": "코어가 준비되지 않았습니다.",
+  "webDashboardApplyFailed": "패널 설정을 적용하지 못했습니다.",
+  "webDashboardUnreachable": "코어가 이 패널을 제공하지 않습니다.",
+  "webDashboardAuthenticationFailed": "코어가 인증 정보를 거부했습니다. 패널을 다시 여세요.",
+  "webDashboardLaunchFailed": "브라우저를 열지 못했습니다.",
+  "webDashboardCancelled": "패널 작업이 취소되었습니다."
+}

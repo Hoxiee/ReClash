@@ -391,6 +391,27 @@ enum TunOverrideKey with OverrideKey {
   final String path;
 }
 
+enum WebDashboardFlavor { zashboard, metacubexd }
+
+enum WebDashboardPhase { downloading, verifying, extracting }
+
+enum WebDashboardFailure {
+  download,
+  checksum,
+  archive,
+  tooLarge,
+  storage,
+  busy,
+  safeMode,
+  noProfile,
+  coreUnavailable,
+  apply,
+  unreachable,
+  authentication,
+  launch,
+  cancelled,
+}
+
 enum ExternalControllerStatus {
   @JsonValue('')
   close(''),

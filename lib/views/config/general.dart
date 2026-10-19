@@ -6,6 +6,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/user_agents.dart';
+import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/models/tool_route.dart';
@@ -46,6 +47,7 @@ class GeneralSettings {
       page: ToolPage.general,
       title: (l) => l.externalControllerSecret,
     ),
+    webDashboardSetting,
     SettingSpec(
       id: 'general.authentication',
       page: ToolPage.general,
@@ -471,6 +473,7 @@ class GeneralView extends ConsumerWidget {
             .ensureControllerSecret(),
       ),
       if (externalController) const ExternalControllerSecretItem(),
+      const WebDashboardItem(),
       const AuthenticationItem(),
       if (authentication) ...const [
         AuthenticationAccountItem(),

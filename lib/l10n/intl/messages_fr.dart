@@ -276,10 +276,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} doit être une URL";
 
-  static String m100(count) =>
-      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+  static String m100(version) => "Version installée : ${version}";
 
   static String m101(count) =>
+      "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
+
+  static String m102(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2713,6 +2715,100 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Configuration WebDAV",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Interface web"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Accès à l’interface terminé",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "L’accès est local et authentifié. L’ouverture ne modifie pas les réglages enregistrés du contrôleur externe. Terminez l’accès ici après utilisation du navigateur.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible d’appliquer la configuration de l’interface.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "Le téléchargement n’est pas une archive d’interface valide.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Le cœur a refusé les identifiants. Rouvrez l’interface.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "L’accès du navigateur reste actif jusqu’à son arrêt ou la fermeture de ReClash",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Une autre opération est en cours.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Opération annulée.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "La somme de contrôle ne correspond pas à la version fixée.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Le cœur n’est pas prêt.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Interfaces web locales de gestion du cœur",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de télécharger l’interface. Réessayez.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Téléchargement de l’interface",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "L’accès se termine à la fermeture de l’interface",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Terminer l’accès à l’interface",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Extraction de l’interface",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage(
+      "Fichiers de l’interface",
+    ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Interface"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Installer l’interface",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "L’interface sélectionnée est téléchargée à la première ouverture. La version est fixée et vérifiée par SHA-256.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible d’ouvrir le navigateur.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Aucune session d’interface",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Sélectionnez un profil avant d’ouvrir l’interface.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Non installée",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage(
+      "Ouvrir l’interface",
+    ),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Ouvrir dans le navigateur",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Recharger"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "L’accès à l’interface est désactivé en mode sans échec.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire ou remplacer les fichiers en toute sécurité.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "L’archive dépasse la taille autorisée.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "Le cœur ne fournit pas cette interface.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Vérification du téléchargement",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Mode liste blanche"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système",
@@ -2720,8 +2816,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

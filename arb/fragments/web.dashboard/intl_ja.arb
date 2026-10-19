@@ -1,0 +1,43 @@
+{
+  "webDashboard": "ウェブパネル",
+  "webDashboardDesc": "コアを管理するローカルウェブパネル",
+  "webDashboardFlavor": "パネル",
+  "webDashboardOpen": "パネルを開く",
+  "webDashboardOpenInBrowser": "ブラウザーで開く",
+  "webDashboardReload": "再読み込み",
+  "webDashboardInstall": "パネルをインストール",
+  "webDashboardFiles": "パネルのファイル",
+  "webDashboardNotInstalled": "未インストール",
+  "webDashboardInstalledVersion": "インストール済みバージョン: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
+  "webDashboardAccessTip": "アクセスはローカルで認証されます。保存された外部コントローラー設定は変更されません。ブラウザーの使用後はここでアクセスを終了してください。",
+  "webDashboardNoAccess": "パネルのセッションなし",
+  "webDashboardEmbeddedAccess": "パネルを閉じるとアクセスが終了します",
+  "webDashboardBrowserAccess": "ブラウザーのアクセスは終了操作またはReClashの終了まで続きます",
+  "webDashboardEndAccess": "パネルへのアクセスを終了",
+  "webDashboardAccessEnded": "パネルへのアクセスが終了しました",
+  "webDashboardDownloading": "パネルをダウンロード中",
+  "webDashboardVerifying": "ダウンロードを検証中",
+  "webDashboardExtracting": "パネルを展開中",
+  "webDashboardDownloadFailed": "パネルをダウンロードできませんでした。再試行してください。",
+  "webDashboardChecksumFailed": "チェックサムが固定されたリリースと一致しません。",
+  "webDashboardArchiveFailed": "有効なパネルのアーカイブではありません。",
+  "webDashboardTooLarge": "パネルのアーカイブが許容サイズを超えています。",
+  "webDashboardStorageFailed": "パネルのファイルを安全に読み取りまたは置換できませんでした。",
+  "webDashboardBusy": "別のパネル操作が進行中です。",
+  "webDashboardSafeMode": "セーフモードではパネルへのアクセスは無効です。",
+  "webDashboardNoProfile": "パネルを開く前にプロファイルを選択してください。",
+  "webDashboardCoreUnavailable": "コアの準備ができていません。",
+  "webDashboardApplyFailed": "パネルの設定を適用できませんでした。",
+  "webDashboardUnreachable": "コアはこのパネルを提供していません。",
+  "webDashboardAuthenticationFailed": "コアが認証情報を拒否しました。パネルを開き直してください。",
+  "webDashboardLaunchFailed": "ブラウザーを開けませんでした。",
+  "webDashboardCancelled": "パネルの操作をキャンセルしました。"
+}

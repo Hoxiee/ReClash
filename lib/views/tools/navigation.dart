@@ -9,6 +9,7 @@ import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/custom_resources.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/general.dart';
+import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/views/config/rules.dart';
@@ -33,6 +34,7 @@ import 'package:material_ui/material_ui.dart';
 ToolPage? toolPageOf(Widget widget) => switch (widget) {
   ApplicationSettingView() => ToolPage.application,
   GeneralView() => ToolPage.general,
+  WebDashboardView() => ToolPage.webDashboard,
   AdvancedConfigView() => ToolPage.advanced,
   BaseScaffold(body: NetworkListView()) ||
   NetworkListView() => ToolPage.network,
@@ -66,6 +68,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
 Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.application => const ApplicationSettingView(),
   ToolPage.general => const GeneralView(),
+  ToolPage.webDashboard => const WebDashboardView(),
   ToolPage.advanced => const AdvancedConfigView(),
   ToolPage.network => BaseScaffold(
     title: context.appLocalizations.network,

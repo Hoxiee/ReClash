@@ -28,13 +28,15 @@ UpdateParams updateParams(Ref ref) {
   final checkCertificate = ref.watch(
     appSettingProvider.select((state) => state.checkCertificate),
   );
-  return ref.watch(
-    patchClashConfigProvider.select(
-      (state) => state.toUpdateParams(
-        authentication: authentication.credentials,
-        skipCertVerify: !checkCertificate,
-      ),
+  return webDashboardEffectiveConfig(
+    ref.watch(patchClashConfigProvider),
+    temporarySecret: ref.watch(
+      webDashboardAccessProvider.select((state) => state.temporarySecret),
     ),
+    safeMode: ref.watch(safeModeProvider),
+  ).toUpdateParams(
+    authentication: authentication.credentials,
+    skipCertVerify: !checkCertificate,
   );
 }
 

@@ -7,8 +7,10 @@ must:
   protocol: Structured requests and events remain compatible with the shared protocol fixtures.
   source: The ReClash engine fork and pin are changed only after explicit compatibility review.
   controller: Typed controller requests retain validation and delegation behavior.
-watch: ['core/**', '.gitmodules', 'lib/core/**', 'android/service/**', 'plugins/rust_api/**', test/providers/state_derived_test.dart, test/core/controller_test.dart, test/core/protocol_contract_test.dart, test/fixtures/core_info.json, lib/common/http.dart, 'test/models/*override_test.dart', test/models/tun_test.dart, test/providers/custom_state_test.dart]
+  dashboard-controller: Temporary dashboard access never persists controller changes, respects Safe Mode and saved settings, and patches through the existing serialized setup owner without starting Core or VPN.
+watch: ['core/**', '.gitmodules', 'lib/core/**', 'android/service/**', 'plugins/rust_api/**', test/providers/state_derived_test.dart, test/core/controller_test.dart, test/core/protocol_contract_test.dart, test/fixtures/core_info.json, lib/common/http.dart, 'test/models/*override_test.dart', test/models/tun_test.dart, test/providers/custom_state_test.dart, lib/common/web_dashboard/access.dart, lib/common/task.dart, lib/providers/web_dashboard.dart, lib/providers/actions/setup.dart, lib/providers/actions/system.dart, lib/providers/state/system.dart, test/providers/web_dashboard_test.dart, test/providers/setup_action_test.dart, test/providers/system_action_test.dart]
 checks:
   core-contracts: [latest-intent, protocol, controller]
   fork-tests: [source]
+  web-dashboard-access: [dashboard-controller]
 drop: An approved upstream engine supplies all required ReClash hooks.

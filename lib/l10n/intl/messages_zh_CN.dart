@@ -236,9 +236,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label}必须为URL";
 
-  static String m100(count) => "${count} 年前";
+  static String m100(version) => "已安装版本：${version}";
 
   static String m101(count) => "${count} 年前";
+
+  static String m102(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1951,13 +1953,81 @@ class MessageLookup extends MessageLookupByLibrary {
       "VPN 通过 VpnService 自动路由系统所有流量。",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("网页面板"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage("面板访问已终止"),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "访问仅限本机并需要认证。打开面板不会更改已保存的外部控制器设置。使用浏览器结束后，请在此终止访问。",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "无法应用面板配置。",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "下载文件不是有效的面板压缩包。",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "核心拒绝了凭据，请重新打开面板。",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "浏览器访问持续到手动终止或退出 ReClash",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage("另一项面板操作正在进行。"),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage("面板操作已取消。"),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "面板校验和与固定版本不一致。",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "核心尚未就绪。",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage("管理核心的本地网页面板"),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "无法下载面板，请重试。",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage("正在下载面板"),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "关闭面板后终止访问",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage("终止面板访问"),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage("正在解压面板"),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("面板文件"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("面板"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage("安装面板"),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "首次打开时下载所选面板。使用固定版本并进行 SHA-256 校验。",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "无法打开浏览器。",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage("无面板会话"),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "打开面板前请选择配置。",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage("未安装"),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("打开面板"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "在浏览器中打开",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("重新加载"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "安全模式下禁用面板访问。",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "无法安全读取或替换面板文件。",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "面板压缩包超过允许的大小。",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "核心未提供此面板。",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage("正在校验下载"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("写入系统"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

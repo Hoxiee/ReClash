@@ -273,10 +273,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} debe ser una URL";
 
-  static String m100(count) =>
-      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+  static String m100(version) => "Versión instalada: ${version}";
 
   static String m101(count) =>
+      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+
+  static String m102(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2716,6 +2718,98 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Configuración de WebDAV",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Panel web"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Acceso al panel finalizado",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "El acceso es local y autenticado. Abrir el panel no cambia la configuración guardada del controlador externo. Finaliza el acceso aquí cuando termines en el navegador.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo aplicar la configuración del panel.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "La descarga no es un archivo de panel válido.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "El núcleo rechazó las credenciales. Vuelve a abrir el panel.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "El acceso del navegador permanece hasta finalizarlo o salir de ReClash",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Hay otra operación del panel en curso.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Operación del panel cancelada.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "La suma de comprobación no coincide con la versión fijada.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "El núcleo no está listo.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Paneles web locales para administrar el núcleo",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo descargar el panel. Inténtalo de nuevo.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Descargando panel",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "El acceso termina al cerrar el panel",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Finalizar acceso al panel",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Extrayendo panel",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage(
+      "Archivos del panel",
+    ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Instalar panel",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudo abrir el navegador.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Sin sesión de panel",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Selecciona un perfil antes de abrir el panel.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "No instalado",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Abrir panel"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Abrir en el navegador",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Recargar"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "El acceso al panel está desactivado en modo seguro.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "No se pudieron leer o reemplazar de forma segura los archivos del panel.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "El archivo del panel supera el tamaño permitido.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "El núcleo no sirve este panel.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Verificando descarga",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Modo lista blanca"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema",
@@ -2723,8 +2817,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

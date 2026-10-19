@@ -1322,5 +1322,46 @@
   "toolsUnpin": "Berkitmegi aýyr",
   "toolsUpdateResources": "Serişdeleri täzele",
   "toolsUpdateResourcesConfirm": "Düzgünleriň we skriptleriň täzelenmegi konfigurasiýany ýene-de ulanyp, baglanyşyklara täsir edip biler. Dowam edilsinmi?",
-  "applicationSettings": "Programma sazlamalary"
+  "applicationSettings": "Programma sazlamalary",
+  "webDashboard": "Web panel",
+  "webDashboardDesc": "Ýadrony dolandyrmak üçin ýerli web paneller",
+  "webDashboardFlavor": "Panel",
+  "webDashboardOpen": "Paneli aç",
+  "webDashboardOpenInBrowser": "Brauzerde aç",
+  "webDashboardReload": "Täzeden ýükle",
+  "webDashboardInstall": "Paneli gurna",
+  "webDashboardFiles": "Panel faýllary",
+  "webDashboardNotInstalled": "Gurnalmadyk",
+  "webDashboardInstalledVersion": "Gurnalan wersiýa: {version}",
+  "webDashboardInstallTip": "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
+  "webDashboardAccessTip": "Giriş ýerli we tassyklanan. Daşarky kontrolleýjiniň ýazdyrylan sazlamalary üýtgemeýär. Brauzerde iş gutarandan soň girişi şu ýerde tamamlaň.",
+  "webDashboardNoAccess": "Işjeň panel sessiýasy ýok",
+  "webDashboardEmbeddedAccess": "Panel ýapylanda giriş tamamlanýar",
+  "webDashboardBrowserAccess": "Brauzer girişi tamamlanýança ýa-da ReClash ýapylýança dowam edýär",
+  "webDashboardEndAccess": "Panele girişi tamamla",
+  "webDashboardAccessEnded": "Panele giriş tamamlandy",
+  "webDashboardDownloading": "Panel ýüklenýär",
+  "webDashboardVerifying": "Ýükleme barlanýar",
+  "webDashboardExtracting": "Panel arhiwi açylýar",
+  "webDashboardDownloadFailed": "Paneli ýükläp bolmady. Täzeden synanyşyň.",
+  "webDashboardChecksumFailed": "Paneliň barlag jemi bellenen goýberilişe gabat gelenok.",
+  "webDashboardArchiveFailed": "Ýüklenen faýl dogry panel arhiwi däl.",
+  "webDashboardTooLarge": "Panel arhiwi rugsat berlen ölçegden uly.",
+  "webDashboardStorageFailed": "Panel faýllaryny howpsuz okap ýa-da çalşyp bolmady.",
+  "webDashboardBusy": "Başga panel amaly ýerine ýetirilýär.",
+  "webDashboardSafeMode": "Howpsuz tertipde panele giriş öçürilen.",
+  "webDashboardNoProfile": "Paneli açmazdan öň profili saýlaň.",
+  "webDashboardCoreUnavailable": "Ýadro taýýar däl.",
+  "webDashboardApplyFailed": "Paneliň konfigurasiýasyny ulanyp bolmady.",
+  "webDashboardUnreachable": "Ýadro bu paneli hödürlänok.",
+  "webDashboardAuthenticationFailed": "Ýadro giriş maglumatlaryny ret etdi. Paneli täzeden açyň.",
+  "webDashboardLaunchFailed": "Brauzeri açyp bolmady.",
+  "webDashboardCancelled": "Panel amaly ýatyryldy.",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

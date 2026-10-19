@@ -265,10 +265,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "Значение «${label}» должно быть URL";
 
-  static String m100(count) =>
-      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+  static String m100(version) => "Установленная версия: ${version}";
 
   static String m101(count) =>
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+
+  static String m102(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2642,6 +2644,96 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Настройка WebDAV",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Веб-панель"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Доступ к панели завершён",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера. Завершите доступ здесь, когда закончите работу в браузере.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось применить конфигурацию панели.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "Загруженный файл не является корректным архивом панели.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Ядро отклонило секрет доступа. Откройте панель заново.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "Доступ из браузера действует до его завершения здесь или выхода из ReClash",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Уже выполняется другая операция с панелью.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Операция с панелью отменена.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "Контрольная сумма панели не совпадает с закреплённым релизом.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ядро ещё не готово.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Локальные веб-панели управления ядром",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить панель. Повторите попытку.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Загрузка панели",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "Доступ завершится при закрытии панели",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Завершить доступ к панели",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Распаковка панели",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("Файлы панели"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Панель"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Установить панель",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось открыть браузер.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Нет активной сессии панели",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Выберите профиль перед открытием панели.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Не установлена",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Открыть панель"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Открыть в браузере",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "В безопасном режиме доступ к панели отключён.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось безопасно прочитать или заменить файлы панели.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Архив панели превышает допустимый размер.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "Ядро не отдаёт выбранную панель.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Проверка загрузки",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
@@ -2651,8 +2743,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

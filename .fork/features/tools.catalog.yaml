@@ -5,8 +5,9 @@ risk: routine
 must:
   catalog: Tools remain available through the catalog and command providers.
   shortcut-details: Desktop shortcut exports remain nested beneath shortcut management, not a new root Tools destination.
+  dashboard-entry: The web dashboard remains a searchable child of General beside the external controller, never a root Tools destination.
 watch: ['lib/views/tools/**', lib/views/tools.dart, 'lib/providers/tool*', 'lib/models/tools.dart', 'lib/models/tool_route.dart', lib/common/tools_search.dart, lib/pages/home.dart, 'arb/fragments/tools.catalog/**', test/common/tools_search_test.dart, test/providers/tools_test.dart, test/views/tools_catalog_test.dart, test/pages/home_test.dart, test/widgets/tools_workspace_test.dart]
 checks:
-  tools: [catalog, shortcut-details]
+  tools: [catalog, shortcut-details, dashboard-entry]
 deps: [settings.specs]
 drop: Upstream provides the same available commands and required interactions.

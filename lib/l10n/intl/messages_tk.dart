@@ -265,10 +265,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} URL bolmaly";
 
-  static String m100(count) =>
+  static String m100(version) => "Gurnalan wersiýa: ${version}";
+
+  static String m101(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m101(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m102(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2621,13 +2623,101 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV sazlamalary",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Web panel"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Panele giriş tamamlandy",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "Giriş ýerli we tassyklanan. Daşarky kontrolleýjiniň ýazdyrylan sazlamalary üýtgemeýär. Brauzerde iş gutarandan soň girişi şu ýerde tamamlaň.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Paneliň konfigurasiýasyny ulanyp bolmady.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "Ýüklenen faýl dogry panel arhiwi däl.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Ýadro giriş maglumatlaryny ret etdi. Paneli täzeden açyň.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "Brauzer girişi tamamlanýança ýa-da ReClash ýapylýança dowam edýär",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Başga panel amaly ýerine ýetirilýär.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Panel amaly ýatyryldy.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "Paneliň barlag jemi bellenen goýberilişe gabat gelenok.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Ýadro taýýar däl.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Ýadrony dolandyrmak üçin ýerli web paneller",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Paneli ýükläp bolmady. Täzeden synanyşyň.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Panel ýüklenýär",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "Panel ýapylanda giriş tamamlanýar",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Panele girişi tamamla",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Panel arhiwi açylýar",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("Panel faýllary"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage("Paneli gurna"),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Brauzeri açyp bolmady.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Işjeň panel sessiýasy ýok",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Paneli açmazdan öň profili saýlaň.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Gurnalmadyk",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Paneli aç"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Brauzerde aç",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Täzeden ýükle"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "Howpsuz tertipde panele giriş öçürilen.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Panel faýllaryny howpsuz okap ýa-da çalşyp bolmady.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Panel arhiwi rugsat berlen ölçegden uly.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "Ýadro bu paneli hödürlänok.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Ýükleme barlanýar",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Ulgama ýazmak"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

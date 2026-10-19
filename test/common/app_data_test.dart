@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:reclash/common/app_data.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/database/database.dart' as db;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
@@ -39,7 +40,19 @@ void main() {
     addTearDown(() => db.database = previous);
     await expectLater(broken.profilesDao.query().get(), throwsA(anything));
 
+    final dashboard = Directory(join(home.path, webDashboardDirectoryName))
+      ..createSync();
+    File(join(dashboard.path, 'index.html')).writeAsStringSync('dashboard');
+    final work = Directory(join(home.path, webDashboardWorkDirectoryName))
+      ..createSync();
+    File(join(work.path, 'download')).writeAsStringSync('partial');
+    final unrelated = File(join(home.path, 'keep'))..writeAsStringSync('keep');
+
     await clearAppData();
+
+    expect(dashboard.existsSync(), isFalse);
+    expect(work.existsSync(), isFalse);
+    expect(unrelated.readAsStringSync(), 'keep');
 
     expect(await preferences.getVersion(), 0);
     expect(

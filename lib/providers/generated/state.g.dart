@@ -142,7 +142,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'e46998c222b0902ef6a76c25fe83c094a6369036';
+String _$updateParamsHash() => r'f091ce22bbd45e82bc68c0c871bda95e9bcd1556';
 
 @ProviderFor(setupPatch)
 final setupPatchProvider = SetupPatchProvider._();

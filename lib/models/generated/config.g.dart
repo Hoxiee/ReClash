@@ -99,6 +99,13 @@ _AppSettingProps _$AppSettingPropsFromJson(
         ),
       ) ??
       const {},
+  webDashboardFlavor:
+      $enumDecodeNullable(
+        _$WebDashboardFlavorEnumMap,
+        json['webDashboardFlavor'],
+        unknownValue: WebDashboardFlavor.zashboard,
+      ) ??
+      WebDashboardFlavor.zashboard,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -144,6 +151,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'enabledServices': instance.enabledServices,
       'disabledServices': instance.disabledServices,
       'tableColumnWidths': instance.tableColumnWidths,
+      'webDashboardFlavor':
+          _$WebDashboardFlavorEnumMap[instance.webDashboardFlavor]!,
     };
 
 const _$TabAnimationEnumMap = {
@@ -160,6 +169,11 @@ const _$EditorFontSizeEnumMap = {
   EditorFontSize.standard: 'standard',
   EditorFontSize.large: 'large',
   EditorFontSize.extraLarge: 'extraLarge',
+};
+
+const _$WebDashboardFlavorEnumMap = {
+  WebDashboardFlavor.zashboard: 'zashboard',
+  WebDashboardFlavor.metacubexd: 'metacubexd',
 };
 
 const _$DashboardWidgetEnumMap = {

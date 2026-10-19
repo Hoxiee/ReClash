@@ -1,0 +1,57 @@
+v: 1
+kind: feature
+state: active
+risk: critical
+must:
+  storage: Pinned SHA-256 releases are bounded, validated and staged outside the served tree; unsafe archives, cancellation and failed publication preserve the previous installation or retain its recovery copy.
+  panels: Each dashboard has independent managed files and metadata; switching flavor neither downloads another panel nor reapplies the profile.
+  access: Dashboard controller access is runtime-only, loopback and authenticated; saved controller settings win and Safe Mode never opens access.
+  ownership: Embedded access belongs to its page; browser handoff keeps that owner until explicit end or exit; removal ends only owners of the removed panel.
+  failure: Failed apply, probe, launch, cancellation, disposal and stale results cannot retain unsuccessful access or close a newer session; every operation resets progress.
+  navigation: The dashboard remains a searchable child of General beside the external controller, not a root Tools tile; embedded navigation cannot enter Core API or external subframes.
+  interface: Installation, update, delete, cancel and access actions use the app bar; loading, unavailable Core or profile, retry and deletion confirmation remain usable on phone widths.
+  localization: Dashboard messages belong to one web.dashboard ARB fragment in every supported locale.
+watch:
+  - lib/common/web_dashboard/**
+  - lib/common/app_data.dart
+  - lib/common/task.dart
+  - lib/common/l10n_labels.dart
+  - lib/enum/enum.dart
+  - lib/models/config.dart
+  - lib/models/state.dart
+  - lib/models/tool_route.dart
+  - lib/providers/web_dashboard.dart
+  - lib/providers/generated/web_dashboard.g.dart
+  - lib/providers/action.dart
+  - lib/providers/actions/setup.dart
+  - lib/providers/actions/store.dart
+  - lib/providers/actions/system.dart
+  - lib/providers/state.dart
+  - lib/providers/state/system.dart
+  - lib/providers/providers.dart
+  - lib/views/config/general.dart
+  - lib/views/config/web_dashboard.dart
+  - lib/views/config/web_dashboard_page.dart
+  - lib/views/tools/catalog.dart
+  - lib/views/tools/navigation.dart
+  - android/app/src/main/AndroidManifest.xml
+  - android/app/src/main/res/xml/network_security_config.xml
+  - macos/Runner/Info.plist
+  - macos/Flutter/GeneratedPluginRegistrant.swift
+  - arb/fragments/web.dashboard/**
+  - test/common/web_dashboard_test.dart
+  - test/common/app_data_test.dart
+  - test/providers/web_dashboard_test.dart
+  - test/providers/setup_action_test.dart
+  - test/providers/store_action_test.dart
+  - test/providers/system_action_test.dart
+  - test/views/web_dashboard_test.dart
+  - test/views/tools_catalog_test.dart
+checks:
+  web-dashboard-storage: [storage, panels]
+  web-dashboard-access: [panels, access, ownership, failure]
+  web-dashboard-ui: [navigation, interface, failure]
+  localization: [localization]
+  localization-assembly: [localization]
+deps: [core.integration, settings.specs, localization.catalog]
+drop: Remove only when both managed dashboards, safe installation and runtime-owned authenticated access are preserved upstream.

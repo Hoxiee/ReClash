@@ -37,6 +37,9 @@ class StoreAction extends _$StoreAction {
   }
 
   Future handleClear() async {
+    final dashboard = ref.read(webDashboardActionProvider.notifier);
+    await dashboard.endAccess();
+    await dashboard.cancelAndWait();
     debouncer.cancel(FunctionTag.savePreferences);
     final profileIds = ref
         .read(profilesProvider)

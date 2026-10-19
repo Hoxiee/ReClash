@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/dashboard.dart';
+import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
@@ -15,6 +17,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/web_dashboard.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1166,6 +1169,180 @@ void main() {
       addedRules: [],
       script: null,
       overrides: ProfileOverrides(),
+    );
+
+    Future<void> seedDashboard(WebDashboardFlavor flavor) async {
+      final panel = Directory(
+        join(tempDir.path, webDashboardDirectoryName, flavor.name),
+      )..createSync(recursive: true);
+      File(
+        join(panel.path, webDashboardEntryName),
+      ).writeAsStringSync('<html>test</html>');
+      File(join(panel.path, webDashboardManifestName)).writeAsStringSync(
+        '{"panel":"${flavor.name}","version":"fixture","sha256":"${'a' * 64}"}',
+      );
+    }
+
+    test(
+      'dashboard publication reapplies once, then switching or access uses no apply',
+      () async {
+        addTearDown(() => clearWebDashboardFiles(tempDir.path));
+        final profile = Profile.normal(label: 'dashboard');
+        final core = _MockCoreHandlerInterface();
+        when(() => core.getProfileBase(any())).thenAnswer(
+          (_) async => const ProfileBase(config: {}, digest: 'dashboard'),
+        );
+        when(() => core.setupConfig(any())).thenAnswer((_) async => '');
+        when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+        when(
+          () => core.getProxies(),
+        ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
+        when(() => core.getExternalProviders()).thenAnswer((_) async => []);
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(() => TestProfiles([profile])),
+            currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+            setupStateProvider.overrideWith(
+              (_, _) => nullProfileSetupState.copyWith(profileId: profile.id),
+            ),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(SetupAction.new),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+        final setup = scoped.read(setupActionProvider.notifier);
+        expect(await setup.prepareWebDashboard(), isFalse);
+        expect(await setup.applyProfile(force: true), isTrue);
+        verify(() => core.setupConfig(any())).called(1);
+        verify(() => core.getProfileBase(any())).called(1);
+        await seedDashboard(WebDashboardFlavor.zashboard);
+        expect(await setup.prepareWebDashboard(), isTrue);
+        verify(() => core.setupConfig(any())).called(1);
+        verify(() => core.getProfileBase(any())).called(1);
+        await seedDashboard(WebDashboardFlavor.metacubexd);
+        scoped
+            .read(appSettingProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                webDashboardFlavor: WebDashboardFlavor.metacubexd,
+              ),
+            );
+        expect(await setup.prepareWebDashboard(), isTrue);
+        expect(await setup.prepareWebDashboard(), isTrue);
+        verifyNever(() => core.setupConfig(any()));
+        verifyNever(() => core.getProfileBase(any()));
+        final access = scoped.read(webDashboardAccessProvider.notifier);
+        final owner = access.acquire(WebDashboardFlavor.metacubexd);
+        await setup.syncWebDashboardAccess();
+        final params =
+            verify(() => core.updateConfig(captureAny())).captured.single
+                as UpdateParams;
+        expect(params.externalController, ExternalControllerStatus.open);
+        expect(
+          params.secret,
+          scoped.read(webDashboardAccessProvider).temporarySecret,
+        );
+        expect(
+          scoped.read(patchClashConfigProvider).externalController,
+          ExternalControllerStatus.close,
+        );
+        await access.close(owner);
+        verifyNever(() => core.setupConfig(any()));
+      },
+    );
+
+    test(
+      'dashboard live patches queue behind apply and use current access',
+      () async {
+        addTearDown(() => clearWebDashboardFiles(tempDir.path));
+        await seedDashboard(WebDashboardFlavor.zashboard);
+        final profile = Profile.normal(label: 'dashboard');
+        final core = _MockCoreHandlerInterface();
+        final entered = Completer<void>();
+        final applied = Completer<void>();
+        addTearDown(() {
+          if (!applied.isCompleted) applied.complete();
+        });
+        when(() => core.getProfileBase(any())).thenAnswer(
+          (_) async => const ProfileBase(config: {}, digest: 'dashboard'),
+        );
+        when(() => core.setupConfig(any())).thenAnswer((_) async {
+          entered.complete();
+          await applied.future;
+          return '';
+        });
+        when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+        when(
+          () => core.getProxies(),
+        ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
+        when(() => core.getExternalProviders()).thenAnswer((_) async => []);
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(() => TestProfiles([profile])),
+            currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+            setupStateProvider.overrideWith(
+              (_, _) => nullProfileSetupState.copyWith(profileId: profile.id),
+            ),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(SetupAction.new),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+        final setup = scoped.read(setupActionProvider.notifier);
+        final pendingApply = setup.applyProfile(force: true);
+        await entered.future;
+        final access = scoped.read(webDashboardAccessProvider.notifier);
+        final owner = access.acquire(WebDashboardFlavor.zashboard);
+        final pendingSync = setup.syncWebDashboardAccess();
+        await pumpEventQueue();
+        verifyNever(() => core.updateConfig(any()));
+        applied.complete();
+        await Future.wait([pendingApply, pendingSync]);
+        final params =
+            verify(() => core.updateConfig(captureAny())).captured.single
+                as UpdateParams;
+        expect(params.externalController, ExternalControllerStatus.open);
+        expect(
+          params.secret,
+          scoped.read(webDashboardAccessProvider).temporarySecret,
+        );
+        await access.close(owner);
+      },
+    );
+
+    test(
+      'dashboard patch reports Core rejection and skips a disconnected Core',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        when(
+          () => core.updateConfig(any()),
+        ).thenAnswer((_) async => 'rejected');
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(SetupAction.new),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        final setup = scoped.read(setupActionProvider.notifier);
+        await setup.syncWebDashboardAccess();
+        verifyNever(() => core.updateConfig(any()));
+        scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+        await expectLater(
+          setup.syncWebDashboardAccess(),
+          throwsA(
+            isA<WebDashboardException>().having(
+              (e) => e.failure,
+              'failure',
+              WebDashboardFailure.apply,
+            ),
+          ),
+        );
+        verify(() => core.updateConfig(any())).called(1);
+      },
     );
 
     test(

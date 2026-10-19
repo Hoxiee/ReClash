@@ -160,6 +160,35 @@ withholds the Android VPN system proxy declaration because `ProxyInfo` cannot ca
 traffic). Desktop system proxy is deliberately not gated — dropping it would leak traffic direct, so the setting's
 description tells users to supply credentials manually instead.
 
+### Web Dashboard Access
+
+`lib/common/web_dashboard/` owns pinned zashboard and MetaCubeXD releases, SHA-256 verification, archive validation and
+managed storage. Valid installations live in `web-dashboard/<flavor>/`, with a bounded `.reclash-panel.json` manifest
+and a nonempty `index.html`. The profile task serves only this managed root through `external-ui` and clears
+`external-ui-name` and `external-ui-url`; a profile cannot redirect dashboard storage or initiate an automatic download.
+Both dashboards use `/ui/<flavor>/`, so changing flavor neither downloads the other panel nor reapplies the profile.
+
+Downloads and isolate-based verification/extraction use a fresh `.web-dashboard-work/<operation>/` directory outside
+the served tree. Size, entry count, path, link, duplicate and checksum checks precede publication. Directory replacement
+keeps the previous installation until staging succeeds and rolls back on rename failure; if rollback itself fails, the
+work directory retains `previous` for recovery. `StoreAction.handleClear` ends access and awaits cancellation before
+`clearAppData` removes only the two managed dashboard directories.
+
+`WebDashboardAccess` owns runtime session tokens and a temporary secret, never stored controller settings. Saved
+controller settings take precedence; otherwise an active owner opens the loopback controller with a generated secret.
+`SetupAction._effectivePatchConfig` and `updateParamsProvider` share this effective config. `prepareWebDashboard` applies
+only when Core has not received the installed root, and `syncWebDashboardAccess` queues a live patch behind existing
+setup work. Opening a dashboard requires an initialized, connected Core and a selected profile; it never starts Core
+or VPN, and Safe Mode refuses access before install, apply, probe or browser launch.
+
+An embedded Android/macOS page releases its own owner on disposal or load failure. Windows/Linux use an external
+browser; a successful browser launch or handoff retains the same owner until explicit end or application exit.
+Cancellation, failed apply/probe/launch and stale callbacks cannot retain a failed opening or close another session.
+Removing one panel ends only its owners. Controller-setting changes, Core disconnect, profile removal and Safe Mode
+revoke existing access. The Core API probe is authenticated and bounded by a shared deadline, while credentials stay
+in the dashboard URL fragment and never enter request paths or error messages. Embedded navigation stays within the
+selected panel; external main-frame links use the system browser and Core API or external subframe navigation is blocked.
+
 ### Local Trust Boundary
 
 The Windows Helper answers only a connection whose client process runs under the owner SID it was installed for;
