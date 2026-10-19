@@ -61,32 +61,37 @@ Future<BuildReport> buildPlatform(BuildRequest request) async {
     notice: notice,
     harnessInputs: harnessInputs,
   ).build(target);
-  if (!target.hasHelper) {
-    _log.info('Done in ${stopwatch.elapsed}: ${core.primaryOutput}');
-    return _report([core]);
-  }
-
   final coreSha256 = await calcSha256(core.primaryOutput);
-  final helper = await RustBuilder(
-    rootDir: rootDir,
-    config: config,
-    cache: cache,
-    notice: notice,
-    harnessInputs: harnessInputs,
-  ).build(target, coreSha256);
+  BuildExecution? helper;
+  if (target.hasHelper) {
+    helper = await RustBuilder(
+      rootDir: rootDir,
+      config: config,
+      cache: cache,
+      notice: notice,
+      harnessInputs: harnessInputs,
+    ).build(target, coreSha256);
+  }
   final manifestPath = p.join(
     rootDir,
     config.outputDir,
     target.platformDir,
     coreManifestName,
   );
-  writeCoreManifest(path: manifestPath, coreSha256: coreSha256);
-
-  _log.info(
-    'Done in ${stopwatch.elapsed}: ${core.primaryOutput}, '
-    '${helper.primaryOutput}',
+  writeCoreManifest(
+    path: manifestPath,
+    coreSha256: coreSha256,
+    helperSha256: helper == null
+        ? null
+        : await calcSha256(helper.primaryOutput),
+    helperProtocolVersion: target.hasHelper ? '9' : null,
   );
-  return _report([core, helper], extraOutputs: [manifestPath]);
+
+  _log.info('Done in ${stopwatch.elapsed}: ${core.primaryOutput}');
+  return _report(
+    [core, if (helper != null) helper],
+    extraOutputs: [manifestPath],
+  );
 }
 
 BuildReport _report(

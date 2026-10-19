@@ -19,6 +19,11 @@ class CommonAction extends _$CommonAction {
   Future<void> setRunning(bool running) async {
     _pendingToggleRunning = running;
     final requestRevision = ++_toggleRequestRevision;
+    if (!running &&
+        system.isDesktop &&
+        ref.read(coreStatusProvider) == CoreStatus.connecting) {
+      unawaited(ref.read(coreActionProvider.notifier).cancelCoreStart());
+    }
     final setupAction = ref.read(setupActionProvider.notifier);
     final runIntentRevision = setupAction.runIntentRevision;
     await globalState.safeRun(() async {
@@ -26,7 +31,7 @@ class CommonAction extends _$CommonAction {
         if (running && ref.read(coreStatusProvider) != CoreStatus.connected) {
           final started = await ref
               .read(coreActionProvider.notifier)
-              .startCore();
+              .startCore(allowPrompt: true);
           if (!started ||
               requestRevision != _toggleRequestRevision ||
               setupAction.runIntentRevision != runIntentRevision) {
@@ -38,6 +43,7 @@ class CommonAction extends _$CommonAction {
         final applied = await setupAction.setRunning(
           running,
           initialize: initialize,
+          allowPrompt: running,
         );
         if (applied &&
             running &&

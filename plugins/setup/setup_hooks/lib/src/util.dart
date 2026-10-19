@@ -122,16 +122,26 @@ Future<String> calcSha256(String filePath) async {
 
 const coreManifestName = 'manifest.json';
 
-void writeCoreManifest({required String path, required String coreSha256}) {
-  if (!RegExp(r'^[0-9a-f]{64}$').hasMatch(coreSha256)) {
+void writeCoreManifest({
+  required String path,
+  required String coreSha256,
+  String? helperSha256,
+  String? helperProtocolVersion,
+}) {
+  final hashPattern = RegExp(r'^[0-9a-f]{64}$');
+  if (!hashPattern.hasMatch(coreSha256)) {
     throw BuildException('Invalid Core SHA256: $coreSha256');
   }
-
-  final manifest = File(path);
-  final content = '${jsonEncode({'coreSha256': coreSha256})}\n';
-  if (manifest.existsSync() && manifest.readAsStringSync() == content) {
-    return;
+  if (helperSha256 != null && !hashPattern.hasMatch(helperSha256)) {
+    throw BuildException('Invalid Helper SHA256: $helperSha256');
   }
+  if (helperProtocolVersion != null && helperProtocolVersion != '9') {
+    throw BuildException('Invalid Helper protocol: $helperProtocolVersion');
+  }
+  final manifest = File(path);
+  final content =
+      '${jsonEncode({'coreSha256': coreSha256, if (helperSha256 != null) 'helperSha256': helperSha256, if (helperProtocolVersion != null) 'helperProtocolVersion': helperProtocolVersion})}\n';
+  if (manifest.existsSync() && manifest.readAsStringSync() == content) return;
   ensureDir(manifest.parent.path);
   manifest.writeAsStringSync(content, flush: true);
 }

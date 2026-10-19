@@ -47,6 +47,44 @@ void main() {
       }
     });
 
+    test('records final Helper integrity and protocol', () {
+      final directory = Directory.systemTemp.createTempSync('helper_manifest_');
+      final path = '${directory.path}/manifest.json';
+      final coreHash = 'a' * 64;
+      final helperHash = 'b' * 64;
+      try {
+        writeCoreManifest(
+          path: path,
+          coreSha256: coreHash,
+          helperSha256: helperHash,
+          helperProtocolVersion: '9',
+        );
+        expect(
+          File(path).readAsStringSync(),
+          '{"coreSha256":"$coreHash","helperSha256":"$helperHash",'
+          '"helperProtocolVersion":"9"}\n',
+        );
+        expect(
+          () => writeCoreManifest(
+            path: path,
+            coreSha256: coreHash,
+            helperSha256: 'bad',
+          ),
+          throwsA(isA<BuildException>()),
+        );
+        expect(
+          () => writeCoreManifest(
+            path: path,
+            coreSha256: coreHash,
+            helperProtocolVersion: '6',
+          ),
+          throwsA(isA<BuildException>()),
+        );
+      } finally {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
     test('replaces an existing manifest', () {
       final directory = Directory.systemTemp.createTempSync(
         'setup_hooks_manifest_test_',

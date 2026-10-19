@@ -28,7 +28,9 @@ The update path carries these fields:
   `skip-cert-verify`.
 
 On desktop, `updateListeners` rebuilds the TUN from the patched `tun`. Enabling TUN may need authorization first. When
-`requestAdmin` gets it newly granted, `updateConfig` restarts the Core instead of patching it. On Android,
+`requestAdmin` requires a privileged lease handoff, `updateConfig` restarts the Core instead of patching it.
+Only the explicit TUN switch/start/restart grants a system prompt; a debounced setting update does not.
+Registration does not enable TUN until the managed lease is active, and system DNS follows confirmed `tunActive`. On Android,
 `updateListeners` skips TUN, so a `tun` update reaches the VPN only through a restart.
 
 To move a setting onto this path:

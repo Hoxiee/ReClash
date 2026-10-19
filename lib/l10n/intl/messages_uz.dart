@@ -628,11 +628,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ishga tushirish usuli",
     ),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Joylashuv"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Boshqariladigan yuqori huquqli jarayon",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper orqali jarayon",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "Jarayon ichidagi kutubxona",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Imzolangan Helper orqali boshqariladigan jarayon",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("Alohida jarayon"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
@@ -733,6 +739,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "ClashMeta yadrosi asosida qurilgan koʻp platformali proksi ilova. Sodda va oson foydalanish, ochiq kodli, reklamasiz.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "Grafik ruxsat agenti mavjud emas. Uni joriy ish stoli seansida ishga tushiring va qayta urinib ko‘ring.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Ruxsat berish bekor qilindi. TUN ishga tushmadi.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "Ruxsat berilmadi. TUN ishga tushmadi.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN uchun ruxsat kerak. Ruxsat berish uchun ulanishni boshlang yoki TUNni yoqing.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Ruxsat berishni kutish vaqti tugadi. Ulanish tugmasi orqali qayta urinib ko‘ring.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "Ruxsat berilgan Core tekshirilgan ishga tushirishni yakunlay olmadi. Paket va tizim jurnallarini tekshiring.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core yoki Helper yaxlitlik tekshiruvidan o‘tmadi. To‘liq ReClash paketini qayta o‘rnating.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Tizim sozlamalari → Umumiy → Kirish elementlari va kengaytmalar bo‘limida ReClash Helperga ruxsat bering, so‘ng qayta urinib ko‘ring.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper mavjud emas. O‘rnatilgan paket va xizmatni tekshiring, so‘ng qayta urinib ko‘ring.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "Oldingi ruxsat berish yoki Core to‘xtatilishi hali tugamadi. Tugashini kuting va qayta urinib ko‘ring.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN uchun to‘g‘ri imzolangan ReClash ilovasi va Helper kerak. Imzosiz yoki ad-hoc imzoli yig‘ilishga ruxsat berib bo‘lmaydi.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core ishga tushdi, ammo TUN adapteri tayyor emas. TUNdan foydalanishdan oldin Core jurnalini tekshiring.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Manzil"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Manzil GeoIP"),

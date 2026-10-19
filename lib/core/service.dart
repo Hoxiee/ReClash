@@ -10,6 +10,10 @@ import 'desktop/helper_client.dart';
 import 'desktop/launcher.dart';
 import 'desktop/lifecycle.dart';
 import 'desktop/model.dart';
+import 'desktop/privilege.dart';
+import 'desktop/linux_helper.dart';
+import 'desktop/macos_helper.dart';
+import 'desktop/windows_launcher.dart';
 import 'desktop/rpc_client.dart';
 import 'desktop/transport.dart';
 import 'event.dart';
@@ -21,6 +25,7 @@ class CoreService extends CoreHandlerInterface {
 
   final DesktopCoreLifecycleController _lifecycle;
   final CoreRpcChannel _rpcClient;
+  final DesktopPrivilegeCoordinator? _privileges;
   late final StreamSubscription<DesktopCoreFailure> _crashSubscription;
   Future<CoreLifecycleResult>? _closeOperation;
 
@@ -37,19 +42,31 @@ class CoreService extends CoreHandlerInterface {
     final address = system.isWindows ? windowsPipeName : unixSocketPath;
     final directLauncher = DirectCoreLauncher();
 
-    final lifecycle = DesktopCoreLifecycle(
-      transportFactory: () => IpcCoreTransport(address: address),
-      launcherResolver: HelperLauncherResolver(
-        hasHelper: system.hasHelperService && !safeModeBuild,
-        directLauncher: directLauncher,
-        helperLauncher: HelperLauncher(helperClient),
-        helperReady: () => helperClient.readiness(),
+    late final DesktopCoreLifecycle lifecycle;
+    final privileges = DesktopPrivilegeCoordinator(
+      direct: directLauncher,
+      linux: HelperLauncher(helperClient),
+      windows: WindowsLauncherResolver(
+        direct: directLauncher,
+        elevated: WindowsCoreLauncher(),
       ),
-      verifyPeerPid: system.isWindows,
+      macos: MacOSHelperLauncher(),
+      linuxInstaller: LinuxHelperInstaller(),
+      linuxReady: () => helperClient.readiness(logFailure: false),
+      currentOwner: () => switch (lifecycle.state) {
+        DesktopCoreRunning(:final session) => session.owner,
+        _ => null,
+      },
+    );
+    lifecycle = DesktopCoreLifecycle(
+      transportFactory: () => IpcCoreTransport(address: address),
+      launcherResolver: privileges,
+      verifyPeerPid: true,
     );
     return CoreService._(
       lifecycle: lifecycle,
       rpcClient: CoreRpcClient(lifecycle.transport),
+      privileges: privileges,
     );
   }
 
@@ -57,12 +74,19 @@ class CoreService extends CoreHandlerInterface {
   CoreService.forTesting({
     required DesktopCoreLifecycleController lifecycle,
     required CoreRpcChannel rpcClient,
-  }) : this._(lifecycle: lifecycle, rpcClient: rpcClient);
+    DesktopPrivilegeCoordinator? privileges,
+  }) : this._(
+         lifecycle: lifecycle,
+         rpcClient: rpcClient,
+         privileges: privileges,
+       );
 
   CoreService._({
     required DesktopCoreLifecycleController lifecycle,
     required CoreRpcChannel rpcClient,
-  }) : _lifecycle = lifecycle,
+    DesktopPrivilegeCoordinator? privileges,
+  }) : _privileges = privileges,
+       _lifecycle = lifecycle,
        _rpcClient = rpcClient {
     _crashSubscription = _lifecycle.crashEvents.listen((failure) {
       coreEventManager.sendEvent(
@@ -82,6 +106,28 @@ class CoreService extends CoreHandlerInterface {
   };
 
   @override
+  void configurePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) {
+    _privileges?.configure(tunEnabled: tunEnabled, allowPrompt: allowPrompt);
+  }
+
+  @override
+  void revokePrivilegePrompt() => _privileges?.revokePrompt();
+
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async =>
+      await _privileges?.prepare(
+        tunEnabled: tunEnabled,
+        allowPrompt: allowPrompt,
+      ) ??
+      DesktopPrivilegeDecision.notRequired;
+
+  @override
   Future<CoreLifecycleResult> start() => _lifecycle.start();
 
   @override
@@ -92,6 +138,7 @@ class CoreService extends CoreHandlerInterface {
 
   @override
   Future<CoreLifecycleResult> close() {
+    revokePrivilegePrompt();
     return _closeOperation ??= _close();
   }
 

@@ -30,6 +30,14 @@
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		F5131FDD2EF0F1A500A1748D /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = F5131FDC2EF0F1A500A1748D /* LaunchAtLogin */; };
 		F51BB7CB2EF0267400E05D67 /* ReClashCore in Copy Core */ = {isa = PBXBuildFile; fileRef = F51BB7CA2EF0267400E05D67 /* ReClashCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F9A000000000000000000014 = {isa = PBXBuildFile; fileRef = F9A000000000000000000001; };
+		F9A000000000000000000015 = {isa = PBXBuildFile; fileRef = F9A000000000000000000002; };
+		F9A000000000000000000016 = {isa = PBXBuildFile; fileRef = F9A000000000000000000003; };
+		F9A000000000000000000017 = {isa = PBXBuildFile; fileRef = F9A000000000000000000002; };
+		F9A000000000000000000018 = {isa = PBXBuildFile; fileRef = F9A000000000000000000003; };
+		F9A000000000000000000019 = {isa = PBXBuildFile; fileRef = F9A000000000000000000004; };
+		F9A00000000000000000001A = {isa = PBXBuildFile; fileRef = F9A000000000000000000005; };
+		F9A00000000000000000001B = {isa = PBXBuildFile; fileRef = F9A000000000000000000006; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +54,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 33CC111A2044C6BA0003C045;
 			remoteInfo = FLX;
+		};
+		F9A00000000000000000000F = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045;
+			proxyType = 1;
+			remoteGlobalIDString = F9A000000000000000000009;
+			remoteInfo = "ReClash Privileged Helper";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -94,6 +109,13 @@
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		F51BB7CA2EF0267400E05D67 /* ReClashCore */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ReClashCore; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9A000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Runner/PrivilegedHelperBridge.swift; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/HelperPolicy.swift; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Shared/HelperXPC.m; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelper/HelperMain.swift; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelper/HelperCoreOwner.swift; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PrivilegedHelper/CoreSpawn.c; sourceTree = SOURCE_ROOT; };
+		F9A000000000000000000007 = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.reclash.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +135,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F9A00000000000000000000B = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -140,6 +163,7 @@
 			children = (
 				F51BB7CA2EF0267400E05D67 /* ReClashCore */,
 				33FAB671232836740065AC1E /* Runner */,
+				F9A000000000000000000008 /* Privileged Helper */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
 				33CC10EE2044A3C60003C045 /* Products */,
@@ -151,6 +175,7 @@
 			children = (
 				33CC10ED2044A3C60003C045 /* ReClash.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
+				F9A000000000000000000007 /* Privileged Helper */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -191,6 +216,19 @@
 			path = Runner;
 			sourceTree = "<group>";
 		};
+		F9A000000000000000000008 /* Privileged Helper */ = {
+			isa = PBXGroup;
+			children = (
+				F9A000000000000000000001,
+				F9A000000000000000000002,
+				F9A000000000000000000003,
+				F9A000000000000000000004,
+				F9A000000000000000000005,
+				F9A000000000000000000006,
+			);
+			name = "Privileged Helper";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -223,11 +261,13 @@
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				F51BB7CC2EF0268000E05D67 /* Stage Core */,
 				F51BB7C92EF0265000E05D67 /* Copy Core */,
+				F9A00000000000000000000D /* Embed Signed Helper */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
+				F9A00000000000000000000E /* Helper dependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -236,6 +276,21 @@
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* ReClash.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F9A000000000000000000009 /* ReClash Privileged Helper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9A000000000000000000013;
+			buildPhases = (
+				F9A00000000000000000000C /* Prepare Helper Metadata */,
+				F9A00000000000000000000A /* Sources */,
+				F9A00000000000000000000B /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = "ReClash Privileged Helper";
+			productName = com.reclash.helper;
+			productReference = F9A000000000000000000007;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -288,6 +343,7 @@
 				33CC10EC2044A3C60003C045 /* Runner */,
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
+				F9A000000000000000000009 /* ReClash Privileged Helper */,
 			);
 		};
 /* End PBXProject section */
@@ -370,6 +426,30 @@
 			shellPath = /bin/sh;
 			shellScript = "core=\"$SRCROOT/../libclash/macos/ReClashCore\"\nif [ ! -f \"$core\" ]; then\n  echo \"error: $core is missing; the setup build hook produced no Core\"\n  exit 1\nfi\nslices=\"$(lipo -archs \"$core\")\"\nfor arch in $ARCHS; do\n  case \" $slices \" in\n    *\" $arch \"*) ;;\n    *) echo \"error: $core has no $arch slice (has: $slices)\"; exit 1 ;;\n  esac\ndone\nif ! cmp -s \"$core\" \"$BUILT_PRODUCTS_DIR/ReClashCore\"; then\n  cp -f \"$core\" \"$BUILT_PRODUCTS_DIR/ReClashCore\"\nfi\n";
 		};
+		F9A00000000000000000000C /* Prepare Helper Metadata */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			name = "Prepare Helper Metadata";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/ReClashHelperMetadata/info.plist",
+				"$(DERIVED_FILE_DIR)/ReClashHelperMetadata/launchd.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "bash \"$SRCROOT/packaging/helper/prepare_metadata.sh\"";
+		};
+		F9A00000000000000000000D /* Embed Signed Helper */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			name = "Embed Signed Helper";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "bash \"$SRCROOT/packaging/helper/embed_helper.sh\"";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -386,8 +466,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
+				F9A000000000000000000014,
+				F9A000000000000000000015,
+				F9A000000000000000000016,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9A00000000000000000000A = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9A000000000000000000019,
+				F9A00000000000000000001A,
+				F9A00000000000000000001B,
+				F9A000000000000000000017,
+				F9A000000000000000000018,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,6 +499,7 @@
 			target = 33CC111A2044C6BA0003C045 /* Flutter Assemble */;
 			targetProxy = 33CC111F2044C79F0003C045 /* PBXContainerItemProxy */;
 		};
+		F9A00000000000000000000E = {isa = PBXTargetDependency; target = F9A000000000000000000009; targetProxy = F9A00000000000000000000F; };
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -517,7 +613,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
@@ -528,6 +623,9 @@
 					"@executable_path/../Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				ENABLE_HARDENED_RUNTIME = YES;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
 			name = Profile;
@@ -664,6 +762,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.reclash.debug;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				ENABLE_HARDENED_RUNTIME = YES;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -685,6 +786,9 @@
 					"@executable_path/../Frameworks",
 				);
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				ENABLE_HARDENED_RUNTIME = YES;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security);
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -704,6 +808,72 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
+		};
+		F9A000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = ("$(inherited)", "$(SRCROOT)/Shared", "$(SRCROOT)/PrivilegedHelper");
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, "-sectcreate", __TEXT, __info_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/info.plist", "-sectcreate", __TEXT, __launchd_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/launchd.plist");
+				PRODUCT_BUNDLE_IDENTIFIER = com.reclash.debug.helper;
+				PRODUCT_NAME = com.reclash.debug.helper;
+				RECLASH_APP_IDENTIFIER = com.reclash.debug;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F9A000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = ("$(inherited)", "$(SRCROOT)/Shared", "$(SRCROOT)/PrivilegedHelper");
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, "-sectcreate", __TEXT, __info_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/info.plist", "-sectcreate", __TEXT, __launchd_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/launchd.plist");
+				PRODUCT_BUNDLE_IDENTIFIER = com.reclash.helper;
+				PRODUCT_NAME = com.reclash.helper;
+				RECLASH_APP_IDENTIFIER = com.reclash;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F9A000000000000000000012 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = ("$(inherited)", "$(SRCROOT)/Shared", "$(SRCROOT)/PrivilegedHelper");
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_LDFLAGS = ("$(inherited)", "-framework", Security, "-sectcreate", __TEXT, __info_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/info.plist", "-sectcreate", __TEXT, __launchd_plist, "$(DERIVED_FILE_DIR)/ReClashHelperMetadata/launchd.plist");
+				PRODUCT_BUNDLE_IDENTIFIER = com.reclash.helper;
+				PRODUCT_NAME = com.reclash.helper;
+				RECLASH_APP_IDENTIFIER = com.reclash;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Shared/Helper-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Profile;
 		};
 /* End XCBuildConfiguration section */
 
@@ -744,6 +914,16 @@
 				33CC111C2044C6BA0003C045 /* Debug */,
 				33CC111D2044C6BA0003C045 /* Release */,
 				338D0CEB231458BD00FA5F75 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9A000000000000000000013 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9A000000000000000000010,
+				F9A000000000000000000011,
+				F9A000000000000000000012,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -615,11 +615,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Іске қосу тәсілі"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Орналасуы"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Басқарылатын жоғары құқықты процесс",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper арқылы процесс",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "Кірістірілген кітапхана",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Қолтаңбасы бар Helper арқылы басқарылатын процесс",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("Бөлек процесс"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
@@ -720,6 +726,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "ClashMeta негізіндегі көп платформалы прокси клиент. Қарапайым әрі ыңғайлы, ашық код, жарнамасыз.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "Графикалық рұқсат агенті қолжетімсіз. Оны осы жұмыс үстелі сеансында іске қосып, қайталап көріңіз.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Рұқсат беру тоқтатылды. TUN іске қосылмады.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "Рұқсат берілмеді. TUN іске қосылмады.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN үшін рұқсат қажет. Рұқсат беру үшін қосылымды іске қосыңыз немесе TUN режимін қосыңыз.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Рұқсат күту уақыты аяқталды. Қосылым түймесі арқылы қайталап көріңіз.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "Рұқсат берілген Core тексерілген іске қосуды аяқтай алмады. Пакет пен жүйе журналдарын тексеріңіз.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core немесе Helper тұтастық тексеруінен өтпеді. Толық ReClash пакетін қайта орнатыңыз.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Жүйе параметрлері → Жалпы → Кіру элементтері мен кеңейтімдер бөлімінде ReClash Helper қызметіне рұқсат беріп, қайталап көріңіз.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper қолжетімсіз. Орнатылған пакет пен қызметті тексеріп, қайталап көріңіз.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "Алдыңғы рұқсат беру немесе Core тоқтату әлі аяқталмады. Аяқталғанша күтіп, қайталап көріңіз.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN үшін дұрыс қол қойылған ReClash қолданбасы мен Helper қажет. Қолтаңбасыз немесе ad-hoc қолтаңбалы жинаққа рұқсат берілмейді.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core іске қосылды, бірақ TUN адаптері дайын емес. TUN қолданбас бұрын Core журналын тексеріңіз.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Нысан"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Нысан GeoIP"),

@@ -28,6 +28,9 @@ var (
 func handleInitClash(params *InitParams) bool {
 	configMu.Lock()
 	defer configMu.Unlock()
+	if !permittedDesktopHome(params.HomeDir) {
+		return false
+	}
 	sdkVersion.Store(int32(params.Version))
 	constant.SetHomeDir(params.HomeDir)
 	initOwnership(params.HomeDir)

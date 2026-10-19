@@ -24,7 +24,7 @@ func spilledResponseDir() string {
 // elevated Core just made would refuse until the debounced reclaim.
 func makeSpilledResponseDir() (string, error) {
 	dir := spilledResponseDir()
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := makeCoreDirectory(dir, 0o755); err != nil {
 		return "", err
 	}
 	reclaimDirOwnership(dir)
@@ -48,14 +48,14 @@ func writeSpilledResponse(data []byte) (path string, err error) {
 	if err != nil {
 		return "", err
 	}
-	file, err := os.CreateTemp(dir, "*.json")
+	file, err := createCoreTempFile(dir, "*.json")
 	if err != nil {
 		return "", err
 	}
 	path = file.Name()
 	defer func() {
 		if err != nil {
-			_ = os.Remove(path)
+			_ = removeCorePath(path, false)
 		}
 	}()
 	// An elevated Core still answers a host running as the app user.
@@ -80,6 +80,6 @@ func clearSpilledResponses() {
 		return
 	}
 	for _, entry := range entries {
-		_ = os.Remove(filepath.Join(spilledResponseDir(), entry.Name()))
+		_ = removeCorePath(filepath.Join(spilledResponseDir(), entry.Name()), false)
 	}
 }

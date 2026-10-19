@@ -71,7 +71,9 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
           ref.read(coreStatusProvider) == CoreStatus.connecting) {
         return;
       }
-      await ref.read(coreActionProvider.notifier).restartCore();
+      await ref
+          .read(coreActionProvider.notifier)
+          .restartCore(allowPrompt: true);
     } catch (error) {
       if (mounted) {
         context.showNotifier(
@@ -232,6 +234,8 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
     return switch (ref.read(coreHandlerProvider).processOwner) {
       CoreProcessOwner.direct => l10n.coreModeProcess,
       CoreProcessOwner.helper => l10n.coreModeHelper,
+      CoreProcessOwner.windowsElevated => l10n.coreModeElevated,
+      CoreProcessOwner.macosHelper => l10n.coreModePrivilegedHelper,
       null => l10n.unknown,
     };
   }

@@ -490,7 +490,7 @@ final class ShouldPatchSystemDnsProvider
 }
 
 String _$shouldPatchSystemDnsHash() =>
-    r'f74bcdbae504e9528b2e960b8620d097c27f3ca9';
+    r'5f42e120ad31f5896e37e93e963dfb1851c36aeb';
 
 @ProviderFor(sharedState)
 final sharedStateProvider = SharedStateProvider._();

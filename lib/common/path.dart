@@ -85,8 +85,12 @@ class AppPath {
   }
 
   Future<String> get tempFilePath async {
-    final mTempDir = await _tempDir.value;
-    return join(mTempDir.path, 'temp$uniqueId');
+    final directory = system.isDesktop
+        ? await Directory(
+            join(await homeDirPath, 'inputs'),
+          ).create(recursive: true)
+        : await _tempDir.value;
+    return join(directory.path, 'temp$uniqueId');
   }
 
   Future<String> get lockFilePath async {

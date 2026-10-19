@@ -21,6 +21,8 @@ use std::os::windows::fs::OpenOptionsExt;
 use std::os::windows::io::AsRawHandle;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
+#[cfg(target_os = "linux")]
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 use std::{io, thread};
@@ -51,7 +53,9 @@ const CORE_SOCKET_SUFFIX: &str = ".sock";
 const PROTOCOL_VERSION_HEADER: &str = "x-reclash-helper-protocol";
 #[cfg(windows)]
 const PROTOCOL_VERSION: &str = "8";
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
+const PROTOCOL_VERSION: &str = "9";
+#[cfg(not(any(windows, target_os = "linux")))]
 const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
@@ -227,6 +231,12 @@ impl VerifiedCore {
             .parent()
             .ok_or_else(|| Error::other("Core executable has no parent directory"))?
             .to_path_buf();
+        #[cfg(target_os = "linux")]
+        let handle = verify_core_handle(
+            super::linux_install::verify_installed_executable(&path).map_err(Error::other)?,
+            EXPECTED_CORE_SHA256,
+        )?;
+        #[cfg(not(target_os = "linux"))]
         let handle = open_verified_core(&path, EXPECTED_CORE_SHA256)?;
         Ok(Self {
             path,
@@ -242,28 +252,14 @@ impl VerifiedCore {
             .stderr(Stdio::piped())
             .arg(address);
         #[cfg(target_os = "linux")]
-        adopt_core_owner(&mut command)?;
+        super::linux::ensure_core_owner()?;
+        #[cfg(target_os = "linux")]
+        command
+            .env_clear()
+            .env("PATH", "/usr/bin:/bin")
+            .env("LANG", "C.UTF-8");
         command.spawn()
     }
-}
-
-/// The Core hands files back to its real UID only when that differs from its
-/// effective one, so the child needs a setuid Core's split credentials.
-#[cfg(target_os = "linux")]
-fn adopt_core_owner(command: &mut Command) -> Result<(), Error> {
-    use std::os::unix::process::CommandExt;
-
-    let (uid, gid) = super::linux::core_owner()?;
-    // SAFETY: async-signal-safe calls touching only this child, before exec.
-    unsafe {
-        command.pre_exec(move || {
-            if libc::setresgid(gid, 0, 0) != 0 || libc::setresuid(uid, 0, 0) != 0 {
-                return Err(Error::last_os_error());
-            }
-            Ok(())
-        });
-    }
-    Ok(())
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -286,7 +282,16 @@ fn open_core(path: &Path) -> Result<File, Error> {
     options.read(true);
     #[cfg(windows)]
     options.share_mode(FILE_SHARE_READ);
-    options.open(path)
+    #[cfg(target_os = "linux")]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK);
+    }
+    let file = options.open(path)?;
+    if !file.metadata()?.is_file() {
+        return Err(Error::other("Core executable must be a regular file"));
+    }
+    Ok(file)
 }
 
 fn sha256_file(file: &mut File) -> Result<String, Error> {
@@ -305,10 +310,13 @@ fn sha256_file(file: &mut File) -> Result<String, Error> {
 }
 
 fn open_verified_core(path: &Path, expected_sha256: &str) -> Result<File, Error> {
+    verify_core_handle(open_core(path)?, expected_sha256)
+}
+
+fn verify_core_handle(mut core_file: File, expected_sha256: &str) -> Result<File, Error> {
     if expected_sha256.is_empty() {
         return Err(Error::other("expected Core SHA256 is empty"));
     }
-    let mut core_file = open_core(path)?;
     if sha256_file(&mut core_file)? != expected_sha256 {
         return Err(Error::other("Core executable SHA256 mismatch"));
     }
@@ -331,7 +339,10 @@ fn is_allowed_core_address(address: &str) -> bool {
     let Some(digits) = suffix.strip_suffix(CORE_SOCKET_SUFFIX) else {
         return false;
     };
-    !digits.is_empty() && digits.len() <= 10 && digits.bytes().all(|byte| byte.is_ascii_digit())
+    !digits.is_empty()
+        && digits.len() <= 10
+        && digits.bytes().all(|byte| byte.is_ascii_digit())
+        && digits.parse::<u32>().is_ok()
 }
 
 fn is_valid_session_id(value: &str) -> bool {
@@ -352,6 +363,8 @@ fn stop_decision(current: Option<&str>, requested: &str) -> StopDecision {
 static LOGS: Lazy<Mutex<VecDeque<String>>> =
     Lazy::new(|| Mutex::new(VecDeque::with_capacity(LOG_CAPACITY)));
 static MANAGED_CORE: Lazy<Mutex<Option<ManagedCore>>> = Lazy::new(|| Mutex::new(None));
+#[cfg(target_os = "linux")]
+static SHUTTING_DOWN: AtomicBool = AtomicBool::new(false);
 
 fn lock_surviving_poison<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
@@ -362,14 +375,17 @@ fn lock_surviving_poison<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 /// A Core whose app went away exits on its own, and stays a zombie until it is
 /// waited on; without this nothing waits before the next start or stop.
 fn reap_exited_core(session_id: &str) {
+    reap_core_exit(session_id, None);
+}
+
+fn reap_core_exit(session_id: &str, pid: Option<u32>) {
     let deadline = Instant::now() + CORE_EXIT_TIMEOUT;
     loop {
         {
             let mut managed = lock_surviving_poison(&MANAGED_CORE);
-            let Some(core) = managed
-                .as_mut()
-                .filter(|core| core.session_id == session_id)
-            else {
+            let Some(core) = managed.as_mut().filter(|core| {
+                core.session_id == session_id && pid.is_none_or(|pid| core.child.id() == pid)
+            }) else {
                 return;
             };
             match core.child.try_wait() {
@@ -454,10 +470,47 @@ fn start(start_params: StartParams) -> warp::reply::Response {
     launch(start_params)
 }
 
-/// Releases the managed Core before anything else, so a request reaching this
-/// point must already be accepted: a rejected one has to leave it running.
+/// A pre-spawn fallback is safe only after any previously owned Core has exited.
 fn launch(start_params: StartParams) -> warp::reply::Response {
     let mut managed = lock_surviving_poison(&MANAGED_CORE);
+    #[cfg(target_os = "linux")]
+    {
+        if SHUTTING_DOWN.load(Ordering::Acquire) {
+            return error_response(
+                "coreStopFailed",
+                "Helper is shutting down",
+                StatusCode::CONFLICT,
+            );
+        }
+        if let Some(core) = managed.as_mut() {
+            match core.child.try_wait() {
+                Ok(Some(_)) => *managed = None,
+                Err(error) => {
+                    return error_response(
+                        "coreStopFailed",
+                        error.to_string(),
+                        StatusCode::CONFLICT,
+                    )
+                }
+                Ok(None) => {
+                    if core.session_id == start_params.session_id {
+                        return json_response(
+                            &StartResponse {
+                                session_id: core.session_id.clone(),
+                                pid: core.child.id(),
+                            },
+                            StatusCode::OK,
+                        );
+                    }
+                    return error_response(
+                        "coreStopFailed",
+                        "another active session owns the Core",
+                        StatusCode::CONFLICT,
+                    );
+                }
+            }
+        }
+    }
     if let Err(error) = release_managed_core(&mut managed) {
         log_message(format!(
             "Helper could not release the managed Core: {error}"
@@ -496,7 +549,7 @@ fn launch(start_params: StartParams) -> warp::reply::Response {
                             }
                         }
                     }
-                    reap_exited_core(&session_id);
+                    reap_core_exit(&session_id, Some(process_id));
                 });
             }
             *managed = match ManagedCore::adopt(start_params.session_id.clone(), child) {
@@ -624,6 +677,9 @@ fn ping_core_sha256_mismatch() -> warp::reply::Response {
 }
 
 fn probe_helper_path() -> Result<PathBuf, Error> {
+    #[cfg(target_os = "linux")]
+    super::linux_install::verify_installed_executable(&core_path()?).map_err(Error::other)?;
+    #[cfg(not(target_os = "linux"))]
     open_core(&core_path()?)?;
     std::env::current_exe()
 }
@@ -821,6 +877,19 @@ pub(super) fn ensure_core_sha256_configured() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "linux")]
+pub(super) fn begin_shutdown() {
+    let _managed = lock_surviving_poison(&MANAGED_CORE);
+    SHUTTING_DOWN.store(true, Ordering::Release);
+}
+
+#[cfg(target_os = "linux")]
+pub(super) fn release_managed_core_on_shutdown_confirmed() -> Result<(), Error> {
+    let mut managed = lock_surviving_poison(&MANAGED_CORE);
+    release_managed_core(&mut managed)
+}
+
+#[cfg(not(target_os = "linux"))]
 pub(super) fn release_managed_core_on_shutdown() {
     let mut managed = lock_surviving_poison(&MANAGED_CORE);
     if let Err(error) = release_managed_core(&mut managed) {
@@ -920,7 +989,16 @@ mod tests {
 
     #[test]
     fn protocol_uses_lowercase_session_ownership() {
-        assert_eq!(PROTOCOL_VERSION, if cfg!(windows) { "8" } else { "6" });
+        assert_eq!(
+            PROTOCOL_VERSION,
+            if cfg!(windows) {
+                "8"
+            } else if cfg!(target_os = "linux") {
+                "9"
+            } else {
+                "6"
+            }
+        );
         assert!(is_valid_session_id("0123456789abcdef0123456789abcdef"));
         assert!(!is_valid_session_id("ABCDEF0123456789abcdef0123456789"));
         assert!(!is_valid_session_id("0123456789abcdef"));
@@ -1127,6 +1205,7 @@ mod tests {
             .unwrap(),
         );
 
+        reap_exited_core("fedcba9876543210fedcba9876543210");
         let response = launch(StartParams {
             address: ALLOWED_CORE_ADDRESS.to_string(),
             session_id: "0123456789abcdef0123456789abcdef".to_string(),
@@ -1141,6 +1220,49 @@ mod tests {
         )
         .unwrap();
         assert_eq!(body["code"], "coreVerificationFailed");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    #[allow(clippy::await_holding_lock)]
+    async fn another_session_cannot_replace_the_active_linux_core() {
+        let _state = lock_process_state();
+        let session_id = "0123456789abcdef0123456789abcdef";
+        adopt_core(session_id);
+        let pid = lock_surviving_poison(&MANAGED_CORE)
+            .as_ref()
+            .unwrap()
+            .child
+            .id();
+        let response = launch(StartParams {
+            address: ALLOWED_CORE_ADDRESS.to_string(),
+            session_id: "fedcba9876543210fedcba9876543210".to_string(),
+        });
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        let body: serde_json::Value = serde_json::from_slice(
+            &warp::hyper::body::to_bytes(response.into_body())
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(body["code"], "coreStopFailed");
+        let mut managed = lock_surviving_poison(&MANAGED_CORE);
+        assert_eq!(managed.as_ref().unwrap().child.id(), pid);
+        release_managed_core(&mut managed).unwrap();
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn linux_shutdown_blocks_core_replacement() {
+        let _state = lock_process_state();
+        begin_shutdown();
+        let response = launch(StartParams {
+            address: ALLOWED_CORE_ADDRESS.to_string(),
+            session_id: "0123456789abcdef0123456789abcdef".to_string(),
+        });
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+        assert!(lock_surviving_poison(&MANAGED_CORE).is_none());
+        SHUTTING_DOWN.store(false, Ordering::Release);
     }
 
     #[test]

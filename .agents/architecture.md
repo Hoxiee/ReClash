@@ -1738,97 +1738,42 @@ returns the JSON the script produced. Nothing about the script runs in Dart.
   nullish coalescing, `Object.fromEntries`, named capture groups and lookbehind in one pass. Keep it first-party and
   free of external URLs — vendoring somebody's published script here carries their attribution and their links.
 
-## Rust Helper Service
+## Desktop Privileged Core
 
-`services/helper/` is the privileged helper that starts the core elevated so TUN works. It ships on Windows and Linux
-and is built by the setup build hook alongside the Core, which always compiles the Helper in Rust release mode
-after calculating the SHA256 of the Core produced for the active Flutter configuration.
+`DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without
+privileges. TUN enable, an explicit start/restart, and the connection wizard may grant one authorization attempt;
+bootstrap, recovery and Safe Mode never raise a system prompt. Registration/readiness, an active privileged lease and
+`CoreInfo.tunActive` are separate. System DNS follows applied TUN, not merely the saved switch or authorization.
+Cancellation revokes pending grants; a late launch is stopped, and an unconfirmed exit prevents replacement.
 
-The helper owns its Windows Service Control Manager lifecycle through two elevated commands:
+Linux builds `services/helper/` beside Core with the final Core SHA256 embedded. Protocol `9` uses a per-owner systemd
+`Type=notify` unit with `User`, `Group`, `NoNewPrivileges` and only `CAP_NET_ADMIN`/`CAP_NET_RAW`. Helper and Core never
+run as root. Core clears ambient capabilities on every Go thread before processing requests. The private runtime is
+`/run/reclash-helper-<uid>` (0700), the socket is `helper.sock` (0600), and each peer must have the owner UID.
+`pkexec --disable-internal-agent` installs the verified pair into
+`/var/lib/reclash-helper/<uid>/bundles/<coreSha256>-<helperSha256>` under an installer lock, with rollback and scoped
+inactive-bundle pruning. AppImage uses the same stable bundle. Cancellation is final; there is no sudo/password or
+setuid fallback, and a host without systemd reports the Helper unavailable.
 
-- `ReClashHelperService.exe install --owner-pid <pid>` reads the account of that process (the app, which Dart names with
-  its own PID because the elevated installer may be another administrator), stops and removes any stale registration,
-  creates the auto-start service for the current executable path with `--owner-sid <SID>` as its launch argument,
-  starts it, and waits for the running state. A service started without an owner exits instead of serving anyone.
-- `ReClashHelperService.exe uninstall` stops the service, waits for shutdown, removes its registration, and is also used
-  by the Windows package uninstaller.
+Linux Helper accepts bounded, same-owner `/ping`, `/start`, `/stop` and `/logs` requests, rejects browser origins and
+non-local hosts, and checks the current hash/protocol. Start and stop use a 32-character lowercase-hex session ID.
+A successful stop confirms the child exited; failure retains the child and prevents replacement or direct fallback.
 
-The Dart layer only launches the helper's `install` command through `ShellExecuteW`; it does not compose `sc.exe`,
-`taskkill`, or `cmd.exe` command lines.
+Windows uses managed `ShellExecuteExW` UAC launch, not a runtime SCM service. A verified fixed Core image and a local
+first-instance bootstrap pipe bind PID, creation time, session and elevated token identity, including alternate-admin
+UAC. Temporary DACL grants are restored, and Core joins a kill-on-job-close job before readiness. A cancelled or late
+UAC result cannot become the active lease. Installed-product maintenance alone may gracefully terminate a verified
+installed runner through `SystemExitCoordinator` and remove its matching old Helper service.
 
-Linux takes the same shape with systemd in place of the Service Control Manager, and the same install timing: nothing
-is registered at package install, and `Linux.registerService` asks for elevation only when TUN authorization needs it.
-Elevation goes through `pkexec` so polkit raises the system prompt. When pkexec is missing, or exits 127 because no
-polkit agent runs (common under tiling window managers), it falls back to `sudo`: cached credentials first, then a
-password the app asks for and hands to `sudo -S` on stdin. A 126 means the user dismissed the polkit dialog and is final.
+macOS preserves deployment target 12: signed Helper registration uses `SMAppService.daemon` on 13+ and `SMJobBless` on
+12. Public low-level XPC identity validation binds the caller and fixed signed Core. Registration requiring Settings
+approval is not readiness. A root managed Core is the current backend; it receives a socketpair bootstrap and retains
+the authenticated owner's real UID/GID for generated-file ownership. Its sandbox denies execution/fork outside the
+fixed launch and confines data reads/writes, with only required system resources admitted. There is no setuid or
+osascript fallback; unsigned/ad-hoc builds fail closed for this backend.
 
-- `ReClashHelperService install`, run through `LinuxElevation` (`lib/common/linux_elevation.dart`), writes
-  `/etc/systemd/system/reclash-helper.service` for the current executable path and enables and restarts it. It reads
-  `PKEXEC_UID`/`SUDO_UID` to learn who asked, and refuses to install without one — there would be no account to grant
-  the socket to. It also refuses a Helper whose binary or directory is not root-owned and non-writable (a unit runs it
-  as root at every boot, so an unpacked bundle would be a standing escalation), and refuses to replace a unit already
-  installed for a different UID rather than restart the service out from under that account.
-- That ownership check is why the `flutter_distributor` fork normalizes the packaging tree to 0755/0644 before
-  `dpkg-deb`, `rpmbuild` and `appimagetool` run: they record modes verbatim, and Ubuntu's per-user default umask
-  of 002 would otherwise ship `/opt/ReClash` as 0775, which the installer rejects as group-writable.
-- The rpm spec sets `debug_package` and `__os_install_post` to nil for the same reason: rpmbuild's find-debuginfo and
-  brp-strip rewrite `ReClashCore`, and a Core whose SHA256 no longer matches the Helper's embedded value is refused at
-  `/start`, which silently degrades every launch to the direct Core.
-- `ReClashHelperService uninstall` disables the unit, removes it and reloads systemd.
-- The unit carries `Group=` (the owner's primary GID), `RuntimeDirectory=reclash`, the owner's UID/GID in
-  `RECLASH_HELPER_OWNER_UID`/`_GID`, a double-quoted `ExecStart=` with `%` escaped, and `Restart=on-failure` under a
-  start limit so a broken unit ends up failed instead of restarting forever. The helper serves
-  `/run/reclash/helper.sock` at mode `0660`, additionally drops any connection whose `SO_PEERCRED` UID is not the
-  owner's, logs and retries an `accept` failure instead of letting hyper end the server, and handles SIGTERM so
-  `systemctl stop` still runs its own Core teardown.
-- `/start` additionally requires the Core address to be a socket owned by the owner UID before spawning, since the
-  Core connects to it as root.
-- The Core is spawned with the owner's real UID and an effective UID of 0, which is what a setuid Core would have had.
-  It is the signal `core/ownership_unix.go` uses to hand the files it created back to the user; without it a root
-  service would leave a root-owned config tree in the owner's home.
-- An AppImage has neither a stable executable path nor a writable Core, and its FUSE mount is `nosuid`, so
-  `system.isAppImage` reports TUN authorization as unavailable instead of prompting for a password that cannot help.
-- A Linux host without systemd (`/run/systemd/system` absent) has no Helper: `system.hasHelperService` is false there,
-  readiness is the `stat` check, and the same elevation sets the setuid bit on the bundled Core as before.
-
-A setuid Core is a root process for whoever gives it an address to dial (`argv[1]`), so its mode never lets others
-execute it: macOS runs `chown root:admin` and `chmod 4750` (and refuses an account outside the `admin` group, which
-could not run the result), and a Linux host without systemd hands it to the primary group of the user that
-`PKEXEC_UID` or `SUDO_UID` names. `System.isPrivilegedStatOutput` reads a Core that others can execute as unauthorized, so one that an earlier
-version marked `+sx` is re-authorized on the next TUN enable.
-
-In every Flutter build mode `/start` opens the fixed Core executable beside the Helper without write/delete sharing,
-validates it against the SHA256 embedded only in the Helper, and keeps that handle open through process creation.
-`/ping` only compares the requested `coreSha256` with the Helper's embedded value and checks the fixed Core path exists;
-it never hashes the Core. Protocol version 6 (8 on Windows, where the owner check and the browser-origin check arrived
-and an older Helper must be reinstalled) uses 32-character lowercase-hex session ownership:
-
-- `GET /ping?coreSha256=...` returns the current Helper executable path with `x-reclash-helper-protocol` when the
-  requested SHA matches.
-- `POST /start` rejects unknown JSON fields and validates `{address, sessionId}` and, on Linux, the socket owner, which
-  leaves a running Core alone. It then releases any previously managed Core before verifying the Core — so every
-  outcome of a request that passed validation, including a rejected one, leaves the Helper owning no Core — and returns
-  `{sessionId, pid}`.
-- `POST /stop` validates `{sessionId}` and only stops the matching managed Core. A session mismatch is HTTP 409.
-- `GET /logs` exposes the bounded recent Helper/Core stderr buffer with `no-store` caching.
-
-`/start` and `/stop` take at most 4096 bytes and need a `Content-Length` (HTTP 413 and 411 otherwise); `HelperClient`
-always sends one. All endpoints reject `Origin` headers and non-local `Host` values, preventing browser requests and DNS
-rebinding through an owner-account browser, which would otherwise pass the Windows account check. The accepted
-authorities are `127.0.0.1`, `localhost` and the Linux Unix-socket placeholder `ReClashHelperService`. The Helper grants
-no CORS access.
-
-Endpoints bind only to `127.0.0.1` on Windows and to `/run/reclash/helper.sock` on Linux, and do not use
-request-token authentication. The Windows port is picked by the system, because Hyper-V and WinNAT reserve ranges that
-can cover any fixed one, and published as the `Port` DWORD of a volatile `Runtime` key under the service's own registry
-key, which only administrators can write; `HelperClient` reads it per request and falls back to 47890, where a Helper
-from before listens. Who may call them is decided per connection, before any request is read: the Linux
-socket drops a peer whose `SO_PEERCRED` UID is not the owner's, and the Windows listener (`service/peer.rs`) traces the
-connection through the TCP table to the process holding its client end and drops it unless that process runs as the
-owner SID the service was registered with. The Windows Core runs as SYSTEM and dials whatever pipe `/start` names, so
-without that check any local account would host a SYSTEM Core. What no per-connection check closes is a process that
-runs as the owner itself, on either platform. Lifecycle safety also comes from the fixed executable/hash, the strict
-address namespace (`\\.\pipe\ReClashCore_<32 hex>` on Windows, `/tmp/ReClashSocket_<digits>.sock` on Linux), the session-scoped stop
-contract, Dart-side peer-PID verification on Windows and, on Unix, the Core socket that `plugins/rust_api` sets to
-mode `0600` so only the owning user (and the root-effective Core) can connect. When the Helper service itself shuts
-down, it unconditionally stops the Core process it owns; under systemd the unit's control group does the same.
+Every desktop manifest records the final Core hash; Linux also records final Helper hash and string protocol `9`.
+macOS recomputes the manifest after signing. Hashes attest consistency, not publisher provenance. Managed privileged
+Core pins its application home and each IPC peer; file RPCs use an opened `os.Root`, reject non-regular/multiply-linked
+input, and cannot escape through symlinks. Flutter stages external profile inputs as the GUI user under its home.
+Native acceptance still requires real polkit/systemd, Windows UAC/token/job, and signed macOS XPC hosts.

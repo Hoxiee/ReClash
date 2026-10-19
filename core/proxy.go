@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"maps"
-	"os"
 	"strings"
 	"sync"
 
@@ -212,7 +211,7 @@ func handleValidateProxies(mappings []map[string]any) []string {
 
 // The share-link list a proxy provider also accepts, plain or base64.
 func handleConvertProxies(path string) ([]map[string]any, error) {
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return nil, err
 	}

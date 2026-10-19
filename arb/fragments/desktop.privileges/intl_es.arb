@@ -1,0 +1,16 @@
+{
+  "coreModeElevated": "Proceso elevado administrado",
+  "coreModePrivilegedHelper": "Proceso administrado mediante Helper firmado",
+  "desktopAuthorizationRequired": "TUN requiere autorización. Inicia la conexión o activa TUN para autorizarlo.",
+  "desktopAuthorizationCancelled": "Se canceló la autorización. TUN no se ha iniciado.",
+  "desktopAuthorizationDenied": "No se concedió la autorización. TUN no se ha iniciado.",
+  "desktopAuthorizationAgentUnavailable": "No hay un agente de autorización gráfico disponible. Inícialo en esta sesión de escritorio y vuelve a intentarlo.",
+  "desktopHelperUnavailable": "El Helper de TUN no está disponible. Comprueba el paquete instalado y el servicio, y vuelve a intentarlo.",
+  "desktopHelperApprovalRequired": "Permite el Helper de ReClash en Ajustes del Sistema → General → Ítems de inicio y extensiones, y vuelve a intentarlo.",
+  "desktopSigningRequired": "TUN requiere una app ReClash y un Helper correctamente firmados. No se puede autorizar una compilación sin firma o con firma ad-hoc.",
+  "desktopBundleInvalid": "Core o Helper no superó la comprobación de integridad. Reinstala un paquete completo de ReClash.",
+  "desktopLaunchPending": "La autorización o el cierre anterior de Core sigue pendiente. Espera a que termine antes de volver a intentarlo.",
+  "desktopAuthorizationTimeout": "La autorización agotó el tiempo de espera. Vuelve a intentarlo con el botón de conexión.",
+  "desktopBootstrapFailed": "El Core autorizado no pudo completar un inicio verificado. Comprueba el paquete y los registros del sistema.",
+  "desktopTunNotReady": "Core se inició, pero el adaptador TUN no está listo. Comprueba el registro de Core antes de usar TUN."
+}

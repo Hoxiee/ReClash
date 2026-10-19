@@ -11,7 +11,31 @@ class AutoLaunch {
   static AutoLaunch? _instance;
 
   AutoLaunch._internal() {
-    launcher.setup(appName: appName, appPath: Platform.resolvedExecutable);
+    launcher.setup(appName: appName, appPath: resolveLaunchAppPath());
+  }
+
+  @visibleForTesting
+  static String resolveLaunchAppPath({
+    String? resolvedExecutable,
+    Map<String, String>? environment,
+    String? platform,
+  }) {
+    final os = platform ?? Platform.operatingSystem;
+    final env = environment ?? Platform.environment;
+    final executable = os == 'linux' && (env['APPIMAGE'] ?? '').isNotEmpty
+        ? env['APPIMAGE']!
+        : resolvedExecutable ?? Platform.resolvedExecutable;
+    if (os == 'windows') return '"${executable.replaceAll('"', '')}"';
+    if (os == 'linux') {
+      final escaped = executable
+          .replaceAll(r'\', r'\\')
+          .replaceAll('"', r'\"')
+          .replaceAll(r'$', r'\$')
+          .replaceAll('`', r'\`')
+          .replaceAll('%', '%%');
+      return '"$escaped"';
+    }
+    return executable;
   }
 
   factory AutoLaunch() {

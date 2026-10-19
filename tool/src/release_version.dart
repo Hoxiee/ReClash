@@ -42,6 +42,12 @@ class ReleaseVersion {
   final String name;
   final String? buildNumber;
 
+  String get flutterBuildNumber {
+    final build = buildNumber;
+    if (build != null) return build;
+    return RegExp(r'-pre\.(\d+)$').firstMatch(name)?.group(1) ?? '1';
+  }
+
   String get base => name.split('-').first;
   String get linuxVersion => name.replaceFirst('-pre.', '~pre.');
   String get debianVersion => '1:$linuxVersion-${buildNumber ?? '1'}';

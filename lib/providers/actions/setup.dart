@@ -43,6 +43,8 @@ class SetupAction extends _$SetupAction {
   _SetupInputs? _appliedInputs;
   var _pendingForceApply = false;
   var _runIntentRevision = 0;
+  bool _allowPrivilegePrompt = false;
+  int _privilegeIntentRevision = 0;
   String _appliedWebDashboardDirectory = '';
 
   int get runIntentRevision => _runIntentRevision;
@@ -192,12 +194,24 @@ class SetupAction extends _$SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) {
     if (running && !initialize && !ref.read(initProvider)) {
       return Future.value(true);
     }
 
     _runIntentRevision++;
+    if (running) {
+      _allowPrivilegePrompt |= allowPrompt;
+    } else {
+      _privilegeIntentRevision++;
+      _allowPrivilegePrompt = false;
+      _core.revokePrivilegePrompt();
+      if (system.isDesktop &&
+          ref.read(coreStatusProvider) == CoreStatus.connecting) {
+        unawaited(ref.read(coreActionProvider.notifier).cancelCoreStart());
+      }
+    }
     final request = _RunRequest(
       running: running,
       initialize: running && initialize,
@@ -307,7 +321,23 @@ class SetupAction extends _$SetupAction {
     ref.read(runningVpnOptionsProvider.notifier).value = running && answered
         ? vpnOptions
         : null;
+    if (!running && ref.mounted) {
+      ref.read(tunAppliedProvider.notifier).value = false;
+    }
     return answered;
+  }
+
+  Future<void> _syncTunApplied() async {
+    if (!system.isDesktop || ref.read(safeModeProvider)) return;
+    final info = await _core.getCoreInfo();
+    if (!ref.mounted) return;
+    ref.read(tunAppliedProvider.notifier).value = info?.tunActive ?? false;
+    if (ref.read(isStartProvider) &&
+        !ref.read(suspendProvider) &&
+        _effectivePatchConfig(ref.read(patchClashConfigProvider)).tun.enable &&
+        info?.tunActive != true) {
+      throw const DesktopPrivilegeException('tun_not_ready');
+    }
   }
 
   CoreMethodException _unanswered(CoreMethod method) => CoreMethodException(
@@ -323,6 +353,7 @@ class SetupAction extends _$SetupAction {
           return;
         }
         await _setListening(!ref.read(suspendProvider));
+        await _syncTunApplied();
       });
     });
   }
@@ -376,6 +407,7 @@ class SetupAction extends _$SetupAction {
         ),
       );
       if (message.isNotEmpty) throw MessageException(message);
+      await _syncTunApplied();
     });
   }
 
@@ -723,8 +755,10 @@ class SetupAction extends _$SetupAction {
       safeMode: false,
     );
     final authorized =
-        ref.read(authorizedTunEnableProvider) ==
-        TunAuthorizationState.authorized;
+        system.isAndroid ||
+        (isPrivilegedCoreOwner(_core.processOwner) &&
+            ref.read(authorizedTunEnableProvider) ==
+                TunAuthorizationState.authorized);
     return patchConfig.copyWith(
       tun: patchConfig.tun.copyWith(
         enable: patchConfig.tun.enable && authorized,
@@ -735,50 +769,63 @@ class SetupAction extends _$SetupAction {
     );
   }
 
-  @protected
-  Future<AuthorizeCode> authorizeCore() {
-    return system.authorizeCore();
+  Future<void> setTunEnabled(bool enabled) async {
+    _privilegeIntentRevision++;
+    _allowPrivilegePrompt = enabled;
+    if (!enabled) _core.revokePrivilegePrompt();
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith.tun(enable: enabled));
+    await updateConfig();
   }
+
+  @protected
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    required bool allowPrompt,
+  }) =>
+      _core.preparePrivilege(tunEnabled: tunEnabled, allowPrompt: allowPrompt);
 
   @visibleForTesting
   Future<bool> requestAdmin(bool enableTun, {bool silence = false}) async {
-    if (!enableTun || ref.read(safeModeProvider)) {
+    if (ref.read(safeModeProvider)) return true;
+    if (!enableTun) {
+      _allowPrivilegePrompt = false;
+      _core.configurePrivilege(tunEnabled: false);
       return true;
     }
-    final authorizationState = ref.read(authorizedTunEnableProvider);
-    if (authorizationState != TunAuthorizationState.none) {
+    if (system.isAndroid) {
+      ref.read(authorizedTunEnableProvider.notifier).value =
+          TunAuthorizationState.authorized;
       return true;
     }
-
-    final authorizationNotifier = ref.read(
-      authorizedTunEnableProvider.notifier,
+    final revision = _runIntentRevision;
+    final privilegeRevision = _privilegeIntentRevision;
+    final allowPrompt = _allowPrivilegePrompt;
+    _allowPrivilegePrompt = false;
+    final decision = await preparePrivilege(
+      tunEnabled: enableTun,
+      allowPrompt: allowPrompt,
     );
-    authorizationNotifier.value = TunAuthorizationState.unauthorized;
-
-    final code = await authorizeCore();
-
-    switch (code) {
-      case AuthorizeCode.success:
-        authorizationNotifier.value = TunAuthorizationState.authorized;
+    if (!ref.mounted ||
+        revision != _runIntentRevision ||
+        privilegeRevision != _privilegeIntentRevision) {
+      _core.revokePrivilegePrompt();
+      return true;
+    }
+    final notifier = ref.read(authorizedTunEnableProvider.notifier);
+    switch (decision) {
+      case DesktopPrivilegeDecision.notRequired:
+        return true;
+      case DesktopPrivilegeDecision.active:
+        notifier.value = TunAuthorizationState.authorized;
+        return true;
+      case DesktopPrivilegeDecision.restartRequired:
+        notifier.value = TunAuthorizationState.unauthorized;
         return false;
-      case AuthorizeCode.none:
-        authorizationNotifier.value = TunAuthorizationState.authorized;
-        return true;
-      case AuthorizeCode.error:
-        authorizationNotifier.value = TunAuthorizationState.none;
-        if (silence) {
-          throw MessageException(
-            currentAppLocalizations.tunAuthorizationFailed,
-          );
-        }
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith.tun(enable: false));
-        dialogs.showNotifier(
-          currentAppLocalizations.tunAuthorizationFailed,
-          level: MessageLevel.error,
-        );
-        return true;
+      case DesktopPrivilegeDecision.authorizationRequired:
+        notifier.value = TunAuthorizationState.unauthorized;
+        throw const DesktopPrivilegeException('authorization_required');
     }
   }
 
@@ -907,8 +954,8 @@ class SetupAction extends _$SetupAction {
         }
         rethrow;
       }
-      _appliedWebDashboardDirectory =
-          realProfile?.webDashboardDirectory ?? '';
+      await _syncTunApplied();
+      _appliedWebDashboardDirectory = realProfile?.webDashboardDirectory ?? '';
       globalState.lastConfigMd5 = yamlMd5;
       globalState.lastConfigCounts =
           realProfile?.counts ?? configCountsOf(const {});

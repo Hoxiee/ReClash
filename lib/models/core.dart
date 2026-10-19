@@ -289,6 +289,7 @@ abstract class CoreInfo with _$CoreInfo {
     @Default([]) List<String> tags,
     @Default('') String workingDirectory,
     @Default('') String executablePath,
+    @Default(false) bool tunActive,
   }) = _CoreInfo;
 
   factory CoreInfo.fromJson(Map<String, Object?> json) =>

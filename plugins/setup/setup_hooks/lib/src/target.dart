@@ -34,7 +34,7 @@ class Target {
     throw BuildException('No $platform Core target for GOARCH $goarch');
   }
 
-  bool get hasHelper => goos == 'linux' || goos == 'windows';
+  bool get hasHelper => goos == 'linux';
 
   String get executableExtension => goos == 'windows' ? '.exe' : '';
 

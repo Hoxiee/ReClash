@@ -4,6 +4,7 @@ state: active
 risk: routine
 must:
   package: Linux package output and version metadata remain internally consistent.
-watch: ['tool/linux_package.dart', 'linux/**', 'setup.dart', 'distribute_options.yaml', plugins/tray/linux/CMakeLists.txt, tool/src/release_version.dart, test/setup_test.dart, test/tool/packaging_config_test.dart, test/tool/release_version_test.dart]
+  integrity: Packagers preserve final Core and Helper bytes; AppImage authorization stages a verified pair into an immutable root-owned bundle.
+watch: ['tool/linux_package.dart', 'linux/**', 'setup.dart', 'distribute_options.yaml', plugins/tray/linux/CMakeLists.txt, tool/src/release_version.dart, test/setup_test.dart, test/tool/packaging_config_test.dart, test/tool/release_version_test.dart, services/helper/build.rs, services/helper/src/service/linux.rs, services/helper/src/service/linux_install.rs, services/helper/src/service/hub.rs, lib/core/desktop/linux_helper.dart, core/cmd/core/startup_linux.go, plugins/setup/setup_hooks/lib/src/build.dart, plugins/setup/setup_hooks/lib/src/target.dart, plugins/setup/setup_hooks/lib/src/util.dart, test/core/desktop/linux_helper_test.dart]
 checks:
-  packaging: [package]
+  packaging: [package, integrity]

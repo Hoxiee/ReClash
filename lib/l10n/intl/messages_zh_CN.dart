@@ -468,8 +468,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreInfoUnavailable": MessageLookupByLibrary.simpleMessage("无法读取内核信息"),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("运行方式"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("位置"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage("受管理的提权进程"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage("通过 Helper 运行"),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage("进程内动态库"),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "通过已签名Helper管理的进程",
+    ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("独立进程"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage("打开运行时配置"),
     "corePlatform": MessageLookupByLibrary.simpleMessage("平台"),
@@ -553,6 +557,41 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "基于ClashMeta的多平台代理客户端，简单易用，开源无广告。",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage("图形授权代理不可用。请在当前桌面会话中启动代理后重试。"),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "授权已取消。TUN未启动。",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "授权未获批准。TUN未启动。",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN需要授权。请启动连接或启用TUN以进行授权。",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "授权超时。请使用连接按钮重试。",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "已授权的Core未能完成经过验证的启动。请检查软件包和系统日志。",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core或Helper未通过完整性验证。请重新安装完整的ReClash软件包。",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "请在系统设置 → 通用 → 登录项与扩展中允许ReClash Helper，然后重试。",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper不可用。请检查已安装的软件包和服务后重试。",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "上一次授权或Core关闭尚未完成。请等待完成后重试。",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN需要正确签名的ReClash应用和Helper。未签名或ad-hoc签名的构建无法授权。",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core已启动，但TUN适配器尚未就绪。使用TUN前请检查Core日志。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("目标地址"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("目标地理定位"),

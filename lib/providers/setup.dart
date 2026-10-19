@@ -140,6 +140,7 @@ class SetupSession extends Notifier<SetupSessionState> {
   bool _committing = false;
   bool _probing = false;
   bool _hadConnection = false;
+  CoreAction? _ownedCoreStart;
   RouteTracker? _routeWatcher;
   final Object _connectionOwner = Object();
   Future<void>? _operation;
@@ -334,6 +335,9 @@ class SetupSession extends Notifier<SetupSessionState> {
   void _cancelOperation() {
     _generation++;
     _probing = false;
+    final coreStart = _ownedCoreStart;
+    _ownedCoreStart = null;
+    if (coreStart?.ref.mounted == true) unawaited(coreStart!.cancelCoreStart());
     final cancellation = _cancellation;
     if (cancellation != null && !cancellation.isCompleted) {
       cancellation.complete();
@@ -398,11 +402,18 @@ class SetupSession extends Notifier<SetupSessionState> {
       return false;
     }
     if (ref.read(coreStatusProvider) != CoreStatus.connected) {
-      final started = await ref
-          .read(coreActionProvider.notifier)
-          .startCore(silence: true);
-      if (!started) {
-        throw MessageException(currentAppLocalizations.setupUnknownError);
+      final coreStart = ref.read(coreActionProvider.notifier);
+      _ownedCoreStart = coreStart;
+      try {
+        final started = await coreStart.startCore(
+          silence: true,
+          allowPrompt: true,
+        );
+        if (!started) {
+          throw MessageException(currentAppLocalizations.setupUnknownError);
+        }
+      } finally {
+        if (identical(_ownedCoreStart, coreStart)) _ownedCoreStart = null;
       }
     }
     return true;
@@ -477,6 +488,7 @@ class SetupSession extends Notifier<SetupSessionState> {
         initialize: true,
         silence: true,
         owner: _connectionOwner,
+        allowPrompt: true,
       );
 
   @protected

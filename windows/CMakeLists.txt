@@ -88,11 +88,12 @@ install(FILES "EnableLoopback.exe" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
 # these the app cannot start at all.
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
 include(InstallRequiredSystemLibraries)
-if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
-  install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-    COMPONENT Runtime)
+if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  message(FATAL_ERROR "MSVC runtime must be bundled for Windows")
 endif()
+install(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
 
 if(PLUGIN_BUNDLED_LIBRARIES)
   install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
@@ -102,27 +103,8 @@ endif()
 
 # Produced by the setup build hook during flutter_assemble.
 set(CORE_ARTIFACTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/windows")
-# A running Debug Helper holds its exe open and the copy below fails behind an
-# opaque MSB3073; only a Debug install with a changed Helper stops it, matched
-# by path so a Helper registered from an installed release is left alone.
-install(CODE "
-  set(helper_src \"${CORE_ARTIFACTS_DIR}/ReClashHelperService.exe\")
-  set(helper_dst \"${INSTALL_BUNDLE_LIB_DIR}/ReClashHelperService.exe\")
-  if(\"\${CMAKE_INSTALL_CONFIG_NAME}\" STREQUAL \"Debug\" AND EXISTS \"\${helper_dst}\")
-    file(SHA256 \"\${helper_src}\" helper_src_hash)
-    file(SHA256 \"\${helper_dst}\" helper_dst_hash)
-    if(NOT helper_src_hash STREQUAL helper_dst_hash)
-      message(STATUS \"Stopping the Helper running from \${helper_dst} before installing the Debug build\")
-      file(TO_NATIVE_PATH \"\${helper_dst}\" helper_dst_native)
-      execute_process(COMMAND powershell -NoProfile -NonInteractive -Command
-        \"Get-Process -Name ReClashHelperService -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq '\${helper_dst_native}' } | Stop-Process -Force\"
-        OUTPUT_QUIET ERROR_QUIET)
-    endif()
-  endif()
-" COMPONENT Runtime)
 install(FILES
   "${CORE_ARTIFACTS_DIR}/ReClashCore.exe"
-  "${CORE_ARTIFACTS_DIR}/ReClashHelperService.exe"
   "${CORE_ARTIFACTS_DIR}/manifest.json"
   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)

@@ -1,6 +1,7 @@
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
+
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -10,6 +11,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/views/config/tun.dart';
@@ -92,9 +94,8 @@ class TUNItem extends ConsumerWidget {
       setting: networkToolSettings[1],
       title: networkToolSettings[1].title,
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
-      onChanged: _tunWriter(
-        (state, value) => state.copyWith.tun(enable: value),
-      ),
+      onChanged: (ref, value) =>
+          ref.read(setupActionProvider.notifier).setTunEnabled(value),
     );
   }
 }

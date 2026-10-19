@@ -463,8 +463,6 @@ enum EditorFontSize {
   const EditorFontSize(this.value);
 }
 
-enum AuthorizeCode { none, success, error }
-
 enum TunAuthorizationState { none, authorized, unauthorized }
 
 enum FunctionTag {

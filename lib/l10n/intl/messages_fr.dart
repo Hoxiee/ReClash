@@ -636,11 +636,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Mode d’exécution"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Emplacement"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Processus élevé géré",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Processus via Helper",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "Bibliothèque intégrée au processus",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Processus géré via un Helper signé",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("Processus séparé"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
@@ -747,6 +753,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "Un client proxy multiplateforme basé sur ClashMeta, simple d’utilisation, open source et sans publicité.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "Aucun agent d’autorisation graphique n’est disponible. Démarrez-en un dans cette session de bureau, puis réessayez.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation a été annulée. TUN n’a pas démarré.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation n’a pas été accordée. TUN n’a pas démarré.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN nécessite une autorisation. Démarrez la connexion ou activez TUN pour l’autoriser.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Le délai d’autorisation a expiré. Réessayez avec le bouton de connexion.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "Le Core autorisé n’a pas pu terminer un démarrage vérifié. Vérifiez le paquet et les journaux système.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core ou Helper a échoué à la vérification d’intégrité. Réinstallez un paquet ReClash complet.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Autorisez le Helper ReClash dans Réglages Système → Général → Ouverture et extensions, puis réessayez.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Le Helper TUN est indisponible. Vérifiez le paquet installé et le service, puis réessayez.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation ou l’arrêt précédent de Core est toujours en cours. Attendez sa fin avant de réessayer.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN nécessite une app ReClash et un Helper correctement signés. Une version non signée ou signée ad-hoc ne peut pas être autorisée.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core a démarré, mais l’adaptateur TUN n’est pas prêt. Vérifiez le journal Core avant d’utiliser TUN.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Destination"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(

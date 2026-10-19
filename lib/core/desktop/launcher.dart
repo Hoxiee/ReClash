@@ -17,6 +17,21 @@ abstract interface class CoreProcessLauncher {
   });
 }
 
+abstract interface class CoreLaunchAttempt {
+  String get sessionId;
+  Future<void> get spawned;
+  Future<CoreProcessLease> get result;
+  Future<void> get settled;
+  bool get isSettled;
+  CoreProcessLease? get lease;
+  void cancel();
+}
+
+abstract interface class CancellableCoreProcessLauncher
+    implements CoreProcessLauncher {
+  CoreLaunchAttempt begin({required String sessionId, required String address});
+}
+
 abstract interface class DesktopCoreLauncherResolver {
   Future<CoreProcessLauncher> resolve();
 }

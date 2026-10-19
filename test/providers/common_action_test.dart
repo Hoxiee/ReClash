@@ -29,6 +29,7 @@ class _SetupRunRecorder extends SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) async {
     revision++;
     calls.add((running: running, initialize: initialize));
@@ -43,7 +44,7 @@ class _CoreStartRecorder extends CoreAction {
   final started = Completer<void>();
 
   @override
-  Future<bool> startCore({bool silence = false}) {
+  Future<bool> startCore({bool silence = false, bool allowPrompt = false}) {
     starts++;
     if (!started.isCompleted) started.complete();
     return pendingStart?.future ?? Future.value(startResult);
