@@ -14,6 +14,7 @@ enum ToolPage {
   locale,
   hotkey,
   hotkeyDesktop,
+  urlScheme,
   access,
   resources,
   customResources,

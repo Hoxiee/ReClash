@@ -168,6 +168,59 @@ void main() {
     });
   });
 
+  group('CommonAction.setRunning', () {
+    test(
+      'explicit start prepares a disconnected Core before applying settings',
+      () async {
+        final coreAction = _CoreStartRecorder();
+        final setupAction = _SetupRunRecorder();
+        final container = buildContainer(
+          overrides: [
+            coreActionProvider.overrideWith(() => coreAction),
+            setupActionProvider.overrideWith(() => setupAction),
+          ],
+        );
+        await container.read(commonActionProvider.notifier).setRunning(true);
+        expect(coreAction.starts, 1);
+        expect(setupAction.calls, [(running: true, initialize: true)]);
+        expect(container.read(initProvider), isTrue);
+      },
+    );
+
+    test('explicit stop never starts a disconnected Core', () async {
+      final coreAction = _CoreStartRecorder();
+      final setupAction = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          coreActionProvider.overrideWith(() => coreAction),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+      await container.read(commonActionProvider.notifier).setRunning(false);
+      expect(coreAction.starts, 0);
+      expect(setupAction.calls, [(running: false, initialize: false)]);
+    });
+
+    test('explicit stop supersedes an in-flight external start', () async {
+      final coreAction = _CoreStartRecorder()..pendingStart = Completer<bool>();
+      final setupAction = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          coreActionProvider.overrideWith(() => coreAction),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+      final action = container.read(commonActionProvider.notifier);
+      final pending = action.setRunning(true);
+      await coreAction.started.future;
+      await action.setRunning(false);
+      coreAction.pendingStart!.complete(true);
+      await pending;
+      expect(setupAction.calls, [(running: false, initialize: false)]);
+      expect(container.read(initProvider), isFalse);
+    });
+  });
+
   group('CommonAction.updateMode', () {
     test('advances through every mode and wraps back to the first', () {
       final container = buildContainer();

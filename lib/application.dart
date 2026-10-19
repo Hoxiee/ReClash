@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/window.dart';
 import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/enum/enum.dart';
@@ -15,6 +14,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/views/setup.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/widgets/url_scheme_labels.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -89,36 +89,69 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   void _initLink() {
-    linkManager.initAppLinksListen((url) async {
-      unawaited(window?.show());
-      if (ref.read(setupSessionProvider).active) {
-        ref.read(setupSessionProvider.notifier).offerLink(url);
-        return;
+    unawaited(
+      linkManager.initAppLinksListen(
+        _handleLink,
+        onError: () {
+          if (mounted) {
+            dialogs.showNotifier(
+              currentAppLocalizations.urlSchemeDeliveryError,
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleLink(String input) async {
+    if (!mounted) return;
+    try {
+      await ref
+          .read(urlSchemeActionProvider.notifier)
+          .handleLink(
+            input,
+            isCurrent: () => mounted,
+            confirmCommand: (action) async =>
+                await dialogs.showMessage(
+                  title: currentAppLocalizations.urlSchemeConfirmTitle,
+                  confirmText: urlSchemeCommandLabel(
+                    action,
+                    currentAppLocalizations,
+                  ),
+                  destructive: action == ReClashCommand.close,
+                  message: TextSpan(
+                    text: currentAppLocalizations.urlSchemeConfirmMessage(
+                      urlSchemeCommandLabel(action, currentAppLocalizations),
+                    ),
+                  ),
+                ) ==
+                true,
+            confirmImport: (source) async =>
+                await dialogs.showMessage(
+                  title: currentAppLocalizations.addProfile,
+                  confirmText: currentAppLocalizations.import,
+                  message: TextSpan(
+                    text: currentAppLocalizations.urlSchemeImportConfirm(
+                      source.name ?? currentAppLocalizations.unnamed,
+                      source.displaySource.isNotEmpty
+                          ? source.displaySource
+                          : currentAppLocalizations.urlSchemeEmbeddedConfig,
+                    ),
+                  ),
+                ) ==
+                true,
+          );
+    } catch (error) {
+      if (mounted) {
+        await dialogs.showMessage(
+          title: currentAppLocalizations.urlScheme,
+          message: TextSpan(
+            text: userFacingErrorMessage(error, currentAppLocalizations),
+          ),
+          cancelable: false,
+        );
       }
-      final message = currentAppLocalizations.createProfileFromUrlTip(url);
-      final parts = message.split(url);
-      final res = await dialogs.showMessage(
-        title: currentAppLocalizations.addProfile,
-        message: TextSpan(
-          children: [
-            TextSpan(text: parts.first),
-            TextSpan(
-              text: url,
-              style: TextStyle(
-                color: context.colorScheme.primary,
-                decoration: TextDecoration.underline,
-                decorationColor: context.colorScheme.primary,
-              ),
-            ),
-            if (parts.length > 1) TextSpan(text: parts.last),
-          ],
-        ),
-      );
-      if (res != true) return;
-      unawaited(
-        ref.read(profilesActionProvider.notifier).addProfileFromLink(url),
-      );
-    });
+    }
   }
 
   void _autoUpdateProfilesTask() {

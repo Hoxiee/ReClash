@@ -263,14 +263,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "Gurnalan wersiýa: ${version}";
 
-  static String m99(label) => "${label} URL bolmaly";
+  static String m99(nodes, groups, providers) =>
+      "Proksiler: ${nodes}, toparlar: ${groups}, uzakdaky üpjün edijiler: ${providers}";
 
-  static String m100(version) => "Gurnalan wersiýa: ${version}";
+  static String m100(action) =>
+      "Bu salgylanma «${action}» hereketini soraýar. ReClash-a ony ýerine ýetirmäge rugsat berilsinmi?";
 
-  static String m101(count) =>
+  static String m101(name, source) =>
+      "${source} çeşmesinden «${name}» import edilsinmi? Tassyklamadan soň profil we öwürmeler barlanar.";
+
+  static String m102(label) => "${label} URL bolmaly";
+
+  static String m103(version) => "Gurnalan wersiýa: ${version}";
+
+  static String m104(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m102(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m105(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2600,7 +2609,175 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Ýükle"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Ýükleme kuwwaty"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL shemasy"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Hereket"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Abunalyk goş"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP ýa-da HTTPS abunalyk salgysyndan profil döret. At hökmany däl.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Salgylanma döret"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "Diňe şu herekete gerekli meýdanlar goşulýar. Konfigurasiýa salgylanmasy doly mazmuny saklaýar we tassyklamadan sowlup geçmeýär.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Programmany ýap"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Ýapmak sazlamasyna eýer: penjiräni gizle ýa-da ReClash-dan çyk. Android adaty programma ýapmak hereketini ulanýar.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "YAML ýa-da JSON konfigurasiýasyny goýuň",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
+      "Konfigurasiýanyň mazmuny",
+    ),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Daşarky programma buýrugy",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "Daşarky birikme we ýapmak buýruklary tassyklamagy talap edýär. Birikme buýruklaryny ulanmazdan öň başlangyç sazlamany tamamlaň.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Birikdir"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan profil we häzirki gurşaw sazlamalary bilen birikmäni başlat.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Birikme"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
+      "Mazmunyň görnüşi",
+    ),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "Öwürme käbir mazmuny aýyrýar. Import wagtynda üýtgeşmeleri gözden geçiriň we tassyklaň.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany göçürip bolmady. Täzeden synanyşyň.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany göçür",
+    ),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany ýetirip bolmady ýa-da nobat doldy. Häzirki hereket tamamlanandan soň täzeden synanyşyň.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage(
+      "Birikmäni kes",
+    ),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan profili üýtgetmän birikmäni sakla.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
+      "Goşulan konfigurasiýa",
+    ),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "Mysal profil",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
+      "Konfigurasiýany import et",
+    ),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Salgylanma Base64 görnüşinde goşulan UTF-8 konfigurasiýany import et. At hökmany däl.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany barla",
+    ),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "Programma ýa-da profil salgylanmasyny goýuň",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "Barlag şu enjamda ýerine ýetirilýär. Ol salgylanmany açmaýar, abunalygy ýüklemeýär we profili import etmeýär.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmanyň gurluşy dogry. Abunalygyň elýeterliligi we ýadro barlagy diňe import wagtynda barlanýar.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage(
+      "Barlag netijesi",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Konfigurasiýany gur",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash müşderileriniň goldaýan install-config salgylanma görnüşi bilen abunalygy import et.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "ReClash-y gysga ýollar, web sahypalary we beýleki programmalar bilen baglanyşdyryň. Taýýar salgylanma dörediň ýa-da açmazdan öň barlaň.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "Goşulan konfigurasiýa dogry UTF-8 Base64 maglumatlary däl.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "Salgylanma nädogry. Gurluşyny we göterim kodlamasyny barlaň.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Profil ady dolandyryş nyşanlary bolmazdan 64 nyşandan köp bolmaly däl.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "Dogry HTTP ýa-da HTTPS abunalyk URL salgysyny giriziň.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmada abunalyk URL salgysy ýa-da konfigurasiýa ýok.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "Hiç bir hereket ýerine ýetirilmedi.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Programmany görkez"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Birikmäni üýtgetmän ReClash-y öňe çykar.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Parametrler"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "Alyş-çalyş buferini okap bolmady. Salgylanmany el bilen goýuň.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany öňünden görmek",
+    ),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmany görmek üçin hökmany meýdanlary dolduryň.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmada giriş tokenleri ýa-da proksi giriş maglumatlary bolup biler. Diňe ynanýan adamlaryňyz bilen paýlaşyň; ReClash salgylanma taryhyny saklamaýar.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "Profil buýruklary döredijini açýar. Daşarky import tassyklama soraýar we adaty barlaglary hem-de öwürmäni saklaýar.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profiller"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
+      "Proksi paýlaşma salgylanmalary",
+    ),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage(
+      "Salgylanma tanaldy",
+    ),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "Daşarky birikme buýruklaryny ulanmazdan öň birikme sazlamasyny tamamlaň.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "Goldanylýan import salgylanmalary",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clash salgylanmalary, INCY we Happ örtükleri hem-de proksi salgylanmalary el bilen importda we QR skanerde hem işleýär. Näbelli şifrleme wersiýalary ret edilýär.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Birikmäni çalyş"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Saklanan bolsa birikdir, işleýän bolsa kes. Tassyklamada hakyky hereket görkezilýär.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "Salgylanmada iç-içe örtükler aşa köp.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Salgylanma 4 MB-den ýa-da goşulan konfigurasiýa 2 MB-den uly.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "Bu salgylanma buýrugy goldanylmaýar.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Mysaly ulan"),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "Abunalyk salgylanmalary, goşulan konfigurasiýalar we INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -2678,7 +2855,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzeri açyp bolmady.",
     ),
@@ -2716,8 +2893,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

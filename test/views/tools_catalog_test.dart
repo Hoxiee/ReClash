@@ -1,4 +1,7 @@
 import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/common/tools_search.dart';
+import 'package:reclash/views/tools/navigation.dart';
+import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/config/general.dart';
@@ -174,6 +177,59 @@ void main() {
     );
     expect(secret.document.keywords, ['externalControllerSecret']);
   });
+
+  test(
+    'URL scheme follows shortcuts in the application category on desktop',
+    () async {
+      final l = await AppLocalizations.load(const Locale('en'));
+      final catalog = buildToolCatalog(l, _environment());
+      final pages = catalog
+          .where(
+            (entry) =>
+                entry.category == ToolCategory.application &&
+                entry.showInCatalog,
+          )
+          .map((entry) => entry.id)
+          .toList();
+      expect(pages.indexOf('page.urlScheme'), pages.indexOf('page.hotkey') + 1);
+      final entry = catalog.singleWhere(
+        (entry) => entry.id == 'page.urlScheme',
+      );
+      expect(entry.route, const ToolRoute(ToolPage.urlScheme));
+      expect(entry.path, l.applicationSettings);
+      expect(toolPageOf(const UrlSchemeView()), ToolPage.urlScheme);
+    },
+  );
+
+  test(
+    'URL scheme is available on mobile and through localized search',
+    () async {
+      for (final locale in ['en', 'ru']) {
+        final l = await AppLocalizations.load(Locale(locale));
+        final catalog = buildToolCatalog(l, _environment(android: true));
+        expect(
+          catalog
+              .singleWhere((entry) => entry.id == 'page.urlScheme')
+              .showInCatalog,
+          isTrue,
+        );
+        final search = ToolsSearch(catalog.map((entry) => entry.document));
+        for (final query in [
+          'url',
+          'deep link',
+          'automation',
+          'ссылки',
+          'автоматизация',
+        ]) {
+          expect(
+            search.search(query).map((match) => match.document.id),
+            contains('page.urlScheme'),
+            reason: '$locale: $query',
+          );
+        }
+      }
+    },
+  );
 
   test('application and core settings have disjoint owners', () {
     final app = ApplicationSettings.all;

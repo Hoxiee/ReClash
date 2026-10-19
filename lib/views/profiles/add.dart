@@ -54,7 +54,7 @@ class AddProfileMenu extends ConsumerWidget {
         if (value == null || value.isEmpty) {
           return appLocalizations.emptyTip(appLocalizations.link);
         }
-        if (!value.isUrl && !value.isShareLink) {
+        if (!isProfileLinkInput(value)) {
           return appLocalizations.invalidLinkTip;
         }
         return null;
@@ -64,6 +64,7 @@ class AddProfileMenu extends ConsumerWidget {
           if (profile.url.isNotEmpty) profile.url,
       },
       withAgeSecretKey: true,
+      urlMaxLength: urlSchemeMaxLength,
       additionalValidator: () => clientSettings.isValid
           ? null
           : appLocalizations.subscriptionClientCustomUserAgentInvalid,

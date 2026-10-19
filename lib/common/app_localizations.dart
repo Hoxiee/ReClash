@@ -1,3 +1,4 @@
+import 'url_scheme.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/exception.dart';
 import 'package:reclash/common/network_error.dart';
@@ -117,7 +118,10 @@ String? coreLaunchBlockedMessage(
 }
 
 String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
-  return networkErrorMessage(error, appLocalizations) ??
+  return (error is UrlSchemeException
+          ? urlSchemeErrorMessage(error.issue, appLocalizations)
+          : null) ??
+      networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
       switch (error) {
         AgeSecretKeyRequiredException() =>
@@ -157,3 +161,17 @@ Locale? getLocaleForString(String? localString) {
   }
   return null;
 }
+
+String urlSchemeErrorMessage(UrlSchemeIssue issue, AppLocalizations l) =>
+    switch (issue) {
+      UrlSchemeIssue.invalidLink => l.urlSchemeInvalidLink,
+      UrlSchemeIssue.unknownCommand => l.urlSchemeUnknownCommand,
+      UrlSchemeIssue.missingPayload => l.urlSchemeMissingPayload,
+      UrlSchemeIssue.invalidUrl => l.urlSchemeInvalidUrl,
+      UrlSchemeIssue.invalidName => l.urlSchemeInvalidName,
+      UrlSchemeIssue.invalidBase64 => l.urlSchemeInvalidBase64,
+      UrlSchemeIssue.tooLarge => l.urlSchemeTooLarge,
+      UrlSchemeIssue.tooDeep => l.urlSchemeTooDeep,
+      UrlSchemeIssue.unsupportedEncryption => l.urlSchemeUnsupportedEncryption,
+      UrlSchemeIssue.authenticationFailed => l.urlSchemeAuthenticationFailed,
+    };

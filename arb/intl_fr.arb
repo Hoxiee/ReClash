@@ -1183,6 +1183,102 @@
   "updateSeeFullReleaseNotes": "Voir toutes les notes de version",
   "updateShowAllNotes": "Afficher toutes les modifications",
   "updateInstalledVersion": "Version installée : {version}",
+  "urlScheme": "Schéma d’URL",
+  "urlSchemeIntro": "Reliez ReClash à des raccourcis, des sites et d’autres applications. Créez un lien prêt à l’emploi ou vérifiez-le avant de l’ouvrir.",
+  "urlSchemeConnection": "Connexion",
+  "urlSchemeProfiles": "Profils",
+  "urlSchemeConfirmationTip": "Les commandes externes de connexion et de fermeture demandent confirmation. Terminez la configuration avant d’utiliser les commandes de connexion.",
+  "urlSchemeProfileCommandsTip": "Les commandes de profil ouvrent le générateur. Chaque importation entrante demande confirmation et conserve les contrôles de validation et de conversion.",
+  "urlSchemeSupportedLinks": "Liens d’importation pris en charge",
+  "urlSchemeSupportedLinksTip": "Les liens Clash, les enveloppes INCY et Happ et les liens de proxy fonctionnent aussi lors d’un import manuel et d’un scan QR. Les versions de chiffrement inconnues sont refusées.",
+  "urlSchemeWrappedLinks": "Liens d’abonnement, configurations intégrées et INCY crypt1",
+  "urlSchemeProxyLinks": "Liens de proxy",
+  "urlSchemeConnect": "Connecter",
+  "urlSchemeConnectDesc": "Démarre la connexion avec le profil sélectionné et vos paramètres de couverture actuels.",
+  "urlSchemeDisconnect": "Déconnecter",
+  "urlSchemeDisconnectDesc": "Arrête la connexion sans changer le profil sélectionné.",
+  "urlSchemeToggle": "Basculer la connexion",
+  "urlSchemeToggleDesc": "Connecte si elle est arrêtée, déconnecte si elle est active. La confirmation indique l’action réelle.",
+  "urlSchemeOpen": "Afficher l’application",
+  "urlSchemeOpenDesc": "Place ReClash au premier plan sans modifier la connexion.",
+  "urlSchemeClose": "Fermer l’application",
+  "urlSchemeCloseDesc": "Suit votre choix de fermeture : masquer la fenêtre ou quitter ReClash. Android utilise son comportement habituel de fermeture.",
+  "urlSchemeAdd": "Ajouter un abonnement",
+  "urlSchemeAddDesc": "Crée un profil à partir d’une URL d’abonnement HTTP ou HTTPS, avec un nom facultatif.",
+  "urlSchemeImport": "Importer une configuration",
+  "urlSchemeImportDesc": "Importe une configuration UTF-8 intégrée au lien en Base64, avec un nom facultatif.",
+  "urlSchemeInstallConfig": "Installer une configuration",
+  "urlSchemeInstallConfigDesc": "Importe un abonnement au format de lien install-config pris en charge par les clients Clash.",
+  "urlSchemeBuild": "Créer un lien",
+  "urlSchemeInspect": "Vérifier un lien",
+  "urlSchemeAction": "Action",
+  "urlSchemeParameters": "Paramètres",
+  "urlSchemeCopyLink": "Copier le lien",
+  "urlSchemeUseExample": "Utiliser l’exemple",
+  "urlSchemeExampleProfile": "Profil d’exemple",
+  "urlSchemeConfigHint": "Collez une configuration YAML ou JSON",
+  "urlSchemeBuilderTip": "Seuls les champs de cette action sont inclus. Un lien de configuration contient toutes les données et ne contourne jamais la confirmation.",
+  "urlSchemePreview": "Aperçu du lien",
+  "urlSchemePreviewEmpty": "Remplissez les champs obligatoires pour voir le lien.",
+  "urlSchemePrivateLinkTip": "Un lien peut contenir des jetons d’accès ou des identifiants de proxy. Partagez-le uniquement avec des personnes de confiance ; ReClash ne conserve aucun historique.",
+  "urlSchemeCopyFailed": "Impossible de copier le lien. Réessayez.",
+  "urlSchemePasteFailed": "Impossible de lire le presse-papiers. Collez le lien manuellement.",
+  "urlSchemeInspectTip": "La vérification reste sur cet appareil. Elle n’ouvre aucun lien, ne télécharge aucun abonnement et n’importe aucun profil.",
+  "urlSchemeInspectHint": "Collez un lien d’application ou de profil",
+  "urlSchemeInspectionResult": "Résultat de la vérification",
+  "urlSchemeRecognized": "Lien reconnu",
+  "urlSchemeNoExecution": "Aucune action n’a été exécutée.",
+  "urlSchemeInspectionLimit": "La structure du lien est valide. La disponibilité de l’abonnement et la validation du noyau sont vérifiées uniquement lors de l’importation.",
+  "urlSchemeContentFormat": "Format du contenu",
+  "urlSchemeConfigSummary": "Contenu de la configuration",
+  "urlSchemeConfigCounts": "{nodes} proxys, {groups} groupes, {providers} fournisseurs distants",
+  "urlSchemeConversionWarning": "La conversion omet une partie du contenu. Vérifiez et approuvez ces changements lors de l’importation.",
+  "urlSchemeConfirmTitle": "Commande externe de l’application",
+  "urlSchemeConfirmMessage": "Ce lien demande « {action} ». Autoriser ReClash à effectuer cette action ?",
+  "urlSchemeImportConfirm": "Importer « {name} » depuis {source} ? La validation du profil et la vérification des conversions suivront votre confirmation.",
+  "urlSchemeEmbeddedConfig": "Configuration intégrée",
+  "urlSchemeSetupRequired": "Terminez la configuration de connexion avant d’utiliser les commandes externes de connexion.",
+  "urlSchemeDeliveryError": "Impossible de transmettre le lien, ou la file est pleine. Réessayez après la fin de l’action en cours.",
+  "urlSchemeInvalidLink": "Le lien est mal formé. Vérifiez sa structure et l’encodage des caractères en pourcentage.",
+  "urlSchemeUnknownCommand": "Cette commande de lien n’est pas prise en charge.",
+  "urlSchemeMissingPayload": "Le lien ne contient pas d’URL d’abonnement ou de configuration.",
+  "urlSchemeInvalidUrl": "Saisissez une URL d’abonnement HTTP ou HTTPS valide.",
+  "urlSchemeInvalidName": "Utilisez un nom de profil de 64 caractères maximum, sans caractères de contrôle.",
+  "urlSchemeInvalidBase64": "La configuration intégrée n’est pas un contenu UTF-8 Base64 valide.",
+  "urlSchemeTooLarge": "Le lien dépasse 4 Mo ou sa configuration intégrée dépasse 2 Mo.",
+  "urlSchemeTooDeep": "Le lien contient trop d’enveloppes imbriquées.",
+  "urlSchemeUnsupportedEncryption": "Cette version de chiffrement n’est pas prise en charge. Demandez un lien d’abonnement non chiffré.",
+  "urlSchemeAuthenticationFailed": "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé.",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "En cours d’exécution",
   "coreStarting": "Démarrage…",
   "coreStopped": "Arrêté",

@@ -274,14 +274,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "Version installée : ${version}";
 
-  static String m99(label) => "${label} doit être une URL";
+  static String m99(nodes, groups, providers) =>
+      "${nodes} proxys, ${groups} groupes, ${providers} fournisseurs distants";
 
-  static String m100(version) => "Version installée : ${version}";
+  static String m100(action) =>
+      "Ce lien demande « ${action} ». Autoriser ReClash à effectuer cette action ?";
 
-  static String m101(count) =>
+  static String m101(name, source) =>
+      "Importer « ${name} » depuis ${source} ? La validation du profil et la vérification des conversions suivront votre confirmation.";
+
+  static String m102(label) => "${label} doit être une URL";
+
+  static String m103(version) => "Version installée : ${version}";
+
+  static String m104(count) =>
       "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
 
-  static String m102(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2692,7 +2701,177 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bande passante d’envoi",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("Schéma d’URL"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Action"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage(
+      "Ajouter un abonnement",
+    ),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "Crée un profil à partir d’une URL d’abonnement HTTP ou HTTPS, avec un nom facultatif.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Créer un lien"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "Seuls les champs de cette action sont inclus. Un lien de configuration contient toutes les données et ne contourne jamais la confirmation.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage(
+      "Fermer l’application",
+    ),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Suit votre choix de fermeture : masquer la fenêtre ou quitter ReClash. Android utilise son comportement habituel de fermeture.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "Collez une configuration YAML ou JSON",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
+      "Contenu de la configuration",
+    ),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Commande externe de l’application",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "Les commandes externes de connexion et de fermeture demandent confirmation. Terminez la configuration avant d’utiliser les commandes de connexion.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Connecter"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Démarre la connexion avec le profil sélectionné et vos paramètres de couverture actuels.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Connexion"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
+      "Format du contenu",
+    ),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "La conversion omet une partie du contenu. Vérifiez et approuvez ces changements lors de l’importation.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de copier le lien. Réessayez.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage("Copier le lien"),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "Impossible de transmettre le lien, ou la file est pleine. Réessayez après la fin de l’action en cours.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Déconnecter"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Arrête la connexion sans changer le profil sélectionné.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
+      "Configuration intégrée",
+    ),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "Profil d’exemple",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
+      "Importer une configuration",
+    ),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Importe une configuration UTF-8 intégrée au lien en Base64, avec un nom facultatif.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
+      "Vérifier un lien",
+    ),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "Collez un lien d’application ou de profil",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "La vérification reste sur cet appareil. Elle n’ouvre aucun lien, ne télécharge aucun abonnement et n’importe aucun profil.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "La structure du lien est valide. La disponibilité de l’abonnement et la validation du noyau sont vérifiées uniquement lors de l’importation.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage(
+      "Résultat de la vérification",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Installer une configuration",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Importe un abonnement au format de lien install-config pris en charge par les clients Clash.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "Reliez ReClash à des raccourcis, des sites et d’autres applications. Créez un lien prêt à l’emploi ou vérifiez-le avant de l’ouvrir.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "La configuration intégrée n’est pas un contenu UTF-8 Base64 valide.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "Le lien est mal formé. Vérifiez sa structure et l’encodage des caractères en pourcentage.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Utilisez un nom de profil de 64 caractères maximum, sans caractères de contrôle.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "Saisissez une URL d’abonnement HTTP ou HTTPS valide.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "Le lien ne contient pas d’URL d’abonnement ou de configuration.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "Aucune action n’a été exécutée.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage(
+      "Afficher l’application",
+    ),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Place ReClash au premier plan sans modifier la connexion.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Paramètres"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire le presse-papiers. Collez le lien manuellement.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Aperçu du lien"),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "Remplissez les champs obligatoires pour voir le lien.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Un lien peut contenir des jetons d’accès ou des identifiants de proxy. Partagez-le uniquement avec des personnes de confiance ; ReClash ne conserve aucun historique.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "Les commandes de profil ouvrent le générateur. Chaque importation entrante demande confirmation et conserve les contrôles de validation et de conversion.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profils"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
+      "Liens de proxy",
+    ),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage("Lien reconnu"),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "Terminez la configuration de connexion avant d’utiliser les commandes externes de connexion.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "Liens d’importation pris en charge",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Les liens Clash, les enveloppes INCY et Happ et les liens de proxy fonctionnent aussi lors d’un import manuel et d’un scan QR. Les versions de chiffrement inconnues sont refusées.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
+      "Basculer la connexion",
+    ),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Connecte si elle est arrêtée, déconnecte si elle est active. La confirmation indique l’action réelle.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "Le lien contient trop d’enveloppes imbriquées.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Le lien dépasse 4 Mo ou sa configuration intégrée dépasse 2 Mo.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "Cette commande de lien n’est pas prise en charge.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "Cette version de chiffrement n’est pas prise en charge. Demandez un lien d’abonnement non chiffré.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
+      "Utiliser l’exemple",
+    ),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "Liens d’abonnement, configurations intégrées et INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -2774,7 +2953,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "L’interface sélectionnée est téléchargée à la première ouverture. La version est fixée et vérifiée par SHA-256.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Impossible d’ouvrir le navigateur.",
     ),
@@ -2816,8 +2995,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

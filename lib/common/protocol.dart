@@ -2,9 +2,17 @@ import 'dart:io';
 
 import 'package:win32_registry/win32_registry.dart';
 
+import 'constant.dart' show shareLinkSchemes;
 import 'print.dart';
 
-const protocolSchemes = ['clash', 'clashmeta', 'reclash'];
+const configProtocolSchemes = ['clash', 'clashmeta', 'reclash'];
+const deepLinkProtocolSchemes = ['incy', 'happ'];
+const shareProtocolSchemes = [...shareLinkSchemes];
+const protocolSchemes = [
+  ...configProtocolSchemes,
+  ...deepLinkProtocolSchemes,
+  ...shareProtocolSchemes,
+];
 
 class ProtocolRegistrationPlan {
   final String scheme;
@@ -24,18 +32,26 @@ class ProtocolRegistrationPlan {
   String get protocolValue => '';
 
   String get command => '"$executable" "%1"';
+
+  String get applicationKey => r'Software\ReClash\UrlHandler';
+
+  String get progId => 'ReClash.Url.$scheme';
+
+  String get progIdKey => 'Software\\Classes\\$progId';
+
+  bool get claimsDefault => configProtocolSchemes.contains(scheme);
 }
 
-/// A user-level desktop entry that claims the schemes for the running binary,
-/// so an AppImage or a development build is reachable without a packaged
-/// .desktop file. Rewritten on every launch, like the Windows registry keys.
+/// AppImages also need a desktop entry to appear among available handlers.
 class LinuxProtocolRegistrationPlan {
   final List<String> schemes;
+  final List<String> defaults;
   final String executable;
   final String applicationsDir;
 
   const LinuxProtocolRegistrationPlan({
     required this.schemes,
+    this.defaults = configProtocolSchemes,
     required this.executable,
     required this.applicationsDir,
   });
@@ -59,7 +75,11 @@ class LinuxProtocolRegistrationPlan {
     '',
   ].join('\n');
 
-  List<String> get xdgMimeArguments => ['default', desktopId, ...mimeTypes];
+  List<String> get xdgMimeArguments => [
+    'default',
+    desktopId,
+    ...defaults.map((scheme) => 'x-scheme-handler/$scheme'),
+  ];
 
   static String _quoteExecArgument(String value) {
     return value
@@ -86,7 +106,28 @@ class Protocol {
       scheme: scheme,
       executable: Platform.resolvedExecutable,
     );
-    final regKey = CURRENT_USER.create(plan.protocolKey);
+    final application = CURRENT_USER.create(plan.applicationKey);
+    try {
+      application.setValue(
+        'ApplicationName',
+        const RegistryValue.string('ReClash'),
+      );
+      final associations = application.create('URLAssociations');
+      try {
+        associations.setValue(scheme, RegistryValue.string(plan.progId));
+      } finally {
+        associations.close();
+      }
+    } finally {
+      application.close();
+    }
+    final registered = CURRENT_USER.create(r'Software\RegisteredApplications');
+    try {
+      registered.setValue('ReClash', RegistryValue.string(plan.applicationKey));
+    } finally {
+      registered.close();
+    }
+    final regKey = CURRENT_USER.create(plan.progIdKey);
     try {
       regKey.setValue(
         plan.protocolValueName,
@@ -100,6 +141,26 @@ class Protocol {
       }
     } finally {
       regKey.close();
+    }
+    final choices = CURRENT_USER.create('${plan.protocolKey}\\OpenWithProgids');
+    try {
+      choices.setValue(plan.progId, const RegistryValue.none());
+    } finally {
+      choices.close();
+    }
+    if (plan.claimsDefault) {
+      final key = CURRENT_USER.create(plan.protocolKey);
+      try {
+        key.setValue(plan.protocolValueName, const RegistryValue.string(''));
+        final command = key.create(plan.commandKey);
+        try {
+          command.setValue('', RegistryValue.string(plan.command));
+        } finally {
+          command.close();
+        }
+      } finally {
+        key.close();
+      }
     }
   }
 
@@ -120,12 +181,19 @@ class Protocol {
       final file = File(plan.desktopPath);
       await file.parent.create(recursive: true);
       await file.writeAsString(plan.desktopEntry);
-      final result = await Process.run('xdg-mime', plan.xdgMimeArguments);
-      if (result.exitCode != 0) {
-        commonPrint.log('xdg-mime default failed: ${result.stderr}'.trim());
-      }
+      await _run('xdg-mime', plan.xdgMimeArguments);
+      await _run('update-desktop-database', [file.parent.path]);
     } catch (e) {
       commonPrint.log('linux protocol registration failed: $e');
+    }
+  }
+
+  Future<void> _run(String executable, List<String> arguments) async {
+    try {
+      final result = await Process.run(executable, arguments);
+      if (result.exitCode != 0) commonPrint.log('$executable failed');
+    } catch (_) {
+      commonPrint.log('$executable is unavailable');
     }
   }
 }

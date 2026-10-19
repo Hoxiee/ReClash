@@ -240,13 +240,21 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "インストール済み: ${version}";
 
-  static String m99(label) => "${label}はURLである必要があります";
+  static String m99(nodes, groups, providers) =>
+      "プロキシ: ${nodes}、グループ: ${groups}、リモートプロバイダー: ${providers}";
 
-  static String m100(version) => "インストール済みバージョン: ${version}";
+  static String m100(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
 
-  static String m101(count) => "${count} 年前";
+  static String m101(name, source) =>
+      "${source}から「${name}」をインポートしますか？確認後にプロファイルの検証と変換内容の確認を行います。";
 
-  static String m102(count) => "${count} 年前";
+  static String m102(label) => "${label}はURLである必要があります";
+
+  static String m103(version) => "インストール済みバージョン: ${version}";
+
+  static String m104(count) => "${count} 年前";
+
+  static String m105(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2142,7 +2150,153 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URLスキーム"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("操作"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("サブスクリプションを追加する"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTPまたはHTTPSのサブスクリプションURLからプロファイルを作成します。名前は省略できます。",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "暗号化リンクを認証できませんでした。破損しているか、異なる鍵を使っている可能性があります。",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("リンクを作成"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "選択した操作に必要な項目だけが含まれます。設定リンクは内容全体を含み、確認を省略することはできません。",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("アプリを閉じる"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "終了設定に従ってウィンドウを隠すかReClashを終了します。Androidでは通常のアプリ終了動作に従います。",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "YAMLまたはJSONの設定を貼り付けてください",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("設定の内容"),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "外部からのアプリコマンド",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "外部からの接続・終了コマンドは確認が必要です。接続コマンドを使う前に初期設定を完了してください。",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("接続する"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "選択中のプロファイルと現在の適用範囲設定で接続を開始します。",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("接続"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("内容の形式"),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "変換では一部の内容が省略されます。インポート時に変更を確認して承認してください。",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "リンクをコピーできませんでした。再試行してください。",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage("リンクをコピー"),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "リンクを受け取れなかったか、待機キューがいっぱいです。現在の操作が終わってから再試行してください。",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("切断する"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "選択中のプロファイルを変更せずに接続を停止します。",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("埋め込み設定"),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "サンプルプロファイル",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポートする"),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "リンクにBase64で埋め込まれたUTF-8設定をインポートします。名前は省略できます。",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("リンクを確認"),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "アプリまたはプロファイルのリンクを貼り付けてください",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "確認はこの端末内で行います。リンクを開いたり、サブスクリプションをダウンロードしたり、プロファイルをインポートしたりしません。",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "リンクの構造は有効です。サブスクリプションの取得とコアによる検証はインポート時に行います。",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage("確認結果"),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "設定をインストールする",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clashクライアント対応のinstall-config形式でサブスクリプションをインポートします。",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "ReClashをショートカット、ウェブサイト、ほかのアプリと連携させます。すぐ使えるリンクを作成したり、開く前に内容を確認したりできます。",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "埋め込み設定が有効なUTF-8 Base64データではありません。",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "リンクの形式が正しくありません。構造とパーセントエンコーディングを確認してください。",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "プロファイル名は64文字以内にし、制御文字を含めないでください。",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "有効なHTTPまたはHTTPSのサブスクリプションURLを入力してください。",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "リンクにサブスクリプションURLまたは設定がありません。",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "操作は実行されていません。",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("アプリを表示する"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "接続状態を変えずにReClashを前面に表示します。",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("パラメーター"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "クリップボードを読み取れませんでした。リンクを手動で貼り付けてください。",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("リンクのプレビュー"),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "必須項目を入力するとリンクが表示されます。",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "リンクにはアクセストークンやプロキシ認証情報が含まれる場合があります。信頼できる相手にだけ共有してください。ReClashはリンクの履歴を保存しません。",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "プロファイルコマンドはリンク作成画面を開きます。外部リンクのインポートには確認が必要で、通常の検証と変換チェックも行われます。",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("プロファイル"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("プロキシ共有リンク"),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage("リンクを認識しました"),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "外部接続コマンドを使う前に接続の初期設定を完了してください。",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "対応するインポートリンク",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clashリンク、INCY・Happのラップされたリンク、プロキシ共有リンクは手動インポートやQRスキャンでも使えます。未知の暗号化バージョンは拒否されます。",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("接続を切り替える"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "停止中なら接続し、接続中なら切断します。確認画面には実際の操作が表示されます。",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "リンクのラップが多重に入れ子になりすぎています。",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "リンクが4 MB、または埋め込み設定が2 MBを超えています。",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "このリンクコマンドには対応していません。",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("例を使う"),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション、埋め込み設定、INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2212,7 +2366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "ブラウザーを開けませんでした。",
     ),
@@ -2244,8 +2398,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

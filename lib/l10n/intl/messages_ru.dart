@@ -263,14 +263,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "Установлена версия ${version}";
 
-  static String m99(label) => "Значение «${label}» должно быть URL";
+  static String m99(nodes, groups, providers) =>
+      "Прокси: ${nodes}, группы: ${groups}, удалённые провайдеры: ${providers}";
 
-  static String m100(version) => "Установленная версия: ${version}";
+  static String m100(action) =>
+      "Ссылка запрашивает действие «${action}». Разрешить ReClash выполнить его?";
 
-  static String m101(count) =>
+  static String m101(name, source) =>
+      "Импортировать «${name}» из ${source}? После согласия выполнятся проверка профиля и рассмотрение преобразований.";
+
+  static String m102(label) => "Значение «${label}» должно быть URL";
+
+  static String m103(version) => "Установленная версия: ${version}";
+
+  static String m104(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m102(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2619,7 +2628,181 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL-схема"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Действие"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Добавить подписку"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "Создать профиль по HTTP- или HTTPS-ссылке подписки с необязательным именем.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Создать ссылку"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "В ссылку входят только поля выбранного действия. Ссылка конфигурации содержит все её данные и не позволяет обойти подтверждение.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage(
+      "Закрыть приложение",
+    ),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Следовать настройке закрытия: скрыть окно или выйти из ReClash. На Android используется обычное поведение закрытия приложения.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "Вставьте конфигурацию YAML или JSON",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
+      "Состав конфигурации",
+    ),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Внешняя команда приложения",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "Внешние команды подключения и закрытия требуют подтверждения. Сначала завершите настройку подключения.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Подключить"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Запустить подключение с выбранным профилем и текущими настройками охвата.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Подключение"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
+      "Формат содержимого",
+    ),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "При преобразовании часть содержимого пропускается. Проверьте и подтвердите изменения во время импорта.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось скопировать ссылку. Повторите попытку.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Скопировать ссылку",
+    ),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось доставить ссылку или очередь заполнена. Повторите попытку после завершения текущего действия.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Отключить"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Остановить подключение, не меняя выбранный профиль.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
+      "Встроенная конфигурация",
+    ),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "Пример профиля",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
+      "Импортировать конфигурацию",
+    ),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Импортировать встроенную в ссылку UTF-8-конфигурацию в Base64 с необязательным именем.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
+      "Проверить ссылку",
+    ),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "Вставьте ссылку приложения или профиля",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "Проверка выполняется на устройстве. Она не открывает ссылку, не скачивает подписку и не импортирует профиль.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "Структура ссылки корректна. Доступность подписки и проверка ядром выполняются только при импорте.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage(
+      "Результат проверки",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Установить конфигурацию",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Импортировать подписку через формат install-config, поддерживаемый клиентами Clash.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "Свяжите ReClash с ярлыками, сайтами и другими приложениями. Создайте готовую ссылку или проверьте её перед открытием.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "Встроенная конфигурация не является корректными UTF-8-данными в Base64.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "Ссылка некорректна. Проверьте её структуру и percent encoding.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Имя профиля должно содержать не более 64 символов и не иметь управляющих символов.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "Укажите корректный HTTP- или HTTPS-адрес подписки.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "В ссылке отсутствует URL подписки или конфигурация.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "Никакие действия не выполнялись.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage(
+      "Показать приложение",
+    ),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Вывести ReClash на передний план, не меняя подключение.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Параметры"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось прочитать буфер обмена. Вставьте ссылку вручную.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
+      "Предпросмотр ссылки",
+    ),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "Заполните обязательные поля, чтобы увидеть ссылку.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Ссылка может содержать токены доступа и учётные данные прокси. Делитесь ею только с теми, кому доверяете; ReClash не хранит историю ссылок.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "Команды профилей открывают конструктор. Входящий импорт требует согласия и проходит обычные проверки и преобразование.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Профили"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
+      "Ссылки на прокси",
+    ),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage(
+      "Ссылка распознана",
+    ),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "Завершите настройку подключения перед использованием внешних команд подключения.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "Поддерживаемые ссылки импорта",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Ссылки Clash, обёртки INCY и Happ и ссылки на прокси работают также при ручном импорте и сканировании QR. Неизвестные версии шифрования отклоняются.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
+      "Переключить подключение",
+    ),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Подключить, если остановлено; отключить, если запущено. В подтверждении указано фактическое действие.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "В ссылке слишком много вложенных обёрток.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Ссылка превышает 4 МБ или встроенная конфигурация превышает 2 МБ.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "Эта команда ссылки не поддерживается.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "Эта версия шифрования не поддерживается. Запросите обычную ссылку подписки.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
+      "Подставить пример",
+    ),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "Ссылки подписок, встроенные конфигурации и INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2701,7 +2884,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось открыть браузер.",
     ),
@@ -2743,8 +2926,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

@@ -188,6 +188,13 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     root: false,
   );
   page(
+    ToolPage.urlScheme,
+    l.urlScheme,
+    ToolCategory.application,
+    AppGlyphs.link,
+    keywords: ['url', 'deep link', 'automation', 'ссылки', 'автоматизация'],
+  );
+  page(
     ToolPage.general,
     l.general,
     ToolCategory.configuration,

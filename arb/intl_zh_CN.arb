@@ -1183,6 +1183,102 @@
   "updateSeeFullReleaseNotes": "查看完整发布说明",
   "updateShowAllNotes": "显示所有更改",
   "updateInstalledVersion": "已安装版本：{version}",
+  "urlScheme": "URL 方案",
+  "urlSchemeIntro": "将 ReClash 与快捷方式、网站和其他应用连接。生成可直接使用的链接，或在打开前检查链接。",
+  "urlSchemeConnection": "连接",
+  "urlSchemeProfiles": "配置文件",
+  "urlSchemeConfirmationTip": "外部连接和关闭命令需要确认。使用连接命令前，请先完成初始设置。",
+  "urlSchemeProfileCommandsTip": "配置文件命令会打开链接生成器。外部导入需要确认，并保留现有的验证和转换检查。",
+  "urlSchemeSupportedLinks": "支持的导入链接",
+  "urlSchemeSupportedLinksTip": "Clash 链接、INCY 和 Happ 封装链接及代理分享链接也可用于手动导入和 QR 扫描。未知的加密版本会被拒绝。",
+  "urlSchemeWrappedLinks": "订阅链接、内嵌配置和 INCY crypt1",
+  "urlSchemeProxyLinks": "代理分享链接",
+  "urlSchemeConnect": "连接",
+  "urlSchemeConnectDesc": "使用所选配置文件和当前覆盖范围设置启动连接。",
+  "urlSchemeDisconnect": "断开连接",
+  "urlSchemeDisconnectDesc": "停止当前连接，不更改所选配置文件。",
+  "urlSchemeToggle": "切换连接",
+  "urlSchemeToggleDesc": "停止时连接，运行时断开。确认框会显示实际操作。",
+  "urlSchemeOpen": "显示应用",
+  "urlSchemeOpenDesc": "将 ReClash 置于前台，不更改连接状态。",
+  "urlSchemeClose": "关闭应用",
+  "urlSchemeCloseDesc": "遵循关闭设置：隐藏窗口或退出 ReClash。Android 使用常规应用关闭行为。",
+  "urlSchemeAdd": "添加订阅",
+  "urlSchemeAddDesc": "通过 HTTP 或 HTTPS 订阅 URL 创建配置文件，可选填名称。",
+  "urlSchemeImport": "导入配置",
+  "urlSchemeImportDesc": "导入以 Base64 嵌入链接的 UTF-8 配置，可选填名称。",
+  "urlSchemeInstallConfig": "安装配置",
+  "urlSchemeInstallConfigDesc": "使用 Clash 客户端支持的 install-config 链接格式导入订阅。",
+  "urlSchemeBuild": "生成链接",
+  "urlSchemeInspect": "检查链接",
+  "urlSchemeAction": "操作",
+  "urlSchemeParameters": "参数",
+  "urlSchemeCopyLink": "复制链接",
+  "urlSchemeUseExample": "使用示例",
+  "urlSchemeExampleProfile": "示例配置文件",
+  "urlSchemeConfigHint": "粘贴 YAML 或 JSON 配置",
+  "urlSchemeBuilderTip": "仅包含此操作所需的字段。配置链接包含全部内容，不能绕过确认。",
+  "urlSchemePreview": "链接预览",
+  "urlSchemePreviewEmpty": "填写必填字段后即可预览链接。",
+  "urlSchemePrivateLinkTip": "链接可能包含访问令牌或代理凭据。请仅与可信的人分享；ReClash 不保存链接历史。",
+  "urlSchemeCopyFailed": "无法复制链接。请重试。",
+  "urlSchemePasteFailed": "无法读取剪贴板。请手动粘贴链接。",
+  "urlSchemeInspectTip": "检查仅在此设备上进行。不会打开链接、下载订阅或导入配置文件。",
+  "urlSchemeInspectHint": "粘贴应用或配置文件链接",
+  "urlSchemeInspectionResult": "检查结果",
+  "urlSchemeRecognized": "已识别链接",
+  "urlSchemeNoExecution": "未执行任何操作。",
+  "urlSchemeInspectionLimit": "链接结构有效。订阅可用性和内核验证仅在导入时检查。",
+  "urlSchemeContentFormat": "内容格式",
+  "urlSchemeConfigSummary": "配置内容",
+  "urlSchemeConfigCounts": "代理：{nodes}，组：{groups}，远程提供者：{providers}",
+  "urlSchemeConversionWarning": "转换会省略部分内容。请在导入时审阅并确认这些更改。",
+  "urlSchemeConfirmTitle": "外部应用命令",
+  "urlSchemeConfirmMessage": "此链接请求“{action}”。允许 ReClash 执行此操作吗？",
+  "urlSchemeImportConfirm": "从 {source} 导入“{name}”吗？确认后将验证配置文件并检查转换内容。",
+  "urlSchemeEmbeddedConfig": "内嵌配置",
+  "urlSchemeSetupRequired": "使用外部连接命令前，请先完成连接设置。",
+  "urlSchemeDeliveryError": "无法传递链接，或待处理队列已满。请在当前操作完成后重试。",
+  "urlSchemeInvalidLink": "链接格式错误。请检查结构和百分号编码。",
+  "urlSchemeUnknownCommand": "不支持此链接命令。",
+  "urlSchemeMissingPayload": "链接缺少订阅 URL 或配置。",
+  "urlSchemeInvalidUrl": "请输入有效的 HTTP 或 HTTPS 订阅 URL。",
+  "urlSchemeInvalidName": "配置文件名称不能超过 64 个字符，且不能包含控制字符。",
+  "urlSchemeInvalidBase64": "内嵌配置不是有效的 UTF-8 Base64 数据。",
+  "urlSchemeTooLarge": "链接超过 4 MB，或内嵌配置超过 2 MB。",
+  "urlSchemeTooDeep": "链接的嵌套封装层数过多。",
+  "urlSchemeUnsupportedEncryption": "不支持此加密版本。请索取普通订阅链接。",
+  "urlSchemeAuthenticationFailed": "无法验证加密链接。它可能已损坏或使用了其他密钥。",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "运行中",
   "coreStarting": "启动中…",
   "coreStopped": "已停止",

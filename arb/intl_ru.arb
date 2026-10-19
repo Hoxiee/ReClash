@@ -1183,6 +1183,102 @@
   "updateSeeFullReleaseNotes": "Все примечания к релизу",
   "updateShowAllNotes": "Показать все изменения",
   "updateInstalledVersion": "Установлена версия {version}",
+  "urlScheme": "URL-схема",
+  "urlSchemeIntro": "Свяжите ReClash с ярлыками, сайтами и другими приложениями. Создайте готовую ссылку или проверьте её перед открытием.",
+  "urlSchemeConnection": "Подключение",
+  "urlSchemeProfiles": "Профили",
+  "urlSchemeConfirmationTip": "Внешние команды подключения и закрытия требуют подтверждения. Сначала завершите настройку подключения.",
+  "urlSchemeProfileCommandsTip": "Команды профилей открывают конструктор. Входящий импорт требует согласия и проходит обычные проверки и преобразование.",
+  "urlSchemeSupportedLinks": "Поддерживаемые ссылки импорта",
+  "urlSchemeSupportedLinksTip": "Ссылки Clash, обёртки INCY и Happ и ссылки на прокси работают также при ручном импорте и сканировании QR. Неизвестные версии шифрования отклоняются.",
+  "urlSchemeWrappedLinks": "Ссылки подписок, встроенные конфигурации и INCY crypt1",
+  "urlSchemeProxyLinks": "Ссылки на прокси",
+  "urlSchemeConnect": "Подключить",
+  "urlSchemeConnectDesc": "Запустить подключение с выбранным профилем и текущими настройками охвата.",
+  "urlSchemeDisconnect": "Отключить",
+  "urlSchemeDisconnectDesc": "Остановить подключение, не меняя выбранный профиль.",
+  "urlSchemeToggle": "Переключить подключение",
+  "urlSchemeToggleDesc": "Подключить, если остановлено; отключить, если запущено. В подтверждении указано фактическое действие.",
+  "urlSchemeOpen": "Показать приложение",
+  "urlSchemeOpenDesc": "Вывести ReClash на передний план, не меняя подключение.",
+  "urlSchemeClose": "Закрыть приложение",
+  "urlSchemeCloseDesc": "Следовать настройке закрытия: скрыть окно или выйти из ReClash. На Android используется обычное поведение закрытия приложения.",
+  "urlSchemeAdd": "Добавить подписку",
+  "urlSchemeAddDesc": "Создать профиль по HTTP- или HTTPS-ссылке подписки с необязательным именем.",
+  "urlSchemeImport": "Импортировать конфигурацию",
+  "urlSchemeImportDesc": "Импортировать встроенную в ссылку UTF-8-конфигурацию в Base64 с необязательным именем.",
+  "urlSchemeInstallConfig": "Установить конфигурацию",
+  "urlSchemeInstallConfigDesc": "Импортировать подписку через формат install-config, поддерживаемый клиентами Clash.",
+  "urlSchemeBuild": "Создать ссылку",
+  "urlSchemeInspect": "Проверить ссылку",
+  "urlSchemeAction": "Действие",
+  "urlSchemeParameters": "Параметры",
+  "urlSchemeCopyLink": "Скопировать ссылку",
+  "urlSchemeUseExample": "Подставить пример",
+  "urlSchemeExampleProfile": "Пример профиля",
+  "urlSchemeConfigHint": "Вставьте конфигурацию YAML или JSON",
+  "urlSchemeBuilderTip": "В ссылку входят только поля выбранного действия. Ссылка конфигурации содержит все её данные и не позволяет обойти подтверждение.",
+  "urlSchemePreview": "Предпросмотр ссылки",
+  "urlSchemePreviewEmpty": "Заполните обязательные поля, чтобы увидеть ссылку.",
+  "urlSchemePrivateLinkTip": "Ссылка может содержать токены доступа и учётные данные прокси. Делитесь ею только с теми, кому доверяете; ReClash не хранит историю ссылок.",
+  "urlSchemeCopyFailed": "Не удалось скопировать ссылку. Повторите попытку.",
+  "urlSchemePasteFailed": "Не удалось прочитать буфер обмена. Вставьте ссылку вручную.",
+  "urlSchemeInspectTip": "Проверка выполняется на устройстве. Она не открывает ссылку, не скачивает подписку и не импортирует профиль.",
+  "urlSchemeInspectHint": "Вставьте ссылку приложения или профиля",
+  "urlSchemeInspectionResult": "Результат проверки",
+  "urlSchemeRecognized": "Ссылка распознана",
+  "urlSchemeNoExecution": "Никакие действия не выполнялись.",
+  "urlSchemeInspectionLimit": "Структура ссылки корректна. Доступность подписки и проверка ядром выполняются только при импорте.",
+  "urlSchemeContentFormat": "Формат содержимого",
+  "urlSchemeConfigSummary": "Состав конфигурации",
+  "urlSchemeConfigCounts": "Прокси: {nodes}, группы: {groups}, удалённые провайдеры: {providers}",
+  "urlSchemeConversionWarning": "При преобразовании часть содержимого пропускается. Проверьте и подтвердите изменения во время импорта.",
+  "urlSchemeConfirmTitle": "Внешняя команда приложения",
+  "urlSchemeConfirmMessage": "Ссылка запрашивает действие «{action}». Разрешить ReClash выполнить его?",
+  "urlSchemeImportConfirm": "Импортировать «{name}» из {source}? После согласия выполнятся проверка профиля и рассмотрение преобразований.",
+  "urlSchemeEmbeddedConfig": "Встроенная конфигурация",
+  "urlSchemeSetupRequired": "Завершите настройку подключения перед использованием внешних команд подключения.",
+  "urlSchemeDeliveryError": "Не удалось доставить ссылку или очередь заполнена. Повторите попытку после завершения текущего действия.",
+  "urlSchemeInvalidLink": "Ссылка некорректна. Проверьте её структуру и percent encoding.",
+  "urlSchemeUnknownCommand": "Эта команда ссылки не поддерживается.",
+  "urlSchemeMissingPayload": "В ссылке отсутствует URL подписки или конфигурация.",
+  "urlSchemeInvalidUrl": "Укажите корректный HTTP- или HTTPS-адрес подписки.",
+  "urlSchemeInvalidName": "Имя профиля должно содержать не более 64 символов и не иметь управляющих символов.",
+  "urlSchemeInvalidBase64": "Встроенная конфигурация не является корректными UTF-8-данными в Base64.",
+  "urlSchemeTooLarge": "Ссылка превышает 4 МБ или встроенная конфигурация превышает 2 МБ.",
+  "urlSchemeTooDeep": "В ссылке слишком много вложенных обёрток.",
+  "urlSchemeUnsupportedEncryption": "Эта версия шифрования не поддерживается. Запросите обычную ссылку подписки.",
+  "urlSchemeAuthenticationFailed": "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ.",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "Работает",
   "coreStarting": "Запускается…",
   "coreStopped": "Остановлено",

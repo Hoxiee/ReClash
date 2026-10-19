@@ -24,6 +24,8 @@ checks:
     argv: [flutter, test, test/widgets/fork_tooltip_contract_test.dart, test/lint/icon_button_tooltip_test.dart]
   identity:
     argv: [flutter, test, test/tool/fork_identity_test.dart]
+  url-scheme:
+    argv: [flutter, test, test/common/link_test.dart, test/common/url_scheme_test.dart, test/subscriptions/external_link_test.dart, test/providers/url_scheme_action_test.dart, test/providers/profiles_action_test.dart, test/features/url_scheme_test.dart, test/views/url_scheme_view_test.dart, test/views/tools_catalog_test.dart, test/widgets/tools_workspace_test.dart, test/tool/url_scheme_registration_test.dart]
   subscription-compatibility:
     argv: [flutter, test, test/subscriptions/compatibility, test/subscriptions/protocol_transport_test.dart]
   subscription-foundation:

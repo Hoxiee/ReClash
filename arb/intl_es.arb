@@ -1183,6 +1183,102 @@
   "updateSeeFullReleaseNotes": "Ver todas las notas de la versión",
   "updateShowAllNotes": "Mostrar todos los cambios",
   "updateInstalledVersion": "Versión instalada: {version}",
+  "urlScheme": "Esquema de URL",
+  "urlSchemeIntro": "Conecta ReClash con atajos, sitios web y otras aplicaciones. Crea un enlace listo para usar o compruébalo antes de abrirlo.",
+  "urlSchemeConnection": "Conexión",
+  "urlSchemeProfiles": "Perfiles",
+  "urlSchemeConfirmationTip": "Los comandos externos de conexión y cierre requieren confirmación. Completa la configuración antes de usar los comandos de conexión.",
+  "urlSchemeProfileCommandsTip": "Los comandos de perfiles abren el generador. Las importaciones entrantes piden confirmación y mantienen las comprobaciones de validación y conversión.",
+  "urlSchemeSupportedLinks": "Enlaces de importación compatibles",
+  "urlSchemeSupportedLinksTip": "Los enlaces Clash, los envoltorios INCY y Happ y los enlaces de proxy también funcionan en la importación manual y el escaneo QR. Se rechazan las versiones de cifrado desconocidas.",
+  "urlSchemeWrappedLinks": "Enlaces de suscripción, configuraciones integradas e INCY crypt1",
+  "urlSchemeProxyLinks": "Enlaces de proxy",
+  "urlSchemeConnect": "Conectar",
+  "urlSchemeConnectDesc": "Inicia la conexión con el perfil seleccionado y la cobertura actual.",
+  "urlSchemeDisconnect": "Desconectar",
+  "urlSchemeDisconnectDesc": "Detiene la conexión sin cambiar el perfil seleccionado.",
+  "urlSchemeToggle": "Alternar conexión",
+  "urlSchemeToggleDesc": "Conecta si está detenida; desconecta si está activa. La confirmación indica la acción real.",
+  "urlSchemeOpen": "Mostrar aplicación",
+  "urlSchemeOpenDesc": "Trae ReClash al primer plano sin cambiar la conexión.",
+  "urlSchemeClose": "Cerrar aplicación",
+  "urlSchemeCloseDesc": "Sigue la opción de cierre: ocultar la ventana o salir de ReClash. Android usa su comportamiento habitual de cierre.",
+  "urlSchemeAdd": "Añadir suscripción",
+  "urlSchemeAddDesc": "Crea un perfil desde una URL de suscripción HTTP o HTTPS, con un nombre opcional.",
+  "urlSchemeImport": "Importar configuración",
+  "urlSchemeImportDesc": "Importa una configuración UTF-8 incluida en el enlace como Base64, con un nombre opcional.",
+  "urlSchemeInstallConfig": "Instalar configuración",
+  "urlSchemeInstallConfigDesc": "Importa una suscripción con el formato de enlace install-config compatible con clientes Clash.",
+  "urlSchemeBuild": "Crear enlace",
+  "urlSchemeInspect": "Comprobar enlace",
+  "urlSchemeAction": "Acción",
+  "urlSchemeParameters": "Parámetros",
+  "urlSchemeCopyLink": "Copiar enlace",
+  "urlSchemeUseExample": "Usar ejemplo",
+  "urlSchemeExampleProfile": "Perfil de ejemplo",
+  "urlSchemeConfigHint": "Pega una configuración YAML o JSON",
+  "urlSchemeBuilderTip": "Solo se incluyen los campos de esta acción. Los enlaces de configuración contienen todos los datos y nunca omiten la confirmación.",
+  "urlSchemePreview": "Vista previa del enlace",
+  "urlSchemePreviewEmpty": "Completa los campos obligatorios para ver el enlace.",
+  "urlSchemePrivateLinkTip": "Un enlace puede contener tokens de acceso o credenciales de proxy. Compártelo solo con personas de confianza; ReClash no guarda un historial.",
+  "urlSchemeCopyFailed": "No se pudo copiar el enlace. Inténtalo de nuevo.",
+  "urlSchemePasteFailed": "No se pudo leer el portapapeles. Pega el enlace manualmente.",
+  "urlSchemeInspectTip": "La comprobación es local. No abre el enlace, descarga suscripciones ni importa perfiles.",
+  "urlSchemeInspectHint": "Pega un enlace de aplicación o perfil",
+  "urlSchemeInspectionResult": "Resultado de la comprobación",
+  "urlSchemeRecognized": "Enlace reconocido",
+  "urlSchemeNoExecution": "No se ha ejecutado ninguna acción.",
+  "urlSchemeInspectionLimit": "La estructura del enlace es válida. La disponibilidad de la suscripción y la validación del núcleo se comprueban durante la importación.",
+  "urlSchemeContentFormat": "Formato del contenido",
+  "urlSchemeConfigSummary": "Contenido de la configuración",
+  "urlSchemeConfigCounts": "{nodes} proxies, {groups} grupos, {providers} proveedores remotos",
+  "urlSchemeConversionWarning": "La conversión omite parte del contenido. Revisa y aprueba los cambios durante la importación.",
+  "urlSchemeConfirmTitle": "Comando externo de aplicación",
+  "urlSchemeConfirmMessage": "Este enlace solicita «{action}». ¿Permitir que ReClash realice esta acción?",
+  "urlSchemeImportConfirm": "¿Importar «{name}» desde {source}? Tras la confirmación se validará el perfil y se revisarán las conversiones necesarias.",
+  "urlSchemeEmbeddedConfig": "Configuración integrada",
+  "urlSchemeSetupRequired": "Completa la configuración de conexión antes de usar comandos externos de conexión.",
+  "urlSchemeDeliveryError": "No se pudo entregar el enlace o la cola está llena. Inténtalo de nuevo cuando termine la acción actual.",
+  "urlSchemeInvalidLink": "El enlace está mal formado. Comprueba su estructura y la codificación porcentual.",
+  "urlSchemeUnknownCommand": "Este comando de enlace no es compatible.",
+  "urlSchemeMissingPayload": "Falta una URL de suscripción o una configuración en el enlace.",
+  "urlSchemeInvalidUrl": "Introduce una URL de suscripción HTTP o HTTPS válida.",
+  "urlSchemeInvalidName": "Usa un nombre de perfil de hasta 64 caracteres, sin caracteres de control.",
+  "urlSchemeInvalidBase64": "La configuración integrada no contiene datos UTF-8 Base64 válidos.",
+  "urlSchemeTooLarge": "El enlace supera los 4 MB o la configuración integrada supera los 2 MB.",
+  "urlSchemeTooDeep": "El enlace contiene demasiados envoltorios anidados.",
+  "urlSchemeUnsupportedEncryption": "Esta versión de cifrado no es compatible. Solicita un enlace de suscripción sin cifrar.",
+  "urlSchemeAuthenticationFailed": "No se pudo autenticar el enlace cifrado. Puede estar dañado o usar otra clave.",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "En ejecución",
   "coreStarting": "Iniciando…",
   "coreStopped": "Detenido",

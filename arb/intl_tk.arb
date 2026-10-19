@@ -1178,6 +1178,102 @@
   "updateSeeFullReleaseNotes": "Doly reliz belliklerini gör",
   "updateShowAllNotes": "Ähli üýtgeşmeleri görkez",
   "updateInstalledVersion": "Gurnalan wersiýa: {version}",
+  "urlScheme": "URL shemasy",
+  "urlSchemeIntro": "ReClash-y gysga ýollar, web sahypalary we beýleki programmalar bilen baglanyşdyryň. Taýýar salgylanma dörediň ýa-da açmazdan öň barlaň.",
+  "urlSchemeConnection": "Birikme",
+  "urlSchemeProfiles": "Profiller",
+  "urlSchemeConfirmationTip": "Daşarky birikme we ýapmak buýruklary tassyklamagy talap edýär. Birikme buýruklaryny ulanmazdan öň başlangyç sazlamany tamamlaň.",
+  "urlSchemeProfileCommandsTip": "Profil buýruklary döredijini açýar. Daşarky import tassyklama soraýar we adaty barlaglary hem-de öwürmäni saklaýar.",
+  "urlSchemeSupportedLinks": "Goldanylýan import salgylanmalary",
+  "urlSchemeSupportedLinksTip": "Clash salgylanmalary, INCY we Happ örtükleri hem-de proksi salgylanmalary el bilen importda we QR skanerde hem işleýär. Näbelli şifrleme wersiýalary ret edilýär.",
+  "urlSchemeWrappedLinks": "Abunalyk salgylanmalary, goşulan konfigurasiýalar we INCY crypt1",
+  "urlSchemeProxyLinks": "Proksi paýlaşma salgylanmalary",
+  "urlSchemeConnect": "Birikdir",
+  "urlSchemeConnectDesc": "Saýlanan profil we häzirki gurşaw sazlamalary bilen birikmäni başlat.",
+  "urlSchemeDisconnect": "Birikmäni kes",
+  "urlSchemeDisconnectDesc": "Saýlanan profili üýtgetmän birikmäni sakla.",
+  "urlSchemeToggle": "Birikmäni çalyş",
+  "urlSchemeToggleDesc": "Saklanan bolsa birikdir, işleýän bolsa kes. Tassyklamada hakyky hereket görkezilýär.",
+  "urlSchemeOpen": "Programmany görkez",
+  "urlSchemeOpenDesc": "Birikmäni üýtgetmän ReClash-y öňe çykar.",
+  "urlSchemeClose": "Programmany ýap",
+  "urlSchemeCloseDesc": "Ýapmak sazlamasyna eýer: penjiräni gizle ýa-da ReClash-dan çyk. Android adaty programma ýapmak hereketini ulanýar.",
+  "urlSchemeAdd": "Abunalyk goş",
+  "urlSchemeAddDesc": "HTTP ýa-da HTTPS abunalyk salgysyndan profil döret. At hökmany däl.",
+  "urlSchemeImport": "Konfigurasiýany import et",
+  "urlSchemeImportDesc": "Salgylanma Base64 görnüşinde goşulan UTF-8 konfigurasiýany import et. At hökmany däl.",
+  "urlSchemeInstallConfig": "Konfigurasiýany gur",
+  "urlSchemeInstallConfigDesc": "Clash müşderileriniň goldaýan install-config salgylanma görnüşi bilen abunalygy import et.",
+  "urlSchemeBuild": "Salgylanma döret",
+  "urlSchemeInspect": "Salgylanmany barla",
+  "urlSchemeAction": "Hereket",
+  "urlSchemeParameters": "Parametrler",
+  "urlSchemeCopyLink": "Salgylanmany göçür",
+  "urlSchemeUseExample": "Mysaly ulan",
+  "urlSchemeExampleProfile": "Mysal profil",
+  "urlSchemeConfigHint": "YAML ýa-da JSON konfigurasiýasyny goýuň",
+  "urlSchemeBuilderTip": "Diňe şu herekete gerekli meýdanlar goşulýar. Konfigurasiýa salgylanmasy doly mazmuny saklaýar we tassyklamadan sowlup geçmeýär.",
+  "urlSchemePreview": "Salgylanmany öňünden görmek",
+  "urlSchemePreviewEmpty": "Salgylanmany görmek üçin hökmany meýdanlary dolduryň.",
+  "urlSchemePrivateLinkTip": "Salgylanmada giriş tokenleri ýa-da proksi giriş maglumatlary bolup biler. Diňe ynanýan adamlaryňyz bilen paýlaşyň; ReClash salgylanma taryhyny saklamaýar.",
+  "urlSchemeCopyFailed": "Salgylanmany göçürip bolmady. Täzeden synanyşyň.",
+  "urlSchemePasteFailed": "Alyş-çalyş buferini okap bolmady. Salgylanmany el bilen goýuň.",
+  "urlSchemeInspectTip": "Barlag şu enjamda ýerine ýetirilýär. Ol salgylanmany açmaýar, abunalygy ýüklemeýär we profili import etmeýär.",
+  "urlSchemeInspectHint": "Programma ýa-da profil salgylanmasyny goýuň",
+  "urlSchemeInspectionResult": "Barlag netijesi",
+  "urlSchemeRecognized": "Salgylanma tanaldy",
+  "urlSchemeNoExecution": "Hiç bir hereket ýerine ýetirilmedi.",
+  "urlSchemeInspectionLimit": "Salgylanmanyň gurluşy dogry. Abunalygyň elýeterliligi we ýadro barlagy diňe import wagtynda barlanýar.",
+  "urlSchemeContentFormat": "Mazmunyň görnüşi",
+  "urlSchemeConfigSummary": "Konfigurasiýanyň mazmuny",
+  "urlSchemeConfigCounts": "Proksiler: {nodes}, toparlar: {groups}, uzakdaky üpjün edijiler: {providers}",
+  "urlSchemeConversionWarning": "Öwürme käbir mazmuny aýyrýar. Import wagtynda üýtgeşmeleri gözden geçiriň we tassyklaň.",
+  "urlSchemeConfirmTitle": "Daşarky programma buýrugy",
+  "urlSchemeConfirmMessage": "Bu salgylanma «{action}» hereketini soraýar. ReClash-a ony ýerine ýetirmäge rugsat berilsinmi?",
+  "urlSchemeImportConfirm": "{source} çeşmesinden «{name}» import edilsinmi? Tassyklamadan soň profil we öwürmeler barlanar.",
+  "urlSchemeEmbeddedConfig": "Goşulan konfigurasiýa",
+  "urlSchemeSetupRequired": "Daşarky birikme buýruklaryny ulanmazdan öň birikme sazlamasyny tamamlaň.",
+  "urlSchemeDeliveryError": "Salgylanmany ýetirip bolmady ýa-da nobat doldy. Häzirki hereket tamamlanandan soň täzeden synanyşyň.",
+  "urlSchemeInvalidLink": "Salgylanma nädogry. Gurluşyny we göterim kodlamasyny barlaň.",
+  "urlSchemeUnknownCommand": "Bu salgylanma buýrugy goldanylmaýar.",
+  "urlSchemeMissingPayload": "Salgylanmada abunalyk URL salgysy ýa-da konfigurasiýa ýok.",
+  "urlSchemeInvalidUrl": "Dogry HTTP ýa-da HTTPS abunalyk URL salgysyny giriziň.",
+  "urlSchemeInvalidName": "Profil ady dolandyryş nyşanlary bolmazdan 64 nyşandan köp bolmaly däl.",
+  "urlSchemeInvalidBase64": "Goşulan konfigurasiýa dogry UTF-8 Base64 maglumatlary däl.",
+  "urlSchemeTooLarge": "Salgylanma 4 MB-den ýa-da goşulan konfigurasiýa 2 MB-den uly.",
+  "urlSchemeTooDeep": "Salgylanmada iç-içe örtükler aşa köp.",
+  "urlSchemeUnsupportedEncryption": "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
+  "urlSchemeAuthenticationFailed": "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler.",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "Çekirdek işleýär",
   "coreStarting": "Işe başlaýar…",
   "coreStopped": "Saklandy",
