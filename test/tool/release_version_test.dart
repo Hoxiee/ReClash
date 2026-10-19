@@ -33,9 +33,19 @@ void main() {
     final initial = ReleaseVersion.parse('0.1.0-pre.1');
     expect(initial.name, '0.1.0-pre.1');
     expect(initial.buildNumber, isNull);
+    expect(initial.flutterBuildNumber, '1');
     expect(initial.debianVersion, '1:0.1.0~pre.1-1');
     expect(initial.pacmanRelease, '1');
     expect(() => initial.macosBuildNumber, throwsStateError);
+  });
+
+  test('provides numeric Flutter build numbers for prereleases', () {
+    expect(ReleaseVersion.parse('0.1.0-pre.2').flutterBuildNumber, '2');
+    expect(
+      ReleaseVersion.parse('0.1.0-pre.1+2026091501').flutterBuildNumber,
+      '2026091501',
+    );
+    expect(ReleaseVersion.parse('1.0.0').flutterBuildNumber, '1');
   });
 
   test('preserves per-ABI Android upgrade ordering and Play limits', () {

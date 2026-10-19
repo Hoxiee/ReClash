@@ -5,6 +5,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/core/spill.dart';
@@ -33,7 +34,16 @@ import '../helpers/app_paths.dart';
 import '../helpers/preferences.dart';
 import '../helpers/test_profiles.dart';
 
-class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
+  @override
+  Future<CoreInfo?> getCoreInfo() async => null;
+
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async => DesktopPrivilegeDecision.notRequired;
+}
 
 class _NoopProxiesAction extends ProxiesAction {
   @override
@@ -90,7 +100,16 @@ class TestCommonAction extends CommonAction {
 }
 
 class TestSetupAction extends SetupAction {
+  final pauseCalls = <(bool, bool)>[];
+
+  @override
+  Future<bool> setOnDemandPause(bool paused, {required bool fullStop}) async {
+    pauseCalls.add((paused, fullStop));
+    return true;
+  }
+
   final List<bool> coreRunningCalls = [];
+  final firstCoreCall = Completer<void>();
   final List<Completer<void>> pendingCoreCalls = [];
   int trafficResets = 0;
   int applyProfileCalls = 0;
@@ -101,24 +120,35 @@ class TestSetupAction extends SetupAction {
   Error? coreRunningError;
   final Set<bool> unansweredCoreCalls = {};
   int authorizeCalls = 0;
-  AuthorizeCode authorizeResult = AuthorizeCode.none;
   DateTime? serviceStart;
+  Completer<DateTime?>? pendingServiceStart;
 
   @override
-  Future<DateTime?> serviceStartTime() async => serviceStart;
+  Future<DateTime?> serviceStartTime() async => pendingServiceStart == null
+      ? serviceStart
+      : await pendingServiceStart!.future;
 
   @override
   Duration get minApplyDebounce => const Duration(milliseconds: 100);
+  DesktopPrivilegeDecision authorizeResult =
+      DesktopPrivilegeDecision.notRequired;
+  final List<bool> authorizationPrompts = [];
+  Completer<DesktopPrivilegeDecision>? pendingAuthorization;
 
   @override
-  Future<AuthorizeCode> authorizeCore() async {
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    required bool allowPrompt,
+  }) async {
     authorizeCalls++;
-    return authorizeResult;
+    authorizationPrompts.add(allowPrompt);
+    return await pendingAuthorization?.future ?? authorizeResult;
   }
 
   @override
   Future<bool> setCoreRunning(bool running) async {
     coreRunningCalls.add(running);
+    if (!firstCoreCall.isCompleted) firstCoreCall.complete();
     if (blockCoreCalls) {
       final gate = Completer<void>();
       pendingCoreCalls.add(gate);
@@ -178,6 +208,9 @@ void main() {
     action = TestSetupAction();
     container = ProviderContainer(
       overrides: [
+        coreHandlerProvider.overrideWithValue(
+          CoreController.scoped(_MockCoreHandlerInterface()),
+        ),
         profilesProvider.overrideWith(TestProfiles.new),
         setupActionProvider.overrideWith(() => action),
         commonActionProvider.overrideWith(TestCommonAction.new),
@@ -256,6 +289,9 @@ void main() {
       final scopedAction = TestSetupAction();
       final scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           commonActionProvider.overrideWith(TestCommonAction.new),
@@ -466,6 +502,9 @@ void main() {
     SetupAction buildScoped() {
       scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(TestSetupAction.new),
           commonActionProvider.overrideWith(TestCommonAction.new),
@@ -553,62 +592,77 @@ void main() {
   });
 
   group('suspend', () {
-    test('skips starting the core on an excluded SSID', () async {
-      container.dispose();
-      action = TestSetupAction();
-      container = ProviderContainer(
-        overrides: [
-          profilesProvider.overrideWith(TestProfiles.new),
-          setupActionProvider.overrideWith(() => action),
-          commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-        ],
-      );
-      globalState.container = container;
-      container.read(initProvider.notifier).value = true;
-      container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
+    test(
+      'starts the core and preserves the core on an excluded SSID',
+      () async {
+        container.dispose();
+        action = TestSetupAction();
+        container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupActionProvider.overrideWith(() => action),
+            commonActionProvider.overrideWith(TestCommonAction.new),
+            excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          ],
+        );
+        globalState.container = container;
+        container.read(initProvider.notifier).value = true;
+        container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
 
-      await container.read(setupActionProvider.notifier).setRunning(true);
+        await container.read(setupActionProvider.notifier).setRunning(true);
 
-      expect(action.coreRunningCalls, isEmpty);
-      expect(container.read(runningVpnOptionsProvider), isNull);
-    });
+        expect(action.coreRunningCalls, [true]);
+        expect(action.pauseCalls, [(true, false)]);
+        expect(container.read(runningVpnOptionsProvider), isNotNull);
+      },
+    );
 
-    test('an excluded SSID parks a run and leaving it resumes', () async {
-      container.dispose();
-      action = TestSetupAction();
-      container = ProviderContainer(
-        overrides: [
-          profilesProvider.overrideWith(TestProfiles.new),
-          setupActionProvider.overrideWith(() => action),
-          commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-        ],
-      );
-      globalState.container = container;
-      container.read(initProvider.notifier).value = true;
-      final setup = container.read(setupActionProvider.notifier);
-      await setup.setRunning(true);
-      action.coreRunningCalls.clear();
+    test(
+      'an excluded SSID pauses without ending the run and leaving resumes',
+      () async {
+        container.dispose();
+        action = TestSetupAction();
+        container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupActionProvider.overrideWith(() => action),
+            commonActionProvider.overrideWith(TestCommonAction.new),
+            excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          ],
+        );
+        globalState.container = container;
+        container.read(initProvider.notifier).value = true;
+        final setup = container.read(setupActionProvider.notifier);
+        await setup.setRunning(true);
+        action.coreRunningCalls.clear();
 
-      container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
-      setup.syncSuspend();
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+        container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
+        setup.syncSuspend();
+        await Future<void>.delayed(const Duration(milliseconds: 700));
 
-      expect(action.coreRunningCalls, [false]);
-      expect(container.read(isStartProvider), isTrue);
-      expect(container.read(runningVpnOptionsProvider), isNull);
+        expect(action.coreRunningCalls, isEmpty);
+        expect(action.pauseCalls, [(true, false)]);
+        expect(container.read(isStartProvider), isTrue);
+        expect(container.read(runningVpnOptionsProvider), isNotNull);
 
-      container.read(currentSSIDProvider.notifier).value = 'Home';
-      setup.syncSuspend();
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+        container.read(currentSSIDProvider.notifier).value = 'Home';
+        setup.syncSuspend();
+        await Future<void>.delayed(const Duration(milliseconds: 700));
 
-      expect(action.coreRunningCalls, [false, true]);
-      expect(
-        container.read(runningVpnOptionsProvider),
-        await container.read(vpnOptionsProvider.future),
-      );
-    });
+        expect(action.coreRunningCalls, isEmpty);
+        expect(action.pauseCalls, [(true, false), (false, false)]);
+        expect(
+          container.read(runningVpnOptionsProvider),
+          await container.read(vpnOptionsProvider.future),
+        );
+      },
+    );
 
     test('an SSID change leaves a stopped run alone', () async {
       markInitialized();
@@ -623,6 +677,9 @@ void main() {
       action = TestSetupAction();
       container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => action),
           commonActionProvider.overrideWith(TestCommonAction.new),
@@ -703,7 +760,7 @@ void main() {
       action.blockCoreCalls = true;
 
       final stopping = notifier.setRunning(false);
-      await Future<void>.delayed(Duration.zero);
+      await action.firstCoreCall.future;
       final starting = notifier.setRunning(true);
       await Future<void>.delayed(Duration.zero);
 
@@ -729,7 +786,7 @@ void main() {
         action.unansweredCoreCalls.add(true);
 
         final starting = notifier.setRunning(true);
-        await Future<void>.delayed(Duration.zero);
+        await action.firstCoreCall.future;
         final stopping = notifier.setRunning(false);
         await Future<void>.delayed(Duration.zero);
 
@@ -803,17 +860,39 @@ void main() {
 
       await container.read(setupActionProvider.notifier).initStatus();
 
-      expect(action.coreRunningCalls, [true]);
+      expect(action.coreRunningCalls, isEmpty);
       expect(action.appliedForce, [false]);
       expect(globalState.lastConfigMd5, 'running');
       expect(container.read(isStartProvider), isTrue);
     });
   });
 
+  test('a stop supersedes an in-flight native status restore', () async {
+    action.pendingServiceStart = Completer<DateTime?>();
+    final notifier = container.read(setupActionProvider.notifier);
+    final restore = notifier.initStatus();
+    await notifier.setRunning(false);
+    action.pendingServiceStart!.complete(
+      DateTime.now().subtract(const Duration(minutes: 1)),
+    );
+    await restore;
+
+    expect(action.coreRunningCalls, [false]);
+    expect(action.applyProfileCalls, 0);
+    expect(container.read(isStartProvider), isFalse);
+  });
+
   group('requestAdmin', () {
+    test('an explicit start grants one privilege prompt', () async {
+      await action.setRunning(true, initialize: true, allowPrompt: true);
+      await action.requestAdmin(true);
+      await action.requestAdmin(true);
+
+      expect(action.authorizationPrompts, [true, false]);
+    });
+
     test('never asks for authorization while tun is disabled', () async {
       expect(await action.requestAdmin(false), isTrue);
-
       expect(action.authorizeCalls, 0);
       expect(
         container.read(authorizedTunEnableProvider),
@@ -825,6 +904,9 @@ void main() {
       final scopedAction = TestSetupAction();
       final scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           safeModeProvider.overrideWithValue(true),
@@ -832,7 +914,6 @@ void main() {
       );
       addTearDown(scoped.dispose);
       scoped.read(setupActionProvider.notifier);
-
       expect(await scopedAction.requestAdmin(true), isTrue);
       expect(scopedAction.authorizeCalls, 0);
       expect(
@@ -841,21 +922,12 @@ void main() {
       );
     });
 
-    test('does not ask again once the state left none', () async {
-      container.read(authorizedTunEnableProvider.notifier).value =
-          TunAuthorizationState.authorized;
-
-      expect(await action.requestAdmin(true), isTrue);
-      expect(action.authorizeCalls, 0);
-    });
-
     test(
-      'a successful authorization hands off instead of continuing',
+      'an active privileged lease continues without another prompt',
       () async {
-        action.authorizeResult = AuthorizeCode.success;
-
-        expect(await action.requestAdmin(true), isFalse);
-        expect(action.authorizeCalls, 1);
+        action.authorizeResult = DesktopPrivilegeDecision.active;
+        expect(await action.requestAdmin(true), isTrue);
+        expect(action.authorizationPrompts, [false]);
         expect(
           container.read(authorizedTunEnableProvider),
           TunAuthorizationState.authorized,
@@ -863,31 +935,20 @@ void main() {
       },
     );
 
-    test('a platform without an authorization step continues inline', () async {
-      action.authorizeResult = AuthorizeCode.none;
-
-      expect(await action.requestAdmin(true), isTrue);
+    test('registration does not mark the privileged session active', () async {
+      action.authorizeResult = DesktopPrivilegeDecision.restartRequired;
+      expect(await action.requestAdmin(true), isFalse);
+      expect(action.authorizeCalls, 1);
       expect(
         container.read(authorizedTunEnableProvider),
-        TunAuthorizationState.authorized,
+        TunAuthorizationState.unauthorized,
       );
     });
 
     test(
-      'silent authorization failure preserves the selected TUN setting',
+      'a launch without TUN privileges continues without authorization',
       () async {
-        await AppLocalizations.load(const Locale('en'));
-        container
-            .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith.tun(enable: true));
-        action.authorizeResult = AuthorizeCode.error;
-
-        await expectLater(
-          action.requestAdmin(true, silence: true),
-          throwsA(isA<MessageException>()),
-        );
-
-        expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+        expect(await action.requestAdmin(true), isTrue);
         expect(
           container.read(authorizedTunEnableProvider),
           TunAuthorizationState.none,
@@ -895,29 +956,129 @@ void main() {
       },
     );
 
-    test('a failed authorization turns tun off and asks again on the next '
-        'enable', () async {
-      await AppLocalizations.load(const Locale('en'));
-      container
-          .read(patchClashConfigProvider.notifier)
-          .update((state) => state.copyWith.tun(enable: true));
-      action.authorizeResult = AuthorizeCode.error;
+    test(
+      'both silent and visible failures preserve the selected TUN setting',
+      () async {
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith.tun(enable: true));
+        action.authorizeResult = DesktopPrivilegeDecision.authorizationRequired;
+        for (final silence in [false, true]) {
+          await expectLater(
+            action.requestAdmin(true, silence: silence),
+            throwsA(
+              isA<DesktopPrivilegeException>().having(
+                (error) => error.code,
+                'code',
+                'authorization_required',
+              ),
+            ),
+          );
+        }
+        expect(action.authorizationPrompts, [false, false]);
+        expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.unauthorized,
+        );
+      },
+    );
 
-      expect(await action.requestAdmin(true), isTrue);
-      expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
+    test('stale authorization cannot reactivate a stopped intent', () async {
+      final pending = Completer<DesktopPrivilegeDecision>();
+      action.pendingAuthorization = pending;
+      final preparation = action.requestAdmin(true);
+      await action.setRunning(false);
+      pending.complete(DesktopPrivilegeDecision.active);
+      expect(await preparation, isTrue);
       expect(
         container.read(authorizedTunEnableProvider),
         TunAuthorizationState.none,
       );
-
-      action.authorizeResult = AuthorizeCode.success;
-
-      expect(await action.requestAdmin(true), isFalse);
-      expect(action.authorizeCalls, 2);
     });
   });
 
   group('updateConfig', () {
+    for (final status in [CoreStatus.disconnected, CoreStatus.connecting]) {
+      for (final safeMode in [false, true]) {
+        test('$status keeps offline settings without RPC or authorization '
+            '(safeMode=$safeMode)', () async {
+          final core = _MockCoreHandlerInterface();
+          when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+          final scopedAction = TestSetupAction();
+          final scoped = ProviderContainer(
+            overrides: [
+              profilesProvider.overrideWith(TestProfiles.new),
+              setupActionProvider.overrideWith(() => scopedAction),
+              coreHandlerProvider.overrideWithValue(
+                CoreController.scoped(core),
+              ),
+              coreStatusProvider.overrideWithValue(status),
+              safeModeProvider.overrideWithValue(safeMode),
+            ],
+          );
+          addTearDown(scoped.dispose);
+          scoped.read(setupActionProvider.notifier);
+          scoped
+              .read(patchClashConfigProvider.notifier)
+              .update(
+                (state) => state.copyWith(
+                  tun: state.tun.copyWith(enable: true),
+                  mixedPort: 8899,
+                ),
+              );
+
+          await scopedAction.updateConfig();
+
+          verifyNever(() => core.updateConfig(any()));
+          verifyNever(() => core.start());
+          verifyNever(() => core.restart());
+          expect(scopedAction.authorizeCalls, 0);
+          expect(scoped.read(patchClashConfigProvider).tun.enable, isTrue);
+          expect(scoped.read(patchClashConfigProvider).mixedPort, 8899);
+        });
+      }
+    }
+
+    test('reconnection receives settings kept while offline', () async {
+      final core = _MockCoreHandlerInterface();
+      when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+      final scopedAction = TestSetupAction();
+      final scoped = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          setupActionProvider.overrideWith(() => scopedAction),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithBuild(
+            (_, _) => CoreStatus.disconnected,
+          ),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      scoped.read(setupActionProvider.notifier);
+      scoped
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              mode: Mode.global,
+              mixedPort: 8899,
+              tun: state.tun.copyWith(enable: false),
+            ),
+          );
+
+      await scopedAction.updateConfig();
+      verifyNever(() => core.updateConfig(any()));
+      scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      await scopedAction.updateConfig();
+
+      final params =
+          verify(() => core.updateConfig(captureAny())).captured.single
+              as UpdateParams;
+      expect(params.mode, Mode.global);
+      expect(params.mixedPort, 8899);
+      expect(scopedAction.authorizeCalls, 0);
+    });
+
     test('safe mode pushes tun disabled even once authorized', () async {
       final core = _MockCoreHandlerInterface();
       when(() => core.updateConfig(any())).thenAnswer((_) async => '');
@@ -927,6 +1088,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
           safeModeProvider.overrideWithValue(true),
         ],
       );
@@ -958,6 +1120,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
           safeModeProvider.overrideWithValue(true),
         ],
       );
@@ -992,6 +1155,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
         ],
       );
       addTearDown(scoped.dispose);
@@ -1031,6 +1195,9 @@ void main() {
     ProviderContainer buildScoped(List<Profile> profiles, int? profileId) {
       final scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(() => TestProfiles(profiles)),
           currentProfileIdProvider.overrideWithBuild((_, _) => profileId),
           setupActionProvider.overrideWith(TestSetupAction.new),
@@ -1087,6 +1254,9 @@ void main() {
       ).copyWith(id: 1, currentGroupName: 'Manual');
       final scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(() => TestProfiles([profile])),
           currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
           setupActionProvider.overrideWith(TestSetupAction.new),
@@ -1105,6 +1275,9 @@ void main() {
       ).copyWith(id: 1, currentGroupName: 'Manual');
       final scoped = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           profilesProvider.overrideWith(() => TestProfiles([profile])),
           currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
           setupActionProvider.overrideWith(TestSetupAction.new),

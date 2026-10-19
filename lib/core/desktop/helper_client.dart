@@ -12,6 +12,7 @@ import 'package:win32_registry/win32_registry.dart';
 
 import 'core_manifest.dart';
 import 'launcher.dart';
+import 'linux_helper.dart';
 import 'model.dart';
 import 'process_probe.dart';
 
@@ -53,17 +54,18 @@ final class HelperException implements Exception {
 
 final class HelperClient {
   final Dio _dio;
-  final String Function() _expectedHelperPath;
+  final FutureOr<String> Function() _expectedHelperPath;
   final Future<String> Function() _readCoreSha256;
   final String Function() _baseUrl;
   String? _coreSha256Cache;
 
   HelperClient({
     Dio? dio,
-    String Function()? expectedHelperPath,
+    FutureOr<String> Function()? expectedHelperPath,
     Future<String> Function()? readCoreSha256,
     String? baseUrl,
-  }) : _dio = dio ?? _createDio(),
+    String? socketPath,
+  }) : _dio = dio ?? _createDio(socketPath: socketPath),
        _baseUrl = baseUrl == null ? _defaultBaseUrl : (() => baseUrl),
        _expectedHelperPath = expectedHelperPath ?? _defaultHelperPath,
        _readCoreSha256 = readCoreSha256 ?? _readBundledCoreSha256;
@@ -90,7 +92,7 @@ final class HelperClient {
   // The Helper protocol never leaves the machine; never route it through a
   // proxy. Linux carries it over a Unix socket the systemd unit owns, so the
   // authority in the URL is a placeholder the connection factory ignores.
-  static Dio _createDio() {
+  static Dio _createDio({String? socketPath}) {
     return Dio()
       ..httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
@@ -100,7 +102,7 @@ final class HelperClient {
             client.connectionFactory = (uri, proxyHost, proxyPort) {
               return Socket.startConnect(
                 InternetAddress(
-                  helperSocketPath,
+                  socketPath ?? helperSocketPath,
                   type: InternetAddressType.unix,
                 ),
                 0,
@@ -181,9 +183,9 @@ final class HelperClient {
         cancelToken: cancelToken,
         options: _options(ResponseType.plain, acceptAnyStatus: true),
       );
-      return response.statusCode == HttpStatus.ok
+      return await (response.statusCode == HttpStatus.ok
           ? _readyFromOk(response, logFailure)
-          : _notReadyFromPing(response, logFailure);
+          : _notReadyFromPing(response, logFailure));
     } catch (error) {
       _logPingFailure('helper ping failed: $error', logFailure);
       return HelperReadiness.notReady;
@@ -192,7 +194,10 @@ final class HelperClient {
     }
   }
 
-  HelperReadiness _readyFromOk(Response<Object?> response, bool logFailure) {
+  Future<HelperReadiness> _readyFromOk(
+    Response<Object?> response,
+    bool logFailure,
+  ) async {
     final protocolVersion = response.headers.value(helperProtocolVersionHeader);
     final helperPath = response.data;
     if (helperPath is! String) {
@@ -205,7 +210,7 @@ final class HelperClient {
     }
     final matches = _pathContext.equals(
       helperPath.trim(),
-      _expectedHelperPath(),
+      await _expectedHelperPath(),
     );
     if (!matches) {
       _logPingFailure('helper executable path mismatch', logFailure);
@@ -598,4 +603,16 @@ final class HelperCoreLease implements CoreProcessLease {
   }
 }
 
-final helperClient = HelperClient();
+HelperClient _createHelperClient() {
+  if (!Platform.isLinux) return HelperClient();
+  final environment = LinuxHelperEnvironment();
+  return HelperClient(
+    socketPath: environment.socketPath,
+    expectedHelperPath: environment.installedHelperPath,
+    readCoreSha256: () async =>
+        (await CoreManifest.readCoreSha256(path: environment.manifestPath)) ??
+        '',
+  );
+}
+
+final helperClient = _createHelperClient();

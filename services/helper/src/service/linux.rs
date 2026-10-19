@@ -1,16 +1,18 @@
+use super::linux_install;
 use crate::service::hub::{
-    ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown, routes,
+    begin_shutdown, ensure_core_sha256_configured, log_message,
+    release_managed_core_on_shutdown_confirmed, routes,
 };
-
 use anyhow::{bail, Context, Result};
 use std::ffi::{OsStr, OsString};
-use std::fs;
+use std::fs::{self, File, OpenOptions};
 use std::future::Future;
 use std::io::{Error, ErrorKind};
-use std::os::unix::fs::{FileTypeExt, MetadataExt, PermissionsExt};
-use std::path::Path;
+use std::os::fd::AsRawFd;
+use std::os::unix::fs::{FileTypeExt, MetadataExt, OpenOptionsExt, PermissionsExt};
+use std::os::unix::net::UnixDatagram;
+use std::path::{Path, PathBuf};
 use std::pin::Pin;
-use std::process::{Command, Stdio};
 use std::task::{Context as TaskContext, Poll};
 use std::time::Duration;
 use tokio::net::{UnixListener, UnixStream};
@@ -19,33 +21,29 @@ use tokio::signal::unix::{signal, SignalKind};
 use tokio::time::Sleep;
 use tokio_stream::Stream;
 
-const SERVICE_NAME: &str = "reclash-helper";
-const UNIT_PATH: &str = "/etc/systemd/system/reclash-helper.service";
-const RUNTIME_DIR_NAME: &str = "reclash";
-const SOCKET_PATH: &str = "/run/reclash/helper.sock";
 const OWNER_UID_ENV: &str = "RECLASH_HELPER_OWNER_UID";
 const OWNER_GID_ENV: &str = "RECLASH_HELPER_OWNER_GID";
-const SOCKET_MODE: u32 = 0o660;
+const NETWORK_CAPABILITIES: u64 = (1 << 12) | (1 << 13);
 const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
 
 #[derive(Debug, PartialEq, Eq)]
 enum ServiceCommand {
     Run,
-    Install,
+    Install(PathBuf),
     Uninstall,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct Owner {
-    uid: u32,
-    gid: u32,
+pub(super) struct Owner {
+    pub(super) uid: u32,
+    pub(super) gid: u32,
 }
 
 pub fn main() -> Result<()> {
     match service_command(std::env::args_os().skip(1))? {
         ServiceCommand::Run => run_service(),
-        ServiceCommand::Install => install_service(),
-        ServiceCommand::Uninstall => uninstall_service(),
+        ServiceCommand::Install(source) => linux_install::install(invoking_owner()?, &source),
+        ServiceCommand::Uninstall => linux_install::uninstall(invoking_owner()?),
     }
 }
 
@@ -53,213 +51,116 @@ fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<ServiceCo
     let mut args = args.into_iter();
     let command = match args.next().as_deref() {
         None => ServiceCommand::Run,
-        Some(value) if value == OsStr::new("install") => ServiceCommand::Install,
+        Some(value) if value == OsStr::new("install") => {
+            if args.next().as_deref() != Some(OsStr::new("--bundle")) {
+                bail!("installation requires --bundle and a verified staged pair");
+            }
+            let path = PathBuf::from(args.next().context("staged bundle path is missing")?);
+            if !path.is_absolute()
+                || path
+                    .components()
+                    .any(|part| matches!(part, std::path::Component::ParentDir))
+            {
+                bail!("invalid staged bundle path");
+            }
+            ServiceCommand::Install(path)
+        }
         Some(value) if value == OsStr::new("uninstall") => ServiceCommand::Uninstall,
         Some(value) => bail!("unknown helper command: {}", value.to_string_lossy()),
     };
     if args.next().is_some() {
-        bail!("helper accepts at most one command");
+        bail!("unexpected helper command arguments");
     }
     Ok(command)
 }
 
-pub(super) fn core_owner() -> Result<(u32, u32), Error> {
-    let owner = owner_from_env().map_err(Error::other)?;
-    Ok((owner.uid, owner.gid))
-}
-
-pub(super) fn ensure_owner_socket(address: &str) -> Result<(), Error> {
-    let owner = owner_from_env().map_err(Error::other)?;
-    let metadata = fs::symlink_metadata(address)?;
-    if !metadata.file_type().is_socket() || metadata.uid() != owner.uid {
-        return Err(Error::other(
-            "Core address is not a socket owned by the Helper owner",
-        ));
-    }
-    Ok(())
-}
-
-fn owner_from_env() -> Result<Owner> {
-    Ok(Owner {
-        uid: read_id_env(OWNER_UID_ENV)?,
-        gid: read_id_env(OWNER_GID_ENV)?,
-    })
-}
-
-fn read_id_env(name: &str) -> Result<u32> {
-    let value = std::env::var(name).with_context(|| format!("{name} is not set"))?;
-    parse_owner_id(&value).with_context(|| format!("{name} is not a usable ID"))
-}
-
-/// Root owns the Core already; an owner of 0 would mean the service is running
-/// for nobody and would hand the Core the credentials it is trying to avoid.
 fn parse_owner_id(value: &str) -> Result<u32> {
-    let id: u32 = value.trim().parse().context("expected an unsigned ID")?;
-    if id == 0 {
+    if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit()) {
+        bail!("expected a non-root numeric ID");
+    }
+    let id = value.parse::<u32>()?;
+    if id == 0 || id == u32::MAX {
         bail!("expected a non-root ID");
     }
     Ok(id)
 }
 
-/// pkexec and sudo both name the user who asked for the elevation; without one
-/// there is nobody to grant the socket to, so installation has no owner.
+fn owner_from_env() -> Result<Owner> {
+    Ok(Owner {
+        uid: parse_owner_id(&std::env::var(OWNER_UID_ENV).context("Helper owner UID is missing")?)?,
+        gid: parse_owner_id(&std::env::var(OWNER_GID_ENV).context("Helper owner GID is missing")?)?,
+    })
+}
+
 fn invoking_owner() -> Result<Owner> {
-    let uid = ["PKEXEC_UID", "SUDO_UID"]
-        .into_iter()
-        .find_map(|name| std::env::var(name).ok())
-        .context("neither PKEXEC_UID nor SUDO_UID is set; run the installer through pkexec")?;
-    let uid = parse_owner_id(&uid).context("the invoking user ID is not usable")?;
-    let gid = parse_owner_id(&invoking_gid(uid)?).context("the invoking group is not usable")?;
-    Ok(Owner { uid, gid })
-}
-
-fn invoking_gid(uid: u32) -> Result<String> {
-    let output = Command::new("id")
-        .args(["-g", &uid.to_string()])
-        .output()
-        .context("query the invoking user")?;
-    if !output.status.success() {
-        bail!("id -g {uid} failed with {}", output.status);
+    let uid = parse_owner_id(
+        &std::env::var("PKEXEC_UID").context("installation requires pkexec owner identity")?,
+    )?;
+    let mut entry: libc::passwd = unsafe { std::mem::zeroed() };
+    let mut found = std::ptr::null_mut();
+    let mut buffer = vec![0u8; 65536];
+    // SAFETY: the caller supplies valid storage for getpwuid_r and its result.
+    let result = unsafe {
+        libc::getpwuid_r(
+            uid,
+            &mut entry,
+            buffer.as_mut_ptr().cast(),
+            buffer.len(),
+            &mut found,
+        )
+    };
+    if result != 0 || found.is_null() || entry.pw_uid != uid || entry.pw_gid == 0 {
+        bail!("cannot resolve the pkexec invoking account");
     }
-    let value = String::from_utf8(output.stdout)
-        .context("id returned invalid UTF-8")?
-        .trim()
-        .to_string();
-    if value.is_empty() {
-        bail!("id -g {uid} returned nothing");
-    }
-    Ok(value)
+    Ok(Owner {
+        uid,
+        gid: entry.pw_gid,
+    })
 }
 
-/// systemd splits `ExecStart=` on whitespace and expands `%` specifiers, so the
-/// path travels double-quoted with its quotes, backslashes and `%` escaped.
-fn quoted_unit_argument(path: &Path) -> String {
-    let mut quoted = String::from("\"");
-    for character in path.to_string_lossy().chars() {
-        match character {
-            '"' | '\\' => {
-                quoted.push('\\');
-                quoted.push(character);
-            }
-            '%' => quoted.push_str("%%"),
-            _ => quoted.push(character),
-        }
-    }
-    quoted.push('"');
-    quoted
-}
-
-fn unit_contents(executable: &Path, owner: Owner) -> String {
-    format!(
-        "[Unit]\n\
-         Description=ReClash Helper starts the ReClash Core with the privileges TUN mode needs.\n\
-         After=network-online.target nftables.service iptables.service\n\
-         StartLimitIntervalSec=60\n\
-         StartLimitBurst=5\n\
-         \n\
-         [Service]\n\
-         Type=simple\n\
-         ExecStart={executable}\n\
-         Group={gid}\n\
-         Environment={OWNER_UID_ENV}={uid}\n\
-         Environment={OWNER_GID_ENV}={gid}\n\
-         RuntimeDirectory={RUNTIME_DIR_NAME}\n\
-         RuntimeDirectoryMode=0755\n\
-         Restart=on-failure\n\
-         RestartSec=5\n\
-         \n\
-         [Install]\n\
-         WantedBy=multi-user.target\n",
-        executable = quoted_unit_argument(executable),
-        uid = owner.uid,
-        gid = owner.gid,
-    )
-}
-
-/// The unit runs this binary as root at every boot, so one the invoking user
-/// could overwrite would turn a single polkit approval into standing root.
-fn ensure_root_owned(executable: &Path) -> Result<()> {
-    let directory = executable
-        .parent()
-        .context("helper executable has no parent directory")?;
-    for path in [executable, directory] {
-        let metadata = fs::metadata(path).with_context(|| format!("inspect {}", path.display()))?;
-        if metadata.uid() != 0 || metadata.mode() & 0o022 != 0 {
-            bail!(
-                "{} must be owned by root and not writable by group or others to run as a service; \
-                 install the package instead of running an unpacked bundle",
-                path.display()
-            );
-        }
+pub(super) fn ensure_core_owner() -> Result<(), Error> {
+    let owner = owner_from_env().map_err(Error::other)?;
+    if unsafe { libc::getuid() } != owner.uid
+        || unsafe { libc::geteuid() } != owner.uid
+        || unsafe { libc::getgid() } != owner.gid
+        || unsafe { libc::getegid() } != owner.gid
+    {
+        return Err(Error::other(
+            "Helper and Core must run as the non-root owner",
+        ));
     }
     Ok(())
 }
 
-fn installed_owner_uid(unit: &str) -> Option<u32> {
-    let prefix = format!("Environment={OWNER_UID_ENV}=");
-    unit.lines()
-        .find_map(|line| line.strip_prefix(prefix.as_str()))
-        .and_then(|value| value.trim().parse().ok())
-}
-
-fn ensure_unit_is_free_for(owner: Owner) -> Result<()> {
-    let existing = match fs::read_to_string(UNIT_PATH) {
-        Ok(contents) => contents,
-        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(()),
-        Err(error) => return Err(error).with_context(|| format!("read {UNIT_PATH}")),
-    };
-    match installed_owner_uid(&existing) {
-        Some(uid) if uid != owner.uid => bail!(
-            "the Helper is already installed for UID {uid}; \
-             run `ReClashHelperService uninstall` as that user first"
-        ),
-        _ => Ok(()),
+pub(super) fn ensure_owner_socket(address: &str) -> Result<(), Error> {
+    let owner = owner_from_env().map_err(Error::other)?;
+    let metadata = fs::symlink_metadata(address)?;
+    if !metadata.file_type().is_socket()
+        || metadata.uid() != owner.uid
+        || metadata.mode() & 0o077 != 0
+    {
+        return Err(Error::other(
+            "Core address is not a private socket owned by the Helper owner",
+        ));
     }
+    Ok(())
 }
 
-fn install_service() -> Result<()> {
-    let executable = std::env::current_exe().context("resolve helper executable path")?;
-    ensure_root_owned(&executable)?;
-    let owner = invoking_owner()?;
-    ensure_unit_is_free_for(owner)?;
-
-    fs::write(UNIT_PATH, unit_contents(&executable, owner))
-        .with_context(|| format!("write {UNIT_PATH}"))?;
-    fs::set_permissions(UNIT_PATH, fs::Permissions::from_mode(0o644))
-        .with_context(|| format!("secure {UNIT_PATH}"))?;
-
-    run_systemctl(&["daemon-reload"])?;
-    run_systemctl(&["enable", SERVICE_NAME])?;
-    run_systemctl(&["restart", SERVICE_NAME])
-}
-
-fn uninstall_service() -> Result<()> {
-    silence_systemctl(&["disable", "--now", SERVICE_NAME]);
-    match fs::remove_file(UNIT_PATH) {
-        Ok(()) => {}
-        Err(error) if error.kind() == ErrorKind::NotFound => return Ok(()),
-        Err(error) => return Err(error).with_context(|| format!("remove {UNIT_PATH}")),
+fn validate_capabilities(status: &str) -> Result<()> {
+    for field in ["CapInh:", "CapPrm:", "CapEff:", "CapBnd:", "CapAmb:"] {
+        let value = status
+            .lines()
+            .find_map(|line| line.strip_prefix(field))
+            .context("capability field missing")?;
+        if u64::from_str_radix(value.trim(), 16)? != NETWORK_CAPABILITIES {
+            bail!("Helper must have only CAP_NET_ADMIN and CAP_NET_RAW in {field}");
+        }
     }
-    run_systemctl(&["daemon-reload"])
-}
-
-/// A package removal runs this twice, so the second `disable` reporting a unit
-/// that is already gone is expected rather than something to print.
-fn silence_systemctl(arguments: &[&str]) {
-    let _ = Command::new("systemctl")
-        .args(arguments)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status();
-}
-
-fn run_systemctl(arguments: &[&str]) -> Result<()> {
-    let status = Command::new("systemctl")
-        .args(arguments)
-        .status()
-        .with_context(|| format!("run systemctl {}", arguments.join(" ")))?;
-    if !status.success() {
-        bail!("systemctl {} failed with {status}", arguments.join(" "));
+    if !status.lines().any(|line| {
+        line.strip_prefix("NoNewPrivs:")
+            .is_some_and(|value| value.trim() == "1")
+    }) {
+        bail!("Helper must run with NoNewPrivileges");
     }
     Ok(())
 }
@@ -267,47 +168,112 @@ fn run_systemctl(arguments: &[&str]) -> Result<()> {
 fn run_service() -> Result<()> {
     ensure_core_sha256_configured()?;
     let owner = owner_from_env()?;
-    let runtime = Runtime::new().context("create helper runtime")?;
+    ensure_core_owner()?;
+    validate_capabilities(&fs::read_to_string("/proc/self/status")?)?;
+    linux_install::verify_runtime_bundle(owner)?;
+    let runtime = Runtime::new().context("create Helper runtime")?;
     runtime.block_on(async move {
         let mut terminate = signal(SignalKind::terminate()).context("listen for SIGTERM")?;
         let mut interrupt = signal(SignalKind::interrupt()).context("listen for SIGINT")?;
+        let incoming = AuthorizedIncoming::bind(owner, &linux_install::runtime_path(owner))?;
+        notify_systemd(b"READY=1")?;
         let shutdown = async move {
             tokio::select! {
                 _ = terminate.recv() => {}
                 _ = interrupt.recv() => {}
             }
+            begin_shutdown();
+            let _ = notify_systemd(b"STOPPING=1");
         };
-        let incoming = AuthorizedIncoming::bind(owner)?;
         warp::serve(routes())
             .serve_incoming_with_graceful_shutdown(incoming, shutdown)
             .await;
-        release_managed_core_on_shutdown();
+        release_managed_core_on_shutdown_confirmed()?;
         Ok(())
     })
 }
 
-/// Connections are filtered by peer credential rather than by the socket mode
-/// alone: a supplementary group membership is enough to reach a `0660` socket,
-/// and only the installing user may drive a Core that runs as root.
+fn notify_systemd(message: &[u8]) -> Result<()> {
+    let path =
+        std::env::var_os("NOTIFY_SOCKET").context("systemd notification socket is missing")?;
+    notify_socket(&path, message)
+}
+
+fn notify_socket(path: &OsStr, message: &[u8]) -> Result<()> {
+    use std::os::linux::net::SocketAddrExt;
+    use std::os::unix::ffi::OsStrExt;
+    let socket = UnixDatagram::unbound()?;
+    if let Some(name) = path.as_bytes().strip_prefix(b"@") {
+        let address = std::os::unix::net::SocketAddr::from_abstract_name(name)?;
+        socket.send_to_addr(message, &address)?;
+    } else {
+        if !Path::new(path).is_absolute() {
+            bail!("invalid systemd notification socket");
+        }
+        socket.send_to(message, Path::new(path))?;
+    }
+    Ok(())
+}
+
 struct AuthorizedIncoming {
     listener: UnixListener,
     owner: Owner,
     retry: Option<Pin<Box<Sleep>>>,
+    _lock: File,
 }
 
 impl AuthorizedIncoming {
-    fn bind(owner: Owner) -> Result<Self> {
-        if Path::new(SOCKET_PATH).exists() {
-            fs::remove_file(SOCKET_PATH).with_context(|| format!("remove stale {SOCKET_PATH}"))?;
+    fn bind(owner: Owner, runtime: &Path) -> Result<Self> {
+        let directory = linux_install::open_directory(runtime)?;
+        let metadata = directory.metadata()?;
+        if metadata.uid() != owner.uid || metadata.mode() & 0o777 != 0o700 {
+            bail!("Helper runtime must be owner-only at mode 0700");
         }
-        let listener =
-            UnixListener::bind(SOCKET_PATH).with_context(|| format!("bind {SOCKET_PATH}"))?;
-        fs::set_permissions(SOCKET_PATH, fs::Permissions::from_mode(SOCKET_MODE))
-            .with_context(|| format!("secure {SOCKET_PATH}"))?;
+        let lock = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .mode(0o600)
+            .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
+            .open(runtime.join("service.lock"))?;
+        let metadata = lock.metadata()?;
+        if !metadata.is_file()
+            || metadata.uid() != owner.uid
+            || metadata.nlink() != 1
+            || metadata.mode() & 0o777 != 0o600
+        {
+            bail!("invalid Helper service lock");
+        }
+        if unsafe { libc::flock(lock.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) } != 0 {
+            bail!("another Helper already owns this runtime");
+        }
+        let socket_path = runtime.join("helper.sock");
+        match fs::symlink_metadata(&socket_path) {
+            Ok(metadata) => {
+                if !metadata.file_type().is_socket()
+                    || metadata.uid() != owner.uid
+                    || metadata.mode() & 0o777 != 0o600
+                {
+                    bail!("refusing to remove an untrusted Helper socket");
+                }
+                match std::os::unix::net::UnixStream::connect(&socket_path) {
+                    Err(error) if error.kind() == ErrorKind::ConnectionRefused => {
+                        fs::remove_file(&socket_path)?
+                    }
+                    _ => bail!("Helper socket is not confirmed stale"),
+                }
+            }
+            Err(error) if error.kind() == ErrorKind::NotFound => {}
+            Err(error) => return Err(error.into()),
+        }
+        let listener = UnixListener::bind(&socket_path)?;
+        fs::set_permissions(&socket_path, fs::Permissions::from_mode(0o600))?;
         Ok(Self {
             listener,
             owner,
             retry: None,
+            _lock: lock,
         })
     }
 }
@@ -319,8 +285,6 @@ fn is_authorized_peer(stream: &UnixStream, owner: Owner) -> bool {
 impl Stream for AuthorizedIncoming {
     type Item = Result<UnixStream, Error>;
 
-    /// hyper ends the whole server on the first accept error it is handed, so
-    /// resource exhaustion is logged and retried after a pause instead.
     fn poll_next(
         mut self: Pin<&mut Self>,
         context: &mut TaskContext<'_>,
@@ -351,72 +315,77 @@ impl Stream for AuthorizedIncoming {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::unix::fs::symlink;
 
     #[test]
-    fn parses_service_commands() {
+    fn installer_accepts_only_fixed_commands_and_absolute_staging_path() {
         assert_eq!(service_command([]).unwrap(), ServiceCommand::Run);
         assert_eq!(
-            service_command([OsString::from("install")]).unwrap(),
-            ServiceCommand::Install
+            service_command(["install", "--bundle", "/tmp/private"].map(OsString::from)).unwrap(),
+            ServiceCommand::Install("/tmp/private".into())
         );
-        assert_eq!(
-            service_command([OsString::from("uninstall")]).unwrap(),
-            ServiceCommand::Uninstall
-        );
-    }
-
-    #[test]
-    fn rejects_unknown_or_extra_service_commands() {
-        assert!(service_command([OsString::from("unknown")]).is_err());
-        assert!(service_command([OsString::from("install"), OsString::from("extra")]).is_err());
-    }
-
-    #[test]
-    fn rejects_owner_ids_that_cannot_own_a_core() {
-        assert_eq!(parse_owner_id(" 1000\n").unwrap(), 1000);
+        assert!(service_command(["install"].map(OsString::from)).is_err());
+        assert!(service_command(["install", "--bundle", "../a"].map(OsString::from)).is_err());
+        assert!(service_command(["exec", "/bin/sh"].map(OsString::from)).is_err());
+        assert!(service_command(["uninstall", "/etc"].map(OsString::from)).is_err());
         assert!(parse_owner_id("0").is_err());
-        assert!(parse_owner_id("-1").is_err());
-        assert!(parse_owner_id("nobody").is_err());
+        assert!(parse_owner_id("1000\n").is_err());
+        assert_eq!(parse_owner_id("1000").unwrap(), 1000);
     }
 
     #[test]
-    fn unit_names_the_owner_and_the_helper_it_starts() {
-        let unit = unit_contents(
-            Path::new("/opt/ReClash/ReClashHelperService"),
-            Owner {
-                uid: 1000,
-                gid: 1001,
-            },
+    fn capability_boundary_rejects_root_power_and_missing_no_new_privileges() {
+        let status = "CapInh:\t0000000000003000\nCapPrm:\t0000000000003000\nCapEff:\t0000000000003000\nCapBnd:\t0000000000003000\nCapAmb:\t0000000000003000\nNoNewPrivs:\t1\n";
+        validate_capabilities(status).unwrap();
+        assert!(validate_capabilities(&status.replace("3000", "3001")).is_err());
+        assert!(
+            validate_capabilities(&status.replace("NoNewPrivs:\t1", "NoNewPrivs:\t0")).is_err()
         );
-
-        assert!(unit.contains("ExecStart=\"/opt/ReClash/ReClashHelperService\"\n"));
-        assert!(unit.contains("Group=1001\n"));
-        assert!(unit.contains("Environment=RECLASH_HELPER_OWNER_UID=1000\n"));
-        assert!(unit.contains("Environment=RECLASH_HELPER_OWNER_GID=1001\n"));
-        assert!(unit.contains("RuntimeDirectory=reclash\n"));
-        assert!(unit.contains("Restart=on-failure\n"));
-        assert!(unit.contains("StartLimitBurst=5\n"));
     }
 
-    #[test]
-    fn unit_argument_survives_whitespace_and_specifiers() {
+    #[tokio::test]
+    async fn runtime_is_private_checks_peers_and_does_not_replace_live_socket() {
+        let path =
+            std::env::temp_dir().join(format!("reclash-runtime-test-{}", std::process::id()));
+        fs::create_dir(&path).unwrap();
+        fs::set_permissions(&path, fs::Permissions::from_mode(0o700)).unwrap();
+        let owner = Owner {
+            uid: unsafe { libc::getuid() },
+            gid: unsafe { libc::getgid() },
+        };
+        let incoming = AuthorizedIncoming::bind(owner, &path).unwrap();
+        let client = UnixStream::connect(path.join("helper.sock")).await.unwrap();
+        let (peer, _) = incoming.listener.accept().await.unwrap();
+        assert!(is_authorized_peer(&peer, owner));
+        assert!(!is_authorized_peer(
+            &peer,
+            Owner {
+                uid: owner.uid + 1,
+                gid: owner.gid
+            }
+        ));
+        assert!(AuthorizedIncoming::bind(owner, &path).is_err());
         assert_eq!(
-            quoted_unit_argument(Path::new("/home/u/My Apps/100%/a\"b\\c")),
-            r#""/home/u/My Apps/100%%/a\"b\\c""#
+            fs::metadata(path.join("helper.sock")).unwrap().mode() & 0o777,
+            0o600
         );
+        drop(client);
+        drop(peer);
+        drop(incoming);
+        fs::remove_file(path.join("helper.sock")).unwrap();
+        symlink("/etc/passwd", path.join("helper.sock")).unwrap();
+        assert!(AuthorizedIncoming::bind(owner, &path).is_err());
+        fs::remove_dir_all(path).unwrap();
     }
 
     #[test]
-    fn reads_the_owner_back_out_of_an_installed_unit() {
-        let unit = unit_contents(
-            Path::new("/opt/ReClash/ReClashHelperService"),
-            Owner {
-                uid: 1000,
-                gid: 1001,
-            },
-        );
-
-        assert_eq!(installed_owner_uid(&unit), Some(1000));
-        assert_eq!(installed_owner_uid("[Unit]\n"), None);
+    fn sends_systemd_ready_after_socket_setup() {
+        let path = std::env::temp_dir().join(format!("reclash-notify-test-{}", std::process::id()));
+        let socket = UnixDatagram::bind(&path).unwrap();
+        notify_socket(path.as_os_str(), b"READY=1").unwrap();
+        let mut bytes = [0; 32];
+        let size = socket.recv(&mut bytes).unwrap();
+        assert_eq!(&bytes[..size], b"READY=1");
+        fs::remove_file(path).unwrap();
     }
 }

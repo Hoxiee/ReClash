@@ -1,0 +1,16 @@
+{
+  "coreModeElevated": "Boshqariladigan yuqori huquqli jarayon",
+  "coreModePrivilegedHelper": "Imzolangan Helper orqali boshqariladigan jarayon",
+  "desktopAuthorizationRequired": "TUN uchun ruxsat kerak. Ruxsat berish uchun ulanishni boshlang yoki TUNni yoqing.",
+  "desktopAuthorizationCancelled": "Ruxsat berish bekor qilindi. TUN ishga tushmadi.",
+  "desktopAuthorizationDenied": "Ruxsat berilmadi. TUN ishga tushmadi.",
+  "desktopAuthorizationAgentUnavailable": "Grafik ruxsat agenti mavjud emas. Uni joriy ish stoli seansida ishga tushiring va qayta urinib ko‘ring.",
+  "desktopHelperUnavailable": "TUN Helper mavjud emas. O‘rnatilgan paket va xizmatni tekshiring, so‘ng qayta urinib ko‘ring.",
+  "desktopHelperApprovalRequired": "Tizim sozlamalari → Umumiy → Kirish elementlari va kengaytmalar bo‘limida ReClash Helperga ruxsat bering, so‘ng qayta urinib ko‘ring.",
+  "desktopSigningRequired": "TUN uchun to‘g‘ri imzolangan ReClash ilovasi va Helper kerak. Imzosiz yoki ad-hoc imzoli yig‘ilishga ruxsat berib bo‘lmaydi.",
+  "desktopBundleInvalid": "Core yoki Helper yaxlitlik tekshiruvidan o‘tmadi. To‘liq ReClash paketini qayta o‘rnating.",
+  "desktopLaunchPending": "Oldingi ruxsat berish yoki Core to‘xtatilishi hali tugamadi. Tugashini kuting va qayta urinib ko‘ring.",
+  "desktopAuthorizationTimeout": "Ruxsat berishni kutish vaqti tugadi. Ulanish tugmasi orqali qayta urinib ko‘ring.",
+  "desktopBootstrapFailed": "Ruxsat berilgan Core tekshirilgan ishga tushirishni yakunlay olmadi. Paket va tizim jurnallarini tekshiring.",
+  "desktopTunNotReady": "Core ishga tushdi, ammo TUN adapteri tayyor emas. TUNdan foydalanishdan oldin Core jurnalini tekshiring."
+}

@@ -563,6 +563,8 @@ void main() {
     expect(vpn.port, 8899);
     expect(vpn.bypassDomain, ['localhost']);
 
+    expect(container.read(shouldPatchSystemDnsProvider), isFalse);
+    container.read(tunAppliedProvider.notifier).value = true;
     expect(container.read(shouldPatchSystemDnsProvider), isTrue);
 
     container

@@ -3,7 +3,6 @@ package core
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -65,7 +64,7 @@ func handleSetupConfig(params *SetupParams) error {
 
 func handleGetConfig(path string) (*config.RawConfig, error) {
 	defer scheduleLoadMemoryRelease()
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +100,7 @@ func handleValidateConfig(path string) error {
 }
 
 func handleDecryptConfig(params DecryptConfigParams) (string, error) {
-	buf, err := os.ReadFile(params.Path)
+	buf, err := readCoreFile(params.Path)
 	if err != nil {
 		return "", err
 	}
@@ -117,7 +116,7 @@ func handleDecryptConfig(params DecryptConfigParams) (string, error) {
 var systemTimeWritable = runtime.GOOS != "android"
 
 func loadConfig(path string) (*config.Config, error) {
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return nil, err
 	}

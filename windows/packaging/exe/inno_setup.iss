@@ -19,30 +19,164 @@ ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
-procedure KillProcesses;
-var
-  Processes: TArrayOfString;
-  i: Integer;
-  ResultCode: Integer;
-begin
-  Processes := ['ReClash.exe', 'ReClashCore.exe', 'ReClashHelperService.exe'];
+const
+  ServiceMissing = 1060;
+  ServiceNotActive = 1062;
+  ServiceMarkedForDelete = 1072;
+  QueryAndSynchronize = $00101000;
+  WaitCompleted = 0;
 
-  for i := 0 to GetArrayLength(Processes)-1 do
+function EnumWindows(Callback: LongWord; Param: LongWord): Boolean;
+  external 'EnumWindows@user32.dll stdcall';
+function GetWindowThreadProcessId(Window: HWND; var Pid: LongWord): LongWord;
+  external 'GetWindowThreadProcessId@user32.dll stdcall';
+function OpenProcess(Access: LongWord; Inherit: Boolean; Pid: LongWord): THandle;
+  external 'OpenProcess@kernel32.dll stdcall';
+function QueryFullProcessImageName(Process: THandle; Flags: LongWord; Path: String; var Size: LongWord): Boolean;
+  external 'QueryFullProcessImageNameW@kernel32.dll stdcall';
+function WaitForSingleObject(Handle: THandle; Timeout: LongWord): LongWord;
+  external 'WaitForSingleObject@kernel32.dll stdcall';
+function CloseHandle(Handle: THandle): Boolean;
+  external 'CloseHandle@kernel32.dll stdcall';
+function RegisterWindowMessage(Name: String): LongWord;
+  external 'RegisterWindowMessageW@user32.dll stdcall';
+function PostMessage(Window: HWND; Message: LongWord; WParam: LongWord; LParam: LongWord): Boolean;
+  external 'PostMessageW@user32.dll stdcall';
+
+var
+  ShutdownMessage: LongWord;
+  ShutdownHandles: TArrayOfInteger;
+  ShutdownFailed: Boolean;
+
+function ShutdownInstalledWindow(Window: HWND; Param: LongWord): Boolean;
+var
+  Pid: LongWord;
+  Process: THandle;
+  Size: LongWord;
+  Path: String;
+  Count: Integer;
+begin
+  Result := True;
+  GetWindowThreadProcessId(Window, Pid);
+  Process := OpenProcess(QueryAndSynchronize, False, Pid);
+  if Process = 0 then Exit;
+  Size := 32768;
+  SetLength(Path, Size);
+  if QueryFullProcessImageName(Process, 0, Path, Size) then
   begin
-    Exec('taskkill', '/f /im ' + Processes[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    SetLength(Path, Size);
+    if CompareText(Path, ExpandConstant('{app}\{{EXECUTABLE_NAME}}')) = 0 then
+    begin
+      Count := GetArrayLength(ShutdownHandles);
+      SetArrayLength(ShutdownHandles, Count + 1);
+      ShutdownHandles[Count] := Process;
+      if not PostMessage(Window, ShutdownMessage, 0, 0) then ShutdownFailed := True;
+      Exit;
+    end;
   end;
+  CloseHandle(Process);
 end;
 
-procedure UnregisterHelperService;
+function ShutdownInstalledApp(): Boolean;
 var
-  HelperPath: String;
-  ResultCode: Integer;
+  i: Integer;
 begin
-  HelperPath := ExpandConstant('{app}\\ReClashHelperService.exe');
-  if FileExists(HelperPath) then
+  SetArrayLength(ShutdownHandles, 0);
+  ShutdownFailed := False;
+  ShutdownMessage := RegisterWindowMessage('ReClash.InstalledProductMaintenance');
+  if ShutdownMessage = 0 then
   begin
-    Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Result := False;
+    Exit;
   end;
+  Result := EnumWindows(CreateCallback(@ShutdownInstalledWindow), 0);
+  Result := Result and not ShutdownFailed;
+  for i := 0 to GetArrayLength(ShutdownHandles) - 1 do
+  begin
+    if WaitForSingleObject(ShutdownHandles[i], 20000) <> WaitCompleted then Result := False;
+    CloseHandle(ShutdownHandles[i]);
+  end;
+  SetArrayLength(ShutdownHandles, 0);
+end;
+
+function RunServiceCommand(Command: String; var ResultCode: Integer): Boolean;
+begin
+  Result := Exec(ExpandConstant('{sys}\sc.exe'), Command + ' "ReClashHelperService"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function UnregisterHelperService(): Boolean;
+var
+  Value: String;
+  Expected: String;
+  ResultCode: Integer;
+  Attempt: Integer;
+begin
+  Result := True;
+  if not RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\ReClashHelperService') then Exit;
+  if not RegQueryStringValue(HKLM, 'SYSTEM\CurrentControlSet\Services\ReClashHelperService', 'ImagePath', Value) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  Value := Trim(Value);
+  if (Length(Value) > 0) and (Value[1] = '"') then
+  begin
+    Delete(Value, 1, 1);
+    Attempt := Pos('"', Value);
+    if Attempt = 0 then
+    begin
+      Result := False;
+      Exit;
+    end;
+    Value := Copy(Value, 1, Attempt - 1);
+  end
+  else
+  begin
+    Attempt := Pos(' --', Value);
+    if Attempt > 0 then Value := Copy(Value, 1, Attempt - 1);
+  end;
+  Expected := ExpandConstant('{app}\ReClashHelperService.exe');
+  if CompareText(Value, Expected) <> 0 then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if not RunServiceCommand('stop', ResultCode) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if (ResultCode <> 0) and (ResultCode <> ServiceMissing) and (ResultCode <> ServiceNotActive) and (ResultCode <> ServiceMarkedForDelete) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if not RunServiceCommand('delete', ResultCode) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if (ResultCode <> 0) and (ResultCode <> ServiceMissing) and (ResultCode <> ServiceMarkedForDelete) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  for Attempt := 1 to 200 do
+  begin
+    if not RunServiceCommand('query', ResultCode) then
+    begin
+      Result := False;
+      Exit;
+    end;
+    if ResultCode = ServiceMissing then Exit;
+    if (ResultCode <> 0) and (ResultCode <> ServiceMarkedForDelete) then
+    begin
+      Result := False;
+      Exit;
+    end;
+    Sleep(100);
+  end;
+  Result := False;
 end;
 
 procedure ClearStaleProxy;
@@ -98,9 +232,14 @@ end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
-  UnregisterHelperService;
-  KillProcesses;
   Result := '';
+  if not ShutdownInstalledApp() then
+  begin
+    Result := 'Close ReClash in this installation before continuing.';
+    Exit;
+  end;
+  if not UnregisterHelperService() then
+    Result := 'The installed ReClash service could not be safely removed.';
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -113,10 +252,10 @@ end;
 
 function InitializeUninstall(): Boolean;
 begin
-  UnregisterHelperService;
-  KillProcesses;
-  ClearStaleProxy;
-  Result := True;
+  Result := ShutdownInstalledApp();
+  if not Result then Exit;
+  Result := UnregisterHelperService();
+  if Result then ClearStaleProxy;
 end;
 
 // path_provider names these folders after CompanyName and ProductName in
@@ -181,8 +320,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+[InstallDelete]
+Type: files; Name: "{app}\ReClashHelperService.exe"
+
+[UninstallDelete]
+Type: files; Name: "{app}\ReClashHelperService.exe"
+
 [Icons]
 Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
-Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: runasoriginaluser nowait postinstall skipifsilent

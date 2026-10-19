@@ -26,6 +26,7 @@ class _RecordingSetupAction extends SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) async {
     requests.add(running);
     return true;

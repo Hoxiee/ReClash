@@ -53,6 +53,36 @@ void main() {
     AutoLaunch.launcher = launchAtStartup;
   });
 
+  test('autostart quotes the stable AppImage rather than its mount', () {
+    expect(
+      AutoLaunch.resolveLaunchAppPath(
+        platform: 'linux',
+        environment: {'APPIMAGE': '/home/a b/ReClash.AppImage'},
+        resolvedExecutable: '/tmp/.mount/random/ReClash',
+      ),
+      '"/home/a b/ReClash.AppImage"',
+    );
+    expect(
+      AutoLaunch.resolveLaunchAppPath(
+        platform: 'windows',
+        environment: {},
+        resolvedExecutable: r'C:\Program Files\ReClash\ReClash.exe',
+      ),
+      r'"C:\Program Files\ReClash\ReClash.exe"',
+    );
+  });
+
+  test('desktop Exec escapes field codes and metacharacters', () {
+    expect(
+      AutoLaunch.resolveLaunchAppPath(
+        platform: 'linux',
+        environment: {},
+        resolvedExecutable: r'/home/a/%$b/ReClash',
+      ),
+      r'"/home/a/%%\$b/ReClash"',
+    );
+  });
+
   test('AutoLaunch is a singleton', () {
     expect(AutoLaunch(), same(autoLaunch));
   });

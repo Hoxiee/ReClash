@@ -9,5 +9,13 @@ import (
 )
 
 func dial(path string) (net.Conn, error) {
-	return winio.DialPipe(path, nil)
+	connection, err := winio.DialPipe(path, nil)
+	if err != nil {
+		return nil, err
+	}
+	if err := verifyDesktopConnection(connection); err != nil {
+		_ = connection.Close()
+		return nil, err
+	}
+	return connection, nil
 }

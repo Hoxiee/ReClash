@@ -6,6 +6,8 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+import 'tool/src/release_version.dart';
+
 const _appImageToolRelease = '12';
 const _appImageToolSha256 = <String, String>{
   'aarch64': 'c9d058310a4e04b9fbbd81340fff2b5fb44943a630b31881e321719f271bd41a',
@@ -120,13 +122,16 @@ ArgParser createSetupArgParser() {
 List<String> createFlutterBuildArgs({
   required String platform,
   required bool verbose,
+  String? buildNumber,
 }) {
   final flutterBuildArgs = <String>[
     if (verbose) 'verbose',
     'dart-define-from-file=env.json',
   ];
   if (platform == 'android') {
-    flutterBuildArgs.add('split-per-abi');
+    flutterBuildArgs
+      ..add('split-per-abi')
+      ..add('build-number=${buildNumber ?? '1'}');
   }
   return flutterBuildArgs;
 }
@@ -176,6 +181,9 @@ Future<int> _package(
   final flutterBuildArgs = createFlutterBuildArgs(
     platform: platform,
     verbose: verbose,
+    buildNumber: platform == 'android'
+        ? ReleaseVersion.read(rootDir).flutterBuildNumber
+        : null,
   );
   final descriptionArgs = <String>[];
   if (platform != 'android') {

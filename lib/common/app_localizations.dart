@@ -1,8 +1,12 @@
-import 'url_scheme.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/exception.dart';
 import 'package:reclash/common/network_error.dart';
+import 'package:reclash/common/url_scheme.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
+import 'package:reclash/core/desktop/privilege.dart';
+import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/windows_launcher.dart';
+import 'package:reclash/core/desktop/macos_helper.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/l10n.dart';
@@ -123,6 +127,7 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
           : null) ??
       networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
+      desktopPrivilegeErrorMessage(error, appLocalizations) ??
       switch (error) {
         AgeSecretKeyRequiredException() =>
           appLocalizations.ageSecretKeyRequiredTip,
@@ -161,6 +166,71 @@ Locale? getLocaleForString(String? localString) {
   }
   return null;
 }
+
+String? desktopPrivilegeErrorMessage(Object error, AppLocalizations l10n) {
+  final code = switch (error) {
+    DesktopCoreFailure(:final cause) when cause != null =>
+      _desktopPrivilegeCode(cause) ?? error.code,
+    DesktopCoreFailure(:final code) => code,
+    _ => _desktopPrivilegeCode(error),
+  }?.toLowerCase();
+  if (code == null) return null;
+  if (code.contains('cancelled')) return l10n.desktopAuthorizationCancelled;
+  if (code.contains('requires_approval') || code.contains('requiresapproval')) {
+    return l10n.desktopHelperApprovalRequired;
+  }
+  if (code.contains('sign') ||
+      code.contains('team') ||
+      code.contains('requirement')) {
+    return l10n.desktopSigningRequired;
+  }
+  if (code.contains('hash') ||
+      code.contains('bundle_invalid') ||
+      code.contains('bundleinvalid') ||
+      code.contains('manifest')) {
+    return l10n.desktopBundleInvalid;
+  }
+  if (code.contains('agentunavailable') || code.contains('pkexecunavailable')) {
+    return l10n.desktopAuthorizationAgentUnavailable;
+  }
+  if (code.contains('denied')) return l10n.desktopAuthorizationDenied;
+  if (code.contains('authorization_timeout')) {
+    return l10n.desktopAuthorizationTimeout;
+  }
+  if (code.contains('pending') ||
+      code.contains('stop_failed') ||
+      code.contains('stopfailed')) {
+    return l10n.desktopLaunchPending;
+  }
+  if (code.contains('authorization_required')) {
+    return l10n.desktopAuthorizationRequired;
+  }
+  if (code.contains('tun_not_ready')) return l10n.desktopTunNotReady;
+  if (code.contains('linux_') ||
+      code.contains('notready') ||
+      code.contains('notregistered') ||
+      code.contains('notfound') ||
+      code.contains('helper_unavailable')) {
+    return l10n.desktopHelperUnavailable;
+  }
+  if (code.startsWith('windows_') ||
+      code.startsWith('macos_') ||
+      code.contains('bootstrap') ||
+      code.contains('helperresponseinvalid')) {
+    return l10n.desktopBootstrapFailed;
+  }
+  return null;
+}
+
+String? _desktopPrivilegeCode(Object error) => switch (error) {
+  DesktopPrivilegeException(:final code) => code,
+  WindowsLaunchException(:final detail) => detail,
+  MacOSHelperException(:final code) => code,
+  DesktopCoreFailure(:final cause) when cause != null => _desktopPrivilegeCode(
+    cause,
+  ),
+  _ => null,
+};
 
 String urlSchemeErrorMessage(UrlSchemeIssue issue, AppLocalizations l) =>
     switch (issue) {

@@ -46,6 +46,7 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'tags': ['with_gvisor'],
         'workingDirectory': '/home/reclash/.config',
         'executablePath': '/usr/bin/ReClashCore',
+        'tunActive': false,
       },
       CoreMethod.getTraffic ||
       CoreMethod.getTotalTraffic => {'up': 12, 'down': 34},

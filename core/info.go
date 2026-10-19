@@ -7,6 +7,7 @@ import (
 
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/mihomo/listener"
 )
 
 type CoreInfo struct {
@@ -18,6 +19,7 @@ type CoreInfo struct {
 	Tags             []string   `json:"tags"`
 	WorkingDirectory string     `json:"workingDirectory"`
 	ExecutablePath   string     `json:"executablePath"`
+	TunActive        bool       `json:"tunActive"`
 }
 
 func handleGetCoreInfo() CoreInfo {
@@ -33,6 +35,7 @@ func handleGetCoreInfo() CoreInfo {
 		info.ExecutablePath, _ = os.Executable()
 	}
 	configMu.Lock()
+	info.TunActive = !features.Android && isRunning.Load() && listener.GetTunConf().Enable
 	if isInit.Load() {
 		info.WorkingDirectory = constant.Path.HomeDir()
 	}

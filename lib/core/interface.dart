@@ -10,10 +10,23 @@ import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
 import 'desktop/model.dart';
+import 'desktop/privilege.dart';
 import 'method.dart';
 
 mixin CoreInterface {
   CoreProcessOwner? get processOwner => null;
+
+  void configurePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) {}
+
+  void revokePrivilegePrompt() {}
+
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async => DesktopPrivilegeDecision.notRequired;
 
   Future<CoreLifecycleResult> start();
 

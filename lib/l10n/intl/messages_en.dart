@@ -588,11 +588,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Execution mode"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Location"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Managed elevated process",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Process via Helper",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "In-process library",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Managed process via signed Helper",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("Separate process"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
@@ -697,6 +703,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "No graphical authorization agent is available. Start one for this desktop session and try again.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Authorization was cancelled. TUN has not started.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "Authorization was not granted. TUN has not started.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN needs authorization. Start the connection or enable TUN to authorize it.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Authorization timed out. Try again from the connection button.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "The authorized Core could not complete a verified startup. Check the package and system logs.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "The Core or Helper failed integrity verification. Reinstall a complete ReClash package.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Allow the ReClash Helper in System Settings → General → Login Items & Extensions, then try again.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The TUN Helper is unavailable. Check the installed package and service, then try again.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "The previous authorization or Core shutdown is still pending. Wait for it to finish before trying again.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN requires a correctly signed ReClash app and Helper. An unsigned or ad-hoc build cannot be authorized.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "The Core started, but the TUN adapter is not ready. Check the Core log before using TUN.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Destination"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(

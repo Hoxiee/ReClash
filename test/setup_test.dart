@@ -31,7 +31,11 @@ void main() {
         verbose: false,
       );
 
-      expect(args, ['dart-define-from-file=env.json', 'split-per-abi']);
+      expect(args, [
+        'dart-define-from-file=env.json',
+        'split-per-abi',
+        'build-number=1',
+      ]);
     });
 
     test('adds verbose to flutter build args with -v', () {
@@ -44,7 +48,18 @@ void main() {
         'verbose',
         'dart-define-from-file=env.json',
         'split-per-abi',
+        'build-number=1',
       ]);
+    });
+
+    test('uses an explicit numeric build number for Android prereleases', () {
+      final args = setup.createFlutterBuildArgs(
+        platform: 'android',
+        verbose: false,
+        buildNumber: '2',
+      );
+
+      expect(args.last, 'build-number=2');
     });
 
     test('refuses to package while a native build hook is skipped', () {

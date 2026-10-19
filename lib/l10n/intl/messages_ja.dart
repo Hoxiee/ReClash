@@ -506,8 +506,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("実行方式"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("場所"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage("管理された権限昇格プロセス"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage("Helper 経由のプロセス"),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage("プロセス内ライブラリ"),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "署名済みHelperによる管理プロセス",
+    ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("独立したプロセス"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage("実行時設定を開く"),
     "corePlatform": MessageLookupByLibrary.simpleMessage("プラットフォーム"),
@@ -595,6 +599,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "ClashMetaベースのマルチプラットフォーム対応プロキシクライアント。シンプルで使いやすく、オープンソースで広告もありません。",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "グラフィカル認証エージェントが利用できません。このデスクトップセッションで起動して再試行してください。",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "認証がキャンセルされました。TUNは起動していません。",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "認証が許可されませんでした。TUNは起動していません。",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUNには認証が必要です。接続を開始するかTUNを有効にして許可してください。",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "認証がタイムアウトしました。接続ボタンから再試行してください。",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "認証済みCoreが検証付き起動を完了できませんでした。パッケージとシステムログを確認してください。",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "CoreまたはHelperの整合性を確認できませんでした。完全なReClashパッケージを再インストールしてください。",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "システム設定 → 一般 → ログイン項目と機能拡張でReClash Helperを許可してから再試行してください。",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUNのHelperが利用できません。インストール済みパッケージとサービスを確認して再試行してください。",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "前の認証またはCoreの終了がまだ完了していません。完了後に再試行してください。",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUNには正しく署名されたReClashアプリとHelperが必要です。未署名またはad-hoc署名のビルドは認証できません。",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Coreは起動しましたがTUNアダプターの準備ができていません。TUNを使用する前にCoreログを確認してください。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("宛先"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("宛先GeoIP"),

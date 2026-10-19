@@ -23,6 +23,28 @@ void main() {
     expect(await CoreManifest.readCoreSha256(path: file.path), hash);
   });
 
+  test('reads final Helper integrity independently of the Core hash', () async {
+    final core = '0' * 64;
+    final helper = '1' * 64;
+    final file = File('${directory.path}/manifest.json')
+      ..writeAsStringSync(
+        '{'
+        '"coreSha256":"$core",'
+        '"helperSha256":"$helper"'
+        '}',
+      );
+    expect(await CoreManifest.readCoreSha256(path: file.path), core);
+    expect(await CoreManifest.readHelperSha256(path: file.path), helper);
+    file.writeAsStringSync(
+      '{'
+      '"coreSha256":"$core",'
+      '"helperSha256":"INVALID"'
+      '}',
+    );
+    expect(await CoreManifest.readHelperSha256(path: file.path), isNull);
+    expect(await CoreManifest.readCoreSha256(path: file.path), core);
+  });
+
   test('rejects malformed or non-SHA256 manifest values', () async {
     final file = File('${directory.path}/manifest.json')
       ..writeAsStringSync('{"coreSha256":"not-a-sha256"}');

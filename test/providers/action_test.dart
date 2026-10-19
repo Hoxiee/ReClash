@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
@@ -21,7 +22,19 @@ import 'package:riverpod/riverpod.dart';
 
 import '../helpers/test_profiles.dart';
 
-class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
+  @override
+  void configurePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) {}
+
+  @override
+  void revokePrivilegePrompt() {}
+
+  @override
+  Future<bool> stopListener() async => true;
+}
 
 void main() {
   group('ProfilesAction', () {
@@ -70,6 +83,9 @@ void main() {
       final second = Profile.normal(label: 'Second');
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           currentProfileIdProvider.overrideWithBuild((_, _) => first.id),
           profilesProvider.overrideWith(() => TestProfiles([first])),
         ],
@@ -106,6 +122,9 @@ void main() {
         ];
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             currentProfileIdProvider.overrideWithBuild((_, _) => null),
             profilesProvider.overrideWith(() => TestProfiles(profiles)),
           ],
@@ -128,6 +147,9 @@ void main() {
     ) {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
           profilesProvider.overrideWith(() => TestProfiles([profile])),
           scriptsProvider.overrideWith(_MemoryScripts.new),
@@ -304,6 +326,9 @@ void main() {
     test('applies the profile after restarting a stopped core', () async {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -326,6 +351,9 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             coreActionProvider.overrideWith(_TestCoreAction.new),
             setupActionProvider.overrideWith(_TestSetupAction.new),
           ],
@@ -348,6 +376,9 @@ void main() {
     test('restart preserves the current run intent owner', () async {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -371,6 +402,9 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             coreActionProvider.overrideWith(_TestCoreAction.new),
             setupActionProvider.overrideWith(_TestSetupAction.new),
           ],
@@ -395,6 +429,9 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             coreActionProvider.overrideWith(_TestCoreAction.new),
             setupActionProvider.overrideWith(_TestSetupAction.new),
           ],
@@ -422,6 +459,9 @@ void main() {
     test('reapplies the latest request without restarting twice', () async {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -454,6 +494,9 @@ void main() {
     test('surfaces a failed restart to its caller as a rejection', () async {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -481,7 +524,12 @@ void main() {
       'startCore leaves status and initCore to the superseding operation',
       () async {
         final container = ProviderContainer(
-          overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            coreActionProvider.overrideWith(_TestCoreAction.new),
+          ],
         );
         addTearDown(container.dispose);
         final coreAction =
@@ -502,7 +550,12 @@ void main() {
       'startCore silence propagates failure without notifier path',
       () async {
         final container = ProviderContainer(
-          overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            coreActionProvider.overrideWith(_TestCoreAction.new),
+          ],
         );
         addTearDown(container.dispose);
         final action =
@@ -516,7 +569,12 @@ void main() {
 
     test('startCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
-        overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
+        overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
+          coreActionProvider.overrideWith(_TestCoreAction.new),
+        ],
       );
       addTearDown(container.dispose);
       final coreAction =
@@ -537,6 +595,9 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             coreActionProvider.overrideWith(_TestCoreAction.new),
             setupActionProvider.overrideWith(_TestSetupAction.new),
           ],
@@ -567,6 +628,9 @@ void main() {
     test('restartCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           coreActionProvider.overrideWith(_TestCoreAction.new),
           setupActionProvider.overrideWith(_TestSetupAction.new),
         ],
@@ -595,6 +659,9 @@ void main() {
         final startCompleter = Completer<bool>();
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
@@ -625,6 +692,9 @@ void main() {
         final stopCompleter = Completer<bool>();
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
@@ -662,6 +732,9 @@ void main() {
         final startCompleter = Completer<bool>();
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
@@ -698,6 +771,9 @@ void main() {
         final startCompleter = Completer<bool>();
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
@@ -727,6 +803,9 @@ void main() {
       test('stale initialization cannot start after a newer stop', () async {
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             initProvider.overrideWithBuild((_, _) => true),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_InitializingSetupAction.new),
@@ -756,6 +835,9 @@ void main() {
         () async {
           final container = ProviderContainer(
             overrides: [
+              coreHandlerProvider.overrideWithValue(
+                CoreController.scoped(_MockCoreHandlerInterface()),
+              ),
               initProvider.overrideWithBuild((_, _) => true),
               suspendProvider.overrideWithValue(true),
               commonActionProvider.overrideWith(_RaceCommonAction.new),
@@ -785,8 +867,13 @@ void main() {
         late _RestartRecordingCoreAction coreAction;
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             setupActionProvider.overrideWith(() {
-              setupAction = _AuthorizationSetupAction([AuthorizeCode.success]);
+              setupAction = _AuthorizationSetupAction([
+                DesktopPrivilegeDecision.restartRequired,
+              ]);
               return setupAction;
             }),
             coreActionProvider.overrideWith(() {
@@ -807,7 +894,7 @@ void main() {
         expect(setupAction.authorizationRequestCount, 1);
         expect(
           container.read(authorizedTunEnableProvider),
-          TunAuthorizationState.authorized,
+          TunAuthorizationState.unauthorized,
         );
         expect(coreAction.restartCount, 1);
       },
@@ -820,9 +907,14 @@ void main() {
         late _RestartRecordingCoreAction coreAction;
         final container = ProviderContainer(
           overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
             currentProfileProvider.overrideWithValue(null),
             setupActionProvider.overrideWith(() {
-              setupAction = _AuthorizationSetupAction([AuthorizeCode.success]);
+              setupAction = _AuthorizationSetupAction([
+                DesktopPrivilegeDecision.restartRequired,
+              ]);
               return setupAction;
             }),
             coreActionProvider.overrideWith(() {
@@ -849,9 +941,14 @@ void main() {
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           currentProfileProvider.overrideWithValue(null),
           setupActionProvider.overrideWith(() {
-            setupAction = _AuthorizationSetupAction([AuthorizeCode.success]);
+            setupAction = _AuthorizationSetupAction([
+              DesktopPrivilegeDecision.restartRequired,
+            ]);
             return setupAction;
           }),
           coreActionProvider.overrideWith(_FailingRestartCoreAction.new),
@@ -875,11 +972,14 @@ void main() {
       );
     });
 
-    test('asks once while an authorization request is pending', () async {
-      final pending = Completer<AuthorizeCode>();
+    test('a stop supersedes a pending privilege preparation', () async {
+      final pending = Completer<DesktopPrivilegeDecision>();
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(_MockCoreHandlerInterface()),
+          ),
           setupActionProvider.overrideWith(() {
             setupAction = _AuthorizationSetupAction([], pending: pending);
             return setupAction;
@@ -888,50 +988,53 @@ void main() {
       );
       addTearDown(container.dispose);
       container.read(setupActionProvider);
-
       final first = setupAction.requestAdmin(true);
+      await setupAction.setRunning(false);
+      pending.complete(DesktopPrivilegeDecision.restartRequired);
+      expect(await first, isTrue);
+      expect(setupAction.authorizationRequestCount, 1);
       expect(
         container.read(authorizedTunEnableProvider),
-        TunAuthorizationState.unauthorized,
+        TunAuthorizationState.none,
       );
-
-      expect(await setupAction.requestAdmin(true), isTrue);
-      expect(setupAction.authorizationRequestCount, 1);
-
-      pending.complete(AuthorizeCode.success);
-      expect(await first, isFalse);
     });
 
-    test('a failed authorization leaves tun and system DNS off', () async {
-      TestWidgetsFlutterBinding.ensureInitialized();
-      await AppLocalizations.load(const Locale('en'));
-      late _AuthorizationSetupAction setupAction;
-      final container = ProviderContainer(
-        overrides: [
-          setupActionProvider.overrideWith(() {
-            setupAction = _AuthorizationSetupAction([AuthorizeCode.error]);
-            return setupAction;
-          }),
-        ],
-      );
-      addTearDown(container.dispose);
-      container
-          .read(patchClashConfigProvider.notifier)
-          .update((state) => state.copyWith.tun(enable: true));
-      container.read(setupActionProvider);
+    test(
+      'failed authorization keeps selected TUN but system DNS off',
+      () async {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        await AppLocalizations.load(const Locale('en'));
+        late _AuthorizationSetupAction setupAction;
+        final container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            setupActionProvider.overrideWith(() {
+              setupAction = _AuthorizationSetupAction([
+                DesktopPrivilegeDecision.authorizationRequired,
+              ]);
+              return setupAction;
+            }),
+          ],
+        );
+        addTearDown(container.dispose);
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith.tun(enable: true));
+        container.read(setupActionProvider);
 
-      expect(await setupAction.requestAdmin(true), isTrue);
+        await expectLater(
+          setupAction.requestAdmin(true),
+          throwsA(isA<DesktopPrivilegeException>()),
+        );
 
-      expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
-      expect(container.read(shouldPatchSystemDnsProvider), isFalse);
-      expect(
-        await setupAction.requestAdmin(
-          container.read(patchClashConfigProvider).tun.enable,
-        ),
-        isTrue,
-      );
-      expect(setupAction.authorizationRequestCount, 1);
-    });
+        expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+        expect(container.read(shouldPatchSystemDnsProvider), isFalse);
+        expect(await setupAction.requestAdmin(false), isTrue);
+        expect(setupAction.authorizationRequestCount, 1);
+      },
+    );
   });
 }
 
@@ -999,6 +1102,7 @@ class _TestSetupAction extends SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) async {
     setRunningCount++;
     passedOwner = owner;
@@ -1031,7 +1135,10 @@ class _RestartRecordingCoreAction extends CoreAction {
   bool restartResult = true;
 
   @override
-  Future<bool> restartCore({bool silence = false}) async {
+  Future<bool> restartCore({
+    bool silence = false,
+    bool allowPrompt = false,
+  }) async {
     restartCount++;
     return restartResult;
   }
@@ -1039,7 +1146,10 @@ class _RestartRecordingCoreAction extends CoreAction {
 
 class _FailingRestartCoreAction extends CoreAction {
   @override
-  Future<bool> restartCore({bool silence = false}) async {
+  Future<bool> restartCore({
+    bool silence = false,
+    bool allowPrompt = false,
+  }) async {
     throw _restartFailure;
   }
 }
@@ -1047,14 +1157,17 @@ class _FailingRestartCoreAction extends CoreAction {
 final _restartFailure = Exception('restart failed');
 
 class _AuthorizationSetupAction extends SetupAction {
-  final List<AuthorizeCode> authorizationResults;
-  final Completer<AuthorizeCode>? pending;
+  final List<DesktopPrivilegeDecision> authorizationResults;
+  final Completer<DesktopPrivilegeDecision>? pending;
   int authorizationRequestCount = 0;
 
   _AuthorizationSetupAction(this.authorizationResults, {this.pending});
 
   @override
-  Future<AuthorizeCode> authorizeCore() async {
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    required bool allowPrompt,
+  }) async {
     final index = authorizationRequestCount++;
     final pending = this.pending;
     if (pending != null) {

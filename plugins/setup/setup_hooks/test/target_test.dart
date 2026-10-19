@@ -31,12 +31,10 @@ void main() {
     });
   });
 
-  test('only Linux and Windows ship the Helper', () {
+  test('only Linux ships the Rust service Helper', () {
     expect(Target.all.where((target) => target.hasHelper), [
       Target.linuxArm64,
       Target.linuxAmd64,
-      Target.windowsAmd64,
-      Target.windowsArm64,
     ]);
   });
 

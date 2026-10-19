@@ -1,0 +1,16 @@
+{
+  "coreModeElevated": "관리되는 권한 상승 프로세스",
+  "coreModePrivilegedHelper": "서명된 Helper를 통한 관리 프로세스",
+  "desktopAuthorizationRequired": "TUN에는 인증이 필요합니다. 연결을 시작하거나 TUN을 켜서 승인하세요.",
+  "desktopAuthorizationCancelled": "인증이 취소되었습니다. TUN은 시작되지 않았습니다.",
+  "desktopAuthorizationDenied": "인증이 승인되지 않았습니다. TUN은 시작되지 않았습니다.",
+  "desktopAuthorizationAgentUnavailable": "그래픽 인증 에이전트를 사용할 수 없습니다. 현재 데스크톱 세션에서 실행한 후 다시 시도하세요.",
+  "desktopHelperUnavailable": "TUN Helper를 사용할 수 없습니다. 설치된 패키지와 서비스를 확인한 후 다시 시도하세요.",
+  "desktopHelperApprovalRequired": "시스템 설정 → 일반 → 로그인 항목 및 확장 프로그램에서 ReClash Helper를 허용한 후 다시 시도하세요.",
+  "desktopSigningRequired": "TUN에는 올바르게 서명된 ReClash 앱과 Helper가 필요합니다. 서명이 없거나 ad-hoc 서명된 빌드는 인증할 수 없습니다.",
+  "desktopBundleInvalid": "Core 또는 Helper의 무결성 검증에 실패했습니다. 전체 ReClash 패키지를 다시 설치하세요.",
+  "desktopLaunchPending": "이전 인증 또는 Core 종료가 아직 완료되지 않았습니다. 완료될 때까지 기다린 후 다시 시도하세요.",
+  "desktopAuthorizationTimeout": "인증 시간이 초과되었습니다. 연결 버튼으로 다시 시도하세요.",
+  "desktopBootstrapFailed": "인증된 Core가 검증된 시작을 완료하지 못했습니다. 패키지와 시스템 로그를 확인하세요.",
+  "desktopTunNotReady": "Core는 시작되었지만 TUN 어댑터가 준비되지 않았습니다. TUN을 사용하기 전에 Core 로그를 확인하세요."
+}

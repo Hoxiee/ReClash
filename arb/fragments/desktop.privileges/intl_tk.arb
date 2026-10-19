@@ -1,0 +1,16 @@
+{
+  "coreModeElevated": "Dolandyrylýan ýokary ygtyýarly proses",
+  "coreModePrivilegedHelper": "Gol çekilen Helper arkaly dolandyrylýan proses",
+  "desktopAuthorizationRequired": "TUN üçin rugsat gerek. Rugsat bermek üçin birikmäni başladyň ýa-da TUN-y açyň.",
+  "desktopAuthorizationCancelled": "Rugsat bermek ýatyryldy. TUN başlamady.",
+  "desktopAuthorizationDenied": "Rugsat berilmedi. TUN başlamady.",
+  "desktopAuthorizationAgentUnavailable": "Grafiki rugsat agenti elýeterli däl. Ony şu iş stoly sessiýasynda başladyň we gaýtadan synanyşyň.",
+  "desktopHelperUnavailable": "TUN Helper elýeterli däl. Gurnalan paketi we hyzmaty barlaň, soň gaýtadan synanyşyň.",
+  "desktopHelperApprovalRequired": "Ulgam sazlamalary → Umumy → Giriş elementleri we giňeltmeler bölüminde ReClash Helper-e rugsat beriň, soň gaýtadan synanyşyň.",
+  "desktopSigningRequired": "TUN üçin dogry gol çekilen ReClash programmasy we Helper gerek. Golsuz ýa-da ad-hoc golly ýygynda rugsat berip bolmaýar.",
+  "desktopBundleInvalid": "Core ýa-da Helper bitewilik barlagyndan geçmedi. Doly ReClash paketini gaýtadan guruň.",
+  "desktopLaunchPending": "Öňki rugsat bermek ýa-da Core-i duruzmak entek tamamlanmady. Tamamlanmagyna garaşyň we gaýtadan synanyşyň.",
+  "desktopAuthorizationTimeout": "Rugsat garaşma wagty gutardy. Birikme düwmesi arkaly gaýtadan synanyşyň.",
+  "desktopBootstrapFailed": "Rugsat berlen Core barlanan başlangyjy tamamlap bilmedi. Paketi we ulgam ýazgylaryny barlaň.",
+  "desktopTunNotReady": "Core başlady, emma TUN adapteri taýýar däl. TUN-y ulanmazdan öň Core ýazgysyny barlaň."
+}

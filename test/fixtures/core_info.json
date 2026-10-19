@@ -6,5 +6,6 @@
   "buildTime": "2026-10-02T08:05:06.123Z",
   "tags": ["with_gvisor"],
   "workingDirectory": "/home/reclash/.config",
-  "executablePath": "/usr/bin/ReClashCore"
+  "executablePath": "/usr/bin/ReClashCore",
+  "tunActive": false
 }

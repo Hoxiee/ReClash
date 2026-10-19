@@ -16,6 +16,7 @@ import 'package:reclash/views/dashboard/layout.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/current_outbound.dart';
 import 'package:reclash/widgets/widgets.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -51,6 +52,7 @@ class _RecordingSetupAction extends SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) {
     requests.add(running);
     ref.read(runTimeProvider.notifier).value = running ? 1 : null;

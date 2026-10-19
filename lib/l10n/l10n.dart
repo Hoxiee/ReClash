@@ -10456,6 +10456,146 @@ class AppLocalizations {
     );
   }
 
+  /// `Managed elevated process`
+  String get coreModeElevated {
+    return Intl.message(
+      'Managed elevated process',
+      name: 'coreModeElevated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Managed process via signed Helper`
+  String get coreModePrivilegedHelper {
+    return Intl.message(
+      'Managed process via signed Helper',
+      name: 'coreModePrivilegedHelper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN needs authorization. Start the connection or enable TUN to authorize it.`
+  String get desktopAuthorizationRequired {
+    return Intl.message(
+      'TUN needs authorization. Start the connection or enable TUN to authorize it.',
+      name: 'desktopAuthorizationRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authorization was cancelled. TUN has not started.`
+  String get desktopAuthorizationCancelled {
+    return Intl.message(
+      'Authorization was cancelled. TUN has not started.',
+      name: 'desktopAuthorizationCancelled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authorization was not granted. TUN has not started.`
+  String get desktopAuthorizationDenied {
+    return Intl.message(
+      'Authorization was not granted. TUN has not started.',
+      name: 'desktopAuthorizationDenied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No graphical authorization agent is available. Start one for this desktop session and try again.`
+  String get desktopAuthorizationAgentUnavailable {
+    return Intl.message(
+      'No graphical authorization agent is available. Start one for this desktop session and try again.',
+      name: 'desktopAuthorizationAgentUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The TUN Helper is unavailable. Check the installed package and service, then try again.`
+  String get desktopHelperUnavailable {
+    return Intl.message(
+      'The TUN Helper is unavailable. Check the installed package and service, then try again.',
+      name: 'desktopHelperUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow the ReClash Helper in System Settings → General → Login Items & Extensions, then try again.`
+  String get desktopHelperApprovalRequired {
+    return Intl.message(
+      'Allow the ReClash Helper in System Settings → General → Login Items & Extensions, then try again.',
+      name: 'desktopHelperApprovalRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN requires a correctly signed ReClash app and Helper. An unsigned or ad-hoc build cannot be authorized.`
+  String get desktopSigningRequired {
+    return Intl.message(
+      'TUN requires a correctly signed ReClash app and Helper. An unsigned or ad-hoc build cannot be authorized.',
+      name: 'desktopSigningRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core or Helper failed integrity verification. Reinstall a complete ReClash package.`
+  String get desktopBundleInvalid {
+    return Intl.message(
+      'The Core or Helper failed integrity verification. Reinstall a complete ReClash package.',
+      name: 'desktopBundleInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The previous authorization or Core shutdown is still pending. Wait for it to finish before trying again.`
+  String get desktopLaunchPending {
+    return Intl.message(
+      'The previous authorization or Core shutdown is still pending. Wait for it to finish before trying again.',
+      name: 'desktopLaunchPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authorization timed out. Try again from the connection button.`
+  String get desktopAuthorizationTimeout {
+    return Intl.message(
+      'Authorization timed out. Try again from the connection button.',
+      name: 'desktopAuthorizationTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The authorized Core could not complete a verified startup. Check the package and system logs.`
+  String get desktopBootstrapFailed {
+    return Intl.message(
+      'The authorized Core could not complete a verified startup. Check the package and system logs.',
+      name: 'desktopBootstrapFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core started, but the TUN adapter is not ready. Check the Core log before using TUN.`
+  String get desktopTunNotReady {
+    return Intl.message(
+      'The Core started, but the TUN adapter is not ready. Check the Core log before using TUN.',
+      name: 'desktopTunNotReady',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
   String get translationNotice {
     return Intl.message(

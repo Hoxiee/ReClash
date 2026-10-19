@@ -10,6 +10,7 @@ import 'api/editor.dart';
 import 'api/hotkey.dart';
 import 'api/ipc.dart';
 import 'api/script.dart';
+import 'api/windows.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -94,6 +95,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<IpcEvent> dco_decode_StreamSink_ipc_event_Sse(dynamic raw);
+
+  @protected
+  RustStreamSink<List<String>> dco_decode_StreamSink_list_String_Sse(
+    dynamic raw,
+  );
 
   @protected
   RustStreamSink<int> dco_decode_StreamSink_u_32_Sse(dynamic raw);
@@ -244,6 +250,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<IpcEvent> sse_decode_StreamSink_ipc_event_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<List<String>> sse_decode_StreamSink_list_String_Sse(
     SseDeserializer deserializer,
   );
 
@@ -419,6 +430,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_StreamSink_ipc_event_Sse(
     RustStreamSink<IpcEvent> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_list_String_Sse(
+    RustStreamSink<List<String>> self,
     SseSerializer serializer,
   );
 

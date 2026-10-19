@@ -1,10 +1,21 @@
 #include "flutter_window.h"
 
+#include <flutter/encodable_value.h>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 #include <optional>
 
 #include <window/window_plugin_runner.h>
 
 #include "flutter/generated_plugin_registrant.h"
+
+namespace {
+UINT MaintenanceMessage() {
+  static const UINT message =
+      ::RegisterWindowMessageW(L"ReClash.InstalledProductMaintenance");
+  return message;
+}
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -53,6 +64,19 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (flutter_controller_ && MaintenanceMessage() != 0 &&
+      message == MaintenanceMessage()) {
+    flutter::MethodChannel<flutter::EncodableValue> channel(
+        flutter_controller_->engine()->messenger(), "window",
+        &flutter::StandardMethodCodec::GetInstance());
+    flutter::EncodableMap args;
+    args[flutter::EncodableValue("name")] =
+        flutter::EncodableValue("should-terminate");
+    channel.InvokeMethod("onEvent",
+                         std::make_unique<flutter::EncodableValue>(args));
+    return 0;
+  }
+
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     WindowPluginForwardVisibility(*flutter_controller_, message, wparam,

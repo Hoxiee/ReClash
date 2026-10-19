@@ -50,6 +50,8 @@ checks:
     argv: [flutter, test, test/widgets/null_status_test.dart, test/widgets/sidebar_test.dart]
   packaging:
     argv: [flutter, test, test/tool/packaging_config_test.dart, test/tool/release_version_test.dart]
+  native-privileges:
+    argv: [flutter, test, test/core/desktop, test/core/service_test.dart, test/providers/action_test.dart, test/providers/setup_action_test.dart, test/providers/common_action_test.dart, test/providers/state_derived_test.dart, test/common/launch_test.dart, test/common/system_test.dart]
   core-contracts:
     argv: [flutter, test, test/core/controller_test.dart, test/core/desktop/lifecycle_test.dart, test/core/protocol_contract_test.dart]
   desktop-window:

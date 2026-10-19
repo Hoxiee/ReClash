@@ -616,11 +616,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Işlediş usuly"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Ýerleşiş"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Dolandyrylýan ýokary ygtyýarly proses",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Helper arkaly proses",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "Prosesiň içindäki kitaphana",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Gol çekilen Helper arkaly dolandyrylýan proses",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("Aýratyn proses"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage(
@@ -721,6 +727,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "ClashMeta esasynda gurlan köp platformaly proksi müşderisi: peýdalanmagy aňsat, açyk kodly we reklamasyz.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "Grafiki rugsat agenti elýeterli däl. Ony şu iş stoly sessiýasynda başladyň we gaýtadan synanyşyň.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Rugsat bermek ýatyryldy. TUN başlamady.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "Rugsat berilmedi. TUN başlamady.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN üçin rugsat gerek. Rugsat bermek üçin birikmäni başladyň ýa-da TUN-y açyň.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Rugsat garaşma wagty gutardy. Birikme düwmesi arkaly gaýtadan synanyşyň.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "Rugsat berlen Core barlanan başlangyjy tamamlap bilmedi. Paketi we ulgam ýazgylaryny barlaň.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core ýa-da Helper bitewilik barlagyndan geçmedi. Doly ReClash paketini gaýtadan guruň.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Ulgam sazlamalary → Umumy → Giriş elementleri we giňeltmeler bölüminde ReClash Helper-e rugsat beriň, soň gaýtadan synanyşyň.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper elýeterli däl. Gurnalan paketi we hyzmaty barlaň, soň gaýtadan synanyşyň.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "Öňki rugsat bermek ýa-da Core-i duruzmak entek tamamlanmady. Tamamlanmagyna garaşyň we gaýtadan synanyşyň.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN üçin dogry gol çekilen ReClash programmasy we Helper gerek. Golsuz ýa-da ad-hoc golly ýygynda rugsat berip bolmaýar.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core başlady, emma TUN adapteri taýýar däl. TUN-y ulanmazdan öň Core ýazgysyny barlaň.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Nyşan"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("Nyşanyň GeoIP-i"),

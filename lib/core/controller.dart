@@ -6,6 +6,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/spill.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
@@ -54,6 +55,26 @@ class CoreController {
 
   CoreProcessOwner? get processOwner => _interface.processOwner;
 
+  void configurePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) {
+    _interface.configurePrivilege(
+      tunEnabled: tunEnabled,
+      allowPrompt: allowPrompt,
+    );
+  }
+
+  void revokePrivilegePrompt() => _interface.revokePrivilegePrompt();
+
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) => _interface.preparePrivilege(
+    tunEnabled: tunEnabled,
+    allowPrompt: allowPrompt,
+  );
+
   static Future<void> ensureHomeDir() async {
     final homePath = await appPath.homeDirPath;
     final homeDir = Directory(homePath);
@@ -61,7 +82,6 @@ class CoreController {
     if (!isExists) {
       await homeDir.create(recursive: true);
     }
-    await system.grantHomeDirAccess(homePath);
   }
 
   static Future<void> initGeo() async {
@@ -103,8 +123,26 @@ class CoreController {
   }
 
   Future<String> validateConfig(String path) async {
-    final res = await _interface.validateConfig(path);
-    return res;
+    return _withCoreInput(path, _interface.validateConfig);
+  }
+
+  Future<T> _withCoreInput<T>(
+    String path,
+    Future<T> Function(String) read,
+  ) async {
+    if (!isPrivilegedCoreOwner(processOwner)) return read(path);
+    final home = await Directory(
+      await appPath.homeDirPath,
+    ).resolveSymbolicLinks();
+    final source = File(path);
+    final canonical = await source.resolveSymbolicLinks();
+    if (isWithin(home, canonical)) return read(canonical);
+    final input = await source.copy(await appPath.tempFilePath);
+    try {
+      return await read(await input.resolveSymbolicLinks());
+    } finally {
+      await input.safeDelete();
+    }
   }
 
   Future<Uint8List> decryptProfilePayload(
@@ -124,7 +162,12 @@ class CoreController {
     await file.safeWriteAsBytes(bytes);
     try {
       final plain = Uint8List.fromList(
-        utf8.encode(await _interface.decryptConfig(file.path, ageSecretKey)),
+        utf8.encode(
+          await _withCoreInput(
+            file.path,
+            (input) => _interface.decryptConfig(input, ageSecretKey),
+          ),
+        ),
       );
       if (plain.length > subscriptionPayloadLimit) {
         throw const SubscriptionException(SubscriptionFailure.oversized);
@@ -147,7 +190,10 @@ class CoreController {
         throw const AgeSecretKeyRequiredException();
       }
       await file.safeWriteAsString(
-        await _interface.decryptConfig(path, ageSecretKey),
+        await _withCoreInput(
+          path,
+          (input) => _interface.decryptConfig(input, ageSecretKey),
+        ),
       );
     }
     final message = await validateConfig(path);
@@ -156,7 +202,7 @@ class CoreController {
     }
     final List<Map<String, dynamic>> proxies;
     try {
-      proxies = await _interface.convertProxies(path);
+      proxies = await _withCoreInput(path, _interface.convertProxies);
     } on Exception {
       return message;
     }
@@ -201,9 +247,11 @@ class CoreController {
     final path = await appPath.tempFilePath;
     final file = File(path);
     await file.safeWriteAsBytes(data);
-    final res = await _interface.validateConfig(path);
-    await File(path).safeDelete();
-    return res;
+    try {
+      return await validateConfig(path);
+    } finally {
+      await file.safeDelete();
+    }
   }
 
   Future<String> updateConfig(UpdateParams updateParams) async {
@@ -258,6 +306,48 @@ class CoreController {
     return _interface.checkRoutes(params);
   }
 
+  Future<RcxStatus> rcxSetPolicy(RcxUserLayer layer) {
+    return _interface.rcxSetPolicy(layer);
+  }
+
+  Future<RcxStatus> rcxStatus() {
+    return _interface.rcxStatus();
+  }
+
+  Future<RcxExplanation> rcxExplain(String group) {
+    return _interface.rcxExplain(group);
+  }
+
+  Future<List<RcxJournalEntry>> rcxJournal({String? group, int limit = 0}) {
+    return _interface.rcxJournal(group: group, limit: limit);
+  }
+
+  Future<RcxDecision> rcxAction({
+    required String group,
+    required RcxAction action,
+    String? node,
+    bool here = false,
+  }) {
+    return _interface.rcxAction(
+      group: group,
+      action: action,
+      node: node,
+      here: here,
+    );
+  }
+
+  Future<bool> rcxHints(Map<String, Object?> hints) {
+    return _interface.rcxHints(hints);
+  }
+
+  Future<List<RcxProfileInfo>> rcxProfiles() {
+    return _interface.rcxProfiles();
+  }
+
+  Future<RcxStudioResult> rcxStudio(Map<String, Object?> request) {
+    return _interface.rcxStudio(request);
+  }
+
   Future<List<TrackerInfo>> getConnections() async {
     return _interface.getConnections();
   }
@@ -307,7 +397,7 @@ class CoreController {
   }
 
   Future<String> dumpRuleSet(String path) {
-    return _interface.dumpRuleSet(path);
+    return _withCoreInput(path, _interface.dumpRuleSet);
   }
 
   Future<RuleSetInfo> compileRuleSet(
@@ -325,6 +415,7 @@ class CoreController {
     Duration timeout = const Duration(seconds: 20),
     int maxBytes = subscriptionWireLimit,
     bool protected = false,
+    bool bypass = false,
   }) => _interface.fetchSubscription(
     requestId,
     url,
@@ -332,6 +423,7 @@ class CoreController {
     timeout: timeout,
     maxBytes: maxBytes,
     protected: protected,
+    bypass: bypass,
   );
 
   Future<bool> cancelSubscriptionFetch(String requestId) =>
@@ -344,6 +436,9 @@ class CoreController {
   Future<bool> startListener() async {
     return _interface.startListener();
   }
+
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop}) =>
+      _interface.setOnDemandPaused(paused, fullStop: fullStop);
 
   Future<bool> stopListener() async {
     return _interface.stopListener();

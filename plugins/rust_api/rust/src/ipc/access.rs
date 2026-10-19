@@ -39,26 +39,38 @@ pub fn admit(stream: &Stream) -> io::Result<Option<u32>> {
         let peer_uid = credentials
             .euid()
             .ok_or_else(|| denied("peer user ID is unavailable".into()))?;
-        // SAFETY: geteuid() takes no arguments and cannot fail.
         let own_uid = unsafe { libc::geteuid() };
         if !is_permitted_uid(peer_uid, own_uid) {
-            return Err(denied(format!(
-                "peer uid {peer_uid} is neither {own_uid} nor root"
-            )));
+            return Err(denied(format!("peer uid {peer_uid} is not permitted")));
         }
     }
     #[allow(clippy::useless_conversion)]
-    Ok(credentials.pid().and_then(|pid| u32::try_from(pid).ok()))
+    let pid = credentials.pid().and_then(|pid| u32::try_from(pid).ok());
+    #[cfg(windows)]
+    crate::windows::authorize_rpc_peer(
+        pid.ok_or_else(|| denied("peer process ID is unavailable".into()))?,
+    )?;
+    Ok(pid)
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, windows))]
 fn denied(reason: String) -> io::Error {
     io::Error::new(io::ErrorKind::PermissionDenied, reason)
 }
 
 #[cfg(unix)]
 fn is_permitted_uid(peer_uid: libc::uid_t, own_uid: libc::uid_t) -> bool {
-    peer_uid == own_uid || peer_uid == 0
+    if peer_uid == own_uid {
+        return true;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        peer_uid == 0
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        false
+    }
 }
 
 #[cfg(all(test, unix))]
@@ -71,8 +83,8 @@ mod tests {
     }
 
     #[test]
-    fn admits_root_because_the_core_runs_privileged_for_tun() {
-        assert!(is_permitted_uid(0, 501));
+    fn root_admission_is_only_for_the_managed_macos_core() {
+        assert_eq!(is_permitted_uid(0, 501), cfg!(target_os = "macos"));
     }
 
     #[test]

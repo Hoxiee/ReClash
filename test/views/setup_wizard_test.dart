@@ -227,6 +227,7 @@ class _TestSetupAction extends SetupAction {
     bool initialize = false,
     bool silence = false,
     Object? owner,
+    bool allowPrompt = false,
   }) async => true;
 
   @override

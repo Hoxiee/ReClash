@@ -495,8 +495,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("실행 방식"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("위치"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage("관리되는 권한 상승 프로세스"),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage("Helper를 통한 프로세스"),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage("프로세스 내 라이브러리"),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "서명된 Helper를 통한 관리 프로세스",
+    ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage("별도 프로세스"),
     "coreOpenRuntimeConfig": MessageLookupByLibrary.simpleMessage("런타임 설정 열기"),
     "corePlatform": MessageLookupByLibrary.simpleMessage("플랫폼"),
@@ -584,6 +588,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "ClashMeta 기반의 멀티 플랫폼 프록시 클라이언트로, 간편하게 사용할 수 있으며 오픈 소스이고 광고가 없습니다.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "그래픽 인증 에이전트를 사용할 수 없습니다. 현재 데스크톱 세션에서 실행한 후 다시 시도하세요.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "인증이 취소되었습니다. TUN은 시작되지 않았습니다.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "인증이 승인되지 않았습니다. TUN은 시작되지 않았습니다.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN에는 인증이 필요합니다. 연결을 시작하거나 TUN을 켜서 승인하세요.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "인증 시간이 초과되었습니다. 연결 버튼으로 다시 시도하세요.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "인증된 Core가 검증된 시작을 완료하지 못했습니다. 패키지와 시스템 로그를 확인하세요.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core 또는 Helper의 무결성 검증에 실패했습니다. 전체 ReClash 패키지를 다시 설치하세요.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "시스템 설정 → 일반 → 로그인 항목 및 확장 프로그램에서 ReClash Helper를 허용한 후 다시 시도하세요.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper를 사용할 수 없습니다. 설치된 패키지와 서비스를 확인한 후 다시 시도하세요.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "이전 인증 또는 Core 종료가 아직 완료되지 않았습니다. 완료될 때까지 기다린 후 다시 시도하세요.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN에는 올바르게 서명된 ReClash 앱과 Helper가 필요합니다. 서명이 없거나 ad-hoc 서명된 빌드는 인증할 수 없습니다.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core는 시작되었지만 TUN 어댑터가 준비되지 않았습니다. TUN을 사용하기 전에 Core 로그를 확인하세요.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("목적지"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("목적지 GeoIP"),

@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -23,7 +22,7 @@ var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules"}
 
 func handleGetProfileBase(path string) (*ProfileBase, error) {
 	defer scheduleLoadMemoryRelease()
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +50,7 @@ func handleGetProfileBase(path string) (*ProfileBase, error) {
 
 func handleGetProfileOutbounds(path string) (*ProfileOutbounds, error) {
 	defer scheduleLoadMemoryRelease()
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +117,7 @@ func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, err
 }
 
 func mergeProfileBase(base *SetupBase) (*yaml.Node, error) {
-	buf, err := os.ReadFile(base.Path)
+	buf, err := readCoreFile(base.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -256,8 +255,8 @@ func writeConfigDocument(path string, document *yaml.Node) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Rename(temporary, path); err != nil {
-		_ = os.Remove(temporary)
+	if err := renameCoreFile(temporary, path); err != nil {
+		_ = removeCorePath(temporary, false)
 		return err
 	}
 	scheduleReclaimOwnership()
@@ -266,7 +265,7 @@ func writeConfigDocument(path string, document *yaml.Node) error {
 
 func writeDocumentFile(dir, pattern string, document *yaml.Node) (string, error) {
 	inlineAliases(document)
-	file, err := os.CreateTemp(dir, pattern)
+	file, err := createCoreTempFile(dir, pattern)
 	if err != nil {
 		return "", err
 	}
@@ -274,11 +273,11 @@ func writeDocumentFile(dir, pattern string, document *yaml.Node) (string, error)
 	err = errors.Join(
 		encodeConfigMapping(writer, document.Content[0]),
 		writer.Flush(),
+		file.Chmod(0o644),
 		file.Close(),
-		os.Chmod(file.Name(), 0o644),
 	)
 	if err != nil {
-		_ = os.Remove(file.Name())
+		_ = removeCorePath(file.Name(), false)
 		return "", err
 	}
 	return file.Name(), nil

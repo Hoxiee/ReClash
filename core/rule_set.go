@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/netip"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -55,7 +54,7 @@ func handleCompileRuleSet(params CompileRuleSetParams) (*RuleSetInfo, error) {
 	if params.URL != "" {
 		buf, err = downloadRuleSet(params.URL, source, params.Headers)
 	} else {
-		buf, err = os.ReadFile(source)
+		buf, err = readCoreFile(source)
 	}
 	if err != nil {
 		return nil, err
@@ -101,30 +100,21 @@ func downloadRuleSet(rawURL, path string, headers map[string]string) ([]byte, er
 }
 
 func writeRuleSetFile(path string, buf []byte) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := makeCoreDirectory(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	// The directory belongs to the user while the Core may run as root, so the
-	// temp file is created afresh rather than opened through whatever is there.
-	temp := path + ".tmp"
-	_ = os.Remove(temp)
-	file, err := os.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	file, err := createCoreTempFile(filepath.Dir(path), ".rule-*.tmp")
 	if err != nil {
 		return err
 	}
-	_, err = file.Write(buf)
-	if closeErr := file.Close(); err == nil {
-		err = closeErr
-	}
+	temporary := file.Name()
+	defer func() { _ = removeCorePath(temporary, false) }()
+	_, writeErr := file.Write(buf)
+	err = errors.Join(writeErr, file.Chmod(0o644), file.Close())
 	if err != nil {
-		_ = os.Remove(temp)
 		return err
 	}
-	if err := os.Rename(temp, path); err != nil {
-		_ = os.Remove(temp)
-		return err
-	}
-	return nil
+	return renameCoreFile(temporary, path)
 }
 
 func compileRuleSet(buf []byte, allowEmpty bool) (*RuleSetInfo, []byte, error) {

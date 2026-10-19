@@ -23,7 +23,7 @@ const helperPortKey =
 const helperPortValue = 'Port';
 const helperSocketPath = '/run/reclash/helper.sock';
 const helperProtocolVersionHeader = 'x-reclash-helper-protocol';
-final helperProtocolVersion = Platform.isWindows ? '8' : '6';
+final helperProtocolVersion = Platform.isWindows ? '8' : '9';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
 

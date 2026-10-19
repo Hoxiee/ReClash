@@ -464,6 +464,7 @@ _CoreInfo _$CoreInfoFromJson(Map<String, dynamic> json) => _CoreInfo(
       const [],
   workingDirectory: json['workingDirectory'] as String? ?? '',
   executablePath: json['executablePath'] as String? ?? '',
+  tunActive: json['tunActive'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$CoreInfoToJson(_CoreInfo instance) => <String, dynamic>{
@@ -475,6 +476,7 @@ Map<String, dynamic> _$CoreInfoToJson(_CoreInfo instance) => <String, dynamic>{
   'tags': instance.tags,
   'workingDirectory': instance.workingDirectory,
   'executablePath': instance.executablePath,
+  'tunActive': instance.tunActive,
 };
 
 _CoreMemoryStats _$CoreMemoryStatsFromJson(Map<String, dynamic> json) =>

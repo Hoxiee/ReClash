@@ -287,7 +287,7 @@ func handleSideLoadExternalProvider(params *SideLoadParams) error {
 }
 
 func handleDumpRuleSet(path string) (string, error) {
-	buf, err := os.ReadFile(path)
+	buf, err := readCoreFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -319,9 +319,9 @@ func handleClearEffect(profileId int64) error {
 		return errors.New("invalid profile id")
 	}
 	providersRoot, providersPath := providerPaths(constant.Path.HomeDir(), profileId)
-	if err := os.RemoveAll(providersPath); err != nil {
+	if err := removeCorePath(providersPath, true); err != nil {
 		return err
 	}
-	_ = os.Remove(providersRoot)
+	_ = removeCorePath(providersRoot, false)
 	return nil
 }

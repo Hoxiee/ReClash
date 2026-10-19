@@ -7,9 +7,37 @@ class CoreAction extends _$CoreAction {
   int _requestedRestartRevision = 0;
   Future<bool>? _restartOperation;
   bool _restartSilence = false;
+  int _launchRevision = 0;
 
   @override
-  void build() {}
+  void build() {
+    ref.listen(coreStatusProvider, (_, status) {
+      if (status != CoreStatus.connected) {
+        ref.read(authorizedTunEnableProvider.notifier).value =
+            TunAuthorizationState.none;
+        ref.read(tunAppliedProvider.notifier).value = false;
+      }
+    });
+  }
+
+  void _configureLaunch({bool allowPrompt = false}) {
+    _core.configurePrivilege(
+      tunEnabled:
+          ref.read(patchClashConfigProvider).tun.enable &&
+          !ref.read(safeModeProvider),
+      allowPrompt: allowPrompt,
+    );
+  }
+
+  Future<void> cancelCoreStart() async {
+    _launchRevision++;
+    _core.revokePrivilegePrompt();
+    final result = await _core.stop();
+    if (!ref.mounted || result.outcome == CoreLifecycleOutcome.superseded) {
+      return;
+    }
+    ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+  }
 
   Future<void> initCore() async {
     final isInit = await _core.isInit;
@@ -24,15 +52,26 @@ class CoreAction extends _$CoreAction {
     }
   }
 
-  Future<bool> startCore({bool silence = false}) async {
+  Future<bool> startCore({
+    bool silence = false,
+    bool allowPrompt = false,
+  }) async {
+    final revision = ++_launchRevision;
+    _configureLaunch(allowPrompt: allowPrompt);
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     try {
       final result = await startLifecycle();
-      return await _applyLifecycleResult(result);
+      if (revision != _launchRevision || !ref.mounted) return false;
+      return await _applyLifecycleResult(result, launchRevision: revision);
     } catch (error) {
+      _core.revokePrivilegePrompt();
+      if (revision != _launchRevision || !ref.mounted) return false;
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
       if (!silence) {
-        dialogs.showNotifier(error.toString(), level: MessageLevel.error);
+        dialogs.showNotifier(
+          userFacingErrorMessage(error, currentAppLocalizations),
+          level: MessageLevel.error,
+        );
       }
       if (silence) rethrow;
       return false;
@@ -49,14 +88,14 @@ class CoreAction extends _$CoreAction {
     return _core.restart();
   }
 
-  // Nothing in lib/ calls CoreController.stop(); only close() (app exit)
-  // supersedes a start/restart. statusFirst lets onCrash catch a crash
-  // during initCore itself (it early-returns unless status is connected).
   Future<bool> _applyLifecycleResult(
     CoreLifecycleResult result, {
     bool statusFirst = false,
+    required int launchRevision,
   }) async {
-    if (result.outcome == CoreLifecycleOutcome.superseded) {
+    if (!ref.mounted ||
+        launchRevision != _launchRevision ||
+        result.outcome == CoreLifecycleOutcome.superseded) {
       return false;
     }
     if (statusFirst) {
@@ -64,8 +103,15 @@ class CoreAction extends _$CoreAction {
       await initCore();
     } else {
       await initCore();
+      if (!ref.mounted || launchRevision != _launchRevision) return false;
       ref.read(coreStatusProvider.notifier).value = CoreStatus.connected;
     }
+    if (!ref.mounted || launchRevision != _launchRevision) return false;
+    ref
+        .read(authorizedTunEnableProvider.notifier)
+        .value = system.isAndroid || isPrivilegedCoreOwner(_core.processOwner)
+        ? TunAuthorizationState.authorized
+        : TunAuthorizationState.none;
     return true;
   }
 
@@ -99,7 +145,8 @@ class CoreAction extends _$CoreAction {
     await _core.crash();
   }
 
-  Future<bool> restartCore({bool silence = false}) {
+  Future<bool> restartCore({bool silence = false, bool allowPrompt = false}) {
+    _configureLaunch(allowPrompt: allowPrompt);
     _restartSilence |= silence;
     _requestedRestartRevision++;
     final activeOperation = _restartOperation;
@@ -113,16 +160,23 @@ class CoreAction extends _$CoreAction {
   }
 
   Future<bool> _runRestartWorker() async {
+    final launchRevision = ++_launchRevision;
     try {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
       final result = await restartLifecycle();
-      if (!await _applyLifecycleResult(result, statusFirst: true)) {
+      if (!ref.mounted || launchRevision != _launchRevision) return false;
+      if (!await _applyLifecycleResult(
+        result,
+        statusFirst: true,
+        launchRevision: launchRevision,
+      )) {
         return false;
       }
 
       var appliedRevision = 0;
       var applied = true;
       while (appliedRevision < _requestedRestartRevision) {
+        if (!ref.mounted || launchRevision != _launchRevision) return false;
         final revision = _requestedRestartRevision;
         final setupAction = ref.read(setupActionProvider.notifier);
         if (ref.read(isStartProvider)) {
@@ -143,6 +197,8 @@ class CoreAction extends _$CoreAction {
       }
       return applied;
     } catch (_) {
+      _core.revokePrivilegePrompt();
+      if (!ref.mounted || launchRevision != _launchRevision) return false;
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
       rethrow;
     } finally {

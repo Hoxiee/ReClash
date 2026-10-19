@@ -1,29 +1,30 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reclash/common/constant.dart';
 import 'package:path/path.dart' as p;
+import 'package:reclash/common/constant.dart';
 
-final class CoreManifest {
-  const CoreManifest._();
+abstract final class CoreManifest {
+  static Future<String?> readCoreSha256({String? path}) =>
+      _readHash('coreSha256', path);
 
-  static Future<String?> readCoreSha256({String? path}) async {
+  static Future<String?> readHelperSha256({String? path}) =>
+      _readHash('helperSha256', path);
+
+  static Future<String?> _readHash(String field, String? path) async {
     try {
-      final file = File(path ?? _defaultPath());
+      final file = File(
+        path ??
+            p.join(p.dirname(Platform.resolvedExecutable), coreManifestName),
+      );
       final value = jsonDecode(await file.readAsString());
-      if (value is! Map) return null;
-      final coreSha256 = value['coreSha256'];
-      if (coreSha256 is! String ||
-          !RegExp(r'^[0-9a-f]{64}$').hasMatch(coreSha256)) {
-        return null;
-      }
-      return coreSha256;
+      if (value is! Map<String, dynamic>) return null;
+      final hash = value[field];
+      return hash is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(hash)
+          ? hash
+          : null;
     } on Object {
       return null;
     }
-  }
-
-  static String _defaultPath() {
-    return p.join(p.dirname(Platform.resolvedExecutable), coreManifestName);
   }
 }

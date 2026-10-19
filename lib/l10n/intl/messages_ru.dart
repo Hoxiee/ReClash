@@ -609,11 +609,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "coreLaunchMode": MessageLookupByLibrary.simpleMessage("Способ запуска"),
     "coreLocation": MessageLookupByLibrary.simpleMessage("Расположение"),
+    "coreModeElevated": MessageLookupByLibrary.simpleMessage(
+      "Управляемый процесс с повышенными правами",
+    ),
     "coreModeHelper": MessageLookupByLibrary.simpleMessage(
       "Процесс через Helper",
     ),
     "coreModeLibrary": MessageLookupByLibrary.simpleMessage(
       "Встроенная библиотека",
+    ),
+    "coreModePrivilegedHelper": MessageLookupByLibrary.simpleMessage(
+      "Управляемый процесс через подписанный Helper",
     ),
     "coreModeProcess": MessageLookupByLibrary.simpleMessage(
       "Отдельный процесс",
@@ -718,6 +724,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteTip": m21,
     "desc": MessageLookupByLibrary.simpleMessage(
       "Многоплатформенный прокси-клиент на основе ClashMeta: простой и удобный, с открытым исходным кодом и без рекламы.",
+    ),
+    "desktopAuthorizationAgentUnavailable":
+        MessageLookupByLibrary.simpleMessage(
+          "Графический агент авторизации недоступен. Запустите его в текущем сеансе рабочего стола и повторите попытку.",
+        ),
+    "desktopAuthorizationCancelled": MessageLookupByLibrary.simpleMessage(
+      "Авторизация отменена. TUN не запущен.",
+    ),
+    "desktopAuthorizationDenied": MessageLookupByLibrary.simpleMessage(
+      "Разрешение не предоставлено. TUN не запущен.",
+    ),
+    "desktopAuthorizationRequired": MessageLookupByLibrary.simpleMessage(
+      "Для TUN нужна авторизация. Запустите подключение или включите TUN, чтобы предоставить разрешение.",
+    ),
+    "desktopAuthorizationTimeout": MessageLookupByLibrary.simpleMessage(
+      "Время ожидания авторизации истекло. Повторите попытку кнопкой подключения.",
+    ),
+    "desktopBootstrapFailed": MessageLookupByLibrary.simpleMessage(
+      "Авторизованный Core не смог завершить проверенный запуск. Проверьте пакет и системные журналы.",
+    ),
+    "desktopBundleInvalid": MessageLookupByLibrary.simpleMessage(
+      "Core или Helper не прошёл проверку целостности. Переустановите полный пакет ReClash.",
+    ),
+    "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
+      "Разрешите Helper ReClash в «Системных настройках» → «Основные» → «Объекты входа и расширения», затем повторите попытку.",
+    ),
+    "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Helper для TUN недоступен. Проверьте установленный пакет и службу, затем повторите попытку.",
+    ),
+    "desktopLaunchPending": MessageLookupByLibrary.simpleMessage(
+      "Предыдущая авторизация или остановка Core ещё не завершена. Дождитесь завершения и повторите попытку.",
+    ),
+    "desktopSigningRequired": MessageLookupByLibrary.simpleMessage(
+      "Для TUN необходимы корректно подписанные приложение ReClash и Helper. Сборку без подписи или с подписью ad-hoc авторизовать нельзя.",
+    ),
+    "desktopTunNotReady": MessageLookupByLibrary.simpleMessage(
+      "Core запущен, но адаптер TUN не готов. Перед использованием TUN проверьте журнал Core.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Назначение"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(

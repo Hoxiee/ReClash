@@ -204,7 +204,7 @@ jobs:
             gofmt -l ./*.go ./cmd ./mobile ./platform ./tun >&2
             exit 1
           }
-          go test -count=1 .
+          go test -count=1 . ./cmd/core
           go vet . ./cmd/...
           GOOS=linux go vet ./platform
 
@@ -306,28 +306,48 @@ jobs:
 
       - name: Run tests
         run: |
-          cargo test --manifest-path services/helper/Cargo.toml
-          cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
+          cargo test --locked --manifest-path services/helper/Cargo.toml
+          cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
 
   windows-helper-test:
-    name: Windows helper test
+    name: Windows native backend test
     if: *checks
     runs-on: windows-2022
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: services/helper
+          workspaces: |
+            services/helper
+            plugins/rust_api/rust
           save-if: ${{ env.BRANCH_CACHE }}
 
       - name: Check format
         run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
 
       - name: Run Windows service tests
-        run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
+        run: cargo test --locked --manifest-path services/helper/Cargo.toml --features windows-service
+
+      - name: Run managed Windows backend tests
+        run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: ${{ env.BRANCH_CACHE }}
+          cache-dependency-path: core/go.sum
+
+      - name: Validate Windows Core bootstrap
+        working-directory: core
+        env:
+          CGO_ENABLED: 0
+        run: go test ./cmd/core
 
   build:
     # Releases publish where the release links point: the public repository.

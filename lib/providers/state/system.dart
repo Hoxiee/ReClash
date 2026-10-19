@@ -184,10 +184,10 @@ bool shouldPatchSystemDns(Ref ref) {
   final tunEnable = ref.watch(
     patchClashConfigProvider.select((state) => state.tun.enable),
   );
-  final authorizationState = ref.watch(authorizedTunEnableProvider);
-  return isStart &&
-      tunEnable &&
-      authorizationState == TunAuthorizationState.authorized;
+  final authorized =
+      ref.watch(authorizedTunEnableProvider) ==
+      TunAuthorizationState.authorized;
+  return isStart && tunEnable && authorized && ref.watch(tunAppliedProvider);
 }
 
 @riverpod
