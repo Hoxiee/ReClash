@@ -9,6 +9,7 @@ enum ToolPage {
   onDemand,
   appRegion,
   userAgents,
+  webDashboard,
   theme,
   locale,
   hotkey,
@@ -36,7 +37,7 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.dns ||
     ToolPage.rules ||
     ToolPage.scripts => ToolPage.advanced,
-    ToolPage.userAgents => ToolPage.general,
+    ToolPage.userAgents || ToolPage.webDashboard => ToolPage.general,
     ToolPage.onDemand || ToolPage.appRegion => ToolPage.application,
     ToolPage.coreRuntimeConfig => ToolPage.coreDetails,
     ToolPage.hotkeyDesktop => ToolPage.hotkey,

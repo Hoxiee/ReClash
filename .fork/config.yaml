@@ -36,6 +36,12 @@ checks:
     argv: [flutter, test, test/models/config_test.dart, test/providers/config_test.dart]
   tools:
     argv: [flutter, test, test/providers/tools_test.dart, test/views/tools_catalog_test.dart, test/widgets/tools_workspace_test.dart]
+  web-dashboard-storage:
+    argv: [flutter, test, test/common/web_dashboard_test.dart, test/common/app_data_test.dart]
+  web-dashboard-access:
+    argv: [flutter, test, test/providers/web_dashboard_test.dart, test/providers/setup_action_test.dart, test/providers/store_action_test.dart, test/providers/system_action_test.dart]
+  web-dashboard-ui:
+    argv: [flutter, test, test/views/web_dashboard_test.dart, test/views/tools_catalog_test.dart]
   interactions:
     argv: [flutter, test, test/widgets/null_status_test.dart, test/widgets/sidebar_test.dart]
   packaging:
@@ -76,8 +82,8 @@ sentinels:
   lint_options.yaml: [meta.maintenance]
   tool/check_format.dart: [meta.maintenance]
   ".github/workflows/**": [meta.maintenance]
-  pubspec.yaml: [core.integration, tools.catalog, settings.specs, meta.maintenance]
-  pubspec.lock: [core.integration, tools.catalog, settings.specs]
+  pubspec.yaml: [core.integration, tools.catalog, settings.specs, web.dashboard, meta.maintenance]
+  pubspec.lock: [core.integration, tools.catalog, settings.specs, web.dashboard]
   build.yaml: [settings.specs, tools.catalog]
   'lib/manager/window_manager.dart': [desktop.window]
   'lib/manager/hotkey_manager.dart': [desktop.hotkeys]

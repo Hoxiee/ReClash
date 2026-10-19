@@ -267,10 +267,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} must be a URL";
 
-  static String m100(count) =>
+  static String m100(version) => "Installed version: ${version}";
+
+  static String m101(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m101(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m102(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2533,13 +2535,105 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Web dashboard"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Dashboard access ended",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not apply the dashboard configuration.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "The download is not a valid dashboard archive.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "The Core rejected the dashboard credentials. Reopen the dashboard.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "Browser access stays active until you end it or quit ReClash",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Another dashboard operation is in progress.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Dashboard operation cancelled.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "The dashboard checksum does not match the pinned release.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "The Core is not ready.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Manage local web dashboards for the Core",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not download the dashboard. Try again.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Downloading dashboard",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "Access ends when the dashboard closes",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "End dashboard access",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Extracting dashboard",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage(
+      "Dashboard files",
+    ),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Dashboard"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Install dashboard",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not open the browser.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "No dashboard session",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Select a profile before opening the dashboard.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Not installed",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Open dashboard"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Open in browser",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Reload"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "Dashboard access is disabled in Safe Mode.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not safely read or replace the dashboard files.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "The dashboard archive exceeds the allowed size.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "The Core is not serving this dashboard.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Verifying download",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Write to system"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

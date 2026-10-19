@@ -233,6 +233,7 @@ enum CoreEventType {
   geoUpdate,
   routeChanged,
   dialerLoop,
+  rcxStatus,
 }
 
 enum FindProcessMode { always, off }
@@ -407,6 +408,28 @@ enum GeneralOverrideKey with OverrideKey {
   final String path;
 }
 
+enum WebDashboardFlavor { zashboard, metacubexd }
+
+enum WebDashboardPhase { downloading, verifying, extracting }
+
+enum WebDashboardFailure {
+  download,
+  checksum,
+  archive,
+  tooLarge,
+  storage,
+  busy,
+  safeMode,
+  restricted,
+  noProfile,
+  coreUnavailable,
+  apply,
+  unreachable,
+  authentication,
+  launch,
+  cancelled,
+}
+
 enum ExternalControllerStatus {
   @JsonValue('')
   close(''),
@@ -458,8 +481,6 @@ enum EditorFontSize {
   const EditorFontSize(this.value);
 }
 
-enum AuthorizeCode { none, success, error }
-
 enum TunAuthorizationState { none, authorized, unauthorized }
 
 enum FunctionTag {
@@ -493,7 +514,8 @@ enum DashboardWidget {
   proxyGroups,
   connectionStats,
   intranetIp,
-  memoryInfo;
+  memoryInfo,
+  announcement;
 
   final List<SupportPlatform> platforms;
 
@@ -857,7 +879,28 @@ enum RestoreStrategy { compatible, override }
 
 enum TabAnimation { slide, fade }
 
+enum NavigationLayout { auto, bar, sidebar }
+
 enum LiquidGlassMode { none, standard, ultra }
+
+enum NavigationLabels { always, selected, never }
+
+enum TrayIconStyle { color, light, dark }
+
+enum AppIcon {
+  standard,
+  velvet,
+  solar,
+  circuit,
+  echo,
+  ink,
+  blueprint,
+  strata,
+  shatter,
+  trace,
+  topo,
+  spark,
+}
 
 enum Language { yaml, javaScript, json }
 
@@ -873,7 +916,6 @@ enum LoadingTag {
   backup_restore,
   access,
   proxies,
-  checkUpdate,
 }
 
 enum CoreStatus { connecting, connected, disconnected }

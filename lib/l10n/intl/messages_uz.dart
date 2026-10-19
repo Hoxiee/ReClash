@@ -270,10 +270,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label} URL boʻlishi kerak";
 
-  static String m100(count) =>
-      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+  static String m100(version) => "Oʻrnatilgan versiya: ${version}";
 
   static String m101(count) =>
+      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+
+  static String m102(count) =>
       "${Intl.plural(count, other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2701,13 +2703,103 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV sozlamalari",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Veb panel"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "Panelga kirish yakunlandi",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "Kirish mahalliy va autentifikatsiya bilan himoyalangan. Saqlangan tashqi kontroller sozlamalari oʻzgarmaydi. Brauzerda ishni tugatgach, kirishni shu yerda yakunlang.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "Panel konfiguratsiyasini qoʻllab boʻlmadi.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "Yuklangan fayl yaroqli panel arxivi emas.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Yadro kirish maʼlumotlarini rad etdi. Panelni qayta oching.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "Brauzer kirishi yakunlanguncha yoki ReClash yopilguncha faol qoladi",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "Boshqa panel amali bajarilmoqda.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "Panel amali bekor qilindi.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "Panel nazorat summasi belgilangan relizga mos emas.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Yadro tayyor emas.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Yadroni boshqarish uchun mahalliy veb panellar",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Panelni yuklab boʻlmadi. Qayta urinib koʻring.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "Panel yuklab olinmoqda",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "Panel yopilganda kirish tugaydi",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "Panelga kirishni yakunlash",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "Panel arxivi ochilmoqda",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("Panel fayllari"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Panel"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
+      "Panelni oʻrnatish",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan panel birinchi ochishda yuklab olinadi. Belgilangan reliz SHA-256 orqali tekshiriladi.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "Brauzerni ochib boʻlmadi.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage(
+      "Faol panel seansi yoʻq",
+    ),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "Panelni ochishdan oldin profilni tanlang.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage(
+      "Oʻrnatilmagan",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Panelni ochish"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "Brauzerda ochish",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("Qayta yuklash"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "Xavfsiz rejimda panelga kirish oʻchirilgan.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "Panel fayllarini xavfsiz oʻqish yoki almashtirish imkonsiz.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Panel arxivi ruxsat etilgan hajmdan oshdi.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "Yadro bu panelni taqdim etmayapti.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
+      "Yuklama tekshirilmoqda",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Oq roʻyxat rejimi"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Tizimga yozish"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Tizimga yozish tizim soatini ham oʻrnatadi; Android bunga eʼtibor bermaydi.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("Ha"),
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",

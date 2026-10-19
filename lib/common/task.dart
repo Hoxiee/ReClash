@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/dashboard.dart';
+import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter/foundation.dart';
@@ -175,7 +177,13 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
       rawConfig['iptables'] = {'enable': false};
     }
   }
-  rawConfig['external-ui'] = '';
+  rawConfig['external-ui'] =
+      data.webDashboardDirectory == webDashboardDirectoryName &&
+          await webDashboardServedDirectory(dirname(profilesPath)) ==
+              webDashboardDirectoryName
+      ? webDashboardDirectoryName
+      : '';
+  rawConfig['external-ui-name'] = '';
   switch (realPatchConfig.interfaceNameMode) {
     case InterfaceNameMode.clear:
       rawConfig['interface-name'] = '';

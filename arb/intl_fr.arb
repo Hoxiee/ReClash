@@ -1322,5 +1322,46 @@
   "toolsNeedsOverride": "Ajoutez d’abord cette surcharge sur la page DNS",
   "toolsNeedsCustomInterface": "Sélectionnez d’abord une interface réseau personnalisée",
   "toolsNeedsWebdav": "Configurez d’abord WebDAV",
-  "toolsNeedsMipsStack": "Sélectionnez d’abord la pile réseau MIPS"
+  "toolsNeedsMipsStack": "Sélectionnez d’abord la pile réseau MIPS",
+  "webDashboard": "Interface web",
+  "webDashboardDesc": "Interfaces web locales de gestion du cœur",
+  "webDashboardFlavor": "Interface",
+  "webDashboardOpen": "Ouvrir l’interface",
+  "webDashboardOpenInBrowser": "Ouvrir dans le navigateur",
+  "webDashboardReload": "Recharger",
+  "webDashboardInstall": "Installer l’interface",
+  "webDashboardFiles": "Fichiers de l’interface",
+  "webDashboardNotInstalled": "Non installée",
+  "webDashboardInstalledVersion": "Version installée : {version}",
+  "webDashboardInstallTip": "L’interface sélectionnée est téléchargée à la première ouverture. La version est fixée et vérifiée par SHA-256.",
+  "webDashboardAccessTip": "L’accès est local et authentifié. L’ouverture ne modifie pas les réglages enregistrés du contrôleur externe. Terminez l’accès ici après utilisation du navigateur.",
+  "webDashboardNoAccess": "Aucune session d’interface",
+  "webDashboardEmbeddedAccess": "L’accès se termine à la fermeture de l’interface",
+  "webDashboardBrowserAccess": "L’accès du navigateur reste actif jusqu’à son arrêt ou la fermeture de ReClash",
+  "webDashboardEndAccess": "Terminer l’accès à l’interface",
+  "webDashboardAccessEnded": "Accès à l’interface terminé",
+  "webDashboardDownloading": "Téléchargement de l’interface",
+  "webDashboardVerifying": "Vérification du téléchargement",
+  "webDashboardExtracting": "Extraction de l’interface",
+  "webDashboardDownloadFailed": "Impossible de télécharger l’interface. Réessayez.",
+  "webDashboardChecksumFailed": "La somme de contrôle ne correspond pas à la version fixée.",
+  "webDashboardArchiveFailed": "Le téléchargement n’est pas une archive d’interface valide.",
+  "webDashboardTooLarge": "L’archive dépasse la taille autorisée.",
+  "webDashboardStorageFailed": "Impossible de lire ou remplacer les fichiers en toute sécurité.",
+  "webDashboardBusy": "Une autre opération est en cours.",
+  "webDashboardSafeMode": "L’accès à l’interface est désactivé en mode sans échec.",
+  "webDashboardNoProfile": "Sélectionnez un profil avant d’ouvrir l’interface.",
+  "webDashboardCoreUnavailable": "Le cœur n’est pas prêt.",
+  "webDashboardApplyFailed": "Impossible d’appliquer la configuration de l’interface.",
+  "webDashboardUnreachable": "Le cœur ne fournit pas cette interface.",
+  "webDashboardAuthenticationFailed": "Le cœur a refusé les identifiants. Rouvrez l’interface.",
+  "webDashboardLaunchFailed": "Impossible d’ouvrir le navigateur.",
+  "webDashboardCancelled": "Opération annulée.",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -27,6 +27,8 @@ class SystemAction extends _$SystemAction {
   }
 
   Future<void> handleExit([bool needSave = true]) {
+    ref.read(webDashboardActionProvider.notifier).cancel();
+    ref.read(webDashboardAccessProvider.notifier).end();
     final coordinator = _exitCoordinator ??= SystemExitCoordinator(
       watchdogDuration: exitWatchdogDuration,
       closeWindow: closeWindow,

@@ -10484,6 +10484,346 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Web dashboard`
+  String get webDashboard {
+    return Intl.message(
+      'Web dashboard',
+      name: 'webDashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage local web dashboards for the Core`
+  String get webDashboardDesc {
+    return Intl.message(
+      'Manage local web dashboards for the Core',
+      name: 'webDashboardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard`
+  String get webDashboardFlavor {
+    return Intl.message(
+      'Dashboard',
+      name: 'webDashboardFlavor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open dashboard`
+  String get webDashboardOpen {
+    return Intl.message(
+      'Open dashboard',
+      name: 'webDashboardOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in browser`
+  String get webDashboardOpenInBrowser {
+    return Intl.message(
+      'Open in browser',
+      name: 'webDashboardOpenInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reload`
+  String get webDashboardReload {
+    return Intl.message(
+      'Reload',
+      name: 'webDashboardReload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install dashboard`
+  String get webDashboardInstall {
+    return Intl.message(
+      'Install dashboard',
+      name: 'webDashboardInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard files`
+  String get webDashboardFiles {
+    return Intl.message(
+      'Dashboard files',
+      name: 'webDashboardFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not installed`
+  String get webDashboardNotInstalled {
+    return Intl.message(
+      'Not installed',
+      name: 'webDashboardNotInstalled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installed version: {version}`
+  String webDashboardInstalledVersion(String version) {
+    return Intl.message(
+      'Installed version: $version',
+      name: 'webDashboardInstalledVersion',
+      desc: '',
+      args: [version],
+    );
+  }
+
+  /// `The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.`
+  String get webDashboardInstallTip {
+    return Intl.message(
+      'The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.',
+      name: 'webDashboardInstallTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.`
+  String get webDashboardAccessTip {
+    return Intl.message(
+      'Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.',
+      name: 'webDashboardAccessTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No dashboard session`
+  String get webDashboardNoAccess {
+    return Intl.message(
+      'No dashboard session',
+      name: 'webDashboardNoAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access ends when the dashboard closes`
+  String get webDashboardEmbeddedAccess {
+    return Intl.message(
+      'Access ends when the dashboard closes',
+      name: 'webDashboardEmbeddedAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Browser access stays active until you end it or quit ReClash`
+  String get webDashboardBrowserAccess {
+    return Intl.message(
+      'Browser access stays active until you end it or quit ReClash',
+      name: 'webDashboardBrowserAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `End dashboard access`
+  String get webDashboardEndAccess {
+    return Intl.message(
+      'End dashboard access',
+      name: 'webDashboardEndAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard access ended`
+  String get webDashboardAccessEnded {
+    return Intl.message(
+      'Dashboard access ended',
+      name: 'webDashboardAccessEnded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading dashboard`
+  String get webDashboardDownloading {
+    return Intl.message(
+      'Downloading dashboard',
+      name: 'webDashboardDownloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verifying download`
+  String get webDashboardVerifying {
+    return Intl.message(
+      'Verifying download',
+      name: 'webDashboardVerifying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extracting dashboard`
+  String get webDashboardExtracting {
+    return Intl.message(
+      'Extracting dashboard',
+      name: 'webDashboardExtracting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not download the dashboard. Try again.`
+  String get webDashboardDownloadFailed {
+    return Intl.message(
+      'Could not download the dashboard. Try again.',
+      name: 'webDashboardDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The dashboard checksum does not match the pinned release.`
+  String get webDashboardChecksumFailed {
+    return Intl.message(
+      'The dashboard checksum does not match the pinned release.',
+      name: 'webDashboardChecksumFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The download is not a valid dashboard archive.`
+  String get webDashboardArchiveFailed {
+    return Intl.message(
+      'The download is not a valid dashboard archive.',
+      name: 'webDashboardArchiveFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The dashboard archive exceeds the allowed size.`
+  String get webDashboardTooLarge {
+    return Intl.message(
+      'The dashboard archive exceeds the allowed size.',
+      name: 'webDashboardTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not safely read or replace the dashboard files.`
+  String get webDashboardStorageFailed {
+    return Intl.message(
+      'Could not safely read or replace the dashboard files.',
+      name: 'webDashboardStorageFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Another dashboard operation is in progress.`
+  String get webDashboardBusy {
+    return Intl.message(
+      'Another dashboard operation is in progress.',
+      name: 'webDashboardBusy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard access is disabled in Safe Mode.`
+  String get webDashboardSafeMode {
+    return Intl.message(
+      'Dashboard access is disabled in Safe Mode.',
+      name: 'webDashboardSafeMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a profile before opening the dashboard.`
+  String get webDashboardNoProfile {
+    return Intl.message(
+      'Select a profile before opening the dashboard.',
+      name: 'webDashboardNoProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core is not ready.`
+  String get webDashboardCoreUnavailable {
+    return Intl.message(
+      'The Core is not ready.',
+      name: 'webDashboardCoreUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not apply the dashboard configuration.`
+  String get webDashboardApplyFailed {
+    return Intl.message(
+      'Could not apply the dashboard configuration.',
+      name: 'webDashboardApplyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core is not serving this dashboard.`
+  String get webDashboardUnreachable {
+    return Intl.message(
+      'The Core is not serving this dashboard.',
+      name: 'webDashboardUnreachable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core rejected the dashboard credentials. Reopen the dashboard.`
+  String get webDashboardAuthenticationFailed {
+    return Intl.message(
+      'The Core rejected the dashboard credentials. Reopen the dashboard.',
+      name: 'webDashboardAuthenticationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not open the browser.`
+  String get webDashboardLaunchFailed {
+    return Intl.message(
+      'Could not open the browser.',
+      name: 'webDashboardLaunchFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard operation cancelled.`
+  String get webDashboardCancelled {
+    return Intl.message(
+      'Dashboard operation cancelled.',
+      name: 'webDashboardCancelled',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

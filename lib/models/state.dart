@@ -225,6 +225,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default({}) Map<String, dynamic> injectedRuleProviders,
     String? matchTarget,
     @Default(false) bool safeMode,
+    @Default('') String webDashboardDirectory,
   }) = _MakeRealProfileState;
 }
 

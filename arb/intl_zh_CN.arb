@@ -1322,5 +1322,46 @@
   "toolsNeedsOverride": "请先在 DNS 页面添加此覆盖项",
   "toolsNeedsCustomInterface": "请先选择自定义网络接口",
   "toolsNeedsWebdav": "请先配置 WebDAV",
-  "toolsNeedsMipsStack": "请先选择 MIPS 网络栈"
+  "toolsNeedsMipsStack": "请先选择 MIPS 网络栈",
+  "webDashboard": "网页面板",
+  "webDashboardDesc": "管理核心的本地网页面板",
+  "webDashboardFlavor": "面板",
+  "webDashboardOpen": "打开面板",
+  "webDashboardOpenInBrowser": "在浏览器中打开",
+  "webDashboardReload": "重新加载",
+  "webDashboardInstall": "安装面板",
+  "webDashboardFiles": "面板文件",
+  "webDashboardNotInstalled": "未安装",
+  "webDashboardInstalledVersion": "已安装版本：{version}",
+  "webDashboardInstallTip": "首次打开时下载所选面板。使用固定版本并进行 SHA-256 校验。",
+  "webDashboardAccessTip": "访问仅限本机并需要认证。打开面板不会更改已保存的外部控制器设置。使用浏览器结束后，请在此终止访问。",
+  "webDashboardNoAccess": "无面板会话",
+  "webDashboardEmbeddedAccess": "关闭面板后终止访问",
+  "webDashboardBrowserAccess": "浏览器访问持续到手动终止或退出 ReClash",
+  "webDashboardEndAccess": "终止面板访问",
+  "webDashboardAccessEnded": "面板访问已终止",
+  "webDashboardDownloading": "正在下载面板",
+  "webDashboardVerifying": "正在校验下载",
+  "webDashboardExtracting": "正在解压面板",
+  "webDashboardDownloadFailed": "无法下载面板，请重试。",
+  "webDashboardChecksumFailed": "面板校验和与固定版本不一致。",
+  "webDashboardArchiveFailed": "下载文件不是有效的面板压缩包。",
+  "webDashboardTooLarge": "面板压缩包超过允许的大小。",
+  "webDashboardStorageFailed": "无法安全读取或替换面板文件。",
+  "webDashboardBusy": "另一项面板操作正在进行。",
+  "webDashboardSafeMode": "安全模式下禁用面板访问。",
+  "webDashboardNoProfile": "打开面板前请选择配置。",
+  "webDashboardCoreUnavailable": "核心尚未就绪。",
+  "webDashboardApplyFailed": "无法应用面板配置。",
+  "webDashboardUnreachable": "核心未提供此面板。",
+  "webDashboardAuthenticationFailed": "核心拒绝了凭据，请重新打开面板。",
+  "webDashboardLaunchFailed": "无法打开浏览器。",
+  "webDashboardCancelled": "面板操作已取消。",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

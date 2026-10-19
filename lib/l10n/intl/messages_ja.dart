@@ -242,9 +242,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label}はURLである必要があります";
 
-  static String m100(count) => "${count} 年前";
+  static String m100(version) => "インストール済みバージョン: ${version}";
 
   static String m101(count) => "${count} 年前";
+
+  static String m102(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2159,13 +2161,91 @@ class MessageLookup extends MessageLookupByLibrary {
       "VPN は VpnService でシステムの全トラフィックを自動的にルーティングします。",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("ウェブパネル"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "パネルへのアクセスが終了しました",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "アクセスはローカルで認証されます。保存された外部コントローラー設定は変更されません。ブラウザーの使用後はここでアクセスを終了してください。",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "パネルの設定を適用できませんでした。",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "有効なパネルのアーカイブではありません。",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "コアが認証情報を拒否しました。パネルを開き直してください。",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "ブラウザーのアクセスは終了操作またはReClashの終了まで続きます",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage("別のパネル操作が進行中です。"),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "パネルの操作をキャンセルしました。",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "チェックサムが固定されたリリースと一致しません。",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "コアの準備ができていません。",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "コアを管理するローカルウェブパネル",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "パネルをダウンロードできませんでした。再試行してください。",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "パネルをダウンロード中",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "パネルを閉じるとアクセスが終了します",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage(
+      "パネルへのアクセスを終了",
+    ),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage("パネルを展開中"),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("パネルのファイル"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("パネル"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage("パネルをインストール"),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "ブラウザーを開けませんでした。",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage("パネルのセッションなし"),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "パネルを開く前にプロファイルを選択してください。",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage("未インストール"),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("パネルを開く"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "ブラウザーで開く",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("再読み込み"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "セーフモードではパネルへのアクセスは無効です。",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "パネルのファイルを安全に読み取りまたは置換できませんでした。",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "パネルのアーカイブが許容サイズを超えています。",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "コアはこのパネルを提供していません。",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage("ダウンロードを検証中"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("システムに書き込む"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

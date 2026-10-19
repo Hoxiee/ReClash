@@ -1,0 +1,43 @@
+{
+  "webDashboard": "Panel web",
+  "webDashboardDesc": "Paneles web locales para administrar el núcleo",
+  "webDashboardFlavor": "Panel",
+  "webDashboardOpen": "Abrir panel",
+  "webDashboardOpenInBrowser": "Abrir en el navegador",
+  "webDashboardReload": "Recargar",
+  "webDashboardInstall": "Instalar panel",
+  "webDashboardFiles": "Archivos del panel",
+  "webDashboardNotInstalled": "No instalado",
+  "webDashboardInstalledVersion": "Versión instalada: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
+  "webDashboardAccessTip": "El acceso es local y autenticado. Abrir el panel no cambia la configuración guardada del controlador externo. Finaliza el acceso aquí cuando termines en el navegador.",
+  "webDashboardNoAccess": "Sin sesión de panel",
+  "webDashboardEmbeddedAccess": "El acceso termina al cerrar el panel",
+  "webDashboardBrowserAccess": "El acceso del navegador permanece hasta finalizarlo o salir de ReClash",
+  "webDashboardEndAccess": "Finalizar acceso al panel",
+  "webDashboardAccessEnded": "Acceso al panel finalizado",
+  "webDashboardDownloading": "Descargando panel",
+  "webDashboardVerifying": "Verificando descarga",
+  "webDashboardExtracting": "Extrayendo panel",
+  "webDashboardDownloadFailed": "No se pudo descargar el panel. Inténtalo de nuevo.",
+  "webDashboardChecksumFailed": "La suma de comprobación no coincide con la versión fijada.",
+  "webDashboardArchiveFailed": "La descarga no es un archivo de panel válido.",
+  "webDashboardTooLarge": "El archivo del panel supera el tamaño permitido.",
+  "webDashboardStorageFailed": "No se pudieron leer o reemplazar de forma segura los archivos del panel.",
+  "webDashboardBusy": "Hay otra operación del panel en curso.",
+  "webDashboardSafeMode": "El acceso al panel está desactivado en modo seguro.",
+  "webDashboardNoProfile": "Selecciona un perfil antes de abrir el panel.",
+  "webDashboardCoreUnavailable": "El núcleo no está listo.",
+  "webDashboardApplyFailed": "No se pudo aplicar la configuración del panel.",
+  "webDashboardUnreachable": "El núcleo no sirve este panel.",
+  "webDashboardAuthenticationFailed": "El núcleo rechazó las credenciales. Vuelve a abrir el panel.",
+  "webDashboardLaunchFailed": "No se pudo abrir el navegador.",
+  "webDashboardCancelled": "Operación del panel cancelada."
+}

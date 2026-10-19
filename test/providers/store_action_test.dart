@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/dashboard.dart';
+import 'package:reclash/common/web_dashboard/installation.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/database/database.dart' as db;
@@ -10,6 +15,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/web_dashboard.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -37,6 +43,36 @@ class _TestProfiles extends Profiles {
 
   @override
   List<Profile> build() => _profiles;
+}
+
+class _CancellableDashboardStore extends WebDashboardStore {
+  _CancellableDashboardStore()
+    : super(
+        homeDirectory: () async => '',
+        download:
+            (uri, path, {required onProgress, required cancelToken}) async =>
+                null,
+      );
+
+  final started = Completer<void>();
+  bool cancelled = false;
+
+  @override
+  Future<Map<WebDashboardFlavor, WebDashboardInstallation>>
+  installations() async => {};
+
+  @override
+  Future<void> install(
+    WebDashboardFlavor flavor, {
+    required CancelToken cancelToken,
+    required ValueChanged<WebDashboardProgress> onProgress,
+    WebDashboardRelease? release,
+  }) async {
+    started.complete();
+    await cancelToken.whenCancel;
+    cancelled = true;
+    throw const WebDashboardException(WebDashboardFailure.cancelled);
+  }
 }
 
 void main() {
@@ -96,6 +132,41 @@ void main() {
       Profile(id: id, label: 'p$id', autoUpdateDuration: Duration.zero);
 
   group('StoreAction.handleClear', () {
+    test(
+      'cancels dashboard installation before clearing managed files',
+      () async {
+        final store = _CancellableDashboardStore();
+        final container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            systemActionProvider.overrideWith(_RecordingSystemAction.new),
+            profilesProvider.overrideWith(() => _TestProfiles([])),
+            webDashboardStoreProvider.overrideWithValue(store),
+          ],
+        );
+        addTearDown(container.dispose);
+        globalState.container = container;
+        final dashboard = container.read(webDashboardActionProvider.notifier);
+        final access = container.read(webDashboardAccessProvider.notifier);
+        final owner = access.acquire(WebDashboardFlavor.zashboard);
+        access.keepForBrowser(owner);
+        final installation = dashboard.install(WebDashboardFlavor.zashboard);
+        await store.started.future;
+        final managed = Directory(join(home.path, webDashboardDirectoryName))
+          ..createSync();
+        File(join(managed.path, 'old')).writeAsStringSync('old');
+
+        await container.read(storeActionProvider.notifier).handleClear();
+
+        expect(await installation, isFalse);
+        expect(store.cancelled, isTrue);
+        expect(container.read(webDashboardActionProvider).busy, isFalse);
+        expect(access.contains(owner), isFalse);
+        expect(managed.existsSync(), isFalse);
+        expect(_RecordingSystemAction.exits, [false]);
+      },
+    );
+
     test('clears the core effect of every profile still in state', () async {
       final container = buildContainer(profiles: [profile(1), profile(2)]);
 

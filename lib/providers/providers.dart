@@ -7,3 +7,4 @@ export 'on_demand.dart';
 export 'route_state.dart';
 export 'state.dart';
 export 'tools.dart';
+export 'web_dashboard.dart';

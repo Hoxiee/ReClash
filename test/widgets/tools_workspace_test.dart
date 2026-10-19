@@ -437,6 +437,8 @@ void main() {
         .read(toolsSessionProvider.notifier)
         .open(const ToolRoute(ToolPage.general));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('User-Agent').last);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('User-Agent').last);
     await tester.pumpAndSettle();
 

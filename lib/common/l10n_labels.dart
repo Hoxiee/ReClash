@@ -175,3 +175,32 @@ extension LocaleL10n on Locale {
     };
   }
 }
+
+extension WebDashboardFlavorL10n on WebDashboardFlavor {
+  String get label => switch (this) {
+    WebDashboardFlavor.zashboard => 'zashboard',
+    WebDashboardFlavor.metacubexd => 'MetaCubeXD',
+  };
+}
+
+extension WebDashboardFailureL10n on WebDashboardFailure {
+  String get label {
+    final l = currentAppLocalizations;
+    return switch (this) {
+      WebDashboardFailure.download => l.webDashboardDownloadFailed,
+      WebDashboardFailure.checksum => l.webDashboardChecksumFailed,
+      WebDashboardFailure.archive => l.webDashboardArchiveFailed,
+      WebDashboardFailure.tooLarge => l.webDashboardTooLarge,
+      WebDashboardFailure.storage => l.webDashboardStorageFailed,
+      WebDashboardFailure.busy => l.webDashboardBusy,
+      WebDashboardFailure.safeMode => l.webDashboardSafeMode,
+      WebDashboardFailure.noProfile => l.webDashboardNoProfile,
+      WebDashboardFailure.coreUnavailable => l.webDashboardCoreUnavailable,
+      WebDashboardFailure.apply => l.webDashboardApplyFailed,
+      WebDashboardFailure.unreachable => l.webDashboardUnreachable,
+      WebDashboardFailure.authentication => l.webDashboardAuthenticationFailed,
+      WebDashboardFailure.launch => l.webDashboardLaunchFailed,
+      WebDashboardFailure.cancelled => l.webDashboardCancelled,
+    };
+  }
+}

@@ -243,9 +243,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m100(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m100(version) => "설치된 버전: ${version}";
 
   static String m101(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m102(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2130,13 +2132,93 @@ class MessageLookup extends MessageLookupByLibrary {
       "VPN은 VpnService를 통해 모든 시스템 트래픽을 자동으로 라우팅합니다.",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV 구성"),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("웹 패널"),
+    "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
+      "패널 접근 종료됨",
+    ),
+    "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
+      "접근은 로컬에서 인증됩니다. 저장된 외부 컨트롤러 설정은 변경되지 않습니다. 브라우저 사용을 마치면 여기에서 접근을 종료하세요.",
+    ),
+    "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
+      "패널 설정을 적용하지 못했습니다.",
+    ),
+    "webDashboardArchiveFailed": MessageLookupByLibrary.simpleMessage(
+      "유효한 패널 압축 파일이 아닙니다.",
+    ),
+    "webDashboardAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "코어가 인증 정보를 거부했습니다. 패널을 다시 여세요.",
+    ),
+    "webDashboardBrowserAccess": MessageLookupByLibrary.simpleMessage(
+      "브라우저 접근은 종료하거나 ReClash를 종료할 때까지 유지됩니다",
+    ),
+    "webDashboardBusy": MessageLookupByLibrary.simpleMessage(
+      "다른 패널 작업이 진행 중입니다.",
+    ),
+    "webDashboardCancelled": MessageLookupByLibrary.simpleMessage(
+      "패널 작업이 취소되었습니다.",
+    ),
+    "webDashboardChecksumFailed": MessageLookupByLibrary.simpleMessage(
+      "체크섬이 고정된 릴리스와 일치하지 않습니다.",
+    ),
+    "webDashboardCoreUnavailable": MessageLookupByLibrary.simpleMessage(
+      "코어가 준비되지 않았습니다.",
+    ),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "코어를 관리하는 로컬 웹 패널",
+    ),
+    "webDashboardDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "패널을 다운로드하지 못했습니다. 다시 시도하세요.",
+    ),
+    "webDashboardDownloading": MessageLookupByLibrary.simpleMessage(
+      "패널 다운로드 중",
+    ),
+    "webDashboardEmbeddedAccess": MessageLookupByLibrary.simpleMessage(
+      "패널을 닫으면 접근이 종료됩니다",
+    ),
+    "webDashboardEndAccess": MessageLookupByLibrary.simpleMessage("패널 접근 종료"),
+    "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
+      "패널 압축 해제 중",
+    ),
+    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("패널 파일"),
+    "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("패널"),
+    "webDashboardInstall": MessageLookupByLibrary.simpleMessage("패널 설치"),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
+    ),
+    "webDashboardInstalledVersion": m100,
+    "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
+      "브라우저를 열지 못했습니다.",
+    ),
+    "webDashboardNoAccess": MessageLookupByLibrary.simpleMessage("활성 패널 세션 없음"),
+    "webDashboardNoProfile": MessageLookupByLibrary.simpleMessage(
+      "패널을 열기 전에 프로필을 선택하세요.",
+    ),
+    "webDashboardNotInstalled": MessageLookupByLibrary.simpleMessage("설치되지 않음"),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("패널 열기"),
+    "webDashboardOpenInBrowser": MessageLookupByLibrary.simpleMessage(
+      "브라우저에서 열기",
+    ),
+    "webDashboardReload": MessageLookupByLibrary.simpleMessage("새로고침"),
+    "webDashboardSafeMode": MessageLookupByLibrary.simpleMessage(
+      "안전 모드에서는 패널 접근이 비활성화됩니다.",
+    ),
+    "webDashboardStorageFailed": MessageLookupByLibrary.simpleMessage(
+      "패널 파일을 안전하게 읽거나 교체하지 못했습니다.",
+    ),
+    "webDashboardTooLarge": MessageLookupByLibrary.simpleMessage(
+      "패널 압축 파일이 허용 크기를 초과합니다.",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "코어가 이 패널을 제공하지 않습니다.",
+    ),
+    "webDashboardVerifying": MessageLookupByLibrary.simpleMessage("다운로드 검증 중"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("화이트리스트 모드"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("시스템에 기록"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

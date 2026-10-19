@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 
 Future<void> clearAppData() async {
   await preferences.clearPreferences();
+  await clearWebDashboardFiles(await appPath.homeDirPath);
   try {
     await database.close();
   } catch (error) {

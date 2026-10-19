@@ -4,6 +4,8 @@ import 'dart:ui' show Brightness, Color;
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/common/preferences.dart';
 import 'package:reclash/models/config.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/web_dashboard.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/config.dart';
@@ -192,6 +194,28 @@ void main() {
       expect(action.calls, ['cleanup', 'window', 'core', 'exit']);
       expect(action.cleanupNeedSave, [true]);
     });
+
+    test(
+      'application exit revokes browser access without persisting it',
+      () async {
+        container.listen(configProvider, (_, _) {}, fireImmediately: true);
+        final saved = container.read(configProvider);
+        final access = container.read(webDashboardAccessProvider.notifier);
+        final owner = access.acquire(WebDashboardFlavor.zashboard);
+        access.keepForBrowser(owner);
+        expect(container.read(webDashboardAccessProvider).browser, isTrue);
+
+        await notifier().handleExit();
+
+        expect(access.contains(owner), isFalse);
+        expect(
+          container.read(webDashboardAccessProvider).temporarySecret,
+          isEmpty,
+        );
+        expect(container.read(configProvider), saved);
+        expect(action.calls, ['cleanup', 'window', 'core', 'exit']);
+      },
+    );
 
     test('forwards an explicit save opt-out to resource cleanup', () async {
       await notifier().handleExit(false);

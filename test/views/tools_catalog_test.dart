@@ -2,6 +2,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/config/general.dart';
+import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -52,6 +53,24 @@ void main() {
         'page.backup',
         'page.customResources',
       ],
+    );
+  });
+
+  test('web dashboard stays nested beside the external controller', () async {
+    final l = await AppLocalizations.load(const Locale('en'));
+    final catalog = buildToolCatalog(l, _environment());
+    final dashboard = catalog.singleWhere(
+      (entry) => entry.id == 'page.webDashboard',
+    );
+    expect(dashboard.route, const ToolRoute(ToolPage.webDashboard));
+    expect(dashboard.path, contains(l.general));
+    expect(dashboard.showInCatalog, isFalse);
+    expect(ToolPage.webDashboard.ancestors, [ToolPage.general]);
+    expect(webDashboardSetting.page, ToolPage.general);
+    final ids = GeneralSettings.all.map((spec) => spec.id).toList();
+    expect(
+      ids.indexOf('general.webDashboard'),
+      ids.indexOf('general.externalControllerSecret') + 1,
     );
   });
 

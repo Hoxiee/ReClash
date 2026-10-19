@@ -1,0 +1,43 @@
+{
+  "webDashboard": "Веб-панель",
+  "webDashboardDesc": "Локальные веб-панели управления ядром",
+  "webDashboardFlavor": "Панель",
+  "webDashboardOpen": "Открыть панель",
+  "webDashboardOpenInBrowser": "Открыть в браузере",
+  "webDashboardReload": "Перезагрузить",
+  "webDashboardInstall": "Установить панель",
+  "webDashboardFiles": "Файлы панели",
+  "webDashboardNotInstalled": "Не установлена",
+  "webDashboardInstalledVersion": "Установленная версия: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
+  "webDashboardAccessTip": "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера. Завершите доступ здесь, когда закончите работу в браузере.",
+  "webDashboardNoAccess": "Нет активной сессии панели",
+  "webDashboardEmbeddedAccess": "Доступ завершится при закрытии панели",
+  "webDashboardBrowserAccess": "Доступ из браузера действует до его завершения здесь или выхода из ReClash",
+  "webDashboardEndAccess": "Завершить доступ к панели",
+  "webDashboardAccessEnded": "Доступ к панели завершён",
+  "webDashboardDownloading": "Загрузка панели",
+  "webDashboardVerifying": "Проверка загрузки",
+  "webDashboardExtracting": "Распаковка панели",
+  "webDashboardDownloadFailed": "Не удалось загрузить панель. Повторите попытку.",
+  "webDashboardChecksumFailed": "Контрольная сумма панели не совпадает с закреплённым релизом.",
+  "webDashboardArchiveFailed": "Загруженный файл не является корректным архивом панели.",
+  "webDashboardTooLarge": "Архив панели превышает допустимый размер.",
+  "webDashboardStorageFailed": "Не удалось безопасно прочитать или заменить файлы панели.",
+  "webDashboardBusy": "Уже выполняется другая операция с панелью.",
+  "webDashboardSafeMode": "В безопасном режиме доступ к панели отключён.",
+  "webDashboardNoProfile": "Выберите профиль перед открытием панели.",
+  "webDashboardCoreUnavailable": "Ядро ещё не готово.",
+  "webDashboardApplyFailed": "Не удалось применить конфигурацию панели.",
+  "webDashboardUnreachable": "Ядро не отдаёт выбранную панель.",
+  "webDashboardAuthenticationFailed": "Ядро отклонило секрет доступа. Откройте панель заново.",
+  "webDashboardLaunchFailed": "Не удалось открыть браузер.",
+  "webDashboardCancelled": "Операция с панелью отменена."
+}

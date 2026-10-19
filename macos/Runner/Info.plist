@@ -43,6 +43,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>ReClash needs location access to detect WiFi network name for connectivity features.</string>
 </dict>

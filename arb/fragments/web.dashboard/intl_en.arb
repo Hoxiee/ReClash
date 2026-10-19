@@ -1,0 +1,43 @@
+{
+  "webDashboard": "Web dashboard",
+  "webDashboardDesc": "Manage local web dashboards for the Core",
+  "webDashboardFlavor": "Dashboard",
+  "webDashboardOpen": "Open dashboard",
+  "webDashboardOpenInBrowser": "Open in browser",
+  "webDashboardReload": "Reload",
+  "webDashboardInstall": "Install dashboard",
+  "webDashboardFiles": "Dashboard files",
+  "webDashboardNotInstalled": "Not installed",
+  "webDashboardInstalledVersion": "Installed version: {version}",
+  "@webDashboardInstalledVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "webDashboardInstallTip": "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
+  "webDashboardAccessTip": "Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.",
+  "webDashboardNoAccess": "No dashboard session",
+  "webDashboardEmbeddedAccess": "Access ends when the dashboard closes",
+  "webDashboardBrowserAccess": "Browser access stays active until you end it or quit ReClash",
+  "webDashboardEndAccess": "End dashboard access",
+  "webDashboardAccessEnded": "Dashboard access ended",
+  "webDashboardDownloading": "Downloading dashboard",
+  "webDashboardVerifying": "Verifying download",
+  "webDashboardExtracting": "Extracting dashboard",
+  "webDashboardDownloadFailed": "Could not download the dashboard. Try again.",
+  "webDashboardChecksumFailed": "The dashboard checksum does not match the pinned release.",
+  "webDashboardArchiveFailed": "The download is not a valid dashboard archive.",
+  "webDashboardTooLarge": "The dashboard archive exceeds the allowed size.",
+  "webDashboardStorageFailed": "Could not safely read or replace the dashboard files.",
+  "webDashboardBusy": "Another dashboard operation is in progress.",
+  "webDashboardSafeMode": "Dashboard access is disabled in Safe Mode.",
+  "webDashboardNoProfile": "Select a profile before opening the dashboard.",
+  "webDashboardCoreUnavailable": "The Core is not ready.",
+  "webDashboardApplyFailed": "Could not apply the dashboard configuration.",
+  "webDashboardUnreachable": "The Core is not serving this dashboard.",
+  "webDashboardAuthenticationFailed": "The Core rejected the dashboard credentials. Reopen the dashboard.",
+  "webDashboardLaunchFailed": "Could not open the browser.",
+  "webDashboardCancelled": "Dashboard operation cancelled."
+}

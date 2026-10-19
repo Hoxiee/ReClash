@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/web_dashboard/access.dart';
 import 'package:reclash/common/regional/device_region_signals.dart';
 import 'package:reclash/common/regional/region_detection.dart';
 import 'package:reclash/common/regional/regional_network.dart';
@@ -21,6 +22,7 @@ import 'app.dart';
 import 'config.dart';
 import 'core.dart';
 import 'database.dart';
+import 'web_dashboard.dart';
 
 part 'generated/state.g.dart';
 part 'state/proxies.dart';
