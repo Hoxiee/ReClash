@@ -533,31 +533,80 @@ class ProfilesAction extends _$ProfilesAction {
     BuildContext? reviewContext,
     SubscriptionCancellation? cancellation,
   }) async {
-    if (cancellation?.cancelled == true) {
+    final source = await resolveProfileLink(link);
+    if (reviewContext != null && !reviewContext.mounted) {
       throw const SubscriptionUpdateCancelled();
     }
-    if (!link.isShareLink) _throwIfDuplicateSubscription(link);
+    return importProfileLinkSource(
+      source,
+      label: label,
+      ageSecretKey: ageSecretKey,
+      select: select,
+      clientSettings: clientSettings,
+      reviewContext: reviewContext,
+      cancellation: cancellation,
+    );
+  }
+
+  Future<Profile> importProfileLinkSource(
+    ProfileLinkSource source, {
+    String? label,
+    String ageSecretKey = '',
+    bool select = true,
+    SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    if (cancellation?.cancelled == true ||
+        reviewContext != null && !reviewContext.mounted) {
+      throw const SubscriptionUpdateCancelled();
+    }
+    final name = label?.trim().isNotEmpty == true ? label!.trim() : source.name;
+    if (source.bytes case final bytes?) {
+      final profile = await importProfileData(
+        bytes,
+        name: name ?? currentAppLocalizations.unnamed,
+        ageSecretKey: ageSecretKey,
+        select: select,
+        reviewContext: reviewContext,
+        cancellation: cancellation,
+      );
+      if (profile == null) throw const SubscriptionUpdateCancelled();
+      return profile;
+    }
     Future<void> save(Profile saved) =>
         _saveImportedProfile(saved, cancellation: cancellation);
-    final profile = link.isShareLink
-        ? await _fromShareLinks(
-            Profile.normal(label: label),
-            [link],
-            cancellation: cancellation,
-            onCommitted: save,
-          )
-        : await _download(
-            _withClientSettings(
-              Profile.normal(
-                label: label,
-                url: link,
-              ).copyWith(ageSecretKey: ageSecretKey),
-              clientSettings,
-            ),
-            reviewContext: reviewContext,
-            cancellation: cancellation,
-            onCommitted: save,
-          );
+    final Profile profile;
+    if (source.shareLink case final link?) {
+      profile = await _fromShareLinks(
+        Profile.normal(label: name),
+        [link],
+        cancellation: cancellation,
+        onCommitted: save,
+      );
+    } else {
+      final url = source.url!;
+      _throwIfDuplicateSubscription(url);
+      final chosenSettings =
+          clientSettings ?? const SubscriptionClientSettings.forNewProfile();
+      final settings =
+          chosenSettings.preset == SubscriptionClientPreset.auto &&
+              source.preset != null
+          ? chosenSettings.copyWith(preset: source.preset)
+          : chosenSettings;
+      profile = await _download(
+        _withClientSettings(
+          Profile.normal(
+            label: name,
+            url: url,
+          ).copyWith(ageSecretKey: ageSecretKey),
+          settings,
+        ),
+        reviewContext: reviewContext,
+        cancellation: cancellation,
+        onCommitted: save,
+      );
+    }
     return _importedProfile(profile, select: select);
   }
 
@@ -753,31 +802,71 @@ class ProfilesAction extends _$ProfilesAction {
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
   }) async {
+    final source = await globalState.safeRun(() => resolveProfileLink(link));
+    if (source == null) return;
+    await addProfileLinkSource(
+      source,
+      label: label,
+      ageSecretKey: ageSecretKey,
+      clientSettings: clientSettings,
+    );
+  }
+
+  Future<void> addProfileLinkSource(
+    ProfileLinkSource source, {
+    String? label,
+    String ageSecretKey = '',
+    SubscriptionClientSettings? clientSettings,
+  }) async {
     _showProfiles();
-    final profile = await globalState.loadingRun(tag: LoadingTag.profiles, () {
-      if (!link.isShareLink) {
-        _throwIfDuplicateSubscription(link);
-      }
-      return link.isShareLink
-          ? _fromShareLinks(Profile.normal(label: label), [link])
-          : _withAgeSecretKey(
-              _withClientSettings(
-                Profile.normal(
-                  label: label,
-                  url: link,
-                ).copyWith(ageSecretKey: ageSecretKey),
-                clientSettings,
-              ),
-              _download,
-            );
-    }, title: currentAppLocalizations.addProfile);
-    if (profile != null) {
-      putProfile(profile);
+    await globalState.loadingRun(
+      tag: LoadingTag.profiles,
+      () => _saveProfileLinkSource(
+        source,
+        label: label,
+        ageSecretKey: ageSecretKey,
+        clientSettings: clientSettings,
+      ),
+      title: currentAppLocalizations.addProfile,
+    );
+  }
+
+  Future<Profile> _addProfileLink(
+    String link, {
+    String? label,
+    String ageSecretKey = '',
+    SubscriptionClientSettings? clientSettings,
+  }) async {
+    final source = await resolveProfileLink(link);
+    return _saveProfileLinkSource(
+      source,
+      label: label,
+      ageSecretKey: ageSecretKey,
+      clientSettings: clientSettings,
+    );
+  }
+
+  Future<Profile> _saveProfileLinkSource(
+    ProfileLinkSource source, {
+    String? label,
+    String ageSecretKey = '',
+    SubscriptionClientSettings? clientSettings,
+  }) async {
+    Future<Profile> save(String key) => importProfileLinkSource(
+      source,
+      label: label,
+      ageSecretKey: key,
+      clientSettings: clientSettings,
+    );
+    try {
+      return await save(ageSecretKey);
+    } on AgeSecretKeyRequiredException {
+      final key = (await dialogs.showAgeSecretKeyInput())?.trim();
+      if (key == null || key.isEmpty) rethrow;
+      return save(key);
     }
   }
 
-  /// Ids are taken up front so the list keeps the order of [links]; the share
-  /// links among them make up one profile, in the place of the first.
   Future<void> addProfilesFromLinks(
     List<String> links, {
     SubscriptionClientSettings? clientSettings,
@@ -791,27 +880,23 @@ class ProfilesAction extends _$ProfilesAction {
       [
         for (final link in links)
           if (!link.isShareLink)
-            (
-              profile: _withClientSettings(
-                Profile.normal(url: link),
-                clientSettings,
-              ),
-              shareLinks: const <String>[],
-            )
+            (link: link, shareLinks: const <String>[])
           else if (link == shareLinks.first)
-            (profile: Profile.normal(), shareLinks: shareLinks),
+            (link: link, shareLinks: shareLinks),
       ],
       (item) async {
         if (item.shareLinks.isEmpty) {
-          _throwIfDuplicateSubscription(item.profile.url);
+          await _addProfileLink(item.link, clientSettings: clientSettings);
+        } else {
+          final profile = await _fromShareLinks(
+            Profile.normal(),
+            item.shareLinks,
+            onCommitted: _saveImportedProfile,
+          );
+          _importedProfile(profile, select: true);
         }
-        return putProfile(
-          await (item.shareLinks.isEmpty
-              ? _download(item.profile)
-              : _fromShareLinks(item.profile, item.shareLinks)),
-        );
       },
-      label: (item) => item.shareLinks.firstOrNull ?? item.profile.url,
+      label: (item) => profileLinkDisplaySource(item.link),
       concurrency: maxConcurrentImports,
       tag: LoadingTag.profiles,
     );
@@ -914,7 +999,9 @@ class ProfilesAction extends _$ProfilesAction {
         throw MessageException(
           links.length == 1
               ? appLocalizations.shareLinksInvalid
-              : appLocalizations.shareLinkUnreadable(links[index]),
+              : appLocalizations.shareLinkUnreadable(
+                  profileLinkDisplaySource(links[index]),
+                ),
         );
       }
       for (final definition in definitions) {

@@ -11,43 +11,46 @@ class CommonAction extends _$CommonAction {
   void build() {}
 
   void toggleRunning() {
-    final running = !(_pendingToggleRunning ?? ref.read(isStartProvider));
+    unawaited(
+      setRunning(!(_pendingToggleRunning ?? ref.read(isStartProvider))),
+    );
+  }
+
+  Future<void> setRunning(bool running) async {
     _pendingToggleRunning = running;
     final requestRevision = ++_toggleRequestRevision;
     final setupAction = ref.read(setupActionProvider.notifier);
     final runIntentRevision = setupAction.runIntentRevision;
-    unawaited(
-      globalState.safeRun(() async {
-        try {
-          if (running && ref.read(coreStatusProvider) != CoreStatus.connected) {
-            final started = await ref
-                .read(coreActionProvider.notifier)
-                .startCore();
-            if (!started ||
-                requestRevision != _toggleRequestRevision ||
-                setupAction.runIntentRevision != runIntentRevision) {
-              return;
-            }
-          }
-          if (requestRevision != _toggleRequestRevision) return;
-          final initialize = running && !ref.read(initProvider);
-          final applied = await setupAction.setRunning(
-            running,
-            initialize: initialize,
-          );
-          if (applied &&
-              running &&
-              initialize &&
-              requestRevision == _toggleRequestRevision) {
-            ref.read(initProvider.notifier).value = true;
-          }
-        } finally {
-          if (requestRevision == _toggleRequestRevision) {
-            _pendingToggleRunning = null;
+    await globalState.safeRun(() async {
+      try {
+        if (running && ref.read(coreStatusProvider) != CoreStatus.connected) {
+          final started = await ref
+              .read(coreActionProvider.notifier)
+              .startCore();
+          if (!started ||
+              requestRevision != _toggleRequestRevision ||
+              setupAction.runIntentRevision != runIntentRevision) {
+            return;
           }
         }
-      }),
-    );
+        if (requestRevision != _toggleRequestRevision) return;
+        final initialize = running && !ref.read(initProvider);
+        final applied = await setupAction.setRunning(
+          running,
+          initialize: initialize,
+        );
+        if (applied &&
+            running &&
+            initialize &&
+            requestRevision == _toggleRequestRevision) {
+          ref.read(initProvider.notifier).value = true;
+        }
+      } finally {
+        if (requestRevision == _toggleRequestRevision) {
+          _pendingToggleRunning = null;
+        }
+      }
+    });
   }
 
   void updateSpeedStatistics() {

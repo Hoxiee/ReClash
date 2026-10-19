@@ -40,7 +40,7 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'a04df7439b26978f3f34f49893c81183cdaad531';
+String _$commonActionHash() => r'5a1c09a15c7952b87f361e1e82a7b59dee3513c1';
 
 abstract class _$CommonAction extends $Notifier<void> {
   void build();
@@ -502,9 +502,61 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'fd82ad7ebf896a574b244592c5f5deeeca550cbb';
+String _$profilesActionHash() => r'40247f101191222dc189b5acd3c0fa4b36fc8232';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(UrlSchemeAction)
+final urlSchemeActionProvider = UrlSchemeActionProvider._();
+
+final class UrlSchemeActionProvider
+    extends $NotifierProvider<UrlSchemeAction, void> {
+  UrlSchemeActionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'urlSchemeActionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$urlSchemeActionHash();
+
+  @$internal
+  @override
+  UrlSchemeAction create() => UrlSchemeAction();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$urlSchemeActionHash() => r'fa0a8e06769c3fab80636aa7cdf36659ffe6d000';
+
+abstract class _$UrlSchemeAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

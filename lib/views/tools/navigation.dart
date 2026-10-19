@@ -28,6 +28,7 @@ import 'package:reclash/views/region.dart';
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/tools/core.dart';
+import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -47,6 +48,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   LanguageView() => ToolPage.locale,
   HotKeyView() => ToolPage.hotkey,
   HotkeyDesktopView() => ToolPage.hotkeyDesktop,
+  UrlSchemeView() => ToolPage.urlScheme,
   AccessView() => ToolPage.access,
   ResourcesView() => ToolPage.resources,
   CustomResourcesView() => ToolPage.customResources,
@@ -82,6 +84,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.locale => const LanguageView(),
   ToolPage.hotkey => const HotKeyView(),
   ToolPage.hotkeyDesktop => const HotkeyDesktopView(),
+  ToolPage.urlScheme => const UrlSchemeView(),
   ToolPage.access => const AccessView(),
   ToolPage.resources => const ResourcesView(),
   ToolPage.customResources => const CustomResourcesView(),

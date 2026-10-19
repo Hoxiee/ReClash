@@ -1178,6 +1178,102 @@
   "updateSeeFullReleaseNotes": "Толық релиз ескертпелерін көру",
   "updateShowAllNotes": "Барлық өзгерістерді көрсету",
   "updateInstalledVersion": "Орнатылған нұсқа: {version}",
+  "urlScheme": "URL схемасы",
+  "urlSchemeIntro": "ReClash қолданбасын жарлықтармен, сайттармен және басқа қолданбалармен байланыстырыңыз. Дайын сілтеме жасаңыз немесе оны ашпай тұрып тексеріңіз.",
+  "urlSchemeConnection": "Қосылым",
+  "urlSchemeProfiles": "Профильдер",
+  "urlSchemeConfirmationTip": "Сыртқы қосылу және жабу пәрмендері растауды талап етеді. Қосылым пәрмендерін қолданбас бұрын бастапқы баптауды аяқтаңыз.",
+  "urlSchemeProfileCommandsTip": "Профиль пәрмендері құрастыру құралын ашады. Сыртқы импорт келісімді сұрайды және қалыпты тексеру мен түрлендіруді сақтайды.",
+  "urlSchemeSupportedLinks": "Қолдау көрсетілетін импорт сілтемелері",
+  "urlSchemeSupportedLinksTip": "Clash сілтемелері, INCY және Happ орауыштары және прокси сілтемелері қолмен импорттауда және QR сканерлеуде де жұмыс істейді. Белгісіз шифрлау нұсқалары қабылданбайды.",
+  "urlSchemeWrappedLinks": "Жазылым сілтемелері, ендірілген конфигурациялар және INCY crypt1",
+  "urlSchemeProxyLinks": "Прокси сілтемелері",
+  "urlSchemeConnect": "Қосылу",
+  "urlSchemeConnectDesc": "Таңдалған профиль мен ағымдағы қамту баптауларын пайдаланып қосылымды бастау.",
+  "urlSchemeDisconnect": "Ажырату",
+  "urlSchemeDisconnectDesc": "Таңдалған профильді өзгертпей қосылымды тоқтату.",
+  "urlSchemeToggle": "Қосылымды ауыстыру",
+  "urlSchemeToggleDesc": "Тоқтап тұрса қосылу, жұмыс істеп тұрса ажырату. Растау терезесі нақты әрекетті көрсетеді.",
+  "urlSchemeOpen": "Қолданбаны көрсету",
+  "urlSchemeOpenDesc": "Қосылымды өзгертпей ReClash қолданбасын алдыңғы қатарға шығару.",
+  "urlSchemeClose": "Қолданбаны жабу",
+  "urlSchemeCloseDesc": "Жабу баптауына сай терезені жасыру немесе ReClash қолданбасынан шығу. Android қалыпты жабу тәртібін қолданады.",
+  "urlSchemeAdd": "Жазылым қосу",
+  "urlSchemeAddDesc": "HTTP немесе HTTPS жазылым сілтемесінен профиль жасау. Атау міндетті емес.",
+  "urlSchemeImport": "Конфигурацияны импорттау",
+  "urlSchemeImportDesc": "Сілтемеге Base64 түрінде енгізілген UTF-8 конфигурациясын импорттау. Атау міндетті емес.",
+  "urlSchemeInstallConfig": "Конфигурацияны орнату",
+  "urlSchemeInstallConfigDesc": "Clash клиенттері қолдайтын install-config сілтемесі арқылы жазылымды импорттау.",
+  "urlSchemeBuild": "Сілтеме жасау",
+  "urlSchemeInspect": "Сілтемені тексеру",
+  "urlSchemeAction": "Әрекет",
+  "urlSchemeParameters": "Параметрлер",
+  "urlSchemeCopyLink": "Сілтемені көшіру",
+  "urlSchemeUseExample": "Мысалды қолдану",
+  "urlSchemeExampleProfile": "Профиль мысалы",
+  "urlSchemeConfigHint": "YAML немесе JSON конфигурациясын қойыңыз",
+  "urlSchemeBuilderTip": "Тек осы әрекетке қажетті өрістер қосылады. Конфигурация сілтемесі барлық мазмұнды қамтиды және растауды айналып өтпейді.",
+  "urlSchemePreview": "Сілтемені алдын ала қарау",
+  "urlSchemePreviewEmpty": "Сілтемені көру үшін міндетті өрістерді толтырыңыз.",
+  "urlSchemePrivateLinkTip": "Сілтемеде кіру токендері немесе прокси деректері болуы мүмкін. Оны тек сенімді адамдармен бөлісіңіз; ReClash сілтемелер тарихын сақтамайды.",
+  "urlSchemeCopyFailed": "Сілтемені көшіру мүмкін болмады. Қайталап көріңіз.",
+  "urlSchemePasteFailed": "Алмасу буферін оқу мүмкін болмады. Сілтемені қолмен қойыңыз.",
+  "urlSchemeInspectTip": "Тексеру осы құрылғыда орындалады. Ол сілтемені ашпайды, жазылымды жүктемейді және профильді импорттамайды.",
+  "urlSchemeInspectHint": "Қолданба немесе профиль сілтемесін қойыңыз",
+  "urlSchemeInspectionResult": "Тексеру нәтижесі",
+  "urlSchemeRecognized": "Сілтеме танылды",
+  "urlSchemeNoExecution": "Ешбір әрекет орындалмады.",
+  "urlSchemeInspectionLimit": "Сілтеме құрылымы дұрыс. Жазылымның қолжетімділігі мен ядро тексеруі импорт кезінде ғана орындалады.",
+  "urlSchemeContentFormat": "Мазмұн пішімі",
+  "urlSchemeConfigSummary": "Конфигурация құрамы",
+  "urlSchemeConfigCounts": "Прокси: {nodes}, топтар: {groups}, қашықтағы провайдерлер: {providers}",
+  "urlSchemeConversionWarning": "Түрлендіру кезінде кейбір мазмұн өткізіледі. Импорт кезінде өзгерістерді қарап, растаңыз.",
+  "urlSchemeConfirmTitle": "Қолданбаның сыртқы пәрмені",
+  "urlSchemeConfirmMessage": "Сілтеме «{action}» әрекетін сұрайды. ReClash қолданбасына орындауға рұқсат бересіз бе?",
+  "urlSchemeImportConfirm": "{source} көзінен «{name}» импортталсын ба? Растаудан кейін профиль мен түрлендіру тексеріледі.",
+  "urlSchemeEmbeddedConfig": "Ендірілген конфигурация",
+  "urlSchemeSetupRequired": "Сыртқы қосылым пәрмендерін қолданбас бұрын қосылым баптауын аяқтаңыз.",
+  "urlSchemeDeliveryError": "Сілтеме жеткізілмеді немесе кезек толды. Ағымдағы әрекет аяқталған соң қайталап көріңіз.",
+  "urlSchemeInvalidLink": "Сілтеме дұрыс емес. Құрылымын және пайыздық кодталуын тексеріңіз.",
+  "urlSchemeUnknownCommand": "Бұл сілтеме пәрменіне қолдау көрсетілмейді.",
+  "urlSchemeMissingPayload": "Сілтемеде жазылым URL мекенжайы немесе конфигурация жоқ.",
+  "urlSchemeInvalidUrl": "Дұрыс HTTP немесе HTTPS жазылым URL мекенжайын енгізіңіз.",
+  "urlSchemeInvalidName": "Профиль атауы 64 таңбадан аспауы және басқару таңбаларын қамтымауы керек.",
+  "urlSchemeInvalidBase64": "Ендірілген конфигурация дұрыс UTF-8 Base64 деректері емес.",
+  "urlSchemeTooLarge": "Сілтеме 4 МБ немесе ендірілген конфигурация 2 МБ шегінен асады.",
+  "urlSchemeTooDeep": "Сілтемеде кірістірілген орауыштар тым көп.",
+  "urlSchemeUnsupportedEncryption": "Бұл шифрлау нұсқасына қолдау көрсетілмейді. Қалыпты жазылым сілтемесін сұраңыз.",
+  "urlSchemeAuthenticationFailed": "Шифрланған сілтеменің түпнұсқалығы расталмады. Ол бүлінген немесе басқа кілтті қолдануы мүмкін.",
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "coreRunning": "Жұмыс істеп тұр",
   "coreStarting": "Іске қосылуда…",
   "coreStopped": "Тоқтатылған",

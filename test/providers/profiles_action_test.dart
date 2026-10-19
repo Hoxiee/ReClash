@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -7,6 +9,7 @@ import 'package:reclash/core/interface.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/compatibility/import_review.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
+import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/database/database.dart' as db;
 import 'package:drift/native.dart';
 import 'package:reclash/enum/enum.dart';
@@ -372,11 +375,174 @@ void main() {
       final l10n = currentAppLocalizations;
       expect(
         find.text(
-          l10n.failedItem(links.first, l10n.shareLinkUnreadable(links[1])),
+          l10n.failedItem(
+            profileLinkDisplaySource(links.first),
+            l10n.shareLinkUnreadable(profileLinkDisplaySource(links[1])),
+          ),
         ),
         findsOne,
       );
       expect(container.read(profilesProvider), isEmpty);
+      verifyNever(() => core.validateConfig(any()));
+    });
+  });
+
+  group('external profile link imports', () {
+    for (final scheme in ['happ', 'incy']) {
+      for (final explicitClient in [false, true]) {
+        testWidgets(
+          '$scheme retains request metadata with override=$explicitClient',
+          (tester) async {
+            await pumpHost(tester);
+            await tester.runAsync(() async {
+              final previousOverrides = HttpOverrides.current;
+              HttpOverrides.global = null;
+              final server = await HttpServer.bind(
+                InternetAddress.loopbackIPv4,
+                0,
+              );
+              final agents = <String?>[];
+              server.listen((request) async {
+                agents.add(request.headers.value(HttpHeaders.userAgentHeader));
+                request.response.write(
+                  'proxies:\n  - name: test\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\nrules: [MATCH,DIRECT]',
+                );
+                await request.response.close();
+              });
+              try {
+                final selected = Profile.normal(
+                  label: 'Selected',
+                ).copyWith(id: 994);
+                container.read(profilesProvider.notifier).put(selected);
+                final selection = container.listen<int?>(
+                  currentProfileIdProvider,
+                  (_, _) {},
+                );
+                addTearDown(selection.close);
+                container.read(currentProfileIdProvider.notifier).value =
+                    selected.id;
+                final url =
+                    'http://127.0.0.1:${server.port}/private?token=secret';
+                final source = await resolveProfileLink(
+                  '$scheme://add/${Uri.encodeComponent(url)}?name=Home',
+                );
+                final chosen = explicitClient
+                    ? SubscriptionClientPreset.clash
+                    : scheme == 'happ'
+                    ? SubscriptionClientPreset.happ
+                    : SubscriptionClientPreset.incy;
+                final profile = await container
+                    .read(profilesActionProvider.notifier)
+                    .importProfileLinkSource(
+                      source,
+                      select: false,
+                      clientSettings: explicitClient
+                          ? const SubscriptionClientSettings(
+                              preset: SubscriptionClientPreset.clash,
+                            )
+                          : const SubscriptionClientSettings.forNewProfile(),
+                    );
+                expect(agents, [
+                  subscriptionClientRequestHeaders(
+                    chosen,
+                    defaultUserAgent: 'ReClash',
+                  )['User-Agent'],
+                ]);
+                expect(profile.label, 'Home');
+                expect(profile.url, url);
+                expect(profile.subscriptionPreferences.client.preset, chosen);
+                expect((await profile.file).existsSync(), isTrue);
+                expect(container.read(profilesProvider), hasLength(2));
+                expect(container.read(currentProfileIdProvider), selected.id);
+              } finally {
+                await server.close(force: true);
+                HttpOverrides.global = previousOverrides;
+              }
+            });
+          },
+        );
+      }
+    }
+
+    for (final explicitLabel in [false, true]) {
+      test(
+        'embedded imports preserve names with override=$explicitLabel',
+        () async {
+          const content = 'proxies: []\nrules: [MATCH,DIRECT]';
+          final link = await buildUrlSchemeLink(
+            ReClashCommand.importProfile,
+            payload: content,
+            name: 'Дом 🦊',
+          );
+          final profile = await container
+              .read(profilesActionProvider.notifier)
+              .importProfileFromLink(
+                link,
+                label: explicitLabel ? 'Mine' : null,
+                ageSecretKey: '',
+                select: false,
+              );
+          expect(profile.label, explicitLabel ? 'Mine' : 'Дом 🦊');
+          expect(profile.type, ProfileType.file);
+          expect(await (await profile.file).readAsString(), content);
+          expect(container.read(profilesProvider).single, profile);
+          verify(() => core.validateConfig(any())).called(1);
+          verifyNever(() => core.decodeShareLinks(any()));
+        },
+      );
+    }
+
+    test('prepared opaque share payload reaches the Core unchanged', () async {
+      const link = 'vmess://AbCdEFGh+/==';
+      decodesTo(link, [
+        {'name': 'Decoded', 'type': 'vmess', 'server': 'node.test'},
+      ]);
+      final source = await resolveProfileLink(link);
+      final profile = await container
+          .read(profilesActionProvider.notifier)
+          .importProfileLinkSource(source, label: 'Mine', select: false);
+      expect(profile.label, 'Mine');
+      expect((await savedProxies(profile)).single['name'], 'Decoded');
+      verify(() => core.decodeShareLinks([link])).called(1);
+    });
+
+    test('wrapped subscriptions reuse duplicate prevention', () async {
+      const url = 'https://example.com/private?token=secret';
+      container
+          .read(profilesProvider.notifier)
+          .put(Profile.normal(label: 'Existing', url: url));
+      final source = await resolveProfileLink(
+        'happ://add/${Uri.encodeComponent(url)}?name=Home',
+      );
+      await expectLater(
+        container
+            .read(profilesActionProvider.notifier)
+            .importProfileLinkSource(source, select: false),
+        throwsA(
+          isA<MessageException>().having(
+            (error) => error.message,
+            'message',
+            currentAppLocalizations.profileImportDuplicate,
+          ),
+        ),
+      );
+      expect(container.read(profilesProvider), hasLength(1));
+      verifyNever(() => core.validateConfig(any()));
+    });
+
+    test('a cancelled prepared share source never reaches the Core', () async {
+      final cancellation = SubscriptionCancellation()..cancel();
+      await expectLater(
+        container
+            .read(profilesActionProvider.notifier)
+            .importProfileLinkSource(
+              const ProfileLinkSource(shareLink: 'vless://id@node.test:443'),
+              cancellation: cancellation,
+            ),
+        throwsA(isA<SubscriptionUpdateCancelled>()),
+      );
+      expect(container.read(profilesProvider), isEmpty);
+      verifyNever(() => core.decodeShareLinks(any()));
       verifyNever(() => core.validateConfig(any()));
     });
   });
@@ -448,9 +614,11 @@ void main() {
           await tester.runAsync(() async {
             pending = container
                 .read(profilesActionProvider.notifier)
-                .importProfileData(
-                  content.codeUnits,
-                  name: 'Converted import',
+                .importProfileLinkSource(
+                  ProfileLinkSource(
+                    bytes: Uint8List.fromList(utf8.encode(content)),
+                    name: 'Converted import',
+                  ),
                   select: false,
                   reviewContext: reviewContext,
                 );
@@ -488,8 +656,8 @@ void main() {
           }
           await tester.pumpAndSettle();
           await tester.runAsync(() async {
-            final profile = await pending;
             if (accept) {
+              final profile = await pending;
               expect(profile, isNotNull);
               expect(
                 container.read(profilesProvider).getProfile(profile!.id),
@@ -499,7 +667,10 @@ void main() {
               expect((await profile.file).existsSync(), isTrue);
               verify(() => core.validateConfig(any())).called(1);
             } else {
-              expect(profile, isNull);
+              await expectLater(
+                pending,
+                throwsA(isA<SubscriptionUpdateCancelled>()),
+              );
               expect(container.read(profilesProvider), [selected]);
               expect(storedFiles(), filesBefore);
               verifyNever(() => core.validateConfig(any()));
@@ -553,9 +724,11 @@ void main() {
         () => expectLater(
           container
               .read(profilesActionProvider.notifier)
-              .importProfileData(
-                'proxies: []'.codeUnits,
-                name: 'Wizard import',
+              .importProfileLinkSource(
+                ProfileLinkSource(
+                  bytes: Uint8List.fromList(utf8.encode('proxies: []')),
+                  name: 'Wizard import',
+                ),
                 select: false,
               ),
           throwsA(anything),
@@ -585,9 +758,11 @@ void main() {
       final cancellation = SubscriptionCancellation();
       final pending = container
           .read(profilesActionProvider.notifier)
-          .importProfileData(
-            'proxies: []'.codeUnits,
-            name: 'Cancelled import',
+          .importProfileLinkSource(
+            ProfileLinkSource(
+              bytes: Uint8List.fromList(utf8.encode('proxies: []')),
+              name: 'Cancelled import',
+            ),
             select: false,
             cancellation: cancellation,
           );
@@ -604,9 +779,13 @@ void main() {
       await expectLater(
         container
             .read(profilesActionProvider.notifier)
-            .importProfileData(
-              '-----BEGIN AGE ENCRYPTED FILE-----'.codeUnits,
-              name: 'Encrypted import',
+            .importProfileLinkSource(
+              ProfileLinkSource(
+                bytes: Uint8List.fromList(
+                  utf8.encode('-----BEGIN AGE ENCRYPTED FILE-----'),
+                ),
+                name: 'Encrypted import',
+              ),
               select: false,
             ),
         throwsA(isA<AgeSecretKeyRequiredException>()),

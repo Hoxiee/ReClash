@@ -62,8 +62,7 @@ begin
   Result := Pos(Lowercase(AddBackslash(ExpandConstant('{app}'))), Lowercase(Value)) > 0;
 end;
 
-// The value name is appName and the schemes are protocolSchemes, both in
-// lib/common.
+// Remove registrations only while their commands still point into this install.
 procedure RemoveUserRegistrations;
 var
   Schemes: TArrayOfString;
@@ -76,13 +75,24 @@ begin
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{APP_NAME}}');
   end;
 
-  Schemes := ['clash', 'clashmeta', 'reclash'];
+  Schemes := ['clash', 'clashmeta', 'reclash', 'incy', 'happ', 'hysteria', 'hysteria2', 'hy2', 'hysteria2+realm', 'hy2+realm', 'tuic', 'trojan', 'vless', 'vmess', 'ss', 'ssr', 'socks', 'socks5', 'socks5h', 'anytls', 'mierus'];
   for i := 0 to GetArrayLength(Schemes)-1 do
   begin
     if RegQueryStringValue(HKCU, 'Software\Classes\' + Schemes[i] + '\shell\open\command', '', Value) and PointsIntoApp(Value) then
     begin
       RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\' + Schemes[i]);
     end;
+    if RegQueryStringValue(HKCU, 'Software\Classes\ReClash.Url.' + Schemes[i] + '\shell\open\command', '', Value) and PointsIntoApp(Value) then
+    begin
+      RegDeleteValue(HKCU, 'Software\Classes\' + Schemes[i] + '\OpenWithProgids', 'ReClash.Url.' + Schemes[i]);
+      RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\ReClash.Url.' + Schemes[i]);
+      RegDeleteValue(HKCU, 'Software\ReClash\UrlHandler\URLAssociations', Schemes[i]);
+    end;
+  end;
+  if not RegKeyExists(HKCU, 'Software\Classes\ReClash.Url.reclash') then
+  begin
+    RegDeleteValue(HKCU, 'Software\RegisteredApplications', 'ReClash');
+    RegDeleteKeyIncludingSubkeys(HKCU, 'Software\ReClash\UrlHandler');
   end;
 end;
 

@@ -268,14 +268,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "Oʻrnatilgan versiya: ${version}";
 
-  static String m99(label) => "${label} URL boʻlishi kerak";
+  static String m99(nodes, groups, providers) =>
+      "Proksilar: ${nodes}, guruhlar: ${groups}, masofaviy provayderlar: ${providers}";
 
-  static String m100(version) => "Oʻrnatilgan versiya: ${version}";
+  static String m100(action) =>
+      "Bu havola «${action}» amalini so‘raydi. ReClash’ga uni bajarishga ruxsat berilsinmi?";
 
-  static String m101(count) =>
+  static String m101(name, source) =>
+      "${source} manbasidan «${name}» import qilinsinmi? Tasdiqlashdan so‘ng profil va o‘girishlar tekshiriladi.";
+
+  static String m102(label) => "${label} URL boʻlishi kerak";
+
+  static String m103(version) => "Oʻrnatilgan versiya: ${version}";
+
+  static String m104(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
-  static String m102(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2680,7 +2689,177 @@ class MessageLookup extends MessageLookupByLibrary {
       "Yuklab yuborish oʻtkazish qobiliyati",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL sxemasi"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Amal"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Obuna qo‘shish"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP yoki HTTPS obuna URL manzilidan profil yaratish. Nom ixtiyoriy.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Shifrlangan havolaning haqiqiyligi tasdiqlanmadi. U buzilgan yoki boshqa kalitdan foydalanayotgan bo‘lishi mumkin.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Havola yaratish"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "Faqat ushbu amal uchun zarur maydonlar qo‘shiladi. Konfiguratsiya havolasi to‘liq tarkibni saqlaydi va tasdiqlashni chetlab o‘tmaydi.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Ilovani yopish"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Yopish sozlamasiga rioya qilish: oynani yashirish yoki ReClash’dan chiqish. Android odatiy ilova yopish xatti-harakatini ishlatadi.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "YAML yoki JSON konfiguratsiyasini joylashtiring",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
+      "Konfiguratsiya tarkibi",
+    ),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Ilovaning tashqi buyrug‘i",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "Tashqi ulanish va yopish buyruqlari tasdiqlashni talab qiladi. Ulanish buyruqlaridan oldin dastlabki sozlashni tugating.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Ulash"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan profil va joriy qamrov sozlamalari bilan ulanishni boshlash.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Ulanish"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
+      "Tarkib formati",
+    ),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "O‘girishda ayrim tarkib tushirib qoldiriladi. Import paytida o‘zgarishlarni ko‘rib chiqing va tasdiqlang.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "Havolani nusxalab bo‘lmadi. Qayta urinib ko‘ring.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Havolani nusxalash",
+    ),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "Havolani yetkazib bo‘lmadi yoki navbat to‘la. Joriy amal tugaganidan keyin qayta urinib ko‘ring.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Uzish"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan profilni o‘zgartirmasdan ulanishni to‘xtatish.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
+      "Ichki konfiguratsiya",
+    ),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "Namuna profil",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
+      "Konfiguratsiyani import qilish",
+    ),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Havolaga Base64 sifatida joylangan UTF-8 konfiguratsiyasini import qilish. Nom ixtiyoriy.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
+      "Havolani tekshirish",
+    ),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "Ilova yoki profil havolasini joylashtiring",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "Tekshiruv shu qurilmada bajariladi. U havolani ochmaydi, obunani yuklamaydi va profilni import qilmaydi.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "Havola tuzilishi to‘g‘ri. Obuna mavjudligi va yadro tekshiruvi faqat import paytida tekshiriladi.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage(
+      "Tekshiruv natijasi",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Konfiguratsiyani o‘rnatish",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash mijozlari qo‘llaydigan install-config havola formati orqali obunani import qilish.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "ReClash’ni yorliqlar, saytlar va boshqa ilovalar bilan bog‘lang. Tayyor havola yarating yoki ochishdan oldin tekshiring.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "Ichki konfiguratsiya to‘g‘ri UTF-8 Base64 ma’lumotlari emas.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "Havola noto‘g‘ri. Uning tuzilishi va foizli kodlanishini tekshiring.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Profil nomi boshqaruv belgilarisiz 64 ta belgidan oshmasligi kerak.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "To‘g‘ri HTTP yoki HTTPS obuna URL manzilini kiriting.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "Havolada obuna URL manzili yoki konfiguratsiya yo‘q.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "Hech qanday amal bajarilmadi.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Ilovani ko‘rsatish"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Ulanishni o‘zgartirmasdan ReClash’ni oldingi planga chiqarish.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Parametrlar"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "Buferni o‘qib bo‘lmadi. Havolani qo‘lda joylashtiring.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
+      "Havolani oldindan ko‘rish",
+    ),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "Havolani ko‘rish uchun majburiy maydonlarni to‘ldiring.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Havolada kirish tokenlari yoki proksi hisob ma’lumotlari bo‘lishi mumkin. Uni faqat ishonchli odamlar bilan ulashing; ReClash havolalar tarixini saqlamaydi.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "Profil buyruqlari havola yaratuvchisini ochadi. Tashqi import rozilik so‘raydi va odatiy tekshirish hamda o‘girishni saqlaydi.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profillar"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
+      "Proksi ulashish havolalari",
+    ),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage(
+      "Havola aniqlandi",
+    ),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "Tashqi ulanish buyruqlaridan oldin ulanish sozlashini tugating.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "Qo‘llab-quvvatlanadigan import havolalari",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clash havolalari, INCY va Happ o‘ramlari hamda proksi havolalari qo‘lda import va QR skanerlashda ham ishlaydi. Noma’lum shifrlash versiyalari rad etiladi.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
+      "Ulanishni almashtirish",
+    ),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "To‘xtagan bo‘lsa ulash, ishlayotgan bo‘lsa uzish. Tasdiqlash oynasi haqiqiy amalni ko‘rsatadi.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "Havolada ichma-ich o‘ramlar juda ko‘p.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Havola 4 MB yoki ichki konfiguratsiya 2 MB chegarasidan oshadi.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "Bu havola buyrug‘i qo‘llab-quvvatlanmaydi.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "Bu shifrlash versiyasi qo‘llab-quvvatlanmaydi. Oddiy obuna havolasini so‘rang.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
+      "Misoldan foydalanish",
+    ),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "Obuna havolalari, ichki konfiguratsiyalar va INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -2760,7 +2939,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Tanlangan panel birinchi ochishda yuklab olinadi. Belgilangan reliz SHA-256 orqali tekshiriladi.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzerni ochib boʻlmadi.",
     ),
@@ -2798,8 +2977,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Tizimga yozish tizim soatini ham oʻrnatadi; Android bunga eʼtibor bermaydi.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("Ha"),
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",

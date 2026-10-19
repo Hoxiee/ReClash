@@ -20,6 +20,24 @@ supported_mime_type:
   - x-scheme-handler/clash
   - x-scheme-handler/clashmeta
   - x-scheme-handler/reclash
+  - x-scheme-handler/incy
+  - x-scheme-handler/happ
+  - x-scheme-handler/hysteria
+  - x-scheme-handler/hysteria2
+  - x-scheme-handler/hy2
+  - x-scheme-handler/hysteria2+realm
+  - x-scheme-handler/hy2+realm
+  - x-scheme-handler/tuic
+  - x-scheme-handler/trojan
+  - x-scheme-handler/vless
+  - x-scheme-handler/vmess
+  - x-scheme-handler/ss
+  - x-scheme-handler/ssr
+  - x-scheme-handler/socks
+  - x-scheme-handler/socks5
+  - x-scheme-handler/socks5h
+  - x-scheme-handler/anytls
+  - x-scheme-handler/mierus
 
 keywords:
   - ReClash

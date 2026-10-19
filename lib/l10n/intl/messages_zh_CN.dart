@@ -234,13 +234,21 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "已安装版本：${version}";
 
-  static String m99(label) => "${label}必须为URL";
+  static String m99(nodes, groups, providers) =>
+      "代理：${nodes}，组：${groups}，远程提供者：${providers}";
 
-  static String m100(version) => "已安装版本：${version}";
+  static String m100(action) => "此链接请求“${action}”。允许 ReClash 执行此操作吗？";
 
-  static String m101(count) => "${count} 年前";
+  static String m101(name, source) =>
+      "从 ${source} 导入“${name}”吗？确认后将验证配置文件并检查转换内容。";
 
-  static String m102(count) => "${count} 年前";
+  static String m102(label) => "${label}必须为URL";
+
+  static String m103(version) => "已安装版本：${version}";
+
+  static String m104(count) => "${count} 年前";
+
+  static String m105(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1934,7 +1942,137 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL 方案"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("操作"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("添加订阅"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "通过 HTTP 或 HTTPS 订阅 URL 创建配置文件，可选填名称。",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "无法验证加密链接。它可能已损坏或使用了其他密钥。",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("生成链接"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "仅包含此操作所需的字段。配置链接包含全部内容，不能绕过确认。",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("关闭应用"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "遵循关闭设置：隐藏窗口或退出 ReClash。Android 使用常规应用关闭行为。",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "粘贴 YAML 或 JSON 配置",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("配置内容"),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("外部应用命令"),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "外部连接和关闭命令需要确认。使用连接命令前，请先完成初始设置。",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("连接"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "使用所选配置文件和当前覆盖范围设置启动连接。",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("连接"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("内容格式"),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "转换会省略部分内容。请在导入时审阅并确认这些更改。",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage("无法复制链接。请重试。"),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage("复制链接"),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "无法传递链接，或待处理队列已满。请在当前操作完成后重试。",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("断开连接"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "停止当前连接，不更改所选配置文件。",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("内嵌配置"),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("示例配置文件"),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("导入配置"),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "导入以 Base64 嵌入链接的 UTF-8 配置，可选填名称。",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("检查链接"),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage("粘贴应用或配置文件链接"),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "检查仅在此设备上进行。不会打开链接、下载订阅或导入配置文件。",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "链接结构有效。订阅可用性和内核验证仅在导入时检查。",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage("检查结果"),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage("安装配置"),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "使用 Clash 客户端支持的 install-config 链接格式导入订阅。",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "将 ReClash 与快捷方式、网站和其他应用连接。生成可直接使用的链接，或在打开前检查链接。",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "内嵌配置不是有效的 UTF-8 Base64 数据。",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "链接格式错误。请检查结构和百分号编码。",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "配置文件名称不能超过 64 个字符，且不能包含控制字符。",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "请输入有效的 HTTP 或 HTTPS 订阅 URL。",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "链接缺少订阅 URL 或配置。",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage("未执行任何操作。"),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("显示应用"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "将 ReClash 置于前台，不更改连接状态。",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("参数"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "无法读取剪贴板。请手动粘贴链接。",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("链接预览"),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "填写必填字段后即可预览链接。",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "链接可能包含访问令牌或代理凭据。请仅与可信的人分享；ReClash 不保存链接历史。",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "配置文件命令会打开链接生成器。外部导入需要确认，并保留现有的验证和转换检查。",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("配置文件"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("代理分享链接"),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage("已识别链接"),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "使用外部连接命令前，请先完成连接设置。",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage("支持的导入链接"),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clash 链接、INCY 和 Happ 封装链接及代理分享链接也可用于手动导入和 QR 扫描。未知的加密版本会被拒绝。",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切换连接"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "停止时连接，运行时断开。确认框会显示实际操作。",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage("链接的嵌套封装层数过多。"),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "链接超过 4 MB，或内嵌配置超过 2 MB。",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "不支持此链接命令。",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "不支持此加密版本。请索取普通订阅链接。",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("使用示例"),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "订阅链接、内嵌配置和 INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1994,7 +2132,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "首次打开时下载所选面板。使用固定版本并进行 SHA-256 校验。",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "无法打开浏览器。",
     ),
@@ -2026,8 +2164,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

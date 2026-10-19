@@ -241,13 +241,22 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "설치된 버전: ${version}";
 
-  static String m99(label) => "${label}은(는) URL이어야 합니다";
+  static String m99(nodes, groups, providers) =>
+      "프록시 ${nodes}개, 그룹 ${groups}개, 원격 공급자 ${providers}개";
 
-  static String m100(version) => "설치된 버전: ${version}";
+  static String m100(action) =>
+      "이 링크가 “${action}” 동작을 요청합니다. ReClash에서 실행하도록 허용할까요?";
 
-  static String m101(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m101(name, source) =>
+      "${source}에서 “${name}”을 가져올까요? 확인 후 프로필 검증과 변환 검토가 진행됩니다.";
 
-  static String m102(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m102(label) => "${label}은(는) URL이어야 합니다";
+
+  static String m103(version) => "설치된 버전: ${version}";
+
+  static String m104(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m105(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2113,7 +2122,147 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL 스킴"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("동작"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("구독 추가"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP 또는 HTTPS 구독 URL에서 프로필을 만듭니다. 이름은 선택 사항입니다.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "암호화 링크를 인증하지 못했습니다. 손상되었거나 다른 키를 사용할 수 있습니다.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("링크 만들기"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "이 동작에 필요한 항목만 포함됩니다. 설정 링크에는 전체 내용이 들어가며 확인을 건너뛸 수 없습니다.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("앱 닫기"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "닫기 설정에 따라 창을 숨기거나 ReClash를 종료합니다. Android에서는 일반 앱 닫기 동작을 따릅니다.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "YAML 또는 JSON 설정을 붙여넣으세요",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("설정 내용"),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("외부 앱 명령"),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "외부 연결 및 종료 명령은 확인이 필요합니다. 연결 명령을 사용하기 전에 초기 설정을 완료하세요.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("연결"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "선택한 프로필과 현재 적용 범위 설정으로 연결을 시작합니다.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("연결"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("내용 형식"),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "변환하면 일부 내용이 제외됩니다. 가져올 때 변경 사항을 검토하고 승인하세요.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "링크를 복사하지 못했습니다. 다시 시도하세요.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage("링크 복사"),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "링크를 전달하지 못했거나 대기열이 가득 찼습니다. 현재 동작이 끝난 뒤 다시 시도하세요.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("연결 해제"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "선택한 프로필을 바꾸지 않고 연결을 중지합니다.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("내장 설정"),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("예시 프로필"),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "링크에 Base64로 포함된 UTF-8 설정을 가져옵니다. 이름은 선택 사항입니다.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("링크 확인"),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "앱 또는 프로필 링크를 붙여넣으세요",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "확인은 이 기기에서만 진행됩니다. 링크를 열거나 구독을 다운로드하거나 프로필을 가져오지 않습니다.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "링크 구조가 유효합니다. 구독 가용성과 코어 검증은 가져올 때 확인합니다.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage("확인 결과"),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage("설정 설치"),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash 클라이언트에서 지원하는 install-config 링크 형식으로 구독을 가져옵니다.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "ReClash를 단축키, 웹사이트, 다른 앱과 연결하세요. 바로 쓸 수 있는 링크를 만들거나 열기 전에 확인할 수 있습니다.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "내장 설정이 유효한 UTF-8 Base64 데이터가 아닙니다.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "링크 형식이 잘못되었습니다. 구조와 퍼센트 인코딩을 확인하세요.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "프로필 이름은 제어 문자 없이 64자 이내로 입력하세요.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "유효한 HTTP 또는 HTTPS 구독 URL을 입력하세요.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "링크에 구독 URL 또는 설정이 없습니다.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "아무 동작도 실행되지 않았습니다.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("앱 표시"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "연결을 바꾸지 않고 ReClash를 앞으로 가져옵니다.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("매개변수"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "클립보드를 읽지 못했습니다. 링크를 직접 붙여넣으세요.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("링크 미리보기"),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "필수 항목을 입력하면 링크가 표시됩니다.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "링크에는 접근 토큰이나 프록시 인증 정보가 포함될 수 있습니다. 신뢰하는 사람에게만 공유하세요. ReClash는 링크 기록을 저장하지 않습니다.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "프로필 명령은 링크 생성기를 엽니다. 외부 가져오기는 확인을 요청하며 기존 검증과 변환 검사를 유지합니다.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("프로필"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("프록시 공유 링크"),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage("링크가 인식되었습니다"),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "외부 연결 명령을 사용하기 전에 연결 설정을 완료하세요.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "지원하는 가져오기 링크",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clash 링크, INCY 및 Happ 래퍼, 프록시 공유 링크는 수동 가져오기와 QR 스캔에서도 작동합니다. 알 수 없는 암호화 버전은 거부됩니다.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("연결 전환"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "중지되어 있으면 연결하고 실행 중이면 해제합니다. 확인 화면에는 실제 동작이 표시됩니다.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "링크에 중첩된 래퍼가 너무 많습니다.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "링크가 4 MB 또는 내장 설정이 2 MB를 초과합니다.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "이 링크 명령은 지원되지 않습니다.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("예시 사용"),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "구독 링크, 내장 설정 및 INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -2185,7 +2334,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "브라우저를 열지 못했습니다.",
     ),
@@ -2217,8 +2366,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

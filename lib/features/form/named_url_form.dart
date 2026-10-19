@@ -41,6 +41,7 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   FormFieldValidator<String>? urlValidator,
   Set<String> existingUrls = const {},
   bool withAgeSecretKey = false,
+  int urlMaxLength = TextInputLimits.url,
   Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder,
   String? Function()? additionalValidator,
 }) {
@@ -55,6 +56,7 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
       batch: true,
       existingUrls: existingUrls,
       withAgeSecretKey: withAgeSecretKey,
+      urlMaxLength: urlMaxLength,
       additionalSectionsBuilder: additionalSectionsBuilder,
       additionalValidator: additionalValidator,
     ),
@@ -76,6 +78,7 @@ class NamedUrlForm extends StatefulWidget {
   final bool batch;
   final Set<String> existingUrls;
   final bool withAgeSecretKey;
+  final int urlMaxLength;
   final Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder;
   final String? Function()? additionalValidator;
 
@@ -91,6 +94,7 @@ class NamedUrlForm extends StatefulWidget {
     this.batch = false,
     this.existingUrls = const {},
     this.withAgeSecretKey = false,
+    this.urlMaxLength = TextInputLimits.url,
     this.additionalSectionsBuilder,
     this.additionalValidator,
   });
@@ -161,9 +165,9 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
   }
 
   String? _validateBatchUrl(String url) {
-    if (url.length > TextInputLimits.url) {
+    if (url.length > widget.urlMaxLength) {
       final appLocalizations = context.appLocalizations;
-      return appLocalizations.maxLengthTip(_urlLabel, TextInputLimits.url);
+      return appLocalizations.maxLengthTip(_urlLabel, widget.urlMaxLength);
     }
     return _validateUrl(url);
   }
@@ -318,7 +322,7 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
                 ? TextInputAction.next
                 : TextInputAction.done,
             autocorrect: false,
-            inputFormatters: TextInputLimits.limit(TextInputLimits.url),
+            inputFormatters: TextInputLimits.limit(widget.urlMaxLength),
             onChanged: _handleChanged,
             onFieldSubmitted: (_) {
               if (widget.withAgeSecretKey) {

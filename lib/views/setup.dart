@@ -131,7 +131,12 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
       return;
     } catch (error) {
       if (mounted && !cancellation.cancelled) {
-        setState(() => _importError = compactError(error));
+        setState(
+          () => _importError = userFacingErrorMessage(
+            error,
+            context.appLocalizations,
+          ),
+        );
       }
     } finally {
       cancellation.cancel();
@@ -150,7 +155,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
 
   void _importLink() {
     final link = _linkController.text.trim();
-    if (!link.isUrl && !link.isShareLink) {
+    if (!isProfileLinkInput(link)) {
       setState(
         () => _importError =
             context.appLocalizations.profileUrlInvalidValidationDesc,

@@ -267,14 +267,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m98(version) => "Орнатылған нұсқа: ${version}";
 
-  static String m99(label) => "${label} URL болуы керек";
+  static String m99(nodes, groups, providers) =>
+      "Прокси: ${nodes}, топтар: ${groups}, қашықтағы провайдерлер: ${providers}";
 
-  static String m100(version) => "Орнатылған нұсқа: ${version}";
+  static String m100(action) =>
+      "Сілтеме «${action}» әрекетін сұрайды. ReClash қолданбасына орындауға рұқсат бересіз бе?";
 
-  static String m101(count) =>
+  static String m101(name, source) =>
+      "${source} көзінен «${name}» импортталсын ба? Растаудан кейін профиль мен түрлендіру тексеріледі.";
+
+  static String m102(label) => "${label} URL болуы керек";
+
+  static String m103(version) => "Орнатылған нұсқа: ${version}";
+
+  static String m104(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
-  static String m102(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2625,7 +2634,177 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жүктеп салу жолағы",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m99,
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL схемасы"),
+    "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Әрекет"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Жазылым қосу"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP немесе HTTPS жазылым сілтемесінен профиль жасау. Атау міндетті емес.",
+    ),
+    "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
+      "Шифрланған сілтеменің түпнұсқалығы расталмады. Ол бүлінген немесе басқа кілтті қолдануы мүмкін.",
+    ),
+    "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Сілтеме жасау"),
+    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
+      "Тек осы әрекетке қажетті өрістер қосылады. Конфигурация сілтемесі барлық мазмұнды қамтиды және растауды айналып өтпейді.",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Қолданбаны жабу"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Жабу баптауына сай терезені жасыру немесе ReClash қолданбасынан шығу. Android қалыпты жабу тәртібін қолданады.",
+    ),
+    "urlSchemeConfigCounts": m99,
+    "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
+      "YAML немесе JSON конфигурациясын қойыңыз",
+    ),
+    "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
+      "Конфигурация құрамы",
+    ),
+    "urlSchemeConfirmMessage": m100,
+    "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Қолданбаның сыртқы пәрмені",
+    ),
+    "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
+      "Сыртқы қосылу және жабу пәрмендері растауды талап етеді. Қосылым пәрмендерін қолданбас бұрын бастапқы баптауды аяқтаңыз.",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Қосылу"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Таңдалған профиль мен ағымдағы қамту баптауларын пайдаланып қосылымды бастау.",
+    ),
+    "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Қосылым"),
+    "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
+      "Мазмұн пішімі",
+    ),
+    "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
+      "Түрлендіру кезінде кейбір мазмұн өткізіледі. Импорт кезінде өзгерістерді қарап, растаңыз.",
+    ),
+    "urlSchemeCopyFailed": MessageLookupByLibrary.simpleMessage(
+      "Сілтемені көшіру мүмкін болмады. Қайталап көріңіз.",
+    ),
+    "urlSchemeCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Сілтемені көшіру",
+    ),
+    "urlSchemeDeliveryError": MessageLookupByLibrary.simpleMessage(
+      "Сілтеме жеткізілмеді немесе кезек толды. Ағымдағы әрекет аяқталған соң қайталап көріңіз.",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Ажырату"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Таңдалған профильді өзгертпей қосылымды тоқтату.",
+    ),
+    "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
+      "Ендірілген конфигурация",
+    ),
+    "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
+      "Профиль мысалы",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
+      "Конфигурацияны импорттау",
+    ),
+    "urlSchemeImportConfirm": m101,
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Сілтемеге Base64 түрінде енгізілген UTF-8 конфигурациясын импорттау. Атау міндетті емес.",
+    ),
+    "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
+      "Сілтемені тексеру",
+    ),
+    "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
+      "Қолданба немесе профиль сілтемесін қойыңыз",
+    ),
+    "urlSchemeInspectTip": MessageLookupByLibrary.simpleMessage(
+      "Тексеру осы құрылғыда орындалады. Ол сілтемені ашпайды, жазылымды жүктемейді және профильді импорттамайды.",
+    ),
+    "urlSchemeInspectionLimit": MessageLookupByLibrary.simpleMessage(
+      "Сілтеме құрылымы дұрыс. Жазылымның қолжетімділігі мен ядро тексеруі импорт кезінде ғана орындалады.",
+    ),
+    "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage(
+      "Тексеру нәтижесі",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Конфигурацияны орнату",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash клиенттері қолдайтын install-config сілтемесі арқылы жазылымды импорттау.",
+    ),
+    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
+      "ReClash қолданбасын жарлықтармен, сайттармен және басқа қолданбалармен байланыстырыңыз. Дайын сілтеме жасаңыз немесе оны ашпай тұрып тексеріңіз.",
+    ),
+    "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
+      "Ендірілген конфигурация дұрыс UTF-8 Base64 деректері емес.",
+    ),
+    "urlSchemeInvalidLink": MessageLookupByLibrary.simpleMessage(
+      "Сілтеме дұрыс емес. Құрылымын және пайыздық кодталуын тексеріңіз.",
+    ),
+    "urlSchemeInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Профиль атауы 64 таңбадан аспауы және басқару таңбаларын қамтымауы керек.",
+    ),
+    "urlSchemeInvalidUrl": MessageLookupByLibrary.simpleMessage(
+      "Дұрыс HTTP немесе HTTPS жазылым URL мекенжайын енгізіңіз.",
+    ),
+    "urlSchemeMissingPayload": MessageLookupByLibrary.simpleMessage(
+      "Сілтемеде жазылым URL мекенжайы немесе конфигурация жоқ.",
+    ),
+    "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage(
+      "Ешбір әрекет орындалмады.",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Қолданбаны көрсету"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Қосылымды өзгертпей ReClash қолданбасын алдыңғы қатарға шығару.",
+    ),
+    "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Параметрлер"),
+    "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
+      "Алмасу буферін оқу мүмкін болмады. Сілтемені қолмен қойыңыз.",
+    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
+      "Сілтемені алдын ала қарау",
+    ),
+    "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
+      "Сілтемені көру үшін міндетті өрістерді толтырыңыз.",
+    ),
+    "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
+      "Сілтемеде кіру токендері немесе прокси деректері болуы мүмкін. Оны тек сенімді адамдармен бөлісіңіз; ReClash сілтемелер тарихын сақтамайды.",
+    ),
+    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
+      "Профиль пәрмендері құрастыру құралын ашады. Сыртқы импорт келісімді сұрайды және қалыпты тексеру мен түрлендіруді сақтайды.",
+    ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Профильдер"),
+    "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
+      "Прокси сілтемелері",
+    ),
+    "urlSchemeRecognized": MessageLookupByLibrary.simpleMessage(
+      "Сілтеме танылды",
+    ),
+    "urlSchemeSetupRequired": MessageLookupByLibrary.simpleMessage(
+      "Сыртқы қосылым пәрмендерін қолданбас бұрын қосылым баптауын аяқтаңыз.",
+    ),
+    "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
+      "Қолдау көрсетілетін импорт сілтемелері",
+    ),
+    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
+      "Clash сілтемелері, INCY және Happ орауыштары және прокси сілтемелері қолмен импорттауда және QR сканерлеуде де жұмыс істейді. Белгісіз шифрлау нұсқалары қабылданбайды.",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
+      "Қосылымды ауыстыру",
+    ),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Тоқтап тұрса қосылу, жұмыс істеп тұрса ажырату. Растау терезесі нақты әрекетті көрсетеді.",
+    ),
+    "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
+      "Сілтемеде кірістірілген орауыштар тым көп.",
+    ),
+    "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Сілтеме 4 МБ немесе ендірілген конфигурация 2 МБ шегінен асады.",
+    ),
+    "urlSchemeUnknownCommand": MessageLookupByLibrary.simpleMessage(
+      "Бұл сілтеме пәрменіне қолдау көрсетілмейді.",
+    ),
+    "urlSchemeUnsupportedEncryption": MessageLookupByLibrary.simpleMessage(
+      "Бұл шифрлау нұсқасына қолдау көрсетілмейді. Қалыпты жазылым сілтемесін сұраңыз.",
+    ),
+    "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
+      "Мысалды қолдану",
+    ),
+    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
+      "Жазылым сілтемелері, ендірілген конфигурациялар және INCY crypt1",
+    ),
+    "urlTip": m102,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -2707,7 +2886,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
     ),
-    "webDashboardInstalledVersion": m100,
+    "webDashboardInstalledVersion": m103,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Браузерді ашу мүмкін болмады.",
     ),
@@ -2745,8 +2924,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m104,
+    "yearsAgoShort": m105,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

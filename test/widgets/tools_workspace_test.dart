@@ -1,5 +1,7 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
+import 'package:reclash/features/url_scheme/inspect.dart';
+import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -240,6 +242,47 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  for (final size in [const Size(390, 844), const Size(1800, 1000)]) {
+    testWidgets('URL scheme remains in Tools with back navigation at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size, home: true);
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pumpAndSettle();
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.urlScheme));
+      await tester.pumpAndSettle();
+      expect(find.byType(UrlSchemeView), findsOneWidget);
+      expect(container.read(shownPageLabelProvider), PageLabel.tools);
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.urlScheme),
+      ]);
+      expect(globalState.navigatorKey.currentState!.canPop(), isFalse);
+      await tester.tap(
+        find.byTooltip(currentAppLocalizations.urlSchemeInspect),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(UrlSchemeInspector), findsOneWidget);
+      expect(globalState.navigatorKey.currentState!.canPop(), isFalse);
+      final tools = tester.state<ToolsViewState>(find.byType(ToolsView));
+      expect(await tools.handleBack(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.byType(UrlSchemeInspector), findsNothing);
+      expect(find.byType(UrlSchemeView), findsOneWidget);
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.urlScheme),
+      ]);
+      expect(await tools.handleBack(), isTrue);
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      expect(find.byType(UrlSchemeView), findsNothing);
+      expect(container.read(shownPageLabelProvider), PageLabel.tools);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 
   testWidgets('desktop landing offers recent tools and reopens them', (
     tester,

@@ -1,0 +1,47 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+why: External links share one bounded parser, confirmation flow and profile import pipeline.
+deps: [app.setup, localization.catalog, profiles.no-duplicates, subscription.compatibility, tools.catalog]
+must:
+  commands: Known connection and window commands use existing lifecycle owners and explicit confirmation; unknown commands never dispatch.
+  imports: Subscription URLs, embedded configs, INCY/Happ wrappers and proxy links resolve locally, retain names and presets, and reuse validation, encryption-key retry, loss approval and durable save.
+  safety: Parsing and external decoding are bounded and never log or display credential-bearing URLs or embedded payloads.
+  delivery: OS and argv inputs serialize through one bounded queue, suppress only the startup echo and discard stale work after disposal.
+  setup: Setup accepts the original profile link for review, but connection commands and imports remain gated by setup ownership and explicit consent.
+  tools: The builder, local inspector and supported-command catalog live inside the Tools workspace on desktop and mobile.
+  platforms: Android, macOS, Windows and Linux advertise the same supported schemes without taking ownership of third-party default handlers; safe mode skips runtime registration.
+  localization: URL-scheme UI and errors are owned by app.url-scheme fragments in every supported locale.
+watch:
+  - lib/common/link.dart
+  - lib/common/url_scheme.dart
+  - lib/common/protocol.dart
+  - lib/application.dart
+  - lib/providers/actions/url_scheme.dart
+  - lib/providers/actions/profiles.dart
+  - lib/subscriptions/external_link.dart
+  - lib/features/url_scheme/**
+  - lib/views/url_scheme.dart
+  - lib/views/tools/catalog.dart
+  - lib/views/tools/navigation.dart
+  - lib/models/tool_route.dart
+  - lib/widgets/url_scheme_*.dart
+  - android/app/src/main/AndroidManifest.xml
+  - macos/Runner/Info.plist
+  - windows/packaging/exe/inno_setup.iss
+  - linux/packaging/*/make_config.yaml
+  - arb/fragments/app.url-scheme/**
+  - test/common/link_test.dart
+  - test/common/url_scheme_test.dart
+  - test/subscriptions/external_link_test.dart
+  - test/providers/url_scheme_action_test.dart
+  - test/providers/profiles_action_test.dart
+  - test/features/url_scheme_test.dart
+  - test/views/url_scheme_view_test.dart
+  - test/views/tools_catalog_test.dart
+  - test/widgets/tools_workspace_test.dart
+  - test/tool/url_scheme_registration_test.dart
+checks:
+  url-scheme: [commands, imports, safety, delivery, setup, tools, platforms, localization]
+drop: Remove only when the same commands, link families, safety gates and Tools workflow are supported upstream.

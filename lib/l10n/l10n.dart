@@ -9226,6 +9226,656 @@ class AppLocalizations {
     );
   }
 
+  /// `URL scheme`
+  String get urlScheme {
+    return Intl.message('URL scheme', name: 'urlScheme', desc: '', args: []);
+  }
+
+  /// `Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.`
+  String get urlSchemeIntro {
+    return Intl.message(
+      'Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.',
+      name: 'urlSchemeIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection`
+  String get urlSchemeConnection {
+    return Intl.message(
+      'Connection',
+      name: 'urlSchemeConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profiles`
+  String get urlSchemeProfiles {
+    return Intl.message(
+      'Profiles',
+      name: 'urlSchemeProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `External connection and close commands require confirmation. Finish setup before using connection commands.`
+  String get urlSchemeConfirmationTip {
+    return Intl.message(
+      'External connection and close commands require confirmation. Finish setup before using connection commands.',
+      name: 'urlSchemeConfirmationTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.`
+  String get urlSchemeProfileCommandsTip {
+    return Intl.message(
+      'Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.',
+      name: 'urlSchemeProfileCommandsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Supported import links`
+  String get urlSchemeSupportedLinks {
+    return Intl.message(
+      'Supported import links',
+      name: 'urlSchemeSupportedLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.`
+  String get urlSchemeSupportedLinksTip {
+    return Intl.message(
+      'Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.',
+      name: 'urlSchemeSupportedLinksTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription links, embedded configs and INCY crypt1`
+  String get urlSchemeWrappedLinks {
+    return Intl.message(
+      'Subscription links, embedded configs and INCY crypt1',
+      name: 'urlSchemeWrappedLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy share links`
+  String get urlSchemeProxyLinks {
+    return Intl.message(
+      'Proxy share links',
+      name: 'urlSchemeProxyLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect`
+  String get urlSchemeConnect {
+    return Intl.message(
+      'Connect',
+      name: 'urlSchemeConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the connection using the selected profile and your current coverage settings.`
+  String get urlSchemeConnectDesc {
+    return Intl.message(
+      'Start the connection using the selected profile and your current coverage settings.',
+      name: 'urlSchemeConnectDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disconnect`
+  String get urlSchemeDisconnect {
+    return Intl.message(
+      'Disconnect',
+      name: 'urlSchemeDisconnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop the current connection without changing the selected profile.`
+  String get urlSchemeDisconnectDesc {
+    return Intl.message(
+      'Stop the current connection without changing the selected profile.',
+      name: 'urlSchemeDisconnectDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Toggle connection`
+  String get urlSchemeToggle {
+    return Intl.message(
+      'Toggle connection',
+      name: 'urlSchemeToggle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect when stopped; disconnect when running. Confirmation names the actual action.`
+  String get urlSchemeToggleDesc {
+    return Intl.message(
+      'Connect when stopped; disconnect when running. Confirmation names the actual action.',
+      name: 'urlSchemeToggleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show application`
+  String get urlSchemeOpen {
+    return Intl.message(
+      'Show application',
+      name: 'urlSchemeOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bring ReClash to the foreground without changing the connection.`
+  String get urlSchemeOpenDesc {
+    return Intl.message(
+      'Bring ReClash to the foreground without changing the connection.',
+      name: 'urlSchemeOpenDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close application`
+  String get urlSchemeClose {
+    return Intl.message(
+      'Close application',
+      name: 'urlSchemeClose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.`
+  String get urlSchemeCloseDesc {
+    return Intl.message(
+      'Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.',
+      name: 'urlSchemeCloseDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add subscription`
+  String get urlSchemeAdd {
+    return Intl.message(
+      'Add subscription',
+      name: 'urlSchemeAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a profile from an HTTP or HTTPS subscription URL, with an optional name.`
+  String get urlSchemeAddDesc {
+    return Intl.message(
+      'Create a profile from an HTTP or HTTPS subscription URL, with an optional name.',
+      name: 'urlSchemeAddDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import configuration`
+  String get urlSchemeImport {
+    return Intl.message(
+      'Import configuration',
+      name: 'urlSchemeImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import a UTF-8 configuration carried in the link as Base64, with an optional name.`
+  String get urlSchemeImportDesc {
+    return Intl.message(
+      'Import a UTF-8 configuration carried in the link as Base64, with an optional name.',
+      name: 'urlSchemeImportDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install configuration`
+  String get urlSchemeInstallConfig {
+    return Intl.message(
+      'Install configuration',
+      name: 'urlSchemeInstallConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import a subscription using the install-config link format supported by Clash clients.`
+  String get urlSchemeInstallConfigDesc {
+    return Intl.message(
+      'Import a subscription using the install-config link format supported by Clash clients.',
+      name: 'urlSchemeInstallConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build link`
+  String get urlSchemeBuild {
+    return Intl.message(
+      'Build link',
+      name: 'urlSchemeBuild',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inspect link`
+  String get urlSchemeInspect {
+    return Intl.message(
+      'Inspect link',
+      name: 'urlSchemeInspect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action`
+  String get urlSchemeAction {
+    return Intl.message('Action', name: 'urlSchemeAction', desc: '', args: []);
+  }
+
+  /// `Parameters`
+  String get urlSchemeParameters {
+    return Intl.message(
+      'Parameters',
+      name: 'urlSchemeParameters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy link`
+  String get urlSchemeCopyLink {
+    return Intl.message(
+      'Copy link',
+      name: 'urlSchemeCopyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use example`
+  String get urlSchemeUseExample {
+    return Intl.message(
+      'Use example',
+      name: 'urlSchemeUseExample',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Example profile`
+  String get urlSchemeExampleProfile {
+    return Intl.message(
+      'Example profile',
+      name: 'urlSchemeExampleProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste a YAML or JSON configuration`
+  String get urlSchemeConfigHint {
+    return Intl.message(
+      'Paste a YAML or JSON configuration',
+      name: 'urlSchemeConfigHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.`
+  String get urlSchemeBuilderTip {
+    return Intl.message(
+      'Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.',
+      name: 'urlSchemeBuilderTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link preview`
+  String get urlSchemePreview {
+    return Intl.message(
+      'Link preview',
+      name: 'urlSchemePreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fill in the required fields to preview the link.`
+  String get urlSchemePreviewEmpty {
+    return Intl.message(
+      'Fill in the required fields to preview the link.',
+      name: 'urlSchemePreviewEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.`
+  String get urlSchemePrivateLinkTip {
+    return Intl.message(
+      'A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.',
+      name: 'urlSchemePrivateLinkTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not copy the link. Try again.`
+  String get urlSchemeCopyFailed {
+    return Intl.message(
+      'Could not copy the link. Try again.',
+      name: 'urlSchemeCopyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read the clipboard. Paste the link manually.`
+  String get urlSchemePasteFailed {
+    return Intl.message(
+      'Could not read the clipboard. Paste the link manually.',
+      name: 'urlSchemePasteFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inspection stays on this device. It does not open a link, download a subscription or import a profile.`
+  String get urlSchemeInspectTip {
+    return Intl.message(
+      'Inspection stays on this device. It does not open a link, download a subscription or import a profile.',
+      name: 'urlSchemeInspectTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste an application or profile link`
+  String get urlSchemeInspectHint {
+    return Intl.message(
+      'Paste an application or profile link',
+      name: 'urlSchemeInspectHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inspection result`
+  String get urlSchemeInspectionResult {
+    return Intl.message(
+      'Inspection result',
+      name: 'urlSchemeInspectionResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link recognized`
+  String get urlSchemeRecognized {
+    return Intl.message(
+      'Link recognized',
+      name: 'urlSchemeRecognized',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action was executed.`
+  String get urlSchemeNoExecution {
+    return Intl.message(
+      'No action was executed.',
+      name: 'urlSchemeNoExecution',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link structure is valid. Subscription availability and Core validation are checked only during import.`
+  String get urlSchemeInspectionLimit {
+    return Intl.message(
+      'The link structure is valid. Subscription availability and Core validation are checked only during import.',
+      name: 'urlSchemeInspectionLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Content format`
+  String get urlSchemeContentFormat {
+    return Intl.message(
+      'Content format',
+      name: 'urlSchemeContentFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configuration contents`
+  String get urlSchemeConfigSummary {
+    return Intl.message(
+      'Configuration contents',
+      name: 'urlSchemeConfigSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{nodes} proxies, {groups} groups, {providers} remote providers`
+  String urlSchemeConfigCounts(int nodes, int groups, int providers) {
+    return Intl.message(
+      '$nodes proxies, $groups groups, $providers remote providers',
+      name: 'urlSchemeConfigCounts',
+      desc: '',
+      args: [nodes, groups, providers],
+    );
+  }
+
+  /// `Conversion omits some content. Review and approve these changes during import.`
+  String get urlSchemeConversionWarning {
+    return Intl.message(
+      'Conversion omits some content. Review and approve these changes during import.',
+      name: 'urlSchemeConversionWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `External application command`
+  String get urlSchemeConfirmTitle {
+    return Intl.message(
+      'External application command',
+      name: 'urlSchemeConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link requests “{action}”. Allow ReClash to perform this action?`
+  String urlSchemeConfirmMessage(String action) {
+    return Intl.message(
+      'This link requests “$action”. Allow ReClash to perform this action?',
+      name: 'urlSchemeConfirmMessage',
+      desc: '',
+      args: [action],
+    );
+  }
+
+  /// `Import “{name}” from {source}? Profile validation and any conversion review follow your confirmation.`
+  String urlSchemeImportConfirm(String name, String source) {
+    return Intl.message(
+      'Import “$name” from $source? Profile validation and any conversion review follow your confirmation.',
+      name: 'urlSchemeImportConfirm',
+      desc: '',
+      args: [name, source],
+    );
+  }
+
+  /// `Embedded configuration`
+  String get urlSchemeEmbeddedConfig {
+    return Intl.message(
+      'Embedded configuration',
+      name: 'urlSchemeEmbeddedConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finish the connection setup before using external connection commands.`
+  String get urlSchemeSetupRequired {
+    return Intl.message(
+      'Finish the connection setup before using external connection commands.',
+      name: 'urlSchemeSetupRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not deliver the link, or the pending link queue is full. Try again after the current action finishes.`
+  String get urlSchemeDeliveryError {
+    return Intl.message(
+      'Could not deliver the link, or the pending link queue is full. Try again after the current action finishes.',
+      name: 'urlSchemeDeliveryError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link is malformed. Check its structure and percent encoding.`
+  String get urlSchemeInvalidLink {
+    return Intl.message(
+      'The link is malformed. Check its structure and percent encoding.',
+      name: 'urlSchemeInvalidLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link command is not supported.`
+  String get urlSchemeUnknownCommand {
+    return Intl.message(
+      'This link command is not supported.',
+      name: 'urlSchemeUnknownCommand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link is missing a subscription URL or configuration.`
+  String get urlSchemeMissingPayload {
+    return Intl.message(
+      'The link is missing a subscription URL or configuration.',
+      name: 'urlSchemeMissingPayload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid HTTP or HTTPS subscription URL.`
+  String get urlSchemeInvalidUrl {
+    return Intl.message(
+      'Enter a valid HTTP or HTTPS subscription URL.',
+      name: 'urlSchemeInvalidUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use a profile name of up to 64 characters, without control characters.`
+  String get urlSchemeInvalidName {
+    return Intl.message(
+      'Use a profile name of up to 64 characters, without control characters.',
+      name: 'urlSchemeInvalidName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The embedded configuration is not valid UTF-8 Base64 data.`
+  String get urlSchemeInvalidBase64 {
+    return Intl.message(
+      'The embedded configuration is not valid UTF-8 Base64 data.',
+      name: 'urlSchemeInvalidBase64',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link exceeds 4 MB or its embedded configuration exceeds 2 MB.`
+  String get urlSchemeTooLarge {
+    return Intl.message(
+      'The link exceeds 4 MB or its embedded configuration exceeds 2 MB.',
+      name: 'urlSchemeTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The link contains too many nested wrappers.`
+  String get urlSchemeTooDeep {
+    return Intl.message(
+      'The link contains too many nested wrappers.',
+      name: 'urlSchemeTooDeep',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This encryption version is not supported. Request a plain subscription link.`
+  String get urlSchemeUnsupportedEncryption {
+    return Intl.message(
+      'This encryption version is not supported. Request a plain subscription link.',
+      name: 'urlSchemeUnsupportedEncryption',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The encrypted link could not be authenticated. It may be damaged or use a different key.`
+  String get urlSchemeAuthenticationFailed {
+    return Intl.message(
+      'The encrypted link could not be authenticated. It may be damaged or use a different key.',
+      name: 'urlSchemeAuthenticationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Running`
   String get coreRunning {
     return Intl.message('Running', name: 'coreRunning', desc: '', args: []);

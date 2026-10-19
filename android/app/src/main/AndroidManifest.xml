@@ -49,7 +49,7 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
-            <!-- install-config links go through app_links; Flutter would also push them as routes. -->
+            <!-- app_links owns delivery, not Flutter's route handling. -->
             <meta-data
                 android:name="flutter_deeplinking_enabled"
                 android:value="false" />
@@ -71,9 +71,57 @@
 
                 <data android:scheme="clash" />
                 <data android:scheme="clashmeta" />
-                <data android:scheme="reclash" />
-
                 <data android:host="install-config" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="reclash" />
+                <data android:host="install-config" />
+                <data android:host="connect" />
+                <data android:host="disconnect" />
+                <data android:host="toggle" />
+                <data android:host="open" />
+                <data android:host="close" />
+                <data android:host="add" />
+                <data android:host="import" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="incy" />
+                <data android:host="crypt1" />
+                <data android:host="add" />
+                <data android:host="import" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="happ" android:host="add" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="hysteria" />
+                <data android:scheme="hysteria2" />
+                <data android:scheme="hy2" />
+                <data android:scheme="hysteria2+realm" />
+                <data android:scheme="hy2+realm" />
+                <data android:scheme="tuic" />
+                <data android:scheme="trojan" />
+                <data android:scheme="vless" />
+                <data android:scheme="vmess" />
+                <data android:scheme="ss" />
+                <data android:scheme="ssr" />
+                <data android:scheme="socks" />
+                <data android:scheme="socks5" />
+                <data android:scheme="socks5h" />
+                <data android:scheme="anytls" />
+                <data android:scheme="mierus" />
             </intent-filter>
         </activity>
 
