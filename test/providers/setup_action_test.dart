@@ -17,6 +17,7 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -29,6 +30,16 @@ import '../helpers/app_paths.dart';
 import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+class _NoopProxiesAction extends ProxiesAction {
+  @override
+  Future<void> updateGroups() async {}
+}
+
+class _NoopProviders extends Providers {
+  @override
+  Future<void> syncProviders() async {}
+}
 
 // checkAndUpdateAndCopy checks the file system before it refreshes, so its
 // failure tests need appPath to resolve to a real, writable directory.
@@ -71,6 +82,8 @@ class TestSetupAction extends SetupAction {
   int applyProfileCalls = 0;
   final List<bool> appliedForce = [];
   bool blockCoreCalls = false;
+  bool applyProfileResult = true;
+  Error? applyProfileError;
   Error? coreRunningError;
   final Set<bool> unansweredCoreCalls = {};
   int authorizeCalls = 0;
@@ -103,13 +116,16 @@ class TestSetupAction extends SetupAction {
   @override
   Future<bool> applyProfile({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {
     applyProfileCalls++;
     appliedForce.add(force);
+    final error = applyProfileError;
+    if (error != null) throw error;
     await preloadInvoke?.call();
-    return true;
+    return applyProfileResult;
   }
 }
 
@@ -175,6 +191,34 @@ void main() {
 
       expect(action.coreRunningCalls, isEmpty);
       expect(container.read(runTimeProvider), isNull);
+    });
+
+    test('run intent owner follows the latest accepted request', () async {
+      final setup = container.read(setupActionProvider.notifier);
+      final firstOwner = Object();
+      final secondOwner = Object();
+
+      await setup.setRunning(true, initialize: true, owner: firstOwner);
+      expect(identical(setup.runIntentOwner, firstOwner), isTrue);
+
+      await setup.setRunning(true, initialize: true, owner: secondOwner);
+      expect(identical(setup.runIntentOwner, secondOwner), isTrue);
+
+      await setup.setRunning(false);
+      expect(setup.runIntentOwner, isNull);
+    });
+
+    test('run intent revision advances only for accepted requests', () async {
+      final setup = container.read(setupActionProvider.notifier);
+
+      expect(setup.runIntentRevision, 0);
+      await setup.setRunning(true);
+      expect(setup.runIntentRevision, 0);
+
+      await setup.setRunning(false);
+      expect(setup.runIntentRevision, 1);
+      await setup.setRunning(true, initialize: true);
+      expect(setup.runIntentRevision, 2);
     });
 
     test('an initialize request bypasses the init gate', () async {
@@ -243,6 +287,70 @@ void main() {
 
       expect(container.read(runTimeProvider), isNull);
     });
+
+    test(
+      'silent start propagates failure and rolls back local run state',
+      () async {
+        markInitialized();
+        action.coreRunningError = StateError('start failed');
+
+        await expectLater(
+          container
+              .read(setupActionProvider.notifier)
+              .setRunning(true, silence: true),
+          throwsStateError,
+        );
+
+        expect(container.read(isStartProvider), isFalse);
+        expect(container.read(runTimeProvider), isNull);
+      },
+    );
+
+    test(
+      'silent initialize failure preserves a prior running connection',
+      () async {
+        markInitialized();
+        final setup = container.read(setupActionProvider.notifier);
+        await setup.setRunning(true);
+        final previousRunTime = container.read(runTimeProvider);
+        action.applyProfileResult = false;
+
+        expect(
+          await setup.setRunning(true, initialize: true, silence: true),
+          isFalse,
+        );
+
+        expect(action.coreRunningCalls, [true, true]);
+        expect(container.read(isStartProvider), isTrue);
+        expect(
+          container.read(runTimeProvider),
+          greaterThanOrEqualTo(previousRunTime!),
+        );
+      },
+    );
+
+    test(
+      'silent initialize exception preserves a prior running connection',
+      () async {
+        markInitialized();
+        final setup = container.read(setupActionProvider.notifier);
+        await setup.setRunning(true);
+        final previousRunTime = container.read(runTimeProvider);
+        action.applyProfileError = StateError('profile failed');
+
+        await expectLater(
+          setup.setRunning(true, initialize: true, silence: true),
+          throwsStateError,
+        );
+
+        expect(action.coreRunningCalls, [true]);
+        expect(container.read(isStartProvider), isTrue);
+        expect(
+          container.read(runTimeProvider),
+          greaterThanOrEqualTo(previousRunTime!),
+        );
+      },
+    );
 
     test(
       'a stop the core rejects keeps the run time it started with',
@@ -728,6 +836,28 @@ void main() {
         TunAuthorizationState.authorized,
       );
     });
+
+    test(
+      'silent authorization failure preserves the selected TUN setting',
+      () async {
+        await AppLocalizations.load(const Locale('en'));
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith.tun(enable: true));
+        action.authorizeResult = AuthorizeCode.error;
+
+        await expectLater(
+          action.requestAdmin(true, silence: true),
+          throwsA(isA<MessageException>()),
+        );
+
+        expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.none,
+        );
+      },
+    );
 
     test('a failed authorization turns tun off and asks again on the next '
         'enable', () async {
@@ -1756,6 +1886,44 @@ void main() {
       await build(ProfileType.file);
       expect(evaluated, hasLength(1));
       verify(() => core.getConfig(any())).called(1);
+    });
+
+    test('suppressErrors throws the setup error without a notifier', () async {
+      final core = _MockCoreHandlerInterface();
+      when(() => core.setupConfig(any())).thenAnswer((_) async => 'rejected');
+      when(
+        () => core.getProxies(),
+      ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
+      when(() => core.getExternalProviders()).thenAnswer((_) async => []);
+      final scoped = ProviderContainer(
+        overrides: [
+          currentProfileProvider.overrideWithValue(null),
+          setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
+          profilesProvider.overrideWith(TestProfiles.new),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          setupActionProvider.overrideWith(SetupAction.new),
+          proxiesActionProvider.overrideWith(_NoopProxiesAction.new),
+          providersProvider.overrideWith(_NoopProviders.new),
+          safeModeProvider.overrideWithValue(true),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      globalState.container = scoped;
+      final setup = scoped.read(setupActionProvider.notifier);
+
+      await expectLater(
+        setup
+            .applyProfile(force: true, silence: true, suppressErrors: true)
+            .timeout(const Duration(seconds: 5)),
+        throwsA(
+          isA<MessageException>().having(
+            (error) => error.message,
+            'message',
+            'rejected',
+          ),
+        ),
+      );
+      expect(await setup.applyProfile(force: true, silence: true), isFalse);
     });
 
     test(

@@ -1,3 +1,14 @@
+import 'package:reclash/common/setup_check.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/pages/home.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/setup.dart';
+import 'package:reclash/providers/state.dart';
+import 'package:reclash/views/setup.dart';
+import 'helpers/test_app.dart';
+import 'helpers/test_profiles.dart';
 import 'package:reclash/application.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
@@ -139,6 +150,50 @@ void main() {
         same(_leaf),
         reason: 'every manager must wrap the app content, not replace it',
       );
+    }
+  });
+  registerApplicationRootTest();
+}
+
+class _RootSetupSession extends SetupSession {
+  _RootSetupSession(this.active);
+
+  final bool active;
+
+  @override
+  SetupSessionState build() => SetupSessionState(
+    active: active,
+    step: active ? SetupStep.language : SetupStep.result,
+    draft: const SetupDraft(coverage: SetupCoverage.tun),
+  );
+}
+
+void registerApplicationRootTest() {
+  testWidgets('ApplicationRoot keeps the dashboard out of first run', (
+    tester,
+  ) async {
+    for (final active in [true, false]) {
+      await tester.pumpWidget(
+        TestApp(
+          key: ValueKey(active),
+          overrides: [
+            appSettingProvider.overrideWithBuild(
+              (_, _) => const AppSettingProps(setupCompleted: false),
+            ),
+            profilesProvider.overrideWith(TestProfiles.new),
+            detectedRegionProvider.overrideWith((_) async => null),
+            safeModeProvider.overrideWithValue(false),
+            viewSizeProvider.overrideWithBuild((_, _) => Size.zero),
+            setupSessionProvider.overrideWith(() => _RootSetupSession(active)),
+          ],
+          child: const ApplicationRoot(),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(SetupWizard), active ? findsOneWidget : findsNothing);
+      expect(find.byType(HomePage), active ? findsNothing : findsOneWidget);
+      expect(tester.takeException(), isNull);
     }
   });
 }

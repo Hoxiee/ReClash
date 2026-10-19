@@ -149,12 +149,51 @@ void main() {
       expect(restored.autoCheckUpdate, true);
       expect(restored.updateChannel, isNull);
       expect(restored.regionCode, isNull);
+      expect(restored.setupCompleted, isNull);
+      expect(restored.setupStep, 0);
+      expect(restored.setupProfileId, isNull);
+      expect(restored.setupCoverage, isNull);
+      expect(restored.setupRegionCode, isNull);
+      expect(restored.setupRegionChosen, isFalse);
       expect(restored.sidebarExpanded, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.userAgents, defaultUserAgents);
       expect(restored.filters, defaultFilters);
       expect(restored.testUrl, defaultTestUrl);
+    });
+
+    test('setup state distinguishes legacy settings from completed setup', () {
+      expect(AppSettingProps.fromJson({}).setupCompleted, isNull);
+      expect(
+        AppSettingProps.fromJson({'setupCompleted': null}).setupCompleted,
+        isNull,
+      );
+
+      const props = AppSettingProps(
+        setupCompleted: false,
+        setupStep: 3,
+        setupProfileId: 42,
+        setupCoverage: 'full',
+        setupRegionCode: 'RU',
+        setupRegionChosen: true,
+        acceptedDisclaimerVersion: 2,
+      );
+      final restored = roundTrip(props.toJson, AppSettingProps.fromJson);
+      expect(restored.setupCompleted, isFalse);
+      expect(restored.setupStep, 3);
+      expect(restored.setupProfileId, 42);
+      expect(restored.setupCoverage, 'full');
+      expect(restored.setupRegionCode, 'RU');
+      expect(restored.setupRegionChosen, isTrue);
+      expect(restored.acceptedDisclaimerVersion, 2);
+
+      final neutralRegion = roundTrip(
+        () => const AppSettingProps(setupRegionChosen: true).toJson(),
+        AppSettingProps.fromJson,
+      );
+      expect(neutralRegion.setupRegionCode, isNull);
+      expect(neutralRegion.setupRegionChosen, isTrue);
     });
 
     test(

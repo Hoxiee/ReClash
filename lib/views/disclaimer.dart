@@ -17,8 +17,15 @@ Future<bool> requestDisclaimerConsent() async {
 
 class DisclaimerView extends StatelessWidget {
   final bool requireConsent;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
 
-  const DisclaimerView({super.key, this.requireConsent = false});
+  const DisclaimerView({
+    super.key,
+    this.requireConsent = false,
+    this.onAgree,
+    this.onDecline,
+  });
 
   static const _maxContentWidth = 720.0;
 
@@ -91,6 +98,8 @@ class DisclaimerView extends StatelessWidget {
               maxWidth: _maxContentWidth,
               gutter: _mobileGutter,
               compact: true,
+              onAgree: onAgree,
+              onDecline: onDecline,
               child: body,
             ),
           );
@@ -101,6 +110,8 @@ class DisclaimerView extends StatelessWidget {
               maxWidth: _maxContentWidth,
               gutter: _desktopGutter,
               compact: false,
+              onAgree: onAgree,
+              onDecline: onDecline,
               child: _buildBody(
                 padding: const EdgeInsets.fromLTRB(
                   _desktopGutter,
@@ -256,12 +267,16 @@ class _ConsentLayout extends StatefulWidget {
   final double maxWidth;
   final double gutter;
   final bool compact;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
   final Widget child;
 
   const _ConsentLayout({
     required this.maxWidth,
     required this.gutter,
     required this.compact,
+    this.onAgree,
+    this.onDecline,
     required this.child,
   });
 
@@ -270,9 +285,20 @@ class _ConsentLayout extends StatefulWidget {
 }
 
 class _ConsentLayoutState extends State<_ConsentLayout> {
+  Locale? _locale;
   static const _endTolerance = 1.0;
 
   bool _readToEnd = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_locale != locale) {
+      _locale = locale;
+      _readToEnd = false;
+    }
+  }
 
   bool _handleNotification(Notification notification) {
     if (_readToEnd) {
@@ -306,6 +332,8 @@ class _ConsentLayoutState extends State<_ConsentLayout> {
           gutter: widget.gutter,
           compact: widget.compact,
           readToEnd: _readToEnd,
+          onAgree: widget.onAgree,
+          onDecline: widget.onDecline,
         ),
       ],
     );
@@ -317,19 +345,27 @@ class _ConsentBar extends StatelessWidget {
   final double gutter;
   final bool compact;
   final bool readToEnd;
+  final VoidCallback? onAgree;
+  final VoidCallback? onDecline;
 
   const _ConsentBar({
     required this.maxWidth,
     required this.gutter,
     required this.compact,
     required this.readToEnd,
+    this.onAgree,
+    this.onDecline,
   });
 
   Widget _buildExitButton(BuildContext context) {
     return ElasticButton(
       child: OutlinedButton(
         onPressed: () {
-          Navigator.of(context).pop(false);
+          if (onDecline != null) {
+            onDecline!();
+          } else {
+            Navigator.of(context).pop(false);
+          }
         },
         child: Text(context.appLocalizations.exit),
       ),
@@ -337,7 +373,11 @@ class _ConsentBar extends StatelessWidget {
   }
 
   void _handleAgree(BuildContext context) {
-    Navigator.of(context).pop(true);
+    if (onAgree != null) {
+      onAgree!();
+    } else {
+      Navigator.of(context).pop(true);
+    }
   }
 
   Widget _buildAgreeButton(BuildContext context, {required String label}) {

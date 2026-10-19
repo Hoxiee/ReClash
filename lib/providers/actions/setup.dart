@@ -20,11 +20,13 @@ class _RunRequest {
   final bool running;
   final bool initialize;
   final DateTime? previousStartTime;
+  final Object? owner;
 
   const _RunRequest({
     required this.running,
     required this.initialize,
     required this.previousStartTime,
+    required this.owner,
   });
 }
 
@@ -39,6 +41,11 @@ class SetupAction extends _$SetupAction {
   DateTime? _startTime;
   _SetupInputs? _appliedInputs;
   var _pendingForceApply = false;
+  var _runIntentRevision = 0;
+
+  int get runIntentRevision => _runIntentRevision;
+
+  Object? get runIntentOwner => _latestRunRequest?.owner;
 
   bool get _isRunning => _startTime != null && _startTime!.isBeforeNow;
 
@@ -140,8 +147,27 @@ class SetupAction extends _$SetupAction {
               startTime.millisecondsSinceEpoch;
   }
 
+  @protected
+  Future<DateTime?> readNativeRunTime() async => service?.getRunTime();
+
   Future<void> _updateStartTime() async {
-    _startTime = await service?.getRunTime();
+    _startTime = await readNativeRunTime();
+  }
+
+  Future<bool> restoreRunningState() async {
+    final revision = _runIntentRevision;
+    final startedAt = await readNativeRunTime();
+    if (!ref.mounted || revision != _runIntentRevision || startedAt == null) {
+      return false;
+    }
+    final options =
+        ref.read(runningVpnOptionsProvider) ??
+        await ref.read(vpnOptionsProvider.future);
+    if (!ref.mounted || revision != _runIntentRevision) return false;
+    _startTime = startedAt;
+    ref.read(runningVpnOptionsProvider.notifier).value = options;
+    _setLocalRunning(true);
+    return true;
   }
 
   Future<void> initStatus() async {
@@ -159,37 +185,61 @@ class SetupAction extends _$SetupAction {
     }
   }
 
-  Future<bool> setRunning(bool running, {bool initialize = false}) {
+  Future<bool> setRunning(
+    bool running, {
+    bool initialize = false,
+    bool silence = false,
+    Object? owner,
+  }) {
     if (running && !initialize && !ref.read(initProvider)) {
       return Future.value(true);
     }
 
+    _runIntentRevision++;
     final request = _RunRequest(
       running: running,
       initialize: running && initialize,
       previousStartTime: _startTime,
+      owner: owner,
     );
     _latestRunRequest = request;
     _setLocalRunning(running);
     if (request.initialize) {
       globalState.needInitStatus = false;
     }
-    return running ? _start(request) : _stop(request);
+    return running ? _start(request, silence: silence) : _stop(request);
   }
 
-  Future<bool> _start(_RunRequest request) async {
+  Future<bool> _start(_RunRequest request, {required bool silence}) async {
     if (request.initialize) {
       var applied = false;
       try {
         applied = await applyProfile(
           force: true,
+          silence: silence,
+          suppressErrors: silence,
           preloadInvoke: () => _startCoreRunning(request),
         );
       } catch (_) {
+        if (silence) {
+          _rollbackRunning(request);
+          if (request.previousStartTime == null && _isCurrent(request)) {
+            await setRunning(false, silence: true, owner: request.owner);
+          }
+          rethrow;
+        }
         applied = false;
       }
       if (!applied && _isCurrent(request)) {
-        await globalState.safeRun(() => setRunning(false));
+        if (silence && request.previousStartTime != null) {
+          _rollbackRunning(request);
+        } else if (silence) {
+          await setRunning(false, silence: true, owner: request.owner);
+        } else {
+          await globalState.safeRun(
+            () => setRunning(false, owner: request.owner),
+          );
+        }
       }
       return applied;
     }
@@ -288,7 +338,7 @@ class SetupAction extends _$SetupAction {
       return;
     }
     _startTime = request.previousStartTime;
-    _setLocalRunning(!request.running);
+    _setLocalRunning(_startTime != null);
   }
 
   bool _isCurrent(_RunRequest request) => identical(_latestRunRequest, request);
@@ -386,12 +436,14 @@ class SetupAction extends _$SetupAction {
   // authorizeCore failures still throw.
   Future<bool> applyProfile({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {
     final result = await _runSetup(
       force: force,
       silence: silence,
+      suppressErrors: suppressErrors,
       preloadInvoke: preloadInvoke,
     );
     return result != _SetupTaskResult.failed;
@@ -399,6 +451,7 @@ class SetupAction extends _$SetupAction {
 
   Future<_SetupTaskResult> _runSetup({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {
@@ -406,6 +459,7 @@ class SetupAction extends _$SetupAction {
       return _setupConfig(
         force: force,
         silence: silence,
+        suppressErrors: suppressErrors,
         preloadInvoke: preloadInvoke,
         onUpdated: () async {
           await ref.read(proxiesActionProvider.notifier).updateGroups();
@@ -417,13 +471,17 @@ class SetupAction extends _$SetupAction {
       return result;
     }
     // Release the current serial task before restartCore reapplies the profile.
-    final restarted = await _restartCoreAfterAuthorization();
+    final restarted = await _restartCoreAfterAuthorization(
+      silence: suppressErrors,
+    );
     return restarted ? _SetupTaskResult.completed : _SetupTaskResult.failed;
   }
 
-  Future<bool> _restartCoreAfterAuthorization() async {
+  Future<bool> _restartCoreAfterAuthorization({bool silence = false}) async {
     try {
-      return await ref.read(coreActionProvider.notifier).restartCore();
+      return await ref
+          .read(coreActionProvider.notifier)
+          .restartCore(silence: silence);
     } catch (_) {
       ref.read(authorizedTunEnableProvider.notifier).value =
           TunAuthorizationState.none;
@@ -617,7 +675,7 @@ class SetupAction extends _$SetupAction {
   }
 
   @visibleForTesting
-  Future<bool> requestAdmin(bool enableTun) async {
+  Future<bool> requestAdmin(bool enableTun, {bool silence = false}) async {
     if (!enableTun || ref.read(safeModeProvider)) {
       return true;
     }
@@ -642,6 +700,11 @@ class SetupAction extends _$SetupAction {
         return true;
       case AuthorizeCode.error:
         authorizationNotifier.value = TunAuthorizationState.none;
+        if (silence) {
+          throw MessageException(
+            currentAppLocalizations.tunAuthorizationFailed,
+          );
+        }
         ref
             .read(patchClashConfigProvider.notifier)
             .update((state) => state.copyWith.tun(enable: false));
@@ -673,36 +736,50 @@ class SetupAction extends _$SetupAction {
   Future<_SetupTaskResult> _setupConfig({
     bool force = false,
     bool silence = false,
+    bool suppressErrors = false,
     Future<void> Function()? preloadInvoke,
     FutureOr Function()? onUpdated,
   }) async {
     var profile = ref.read(currentProfileProvider) ?? recoverMissingProfile();
-    // A refresh failure is surfaced by safeRun; setup keeps the old profile.
-    final nextProfile = await globalState.safeRun(
-      () => profile?.checkAndUpdateAndCopy(
-        validate: (path, key) => _core.validateProfile(path, key),
-        defaultUserAgent: globalState.ua,
-        decrypt: _core.decryptProfilePayload,
-      ),
-    );
+    Future<Profile?> refreshProfile() async =>
+        await profile?.checkAndUpdateAndCopy(
+          validate: (path, key) => _core.validateProfile(path, key),
+          defaultUserAgent: globalState.ua,
+          decrypt: _core.decryptProfilePayload,
+        );
+    final nextProfile = suppressErrors
+        ? await refreshProfile()
+        : await globalState.safeRun(refreshProfile);
     if (nextProfile != null) {
       profile = nextProfile;
-      ref.read(profilesProvider.notifier).put(nextProfile);
+      final profiles = ref.read(profilesProvider.notifier);
+      if (suppressErrors) {
+        await profiles.putAndWait(nextProfile);
+      } else {
+        profiles.put(nextProfile);
+      }
     }
     commonPrint.log('setup ===> ${profile?.realLabel}');
     final patchConfig = ref.read(regionalNetworkConfigProvider).patchConfig;
-    final shouldContinueSetup = await requestAdmin(patchConfig.tun.enable);
+    final shouldContinueSetup = await requestAdmin(
+      patchConfig.tun.enable,
+      silence: suppressErrors,
+    );
     if (!shouldContinueSetup) {
       return _SetupTaskResult.handoffToCoreRestart;
     }
     final realPatchConfig = _effectivePatchConfig(patchConfig);
     final networkSetting = ref.read(networkSettingProvider);
     SetupState? setupState;
-    final realProfile = await globalState.safeRun(() async {
+    Future<BuiltProfile> buildProfile() async {
       final state = await ref.read(setupStateProvider(profile?.id).future);
       setupState = state;
       return getProfile(setupState: state, patchConfig: realPatchConfig);
-    }, title: 'build profile');
+    }
+
+    final realProfile = suppressErrors
+        ? await buildProfile()
+        : await globalState.safeRun(buildProfile, title: 'build profile');
     final profileFailed = realProfile == null;
     final setupParams = _setupParams.copyWith(base: realProfile?.base);
     final inputs = switch (setupState) {
@@ -732,42 +809,52 @@ class SetupAction extends _$SetupAction {
     // Recaptured so _start's catch can roll back after safeRun swallows it.
     (Object, StackTrace)? handoffFailure;
     var setupFailed = false;
-    await globalState.loadingRun(
-      () async {
-        try {
-          if (setupParams.base == null) {
-            final configFilePath = await appPath.configFilePath;
-            await File(configFilePath).writeAsStringAtomically(yamlString);
-          }
-          final profileId = profile?.id;
-          if (profileId != null) {
-            await appPath.ensureProviderDirs(profileId);
-          }
-          final message = await _core.setupConfig(
-            params: setupParams,
-            preloadInvoke: preloadInvoke,
-          );
-          if (message.isNotEmpty) {
-            globalState.lastConfigCounts = configCountsOf(const {});
-            await globalState.safeRun(() => onUpdated?.call());
-            throw MessageException(message);
-          }
-        } catch (e, s) {
-          setupFailed = true;
-          if (preloadInvoke != null) {
-            handoffFailure = (e, s);
-          }
-          rethrow;
+    Future<void> pushProfile() async {
+      try {
+        if (setupParams.base == null) {
+          final configFilePath = await appPath.configFilePath;
+          await File(configFilePath).writeAsStringAtomically(yamlString);
         }
-        globalState.lastConfigMd5 = yamlMd5;
-        globalState.lastConfigCounts =
-            realProfile?.counts ?? configCountsOf(const {});
-        _appliedInputs = inputs;
-        await onUpdated?.call();
-      },
-      silence: true,
-      tag: !silence ? LoadingTag.proxies : null,
-    );
+        final profileId = profile?.id;
+        if (profileId != null) {
+          await appPath.ensureProviderDirs(profileId);
+        }
+        final message = await _core.setupConfig(
+          params: setupParams,
+          preloadInvoke: preloadInvoke,
+        );
+        if (message.isNotEmpty) {
+          globalState.lastConfigCounts = configCountsOf(const {});
+          if (suppressErrors) {
+            await onUpdated?.call();
+          } else {
+            await globalState.safeRun(() => onUpdated?.call());
+          }
+          throw MessageException(message);
+        }
+      } catch (e, s) {
+        setupFailed = true;
+        if (preloadInvoke != null) {
+          handoffFailure = (e, s);
+        }
+        rethrow;
+      }
+      globalState.lastConfigMd5 = yamlMd5;
+      globalState.lastConfigCounts =
+          realProfile?.counts ?? configCountsOf(const {});
+      _appliedInputs = inputs;
+      await onUpdated?.call();
+    }
+
+    if (suppressErrors) {
+      await pushProfile();
+    } else {
+      await globalState.loadingRun(
+        pushProfile,
+        silence: true,
+        tag: !silence ? LoadingTag.proxies : null,
+      );
+    }
     if (handoffFailure != null) {
       Error.throwWithStackTrace(handoffFailure!.$1, handoffFailure!.$2);
     }

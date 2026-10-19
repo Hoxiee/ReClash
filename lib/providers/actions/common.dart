@@ -4,21 +4,49 @@ part of '../action.dart';
 class CommonAction extends _$CommonAction {
   CoreController get _core => ref.read(coreHandlerProvider);
   bool _isUpdatingTraffic = false;
+  int _toggleRequestRevision = 0;
+  bool? _pendingToggleRunning;
 
   @override
   void build() {}
 
   void toggleRunning() {
-    final running = !ref.read(isStartProvider);
+    final running = !(_pendingToggleRunning ?? ref.read(isStartProvider));
+    _pendingToggleRunning = running;
+    final requestRevision = ++_toggleRequestRevision;
+    final setupAction = ref.read(setupActionProvider.notifier);
+    final runIntentRevision = setupAction.runIntentRevision;
     unawaited(
-      globalState.safeRun(
-        () => ref
-            .read(setupActionProvider.notifier)
-            .setRunning(
-              running,
-              initialize: running && !ref.read(initProvider),
-            ),
-      ),
+      globalState.safeRun(() async {
+        try {
+          if (running && ref.read(coreStatusProvider) != CoreStatus.connected) {
+            final started = await ref
+                .read(coreActionProvider.notifier)
+                .startCore();
+            if (!started ||
+                requestRevision != _toggleRequestRevision ||
+                setupAction.runIntentRevision != runIntentRevision) {
+              return;
+            }
+          }
+          if (requestRevision != _toggleRequestRevision) return;
+          final initialize = running && !ref.read(initProvider);
+          final applied = await setupAction.setRunning(
+            running,
+            initialize: initialize,
+          );
+          if (applied &&
+              running &&
+              initialize &&
+              requestRevision == _toggleRequestRevision) {
+            ref.read(initProvider.notifier).value = true;
+          }
+        } finally {
+          if (requestRevision == _toggleRequestRevision) {
+            _pendingToggleRunning = null;
+          }
+        }
+      }),
     );
   }
 

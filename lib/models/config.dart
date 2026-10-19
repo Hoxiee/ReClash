@@ -255,6 +255,12 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,
     @Default(0) int acceptedDisclaimerVersion,
+    bool? setupCompleted,
+    @Default(0) int setupStep,
+    int? setupProfileId,
+    String? setupCoverage,
+    String? setupRegionCode,
+    @Default(false) bool setupRegionChosen,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,

@@ -319,6 +319,27 @@ void main() {
       },
     );
 
+    test('restart preserves the current run intent owner', () async {
+      final container = ProviderContainer(
+        overrides: [
+          coreActionProvider.overrideWith(_TestCoreAction.new),
+          setupActionProvider.overrideWith(_TestSetupAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(runTimeProvider.notifier).value = 0;
+      final action =
+          container.read(coreActionProvider.notifier) as _TestCoreAction;
+      final setup =
+          container.read(setupActionProvider.notifier) as _TestSetupAction;
+      final owner = Object();
+      setup.currentOwner = owner;
+
+      await action.restartCore(silence: true);
+
+      expect(identical(setup.passedOwner, owner), isTrue);
+    });
+
     test(
       'a rejected setup while running reports restartCore as unsuccessful',
       () async {
@@ -451,6 +472,22 @@ void main() {
       },
     );
 
+    test(
+      'startCore silence propagates failure without notifier path',
+      () async {
+        final container = ProviderContainer(
+          overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
+        );
+        addTearDown(container.dispose);
+        final action =
+            container.read(coreActionProvider.notifier) as _TestCoreAction
+              ..startError = StateError('start failed');
+
+        await expectLater(action.startCore(silence: true), throwsStateError);
+        expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+      },
+    );
+
     test('startCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
         overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
@@ -463,7 +500,7 @@ void main() {
         outcome: CoreLifecycleOutcome.coalesced,
       );
 
-      await coreAction.startCore();
+      expect(await coreAction.startCore(), isTrue);
 
       expect(coreAction.initCoreCount, 1);
       expect(container.read(coreStatusProvider), CoreStatus.connected);
@@ -878,6 +915,7 @@ class _TestCoreAction extends CoreAction {
   Completer<CoreLifecycleResult>? restartCompleter;
   Completer<CoreLifecycleResult>? startCompleter;
   CoreLifecycleResult startResult = _restartResult;
+  Error? startError;
 
   @override
   Future<void> initCore() async {
@@ -886,6 +924,8 @@ class _TestCoreAction extends CoreAction {
 
   @override
   Future<CoreLifecycleResult> startLifecycle() {
+    final error = startError;
+    if (error != null) throw error;
     return startCompleter?.future ?? Future.value(startResult);
   }
 
@@ -919,18 +959,30 @@ class _TestSetupAction extends SetupAction {
   int setRunningCount = 0;
   int applyProfileCount = 0;
   bool setRunningResult = true;
+  Object? currentOwner;
+  Object? passedOwner;
   Completer<void>? firstApplyStarted;
   Completer<void>? firstApplyCompleter;
 
   @override
-  Future<bool> setRunning(bool running, {bool initialize = false}) async {
+  Object? get runIntentOwner => currentOwner;
+
+  @override
+  Future<bool> setRunning(
+    bool running, {
+    bool initialize = false,
+    bool silence = false,
+    Object? owner,
+  }) async {
     setRunningCount++;
+    passedOwner = owner;
     return setRunningResult;
   }
 
   @override
   Future<bool> applyProfile({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {
@@ -953,7 +1005,7 @@ class _RestartRecordingCoreAction extends CoreAction {
   bool restartResult = true;
 
   @override
-  Future<bool> restartCore() async {
+  Future<bool> restartCore({bool silence = false}) async {
     restartCount++;
     return restartResult;
   }
@@ -961,7 +1013,7 @@ class _RestartRecordingCoreAction extends CoreAction {
 
 class _FailingRestartCoreAction extends CoreAction {
   @override
-  Future<bool> restartCore() async {
+  Future<bool> restartCore({bool silence = false}) async {
     throw _restartFailure;
   }
 }
@@ -1022,6 +1074,7 @@ class _InitializingSetupAction extends _RaceSetupAction {
   @override
   Future<bool> applyProfile({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {

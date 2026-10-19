@@ -120,6 +120,22 @@ void main() {
     expect(store.record?.failureCount, 0);
   });
 
+  test(
+    'a mounted incomplete setup counts as a running launch on relaunch',
+    () async {
+      final store = _RecordStore();
+      final guard = _guard(store);
+
+      await guard.evaluate(profileId: 7);
+      await guard.markRunning();
+      final relaunched = await _guard(store, now: 6000).evaluate(profileId: 7);
+
+      expect(relaunched.recovery, BootRecovery.none);
+      expect(store.record?.failureCount, 0);
+      expect(store.record?.stage, BootStage.starting);
+    },
+  );
+
   test('a degraded launch keeps its failure count until a clean run', () async {
     final store = _RecordStore()
       ..record = const BootRecord(

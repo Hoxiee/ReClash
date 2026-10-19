@@ -28,9 +28,16 @@ String _detectionSourceLabel(
 };
 
 class RegionView extends ConsumerStatefulWidget {
-  const RegionView({super.key, this.isAndroid});
+  const RegionView({
+    super.key,
+    this.isAndroid,
+    this.initialRegionCode,
+    this.onApply,
+  });
 
   final bool? isAndroid;
+  final String? initialRegionCode;
+  final ValueChanged<String?>? onApply;
 
   @override
   ConsumerState<RegionView> createState() => _RegionViewState();
@@ -43,13 +50,19 @@ class _RegionViewState extends ConsumerState<RegionView> {
   void initState() {
     super.initState();
     _selectedRegionCode = sanitizeRegionCode(
-      ref.read(appSettingProvider).regionCode,
+      widget.onApply != null
+          ? widget.initialRegionCode
+          : ref.read(appSettingProvider).regionCode,
     );
   }
 
   void _select(String? code) => setState(() => _selectedRegionCode = code);
 
   void _apply() {
+    if (widget.onApply != null) {
+      widget.onApply!(_selectedRegionCode);
+      return;
+    }
     ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(regionCode: _selectedRegionCode));
@@ -157,14 +170,17 @@ class _RegionViewState extends ConsumerState<RegionView> {
       ref.watch(enabledServiceTargetsProvider),
       targetServices,
     );
-    final hasChanges = currentRegionCode != selectedRegionCode;
+    final hasChanges =
+        widget.onApply != null || currentRegionCode != selectedRegionCode;
     return CommonScaffold(
       title: l.regionTitle,
-      primaryAction: IconButtonData(
-        glyph: AppGlyphs.check,
-        tooltip: l.regionApply,
-        onPressed: hasChanges ? _apply : null,
-      ),
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.check,
+          tooltip: l.regionApply,
+          onPressed: hasChanges ? _apply : null,
+        ),
+      ],
       body: SettingsPageScroll(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -282,22 +298,6 @@ class _RegionViewState extends ConsumerState<RegionView> {
                   l.regionCustomPreserved,
                   if (isAndroid) l.regionPreviewAndroid,
                 ].join('\n'),
-              ),
-              OverflowBar(
-                alignment: MainAxisAlignment.end,
-                spacing: 12,
-                overflowSpacing: 8,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    child: Text(l.cancel),
-                  ),
-                  FilledButton.icon(
-                    onPressed: hasChanges ? _apply : null,
-                    icon: const GlyphIcon(AppGlyphs.check, fill: 1),
-                    label: Text(l.regionApply),
-                  ),
-                ],
               ),
             ],
           ),

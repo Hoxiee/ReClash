@@ -1684,7 +1684,7 @@ final class HotKeyPlatformProvider
   }
 }
 
-String _$hotKeyPlatformHash() => r'c15f923496bdedb2aba5b58fedbcfc1e60b6dcbe';
+String _$hotKeyPlatformHash() => r'53ac623567e49a8c0890875c338838e9233cda88';
 
 abstract class _$HotKeyPlatform extends $Notifier<HotkeyPlatformState> {
   HotkeyPlatformState build();

@@ -1066,6 +1066,107 @@
       }
     }
   },
+  "setupTitle": "首次连接",
+  "setupLanguageTitle": "选择语言",
+  "setupLanguageDescription": "阅读条款前，请先选择语言。之后可以更改。",
+  "setupLanguageContinue": "继续",
+  "setupProfileTitle": "添加连接配置",
+  "setupProfileDescription": "ReClash 不提供服务器。请导入服务提供商的订阅或配置。",
+  "setupProfileReady": "配置已就绪",
+  "setupProfileImport": "导入配置",
+  "setupProfileLinkHint": "订阅或分享链接",
+  "setupProfileSkip": "稍后设置",
+  "setupCoverageTitle": "要连接哪些应用？",
+  "setupCoverageDescription": "选择使用 ReClash 的应用。哪些连接使用服务器由配置规则决定。",
+  "setupCoverageAll": "所有应用",
+  "setupCoverageAllDescription": "TUN 会接管设备流量。系统可能会请求权限。",
+  "setupCoverageSystem": "系统代理",
+  "setupCoverageSystemDescription": "不支持系统代理的应用将直接连接。",
+  "setupCoverageLocal": "我将手动配置应用",
+  "setupCoverageLocalDescription": "在每个需要连接的应用中设置本地代理地址。",
+  "setupCoverageAndroidDescription": "Android 将请求创建 VPN 连接。应用选择可在访问设置中进行。",
+  "setupCoverageNote": "接管所有流量不代表将所有流量发送到服务器。直连路由仍会保留。",
+  "setupRegionConfirm": "使用这些区域设置",
+  "setupRegionDescription": "推荐区域来自此设备，而非界面语言。仅当其符合您的网络情况时才应用。",
+  "setupRegionNeutral": "保留配置默认值",
+  "setupCheckAction": "检查连接",
+  "setupCheckingTitle": "正在连接并检查",
+  "setupCheckingDescription": "我们会检查一条选定路由。系统权限请求会单独显示。",
+  "setupPhaseCore": "正在启动核心",
+  "setupPhaseProfile": "正在应用配置",
+  "setupPhaseConnection": "正在启动连接",
+  "setupPhaseRoute": "正在检查路由",
+  "setupPhaseExit": "正在确认出口",
+  "setupPhaseServices": "正在检查服务",
+  "setupPhaseAlternatives": "正在查找其他服务器",
+  "setupStepStatus": "第 {step} 步，共 {total} 步",
+  "setupCheckLimit": "结果仅适用于此路由，并不代表所有应用或网站。",
+  "setupConnectedTitle": "连接正常",
+  "setupConnectedDescription": "选定路由已响应。流量将遵循配置规则。",
+  "setupPartialTitle": "已连接，但有限制",
+  "setupPartialDescription": "路由已响应，但部分检查无法确认。",
+  "setupUnconfirmedTitle": "未能确认连接",
+  "setupUnconfirmedDescription": "连接已启动，但选定路由未提供足够结果。",
+  "setupFailedTitle": "连接需要处理",
+  "setupSavedTitle": "稍后连接",
+  "setupSavedDescription": "已保存您的选择。准备好后可从控制面板连接。",
+  "setupAutoConnect": "打开 ReClash 时连接",
+  "setupAutoConnectDescription": "随应用一起启动此连接。",
+  "setupSaveWithoutConnection": "保存但不连接",
+  "setupRepeat": "重新检查",
+  "setupTryServer": "尝试 {server}",
+  "setupAlternativeDescription": "此服务器通过了单独探测。切换后重新检查完整路由。",
+  "setupReport": "检查报告",
+  "setupReceipt": "您的连接",
+  "setupReceiptProfile": "配置",
+  "setupReceiptCoverage": "范围",
+  "setupReceiptCheck": "检查",
+  "setupNotChecked": "未检查",
+  "setupConfirmed": "已确认",
+  "setupUnavailable": "无响应",
+  "setupStoppedTitle": "检查已停止",
+  "setupStoppedDescription": "已保存您的选择。之前的连接未停止。",
+  "setupPermissionTitle": "需要权限",
+  "setupPermissionDescription": "请在系统提示中允许连接后重试，或选择其他范围。",
+  "setupLocalTitle": "本地代理已就绪",
+  "setupLocalDescription": "在要连接的应用中设置此地址。此检查无法证明这些应用已完成配置。",
+  "setupCopyProxy": "复制代理地址",
+  "setupErrorDetails": "详情",
+  "setupSaveError": "无法保存您的选择，请重试。",
+  "setupSafeMode": "安全模式不会启动真实连接。请保存设置，或在普通构建中测试。",
+  "setupResume": "继续设置",
+  "setupRestart": "设置连接",
+  "setupLaterNote": "设置未完成；连接尚未检查。",
+  "setupProfileCount": "可用配置：{count} 个",
+  "setupAgeKeyDescription": "此配置已加密。请输入 age 密钥以继续。",
+  "setupFinishDescription": "您可以在设置中更改任何选择。",
+  "setupRouteChanged": "检查期间路由已更改。请重新检查当前连接。",
+  "setupUnknownError": "操作未完成。请重试或查看详情。",
+  "setupRequestPermission": "允许连接",
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "更新通道",
   "updateChannelRelease": "正式版",
   "updateChannelPre": "预发布版",

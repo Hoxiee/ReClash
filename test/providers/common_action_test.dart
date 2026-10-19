@@ -12,9 +12,43 @@ import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+class _SetupRunRecorder extends SetupAction {
+  int revision = 0;
+  final calls = <({bool running, bool initialize})>[];
+
+  @override
+  int get runIntentRevision => revision;
+
+  @override
+  Future<bool> setRunning(
+    bool running, {
+    bool initialize = false,
+    bool silence = false,
+    Object? owner,
+  }) async {
+    revision++;
+    calls.add((running: running, initialize: initialize));
+    return true;
+  }
+}
+
+class _CoreStartRecorder extends CoreAction {
+  int starts = 0;
+  bool startResult = true;
+  Completer<bool>? pendingStart;
+  final started = Completer<void>();
+
+  @override
+  Future<bool> startCore({bool silence = false}) {
+    starts++;
+    if (!started.isCompleted) started.complete();
+    return pendingStart?.future ?? Future.value(startResult);
+  }
+}
 
 const runningVersion = '0.8.96';
 
@@ -35,15 +69,104 @@ void main() {
 
   setUp(() => reset(core));
 
-  ProviderContainer buildContainer() {
+  ProviderContainer buildContainer({List<Override> overrides = const []}) {
     final container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        ...overrides,
       ],
     );
+    globalState.container = container;
     addTearDown(container.dispose);
     return container;
   }
+
+  group('CommonAction.toggleRunning', () {
+    test('starts a disconnected Core before an initialized run', () async {
+      final coreAction = _CoreStartRecorder();
+      final setupAction = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          coreActionProvider.overrideWith(() => coreAction),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+
+      container.read(commonActionProvider.notifier).toggleRunning();
+      await coreAction.started.future;
+      for (var i = 0; i < 4 && setupAction.calls.isEmpty; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+
+      expect(coreAction.starts, 1);
+      expect(setupAction.calls, [(running: true, initialize: true)]);
+      expect(container.read(initProvider), isTrue);
+    });
+
+    test(
+      'uses the existing connected Core without starting it again',
+      () async {
+        final coreAction = _CoreStartRecorder();
+        final setupAction = _SetupRunRecorder();
+        final container = buildContainer(
+          overrides: [
+            coreActionProvider.overrideWith(() => coreAction),
+            setupActionProvider.overrideWith(() => setupAction),
+          ],
+        );
+        container.read(coreStatusProvider.notifier).value =
+            CoreStatus.connected;
+        container.read(initProvider.notifier).value = true;
+
+        container.read(commonActionProvider.notifier).toggleRunning();
+        for (var i = 0; i < 4 && setupAction.calls.isEmpty; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
+        expect(coreAction.starts, 0);
+        expect(setupAction.calls, [(running: true, initialize: false)]);
+      },
+    );
+
+    test('does not run setup if starting a disconnected Core fails', () async {
+      final coreAction = _CoreStartRecorder()..startResult = false;
+      final setupAction = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          coreActionProvider.overrideWith(() => coreAction),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+
+      container.read(commonActionProvider.notifier).toggleRunning();
+      await coreAction.started.future;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(setupAction.calls, isEmpty);
+      expect(container.read(initProvider), isFalse);
+    });
+
+    test('a newer stop intent supersedes a pending Core start', () async {
+      final coreAction = _CoreStartRecorder()..pendingStart = Completer<bool>();
+      final setupAction = _SetupRunRecorder();
+      final container = buildContainer(
+        overrides: [
+          coreActionProvider.overrideWith(() => coreAction),
+          setupActionProvider.overrideWith(() => setupAction),
+        ],
+      );
+
+      container.read(commonActionProvider.notifier).toggleRunning();
+      await coreAction.started.future;
+      await setupAction.setRunning(false);
+      coreAction.pendingStart!.complete(true);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(setupAction.calls, [(running: false, initialize: false)]);
+      expect(container.read(initProvider), isFalse);
+    });
+  });
 
   group('CommonAction.updateMode', () {
     test('advances through every mode and wraps back to the first', () {

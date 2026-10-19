@@ -234,35 +234,41 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m85(count) =>
       "${Intl.plural(count, one: '${count} настройка', few: '${count} настройки', many: '${count} настроек', other: '${count} настройки')}";
 
-  static String m86(link) => "Не удалось прочитать прокси из ${link}";
+  static String m86(count) => "Доступно профилей: ${count}";
 
-  static String m87(label) => "«${label}» — только одно значение";
+  static String m87(step, total) => "${step} из ${total}";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "Попробовать ${server}";
+
+  static String m89(link) => "Не удалось прочитать прокси из ${link}";
+
+  static String m90(label) => "«${label}» — только одно значение";
+
+  static String m91(client, format, count) =>
       "Получено как ${client}: ${format}, узлов: ${count}.";
 
-  static String m89(sections) =>
+  static String m92(sections) =>
       "Не будут перенесены разделы исходной конфигурации: ${sections}.";
 
-  static String m90(count, format) =>
+  static String m93(count, format) =>
       "Из формата ${format} можно импортировать узлов: ${count}.";
 
-  static String m91(count) => "Не удалось преобразовать узлов: ${count}.";
+  static String m94(count) => "Не удалось преобразовать узлов: ${count}.";
 
-  static String m92(count) => "Результатов: ${count}";
+  static String m95(count) => "Результатов: ${count}";
 
-  static String m93(value) => "Пик ${value}";
+  static String m96(value) => "Пик ${value}";
 
-  static String m94(value) => "Всего ${value}";
+  static String m97(value) => "Всего ${value}";
 
-  static String m95(version) => "Установлена версия ${version}";
+  static String m98(version) => "Установлена версия ${version}";
 
-  static String m96(label) => "Значение «${label}» должно быть URL";
+  static String m99(label) => "Значение «${label}» должно быть URL";
 
-  static String m97(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m98(count) =>
+  static String m101(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1966,7 +1972,196 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("параметры"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "Этот профиль зашифрован. Укажите ключ age, чтобы продолжить.",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "Этот сервер ответил на отдельную пробу. Переключитесь и проверьте весь маршрут снова.",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage(
+      "Подключаться при открытии ReClash",
+    ),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "Включать это подключение вместе с приложением.",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage(
+      "Проверить подключение",
+    ),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "Результат относится к этому маршруту, а не ко всем приложениям и сайтам.",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Проверяем один выбранный маршрут. Системные запросы разрешений открываются отдельно.",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Подключаемся и проверяем",
+    ),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("Подтверждено"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "Выбранный маршрут ответил. Трафик следует правилам профиля.",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage(
+      "Подключение работает",
+    ),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage(
+      "Скопировать адрес прокси",
+    ),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage("Все приложения"),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN перехватывает трафик устройства. Система может запросить разрешение.",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android запросит разрешение на VPN-подключение. Выбор приложений доступен в настройках доступа.",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "Выберите охват. Какие соединения идут через сервер, решают правила профиля.",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage(
+      "Настрою приложения вручную",
+    ),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Укажите адрес локального прокси в каждом приложении, которое хотите подключить.",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "Перехват всего трафика не означает отправку всего через сервер. Прямые маршруты сохраняются.",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage(
+      "Системный прокси",
+    ),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "Приложения без поддержки системного прокси идут напрямую.",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage(
+      "Какие приложения подключать?",
+    ),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("Подробности"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Не удалось подключиться",
+    ),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "Любой выбор можно изменить в настройках.",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("Продолжить"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "Выберите язык, чтобы прочитать соглашение. Позже его можно изменить.",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage("Выберите язык"),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage(
+      "Настройка не завершена; подключение не проверено.",
+    ),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "Укажите этот адрес в нужных приложениях. Проверка не подтверждает, что приложения уже настроены.",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage(
+      "Локальный прокси готов",
+    ),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("Не проверено"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "Маршрут ответил, но часть проверок не удалось подтвердить.",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage(
+      "Подключение работает с ограничениями",
+    ),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "Разрешите подключение в системном окне, повторите проверку или выберите другой охват.",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Нужно разрешение системы",
+    ),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage(
+      "Поиск другого сервера",
+    ),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage(
+      "Запуск подключения",
+    ),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage("Запуск ядра"),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage(
+      "Подтверждение выхода",
+    ),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage(
+      "Применение профиля",
+    ),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage(
+      "Проверка маршрута",
+    ),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage(
+      "Проверка сервисов",
+    ),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash не предоставляет серверы. Добавьте подписку или конфигурацию вашего провайдера.",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage(
+      "Импортировать профиль",
+    ),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage(
+      "Ссылка подписки или подключения",
+    ),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("Профиль готов"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage("Настроить позже"),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage(
+      "Добавьте профиль подключения",
+    ),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("Ваше подключение"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("Проверка"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("Охват"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("Профиль"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage(
+      "Применить настройки региона",
+    ),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "Регион предложен по данным устройства, а не по выбранному языку интерфейса. Примените его, если он соответствует вашей сети.",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage(
+      "Оставить настройки профиля",
+    ),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("Проверить ещё раз"),
+    "setupReport": MessageLookupByLibrary.simpleMessage("Отчёт проверки"),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage(
+      "Разрешить подключение",
+    ),
+    "setupRestart": MessageLookupByLibrary.simpleMessage(
+      "Настроить подключение",
+    ),
+    "setupResume": MessageLookupByLibrary.simpleMessage("Продолжить настройку"),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "Маршрут изменился во время проверки. Проверьте текущее подключение ещё раз.",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "В безопасном режиме реальное подключение не запускается. Сохраните настройку или проверьте её в обычной сборке.",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось сохранить выбор. Попробуйте ещё раз.",
+    ),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "Сохранить без подключения",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ваш выбор сохранён. Подключение можно включить с главной страницы, когда будете готовы.",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage(
+      "Подключимся позже",
+    ),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ваш выбор сохранён. Прежнее подключение не остановлено.",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage(
+      "Проверка остановлена",
+    ),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("Первое подключение"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("Нет ответа"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "Подключение запущено, но выбранный маршрут не дал достаточных результатов.",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage(
+      "Подключение не подтверждено",
+    ),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "Операция не завершилась. Повторите попытку или откройте подробности.",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "Не удалось прочитать прокси из ссылок",
     ),
@@ -1992,7 +2187,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Здесь укажите одну ссылку, несколько можно задать в быстром редактировании списка",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Пропускать проверку сертификата",
@@ -2130,7 +2325,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Использовать этот клиент"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core разобрал результат. Он ещё не сохранён и не применён.",
@@ -2200,7 +2395,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "неизвестный формат",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "Нет поддерживаемых прокси-узлов для импорта.",
     ),
@@ -2211,11 +2406,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Действует только для этого источника, формата и принятых видов потерь. Новые потери требуют повторного согласия.",
         ),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Проверка импорта подписки",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),
@@ -2329,7 +2524,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро",
     ),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
@@ -2347,8 +2542,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -2399,7 +2594,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось запустить установщик пакетов.",
     ),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "У вас уже установлена последняя версия.",
     ),
@@ -2422,7 +2617,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2456,8 +2651,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

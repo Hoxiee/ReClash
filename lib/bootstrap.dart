@@ -7,6 +7,8 @@ import 'package:reclash/common/boot_record.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/launch.dart';
 import 'package:reclash/common/migration.dart';
+import 'package:reclash/common/setup_check.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/common/tray.dart';
 import 'package:reclash/common/window.dart';
 import 'package:reclash/database/database.dart';
@@ -102,6 +104,7 @@ class Bootstrap {
   ) async {
     await _claimDataDirectory();
     globalState.packageInfo = await PackageInfo.fromPlatform();
+    final installed = await preferences.getConfigMap() != null;
     var config = await migration.run();
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,
@@ -113,6 +116,16 @@ class Bootstrap {
     final patchClashConfig = config.patchClashConfig.ensureControllerSecret();
     if (patchClashConfig != config.patchClashConfig) {
       config = config.copyWith(patchClashConfig: patchClashConfig);
+      await preferences.saveConfig(config);
+    }
+    final profiles = await database.profilesDao.query().get();
+    final settings = initializeSetupSettings(
+      config.appSettingProps,
+      installed: installed,
+      hasProfiles: profiles.isNotEmpty,
+    );
+    if (settings != config.appSettingProps) {
+      config = config.copyWith(appSettingProps: settings);
       await preferences.saveConfig(config);
     }
     final appState = AppState(
@@ -138,8 +151,8 @@ class Bootstrap {
           darkSeed: dynamicColor.darkSeed,
           accentColor: dynamicColor.accentColor,
         );
-    final profiles = await database.profilesDao.query().get();
     container.read(profilesProvider.notifier).reorder(profiles);
+    container.read(setupSessionProvider);
     await AppLocalizations.load(
       getLocaleForString(config.appSettingProps.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
@@ -155,8 +168,38 @@ class Bootstrap {
     if (globalState.isAttach == true) {
       return;
     }
-    await _initApp();
+    if (_container.read(setupSessionProvider).active) {
+      unawaited(window?.show());
+      await bootGuard.markRunning();
+      await _handleFailedPreference();
+    } else {
+      await _initApp();
+    }
     globalState.isAttach = true;
+  }
+
+  Future<void>? _setupCompletion;
+
+  Future<void> completeSetup() => _setupCompletion ??= _afterSetup();
+
+  Future<void> _afterSetup() async {
+    await bootGuard.markRunning();
+    unawaited(_container.read(systemActionProvider.notifier).updateTray());
+    unawaited(
+      autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
+    );
+    unawaited(
+      _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
+    );
+    unawaited(_container.read(resourcesActionProvider.notifier).autoUpdate());
+    unawaited(_container.read(locationPermissionsProvider.notifier).refresh());
+    if (!await _container
+        .read(appUpdateActionProvider.notifier)
+        .restorePendingInstall()) {
+      unawaited(
+        _container.read(commonActionProvider.notifier).autoCheckUpdate(),
+      );
+    }
   }
 
   ProviderContainer get _container => globalState.container;

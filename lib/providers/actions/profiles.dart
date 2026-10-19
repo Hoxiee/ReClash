@@ -81,10 +81,31 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  void putProfile(Profile profile) {
+  void putProfile(Profile profile, {bool select = true}) {
     ref.read(profilesProvider.notifier).put(profile);
-    if (ref.read(currentProfileIdProvider) != null) return;
+    if (!select || ref.read(currentProfileIdProvider) != null) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
+  }
+
+  Future<void> _saveImportedProfile(
+    Profile profile, {
+    SubscriptionCancellation? cancellation,
+  }) => ref
+      .read(profilesProvider.notifier)
+      .putAndWait(
+        profile,
+        isCurrent: cancellation == null ? null : () => !cancellation.cancelled,
+      );
+
+  Profile _importedProfile(Profile profile, {required bool select}) {
+    final saved = ref.read(profilesProvider).getProfile(profile.id);
+    if (saved == null) {
+      throw MessageException(currentAppLocalizations.nullProfileDesc);
+    }
+    if (select && ref.read(currentProfileIdProvider) == null) {
+      ref.read(currentProfileIdProvider.notifier).value = saved.id;
+    }
+    return saved;
   }
 
   Future<List<Profile>> providerUsers(Profile profile) async {
@@ -397,34 +418,148 @@ class ProfilesAction extends _$ProfilesAction {
     Profile profile,
     Uint8List bytes, {
     BuildContext? reviewContext,
-  }) => _withAgeSecretKey(profile, (candidate) async {
-    final content = await _core.decryptProfilePayload(
-      bytes,
-      candidate.ageSecretKey,
-    );
-    final imported = await prepareSubscriptionImport(content);
-    if (imported.summary.rejectCoreFallback) {
-      throw MessageException(currentAppLocalizations.importConfigInvalid);
-    }
-    if (imported.summary.hasLosses) {
-      final context =
-          reviewContext ?? globalState.navigatorKey.currentState?.context;
-      if (context == null ||
-          !context.mounted ||
-          await reviewSubscriptionImport(
-                context,
-                format: imported.format,
-                summary: imported.summary,
-              ) !=
-              true) {
-        return null;
+    bool promptAgeKey = true,
+    SubscriptionCancellation? cancellation,
+    Future<void> Function(Profile saved)? onCommitted,
+  }) {
+    Future<Profile?> save(Profile candidate) async {
+      void ensureCurrent() {
+        if (cancellation?.cancelled == true) {
+          throw const SubscriptionUpdateCancelled();
+        }
       }
+
+      ensureCurrent();
+      final content = await _core.decryptProfilePayload(
+        bytes,
+        candidate.ageSecretKey,
+      );
+      ensureCurrent();
+      final imported = await prepareSubscriptionImport(content);
+      ensureCurrent();
+      if (imported.summary.rejectCoreFallback) {
+        throw MessageException(currentAppLocalizations.importConfigInvalid);
+      }
+      if (imported.summary.hasLosses) {
+        final context =
+            reviewContext ?? globalState.navigatorKey.currentState?.context;
+        if (context == null || !context.mounted) return null;
+        final accepted = await reviewSubscriptionImport(
+          context,
+          format: imported.format,
+          summary: imported.summary,
+        );
+        ensureCurrent();
+        if (accepted != true) return null;
+      }
+      return candidate.saveFile(
+        imported.bytes,
+        validate: (path, _) => _core.validateConfig(path),
+        isCurrent: cancellation == null ? null : () => !cancellation.cancelled,
+        onCommitted: onCommitted,
+      );
     }
-    return candidate.saveFile(
-      imported.bytes,
-      validate: (path, _) => _core.validateConfig(path),
+
+    return promptAgeKey ? _withAgeSecretKey(profile, save) : save(profile);
+  }
+
+  Future<Profile?> importProfileData(
+    List<int> data, {
+    required String name,
+    String ageSecretKey = '',
+    bool select = true,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    final profile = await saveImportedProfileFile(
+      Profile.normal(label: name).copyWith(ageSecretKey: ageSecretKey),
+      Uint8List.fromList(data),
+      reviewContext: reviewContext,
+      promptAgeKey: false,
+      cancellation: cancellation,
+      onCommitted: (saved) =>
+          _saveImportedProfile(saved, cancellation: cancellation),
     );
-  });
+    return profile == null ? null : _importedProfile(profile, select: select);
+  }
+
+  Future<Profile?> importProfileFile({
+    String ageSecretKey = '',
+    bool select = true,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    final platformFile = await picker.pickerFile();
+    if (platformFile == null) return null;
+    final bytes = await platformFile.readBytes();
+    if (reviewContext != null && !reviewContext.mounted) return null;
+    return importProfileData(
+      bytes,
+      name: platformFile.name,
+      ageSecretKey: ageSecretKey,
+      select: select,
+      reviewContext: reviewContext,
+      cancellation: cancellation,
+    );
+  }
+
+  Future<Profile?> importProfileQrCode({
+    String ageSecretKey = '',
+    bool select = true,
+    SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    final link = await picker.pickerConfigQRCode();
+    if (link == null || reviewContext != null && !reviewContext.mounted) {
+      return null;
+    }
+    return importProfileFromLink(
+      link,
+      ageSecretKey: ageSecretKey,
+      select: select,
+      clientSettings: clientSettings,
+      reviewContext: reviewContext,
+      cancellation: cancellation,
+    );
+  }
+
+  Future<Profile> importProfileFromLink(
+    String link, {
+    String? label,
+    required String ageSecretKey,
+    bool select = true,
+    SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    if (cancellation?.cancelled == true) {
+      throw const SubscriptionUpdateCancelled();
+    }
+    if (!link.isShareLink) _throwIfDuplicateSubscription(link);
+    Future<void> save(Profile saved) =>
+        _saveImportedProfile(saved, cancellation: cancellation);
+    final profile = link.isShareLink
+        ? await _fromShareLinks(
+            Profile.normal(label: label),
+            [link],
+            cancellation: cancellation,
+            onCommitted: save,
+          )
+        : await _download(
+            _withClientSettings(
+              Profile.normal(
+                label: label,
+                url: link,
+              ).copyWith(ageSecretKey: ageSecretKey),
+              clientSettings,
+            ),
+            reviewContext: reviewContext,
+            cancellation: cancellation,
+            onCommitted: save,
+          );
+    return _importedProfile(profile, select: select);
+  }
 
   Future<void> addProfileFormFile() async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
@@ -696,19 +831,32 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<Profile> _download(Profile profile) async {
+  Future<Profile> _download(
+    Profile profile, {
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+    Future<void> Function(Profile saved)? onCommitted,
+  }) async {
     final request = await _subscriptionRequestInputs(profile);
     final prepared = await _prepareProfileCompatibility(
       profile,
       request: request,
+      cancellation: cancellation,
     );
+    if (reviewContext != null && !reviewContext.mounted) {
+      throw const SubscriptionUpdateCancelled();
+    }
     SubscriptionImportApproval? approval = const SubscriptionImportApproval();
     if (!profile.subscriptionPreferences.client.importPolicy.allows(
       prepared.payload.format,
       prepared.summary,
       sourceScope: subscriptionImportScope(profile.url, profile.ageSecretKey),
     )) {
-      approval = await _approveImportLosses(prepared);
+      approval = await _approveImportLosses(
+        prepared,
+        reviewContext: reviewContext,
+        cancellation: cancellation,
+      );
       if (approval == null) throw const SubscriptionUpdateCancelled();
     }
     _ensurePreparedSubscriptionCurrent(
@@ -716,12 +864,17 @@ class ProfilesAction extends _$ProfilesAction {
       prepared,
       await _subscriptionRequestInputs(profile),
     );
+    if (cancellation?.cancelled == true) {
+      throw const SubscriptionUpdateCancelled();
+    }
     return profile.commitPreparedUpdate(
       prepared,
       validate: (path, _) => _core.validateConfig(path),
       acceptLosses: true,
       allowProviderLabel: true,
       importPolicy: approval.rememberedPolicy,
+      isCurrent: cancellation == null ? null : () => !cancellation.cancelled,
+      onCommitted: onCommitted,
     );
   }
 
@@ -740,9 +893,20 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<Profile> _fromShareLinks(Profile profile, List<String> links) async {
+  Future<Profile> _fromShareLinks(
+    Profile profile,
+    List<String> links, {
+    SubscriptionCancellation? cancellation,
+    Future<void> Function(Profile saved)? onCommitted,
+  }) async {
+    if (cancellation?.cancelled == true) {
+      throw const SubscriptionUpdateCancelled();
+    }
     final appLocalizations = currentAppLocalizations;
     final decoded = await _core.decodeShareLinks(links);
+    if (cancellation?.cancelled == true) {
+      throw const SubscriptionUpdateCancelled();
+    }
     final taken = {...reservedCustomProxyNames};
     final proxies = <Map<String, dynamic>>[];
     for (final (index, definitions) in decoded.indexed) {
@@ -768,6 +932,10 @@ class ProfilesAction extends _$ProfilesAction {
         .saveFile(
           utf8.encode(config),
           validate: (path, _) => _core.validateConfig(path),
+          isCurrent: cancellation == null
+              ? null
+              : () => !cancellation.cancelled,
+          onCommitted: onCommitted,
         );
   }
 

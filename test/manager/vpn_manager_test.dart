@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
@@ -8,10 +9,24 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _TestSetupSession extends SetupSession {
+  _TestSetupSession(this.active);
+
+  final bool active;
+
+  @override
+  SetupSessionState build() => SetupSessionState(
+    active: active,
+    step: SetupStep.profile,
+    draft: const SetupDraft(coverage: SetupCoverage.local),
+  );
+}
 
 class _RestartRecordingSetupAction extends SetupAction {
   int restarts = 0;
@@ -31,6 +46,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         setupActionProvider.overrideWith(() => setupAction),
+        setupSessionProvider.overrideWith(() => _TestSetupSession(false)),
         // Bypassing private addresses computes the routes in Isolate.run, which
         // the fake clock never lets finish.
         networkSettingProvider.overrideWithBuild(
@@ -106,6 +122,25 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.restart));
     await tester.pump();
     expect(setupAction.restarts, 1);
+    await drainTimers(tester);
+  });
+
+  testWidgets('setup mode suppresses the VPN restart tip only while active', (
+    tester,
+  ) async {
+    await pumpVpnManager(tester);
+    startService();
+    final setupSession = container.read(setupSessionProvider.notifier);
+    setupSession.state = setupSession.state.copyWith(active: true);
+
+    updateVpn((state) => state.copyWith(ipv6: !state.ipv6));
+    await settle(tester);
+    expect(tip(), findsNothing);
+
+    setupSession.state = setupSession.state.copyWith(active: false);
+    updateVpn((state) => state.copyWith(allowBypass: !state.allowBypass));
+    await settle(tester);
+    expect(tip(), findsOneWidget);
     await drainTimers(tester);
   });
 

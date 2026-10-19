@@ -1066,6 +1066,107 @@
       }
     }
   },
+  "setupTitle": "Первое подключение",
+  "setupLanguageTitle": "Выберите язык",
+  "setupLanguageDescription": "Выберите язык, чтобы прочитать соглашение. Позже его можно изменить.",
+  "setupLanguageContinue": "Продолжить",
+  "setupProfileTitle": "Добавьте профиль подключения",
+  "setupProfileDescription": "ReClash не предоставляет серверы. Добавьте подписку или конфигурацию вашего провайдера.",
+  "setupProfileReady": "Профиль готов",
+  "setupProfileImport": "Импортировать профиль",
+  "setupProfileLinkHint": "Ссылка подписки или подключения",
+  "setupProfileSkip": "Настроить позже",
+  "setupCoverageTitle": "Какие приложения подключать?",
+  "setupCoverageDescription": "Выберите охват. Какие соединения идут через сервер, решают правила профиля.",
+  "setupCoverageAll": "Все приложения",
+  "setupCoverageAllDescription": "TUN перехватывает трафик устройства. Система может запросить разрешение.",
+  "setupCoverageSystem": "Системный прокси",
+  "setupCoverageSystemDescription": "Приложения без поддержки системного прокси идут напрямую.",
+  "setupCoverageLocal": "Настрою приложения вручную",
+  "setupCoverageLocalDescription": "Укажите адрес локального прокси в каждом приложении, которое хотите подключить.",
+  "setupCoverageAndroidDescription": "Android запросит разрешение на VPN-подключение. Выбор приложений доступен в настройках доступа.",
+  "setupCoverageNote": "Перехват всего трафика не означает отправку всего через сервер. Прямые маршруты сохраняются.",
+  "setupRegionConfirm": "Применить настройки региона",
+  "setupRegionDescription": "Регион предложен по данным устройства, а не по выбранному языку интерфейса. Примените его, если он соответствует вашей сети.",
+  "setupRegionNeutral": "Оставить настройки профиля",
+  "setupCheckAction": "Проверить подключение",
+  "setupCheckingTitle": "Подключаемся и проверяем",
+  "setupCheckingDescription": "Проверяем один выбранный маршрут. Системные запросы разрешений открываются отдельно.",
+  "setupPhaseCore": "Запуск ядра",
+  "setupPhaseProfile": "Применение профиля",
+  "setupPhaseConnection": "Запуск подключения",
+  "setupPhaseRoute": "Проверка маршрута",
+  "setupPhaseExit": "Подтверждение выхода",
+  "setupPhaseServices": "Проверка сервисов",
+  "setupPhaseAlternatives": "Поиск другого сервера",
+  "setupStepStatus": "{step} из {total}",
+  "setupCheckLimit": "Результат относится к этому маршруту, а не ко всем приложениям и сайтам.",
+  "setupConnectedTitle": "Подключение работает",
+  "setupConnectedDescription": "Выбранный маршрут ответил. Трафик следует правилам профиля.",
+  "setupPartialTitle": "Подключение работает с ограничениями",
+  "setupPartialDescription": "Маршрут ответил, но часть проверок не удалось подтвердить.",
+  "setupUnconfirmedTitle": "Подключение не подтверждено",
+  "setupUnconfirmedDescription": "Подключение запущено, но выбранный маршрут не дал достаточных результатов.",
+  "setupFailedTitle": "Не удалось подключиться",
+  "setupSavedTitle": "Подключимся позже",
+  "setupSavedDescription": "Ваш выбор сохранён. Подключение можно включить с главной страницы, когда будете готовы.",
+  "setupAutoConnect": "Подключаться при открытии ReClash",
+  "setupAutoConnectDescription": "Включать это подключение вместе с приложением.",
+  "setupSaveWithoutConnection": "Сохранить без подключения",
+  "setupRepeat": "Проверить ещё раз",
+  "setupTryServer": "Попробовать {server}",
+  "setupAlternativeDescription": "Этот сервер ответил на отдельную пробу. Переключитесь и проверьте весь маршрут снова.",
+  "setupReport": "Отчёт проверки",
+  "setupReceipt": "Ваше подключение",
+  "setupReceiptProfile": "Профиль",
+  "setupReceiptCoverage": "Охват",
+  "setupReceiptCheck": "Проверка",
+  "setupNotChecked": "Не проверено",
+  "setupConfirmed": "Подтверждено",
+  "setupUnavailable": "Нет ответа",
+  "setupStoppedTitle": "Проверка остановлена",
+  "setupStoppedDescription": "Ваш выбор сохранён. Прежнее подключение не остановлено.",
+  "setupPermissionTitle": "Нужно разрешение системы",
+  "setupPermissionDescription": "Разрешите подключение в системном окне, повторите проверку или выберите другой охват.",
+  "setupLocalTitle": "Локальный прокси готов",
+  "setupLocalDescription": "Укажите этот адрес в нужных приложениях. Проверка не подтверждает, что приложения уже настроены.",
+  "setupCopyProxy": "Скопировать адрес прокси",
+  "setupErrorDetails": "Подробности",
+  "setupSaveError": "Не удалось сохранить выбор. Попробуйте ещё раз.",
+  "setupSafeMode": "В безопасном режиме реальное подключение не запускается. Сохраните настройку или проверьте её в обычной сборке.",
+  "setupResume": "Продолжить настройку",
+  "setupRestart": "Настроить подключение",
+  "setupLaterNote": "Настройка не завершена; подключение не проверено.",
+  "setupProfileCount": "Доступно профилей: {count}",
+  "setupAgeKeyDescription": "Этот профиль зашифрован. Укажите ключ age, чтобы продолжить.",
+  "setupFinishDescription": "Любой выбор можно изменить в настройках.",
+  "setupRouteChanged": "Маршрут изменился во время проверки. Проверьте текущее подключение ещё раз.",
+  "setupUnknownError": "Операция не завершилась. Повторите попытку или откройте подробности.",
+  "setupRequestPermission": "Разрешить подключение",
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "updateChannel": "Канал обновлений",
   "updateChannelRelease": "Релиз",
   "updateChannelPre": "Предрелиз",

@@ -207,32 +207,38 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m85(count) => "${count} 项设置";
 
-  static String m86(link) => "无法从 ${link} 中读取代理";
+  static String m86(count) => "可用配置：${count} 个";
 
-  static String m87(label) => "${label}只能是一项";
+  static String m87(step, total) => "第 ${step} 步，共 ${total} 步";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "尝试 ${server}";
+
+  static String m89(link) => "无法从 ${link} 中读取代理";
+
+  static String m90(label) => "${label}只能是一项";
+
+  static String m91(client, format, count) =>
       "以 ${client} 获取：${format}，代理节点 ${count} 个。";
 
-  static String m89(sections) => "以下源配置部分不会迁移：${sections}。";
+  static String m92(sections) => "以下源配置部分不会迁移：${sections}。";
 
-  static String m90(count, format) => "可从 ${format} 导入 ${count} 个代理节点。";
+  static String m93(count, format) => "可从 ${format} 导入 ${count} 个代理节点。";
 
-  static String m91(count) => "无法转换的节点数：${count}。";
+  static String m94(count) => "无法转换的节点数：${count}。";
 
-  static String m92(count) => "${count} 个结果";
+  static String m95(count) => "${count} 个结果";
 
-  static String m93(value) => "峰值 ${value}";
+  static String m96(value) => "峰值 ${value}";
 
-  static String m94(value) => "累计 ${value}";
+  static String m97(value) => "累计 ${value}";
 
-  static String m95(version) => "已安装版本：${version}";
+  static String m98(version) => "已安装版本：${version}";
 
-  static String m96(label) => "${label}必须为URL";
+  static String m99(label) => "${label}必须为URL";
 
-  static String m97(count) => "${count} 年前";
+  static String m100(count) => "${count} 年前";
 
-  static String m98(count) => "${count} 年前";
+  static String m101(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1455,7 +1461,136 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("设置项"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "此配置已加密。请输入 age 密钥以继续。",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "此服务器通过了单独探测。切换后重新检查完整路由。",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage("打开 ReClash 时连接"),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "随应用一起启动此连接。",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage("检查连接"),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "结果仅适用于此路由，并不代表所有应用或网站。",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "我们会检查一条选定路由。系统权限请求会单独显示。",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage("正在连接并检查"),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("已确认"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "选定路由已响应。流量将遵循配置规则。",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage("连接正常"),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage("复制代理地址"),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage("所有应用"),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN 会接管设备流量。系统可能会请求权限。",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android 将请求创建 VPN 连接。应用选择可在访问设置中进行。",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "选择使用 ReClash 的应用。哪些连接使用服务器由配置规则决定。",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage("我将手动配置应用"),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "在每个需要连接的应用中设置本地代理地址。",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "接管所有流量不代表将所有流量发送到服务器。直连路由仍会保留。",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage("系统代理"),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "不支持系统代理的应用将直接连接。",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage("要连接哪些应用？"),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("详情"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage("连接需要处理"),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "您可以在设置中更改任何选择。",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("继续"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "阅读条款前，请先选择语言。之后可以更改。",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage("选择语言"),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage("设置未完成；连接尚未检查。"),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "在要连接的应用中设置此地址。此检查无法证明这些应用已完成配置。",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage("本地代理已就绪"),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("未检查"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "路由已响应，但部分检查无法确认。",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage("已连接，但有限制"),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "请在系统提示中允许连接后重试，或选择其他范围。",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage("需要权限"),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage("正在查找其他服务器"),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage("正在启动连接"),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage("正在启动核心"),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage("正在确认出口"),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage("正在应用配置"),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage("正在检查路由"),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage("正在检查服务"),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash 不提供服务器。请导入服务提供商的订阅或配置。",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage("导入配置"),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage("订阅或分享链接"),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("配置已就绪"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage("稍后设置"),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage("添加连接配置"),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("您的连接"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("检查"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("范围"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("配置"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage("使用这些区域设置"),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "推荐区域来自此设备，而非界面语言。仅当其符合您的网络情况时才应用。",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage("保留配置默认值"),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("重新检查"),
+    "setupReport": MessageLookupByLibrary.simpleMessage("检查报告"),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage("允许连接"),
+    "setupRestart": MessageLookupByLibrary.simpleMessage("设置连接"),
+    "setupResume": MessageLookupByLibrary.simpleMessage("继续设置"),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "检查期间路由已更改。请重新检查当前连接。",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "安全模式不会启动真实连接。请保存设置，或在普通构建中测试。",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage("无法保存您的选择，请重试。"),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "保存但不连接",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "已保存您的选择。准备好后可从控制面板连接。",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage("稍后连接"),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "已保存您的选择。之前的连接未停止。",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage("检查已停止"),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("首次连接"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("无响应"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "连接已启动，但选定路由未提供足够结果。",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage("未能确认连接"),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "操作未完成。请重试或查看详情。",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage("无法从链接中读取代理"),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
@@ -1473,7 +1608,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "这里只能填写一条链接，多条请在列表的快速编辑中填写",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("尺寸"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("跳过证书验证"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("跳过域名"),
@@ -1579,7 +1714,7 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("导入会忽略部分源数据。应用前请检查损失内容。"),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("使用此客户端"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage("Core 已解析此结果，但尚未保存或应用。"),
     "subscriptionCompatibilityRateLimited":
@@ -1641,7 +1776,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "未知格式",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "没有可导入的受支持代理节点。",
     ),
@@ -1650,11 +1785,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionImportRememberConsentHint":
         MessageLookupByLibrary.simpleMessage("仅适用于此来源、格式及已同意的损失类型。新的损失需要再次确认。"),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "检查订阅导入",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("订阅"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("账户"),
@@ -1728,7 +1863,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("固定"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("已固定"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("重启内核"),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("执行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("分区"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("设置"),
@@ -1744,8 +1879,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("上传总量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
     "traffic": MessageLookupByLibrary.simpleMessage("流量"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
@@ -1782,7 +1917,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新。"),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序。"),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("当前已是最新版本。"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("更新内容"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage("暂无发布说明。"),
@@ -1797,7 +1932,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1821,8 +1956,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

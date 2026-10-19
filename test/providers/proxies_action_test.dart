@@ -557,6 +557,21 @@ void main() {
       });
     });
 
+    test('silence propagates switch error and rolls selection back', () async {
+      when(() => core.changeProxy(any())).thenThrow(StateError('core down'));
+      final container = buildContainer(profile: _selectedProfile('HK-00'));
+
+      await expectLater(
+        actionOf(
+          container,
+        ).changeProxy(groupName: 'Proxy', proxyName: 'HK-01', silence: true),
+        throwsStateError,
+      );
+      expect(container.read(currentProfileProvider)?.selectedMap, {
+        'Proxy': 'HK-00',
+      });
+    });
+
     test('rolls the selection back when the switch fails', () async {
       when(() => core.changeProxy(any())).thenThrow(StateError('core down'));
       final container = buildContainer(profile: _selectedProfile('HK-00'));

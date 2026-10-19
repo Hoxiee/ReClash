@@ -8,6 +8,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/sheet.dart';
 import 'package:reclash/views/region.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +54,8 @@ void main() {
     Size size = const Size(1200, 1800),
     Locale locale = const Locale('en'),
     bool isAndroid = false,
+    RegionView? regionView,
+    bool inSheet = false,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -64,11 +67,26 @@ void main() {
         container: container,
         child: TestApp(
           locale: locale,
-          child: RegionView(isAndroid: isAndroid),
+          child: inSheet
+              ? Builder(
+                  builder: (context) => FilledButton(
+                    onPressed: () => showFormSheet<void>(
+                      context: context,
+                      builder: (_) =>
+                          regionView ?? RegionView(isAndroid: isAndroid),
+                    ),
+                    child: const Text('Open region'),
+                  ),
+                )
+              : regionView ?? RegionView(isAndroid: isAndroid),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    if (inSheet) {
+      await tester.tap(find.text('Open region'));
+      await tester.pumpAndSettle();
+    }
   }
 
   Future<void> choose(WidgetTester tester, String name) async {
@@ -79,7 +97,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Finder applyButton() => find.widgetWithText(FilledButton, 'Apply region');
+  Finder applyButton() => find.ancestor(
+    of: find.byTooltip('Apply region'),
+    matching: find.byType(IconButton),
+  );
 
   testWidgets(
     'a device suggestion remains a preview until explicitly applied',
@@ -87,14 +108,105 @@ void main() {
       await pumpRegionView(tester);
       expect(find.text('Suggested: China · time zone'), findsOneWidget);
       expect(find.text('Country profile: Off'), findsOneWidget);
-      expect(tester.widget<FilledButton>(applyButton()).onPressed, isNull);
+      expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
       await tester.tap(find.text('Use detected region'));
       await tester.pumpAndSettle();
       expect(find.text('Country profile: China'), findsOneWidget);
       expect(container.read(appSettingProvider).regionCode, isNull);
-      await tester.tap(applyButton());
+      await tester.tap(find.byTooltip('Apply region'));
       await tester.pumpAndSettle();
       expect(container.read(appSettingProvider).regionCode, 'CN');
+    },
+  );
+
+  testWidgets(
+    'wizard region preview cancellation leaves actual region unchanged',
+    (tester) async {
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      String? applied;
+      await pumpRegionView(
+        tester,
+        regionView: RegionView(
+          initialRegionCode: null,
+          onApply: (code) => applied = code,
+        ),
+        inSheet: true,
+      );
+
+      expect(find.text('Country profile: Off'), findsOneWidget);
+      await choose(tester, 'Iran');
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(applied, isNull);
+      expect(container.read(appSettingProvider).regionCode, 'RU');
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('wizard region apply calls back with draft only', (tester) async {
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(regionCode: 'RU'));
+    final stored = container.read(configProvider);
+    final effective = container.read(regionalNetworkConfigProvider);
+    final applied = <String?>[];
+    await pumpRegionView(
+      tester,
+      regionView: RegionView(initialRegionCode: null, onApply: applied.add),
+    );
+
+    expect(find.text('Country profile: Off'), findsOneWidget);
+    await choose(tester, 'Iran');
+    expect(container.read(appSettingProvider).regionCode, 'RU');
+    expect(container.read(configProvider), stored);
+    expect(container.read(regionalNetworkConfigProvider), effective);
+    await tester.tap(find.byTooltip('Apply region'));
+    await tester.pumpAndSettle();
+
+    expect(applied, ['IR']);
+    expect(container.read(appSettingProvider).regionCode, 'RU');
+    expect(container.read(configProvider), stored);
+    expect(container.read(regionalNetworkConfigProvider), effective);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets(
+    'region sheet keeps close left and apply right without footer copies',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      container.read(viewSizeProvider.notifier).value = const Size(1200, 900);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: Builder(
+              builder: (context) => FilledButton(
+                onPressed: () => showFormSheet<void>(
+                  context: context,
+                  builder: (_) => const RegionView(),
+                ),
+                child: const Text('Open region'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open region'));
+      await tester.pumpAndSettle();
+
+      final close = find.byTooltip('Close');
+      final apply = applyButton();
+      expect(close, findsOneWidget);
+      expect(apply, findsOneWidget);
+      expect(tester.getCenter(close).dx, lessThan(tester.getCenter(apply).dx));
+      expect(find.widgetWithText(FilledButton, 'Apply region'), findsNothing);
+      expect(find.widgetWithText(TextButton, 'Cancel'), findsNothing);
     },
   );
 
@@ -103,7 +215,7 @@ void main() {
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(regionCode: 'RU'));
     await pumpRegionView(tester);
-    expect(tester.widget<FilledButton>(applyButton()).onPressed, isNull);
+    expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
     expect(container.read(appSettingProvider).regionCode, 'RU');
   });
 
@@ -115,12 +227,12 @@ void main() {
           .update((state) => state.copyWith(regionCode: 'RU'));
       final stored = container.read(configProvider);
       final effective = container.read(regionalNetworkConfigProvider);
-      await pumpRegionView(tester);
+      await pumpRegionView(tester, inSheet: true);
       await choose(tester, 'Iran');
       expect(find.text('Country profile: Iran'), findsOneWidget);
       expect(container.read(configProvider), stored);
       expect(container.read(regionalNetworkConfigProvider), effective);
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox.shrink());
       expect(container.read(configProvider), stored);
@@ -139,7 +251,7 @@ void main() {
     await choose(tester, 'Off');
     expect(container.read(appSettingProvider).regionCode, 'RU');
     expect(find.textContaining('Profile defaults'), findsWidgets);
-    await tester.tap(applyButton());
+    await tester.tap(find.byTooltip('Apply region'));
     await tester.pumpAndSettle();
     expect(container.read(appSettingProvider).regionCode, isNull);
     expect(container.read(regionalNetworkConfigProvider).patchConfig, raw);
@@ -162,7 +274,7 @@ void main() {
     await tester.tap(find.byTooltip('Update'));
     await tester.pumpAndSettle();
     expect(find.text('Country profile: Egypt'), findsOneWidget);
-    expect(tester.widget<FilledButton>(applyButton()).onPressed, isNotNull);
+    expect(tester.widget<IconButton>(applyButton()).onPressed, isNotNull);
   });
 
   testWidgets('detection arriving later never replaces the manual draft', (
@@ -194,7 +306,7 @@ void main() {
       );
       await tester.tap(find.text('Выбрать определённый регион'));
       await tester.pumpAndSettle();
-      final button = find.widgetWithText(FilledButton, 'Применить регион');
+      final button = find.byTooltip('Применить регион');
       await tester.ensureVisible(button);
       await tester.pumpAndSettle();
       await tester.tap(button);

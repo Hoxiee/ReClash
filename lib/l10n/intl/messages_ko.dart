@@ -213,33 +213,39 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m85(count) => "${Intl.plural(count, other: '설정 ${count}개')}";
 
-  static String m86(link) => "읽을 수 있는 프록시가 없습니다: ${link}";
+  static String m86(count) => "사용 가능한 프로필 ${count}개";
 
-  static String m87(label) => "${label}은(는) 하나만 입력해야 합니다";
+  static String m87(step, total) => "${total}개 중 ${step}단계";
 
-  static String m88(client, format, count) =>
+  static String m88(server) => "${server} 사용해 보기";
+
+  static String m89(link) => "읽을 수 있는 프록시가 없습니다: ${link}";
+
+  static String m90(label) => "${label}은(는) 하나만 입력해야 합니다";
+
+  static String m91(client, format, count) =>
       "${client}로 수신: ${format}, 프록시 노드 ${count}개.";
 
-  static String m89(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
+  static String m92(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
 
-  static String m90(count, format) =>
+  static String m93(count, format) =>
       "${format}에서 프록시 노드 ${count}개를 가져올 수 있습니다.";
 
-  static String m91(count) => "변환할 수 없는 노드: ${count}개.";
+  static String m94(count) => "변환할 수 없는 노드: ${count}개.";
 
-  static String m92(count) => "결과 ${count}개";
+  static String m95(count) => "결과 ${count}개";
 
-  static String m93(value) => "최고 ${value}";
+  static String m96(value) => "최고 ${value}";
 
-  static String m94(value) => "합계 ${value}";
+  static String m97(value) => "합계 ${value}";
 
-  static String m95(version) => "설치된 버전: ${version}";
+  static String m98(version) => "설치된 버전: ${version}";
 
-  static String m96(label) => "${label}은(는) URL이어야 합니다";
+  static String m99(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m97(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m100(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
-  static String m98(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m101(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1578,7 +1584,142 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingEntries": MessageLookupByLibrary.simpleMessage("설정"),
     "settings": MessageLookupByLibrary.simpleMessage("설정"),
     "settingsCount": m85,
-    "shareLinkUnreadable": m86,
+    "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
+      "이 프로필은 암호화되어 있습니다. 계속하려면 age 키를 입력하세요.",
+    ),
+    "setupAlternativeDescription": MessageLookupByLibrary.simpleMessage(
+      "이 서버는 별도 검사에 응답했습니다. 전환한 뒤 전체 경로를 다시 확인하세요.",
+    ),
+    "setupAutoConnect": MessageLookupByLibrary.simpleMessage("ReClash 실행 시 연결"),
+    "setupAutoConnectDescription": MessageLookupByLibrary.simpleMessage(
+      "앱과 함께 이 연결을 시작합니다.",
+    ),
+    "setupCheckAction": MessageLookupByLibrary.simpleMessage("연결 확인"),
+    "setupCheckLimit": MessageLookupByLibrary.simpleMessage(
+      "결과는 모든 앱이나 웹사이트가 아니라 이 경로에만 해당합니다.",
+    ),
+    "setupCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "선택한 경로 하나를 확인합니다. 시스템 권한 요청은 별도로 표시됩니다.",
+    ),
+    "setupCheckingTitle": MessageLookupByLibrary.simpleMessage("연결 및 확인 중"),
+    "setupConfirmed": MessageLookupByLibrary.simpleMessage("확인됨"),
+    "setupConnectedDescription": MessageLookupByLibrary.simpleMessage(
+      "선택한 경로가 응답했습니다. 트래픽은 프로필 규칙을 따릅니다.",
+    ),
+    "setupConnectedTitle": MessageLookupByLibrary.simpleMessage("연결이 작동합니다"),
+    "setupCopyProxy": MessageLookupByLibrary.simpleMessage("프록시 주소 복사"),
+    "setupCoverageAll": MessageLookupByLibrary.simpleMessage("모든 앱"),
+    "setupCoverageAllDescription": MessageLookupByLibrary.simpleMessage(
+      "TUN이 기기 트래픽을 가로챕니다. 시스템에서 권한을 요청할 수 있습니다.",
+    ),
+    "setupCoverageAndroidDescription": MessageLookupByLibrary.simpleMessage(
+      "Android에서 VPN 연결 생성 권한을 요청합니다. 앱 선택은 접근 설정에서 할 수 있습니다.",
+    ),
+    "setupCoverageDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash를 사용할 앱을 선택하세요. 서버를 사용하는 연결은 프로필 규칙에 따라 결정됩니다.",
+    ),
+    "setupCoverageLocal": MessageLookupByLibrary.simpleMessage("앱을 직접 설정하겠습니다"),
+    "setupCoverageLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "연결할 각 앱에 로컬 프록시 주소를 설정하세요.",
+    ),
+    "setupCoverageNote": MessageLookupByLibrary.simpleMessage(
+      "모든 트래픽을 가로채도 전부 서버로 전송되는 것은 아닙니다. 직접 경로는 유지됩니다.",
+    ),
+    "setupCoverageSystem": MessageLookupByLibrary.simpleMessage("시스템 프록시"),
+    "setupCoverageSystemDescription": MessageLookupByLibrary.simpleMessage(
+      "시스템 프록시를 지원하지 않는 앱은 직접 연결됩니다.",
+    ),
+    "setupCoverageTitle": MessageLookupByLibrary.simpleMessage("어떤 앱을 연결할까요?"),
+    "setupErrorDetails": MessageLookupByLibrary.simpleMessage("세부정보"),
+    "setupFailedTitle": MessageLookupByLibrary.simpleMessage("연결에 확인이 필요합니다"),
+    "setupFinishDescription": MessageLookupByLibrary.simpleMessage(
+      "설정에서 모든 선택을 변경할 수 있습니다.",
+    ),
+    "setupLanguageContinue": MessageLookupByLibrary.simpleMessage("계속"),
+    "setupLanguageDescription": MessageLookupByLibrary.simpleMessage(
+      "약관을 읽기 전에 언어를 선택하세요. 나중에 변경할 수 있습니다.",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage("언어 선택"),
+    "setupLaterNote": MessageLookupByLibrary.simpleMessage(
+      "설정이 완료되지 않았으며 연결도 확인되지 않았습니다.",
+    ),
+    "setupLocalDescription": MessageLookupByLibrary.simpleMessage(
+      "연결하려는 앱에 이 주소를 설정하세요. 이 확인은 앱 설정 여부를 보장하지 않습니다.",
+    ),
+    "setupLocalTitle": MessageLookupByLibrary.simpleMessage("로컬 프록시 준비 완료"),
+    "setupNotChecked": MessageLookupByLibrary.simpleMessage("확인 안 됨"),
+    "setupPartialDescription": MessageLookupByLibrary.simpleMessage(
+      "경로가 응답했지만 일부 확인을 완료하지 못했습니다.",
+    ),
+    "setupPartialTitle": MessageLookupByLibrary.simpleMessage("연결됨, 제한 있음"),
+    "setupPermissionDescription": MessageLookupByLibrary.simpleMessage(
+      "시스템 메시지에서 연결을 허용하고 다시 시도하거나 다른 범위를 선택하세요.",
+    ),
+    "setupPermissionTitle": MessageLookupByLibrary.simpleMessage("권한이 필요합니다"),
+    "setupPhaseAlternatives": MessageLookupByLibrary.simpleMessage(
+      "다른 서버 찾는 중",
+    ),
+    "setupPhaseConnection": MessageLookupByLibrary.simpleMessage("연결 시작 중"),
+    "setupPhaseCore": MessageLookupByLibrary.simpleMessage("코어 시작 중"),
+    "setupPhaseExit": MessageLookupByLibrary.simpleMessage("출구 확인 중"),
+    "setupPhaseProfile": MessageLookupByLibrary.simpleMessage("프로필 적용 중"),
+    "setupPhaseRoute": MessageLookupByLibrary.simpleMessage("경로 확인 중"),
+    "setupPhaseServices": MessageLookupByLibrary.simpleMessage("서비스 확인 중"),
+    "setupProfileCount": m86,
+    "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash는 서버를 제공하지 않습니다. 제공업체의 구독 또는 구성을 가져오세요.",
+    ),
+    "setupProfileImport": MessageLookupByLibrary.simpleMessage("프로필 가져오기"),
+    "setupProfileLinkHint": MessageLookupByLibrary.simpleMessage("구독 또는 공유 링크"),
+    "setupProfileReady": MessageLookupByLibrary.simpleMessage("프로필 준비 완료"),
+    "setupProfileSkip": MessageLookupByLibrary.simpleMessage("나중에 설정"),
+    "setupProfileTitle": MessageLookupByLibrary.simpleMessage("연결 프로필 추가"),
+    "setupReceipt": MessageLookupByLibrary.simpleMessage("내 연결"),
+    "setupReceiptCheck": MessageLookupByLibrary.simpleMessage("확인"),
+    "setupReceiptCoverage": MessageLookupByLibrary.simpleMessage("범위"),
+    "setupReceiptProfile": MessageLookupByLibrary.simpleMessage("프로필"),
+    "setupRegionConfirm": MessageLookupByLibrary.simpleMessage("이 지역 설정 사용"),
+    "setupRegionDescription": MessageLookupByLibrary.simpleMessage(
+      "추천 지역은 인터페이스 언어가 아니라 이 기기에서 가져옵니다. 네트워크와 일치할 때만 적용하세요.",
+    ),
+    "setupRegionNeutral": MessageLookupByLibrary.simpleMessage("프로필 기본값 유지"),
+    "setupRepeat": MessageLookupByLibrary.simpleMessage("다시 확인"),
+    "setupReport": MessageLookupByLibrary.simpleMessage("확인 보고서"),
+    "setupRequestPermission": MessageLookupByLibrary.simpleMessage("연결 허용"),
+    "setupRestart": MessageLookupByLibrary.simpleMessage("연결 설정"),
+    "setupResume": MessageLookupByLibrary.simpleMessage("설정 계속하기"),
+    "setupRouteChanged": MessageLookupByLibrary.simpleMessage(
+      "확인 중 경로가 변경되었습니다. 현재 연결을 다시 확인하세요.",
+    ),
+    "setupSafeMode": MessageLookupByLibrary.simpleMessage(
+      "안전 모드에서는 실제 연결을 시작하지 않습니다. 설정을 저장하거나 일반 빌드에서 테스트하세요.",
+    ),
+    "setupSaveError": MessageLookupByLibrary.simpleMessage(
+      "선택 항목을 저장하지 못했습니다. 다시 시도하세요.",
+    ),
+    "setupSaveWithoutConnection": MessageLookupByLibrary.simpleMessage(
+      "연결하지 않고 저장",
+    ),
+    "setupSavedDescription": MessageLookupByLibrary.simpleMessage(
+      "선택 항목이 저장되었습니다. 준비되면 대시보드에서 연결할 수 있습니다.",
+    ),
+    "setupSavedTitle": MessageLookupByLibrary.simpleMessage("나중에 연결"),
+    "setupStepStatus": m87,
+    "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
+      "선택 항목이 저장되었습니다. 이전 연결은 중지되지 않았습니다.",
+    ),
+    "setupStoppedTitle": MessageLookupByLibrary.simpleMessage("확인 중지됨"),
+    "setupTitle": MessageLookupByLibrary.simpleMessage("첫 연결"),
+    "setupTryServer": m88,
+    "setupUnavailable": MessageLookupByLibrary.simpleMessage("응답 없음"),
+    "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
+      "연결은 시작했지만 선택한 경로에서 충분한 결과를 얻지 못했습니다.",
+    ),
+    "setupUnconfirmedTitle": MessageLookupByLibrary.simpleMessage("연결 확인 안 됨"),
+    "setupUnknownError": MessageLookupByLibrary.simpleMessage(
+      "작업이 완료되지 않았습니다. 다시 시도하거나 세부정보를 여세요.",
+    ),
+    "shareLinkUnreadable": m89,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "링크에서 읽을 수 있는 프록시가 없습니다",
     ),
@@ -1602,7 +1743,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "여기에는 링크를 하나만 입력하세요. 여러 개는 목록의 빠른 편집에서 편집하세요",
     ),
-    "singleValueTip": m87,
+    "singleValueTip": m90,
     "size": MessageLookupByLibrary.simpleMessage("크기"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("인증서 검증 건너뛰기"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("건너뛸 도메인"),
@@ -1720,7 +1861,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("이 클라이언트 사용"),
-    "subscriptionCompatibilityPrepared": m88,
+    "subscriptionCompatibilityPrepared": m91,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core가 이 결과를 분석했습니다. 아직 저장하거나 적용하지 않았습니다.",
@@ -1786,7 +1927,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "알 수 없는 형식",
     ),
-    "subscriptionImportIgnoredSections": m89,
+    "subscriptionImportIgnoredSections": m92,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "가져올 수 있는 지원 프록시 노드가 없습니다.",
     ),
@@ -1797,11 +1938,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "이 소스, 형식 및 동의한 손실 유형에만 적용됩니다. 새로운 손실에는 다시 동의해야 합니다.",
         ),
-    "subscriptionImportReviewSummary": m90,
+    "subscriptionImportReviewSummary": m93,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "구독 가져오기 검토",
     ),
-    "subscriptionImportSkippedNodes": m91,
+    "subscriptionImportSkippedNodes": m94,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("구독"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("계정"),
@@ -1887,7 +2028,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
-    "toolsResults": m92,
+    "toolsResults": m95,
     "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
@@ -1903,8 +2044,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m93,
-    "trafficTotal": m94,
+    "trafficPeak": m96,
+    "trafficTotal": m97,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -1949,7 +2090,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "패키지 설치 프로그램을 시작할 수 없습니다.",
     ),
-    "updateInstalledVersion": m95,
+    "updateInstalledVersion": m98,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "이미 최신 버전을 사용 중입니다.",
     ),
@@ -1970,7 +2111,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m96,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1994,8 +2135,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m97,
-    "yearsAgoShort": m98,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

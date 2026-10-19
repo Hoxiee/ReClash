@@ -320,8 +320,9 @@ void main() {
       await tester.tap(find.text('Iran').last);
       await tester.pumpAndSettle();
       expect(container.read(appSettingProvider).regionCode, initialRegion);
-      await tester.ensureVisible(find.text('Cancel'));
-      await tester.tap(find.text('Cancel'));
+      final back = find.byTooltip('Back');
+      await tester.ensureVisible(back);
+      await tester.tap(back);
       await tester.pumpAndSettle();
       expect(container.read(toolsSessionProvider).path, [
         const ToolRoute(ToolPage.application),
@@ -335,7 +336,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Iran').last);
       await tester.pumpAndSettle();
-      final apply = find.widgetWithText(FilledButton, 'Apply region');
+      final apply = find.byTooltip('Apply region');
       await tester.ensureVisible(apply);
       await tester.tap(apply);
       await tester.pumpAndSettle();

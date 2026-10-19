@@ -9,6 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/route_state.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     with CoreEventListener {
   CoreController get _core => ref.read(coreHandlerProvider);
 
+  bool get _setupActive => ref.read(setupSessionProvider).active;
+
   @override
   Widget build(BuildContext context) {
     return widget.child;
@@ -39,18 +42,20 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     // A rejected profile stays selected on purpose: silently reverting to
     // the previous one hides the error and looks like the switch was lost.
     ref.listenManual(currentProfileIdProvider, (prev, next) {
-      if (prev == next) return;
+      if (prev == next || _setupActive) return;
       runAfterFrame(() {
-        unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+        if (!_setupActive) {
+          unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+        }
       });
     });
     ref.listenManual(updateParamsProvider, (prev, next) {
-      if (prev != next) {
+      if (prev != next && !_setupActive) {
         ref.read(setupActionProvider.notifier).updateConfigDebounce();
       }
     });
     ref.listenManual(setupPatchProvider, (prev, next) {
-      if (prev != next) {
+      if (prev != next && !_setupActive) {
         ref
             .read(setupActionProvider.notifier)
             .applyProfileDebounce(silence: true);
@@ -102,7 +107,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void onLog(Log log) {
     ref.read(logsProvider.notifier).add(log);
-    if (log.logLevel == LogLevel.error) {
+    if (log.logLevel == LogLevel.error && !_setupActive) {
       throttler.call(
         FunctionTag.coreErrorNotifier,
         () => dialogs.showNotifier(log.payload, level: MessageLevel.error),
@@ -115,15 +120,17 @@ class _CoreContainerState extends ConsumerState<CoreManager>
 
   @override
   void onDialerLoop(String proxyName) {
-    throttler.call(
-      FunctionTag.dialerLoopNotifier,
-      () => dialogs.showNotifier(
-        currentAppLocalizations.dialerProxyLoopStopped(proxyName),
-        level: MessageLevel.error,
-      ),
-      duration: const Duration(seconds: 3),
-      fire: true,
-    );
+    if (!_setupActive) {
+      throttler.call(
+        FunctionTag.dialerLoopNotifier,
+        () => dialogs.showNotifier(
+          currentAppLocalizations.dialerProxyLoopStopped(proxyName),
+          level: MessageLevel.error,
+        ),
+        duration: const Duration(seconds: 3),
+        fire: true,
+      );
+    }
     super.onDialerLoop(proxyName);
   }
 
@@ -169,7 +176,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       return;
     }
     ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+    if (!_setupActive &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       context.showNotifier(message, level: MessageLevel.error);
     }
     super.onCrash(message);

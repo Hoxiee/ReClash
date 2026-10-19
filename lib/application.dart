@@ -11,6 +11,8 @@ import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/setup.dart';
+import 'package:reclash/views/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -77,7 +79,7 @@ class ApplicationState extends ConsumerState<Application> {
       } else {
         exit(0);
       }
-      _autoUpdateProfilesTask();
+      if (!ref.read(setupSessionProvider).active) _autoUpdateProfilesTask();
       _initLink();
       if (!safeModeBuild) {
         unawaited(app?.initShortcuts());
@@ -88,6 +90,10 @@ class ApplicationState extends ConsumerState<Application> {
   void _initLink() {
     linkManager.initAppLinksListen((url) async {
       unawaited(window?.show());
+      if (ref.read(setupSessionProvider).active) {
+        ref.read(setupSessionProvider.notifier).offerLink(url);
+        return;
+      }
       final message = currentAppLocalizations.createProfileFromUrlTip(url);
       final parts = message.split(url);
       final res = await dialogs.showMessage(
@@ -116,8 +122,10 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _autoUpdateProfilesTask() {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
-      await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
-      await ref.read(resourcesActionProvider.notifier).autoUpdate();
+      if (!ref.read(setupSessionProvider).active) {
+        await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
+        await ref.read(resourcesActionProvider.notifier).autoUpdate();
+      }
       if (!mounted) {
         return;
       }
@@ -140,6 +148,16 @@ class ApplicationState extends ConsumerState<Application> {
 
   @override
   Widget build(context) {
+    ref.listen(setupSessionProvider.select((state) => state.active), (
+      previous,
+      active,
+    ) {
+      if (previous == true && !active) {
+        unawaited(bootstrap.completeSetup());
+        _autoUpdateProfilesTaskTimer?.cancel();
+        _autoUpdateProfilesTask();
+      }
+    });
     return Consumer(
       builder: (_, ref, child) {
         final locale = ref.watch(
@@ -178,10 +196,9 @@ class ApplicationState extends ConsumerState<Application> {
           theme: watchAppTheme(ref, Brightness.light),
           darkTheme: watchAppTheme(ref, Brightness.dark),
           themeAnimationStyle: AnimationStyle.noAnimation,
-          home: KeyboardInsetHold(child: child!),
+          home: const KeyboardInsetHold(child: ApplicationRoot()),
         );
       },
-      child: const HomePage(),
     );
   }
 
@@ -191,4 +208,14 @@ class ApplicationState extends ConsumerState<Application> {
     _autoUpdateProfilesTaskTimer?.cancel();
     super.dispose();
   }
+}
+
+class ApplicationRoot extends ConsumerWidget {
+  const ApplicationRoot({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      ref.watch(setupSessionProvider.select((state) => state.active))
+      ? const SetupWizard()
+      : const HomePage();
 }
