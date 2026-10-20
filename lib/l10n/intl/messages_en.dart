@@ -641,21 +641,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — the DPI-bypass tool",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — the client this is built on",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("DPI bypass"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Client foundation"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — extra features",
+      "Additional features",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — provider features and ideas",
+      "Provider features and ideas",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — the proxy core",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Proxy core"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Holds the start button and can\'t be removed",
     ),
@@ -1359,7 +1353,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsTest": MessageLookupByLibrary.simpleMessage("Logs test"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP loopback exemption"),
     "loose": MessageLookupByLibrary.simpleMessage("Loose"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Made by"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Maintainer"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Match case"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage("Match source IP"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
@@ -1764,7 +1758,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Result"),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Author and maintainer"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route addresses"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Route exclude addresses",
