@@ -679,21 +679,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Yaratish"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Yaratilgan vaqt"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — DPI chetlab oʻtish vositasi",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — ilova shu mijoz asosida qurilgan",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("DPI chetlab oʻtish"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Ilova asosi"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — qoʻshimcha funksiyalar",
+      "Qoʻshimcha funksiyalar",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — provayder funksiyalari va gʻoyalari",
+      "Provayder funksiyalari va gʻoyalari",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — proksi yadrosi",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Proksi yadrosi"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Ishga tushirish tugmasini oʻz ichiga oladi; uni olib tashlab boʻlmaydi",
     ),
@@ -1425,7 +1419,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsTest": MessageLookupByLibrary.simpleMessage("Jurnal testi"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP loopback istisnosi"),
     "loose": MessageLookupByLibrary.simpleMessage("Keng"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Muallif"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Meynteyner"),
     "matchCase": MessageLookupByLibrary.simpleMessage(
       "Katta-kichik harflarni hisobga olish",
     ),
@@ -1868,7 +1862,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Natija"),
     "retry": MessageLookupByLibrary.simpleMessage("Qayta urinish"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Muallif va meynteyner"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Marshrut manzillari"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Marshrutdan chiqarilgan manzillar",

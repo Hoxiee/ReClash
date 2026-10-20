@@ -692,21 +692,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Crear"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Fecha de creación"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — la herramienta anti-DPI",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — el cliente sobre el que está construido",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("Evasión de DPI"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Base del cliente"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — funciones adicionales",
+      "Funciones adicionales",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — funciones e ideas para proveedores",
+      "Funciones e ideas para proveedores",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — el núcleo del proxy",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Núcleo proxy"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Contiene el botón de inicio y no se puede quitar",
     ),
@@ -1448,7 +1442,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Exención de loopback de UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Amplio"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Hecho por"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Mantenedor"),
     "matchCase": MessageLookupByLibrary.simpleMessage(
       "Coincidir mayúsculas y minúsculas",
     ),
@@ -1885,7 +1879,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Resultado"),
     "retry": MessageLookupByLibrary.simpleMessage("Reintentar"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Autor y mantenedor"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Direcciones de ruta"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Direcciones excluidas de la ruta",

@@ -666,21 +666,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Жасау"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Жасалу уақыты"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — DPI айналып өту құралы",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — осы қолданбаның негізі",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("DPI айналып өту"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Қолданбаның негізі"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — қосымша мүмкіндіктер",
+      "Қосымша мүмкіндіктер",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — провайдер мүмкіндіктері мен идеялары",
+      "Провайдер мүмкіндіктері мен идеялары",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — прокси ядросы",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Прокси ядросы"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Бастау түймесін ұстайды және алынып тасталмайды",
     ),
@@ -1408,7 +1402,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsTest": MessageLookupByLibrary.simpleMessage("Журнал тесті"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP loopback ерекшелігі"),
     "loose": MessageLookupByLibrary.simpleMessage("Кең"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Жасаған"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Мейнтейнер"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Регистрді ескеру"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage(
       "Бастапқы IP-ді сәйкестендіру",
@@ -1835,7 +1829,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Нәтиже"),
     "retry": MessageLookupByLibrary.simpleMessage("Қайталау"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Автор және мейнтейнер"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Бағыттау адрестері"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Маршруттан шығарылған мекенжайлар",

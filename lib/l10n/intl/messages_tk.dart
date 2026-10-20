@@ -667,21 +667,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Döret"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Döredilen wagt"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — DPI böwüsme guraly",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("DPI böwüsme"),
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — bu programmanyň binýady",
+      "Programmanyň binýady",
     ),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — goşmaça funksiýalar",
+      "Goşmaça funksiýalar",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — üpjün edijilere degişli funksiýalar we pikirler",
+      "Üpjün edijilere degişli funksiýalar we pikirler",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — proksi çekirdegi",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Proksi çekirdegi"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Başlat düwmesini saklaýar, ýok edip bolmaýar",
     ),
@@ -1395,7 +1391,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logsTest": MessageLookupByLibrary.simpleMessage("Hasaba alyş synagy"),
     "loopback": MessageLookupByLibrary.simpleMessage("UWP loopback aýrylmasy"),
     "loose": MessageLookupByLibrary.simpleMessage("Giň"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Ýasajan"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Meýnteýner"),
     "matchCase": MessageLookupByLibrary.simpleMessage(
       "Registr tapawudyny sakla",
     ),
@@ -1810,7 +1806,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("Dikeltildi"),
     "result": MessageLookupByLibrary.simpleMessage("Netije"),
     "retry": MessageLookupByLibrary.simpleMessage("Gaýtadan synanyş"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Awtor we meýnteýner"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Marşrut salgylary"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Ugurlamadan çykarylan salgylar",

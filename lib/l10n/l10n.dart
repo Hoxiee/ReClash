@@ -7836,19 +7836,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Made by`
-  String get madeBy {
-    return Intl.message('Made by', name: 'madeBy', desc: '', args: []);
-  }
-
-  /// `Author and maintainer`
-  String get roleAuthor {
-    return Intl.message(
-      'Author and maintainer',
-      name: 'roleAuthor',
-      desc: '',
-      args: [],
-    );
+  /// `Maintainer`
+  String get maintainer {
+    return Intl.message('Maintainer', name: 'maintainer', desc: '', args: []);
   }
 
   /// `Gratitude`
@@ -7866,54 +7856,44 @@ class AppLocalizations {
     );
   }
 
-  /// `FlClash — the client this is built on`
+  /// `Client foundation`
   String get creditFlClash {
     return Intl.message(
-      'FlClash — the client this is built on',
+      'Client foundation',
       name: 'creditFlClash',
       desc: '',
       args: [],
     );
   }
 
-  /// `FlClashX — provider features and ideas`
+  /// `Provider features and ideas`
   String get creditFlClashX {
     return Intl.message(
-      'FlClashX — provider features and ideas',
+      'Provider features and ideas',
       name: 'creditFlClashX',
       desc: '',
       args: [],
     );
   }
 
-  /// `FlClash-Patched — extra features`
+  /// `Additional features`
   String get creditFlClashPatched {
     return Intl.message(
-      'FlClash-Patched — extra features',
+      'Additional features',
       name: 'creditFlClashPatched',
       desc: '',
       args: [],
     );
   }
 
-  /// `mihomo — the proxy core`
+  /// `Proxy core`
   String get creditMihomo {
-    return Intl.message(
-      'mihomo — the proxy core',
-      name: 'creditMihomo',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Proxy core', name: 'creditMihomo', desc: '', args: []);
   }
 
-  /// `ByeDPI — the DPI-bypass tool`
+  /// `DPI bypass`
   String get creditByeDpi {
-    return Intl.message(
-      'ByeDPI — the DPI-bypass tool',
-      name: 'creditByeDpi',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('DPI bypass', name: 'creditByeDpi', desc: '', args: []);
   }
 
   /// `License`

@@ -687,21 +687,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Créer"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Date de création"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — l\'outil de contournement DPI",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — le client sur lequel ceci est construit",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("Contournement DPI"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Client de base"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — fonctions supplémentaires",
+      "Fonctions supplémentaires",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — fonctions et idées pour les fournisseurs",
+      "Fonctions et idées pour les fournisseurs",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — le cœur du proxy",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Cœur du proxy"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Contient le bouton de démarrage et ne peut pas être retiré",
     ),
@@ -1449,7 +1443,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Exemption de bouclage UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Aérée"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Réalisé par"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Mainteneur"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Respecter la casse"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage(
       "Faire correspondre l’IP source",
@@ -1886,7 +1880,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Résultat"),
     "retry": MessageLookupByLibrary.simpleMessage("Réessayer"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Auteur et mainteneur"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Adresses de route"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Adresses de route exclues",

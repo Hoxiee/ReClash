@@ -660,21 +660,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "create": MessageLookupByLibrary.simpleMessage("Создать"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
-    "creditByeDpi": MessageLookupByLibrary.simpleMessage(
-      "ByeDPI — инструмент обхода DPI",
-    ),
-    "creditFlClash": MessageLookupByLibrary.simpleMessage(
-      "FlClash — клиент, на котором всё построено",
-    ),
+    "creditByeDpi": MessageLookupByLibrary.simpleMessage("Обход DPI"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage("Основа приложения"),
     "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
-      "FlClash-Patched — дополнительные функции",
+      "Дополнительные функции",
     ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
-      "FlClashX — функции и идеи для работы с провайдерами",
+      "Функции и идеи для провайдеров",
     ),
-    "creditMihomo": MessageLookupByLibrary.simpleMessage(
-      "mihomo — прокси-ядро",
-    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("Прокси-ядро"),
     "currentOutboundDesc": MessageLookupByLibrary.simpleMessage(
       "Содержит кнопку запуска, удалить нельзя",
     ),
@@ -1402,7 +1396,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Снятие ограничения loopback для UWP",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Свободный"),
-    "madeBy": MessageLookupByLibrary.simpleMessage("Автор"),
+    "maintainer": MessageLookupByLibrary.simpleMessage("Мейнтейнер"),
     "matchCase": MessageLookupByLibrary.simpleMessage("Учитывать регистр"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage(
       "Сопоставлять IP источника",
@@ -1833,7 +1827,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "result": MessageLookupByLibrary.simpleMessage("Результат"),
     "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
-    "roleAuthor": MessageLookupByLibrary.simpleMessage("Автор и мейнтейнер"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Адреса маршрутов"),
     "routeExcludeAddress": MessageLookupByLibrary.simpleMessage(
       "Исключённые адреса маршрутов",

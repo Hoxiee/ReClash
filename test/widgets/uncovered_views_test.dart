@@ -19,6 +19,7 @@ import 'package:reclash/views/config/rules.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/profiles/extend/standard.dart';
 import 'package:reclash/views/proxies/setting.dart';
+import 'package:reclash/widgets/update_sheet.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
@@ -243,8 +244,16 @@ void main() {
     await tester.tap(find.text('Check for updates'));
     await tester.pump();
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byType(UpdateSheet), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const ValueKey('update-offer-accept')),
+          )
+          .onPressed,
+      isNull,
+    );
 
-    await tester.tap(find.text('Check for updates'));
     await tester.pump(const Duration(milliseconds: 100));
     expect(adapter.requests, 1);
 
@@ -264,8 +273,9 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsNothing);
     expect(find.text(currentAppLocalizations.updateNoUpdates), findsOneWidget);
     expect(tester.takeException(), null);
-    await tester.tap(find.byType(TextButton).first);
+    await tester.tap(find.byTooltip(currentAppLocalizations.close));
     await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsNothing);
   });
 
   testWidgets('scripts view lists scripts and offers the add menu', (
