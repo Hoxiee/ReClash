@@ -305,8 +305,6 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     0 => const _ThemeSettingsPage(
       id: 'theme',
       items: [
-        ThemeLivePreview(),
-        SizedBox(height: 16),
         _ThemeModeItem(),
         SizedBox(height: 16),
         _PureBlackItem(),
@@ -318,8 +316,6 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     _ => const _ThemeSettingsPage(
       id: 'interface',
       items: [
-        ThemeLivePreview(),
-        SizedBox(height: 16),
         _NavigationBarItem(),
         SizedBox(height: 16),
         _TabAnimationItem(),
@@ -410,6 +406,10 @@ class _ThemeSettingsPageState extends State<_ThemeSettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: context.appBarInset),
+        if (ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
+          ThemeLivePreview(),
+          SizedBox(height: 16),
+        ],
         ...widget.items,
         SizedBox(height: BottomInsetScope.of(context) + 32),
       ],

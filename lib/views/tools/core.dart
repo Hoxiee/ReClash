@@ -126,13 +126,19 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
         ],
       ),
       trailing: system.isDesktop
-          ? IconButton.outlined(
-              tooltip: l10n.restart,
-              onPressed: _restartPending || status == CoreStatus.connecting
-                  ? null
-                  : _restart,
-              icon: const GlyphIcon(AppGlyphs.reset),
-            ).withAppTooltip()
+          ? TonalButtonTheme(
+              size: TonalButtonSize.section,
+              child: ElasticPress(
+                enabled: !_restartPending && status != CoreStatus.connecting,
+                child: IconButton(
+                  tooltip: l10n.restart,
+                  onPressed: _restartPending || status == CoreStatus.connecting
+                      ? null
+                      : _restart,
+                  icon: const GlyphIcon(AppGlyphs.reset),
+                ).withAppTooltip(),
+              ),
+            )
           : null,
       onPressed: widget.onOpen,
     );

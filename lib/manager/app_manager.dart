@@ -1,16 +1,21 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _sidebarWallpaperOpacity = 0.5;
+const _sidebarWallpaperBlur = 18.0;
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
@@ -200,6 +205,51 @@ class _Sidebar extends ConsumerWidget {
   }
 }
 
+class _SidebarBackground extends StatefulWidget {
+  const _SidebarBackground({
+    required this.wallpaperActive,
+    required this.windowBlur,
+    required this.child,
+  });
+
+  final bool wallpaperActive;
+  final bool windowBlur;
+  final Widget child;
+
+  @override
+  State<_SidebarBackground> createState() => _SidebarBackgroundState();
+}
+
+class _SidebarBackgroundState extends State<_SidebarBackground> {
+  final GlobalKey _panelKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final color = widget.wallpaperActive
+        ? colorScheme.chromeSurface.withValues(alpha: _sidebarWallpaperOpacity)
+        : widget.windowBlur
+        ? colorScheme.chromeSurface.withValues(alpha: kSidebarBlurOpacity)
+        : colorScheme.chromeSurface;
+    final panel = Material(
+      key: _panelKey,
+      color: color,
+      shape: BorderDirectional(end: Divider.createBorderSide(context)),
+      child: widget.child,
+    );
+    if (!widget.wallpaperActive) return panel;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: _sidebarWallpaperBlur,
+          sigmaY: _sidebarWallpaperBlur,
+        ),
+        child: panel,
+      ),
+    );
+  }
+}
+
 class AppSidebarContainer extends ConsumerWidget {
   final Widget child;
 
@@ -237,55 +287,59 @@ class AppSidebarContainer extends ConsumerWidget {
     final viewMode = navigationState.viewMode;
     final currentIndex = navigationState.currentIndex;
     final blur = ref.watch(windowBlurProvider);
+    final wallpaperActive = ref.watch(effectiveWallpaperImageProvider) != null;
     final page = SurfaceLevel.page.colorOf(context.colorScheme);
-    final chrome = context.colorScheme.chromeSurface;
     void onSelected(int index) {
       _handleToPage(ref, navigationItems[index].label);
     }
 
     final hasSidebar = viewMode != ViewMode.mobile;
     final isLtr = Directionality.of(context) == TextDirection.ltr;
-    return Container(
-      color: blur ? Colors.transparent : page,
-      child: Row(
-        children: [
-          AnimatedVisibility.sidebar(
-            visible: hasSidebar,
-            child: Material(
-              color: blur
-                  ? chrome.withValues(alpha: kSidebarBlurOpacity)
-                  : chrome,
-              shape: BorderDirectional(end: Divider.createBorderSide(context)),
-              child: MediaQuery.removePadding(
-                context: context,
-                removeLeft: !isLtr,
-                removeRight: isLtr,
-                child: _Sidebar(
-                  items: navigationItems,
-                  currentIndex: currentIndex,
-                  viewMode: viewMode,
-                  onSelected: onSelected,
+    return PageBackground(
+      baseColor: blur && !wallpaperActive ? Colors.transparent : page,
+      child: Container(
+        color: blur || wallpaperActive ? Colors.transparent : page,
+        child: Row(
+          children: [
+            AnimatedVisibility.sidebar(
+              visible: hasSidebar,
+              child: _SidebarBackground(
+                wallpaperActive: wallpaperActive,
+                windowBlur: blur,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeLeft: !isLtr,
+                  removeRight: isLtr,
+                  child: _Sidebar(
+                    items: navigationItems,
+                    currentIndex: currentIndex,
+                    viewMode: viewMode,
+                    onSelected: onSelected,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: ClipRect(
-              child: LayoutBuilder(
-                builder: (_, constraints) {
-                  _updateSideBarWidth(ref, constraints.maxWidth);
-                  return MediaQuery.removePadding(
-                    context: context,
-                    removeLeft: hasSidebar && isLtr,
-                    removeRight: hasSidebar && !isLtr,
-                    child: child,
-                  );
-                },
+            Expanded(
+              flex: 1,
+              child: ClipRect(
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    _updateSideBarWidth(ref, constraints.maxWidth);
+                    return ColoredBox(
+                      color: wallpaperActive ? Colors.transparent : page,
+                      child: MediaQuery.removePadding(
+                        context: context,
+                        removeLeft: hasSidebar && isLtr,
+                        removeRight: hasSidebar && !isLtr,
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

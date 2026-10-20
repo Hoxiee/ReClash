@@ -562,6 +562,30 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('live previews follow the window layout in every category', (
+      tester,
+    ) async {
+      for (final size in [
+        const Size(390, 844),
+        const Size(1400, 2400),
+        const Size(390, 844),
+      ]) {
+        await pumpThemeView(tester, size: size);
+        for (final label in ['Theme', 'Background', 'Interface']) {
+          await tester.tap(destination(label));
+          await tester.pumpAndSettle();
+          expect(
+            find.byType(ThemeLivePreview),
+            size.width <= maxMobileWidth ? findsOneWidget : findsNothing,
+          );
+          if (label != 'Background') {
+            expect(find.byType(MiniScreenThumb), findsWidgets);
+          }
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
     testWidgets('search reveal selects the tab and focuses its setting', (
       tester,
     ) async {
@@ -879,7 +903,7 @@ void main() {
     testWidgets('the preview switches to the destination tapped', (
       tester,
     ) async {
-      await pumpThemeView(tester, interface: true);
+      await pumpThemeView(tester, interface: true, size: const Size(390, 844));
       Finder inPreview(Type type) => find.descendant(
         of: find.byType(ThemeLivePreview),
         matching: find.byType(type),
