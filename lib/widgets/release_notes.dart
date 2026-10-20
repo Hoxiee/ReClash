@@ -13,10 +13,12 @@ class ReleaseNotes extends StatefulWidget {
   const ReleaseNotes({
     super.key,
     required this.body,
+    required this.tag,
     required this.fullReleaseUrl,
   });
 
   final String? body;
+  final String tag;
   final String fullReleaseUrl;
 
   @override
@@ -35,7 +37,9 @@ class _ReleaseNotesState extends State<ReleaseNotes> {
   @override
   Widget build(BuildContext context) {
     final version = parseReleaseChangelog(widget.body);
-    if (version != null) return _structuredNotes(context, version);
+    if (version != null && version.tag == widget.tag) {
+      return _structuredNotes(context, version);
+    }
 
     final lines = _filterReleaseMarkdown(widget.body);
     if (lines.isEmpty) {
@@ -309,12 +313,20 @@ class _MarkdownBlocksState extends State<_MarkdownBlocks> {
     if (visible < blocks.length && visible > 0 && blocks[visible - 1] is Text) {
       visible--;
     }
+    final warnings = blocks
+        .whereType<_NoteSection>()
+        .where((block) => block.isWarning)
+        .toList();
+    final preview = blocks
+        .take(visible)
+        .where((block) => !warnings.contains(block));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       spacing: 14,
       children: [
-        ...blocks.take(visible),
+        ...warnings,
+        ...preview,
         if (visible < blocks.length)
           _NotesDisclosure(onPressed: () => setState(() => _expanded = true)),
       ],

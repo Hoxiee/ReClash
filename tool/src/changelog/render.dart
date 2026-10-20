@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:reclash/common/update_summary.dart';
+
 import 'models.dart';
 
 const changelogTitle = '# Changelog';
@@ -55,7 +57,10 @@ String renderMarkdown(Changelog changelog) {
   return buffer.toString();
 }
 
-String renderRelease(ChangelogVersion version) {
+String renderRelease(ChangelogVersion version, {ReleaseSummary? summary}) {
+  if (summary != null && summary.tag != version.tag) {
+    throw const FormatException('Release summary must match the release tag');
+  }
   final buffer = StringBuffer()..writeln(releaseBeginMarker);
   if (version.isEmpty) {
     buffer.writeln('- $emptyVersionNote');
@@ -71,6 +76,7 @@ String renderRelease(ChangelogVersion version) {
     ..writeln(releaseEndMarker)
     ..writeln()
     ..write(renderReleaseJson(version));
+  if (summary != null) buffer.write(renderReleaseSummary(summary));
   return buffer.toString();
 }
 

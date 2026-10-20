@@ -15,7 +15,6 @@ import android.os.Looper
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -25,6 +24,9 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.reclash.R
+import com.reclash.updates.InvalidUpdateApkException
+import com.reclash.updates.UpdateInstaller
+import com.reclash.updates.UpdateInstallStatus
 import com.reclash.common.Components
 import com.reclash.common.GlobalState
 import com.reclash.common.PendingCallback
@@ -49,8 +51,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-
-private class InvalidUpdateApkException(message: String) : Exception(message)
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -236,23 +236,51 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
 
             "canRequestPackageInstalls" -> {
-                result.success(canRequestPackageInstalls())
+                result.success(UpdateInstaller.canRequestInstalls(GlobalState.application))
             }
 
-            "installApk" -> {
+            "updateInstallBlockedByVpn" -> {
+                result.success(UpdateInstaller.blockedByVpn())
+            }
+
+            "openUpdateInstallPermission" -> replyUpdate(result) {
+                UpdateInstaller.openPermission(activity)
+            }
+
+            "updateInstalledVersion" -> replyUpdate(result) {
+                val context = GlobalState.application
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+                    ?: throw IllegalStateException("Installed app version is unavailable")
+            }
+
+            "updateInstallStatus" -> replyUpdate(result) {
+                UpdateInstaller.status(GlobalState.application).wireValue
+            }
+
+            "continueUpdateInstall" -> replyUpdate(result) {
+                UpdateInstaller.continueInstall(GlobalState.application, activity)
+            }
+
+            "verifyUpdateApk", "installApk" -> {
                 val path = call.argument<String>("path")
                 val version = call.argument<String>("version")
-                if (path.isNullOrEmpty() || version.isNullOrEmpty()) {
-                    result.error("INVALID_ARGUMENT", "APK path and version are required", null)
+                val sha256 = call.argument<String>("sha256")
+                if (path.isNullOrEmpty() || version.isNullOrEmpty() || sha256.isNullOrEmpty()) {
+                    result.error("INVALID_ARGUMENT", "APK path, version and SHA-256 are required", null)
                 } else {
-                    try {
-                        result.success(installApk(path, version))
-                    } catch (error: InvalidUpdateApkException) {
-                        GlobalState.log("installApk validation failed: $error")
-                        result.error("APK_INVALID", error.message, null)
-                    } catch (error: Exception) {
-                        GlobalState.log("installApk failed: $error")
-                        result.error("APK_INSTALL_FAILED", error.toString(), null)
+                    replyUpdate(result) {
+                        if (call.method == "verifyUpdateApk") {
+                            UpdateInstaller.verify(GlobalState.application, path, version, sha256)
+                            null
+                        } else {
+                            UpdateInstaller.install(
+                                GlobalState.application,
+                                path,
+                                version,
+                                sha256,
+                                call.argument<Boolean>("automatic") == true,
+                            )
+                        }
                     }
                 }
             }
@@ -314,99 +342,27 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             QuickAction.TOGGLE -> R.drawable.ic_shortcut_toggle
         }
 
-    private fun canRequestPackageInstalls(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
-            GlobalState.application.packageManager.canRequestPackageInstalls()
-
-    private fun installApk(path: String, expectedVersion: String): String {
-        val context = GlobalState.application
-        val activity = activity ?: throw IllegalStateException("Activity is unavailable")
-        val updateDirectory = File(context.filesDir, "app-updates").canonicalFile
-        val apkFile = File(path).canonicalFile
-        if (apkFile.parentFile != updateDirectory || !apkFile.isFile) {
-            throw InvalidUpdateApkException("APK path is outside the update directory")
+    private fun replyUpdate(result: Result, block: suspend () -> Any?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                result.success(block())
+            } catch (error: InvalidUpdateApkException) {
+                GlobalState.log("Update verification failed: $error")
+                result.error("APK_INVALID", error.message, null)
+            } catch (error: Exception) {
+                GlobalState.log("Update installation failed: $error")
+                result.error("APK_INSTALL_FAILED", error.toString(), null)
+            }
         }
-        verifyUpdateApk(context, apkFile, expectedVersion)
-        if (!canRequestPackageInstalls()) {
-            activity.startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    "package:${context.packageName}".toUri(),
-                ),
-            )
-            return "permissionRequired"
-        }
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileProvider",
-            apkFile,
-        )
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "application/vnd.android.package-archive")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val installers = context.packageManager.queryIntentActivities(
-            intent,
-            PackageManager.MATCH_DEFAULT_ONLY,
-        )
-        for (installer in installers) {
-            context.grantUriPermission(
-                installer.activityInfo.packageName,
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            )
-        }
-        activity.startActivity(intent)
-        return "started"
     }
 
-    @Suppress("DEPRECATION")
-    private fun verifyUpdateApk(context: Context, file: File, expectedVersion: String) {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            PackageManager.GET_SIGNING_CERTIFICATES
-        } else {
-            PackageManager.GET_SIGNATURES
+    @Volatile
+    private var updateEngineAttached = false
+
+    private val updateInstallObserver: (UpdateInstallStatus) -> Unit = { status ->
+        onMainThread {
+            if (updateEngineAttached) channel.invokeMethod("updateInstallChanged", status.wireValue)
         }
-        val update = context.packageManager.getPackageArchiveInfo(file.path, flags)
-            ?: throw InvalidUpdateApkException("APK metadata is invalid")
-        val installed = context.packageManager.getPackageInfo(context.packageName, flags)
-        val updateVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            update.longVersionCode
-        } else {
-            update.versionCode.toLong()
-        }
-        val installedVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            installed.longVersionCode
-        } else {
-            installed.versionCode.toLong()
-        }
-        if (update.packageName != context.packageName ||
-            update.versionName?.removePrefix("v") != expectedVersion.removePrefix("v") ||
-            updateVersionCode <= installedVersionCode
-        ) {
-            throw InvalidUpdateApkException("APK package identity or version does not match")
-        }
-        val trusted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val updateSigning = update.signingInfo
-                ?: throw InvalidUpdateApkException("APK signing metadata is missing")
-            val installedSigning = installed.signingInfo
-                ?: throw InvalidUpdateApkException("Installed signing metadata is missing")
-            if (updateSigning.hasMultipleSigners() || installedSigning.hasMultipleSigners()) {
-                updateSigning.apkContentsSigners.map { it.toCharsString() }.toSet() ==
-                    installedSigning.apkContentsSigners.map { it.toCharsString() }.toSet()
-            } else {
-                val installedSigner = installedSigning.apkContentsSigners
-                    .map { it.toCharsString() }.toSet()
-                installedSigner.isNotEmpty() && installedSigner.all { signer ->
-                    updateSigning.signingCertificateHistory.any {
-                        it.toCharsString() == signer
-                    }
-                }
-            }
-        } else {
-            update.signatures?.map { it.toCharsString() }?.toSet() ==
-                installed.signatures?.map { it.toCharsString() }?.toSet()
-        }
-        if (!trusted) throw InvalidUpdateApkException("APK signing certificate does not match")
     }
 
     private fun openAppSettings(): Boolean {
@@ -564,6 +520,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         channel =
             MethodChannel(flutterPluginBinding.binaryMessenger, "${Components.PACKAGE_NAME}/app")
         channel.setMethodCallHandler(this)
+        updateEngineAttached = true
+        UpdateInstaller.observe(updateInstallObserver)
         watchPackageChanges(flutterPluginBinding.applicationContext)
     }
 
@@ -579,6 +537,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        updateEngineAttached = false
+        UpdateInstaller.removeObserver(updateInstallObserver)
         packageChangeContext?.unregisterReceiver(packageChangeReceiver)
         packageChangeContext = null
         channel.setMethodCallHandler(null)

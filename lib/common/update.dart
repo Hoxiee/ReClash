@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/package.dart';
 import 'package:reclash/enum/enum.dart';
+import 'update_summary.dart';
 
 const _releaseConnectTimeout = Duration(seconds: 12);
 const _releaseReceiveTimeout = Duration(seconds: 30);
@@ -28,6 +30,11 @@ class AppUpdateRelease {
 
   String get tag => data['tag_name'] as String;
   String? get body => data['body'] is String ? data['body'] as String : null;
+  ReleaseSummary? get summary => parseReleaseSummary(body, tag: tag);
+  bool get prerelease => isPrereleaseRelease(
+    tag: tag,
+    flaggedPrerelease: data['prerelease'] == true,
+  );
   List<dynamic> get assets =>
       data['assets'] is List ? data['assets'] as List<dynamic> : const [];
 }

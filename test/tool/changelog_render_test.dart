@@ -1,3 +1,4 @@
+import 'package:reclash/common/update_summary.dart';
 import 'package:test/test.dart';
 
 import '../../tool/src/changelog/builder.dart';
@@ -133,6 +134,64 @@ void main() {
   });
 
   group('renderRelease', () {
+    const summary = ReleaseSummary(
+      tag: 'v0.8.96',
+      locales: {
+        'en': ReleaseSummaryLocale(
+          headline: 'An authored release',
+          spotlight: ReleaseHighlight(
+            title: 'A --> B',
+            description: 'Written independently of the changelog.',
+          ),
+        ),
+      },
+    );
+
+    test('keeps the full changelog alongside an authored summary', () {
+      final release = version(
+        groups: [
+          entryGroup(ChangelogType.breaking, [
+            ('af20769', 'lib', 'Backups need re-import'),
+          ]),
+        ],
+      );
+      final without = renderRelease(release);
+      final withSummary = renderRelease(release, summary: summary);
+      expect(withSummary, startsWith(without));
+      expect(without, isNot(contains(releaseSummaryMarker)));
+      expect(
+        decodeChangelog(
+          _payloadOf(withSummary),
+        ).versions.single.groups.single.entries.single.text,
+        'Backups need re-import',
+      );
+      expect(
+        parseReleaseSummary(
+          withSummary,
+          tag: release.tag,
+        )?.locales['en']?.spotlight.title,
+        'A --> B',
+      );
+      final start =
+          withSummary.indexOf(releaseSummaryMarker) +
+          releaseSummaryMarker.length;
+      final end = withSummary.indexOf('-->', start);
+      final payload = withSummary.substring(start, end);
+      expect(payload, isNot(contains('-->')));
+      expect(
+        payload,
+        contains(String.fromCharCodes([92, 117, 48, 48, 51, 101])),
+      );
+      expect(withSummary.substring(end), '-->\n');
+    });
+
+    test('refuses a summary authored for another tag', () {
+      expect(
+        () => renderRelease(version(tag: 'v0.8.97'), summary: summary),
+        throwsFormatException,
+      );
+    });
+
     test('wraps entries in the app readable markers', () {
       final body = renderRelease(
         version(

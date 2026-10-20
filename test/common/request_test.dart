@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/app_update.dart';
 import 'package:reclash/common/request.dart';
 import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
@@ -63,6 +65,68 @@ class _HostAdapter implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+}
+
+class _UpdateAdapter implements HttpClientAdapter {
+  _UpdateAdapter(this.respond);
+
+  final FutureOr<ResponseBody> Function(RequestOptions options) respond;
+  final requests = <RequestOptions>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+    return respond(options);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+String _updateDigest(String value) =>
+    sha256.convert(utf8.encode(value)).toString();
+
+ResponseBody _updateResponse(
+  String value, {
+  int status = HttpStatus.ok,
+  String? range,
+  String? etag,
+  String? modified,
+}) => ResponseBody.fromString(
+  value,
+  status,
+  headers: {
+    HttpHeaders.contentLengthHeader: ['${utf8.encode(value).length}'],
+    if (range != null) HttpHeaders.contentRangeHeader: [range],
+    if (etag != null) HttpHeaders.etagHeader: [etag],
+    if (modified != null) HttpHeaders.lastModifiedHeader: [modified],
+  },
+);
+
+Future<void> _savePartial(
+  String target, {
+  required String contents,
+  String complete = 'apk-bytes',
+  String url = 'https://updates.example/update.apk',
+  String? etag = '"apk-1"',
+  String? modified,
+}) async {
+  await File('$target.tmp').writeAsString(contents);
+  await File('$target.tmp.json').writeAsString(
+    jsonEncode({
+      'schemaVersion': 1,
+      'url': url,
+      'sha256': _updateDigest(complete),
+      'size': utf8.encode(complete).length,
+      'total': utf8.encode(complete).length,
+      'etag': etag,
+      'lastModified': modified,
+    }),
+  );
 }
 
 void main() {
@@ -196,6 +260,25 @@ void main() {
       expect(await File('$target.tmp').exists(), isFalse);
     });
 
+    test('creates the destination directory without resume opt-in', () async {
+      final target = '${directory.path}/new/cache/update-v1.apk';
+      final client = Request()
+        ..updateDownloadAdapter = _UpdateAdapter(
+          (_) => _updateResponse('apk-bytes'),
+        );
+      expect(
+        await client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+        ),
+        isNull,
+      );
+      expect(await File(target).readAsString(), 'apk-bytes');
+      expect(await File('$target.tmp').exists(), isFalse);
+    });
+
     test('removes a partial temporary file after a failed download', () async {
       final client = Request()
         ..updateDownloadAdapter = _HostAdapter({
@@ -213,6 +296,495 @@ void main() {
       expect(await File(target).exists(), isFalse);
       expect(await File('$target.tmp').exists(), isFalse);
     });
+
+    test('resumes a pinned partial with Range and a strong If-Range', () async {
+      final target = '${directory.path}/update-v1.apk';
+      await _savePartial(target, contents: 'apk-');
+      final adapter = _UpdateAdapter(
+        (_) => _updateResponse(
+          'bytes',
+          status: HttpStatus.partialContent,
+          range: 'bytes 4-8/9',
+          etag: '"apk-1"',
+        ),
+      );
+      final client = Request()..updateDownloadAdapter = adapter;
+      final progress = <(int, int)>[];
+      final error = await client.downloadUpdateFile(
+        Uri.https('updates.example', '/update.apk'),
+        target,
+        onProgress: (received, total) => progress.add((received, total)),
+        cancelToken: CancelToken(),
+        resume: true,
+        expectedSha256: _updateDigest('apk-bytes'),
+        expectedSize: 9,
+      );
+
+      expect(error, isNull);
+      expect(
+        adapter.requests.single.headers[HttpHeaders.rangeHeader],
+        'bytes=4-',
+      );
+      expect(
+        adapter.requests.single.headers[HttpHeaders.ifRangeHeader],
+        '"apk-1"',
+      );
+      expect(progress.first, (4, 9));
+      expect(progress.last, (9, 9));
+      expect(await File(target).readAsString(), 'apk-bytes');
+      expect(await File('$target.tmp').exists(), isFalse);
+      expect(await File('$target.tmp.json').exists(), isFalse);
+    });
+
+    test('uses Last-Modified when no strong ETag was recorded', () async {
+      final target = '${directory.path}/update-v1.apk';
+      const modified = 'Wed, 21 Oct 2015 07:28:00 GMT';
+      await _savePartial(
+        target,
+        contents: 'apk-',
+        etag: null,
+        modified: modified,
+      );
+      final adapter = _UpdateAdapter(
+        (_) => _updateResponse(
+          'bytes',
+          status: HttpStatus.partialContent,
+          range: 'bytes 4-8/9',
+          modified: modified,
+        ),
+      );
+      final client = Request()..updateDownloadAdapter = adapter;
+      expect(
+        await client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        ),
+        isNull,
+      );
+      expect(
+        adapter.requests.single.headers[HttpHeaders.ifRangeHeader],
+        modified,
+      );
+    });
+
+    test(
+      'flushes a paused partial and resumes it without redownloading',
+      () async {
+        final target = '${directory.path}/update-v1.apk';
+        final source = StreamController<Uint8List>();
+        addTearDown(source.close);
+        final adapter = _UpdateAdapter(
+          (_) => ResponseBody(
+            source.stream,
+            HttpStatus.ok,
+            headers: {
+              HttpHeaders.contentLengthHeader: ['9'],
+              HttpHeaders.etagHeader: ['"apk-1"'],
+            },
+          ),
+        );
+        final client = Request()..updateDownloadAdapter = adapter;
+        final cancellation = CancelToken();
+        final receiving = Completer<void>();
+        final transfer = client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (received, total) {
+            if (received == 0) {
+              source.add(Uint8List.fromList(utf8.encode('apk-')));
+            }
+            if (received == 4 && !receiving.isCompleted) receiving.complete();
+          },
+          cancelToken: cancellation,
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        );
+        await receiving.future;
+        cancellation.cancel();
+        expect(await transfer, '');
+        expect(await File('$target.tmp').readAsString(), 'apk-');
+        expect(await File('$target.tmp.json').exists(), isTrue);
+        expect(await File(target).exists(), isFalse);
+
+        client.updateDownloadAdapter = _UpdateAdapter(
+          (_) => _updateResponse(
+            'bytes',
+            status: HttpStatus.partialContent,
+            range: 'bytes 4-8/9',
+            etag: '"apk-1"',
+          ),
+        );
+        expect(
+          await client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          isNull,
+        );
+        expect(await File(target).readAsString(), 'apk-bytes');
+      },
+    );
+
+    test('does not retain a cancelled partial without resume opt-in', () async {
+      final target = '${directory.path}/update-v1.apk';
+      final source = StreamController<Uint8List>();
+      addTearDown(source.close);
+      final client = Request()
+        ..updateDownloadAdapter = _UpdateAdapter(
+          (_) => ResponseBody(
+            source.stream,
+            HttpStatus.ok,
+            headers: {
+              HttpHeaders.contentLengthHeader: ['9'],
+            },
+          ),
+        );
+      final cancellation = CancelToken();
+      final receiving = Completer<void>();
+      final transfer = client.downloadUpdateFile(
+        Uri.https('updates.example', '/update.apk'),
+        target,
+        onProgress: (received, total) {
+          if (received == 0) {
+            source.add(Uint8List.fromList(utf8.encode('apk-')));
+          }
+          if (received == 4 && !receiving.isCompleted) receiving.complete();
+        },
+        cancelToken: cancellation,
+      );
+      await receiving.future;
+      cancellation.cancel();
+      expect(await transfer, '');
+      expect(await File('$target.tmp').exists(), isFalse);
+      expect(await File('$target.tmp.json').exists(), isFalse);
+      expect(await File(target).exists(), isFalse);
+    });
+
+    for (final identity in ['url', 'sha256', 'size']) {
+      test('starts over when the saved asset $identity changed', () async {
+        final target = '${directory.path}/update-v1.apk';
+        await _savePartial(target, contents: 'apk-');
+        final metadata = File('$target.tmp.json');
+        final saved =
+            jsonDecode(await metadata.readAsString()) as Map<String, dynamic>;
+        saved[identity] = switch (identity) {
+          'url' => 'https://updates.example/another.apk',
+          'sha256' => '0' * 64,
+          _ => 10,
+        };
+        await metadata.writeAsString(jsonEncode(saved));
+        final adapter = _UpdateAdapter((_) => _updateResponse('apk-bytes'));
+        final client = Request()..updateDownloadAdapter = adapter;
+        expect(
+          await client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          isNull,
+        );
+        expect(
+          adapter.requests.single.headers.containsKey(HttpHeaders.rangeHeader),
+          isFalse,
+        );
+        expect(await File(target).readAsString(), 'apk-bytes');
+      });
+    }
+
+    test(
+      'restarts instead of appending when the server ignores Range',
+      () async {
+        final target = '${directory.path}/update-v1.apk';
+        await _savePartial(target, contents: 'apk-');
+        final adapter = _UpdateAdapter((_) => _updateResponse('apk-bytes'));
+        final client = Request()..updateDownloadAdapter = adapter;
+        expect(
+          await client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          isNull,
+        );
+        expect(await File(target).readAsString(), 'apk-bytes');
+      },
+    );
+
+    for (final range in [
+      'bytes 0-4/9',
+      'bytes 4-9/9',
+      'bytes 4-8/*',
+      'bytes 4-7/9',
+      'invalid',
+    ]) {
+      test('rejects an incompatible Content-Range $range', () async {
+        final target = '${directory.path}/update-v1.apk';
+        await _savePartial(target, contents: 'apk-');
+        final client = Request()
+          ..updateDownloadAdapter = _UpdateAdapter(
+            (_) => _updateResponse(
+              'bytes',
+              status: HttpStatus.partialContent,
+              range: range,
+            ),
+          );
+        await expectLater(
+          client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          throwsA(isA<UpdateDownloadVerificationException>()),
+        );
+        expect(await File(target).exists(), isFalse);
+        expect(await File('$target.tmp').exists(), isFalse);
+        expect(await File('$target.tmp.json').exists(), isFalse);
+      });
+    }
+
+    test('rejects a changed validator on a partial response', () async {
+      final target = '${directory.path}/update-v1.apk';
+      await _savePartial(target, contents: 'apk-');
+      final client = Request()
+        ..updateDownloadAdapter = _UpdateAdapter(
+          (_) => _updateResponse(
+            'bytes',
+            status: HttpStatus.partialContent,
+            range: 'bytes 4-8/9',
+            etag: '"apk-2"',
+          ),
+        );
+      await expectLater(
+        client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        ),
+        throwsA(isA<UpdateDownloadVerificationException>()),
+      );
+      expect(await File('$target.tmp').exists(), isFalse);
+    });
+
+    test(
+      'accepts 416 only for a complete pinned file with matching digest',
+      () async {
+        final target = '${directory.path}/update-v1.apk';
+        await _savePartial(target, contents: 'apk-bytes');
+        final client = Request()
+          ..updateDownloadAdapter = _UpdateAdapter(
+            (_) => _updateResponse(
+              '',
+              status: HttpStatus.requestedRangeNotSatisfiable,
+              range: 'bytes */9',
+            ),
+          );
+        expect(
+          await client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          isNull,
+        );
+        expect(await File(target).readAsString(), 'apk-bytes');
+      },
+    );
+
+    test('retries one rejected range without offset', () async {
+      final target = '${directory.path}/update-v1.apk';
+      await _savePartial(target, contents: 'apk-');
+      final adapter = _UpdateAdapter(
+        (options) => options.headers.containsKey(HttpHeaders.rangeHeader)
+            ? _updateResponse(
+                '',
+                status: HttpStatus.requestedRangeNotSatisfiable,
+                range: 'bytes */9',
+              )
+            : _updateResponse('apk-bytes'),
+      );
+      final client = Request()..updateDownloadAdapter = adapter;
+      expect(
+        await client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        ),
+        isNull,
+      );
+      expect(adapter.requests, hasLength(2));
+      expect(
+        adapter.requests.last.headers.containsKey(HttpHeaders.rangeHeader),
+        isFalse,
+      );
+    });
+
+    test('does not loop forever when the server always answers 416', () async {
+      final target = '${directory.path}/update-v1.apk';
+      await _savePartial(target, contents: 'apk-');
+      final adapter = _UpdateAdapter(
+        (_) => _updateResponse(
+          '',
+          status: HttpStatus.requestedRangeNotSatisfiable,
+          range: 'bytes */9',
+        ),
+      );
+      final client = Request()..updateDownloadAdapter = adapter;
+      await expectLater(
+        client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        ),
+        throwsA(isA<UpdateDownloadVerificationException>()),
+      );
+      expect(adapter.requests, hasLength(2));
+      expect(await File(target).exists(), isFalse);
+    });
+
+    test(
+      'never publishes a digest mismatch over an existing complete target',
+      () async {
+        final target = '${directory.path}/update-v1.apk';
+        await File(target).writeAsString('previous');
+        final client = Request()
+          ..updateDownloadAdapter = _UpdateAdapter(
+            (_) => _updateResponse('bad-bytes'),
+          );
+        await expectLater(
+          client.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          throwsA(isA<UpdateDownloadVerificationException>()),
+        );
+        expect(await File(target).readAsString(), 'previous');
+        expect(await File('$target.tmp').exists(), isFalse);
+        expect(await File('$target.tmp.json').exists(), isFalse);
+      },
+    );
+
+    test('keeps a truncated resumable body but never publishes it', () async {
+      final target = '${directory.path}/update-v1.apk';
+      final client = Request()
+        ..updateDownloadAdapter = _UpdateAdapter(
+          (_) => ResponseBody.fromString(
+            'apk-',
+            HttpStatus.ok,
+            headers: {
+              HttpHeaders.contentLengthHeader: ['9'],
+            },
+          ),
+        );
+      expect(
+        await client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (_, _) {},
+          cancelToken: CancelToken(),
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        ),
+        isNotNull,
+      );
+      expect(await File('$target.tmp').readAsString(), 'apk-');
+      expect(await File(target).exists(), isFalse);
+    });
+
+    test(
+      'rejects concurrent writers to the same target across clients',
+      () async {
+        final target = '${directory.path}/update-v1.apk';
+        final source = StreamController<Uint8List>();
+        addTearDown(source.close);
+        final client = Request()
+          ..updateDownloadAdapter = _UpdateAdapter(
+            (_) => ResponseBody(
+              source.stream,
+              HttpStatus.ok,
+              headers: {
+                HttpHeaders.contentLengthHeader: ['9'],
+              },
+            ),
+          );
+        final ready = Completer<void>();
+        final cancellation = CancelToken();
+        final transfer = client.downloadUpdateFile(
+          Uri.https('updates.example', '/update.apk'),
+          target,
+          onProgress: (received, total) {
+            if (!ready.isCompleted) ready.complete();
+          },
+          cancelToken: cancellation,
+          resume: true,
+          expectedSha256: _updateDigest('apk-bytes'),
+          expectedSize: 9,
+        );
+        await ready.future;
+        final other = Request()
+          ..updateDownloadAdapter = _UpdateAdapter(
+            (_) => _updateResponse('apk-bytes'),
+          );
+        expect(
+          await other.downloadUpdateFile(
+            Uri.https('updates.example', '/update.apk'),
+            target,
+            onProgress: (_, _) {},
+            cancelToken: CancelToken(),
+            resume: true,
+            expectedSha256: _updateDigest('apk-bytes'),
+            expectedSize: 9,
+          ),
+          contains('already in progress'),
+        );
+        cancellation.cancel();
+        expect(await transfer, '');
+      },
+    );
   });
 
   group('latestRelease', () {

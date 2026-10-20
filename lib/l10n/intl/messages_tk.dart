@@ -266,28 +266,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "Gurnalan wersiýa: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} min";
+
+  static String m101(time) => "${time} galdy";
+
+  static String m102(count) => "${count} s";
+
+  static String m103(speed) => "${speed}/s";
+
+  static String m104(nodes, groups, providers) =>
       "Proksiler: ${nodes}, toparlar: ${groups}, uzakdaky üpjün edijiler: ${providers}";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "Bu salgylanma «${action}» hereketini soraýar. ReClash-a ony ýerine ýetirmäge rugsat berilsinmi?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "${source} çeşmesinden «${name}» import edilsinmi? Tassyklamadan soň profil we öwürmeler barlanar.";
 
-  static String m103(label) => "${label} URL bolmaly";
+  static String m107(label) => "${label} URL bolmaly";
 
-  static String m104(index) => "Fon ${index}";
+  static String m108(index) => "Fon ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
 
-  static String m106(version) => "Gurnalan wersiýa: ${version}";
+  static String m110(version) => "Gurnalan wersiýa: ${version}";
 
-  static String m107(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m108(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m112(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2651,39 +2659,238 @@ class MessageLookup extends MessageLookupByLibrary {
       "Penjireni berkitmegi aýyr",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Täzele"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Awtomatik gurnamaga rugsat bermek",
+    ),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "Bu sazlamalar Android-de programma gurnamaga rugsat bermeýär. Olary islendik wagt üýtgedip bilersiňiz.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash barlanan, laýyk durnukly täzelenmeleri her gezek soramazdan gurup biler. VPN hiç wagt kesilmez. Android gurnamany tassyklamagyňyzy sorap biler.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "Awtomatik gurnamaga rugsat berilsinmi?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
+      "Awtomatik gurmak",
+    ),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "Diňe VPN öçük wagty laýyk durnukly täzelenmeleri gurmak. Möhüm üýtgeşmeler siziň kararyňyza garaşýar.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "Bu penjiräni ýapmak ýüklemäni duruzmaýar.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Ýüklemäni ýatyrmak",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage("Täzelenme kanaly"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("Deslapky reliz"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
       "Durnukly reliz",
     ),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage(
+      "Awtomatik barlamak",
+    ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Täzelenmeleri barlap bolmady.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Baglanyşygy barlap, täzeden synanyşyň.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "ReClash işleýän wagty wagtal-wagtal barlamak. Täzelenme penjire açmazdan baş sahypada görkezilýär.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan kanalda täze wersiýa gözlenýär.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage(
+      "Penjiräni ýapmak",
+    ),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android siziň razylygyňyzy talap edýär. Ulgam tassyklamasyny açmak üçin dowam ediň.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Android-de tassyklaň",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "Fonda dowam etmek",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage(
+      "Gurnamany dowam etmek",
+    ),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage(
+      "Iň soňky wersiýa gurnalan",
+    ),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "Bu platformada ReClash neşiriň sahypasyny açýar. Täzelenmäni özüňiz ýükläp guruň.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Bu enjam üçin barlanan ýükleme elýeterli däl. Neşiriň sahypasyndan bukja saýlaň.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "Kesip gurmak",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage(
+      "El bilen gurnamagy saklamak",
+    ),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmäni ýüklemek",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
+      "Täzeden ýüklemek",
+    ),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Bu penjiräni ýapyp bilersiňiz. Gidişat baş sahypada galýar.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Täzelenmäni ýükläp bolmady.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ýüklenen bölek saklandy. Baglanyşygy barlap, ýüklemäni dowam ediň.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "Gurnalan wersiýa üýtgemeýär.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("Düşnükli"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Bukja gurnaýjysyny başlap bolmady.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android gurnamany tamamlamady. Taýýar bolanyňyzda täzeden synanyşyň.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("Häzir gurmak"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash indi täze wersiýany ulanýar.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme guruldy",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android gurnamany tamamlaýar. Bu ädimde ReClash ýapylyp biler.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme gurulýar",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Sizde eýýäm iň täze wersiýa bar.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("Häzir däl"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Näme täzelik"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Reliz bellikleri ýok.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "Ýükleme täzelenmäni gurmaýar we VPN-i kesmeýär.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme elýeterli",
+    ),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Android sazlamalaryny açmak",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage(
+      "Enjam üçin gurluş",
+    ),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage(
+      "Ýüklemegiň möçberi",
+    ),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "Bukjany barlamak",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "Ýüklenenden soň, gurulmazdan öň barlanýar",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "Bütewilik, programmanyň şahsyýeti we gol barlandy",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Wersiýa"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("Säginmek"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ýüklenen bölek saklandy. Taýýar bolanyňyzda dowam ediň.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
+      "Ýükleme säginýär",
+    ),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash-a şu çeşmeden programmalar gurnamaga rugsat beriň we dowam etmek üçin gaýdyp geliň.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Android rugsady gerek",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "Barlamagy, ýüklemegi we gurmagy aýratyn sazlaň.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmeler siziň islegiňiz boýunça",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalar saklanmady. Täzeden synanyşyň; awtomatik gurnama açylmady.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme sazlamalary",
+    ),
+    "updatePreload": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi arkaly öňünden ýüklemek",
+    ),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Elýeterli täzelenmeleri Wi-Fi arkaly ýüklemek. Wi-Fi-dan çykylsa, awtomatik ýükleme säginýär.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "Bukja ähli barlaglardan geçdi. Häzir guruň ýa-da soňra goýuň.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
+      "Gurnamaga taýýar",
+    ),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
+      "Neşiriň jikme-jiklikleri",
+    ),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage(
+      "Ýüklemäni dowam etmek",
+    ),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage(
+      "Täzeden barlamak",
+    ),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
+      "Gurnamany gaýtalamak",
+    ),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Doly reliz belliklerini gör",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
       "Ähli üýtgeşmeleri görkez",
     ),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("Täzelenmeler"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "Barlagdan geçmedik bukja hiç wagt gurulmaz.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Ýüklenen täzelenmäniň bitewüligini barlap bolmady.",
+    ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Faýl, wersiýa ýa-da gol barlagdan geçmedi. Täze nusgany ýükläp, täzeden synanyşyň.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Bu bukjany gurup bolmaýar",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "Gurnamazdan öň faýl, programma wersiýasy we gol şahadatnamasy barlanýar.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenme barlanýar",
+    ),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "Gurnama wagty ReClash gysga wagtlyk ýapylar. Baglanyşygy kesmäge taýýar bolsaňyz kesiň.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "Gurnama wagty programma gysga wagtlyk ýapylar. VPN tassyklamasyz duruzylmaz.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
+      "VPN henizem işleýär",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Ýükle"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Ýükleme kuwwaty"),
@@ -2705,14 +2912,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Ýapmak sazlamasyna eýer: penjiräni gizle ýa-da ReClash-dan çyk. Android adaty programma ýapmak hereketini ulanýar.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML ýa-da JSON konfigurasiýasyny goýuň",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Konfigurasiýanyň mazmuny",
     ),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Daşarky programma buýrugy",
     ),
@@ -2754,7 +2961,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Konfigurasiýany import et",
     ),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Salgylanma Base64 görnüşinde goşulan UTF-8 konfigurasiýany import et. At hökmany däl.",
     ),
@@ -2856,7 +3063,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "Abunalyk salgylanmalary, goşulan konfigurasiýalar we INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -2901,9 +3108,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Suratyň dury dälligi",
     ),
@@ -2992,7 +3199,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzeri açyp bolmady.",
     ),
@@ -3030,8 +3237,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

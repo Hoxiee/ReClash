@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/update.dart';
@@ -7,13 +8,16 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/update_offer_dialog.dart';
+import 'package:reclash/widgets/update_sheet.dart';
+import 'package:reclash/common/app_update_state.dart';
+import 'package:reclash/providers/app_update.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_update_runtime.dart';
 
 const _runningVersion = '0.8.95';
 
@@ -34,9 +38,7 @@ String _bodyWith(String payload) =>
     '$_bulletsOnly\n<!-- reclash:changelog:json\n$payload\n-->\n';
 
 class _UpdateSource implements AppUpdateSource {
-  const _UpdateSource({this.failure});
-
-  final Exception? failure;
+  const _UpdateSource();
 
   @override
   String get id => 'test';
@@ -45,7 +47,6 @@ class _UpdateSource implements AppUpdateSource {
   Future<List<Map<String, dynamic>>> fetchReleases({
     required UpdateChannel channel,
   }) async {
-    if (failure case final error?) throw error;
     return const [];
   }
 
@@ -62,7 +63,11 @@ AppUpdateRelease release(String? body) => AppUpdateRelease(
 );
 
 Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
-  final container = ProviderContainer();
+  final runtime = TestUpdateRuntime(Directory.systemTemp)..enabled = false;
+  addTearDown(runtime.dispose);
+  final container = ProviderContainer(
+    overrides: [appUpdateRuntimeProvider.overrideWithValue(runtime)],
+  );
   addTearDown(container.dispose);
   globalState.container = container;
   // appSettingProvider is autoDispose; in the app `configProvider` keeps it
@@ -70,7 +75,7 @@ Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
   container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
   container
       .read(viewSizeProvider.notifier)
-      .update((_) => const Size(1200, 800));
+      .update((_) => tester.view.physicalSize / tester.view.devicePixelRatio);
 
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -85,14 +90,18 @@ Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
   return container;
 }
 
-/// The dialog blocks until the user answers, so tests must close it before
-/// awaiting the call that opened it.
 Future<void> tapCancel(WidgetTester tester) async {
-  final dismiss = find.byKey(const ValueKey('update-offer-dismiss'));
-  await tester.tap(
-    dismiss.evaluate().isNotEmpty ? dismiss : find.byType(TextButton).first,
-  );
+  await tester.tap(find.byTooltip(currentAppLocalizations.close));
   await tester.pumpAndSettle();
+}
+
+Future<void> _showOffer(
+  BuildContext context, {
+  required AppUpdateRelease release,
+}) async {
+  final container = ProviderScope.containerOf(context);
+  await container.read(appUpdateActionProvider.notifier).offer(release);
+  if (context.mounted) await UpdateSheet.show(context);
 }
 
 void main() {
@@ -123,7 +132,10 @@ void main() {
 
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
+        .checkUpdateResultHandle(
+          data: release(_bodyWith(_payload)),
+          isUser: true,
+        );
     await tester.pumpAndSettle();
 
     expect(find.textContaining('v0.8.96'), findsOneWidget);
@@ -140,7 +152,10 @@ void main() {
 
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
+        .checkUpdateResultHandle(
+          data: release(_bodyWith(_payload)),
+          isUser: true,
+        );
     await tester.pumpAndSettle();
 
     // Entry copy comes from the release payload and is English only; the group
@@ -159,7 +174,7 @@ void main() {
 
     final shown = container
         .read(commonActionProvider.notifier)
-        .checkUpdateResultHandle(data: release(_bulletsOnly));
+        .checkUpdateResultHandle(data: release(_bulletsOnly), isUser: true);
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Override scripts'), findsOneWidget);
@@ -168,34 +183,43 @@ void main() {
     await shown;
   });
 
-  testWidgets('stops reminding when an automatic check is dismissed', (
+  testWidgets('automatic checks publish an offer without opening a sheet', (
     tester,
   ) async {
     final container = await pumpApp(tester);
-
-    final shown = container
+    await container
         .read(commonActionProvider.notifier)
         .checkUpdateResultHandle(data: release(_bodyWith(_payload)));
     await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsNothing);
+    expect(container.read(appUpdateActionProvider).phase, UpdatePhase.offered);
+    expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
+  });
+
+  testWidgets('dismissal does not disable future update checks', (
+    tester,
+  ) async {
+    final container = await pumpApp(tester);
+    final shown = container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(
+          data: release(_bodyWith(_payload)),
+          isUser: true,
+        );
+    await tester.pumpAndSettle();
     await tapCancel(tester);
     await shown;
-
-    expect(container.read(appSettingProvider).autoCheckUpdate, isFalse);
+    expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
+    expect(container.read(appUpdateActionProvider).hasUpdate, isTrue);
   });
 
   testWidgets('a failed manual request is not reported as up to date', (
     tester,
   ) async {
     final container = await pumpApp(tester);
-    final oldSources = request.updateSources.toList();
-    addTearDown(() {
-      request.updateSources
-        ..clear()
-        ..addAll(oldSources);
-    });
-    request.updateSources
-      ..clear()
-      ..add(const _UpdateSource(failure: FormatException('offline')));
+    final runtime =
+        container.read(appUpdateRuntimeProvider) as TestUpdateRuntime;
+    runtime.checkFailure = const FormatException('offline');
 
     final checking = container
         .read(commonActionProvider.notifier)
@@ -215,7 +239,7 @@ void main() {
     await checking;
   });
 
-  testWidgets('a manual check keeps the setting and reports a failure', (
+  testWidgets('a manual check keeps the setting and reports no update', (
     tester,
   ) async {
     final container = await pumpApp(tester);
@@ -225,7 +249,10 @@ void main() {
         .checkUpdateResultHandle(isUser: true);
     await tester.pumpAndSettle();
 
-    expect(find.text('Check for updates'), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.updateCurrentTitle),
+      findsOneWidget,
+    );
     expect(find.textContaining('latest version'), findsOneWidget);
 
     await tapCancel(tester);
@@ -309,7 +336,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    final shown = UpdateOfferDialog.show(
+    final shown = _showOffer(
       tester.element(find.byType(Scaffold)),
       release: release(
         '> [!WARNING]\n'
@@ -327,7 +354,6 @@ void main() {
         '</div>\n\n'
         '| OS | Packages |\n| Linux | AppImage |\n',
       ),
-      primaryLabel: 'Download',
     );
     await tester.pumpAndSettle();
 
@@ -346,14 +372,36 @@ void main() {
       findsOneWidget,
     );
     await tapCancel(tester);
-    expect(await shown, isFalse);
+    await shown;
   });
+
+  testWidgets(
+    'a late mandatory Markdown warning stays outside collapsed notes',
+    (tester) async {
+      await pumpApp(tester);
+      final shown = _showOffer(
+        tester.element(find.byType(Scaffold)),
+        release: release(
+          '${List.generate(12, (index) => '- Change $index').join('\n')}\n\n'
+          '> [!WARNING]\n> Keep this complete warning visible.\n',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Keep this complete warning visible.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Change 11'), findsNothing);
+      await tapCancel(tester);
+      await shown;
+    },
+  );
 
   testWidgets('expands complete Markdown blocks without destroying code', (
     tester,
   ) async {
     await pumpApp(tester);
-    final shown = UpdateOfferDialog.show(
+    final shown = _showOffer(
       tester.element(find.byType(Scaffold)),
       release: release(
         '## Changes\n\n'
@@ -361,7 +409,6 @@ void main() {
         '~~~yaml\n# Keep this heading\n  <value>\n| keep this line |\n~~~\n\n'
         '- Last change\n',
       ),
-      primaryLabel: 'Download',
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('Keep this heading'), findsNothing);
@@ -413,10 +460,9 @@ void main() {
           },
         ],
       });
-      final shown = UpdateOfferDialog.show(
+      final shown = _showOffer(
         tester.element(find.byType(Scaffold)),
         release: release(_bodyWith(payload)),
-        primaryLabel: 'Download',
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('Migration 6'), findsOneWidget);
@@ -448,12 +494,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await pumpApp(tester);
-      final shown = UpdateOfferDialog.show(
+      final shown = _showOffer(
         tester.element(find.byType(Scaffold)),
         release: release(
           List.generate(20, (index) => '- Change $index').join('\n'),
         ),
-        primaryLabel: 'Download',
       );
       await tester.pumpAndSettle();
       final accept = find.byKey(const ValueKey('update-offer-accept'));
@@ -467,59 +512,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(accept.hitTestable(), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await tester.tap(accept);
-      await tester.pumpAndSettle();
-      expect(await shown, isTrue);
-    },
-  );
-
-  testWidgets(
-    'fits large text, long versions and automatic-dismiss labels on a phone',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 640);
-      tester.view.devicePixelRatio = 1;
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      await pumpApp(tester, locale: const Locale('ru'));
-      final shown = UpdateOfferDialog.show(
-        tester.element(find.byType(Scaffold)),
-        release: const AppUpdateRelease(
-          data: {
-            'tag_name': 'v0.1.0-pre.123+very-long-build-identifier',
-            'body': '## Changes\n\n- Improved routing',
-          },
-          source: _UpdateSource(),
-        ),
-        currentVersion: '0.1.0-pre.2',
-        primaryLabel: currentAppLocalizations.goDownload,
-        skipLabel: currentAppLocalizations.noLongerRemind,
-      );
-      await tester.pumpAndSettle();
-      expect(find.textContaining('Установлена версия'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('update-offer-accept')).hitTestable(),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey('update-offer-dismiss')).hitTestable(),
-        findsOneWidget,
-      );
-      expect(tester.takeException(), isNull);
       await tapCancel(tester);
       await shown;
     },
   );
 
+  testWidgets('fits large text and long versions on a phone', (tester) async {
+    tester.view.physicalSize = const Size(390, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpApp(tester, locale: const Locale('ru'));
+    final shown = _showOffer(
+      tester.element(find.byType(Scaffold)),
+      release: const AppUpdateRelease(
+        data: {
+          'tag_name': 'v0.1.0-pre.123+very-long-build-identifier',
+          'body': '## Changes\n\n- Improved routing',
+        },
+        source: _UpdateSource(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(_runningVersion), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('update-offer-accept')).hitTestable(),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('update-offer-dismiss')).hitTestable(),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tapCancel(tester);
+    await shown;
+  });
+
   testWidgets(
     'opens formatted release links only through external-link confirmation',
     (tester) async {
       await pumpApp(tester);
-      final shown = UpdateOfferDialog.show(
+      final shown = _showOffer(
         tester.element(find.byType(Scaffold)),
         release: release('[**Read `docs`**](https://example.com/notes)'),
-        primaryLabel: 'Download',
       );
       await tester.pumpAndSettle();
       expect(find.text('Read docs'), findsOneWidget);
@@ -555,7 +592,7 @@ void main() {
           tester,
           locale: Locale(parts.first, parts.length > 1 ? parts.last : null),
         );
-        final shown = UpdateOfferDialog.show(
+        final shown = _showOffer(
           tester.element(find.byType(Scaffold)),
           release: const AppUpdateRelease(
             data: {
@@ -564,7 +601,6 @@ void main() {
             },
             source: _UpdateSource(),
           ),
-          primaryLabel: 'Download',
         );
         await tester.pumpAndSettle();
         expect(find.textContaining('2026'), findsOneWidget);
