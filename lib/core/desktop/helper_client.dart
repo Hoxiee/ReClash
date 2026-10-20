@@ -58,6 +58,7 @@ final class HelperClient {
   final Future<String> Function() _readCoreSha256;
   final String Function() _baseUrl;
   String? _coreSha256Cache;
+  HelperException? readinessFailure;
 
   HelperClient({
     Dio? dio,
@@ -161,6 +162,7 @@ final class HelperClient {
     Duration? timeout,
     bool logFailure = true,
   }) async {
+    readinessFailure = null;
     if (timeout != null && timeout <= Duration.zero) {
       return HelperReadiness.notReady;
     }
@@ -174,7 +176,11 @@ final class HelperClient {
     try {
       final coreSha256 = await _readCoreSha256Once();
       if (coreSha256.isEmpty) {
-        _logPingFailure('Core manifest is missing or invalid', logFailure);
+        _logPingFailure(
+          'Core manifest is missing or invalid',
+          logFailure,
+          code: 'manifestMissing',
+        );
         return HelperReadiness.manifestMissing;
       }
       final response = await _dio.get<Object?>(
@@ -205,7 +211,11 @@ final class HelperClient {
       return HelperReadiness.notReady;
     }
     if (protocolVersion != helperProtocolVersion) {
-      _logPingFailure('helper protocol mismatch: $protocolVersion', logFailure);
+      _logPingFailure(
+        'helper protocol mismatch: $protocolVersion (expected $helperProtocolVersion)',
+        logFailure,
+        code: 'protocolMismatch',
+      );
       return HelperReadiness.notReady;
     }
     final matches = _pathContext.equals(
@@ -225,22 +235,26 @@ final class HelperClient {
   ) {
     final statusCode = response.statusCode;
     final protocolVersion = response.headers.value(helperProtocolVersionHeader);
+    if (protocolVersion != helperProtocolVersion) {
+      _logPingFailure(
+        'helper protocol mismatch: $protocolVersion (expected $helperProtocolVersion, HTTP $statusCode)',
+        logFailure,
+        code: 'protocolMismatch',
+      );
+      return HelperReadiness.notReady;
+    }
     if (statusCode == HttpStatus.conflict) {
       final code = _mapFrom(response.data)?['code'];
       if (code == 'coreSha256Mismatch') {
-        _logPingFailure('Helper Core SHA256 mismatch', logFailure);
-        return HelperReadiness.notReady;
-      }
-      if (protocolVersion == helperProtocolVersion) {
         _logPingFailure(
-          'helper could not access the Core executable',
+          'Helper Core SHA256 mismatch',
           logFailure,
+          code: 'coreSha256Mismatch',
         );
         return HelperReadiness.notReady;
       }
       _logPingFailure(
-        'helper returned an unrecognized conflict '
-        '(protocol $protocolVersion)',
+        'helper could not access the Core executable',
         logFailure,
       );
       return HelperReadiness.notReady;
@@ -253,7 +267,12 @@ final class HelperClient {
     return HelperReadiness.notReady;
   }
 
-  void _logPingFailure(String message, bool enabled) {
+  void _logPingFailure(
+    String message,
+    bool enabled, {
+    String code = 'notReady',
+  }) {
+    readinessFailure = HelperException(code: code, message: message);
     if (enabled) {
       commonPrint.log(message, logLevel: LogLevel.warning);
     }

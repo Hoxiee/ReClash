@@ -729,6 +729,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Allow the ReClash Helper in System Settings → General → Login Items & Extensions, then try again.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "The installed Helper uses a different protocol. Check for another installation or a service override, then reinstall the complete package.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "The existing Linux Helper registration cannot be safely replaced. Inspect the owned service and registration; retrying authorization will not resolve this conflict.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd could not start the TUN Helper. Check the service journal; the installer attempted to restore the previous installation.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN requires a Linux session managed by systemd. This system cannot run the network Helper.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "The TUN Helper is unavailable. Check the installed package and service, then try again.",
     ),
@@ -2759,9 +2771,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Card opacity",
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Choose image"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Keep up to three images and adjust how the background looks across the app.",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Dimming"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
       "Image adjustments",

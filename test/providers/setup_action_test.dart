@@ -915,6 +915,82 @@ void main() {
   });
 
   group('updateConfig', () {
+    for (final status in [CoreStatus.disconnected, CoreStatus.connecting]) {
+      for (final safeMode in [false, true]) {
+        test('$status keeps offline settings without RPC or authorization '
+            '(safeMode=$safeMode)', () async {
+          final core = _MockCoreHandlerInterface();
+          when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+          final scopedAction = TestSetupAction();
+          final scoped = ProviderContainer(
+            overrides: [
+              profilesProvider.overrideWith(TestProfiles.new),
+              setupActionProvider.overrideWith(() => scopedAction),
+              coreHandlerProvider.overrideWithValue(
+                CoreController.scoped(core),
+              ),
+              coreStatusProvider.overrideWithValue(status),
+              safeModeProvider.overrideWithValue(safeMode),
+            ],
+          );
+          addTearDown(scoped.dispose);
+          scoped.read(setupActionProvider.notifier);
+          scoped
+              .read(patchClashConfigProvider.notifier)
+              .update(
+                (state) => state.copyWith(
+                  tun: state.tun.copyWith(enable: true),
+                  mixedPort: 8899,
+                ),
+              );
+
+          await scopedAction.updateConfig();
+
+          verifyNever(() => core.updateConfig(any()));
+          verifyNever(() => core.start());
+          verifyNever(() => core.restart());
+          expect(scopedAction.authorizeCalls, 0);
+          expect(scoped.read(patchClashConfigProvider).tun.enable, isTrue);
+          expect(scoped.read(patchClashConfigProvider).mixedPort, 8899);
+        });
+      }
+    }
+
+    test('reconnection receives settings kept while offline', () async {
+      final core = _MockCoreHandlerInterface();
+      when(() => core.updateConfig(any())).thenAnswer((_) async => '');
+      final scopedAction = TestSetupAction();
+      final scoped = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          setupActionProvider.overrideWith(() => scopedAction),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithBuild(
+            (_, _) => CoreStatus.disconnected,
+          ),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      scoped.read(setupActionProvider.notifier);
+      scoped
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(mode: Mode.global, mixedPort: 8899),
+          );
+
+      await scopedAction.updateConfig();
+      verifyNever(() => core.updateConfig(any()));
+      scoped.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      await scopedAction.updateConfig();
+
+      final params =
+          verify(() => core.updateConfig(captureAny())).captured.single
+              as UpdateParams;
+      expect(params.mode, Mode.global);
+      expect(params.mixedPort, 8899);
+      expect(scopedAction.authorizeCalls, 0);
+    });
+
     test('safe mode pushes tun disabled even once authorized', () async {
       final core = _MockCoreHandlerInterface();
       when(() => core.updateConfig(any())).thenAnswer((_) async => '');
@@ -924,6 +1000,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
           safeModeProvider.overrideWithValue(true),
         ],
       );
@@ -955,6 +1032,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
           safeModeProvider.overrideWithValue(true),
         ],
       );
@@ -989,6 +1067,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => scopedAction),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          coreStatusProvider.overrideWithValue(CoreStatus.connected),
         ],
       );
       addTearDown(scoped.dispose);

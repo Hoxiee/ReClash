@@ -26,7 +26,6 @@
   "wallpaperReadability": "読みやすさ",
   "wallpaperLibraryFull": "背景は最大 {count} 件まで保存できます。追加するには 1 件削除してください。",
   "appearanceInterface": "インターフェース",
-  "wallpaperDescription": "最大3枚の画像を保存して、アプリの背景を調整できます。",
   "wallpaperReset": "効果をリセット",
   "wallpaperResetLayout": "構図をリセット",
   "wallpaperImageLabel": "背景 {index}",

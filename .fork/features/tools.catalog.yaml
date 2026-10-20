@@ -7,8 +7,12 @@ must:
   shortcut-details: Desktop shortcut exports remain nested beneath shortcut management, not a new root Tools destination.
   dashboard-entry: The web dashboard remains a searchable child of General beside the external controller, never a root Tools destination.
   url-scheme: The link builder, inspector and command catalog stay inside the Tools workspace across desktop and mobile.
+  workspace-navigation: Tools replacements never expose the recent landing or let removed pages truncate the latest path.
+  workspace-presentation: All Tools pages share their nested path header without a redundant Tools root; recent and Core rows match settings gutters, normal bodies stay bounded, runtime editors fill the pane and nested sheets keep their own presentation.
+  workspace-surfaces: Tools panes share one stationary wallpaper; app bars stay fixed during sequential page transitions without overlapping content or surface flashes.
+  mobile-navigation: Mobile navigation and its bottom inset hide inside a Tools path or above an open keyboard, and return at the catalog.
 watch: ['lib/views/tools/**', lib/views/url_scheme.dart, lib/features/url_scheme/**, lib/common/url_scheme.dart, lib/common/link.dart, lib/providers/actions/url_scheme.dart, lib/views/tools.dart, 'lib/providers/tool*', 'lib/models/tools.dart', 'lib/models/tool_route.dart', lib/common/tools_search.dart, lib/pages/home.dart, 'arb/fragments/tools.catalog/**', test/common/tools_search_test.dart, test/providers/tools_test.dart, test/views/tools_catalog_test.dart, test/views/url_scheme_view_test.dart, test/pages/home_test.dart, test/widgets/tools_workspace_test.dart]
 checks:
-  tools: [catalog, shortcut-details, dashboard-entry, url-scheme]
+  tools: [catalog, shortcut-details, dashboard-entry, url-scheme, workspace-navigation, workspace-presentation, workspace-surfaces, mobile-navigation]
 deps: [settings.specs]
 drop: Upstream provides the same available commands and required interactions.

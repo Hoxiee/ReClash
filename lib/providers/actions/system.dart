@@ -125,11 +125,9 @@ class SystemAction extends _$SystemAction {
     await windowPort?.toggle();
   }
 
-  void updateTun() {
-    ref
-        .read(patchClashConfigProvider.notifier)
-        .update((state) => state.copyWith.tun(enable: !state.tun.enable));
-  }
+  Future<void> updateTun() => ref
+      .read(setupActionProvider.notifier)
+      .setTunEnabled(!ref.read(patchClashConfigProvider).tun.enable);
 
   void updateSystemProxy() {
     ref

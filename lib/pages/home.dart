@@ -6,7 +6,6 @@ import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/ui/page_background.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -77,27 +76,31 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
     return ToolsSearchLauncher(
       child: HomeBackScopeContainer(
-        child: AppSidebarContainer(
-          child: _HomeShell(
-            child: Consumer(
-              builder: (_, ref, _) {
-                final navigationItems = ref
-                    .watch(currentNavigationItemsStateProvider)
-                    .value;
-                final isMobile = ref.watch(isMobileViewProvider);
-                return _HomePageView(
-                  navigationItems: navigationItems,
-                  pageBuilder: (_, index) {
-                    final navigationItem = navigationItems[index];
-                    return _NavigationPage(
-                      key: ValueKey(navigationItem.label),
-                      item: navigationItem,
-                      isMobile: isMobile,
-                      view: navigationItem.builder(context),
+        child: ShellScrimScope(
+          child: AppSidebarContainer(
+            child: PageViewport(
+              child: _HomeShell(
+                child: Consumer(
+                  builder: (_, ref, _) {
+                    final navigationItems = ref
+                        .watch(currentNavigationItemsStateProvider)
+                        .value;
+                    final isMobile = ref.watch(isMobileViewProvider);
+                    return _HomePageView(
+                      navigationItems: navigationItems,
+                      pageBuilder: (_, index) {
+                        final navigationItem = navigationItems[index];
+                        return _NavigationPage(
+                          key: ValueKey(navigationItem.label),
+                          item: navigationItem,
+                          isMobile: isMobile,
+                          view: navigationItem.builder(context),
+                        );
+                      },
                     );
                   },
-                );
-              },
+                ),
+              ),
             ),
           ),
         ),
@@ -123,8 +126,19 @@ class _HomeShell extends ConsumerWidget {
     final floating = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
+    final toolsDetail =
+        state.pageLabel == PageLabel.tools &&
+        ref.watch(
+          toolsSessionProvider.select((state) => state.path.isNotEmpty),
+        );
+    final showNavigation =
+        isMobile &&
+        !toolsDetail &&
+        MediaQuery.viewInsetsOf(context).bottom == 0;
     return Material(
-      color: SurfaceLevel.page.colorOf(context.colorScheme),
+      color: PageBackgroundRegistration.maybeOf(context) == null
+          ? SurfaceLevel.page.colorOf(context.colorScheme)
+          : Colors.transparent,
       child: Column(
         children: [
           Expanded(
@@ -136,7 +150,7 @@ class _HomeShell extends ConsumerWidget {
                     child: FocusTraversalGroup(
                       policy: PageTraversalPolicy(),
                       child: BottomInsetScope(
-                        inset: isMobile && floating
+                        inset: showNavigation && floating
                             ? NavigationDock.insetOf(context)
                             : 0,
                         child: _BodyPadding(isMobile: isMobile, child: child),
@@ -148,7 +162,7 @@ class _HomeShell extends ConsumerWidget {
                     end: 0,
                     bottom: 0,
                     child: AnimatedVisibility.bottomNavigation(
-                      visible: isMobile && floating,
+                      visible: showNavigation && floating,
                       child: _NavigationPadding(
                         child: NavigationDock(
                           destinations: [
@@ -172,7 +186,7 @@ class _HomeShell extends ConsumerWidget {
             ),
           ),
           AnimatedVisibility.bottomNavigation(
-            visible: isMobile && !floating,
+            visible: showNavigation && !floating,
             child: _NavigationPadding(
               child: AnimatedNavigationBar(
                 destinations: [
@@ -258,7 +272,14 @@ class _NavigationPage extends StatelessWidget {
           ? scopedView
           : Navigator(
               key: ValueKey('${item.label.name}_navigator'),
-              pages: [MaterialPage(child: scopedView)],
+              pages: [
+                MaterialPage(
+                  child: Builder(
+                    builder: (context) =>
+                        PageViewport.inherit(context, child: scopedView),
+                  ),
+                ),
+              ],
               onDidRemovePage: (_) {},
             ),
     );

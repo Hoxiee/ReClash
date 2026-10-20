@@ -12,5 +12,9 @@
   "desktopLaunchPending": "Öňki rugsat bermek ýa-da Core-i duruzmak entek tamamlanmady. Tamamlanmagyna garaşyň we gaýtadan synanyşyň.",
   "desktopAuthorizationTimeout": "Rugsat garaşma wagty gutardy. Birikme düwmesi arkaly gaýtadan synanyşyň.",
   "desktopBootstrapFailed": "Rugsat berlen Core barlanan başlangyjy tamamlap bilmedi. Paketi we ulgam ýazgylaryny barlaň.",
-  "desktopTunNotReady": "Core başlady, emma TUN adapteri taýýar däl. TUN-y ulanmazdan öň Core ýazgysyny barlaň."
+  "desktopTunNotReady": "Core başlady, emma TUN adapteri taýýar däl. TUN-y ulanmazdan öň Core ýazgysyny barlaň.",
+  "desktopHelperRegistrationConflict": "Bar bolan Linux Helper bellige alyşyny howpsuz çalşyp bolmaýar. Hyzmatyň eýesini we bellige alyşyny barlaň: gaýtadan ygtyýarlandyrmak bu gapma-garşylygy çözmez.",
+  "desktopHelperSystemdFailed": "systemd TUN Helper-i işe girizip bilmedi. Hyzmatyň žurnalyny barlaň: gurnaýjy öňki gurnamany dikeltmäge synanyşdy.",
+  "desktopHelperProtocolMismatch": "Gurnalan Helper başga protokoly ulanýar. Başga gurnamany ýa-da hyzmatyň üýtgedilen sazlamalaryny barlap, doly bukjany täzeden guruň.",
+  "desktopHelperSystemdRequired": "TUN üçin systemd tarapyndan dolandyrylýan Linux sessiýasy gerek. Bu ulgam tor Helper-i işe girizip bilmeýär."
 }

@@ -5,7 +5,7 @@ part 'generated/wallpaper.g.dart';
 
 enum WallpaperFit { cover, contain, fill }
 
-const maxWallpaperLibrary = 3;
+const maxWallpaperLibrary = 4;
 
 final _wallpaperFileName = RegExp(r'^[a-f0-9]{32}\.png$');
 

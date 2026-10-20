@@ -10111,16 +10111,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Keep up to three images and adjust how the background looks across the app.`
-  String get wallpaperDescription {
-    return Intl.message(
-      'Keep up to three images and adjust how the background looks across the app.',
-      name: 'wallpaperDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Reset effects`
   String get wallpaperReset {
     return Intl.message(
@@ -10591,6 +10581,46 @@ class AppLocalizations {
     return Intl.message(
       'The Core started, but the TUN adapter is not ready. Check the Core log before using TUN.',
       name: 'desktopTunNotReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The existing Linux Helper registration cannot be safely replaced. Inspect the owned service and registration; retrying authorization will not resolve this conflict.`
+  String get desktopHelperRegistrationConflict {
+    return Intl.message(
+      'The existing Linux Helper registration cannot be safely replaced. Inspect the owned service and registration; retrying authorization will not resolve this conflict.',
+      name: 'desktopHelperRegistrationConflict',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `systemd could not start the TUN Helper. Check the service journal; the installer attempted to restore the previous installation.`
+  String get desktopHelperSystemdFailed {
+    return Intl.message(
+      'systemd could not start the TUN Helper. Check the service journal; the installer attempted to restore the previous installation.',
+      name: 'desktopHelperSystemdFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installed Helper uses a different protocol. Check for another installation or a service override, then reinstall the complete package.`
+  String get desktopHelperProtocolMismatch {
+    return Intl.message(
+      'The installed Helper uses a different protocol. Check for another installation or a service override, then reinstall the complete package.',
+      name: 'desktopHelperProtocolMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN requires a Linux session managed by systemd. This system cannot run the network Helper.`
+  String get desktopHelperSystemdRequired {
+    return Intl.message(
+      'TUN requires a Linux session managed by systemd. This system cannot run the network Helper.',
+      name: 'desktopHelperSystemdRequired',
       desc: '',
       args: [],
     );

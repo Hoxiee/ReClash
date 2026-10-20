@@ -12,5 +12,9 @@
   "desktopLaunchPending": "Oldingi ruxsat berish yoki Core to‘xtatilishi hali tugamadi. Tugashini kuting va qayta urinib ko‘ring.",
   "desktopAuthorizationTimeout": "Ruxsat berishni kutish vaqti tugadi. Ulanish tugmasi orqali qayta urinib ko‘ring.",
   "desktopBootstrapFailed": "Ruxsat berilgan Core tekshirilgan ishga tushirishni yakunlay olmadi. Paket va tizim jurnallarini tekshiring.",
-  "desktopTunNotReady": "Core ishga tushdi, ammo TUN adapteri tayyor emas. TUNdan foydalanishdan oldin Core jurnalini tekshiring."
+  "desktopTunNotReady": "Core ishga tushdi, ammo TUN adapteri tayyor emas. TUNdan foydalanishdan oldin Core jurnalini tekshiring.",
+  "desktopHelperRegistrationConflict": "Mavjud Linux Helper ro‘yxatini xavfsiz almashtirib bo‘lmaydi. Xizmat egasi va ro‘yxatini tekshiring: qayta avtorizatsiya ziddiyatni bartaraf etmaydi.",
+  "desktopHelperSystemdFailed": "systemd TUN Helper’ni ishga tushira olmadi. Xizmat jurnalini tekshiring: o‘rnatuvchi avvalgi o‘rnatishni tiklashga urindi.",
+  "desktopHelperProtocolMismatch": "O‘rnatilgan Helper boshqa protokoldan foydalanadi. Boshqa o‘rnatish yoki xizmat sozlamalarini qayta belgilash borligini tekshirib, to‘liq paketni qayta o‘rnating.",
+  "desktopHelperSystemdRequired": "TUN uchun systemd boshqaradigan Linux seansi kerak. Bu tizim tarmoq Helper’ni ishga tushira olmaydi."
 }

@@ -62,6 +62,22 @@ class PageBackground extends StatelessWidget {
   final Widget child;
   final Color baseColor;
 
+  static Widget inherit(BuildContext context, {required Widget child}) {
+    final background = context
+        .dependOnInheritedWidgetOfExactType<_PageBackgroundRouteScope>();
+    if (background == null) return child;
+    final opacity = context
+        .dependOnInheritedWidgetOfExactType<PageBackgroundScope>();
+    return _PageBackgroundRouteScope(
+      route: ModalRoute.of(context),
+      child: PageBackgroundScope(
+        cardOpacity: opacity?.cardOpacity ?? 1,
+        route: ModalRoute.of(context),
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final route = ModalRoute.of(context);

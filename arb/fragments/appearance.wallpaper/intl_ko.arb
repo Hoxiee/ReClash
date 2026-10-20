@@ -26,7 +26,6 @@
   "wallpaperReadability": "가독성",
   "wallpaperLibraryFull": "배경은 최대 {count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.",
   "appearanceInterface": "인터페이스",
-  "wallpaperDescription": "최대 3개의 이미지를 저장하고 앱 배경을 조정하세요.",
   "wallpaperReset": "효과 초기화",
   "wallpaperResetLayout": "구도 초기화",
   "wallpaperImageLabel": "배경 {index}",

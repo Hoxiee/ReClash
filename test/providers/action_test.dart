@@ -841,6 +841,7 @@ void main() {
         late _RestartRecordingCoreAction coreAction;
         final container = ProviderContainer(
           overrides: [
+            coreStatusProvider.overrideWithValue(CoreStatus.connected),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),

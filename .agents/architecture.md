@@ -1755,6 +1755,18 @@ run as root. Core clears ambient capabilities on every Go thread before processi
 inactive-bundle pruning. AppImage uses the same stable bundle. Cancellation is final; there is no sudo/password or
 setuid fallback, and a host without systemd reports the Helper unavailable.
 
+An explicit authorization installs with `--replace-owned`: an unregistered unit is replaced only when its entire
+shipped ReClash unit, owner, protected executable path and Helper hash match. External units and drop-ins block
+replacement. A confirmed stop precedes the swap; failure restores the original unit and registration, including an
+originally absent registration. No old Helper protocol is accepted. Installer exit codes and bounded stderr reach
+application diagnostics, with separate registration, systemd, integrity and authorization errors.
+
+Native DEB/RPM installations record package origin only after matching the protected package marker and pair. Their
+pre-removal hooks run that packaged Helper while its files still exist and remove only matching owner registrations
+and pairs. Upgrade hooks are no-ops. AppImage-commissioned pairs, unowned records and pairs from another version remain;
+they can be removed explicitly through the owner-scoped `uninstall` command. A native package owns the registrations
+it commissioned, not every installation sharing the unit prefix.
+
 Linux Helper accepts bounded, same-owner `/ping`, `/start`, `/stop` and `/logs` requests, rejects browser origins and
 non-local hosts, and checks the current hash/protocol. Start and stop use a 32-character lowercase-hex session ID.
 A successful stop confirms the child exited; failure retains the child and prevents replacement or direct fallback.

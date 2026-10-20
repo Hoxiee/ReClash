@@ -129,6 +129,7 @@ class Bootstrap {
       await preferences.saveConfig(config);
     }
     final appState = AppState(
+      coreStatus: CoreStatus.disconnected,
       brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
       version: version,
       viewSize: Size.zero,

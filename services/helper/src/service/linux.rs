@@ -29,8 +29,13 @@ const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
 #[derive(Debug, PartialEq, Eq)]
 enum ServiceCommand {
     Run,
-    Install(PathBuf),
+    Install {
+        bundle: PathBuf,
+        replace_owned: bool,
+        package: Option<linux_install::LinuxPackage>,
+    },
     Uninstall,
+    PackageUninstall(linux_install::LinuxPackage),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -40,11 +45,22 @@ pub(super) struct Owner {
 }
 
 pub fn main() -> Result<()> {
-    match service_command(std::env::args_os().skip(1))? {
+    let result = match service_command(std::env::args_os().skip(1))? {
         ServiceCommand::Run => run_service(),
-        ServiceCommand::Install(source) => linux_install::install(invoking_owner()?, &source),
+        ServiceCommand::Install {
+            bundle,
+            replace_owned,
+            package,
+        } => linux_install::install(invoking_owner()?, &bundle, replace_owned, package),
         ServiceCommand::Uninstall => linux_install::uninstall(invoking_owner()?),
+        ServiceCommand::PackageUninstall(package) => linux_install::package_uninstall(package),
+    };
+    if let Err(error) = &result {
+        if let Some(failure) = error.downcast_ref::<linux_install::InstallFailure>() {
+            eprintln!("reclash-helper-error: {}", failure.code());
+        }
     }
+    result
 }
 
 fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<ServiceCommand> {
@@ -63,9 +79,40 @@ fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<ServiceCo
             {
                 bail!("invalid staged bundle path");
             }
-            ServiceCommand::Install(path)
+            let mut replace_owned = false;
+            let mut package = None;
+            while let Some(option) = args.next() {
+                if option == OsStr::new("--replace-owned") && !replace_owned {
+                    replace_owned = true;
+                } else if option == OsStr::new("--package") && package.is_none() {
+                    package = Some(linux_install::LinuxPackage::parse(
+                        args.next()
+                            .and_then(|value| value.into_string().ok())
+                            .context("package format is missing")?
+                            .as_str(),
+                    )?);
+                } else {
+                    bail!("unexpected installation option");
+                }
+            }
+            ServiceCommand::Install {
+                bundle: path,
+                replace_owned,
+                package,
+            }
         }
         Some(value) if value == OsStr::new("uninstall") => ServiceCommand::Uninstall,
+        Some(value) if value == OsStr::new("package-uninstall") => {
+            if args.next().as_deref() != Some(OsStr::new("--package")) {
+                bail!("package removal requires --package");
+            }
+            ServiceCommand::PackageUninstall(linux_install::LinuxPackage::parse(
+                args.next()
+                    .and_then(|value| value.into_string().ok())
+                    .context("package format is missing")?
+                    .as_str(),
+            )?)
+        }
         Some(value) => bail!("unknown helper command: {}", value.to_string_lossy()),
     };
     if args.next().is_some() {
@@ -322,7 +369,11 @@ mod tests {
         assert_eq!(service_command([]).unwrap(), ServiceCommand::Run);
         assert_eq!(
             service_command(["install", "--bundle", "/tmp/private"].map(OsString::from)).unwrap(),
-            ServiceCommand::Install("/tmp/private".into())
+            ServiceCommand::Install {
+                bundle: "/tmp/private".into(),
+                replace_owned: false,
+                package: None,
+            }
         );
         assert!(service_command(["install"].map(OsString::from)).is_err());
         assert!(service_command(["install", "--bundle", "../a"].map(OsString::from)).is_err());
@@ -331,6 +382,53 @@ mod tests {
         assert!(parse_owner_id("0").is_err());
         assert!(parse_owner_id("1000\n").is_err());
         assert_eq!(parse_owner_id("1000").unwrap(), 1000);
+    }
+
+    #[test]
+    fn parses_scoped_owned_replacement_and_native_package_removal() {
+        assert_eq!(
+            service_command(
+                [
+                    "install",
+                    "--bundle",
+                    "/tmp/private",
+                    "--replace-owned",
+                    "--package",
+                    "deb"
+                ]
+                .map(OsString::from)
+            )
+            .unwrap(),
+            ServiceCommand::Install {
+                bundle: "/tmp/private".into(),
+                replace_owned: true,
+                package: Some(linux_install::LinuxPackage::Deb)
+            },
+        );
+        assert_eq!(
+            service_command(["package-uninstall", "--package", "rpm"].map(OsString::from)).unwrap(),
+            ServiceCommand::PackageUninstall(linux_install::LinuxPackage::Rpm),
+        );
+        for arguments in [
+            vec![
+                "install",
+                "--bundle",
+                "/tmp/private",
+                "--replace-owned",
+                "--replace-owned",
+            ],
+            vec![
+                "install",
+                "--bundle",
+                "/tmp/private",
+                "--package",
+                "unknown",
+            ],
+            vec!["package-uninstall", "--package", "deb", "/etc"],
+            vec!["package-uninstall", "--package"],
+        ] {
+            assert!(service_command(arguments.into_iter().map(OsString::from)).is_err());
+        }
     }
 
     #[test]

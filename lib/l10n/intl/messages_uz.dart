@@ -765,6 +765,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Tizim sozlamalari → Umumiy → Kirish elementlari va kengaytmalar bo‘limida ReClash Helperga ruxsat bering, so‘ng qayta urinib ko‘ring.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatilgan Helper boshqa protokoldan foydalanadi. Boshqa o‘rnatish yoki xizmat sozlamalarini qayta belgilash borligini tekshirib, to‘liq paketni qayta o‘rnating.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "Mavjud Linux Helper ro‘yxatini xavfsiz almashtirib bo‘lmaydi. Xizmat egasi va ro‘yxatini tekshiring: qayta avtorizatsiya ziddiyatni bartaraf etmaydi.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd TUN Helper’ni ishga tushira olmadi. Xizmat jurnalini tekshiring: o‘rnatuvchi avvalgi o‘rnatishni tiklashga urindi.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN uchun systemd boshqaradigan Linux seansi kerak. Bu tizim tarmoq Helper’ni ishga tushira olmaydi.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN Helper mavjud emas. O‘rnatilgan paket va xizmatni tekshiring, so‘ng qayta urinib ko‘ring.",
     ),
@@ -2935,9 +2947,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kartochkalarning noshaffofligi",
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Rasm tanlash"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Uchtagacha rasmni saqlang va ilova fonini sozlang.",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Qoraytirish"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
       "Rasm sozlamalari",

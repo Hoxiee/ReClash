@@ -26,28 +26,53 @@ class ThemeView extends ConsumerStatefulWidget {
   ConsumerState<ThemeView> createState() => _ThemeViewState();
 }
 
-class _ThemeViewState extends ConsumerState<ThemeView> {
+typedef _AppearanceFrame = ({double offset, double opacity});
+
+class _ThemeViewState extends ConsumerState<ThemeView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _transition = AnimationController(
+    vsync: this,
+    value: 1,
+    duration: fadeTabDuration,
+  )..addStatusListener(_onTransitionStatus);
+
   int _tab = 0;
-  final _visited = <int>{0};
+  final _visited = <int>{};
+  Map<int, _AppearanceFrame> _starts = {};
+  Map<int, _AppearanceFrame> _ends = {};
+  Curve _curve = fadeTabCurve;
+  bool _restored = false;
   (String?, int)? _handledReveal;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final initial = !_restored;
+    if (initial) {
+      _restored = true;
+      final saved = PageStorage.maybeOf(
+        context,
+      )?.readState(context, identifier: 'appearance-category');
+      if (saved is int && saved >= 0 && saved < 3) _tab = saved;
+      _visited.add(_tab);
+    }
+    final active = PageActivityScope.isActiveOf(context);
+    if ((!active || context.disableAnimations) && _starts.isNotEmpty) {
+      _settleTransition();
+    }
     final reveal = SettingsRevealScope.maybeOf(context);
     final target = reveal?.targetId;
     if (reveal == null ||
         !reveal.active ||
         target == null ||
-        !PageActivityScope.isActiveOf(context) ||
+        !active ||
         _handledReveal == (target, reveal.nonce)) {
       return;
     }
     final index = _tabOf(target);
     if (index == null) return;
     _handledReveal = (target, reveal.nonce);
-    _tab = index;
-    _visited.add(index);
+    _changeTab(index, animate: !initial);
   }
 
   int? _tabOf(String target) {
@@ -61,10 +86,116 @@ class _ThemeViewState extends ConsumerState<ThemeView> {
 
   void _select(int index) {
     if (_tab == index) return;
-    setState(() {
-      _tab = index;
-      _visited.add(index);
-    });
+    setState(() => _changeTab(index));
+  }
+
+  _AppearanceFrame _frameOf(int index) {
+    final start = _starts[index];
+    if (start == null) {
+      return (offset: 0, opacity: index == _tab ? 1 : 0);
+    }
+    final end = _ends[index]!;
+    final t = _curve.transform(_transition.value);
+    return (
+      offset: start.offset + (end.offset - start.offset) * t,
+      opacity: start.opacity + (end.opacity - start.opacity) * t,
+    );
+  }
+
+  void _changeTab(int index, {bool animate = true}) {
+    if (_tab == index) return;
+    final previous = _tab;
+    final animation = ref.read(appSettingProvider).tabAnimation;
+    final fade = animation == TabAnimation.fade;
+    final instant =
+        !animate ||
+        context.disableAnimations ||
+        !PageActivityScope.isActiveOf(context);
+    final direction =
+        (index > previous ? 1.0 : -1.0) *
+        (Directionality.of(context) == TextDirection.ltr ? 1 : -1);
+    final visible = {..._starts.keys, previous};
+    final starts = <int, _AppearanceFrame>{
+      for (final page in visible) page: _frameOf(page),
+    };
+    starts.putIfAbsent(
+      index,
+      () => (offset: fade ? 0 : direction, opacity: fade ? 0 : 1),
+    );
+    _transition.stop();
+    _tab = index;
+    _visited.add(index);
+    PageStorage.maybeOf(
+      context,
+    )?.writeState(context, index, identifier: 'appearance-category');
+    if (instant) {
+      _settleTransition();
+      return;
+    }
+    _starts = starts;
+    _ends = {
+      for (final page in starts.keys)
+        page: (
+          offset: fade || page == index ? 0 : -direction,
+          opacity: !fade || page == index ? 1 : 0,
+        ),
+    };
+    _curve = fade ? fadeTabCurve : Curves.easeOut;
+    _transition.duration = fade ? fadeTabDuration : kTabScrollDuration;
+    _transition.forward(from: 0);
+  }
+
+  void _onTransitionStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed && _starts.isNotEmpty) {
+      setState(() {
+        _starts = {};
+        _ends = {};
+      });
+    }
+  }
+
+  void _settleTransition() {
+    _transition.stop();
+    _starts = {};
+    _ends = {};
+    _transition.value = 1;
+  }
+
+  Widget _buildPages(SettingsRevealScope? reveal) {
+    final active = PageActivityScope.isActiveOf(context);
+    final transitioning = _starts.isNotEmpty;
+    final order = [..._visited.where((index) => index != _tab), _tab];
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          for (final index in order)
+            _AppearancePage(
+              key: ValueKey(index),
+              animation: _transition,
+              frame: () => _frameOf(index),
+              visible: index == _tab || _starts.containsKey(index),
+              active: active && index == _tab,
+              child: SettingsRevealScope(
+                targetId: reveal?.targetId,
+                nonce: reveal?.nonce ?? 0,
+                active:
+                    active &&
+                    index == _tab &&
+                    !transitioning &&
+                    (reveal?.active ?? true),
+                child: PageFocusScope(child: _page(index)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _transition.dispose();
+    super.dispose();
   }
 
   @override
@@ -134,30 +265,7 @@ class _ThemeViewState extends ConsumerState<ThemeView> {
               Positioned.fill(
                 child: BottomInsetScope(
                   inset: NavigationDock.insetOf(context),
-                  child: IndexedStack(
-                    index: _tab,
-                    children: [
-                      for (var index = 0; index < 3; index++)
-                        if (_visited.contains(index))
-                          TickerMode(
-                            enabled: index == _tab,
-                            child: PageActivityScope(
-                              isActive:
-                                  index == _tab &&
-                                  PageActivityScope.isActiveOf(context),
-                              child: SettingsRevealScope(
-                                targetId: reveal?.targetId,
-                                nonce: reveal?.nonce ?? 0,
-                                active:
-                                    index == _tab && (reveal?.active ?? true),
-                                child: _page(index),
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                    ],
-                  ),
+                  child: _buildPages(reveal),
                 ),
               ),
               PositionedDirectional(
@@ -225,6 +333,54 @@ class _ThemeViewState extends ConsumerState<ThemeView> {
       ],
     ),
   };
+}
+
+class _AppearancePage extends StatelessWidget {
+  const _AppearancePage({
+    super.key,
+    required this.animation,
+    required this.frame,
+    required this.visible,
+    required this.active,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final _AppearanceFrame Function() frame;
+  final bool visible;
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Offstage(
+    offstage: !visible,
+    child: TickerMode(
+      enabled: active,
+      child: PageActivityScope(
+        isActive: active,
+        child: ExcludeFocus(
+          excluding: !active,
+          child: ExcludeSemantics(
+            excluding: !active,
+            child: IgnorePointer(
+              ignoring: !active,
+              child: AnimatedBuilder(
+                animation: animation,
+                builder: (_, child) {
+                  final current = frame();
+                  return FractionalTranslation(
+                    translation: Offset(current.offset, 0),
+                    child: Opacity(opacity: current.opacity, child: child),
+                  );
+                },
+                child: RepaintBoundary(child: child),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _ThemeSettingsPage extends StatefulWidget {

@@ -10,6 +10,7 @@ import 'package:reclash/ui/measure.dart';
 import 'package:reclash/ui/metrics.dart';
 import 'package:reclash/ui/models.dart';
 import 'package:reclash/ui/page_background.dart';
+import 'package:reclash/ui/page_viewport.dart';
 import 'package:reclash/ui/pop_scope.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
@@ -760,14 +761,25 @@ class CommonScaffoldState extends State<CommonScaffold> {
     // its top through MediaQuery padding, as extendBodyBehindAppBar does.
     final barFloats = !isBottomSheet;
     final presentation = PagePresentationScope.of(context);
-    final contentBody = SortModeScope(sorting: _sorting, child: widget.body);
+    final contentBody = SortModeScope(
+      sorting: _sorting,
+      child: presentation == null
+          ? widget.body
+          : PagePresentationScope(child: widget.body),
+    );
     final sortableBody = presentation == null
         ? contentBody
-        : Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: presentation.maxBodyWidth),
-              child: contentBody,
+        : LayoutBuilder(
+            builder: (_, constraints) => Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: math.min(
+                  constraints.maxWidth,
+                  presentation.maxBodyWidth,
+                ),
+                height: constraints.maxHeight,
+                child: contentBody,
+              ),
             ),
           );
     final body = SafeArea(
@@ -841,6 +853,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
       ),
     );
     final appBar = _buildAppBar(backAction, form);
+    final header = !isCompact && PageViewport.contains(context)
+        ? ViewportAppBar(appBar: appBar)
+        : appBar;
     final content = form.hasDockedSearch
         ? BottomInsetScope(
             inset: bottomInset + BottomInsetScope.dockedSearchInset,
@@ -852,7 +867,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         context,
         AppBarInsetScope(
           child: Scaffold(
-            appBar: appBar,
+            appBar: header,
             extendBodyBehindAppBar: barFloats,
             body: _BodyScope(child: content),
             resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,

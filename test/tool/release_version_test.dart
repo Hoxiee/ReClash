@@ -158,6 +158,32 @@ void main() {
         (metadata.stdout as String).trim(),
         ReleaseVersion.read(Directory.current.path).debianVersion,
       );
+      final controlDirectory = Directory('${temp.path}/control');
+      final controlExtract = await Process.run('dpkg-deb', [
+        '--control',
+        '${temp.path}/app.deb',
+        controlDirectory.path,
+      ]);
+      expect(controlExtract.exitCode, 0);
+      final hook = File('${controlDirectory.path}/prerm');
+      expect(
+        await hook.readAsString(),
+        contains(linuxHelperPackageRemovalScript(rpm: false)),
+      );
+      expect((await hook.stat()).mode & 0x49, isNonZero);
+      final contentDirectory = Directory('${temp.path}/contents');
+      final contentExtract = await Process.run('dpkg-deb', [
+        '--extract',
+        '${temp.path}/app.deb',
+        contentDirectory.path,
+      ]);
+      expect(contentExtract.exitCode, 0);
+      expect(
+        await File(
+          '${contentDirectory.path}/opt/ReClash/reclash-package',
+        ).readAsString(),
+        'deb\n',
+      );
     },
   );
 

@@ -7,15 +7,16 @@ must:
   protocol: Structured requests and events remain compatible with the shared protocol fixtures.
   source: The ReClash engine fork and pin are changed only after explicit compatibility review.
   controller: Typed controller requests retain validation and delegation behavior.
-  privilege-intent: Privileged Core launch consumes only an explicit one-shot authorization grant; background and Safe Mode paths never prompt.
+  privilege-intent: Privileged Core launch consumes only an explicit one-shot authorization grant; background and Safe Mode paths never prompt, and disconnected Core settings remain local without RPC or authorization.
   privileged-files: Managed privileged Core pins its application home; file RPCs cannot escape it through traversal, symlinks or hard links.
   privilege-state: Helper registration, active privileged lease and applied TUN are separate states; system DNS follows confirmed TUN.
   native-backends: Linux uses per-owner network capabilities, Windows verified UAC jobs, and macOS signed XPC registration with a scoped managed Core.
+  helper-installation: Linux replacement requires a verified owned unit and confirmed shutdown; installer failures retain bounded diagnostics and rollback preserves the previous registration.
   dashboard-controller: Temporary dashboard access never persists controller changes, respects Safe Mode and saved settings, and patches through the existing serialized setup owner without starting Core or VPN.
 watch: ['services/helper/**', 'macos/PrivilegedHelper/**', 'macos/Shared/**', macos/Runner/PrivilegedHelperBridge.swift, macos/Runner/MainFlutterWindow.swift, macos/Runner.xcodeproj/project.pbxproj, 'macos/packaging/helper/**', tool/check_macos_helper.py, 'windows/runner/**', windows/CMakeLists.txt, windows/packaging/exe/inno_setup.iss, tool/windows_package.dart, tool/src/windows_bundle.dart, tool/src/pe_image.dart, test/tool/windows_bundle_test.dart, test/windows_installer_test.dart, lib/common/system.dart, lib/common/path.dart, lib/common/common.dart, lib/common/linux_elevation.dart, 'test/core/desktop/**', test/core/service_test.dart, test/common/system_test.dart, test/common/launch_test.dart, test/providers/action_test.dart, test/providers/common_action_test.dart, test/manager/android_manager_test.dart, test/manager/tile_manager_test.dart, test/views/dashboard/current_outbound_test.dart, test/views/setup_wizard_test.dart, 'core/**', '.gitmodules', 'lib/core/**', 'android/service/**', 'plugins/rust_api/**', test/providers/state_derived_test.dart, test/core/controller_test.dart, test/core/protocol_contract_test.dart, test/fixtures/core_info.json, lib/common/http.dart, 'test/models/*override_test.dart', test/models/tun_test.dart, test/providers/custom_state_test.dart, lib/common/web_dashboard/access.dart, lib/common/task.dart, lib/providers/web_dashboard.dart, lib/providers/actions/setup.dart, lib/providers/actions/system.dart, lib/providers/state/system.dart, test/providers/web_dashboard_test.dart, test/providers/setup_action_test.dart, test/providers/system_action_test.dart, 'plugins/setup/setup_hooks/lib/src/*.dart', 'plugins/setup/setup_hooks/test/*.dart', 'lib/common/launch.dart']
 checks:
   core-contracts: [latest-intent, protocol, controller]
-  native-privileges: [privilege-intent, privileged-files, privilege-state, native-backends]
+  native-privileges: [privilege-intent, privileged-files, privilege-state, native-backends, helper-installation]
   fork-tests: [source]
   web-dashboard-access: [dashboard-controller]
 drop: An approved upstream engine supplies all required ReClash hooks.

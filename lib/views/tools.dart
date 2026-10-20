@@ -8,7 +8,10 @@ import 'package:reclash/providers/tool_commands.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/views/tools/navigation.dart';
 import 'package:reclash/views/tools/search.dart';
+import 'package:reclash/ui/deferred_push.dart';
+import 'package:reclash/ui/drag_back.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/ui/page_transition.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -240,6 +243,49 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     ref.read(toolsSessionProvider.notifier).open(ToolRoute(page), push: true);
   }
 
+  Widget _landing(List<ToolEntry> entries) {
+    final l = context.appLocalizations;
+    return PagePresentationScope(
+      maxBodyWidth: 840,
+      child: CommonScaffold(
+        title: l.toolsLastUsed,
+        body: entries.isEmpty
+            ? AppBarClearance(
+                child: NullStatus(
+                  label: l.toolsChoose,
+                  illustration: NullStatusIllustration.data,
+                ),
+              )
+            : Builder(
+                builder: (context) => ListView(
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    top: context.contentTopPadding,
+                    right: 16,
+                    bottom: 20 + BottomInsetScope.of(context),
+                  ),
+                  children: [
+                    generateSection(
+                      items: [
+                        for (final entry in entries)
+                          ListItem(
+                            key: ValueKey('tools-recent-${entry.id}'),
+                            leading: GlyphIcon(entry.glyph),
+                            title: Text(entry.title),
+                            subtitle: entry.path.isEmpty
+                                ? null
+                                : Text(entry.path),
+                            onTap: () => unawaited(openEntry(entry)),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(toolsSessionProvider);
@@ -269,147 +315,219 @@ class ToolsViewState extends ConsumerState<ToolsView> {
             constraints.maxHeight >= 480;
         _split = split;
         final catalogWidth = split ? 360.0 : constraints.maxWidth;
+        final detailStart = split ? catalogWidth + 1 : 0.0;
+        final rtl = Directionality.of(context) == TextDirection.rtl;
         return ViewScope(
           size: ViewScope.sizeOf(context),
           isMobile: !split,
           windowControls: ViewScope.windowControlsOf(context),
-          child: Stack(
-            children: [
-              PositionedDirectional(
-                start: 0,
-                top: 0,
-                bottom: 0,
-                width: catalogWidth,
-                child: Offstage(
-                  offstage: !split && path.isNotEmpty,
-                  child: ExcludeFocus(
-                    excluding: !split && path.isNotEmpty,
-                    child: TickerMode(
-                      enabled: active && (split || path.isEmpty),
-                      child: ToolsCatalogPanel(
-                        searchFocus: _searchFocus,
-                        onSelect: openEntry,
+          child: PageBackground(
+            baseColor: SurfaceLevel.page.colorOf(context.colorScheme),
+            child: Stack(
+              children: [
+                PositionedDirectional(
+                  start: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: catalogWidth,
+                  child: Offstage(
+                    offstage: !split && path.isNotEmpty,
+                    child: ExcludeFocus(
+                      excluding: !split && path.isNotEmpty,
+                      child: TickerMode(
+                        enabled: active && (split || path.isEmpty),
+                        child: PageActivityScope(
+                          isActive: active && (split || path.isEmpty),
+                          child: PageViewport(
+                            bounds: Rect.fromLTWH(
+                              rtl ? constraints.maxWidth - catalogWidth : 0,
+                              0,
+                              catalogWidth,
+                              constraints.maxHeight,
+                            ),
+                            child: ToolsCatalogPanel(
+                              searchFocus: _searchFocus,
+                              onSelect: openEntry,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (split)
+                if (split)
+                  PositionedDirectional(
+                    start: catalogWidth,
+                    top: 0,
+                    bottom: 0,
+                    width: 1,
+                    child: ColoredBox(
+                      key: const ValueKey('tools-pane-divider'),
+                      color: context.colorScheme.outlineVariant,
+                    ),
+                  ),
                 PositionedDirectional(
-                  start: catalogWidth,
+                  start: detailStart,
+                  end: 0,
                   top: 0,
                   bottom: 0,
-                  width: 1,
-                  child: ColoredBox(
-                    key: const ValueKey('tools-pane-divider'),
-                    color: context.colorScheme.outlineVariant,
-                  ),
-                ),
-              PositionedDirectional(
-                start: split ? catalogWidth + 1 : 0,
-                end: 0,
-                top: 0,
-                bottom: 0,
-                child: Offstage(
-                  offstage: !split && path.isEmpty,
-                  child: Navigator(
-                    key: _navigator,
-                    observers: [_observer],
-                    onDidRemovePage: (page) {
-                      final state = ref.read(toolsSessionProvider);
-                      final index = state.path.indexWhere(
-                        (route) => page.key == ValueKey(route.page),
-                      );
-                      if (index >= 0) {
-                        ref.read(toolsSessionProvider.notifier).popTo(index);
-                      }
-                    },
-                    pages: [
-                      MaterialPage<void>(
-                        key: const ValueKey('tools.placeholder'),
-                        child: recentEntries.isEmpty
-                            ? NullStatus(
-                                label: l.toolsChoose,
-                                illustration: NullStatusIllustration.data,
-                              )
-                            : Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 840,
-                                  ),
-                                  child: ListView(
-                                    padding: EdgeInsets.only(
-                                      bottom: 20 + BottomInsetScope.of(context),
-                                    ),
-                                    children: [
-                                      SizedBox(
-                                        height: 320,
-                                        child: NullStatus(
-                                          label: l.toolsChoose,
-                                          illustration:
-                                              NullStatusIllustration.data,
-                                        ),
-                                      ),
-                                      generateSection(
-                                        title: l.toolsLastUsed,
-                                        items: [
-                                          for (final entry in recentEntries)
-                                            ListItem(
-                                              key: ValueKey(
-                                                'tools-recent-${entry.id}',
-                                              ),
-                                              leading: GlyphIcon(entry.glyph),
-                                              title: Text(entry.title),
-                                              subtitle: entry.path.isEmpty
-                                                  ? null
-                                                  : Text(entry.path),
-                                              onTap: () =>
-                                                  unawaited(openEntry(entry)),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
+                  child: Offstage(
+                    offstage: !split && path.isEmpty,
+                    child: PageViewport(
+                      bounds: Rect.fromLTWH(
+                        rtl ? 0 : detailStart,
+                        0,
+                        constraints.maxWidth - detailStart,
+                        constraints.maxHeight,
+                      ),
+                      child: Navigator(
+                        key: _navigator,
+                        observers: [_observer],
+                        onDidRemovePage: (page) {
+                          if (!_navigator.currentState!.widget.pages.contains(
+                            page,
+                          )) {
+                            return;
+                          }
+                          final state = ref.read(toolsSessionProvider);
+                          final index = state.path.indexWhere(
+                            (route) => page.key == ValueKey(route.page),
+                          );
+                          if (index >= 0) {
+                            ref
+                                .read(toolsSessionProvider.notifier)
+                                .popTo(index);
+                          }
+                        },
+                        pages: [
+                          _ToolsPage(
+                            key: const ValueKey('tools.placeholder'),
+                            child: split && path.isEmpty
+                                ? _landing(recentEntries)
+                                : const SizedBox.expand(),
+                          ),
+                          for (final route in path)
+                            _ToolsPage(
+                              key: ValueKey(route.page),
+                              child: PagePresentationScope(
+                                title: split
+                                    ? _breadcrumbs(
+                                        path
+                                            .take(path.indexOf(route) + 1)
+                                            .toList(),
+                                        pages,
+                                      )
+                                    : null,
+                                maxBodyWidth:
+                                    split &&
+                                        route.page != ToolPage.coreRuntimeConfig
+                                    ? 840
+                                    : double.infinity,
+                                child: PageNavigationScope(
+                                  canOpen: (widget) =>
+                                      toolPageOf(widget) != null,
+                                  open: _openWidget,
+                                  child: SettingsRevealScope(
+                                    targetId: route.settingId,
+                                    nonce: session.focusNonce,
+                                    active: active && route == path.last,
+                                    child: buildToolPage(route.page, context),
                                   ),
                                 ),
                               ),
-                      ),
-                      for (final route in path)
-                        MaterialPage<void>(
-                          key: ValueKey(route.page),
-                          child: PagePresentationScope(
-                            title: split
-                                ? _breadcrumbs(
-                                    path.take(path.indexOf(route) + 1).toList(),
-                                    pages,
-                                  )
-                                : null,
-                            maxBodyWidth:
-                                split &&
-                                    route.page != ToolPage.coreRuntimeConfig
-                                ? 840
-                                : double.infinity,
-                            child: PageNavigationScope(
-                              canOpen: (widget) => toolPageOf(widget) != null,
-                              open: _openWidget,
-                              child: SettingsRevealScope(
-                                targetId: route.settingId,
-                                nonce: session.focusNonce,
-                                active: active && route == path.last,
-                                child: buildToolPage(route.page, context),
-                              ),
                             ),
-                          ),
-                        ),
-                    ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
+}
+
+class _ToolsPage extends Page<void> {
+  const _ToolsPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) =>
+      _ToolsPageRoute(settings: this);
+}
+
+class _ToolsPageRoute extends PageRoute<void>
+    with
+        DragBackRouteMixin<void>,
+        DeferredPushRouteMixin<void>,
+        SharedXPageRouteMixin<void> {
+  _ToolsPageRoute({required super.settings});
+
+  static const _enterCurve = Interval(0.5, 1, curve: Cubic(0.16, 1, 0.3, 1));
+  static const _leaveCurve = Interval(0, 0.5, curve: Cubic(0.4, 0, 1, 1));
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 260);
+
+  @override
+  bool sharesMotionWith(Route<dynamic>? route) => route is _ToolsPageRoute;
+
+  @override
+  Color backdropOf(Color surface, {required bool dragging}) =>
+      Colors.transparent;
+
+  @override
+  Color transitionColorOf(Color surface) => Colors.transparent;
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (isDragBackActive) {
+      return super.buildTransitions(
+        context,
+        animation,
+        secondaryAnimation,
+        child,
+      );
+    }
+    return dragBackDetector(
+      AnimatedBuilder(
+        animation: Listenable.merge([animation, secondaryAnimation]),
+        builder: (context, child) {
+          final entering = _enterCurve.transform(animation.value);
+          final covered = secondaryAnimation.status == AnimationStatus.reverse
+              ? _enterCurve.transform(1 - secondaryAnimation.value)
+              : 1 - _leaveCurve.transform(secondaryAnimation.value);
+          return Opacity(opacity: entering * covered, child: child);
+        },
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) => Semantics(
+    scopesRoute: true,
+    explicitChildNodes: true,
+    child: KeyboardInsetHold(
+      child: PageViewport.inherit(
+        context,
+        child: (settings as _ToolsPage).child,
+      ),
+    ),
+  );
 }
 
 class _ToolsRouteObserver extends NavigatorObserver {

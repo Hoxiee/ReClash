@@ -581,6 +581,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "请在系统设置 → 通用 → 登录项与扩展中允许ReClash Helper，然后重试。",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "已安装的 Helper 使用不同的协议。请检查是否存在其他安装或服务覆盖配置，然后重新安装完整的软件包。",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "无法安全替换现有的 Linux Helper 注册。请检查服务归属及注册信息；重复授权无法解决此冲突。",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd 无法启动 TUN Helper。请查看服务日志；安装程序已尝试恢复先前的安装。",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN 需要由 systemd 管理的 Linux 会话。此系统无法运行网络 Helper。",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN Helper不可用。请检查已安装的软件包和服务后重试。",
     ),
@@ -2139,9 +2151,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperBlur": MessageLookupByLibrary.simpleMessage("模糊"),
     "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("卡片不透明度"),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("选择图片"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "最多保存三张图片，并调整应用背景。",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("调暗"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage("图片调整"),
     "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("使用自定义背景"),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/constant.dart';
@@ -9,6 +10,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/font_family.dart';
 import 'package:reclash/views/theme.dart';
@@ -65,6 +67,478 @@ void main() {
   ThemeProps readTheme() => container.read(themeSettingProvider);
 
   group('appearance tabs', () {
+    Finder destination(String label) => find.descendant(
+      of: find.byType(NavigationDock),
+      matching: find.text(label),
+    );
+
+    Finder page(String id, {bool skipOffstage = true}) =>
+        find.byKey(PageStorageKey('theme-tab-$id'), skipOffstage: skipOffstage);
+
+    ScrollController scrollOf(WidgetTester tester, String id) => tester
+        .widget<SingleChildScrollView>(page(id, skipOffstage: false))
+        .controller!;
+
+    double opacityOf(WidgetTester tester, String id) => tester
+        .widget<Opacity>(
+          find.ancestor(of: page(id), matching: find.byType(Opacity)).first,
+        )
+        .opacity;
+
+    FocusNode focusOf(WidgetTester tester, String id) => tester
+        .widget<Focus>(
+          find
+              .descendant(
+                of: find.byWidgetPredicate(
+                  (widget) => widget is SettingTarget && widget.spec.id == id,
+                  skipOffstage: false,
+                ),
+                matching: find.byWidgetPredicate(
+                  (widget) => widget is Focus && widget.focusNode != null,
+                  skipOffstage: false,
+                ),
+              )
+              .first,
+        )
+        .focusNode!;
+
+    testWidgets('each category retains its own scroll and preview state', (
+      tester,
+    ) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      final themeElement = tester.element(page('theme'));
+      final themeScroll = scrollOf(tester, 'theme');
+      final preview = find.byType(ThemeLivePreview);
+      await tester.tap(
+        find
+            .descendant(of: preview, matching: find.byType(GestureDetector))
+            .at(2),
+      );
+      await tester.pumpAndSettle();
+      themeScroll.jumpTo(250);
+      await tester.pumpAndSettle();
+
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      final backgroundElement = tester.element(page('background'));
+      final backgroundScroll = scrollOf(tester, 'background');
+      expect(backgroundScroll.offset, 0);
+      backgroundScroll.jumpTo(190);
+      await tester.pumpAndSettle();
+
+      await tester.tap(destination('Interface'));
+      await tester.pumpAndSettle();
+      final interfaceScroll = scrollOf(tester, 'interface');
+      expect(interfaceScroll.offset, 0);
+      interfaceScroll.jumpTo(320);
+      await tester.pumpAndSettle();
+
+      await tester.tap(destination('Theme'));
+      await tester.pumpAndSettle();
+      expect(tester.element(page('theme')), same(themeElement));
+      expect(themeScroll.offset, 250);
+      expect(
+        tester
+            .widget<MiniScreen>(
+              find.descendant(of: preview, matching: find.byType(MiniScreen)),
+            )
+            .selected,
+        2,
+      );
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      expect(tester.element(page('background')), same(backgroundElement));
+      expect(backgroundScroll.offset, 190);
+      await tester.tap(destination('Interface'));
+      await tester.pumpAndSettle();
+      expect(interfaceScroll.offset, 320);
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final animation in TabAnimation.values) {
+      testWidgets('$animation animates category changes and keeps the dock '
+          'stationary', (tester) async {
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(tabAnimation: animation));
+        await pumpThemeView(tester, size: const Size(390, 844));
+        final dock = tester.getRect(find.byType(NavigationDock));
+        await tester.tap(destination('Background'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 70));
+        expect(page('theme'), findsOneWidget);
+        expect(page('background'), findsOneWidget);
+        expect(tester.getRect(find.byType(NavigationDock)), dock);
+        if (animation == TabAnimation.fade) {
+          expect(opacityOf(tester, 'theme'), inExclusiveRange(0, 1));
+          expect(opacityOf(tester, 'background'), inExclusiveRange(0, 1));
+        } else {
+          expect(tester.getTopLeft(page('theme')).dx, lessThan(0));
+          expect(
+            tester.getTopLeft(page('background')).dx,
+            inExclusiveRange(0, 390),
+          );
+        }
+        await tester.pumpAndSettle();
+        expect(page('theme'), findsNothing);
+        expect(page('background'), findsOneWidget);
+        expect(tester.getTopLeft(page('background')).dx, 0);
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$animation reverses without jumping or duplicating a page', (
+        tester,
+      ) async {
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(tabAnimation: animation));
+        await pumpThemeView(tester, size: const Size(390, 844));
+        final themeElement = tester.element(page('theme'));
+        await tester.tap(destination('Background'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 80));
+        final themePosition = tester.getTopLeft(page('theme'));
+        final backgroundPosition = tester.getTopLeft(page('background'));
+        final themeOpacity = animation == TabAnimation.fade
+            ? opacityOf(tester, 'theme')
+            : 1.0;
+        final backgroundOpacity = animation == TabAnimation.fade
+            ? opacityOf(tester, 'background')
+            : 1.0;
+
+        await tester.tap(destination('Theme'));
+        await tester.pump();
+        expect(tester.getTopLeft(page('theme')), themePosition);
+        expect(tester.getTopLeft(page('background')), backgroundPosition);
+        if (animation == TabAnimation.fade) {
+          expect(opacityOf(tester, 'theme'), themeOpacity);
+          expect(opacityOf(tester, 'background'), backgroundOpacity);
+        }
+        expect(page('theme', skipOffstage: false), findsOneWidget);
+        expect(page('background', skipOffstage: false), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(page('theme'), findsOneWidget);
+        expect(page('background'), findsNothing);
+        expect(tester.element(page('theme')), same(themeElement));
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets(
+        '$animation rapid category changes honor the last selection',
+        (tester) async {
+          container
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(tabAnimation: animation));
+          await pumpThemeView(tester, size: const Size(390, 844));
+          await tester.tap(destination('Background'));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 60));
+          await tester.tap(destination('Interface'));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 40));
+          await tester.tap(destination('Theme'));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 30));
+          await tester.tap(destination('Interface'));
+          await tester.pumpAndSettle();
+          expect(page('theme'), findsNothing);
+          expect(page('background'), findsNothing);
+          expect(page('interface'), findsOneWidget);
+          for (final id in ['theme', 'background', 'interface']) {
+            expect(page(id, skipOffstage: false), findsOneWidget);
+          }
+          expect(
+            tester
+                .widget<NavigationDock>(find.byType(NavigationDock))
+                .selectedIndex,
+            2,
+          );
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+
+    testWidgets('hidden settings cannot reclaim keyboard focus', (
+      tester,
+    ) async {
+      await pumpThemeView(tester);
+      final themeFocus = focusOf(tester, 'theme.themeMode');
+      themeFocus.requestFocus();
+      await tester.pump();
+      expect(themeFocus.hasPrimaryFocus, isTrue);
+      await tester.tap(destination('Interface'));
+      await tester.pumpAndSettle();
+      themeFocus.requestFocus();
+      await tester.pump();
+      expect(themeFocus.hasPrimaryFocus, isFalse);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('reduced motion settles an in-progress category change', (
+      tester,
+    ) async {
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await pumpThemeView(tester);
+      await tester.tap(destination('Background'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      expect(page('theme'), findsOneWidget);
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      await tester.pump();
+      expect(page('theme'), findsNothing);
+      expect(page('background'), findsOneWidget);
+      await tester.tap(destination('Interface'));
+      await tester.pump();
+      expect(page('background'), findsNothing);
+      expect(page('interface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('search reveal follows the latest target after the category '
+        'transition', (tester) async {
+      final reveal = ValueNotifier<(String?, int)>((null, 0));
+      addTearDown(reveal.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: ValueListenableBuilder(
+              valueListenable: reveal,
+              builder: (_, request, _) => SettingsRevealScope(
+                targetId: request.$1,
+                nonce: request.$2,
+                child: const ThemeView(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      reveal.value = ('theme.wallpaper.fit', 1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      expect(focusOf(tester, 'theme.wallpaper.fit').hasPrimaryFocus, isFalse);
+      reveal.value = ('theme.textScale', 2);
+      await tester.pumpAndSettle();
+      expect(page('interface'), findsOneWidget);
+      expect(focusOf(tester, 'theme.textScale').hasPrimaryFocus, isTrue);
+      expect(focusOf(tester, 'theme.wallpaper.fit').hasPrimaryFocus, isFalse);
+      await tester.tap(destination('Theme'));
+      await tester.pumpAndSettle();
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(pureBlack: !state.pureBlack));
+      await tester.pumpAndSettle();
+      expect(page('theme'), findsOneWidget);
+      reveal.value = ('theme.textScale', 3);
+      await tester.pumpAndSettle();
+      expect(page('interface'), findsOneWidget);
+      expect(focusOf(tester, 'theme.textScale').hasPrimaryFocus, isTrue);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('disposing during a category transition stops its animation', (
+      tester,
+    ) async {
+      await pumpThemeView(tester);
+      await tester.tap(destination('Background'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('reopening within a route restores its category and scroll', (
+      tester,
+    ) async {
+      final shown = ValueNotifier(true);
+      addTearDown(shown.dispose);
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: ValueListenableBuilder(
+              valueListenable: shown,
+              builder: (_, visible, _) =>
+                  visible ? const ThemeView() : const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      scrollOf(tester, 'background').jumpTo(210);
+      await tester.pumpAndSettle();
+      shown.value = false;
+      await tester.pumpAndSettle();
+      shown.value = true;
+      await tester.pumpAndSettle();
+      expect(page('background'), findsOneWidget);
+      expect(scrollOf(tester, 'background').offset, 210);
+      expect(page('theme', skipOffstage: false), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a covered theme page settles and honors a pending search '
+        'when it returns', (tester) async {
+      final visible = ValueNotifier(true);
+      final reveal = ValueNotifier<(String?, int)>((null, 0));
+      addTearDown(visible.dispose);
+      addTearDown(reveal.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: ValueListenableBuilder(
+              valueListenable: visible,
+              builder: (_, active, _) => PageActivityScope(
+                isActive: active,
+                child: ValueListenableBuilder(
+                  valueListenable: reveal,
+                  builder: (_, request, _) => SettingsRevealScope(
+                    targetId: request.$1,
+                    nonce: request.$2,
+                    child: const ThemeView(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(destination('Background'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      visible.value = false;
+      reveal.value = ('theme.textScale', 1);
+      await tester.pump();
+      expect(page('theme'), findsNothing);
+      expect(page('background'), findsOneWidget);
+      expect(page('interface', skipOffstage: false), findsNothing);
+      expect(TickerMode.of(tester.element(page('background'))), isFalse);
+      visible.value = true;
+      await tester.pumpAndSettle();
+      expect(page('interface'), findsOneWidget);
+      expect(focusOf(tester, 'theme.textScale').hasPrimaryFocus, isTrue);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('slide direction follows the reading direction', (
+      tester,
+    ) async {
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: ThemeView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(destination('Background'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 70));
+      expect(tester.getTopLeft(page('theme')).dx, greaterThan(0));
+      expect(tester.getTopLeft(page('background')).dx, lessThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(page('background')).dx, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the background library allows four images but not a fifth', (
+      tester,
+    ) async {
+      const images = [
+        '00000000000000000000000000000001.png',
+        '00000000000000000000000000000002.png',
+        '00000000000000000000000000000003.png',
+        '00000000000000000000000000000004.png',
+      ];
+      final image = MemoryImage(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+        ),
+      );
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          wallpaperThumbnailProvider.overrideWith((ref, name) async => image),
+          wallpaperSaveProvider.overrideWithValue(() async => true),
+        ],
+      );
+      globalState.container = container;
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              wallpaper: WallpaperProps(library: images.take(3).toList()),
+            ),
+          );
+      await pumpThemeView(tester);
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      final choose = find.byWidgetPredicate(
+        (widget) => widget is IconButton && widget.tooltip == 'Choose image',
+      );
+      expect(tester.widget<IconButton>(choose).onPressed, isNotNull);
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              wallpaper: const WallpaperProps(library: images),
+            ),
+          );
+      await tester.pumpAndSettle();
+      expect(tester.widget<IconButton>(choose).onPressed, isNull);
+      expect(find.text('Background 4'), findsOneWidget);
+      await tester.tap(find.text('Background 4'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(themeSettingProvider).wallpaper.fileName,
+        images.last,
+      );
+      expect(container.read(themeSettingProvider).wallpaper.enabled, isTrue);
+      await tester.tap(destination('Theme'));
+      await tester.pumpAndSettle();
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(themeSettingProvider).wallpaper.fileName,
+        images.last,
+      );
+      expect(
+        find.text(
+          'You can keep up to 4 backgrounds. Remove one to add another.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Keep up to three images and adjust how the background looks '
+          'across the app.',
+        ),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('bottom tabs preserve visited page state', (tester) async {
       await pumpThemeView(tester);
       expect(find.text('Theme').last, findsOneWidget);

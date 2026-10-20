@@ -29,6 +29,47 @@ void main() {
     expect(Config.fromJson(decoded).themeProps.wallpaper, wallpaper);
   });
 
+  test('four images and the selected fourth survive a config round trip', () {
+    const library = [
+      '00000000000000000000000000000001.png',
+      '00000000000000000000000000000002.png',
+      '00000000000000000000000000000003.png',
+      '00000000000000000000000000000004.png',
+    ];
+    final wallpaper = WallpaperProps(
+      library: library,
+      fileName: library.last,
+      enabled: true,
+    );
+    final config = Config(themeProps: ThemeProps(wallpaper: wallpaper));
+    final json =
+        jsonDecode(jsonEncode(config.toJson())) as Map<String, Object?>;
+    expect(Config.fromJson(json).themeProps.wallpaper, wallpaper);
+    expect(wallpaperLibraryOf(json), library);
+  });
+
+  test('the wallpaper library stops at four unique safe file names', () {
+    const library = [
+      '00000000000000000000000000000001.png',
+      '00000000000000000000000000000002.png',
+      '00000000000000000000000000000003.png',
+      '00000000000000000000000000000004.png',
+      '00000000000000000000000000000005.png',
+    ];
+    expect(
+      sanitizeWallpaperLibrary(['../outside.png', library.first, ...library]),
+      library.take(4).toList(),
+    );
+    final rejected = WallpaperProps.safeFromJson({
+      'library': library,
+      'fileName': library.last,
+      'enabled': true,
+    });
+    expect(rejected.library, library.take(4).toList());
+    expect(rejected.fileName, isNull);
+    expect(rejected.enabled, isFalse);
+  });
+
   test('malformed and out-of-range wallpaper values are sanitized', () {
     final wallpaper = WallpaperProps.safeFromJson({
       'enabled': true,

@@ -12,6 +12,8 @@ mixin SharedXPageRouteMixin<T> on PageRoute<T>, DragBackRouteMixin<T> {
 
   Color backdropOf(Color surface, {required bool dragging});
 
+  Color transitionColorOf(Color surface) => surface;
+
   @override
   bool get maintainState => true;
 
@@ -52,7 +54,7 @@ mixin SharedXPageRouteMixin<T> on PageRoute<T>, DragBackRouteMixin<T> {
           secondaryAnimation: dragging
               ? kAlwaysDismissedAnimation
               : secondaryAnimation,
-          color: surface,
+          color: transitionColorOf(surface),
           slide: SharedXPageTransition.pageSlide,
           overSettledPage: _overSettledPage,
           uncoveredByGesture: navigator!.userGestureInProgress,
@@ -346,6 +348,15 @@ class _RenderPageFade extends RenderProxyBox {
     }
     if (opacity == 1) {
       super.paint(context, offset);
+      return;
+    }
+    if (_color.a == 0) {
+      final child = this.child!;
+      context.pushOpacity(
+        offset,
+        (opacity * 255).round(),
+        (context, offset) => context.paintChild(child, offset),
+      );
       return;
     }
     if (_opaque) {

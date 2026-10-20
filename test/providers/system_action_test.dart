@@ -3,12 +3,18 @@ import 'dart:ui' show Brightness, Color;
 
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/common/preferences.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/web_dashboard.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/core.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
@@ -49,6 +55,32 @@ class TestSystemAction extends SystemAction {
 
   @override
   Future<void> exitApplication() async => calls.add('exit');
+}
+
+class _TunCore extends Mock implements CoreHandlerInterface {
+  int revocations = 0;
+
+  @override
+  void revokePrivilegePrompt() => revocations++;
+}
+
+class _TunSetupAction extends SetupAction {
+  final prompts = <bool>[];
+  int updates = 0;
+
+  @override
+  Future<void> updateConfig() async => updates++;
+
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    required bool allowPrompt,
+  }) async {
+    prompts.add(allowPrompt);
+    return allowPrompt
+        ? DesktopPrivilegeDecision.restartRequired
+        : DesktopPrivilegeDecision.authorizationRequired;
+  }
 }
 
 class _PersistenceSystemAction extends SystemAction {
@@ -340,12 +372,64 @@ void main() {
 
     tearDown(() => container.dispose());
 
-    test('updateTun flips the patched Core tun flag', () {
-      final before = container.read(patchClashConfigProvider).tun.enable;
+    test('TUN commands grant one prompt through the setup owner', () async {
+      final core = _TunCore();
+      final scoped = ProviderContainer(
+        overrides: [
+          safeModeProvider.overrideWithValue(false),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          setupActionProvider.overrideWith(_TunSetupAction.new),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      scoped
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(enable: false));
+      final setup =
+          scoped.read(setupActionProvider.notifier) as _TunSetupAction;
+      await scoped.read(systemActionProvider.notifier).updateTun();
+      expect(scoped.read(patchClashConfigProvider).tun.enable, isTrue);
+      expect(setup.updates, 1);
+      expect(await setup.requestAdmin(true), isFalse);
+      await expectLater(
+        setup.requestAdmin(true),
+        throwsA(
+          isA<DesktopPrivilegeException>().having(
+            (error) => error.code,
+            'code',
+            'authorization_required',
+          ),
+        ),
+      );
+      expect(setup.prompts, [true, false]);
+    });
 
-      container.read(systemActionProvider.notifier).updateTun();
-
-      expect(container.read(patchClashConfigProvider).tun.enable, !before);
+    test('disabling TUN by command revokes a pending prompt', () async {
+      final core = _TunCore();
+      final scoped = ProviderContainer(
+        overrides: [
+          safeModeProvider.overrideWithValue(false),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          setupActionProvider.overrideWith(_TunSetupAction.new),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      scoped
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith.tun(enable: false));
+      final system = scoped.read(systemActionProvider.notifier);
+      await system.updateTun();
+      await system.updateTun();
+      expect(scoped.read(patchClashConfigProvider).tun.enable, isFalse);
+      expect(core.revocations, 1);
+      final setup =
+          scoped.read(setupActionProvider.notifier) as _TunSetupAction;
+      await expectLater(
+        setup.requestAdmin(true),
+        throwsA(isA<DesktopPrivilegeException>()),
+      );
+      expect(setup.prompts, [false]);
+      expect(setup.updates, 2);
     });
 
     test('updateSystemProxy flips the system proxy flag', () {

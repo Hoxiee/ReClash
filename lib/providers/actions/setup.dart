@@ -392,6 +392,7 @@ class SetupAction extends _$SetupAction {
 
   @visibleForTesting
   Future<void> updateConfig() async {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
     await globalState.safeRun(() async {
       final patchConfig = ref.read(patchClashConfigProvider);
       final shouldContinueSetup = await requestAdmin(patchConfig.tun.enable);
