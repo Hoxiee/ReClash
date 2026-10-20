@@ -8,6 +8,7 @@ import 'package:reclash/common/webdav.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:material_ui/material_ui.dart';
@@ -35,6 +36,33 @@ void main() {
           : Response<void>(requestOptions: options, statusCode: statusCode),
     );
   }
+
+  test('Linux Helper failures give actionable, distinct messages', () {
+    for (final entry in {
+      'linux_registrationConflict':
+          appLocalizations.desktopHelperRegistrationConflict,
+      'linux_systemdFailed': appLocalizations.desktopHelperSystemdFailed,
+      'linux_protocolMismatch': appLocalizations.desktopHelperProtocolMismatch,
+      'linux_systemdUnavailable': appLocalizations.desktopHelperSystemdRequired,
+      'linux_installBusy': appLocalizations.desktopLaunchPending,
+      'linux_stopFailed': appLocalizations.desktopLaunchPending,
+      'linux_cancelled': appLocalizations.desktopAuthorizationCancelled,
+    }.entries) {
+      final failure = DesktopCoreFailure(
+        code: 'start_failed',
+        phase: DesktopCorePhase.starting,
+        revision: 1,
+        cause: DesktopPrivilegeException(
+          entry.key,
+          detail: 'technical details',
+        ),
+      );
+      expect(
+        desktopPrivilegeErrorMessage(failure, appLocalizations),
+        entry.value,
+      );
+    }
+  });
 
   group('Dio failures name their cause', () {
     final cases = <String, (DioException, String Function(AppLocalizations))>{

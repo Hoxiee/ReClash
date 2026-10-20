@@ -29,6 +29,36 @@ String normalizePackageMetadata(
   return normalized;
 }
 
+String linuxHelperPackageRemovalScript({required bool rpm}) => rpm
+    ? '[ "\$1" = 0 ] || exit 0\n'
+          '%{_datadir}/%{name}/ReClashHelperService package-uninstall --package rpm\n'
+    : 'case "\${1:-}" in remove) ;; *) exit 0 ;; esac\n'
+          '/opt/ReClash/ReClashHelperService package-uninstall --package deb\n';
+
+String withRpmHelperPackageHooks(String source) {
+  final existing = RegExp(r'^%preun(?:[ \t].*)?$', multiLine: true);
+  if (existing.hasMatch(source)) {
+    throw const FormatException('RPM package already owns a pre-removal hook');
+  }
+  const section = '%postun\n';
+  if (section.allMatches(source).length != 1) {
+    throw const FormatException('Unexpected RPM removal sections');
+  }
+  if ('%install\n'.allMatches(source).length != 1 ||
+      '%post\n'.allMatches(source).length != 1) {
+    throw const FormatException('Unexpected RPM install sections');
+  }
+  return source
+      .replaceFirst(
+        '%post\n',
+        "printf 'rpm\\n' > %{buildroot}%{_datadir}/%{name}/reclash-package\n%post\n",
+      )
+      .replaceFirst(
+        section,
+        '%preun\n${linuxHelperPackageRemovalScript(rpm: true)}\n%postun\n',
+      );
+}
+
 /// The maker writes `key=value` lines libalpm cannot read: it needs `key = value`,
 /// a single combined `epoch:pkgver-pkgrel`, and repeated singular array keys
 /// instead of the maker's `(a, b)`. Rewrite `.PKGINFO` into that form before
@@ -165,9 +195,41 @@ Future<void> main(List<String> args) async {
     }
     if (metadata != null) {
       final source = await metadata.readAsString();
-      await metadata.writeAsString(
-        normalizePackageMetadata(source, ReleaseVersion.read(root), rpm: rpm),
+      final normalized = normalizePackageMetadata(
+        source,
+        ReleaseVersion.read(root),
+        rpm: rpm,
       );
+      await metadata.writeAsString(
+        rpm ? withRpmHelperPackageHooks(normalized) : normalized,
+      );
+      if (!rpm) {
+        final marker = File(
+          p.join(
+            metadata.parent.parent.path,
+            'opt',
+            'ReClash',
+            'reclash-package',
+          ),
+        );
+        await marker.create(recursive: true);
+        await marker.writeAsString('deb\n');
+        final hook = File(p.join(metadata.parent.path, 'prerm'));
+        if (await hook.exists()) {
+          throw const FormatException(
+            'DEB package already owns a pre-removal hook',
+          );
+        }
+        await hook.writeAsString(
+          '#!/bin/sh\nset -e\n${linuxHelperPackageRemovalScript(rpm: false)}',
+        );
+        final permissions = await Process.run('chmod', ['0755', hook.path]);
+        if (permissions.exitCode != 0) {
+          throw const FileSystemException(
+            'Could not make package removal hook executable',
+          );
+        }
+      }
     }
   }
   final process = await Process.start(

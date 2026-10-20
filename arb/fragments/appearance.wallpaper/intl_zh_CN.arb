@@ -26,7 +26,6 @@
   "wallpaperReadability": "可读性",
   "wallpaperLibraryFull": "最多可保存 {count} 张背景。删除一张后才能添加新背景。",
   "appearanceInterface": "界面",
-  "wallpaperDescription": "最多保存三张图片，并调整应用背景。",
   "wallpaperReset": "重置效果",
   "wallpaperResetLayout": "重置构图",
   "wallpaperImageLabel": "背景 {index}",

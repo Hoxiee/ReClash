@@ -181,7 +181,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       case HotAction.proxy:
         systemAction.updateSystemProxy();
       case HotAction.tun:
-        systemAction.updateTun();
+        await systemAction.updateTun();
       case HotAction.ruleMode:
         setupAction.changeMode(Mode.rule);
       case HotAction.globalMode:

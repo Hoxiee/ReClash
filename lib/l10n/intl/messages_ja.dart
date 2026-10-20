@@ -625,6 +625,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "システム設定 → 一般 → ログイン項目と機能拡張でReClash Helperを許可してから再試行してください。",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "インストール済みの Helper は異なるプロトコルを使用しています。別のインストールやサービスの上書き設定を確認し、完全なパッケージを再インストールしてください。",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "既存の Linux Helper の登録を安全に置き換えることができません。サービスの所有者と登録を確認してください。認証を繰り返しても競合は解消されません。",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd が TUN Helper を起動できませんでした。サービスのログを確認してください。インストーラーは以前のインストールの復元を試みました。",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN には systemd が管理する Linux セッションが必要です。このシステムではネットワーク Helper を実行できません。",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUNのHelperが利用できません。インストール済みパッケージとサービスを確認して再試行してください。",
     ),
@@ -2365,9 +2377,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperBlur": MessageLookupByLibrary.simpleMessage("ぼかし"),
     "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("カードの不透明度"),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("画像を選択"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "最大3枚の画像を保存して、アプリの背景を調整できます。",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("暗さ"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage("画像の調整"),
     "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("カスタム背景を使用"),

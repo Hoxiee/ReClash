@@ -26,7 +26,6 @@
   "wallpaperReadability": "Читаемость",
   "wallpaperLibraryFull": "Можно хранить до {count} фонов. Удалите один, чтобы добавить новый.",
   "appearanceInterface": "Интерфейс",
-  "wallpaperDescription": "Сохраните до трёх изображений и настройте фон приложения.",
   "wallpaperReset": "Сбросить эффекты",
   "wallpaperResetLayout": "Сбросить кадрирование",
   "wallpaperImageLabel": "Фон {index}",

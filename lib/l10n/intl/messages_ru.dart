@@ -750,6 +750,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Разрешите Helper ReClash в «Системных настройках» → «Основные» → «Объекты входа и расширения», затем повторите попытку.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "Установленный Helper использует другой протокол. Проверьте другую установку или переопределение службы и переустановите полный пакет.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "Существующую регистрацию Linux Helper нельзя безопасно заменить. Проверьте принадлежность службы и регистрацию: повторная авторизация не устранит конфликт.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd не смог запустить Helper для TUN. Проверьте журнал службы: установщик попытался восстановить предыдущую установку.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "Для TUN необходим сеанс Linux под управлением systemd. Эта система не может запустить сетевой Helper.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "Helper для TUN недоступен. Проверьте установленный пакет и службу, затем повторите попытку.",
     ),
@@ -2881,9 +2893,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage(
       "Выбрать изображение",
-    ),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Сохраните до трёх изображений и настройте фон приложения.",
     ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Затемнение"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage(

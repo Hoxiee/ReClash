@@ -133,6 +133,7 @@ void main() {
             'install',
             '--bundle',
             p.join(fixture.path, 'stage'),
+            '--replace-owned',
           ]);
           return ProcessResult(10, 126, '', 'cancelled');
         },
@@ -256,6 +257,90 @@ void main() {
       } finally {
         await staged.delete(recursive: true);
       }
+    },
+  );
+
+  test(
+    'native package identity is fixed and AppImage or pacman are unowned',
+    () {
+      expect(
+        LinuxHelperEnvironment.nativePackageFor('/opt/ReClash', 'deb\n'),
+        'deb',
+      );
+      expect(
+        LinuxHelperEnvironment.nativePackageFor('/usr/share/ReClash', 'rpm\n'),
+        'rpm',
+      );
+      expect(
+        LinuxHelperEnvironment.nativePackageFor('/opt/ReClash', 'rpm\n'),
+        isNull,
+      );
+      expect(
+        LinuxHelperEnvironment.nativePackageFor('/opt/ReClash', 'pacman\n'),
+        isNull,
+      );
+      expect(
+        LinuxHelperEnvironment.nativePackageFor('/tmp/.mount_ReClash', 'deb\n'),
+        isNull,
+      );
+      expect(
+        LinuxHelperEnvironment(
+          uid: 1000,
+          bundleDirectory: fixture.path,
+        ).nativePackage,
+        isNull,
+      );
+    },
+  );
+
+  test(
+    'installer failures retain bounded diagnostics and exact codes',
+    () async {
+      for (final entry in {
+        'registration_conflict': LinuxHelperInstallResult.registrationConflict,
+        'bundle_invalid': LinuxHelperInstallResult.bundleInvalid,
+        'systemd_failed': LinuxHelperInstallResult.systemdFailed,
+        'install_busy': LinuxHelperInstallResult.installBusy,
+        'stop_failed': LinuxHelperInstallResult.stopFailed,
+      }.entries) {
+        final install = installer(
+          run: (_, _) async => ProcessResult(
+            10,
+            1,
+            '',
+            'reclash-helper-error: ${entry.key}\n${'x' * 6000}\u0000',
+          ),
+          wait: () => throw StateError('failed install must not wait'),
+        );
+        expect(await install.install(), entry.value);
+        expect(
+          install.lastDiagnostic,
+          startsWith('pkexec exit=1; reclash-helper-error: ${entry.key}'),
+        );
+        expect(install.lastDiagnostic!.length, lessThanOrEqualTo(4096));
+        expect(install.lastDiagnostic, isNot(contains('\u0000')));
+      }
+    },
+  );
+
+  test(
+    'successful install followed by ready never repeats elevation',
+    () async {
+      var ready = false;
+      var elevations = 0;
+      final install = installer(
+        readiness: () async =>
+            ready ? HelperReadiness.ready : HelperReadiness.notReady,
+        run: (_, _) async {
+          elevations++;
+          return ProcessResult(10, 0, '', '');
+        },
+        wait: () async => ready = true,
+      );
+      expect(await install.install(), LinuxHelperInstallResult.installed);
+      expect(await install.install(), LinuxHelperInstallResult.ready);
+      expect(elevations, 1);
+      expect(install.lastDiagnostic, isNull);
     },
   );
 

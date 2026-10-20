@@ -753,6 +753,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Ulgam sazlamalary → Umumy → Giriş elementleri we giňeltmeler bölüminde ReClash Helper-e rugsat beriň, soň gaýtadan synanyşyň.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "Gurnalan Helper başga protokoly ulanýar. Başga gurnamany ýa-da hyzmatyň üýtgedilen sazlamalaryny barlap, doly bukjany täzeden guruň.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "Bar bolan Linux Helper bellige alyşyny howpsuz çalşyp bolmaýar. Hyzmatyň eýesini we bellige alyşyny barlaň: gaýtadan ygtyýarlandyrmak bu gapma-garşylygy çözmez.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd TUN Helper-i işe girizip bilmedi. Hyzmatyň žurnalyny barlaň: gurnaýjy öňki gurnamany dikeltmäge synanyşdy.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN üçin systemd tarapyndan dolandyrylýan Linux sessiýasy gerek. Bu ulgam tor Helper-i işe girizip bilmeýär.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN Helper elýeterli däl. Gurnalan paketi we hyzmaty barlaň, soň gaýtadan synanyşyň.",
     ),
@@ -2853,9 +2865,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kartoçkalaryň dury dälligi",
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Surat saýla"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Üç surata çenli saklaň we programmanyň fonuny sazlaň.",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Garaňkylatmak"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
       "Surat sazlamalary",

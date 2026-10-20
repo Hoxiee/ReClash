@@ -26,7 +26,6 @@
   "wallpaperReadability": "Lisibilité",
   "wallpaperLibraryFull": "Vous pouvez conserver jusqu’à {count} fonds. Supprimez-en un pour en ajouter un autre.",
   "appearanceInterface": "Interface",
-  "wallpaperDescription": "Conservez jusqu’à trois images et ajustez le fond de l’application.",
   "wallpaperReset": "Réinitialiser les effets",
   "wallpaperResetLayout": "Réinitialiser le cadrage",
   "wallpaperImageLabel": "Fond {index}",

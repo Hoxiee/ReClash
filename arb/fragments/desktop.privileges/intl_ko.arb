@@ -12,5 +12,9 @@
   "desktopLaunchPending": "이전 인증 또는 Core 종료가 아직 완료되지 않았습니다. 완료될 때까지 기다린 후 다시 시도하세요.",
   "desktopAuthorizationTimeout": "인증 시간이 초과되었습니다. 연결 버튼으로 다시 시도하세요.",
   "desktopBootstrapFailed": "인증된 Core가 검증된 시작을 완료하지 못했습니다. 패키지와 시스템 로그를 확인하세요.",
-  "desktopTunNotReady": "Core는 시작되었지만 TUN 어댑터가 준비되지 않았습니다. TUN을 사용하기 전에 Core 로그를 확인하세요."
+  "desktopTunNotReady": "Core는 시작되었지만 TUN 어댑터가 준비되지 않았습니다. TUN을 사용하기 전에 Core 로그를 확인하세요.",
+  "desktopHelperRegistrationConflict": "기존 Linux Helper 등록을 안전하게 교체할 수 없습니다. 서비스 소유권과 등록을 확인하세요. 인증을 반복해도 충돌은 해결되지 않습니다.",
+  "desktopHelperSystemdFailed": "systemd가 TUN Helper를 시작하지 못했습니다. 서비스 로그를 확인하세요. 설치 프로그램은 이전 설치 복원을 시도했습니다.",
+  "desktopHelperProtocolMismatch": "설치된 Helper가 다른 프로토콜을 사용합니다. 다른 설치 또는 서비스 재정의 설정을 확인한 다음 전체 패키지를 다시 설치하세요.",
+  "desktopHelperSystemdRequired": "TUN에는 systemd가 관리하는 Linux 세션이 필요합니다. 이 시스템에서는 네트워크 Helper를 실행할 수 없습니다."
 }

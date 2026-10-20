@@ -3,11 +3,11 @@ kind: feature
 state: active
 risk: routine
 must:
-  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a three-image library.
+  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a four-image library.
   lifecycle: Import, select, remove and reset preserve the previous setting on save failure; only unreferenced files are cleaned up.
-  rendering: Wallpaper remains behind page content; modal surfaces, state colors and Liquid Glass retain their established behavior.
+  rendering: Workspace panes share one stationary wallpaper and retain card opacity across their routes; real pushed routes and modal surfaces keep their own backgrounds, state colors and Liquid Glass behavior.
   backup: Full backups carry only referenced wallpaper files; full restore validates and rolls back files and settings, while onlyProfiles leaves both untouched.
-  appearance: Theme, Background and Interface tabs remain at the bottom; search reveal selects the matching tab before focusing its setting.
+  appearance: Theme, Background and Interface stay bottom-aligned; categories retain independent scroll and preview state, follow the chosen tab motion and reveal settings after settling. Background groups share their glyph headers and single settings gutter with Theme and Interface.
   localization: Wallpaper labels belong to this feature fragment in every supported locale.
 watch:
   - lib/models/wallpaper.dart
@@ -21,6 +21,7 @@ watch:
   - lib/providers/actions/backup.dart
   - lib/providers/action.dart
   - lib/ui/page_background.dart
+  - lib/ui/page_viewport.dart
   - lib/ui/scaffold.dart
   - lib/ui/surface.dart
   - lib/ui/card.dart

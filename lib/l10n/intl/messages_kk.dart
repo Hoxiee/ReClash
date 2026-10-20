@@ -752,6 +752,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Жүйе параметрлері → Жалпы → Кіру элементтері мен кеңейтімдер бөлімінде ReClash Helper қызметіне рұқсат беріп, қайталап көріңіз.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "Орнатылған Helper басқа протоколды қолданады. Басқа орнатуды немесе қызметтің қайта анықталған баптауларын тексеріп, толық пакетті қайта орнатыңыз.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "Бар Linux Helper тіркеуін қауіпсіз ауыстыру мүмкін емес. Қызметтің иесін және тіркеуін тексеріңіз: қайта авторизациялау қақтығысты шешпейді.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd TUN Helper-ін іске қоса алмады. Қызмет журналын тексеріңіз: орнатушы алдыңғы орнатуды қалпына келтіруге тырысты.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN үшін systemd басқаратын Linux сеансы қажет. Бұл жүйе желілік Helper-ді іске қоса алмайды.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN Helper қолжетімсіз. Орнатылған пакет пен қызметті тексеріп, қайталап көріңіз.",
     ),
@@ -2880,9 +2892,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Карточкалардың мөлдір еместігі",
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Суретті таңдау"),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Үш суретке дейін сақтап, қолданба фонын реттеңіз.",
-    ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Қараңғылату"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage("Суретті реттеу"),
     "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(

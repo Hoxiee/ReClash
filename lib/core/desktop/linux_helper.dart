@@ -7,6 +7,8 @@ import 'dart:isolate';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/print.dart';
+import 'package:reclash/enum/enum.dart';
 
 import 'core_manifest.dart';
 import 'helper_client.dart';
@@ -23,6 +25,11 @@ enum LinuxHelperInstallResult {
   pkexecUnavailable,
   agentUnavailable,
   bundleInvalid,
+  registrationConflict,
+  systemdFailed,
+  installBusy,
+  stopFailed,
+  protocolMismatch,
   failed,
   notReady,
   unsupported,
@@ -50,6 +57,26 @@ final class LinuxHelperEnvironment {
   String get socketPath => '/run/reclash-helper-$uid/helper.sock';
 
   String get manifestPath => p.join(bundleDirectory, coreManifestName);
+
+  String? get nativePackage {
+    final marker = File(p.join(bundleDirectory, 'reclash-package'));
+    try {
+      if (FileSystemEntity.typeSync(marker.path, followLinks: false) !=
+              FileSystemEntityType.file ||
+          marker.lengthSync() > 4)
+        return null;
+      return nativePackageFor(bundleDirectory, marker.readAsStringSync());
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  static String? nativePackageFor(String directory, String marker) =>
+      switch ((p.normalize(p.absolute(directory)), marker)) {
+        ('/opt/ReClash', 'deb\n') => 'deb',
+        ('/usr/share/ReClash', 'rpm\n') => 'rpm',
+        _ => null,
+      };
 
   Future<String> installedHelperPath() async {
     final core = await CoreManifest.readCoreSha256(path: manifestPath);
@@ -186,6 +213,9 @@ final class LinuxHelperInstaller {
   LinuxHelperEnvironment? _environment;
   HelperClient? _client;
   Future<LinuxHelperInstallResult>? _operation;
+  String? _lastDiagnostic;
+
+  String? get lastDiagnostic => _lastDiagnostic;
 
   LinuxHelperInstaller({
     LinuxHelperEnvironment? environment,
@@ -253,12 +283,14 @@ final class LinuxHelperInstaller {
   }
 
   Future<LinuxHelperInstallResult> _install() async {
+    _lastDiagnostic = null;
     final readiness = await ensureReady();
     if (readiness != LinuxHelperInstallResult.notReady) return readiness;
     final Directory staged;
     try {
       staged = await (_stageHelperBundle?.call() ?? _env.stageBundle());
-    } on Object {
+    } on Object catch (error) {
+      _recordDiagnostic('Bundle staging failed: $error');
       return LinuxHelperInstallResult.bundleInvalid;
     }
     try {
@@ -270,11 +302,17 @@ final class LinuxHelperInstaller {
           'install',
           '--bundle',
           staged.path,
+          '--replace-owned',
+          if (_env.nativePackage case final package?) ...['--package', package],
         ]);
       } on ProcessException catch (error) {
+        _recordDiagnostic('pkexec launch failed: $error');
         return error.errorCode == 2
             ? LinuxHelperInstallResult.pkexecUnavailable
             : LinuxHelperInstallResult.failed;
+      }
+      if (result.exitCode != 0) {
+        _recordDiagnostic('pkexec exit=${result.exitCode}; ${result.stderr}');
       }
       if (result.exitCode == 126) return LinuxHelperInstallResult.cancelled;
       if (result.exitCode == 127) {
@@ -285,15 +323,51 @@ final class LinuxHelperInstaller {
             ? LinuxHelperInstallResult.agentUnavailable
             : LinuxHelperInstallResult.denied;
       }
-      if (result.exitCode != 0) return LinuxHelperInstallResult.failed;
-      return await (_waitForHelperService?.call() ?? _waitUntilReady())
-          ? LinuxHelperInstallResult.installed
+      if (result.exitCode != 0) {
+        final code = RegExp(
+          r'^reclash-helper-error: ([a-z_]+)$',
+          multiLine: true,
+        ).firstMatch('${result.stderr}')?.group(1);
+        return switch (code) {
+          'registration_conflict' =>
+            LinuxHelperInstallResult.registrationConflict,
+          'bundle_invalid' => LinuxHelperInstallResult.bundleInvalid,
+          'systemd_failed' => LinuxHelperInstallResult.systemdFailed,
+          'install_busy' => LinuxHelperInstallResult.installBusy,
+          'stop_failed' => LinuxHelperInstallResult.stopFailed,
+          _ => LinuxHelperInstallResult.failed,
+        };
+      }
+      if (await (_waitForHelperService?.call() ?? _waitUntilReady())) {
+        return LinuxHelperInstallResult.installed;
+      }
+      final failure = _client?.readinessFailure;
+      _recordDiagnostic(
+        'Helper did not become ready after installation: ${failure ?? 'no readiness witness'}',
+      );
+      return failure?.code == 'protocolMismatch'
+          ? LinuxHelperInstallResult.protocolMismatch
           : LinuxHelperInstallResult.notReady;
-    } on Object {
+    } on Object catch (error) {
+      _recordDiagnostic('Helper installation failed: $error');
       return LinuxHelperInstallResult.failed;
     } finally {
       await _removeStaging(staged);
     }
+  }
+
+  void _recordDiagnostic(String message) {
+    final bounded = message.length > 4096
+        ? message.substring(0, 4096)
+        : message;
+    _lastDiagnostic = bounded.replaceAll(
+      RegExp(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]'),
+      '',
+    );
+    commonPrint.log(
+      'Linux Helper installation: $lastDiagnostic',
+      logLevel: LogLevel.error,
+    );
   }
 
   Future<bool> _waitUntilReady() async {

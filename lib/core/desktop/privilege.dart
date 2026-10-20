@@ -165,7 +165,10 @@ final class DesktopPrivilegeCoordinator implements DesktopCoreLauncherResolver {
                 result != LinuxHelperInstallResult.installed) {
               status = DesktopPrivilegeStatus.failed;
               code = 'linux_${result.name}';
-              throw DesktopPrivilegeException(code!);
+              throw DesktopPrivilegeException(
+                code!,
+                detail: linuxInstaller.lastDiagnostic,
+              );
             }
           }
           status = DesktopPrivilegeStatus.ready;

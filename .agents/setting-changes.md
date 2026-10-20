@@ -19,6 +19,9 @@ reads takes no path.
 `PatchClashConfig.toUpdateParams` to Go's `updateConfig` in `core/config.go`. That function writes the fields into the
 running config and calls the runtime setter for each one, or `updateListeners` for the inbounds. Nothing is re-parsed.
 
+When Core is disconnected or still connecting, `updateConfig` keeps settings local without RPC or authorization.
+The next Core initialization applies the saved settings through the full profile path.
+
 The update path carries these fields:
 
 - From `PatchClashConfig`: `mode`, `log-level`, `mixed-port`, `allow-lan`, `find-process-mode`, `external-controller`,
@@ -31,7 +34,9 @@ The update path carries these fields:
 
 On desktop, `updateListeners` rebuilds the TUN from the patched `tun`. Enabling TUN may need authorization first. When
 `requestAdmin` requires a privileged lease handoff, `updateConfig` restarts the Core instead of patching it.
-Only the explicit TUN switch/start/restart grants a system prompt; a debounced setting update does not.
+Only the explicit TUN switch/start/restart grants a system prompt; a debounced setting update does not. Tray, hotkey
+and compositor TUN commands use `SetupAction.setTunEnabled`, like the network switch, so enable grants are one-shot
+and disable revokes a pending authorization.
 Registration does not enable TUN until the managed lease is active, and system DNS follows confirmed `tunActive`. On Android,
 `updateListeners` skips TUN, so a `tun` update reaches the VPN only through a restart.
 

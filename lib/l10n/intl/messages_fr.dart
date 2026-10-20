@@ -779,6 +779,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "desktopHelperApprovalRequired": MessageLookupByLibrary.simpleMessage(
       "Autorisez le Helper ReClash dans Réglages Système → Général → Ouverture et extensions, puis réessayez.",
     ),
+    "desktopHelperProtocolMismatch": MessageLookupByLibrary.simpleMessage(
+      "Le Helper installé utilise un autre protocole. Vérifiez s’il existe une autre installation ou une surcharge du service, puis réinstallez le paquet complet.",
+    ),
+    "desktopHelperRegistrationConflict": MessageLookupByLibrary.simpleMessage(
+      "L’enregistrement existant du Helper Linux ne peut pas être remplacé en toute sécurité. Vérifiez l’appartenance du service et son enregistrement ; une nouvelle autorisation ne résoudra pas ce conflit.",
+    ),
+    "desktopHelperSystemdFailed": MessageLookupByLibrary.simpleMessage(
+      "systemd n’a pas pu démarrer le Helper TUN. Consultez le journal du service ; le programme d’installation a tenté de restaurer l’installation précédente.",
+    ),
+    "desktopHelperSystemdRequired": MessageLookupByLibrary.simpleMessage(
+      "TUN nécessite une session Linux gérée par systemd. Ce système ne peut pas exécuter le Helper réseau.",
+    ),
     "desktopHelperUnavailable": MessageLookupByLibrary.simpleMessage(
       "Le Helper TUN est indisponible. Vérifiez le paquet installé et le service, puis réessayez.",
     ),
@@ -2948,9 +2960,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "wallpaperChoose": MessageLookupByLibrary.simpleMessage(
       "Choisir une image",
-    ),
-    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
-      "Conservez jusqu’à trois images et ajustez le fond de l’application.",
     ),
     "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Assombrissement"),
     "wallpaperEffects": MessageLookupByLibrary.simpleMessage(

@@ -26,7 +26,6 @@
   "wallpaperReadability": "Readability",
   "wallpaperLibraryFull": "You can keep up to {count} backgrounds. Remove one to add another.",
   "appearanceInterface": "Interface",
-  "wallpaperDescription": "Keep up to three images and adjust how the background looks across the app.",
   "wallpaperReset": "Reset effects",
   "wallpaperResetLayout": "Reset framing",
   "wallpaperImageLabel": "Background {index}",

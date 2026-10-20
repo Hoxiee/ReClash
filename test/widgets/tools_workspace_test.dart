@@ -1,3 +1,17 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
+
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/core/method.dart';
+import 'package:reclash/features/connection/tracker_info_list.dart';
+import 'package:reclash/pages/editor.dart';
+import 'package:reclash/views/tools/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/features/url_scheme/inspect.dart';
@@ -5,13 +19,13 @@ import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'dart:async';
 
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
@@ -26,20 +40,91 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_database_providers.dart';
 import '../helpers/test_profiles.dart';
 
+class _WorkspaceCore extends CoreHandlerInterface {
+  @override
+  Future<CoreLifecycleResult> start() async => const CoreLifecycleResult(
+    revision: 1,
+    outcome: CoreLifecycleOutcome.applied,
+  );
+
+  @override
+  Future<CoreLifecycleResult> restart() => start();
+
+  @override
+  Future<CoreLifecycleResult> stop() => start();
+
+  @override
+  Future<CoreLifecycleResult> close() => start();
+
+  @override
+  Future<T?> invokeMethod<T>({
+    required CoreMethod method,
+    Object? arguments,
+    Duration? timeout,
+  }) async => null;
+}
+
+class _WorkspaceBackdrop extends StatelessWidget {
+  const _WorkspaceBackdrop({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => PageBackgroundScope(
+    cardOpacity: 0.4,
+    route: ModalRoute.of(context),
+    child: ColoredBox(color: const Color(0xff2060a0), child: child),
+  );
+}
+
+Future<Color> _pixelAt(
+  WidgetTester tester,
+  Finder boundary,
+  Offset position,
+) async {
+  return (await tester.runAsync(() async {
+    final render = tester.renderObject<RenderRepaintBoundary>(boundary);
+    final image = await render.toImage();
+    final bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+    final offset =
+        (position.dy.toInt() * image.width + position.dx.toInt()) * 4;
+    final color = Color.fromARGB(
+      bytes.getUint8(offset + 3),
+      bytes.getUint8(offset),
+      bytes.getUint8(offset + 1),
+      bytes.getUint8(offset + 2),
+    );
+    image.dispose();
+    return color;
+  }))!;
+}
+
 void main() {
+  late Directory root;
+
   setUp(() async {
+    root = await Directory.systemTemp.createTemp('tools_workspace_test');
+    await useAppPaths(root);
+    await File(await appPath.configFilePath).writeAsString('mode: rule\n');
     SharedPreferences.setMockInitialValues({});
     await preferences.rebind();
+  });
+
+  tearDown(() async {
+    await root.delete(recursive: true);
   });
 
   Future<ProviderContainer> pumpTools(
     WidgetTester tester, {
     Size size = const Size(1200, 900),
     bool home = false,
+    bool wallpaper = false,
+    ThemeData? theme,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -47,6 +132,17 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     final container = ProviderContainer(
       overrides: [
+        coreHandlerProvider.overrideWithValue(
+          CoreController.scoped(_WorkspaceCore()),
+        ),
+        if (wallpaper)
+          effectiveWallpaperImageProvider.overrideWithValue(
+            MemoryImage(
+              base64Decode(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+              ),
+            ),
+          ),
         if (home)
           navigationItemsStateProvider.overrideWithValue(
             NavigationItemsState(
@@ -83,17 +179,266 @@ void main() {
       container
           .read(profilesProvider.notifier)
           .put(const Profile(id: 1, autoUpdateDuration: Duration.zero));
-      container.read(viewSizeProvider.notifier).value = size;
     }
+    container.read(viewSizeProvider.notifier).value = size;
+    final app = TestApp(
+      theme: theme,
+      homeBuilder: (child) => wallpaper
+          ? PageBackgroundRegistration(
+              builder: (_, _, content) => _WorkspaceBackdrop(child: content),
+              child: child,
+            )
+          : child,
+      child: home ? const HomePage() : const ToolsView(),
+    );
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: TestApp(child: home ? const HomePage() : const ToolsView()),
+        child: wallpaper
+            ? RepaintBoundary(
+                key: const ValueKey('workspace-render'),
+                child: app,
+              )
+            : app,
       ),
     );
     await tester.pump();
     return container;
   }
+
+  for (final size in [const Size(390, 844), const Size(1800, 1000)]) {
+    testWidgets('Tools shares one wallpaper across its routes at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(
+        tester,
+        size: size,
+        home: true,
+        wallpaper: true,
+      );
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pumpAndSettle();
+      expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.general));
+      await tester.pumpAndSettle();
+      expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+      expect(
+        PageBackgroundScope.opacityOf(
+          tester.element(find.byType(SettingsPageScroll)),
+        ),
+        0.4,
+      );
+      final header = find.descendant(
+        of: find.byType(SettingsPageScroll).first,
+        matching: find.byType(AppBar),
+      );
+      expect(header, findsNothing);
+      final boundary = find.byKey(const ValueKey('workspace-render'));
+      final body = tester.getRect(find.byType(SettingsPageScroll));
+      final background = await _pixelAt(
+        tester,
+        boundary,
+        Offset(body.right - 1, body.bottom - 100),
+      );
+      expect(background, const Color(0xff2060a0));
+      final detailContext = tester.element(find.byType(SettingsPageScroll));
+      unawaited(
+        Navigator.of(detailContext).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const CommonScaffold(
+              title: 'Editor overlay',
+              body: Text('editor overlay content'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(_WorkspaceBackdrop), findsNWidgets(2));
+      expect(find.text('Editor overlay'), findsOneWidget);
+      expect(
+        find.text('General'),
+        size.width >= 960 ? findsOneWidget : findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final brightness in Brightness.values) {
+      testWidgets(
+        'Tools header stays fixed through replacement at $size in $brightness',
+        (tester) async {
+          final container = await pumpTools(
+            tester,
+            size: size,
+            wallpaper: true,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: brightness,
+              ),
+            ),
+          );
+          container
+              .read(toolsSessionProvider.notifier)
+              .open(const ToolRoute(ToolPage.general));
+          await tester.pumpAndSettle();
+          final header = find.descendant(
+            of: find.byType(CommonScaffold).last,
+            matching: find.byType(FloatingHeader),
+          );
+          final rect = tester.getRect(header);
+          final boundary = find.byKey(const ValueKey('workspace-render'));
+          final sample = Offset(rect.right - 2, rect.top + 1);
+          final before = await _pixelAt(tester, boundary, sample);
+          container
+              .read(toolsSessionProvider.notifier)
+              .open(const ToolRoute(ToolPage.application));
+          await tester.pump();
+          for (var frame = 0; frame < 30; frame++) {
+            await tester.pump(const Duration(milliseconds: 16));
+            final headers = find.descendant(
+              of: find.byType(CommonScaffold).last,
+              matching: find.byType(FloatingHeader),
+            );
+            expect(tester.getRect(headers), rect);
+            expect(await _pixelAt(tester, boundary, sample), before);
+            expect(find.text('Recently used'), findsNothing);
+          }
+          expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        },
+      );
+
+      testWidgets('Tools header stays fixed on pop at $size in $brightness', (
+        tester,
+      ) async {
+        final container = await pumpTools(
+          tester,
+          size: size,
+          wallpaper: true,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: brightness,
+            ),
+          ),
+        );
+        container
+            .read(toolsSessionProvider.notifier)
+            .open(const ToolRoute(ToolPage.general));
+        await tester.pumpAndSettle();
+        container
+            .read(toolsSessionProvider.notifier)
+            .open(const ToolRoute(ToolPage.application), push: true);
+        await tester.pumpAndSettle();
+        final header = find.descendant(
+          of: find.byType(CommonScaffold).last,
+          matching: find.byType(FloatingHeader),
+        );
+        final rect = tester.getRect(header);
+        final boundary = find.byKey(const ValueKey('workspace-render'));
+        final sample = Offset(rect.right - 2, rect.top + 1);
+        final before = await _pixelAt(tester, boundary, sample);
+        final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+        await host.handleBack();
+        await tester.pump();
+        for (var frame = 0; frame < 20; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          final header = find.descendant(
+            of: find.byType(SettingsPageScroll),
+            matching: find.byType(AppBar),
+          );
+          expect(header, findsNothing);
+          expect(await _pixelAt(tester, boundary, sample), before);
+        }
+        expect(
+          container.read(toolsSessionProvider).path.last.page,
+          ToolPage.general,
+        );
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
+  for (final animation in TabAnimation.values) {
+    testWidgets('Home keeps its header fixed during $animation tab motion', (
+      tester,
+    ) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(390, 844),
+        home: true,
+        wallpaper: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(tabAnimation: animation));
+      await tester.pumpAndSettle();
+      final rect = tester.getRect(find.byType(FloatingHeader));
+      final boundary = find.byKey(const ValueKey('workspace-render'));
+      final sample = Offset(rect.right - 2, rect.top + 1);
+      final before = await _pixelAt(tester, boundary, sample);
+      container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(find.byType(FloatingHeader), findsOneWidget);
+        expect(tester.getRect(find.byType(FloatingHeader)), rect);
+        expect(await _pixelAt(tester, boundary, sample), before);
+      }
+      expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets(
+    'a Tools side sheet dims the shell without taking its navigation',
+    (tester) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(1800, 1000),
+        home: true,
+        wallpaper: true,
+      );
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.general, settingId: 'general.hosts'));
+      await tester.pumpAndSettle();
+      final sidebar = tester.getRect(find.byType(NavigationSidebar));
+      final sample = Offset(sidebar.left + 2, sidebar.bottom - 100);
+      final boundary = find.byKey(const ValueKey('workspace-render'));
+      final before = await _pixelAt(tester, boundary, sample);
+      await tester.tap(find.text('Hosts').last);
+      await tester.pumpAndSettle();
+      final editor = find.byWidgetPredicate((widget) => widget is MapEditView);
+      expect(editor, findsOneWidget);
+      expect(await _pixelAt(tester, boundary, sample), isNot(before));
+      final sheet = tester.getRect(find.byType(SideSheet));
+      expect(sheet.left, greaterThan(sidebar.right));
+      container
+          .read(currentPageLabelProvider.notifier)
+          .toPage(PageLabel.dashboard);
+      await tester.pumpAndSettle();
+      expect(editor, findsNothing);
+      expect(await _pixelAt(tester, boundary, sample), before);
+      container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+      await tester.pumpAndSettle();
+      expect(editor, findsOneWidget);
+      expect(await _pixelAt(tester, boundary, sample), isNot(before));
+      final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+      await host.handleBack();
+      await tester.pumpAndSettle();
+      expect(editor, findsNothing);
+      expect(await _pixelAt(tester, boundary, sample), before);
+      expect(
+        container.read(toolsSessionProvider).path.last.page,
+        ToolPage.general,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final floating in [true, false]) {
     testWidgets('global shortcut hands off to Tools with floating=$floating', (
@@ -129,6 +474,89 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final floating in [true, false]) {
+    testWidgets(
+      'mobile navigation follows Tools depth with floating=$floating',
+      (tester) async {
+        final container = await pumpTools(
+          tester,
+          size: const Size(390, 844),
+          home: true,
+        );
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(floatingNavigationBar: floating));
+        container.read(currentPageLabelProvider.notifier).value =
+            PageLabel.tools;
+        await tester.pumpAndSettle();
+        final navigation = find.byType(
+          floating ? FloatingNavigationBar : NavigationBar,
+        );
+        expect(navigation, findsOneWidget);
+        await tester.tap(find.text('General').first);
+        await tester.pumpAndSettle();
+        expect(navigation, findsNothing);
+        final detail = find.byType(SettingsPageScroll);
+        expect(BottomInsetScope.of(tester.element(detail)), 0);
+        final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+        await host.openEntry(
+          const ToolEntry(
+            id: 'page.application',
+            title: 'Application',
+            category: ToolCategory.application,
+            glyph: AppGlyphs.settings,
+            route: ToolRoute(ToolPage.application),
+          ),
+        );
+        for (var frame = 0; frame < 30; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(navigation, findsNothing);
+        }
+        container.read(currentPageLabelProvider.notifier).value =
+            PageLabel.dashboard;
+        await tester.pumpAndSettle();
+        expect(navigation, findsOneWidget);
+        container.read(currentPageLabelProvider.notifier).value =
+            PageLabel.tools;
+        await tester.pumpAndSettle();
+        expect(navigation, findsNothing);
+        await host.handleBack();
+        await tester.pumpAndSettle();
+        expect(navigation, findsOneWidget);
+        expect(container.read(toolsSessionProvider).path, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('mobile keyboard hides navigation with floating=$floating', (
+      tester,
+    ) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(390, 844),
+        home: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(floatingNavigationBar: floating));
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pumpAndSettle();
+      final navigation = find.byType(
+        floating ? FloatingNavigationBar : NavigationBar,
+      );
+      await tester.tap(find.byType(TextField).first);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      expect(navigation, findsNothing);
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pumpAndSettle();
+      expect(navigation, findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
@@ -302,6 +730,248 @@ void main() {
       container.read(toolsSessionProvider).path.last.page,
       ToolPage.general,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in [
+    const Size(390, 844),
+    const Size(1200, 900),
+    const Size(1800, 1000),
+  ]) {
+    testWidgets('Core and recent rows match the settings gutters at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size);
+      final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+      await host.openEntry(
+        const ToolEntry(
+          id: 'page.general',
+          title: 'General',
+          category: ToolCategory.application,
+          glyph: AppGlyphs.settings,
+          route: ToolRoute(ToolPage.general),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final settings = tester.getRect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SettingTarget && widget.spec.id == 'general.port',
+        ),
+      );
+      expect(
+        settings.width,
+        lessThan(tester.getSize(find.byType(SettingsPageScroll)).width),
+      );
+
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.coreDetails));
+      await tester.pumpAndSettle();
+      final coreRow = find
+          .descendant(
+            of: find.byType(CoreDetailView),
+            matching: find.byType(DecorationListItem),
+          )
+          .first;
+      final core = tester.getRect(coreRow);
+      expect(core.left, closeTo(settings.left, 0.5));
+      expect(core.right, closeTo(settings.right, 0.5));
+
+      await host.handleBack();
+      await tester.pumpAndSettle();
+      final recent = find.byKey(const ValueKey('tools-recent-page.general'));
+      if (size.width >= 960) {
+        final landing = tester.getRect(recent);
+        expect(landing.left, closeTo(settings.left, 0.5));
+        expect(landing.right, closeTo(settings.right, 0.5));
+      } else {
+        expect(recent, findsNothing);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final size in [const Size(390, 844), const Size(1800, 1000)]) {
+    testWidgets('section replacements never expose recent tools at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size);
+      final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+      ToolEntry entry(ToolPage page, String title) => ToolEntry(
+        id: 'page.${page.name}',
+        title: title,
+        category: ToolCategory.application,
+        glyph: AppGlyphs.settings,
+        route: ToolRoute(page),
+      );
+      final general = entry(ToolPage.general, 'General');
+      final application = entry(ToolPage.application, 'Application');
+      final core = entry(ToolPage.coreDetails, 'Core');
+      await host.openEntry(general);
+      await tester.pumpAndSettle();
+
+      for (final next in [application, general, core, application]) {
+        await host.openEntry(next);
+        for (var frame = 0; frame < 30; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(
+            find.text('Recently used', skipOffstage: false),
+            findsNothing,
+            reason: 'section ${next.id}, frame $frame',
+          );
+          expect(tester.takeException(), isNull);
+        }
+        expect(container.read(toolsSessionProvider).path, [next.route]);
+      }
+      await host.handleBack();
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      expect(
+        find.text('Recently used'),
+        size.width >= 960 ? findsOneWidget : findsNothing,
+      );
+    });
+  }
+
+  testWidgets('returning to a removed section keeps the latest Tools path', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester);
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+    ToolEntry entry(ToolPage page) => ToolEntry(
+      id: 'page.${page.name}',
+      title: page.name,
+      category: ToolCategory.application,
+      glyph: AppGlyphs.settings,
+      route: ToolRoute(page),
+    );
+    await host.openEntry(entry(ToolPage.application));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    await host.openEntry(entry(ToolPage.general));
+    await tester.pumpAndSettle();
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.general),
+    ]);
+    expect(find.byType(SettingsPageScroll), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a nested sheet keeps its own header inside Tools', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general, settingId: 'general.hosts'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hosts').last);
+    await tester.pumpAndSettle();
+    final sheet = find.byWidgetPredicate((widget) => widget is MapEditView);
+    final header = find.descendant(of: sheet, matching: find.byType(AppBar));
+    expect(
+      find.descendant(of: header, matching: find.text('Hosts')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: header, matching: find.text('Tools')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('all Tools pages keep one path header and fill their pane', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final paneWidth = tester.getSize(find.byType(SettingsPageScroll)).width;
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(openLogs: true));
+    for (final (page, title) in [
+      (ToolPage.coreDetails, 'Core'),
+      (ToolPage.coreRuntimeConfig, 'Runtime configuration'),
+      (ToolPage.requests, 'Requests'),
+      (ToolPage.connections, 'Connections'),
+      (ToolPage.dnsQueries, 'DNS queries'),
+      (ToolPage.logs, 'Logs'),
+    ]) {
+      container.read(toolsSessionProvider.notifier).open(ToolRoute(page));
+      await tester.pumpAndSettle();
+      final titleRow = find.byType(AppBar);
+      expect(
+        find.widgetWithText(TextButton, 'Tools'),
+        findsNothing,
+        reason: page.name,
+      );
+      if (page == ToolPage.coreRuntimeConfig) {
+        expect(
+          find.descendant(of: titleRow, matching: find.text('Core')),
+          findsOneWidget,
+        );
+        final editor = find.byType(EditorView);
+        expect(tester.getSize(editor).width, greaterThan(paneWidth));
+        expect(tester.getSize(editor).height, greaterThan(600));
+      } else if (page == ToolPage.coreDetails) {
+        final body = find.descendant(
+          of: find.byType(CoreDetailView),
+          matching: find.byType(ListView),
+        );
+        expect(tester.getSize(body).width, closeTo(paneWidth, 0.5));
+      }
+      expect(
+        find.descendant(of: titleRow, matching: find.text(title)),
+        findsOneWidget,
+        reason: page.name,
+      );
+      expect(tester.takeException(), isNull);
+    }
+    container.read(toolsSessionProvider.notifier).popTo(0);
+    await tester.pumpAndSettle();
+    final landing = find.widgetWithText(CommonScaffold, 'Recently used');
+    expect(landing, findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('short request lists use the same Tools body width as settings', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final width = tester.getSize(find.byType(SettingsPageScroll)).width;
+    container
+        .read(requestsProvider.notifier)
+        .addRequest(
+          TrackerInfo(
+            id: 'workspace-request',
+            start: DateTime.utc(2026),
+            metadata: Metadata(host: 'example.test', network: 'tcp'),
+            chains: const ['Proxy'],
+            rule: 'DOMAIN',
+            rulePayload: 'example.test',
+          ),
+        );
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.requests));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(TrackerInfoList)).width,
+      closeTo(width, 0.5),
+    );
+    expect(find.textContaining('example.test'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

@@ -206,6 +206,15 @@ String? desktopPrivilegeErrorMessage(Object error, AppLocalizations l10n) {
     return l10n.desktopAuthorizationRequired;
   }
   if (code.contains('tun_not_ready')) return l10n.desktopTunNotReady;
+  if (code == 'linux_registrationconflict') {
+    return l10n.desktopHelperRegistrationConflict;
+  }
+  if (code == 'linux_systemdfailed') return l10n.desktopHelperSystemdFailed;
+  if (code == 'linux_protocolmismatch')
+    return l10n.desktopHelperProtocolMismatch;
+  if (code == 'linux_systemdunavailable')
+    return l10n.desktopHelperSystemdRequired;
+  if (code == 'linux_installbusy') return l10n.desktopLaunchPending;
   if (code.contains('linux_') ||
       code.contains('notready') ||
       code.contains('notregistered') ||

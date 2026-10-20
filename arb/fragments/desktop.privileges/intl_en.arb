@@ -12,5 +12,9 @@
   "desktopLaunchPending": "The previous authorization or Core shutdown is still pending. Wait for it to finish before trying again.",
   "desktopAuthorizationTimeout": "Authorization timed out. Try again from the connection button.",
   "desktopBootstrapFailed": "The authorized Core could not complete a verified startup. Check the package and system logs.",
-  "desktopTunNotReady": "The Core started, but the TUN adapter is not ready. Check the Core log before using TUN."
+  "desktopTunNotReady": "The Core started, but the TUN adapter is not ready. Check the Core log before using TUN.",
+  "desktopHelperRegistrationConflict": "The existing Linux Helper registration cannot be safely replaced. Inspect the owned service and registration; retrying authorization will not resolve this conflict.",
+  "desktopHelperSystemdFailed": "systemd could not start the TUN Helper. Check the service journal; the installer attempted to restore the previous installation.",
+  "desktopHelperProtocolMismatch": "The installed Helper uses a different protocol. Check for another installation or a service override, then reinstall the complete package.",
+  "desktopHelperSystemdRequired": "TUN requires a Linux session managed by systemd. This system cannot run the network Helper."
 }

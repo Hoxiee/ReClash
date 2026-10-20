@@ -247,70 +247,74 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
     final info = _info;
     return CommonScaffold(
       title: l10n.core,
-      body: ListView(
-        padding: EdgeInsets.only(
-          top: context.appBarInset,
-          bottom: BottomInsetScope.of(context),
-        ),
-        children: [
-          generateSection(
-            items: [
-              DetailRow(title: l10n.status, value: Text(_statusText(status))),
-              if (_loading)
-                DecorationListItem(
-                  leading: const CommonCircleLoading(),
-                  title: Text(l10n.loading),
-                ),
-              if (_failed)
-                DecorationListItem(
-                  title: Text(l10n.coreInfoUnavailable),
-                  trailing: IconButton(
-                    tooltip: l10n.retry,
-                    onPressed: _refresh,
-                    icon: const GlyphIcon(AppGlyphs.refresh),
-                  ).withAppTooltip(),
-                ),
-              if (info != null) ..._identityRows(info),
-            ],
+      body: Builder(
+        builder: (context) => ListView(
+          padding: EdgeInsets.only(
+            left: 16,
+            top: context.appBarInset,
+            right: 16,
+            bottom: BottomInsetScope.of(context),
           ),
-          if (info != null)
+          children: [
             generateSection(
-              title: l10n.coreEnvironment,
               items: [
-                _field('Go', info.goVersion),
-                _field(l10n.corePlatform, info.platform),
-                _field(l10n.coreArchitecture, info.architecture),
-                _field(
-                  l10n.coreBuildTags,
-                  info.tags.isEmpty ? l10n.none : info.tags.join(', '),
-                ),
-                _field(l10n.coreLaunchMode, _launchMode(info)),
+                DetailRow(title: l10n.status, value: Text(_statusText(status))),
+                if (_loading)
+                  DecorationListItem(
+                    leading: const CommonCircleLoading(),
+                    title: Text(l10n.loading),
+                  ),
+                if (_failed)
+                  DecorationListItem(
+                    title: Text(l10n.coreInfoUnavailable),
+                    trailing: IconButton(
+                      tooltip: l10n.retry,
+                      onPressed: _refresh,
+                      icon: const GlyphIcon(AppGlyphs.refresh),
+                    ).withAppTooltip(),
+                  ),
+                if (info != null) ..._identityRows(info),
               ],
             ),
-          if (info != null)
-            generateSection(
-              title: l10n.coreLocation,
-              items: [
-                _field(l10n.coreWorkingDirectory, info.workingDirectory),
-                if (info.platform != 'android')
-                  _field(l10n.coreExecutable, info.executablePath),
-              ],
-            ),
-          const SizedBox(height: 16),
-          generateSection(
-            items: [
-              DecorationListItem(
-                leading: const GlyphIcon(AppGlyphs.code),
-                title: Text(l10n.coreOpenRuntimeConfig),
-                subtitle: Text(l10n.coreRuntimeConfigDescription),
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                onPressed: () => PageNavigationScope.of(
-                  context,
-                )?.open(const CoreRuntimeConfigView()),
+            if (info != null)
+              generateSection(
+                title: l10n.coreEnvironment,
+                items: [
+                  _field('Go', info.goVersion),
+                  _field(l10n.corePlatform, info.platform),
+                  _field(l10n.coreArchitecture, info.architecture),
+                  _field(
+                    l10n.coreBuildTags,
+                    info.tags.isEmpty ? l10n.none : info.tags.join(', '),
+                  ),
+                  _field(l10n.coreLaunchMode, _launchMode(info)),
+                ],
               ),
-            ],
-          ),
-        ],
+            if (info != null)
+              generateSection(
+                title: l10n.coreLocation,
+                items: [
+                  _field(l10n.coreWorkingDirectory, info.workingDirectory),
+                  if (info.platform != 'android')
+                    _field(l10n.coreExecutable, info.executablePath),
+                ],
+              ),
+            const SizedBox(height: 16),
+            generateSection(
+              items: [
+                DecorationListItem(
+                  leading: const GlyphIcon(AppGlyphs.code),
+                  title: Text(l10n.coreOpenRuntimeConfig),
+                  subtitle: Text(l10n.coreRuntimeConfigDescription),
+                  trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                  onPressed: () => PageNavigationScope.of(
+                    context,
+                  )?.open(const CoreRuntimeConfigView()),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

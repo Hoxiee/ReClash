@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/ui/drag_back.dart';
+import 'package:reclash/ui/modal_scrim.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/sheet_navigator.dart';
 import 'package:reclash/ui/surface.dart';
@@ -433,13 +434,16 @@ class ModalSideSheetRoute<T> extends PopupRoute<T>
           end: barrierColor,
         ).chain(CurveTween(curve: barrierCurve)),
       );
-      return AnimatedModalBarrier(
+      return ShellModalScrim(
         color: color,
-        dismissible: barrierDismissible,
-        semanticsLabel: barrierLabel,
-        barrierSemanticsDismissible: semanticsDismissible,
-        clipDetailsNotifier: _clipDetailsNotifier,
-        semanticsOnTapHint: barrierOnTapHint,
+        child: AnimatedModalBarrier(
+          color: color,
+          dismissible: barrierDismissible,
+          semanticsLabel: barrierLabel,
+          barrierSemanticsDismissible: semanticsDismissible,
+          clipDetailsNotifier: _clipDetailsNotifier,
+          semanticsOnTapHint: barrierOnTapHint,
+        ),
       );
     } else {
       return ModalBarrier(

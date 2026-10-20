@@ -367,26 +367,29 @@ void main() {
     },
   );
 
-  test('ping requires protocol 6 and the expected Helper path', () async {
-    final adapter = _ResponseAdapter((options) {
-      expect(options.queryParameters, {'coreSha256': _coreSha256});
-      return ResponseBody.fromString(
-        r'C:\Program Files\ReClash\ReClashHelperService.exe',
-        200,
-        headers: {
-          helperProtocolVersionHeader: [helperProtocolVersion],
-          Headers.contentTypeHeader: ['text/plain'],
-        },
-      );
-    });
-    final client = _client(
-      adapter,
-      expectedHelperPath: () =>
+  test(
+    'ping requires the current protocol and the expected Helper path',
+    () async {
+      final adapter = _ResponseAdapter((options) {
+        expect(options.queryParameters, {'coreSha256': _coreSha256});
+        return ResponseBody.fromString(
           r'C:\Program Files\ReClash\ReClashHelperService.exe',
-    );
+          200,
+          headers: {
+            helperProtocolVersionHeader: [helperProtocolVersion],
+            Headers.contentTypeHeader: ['text/plain'],
+          },
+        );
+      });
+      final client = _client(
+        adapter,
+        expectedHelperPath: () =>
+            r'C:\Program Files\ReClash\ReClashHelperService.exe',
+      );
 
-    expect(await client.readiness(), HelperReadiness.ready);
-  });
+      expect(await client.readiness(), HelperReadiness.ready);
+    },
+  );
 
   test('connection refusal reports a not-ready Helper', () async {
     final client = _client(
@@ -415,7 +418,8 @@ void main() {
       ),
     );
 
-    expect(await client.readiness(), HelperReadiness.notReady);
+    expect(await client.readiness(logFailure: false), HelperReadiness.notReady);
+    expect(client.readinessFailure?.code, 'protocolMismatch');
   });
 
   test('ping rejects a Helper at the wrong path', () async {
@@ -488,6 +492,35 @@ void main() {
       );
 
       expect(await client.readiness(), HelperReadiness.notReady);
+    },
+  );
+
+  test(
+    'a protocol conflict remains diagnostic without enabling ping logs',
+    () async {
+      var compatible = false;
+      final client = _client(
+        _ResponseAdapter(
+          (_) => ResponseBody.fromString(
+            compatible ? r'C:\Helper.exe' : '{"code":"coreSha256Mismatch"}',
+            compatible ? HttpStatus.ok : HttpStatus.conflict,
+            headers: {
+              helperProtocolVersionHeader: [
+                compatible ? helperProtocolVersion : '6',
+              ],
+              Headers.contentTypeHeader: ['text/plain'],
+            },
+          ),
+        ),
+      );
+      expect(
+        await client.readiness(logFailure: false),
+        HelperReadiness.notReady,
+      );
+      expect(client.readinessFailure?.code, 'protocolMismatch');
+      compatible = true;
+      expect(await client.readiness(logFailure: false), HelperReadiness.ready);
+      expect(client.readinessFailure, isNull);
     },
   );
 
