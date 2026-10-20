@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "El enlace contiene demasiados envoltorios anidados.",
   "urlSchemeUnsupportedEncryption": "Esta versión de cifrado no es compatible. Solicita un enlace de suscripción sin cifrar.",
   "urlSchemeAuthenticationFailed": "No se pudo autenticar el enlace cifrado. Puede estar dañado o usar otra clave.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Abrir Telegram",
+  "telegramWebFallback": "Abrir en el navegador",
+  "telegramAppUnavailable": "No se pudo abrir Telegram en este dispositivo.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Cuenta",
   "subscriptionProviderLogo": "URL del logotipo",
   "subscriptionUseProviderInterval": "Usar el intervalo del proveedor",
+  "subscriptionDeviceLimit": "No hay dispositivos disponibles para esta suscripción. Elimina uno de la cuenta del proveedor e inténtalo de nuevo.",
+  "subscriptionDeviceRequired": "Esta suscripción requiere registrar el dispositivo. Sigue las instrucciones del proveedor.",
+  "profileBatchResult": "Añadidos: {added}; omitidos: {skipped}; errores: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Evitar suscripciones duplicadas",
   "preventDuplicateProfilesDesc": "Rechazar un enlace de suscripción que ya usa un perfil existente",
   "profileImportDuplicate": "Ya existe un perfil con esta URL de suscripción",

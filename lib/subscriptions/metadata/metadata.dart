@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 
+import '../../common/telegram_link.dart';
 import '../protocol/registry.dart';
 
 enum SubscriptionDeviceStatus { required, accepted, unsupported, limitReached }
@@ -98,7 +99,9 @@ bool validSubscriptionField(SubscriptionField field, Object? value) {
     case SubscriptionFieldType.url:
       return value is String &&
           value.length <= field.limit &&
-          safeSubscriptionLink(value) != null;
+          (field.path == 'provider.supportUrl'
+              ? safeSubscriptionSupportLink(value) != null
+              : safeSubscriptionLink(value) != null);
     case SubscriptionFieldType.integer:
       return value is int && value >= field.minimum && value <= field.maximum;
     case SubscriptionFieldType.boolean:
@@ -121,6 +124,9 @@ Uri? safeSubscriptionLink(String value, {bool httpsOnly = false}) {
   }
   return uri;
 }
+
+Uri? safeSubscriptionSupportLink(String value) =>
+    safeSubscriptionLink(value) ?? TelegramLink.tryParse(value)?.uri;
 
 String? subscriptionHost(String value) {
   if (value.isEmpty ||

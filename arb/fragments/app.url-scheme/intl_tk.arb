@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "Salgylanma 4 MB-den ýa-da goşulan konfigurasiýa 2 MB-den uly.",
   "urlSchemeTooDeep": "Salgylanmada iç-içe örtükler aşa köp.",
   "urlSchemeUnsupportedEncryption": "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
-  "urlSchemeAuthenticationFailed": "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler."
+  "urlSchemeAuthenticationFailed": "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram-y aç",
+  "telegramWebFallback": "Brauzerde aç",
+  "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady."
 }

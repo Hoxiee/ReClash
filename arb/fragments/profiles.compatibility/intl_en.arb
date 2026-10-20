@@ -74,5 +74,15 @@
   "subscriptionProviderBuyTraffic": "Buy traffic",
   "subscriptionProviderAccount": "Account",
   "subscriptionProviderLogo": "Logo URL",
-  "subscriptionUseProviderInterval": "Use provider update interval"
+  "subscriptionUseProviderInterval": "Use provider update interval",
+  "subscriptionDeviceLimit": "No device slots are available for this subscription. Remove a device from the provider account and try again.",
+  "subscriptionDeviceRequired": "This subscription requires device registration. Follow the provider's instructions.",
+  "profileBatchResult": "Added: {added}; skipped: {skipped}; failed: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

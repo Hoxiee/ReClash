@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -75,16 +77,26 @@ class GlobalState {
     required String Function(T item) label,
     required int concurrency,
     required LoadingTag? tag,
+    int skipped = 0,
+    bool reportSummary = false,
   }) async {
     final pool = TaskPool(concurrency);
     final failures = List<UpdatingMessage?>.filled(items.length, null);
+    var added = 0;
+    var cancelled = 0;
     await loadingRun(
       () => Future.wait([
         for (final (index, item) in items.indexed)
           pool.run(() async {
             try {
               await task(item);
+              added++;
             } catch (e, s) {
+              if (e is SubscriptionUpdateCancelled ||
+                  e is SubscriptionUpdateSuperseded) {
+                cancelled++;
+                return;
+              }
               commonPrint.log(
                 '${label(item)} ===> ${compactError(e)}, $s',
                 logLevel: LogLevel.warning,
@@ -98,7 +110,16 @@ class GlobalState {
       ]),
       tag: tag,
     );
-    dialogs.showFailures(failures.nonNulls.toList());
+    final results = failures.nonNulls.toList();
+    if (reportSummary) {
+      dialogs.showBatchImportSummary(
+        added: added,
+        skipped: skipped + cancelled,
+        failures: results,
+      );
+    } else {
+      dialogs.showFailures(results);
+    }
   }
 
   Future<T?> safeRun<T>(
@@ -112,6 +133,10 @@ class GlobalState {
       onStart?.call();
       return await futureFunction();
     } catch (e, s) {
+      if (e is SubscriptionUpdateCancelled ||
+          e is SubscriptionUpdateSuperseded) {
+        return null;
+      }
       commonPrint.log(
         title == null
             ? '${compactError(e)}, $s'
@@ -119,7 +144,26 @@ class GlobalState {
         logLevel: LogLevel.warning,
       );
       final message = userFacingErrorMessage(e, currentAppLocalizations);
-      if (silence) {
+      final supportUri = e is SubscriptionException ? e.supportUri : null;
+      final isDeviceLimit =
+          e is SubscriptionException &&
+              e.failure == SubscriptionFailure.deviceLimit ||
+          e is SubscriptionUpdateRejected &&
+              e.reason == SubscriptionRetryReason.deviceLimitReached;
+      if (isDeviceLimit) {
+        dialogs.showNotifier(
+          message,
+          level: MessageLevel.warning,
+          actionState: supportUri == null
+              ? null
+              : MessageActionState(
+                  actionText:
+                      currentAppLocalizations.subscriptionProviderSupport,
+                  action: () =>
+                      unawaited(dialogs.openUrl(supportUri.toString())),
+                ),
+        );
+      } else if (silence) {
         dialogs.showNotifier(message, level: MessageLevel.error);
       } else {
         unawaited(

@@ -1244,6 +1244,10 @@
   "urlSchemeTooDeep": "Havolada ichma-ich o‘ramlar juda ko‘p.",
   "urlSchemeUnsupportedEncryption": "Bu shifrlash versiyasi qo‘llab-quvvatlanmaydi. Oddiy obuna havolasini so‘rang.",
   "urlSchemeAuthenticationFailed": "Shifrlangan havolaning haqiqiyligi tasdiqlanmadi. U buzilgan yoki boshqa kalitdan foydalanayotgan bo‘lishi mumkin.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegramni ochish",
+  "telegramWebFallback": "Brauzerda ochish",
+  "telegramAppUnavailable": "Bu qurilmada Telegramni ochib bo‘lmadi.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Hisob",
   "subscriptionProviderLogo": "Logotip havolasi",
   "subscriptionUseProviderInterval": "Provayder yangilash intervalidan foydalanish",
+  "subscriptionDeviceLimit": "Bu obuna uchun bo‘sh qurilma joyi qolmagan. Provayder hisobidan qurilmani olib tashlab, qayta urinib ko‘ring.",
+  "subscriptionDeviceRequired": "Bu obuna qurilmani ro‘yxatdan o‘tkazishni talab qiladi. Provayder ko‘rsatmalariga amal qiling.",
+  "profileBatchResult": "Qo‘shildi: {added}; o‘tkazib yuborildi: {skipped}; xatolar: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Obuna takrorlanishining oldini olish",
   "preventDuplicateProfilesDesc": "Mavjud profil ishlatayotgan obuna havolasini rad etish",
   "profileImportDuplicate": "Bu obuna havolasiga ega profil allaqachon mavjud",

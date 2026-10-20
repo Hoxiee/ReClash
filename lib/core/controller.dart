@@ -365,6 +365,7 @@ class CoreController {
     Duration timeout = const Duration(seconds: 20),
     int maxBytes = subscriptionWireLimit,
     bool protected = false,
+    bool bypass = false,
   }) => _interface.fetchSubscription(
     requestId,
     url,
@@ -372,6 +373,7 @@ class CoreController {
     timeout: timeout,
     maxBytes: maxBytes,
     protected: protected,
+    bypass: bypass,
   );
 
   Future<bool> cancelSubscriptionFetch(String requestId) =>

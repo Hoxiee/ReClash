@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "链接超过 4 MB，或内嵌配置超过 2 MB。",
   "urlSchemeTooDeep": "链接的嵌套封装层数过多。",
   "urlSchemeUnsupportedEncryption": "不支持此加密版本。请索取普通订阅链接。",
-  "urlSchemeAuthenticationFailed": "无法验证加密链接。它可能已损坏或使用了其他密钥。"
+  "urlSchemeAuthenticationFailed": "无法验证加密链接。它可能已损坏或使用了其他密钥。",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "打开 Telegram",
+  "telegramWebFallback": "在浏览器中打开",
+  "telegramAppUnavailable": "无法在此设备上打开 Telegram。"
 }

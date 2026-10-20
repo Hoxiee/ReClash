@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Купить трафик",
   "subscriptionProviderAccount": "Аккаунт",
   "subscriptionProviderLogo": "Ссылка на логотип",
-  "subscriptionUseProviderInterval": "Использовать интервал провайдера"
+  "subscriptionUseProviderInterval": "Использовать интервал провайдера",
+  "subscriptionDeviceLimit": "Для этой подписки не осталось свободных мест для устройств. Удалите устройство в аккаунте провайдера и повторите попытку.",
+  "subscriptionDeviceRequired": "Для этой подписки требуется зарегистрировать устройство. Следуйте инструкциям провайдера.",
+  "profileBatchResult": "Добавлено: {added}; пропущено: {skipped}; ошибок: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

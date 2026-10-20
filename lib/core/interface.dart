@@ -81,6 +81,7 @@ mixin CoreInterface {
     Duration timeout = const Duration(seconds: 20),
     int maxBytes = subscriptionWireLimit,
     bool protected = false,
+    bool bypass = false,
   });
 
   Future<bool> cancelSubscriptionFetch(String requestId);
@@ -438,6 +439,7 @@ abstract class CoreHandlerInterface with CoreInterface {
     Duration timeout = const Duration(seconds: 20),
     int maxBytes = subscriptionWireLimit,
     bool protected = false,
+    bool bypass = false,
   }) async {
     final validated = validateSubscriptionHeaders(headers, allowManaged: true);
     final result = await _invokeMethod<Map<String, dynamic>>(
@@ -449,6 +451,7 @@ abstract class CoreHandlerInterface with CoreInterface {
         'timeoutMillis': timeout.inMilliseconds,
         'maxBytes': maxBytes,
         'protected': protected,
+        'bypass': bypass,
       },
     );
     if (result == null) {
@@ -469,6 +472,7 @@ abstract class CoreHandlerInterface with CoreInterface {
       bytes: Uint8List.fromList(base64.decode(result['bodyBase64'] as String)),
       uri: Uri.parse(result['finalUrl'] as String),
       protected: result['protected'] as bool? ?? false,
+      bypassed: result['bypassed'] as bool? ?? false,
     );
   }
 

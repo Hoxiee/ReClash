@@ -130,6 +130,7 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'bodyBase64': base64.encode(utf8.encode('profile bytes')),
         'finalUrl': 'https://example.com/profile',
         'protected': false,
+        'bypassed': false,
       },
       CoreMethod.cancelSubscriptionFetch => true,
       CoreMethod.getConnectionCount => 3,
@@ -307,12 +308,22 @@ void main() {
         'timeoutMillis': 20000,
         'maxBytes': subscriptionWireLimit,
         'protected': false,
+        'bypass': false,
       });
       expect(response.status, 200);
       expect(response.headers, {
         'x-test': ['ok'],
       });
       expect(utf8.decode(response.bytes), 'profile bytes');
+      await handler.fetchSubscription(
+        'request-bypass',
+        Uri.parse('https://example.com/profile'),
+        bypass: true,
+      );
+      expect(
+        (handler.calls[CoreMethod.fetchSubscription] as Map)['bypass'],
+        isTrue,
+      );
       expect(await handler.cancelSubscriptionFetch('request-1'), isTrue);
     },
   );

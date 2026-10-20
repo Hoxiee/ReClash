@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Trafik satyn al",
   "subscriptionProviderAccount": "Hasap",
   "subscriptionProviderLogo": "Logotip salgysy",
-  "subscriptionUseProviderInterval": "Üp üpjün edijiniň täzelenme aralygyny ulan"
+  "subscriptionUseProviderInterval": "Üp üpjün edijiniň täzelenme aralygyny ulan",
+  "subscriptionDeviceLimit": "Bu abuna ýazgysy üçin boş enjam ýeri ýok. Üpjin edijiniň hasabyndan bir enjamy aýryp, gaýtadan synanyşyň.",
+  "subscriptionDeviceRequired": "Bu abuna ýazgysy enjamy hasaba almagy talap edýär. Üpjin edijiniň görkezmelerine eýeriň.",
+  "profileBatchResult": "Goşuldy: {added}; geçirildi: {skipped}; şowsuz: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

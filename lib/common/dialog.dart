@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/common/telegram_link.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -151,8 +154,62 @@ class Dialogs {
     );
   }
 
+  Future<void> showSubscriptionFailure(Object error) async {
+    final l10n = currentAppLocalizations;
+    final supportUri = error is SubscriptionException ? error.supportUri : null;
+    final openSupport = await showMessage(
+      title: l10n.addProfile,
+      message: TextSpan(text: userFacingErrorMessage(error, l10n)),
+      confirmText: supportUri == null
+          ? l10n.confirm
+          : l10n.subscriptionProviderSupport,
+      cancelable: supportUri != null,
+    );
+    if (openSupport == true && supportUri != null) {
+      await openUrl(supportUri.toString());
+    }
+  }
+
+  void showBatchImportSummary({
+    required int added,
+    required int skipped,
+    required List<UpdatingMessage> failures,
+  }) {
+    final l10n = currentAppLocalizations;
+    final onlyDeviceLimits =
+        failures.isNotEmpty &&
+        failures.every(
+          (failure) => failure.message == l10n.subscriptionDeviceLimit,
+        );
+    showNotifier(
+      l10n.profileBatchResult(added, skipped, failures.length),
+      level: failures.isEmpty
+          ? MessageLevel.success
+          : onlyDeviceLimits
+          ? MessageLevel.warning
+          : MessageLevel.error,
+      actionState: failures.isEmpty
+          ? null
+          : MessageActionState(
+              actionText: l10n.view,
+              action: () => unawaited(showFailureDetails(failures)),
+            ),
+    );
+  }
+
   void showFailures(List<UpdatingMessage> failures) {
     final appLocalizations = currentAppLocalizations;
+    if (failures.isNotEmpty &&
+        failures.every(
+          (failure) =>
+              failure.message == appLocalizations.subscriptionDeviceLimit,
+        )) {
+      showNotifier(
+        appLocalizations.subscriptionDeviceLimit,
+        level: MessageLevel.warning,
+      );
+      return;
+    }
     switch (failures) {
       case []:
         return;
@@ -176,6 +233,11 @@ class Dialogs {
   }
 
   Future<void> openUrl(String url) async {
+    final telegram = TelegramLink.tryParse(url);
+    if (telegram != null) {
+      await _openTelegram(telegram);
+      return;
+    }
     final res = await showMessage(
       message: TextSpan(text: url),
       title: currentAppLocalizations.externalLink,
@@ -185,6 +247,78 @@ class Dialogs {
       return;
     }
     unawaited(launchUrl(Uri.parse(url)));
+  }
+
+  Future<void> _openTelegram(TelegramLink link) async {
+    final l10n = currentAppLocalizations;
+    final confirmed = await showCommonDialog<bool>(
+      child: Builder(
+        builder: (context) => CommonDialog(
+          title: l10n.telegramLinkTitle,
+          trailing: const GlyphIcon(AppGlyphs.send),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.telegramOpen),
+            ),
+          ],
+          child: SelectableText(link.destination),
+        ),
+      ),
+    );
+    if (confirmed != true) return;
+
+    var launched = false;
+    try {
+      launched = await launchUrl(
+        link.uri,
+        mode: LaunchMode.externalApplication,
+      );
+    } on Object {
+      launched = false;
+    }
+    if (launched) return;
+
+    final fallback = link.webFallback;
+    if (fallback == null) {
+      await showMessage(
+        title: l10n.telegramLinkTitle,
+        message: TextSpan(text: l10n.telegramAppUnavailable),
+        cancelable: false,
+      );
+      return;
+    }
+    if (await showMessage(
+          title: l10n.telegramLinkTitle,
+          message: TextSpan(text: l10n.telegramAppUnavailable),
+          confirmText: l10n.telegramWebFallback,
+        ) !=
+        true) {
+      return;
+    }
+    try {
+      final opened = await launchUrl(
+        fallback,
+        mode: LaunchMode.platformDefault,
+      );
+      if (!opened) {
+        await showMessage(
+          title: l10n.telegramLinkTitle,
+          message: TextSpan(text: l10n.telegramAppUnavailable),
+          cancelable: false,
+        );
+      }
+    } on Object {
+      await showMessage(
+        title: l10n.telegramLinkTitle,
+        message: TextSpan(text: l10n.telegramAppUnavailable),
+        cancelable: false,
+      );
+    }
   }
 }
 

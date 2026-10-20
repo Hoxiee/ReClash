@@ -1738,6 +1738,11 @@ returns the JSON the script produced. Nothing about the script runs in Dart.
   nullish coalescing, `Object.fromEntries`, named capture groups and lookbehind in one pass. Keep it first-party and
   free of external URLs — vendoring somebody's published script here carries their attribution and their links.
 
+## Subscription Import Paths
+
+All subscription entrypoints, route selection, cancellation, failure handling and local test scenarios are recorded in
+[`subscription-import.md`](subscription-import.md).
+
 ## Desktop Privileged Core
 
 `DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without

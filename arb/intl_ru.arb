@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "В ссылке слишком много вложенных обёрток.",
   "urlSchemeUnsupportedEncryption": "Эта версия шифрования не поддерживается. Запросите обычную ссылку подписки.",
   "urlSchemeAuthenticationFailed": "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Открыть Telegram",
+  "telegramWebFallback": "Открыть в браузере",
+  "telegramAppUnavailable": "Не удалось открыть Telegram на этом устройстве.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Аккаунт",
   "subscriptionProviderLogo": "Ссылка на логотип",
   "subscriptionUseProviderInterval": "Использовать интервал провайдера",
+  "subscriptionDeviceLimit": "Для этой подписки не осталось свободных мест для устройств. Удалите устройство в аккаунте провайдера и повторите попытку.",
+  "subscriptionDeviceRequired": "Для этой подписки требуется зарегистрировать устройство. Следуйте инструкциям провайдера.",
+  "profileBatchResult": "Добавлено: {added}; пропущено: {skipped}; ошибок: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Запрет дубликатов подписок",
   "preventDuplicateProfilesDesc": "Отклонять ссылку подписки, которую уже использует существующий профиль",
   "profileImportDuplicate": "Профиль с этим URL подписки уже добавлен",

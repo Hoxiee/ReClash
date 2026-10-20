@@ -8,7 +8,10 @@ class UrlSchemeAction extends _$UrlSchemeAction {
   Future<void> handleLink(
     String input, {
     required Future<bool> Function(ReClashCommand action) confirmCommand,
-    required Future<bool> Function(ProfileLinkSource source) confirmImport,
+    required Future<SubscriptionClientSettings?> Function(
+      ProfileLinkSource source,
+    )
+    confirmImport,
     bool Function()? isCurrent,
   }) async {
     bool current() => ref.mounted && (isCurrent?.call() ?? true);
@@ -29,14 +32,15 @@ class UrlSchemeAction extends _$UrlSchemeAction {
       return;
     }
     final source = await resolveProfileLink(input);
-    if (!current() || !await confirmImport(source) || !current()) return;
+    final clientSettings = await confirmImport(source);
+    if (!current() || clientSettings == null) return;
     if (ref.read(setupSessionProvider).active) {
       ref.read(setupSessionProvider.notifier).offerLink(input);
       return;
     }
     await ref
         .read(profilesActionProvider.notifier)
-        .addProfileLinkSource(source);
+        .addProfileLinkSource(source, clientSettings: clientSettings);
   }
 
   Future<void> execute(

@@ -10,7 +10,10 @@ import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/profile.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -62,6 +65,58 @@ void main() {
         entry.value,
       );
     }
+  });
+
+  test('subscription device limits read as a next step, not a crash', () {
+    expect(
+      userFacingErrorMessage(
+        const SubscriptionException(SubscriptionFailure.deviceLimit),
+        appLocalizations,
+      ),
+      appLocalizations.subscriptionDeviceLimit,
+    );
+  });
+
+  test('compatibility rejection reasons use user-facing categories', () {
+    expect(
+      userFacingErrorMessage(
+        const SubscriptionUpdateRejected(
+          SubscriptionRetryReason.deviceLimitReached,
+        ),
+        appLocalizations,
+      ),
+      appLocalizations.subscriptionDeviceLimit,
+    );
+    expect(
+      userFacingErrorMessage(
+        const SubscriptionUpdateRejected(SubscriptionRetryReason.timeout),
+        appLocalizations,
+      ),
+      appLocalizations.subscriptionCompatibilityTimeout,
+    );
+  });
+
+  test('device registration is distinct from the device limit', () {
+    expect(
+      userFacingErrorMessage(
+        const SubscriptionException(SubscriptionFailure.deviceRequired),
+        appLocalizations,
+      ),
+      appLocalizations.subscriptionDeviceRequired,
+    );
+  });
+
+  test('subscription failures do not expose enum or exception strings', () {
+    expect(
+      userFacingErrorMessage(
+        const SubscriptionException(
+          SubscriptionFailure.unauthorized,
+          status: 403,
+        ),
+        appLocalizations,
+      ),
+      appLocalizations.subscriptionCompatibilityAuthorization,
+    );
   });
 
   group('Dio failures name their cause', () {

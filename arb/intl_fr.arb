@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "Le lien contient trop d’enveloppes imbriquées.",
   "urlSchemeUnsupportedEncryption": "Cette version de chiffrement n’est pas prise en charge. Demandez un lien d’abonnement non chiffré.",
   "urlSchemeAuthenticationFailed": "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Ouvrir Telegram",
+  "telegramWebFallback": "Ouvrir dans le navigateur",
+  "telegramAppUnavailable": "Impossible d’ouvrir Telegram sur cet appareil.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Compte",
   "subscriptionProviderLogo": "URL du logo",
   "subscriptionUseProviderInterval": "Utiliser l’intervalle du fournisseur",
+  "subscriptionDeviceLimit": "Aucun emplacement d’appareil n’est disponible pour cet abonnement. Supprimez un appareil du compte du fournisseur, puis réessayez.",
+  "subscriptionDeviceRequired": "Cet abonnement exige l’enregistrement de l’appareil. Suivez les instructions du fournisseur.",
+  "profileBatchResult": "Ajoutés : {added} ; ignorés : {skipped} ; échecs : {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Empêcher les abonnements en double",
   "preventDuplicateProfilesDesc": "Refuser un lien d'abonnement déjà utilisé par un profil existant",
   "profileImportDuplicate": "Un profil avec cette URL d'abonnement existe déjà",

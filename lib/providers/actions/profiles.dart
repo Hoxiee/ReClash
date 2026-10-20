@@ -5,6 +5,7 @@ class ProfilesAction extends _$ProfilesAction {
   CoreController get _core => ref.read(coreHandlerProvider);
   final Map<int, int> _subscriptionUpdateIntents = {};
   final _profileUpdateCancellations = <int, SubscriptionCancellation>{};
+  final _reservedSubscriptionUrls = <String>{};
   Future<void> _lossReviewQueue = Future<void>.value();
 
   @override
@@ -196,8 +197,17 @@ class ProfilesAction extends _$ProfilesAction {
   }
 
   SubscriptionTransport _subscriptionTransport() {
-    if (!system.isAndroid) return SubscriptionTransport();
+    if (!system.isAndroid && !system.isDesktop) return SubscriptionTransport();
+    bool canBypass() {
+      if (!ref.read(isStartProvider) || ref.read(suspendProvider)) return false;
+      final settings = ref.read(vpnSettingProvider);
+      return system.isAndroid
+          ? settings.enable && settings.allowBypass
+          : settings.enable && ref.read(tunAppliedProvider);
+    }
+
     return SubscriptionTransport(
+      canUseProtected: canBypass,
       protectedFetcher: (uri, headers, timeout, cancellation) async {
         final requestId = snowflake.id.toString();
         unawaited(
@@ -212,7 +222,8 @@ class ProfilesAction extends _$ProfilesAction {
             headers: headers,
             timeout: timeout,
             maxBytes: subscriptionWireLimit,
-            protected: true,
+            protected: system.isAndroid,
+            bypass: true,
           );
         } on CoreMethodException catch (error) {
           throw SubscriptionException(
@@ -586,26 +597,31 @@ class ProfilesAction extends _$ProfilesAction {
       );
     } else {
       final url = source.url!;
-      _throwIfDuplicateSubscription(url);
-      final chosenSettings =
-          clientSettings ?? const SubscriptionClientSettings.forNewProfile();
-      final settings =
-          chosenSettings.preset == SubscriptionClientPreset.auto &&
-              source.preset != null
-          ? chosenSettings.copyWith(preset: source.preset)
-          : chosenSettings;
-      profile = await _download(
-        _withClientSettings(
-          Profile.normal(
-            label: name,
-            url: url,
-          ).copyWith(ageSecretKey: ageSecretKey),
-          settings,
-        ),
-        reviewContext: reviewContext,
-        cancellation: cancellation,
-        onCommitted: save,
-      );
+      final reservation = _reserveSubscriptionUrl(url);
+      try {
+        final chosenSettings =
+            clientSettings ?? const SubscriptionClientSettings.forNewProfile();
+        final settings =
+            clientSettings == null &&
+                chosenSettings.preset == SubscriptionClientPreset.auto &&
+                source.preset != null
+            ? chosenSettings.copyWith(preset: source.preset)
+            : chosenSettings;
+        profile = await _download(
+          _withClientSettings(
+            Profile.normal(
+              label: name,
+              url: url,
+            ).copyWith(ageSecretKey: ageSecretKey),
+            settings,
+          ),
+          reviewContext: reviewContext,
+          cancellation: cancellation,
+          onCommitted: save,
+        );
+      } finally {
+        if (reservation != null) _reservedSubscriptionUrls.remove(reservation);
+      }
     }
     return _importedProfile(profile, select: select);
   }
@@ -832,16 +848,14 @@ class ProfilesAction extends _$ProfilesAction {
   }
 
   Future<Profile> _addProfileLink(
-    String link, {
-    String? label,
-    String ageSecretKey = '',
+    ProfileLinkInput input, {
     SubscriptionClientSettings? clientSettings,
   }) async {
-    final source = await resolveProfileLink(link);
+    final source = await resolveProfileLink(input.url);
     return _saveProfileLinkSource(
       source,
-      label: label,
-      ageSecretKey: ageSecretKey,
+      label: input.label,
+      ageSecretKey: input.ageSecretKey,
       clientSettings: clientSettings,
     );
   }
@@ -862,58 +876,67 @@ class ProfilesAction extends _$ProfilesAction {
       return await save(ageSecretKey);
     } on AgeSecretKeyRequiredException {
       final key = (await dialogs.showAgeSecretKeyInput())?.trim();
-      if (key == null || key.isEmpty) rethrow;
+      if (key == null || key.isEmpty) {
+        throw const SubscriptionUpdateCancelled();
+      }
       return save(key);
     }
   }
 
   Future<void> addProfilesFromLinks(
-    List<String> links, {
+    List<ProfileLinkInput> links, {
     SubscriptionClientSettings? clientSettings,
+    int skippedExisting = 0,
   }) async {
     _showProfiles();
     final shareLinks = [
-      for (final link in links)
-        if (link.isShareLink) link,
+      for (final input in links)
+        if (input.url.isShareLink) input.url,
     ];
     await globalState.batchRun(
       [
-        for (final link in links)
-          if (!link.isShareLink)
-            (link: link, shareLinks: const <String>[])
-          else if (link == shareLinks.first)
-            (link: link, shareLinks: shareLinks),
+        for (final input in links)
+          if (!input.url.isShareLink)
+            (input: input, shareLinks: const <String>[])
+          else if (input.url == shareLinks.first)
+            (input: input, shareLinks: shareLinks),
       ],
       (item) async {
         if (item.shareLinks.isEmpty) {
-          await _addProfileLink(item.link, clientSettings: clientSettings);
+          await _addProfileLink(item.input, clientSettings: clientSettings);
         } else {
           final profile = await _fromShareLinks(
-            Profile.normal(),
+            Profile.normal(label: item.input.label),
             item.shareLinks,
             onCommitted: _saveImportedProfile,
           );
           _importedProfile(profile, select: true);
         }
       },
-      label: (item) => profileLinkDisplaySource(item.link),
+      label: (item) => profileLinkDisplaySource(item.input.url),
       concurrency: maxConcurrentImports,
       tag: LoadingTag.profiles,
+      skipped: skippedExisting,
+      reportSummary: true,
     );
   }
 
   /// A link import pointed at a subscription URL that an existing profile
   /// already tracks is refused instead of creating a duplicate. Share links
   /// and file imports have no stable URL and skip this check at the call site.
-  void _throwIfDuplicateSubscription(String url) {
-    if (!ref.read(appSettingProvider).preventDuplicateProfiles) return;
+  String? _reserveSubscriptionUrl(String url) {
+    if (!ref.read(appSettingProvider).preventDuplicateProfiles) return null;
     final normalizedUrl = url.trim();
-    final hasDuplicate = ref
-        .read(profilesProvider)
-        .any((profile) => profile.url.trim() == normalizedUrl);
+    final hasDuplicate =
+        _reservedSubscriptionUrls.contains(normalizedUrl) ||
+        ref
+            .read(profilesProvider)
+            .any((profile) => profile.url.trim() == normalizedUrl);
     if (hasDuplicate) {
       throw MessageException(currentAppLocalizations.profileImportDuplicate);
     }
+    _reservedSubscriptionUrls.add(normalizedUrl);
+    return normalizedUrl;
   }
 
   Future<Profile> _download(
@@ -972,7 +995,7 @@ class ProfilesAction extends _$ProfilesAction {
     } on AgeSecretKeyRequiredException {
       final key = (await dialogs.showAgeSecretKeyInput())?.trim();
       if (key == null || key.isEmpty) {
-        rethrow;
+        throw const SubscriptionUpdateCancelled();
       }
       return save(profile.copyWith(ageSecretKey: key));
     }

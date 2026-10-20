@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "通信量を購入",
   "subscriptionProviderAccount": "アカウント",
   "subscriptionProviderLogo": "ロゴのURL",
-  "subscriptionUseProviderInterval": "プロバイダーの更新間隔を使う"
+  "subscriptionUseProviderInterval": "プロバイダーの更新間隔を使う",
+  "subscriptionDeviceLimit": "このサブスクリプションで使用できる端末枠がありません。プロバイダーのアカウントから端末を削除して、もう一度お試しください。",
+  "subscriptionDeviceRequired": "このサブスクリプションでは端末の登録が必要です。プロバイダーの案内に従ってください。",
+  "profileBatchResult": "追加: {added}、スキップ: {skipped}、失敗: {failed}。",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

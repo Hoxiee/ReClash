@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "링크가 4 MB 또는 내장 설정이 2 MB를 초과합니다.",
   "urlSchemeTooDeep": "링크에 중첩된 래퍼가 너무 많습니다.",
   "urlSchemeUnsupportedEncryption": "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
-  "urlSchemeAuthenticationFailed": "암호화 링크를 인증하지 못했습니다. 손상되었거나 다른 키를 사용할 수 있습니다."
+  "urlSchemeAuthenticationFailed": "암호화 링크를 인증하지 못했습니다. 손상되었거나 다른 키를 사용할 수 있습니다.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram 열기",
+  "telegramWebFallback": "브라우저에서 열기",
+  "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다."
 }

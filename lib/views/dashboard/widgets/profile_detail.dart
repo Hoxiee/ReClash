@@ -271,12 +271,16 @@ List<Widget> _providerMetadataSections(
     ('provider.logo', l10n.subscriptionProviderLogo),
   ]) {
     final value = metadata.text(path);
-    final uri = value == null ? null : safeSubscriptionLink(value);
+    final uri = value == null
+        ? null
+        : path == 'provider.supportUrl'
+        ? safeSubscriptionSupportLink(value)
+        : safeSubscriptionLink(value);
     if (uri == null) continue;
     items.add(
       ListItem(
         title: Text(label),
-        subtitle: Text(uri.host),
+        subtitle: Text(uri.scheme == 'tg' ? l10n.telegramLinkTitle : uri.host),
         trailing: const GlyphIcon(AppGlyphs.openExternal),
         onTap: () => unawaited(dialogs.openUrl(uri.toString())),
       ),

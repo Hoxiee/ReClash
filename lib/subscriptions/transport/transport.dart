@@ -28,9 +28,10 @@ enum SubscriptionFailure {
 }
 
 class SubscriptionException implements Exception {
-  const SubscriptionException(this.failure, {this.status});
+  const SubscriptionException(this.failure, {this.status, this.supportUri});
   final SubscriptionFailure failure;
   final int? status;
+  final Uri? supportUri;
 
   @override
   String toString() =>
@@ -53,12 +54,14 @@ class SubscriptionResponse {
     required this.status,
     required this.uri,
     this.protected = false,
+    this.bypassed = false,
   });
   final Uint8List bytes;
   final Map<String, List<String>> headers;
   final int status;
   final Uri uri;
   final bool protected;
+  final bool bypassed;
 }
 
 typedef ProtectedSubscriptionFetcher =
@@ -73,12 +76,14 @@ class SubscriptionTransport {
   SubscriptionTransport({
     HttpClient Function()? createClient,
     this.protectedFetcher,
+    this.canUseProtected,
   }) : _createClient =
            createClient ??
            (() =>
                HttpOverrides.current?.createHttpClient(null) ?? HttpClient());
   final HttpClient Function() _createClient;
   final ProtectedSubscriptionFetcher? protectedFetcher;
+  final bool Function()? canUseProtected;
 
   Future<SubscriptionResponse> fetch(
     Uri source, {
@@ -92,6 +97,11 @@ class SubscriptionTransport {
     final localCancellation = cancellation ?? SubscriptionCancellation();
     var finished = false;
     var receivedResponse = false;
+    final useProtectedFallback =
+        protectedFetcher != null && (canUseProtected?.call() ?? true);
+    final primaryTimeout = useProtectedFallback
+        ? Duration(microseconds: timeout.inMicroseconds * 2 ~/ 3)
+        : timeout;
     unawaited(
       localCancellation.whenCancelled.then((_) {
         if (!finished) client.close(force: true);
@@ -108,9 +118,12 @@ class SubscriptionTransport {
           localCancellation,
           onResponse: () => receivedResponse = true,
         ).timeout(
-          timeout,
-          onTimeout: () =>
-              throw const SubscriptionException(SubscriptionFailure.timeout),
+          primaryTimeout,
+          onTimeout: () => throw SubscriptionException(
+            useProtectedFallback && !receivedResponse
+                ? SubscriptionFailure.transport
+                : SubscriptionFailure.timeout,
+          ),
         );
       } on SubscriptionException {
         rethrow;
@@ -139,9 +152,13 @@ class SubscriptionTransport {
         return await direct();
       } on SubscriptionException catch (error) {
         final protected = protectedFetcher;
-        if (error.failure != SubscriptionFailure.transport ||
+        if (!{
+              SubscriptionFailure.transport,
+              SubscriptionFailure.timeout,
+            }.contains(error.failure) ||
             receivedResponse ||
-            protected == null) {
+            protected == null ||
+            !(canUseProtected?.call() ?? true)) {
           rethrow;
         }
         finished = true;
@@ -165,53 +182,19 @@ class SubscriptionTransport {
         if (response.bytes.length > subscriptionWireLimit) {
           throw const SubscriptionException(SubscriptionFailure.oversized);
         }
-        final device = readSubscriptionMetadata(response.headers).deviceStatus;
-        if (device == SubscriptionDeviceStatus.required) {
-          throw SubscriptionException(
-            SubscriptionFailure.deviceRequired,
-            status: response.status,
-          );
-        }
-        if (device == SubscriptionDeviceStatus.limitReached) {
-          throw SubscriptionException(
-            SubscriptionFailure.deviceLimit,
-            status: response.status,
-          );
-        }
-        if (response.status == 401 || response.status == 403) {
-          throw SubscriptionException(
-            SubscriptionFailure.unauthorized,
-            status: response.status,
-          );
-        }
-        if (response.status == 429) {
-          throw SubscriptionException(
-            SubscriptionFailure.rateLimited,
-            status: response.status,
-          );
-        }
-        if (response.status < 200 || response.status >= 300) {
-          throw SubscriptionException(
-            SubscriptionFailure.http,
-            status: response.status,
-          );
-        }
-        final bytes = await decompressSubscriptionPayload(
+        _validateResponseStatus(response.status, response.headers);
+        final bytes = await _decodeResponseBody(
           response.bytes,
-          encoding: _contentEncoding(response.headers),
+          response.headers,
+          localCancellation,
         );
-        if (localCancellation.cancelled) {
-          throw const SubscriptionException(SubscriptionFailure.cancelled);
-        }
-        if (bytes.isEmpty) {
-          throw const SubscriptionException(SubscriptionFailure.empty);
-        }
         return SubscriptionResponse(
           bytes: bytes,
           headers: response.headers,
           status: response.status,
           uri: response.uri,
-          protected: true,
+          protected: response.protected,
+          bypassed: response.bypassed,
         );
       }
     } on SubscriptionException {
@@ -304,34 +287,7 @@ class SubscriptionTransport {
         continue;
       }
       final status = response.statusCode;
-      final device = readSubscriptionMetadata(responseHeaders).deviceStatus;
-      if (device == SubscriptionDeviceStatus.required) {
-        throw SubscriptionException(
-          SubscriptionFailure.deviceRequired,
-          status: status,
-        );
-      }
-      if (device == SubscriptionDeviceStatus.limitReached) {
-        throw SubscriptionException(
-          SubscriptionFailure.deviceLimit,
-          status: status,
-        );
-      }
-      if (status == 401 || status == 403) {
-        throw SubscriptionException(
-          SubscriptionFailure.unauthorized,
-          status: status,
-        );
-      }
-      if (status == 429) {
-        throw SubscriptionException(
-          SubscriptionFailure.rateLimited,
-          status: status,
-        );
-      }
-      if (status < 200 || status >= 300) {
-        throw SubscriptionException(SubscriptionFailure.http, status: status);
-      }
+      _validateResponseStatus(status, responseHeaders);
       if (response.contentLength > subscriptionWireLimit) {
         throw const SubscriptionException(SubscriptionFailure.oversized);
       }
@@ -345,16 +301,11 @@ class SubscriptionTransport {
         }
         builder.add(chunk);
       }
-      final bytes = await decompressSubscriptionPayload(
+      final bytes = await _decodeResponseBody(
         builder.takeBytes(),
-        encoding: _contentEncoding(responseHeaders),
+        responseHeaders,
+        cancellation,
       );
-      if (cancellation.cancelled) {
-        throw const SubscriptionException(SubscriptionFailure.cancelled);
-      }
-      if (bytes.isEmpty) {
-        throw const SubscriptionException(SubscriptionFailure.empty);
-      }
       return SubscriptionResponse(
         bytes: bytes,
         headers: Map.unmodifiable(responseHeaders),
@@ -364,6 +315,64 @@ class SubscriptionTransport {
     }
     throw const SubscriptionException(SubscriptionFailure.redirect);
   }
+}
+
+void _validateResponseStatus(int status, Map<String, List<String>> headers) {
+  final metadata = readSubscriptionMetadata(headers);
+  final supportUri = safeSubscriptionLink(
+    metadata.metadata.text('provider.supportUrl') ?? '',
+  );
+  switch (metadata.deviceStatus) {
+    case SubscriptionDeviceStatus.required:
+      throw SubscriptionException(
+        SubscriptionFailure.deviceRequired,
+        status: status,
+        supportUri: supportUri,
+      );
+    case SubscriptionDeviceStatus.limitReached:
+      throw SubscriptionException(
+        SubscriptionFailure.deviceLimit,
+        status: status,
+        supportUri: supportUri,
+      );
+    case SubscriptionDeviceStatus.accepted:
+    case SubscriptionDeviceStatus.unsupported:
+    case null:
+      break;
+  }
+  if (status == 401 || status == 403) {
+    throw SubscriptionException(
+      SubscriptionFailure.unauthorized,
+      status: status,
+    );
+  }
+  if (status == 429) {
+    throw SubscriptionException(
+      SubscriptionFailure.rateLimited,
+      status: status,
+    );
+  }
+  if (status < 200 || status >= 300) {
+    throw SubscriptionException(SubscriptionFailure.http, status: status);
+  }
+}
+
+Future<Uint8List> _decodeResponseBody(
+  Uint8List bytes,
+  Map<String, List<String>> headers,
+  SubscriptionCancellation cancellation,
+) async {
+  final decoded = await decompressSubscriptionPayload(
+    bytes,
+    encoding: _contentEncoding(headers),
+  );
+  if (cancellation.cancelled) {
+    throw const SubscriptionException(SubscriptionFailure.cancelled);
+  }
+  if (decoded.isEmpty) {
+    throw const SubscriptionException(SubscriptionFailure.empty);
+  }
+  return decoded;
 }
 
 String? _contentEncoding(Map<String, List<String>> headers) {

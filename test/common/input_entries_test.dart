@@ -115,6 +115,24 @@ void main() {
 
       expect(parsed.entries, ['https://a.com', 'https://c.com']);
       expect(parsed.skippedExisting, 1);
+      expect(parsed.skippedDuplicates, 1);
+    });
+
+    test('retains duplicates when duplicate prevention is disabled', () {
+      final parsed = parseUrlInput(
+        'https://a.com\nhttps://b.com\nhttps://a.com',
+        isValid: isHttp,
+        existing: {'https://b.com'},
+        allowDuplicates: true,
+      );
+
+      expect(parsed.entries, [
+        'https://a.com',
+        'https://b.com',
+        'https://a.com',
+      ]);
+      expect(parsed.skippedExisting, 0);
+      expect(parsed.skippedDuplicates, 0);
     });
 
     test('reports invalid urls with their line', () {

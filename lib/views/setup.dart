@@ -13,6 +13,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/compatibility/settings_form.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -129,6 +130,19 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
       return;
     } on SubscriptionUpdateSuperseded {
       return;
+    } on SubscriptionUpdateRejected catch (error) {
+      if (error.reason == SubscriptionRetryReason.cancelled) return;
+      if (mounted && !cancellation.cancelled) {
+        await dialogs.showSubscriptionFailure(error);
+      }
+    } on SubscriptionException catch (error) {
+      if (error.failure == SubscriptionFailure.cancelled ||
+          error.failure == SubscriptionFailure.superseded) {
+        return;
+      }
+      if (mounted && !cancellation.cancelled) {
+        await dialogs.showSubscriptionFailure(error);
+      }
     } catch (error) {
       if (mounted && !cancellation.cancelled) {
         setState(

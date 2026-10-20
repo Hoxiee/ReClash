@@ -34,11 +34,13 @@ class InputIssue {
 class ParsedInput<T> {
   final List<T> entries;
   final int skippedExisting;
+  final int skippedDuplicates;
   final List<InputIssue> issues;
 
   const ParsedInput({
     required this.entries,
     required this.skippedExisting,
+    this.skippedDuplicates = 0,
     required this.issues,
   });
 
@@ -144,11 +146,13 @@ ParsedInput<String> parseUrlInput(
   String text, {
   required bool Function(String url) isValid,
   Set<String> existing = const {},
+  bool allowDuplicates = false,
 }) {
   final entries = <String>[];
   final issues = <InputIssue>[];
   final seen = <String>{};
   var skippedExisting = 0;
+  var skippedDuplicates = 0;
   final lines = text.split(_lineSeparator);
   for (var index = 0; index < lines.length; index++) {
     final line = _stripLineMarkup(lines[index]);
@@ -167,10 +171,11 @@ ParsedInput<String> parseUrlInput(
         );
         continue;
       }
-      if (!seen.add(url)) {
+      if (!allowDuplicates && !seen.add(url)) {
+        skippedDuplicates++;
         continue;
       }
-      if (existing.contains(url)) {
+      if (!allowDuplicates && existing.contains(url)) {
         skippedExisting++;
         continue;
       }
@@ -180,6 +185,7 @@ ParsedInput<String> parseUrlInput(
   return ParsedInput(
     entries: entries,
     skippedExisting: skippedExisting,
+    skippedDuplicates: skippedDuplicates,
     issues: issues,
   );
 }

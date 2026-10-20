@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "The link exceeds 4 MB or its embedded configuration exceeds 2 MB.",
   "urlSchemeTooDeep": "The link contains too many nested wrappers.",
   "urlSchemeUnsupportedEncryption": "This encryption version is not supported. Request a plain subscription link.",
-  "urlSchemeAuthenticationFailed": "The encrypted link could not be authenticated. It may be damaged or use a different key."
+  "urlSchemeAuthenticationFailed": "The encrypted link could not be authenticated. It may be damaged or use a different key.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Open Telegram",
+  "telegramWebFallback": "Open in browser",
+  "telegramAppUnavailable": "Telegram could not be opened on this device."
 }

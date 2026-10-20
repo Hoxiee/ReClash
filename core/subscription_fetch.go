@@ -39,6 +39,7 @@ type SubscriptionFetchParams struct {
 	TimeoutMillis int               `json:"timeoutMillis"`
 	MaxBytes      int64             `json:"maxBytes"`
 	Protected     bool              `json:"protected"`
+	Bypass        bool              `json:"bypass"`
 }
 
 type CancelSubscriptionFetchParams struct {
@@ -51,14 +52,16 @@ type SubscriptionFetchResult struct {
 	BodyBase64 string              `json:"bodyBase64"`
 	FinalURL   string              `json:"finalUrl"`
 	Protected  bool                `json:"protected"`
+	Bypassed   bool                `json:"bypassed"`
 }
 
 type subscriptionConnector interface {
 	DialContext(context.Context, string, string) (net.Conn, error)
 }
 
-// Android installs the only protected connector; other builds fail closed.
+// Subscription routes use platform-specific connectors with distinct guarantees.
 var protectedSubscriptionConnector func() (subscriptionConnector, error)
+var bypassSubscriptionConnector func() (subscriptionConnector, error)
 
 var subscriptionFetches = struct {
 	sync.Mutex
@@ -109,16 +112,22 @@ func cancelSubscriptionFetches() {
 }
 
 func handleFetchSubscription(params SubscriptionFetchParams) (*SubscriptionFetchResult, error) {
-	if !params.Protected {
+	if !params.Bypass {
 		return nil, &MethodError{
 			Code:    "invalid_arguments",
-			Message: "Core subscription fetch requires protected transport",
+			Message: "Core subscription fetch requires bypass mode",
 		}
 	}
-	if protectedSubscriptionConnector == nil {
+	var getConnector func() (subscriptionConnector, error)
+	if params.Protected {
+		getConnector = protectedSubscriptionConnector
+	} else {
+		getConnector = bypassSubscriptionConnector
+	}
+	if getConnector == nil {
 		return nil, subscriptionFetchMethodError(errSubscriptionProtectedUnavailable)
 	}
-	connector, err := protectedSubscriptionConnector()
+	connector, err := getConnector()
 	if err != nil {
 		return nil, subscriptionFetchMethodError(err)
 	}
@@ -126,7 +135,8 @@ func handleFetchSubscription(params SubscriptionFetchParams) (*SubscriptionFetch
 	if err != nil {
 		return nil, subscriptionFetchMethodError(err)
 	}
-	result.Protected = true
+	result.Protected = params.Protected
+	result.Bypassed = params.Bypass
 	return result, nil
 }
 

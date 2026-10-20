@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "Havola 4 MB yoki ichki konfiguratsiya 2 MB chegarasidan oshadi.",
   "urlSchemeTooDeep": "Havolada ichma-ich o‘ramlar juda ko‘p.",
   "urlSchemeUnsupportedEncryption": "Bu shifrlash versiyasi qo‘llab-quvvatlanmaydi. Oddiy obuna havolasini so‘rang.",
-  "urlSchemeAuthenticationFailed": "Shifrlangan havolaning haqiqiyligi tasdiqlanmadi. U buzilgan yoki boshqa kalitdan foydalanayotgan bo‘lishi mumkin."
+  "urlSchemeAuthenticationFailed": "Shifrlangan havolaning haqiqiyligi tasdiqlanmadi. U buzilgan yoki boshqa kalitdan foydalanayotgan bo‘lishi mumkin.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegramni ochish",
+  "telegramWebFallback": "Brauzerda ochish",
+  "telegramAppUnavailable": "Bu qurilmada Telegramni ochib bo‘lmadi."
 }
