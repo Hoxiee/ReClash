@@ -141,11 +141,16 @@ class UrlSchemeView extends StatelessWidget {
       onPressed: command.isProfile ? () => _buildLink(context, command) : null,
       trailing: command.isProfile
           ? const GlyphIcon(AppGlyphs.chevronForward, size: 16)
-          : IconButton.filledTonal(
-              tooltip: l.copy,
-              onPressed: () => _copy(context, 'reclash://${command.host}'),
-              icon: const GlyphIcon(AppGlyphs.copy, fill: 1, size: 20),
-            ).withAppTooltip(),
+          : TonalButtonTheme(
+              size: TonalButtonSize.section,
+              child: ElasticPress(
+                child: IconButton(
+                  tooltip: l.copy,
+                  onPressed: () => _copy(context, 'reclash://${command.host}'),
+                  icon: const GlyphIcon(AppGlyphs.copy),
+                ).withAppTooltip(),
+              ),
+            ),
     );
   }
 }

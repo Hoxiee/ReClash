@@ -182,23 +182,38 @@ void main() {
     BorderRadiusGeometry headerCorners() =>
         (surfaceOf(tester, 'G0').shape as RoundedSuperellipseBorder)
             .borderRadius;
+    BorderRadiusGeometry innerCorners() =>
+        (tester
+                    .widget<CommonCard>(
+                      find.descendant(
+                        of: headerOf('G0'),
+                        matching: find.byType(CommonCard),
+                      ),
+                    )
+                    .shape
+                as RoundedSuperellipseBorder)
+            .borderRadius;
+    const buttonInset = 4.0;
 
     await tester.tap(find.text('G0'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
     expect(unfolding, findsWidgets);
     expect(headerCorners(), AppRadius.all(radius));
+    expect(innerCorners(), AppRadius.all(radius - buttonInset));
 
     await tester.pumpAndSettle();
     expect(unfolding, findsNothing);
     expect(cards, findsWidgets);
     expect(headerCorners(), AppRadius.vertical(top: radius));
+    expect(innerCorners(), AppRadius.vertical(top: radius - buttonInset));
 
     await tester.tap(find.text('G0'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
     expect(unfolding, findsWidgets);
     expect(headerCorners(), AppRadius.all(radius));
+    expect(innerCorners(), AppRadius.all(radius - buttonInset));
 
     await tester.pumpAndSettle();
     expect(cards, findsNothing);

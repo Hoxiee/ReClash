@@ -17,6 +17,7 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/features/url_scheme/inspect.dart';
 import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/ui/icons/icons.dart';
 
@@ -34,6 +35,7 @@ import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/views/tools/search.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -204,6 +206,71 @@ void main() {
     );
     await tester.pump();
     return container;
+  }
+
+  for (final brightness in Brightness.values) {
+    testWidgets('native window blur preserves the sidebar backdrop in '
+        '$brightness', (tester) async {
+      final theme = ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: brightness,
+        ),
+      );
+      final container = await pumpTools(tester, home: true, theme: theme);
+      container.read(windowBlurProvider.notifier).value = true;
+      const boundaryKey = ValueKey('native-shell-render');
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: RepaintBoundary(
+            key: boundaryKey,
+            child: TestApp(
+              theme: theme,
+              homeBuilder: (child) => AppWallpaperScope(child: child),
+              child: const AppSidebarContainer(
+                child: SizedBox.expand(key: ValueKey('native-shell-content')),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final sidebarFinder = find.byType(NavigationSidebar);
+      final sidebar = tester.getRect(sidebarFinder);
+      final sample = Offset(sidebar.left + 2, sidebar.bottom - 100);
+      final boundary = find.byKey(boundaryKey);
+      final colorScheme = tester.element(sidebarFinder).colorScheme;
+      final expected = colorScheme.chromeSurface.withValues(
+        alpha: kSidebarBlurOpacity,
+      );
+      final actual = await _pixelAt(tester, boundary, sample);
+      expect(actual.a, closeTo(expected.a, 1 / 255));
+      expect(actual.r, closeTo(expected.r * actual.a, 1 / 255));
+      expect(actual.g, closeTo(expected.g * actual.a, 1 / 255));
+      expect(actual.b, closeTo(expected.b * actual.a, 1 / 255));
+      final body = tester.getRect(
+        find.byKey(const ValueKey('native-shell-content')),
+      );
+      expect(
+        await _pixelAt(
+          tester,
+          boundary,
+          Offset(body.right - 2, body.bottom - 100),
+        ),
+        SurfaceLevel.page.colorOf(colorScheme),
+      );
+      final sidebarState = tester.state(sidebarFinder);
+      container.read(windowBlurProvider.notifier).value = false;
+      await tester.pumpAndSettle();
+      expect(
+        await _pixelAt(tester, boundary, sample),
+        colorScheme.chromeSurface,
+      );
+      expect(tester.state(sidebarFinder), same(sidebarState));
+      expect(tester.takeException(), isNull);
+    });
   }
 
   for (final size in [const Size(390, 844), const Size(1800, 1000)]) {

@@ -615,7 +615,12 @@ class ListHeader extends ConsumerWidget {
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
-      radius: radius - _headerButtonInset,
+      shape: AppShape.vertical(
+        top: radius - _headerButtonInset,
+        bottom: unfolded
+            ? max(radius * floating - _headerButtonInset, 0)
+            : radius - _headerButtonInset,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(_headerInset - _headerButtonInset),
         child: Row(

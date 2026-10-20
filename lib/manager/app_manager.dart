@@ -1,16 +1,22 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/service_status.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _sidebarWallpaperOpacity = 0.5;
+const _sidebarWallpaperBlur = 18.0;
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
@@ -34,6 +40,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         _updateVisible(WidgetsBinding.instance.lifecycleState);
       }
     });
+    ref.listenManual(serviceStatusProvider, (_, _) {});
+    ref.listenManual(providerSettingsSyncProvider, (_, _) {});
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
         ref.read(storeActionProvider.notifier).savePreferencesDebounce();
@@ -59,6 +67,19 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ref.listenManual(suspendProvider, (prev, next) {
       if (prev != next) {
         ref.read(setupActionProvider.notifier).syncSuspend();
+      }
+    });
+    ref.listenManual(vpnSettingProvider, (prev, next) {
+      if (prev?.onDemandFullStop != next.onDemandFullStop) {
+        ref.read(setupActionProvider.notifier).syncSuspend();
+      }
+    });
+    ref.listenManual(onDemandNetworkAnchorProvider, (prev, next) {
+      final override = ref.read(onDemandOverrideProvider);
+      if (next.isNotEmpty &&
+          override.paused != null &&
+          !listEquals(next, override.anchor)) {
+        ref.read(onDemandOverrideProvider.notifier).clear();
       }
     });
     final systemDns = systemDnsCoordinator;
@@ -151,17 +172,6 @@ class _Sidebar extends ConsumerWidget {
   final ViewMode viewMode;
   final void Function(int index) onSelected;
 
-  static int _groupOf(PageLabel label) => switch (label) {
-    PageLabel.dashboard => 0,
-    PageLabel.proxies || PageLabel.profiles => 1,
-    PageLabel.requests ||
-    PageLabel.connections ||
-    PageLabel.dns ||
-    PageLabel.logs ||
-    PageLabel.resources => 2,
-    PageLabel.tools => 3,
-  };
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canExpand = canExpandSidebar(viewMode);
@@ -176,7 +186,7 @@ class _Sidebar extends ConsumerWidget {
             id: item.label,
             glyph: item.glyph,
             label: item.label.label,
-            group: _groupOf(item.label),
+            group: navigationGroupOf(item.label),
           ),
       ],
       selectedIndex: currentIndex,
@@ -195,6 +205,51 @@ class _Sidebar extends ConsumerWidget {
       windowControls: windowControlsOverSidebar(
         isMacOS: system.isMacOS,
         version: version,
+      ),
+    );
+  }
+}
+
+class _SidebarBackground extends StatefulWidget {
+  const _SidebarBackground({
+    required this.wallpaperActive,
+    required this.windowBlur,
+    required this.child,
+  });
+
+  final bool wallpaperActive;
+  final double? windowBlur;
+  final Widget child;
+
+  @override
+  State<_SidebarBackground> createState() => _SidebarBackgroundState();
+}
+
+class _SidebarBackgroundState extends State<_SidebarBackground> {
+  final GlobalKey _panelKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final color = widget.wallpaperActive
+        ? colorScheme.chromeSurface.withValues(alpha: _sidebarWallpaperOpacity)
+        : widget.windowBlur != null
+        ? colorScheme.chromeSurface.withValues(alpha: widget.windowBlur!)
+        : colorScheme.chromeSurface;
+    final panel = Material(
+      key: _panelKey,
+      color: color,
+      shape: BorderDirectional(end: Divider.createBorderSide(context)),
+      child: widget.child,
+    );
+    if (!widget.wallpaperActive) return panel;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: _sidebarWallpaperBlur,
+          sigmaY: _sidebarWallpaperBlur,
+        ),
+        child: panel,
       ),
     );
   }
@@ -236,56 +291,60 @@ class AppSidebarContainer extends ConsumerWidget {
     final navigationItems = navigationState.navigationItems;
     final viewMode = navigationState.viewMode;
     final currentIndex = navigationState.currentIndex;
-    final backdropOpacity = ref.watch(windowBlurProvider);
+    final blur = ref.watch(windowBlurProvider);
+    final wallpaperActive = ref.watch(effectiveWallpaperImageProvider) != null;
     final page = SurfaceLevel.page.colorOf(context.colorScheme);
-    final chrome = context.colorScheme.chromeSurface;
     void onSelected(int index) {
       _handleToPage(ref, navigationItems[index].label);
     }
 
     final hasSidebar = viewMode != ViewMode.mobile;
     final isLtr = Directionality.of(context) == TextDirection.ltr;
-    return Container(
-      color: backdropOpacity != null ? Colors.transparent : page,
-      child: Row(
-        children: [
-          AnimatedVisibility.sidebar(
-            visible: hasSidebar,
-            child: Material(
-              color: backdropOpacity != null
-                  ? chrome.withValues(alpha: backdropOpacity)
-                  : chrome,
-              shape: BorderDirectional(end: Divider.createBorderSide(context)),
-              child: MediaQuery.removePadding(
-                context: context,
-                removeLeft: !isLtr,
-                removeRight: isLtr,
-                child: _Sidebar(
-                  items: navigationItems,
-                  currentIndex: currentIndex,
-                  viewMode: viewMode,
-                  onSelected: onSelected,
+    return PageBackground(
+      baseColor: blur != null && !wallpaperActive ? Colors.transparent : page,
+      child: Container(
+        color: blur != null || wallpaperActive ? Colors.transparent : page,
+        child: Row(
+          children: [
+            AnimatedVisibility.sidebar(
+              visible: hasSidebar,
+              child: _SidebarBackground(
+                wallpaperActive: wallpaperActive,
+                windowBlur: blur,
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeLeft: !isLtr,
+                  removeRight: isLtr,
+                  child: _Sidebar(
+                    items: navigationItems,
+                    currentIndex: currentIndex,
+                    viewMode: viewMode,
+                    onSelected: onSelected,
+                  ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: ClipRect(
-              child: LayoutBuilder(
-                builder: (_, constraints) {
-                  _updateSideBarWidth(ref, constraints.maxWidth);
-                  return MediaQuery.removePadding(
-                    context: context,
-                    removeLeft: hasSidebar && isLtr,
-                    removeRight: hasSidebar && !isLtr,
-                    child: child,
-                  );
-                },
+            Expanded(
+              flex: 1,
+              child: ClipRect(
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    _updateSideBarWidth(ref, constraints.maxWidth);
+                    return ColoredBox(
+                      color: wallpaperActive ? Colors.transparent : page,
+                      child: MediaQuery.removePadding(
+                        context: context,
+                        removeLeft: hasSidebar && isLtr,
+                        removeRight: hasSidebar && !isLtr,
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="atlas-token" content="__ATLAS_TOKEN__">
+  <title>Fork Atlas</title>
+  <meta name="description" content="Локальная read-only мастерская сопровождения ReClash: контракты, связи, влияние изменений и история sync.">
+  <link rel="icon" href="assets/glyph.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="assets/atlas.css">
+  <script type="module" src="assets/atlas.mjs"></script>
+</head>
+<body class="atlas">
+  <a class="skip" href="#workspace">К рабочей области</a>
+  <header class="atlas-header">
+    <a class="atlas-brand" href="#map" aria-label="Fork Atlas: карта контрактов">
+      <img class="atlas-glyph" src="assets/glyph.svg" width="32" height="32" alt="">
+      <span>Fork Atlas<small>Мастерская ReClash</small></span>
+    </a>
+    <div class="repo-context" id="repo-context"><span class="live-dot" aria-hidden="true"></span>Локальная копия</div>
+    <div class="header-actions">
+      <span class="read-only-label"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8V6a5 5 0 0 1 10 0v2M4 8h12v9H4z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Только чтение</span>
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Переключить тему" title="Переключить тему"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+      <button type="button" class="action-button compact" id="refresh"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8a6 6 0 1 0 0 5M16 3v5h-5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Обновить</span></button>
+    </div>
+  </header>
+  <nav class="workspace-tabs" aria-label="Разделы мастерской">
+    <a href="#map" data-view="map" aria-current="page">Карта контрактов</a>
+    <a href="#changes" data-view="changes">Влияние изменений</a>
+    <a href="#sync" data-view="sync">История sync</a>
+    <a href="#checks" data-view="checks">Проверки</a>
+    <a href="#attention" data-view="attention">Требует внимания <span id="attention-count" class="tab-count" hidden></span></a>
+  </nav>
+  <div id="stale-banner" class="stale-banner" role="status" hidden>Рабочая копия изменилась. Этот экран показывает предыдущий снимок. <button type="button" id="refresh-stale">Обновить данные</button></div>
+  <div id="error-banner" class="error-banner" role="alert" hidden></div>
+  <main id="workspace" class="workspace" tabindex="-1">
+    <section id="view-map" class="view-panel" aria-labelledby="map-title">
+      <div class="view-heading"><div><h1 id="map-title">Зачем здесь этот код?</h1><p>Выберите контракт: его намерение, связи и проверки окажутся рядом.</p></div><span class="snapshot-label" id="feature-count"></span></div>
+      <div class="map-layout">
+        <aside class="contract-rail" aria-label="Каталог контрактов">
+          <label class="search atlas-search" for="contract-search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.4"/></svg><input id="contract-search" type="search" placeholder="ID, инвариант, путь…" autocomplete="off"><kbd>/</kbd></label>
+          <div class="rail-filters"><label><span class="sr">Риск</span><select id="risk-filter"><option value="all">Любой риск</option><option value="critical">Critical</option><option value="routine">Routine</option></select></label><label><span class="sr">Состояние</span><select id="state-filter"><option value="all">Все состояния</option><option value="active">Active</option><option value="upstream">Upstream</option><option value="retired">Retired</option></select></label></div>
+          <p class="small-muted" id="contract-list-count"></p>
+          <div id="contract-list" class="contract-list"></div>
+        </aside>
+        <section class="graph-pane" aria-label="Карта зависимостей">
+          <div class="pane-toolbar"><div class="seg atlas-segment" role="group" aria-label="Представление связей"><button type="button" data-graph-view="graph" aria-pressed="true">Карта</button><button type="button" data-graph-view="table" aria-pressed="false">Список</button></div><label class="graph-scope"><span class="sr">Глубина карты</span><select id="graph-scope"><option value="near">Ближайшие связи</option><option value="cluster">Весь кластер</option><option value="all">Все контракты</option></select></label><button class="icon-button" type="button" id="graph-fit" title="Вместить карту" aria-label="Вместить карту"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button></div>
+          <div class="graph-summary" id="graph-summary"></div>
+          <div id="graph" class="graph-stage"></div>
+          <div id="relation-table" class="relation-table" hidden></div>
+          <div class="graph-legend"><span><i class="legend-edge"></i>Зависит от</span><span><i class="legend-node"></i>Контракт</span><span><i class="legend-critical">!</i>Critical</span></div>
+          <p class="graph-note">Стрелка идёт к зависимости. Это связи контрактов, не граф вызовов. <code>watch</code> и <code>sentinel</code> раскрываются в инспекторе.</p>
+        </section>
+        <aside id="contract-detail" class="contract-detail" aria-label="Инспектор контракта"></aside>
+      </div>
+    </section>
+    <section id="view-changes" class="view-panel" aria-labelledby="changes-title" hidden>
+      <div class="view-heading"><div><h1 id="changes-title">Что затронет изменение?</h1><p>Прямые совпадения, транзитивное влияние и точные группы проверок.</p></div><span id="impact-stamp" class="snapshot-label"></span></div>
+      <form id="impact-form" class="comparison-controls"><label><span>Источник сравнения</span><select id="impact-mode"><option value="working">Рабочая копия vs HEAD</option><option value="staged">Staged vs HEAD</option><option value="downstream">ReClash vs vendor</option><option value="refs">Два Git refs</option><option value="paths">Один путь</option></select></label><label class="ref-field" hidden><span>От</span><input id="impact-from" type="text" value="vendor/flclash" list="git-refs" autocomplete="off"></label><label class="ref-field" hidden><span>До</span><input id="impact-to" type="text" value="dev" list="git-refs" autocomplete="off"></label><label class="path-field" hidden><span>Путь в репозитории</span><input id="impact-path" type="text" placeholder="lib/models/config.dart" autocomplete="off"></label><button type="submit" class="action-button primary">Показать влияние</button><datalist id="git-refs"></datalist></form>
+      <div id="impact-summary" class="impact-summary"></div>
+      <div class="impact-layout"><aside class="change-rail"><label class="search atlas-search" for="change-search"><input id="change-search" type="search" placeholder="Файл или контракт…" autocomplete="off"></label><label><span class="sr">Фильтр изменений</span><select id="change-filter"><option value="all">Все файлы</option><option value="unclassified">Unclassified</option><option value="critical">Прямое critical-влияние</option><option value="core">Core source</option><option value="platform">Платформы</option></select></label><p id="change-count" class="small-muted"></p><div id="change-list" class="change-list"></div></aside><section id="file-detail" class="file-detail" aria-label="Diff и объяснение влияния"></section><aside id="impact-detail" class="impact-detail" aria-label="Затронутые контракты и проверки"></aside></div>
+    </section>
+    <section id="view-sync" class="view-panel" aria-labelledby="sync-title" hidden>
+      <div class="view-heading"><div><h1 id="sync-title">От снимка к продукту</h1><p>Vendor-наблюдения и продуктовая история остаются отдельными.</p></div><span class="snapshot-label">Архивы из Git common-dir</span></div>
+      <div class="sync-layout"><aside class="sync-rail"><h2 class="pane-title">Наблюдения</h2><div id="sync-list" class="sync-list"></div><details class="history-disclosure"><summary>Текущая история</summary><div id="current-history"></div></details></aside><section id="sync-detail" class="sync-detail" aria-label="Наблюдение sync"></section></div>
+    </section>
+    <section id="view-checks" class="view-panel" aria-labelledby="checks-title" hidden>
+      <div class="view-heading"><div><h1 id="checks-title">Проверить — не значит разрешить</h1><p>Декларация покрытия, запуск и авторизация показаны отдельно.</p></div></div>
+      <div class="checks-controls"><label class="search atlas-search" for="check-search"><input id="check-search" type="search" placeholder="Проверка, контракт, команда…" autocomplete="off"></label><label><span>Результаты</span><select id="check-run"><option value="">Без запуска: только декларации</option></select></label><label><span class="sr">Фильтр проверок</span><select id="check-filter"><option value="all">Все проверки</option><option value="baseline">Baseline</option><option value="host">Другая ОС</option><option value="failed">Failed / waived</option></select></label></div>
+      <p class="interpretation-note">Привязка к <code>must</code> не доказывает качество assertions. Архивный успех не подтверждает текущий HEAD. Команды можно скопировать, но Atlas ничего не запускает.</p>
+      <div id="checks-table" class="checks-table"></div>
+    </section>
+    <section id="view-attention" class="view-panel" aria-labelledby="attention-title" hidden>
+      <div class="view-heading"><div><h1 id="attention-title">Что осталось разобраться?</h1><p>Конкретные препятствия и запросы на review — без условного «процента здоровья».</p></div></div>
+      <div id="attention-list" class="attention-list"></div>
+      <div class="policy-note"><h2>Atlas не принимает решения за вас</h2><p>Critical review, <code>--reviewed</code> и <code>--waive-check</code> требуют отдельного разрешения. Валидная схема, пройденные тесты и разрешение принять sync — разные вещи.</p></div>
+    </section>
+  </main>
+  <footer class="atlas-footer"><span id="footer-source">Данные только из локального репозитория</span><span id="footer-time"></span><span>Без fetch, Git writes и отправки данных</span></footer>
+  <dialog id="log-dialog" class="log-dialog"><div class="dialog-top"><h2 id="log-title">Лог проверки</h2><button class="icon-button" type="button" id="close-log" aria-label="Закрыть лог">×</button></div><p id="log-meta" class="small-muted"></p><pre id="log-content"></pre></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

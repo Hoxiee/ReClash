@@ -45,8 +45,10 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: context.appBarInset),
-          const ThemeLivePreview(),
-          const SizedBox(height: 16),
+          if (ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
+            ThemeLivePreview(),
+            SizedBox(height: 16),
+          ],
           _WallpaperSection(
             info: Info(label: l.wallpaperTitle, glyph: AppGlyphs.photos),
             child: Column(
