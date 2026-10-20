@@ -266,28 +266,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "Установлена версия ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} мин";
+
+  static String m101(time) => "Осталось ${time}";
+
+  static String m102(count) => "${count} с";
+
+  static String m103(speed) => "${speed}/с";
+
+  static String m104(nodes, groups, providers) =>
       "Прокси: ${nodes}, группы: ${groups}, удалённые провайдеры: ${providers}";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "Ссылка запрашивает действие «${action}». Разрешить ReClash выполнить его?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "Импортировать «${name}» из ${source}? После согласия выполнятся проверка профиля и рассмотрение преобразований.";
 
-  static String m103(label) => "Значение «${label}» должно быть URL";
+  static String m107(label) => "Значение «${label}» должно быть URL";
 
-  static String m104(index) => "Фон ${index}";
+  static String m108(index) => "Фон ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
 
-  static String m106(version) => "Установленная версия: ${version}";
+  static String m110(version) => "Установленная версия: ${version}";
 
-  static String m107(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m108(count) =>
+  static String m112(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2674,37 +2682,234 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Без названия"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Открепить окно"),
     "update": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Разрешить автоустановку",
+    ),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "Эти настройки не дают системного разрешения на установку приложений. Их можно изменить в любой момент.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash сможет устанавливать проверенные стабильные обновления без нового запроса каждый раз. Ваш VPN не будет отключён. Android всё ещё может попросить подтвердить установку.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "Разрешить автоматическую установку?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
+      "Устанавливать автоматически",
+    ),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "Устанавливать подходящие стабильные обновления только при выключенном VPN. Важные изменения всегда ждут вашего решения.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "Закрытие окна не остановит загрузку.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Отменить загрузку",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage("Канал обновлений"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("Предрелиз"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("Релиз"),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage(
+      "Проверять автоматически",
+    ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось проверить обновления.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Проверьте соединение и попробуйте ещё раз.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "Периодически проверять, пока ReClash работает. Обновление появится на главной странице, без открытия окна.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Ищем новую версию в выбранном канале.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Закрыть окно"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android требуется ваше согласие. Продолжите, чтобы открыть системное подтверждение.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Подтвердите в Android",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "Продолжить в фоне",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage(
+      "Продолжить установку",
+    ),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage(
+      "У вас последняя версия",
+    ),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "На этой платформе ReClash открывает страницу релиза. Загрузите и установите обновление самостоятельно.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Проверенная загрузка для этого устройства недоступна. Выберите пакет на странице релиза.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "Отключить и установить",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage(
+      "Оставить ручную установку",
+    ),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "Загрузить обновление",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
+      "Загрузить заново",
+    ),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Окно можно закрыть. Прогресс останется на главной странице.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось загрузить обновление.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Загруженная часть сохранена. Проверьте соединение и продолжите загрузку.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "Установленная версия остаётся без изменений.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("Понятно"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось запустить установщик пакетов.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android не завершил установку. Попробуйте ещё раз, когда будет удобно.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage(
+      "Установить сейчас",
+    ),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash уже использует новую версию.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "Обновление установлено",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android завершает установку. На этом этапе ReClash может закрыться.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "Устанавливаем обновление",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "У вас уже установлена последняя версия.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("Не сейчас"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Что нового"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Описание изменений не опубликовано.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "Загрузка не устанавливает обновление и не прерывает VPN.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
+      "Доступно обновление",
+    ),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Открыть настройки Android",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage(
+      "Сборка для устройства",
+    ),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage(
+      "Размер загрузки",
+    ),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "Проверка пакета",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "Проверим после загрузки, до установки",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "Целостность, приложение и подпись проверены",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Версия"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("Пауза"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "Загруженная часть сохранена. Продолжите, когда будет удобно.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
+      "Загрузка на паузе",
+    ),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Разрешите ReClash устанавливать приложения из этого источника и вернитесь, чтобы продолжить.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Нужно разрешение Android",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "Настройте проверку, загрузку и установку независимо друг от друга.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "Обновления по вашим правилам",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "Настройки не сохранены. Попробуйте ещё раз; автоустановка не включена.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage(
+      "Настройки обновлений",
+    ),
+    "updatePreload": MessageLookupByLibrary.simpleMessage("Загружать по Wi-Fi"),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Загружать доступные обновления по Wi-Fi. При смене сети автоматическая загрузка приостанавливается.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "Пакет прошёл все проверки. Установите сейчас или оставьте на потом.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
+      "Готово к установке",
+    ),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
+      "Подробности релиза",
+    ),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage(
+      "Продолжить загрузку",
+    ),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage(
+      "Проверить ещё раз",
+    ),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
+      "Повторить установку",
+    ),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Все примечания к релизу",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
       "Показать все изменения",
     ),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("Обновления"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "Пакет, не прошедший проверку, никогда не будет установлен.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось проверить целостность загруженного обновления.",
+    ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Файл, версия или подпись не прошли проверку. Загрузите новую копию и попробуйте ещё раз.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Этот пакет нельзя установить",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "Перед установкой проверяем файл, версию приложения и сертификат подписи.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
+      "Проверяем обновление",
+    ),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "Для установки ReClash ненадолго закроется. Отключайте VPN, только если готовы прервать соединение.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "При установке приложение ненадолго закроется. VPN не отключится без вашего подтверждения.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
+      "Ваш VPN ещё работает",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
@@ -2728,14 +2933,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Следовать настройке закрытия: скрыть окно или выйти из ReClash. На Android используется обычное поведение закрытия приложения.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Вставьте конфигурацию YAML или JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Состав конфигурации",
     ),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Внешняя команда приложения",
     ),
@@ -2775,7 +2980,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Импортировать конфигурацию",
     ),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Импортировать встроенную в ссылку UTF-8-конфигурацию в Base64 с необязательным именем.",
     ),
@@ -2883,7 +3088,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "Ссылки подписок, встроенные конфигурации и INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -2934,9 +3139,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -3027,7 +3232,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось открыть браузер.",
     ),
@@ -3069,8 +3274,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

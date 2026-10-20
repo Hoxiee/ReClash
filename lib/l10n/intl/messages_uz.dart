@@ -271,28 +271,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "Oʻrnatilgan versiya: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} daq";
+
+  static String m101(time) => "${time} qoldi";
+
+  static String m102(count) => "${count} s";
+
+  static String m103(speed) => "${speed}/s";
+
+  static String m104(nodes, groups, providers) =>
       "Proksilar: ${nodes}, guruhlar: ${groups}, masofaviy provayderlar: ${providers}";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "Bu havola «${action}» amalini so‘raydi. ReClash’ga uni bajarishga ruxsat berilsinmi?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "${source} manbasidan «${name}» import qilinsinmi? Tasdiqlashdan so‘ng profil va o‘girishlar tekshiriladi.";
 
-  static String m103(label) => "${label} URL boʻlishi kerak";
+  static String m107(label) => "${label} URL boʻlishi kerak";
 
-  static String m104(index) => "Fon ${index}";
+  static String m108(index) => "Fon ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
 
-  static String m106(version) => "Oʻrnatilgan versiya: ${version}";
+  static String m110(version) => "Oʻrnatilgan versiya: ${version}";
 
-  static String m107(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
-  static String m108(count) =>
+  static String m112(count) =>
       "${Intl.plural(count, other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2729,41 +2737,236 @@ class MessageLookup extends MessageLookupByLibrary {
       "Oynani doim yuqorida tutishni oʻchirish",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Yangilash"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Avtomatik o‘rnatishga ruxsat berish",
+    ),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "Bu sozlamalar Android ilova o‘rnatish ruxsatini bermaydi. Ularni istalgan paytda o‘zgartirishingiz mumkin.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash tekshirilgan, mos barqaror yangilanishlarni har safar so‘ramasdan o‘rnata oladi. VPN hech qachon uzilmaydi. Android o‘rnatishni tasdiqlashingizni so‘rashi mumkin.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "Avtomatik o‘rnatishga ruxsat berilsinmi?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
+      "Avtomatik o‘rnatish",
+    ),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "Faqat VPN o‘chiq bo‘lganda mos barqaror yangilanishlarni o‘rnatish. Muhim o‘zgarishlar har doim qaroringizni kutadi.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "Bu oynani yopish yuklashni to‘xtatmaydi.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Yuklashni bekor qilish",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage("Yangilanish kanali"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("Dastlabki reliz"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
       "Barqaror reliz",
     ),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage(
+      "Avtomatik tekshirish",
+    ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Yangilanishlarni tekshirib bo‘lmadi.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ulanishni tekshirib, qayta urinib ko‘ring.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "ReClash ishlayotganida vaqti-vaqti bilan tekshirish. Yangilanish oyna ochmasdan bosh sahifada ko‘rsatiladi.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Tanlangan kanalda yangi versiya qidirilmoqda.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Oynani yopish"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android tasdig‘ingizni talab qiladi. Tizim tasdiqlash oynasini ochish uchun davom eting.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Android’da tasdiqlang",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "Fonda davom etish",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatishni davom ettirish",
+    ),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage(
+      "Sizda eng yangi versiya",
+    ),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "Bu platformada ReClash reliz sahifasini ochadi. Yangilanishni o‘zingiz yuklab, o‘rnating.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Bu qurilma uchun tekshirilgan yuklash mavjud emas. Reliz sahifasidan paket tanlang.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "Uzish va o‘rnatish",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage(
+      "Qo‘lda o‘rnatishni saqlash",
+    ),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "Yangilanishni yuklash",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
+      "Qayta yuklash",
+    ),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Bu oynani yopishingiz mumkin. Jarayon bosh sahifada ko‘rinib turadi.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni yuklab bo‘lmadi.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Yuklangan qism saqlandi. Ulanishni tekshiring va yuklashni davom ettiring.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatilgan versiya o‘zgarishsiz qoladi.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("Tushunarli"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Paket o‘rnatuvchisini ishga tushirib bo‘lmadi.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android o‘rnatishni yakunlamadi. Tayyor bo‘lganingizda qayta urinib ko‘ring.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("Hozir o‘rnatish"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash endi yangi versiyadan foydalanmoqda.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish o‘rnatildi",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android o‘rnatishni yakunlamoqda. Bu bosqichda ReClash yopilishi mumkin.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish o‘rnatilmoqda",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Sizda allaqachon eng yangi versiya o‘rnatilgan.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("Hozir emas"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage(
       "Nimalar yangilandi",
     ),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Reliz qaydlari mavjud emas.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "Yuklash yangilanishni o‘rnatmaydi va VPN’ni uzmaydi.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish mavjud",
+    ),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Android sozlamalarini ochish",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage(
+      "Qurilma uchun yig‘ilma",
+    ),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage("Yuklash hajmi"),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "Paket tekshiruvi",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "Yuklangandan keyin, o‘rnatishdan oldin tekshiriladi",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "Yaxlitlik, ilova identifikatori va imzo tekshirildi",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Versiya"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("Pauza"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "Yuklangan qism saqlandi. Tayyor bo‘lganingizda davom eting.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
+      "Yuklash pauzada",
+    ),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash’ga ushbu manbadan ilovalarni o‘rnatishga ruxsat bering va davom etish uchun qayting.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Android ruxsati kerak",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "Tekshirish, yuklash va o‘rnatishni alohida sozlang.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "Yangilanishlar siz xohlagandek",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "Sozlamalar saqlanmadi. Qayta urinib ko‘ring; avtomatik o‘rnatish yoqilmadi.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish sozlamalari",
+    ),
+    "updatePreload": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi orqali oldindan yuklash",
+    ),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Mavjud yangilanishlarni Wi-Fi orqali yuklash. Wi-Fi uzilsa, avtomatik yuklash pauza qilinadi.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "Paket barcha tekshiruvlardan o‘tdi. Hozir o‘rnating yoki keyinga qoldiring.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatishga tayyor",
+    ),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
+      "Reliz tafsilotlari",
+    ),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage(
+      "Yuklashni davom ettirish",
+    ),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage(
+      "Qayta tekshirish",
+    ),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatishni qayta urinish",
+    ),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "To‘liq reliz qaydlarini ko‘rish",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
       "Barcha oʻzgarishlarni koʻrsatish",
     ),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("Yangilanishlar"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "Tekshiruvdan o‘tmagan paket hech qachon o‘rnatilmaydi.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Yuklab olingan yangilanish yaxlitligini tekshirib bo‘lmadi.",
+    ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Fayl, versiya yoki imzo tekshiruvdan o‘tmadi. Yangi nusxani yuklab, qayta urinib ko‘ring.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Bu paketni o‘rnatib bo‘lmaydi",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatishdan oldin fayl, ilova versiyasi va imzo sertifikati tekshiriladi.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
+      "Yangilanish tekshirilmoqda",
+    ),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatish ReClash’ni qisqa vaqtga yopadi. Ulanishni uzishga tayyor bo‘lsangizgina uzing.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "O‘rnatish ilovani qisqa vaqtga yopadi. VPN tasdiqsiz to‘xtatilmaydi.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
+      "VPN hali ishlayapti",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Yuklab yuborish"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
@@ -2787,14 +2990,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Yopish sozlamasiga rioya qilish: oynani yashirish yoki ReClash’dan chiqish. Android odatiy ilova yopish xatti-harakatini ishlatadi.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML yoki JSON konfiguratsiyasini joylashtiring",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Konfiguratsiya tarkibi",
     ),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Ilovaning tashqi buyrug‘i",
     ),
@@ -2834,7 +3037,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Konfiguratsiyani import qilish",
     ),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Havolaga Base64 sifatida joylangan UTF-8 konfiguratsiyasini import qilish. Nom ixtiyoriy.",
     ),
@@ -2940,7 +3143,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "Obuna havolalari, ichki konfiguratsiyalar va INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -2987,9 +3190,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -3082,7 +3285,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Tanlangan panel birinchi ochishda yuklab olinadi. Belgilangan reliz SHA-256 orqali tekshiriladi.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzerni ochib boʻlmadi.",
     ),
@@ -3120,8 +3323,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Tizimga yozish tizim soatini ham oʻrnatadi; Android bunga eʼtibor bermaydi.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("Ha"),
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",

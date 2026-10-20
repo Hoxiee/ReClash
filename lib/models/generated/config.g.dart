@@ -39,6 +39,8 @@ _AppSettingProps _$AppSettingPropsFromJson(
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
+  autoDownloadUpdate: json['autoDownloadUpdate'] as bool? ?? false,
+  autoInstallUpdate: json['autoInstallUpdate'] as bool? ?? false,
   updateChannel: updateChannelFromJson(json['updateChannel']),
   sidebarExpanded:
       _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? true,
@@ -126,6 +128,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'autoCheckUpdate': instance.autoCheckUpdate,
+      'autoDownloadUpdate': instance.autoDownloadUpdate,
+      'autoInstallUpdate': instance.autoInstallUpdate,
       'updateChannel': _$UpdateChannelEnumMap[instance.updateChannel],
       'sidebarExpanded': instance.sidebarExpanded,
       'acceptedDisclaimerVersion': instance.acceptedDisclaimerVersion,

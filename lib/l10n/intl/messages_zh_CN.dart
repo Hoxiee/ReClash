@@ -237,25 +237,33 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "已安装版本：${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} 分钟";
+
+  static String m101(time) => "剩余 ${time}";
+
+  static String m102(count) => "${count} 秒";
+
+  static String m103(speed) => "${speed}/秒";
+
+  static String m104(nodes, groups, providers) =>
       "代理：${nodes}，组：${groups}，远程提供者：${providers}";
 
-  static String m101(action) => "此链接请求“${action}”。允许 ReClash 执行此操作吗？";
+  static String m105(action) => "此链接请求“${action}”。允许 ReClash 执行此操作吗？";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "从 ${source} 导入“${name}”吗？确认后将验证配置文件并检查转换内容。";
 
-  static String m103(label) => "${label}必须为URL";
+  static String m107(label) => "${label}必须为URL";
 
-  static String m104(index) => "背景 ${index}";
+  static String m108(index) => "背景 ${index}";
 
-  static String m105(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+  static String m109(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
 
-  static String m106(version) => "已安装版本：${version}";
+  static String m110(version) => "已安装版本：${version}";
 
-  static String m107(count) => "${count} 年前";
+  static String m111(count) => "${count} 年前";
 
-  static String m108(count) => "${count} 年前";
+  static String m112(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1995,24 +2003,161 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("允许自动安装"),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "这些偏好不会授予 Android 安装应用的权限。你可以随时更改。",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash 可以安装已验证且符合条件的稳定更新，无需每次询问。它绝不会断开你的 VPN。Android 仍可能要求确认安装。",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage("允许自动安装吗？"),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage("自动安装"),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "仅在 VPN 关闭时安装符合条件的稳定更新。重要变更始终等待你确认。",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "关闭此窗口不会停止下载。",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateChannel": MessageLookupByLibrary.simpleMessage("更新通道"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("预发布版"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("正式版"),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("自动检查"),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新。"),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "请检查连接后重试。",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "在 ReClash 运行时定期检查。更新会显示在主页，不会自动打开窗口。",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "正在所选更新渠道中查找新版本。",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("关闭窗口"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android 需要你的批准。继续以打开系统确认界面。",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "请在 Android 中确认",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage("在后台继续"),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage("继续安装"),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage("已是最新版本"),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "在此平台上，ReClash 会打开版本页面。请自行下载并安装更新。",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "此设备没有可验证的下载。请打开版本页面选择安装包。",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage("断开并安装"),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage("保持手动安装"),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage("下载更新"),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("重新下载"),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "可以关闭此窗口。进度仍会显示在主页。",
+    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "已下载的部分已保存。请检查连接，然后继续下载。",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "已安装的版本保持不变。",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("知道了"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序。"),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android 未完成安装。准备好后请重试。",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("立即安装"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash 现在使用新版本。",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("更新已安装"),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android 正在完成安装。此时 ReClash 可能会关闭。",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("正在安装更新"),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("当前已是最新版本。"),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("暂不"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("更新内容"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage("暂无发布说明。"),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "下载不会安装更新，也不会中断 VPN。",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage("有可用更新"),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "打开 Android 设置",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage("适用设备的构建"),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage("下载大小"),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage("安装包检查"),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "下载后、安装前进行检查",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "完整性、应用身份和签名已验证",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("版本"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("暂停"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "已下载的部分已保存。准备好后可继续。",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage("下载已暂停"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "请允许 ReClash 安装来自此来源的应用，然后返回继续。",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "需要 Android 权限",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "分别设置检查、下载和安装。",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage("按你的方式更新"),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "偏好未保存。请重试；自动安装尚未启用。",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("更新偏好"),
+    "updatePreload": MessageLookupByLibrary.simpleMessage("通过 Wi-Fi 预下载"),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "通过 Wi-Fi 下载可用更新。离开 Wi-Fi 后会暂停自动下载。",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "安装包已通过所有检查。现在安装或留待以后。",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage("可以安装了"),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("版本详情"),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage("继续下载"),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage("再次检查"),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage("重试安装"),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "查看完整发布说明",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("显示所有更改"),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "未通过验证的安装包绝不会被安装。",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage("无法验证下载更新的完整性。"),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "文件、版本或签名未通过检查。请重新下载后再试。",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage("无法安装此安装包"),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "安装前检查文件、应用版本和签名证书。",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("正在检查更新"),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "安装会短暂关闭 ReClash。只有在可以中断连接时才断开。",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "安装会短暂关闭应用。未经确认不会停止 VPN。",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPN 仍在运行"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
@@ -2033,12 +2178,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "遵循关闭设置：隐藏窗口或退出 ReClash。Android 使用常规应用关闭行为。",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "粘贴 YAML 或 JSON 配置",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("配置内容"),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("外部应用命令"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
       "外部连接和关闭命令需要确认。使用连接命令前，请先完成初始设置。",
@@ -2064,7 +2209,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("内嵌配置"),
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("示例配置文件"),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("导入配置"),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "导入以 Base64 嵌入链接的 UTF-8 配置，可选填名称。",
     ),
@@ -2146,7 +2291,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "订阅链接、内嵌配置和 INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -2181,9 +2326,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "请选择有效的 PNG、JPEG 或 WebP 图片。",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("移除图片"),
@@ -2244,7 +2389,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "首次打开时下载所选面板。使用固定版本并进行 SHA-256 校验。",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "无法打开浏览器。",
     ),
@@ -2276,8 +2421,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

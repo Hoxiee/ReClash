@@ -243,25 +243,33 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "インストール済み: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count}分";
+
+  static String m101(time) => "残り${time}";
+
+  static String m102(count) => "${count}秒";
+
+  static String m103(speed) => "${speed}/秒";
+
+  static String m104(nodes, groups, providers) =>
       "プロキシ: ${nodes}、グループ: ${groups}、リモートプロバイダー: ${providers}";
 
-  static String m101(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
+  static String m105(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "${source}から「${name}」をインポートしますか？確認後にプロファイルの検証と変換内容の確認を行います。";
 
-  static String m103(label) => "${label}はURLである必要があります";
+  static String m107(label) => "${label}はURLである必要があります";
 
-  static String m104(index) => "背景 ${index}";
+  static String m108(index) => "背景 ${index}";
 
-  static String m105(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+  static String m109(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
 
-  static String m106(version) => "インストール済みバージョン: ${version}";
+  static String m110(version) => "インストール済みバージョン: ${version}";
 
-  static String m107(count) => "${count} 年前";
+  static String m111(count) => "${count} 年前";
 
-  static String m108(count) => "${count} 年前";
+  static String m112(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2197,32 +2205,189 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("名称未設定"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("自動インストールを許可"),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "この設定だけではAndroidのアプリインストール権限は付与されません。いつでも変更できます。",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClashは検証済みで条件を満たす安定版を毎回確認せずにインストールできます。VPNを切断することはありません。Androidがインストールの確認を求める場合があります。",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "自動インストールを許可しますか？",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage("自動でインストール"),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "VPNがオフのときだけ、条件を満たす安定版をインストールします。重要な変更は必ず確認を待ちます。",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "このウィンドウを閉じてもダウンロードは停止しません。",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "ダウンロードをキャンセル",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage("更新チャンネル"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("プレリリース"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("リリース"),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("自動で確認"),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage("更新を確認できませんでした。"),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "接続を確認して、もう一度お試しください。",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "ReClashの実行中に定期的に確認します。ウィンドウは開かず、ダッシュボードに表示します。",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "選択したチャネルで新しいバージョンを確認しています。",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("ウィンドウを閉じる"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Androidの承認が必要です。続行するとシステムの確認画面を開きます。",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Androidで確認してください",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "バックグラウンドで続行",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage("インストールを続行"),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage("最新の状態です"),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "このプラットフォームではリリースページを開きます。アップデートは手動でダウンロードし、インストールしてください。",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "このデバイス向けの検証可能なダウンロードがありません。リリースページでパッケージを選んでください。",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "切断してインストール",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage("手動インストールのまま"),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "アップデートをダウンロード",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("再ダウンロード"),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "このウィンドウは閉じられます。進捗はダッシュボードに残ります。",
+    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "更新をダウンロードできませんでした。",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "ダウンロード済みの部分は保存されています。接続を確認して再開してください。",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "インストール済みのバージョンは変更されません。",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("了解"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "パッケージインストーラーを起動できませんでした。",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Androidがインストールを完了できませんでした。準備ができたら再試行してください。",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("今すぐインストール"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClashは新しいバージョンを使用しています。",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "アップデートをインストールしました",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Androidがインストールを完了しています。この間にReClashが閉じる場合があります。",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "アップデートをインストール中",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("今はしない"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "リリースノートはありません。",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "ダウンロードではインストールやVPNの中断は行いません。",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage("アップデートがあります"),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Androidの設定を開く",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage("デバイス向けビルド"),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage("ダウンロードサイズ"),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "パッケージの検証",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "ダウンロード後、インストール前に検証します",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "整合性、アプリの識別情報、署名を検証済み",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("バージョン"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("一時停止"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "ダウンロード済みの部分は保存されています。いつでも再開できます。",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage("ダウンロードを一時停止中"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash にこの提供元からのアプリのインストールを許可してから、戻って続行してください。",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Androidの権限が必要です",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "確認、ダウンロード、インストールを個別に設定できます。",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "自分に合ったアップデート",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "設定を保存できませんでした。もう一度保存してください。自動インストールは有効になっていません。",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("アップデート設定"),
+    "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fiで事前ダウンロード"),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "利用可能なアップデートをWi-Fiでダウンロードします。Wi-Fiを離れると自動ダウンロードは一時停止します。",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "すべての検証を通過しました。今すぐインストールするか、あとで行えます。",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage("インストールの準備完了"),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("リリースの詳細"),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage("ダウンロードを再開"),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage("もう一度確認"),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage("インストールを再試行"),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "リリースノート全文を見る",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("すべての変更を表示"),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("アップデート"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "検証に失敗したパッケージはインストールしません。",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "ダウンロードした更新の整合性を確認できませんでした。",
     ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "ファイル、バージョン、または署名の検証に失敗しました。新しいコピーをダウンロードしてお試しください。",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "このパッケージはインストールできません",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "インストール前にファイル、バージョン、署名証明書を確認しています。",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("アップデートを検証中"),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "インストール中はReClashが一時的に閉じます。接続を中断してよい場合だけ切断してください。",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "インストール中はアプリが一時的に閉じます。確認なしにVPNを停止することはありません。",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPNがまだ動作しています"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
@@ -2243,12 +2408,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "終了設定に従ってウィンドウを隠すかReClashを終了します。Androidでは通常のアプリ終了動作に従います。",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAMLまたはJSONの設定を貼り付けてください",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("設定の内容"),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "外部からのアプリコマンド",
     ),
@@ -2280,7 +2445,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "サンプルプロファイル",
     ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポートする"),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "リンクにBase64で埋め込まれたUTF-8設定をインポートします。名前は省略できます。",
     ),
@@ -2372,7 +2537,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "サブスクリプション、埋め込み設定、INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2409,9 +2574,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
@@ -2484,7 +2649,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "ブラウザーを開けませんでした。",
     ),
@@ -2516,8 +2681,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

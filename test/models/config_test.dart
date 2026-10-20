@@ -147,6 +147,8 @@ void main() {
       expect(restored.tabAnimation, TabAnimation.fade);
       expect(restored.preventDuplicateProfiles, true);
       expect(restored.autoCheckUpdate, true);
+      expect(restored.autoDownloadUpdate, false);
+      expect(restored.autoInstallUpdate, false);
       expect(restored.updateChannel, isNull);
       expect(restored.regionCode, isNull);
       expect(restored.setupCompleted, isNull);
@@ -214,6 +216,24 @@ void main() {
         );
       },
     );
+
+    test('update preferences round-trip independently', () {
+      for (final check in [false, true]) {
+        for (final preload in [false, true]) {
+          for (final install in [false, true]) {
+            final props = AppSettingProps(
+              autoCheckUpdate: check,
+              autoDownloadUpdate: preload,
+              autoInstallUpdate: install,
+            );
+            final restored = roundTrip(props.toJson, AppSettingProps.fromJson);
+            expect(restored.autoCheckUpdate, check);
+            expect(restored.autoDownloadUpdate, preload);
+            expect(restored.autoInstallUpdate, install);
+          }
+        }
+      }
+    });
 
     test('a saved outboundModeV2 card folds into outboundMode', () {
       final restored = AppSettingProps.fromJson({

@@ -274,28 +274,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "Versión instalada: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} min";
+
+  static String m101(time) => "Quedan ${time}";
+
+  static String m102(count) => "${count} s";
+
+  static String m103(speed) => "${speed}/s";
+
+  static String m104(nodes, groups, providers) =>
       "${nodes} proxies, ${groups} grupos, ${providers} proveedores remotos";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "Este enlace solicita «${action}». ¿Permitir que ReClash realice esta acción?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "¿Importar «${name}» desde ${source}? Tras la confirmación se validará el perfil y se revisarán las conversiones necesarias.";
 
-  static String m103(label) => "${label} debe ser una URL";
+  static String m107(label) => "${label} debe ser una URL";
 
-  static String m104(index) => "Fondo ${index}";
+  static String m108(index) => "Fondo ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
 
-  static String m106(version) => "Versión instalada: ${version}";
+  static String m110(version) => "Versión instalada: ${version}";
 
-  static String m107(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m108(count) =>
+  static String m112(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2742,6 +2750,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Sin nombre"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Desfijar ventana"),
     "update": MessageLookupByLibrary.simpleMessage("Actualizar"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Permitir instalación automática",
+    ),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "Estas preferencias no conceden permiso de Android para instalar apps. Puedes cambiarlas cuando quieras.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash podrá instalar actualizaciones estables verificadas y aptas sin preguntar cada vez. Nunca desconectará tu VPN. Android aún puede pedirte que confirmes la instalación.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "¿Permitir la instalación automática?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
+      "Instalar automáticamente",
+    ),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "Instalar actualizaciones estables aptas solo con la VPN apagada. Los cambios importantes siempre esperan tu decisión.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "Cerrar esta ventana no detiene la descarga.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Cancelar descarga",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage(
       "Canal de actualización",
     ),
@@ -2751,34 +2783,203 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
       "Versión estable",
     ),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage(
+      "Buscar automáticamente",
+    ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudieron buscar actualizaciones.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Comprueba tu conexión y vuelve a intentarlo.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "Buscar periódicamente mientras ReClash esté abierto. La actualización aparecerá en el panel sin abrir una ventana.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Buscando una versión más reciente en el canal seleccionado.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Cerrar ventana"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android necesita tu aprobación. Continúa para abrir la confirmación del sistema.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Confirma con Android",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "Continuar en segundo plano",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage(
+      "Continuar instalación",
+    ),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage("Estás al día"),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "En esta plataforma, ReClash abre la página de la versión. Descarga e instala la actualización por tu cuenta.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "No hay una descarga verificada para este dispositivo. Abre la página de la versión para elegir un paquete.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "Desconectar e instalar",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage(
+      "Mantener instalación manual",
+    ),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "Descargar actualización",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
+      "Descargar de nuevo",
+    ),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Puedes cerrar esta ventana. El progreso seguirá en el panel.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo descargar la actualización.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "La parte descargada está guardada. Comprueba tu conexión y continúa la descarga.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "La versión instalada permanece sin cambios.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("Entendido"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo iniciar el instalador de paquetes.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android no completó la instalación. Inténtalo de nuevo cuando quieras.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("Instalar ahora"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash ya utiliza la nueva versión.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "Actualización instalada",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android está completando la instalación. ReClash puede cerrarse durante este paso.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "Instalando la actualización",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Ya tienes la versión más reciente.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("Ahora no"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Novedades"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No hay notas de la versión disponibles.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "La descarga no instala la actualización ni interrumpe tu VPN.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
+      "Hay una actualización disponible",
+    ),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Abrir ajustes de Android",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage(
+      "Compilación para el dispositivo",
+    ),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage(
+      "Tamaño de descarga",
+    ),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "Verificación del paquete",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "Se verificará tras la descarga, antes de instalar",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "Integridad, identidad de la app y firma verificadas",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Versión"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("Pausar"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "La parte descargada está guardada. Continúa cuando quieras.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
+      "Descarga en pausa",
+    ),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Permite que ReClash instale aplicaciones desde esta fuente y vuelve para continuar.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Se necesita permiso de Android",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "Configura por separado la búsqueda, la descarga y la instalación.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "Actualizaciones a tu manera",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "No se guardaron las preferencias. Inténtalo de nuevo; la instalación automática no se ha activado.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage(
+      "Preferencias de actualización",
+    ),
+    "updatePreload": MessageLookupByLibrary.simpleMessage(
+      "Descargar por Wi-Fi",
+    ),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Descargar las actualizaciones disponibles por Wi-Fi. Al salir de Wi-Fi, las descargas automáticas se pausan.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "El paquete ha superado todas las verificaciones. Instálalo ahora o déjalo para después.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
+      "Lista para instalar",
+    ),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
+      "Detalles de la versión",
+    ),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage(
+      "Reanudar descarga",
+    ),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage("Buscar de nuevo"),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
+      "Reintentar instalación",
+    ),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Ver todas las notas de la versión",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
       "Mostrar todos los cambios",
     ),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("Actualizaciones"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "Un paquete que falle la verificación nunca se instalará.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo verificar la integridad de la actualización descargada.",
+    ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "El archivo, la versión o la firma no superaron la verificación. Descarga una copia nueva para intentarlo otra vez.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Este paquete no se puede instalar",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "Se comprueban el archivo, la versión y el certificado de firma antes de instalar.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
+      "Verificando la actualización",
+    ),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "La instalación cerrará ReClash brevemente. Desconecta solo si puedes interrumpir la conexión.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "La instalación cerrará la app brevemente. Tu VPN no se detendrá sin tu confirmación.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
+      "Tu VPN sigue activa",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Subida"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
@@ -2802,14 +3003,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Sigue la opción de cierre: ocultar la ventana o salir de ReClash. Android usa su comportamiento habitual de cierre.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Pega una configuración YAML o JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Contenido de la configuración",
     ),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Comando externo de aplicación",
     ),
@@ -2847,7 +3048,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Importar configuración",
     ),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Importa una configuración UTF-8 incluida en el enlace como Base64, con un nombre opcional.",
     ),
@@ -2951,7 +3152,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "Enlaces de suscripción, configuraciones integradas e INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -2996,9 +3197,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Elige una imagen PNG, JPEG o WebP válida.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Encuadre"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Opacidad de imagen",
     ),
@@ -3091,7 +3292,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo abrir el navegador.",
     ),
@@ -3131,8 +3332,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

@@ -1,7 +1,17 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart';
+
+class UpdateDownloadVerificationException implements Exception {
+  const UpdateDownloadVerificationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class AndroidUpdateAsset {
   const AndroidUpdateAsset({
@@ -66,8 +76,13 @@ String updateApkFileName(String tag) {
   return 'update-${safeTag.isEmpty ? 'latest' : safeTag}.apk';
 }
 
-Future<String> fileSha256(File file) async =>
-    (await sha256.bind(file.openRead()).first).toString();
+Future<String> fileSha256(File file) {
+  final path = file.path;
+  return Isolate.run(() => _fileSha256AtPath(path));
+}
+
+Future<String> _fileSha256AtPath(String path) async =>
+    (await sha256.bind(File(path).openRead()).first).toString();
 
 Future<bool> matchesUpdateAsset(File file, AndroidUpdateAsset asset) async {
   final expected = asset.sha256;
@@ -84,6 +99,7 @@ Future<bool> matchesUpdateAsset(File file, AndroidUpdateAsset asset) async {
 Future<void> removeStaleUpdateApks(
   Directory directory, {
   Set<String> keep = const {},
+  Set<String> keepPartial = const {},
 }) async {
   try {
     final apkFiles = <File>[];
@@ -92,8 +108,13 @@ Future<void> removeStaleUpdateApks(
       if (entity is! File) continue;
       final name = basename(entity.path);
       if (!name.startsWith('update-')) continue;
-      if (name.endsWith('.apk.tmp')) {
-        temporaryFiles.add(entity);
+      final partialAt = name.lastIndexOf('.apk.tmp');
+      if (partialAt >= 0 &&
+          (name.endsWith('.apk.tmp') ||
+              name.endsWith('.apk.tmp.json') ||
+              RegExp(r'\.apk\.tmp\.json\.\d+\.tmp$').hasMatch(name))) {
+        final apkName = name.substring(0, partialAt + '.apk'.length);
+        if (!keepPartial.contains(apkName)) temporaryFiles.add(entity);
       } else if (name.endsWith('.apk')) {
         apkFiles.add(entity);
       }

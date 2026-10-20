@@ -9,7 +9,9 @@ import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/update_sheet.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/views/region.dart';
@@ -95,6 +97,11 @@ class ApplicationSettings {
       id: 'application.updateChannel',
       page: ToolPage.application,
       title: (l) => l.updateChannel,
+    ),
+    SettingSpec(
+      id: 'application.updatePreferences',
+      page: ToolPage.application,
+      title: (l) => l.updatePreferencesTitle,
     ),
     SettingSpec(
       id: 'application.openLogs',
@@ -216,6 +223,15 @@ class ApplicationSettingView extends ConsumerWidget {
           onChanged: (value) => ref
               .read(appSettingProvider.notifier)
               .update((state) => state.copyWith(updateChannel: value)),
+        ),
+      ),
+      SettingTarget(
+        spec: ApplicationSettings.spec('application.updatePreferences'),
+        child: ListItem(
+          title: Text(l.updatePreferencesTitle),
+          subtitle: Text(l.updatePreferencesDescription),
+          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+          onTap: () => UpdateSheet.show(context, preferences: true),
         ),
       ),
       _toggle(

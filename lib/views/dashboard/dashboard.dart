@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/update_card.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -111,7 +112,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 /// Four columns fill the window, the tables taking what the rows above them
 /// leave. A window too short for the tables, and every two column one, gets
 /// the summary cards instead, so no list scrolls inside a page that scrolls.
-class _DesktopDashboard extends StatelessWidget {
+class _DesktopDashboard extends ConsumerWidget {
   const _DesktopDashboard({
     required this.platform,
     required this.columns,
@@ -123,7 +124,10 @@ class _DesktopDashboard extends StatelessWidget {
   final double gap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasUpdate = ref.watch(
+      appUpdateActionProvider.select((state) => state.hasUpdate),
+    );
     final density = DashboardDensityScope.of(context);
     final compact = density.isCompact;
     final scale = DashboardDensityScope.scaleOf(context);
@@ -133,6 +137,7 @@ class _DesktopDashboard extends StatelessWidget {
       24,
       24 + MediaQuery.paddingOf(context).bottom,
     );
+    final updateHeight = 112 * scale;
     final topHeight = (compact ? 176 : 208) * scale;
     final controlHeight = (compact ? 56 : 64) * scale;
     final middleHeight = (compact ? 152 : 176) * scale;
@@ -181,6 +186,7 @@ class _DesktopDashboard extends StatelessWidget {
             child: Column(
               spacing: gap,
               children: [
+                if (hasUpdate) sized(updateHeight, const UpdateCard()),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
@@ -211,6 +217,7 @@ class _DesktopDashboard extends StatelessWidget {
           );
         }
         final rows = [
+          if (hasUpdate) sized(updateHeight, const UpdateCard()),
           sized(
             topHeight,
             row(const [
@@ -241,7 +248,8 @@ class _DesktopDashboard extends StatelessWidget {
             topHeight +
             controlHeight +
             middleHeight +
-            gap * 3;
+            gap * 3 +
+            (hasUpdate ? updateHeight + gap : 0);
         final tablesFit = constraints.maxHeight >= rowsHeight + tablesHeight;
         final fills = constraints.maxHeight >= rowsHeight + summaryHeight;
         return SingleChildScrollView(
@@ -340,6 +348,12 @@ class _MobileDashboard extends ConsumerWidget {
                 child: Column(
                   spacing: gap,
                   children: [
+                    if (ref.watch(
+                      appUpdateActionProvider.select(
+                        (state) => state.hasUpdate,
+                      ),
+                    ))
+                      const UpdateCard(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),

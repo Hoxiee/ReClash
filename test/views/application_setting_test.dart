@@ -96,6 +96,34 @@ void main() {
     expect(container.read(appSettingProvider).updateChannel, UpdateChannel.pre);
   });
 
+  testWidgets(
+    'opens independent update preferences from application settings',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: ApplicationSettingView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final row = find.text('Update preferences');
+      await tester.ensureVisible(row);
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.text('Updates, your way'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('update-preferences-save')).hitTestable(),
+        findsOneWidget,
+      );
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+    },
+  );
+
   testWidgets('reopening setup from application settings keeps a live run', (
     tester,
   ) async {

@@ -270,28 +270,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "Орнатылған нұсқа: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count} мин";
+
+  static String m101(time) => "${time} қалды";
+
+  static String m102(count) => "${count} с";
+
+  static String m103(speed) => "${speed}/с";
+
+  static String m104(nodes, groups, providers) =>
       "Прокси: ${nodes}, топтар: ${groups}, қашықтағы провайдерлер: ${providers}";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "Сілтеме «${action}» әрекетін сұрайды. ReClash қолданбасына орындауға рұқсат бересіз бе?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "${source} көзінен «${name}» импортталсын ба? Растаудан кейін профиль мен түрлендіру тексеріледі.";
 
-  static String m103(label) => "${label} URL болуы керек";
+  static String m107(label) => "${label} URL болуы керек";
 
-  static String m104(index) => "Фон ${index}";
+  static String m108(index) => "Фон ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
 
-  static String m106(version) => "Орнатылған нұсқа: ${version}";
+  static String m110(version) => "Орнатылған нұсқа: ${version}";
 
-  static String m107(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
-  static String m108(count) =>
+  static String m112(count) =>
       "${Intl.plural(count, other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2674,6 +2682,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Атаусыз"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Терезені босату"),
     "update": MessageLookupByLibrary.simpleMessage("Жаңарту"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
+      "Автоматты орнатуға рұқсат беру",
+    ),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "Бұл параметрлер Android жүйесінде қолданба орнатуға рұқсат бермейді. Оларды кез келген уақытта өзгерте аласыз.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash тексерілген, талаптарға сай тұрақты жаңартуларды әр жолы сұрамай орната алады. VPN ешқашан ажыратылмайды. Android орнатуды растауды сұрауы мүмкін.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "Автоматты орнатуға рұқсат бересіз бе?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
+      "Автоматты орнату",
+    ),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "VPN өшірулі кезде ғана талаптарға сай тұрақты жаңартуларды орнату. Маңызды өзгерістер сіздің шешіміңізді күтеді.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "Терезені жабу жүктеуді тоқтатпайды.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
+      "Жүктеуден бас тарту",
+    ),
     "updateChannel": MessageLookupByLibrary.simpleMessage("Жаңарту арнасы"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage(
       "Алдын ала шығарылым",
@@ -2681,35 +2713,198 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage(
       "Тұрақты релиз",
     ),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage(
+      "Автоматты тексеру",
+    ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "Жаңартуларды тексеру мүмкін болмады.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Байланысты тексеріп, қайталап көріңіз.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "ReClash жұмыс істеп тұрғанда мерзімді тексеру. Жаңарту терезе ашпай, басты бетте көрсетіледі.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "Таңдалған арнадан жаңа нұсқа ізделуде.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Терезені жабу"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android сіздің келісіміңізді сұрайды. Жүйелік растауды ашу үшін жалғастырыңыз.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Android жүйесінде растаңыз",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "Фонда жалғастыру",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage(
+      "Орнатуды жалғастыру",
+    ),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage(
+      "Соңғы нұсқа орнатылған",
+    ),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "Бұл платформада ReClash шығарылым бетін ашады. Жаңартуды өзіңіз жүктеп, орнатыңыз.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Бұл құрылғыға тексерілген жүктеу қолжетімсіз. Шығарылым бетінен пакетті таңдаңыз.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage(
+      "Ажыратып, орнату",
+    ),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage(
+      "Қолмен орнатуды сақтау",
+    ),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage(
+      "Жаңартуды жүктеу",
+    ),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("Қайта жүктеу"),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Бұл терезені жабуға болады. Орындалу барысы басты бетте қалады.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Жаңартуды жүктеу мүмкін болмады.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Жүктелген бөлігі сақталды. Байланысты тексеріп, жүктеуді жалғастырыңыз.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "Орнатылған нұсқа өзгеріссіз қалады.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("Түсінікті"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Пакет орнатқышын іске қосу мүмкін болмады.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android орнатуды аяқтамады. Дайын болғанда қайталап көріңіз.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("Қазір орнату"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash енді жаңа нұсқаны қолданады.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту орнатылды",
+    ),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android орнатуды аяқтауда. Осы кезде ReClash жабылуы мүмкін.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту орнатылуда",
+    ),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "Сізде соңғы нұсқа орнатылған.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("Қазір емес"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Не жаңалық"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Релиз ескертпелері қолжетімсіз.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "Жүктеу жаңартуды орнатпайды және VPN жұмысын үзбейді.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту қолжетімді",
+    ),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Android параметрлерін ашу",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage(
+      "Құрылғыға арналған жинақ",
+    ),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage("Жүктеу өлшемі"),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage(
+      "Пакетті тексеру",
+    ),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "Жүктелгеннен кейін, орнату алдында тексеріледі",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "Тұтастық, қолданба сәйкестігі және қолтаңба тексерілді",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Нұсқа"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("Кідірту"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "Жүктелген бөлігі сақталды. Дайын болғанда жалғастырыңыз.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
+      "Жүктеу кідіртілді",
+    ),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash қолданбасына осы көзден қолданбалар орнатуға рұқсат беріп, жалғастыру үшін қайта оралыңыз.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Android рұқсаты қажет",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "Тексеруді, жүктеуді және орнатуды бөлек реттеңіз.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту өз қалауыңызша",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "Параметрлер сақталмады. Қайта сақтап көріңіз; автоматты орнату қосылған жоқ.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту параметрлері",
+    ),
+    "updatePreload": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi арқылы алдын ала жүктеу",
+    ),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "Қолжетімді жаңартуларды Wi-Fi арқылы жүктеу. Wi-Fi өшсе, автоматты жүктеу кідіреді.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "Пакет барлық тексеруден өтті. Қазір орнатыңыз немесе кейінге қалдырыңыз.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage("Орнатуға дайын"),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
+      "Шығарылым туралы мәлімет",
+    ),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage(
+      "Жүктеуді жалғастыру",
+    ),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage("Қайта тексеру"),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
+      "Орнатуды қайталау",
+    ),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Толық релиз ескертпелерін көру",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage(
       "Барлық өзгерістерді көрсету",
     ),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("Жаңартулар"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "Тексеруден өтпеген пакет ешқашан орнатылмайды.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Жүктелген жаңартудың тұтастығын тексеру мүмкін болмады.",
     ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Файл, нұсқа немесе қолтаңба тексеруден өтпеді. Жаңа көшірмені жүктеп, қайталап көріңіз.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "Бұл пакетті орнату мүмкін емес",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "Орнату алдында файл, қолданба нұсқасы және қолтаңба сертификаты тексеріледі.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
+      "Жаңарту тексерілуде",
+    ),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "Орнату кезінде ReClash қысқа уақытқа жабылады. Байланысты үзуге дайын болсаңыз ғана ажыратыңыз.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "Орнату кезінде қолданба қысқа уақытқа жабылады. VPN растаусыз тоқтатылмайды.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPN әлі қосулы"),
     "upload": MessageLookupByLibrary.simpleMessage("Жүктеп салу"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Жүктеп салу жолағы",
@@ -2732,14 +2927,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Жабу баптауына сай терезені жасыру немесе ReClash қолданбасынан шығу. Android қалыпты жабу тәртібін қолданады.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML немесе JSON конфигурациясын қойыңыз",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Конфигурация құрамы",
     ),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Қолданбаның сыртқы пәрмені",
     ),
@@ -2779,7 +2974,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Конфигурацияны импорттау",
     ),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Сілтемеге Base64 түрінде енгізілген UTF-8 конфигурациясын импорттау. Атау міндетті емес.",
     ),
@@ -2885,7 +3080,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "Жазылым сілтемелері, ендірілген конфигурациялар және INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -2928,9 +3123,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Суреттің мөлдір еместігі",
     ),
@@ -3023,7 +3218,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Браузерді ашу мүмкін болмады.",
     ),
@@ -3061,8 +3256,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system жүйелік сағатты да орнатады; Android оны елемейді.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("Иә"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };

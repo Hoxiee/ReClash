@@ -110,106 +110,34 @@ class CommonAction extends _$CommonAction {
     }
   }
 
-  UpdateChannel _updateChannel() {
-    final setting = ref.read(appSettingProvider).updateChannel;
-    return effectiveUpdateChannel(
-      configured: setting,
-      isPreBuild: globalState.isPre,
-    );
-  }
-
   Future<void> checkForUpdates() async {
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final result = await globalState.loadingRun(
-      () async {
-        try {
-          return (
-            release: await request.checkForUpdate(channel: _updateChannel()),
-            error: null,
-          );
-        } catch (error) {
-          return (release: null, error: error);
-        }
-      },
-      title: currentAppLocalizations.checkUpdate,
-      tag: LoadingTag.checkUpdate,
-    );
-    if (result == null || !ref.mounted) return;
-    if (result.error != null) {
-      await _showUpdateCheckFailure();
-      return;
-    }
-    await checkUpdateResultHandle(data: result.release, isUser: true);
+    final context = globalState.navigatorKey.currentContext;
+    if (context == null) return;
+    final action = ref.read(appUpdateActionProvider.notifier);
+    final checking = action.check();
+    await UpdateSheet.show(context);
+    await checking;
   }
 
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
-    final AppUpdateRelease? release;
-    try {
-      release = await request.checkForUpdate(channel: _updateChannel());
-    } catch (error) {
-      commonPrint.log(
-        'checkForUpdate failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
-      return false;
-    }
-    await checkUpdateResultHandle(data: release);
-    return release != null;
-  }
-
-  Future<void> _showUpdateCheckFailure() async {
-    await dialogs.showMessage(
-      title: currentAppLocalizations.checkUpdate,
-      message: TextSpan(text: currentAppLocalizations.updateCheckFailed),
-      cancelable: false,
-    );
+    await ref.read(appUpdateActionProvider.notifier).check(automatic: true);
+    return ref.read(appUpdateActionProvider).hasUpdate;
   }
 
   Future<void> checkUpdateResultHandle({
     AppUpdateRelease? data,
     bool isUser = false,
   }) async {
+    final action = ref.read(appUpdateActionProvider.notifier);
     if (data == null) {
-      if (isUser) {
-        await dialogs.showMessage(
-          title: currentAppLocalizations.checkUpdate,
-          message: TextSpan(text: currentAppLocalizations.updateNoUpdates),
-          cancelable: false,
-        );
-      }
-      return;
+      if (!isUser) return;
+      action.noUpdates();
+    } else {
+      await action.offer(data, automatic: !isUser);
     }
+    if (!isUser) return;
     final context = globalState.navigatorKey.currentContext;
-    if (context == null) {
-      commonPrint.log(
-        'skip update offer: no navigator context',
-        logLevel: LogLevel.warning,
-      );
-      return;
-    }
-    final updater = ref.read(appUpdateActionProvider.notifier);
-    final result = await UpdateOfferDialog.show(
-      context,
-      release: data,
-      currentVersion: globalState.packageInfo.version,
-      primaryLabel: updater.isSupported
-          ? currentAppLocalizations.installUpdate
-          : currentAppLocalizations.goDownload,
-      skipLabel: isUser ? null : currentAppLocalizations.noLongerRemind,
-    );
-    if (result == true) {
-      if (updater.isSupported) {
-        unawaited(updater.install(data));
-      } else {
-        unawaited(
-          dialogs.openUrl(data.source.releasePage(data.tag).toString()),
-        );
-      }
-    } else if (!isUser && result == false) {
-      ref
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(autoCheckUpdate: false));
-    }
+    if (context != null) await UpdateSheet.show(context);
   }
 }

@@ -176,6 +176,59 @@ void main() {
     },
   );
 
+  test(
+    'GC preserves only the explicitly retained partial and metadata',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'reclash-update-partial-',
+      );
+      addTearDown(() async {
+        if (await directory.exists()) await directory.delete(recursive: true);
+      });
+      for (final name in [
+        'update-pending.apk',
+        'update-next.apk.tmp',
+        'update-next.apk.tmp.json',
+        'update-stale.apk.tmp',
+        'update-stale.apk.tmp.json',
+        'update-stale.apk.tmp.json.123.tmp',
+        'pending-install.json',
+        'database.sqlite',
+      ]) {
+        await File(join(directory.path, name)).writeAsString('data');
+      }
+      await removeStaleUpdateApks(
+        directory,
+        keep: {'update-pending.apk'},
+        keepPartial: {'update-next.apk'},
+      );
+      for (final name in [
+        'update-pending.apk',
+        'update-next.apk.tmp',
+        'update-next.apk.tmp.json',
+        'pending-install.json',
+        'database.sqlite',
+      ]) {
+        expect(
+          await File(join(directory.path, name)).exists(),
+          isTrue,
+          reason: name,
+        );
+      }
+      for (final name in [
+        'update-stale.apk.tmp',
+        'update-stale.apk.tmp.json',
+        'update-stale.apk.tmp.json.123.tmp',
+      ]) {
+        expect(
+          await File(join(directory.path, name)).exists(),
+          isFalse,
+          reason: name,
+        );
+      }
+    },
+  );
+
   test('sanitizes release tags for update cache filenames', () {
     expect(updateApkFileName('v1.2.3'), 'update-v1.2.3.apk');
     expect(updateApkFileName('../v1 beta'), 'update-.._v1_beta.apk');

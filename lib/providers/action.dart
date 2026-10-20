@@ -4,8 +4,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:reclash/common/app_data.dart';
+import 'package:reclash/common/app_update_state.dart';
+import 'package:reclash/common/app_update_runtime.dart';
 import 'package:reclash/common/boot_guard.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/update.dart';
@@ -36,13 +37,12 @@ import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/ui.dart';
-import 'package:reclash/widgets/update_offer_dialog.dart';
+import 'package:reclash/widgets/update_sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show basename, join;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'actions/common.dart';

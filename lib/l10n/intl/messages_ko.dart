@@ -244,27 +244,35 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m99(version) => "설치된 버전: ${version}";
 
-  static String m100(nodes, groups, providers) =>
+  static String m100(count) => "${count}분";
+
+  static String m101(time) => "${time} 남음";
+
+  static String m102(count) => "${count}초";
+
+  static String m103(speed) => "${speed}/초";
+
+  static String m104(nodes, groups, providers) =>
       "프록시 ${nodes}개, 그룹 ${groups}개, 원격 공급자 ${providers}개";
 
-  static String m101(action) =>
+  static String m105(action) =>
       "이 링크가 “${action}” 동작을 요청합니다. ReClash에서 실행하도록 허용할까요?";
 
-  static String m102(name, source) =>
+  static String m106(name, source) =>
       "${source}에서 “${name}”을 가져올까요? 확인 후 프로필 검증과 변환 검토가 진행됩니다.";
 
-  static String m103(label) => "${label}은(는) URL이어야 합니다";
+  static String m107(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m104(index) => "배경 ${index}";
+  static String m108(index) => "배경 ${index}";
 
-  static String m105(count) =>
+  static String m109(count) =>
       "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
 
-  static String m106(version) => "설치된 버전: ${version}";
+  static String m110(version) => "설치된 버전: ${version}";
 
-  static String m107(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m111(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
-  static String m108(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m112(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2166,36 +2174,181 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("이름 없음"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("창 고정 해제"),
     "update": MessageLookupByLibrary.simpleMessage("업데이트"),
+    "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("자동 설치 허용"),
+    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
+      "이 설정은 Android의 앱 설치 권한을 부여하지 않습니다. 언제든 변경할 수 있습니다.",
+    ),
+    "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 검증되고 조건에 맞는 안정 버전을 매번 묻지 않고 설치할 수 있습니다. VPN을 끊지는 않습니다. Android에서 설치 확인을 요청할 수 있습니다.",
+    ),
+    "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "자동 설치를 허용할까요?",
+    ),
+    "updateAutoInstall": MessageLookupByLibrary.simpleMessage("자동으로 설치"),
+    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
+      "VPN이 꺼져 있을 때만 조건에 맞는 안정 버전을 설치합니다. 중요한 변경 사항은 항상 결정을 기다립니다.",
+    ),
+    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
+      "이 창을 닫아도 다운로드가 중지되지 않습니다.",
+    ),
+    "updateCancelDownload": MessageLookupByLibrary.simpleMessage("다운로드 취소"),
     "updateChannel": MessageLookupByLibrary.simpleMessage("업데이트 채널"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("사전 릴리스"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("정식 릴리스"),
+    "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("자동으로 확인"),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
       "업데이트를 확인할 수 없습니다.",
+    ),
+    "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "연결을 확인한 후 다시 시도하세요.",
+    ),
+    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
+      "ReClash 실행 중 주기적으로 확인합니다. 창을 열지 않고 대시보드에 업데이트를 표시합니다.",
+    ),
+    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
+      "선택한 채널에서 새 버전을 찾고 있습니다.",
+    ),
+    "updateCloseWindow": MessageLookupByLibrary.simpleMessage("창 닫기"),
+    "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
+      "Android의 승인이 필요합니다. 계속하면 시스템 확인 화면이 열립니다.",
+    ),
+    "updateConfirmationTitle": MessageLookupByLibrary.simpleMessage(
+      "Android에서 확인하세요",
+    ),
+    "updateContinueBackground": MessageLookupByLibrary.simpleMessage(
+      "백그라운드에서 계속",
+    ),
+    "updateContinueInstall": MessageLookupByLibrary.simpleMessage("설치 계속"),
+    "updateCurrentTitle": MessageLookupByLibrary.simpleMessage("최신 버전입니다"),
+    "updateDesktopDescription": MessageLookupByLibrary.simpleMessage(
+      "이 플랫폼에서는 ReClash가 릴리스 페이지를 엽니다. 업데이트를 직접 다운로드하고 설치하세요.",
+    ),
+    "updateDirectUnavailable": MessageLookupByLibrary.simpleMessage(
+      "이 기기용 검증 가능한 다운로드가 없습니다. 릴리스 페이지에서 패키지를 선택하세요.",
+    ),
+    "updateDisconnectInstall": MessageLookupByLibrary.simpleMessage("연결 끊고 설치"),
+    "updateDoNotEnable": MessageLookupByLibrary.simpleMessage("수동 설치 유지"),
+    "updateDownloadAction": MessageLookupByLibrary.simpleMessage("업데이트 다운로드"),
+    "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("다시 다운로드"),
+    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
+      "이 창을 닫아도 됩니다. 진행 상황은 대시보드에 남습니다.",
     ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "업데이트를 다운로드할 수 없습니다.",
     ),
+    "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "다운로드한 부분은 저장되었습니다. 연결을 확인하고 재개하세요.",
+    ),
+    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
+      "설치된 버전은 변경되지 않습니다.",
+    ),
+    "updateGotIt": MessageLookupByLibrary.simpleMessage("확인"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
       "패키지 설치 프로그램을 시작할 수 없습니다.",
     ),
+    "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "Android가 설치를 완료하지 못했습니다. 준비되면 다시 시도하세요.",
+    ),
+    "updateInstallNow": MessageLookupByLibrary.simpleMessage("지금 설치"),
+    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 새 버전을 사용하고 있습니다.",
+    ),
+    "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 완료"),
     "updateInstalledVersion": m99,
+    "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
+      "Android가 설치를 마무리하고 있습니다. 이 과정에서 ReClash가 닫힐 수 있습니다.",
+    ),
+    "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 중"),
+    "updateMinutes": m100,
     "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
       "이미 최신 버전을 사용 중입니다.",
     ),
+    "updateNotNow": MessageLookupByLibrary.simpleMessage("나중에"),
     "updateNotesHeading": MessageLookupByLibrary.simpleMessage("새로운 기능"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "릴리스 노트가 없습니다.",
     ),
+    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
+      "다운로드는 업데이트를 설치하거나 VPN을 중단하지 않습니다.",
+    ),
+    "updateOfferTitle": MessageLookupByLibrary.simpleMessage("업데이트가 있습니다"),
+    "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
+      "Android 설정 열기",
+    ),
+    "updatePackageDevice": MessageLookupByLibrary.simpleMessage("기기용 빌드"),
+    "updatePackageSize": MessageLookupByLibrary.simpleMessage("다운로드 크기"),
+    "updatePackageVerification": MessageLookupByLibrary.simpleMessage("패키지 검증"),
+    "updatePackageVerificationPending": MessageLookupByLibrary.simpleMessage(
+      "다운로드 후 설치 전에 검증합니다",
+    ),
+    "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
+      "무결성, 앱 식별 정보 및 서명 검증 완료",
+    ),
+    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("버전"),
+    "updatePauseAction": MessageLookupByLibrary.simpleMessage("일시 중지"),
+    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
+      "다운로드한 부분은 저장되었습니다. 준비되면 재개하세요.",
+    ),
+    "updatePausedTitle": MessageLookupByLibrary.simpleMessage("다운로드 일시 중지됨"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash가 이 출처의 앱을 설치하도록 허용한 다음 돌아와 계속하세요.",
     ),
+    "updatePermissionTitle": MessageLookupByLibrary.simpleMessage(
+      "Android 권한이 필요합니다",
+    ),
+    "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
+      "확인, 다운로드, 설치를 각각 설정하세요.",
+    ),
+    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
+      "원하는 방식으로 업데이트",
+    ),
+    "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "설정을 저장하지 못했습니다. 다시 저장해 주세요. 자동 설치는 활성화되지 않았습니다.",
+    ),
+    "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("업데이트 설정"),
+    "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fi로 미리 다운로드"),
+    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
+      "사용 가능한 업데이트를 Wi-Fi로 다운로드합니다. Wi-Fi를 벗어나면 자동 다운로드가 일시 중지됩니다.",
+    ),
+    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
+      "패키지가 모든 검증을 통과했습니다. 지금 설치하거나 나중에 설치하세요.",
+    ),
+    "updateReadyTitle": MessageLookupByLibrary.simpleMessage("설치 준비 완료"),
+    "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("릴리스 상세 정보"),
+    "updateRemainingTime": m101,
+    "updateResumeAction": MessageLookupByLibrary.simpleMessage("다운로드 재개"),
+    "updateRetryCheck": MessageLookupByLibrary.simpleMessage("다시 확인"),
+    "updateRetryInstall": MessageLookupByLibrary.simpleMessage("설치 재시도"),
+    "updateSeconds": m102,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "전체 릴리스 노트 보기",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("모든 변경 사항 보기"),
+    "updateTitle": MessageLookupByLibrary.simpleMessage("업데이트"),
+    "updateTransferSpeed": m103,
+    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
+      "검증에 실패한 패키지는 절대 설치하지 않습니다.",
+    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "다운로드한 업데이트의 무결성을 확인할 수 없습니다.",
     ),
+    "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
+      "파일, 버전 또는 서명이 검증을 통과하지 못했습니다. 새로 다운로드하여 다시 시도하세요.",
+    ),
+    "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
+      "이 패키지는 설치할 수 없습니다",
+    ),
+    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
+      "설치 전에 파일, 앱 버전 및 서명 인증서를 확인합니다.",
+    ),
+    "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("업데이트 검증 중"),
+    "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
+      "설치 중 ReClash가 잠시 닫힙니다. 연결을 중단해도 될 때만 끊으세요.",
+    ),
+    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
+      "설치 중 앱이 잠시 닫힙니다. 확인 없이 VPN을 끊지 않습니다.",
+    ),
+    "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPN이 아직 켜져 있습니다"),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
@@ -2216,12 +2369,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "닫기 설정에 따라 창을 숨기거나 ReClash를 종료합니다. Android에서는 일반 앱 닫기 동작을 따릅니다.",
     ),
-    "urlSchemeConfigCounts": m100,
+    "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML 또는 JSON 설정을 붙여넣으세요",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("설정 내용"),
-    "urlSchemeConfirmMessage": m101,
+    "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("외부 앱 명령"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
       "외부 연결 및 종료 명령은 확인이 필요합니다. 연결 명령을 사용하기 전에 초기 설정을 완료하세요.",
@@ -2249,7 +2402,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("내장 설정"),
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("예시 프로필"),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
-    "urlSchemeImportConfirm": m102,
+    "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "링크에 Base64로 포함된 UTF-8 설정을 가져옵니다. 이름은 선택 사항입니다.",
     ),
@@ -2339,7 +2492,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
       "구독 링크, 내장 설정 및 INCY crypt1",
     ),
-    "urlTip": m103,
+    "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -2376,9 +2529,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
-    "wallpaperImageLabel": m104,
+    "wallpaperImageLabel": m108,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m105,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
@@ -2453,7 +2606,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
     ),
-    "webDashboardInstalledVersion": m106,
+    "webDashboardInstalledVersion": m110,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "브라우저를 열지 못했습니다.",
     ),
@@ -2485,8 +2638,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m107,
-    "yearsAgoShort": m108,
+    "yearsAgo": m111,
+    "yearsAgoShort": m112,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

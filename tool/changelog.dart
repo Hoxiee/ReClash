@@ -6,6 +6,7 @@ import 'src/changelog/builder.dart';
 import 'src/changelog/git.dart';
 import 'src/changelog/models.dart';
 import 'src/changelog/render.dart';
+import 'src/changelog/summary.dart';
 
 const _repository = 'Hoxiee/ReClash';
 
@@ -122,7 +123,10 @@ int _render(String root, ArgResults command) {
         );
 
   final output = switch (rest.first) {
-    'release' => renderRelease(version),
+    'release' => renderRelease(
+      version,
+      summary: readReleaseSummary(root, version.tag),
+    ),
     // Only stable builds pass --tag, and only they get a release page; a
     // prerelease caption already links its workflow run.
     'telegram' => renderTelegram(
@@ -146,7 +150,7 @@ int _render(String root, ArgResults command) {
 int _verify(String root) {
   final dataFile = resolve(root, changelogDataPath);
   final markdownFile = resolve(root, changelogMarkdownPath);
-  final problems = <String>[];
+  final problems = <String>[...verifyReleaseSummaries(root)];
 
   if (!dataFile.existsSync()) {
     _fail('$changelogDataPath is missing; run tool/changelog.dart release');

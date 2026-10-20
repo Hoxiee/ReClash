@@ -9226,6 +9226,720 @@ class AppLocalizations {
     );
   }
 
+  /// `Updates`
+  String get updateTitle {
+    return Intl.message('Updates', name: 'updateTitle', desc: '', args: []);
+  }
+
+  /// `An update is available`
+  String get updateOfferTitle {
+    return Intl.message(
+      'An update is available',
+      name: 'updateOfferTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Release details`
+  String get updateReleaseDetails {
+    return Intl.message(
+      'Release details',
+      name: 'updateReleaseDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Version`
+  String get updatePackageVersion {
+    return Intl.message(
+      'Version',
+      name: 'updatePackageVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device build`
+  String get updatePackageDevice {
+    return Intl.message(
+      'Device build',
+      name: 'updatePackageDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download size`
+  String get updatePackageSize {
+    return Intl.message(
+      'Download size',
+      name: 'updatePackageSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Package checks`
+  String get updatePackageVerification {
+    return Intl.message(
+      'Package checks',
+      name: 'updatePackageVerification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Integrity, app identity and signature verified`
+  String get updatePackageVerified {
+    return Intl.message(
+      'Integrity, app identity and signature verified',
+      name: 'updatePackageVerified',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checked after download, before installation`
+  String get updatePackageVerificationPending {
+    return Intl.message(
+      'Checked after download, before installation',
+      name: 'updatePackageVerificationPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update preferences`
+  String get updatePreferencesTitle {
+    return Intl.message(
+      'Update preferences',
+      name: 'updatePreferencesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Updates, your way`
+  String get updatePreferencesIntro {
+    return Intl.message(
+      'Updates, your way',
+      name: 'updatePreferencesIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose checking, downloading and installation separately.`
+  String get updatePreferencesDescription {
+    return Intl.message(
+      'Choose checking, downloading and installation separately.',
+      name: 'updatePreferencesDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check automatically`
+  String get updateCheckAutomatically {
+    return Intl.message(
+      'Check automatically',
+      name: 'updateCheckAutomatically',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check periodically while ReClash is running. An update appears on the dashboard, without opening a window.`
+  String get updateCheckQuietly {
+    return Intl.message(
+      'Check periodically while ReClash is running. An update appears on the dashboard, without opening a window.',
+      name: 'updateCheckQuietly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preload on Wi-Fi`
+  String get updatePreload {
+    return Intl.message(
+      'Preload on Wi-Fi',
+      name: 'updatePreload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download available updates over Wi-Fi. Leaving Wi-Fi pauses automatic downloads.`
+  String get updatePreloadDescription {
+    return Intl.message(
+      'Download available updates over Wi-Fi. Leaving Wi-Fi pauses automatic downloads.',
+      name: 'updatePreloadDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install automatically`
+  String get updateAutoInstall {
+    return Intl.message(
+      'Install automatically',
+      name: 'updateAutoInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install eligible stable updates only when the VPN is off. Important changes always wait for you.`
+  String get updateAutoInstallDescription {
+    return Intl.message(
+      'Install eligible stable updates only when the VPN is off. Important changes always wait for you.',
+      name: 'updateAutoInstallDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow automatic installation?`
+  String get updateAutoConsentTitle {
+    return Intl.message(
+      'Allow automatic installation?',
+      name: 'updateAutoConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash may install verified, eligible stable updates without asking each time. It will never disconnect your VPN. Android may still ask you to confirm an installation.`
+  String get updateAutoConsentDescription {
+    return Intl.message(
+      'ReClash may install verified, eligible stable updates without asking each time. It will never disconnect your VPN. Android may still ask you to confirm an installation.',
+      name: 'updateAutoConsentDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow automatic installation`
+  String get updateAllowAutomatic {
+    return Intl.message(
+      'Allow automatic installation',
+      name: 'updateAllowAutomatic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep manual installation`
+  String get updateDoNotEnable {
+    return Intl.message(
+      'Keep manual installation',
+      name: 'updateDoNotEnable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These preferences do not grant Android permission to install apps. You can change them at any time.`
+  String get updateAndroidAutoNote {
+    return Intl.message(
+      'These preferences do not grant Android permission to install apps. You can change them at any time.',
+      name: 'updateAndroidAutoNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this platform, ReClash opens the release page. Download and install the update yourself.`
+  String get updateDesktopDescription {
+    return Intl.message(
+      'On this platform, ReClash opens the release page. Download and install the update yourself.',
+      name: 'updateDesktopDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preferences weren't saved. Try saving again; automatic installation has not been enabled.`
+  String get updatePreferencesSaveFailed {
+    return Intl.message(
+      'Preferences weren\'t saved. Try saving again; automatic installation has not been enabled.',
+      name: 'updatePreferencesSaveFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can close this window. Progress remains on the dashboard.`
+  String get updateDownloadDescription {
+    return Intl.message(
+      'You can close this window. Progress remains on the dashboard.',
+      name: 'updateDownloadDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download paused`
+  String get updatePausedTitle {
+    return Intl.message(
+      'Download paused',
+      name: 'updatePausedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The downloaded part is saved. Resume when you're ready.`
+  String get updatePausedDescription {
+    return Intl.message(
+      'The downloaded part is saved. Resume when you\'re ready.',
+      name: 'updatePausedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the update`
+  String get updateVerifyingTitle {
+    return Intl.message(
+      'Checking the update',
+      name: 'updateVerifyingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the file, app version and signing certificate before installation.`
+  String get updateVerifyingDescription {
+    return Intl.message(
+      'Checking the file, app version and signing certificate before installation.',
+      name: 'updateVerifyingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ready to install`
+  String get updateReadyTitle {
+    return Intl.message(
+      'Ready to install',
+      name: 'updateReadyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The package has passed all checks. Install now or keep it for later.`
+  String get updateReadyDescription {
+    return Intl.message(
+      'The package has passed all checks. Install now or keep it for later.',
+      name: 'updateReadyDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your VPN is still on`
+  String get updateVpnTitle {
+    return Intl.message(
+      'Your VPN is still on',
+      name: 'updateVpnTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installation will briefly close ReClash. Disconnect only if you're ready to interrupt the connection.`
+  String get updateVpnDescription {
+    return Intl.message(
+      'Installation will briefly close ReClash. Disconnect only if you\'re ready to interrupt the connection.',
+      name: 'updateVpnDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android permission needed`
+  String get updatePermissionTitle {
+    return Intl.message(
+      'Android permission needed',
+      name: 'updatePermissionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm with Android`
+  String get updateConfirmationTitle {
+    return Intl.message(
+      'Confirm with Android',
+      name: 'updateConfirmationTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android requires your approval. Continue to open the system confirmation.`
+  String get updateConfirmationDescription {
+    return Intl.message(
+      'Android requires your approval. Continue to open the system confirmation.',
+      name: 'updateConfirmationDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installing the update`
+  String get updateInstallingTitle {
+    return Intl.message(
+      'Installing the update',
+      name: 'updateInstallingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android is completing the installation. ReClash may close during this step.`
+  String get updateInstallingDescription {
+    return Intl.message(
+      'Android is completing the installation. ReClash may close during this step.',
+      name: 'updateInstallingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update installed`
+  String get updateInstalledTitle {
+    return Intl.message(
+      'Update installed',
+      name: 'updateInstalledTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash is now using the new version.`
+  String get updateInstalledDescription {
+    return Intl.message(
+      'ReClash is now using the new version.',
+      name: 'updateInstalledDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You're up to date`
+  String get updateCurrentTitle {
+    return Intl.message(
+      'You\'re up to date',
+      name: 'updateCurrentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check your connection and try again.`
+  String get updateCheckFailedDescription {
+    return Intl.message(
+      'Check your connection and try again.',
+      name: 'updateCheckFailedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The downloaded part is saved. Check your connection, then resume.`
+  String get updateDownloadFailedDescription {
+    return Intl.message(
+      'The downloaded part is saved. Check your connection, then resume.',
+      name: 'updateDownloadFailedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This package can't be installed`
+  String get updateVerifyFailedTitle {
+    return Intl.message(
+      'This package can\'t be installed',
+      name: 'updateVerifyFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The file, version or signature did not pass verification. Download a fresh copy to try again.`
+  String get updateVerifyFailedDescription {
+    return Intl.message(
+      'The file, version or signature did not pass verification. Download a fresh copy to try again.',
+      name: 'updateVerifyFailedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android did not complete the installation. Try again when you're ready.`
+  String get updateInstallFailedDescription {
+    return Intl.message(
+      'Android did not complete the installation. Try again when you\'re ready.',
+      name: 'updateInstallFailedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for a newer version on your selected channel.`
+  String get updateCheckingDescription {
+    return Intl.message(
+      'Looking for a newer version on your selected channel.',
+      name: 'updateCheckingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download update`
+  String get updateDownloadAction {
+    return Intl.message(
+      'Download update',
+      name: 'updateDownloadAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not now`
+  String get updateNotNow {
+    return Intl.message('Not now', name: 'updateNotNow', desc: '', args: []);
+  }
+
+  /// `Continue in background`
+  String get updateContinueBackground {
+    return Intl.message(
+      'Continue in background',
+      name: 'updateContinueBackground',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause`
+  String get updatePauseAction {
+    return Intl.message('Pause', name: 'updatePauseAction', desc: '', args: []);
+  }
+
+  /// `Resume download`
+  String get updateResumeAction {
+    return Intl.message(
+      'Resume download',
+      name: 'updateResumeAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel download`
+  String get updateCancelDownload {
+    return Intl.message(
+      'Cancel download',
+      name: 'updateCancelDownload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install now`
+  String get updateInstallNow {
+    return Intl.message(
+      'Install now',
+      name: 'updateInstallNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disconnect and install`
+  String get updateDisconnectInstall {
+    return Intl.message(
+      'Disconnect and install',
+      name: 'updateDisconnectInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Android settings`
+  String get updateOpenAndroidSettings {
+    return Intl.message(
+      'Open Android settings',
+      name: 'updateOpenAndroidSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue installation`
+  String get updateContinueInstall {
+    return Intl.message(
+      'Continue installation',
+      name: 'updateContinueInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close window`
+  String get updateCloseWindow {
+    return Intl.message(
+      'Close window',
+      name: 'updateCloseWindow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download again`
+  String get updateDownloadAgain {
+    return Intl.message(
+      'Download again',
+      name: 'updateDownloadAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try installation again`
+  String get updateRetryInstall {
+    return Intl.message(
+      'Try installation again',
+      name: 'updateRetryInstall',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again`
+  String get updateRetryCheck {
+    return Intl.message(
+      'Check again',
+      name: 'updateRetryCheck',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Got it`
+  String get updateGotIt {
+    return Intl.message('Got it', name: 'updateGotIt', desc: '', args: []);
+  }
+
+  /// `Downloading does not install the update or interrupt your VPN.`
+  String get updateOfferDownloadNote {
+    return Intl.message(
+      'Downloading does not install the update or interrupt your VPN.',
+      name: 'updateOfferDownloadNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Closing this window does not stop the download.`
+  String get updateBackgroundNote {
+    return Intl.message(
+      'Closing this window does not stop the download.',
+      name: 'updateBackgroundNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installation will briefly close the app. Your VPN will not be stopped without your confirmation.`
+  String get updateVpnInstallNote {
+    return Intl.message(
+      'Installation will briefly close the app. Your VPN will not be stopped without your confirmation.',
+      name: 'updateVpnInstallNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A package that fails verification will never be installed.`
+  String get updateVerificationGuard {
+    return Intl.message(
+      'A package that fails verification will never be installed.',
+      name: 'updateVerificationGuard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your installed version remains unchanged.`
+  String get updateExistingVersionSafe {
+    return Intl.message(
+      'Your installed version remains unchanged.',
+      name: 'updateExistingVersionSafe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A verified download for this device is unavailable. Open the release page to choose a package.`
+  String get updateDirectUnavailable {
+    return Intl.message(
+      'A verified download for this device is unavailable. Open the release page to choose a package.',
+      name: 'updateDirectUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{speed}/s`
+  String updateTransferSpeed(String speed) {
+    return Intl.message(
+      '$speed/s',
+      name: 'updateTransferSpeed',
+      desc: '',
+      args: [speed],
+    );
+  }
+
+  /// `{time} remaining`
+  String updateRemainingTime(String time) {
+    return Intl.message(
+      '$time remaining',
+      name: 'updateRemainingTime',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `{count, plural, one{1 sec} other{{count} sec}}`
+  String updateSeconds(int count) {
+    return Intl.plural(
+      count,
+      one: '1 sec',
+      other: '$count sec',
+      name: 'updateSeconds',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{1 min} other{{count} min}}`
+  String updateMinutes(int count) {
+    return Intl.plural(
+      count,
+      one: '1 min',
+      other: '$count min',
+      name: 'updateMinutes',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `URL scheme`
   String get urlScheme {
     return Intl.message('URL scheme', name: 'urlScheme', desc: '', args: []);

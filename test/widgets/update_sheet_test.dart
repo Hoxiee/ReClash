@@ -1,0 +1,346 @@
+import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:reclash/common/app_localizations.dart';
+import 'package:reclash/common/app_update.dart';
+import 'package:reclash/common/app_update_state.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/ui/ui.dart';
+import 'package:reclash/widgets/update_card.dart';
+import 'package:reclash/widgets/update_content.dart';
+import 'package:reclash/widgets/update_sheet.dart';
+
+import '../helpers/test_app.dart';
+import '../helpers/test_update_runtime.dart';
+
+class _DisplayUpdateAction extends AppUpdateAction {
+  _DisplayUpdateAction(this.initial);
+  final AppUpdateState initial;
+  @override
+  AppUpdateState build() => initial;
+}
+
+void main() {
+  late Directory directory;
+  late TestUpdateRuntime runtime;
+  late ProviderContainer container;
+  late String previousEnv;
+
+  setUp(() async {
+    previousEnv = globalState.appEnv;
+    globalState.appEnv = 'stable';
+    globalState.packageInfo = PackageInfo(
+      appName: 'ReClash',
+      packageName: 'com.reclash',
+      version: '0.8.95',
+      buildNumber: '1',
+    );
+    directory = await Directory.systemTemp.createTemp('reclash-update-sheet-');
+    runtime = TestUpdateRuntime(directory);
+    container = ProviderContainer(
+      overrides: [appUpdateRuntimeProvider.overrideWithValue(runtime)],
+    );
+    globalState.container = container;
+    container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
+  });
+
+  tearDown(() async {
+    container.dispose();
+    await runtime.dispose();
+    await directory.delete(recursive: true);
+    globalState.appEnv = previousEnv;
+  });
+
+  Future<void> pump(
+    WidgetTester tester,
+    Widget child, {
+    Size size = const Size(390, 844),
+    ThemeMode mode = ThemeMode.light,
+    Locale locale = const Locale('en'),
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    container.read(viewSizeProvider.notifier).update((_) => size);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          locale: locale,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF5068A0),
+            ),
+          ).withAppShapes,
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF5068A0),
+              brightness: Brightness.dark,
+            ),
+          ).withAppShapes,
+          themeMode: mode,
+          child: ViewScope(
+            size: size,
+            isMobile: size.width <= 600,
+            child: Scaffold(body: child),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  Future<void> close(WidgetTester tester) async {
+    await tester.tap(find.byTooltip(currentAppLocalizations.close));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('authored overview leads with complete visible warnings', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      SingleChildScrollView(
+        child: UpdateReleaseContent(
+          release: testUpdateRelease(warning: true, breaking: true),
+          currentVersion: '0.8.95',
+          platform: SupportPlatform.Android,
+        ),
+      ),
+    );
+    expect(find.text('Updates without interruption'), findsOneWidget);
+    expect(find.text('Your background'), findsOneWidget);
+    expect(find.text('Make an explicit choice.'), findsOneWidget);
+    expect(find.text('Review this change.'), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.updatePackageVersion),
+      findsNothing,
+    );
+    final disclosure = find.byKey(const ValueKey('update-release-details'));
+    await tester.ensureVisible(disclosure);
+    await tester.tap(disclosure);
+    await tester.pump();
+    expect(
+      find.text(currentAppLocalizations.updatePackageVersion),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('automatic checking shows a card but no modal', (tester) async {
+    await pump(tester, const UpdateCard());
+    final release = testUpdateRelease();
+    await container
+        .read(commonActionProvider.notifier)
+        .checkUpdateResultHandle(data: release);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('app-update-card')), findsOneWidget);
+    expect(find.byType(UpdateSheet), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('app-update-card')));
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsOneWidget);
+    await close(tester);
+    expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
+  });
+
+  testWidgets('closing the sheet leaves its provider-owned transfer visible', (
+    tester,
+  ) async {
+    final release = testUpdateRelease();
+    final asset = selectAndroidUpdateAsset(
+      release.assets,
+      supportedAbis: const ['arm64-v8a'],
+    );
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        appUpdateRuntimeProvider.overrideWithValue(runtime),
+        appUpdateActionProvider.overrideWith(
+          () => _DisplayUpdateAction(
+            AppUpdateState(
+              phase: UpdatePhase.downloading,
+              release: release,
+              asset: asset,
+              received: 8,
+              total: updateTestBytes.length,
+            ),
+          ),
+        ),
+      ],
+    );
+    globalState.container = container;
+    container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
+    await pump(tester, const UpdateCard());
+    final shown = UpdateSheet.show(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(currentAppLocalizations.updateContinueBackground),
+      findsOneWidget,
+    );
+    await close(tester);
+    await shown;
+    await tester.pump();
+    expect(
+      container.read(appUpdateActionProvider).phase,
+      UpdatePhase.downloading,
+    );
+    expect(find.byKey(const ValueKey('app-update-card')), findsOneWidget);
+  });
+
+  testWidgets(
+    'automatic installation needs inline consent and a successful save',
+    (tester) async {
+      runtime.saved = false;
+      await pump(tester, const SizedBox.shrink());
+      final shown = UpdateSheet.show(
+        tester.element(find.byType(Scaffold)),
+        preferences: true,
+      );
+      await tester.pumpAndSettle();
+      final toggle = find.byType(Switch).at(2);
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('update-auto-consent')), findsOneWidget);
+      final save = find.byKey(const ValueKey('update-preferences-save'));
+      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      expect(container.read(appSettingProvider).autoInstallUpdate, isFalse);
+      final allow = find.byKey(const ValueKey('update-auto-allow'));
+      await tester.ensureVisible(allow);
+      await tester.tap(allow);
+      await tester.pump();
+      await tester.tap(save);
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+      });
+      await tester.pump();
+      expect(
+        find.text(currentAppLocalizations.updatePreferencesSaveFailed),
+        findsOneWidget,
+      );
+      expect(container.read(appSettingProvider).autoInstallUpdate, isFalse);
+      runtime.saved = true;
+      await tester.tap(save);
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 40));
+      });
+      await tester.pumpAndSettle();
+      await shown;
+      expect(container.read(appSettingProvider).autoInstallUpdate, isTrue);
+    },
+  );
+
+  testWidgets('closing preferences discards an unsaved installation consent', (
+    tester,
+  ) async {
+    await pump(tester, const SizedBox.shrink());
+    final shown = UpdateSheet.show(
+      tester.element(find.byType(Scaffold)),
+      preferences: true,
+    );
+    await tester.pumpAndSettle();
+    final toggle = find.byType(Switch).at(2);
+    await tester.ensureVisible(toggle);
+    await tester.tap(toggle);
+    await tester.pump();
+    final allow = find.byKey(const ValueKey('update-auto-allow'));
+    await tester.ensureVisible(allow);
+    await tester.tap(allow);
+    await tester.pump();
+    await close(tester);
+    await shown;
+    expect(container.read(appSettingProvider).autoInstallUpdate, isFalse);
+    expect(runtime.savedConfig, isNull);
+  });
+
+  testWidgets('desktop preferences do not advertise a package installer', (
+    tester,
+  ) async {
+    runtime.enabled = false;
+    await pump(tester, const SizedBox.shrink(), size: const Size(1200, 800));
+    final shown = UpdateSheet.show(
+      tester.element(find.byType(Scaffold)),
+      preferences: true,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(currentAppLocalizations.updateDesktopDescription),
+      findsOneWidget,
+    );
+    expect(find.text(currentAppLocalizations.updateAutoInstall), findsNothing);
+    expect(find.byType(Switch), findsOneWidget);
+    await close(tester);
+    await shown;
+  });
+
+  for (final phase in [
+    UpdatePhase.downloading,
+    UpdatePhase.paused,
+    UpdatePhase.verifying,
+    UpdatePhase.ready,
+    UpdatePhase.vpnActive,
+    UpdatePhase.permission,
+    UpdatePhase.confirmation,
+    UpdatePhase.installing,
+    UpdatePhase.installed,
+    UpdatePhase.upToDate,
+    UpdatePhase.checkFailed,
+    UpdatePhase.downloadFailed,
+    UpdatePhase.verifyFailed,
+    UpdatePhase.installFailed,
+  ]) {
+    testWidgets('$phase renders without layout exceptions at large text', (
+      tester,
+    ) async {
+      container.dispose();
+      final release = testUpdateRelease();
+      final state = AppUpdateState(
+        phase: phase,
+        release: release,
+        received: 12,
+        total: 40,
+        bytesPerSecond: 3,
+        verified: const {
+          UpdatePhase.ready,
+          UpdatePhase.vpnActive,
+          UpdatePhase.permission,
+          UpdatePhase.confirmation,
+          UpdatePhase.installing,
+        }.contains(phase),
+      );
+      container = ProviderContainer(
+        overrides: [
+          appUpdateRuntimeProvider.overrideWithValue(runtime),
+          isMobileViewProvider.overrideWithValue(true),
+          appUpdateActionProvider.overrideWith(
+            () => _DisplayUpdateAction(state),
+          ),
+        ],
+      );
+      globalState.container = container;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pump(
+        tester,
+        const SizedBox.shrink(),
+        size: const Size(390, 640),
+        mode: ThemeMode.dark,
+        locale: const Locale('ru'),
+      );
+      final shown = UpdateSheet.show(tester.element(find.byType(Scaffold)));
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.byKey(const ValueKey('update-offer-accept')), findsOneWidget);
+      expect(find.byTooltip(currentAppLocalizations.close), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      Navigator.of(tester.element(find.byType(Scaffold))).pop();
+      await tester.pump(const Duration(milliseconds: 700));
+      await shown;
+    });
+  }
+}
