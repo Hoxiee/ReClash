@@ -9,6 +9,9 @@ import 'package:reclash/core/desktop/windows_launcher.dart';
 import 'package:reclash/core/desktop/macos_helper.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/profile.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/l10n.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -125,12 +128,17 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
   return (error is UrlSchemeException
           ? urlSchemeErrorMessage(error.issue, appLocalizations)
           : null) ??
+      (error is SubscriptionException
+          ? subscriptionFailureMessage(error, appLocalizations)
+          : null) ??
       networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
       desktopPrivilegeErrorMessage(error, appLocalizations) ??
       switch (error) {
         AgeSecretKeyRequiredException() =>
           appLocalizations.ageSecretKeyRequiredTip,
+        SubscriptionUpdateRejected(:final reason) =>
+          subscriptionRetryReasonMessage(reason, appLocalizations),
         CoreMethodException(code: 'rule_set_empty') =>
           appLocalizations.ruleSetEmptyTip,
         CoreMethodException(code: 'rule_set_mixed') =>
@@ -141,6 +149,52 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
         _ => error.toString(),
       };
 }
+
+String subscriptionFailureMessage(
+  SubscriptionException error,
+  AppLocalizations l10n,
+) => switch (error.failure) {
+  SubscriptionFailure.cancelled ||
+  SubscriptionFailure.superseded => l10n.subscriptionCompatibilitySuperseded,
+  SubscriptionFailure.timeout => l10n.subscriptionCompatibilityTimeout,
+  SubscriptionFailure.transport => l10n.subscriptionCompatibilityTransport,
+  SubscriptionFailure.tls => l10n.networkTlsError,
+  SubscriptionFailure.unauthorized =>
+    l10n.subscriptionCompatibilityAuthorization,
+  SubscriptionFailure.deviceRequired => l10n.subscriptionDeviceRequired,
+  SubscriptionFailure.deviceLimit => l10n.subscriptionDeviceLimit,
+  SubscriptionFailure.rateLimited => l10n.subscriptionCompatibilityRateLimited,
+  SubscriptionFailure.http when error.status != null && error.status! >= 500 =>
+    l10n.networkServerError(error.status!),
+  SubscriptionFailure.http when error.status != null =>
+    l10n.networkBadResponseError(error.status!),
+  SubscriptionFailure.http => l10n.subscriptionCompatibilityCheckFailed,
+  SubscriptionFailure.redirect ||
+  SubscriptionFailure.oversized ||
+  SubscriptionFailure.invalid ||
+  SubscriptionFailure.empty => l10n.subscriptionCompatibilityCheckFailed,
+};
+
+String subscriptionRetryReasonMessage(
+  SubscriptionRetryReason reason,
+  AppLocalizations l10n,
+) => switch (reason) {
+  SubscriptionRetryReason.transport => l10n.subscriptionCompatibilityTransport,
+  SubscriptionRetryReason.tls => l10n.networkTlsError,
+  SubscriptionRetryReason.timeout => l10n.subscriptionCompatibilityTimeout,
+  SubscriptionRetryReason.cancelled => l10n.subscriptionCompatibilitySuperseded,
+  SubscriptionRetryReason.unauthorized || SubscriptionRetryReason.forbidden =>
+    l10n.subscriptionCompatibilityAuthorization,
+  SubscriptionRetryReason.rateLimited =>
+    l10n.subscriptionCompatibilityRateLimited,
+  SubscriptionRetryReason.deviceConsentRequired =>
+    l10n.subscriptionDeviceRequired,
+  SubscriptionRetryReason.deviceLimitReached => l10n.subscriptionDeviceLimit,
+  SubscriptionRetryReason.unsupportedMediaType ||
+  SubscriptionRetryReason.incompatibleResponse ||
+  SubscriptionRetryReason.invalidResponse =>
+    l10n.subscriptionCompatibilityCheckFailed,
+};
 
 String delayFailureText(int delay, AppLocalizations appLocalizations) {
   return delay == delayTimedOutValue

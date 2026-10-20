@@ -9,6 +9,8 @@ import 'package:reclash/common/protocol.dart';
 
 import 'compatibility/clients.dart';
 
+typedef ProfileLinkInput = ({String label, String url, String ageSecretKey});
+
 class ProfileLinkSource {
   const ProfileLinkSource({
     this.url,

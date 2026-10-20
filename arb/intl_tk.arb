@@ -1244,6 +1244,10 @@
   "urlSchemeTooDeep": "Salgylanmada iç-içe örtükler aşa köp.",
   "urlSchemeUnsupportedEncryption": "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
   "urlSchemeAuthenticationFailed": "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram-y aç",
+  "telegramWebFallback": "Brauzerde aç",
+  "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Hasap",
   "subscriptionProviderLogo": "Logotip salgysy",
   "subscriptionUseProviderInterval": "Üp üpjün edijiniň täzelenme aralygyny ulan",
+  "subscriptionDeviceLimit": "Bu abuna ýazgysy üçin boş enjam ýeri ýok. Üpjin edijiniň hasabyndan bir enjamy aýryp, gaýtadan synanyşyň.",
+  "subscriptionDeviceRequired": "Bu abuna ýazgysy enjamy hasaba almagy talap edýär. Üpjin edijiniň görkezmelerine eýeriň.",
+  "profileBatchResult": "Goşuldy: {added}; geçirildi: {skipped}; şowsuz: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Abunalaryň gaýtalanmagynyň öňüni al",
   "preventDuplicateProfilesDesc": "Bar bolan profiliň ulanýan abuna salgysyny ret et",
   "profileImportDuplicate": "Bu abuna URL-li profil eýýäm bar",

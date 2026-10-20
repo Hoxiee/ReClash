@@ -186,6 +186,31 @@ void main() {
     },
   );
 
+  test('retains a verified provider support URL on device limits', () async {
+    final uri = await serve((request) async {
+      request.response.headers
+        ..set('x-hwid-max-devices-reached', 'true')
+        ..set('reclash-supporturl', 'https://provider.example/account');
+      await request.response.close();
+    });
+    await expectLater(
+      SubscriptionTransport().fetch(uri),
+      throwsA(
+        isA<SubscriptionException>()
+            .having(
+              (error) => error.failure,
+              'failure',
+              SubscriptionFailure.deviceLimit,
+            )
+            .having(
+              (error) => error.supportUri,
+              'supportUri',
+              Uri.parse('https://provider.example/account'),
+            ),
+      ),
+    );
+  });
+
   test(
     'never retries authorization, rate limits or device rejection',
     () async {
@@ -231,6 +256,8 @@ void main() {
             headers: const {},
             status: 200,
             uri: source,
+            protected: true,
+            bypassed: true,
           );
         },
       );
@@ -239,9 +266,53 @@ void main() {
         timeout: const Duration(seconds: 2),
       );
       expect(response.protected, isTrue);
+      expect(response.bypassed, isTrue);
       expect(retries, 1);
     },
   );
+
+  test('retries a pre-response timeout within the remaining budget', () async {
+    var retries = 0;
+    final transport = SubscriptionTransport(
+      createClient: () => _HangingClient(),
+      protectedFetcher: (source, _, timeout, _) async {
+        retries++;
+        expect(timeout, greaterThan(Duration.zero));
+        expect(timeout, lessThan(const Duration(milliseconds: 900)));
+        return SubscriptionResponse(
+          bytes: Uint8List.fromList(utf8.encode('proxies: []')),
+          headers: const {},
+          status: 200,
+          uri: source,
+          protected: true,
+          bypassed: true,
+        );
+      },
+    );
+    final result = await transport.fetch(
+      Uri.parse('https://subscription.example/test'),
+      timeout: const Duration(milliseconds: 900),
+    );
+    expect(result.protected, isTrue);
+    expect(retries, 1);
+  });
+
+  test('rechecks fallback permission before switching routes', () async {
+    var retries = 0;
+    final transport = SubscriptionTransport(
+      createClient: () => _FailedClient(const SocketException('fake')),
+      canUseProtected: () => false,
+      protectedFetcher: (_, _, _, _) async {
+        retries++;
+        throw StateError('unexpected fallback');
+      },
+    );
+    await expectLater(
+      transport.fetch(Uri.parse('https://subscription.example/test')),
+      throwsA(_failure(SubscriptionFailure.transport)),
+    );
+    expect(retries, 0);
+  });
 
   test('never retries TLS errors or cancellation', () async {
     var retries = 0;
@@ -311,4 +382,16 @@ void main() {
       throwsA(_failure(SubscriptionFailure.oversized)),
     );
   });
+}
+
+class _HangingClient extends Fake implements HttpClient {
+  @override
+  bool autoUncompress = false;
+  @override
+  Duration? connectionTimeout;
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) =>
+      Completer<HttpClientRequest>().future;
+  @override
+  void close({bool force = false}) {}
 }

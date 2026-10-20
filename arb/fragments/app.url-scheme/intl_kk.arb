@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "Сілтеме 4 МБ немесе ендірілген конфигурация 2 МБ шегінен асады.",
   "urlSchemeTooDeep": "Сілтемеде кірістірілген орауыштар тым көп.",
   "urlSchemeUnsupportedEncryption": "Бұл шифрлау нұсқасына қолдау көрсетілмейді. Қалыпты жазылым сілтемесін сұраңыз.",
-  "urlSchemeAuthenticationFailed": "Шифрланған сілтеменің түпнұсқалығы расталмады. Ол бүлінген немесе басқа кілтті қолдануы мүмкін."
+  "urlSchemeAuthenticationFailed": "Шифрланған сілтеменің түпнұсқалығы расталмады. Ол бүлінген немесе басқа кілтті қолдануы мүмкін.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram ашу",
+  "telegramWebFallback": "Браузерде ашу",
+  "telegramAppUnavailable": "Бұл құрылғыда Telegram ашылмады."
 }

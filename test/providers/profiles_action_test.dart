@@ -169,11 +169,13 @@ void main() {
       decodesTo(link, const []);
       await pumpHost(tester);
 
-      await container
-          .read(profilesActionProvider.notifier)
-          .addProfileFromLink(link);
+      await tester.runAsync(
+        () => container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(link),
+      );
       await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.text(currentAppLocalizations.shareLinksInvalid), findsOne);
       expect(container.read(profilesProvider), isEmpty);
@@ -190,11 +192,13 @@ void main() {
           .read(profilesProvider.notifier)
           .put(Profile.normal(label: 'Existing', url: '  $url  '));
       await pumpHost(tester);
-      await container
-          .read(profilesActionProvider.notifier)
-          .addProfileFromLink(url);
+      await tester.runAsync(
+        () => container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(url),
+      );
       await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(
         find.text(currentAppLocalizations.profileImportDuplicate),
         findsOne,
@@ -207,6 +211,11 @@ void main() {
       tester,
     ) async {
       await pumpHost(tester);
+      final settingSubscription = container.listen(
+        appSettingProvider,
+        (_, _) {},
+      );
+      addTearDown(settingSubscription.close);
       await tester.runAsync(() async {
         final overrides = HttpOverrides.current;
         HttpOverrides.global = null;
@@ -297,11 +306,13 @@ void main() {
           .put(Profile.normal(label: 'Existing', url: url));
       await pumpHost(tester);
 
-      await container
-          .read(profilesActionProvider.notifier)
-          .addProfileFromLink(url);
+      await tester.runAsync(
+        () => container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(url),
+      );
       await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         find.text(currentAppLocalizations.profileImportDuplicate),
@@ -335,7 +346,9 @@ void main() {
 
       await container
           .read(profilesActionProvider.notifier)
-          .addProfilesFromLinks(links);
+          .addProfilesFromLinks([
+            for (final link in links) (label: '', url: link, ageSecretKey: ''),
+          ]);
 
       final profile = container.read(profilesProvider).single;
       expect(profile.type, ProfileType.file);
@@ -368,20 +381,15 @@ void main() {
 
       await container
           .read(profilesActionProvider.notifier)
-          .addProfilesFromLinks(links);
+          .addProfilesFromLinks([
+            for (final link in links) (label: '', url: link, ageSecretKey: ''),
+          ]);
       await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final l10n = currentAppLocalizations;
-      expect(
-        find.text(
-          l10n.failedItem(
-            profileLinkDisplaySource(links.first),
-            l10n.shareLinkUnreadable(profileLinkDisplaySource(links[1])),
-          ),
-        ),
-        findsOne,
-      );
+      expect(find.text(l10n.profileBatchResult(0, 0, 1)), findsOne);
+      expect(find.text(l10n.view), findsOne);
       expect(container.read(profilesProvider), isEmpty);
       verifyNever(() => core.validateConfig(any()));
     });
@@ -389,9 +397,13 @@ void main() {
 
   group('external profile link imports', () {
     for (final scheme in ['happ', 'incy']) {
-      for (final explicitClient in [false, true]) {
+      for (final selectedPreset in <SubscriptionClientPreset?>[
+        null,
+        SubscriptionClientPreset.auto,
+        SubscriptionClientPreset.clash,
+      ]) {
         testWidgets(
-          '$scheme retains request metadata with override=$explicitClient',
+          '$scheme retains request metadata with selection=${selectedPreset?.name ?? 'source hint'}',
           (tester) async {
             await pumpHost(tester);
             await tester.runAsync(() async {
@@ -426,26 +438,24 @@ void main() {
                 final source = await resolveProfileLink(
                   '$scheme://add/${Uri.encodeComponent(url)}?name=Home',
                 );
-                final chosen = explicitClient
-                    ? SubscriptionClientPreset.clash
-                    : scheme == 'happ'
-                    ? SubscriptionClientPreset.happ
-                    : SubscriptionClientPreset.incy;
+                final chosen =
+                    selectedPreset ??
+                    (scheme == 'happ'
+                        ? SubscriptionClientPreset.happ
+                        : SubscriptionClientPreset.incy);
                 final profile = await container
                     .read(profilesActionProvider.notifier)
                     .importProfileLinkSource(
                       source,
                       select: false,
-                      clientSettings: explicitClient
-                          ? const SubscriptionClientSettings(
-                              preset: SubscriptionClientPreset.clash,
-                            )
-                          : const SubscriptionClientSettings.forNewProfile(),
+                      clientSettings: selectedPreset == null
+                          ? null
+                          : SubscriptionClientSettings(preset: selectedPreset),
                     );
                 expect(agents, [
                   subscriptionClientRequestHeaders(
                     chosen,
-                    defaultUserAgent: 'ReClash',
+                    defaultUserAgent: globalState.ua,
                   )['User-Agent'],
                 ]);
                 expect(profile.label, 'Home');
@@ -528,6 +538,58 @@ void main() {
       );
       expect(container.read(profilesProvider), hasLength(1));
       verifyNever(() => core.validateConfig(any()));
+    });
+
+    testWidgets('concurrent wrapped imports reserve the resolved URL', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await tester.runAsync(() async {
+        final previousOverrides = HttpOverrides.current;
+        HttpOverrides.global = null;
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        final requestStarted = Completer<void>();
+        final releaseResponse = Completer<void>();
+        var requestCount = 0;
+        server.listen((request) async {
+          requestCount++;
+          if (!requestStarted.isCompleted) requestStarted.complete();
+          await releaseResponse.future;
+          request.response.write(
+            'proxies:\n  - name: test\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\nrules: [MATCH,DIRECT]',
+          );
+          await request.response.close();
+        });
+        try {
+          final source = ProfileLinkSource(
+            url: 'http://127.0.0.1:${server.port}/sub?token=secret',
+          );
+          final first = container
+              .read(profilesActionProvider.notifier)
+              .importProfileLinkSource(source, select: false);
+          await requestStarted.future;
+          await expectLater(
+            container
+                .read(profilesActionProvider.notifier)
+                .importProfileLinkSource(source, select: false),
+            throwsA(
+              isA<MessageException>().having(
+                (error) => error.message,
+                'message',
+                currentAppLocalizations.profileImportDuplicate,
+              ),
+            ),
+          );
+          releaseResponse.complete();
+          await first;
+          expect(requestCount, 1);
+          expect(container.read(profilesProvider), hasLength(1));
+        } finally {
+          if (!releaseResponse.isCompleted) releaseResponse.complete();
+          await server.close(force: true);
+          HttpOverrides.global = previousOverrides;
+        }
+      });
     });
 
     test('a cancelled prepared share source never reaches the Core', () async {

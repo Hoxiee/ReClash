@@ -1244,6 +1244,10 @@
   "urlSchemeTooDeep": "Сілтемеде кірістірілген орауыштар тым көп.",
   "urlSchemeUnsupportedEncryption": "Бұл шифрлау нұсқасына қолдау көрсетілмейді. Қалыпты жазылым сілтемесін сұраңыз.",
   "urlSchemeAuthenticationFailed": "Шифрланған сілтеменің түпнұсқалығы расталмады. Ол бүлінген немесе басқа кілтті қолдануы мүмкін.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram ашу",
+  "telegramWebFallback": "Браузерде ашу",
+  "telegramAppUnavailable": "Бұл құрылғыда Telegram ашылмады.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "Тіркелгі",
   "subscriptionProviderLogo": "Логотип сілтемесі",
   "subscriptionUseProviderInterval": "Провайдердің жаңарту аралығын пайдалану",
+  "subscriptionDeviceLimit": "Бұл жазылымда бос құрылғы орны жоқ. Провайдер тіркелгісінен құрылғыны өшіріп, қайта көріңіз.",
+  "subscriptionDeviceRequired": "Бұл жазылым құрылғыны тіркеуді талап етеді. Провайдердің нұсқауларын орындаңыз.",
+  "profileBatchResult": "Қосылды: {added}; өткізілді: {skipped}; сәтсіз: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "Жазылым қайталануын болдырмау",
   "preventDuplicateProfilesDesc": "Бұрыннан бар профиль қолданатын жазылым сілтемесін қабылдамау",
   "profileImportDuplicate": "Бұл жазылым сілтемесі бар профиль қазірдің өзінде бар",

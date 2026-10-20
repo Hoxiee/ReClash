@@ -40,10 +40,12 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   FormFieldValidator<String>? labelValidator,
   FormFieldValidator<String>? urlValidator,
   Set<String> existingUrls = const {},
+  bool allowDuplicates = false,
   bool withAgeSecretKey = false,
   int urlMaxLength = TextInputLimits.url,
   Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder,
   String? Function()? additionalValidator,
+  ValueChanged<int>? onBatchSkipped,
 }) {
   return showFormSheet<List<NamedUrl>>(
     context: context,
@@ -55,10 +57,12 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
       urlValidator: urlValidator,
       batch: true,
       existingUrls: existingUrls,
+      allowDuplicates: allowDuplicates,
       withAgeSecretKey: withAgeSecretKey,
       urlMaxLength: urlMaxLength,
       additionalSectionsBuilder: additionalSectionsBuilder,
       additionalValidator: additionalValidator,
+      onBatchSkipped: onBatchSkipped,
     ),
   );
 }
@@ -77,10 +81,12 @@ class NamedUrlForm extends StatefulWidget {
   final FormFieldValidator<String>? urlValidator;
   final bool batch;
   final Set<String> existingUrls;
+  final bool allowDuplicates;
   final bool withAgeSecretKey;
   final int urlMaxLength;
   final Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder;
   final String? Function()? additionalValidator;
+  final ValueChanged<int>? onBatchSkipped;
 
   const NamedUrlForm({
     super.key,
@@ -93,10 +99,12 @@ class NamedUrlForm extends StatefulWidget {
     this.urlValidator,
     this.batch = false,
     this.existingUrls = const {},
+    this.allowDuplicates = false,
     this.withAgeSecretKey = false,
     this.urlMaxLength = TextInputLimits.url,
     this.additionalSectionsBuilder,
     this.additionalValidator,
+    this.onBatchSkipped,
   });
 
   @override
@@ -125,6 +133,7 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
         text,
         isValid: (url) => _validateBatchUrl(url) == null,
         existing: widget.existingUrls,
+        allowDuplicates: widget.allowDuplicates,
       ),
       issueMessage: (issue) => _validateBatchUrl(issue.raw)!,
     );
@@ -197,6 +206,11 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
       }
       if (_isBatch) {
         _parsed = _batchInput.parse(_batchController.text);
+        widget.onBatchSkipped?.call(
+          _parsed!.skippedExisting + _parsed!.skippedDuplicates,
+        );
+      } else {
+        widget.onBatchSkipped?.call(0);
       }
     });
   }
@@ -210,6 +224,9 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
   void _handleBatchChanged(String text) {
     setState(() {
       _parsed = _batchInput.parse(text);
+      widget.onBatchSkipped?.call(
+        _parsed!.skippedExisting + _parsed!.skippedDuplicates,
+      );
     });
   }
 
@@ -227,7 +244,11 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
       }
       Navigator.of(context).pop<List<NamedUrl>>([
         for (final url in parsed.entries)
-          (label: '', url: url, ageSecretKey: ''),
+          (
+            label: '',
+            url: url,
+            ageSecretKey: _ageSecretKeyController.text.trim(),
+          ),
       ]);
       return;
     }
@@ -277,14 +298,29 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
           ),
       ],
       children: [
-        _isBatch
-            ? BatchSection(
-                batch: _batchInput,
-                controller: _batchController,
-                parsed: _parsed,
-                onChanged: _handleBatchChanged,
-              )
-            : _buildFields(appLocalizations, issue?.field),
+        if (_isBatch) ...[
+          BatchSection(
+            batch: _batchInput,
+            controller: _batchController,
+            parsed: _parsed,
+            onChanged: _handleBatchChanged,
+          ),
+          if (widget.withAgeSecretKey)
+            generateSection(
+              items: [
+                FormRow(
+                  title: appLocalizations.ageSecretKey,
+                  trailing: FormRowSecretTextField(
+                    controller: _ageSecretKeyController,
+                    focusNode: _ageSecretKeyFocusNode,
+                    hintText: appLocalizations.optional,
+                    textInputAction: TextInputAction.done,
+                  ),
+                ),
+              ],
+            ),
+        ] else
+          _buildFields(appLocalizations, issue?.field),
         if (widget.additionalSectionsBuilder case final builder?)
           builder(context, () => _handleChanged('')),
       ],

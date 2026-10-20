@@ -191,8 +191,24 @@ void main() {
       );
     });
 
+    test('allows Telegram only for provider support links', () {
+      final metadata = SubscriptionMetadata.fromJson({
+        'provider': {
+          'supportUrl': 'tg://resolve?domain=support_bot',
+          'logo': 'tg://resolve?domain=logo_bot',
+          'webUrl': 'tg://resolve?domain=web_bot',
+        },
+      });
+      expect(
+        metadata.text('provider.supportUrl'),
+        'tg://resolve?domain=support_bot',
+      );
+      expect(metadata.text('provider.logo'), isNull);
+      expect(metadata.text('provider.webUrl'), isNull);
+    });
+
     test('explicit Base64 text round-trips without guessing plain text', () {
-      const metadata = SubscriptionMetadata({'provider.name': 'Provider'});
+      const metadata = SubscriptionMetadata({'provider.name': 'Províder'});
       final encoded = encodeSubscriptionMetadata(metadata);
       expect(encoded['reclash-servicename'], startsWith('base64:'));
       expect(

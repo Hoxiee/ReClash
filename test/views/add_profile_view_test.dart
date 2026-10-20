@@ -3,9 +3,11 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,11 +17,12 @@ import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
 class _RecordingProfilesAction extends ProfilesAction {
-  final batches = <List<String>>[];
+  final batches = <List<ProfileLinkInput>>[];
   final singles = <String>[];
   final ageSecretKeys = <String>[];
   final singleSettings = <SubscriptionClientSettings?>[];
   final batchSettings = <SubscriptionClientSettings?>[];
+  final batchSkipped = <int>[];
 
   @override
   Future<void> addProfileFromLink(
@@ -35,11 +38,13 @@ class _RecordingProfilesAction extends ProfilesAction {
 
   @override
   Future<void> addProfilesFromLinks(
-    List<String> links, {
+    List<ProfileLinkInput> links, {
     SubscriptionClientSettings? clientSettings,
+    int skippedExisting = 0,
   }) async {
     batches.add(links);
     batchSettings.add(clientSettings);
+    batchSkipped.add(skippedExisting);
   }
 }
 
@@ -115,7 +120,7 @@ void main() {
     final container = _containerFor(
       tester,
       profilesAction: action,
-      profiles: [Profile.normal(url: 'https://example.com/old')],
+      profiles: [Profile.normal(url: '  https://example.com/old  ')],
     );
 
     await _openMenu(tester, container);
@@ -126,18 +131,75 @@ void main() {
     await tester.tap(find.byTooltip(l10n.batchImport));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.byType(TextField),
-      'https://example.com/a\nhttps://example.com/old\nhttps://example.com/b',
+      find.byType(TextField).first,
+      'https://example.com/a\nhttps://example.com/old\nhttps://example.com/b\nhttps://example.com/a',
     );
+    await tester.enterText(_field(l10n.ageSecretKey), 'batch-key');
     await tester.pump();
     await tester.tap(find.text(l10n.submit));
     await tester.pumpAndSettle();
 
     expect(action.batches, [
-      ['https://example.com/a', 'https://example.com/b'],
+      [
+        (label: '', url: 'https://example.com/a', ageSecretKey: 'batch-key'),
+        (label: '', url: 'https://example.com/b', ageSecretKey: 'batch-key'),
+      ],
     ]);
-    expect(action.batchSettings.single?.preset, SubscriptionClientPreset.auto);
+    expect(action.batchSettings.single, isNull);
+    expect(action.batchSkipped.single, 2);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('batch import retains duplicates when prevention is disabled', (
+    tester,
+  ) async {
+    final action = _RecordingProfilesAction();
+    const existingUrl = 'https://example.com/existing';
+    final container = _containerFor(
+      tester,
+      profilesAction: action,
+      profiles: [Profile.normal(url: existingUrl)],
+    );
+    final settings = container.listen(appSettingProvider, (_, _) {});
+    addTearDown(settings.close);
+    container
+        .read(appSettingProvider.notifier)
+        .update((value) => value.copyWith(preventDuplicateProfiles: false));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) =>
+                  AddProfileView(context: context, origin: context),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = currentAppLocalizations;
+    await tester.tap(find.text(l10n.link));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(l10n.batchImport));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextField).first,
+      '$existingUrl\nhttps://example.com/new\nhttps://example.com/new',
+    );
+    await tester.pump();
+    await tester.tap(find.text(l10n.submit));
+    await tester.pumpAndSettle();
+
+    expect(action.batches.single, [
+      (label: '', url: existingUrl, ageSecretKey: ''),
+      (label: '', url: 'https://example.com/new', ageSecretKey: ''),
+      (label: '', url: 'https://example.com/new', ageSecretKey: ''),
+    ]);
+    expect(action.batchSkipped.single, 0);
   });
 
   testWidgets('the link import takes a proxy share link', (tester) async {
@@ -181,7 +243,7 @@ void main() {
 
     expect(action.singles, ['https://example.com/sub']);
     expect(action.ageSecretKeys, ['AGE-SECRET-KEY-1A']);
-    expect(action.singleSettings.single?.preset, SubscriptionClientPreset.auto);
+    expect(action.singleSettings.single, isNull);
     expect(tester.takeException(), null);
   });
 

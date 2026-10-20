@@ -9,12 +9,16 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
+import 'package:reclash/models/profile.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/views/setup.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
+import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:reclash/widgets/url_scheme_labels.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -128,31 +132,30 @@ class ApplicationState extends ConsumerState<Application> {
                   ),
                 ) ==
                 true,
-            confirmImport: (source) async =>
-                await dialogs.showMessage(
-                  title: currentAppLocalizations.addProfile,
-                  confirmText: currentAppLocalizations.import,
-                  message: TextSpan(
-                    text: currentAppLocalizations.urlSchemeImportConfirm(
-                      source.name ?? currentAppLocalizations.unnamed,
-                      source.displaySource.isNotEmpty
-                          ? source.displaySource
-                          : currentAppLocalizations.urlSchemeEmbeddedConfig,
-                    ),
-                  ),
-                ) ==
-                true,
+            confirmImport: (source) => showProfileImportDialog(context, source),
           );
     } catch (error) {
-      if (mounted) {
-        await dialogs.showMessage(
-          title: currentAppLocalizations.urlScheme,
-          message: TextSpan(
-            text: userFacingErrorMessage(error, currentAppLocalizations),
-          ),
-          cancelable: false,
-        );
+      if (!mounted) return;
+      if (error is SubscriptionException) {
+        if (error.failure == SubscriptionFailure.cancelled ||
+            error.failure == SubscriptionFailure.superseded) {
+          return;
+        }
+        await dialogs.showSubscriptionFailure(error);
+        return;
       }
+      if (error is SubscriptionUpdateRejected) {
+        if (error.reason == SubscriptionRetryReason.cancelled) return;
+        await dialogs.showSubscriptionFailure(error);
+        return;
+      }
+      await dialogs.showMessage(
+        title: currentAppLocalizations.urlScheme,
+        message: TextSpan(
+          text: userFacingErrorMessage(error, currentAppLocalizations),
+        ),
+        cancelable: false,
+      );
     }
   }
 

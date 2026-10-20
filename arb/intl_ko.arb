@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "링크에 중첩된 래퍼가 너무 많습니다.",
   "urlSchemeUnsupportedEncryption": "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
   "urlSchemeAuthenticationFailed": "암호화 링크를 인증하지 못했습니다. 손상되었거나 다른 키를 사용할 수 있습니다.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegram 열기",
+  "telegramWebFallback": "브라우저에서 열기",
+  "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "계정",
   "subscriptionProviderLogo": "로고 URL",
   "subscriptionUseProviderInterval": "제공자 업데이트 간격 사용",
+  "subscriptionDeviceLimit": "이 구독에 사용할 수 있는 기기 슬롯이 없습니다. 제공업체 계정에서 기기를 삭제한 후 다시 시도하세요.",
+  "subscriptionDeviceRequired": "이 구독은 기기 등록이 필요합니다. 제공업체의 안내를 따르세요.",
+  "profileBatchResult": "추가: {added}, 건너뜀: {skipped}, 실패: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "구독 중복 방지",
   "preventDuplicateProfilesDesc": "기존 프로필이 이미 사용하는 구독 링크를 거부합니다",
   "profileImportDuplicate": "이 구독 URL의 프로필이 이미 있습니다",

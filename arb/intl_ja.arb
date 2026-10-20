@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "リンクのラップが多重に入れ子になりすぎています。",
   "urlSchemeUnsupportedEncryption": "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
   "urlSchemeAuthenticationFailed": "暗号化リンクを認証できませんでした。破損しているか、異なる鍵を使っている可能性があります。",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegramを開く",
+  "telegramWebFallback": "ブラウザーで開く",
+  "telegramAppUnavailable": "この端末でTelegramを開けませんでした。",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "アカウント",
   "subscriptionProviderLogo": "ロゴのURL",
   "subscriptionUseProviderInterval": "プロバイダーの更新間隔を使う",
+  "subscriptionDeviceLimit": "このサブスクリプションで使用できる端末枠がありません。プロバイダーのアカウントから端末を削除して、もう一度お試しください。",
+  "subscriptionDeviceRequired": "このサブスクリプションでは端末の登録が必要です。プロバイダーの案内に従ってください。",
+  "profileBatchResult": "追加: {added}、スキップ: {skipped}、失敗: {failed}。",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "サブスクリプションの重複を防ぐ",
   "preventDuplicateProfilesDesc": "既存のプロファイルが使用している購読リンクを拒否します",
   "profileImportDuplicate": "このサブスクリプションURLのプロファイルは既に存在します",

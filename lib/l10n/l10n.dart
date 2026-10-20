@@ -9876,6 +9876,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Telegram`
+  String get telegramLinkTitle {
+    return Intl.message(
+      'Telegram',
+      name: 'telegramLinkTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Telegram`
+  String get telegramOpen {
+    return Intl.message(
+      'Open Telegram',
+      name: 'telegramOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in browser`
+  String get telegramWebFallback {
+    return Intl.message(
+      'Open in browser',
+      name: 'telegramWebFallback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Telegram could not be opened on this device.`
+  String get telegramAppUnavailable {
+    return Intl.message(
+      'Telegram could not be opened on this device.',
+      name: 'telegramAppUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Theme`
   String get appearanceTheme {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
@@ -11292,6 +11332,36 @@ class AppLocalizations {
       name: 'subscriptionUseProviderInterval',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `No device slots are available for this subscription. Remove a device from the provider account and try again.`
+  String get subscriptionDeviceLimit {
+    return Intl.message(
+      'No device slots are available for this subscription. Remove a device from the provider account and try again.',
+      name: 'subscriptionDeviceLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This subscription requires device registration. Follow the provider's instructions.`
+  String get subscriptionDeviceRequired {
+    return Intl.message(
+      'This subscription requires device registration. Follow the provider\'s instructions.',
+      name: 'subscriptionDeviceRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added: {added}; skipped: {skipped}; failed: {failed}.`
+  String profileBatchResult(int added, int skipped, int failed) {
+    return Intl.message(
+      'Added: $added; skipped: $skipped; failed: $failed.',
+      name: 'profileBatchResult',
+      desc: '',
+      args: [added, skipped, failed],
     );
   }
 

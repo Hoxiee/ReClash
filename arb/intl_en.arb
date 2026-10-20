@@ -1256,6 +1256,10 @@
   "urlSchemeTooDeep": "The link contains too many nested wrappers.",
   "urlSchemeUnsupportedEncryption": "This encryption version is not supported. Request a plain subscription link.",
   "urlSchemeAuthenticationFailed": "The encrypted link could not be authenticated. It may be damaged or use a different key.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Open Telegram",
+  "telegramWebFallback": "Open in browser",
+  "telegramAppUnavailable": "Telegram could not be opened on this device.",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1456,6 +1460,9 @@
   "subscriptionProviderAccount": "Account",
   "subscriptionProviderLogo": "Logo URL",
   "subscriptionUseProviderInterval": "Use provider update interval",
+  "subscriptionDeviceLimit": "No device slots are available for this subscription. Remove a device from the provider account and try again.",
+  "subscriptionDeviceRequired": "This subscription requires device registration. Follow the provider's instructions.",
+  "profileBatchResult": "Added: {added}; skipped: {skipped}; failed: {failed}.",
   "@subscriptionCompatibilityPrepared": {
     "placeholders": {
       "client": {
@@ -1465,6 +1472,19 @@
         "type": "String"
       },
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
         "type": "int"
       }
     }

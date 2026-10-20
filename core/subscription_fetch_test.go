@@ -219,18 +219,48 @@ func TestCancelSubscriptionFetchesCancelsActiveRequests(t *testing.T) {
 	}
 }
 
-func TestUnprotectedCoreSubscriptionFetchIsRefused(t *testing.T) {
-	params := fetchTestParams("https://example.test/profile")
-	_, err := handleFetchSubscription(params)
+func TestUnprotectedCoreSubscriptionFetchUsesPlatformRoute(t *testing.T) {
+	_, err := handleFetchSubscription(fetchTestParams("https://example.test/profile"))
 	var methodErr *MethodError
 	if !errors.As(err, &methodErr) || methodErr.Code != "invalid_arguments" {
-		t.Fatalf("error = %v, want invalid_arguments", err)
+		t.Fatalf("non-bypass request error = %v, want invalid_arguments", err)
+	}
+	if bypassSubscriptionConnector == nil {
+		params := fetchTestParams("https://example.test/profile")
+		params.Bypass = true
+		_, err := handleFetchSubscription(params)
+		var methodErr *MethodError
+		if !errors.As(err, &methodErr) || methodErr.Code != "subscription_protection" {
+			t.Fatalf("error = %v, want subscription_protection", err)
+		}
+		return
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = io.WriteString(w, "profile")
+	}))
+	defer server.Close()
+	params := fetchTestParams(server.URL)
+	params.Bypass = true
+	result, err := handleFetchSubscription(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Protected {
+		t.Fatal("desktop bypass route reported Android socket protection")
+	}
+	if !result.Bypassed {
+		t.Fatal("subscription response did not report bypass route")
+	}
+	body, err := base64.StdEncoding.DecodeString(result.BodyBase64)
+	if err != nil || string(body) != "profile" {
+		t.Fatalf("body = %q, error = %v", body, err)
 	}
 }
 
 func TestProtectedSubscriptionFetchFailsClosedWithoutTransport(t *testing.T) {
 	params := fetchTestParams("https://example.test/subscription")
 	params.Protected = true
+	params.Bypass = true
 	_, err := handleFetchSubscription(params)
 	var methodErr *MethodError
 	if !errors.As(err, &methodErr) || methodErr.Code != "subscription_protection" {

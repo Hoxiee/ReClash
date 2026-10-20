@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "트래픽 구매",
   "subscriptionProviderAccount": "계정",
   "subscriptionProviderLogo": "로고 URL",
-  "subscriptionUseProviderInterval": "제공자 업데이트 간격 사용"
+  "subscriptionUseProviderInterval": "제공자 업데이트 간격 사용",
+  "subscriptionDeviceLimit": "이 구독에 사용할 수 있는 기기 슬롯이 없습니다. 제공업체 계정에서 기기를 삭제한 후 다시 시도하세요.",
+  "subscriptionDeviceRequired": "이 구독은 기기 등록이 필요합니다. 제공업체의 안내를 따르세요.",
+  "profileBatchResult": "추가: {added}, 건너뜀: {skipped}, 실패: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

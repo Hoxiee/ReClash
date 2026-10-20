@@ -10,8 +10,9 @@ must:
   lossy-preview: Imports with omitted sections or skipped nodes are staged and cannot commit without explicit acceptance.
   preserve-old-profile: Failed, cancelled, or rejected updates leave the stored config and metadata unchanged.
   defaults: Existing profiles retain the ReClash request identity while newly added URL profiles default to Auto.
+  explicit-auto: Happ and INCY hints seed the client choice but never override an explicit Auto selection.
   unknown-format: Unknown payloads are not treated as valid empty Clash configurations or silently imported.
 watch: [lib/subscriptions/**, lib/models/profile.dart, lib/database/profiles.dart, lib/database/database.dart, lib/database/generated/database.g.dart, lib/models/generated/profile.freezed.dart, lib/models/generated/profile.g.dart, lib/providers/actions/profiles.dart, lib/views/profiles/add.dart, lib/views/profiles/edit.dart, lib/views/dashboard/widgets/profile_detail.dart, 'arb/fragments/profiles.compatibility/**', test/subscriptions/**, test/models/profile_test.dart, test/database/**, test/providers/profiles_action_test.dart]
 checks:
-  subscription-compatibility: [bounded, no-device-identity, client-adapters, safe-retries, lossy-preview, preserve-old-profile, defaults, unknown-format]
+  subscription-compatibility: [bounded, no-device-identity, client-adapters, safe-retries, lossy-preview, preserve-old-profile, defaults, explicit-auto, unknown-format]
 drop: The FlClash base preserves profile request, import, and confirmation behavior without identity leakage.

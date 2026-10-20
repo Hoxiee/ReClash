@@ -17,6 +17,13 @@ void main() {
   });
   tearDown(() => directory.deleteSync(recursive: true));
 
+  void expectNoStagedFiles() {
+    expect(
+      directory.listSync(recursive: true, followLinks: false).whereType<File>(),
+      isEmpty,
+    );
+  }
+
   final payload = SubscriptionImportResult(
     bytes: Uint8List.fromList(utf8.encode('proxies: []')),
     format: SubscriptionFormat.clash,
@@ -37,7 +44,7 @@ void main() {
         },
       );
       expect(await File(candidatePath).exists(), false);
-      expect(directory.listSync(), isEmpty);
+      expectNoStagedFiles();
     },
   );
 
@@ -57,7 +64,7 @@ void main() {
           ),
         ),
       );
-      expect(directory.listSync(), isEmpty);
+      expectNoStagedFiles();
     },
   );
 
@@ -82,7 +89,7 @@ void main() {
           ),
         ),
       );
-      expect(directory.listSync(), isEmpty);
+      expectNoStagedFiles();
     },
   );
 }

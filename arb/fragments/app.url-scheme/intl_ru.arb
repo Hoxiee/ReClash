@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "Ссылка превышает 4 МБ или встроенная конфигурация превышает 2 МБ.",
   "urlSchemeTooDeep": "В ссылке слишком много вложенных обёрток.",
   "urlSchemeUnsupportedEncryption": "Эта версия шифрования не поддерживается. Запросите обычную ссылку подписки.",
-  "urlSchemeAuthenticationFailed": "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ."
+  "urlSchemeAuthenticationFailed": "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Открыть Telegram",
+  "telegramWebFallback": "Открыть в браузере",
+  "telegramAppUnavailable": "Не удалось открыть Telegram на этом устройстве."
 }

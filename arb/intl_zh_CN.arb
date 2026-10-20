@@ -1249,6 +1249,10 @@
   "urlSchemeTooDeep": "链接的嵌套封装层数过多。",
   "urlSchemeUnsupportedEncryption": "不支持此加密版本。请索取普通订阅链接。",
   "urlSchemeAuthenticationFailed": "无法验证加密链接。它可能已损坏或使用了其他密钥。",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "打开 Telegram",
+  "telegramWebFallback": "在浏览器中打开",
+  "telegramAppUnavailable": "无法在此设备上打开 Telegram。",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1449,6 +1453,22 @@
   "subscriptionProviderAccount": "账户",
   "subscriptionProviderLogo": "徽标链接",
   "subscriptionUseProviderInterval": "使用服务提供方的更新间隔",
+  "subscriptionDeviceLimit": "此订阅没有可用的设备名额。请在服务提供商账户中移除一台设备后重试。",
+  "subscriptionDeviceRequired": "此订阅需要注册设备，请按照服务提供商的说明操作。",
+  "profileBatchResult": "已添加：{added}；已跳过：{skipped}；失败：{failed}。",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
   "preventDuplicateProfiles": "防止重复订阅",
   "preventDuplicateProfilesDesc": "拒绝已有配置使用的订阅链接",
   "profileImportDuplicate": "已存在使用该订阅链接的配置",

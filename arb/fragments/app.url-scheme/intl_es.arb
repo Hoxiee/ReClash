@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "El enlace supera los 4 MB o la configuración integrada supera los 2 MB.",
   "urlSchemeTooDeep": "El enlace contiene demasiados envoltorios anidados.",
   "urlSchemeUnsupportedEncryption": "Esta versión de cifrado no es compatible. Solicita un enlace de suscripción sin cifrar.",
-  "urlSchemeAuthenticationFailed": "No se pudo autenticar el enlace cifrado. Puede estar dañado o usar otra clave."
+  "urlSchemeAuthenticationFailed": "No se pudo autenticar el enlace cifrado. Puede estar dañado o usar otra clave.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Abrir Telegram",
+  "telegramWebFallback": "Abrir en el navegador",
+  "telegramAppUnavailable": "No se pudo abrir Telegram en este dispositivo."
 }

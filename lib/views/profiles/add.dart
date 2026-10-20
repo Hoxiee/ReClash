@@ -45,6 +45,11 @@ class AddProfileMenu extends ConsumerWidget {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     final appLocalizations = context.appLocalizations;
     var clientSettings = const SubscriptionClientSettings.forNewProfile();
+    var clientSettingsExplicit = false;
+    var skippedExisting = 0;
+    final preventDuplicates = ref
+        .read(appSettingProvider)
+        .preventDuplicateProfiles;
     final res = await showNamedUrlsForm(
       context,
       title: appLocalizations.importFromLink,
@@ -59,19 +64,26 @@ class AddProfileMenu extends ConsumerWidget {
         }
         return null;
       },
-      existingUrls: {
-        for (final profile in ref.read(profilesProvider))
-          if (profile.url.isNotEmpty) profile.url,
-      },
+      existingUrls: preventDuplicates
+          ? {
+              for (final profile in ref.read(profilesProvider))
+                if (profile.url.isNotEmpty) profile.url.trim(),
+            }
+          : const {},
+      allowDuplicates: !preventDuplicates,
       withAgeSecretKey: true,
       urlMaxLength: urlSchemeMaxLength,
+      onBatchSkipped: (value) => skippedExisting = value,
       additionalValidator: () => clientSettings.isValid
           ? null
           : appLocalizations.subscriptionClientCustomUserAgentInvalid,
       additionalSectionsBuilder: (context, onChanged) =>
           SubscriptionClientSettingsSection(
             initial: clientSettings,
-            onChanged: (value) => clientSettings = value,
+            onChanged: (value) {
+              clientSettings = value;
+              clientSettingsExplicit = true;
+            },
             onFormChanged: onChanged,
           ),
     );
@@ -84,14 +96,18 @@ class AddProfileMenu extends ConsumerWidget {
             single.url,
             label: single.label,
             ageSecretKey: single.ageSecretKey,
-            clientSettings: single.url.isShareLink ? null : clientSettings,
+            clientSettings: single.url.isShareLink || !clientSettingsExplicit
+                ? null
+                : clientSettings,
           ),
         );
       default:
         unawaited(
-          profilesAction.addProfilesFromLinks([
-            for (final item in res) item.url,
-          ], clientSettings: clientSettings),
+          profilesAction.addProfilesFromLinks(
+            res,
+            clientSettings: clientSettingsExplicit ? clientSettings : null,
+            skippedExisting: skippedExisting,
+          ),
         );
     }
   }

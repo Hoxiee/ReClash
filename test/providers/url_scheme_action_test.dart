@@ -278,14 +278,17 @@ void main() {
     Future<void> handle(
       String input, {
       Future<bool> Function(ReClashCommand)? confirmCommand,
-      Future<bool> Function(ProfileLinkSource)? confirmImport,
+      Future<SubscriptionClientSettings?> Function(ProfileLinkSource)?
+      confirmImport,
       bool Function()? isCurrent,
     }) => container
         .read(urlSchemeActionProvider.notifier)
         .handleLink(
           input,
           confirmCommand: confirmCommand ?? (_) async => true,
-          confirmImport: confirmImport ?? (_) async => true,
+          confirmImport:
+              confirmImport ??
+              (_) async => const SubscriptionClientSettings.forNewProfile(),
           isCurrent: isCurrent,
         );
 
@@ -300,7 +303,7 @@ void main() {
         },
         confirmImport: (_) async {
           imports++;
-          return true;
+          return const SubscriptionClientSettings.forNewProfile();
         },
       );
       expect(confirmed, [ReClashCommand.disconnect]);
@@ -335,7 +338,7 @@ void main() {
           confirmImport: (source) async {
             expect(profiles.sources, isEmpty);
             confirmed = source;
-            return true;
+            return const SubscriptionClientSettings.forNewProfile();
           },
         );
         expect(profiles.sources.single, same(confirmed));
@@ -363,10 +366,7 @@ void main() {
     );
 
     test('declining import leaves profiles and connection untouched', () async {
-      await handle(
-        'https://example.com/sub',
-        confirmImport: (_) async => false,
-      );
+      await handle('https://example.com/sub', confirmImport: (_) async => null);
       expect(profiles.sources, isEmpty);
       expect(common.requests, isEmpty);
     });
@@ -381,7 +381,7 @@ void main() {
           input,
           confirmImport: (_) async {
             confirmations++;
-            return true;
+            return const SubscriptionClientSettings.forNewProfile();
           },
         );
         expect(container.read(setupSessionProvider).pendingLink, input);
@@ -399,7 +399,7 @@ void main() {
           input,
           confirmImport: (_) async {
             session.setActive(true);
-            return true;
+            return const SubscriptionClientSettings.forNewProfile();
           },
         );
         expect(container.read(setupSessionProvider).pendingLink, input);
@@ -422,7 +422,7 @@ void main() {
             },
             confirmImport: (_) async {
               confirmations++;
-              return true;
+              return const SubscriptionClientSettings.forNewProfile();
             },
           ),
           throwsA(isA<UrlSchemeException>()),
@@ -442,7 +442,7 @@ void main() {
           isCurrent: () => current,
           confirmImport: (_) async {
             current = false;
-            return true;
+            return const SubscriptionClientSettings.forNewProfile();
           },
         );
         expect(profiles.sources, isEmpty);
@@ -451,7 +451,7 @@ void main() {
 
     test('disposal prevents importing after confirmation', () async {
       final entered = Completer<void>();
-      final gate = Completer<bool>();
+      final gate = Completer<SubscriptionClientSettings?>();
       final pending = handle(
         'https://example.com/sub',
         confirmImport: (_) {
@@ -461,7 +461,7 @@ void main() {
       );
       await entered.future;
       container.dispose();
-      gate.complete(true);
+      gate.complete(const SubscriptionClientSettings.forNewProfile());
       await pending;
       expect(profiles.sources, isEmpty);
     });

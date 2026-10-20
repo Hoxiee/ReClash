@@ -6,7 +6,10 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/views/disclaimer.dart';
+import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -107,6 +110,65 @@ Future<void> _pumpStatusManagerHost(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets(
+    'Happ import dialog lets the user choose Auto without showing URL secrets',
+    (tester) async {
+      await _pumpHost(tester);
+      final l10n = currentAppLocalizations;
+      final result = showProfileImportDialog(
+        globalState.navigatorKey.currentContext!,
+        const ProfileLinkSource(
+          url: 'https://sub.example/private?token=secret',
+          name: 'Home',
+          preset: SubscriptionClientPreset.happ,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('sub.example'), findsOneWidget);
+      expect(find.textContaining('secret'), findsNothing);
+      await tester.tap(find.text(l10n.subscriptionClientAuto));
+      await tester.pump();
+      await tester.tap(find.text(l10n.import));
+      await tester.pumpAndSettle();
+
+      expect((await result)?.preset, SubscriptionClientPreset.auto);
+    },
+  );
+
+  testWidgets('profile import dialog fits a narrow viewport', (tester) async {
+    await _pumpHost(tester, size: const Size(320, 640));
+    final result = showProfileImportDialog(
+      globalState.navigatorKey.currentContext!,
+      const ProfileLinkSource(
+        url: 'https://sub.example/private?token=secret',
+        preset: SubscriptionClientPreset.incy,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('sub.example'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    Navigator.of(globalState.navigatorKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+    expect(await result, isNull);
+  });
+
+  testWidgets('Telegram links use a destination-aware dialog', (tester) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    final result = dialogs.openUrl('tg://resolve?domain=ReClash');
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.telegramLinkTitle), findsOneWidget);
+    expect(find.text('ReClash'), findsOneWidget);
+    expect(find.text(l10n.telegramOpen), findsOneWidget);
+    await tester.tap(find.text(l10n.cancel));
+    await tester.pumpAndSettle();
+    await result;
+  });
+
   testWidgets('showMessage resolves true when confirmed', (tester) async {
     await _pumpHost(tester);
 
@@ -430,6 +492,23 @@ void main() {
     expect(find.text('Disclaimer'), findsWidgets);
     expect(find.text('Agree'), findsNothing);
     expect(find.text('Exit'), findsNothing);
+  });
+
+  testWidgets('batch import reports added, skipped, and failed counts', (
+    tester,
+  ) async {
+    await _pumpStatusManagerHost(tester);
+    final l10n = currentAppLocalizations;
+    dialogs.showBatchImportSummary(
+      added: 2,
+      skipped: 1,
+      failures: const [UpdatingMessage(label: 'bad', message: 'Invalid input')],
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text(l10n.profileBatchResult(2, 1, 1)), findsOneWidget);
+    expect(find.text(l10n.view), findsOneWidget);
   });
 
   testWidgets('showNotifier delivers text through the StatusManager host', (

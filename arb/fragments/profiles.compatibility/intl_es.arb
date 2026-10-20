@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Comprar tráfico",
   "subscriptionProviderAccount": "Cuenta",
   "subscriptionProviderLogo": "URL del logotipo",
-  "subscriptionUseProviderInterval": "Usar el intervalo del proveedor"
+  "subscriptionUseProviderInterval": "Usar el intervalo del proveedor",
+  "subscriptionDeviceLimit": "No hay dispositivos disponibles para esta suscripción. Elimina uno de la cuenta del proveedor e inténtalo de nuevo.",
+  "subscriptionDeviceRequired": "Esta suscripción requiere registrar el dispositivo. Sigue las instrucciones del proveedor.",
+  "profileBatchResult": "Añadidos: {added}; omitidos: {skipped}; errores: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

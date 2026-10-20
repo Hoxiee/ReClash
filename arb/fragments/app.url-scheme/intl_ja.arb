@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "リンクが4 MB、または埋め込み設定が2 MBを超えています。",
   "urlSchemeTooDeep": "リンクのラップが多重に入れ子になりすぎています。",
   "urlSchemeUnsupportedEncryption": "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
-  "urlSchemeAuthenticationFailed": "暗号化リンクを認証できませんでした。破損しているか、異なる鍵を使っている可能性があります。"
+  "urlSchemeAuthenticationFailed": "暗号化リンクを認証できませんでした。破損しているか、異なる鍵を使っている可能性があります。",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Telegramを開く",
+  "telegramWebFallback": "ブラウザーで開く",
+  "telegramAppUnavailable": "この端末でTelegramを開けませんでした。"
 }

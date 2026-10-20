@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Trafik sotib olish",
   "subscriptionProviderAccount": "Hisob",
   "subscriptionProviderLogo": "Logotip havolasi",
-  "subscriptionUseProviderInterval": "Provayder yangilash intervalidan foydalanish"
+  "subscriptionUseProviderInterval": "Provayder yangilash intervalidan foydalanish",
+  "subscriptionDeviceLimit": "Bu obuna uchun bo‘sh qurilma joyi qolmagan. Provayder hisobidan qurilmani olib tashlab, qayta urinib ko‘ring.",
+  "subscriptionDeviceRequired": "Bu obuna qurilmani ro‘yxatdan o‘tkazishni talab qiladi. Provayder ko‘rsatmalariga amal qiling.",
+  "profileBatchResult": "Qo‘shildi: {added}; o‘tkazib yuborildi: {skipped}; xatolar: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

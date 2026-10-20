@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Acheter du trafic",
   "subscriptionProviderAccount": "Compte",
   "subscriptionProviderLogo": "URL du logo",
-  "subscriptionUseProviderInterval": "Utiliser l’intervalle du fournisseur"
+  "subscriptionUseProviderInterval": "Utiliser l’intervalle du fournisseur",
+  "subscriptionDeviceLimit": "Aucun emplacement d’appareil n’est disponible pour cet abonnement. Supprimez un appareil du compte du fournisseur, puis réessayez.",
+  "subscriptionDeviceRequired": "Cet abonnement exige l’enregistrement de l’appareil. Suivez les instructions du fournisseur.",
+  "profileBatchResult": "Ajoutés : {added} ; ignorés : {skipped} ; échecs : {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

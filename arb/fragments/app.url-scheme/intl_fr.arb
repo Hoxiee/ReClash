@@ -67,5 +67,9 @@
   "urlSchemeTooLarge": "Le lien dépasse 4 Mo ou sa configuration intégrée dépasse 2 Mo.",
   "urlSchemeTooDeep": "Le lien contient trop d’enveloppes imbriquées.",
   "urlSchemeUnsupportedEncryption": "Cette version de chiffrement n’est pas prise en charge. Demandez un lien d’abonnement non chiffré.",
-  "urlSchemeAuthenticationFailed": "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé."
+  "urlSchemeAuthenticationFailed": "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé.",
+  "telegramLinkTitle": "Telegram",
+  "telegramOpen": "Ouvrir Telegram",
+  "telegramWebFallback": "Ouvrir dans le navigateur",
+  "telegramAppUnavailable": "Impossible d’ouvrir Telegram sur cet appareil."
 }

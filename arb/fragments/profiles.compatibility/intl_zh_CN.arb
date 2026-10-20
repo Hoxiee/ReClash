@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "购买流量",
   "subscriptionProviderAccount": "账户",
   "subscriptionProviderLogo": "徽标链接",
-  "subscriptionUseProviderInterval": "使用服务提供方的更新间隔"
+  "subscriptionUseProviderInterval": "使用服务提供方的更新间隔",
+  "subscriptionDeviceLimit": "此订阅没有可用的设备名额。请在服务提供商账户中移除一台设备后重试。",
+  "subscriptionDeviceRequired": "此订阅需要注册设备，请按照服务提供商的说明操作。",
+  "profileBatchResult": "已添加：{added}；已跳过：{skipped}；失败：{failed}。",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }

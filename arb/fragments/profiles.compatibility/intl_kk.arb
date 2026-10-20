@@ -61,5 +61,15 @@
   "subscriptionProviderBuyTraffic": "Трафик сатып алу",
   "subscriptionProviderAccount": "Тіркелгі",
   "subscriptionProviderLogo": "Логотип сілтемесі",
-  "subscriptionUseProviderInterval": "Провайдердің жаңарту аралығын пайдалану"
+  "subscriptionUseProviderInterval": "Провайдердің жаңарту аралығын пайдалану",
+  "subscriptionDeviceLimit": "Бұл жазылымда бос құрылғы орны жоқ. Провайдер тіркелгісінен құрылғыны өшіріп, қайта көріңіз.",
+  "subscriptionDeviceRequired": "Бұл жазылым құрылғыны тіркеуді талап етеді. Провайдердің нұсқауларын орындаңыз.",
+  "profileBatchResult": "Қосылды: {added}; өткізілді: {skipped}; сәтсіз: {failed}.",
+  "@profileBatchResult": {
+    "placeholders": {
+      "added": {"type": "int"},
+      "skipped": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  }
 }
