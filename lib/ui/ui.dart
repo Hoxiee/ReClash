@@ -72,6 +72,7 @@ export 'spring.dart';
 export 'super_reorderable_list.dart';
 export 'surface.dart';
 export 'switch.dart';
+export 'tab_motion.dart';
 export 'table_layout.dart';
 export 'text.dart';
 export 'text_loupe.dart';

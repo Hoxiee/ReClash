@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/ui/code_label.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -37,9 +38,9 @@ class UrlSchemePreview extends StatelessWidget {
                       .of(context)
                       .copyWith(color: context.colorScheme.onSurfaceVariant),
                 )
-              : SelectableText(
+              : CodeLabel(
                   value.length > 4096 ? '${value.substring(0, 4096)}…' : value,
-                  style: AppTextStyle.footnote.of(context).toJetBrainsMono,
+                  selectable: true,
                 ),
         ),
       ],

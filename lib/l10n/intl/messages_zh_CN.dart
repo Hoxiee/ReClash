@@ -1100,6 +1100,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("更多"),
     "name": MessageLookupByLibrary.simpleMessage("名称"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("底栏"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("导航"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage("标签栏"),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage("侧边栏"),
     "network": MessageLookupByLibrary.simpleMessage("网络"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -1997,35 +2000,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("允许自动安装"),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "这些偏好不会授予 Android 安装应用的权限。你可以随时更改。",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash 可以安装已验证且符合条件的稳定更新，无需每次询问。它绝不会断开你的 VPN。Android 仍可能要求确认安装。",
     ),
     "updateAutoConsentTitle": MessageLookupByLibrary.simpleMessage("允许自动安装吗？"),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage("自动安装"),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "仅在 VPN 关闭时安装符合条件的稳定更新。重要变更始终等待你确认。",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "关闭此窗口不会停止下载。",
-    ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateChannel": MessageLookupByLibrary.simpleMessage("更新通道"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("预发布版"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("正式版"),
     "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("自动检查"),
-    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新。"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("无法检查更新"),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "请检查连接后重试。",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "在 ReClash 运行时定期检查。更新会显示在主页，不会自动打开窗口。",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "正在所选更新渠道中查找新版本。",
-    ),
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage("正在检查更新…"),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage("关闭窗口"),
     "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
       "Android 需要你的批准。继续以打开系统确认界面。",
@@ -2046,25 +2035,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDoNotEnable": MessageLookupByLibrary.simpleMessage("保持手动安装"),
     "updateDownloadAction": MessageLookupByLibrary.simpleMessage("下载更新"),
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("重新下载"),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "可以关闭此窗口。进度仍会显示在主页。",
-    ),
-    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新"),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "已下载的部分已保存。请检查连接，然后继续下载。",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "已安装的版本保持不变。",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("知道了"),
-    "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序。"),
+    "updateInstallFailed": MessageLookupByLibrary.simpleMessage("无法启动软件包安装程序"),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android 未完成安装。准备好后请重试。",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("立即安装"),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash 现在使用新版本。",
-    ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("更新已安装"),
     "updateInstalledVersion": m99,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
@@ -2072,13 +2052,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("正在安装更新"),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage("当前已是最新版本。"),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("暂不"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("更新内容"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage("暂无发布说明。"),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "下载不会安装更新，也不会中断 VPN。",
-    ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage("有可用更新"),
     "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
       "打开 Android 设置",
@@ -2092,11 +2067,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "完整性、应用身份和签名已验证",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("版本"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("暂停"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "已下载的部分已保存。准备好后可继续。",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage("下载已暂停"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "请允许 ReClash 安装来自此来源的应用，然后返回继续。",
@@ -2107,18 +2078,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "分别设置检查、下载和安装。",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage("按你的方式更新"),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "偏好未保存。请重试；自动安装尚未启用。",
     ),
     "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("更新偏好"),
     "updatePreload": MessageLookupByLibrary.simpleMessage("通过 Wi-Fi 预下载"),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "通过 Wi-Fi 下载可用更新。离开 Wi-Fi 后会暂停自动下载。",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "安装包已通过所有检查。现在安装或留待以后。",
-    ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("可以安装了"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("版本详情"),
     "updateRemainingTime": m101,
@@ -2132,23 +2096,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("显示所有更改"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("更新"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "未通过验证的安装包绝不会被安装。",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage("无法验证下载更新的完整性。"),
     "updateVerifyFailedDescription": MessageLookupByLibrary.simpleMessage(
       "文件、版本或签名未通过检查。请重新下载后再试。",
     ),
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage("无法安装此安装包"),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "安装前检查文件、应用版本和签名证书。",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("正在检查更新"),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "安装会短暂关闭 ReClash。只有在可以中断连接时才断开。",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "安装会短暂关闭应用。未经确认不会停止 VPN。",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPN 仍在运行"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
@@ -2157,20 +2112,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlScheme": MessageLookupByLibrary.simpleMessage("URL 方案"),
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("操作"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("添加订阅"),
-    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "通过 HTTP 或 HTTPS 订阅 URL 创建配置文件，可选填名称。",
-    ),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage("添加订阅 URL，可选名称。"),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "无法验证加密链接。它可能已损坏或使用了其他密钥。",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("生成链接"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "仅包含此操作所需的字段。配置链接包含全部内容，不能绕过确认。",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage("关闭应用"),
-    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "遵循关闭设置：隐藏窗口或退出 ReClash。Android 使用常规应用关闭行为。",
-    ),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage("按设置的关闭行为操作。"),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "粘贴 YAML 或 JSON 配置",
@@ -2179,12 +2127,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("外部应用命令"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "外部连接和关闭命令需要确认。使用连接命令前，请先完成初始设置。",
+      "外部链接的连接和关闭命令需要确认。",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("连接"),
-    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "使用所选配置文件和当前覆盖范围设置启动连接。",
-    ),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage("使用所选配置连接。"),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("连接"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("内容格式"),
     "urlSchemeConversionWarning": MessageLookupByLibrary.simpleMessage(
@@ -2197,14 +2143,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("断开连接"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "停止当前连接，不更改所选配置文件。",
+      "停止连接，保留所选配置。",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("内嵌配置"),
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("示例配置文件"),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("格式"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "链接格式。请将占位符替换为你的 URL 或数据。",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("导入配置"),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "导入以 Base64 嵌入链接的 UTF-8 配置，可选填名称。",
+      "将 YAML 或 JSON 配置嵌入链接。",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("检查链接"),
     "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage("粘贴应用或配置文件链接"),
@@ -2217,10 +2167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage("检查结果"),
     "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage("安装配置"),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "使用 Clash 客户端支持的 install-config 链接格式导入订阅。",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "将 ReClash 与快捷方式、网站和其他应用连接。生成可直接使用的链接，或在打开前检查链接。",
+      "使用 Clash 客户端通用的订阅链接格式。",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "内嵌配置不是有效的 UTF-8 Base64 数据。",
@@ -2240,21 +2187,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeNoExecution": MessageLookupByLibrary.simpleMessage("未执行任何操作。"),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("显示应用"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "将 ReClash 置于前台，不更改连接状态。",
+      "将 ReClash 显示在前台。",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("参数"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "无法读取剪贴板。请手动粘贴链接。",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("链接预览"),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("链接"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "填写必填字段后即可预览链接。",
+      "输入 URL 或配置以生成链接。",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "链接可能包含访问令牌或代理凭据。请仅与可信的人分享；ReClash 不保存链接历史。",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "配置文件命令会打开链接生成器。外部导入需要确认，并保留现有的验证和转换检查。",
+      "链接可能包含令牌或凭据，请谨慎分享。",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("配置文件"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("代理分享链接"),
@@ -2263,12 +2207,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "使用外部连接命令前，请先完成连接设置。",
     ),
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage("支持的导入链接"),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Clash 链接、INCY 和 Happ 封装链接及代理分享链接也可用于手动导入和 QR 扫描。未知的加密版本会被拒绝。",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切换连接"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "停止时连接，运行时断开。确认框会显示实际操作。",
+      "未连接时连接，已连接时断开。",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage("链接的嵌套封装层数过多。"),
     "urlSchemeTooLarge": MessageLookupByLibrary.simpleMessage(
@@ -2281,9 +2222,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "不支持此加密版本。请索取普通订阅链接。",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("使用示例"),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "订阅链接、内嵌配置和 INCY crypt1",
-    ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),

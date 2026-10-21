@@ -9076,30 +9076,20 @@ class AppLocalizations {
     );
   }
 
-  /// `You're already using the latest version.`
-  String get updateNoUpdates {
-    return Intl.message(
-      'You\'re already using the latest version.',
-      name: 'updateNoUpdates',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Couldn't check for updates.`
+  /// `Couldn't check for updates`
   String get updateCheckFailed {
     return Intl.message(
-      'Couldn\'t check for updates.',
+      'Couldn\'t check for updates',
       name: 'updateCheckFailed',
       desc: '',
       args: [],
     );
   }
 
-  /// `Couldn't download the update.`
+  /// `Couldn't download the update`
   String get updateDownloadFailed {
     return Intl.message(
-      'Couldn\'t download the update.',
+      'Couldn\'t download the update',
       name: 'updateDownloadFailed',
       desc: '',
       args: [],
@@ -9116,10 +9106,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Couldn't start the package installer.`
+  /// `Couldn't start the package installer`
   String get updateInstallFailed {
     return Intl.message(
-      'Couldn\'t start the package installer.',
+      'Couldn\'t start the package installer',
       name: 'updateInstallFailed',
       desc: '',
       args: [],
@@ -9151,16 +9141,6 @@ class AppLocalizations {
     return Intl.message(
       'Downloading update',
       name: 'downloadingUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `What's new`
-  String get updateNotesHeading {
-    return Intl.message(
-      'What\'s new',
-      name: 'updateNotesHeading',
       desc: '',
       args: [],
     );
@@ -9231,16 +9211,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Version`
-  String get updatePackageVersion {
-    return Intl.message(
-      'Version',
-      name: 'updatePackageVersion',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Device build`
   String get updatePackageDevice {
     return Intl.message(
@@ -9301,16 +9271,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Updates, your way`
-  String get updatePreferencesIntro {
-    return Intl.message(
-      'Updates, your way',
-      name: 'updatePreferencesIntro',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Choose checking, downloading and installation separately.`
   String get updatePreferencesDescription {
     return Intl.message(
@@ -9331,16 +9291,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Check periodically while ReClash is running. An update appears on the dashboard, without opening a window.`
-  String get updateCheckQuietly {
-    return Intl.message(
-      'Check periodically while ReClash is running. An update appears on the dashboard, without opening a window.',
-      name: 'updateCheckQuietly',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Preload on Wi-Fi`
   String get updatePreload {
     return Intl.message(
@@ -9351,31 +9301,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Download available updates over Wi-Fi. Leaving Wi-Fi pauses automatic downloads.`
-  String get updatePreloadDescription {
-    return Intl.message(
-      'Download available updates over Wi-Fi. Leaving Wi-Fi pauses automatic downloads.',
-      name: 'updatePreloadDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Install automatically`
   String get updateAutoInstall {
     return Intl.message(
       'Install automatically',
       name: 'updateAutoInstall',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Install eligible stable updates only when the VPN is off. Important changes always wait for you.`
-  String get updateAutoInstallDescription {
-    return Intl.message(
-      'Install eligible stable updates only when the VPN is off. Important changes always wait for you.',
-      name: 'updateAutoInstallDescription',
       desc: '',
       args: [],
     );
@@ -9421,16 +9351,6 @@ class AppLocalizations {
     );
   }
 
-  /// `These preferences do not grant Android permission to install apps. You can change them at any time.`
-  String get updateAndroidAutoNote {
-    return Intl.message(
-      'These preferences do not grant Android permission to install apps. You can change them at any time.',
-      name: 'updateAndroidAutoNote',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `On this platform, ReClash opens the release page. Download and install the update yourself.`
   String get updateDesktopDescription {
     return Intl.message(
@@ -9451,31 +9371,11 @@ class AppLocalizations {
     );
   }
 
-  /// `You can close this window. Progress remains on the dashboard.`
-  String get updateDownloadDescription {
-    return Intl.message(
-      'You can close this window. Progress remains on the dashboard.',
-      name: 'updateDownloadDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Download paused`
   String get updatePausedTitle {
     return Intl.message(
       'Download paused',
       name: 'updatePausedTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The downloaded part is saved. Resume when you're ready.`
-  String get updatePausedDescription {
-    return Intl.message(
-      'The downloaded part is saved. Resume when you\'re ready.',
-      name: 'updatePausedDescription',
       desc: '',
       args: [],
     );
@@ -9491,31 +9391,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Checking the file, app version and signing certificate before installation.`
-  String get updateVerifyingDescription {
-    return Intl.message(
-      'Checking the file, app version and signing certificate before installation.',
-      name: 'updateVerifyingDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Ready to install`
   String get updateReadyTitle {
     return Intl.message(
       'Ready to install',
       name: 'updateReadyTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The package has passed all checks. Install now or keep it for later.`
-  String get updateReadyDescription {
-    return Intl.message(
-      'The package has passed all checks. Install now or keep it for later.',
-      name: 'updateReadyDescription',
       desc: '',
       args: [],
     );
@@ -9601,21 +9481,21 @@ class AppLocalizations {
     );
   }
 
-  /// `ReClash is now using the new version.`
-  String get updateInstalledDescription {
-    return Intl.message(
-      'ReClash is now using the new version.',
-      name: 'updateInstalledDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `You're up to date`
   String get updateCurrentTitle {
     return Intl.message(
       'You\'re up to date',
       name: 'updateCurrentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking for updates…`
+  String get updateCheckingTitle {
+    return Intl.message(
+      'Checking for updates…',
+      name: 'updateCheckingTitle',
       desc: '',
       args: [],
     );
@@ -9666,16 +9546,6 @@ class AppLocalizations {
     return Intl.message(
       'Android did not complete the installation. Try again when you\'re ready.',
       name: 'updateInstallFailedDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Looking for a newer version on your selected channel.`
-  String get updateCheckingDescription {
-    return Intl.message(
-      'Looking for a newer version on your selected channel.',
-      name: 'updateCheckingDescription',
       desc: '',
       args: [],
     );
@@ -9816,56 +9686,6 @@ class AppLocalizations {
     return Intl.message('Got it', name: 'updateGotIt', desc: '', args: []);
   }
 
-  /// `Downloading does not install the update or interrupt your VPN.`
-  String get updateOfferDownloadNote {
-    return Intl.message(
-      'Downloading does not install the update or interrupt your VPN.',
-      name: 'updateOfferDownloadNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Closing this window does not stop the download.`
-  String get updateBackgroundNote {
-    return Intl.message(
-      'Closing this window does not stop the download.',
-      name: 'updateBackgroundNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Installation will briefly close the app. Your VPN will not be stopped without your confirmation.`
-  String get updateVpnInstallNote {
-    return Intl.message(
-      'Installation will briefly close the app. Your VPN will not be stopped without your confirmation.',
-      name: 'updateVpnInstallNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A package that fails verification will never be installed.`
-  String get updateVerificationGuard {
-    return Intl.message(
-      'A package that fails verification will never be installed.',
-      name: 'updateVerificationGuard',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Your installed version remains unchanged.`
-  String get updateExistingVersionSafe {
-    return Intl.message(
-      'Your installed version remains unchanged.',
-      name: 'updateExistingVersionSafe',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `A verified download for this device is unavailable. Open the release page to choose a package.`
   String get updateDirectUnavailable {
     return Intl.message(
@@ -9925,16 +9745,6 @@ class AppLocalizations {
     return Intl.message('URL scheme', name: 'urlScheme', desc: '', args: []);
   }
 
-  /// `Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.`
-  String get urlSchemeIntro {
-    return Intl.message(
-      'Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.',
-      name: 'urlSchemeIntro',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Connection`
   String get urlSchemeConnection {
     return Intl.message(
@@ -9955,21 +9765,11 @@ class AppLocalizations {
     );
   }
 
-  /// `External connection and close commands require confirmation. Finish setup before using connection commands.`
+  /// `External connection and close commands ask for confirmation.`
   String get urlSchemeConfirmationTip {
     return Intl.message(
-      'External connection and close commands require confirmation. Finish setup before using connection commands.',
+      'External connection and close commands ask for confirmation.',
       name: 'urlSchemeConfirmationTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.`
-  String get urlSchemeProfileCommandsTip {
-    return Intl.message(
-      'Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.',
-      name: 'urlSchemeProfileCommandsTip',
       desc: '',
       args: [],
     );
@@ -9980,26 +9780,6 @@ class AppLocalizations {
     return Intl.message(
       'Supported import links',
       name: 'urlSchemeSupportedLinks',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.`
-  String get urlSchemeSupportedLinksTip {
-    return Intl.message(
-      'Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.',
-      name: 'urlSchemeSupportedLinksTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Subscription links, embedded configs and INCY crypt1`
-  String get urlSchemeWrappedLinks {
-    return Intl.message(
-      'Subscription links, embedded configs and INCY crypt1',
-      name: 'urlSchemeWrappedLinks',
       desc: '',
       args: [],
     );
@@ -10025,10 +9805,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Start the connection using the selected profile and your current coverage settings.`
+  /// `Connect with the selected profile.`
   String get urlSchemeConnectDesc {
     return Intl.message(
-      'Start the connection using the selected profile and your current coverage settings.',
+      'Connect with the selected profile.',
       name: 'urlSchemeConnectDesc',
       desc: '',
       args: [],
@@ -10045,10 +9825,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Stop the current connection without changing the selected profile.`
+  /// `Stop the connection; keep the selected profile.`
   String get urlSchemeDisconnectDesc {
     return Intl.message(
-      'Stop the current connection without changing the selected profile.',
+      'Stop the connection; keep the selected profile.',
       name: 'urlSchemeDisconnectDesc',
       desc: '',
       args: [],
@@ -10065,10 +9845,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Connect when stopped; disconnect when running. Confirmation names the actual action.`
+  /// `Connect if stopped; disconnect if running.`
   String get urlSchemeToggleDesc {
     return Intl.message(
-      'Connect when stopped; disconnect when running. Confirmation names the actual action.',
+      'Connect if stopped; disconnect if running.',
       name: 'urlSchemeToggleDesc',
       desc: '',
       args: [],
@@ -10085,10 +9865,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Bring ReClash to the foreground without changing the connection.`
+  /// `Bring ReClash to the foreground.`
   String get urlSchemeOpenDesc {
     return Intl.message(
-      'Bring ReClash to the foreground without changing the connection.',
+      'Bring ReClash to the foreground.',
       name: 'urlSchemeOpenDesc',
       desc: '',
       args: [],
@@ -10105,10 +9885,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.`
+  /// `Use your configured close behavior.`
   String get urlSchemeCloseDesc {
     return Intl.message(
-      'Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.',
+      'Use your configured close behavior.',
       name: 'urlSchemeCloseDesc',
       desc: '',
       args: [],
@@ -10125,10 +9905,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Create a profile from an HTTP or HTTPS subscription URL, with an optional name.`
+  /// `Add a subscription URL with an optional name.`
   String get urlSchemeAddDesc {
     return Intl.message(
-      'Create a profile from an HTTP or HTTPS subscription URL, with an optional name.',
+      'Add a subscription URL with an optional name.',
       name: 'urlSchemeAddDesc',
       desc: '',
       args: [],
@@ -10145,10 +9925,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Import a UTF-8 configuration carried in the link as Base64, with an optional name.`
+  /// `Embed a YAML or JSON configuration in the link.`
   String get urlSchemeImportDesc {
     return Intl.message(
-      'Import a UTF-8 configuration carried in the link as Base64, with an optional name.',
+      'Embed a YAML or JSON configuration in the link.',
       name: 'urlSchemeImportDesc',
       desc: '',
       args: [],
@@ -10165,10 +9945,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Import a subscription using the install-config link format supported by Clash clients.`
+  /// `Use the subscription link format shared by Clash clients.`
   String get urlSchemeInstallConfigDesc {
     return Intl.message(
-      'Import a subscription using the install-config link format supported by Clash clients.',
+      'Use the subscription link format shared by Clash clients.',
       name: 'urlSchemeInstallConfigDesc',
       desc: '',
       args: [],
@@ -10250,40 +10030,25 @@ class AppLocalizations {
     );
   }
 
-  /// `Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.`
-  String get urlSchemeBuilderTip {
-    return Intl.message(
-      'Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.',
-      name: 'urlSchemeBuilderTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Link preview`
+  /// `Link`
   String get urlSchemePreview {
-    return Intl.message(
-      'Link preview',
-      name: 'urlSchemePreview',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Link', name: 'urlSchemePreview', desc: '', args: []);
   }
 
-  /// `Fill in the required fields to preview the link.`
+  /// `Enter a URL or configuration to build the link.`
   String get urlSchemePreviewEmpty {
     return Intl.message(
-      'Fill in the required fields to preview the link.',
+      'Enter a URL or configuration to build the link.',
       name: 'urlSchemePreviewEmpty',
       desc: '',
       args: [],
     );
   }
 
-  /// `A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.`
+  /// `Links may contain tokens or credentials. Share with care.`
   String get urlSchemePrivateLinkTip {
     return Intl.message(
-      'A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.',
+      'Links may contain tokens or credentials. Share with care.',
       name: 'urlSchemePrivateLinkTip',
       desc: '',
       args: [],
@@ -10610,6 +10375,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Formats`
+  String get urlSchemeFormats {
+    return Intl.message(
+      'Formats',
+      name: 'urlSchemeFormats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link formats. Replace placeholders with your URL or data.`
+  String get urlSchemeFormatsTip {
+    return Intl.message(
+      'Link formats. Replace placeholders with your URL or data.',
+      name: 'urlSchemeFormatsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Theme`
   String get appearanceTheme {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
@@ -10880,6 +10665,36 @@ class AppLocalizations {
     return Intl.message(
       'Image unavailable',
       name: 'wallpaperUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Navigation`
+  String get navigationLayout {
+    return Intl.message(
+      'Navigation',
+      name: 'navigationLayout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tab bar`
+  String get navigationLayoutBar {
+    return Intl.message(
+      'Tab bar',
+      name: 'navigationLayoutBar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sidebar`
+  String get navigationLayoutSidebar {
+    return Intl.message(
+      'Sidebar',
+      name: 'navigationLayoutSidebar',
       desc: '',
       args: [],
     );

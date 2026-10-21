@@ -68,8 +68,9 @@ Future<_Harness> _mount(
   PageLabel selected = PageLabel.dashboard,
   bool reducedMotion = false,
   bool withShortcutManager = false,
+  Size size = const Size(500, 800),
 }) async {
-  tester.view.physicalSize = const Size(500, 800);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   tester.platformDispatcher.accessibilityFeaturesTestValue =
       FakeAccessibilityFeatures(disableAnimations: reducedMotion);
@@ -87,7 +88,7 @@ Future<_Harness> _mount(
   );
   addTearDown(container.dispose);
   globalState.container = container;
-  container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+  container.read(viewSizeProvider.notifier).value = size;
   final itemNotifier = container.read(_itemsProvider.notifier)..set(items);
 
   final Widget home = withShortcutManager
@@ -457,5 +458,94 @@ void main() {
     await harness.show(PageLabel.dashboard);
     expect(inits, [PageLabel.dashboard.index, PageLabel.profiles.index]);
     expect(find.text('count:1'), findsOneWidget);
+  });
+
+  testWidgets('the sidebar slides the pages vertically, touching', (
+    tester,
+  ) async {
+    final harness = await _mount(
+      tester,
+      items: [dashboard, proxies, profiles],
+      size: const Size(1200, 800),
+    );
+    harness.container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
+    await tester.pump();
+    final rest = tester.getCenter(find.text('page:dashboard'));
+    harness.container
+        .read(currentPageLabelProvider.notifier)
+        .toPage(PageLabel.profiles);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 70));
+    final outgoing = tester.getCenter(find.text('page:dashboard'));
+    final incoming = tester.getCenter(find.text('page:profiles'));
+    expect(outgoing.dx, rest.dx);
+    expect(incoming.dx, rest.dx);
+    expect(outgoing.dy, lessThan(rest.dy));
+    expect(incoming.dy, greaterThan(rest.dy));
+    expect(incoming.dy - outgoing.dy, moreOrLessEquals(800, epsilon: 0.01));
+    await tester.pumpAndSettle();
+    expect(find.text('page:dashboard'), findsNothing);
+    expect(tester.getCenter(find.text('page:profiles')), rest);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'a switch interrupted for a third page keeps the pages touching',
+    (tester) async {
+      final harness = await _mount(
+        tester,
+        items: [dashboard, proxies, profiles, tools],
+      );
+      harness.container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(tabAnimation: TabAnimation.slide));
+      await tester.pump();
+      final rest = tester.getCenter(find.text('page:dashboard'));
+      final notifier = harness.container.read(
+        currentPageLabelProvider.notifier,
+      );
+      notifier.toPage(PageLabel.proxies);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      notifier.toPage(PageLabel.tools);
+      await tester.pump();
+      for (var frame = 0; frame < 6; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        final first = tester.getCenter(find.text('page:dashboard')).dx;
+        final second = tester.getCenter(find.text('page:proxies')).dx;
+        final third = tester.getCenter(find.text('page:tools')).dx;
+        expect(second - first, moreOrLessEquals(500, epsilon: 0.01));
+        expect(third - second, moreOrLessEquals(500, epsilon: 0.01));
+      }
+      await tester.pumpAndSettle();
+      expect(find.text('page:dashboard'), findsNothing);
+      expect(find.text('page:proxies'), findsNothing);
+      expect(tester.getCenter(find.text('page:tools')), rest);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('the bar layout keeps the bottom bar at desktop width', (
+    tester,
+  ) async {
+    final harness = await _mount(
+      tester,
+      items: [dashboard, proxies, profiles],
+      size: const Size(1200, 800),
+    );
+    expect(find.byType(NavigationDock), findsNothing);
+    harness.container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(navigationLayout: NavigationLayout.bar),
+        );
+    await tester.pumpAndSettle();
+    expect(harness.container.read(isMobileViewProvider), isTrue);
+    expect(find.byType(NavigationDock), findsOneWidget);
+    await harness.show(PageLabel.profiles);
+    expect(find.text('page:profiles'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

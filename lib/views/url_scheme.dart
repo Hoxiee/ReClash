@@ -7,6 +7,8 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/url_scheme/form.dart';
 import 'package:reclash/features/url_scheme/inspect.dart';
+import 'package:reclash/widgets/url_scheme_supported_links.dart';
+import 'package:reclash/ui/code_label.dart';
 import 'package:reclash/widgets/url_scheme_labels.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
@@ -81,36 +83,52 @@ class UrlSchemeView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(l.urlSchemeIntro, style: AppTextStyle.body.of(context)),
               section(l.urlSchemeConnection, const [
                 ReClashCommand.connect,
                 ReClashCommand.disconnect,
                 ReClashCommand.toggle,
+              ]),
+              section(l.app, const [
+                ReClashCommand.open,
+                ReClashCommand.close,
               ], footer: l.urlSchemeConfirmationTip),
-              section(l.app, const [ReClashCommand.open, ReClashCommand.close]),
               section(l.urlSchemeProfiles, const [
                 ReClashCommand.add,
                 ReClashCommand.importProfile,
                 ReClashCommand.installConfig,
-              ], footer: l.urlSchemeProfileCommandsTip),
+              ]),
               generateSection(
                 title: l.urlSchemeSupportedLinks,
-                footer: l.urlSchemeSupportedLinksTip,
                 items: [
-                  const DecorationListItem(
-                    leading: GlyphIcon(AppGlyphs.link),
-                    title: Text('Clash, ClashMeta, ReClash'),
-                    subtitle: Text('install-config'),
+                  UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.link,
+                    title: 'Clash, ClashMeta, ReClash',
+                    formats: [
+                      for (final scheme in configProtocolSchemes)
+                        '$scheme://install-config?url={url}',
+                    ],
                   ),
-                  DecorationListItem(
-                    leading: const GlyphIcon(AppGlyphs.lock),
-                    title: const Text('INCY, Happ'),
-                    subtitle: Text(l.urlSchemeWrappedLinks),
+                  const UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.lock,
+                    title: 'INCY',
+                    formats: [
+                      'incy://add/{url-or-base64}',
+                      'incy://import/{url-or-base64}',
+                      'incy://crypt1/{encrypted}',
+                    ],
                   ),
-                  DecorationListItem(
-                    leading: const GlyphIcon(AppGlyphs.vpn),
-                    title: Text(l.urlSchemeProxyLinks),
-                    subtitle: Text(shareProtocolSchemes.join(', ')),
+                  const UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.link,
+                    title: 'Happ',
+                    formats: ['happ://add/{url-or-base64}'],
+                  ),
+                  UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.vpn,
+                    title: l.urlSchemeProxyLinks,
+                    formats: [
+                      for (final scheme in shareProtocolSchemes)
+                        '$scheme://{data}',
+                    ],
                   ),
                 ],
               ),
@@ -123,34 +141,39 @@ class UrlSchemeView extends StatelessWidget {
 
   Widget _commandRow(BuildContext context, ReClashCommand command) {
     final l = context.appLocalizations;
-    return DecorationListItem(
+    final row = DecorationListItem(
       leading: GlyphIcon(urlSchemeCommandGlyph(command)),
-      title: Text(urlSchemeCommandLabel(command, l)),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 4,
-        children: [
-          Text(urlSchemeCommandDescription(command, l)),
-          if (!command.isProfile)
-            Text(
-              'reclash://${command.host}',
-              style: AppTextStyle.footnote.of(context).toJetBrainsMono,
-            ),
-        ],
+      title: LayoutBuilder(
+        builder: (context, constraints) {
+          final title = Text(urlSchemeCommandLabel(command, l));
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          final wide = constraints.maxWidth >= 420 * scale;
+          final link = CodeLabel(
+            'reclash://${command.host}',
+            maxLines: wide ? 1 : null,
+          );
+          return wide
+              ? Row(
+                  spacing: 16,
+                  children: [
+                    Expanded(child: title),
+                    link,
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 6,
+                  children: [title, link],
+                );
+        },
       ),
-      onPressed: command.isProfile ? () => _buildLink(context, command) : null,
+      onPressed: command.isProfile
+          ? () => _buildLink(context, command)
+          : () => unawaited(_copy(context, 'reclash://${command.host}')),
       trailing: command.isProfile
-          ? const GlyphIcon(AppGlyphs.chevronForward, size: 16)
-          : TonalButtonTheme(
-              size: TonalButtonSize.section,
-              child: ElasticPress(
-                child: IconButton(
-                  tooltip: l.copy,
-                  onPressed: () => _copy(context, 'reclash://${command.host}'),
-                  icon: const GlyphIcon(AppGlyphs.copy),
-                ).withAppTooltip(),
-              ),
-            ),
+          ? const DisclosureIndicator()
+          : const GlyphIcon(AppGlyphs.copy),
     );
+    return command.isProfile ? row : Tooltip(message: l.copy, child: row);
   }
 }

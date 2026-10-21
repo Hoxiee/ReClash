@@ -74,6 +74,14 @@ class AddProfileMenu extends ConsumerWidget {
       withAgeSecretKey: true,
       urlMaxLength: urlSchemeMaxLength,
       onBatchSkipped: (value) => skippedExisting = value,
+      ageFollowUpBuilder: (context, rebuild) => SubscriptionSendHwidRow(
+        value: clientSettings.sendDeviceIdentity,
+        onChanged: (value) {
+          clientSettings = clientSettings.copyWith(sendDeviceIdentity: value);
+          clientSettingsExplicit = true;
+          rebuild();
+        },
+      ),
       additionalValidator: () => clientSettings.isValid
           ? null
           : appLocalizations.subscriptionClientCustomUserAgentInvalid,

@@ -39,6 +39,13 @@ _AppSettingProps _$AppSettingPropsFromJson(
       ) ??
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
+  navigationLayout:
+      $enumDecodeNullable(
+        _$NavigationLayoutEnumMap,
+        json['navigationLayout'],
+        unknownValue: NavigationLayout.auto,
+      ) ??
+      NavigationLayout.auto,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   autoDownloadUpdate: json['autoDownloadUpdate'] as bool? ?? false,
   autoInstallUpdate: json['autoInstallUpdate'] as bool? ?? false,
@@ -129,6 +136,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'delayTestTimeout': instance.delayTestTimeout,
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
+      'navigationLayout': _$NavigationLayoutEnumMap[instance.navigationLayout]!,
       'autoCheckUpdate': instance.autoCheckUpdate,
       'autoDownloadUpdate': instance.autoDownloadUpdate,
       'autoInstallUpdate': instance.autoInstallUpdate,
@@ -165,6 +173,12 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
 const _$TabAnimationEnumMap = {
   TabAnimation.slide: 'slide',
   TabAnimation.fade: 'fade',
+};
+
+const _$NavigationLayoutEnumMap = {
+  NavigationLayout.auto: 'auto',
+  NavigationLayout.bar: 'bar',
+  NavigationLayout.sidebar: 'sidebar',
 };
 
 const _$RestoreStrategyEnumMap = {

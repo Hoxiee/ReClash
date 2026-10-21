@@ -5,6 +5,7 @@ risk: routine
 must:
   application: About, setup wizard and desktop integrations use the current glyph on the established icon paths; Windows ICOs have no background.
   mark: Android vectors and normal tray sources retain the shared three-bar mark, with monochrome themed and notification icons.
+  launcher: Android adaptive foreground and monochrome layers stay centered with padding inside the 66 dp circular safe zone.
   website: Website header, footer and favicon use the same current glyph as application icon generation.
   television: TV uses a full-bleed 320x180 launcher banner from self-contained vector artwork with an outlined ReClash wordmark.
 watch:
@@ -35,3 +36,4 @@ watch:
   - test/tool/ico_test.dart
 checks:
   identity: [application, mark, website, television]
+  tests: [launcher]

@@ -1,3 +1,4 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/tools.dart';
@@ -18,6 +19,7 @@ class ToolCommands extends _$ToolCommands {
   Future<bool> execute(
     ToolCommand command, {
     required Future<bool> Function() confirm,
+    BuildContext? context,
   }) async {
     if (state.contains(command) || !available(command)) return false;
     state = {...state, command};
@@ -26,7 +28,11 @@ class ToolCommands extends _$ToolCommands {
       if (!ref.mounted || !available(command)) return false;
       switch (command) {
         case ToolCommand.checkUpdates:
-          await ref.read(commonActionProvider.notifier).checkForUpdates();
+          await ref
+              .read(commonActionProvider.notifier)
+              .checkForUpdates(
+                context != null && context.mounted ? context : null,
+              );
         case ToolCommand.updateResources:
           final failures = await ref
               .read(resourcesActionProvider.notifier)

@@ -43,6 +43,7 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   bool allowDuplicates = false,
   bool withAgeSecretKey = false,
   int urlMaxLength = TextInputLimits.url,
+  Widget Function(BuildContext, VoidCallback)? ageFollowUpBuilder,
   Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder,
   String? Function()? additionalValidator,
   ValueChanged<int>? onBatchSkipped,
@@ -60,6 +61,7 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
       allowDuplicates: allowDuplicates,
       withAgeSecretKey: withAgeSecretKey,
       urlMaxLength: urlMaxLength,
+      ageFollowUpBuilder: ageFollowUpBuilder,
       additionalSectionsBuilder: additionalSectionsBuilder,
       additionalValidator: additionalValidator,
       onBatchSkipped: onBatchSkipped,
@@ -83,6 +85,7 @@ class NamedUrlForm extends StatefulWidget {
   final Set<String> existingUrls;
   final bool allowDuplicates;
   final bool withAgeSecretKey;
+  final Widget Function(BuildContext, VoidCallback)? ageFollowUpBuilder;
   final int urlMaxLength;
   final Widget Function(BuildContext, VoidCallback)? additionalSectionsBuilder;
   final String? Function()? additionalValidator;
@@ -101,6 +104,7 @@ class NamedUrlForm extends StatefulWidget {
     this.existingUrls = const {},
     this.allowDuplicates = false,
     this.withAgeSecretKey = false,
+    this.ageFollowUpBuilder,
     this.urlMaxLength = TextInputLimits.url,
     this.additionalSectionsBuilder,
     this.additionalValidator,
@@ -317,12 +321,16 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
                     textInputAction: TextInputAction.done,
                   ),
                 ),
+                if (widget.ageFollowUpBuilder case final builder?)
+                  builder(context, () => setState(() {})),
               ],
             ),
         ] else
           _buildFields(appLocalizations, issue?.field),
-        if (widget.additionalSectionsBuilder case final builder?)
+        if (widget.additionalSectionsBuilder case final builder?) ...[
+          const SizedBox(height: 24),
           builder(context, () => _handleChanged('')),
+        ],
       ],
     );
   }
@@ -380,6 +388,9 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
               onFieldSubmitted: (_) => _handleSubmit(),
             ),
           ),
+        if (widget.withAgeSecretKey)
+          if (widget.ageFollowUpBuilder case final builder?)
+            builder(context, () => setState(() {})),
       ],
     );
   }

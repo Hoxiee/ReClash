@@ -25,7 +25,10 @@ Do not use this for README translation sync or manual edits to generated localiz
 5. Replace inline strings with existing project accessors:
    - Widgets with `BuildContext`: `context.appLocalizations.key` from `lib/common/context.dart`.
    - Controllers/providers/non-widget code: `currentAppLocalizations.key` from `lib/common/app_localizations.dart`.
-6. Assemble and regenerate:
+6. Prefer `dart run tool/l10n.dart apply <spec.json>`: it writes every locale of the fragment, validates locales,
+   placeholders, and ownership, then assembles and regenerates in one step. Use `find`/`get` to reuse existing keys
+   and `audit --fragment <feature>` afterwards; never read generated `lib/l10n/` files. By hand, assemble and
+   regenerate:
 
    ```bash
    dart run tool/assemble_l10n.dart

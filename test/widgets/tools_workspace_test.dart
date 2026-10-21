@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:code_forge/code_forge.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:reclash/core/controller.dart';
@@ -46,6 +47,7 @@ import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_database_providers.dart';
 import '../helpers/test_profiles.dart';
+import '../plugins/code_forge/support.dart' show initEditorNative, settle;
 
 class _WorkspaceCore extends CoreHandlerInterface {
   @override
@@ -108,6 +110,8 @@ Future<Color> _pixelAt(
 
 void main() {
   late Directory root;
+
+  setUpAll(initEditorNative);
 
   setUp(() async {
     root = await Directory.systemTemp.createTemp('tools_workspace_test');
@@ -973,7 +977,11 @@ void main() {
       (ToolPage.logs, 'Logs'),
     ]) {
       container.read(toolsSessionProvider.notifier).open(ToolRoute(page));
-      await tester.pumpAndSettle();
+      if (page == ToolPage.coreRuntimeConfig) {
+        await settle(tester, 12);
+      } else {
+        await tester.pumpAndSettle();
+      }
       final titleRow = find.byType(AppBar);
       expect(
         find.widgetWithText(TextButton, 'Tools'),
@@ -986,6 +994,10 @@ void main() {
           findsOneWidget,
         );
         final editor = find.byType(EditorView);
+        final controller = tester
+            .widget<CodeForge>(find.byType(CodeForge))
+            .controller;
+        expect(controller.text, 'mode: rule\n');
         expect(tester.getSize(editor).width, greaterThan(paneWidth));
         expect(tester.getSize(editor).height, greaterThan(600));
       } else if (page == ToolPage.coreDetails) {
@@ -1327,6 +1339,95 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ToolsCatalogPanel), findsNothing);
     expect(tester.getSize(detail).width, 1000);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mobile catalogue starts below the app bar and status inset', (
+    tester,
+  ) async {
+    tester.view.padding = const FakeViewPadding(top: 40);
+    addTearDown(tester.view.resetPadding);
+    await pumpTools(tester, size: const Size(420, 860));
+
+    final bar = tester.getRect(find.byType(AppBar));
+    expect(tester.getTopLeft(find.byType(SearchField)).dy, bar.bottom);
+  });
+
+  testWidgets(
+    'mobile page grows out of its row and drags back to the catalogue',
+    (tester) async {
+      final container = await pumpTools(tester, size: const Size(420, 860));
+      final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
+      final rowRect = tester.getRect(row);
+
+      await tester.tap(row);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      final growing = tester.getRect(find.byType(SettingsPageScroll));
+      expect(growing.top, greaterThan(0));
+      expect(growing.top, lessThan(rowRect.top));
+      expect(find.text('Tools'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('Tools'), findsNothing);
+
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, [
+        const ToolRoute(ToolPage.general),
+      ]);
+      expect(find.byType(SearchField), findsNothing);
+
+      final gesture = await tester.startGesture(const Offset(10, 400));
+      for (var step = 0; step < 6; step++) {
+        await gesture.moveBy(const Offset(50, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(find.byType(SearchField), findsOneWidget);
+      expect(find.text('Tools'), findsOneWidget);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      expect(find.byType(SearchField), findsOneWidget);
+    },
+  );
+
+  testWidgets('mobile Back shrinks the page into its row', (tester) async {
+    await pumpTools(tester, size: const Size(420, 860));
+    final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
+    final rowRect = tester.getRect(row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+
+    final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+    await host.handleBack();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+    final shrinking = tester.getRect(find.byType(SettingsPageScroll));
+    expect(shrinking.top, greaterThan(0));
+    expect(shrinking.top, lessThan(rowRect.top));
+    expect(find.text('Tools'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchField), findsOneWidget);
+  });
+
+  testWidgets('desktop Tools routes do not pop on a horizontal drag', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(1200, 900));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+
+    final title = find.text('General').last;
+    final start = tester.getCenter(title);
+    await tester.dragFrom(start, const Offset(600, 0));
+    await tester.pumpAndSettle();
+
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.general),
+    ]);
+    expect(find.byType(ToolsView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

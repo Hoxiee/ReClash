@@ -7,7 +7,6 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -19,11 +18,6 @@ import 'package:reclash/widgets/settings/setting_target.dart';
 
 class ApplicationSettings {
   static final all = <SettingSpec>[
-    SettingSpec(
-      id: 'application.setup',
-      page: ToolPage.application,
-      title: (l) => l.setupRestart,
-    ),
     SettingSpec(
       id: 'application.autoLaunch',
       page: ToolPage.application,
@@ -274,23 +268,7 @@ class ApplicationSettingView extends ConsumerWidget {
               ),
               generateSection(
                 title: l.startupAndBackground,
-                items: [
-                  SettingTarget(
-                    spec: ApplicationSettings.spec('application.setup'),
-                    child: ListItem(
-                      title: Text(l.setupRestart),
-                      subtitle: Text(l.setupFinishDescription),
-                      onTap: () {
-                        Navigator.of(
-                          context,
-                          rootNavigator: true,
-                        ).popUntil((route) => route.isFirst);
-                        ref.read(setupSessionProvider.notifier).reopen();
-                      },
-                    ),
-                  ),
-                  ...startup,
-                ],
+                items: [...startup],
                 footer: [
                   if (system.isDesktop) l.silentLaunchDesc,
                   l.autoRunDesc,
@@ -304,12 +282,12 @@ class ApplicationSettingView extends ConsumerWidget {
               ),
               generateSection(
                 title: l.requestsAndUpdates,
-                items: appOptions.skip(3).take(3),
+                items: appOptions.skip(3).take(4),
                 footer: l.checkCertificateDesc,
               ),
               generateSection(
                 title: l.logsAndDiagnostics,
-                items: appOptions.skip(6),
+                items: appOptions.skip(7),
                 footer: [l.logcatDesc].join('\n'),
               ),
             ],

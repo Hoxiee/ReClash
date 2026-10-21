@@ -1202,6 +1202,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("その他"),
     "name": MessageLookupByLibrary.simpleMessage("名前"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("ボトムバー"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("ナビゲーション"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage("タブバー"),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage("サイドバー"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2199,9 +2202,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("自動インストールを許可"),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "この設定だけではAndroidのアプリインストール権限は付与されません。いつでも変更できます。",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClashは検証済みで条件を満たす安定版を毎回確認せずにインストールできます。VPNを切断することはありません。Androidがインストールの確認を求める場合があります。",
     ),
@@ -2209,12 +2209,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "自動インストールを許可しますか？",
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage("自動でインストール"),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "VPNがオフのときだけ、条件を満たす安定版をインストールします。重要な変更は必ず確認を待ちます。",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "このウィンドウを閉じてもダウンロードは停止しません。",
-    ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "ダウンロードをキャンセル",
     ),
@@ -2222,16 +2216,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("プレリリース"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("リリース"),
     "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("自動で確認"),
-    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("更新を確認できませんでした。"),
+    "updateCheckFailed": MessageLookupByLibrary.simpleMessage("更新を確認できませんでした"),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "接続を確認して、もう一度お試しください。",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "ReClashの実行中に定期的に確認します。ウィンドウは開かず、ダッシュボードに表示します。",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "選択したチャネルで新しいバージョンを確認しています。",
-    ),
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage("アップデートを確認中…"),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage("ウィンドウを閉じる"),
     "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
       "Androidの承認が必要です。続行するとシステムの確認画面を開きます。",
@@ -2258,29 +2247,20 @@ class MessageLookup extends MessageLookupByLibrary {
       "アップデートをダウンロード",
     ),
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("再ダウンロード"),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "このウィンドウは閉じられます。進捗はダッシュボードに残ります。",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "更新をダウンロードできませんでした。",
+      "更新をダウンロードできませんでした",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "ダウンロード済みの部分は保存されています。接続を確認して再開してください。",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "インストール済みのバージョンは変更されません。",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("了解"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "パッケージインストーラーを起動できませんでした。",
+      "パッケージインストーラーを起動できませんでした",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Androidがインストールを完了できませんでした。準備ができたら再試行してください。",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("今すぐインストール"),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClashは新しいバージョンを使用しています。",
-    ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "アップデートをインストールしました",
     ),
@@ -2292,14 +2272,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "アップデートをインストール中",
     ),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです。"),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("今はしない"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("主な変更点"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "リリースノートはありません。",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "ダウンロードではインストールやVPNの中断は行いません。",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage("アップデートがあります"),
     "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
@@ -2316,11 +2291,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "整合性、アプリの識別情報、署名を検証済み",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("バージョン"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("一時停止"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "ダウンロード済みの部分は保存されています。いつでも再開できます。",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage("ダウンロードを一時停止中"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash にこの提供元からのアプリのインストールを許可してから、戻って続行してください。",
@@ -2331,20 +2302,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "確認、ダウンロード、インストールを個別に設定できます。",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "自分に合ったアップデート",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "設定を保存できませんでした。もう一度保存してください。自動インストールは有効になっていません。",
     ),
     "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("アップデート設定"),
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fiで事前ダウンロード"),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "利用可能なアップデートをWi-Fiでダウンロードします。Wi-Fiを離れると自動ダウンロードは一時停止します。",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "すべての検証を通過しました。今すぐインストールするか、あとで行えます。",
-    ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("インストールの準備完了"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("リリースの詳細"),
     "updateRemainingTime": m101,
@@ -2358,9 +2320,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("すべての変更を表示"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("アップデート"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "検証に失敗したパッケージはインストールしません。",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "ダウンロードした更新の整合性を確認できませんでした。",
     ),
@@ -2370,15 +2329,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "このパッケージはインストールできません",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "インストール前にファイル、バージョン、署名証明書を確認しています。",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("アップデートを検証中"),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "インストール中はReClashが一時的に閉じます。接続を中断してよい場合だけ切断してください。",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "インストール中はアプリが一時的に閉じます。確認なしにVPNを停止することはありません。",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPNがまだ動作しています"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
@@ -2388,18 +2341,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("操作"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("サブスクリプションを追加する"),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "HTTPまたはHTTPSのサブスクリプションURLからプロファイルを作成します。名前は省略できます。",
+      "購読URLを追加します。名前は任意です。",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "暗号化リンクを認証できませんでした。破損しているか、異なる鍵を使っている可能性があります。",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("リンクを作成"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "選択した操作に必要な項目だけが含まれます。設定リンクは内容全体を含み、確認を省略することはできません。",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage("アプリを閉じる"),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "終了設定に従ってウィンドウを隠すかReClashを終了します。Androidでは通常のアプリ終了動作に従います。",
+      "設定した終了時の動作を使います。",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -2411,11 +2361,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "外部からのアプリコマンド",
     ),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "外部からの接続・終了コマンドは確認が必要です。接続コマンドを使う前に初期設定を完了してください。",
+      "外部リンクによる接続操作と終了には確認が必要です。",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("接続する"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "選択中のプロファイルと現在の適用範囲設定で接続を開始します。",
+      "選択中のプロファイルで接続します。",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("接続"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("内容の形式"),
@@ -2431,16 +2381,20 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("切断する"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "選択中のプロファイルを変更せずに接続を停止します。",
+      "プロファイルを変えずに接続を停止します。",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("埋め込み設定"),
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
       "サンプルプロファイル",
     ),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("形式"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポートする"),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "リンクにBase64で埋め込まれたUTF-8設定をインポートします。名前は省略できます。",
+      "YAMLまたはJSON設定をリンクに埋め込みます。",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("リンクを確認"),
     "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
@@ -2457,10 +2411,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "設定をインストールする",
     ),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Clashクライアント対応のinstall-config形式でサブスクリプションをインポートします。",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "ReClashをショートカット、ウェブサイト、ほかのアプリと連携させます。すぐ使えるリンクを作成したり、開く前に内容を確認したりできます。",
+      "Clashクライアント共通の購読リンク形式を使います。",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "埋め込み設定が有効なUTF-8 Base64データではありません。",
@@ -2482,21 +2433,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("アプリを表示する"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "接続状態を変えずにReClashを前面に表示します。",
+      "ReClashを前面に表示します。",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("パラメーター"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "クリップボードを読み取れませんでした。リンクを手動で貼り付けてください。",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("リンクのプレビュー"),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("リンク"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "必須項目を入力するとリンクが表示されます。",
+      "URLまたは設定を入力するとリンクが作成されます。",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "リンクにはアクセストークンやプロキシ認証情報が含まれる場合があります。信頼できる相手にだけ共有してください。ReClashはリンクの履歴を保存しません。",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "プロファイルコマンドはリンク作成画面を開きます。外部リンクのインポートには確認が必要で、通常の検証と変換チェックも行われます。",
+      "リンクにはトークンや認証情報が含まれる場合があります。共有に注意してください。",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("プロキシ共有リンク"),
@@ -2507,12 +2455,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "対応するインポートリンク",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Clashリンク、INCY・Happのラップされたリンク、プロキシ共有リンクは手動インポートやQRスキャンでも使えます。未知の暗号化バージョンは拒否されます。",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("接続を切り替える"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "停止中なら接続し、接続中なら切断します。確認画面には実際の操作が表示されます。",
+      "停止中なら接続し、接続中なら切断します。",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "リンクのラップが多重に入れ子になりすぎています。",
@@ -2527,9 +2472,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("例を使う"),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "サブスクリプション、埋め込み設定、INCY crypt1",
-    ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),

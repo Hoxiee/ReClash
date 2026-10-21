@@ -9,7 +9,7 @@ import 'custom_issue.dart';
 /// with why the last save was refused above them.
 class FormPage extends StatelessWidget {
   final String title;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
   final String? saveLabel;
   final List<IconButtonData> actions;
   final String? error;

@@ -1,30 +1,26 @@
 {
   "urlScheme": "URL 스킴",
-  "urlSchemeIntro": "ReClash를 단축키, 웹사이트, 다른 앱과 연결하세요. 바로 쓸 수 있는 링크를 만들거나 열기 전에 확인할 수 있습니다.",
   "urlSchemeConnection": "연결",
   "urlSchemeProfiles": "프로필",
-  "urlSchemeConfirmationTip": "외부 연결 및 종료 명령은 확인이 필요합니다. 연결 명령을 사용하기 전에 초기 설정을 완료하세요.",
-  "urlSchemeProfileCommandsTip": "프로필 명령은 링크 생성기를 엽니다. 외부 가져오기는 확인을 요청하며 기존 검증과 변환 검사를 유지합니다.",
+  "urlSchemeConfirmationTip": "외부 연결 및 종료 명령은 확인을 요청합니다.",
   "urlSchemeSupportedLinks": "지원하는 가져오기 링크",
-  "urlSchemeSupportedLinksTip": "Clash 링크, INCY 및 Happ 래퍼, 프록시 공유 링크는 수동 가져오기와 QR 스캔에서도 작동합니다. 알 수 없는 암호화 버전은 거부됩니다.",
-  "urlSchemeWrappedLinks": "구독 링크, 내장 설정 및 INCY crypt1",
   "urlSchemeProxyLinks": "프록시 공유 링크",
   "urlSchemeConnect": "연결",
-  "urlSchemeConnectDesc": "선택한 프로필과 현재 적용 범위 설정으로 연결을 시작합니다.",
+  "urlSchemeConnectDesc": "선택한 프로필로 연결합니다.",
   "urlSchemeDisconnect": "연결 해제",
-  "urlSchemeDisconnectDesc": "선택한 프로필을 바꾸지 않고 연결을 중지합니다.",
+  "urlSchemeDisconnectDesc": "프로필을 유지하고 연결을 중지합니다.",
   "urlSchemeToggle": "연결 전환",
-  "urlSchemeToggleDesc": "중지되어 있으면 연결하고 실행 중이면 해제합니다. 확인 화면에는 실제 동작이 표시됩니다.",
+  "urlSchemeToggleDesc": "중지 상태면 연결하고 실행 중이면 해제합니다.",
   "urlSchemeOpen": "앱 표시",
-  "urlSchemeOpenDesc": "연결을 바꾸지 않고 ReClash를 앞으로 가져옵니다.",
+  "urlSchemeOpenDesc": "ReClash를 전면에 표시합니다.",
   "urlSchemeClose": "앱 닫기",
-  "urlSchemeCloseDesc": "닫기 설정에 따라 창을 숨기거나 ReClash를 종료합니다. Android에서는 일반 앱 닫기 동작을 따릅니다.",
+  "urlSchemeCloseDesc": "설정한 종료 동작을 사용합니다.",
   "urlSchemeAdd": "구독 추가",
-  "urlSchemeAddDesc": "HTTP 또는 HTTPS 구독 URL에서 프로필을 만듭니다. 이름은 선택 사항입니다.",
+  "urlSchemeAddDesc": "구독 URL을 추가합니다. 이름은 선택 사항입니다.",
   "urlSchemeImport": "설정 가져오기",
-  "urlSchemeImportDesc": "링크에 Base64로 포함된 UTF-8 설정을 가져옵니다. 이름은 선택 사항입니다.",
+  "urlSchemeImportDesc": "링크에 YAML 또는 JSON 설정을 포함합니다.",
   "urlSchemeInstallConfig": "설정 설치",
-  "urlSchemeInstallConfigDesc": "Clash 클라이언트에서 지원하는 install-config 링크 형식으로 구독을 가져옵니다.",
+  "urlSchemeInstallConfigDesc": "Clash 클라이언트의 공통 구독 링크 형식을 사용합니다.",
   "urlSchemeBuild": "링크 만들기",
   "urlSchemeInspect": "링크 확인",
   "urlSchemeAction": "동작",
@@ -33,10 +29,9 @@
   "urlSchemeUseExample": "예시 사용",
   "urlSchemeExampleProfile": "예시 프로필",
   "urlSchemeConfigHint": "YAML 또는 JSON 설정을 붙여넣으세요",
-  "urlSchemeBuilderTip": "이 동작에 필요한 항목만 포함됩니다. 설정 링크에는 전체 내용이 들어가며 확인을 건너뛸 수 없습니다.",
-  "urlSchemePreview": "링크 미리보기",
-  "urlSchemePreviewEmpty": "필수 항목을 입력하면 링크가 표시됩니다.",
-  "urlSchemePrivateLinkTip": "링크에는 접근 토큰이나 프록시 인증 정보가 포함될 수 있습니다. 신뢰하는 사람에게만 공유하세요. ReClash는 링크 기록을 저장하지 않습니다.",
+  "urlSchemePreview": "링크",
+  "urlSchemePreviewEmpty": "URL이나 설정을 입력하면 링크가 만들어집니다.",
+  "urlSchemePrivateLinkTip": "링크에 토큰이나 인증 정보가 포함될 수 있습니다. 공유에 주의하세요.",
   "urlSchemeCopyFailed": "링크를 복사하지 못했습니다. 다시 시도하세요.",
   "urlSchemePasteFailed": "클립보드를 읽지 못했습니다. 링크를 직접 붙여넣으세요.",
   "urlSchemeInspectTip": "확인은 이 기기에서만 진행됩니다. 링크를 열거나 구독을 다운로드하거나 프로필을 가져오지 않습니다.",
@@ -48,13 +43,40 @@
   "urlSchemeContentFormat": "내용 형식",
   "urlSchemeConfigSummary": "설정 내용",
   "urlSchemeConfigCounts": "프록시 {nodes}개, 그룹 {groups}개, 원격 공급자 {providers}개",
-  "@urlSchemeConfigCounts": {"placeholders": {"nodes": {"type": "int"}, "groups": {"type": "int"}, "providers": {"type": "int"}}},
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
   "urlSchemeConversionWarning": "변환하면 일부 내용이 제외됩니다. 가져올 때 변경 사항을 검토하고 승인하세요.",
   "urlSchemeConfirmTitle": "외부 앱 명령",
   "urlSchemeConfirmMessage": "이 링크가 “{action}” 동작을 요청합니다. ReClash에서 실행하도록 허용할까요?",
-  "@urlSchemeConfirmMessage": {"placeholders": {"action": {"type": "String"}}},
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeImportConfirm": "{source}에서 “{name}”을 가져올까요? 확인 후 프로필 검증과 변환 검토가 진행됩니다.",
-  "@urlSchemeImportConfirm": {"placeholders": {"name": {"type": "String"}, "source": {"type": "String"}}},
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeEmbeddedConfig": "내장 설정",
   "urlSchemeSetupRequired": "외부 연결 명령을 사용하기 전에 연결 설정을 완료하세요.",
   "urlSchemeDeliveryError": "링크를 전달하지 못했거나 대기열이 가득 찼습니다. 현재 동작이 끝난 뒤 다시 시도하세요.",
@@ -71,5 +93,7 @@
   "telegramLinkTitle": "Telegram",
   "telegramOpen": "Telegram 열기",
   "telegramWebFallback": "브라우저에서 열기",
-  "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다."
+  "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다.",
+  "urlSchemeFormats": "형식",
+  "urlSchemeFormatsTip": "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요."
 }

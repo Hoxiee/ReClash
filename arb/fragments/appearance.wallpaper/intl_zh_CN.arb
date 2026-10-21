@@ -43,5 +43,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navigationLayout": "导航",
+  "navigationLayoutBar": "标签栏",
+  "navigationLayoutSidebar": "侧边栏"
 }

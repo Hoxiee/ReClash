@@ -38,7 +38,7 @@ class _UrlSchemeFormState extends State<UrlSchemeForm> {
   void initState() {
     super.initState();
     _command = widget.command;
-    _schedulePreview();
+    if (!_command.isProfile) _link = 'reclash://${_command.host}';
   }
 
   @override
@@ -53,6 +53,15 @@ class _UrlSchemeFormState extends State<UrlSchemeForm> {
   void _schedulePreview() {
     _previewTimer?.cancel();
     final revision = ++_revision;
+    if (!_command.isProfile) {
+      _link = 'reclash://${_command.host}';
+      return;
+    }
+    if (_payloadController.text.trim().isEmpty) {
+      _issue = UrlSchemeIssue.missingPayload;
+      _error = context.appLocalizations.urlSchemeMissingPayload;
+      return;
+    }
     _previewTimer = Timer(const Duration(milliseconds: 180), () {
       unawaited(_buildPreview(revision));
     });
@@ -63,8 +72,9 @@ class _UrlSchemeFormState extends State<UrlSchemeForm> {
       _link = null;
       _issue = null;
       _error = null;
+      _building = false;
+      _schedulePreview();
     });
-    _schedulePreview();
   }
 
   Future<void> _buildPreview(int revision) async {
@@ -251,15 +261,6 @@ class _UrlSchemeFormState extends State<UrlSchemeForm> {
         UrlSchemePreview(
           link: _link,
           onCopy: _building || _copying ? null : () => unawaited(_copy()),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Text(
-            l.urlSchemeBuilderTip,
-            style: AppTextStyle.footnote
-                .of(context)
-                .copyWith(color: context.colorScheme.onSurfaceVariant),
-          ),
         ),
       ],
     );

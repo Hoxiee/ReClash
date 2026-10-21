@@ -370,7 +370,7 @@ class _CoreRuntimeConfigViewState extends ConsumerState<CoreRuntimeConfigView> {
             illustration: NullStatusIllustration.error,
             action: FilledButton.icon(
               onPressed: _load,
-              icon: const GlyphIcon(AppGlyphs.refresh),
+              icon: const GlyphIcon(AppGlyphs.refresh, fill: 1),
               label: Text(l10n.retry),
             ),
           ),

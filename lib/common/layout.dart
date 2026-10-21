@@ -38,6 +38,23 @@ ViewMode getViewMode(double viewWidth) {
   return ViewMode.desktop;
 }
 
+ViewMode resolveViewMode(
+  Size viewSize,
+  NavigationLayout layout, {
+  required bool tablet,
+}) {
+  final byWidth = getViewMode(viewSize.width);
+  return switch (layout) {
+    NavigationLayout.bar => ViewMode.mobile,
+    NavigationLayout.sidebar =>
+      byWidth == ViewMode.mobile ? ViewMode.laptop : byWidth,
+    NavigationLayout.auto => tablet ? ViewMode.mobile : byWidth,
+  };
+}
+
+/// Android's own tablet threshold, a smallest width of 600 dp.
+bool isTabletSize(Size viewSize) => viewSize.shortestSide >= maxMobileWidth;
+
 /// An expanded sidebar in the laptop range would leave the content narrower
 /// than the mobile layout one breakpoint below, so labels wait for desktop.
 bool canExpandSidebar(ViewMode viewMode) => viewMode == ViewMode.desktop;

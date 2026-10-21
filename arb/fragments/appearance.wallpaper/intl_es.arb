@@ -43,5 +43,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navigationLayout": "Navegación",
+  "navigationLayoutBar": "Barra de pestañas",
+  "navigationLayoutSidebar": "Barra lateral"
 }

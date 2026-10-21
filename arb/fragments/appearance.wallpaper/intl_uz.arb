@@ -43,5 +43,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navigationLayout": "Navigatsiya",
+  "navigationLayoutBar": "Varaqlar paneli",
+  "navigationLayoutSidebar": "Yon panel"
 }

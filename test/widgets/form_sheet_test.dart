@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/ui/ui.dart';
@@ -7,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 
 class _Form extends StatefulWidget {
-  const _Form({this.onDismiss});
+  const _Form({this.onDismiss, this.saving, this.saveLabel});
 
   final SheetDismissHandler? onDismiss;
+  final ValueListenable<bool>? saving;
+  final String? saveLabel;
 
   @override
   State<_Form> createState() => _FormState();
@@ -26,15 +29,24 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    return FormPage(
+    Widget form(bool saving) => FormPage(
       title: 'Form',
       onSave: () {},
+      saveLabel: widget.saveLabel,
+      saving: saving,
       children: [
         generateSection(
           items: const [FormRow(title: 'Name', trailing: FormRowTextField())],
         ),
       ],
     );
+    final saving = widget.saving;
+    return saving == null
+        ? form(false)
+        : ValueListenableBuilder(
+            valueListenable: saving,
+            builder: (_, saving, _) => form(saving),
+          );
   }
 }
 
@@ -89,6 +101,32 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Save'), findsOneWidget);
     expect(find.byTooltip('Save'), findsNothing);
     expect(find.byTooltip('Close'), findsNothing);
+  });
+
+  testWidgets('a pending confirmation keeps its label and button layout', (
+    tester,
+  ) async {
+    final saving = ValueNotifier(false);
+    addTearDown(saving.dispose);
+    const label = 'Copy generated subscription link';
+    await _open(
+      tester,
+      const Size(1200, 800),
+      form: _Form(saving: saving, saveLabel: label),
+    );
+    final card = find
+        .ancestor(of: find.byType(FormPage), matching: find.byType(Material))
+        .first;
+    final before = tester.getSize(card);
+    saving.value = true;
+    await tester.pump();
+    expect(find.text(label), findsOneWidget);
+    expect(find.byType(CommonCircleLoading), findsOneWidget);
+    expect(tester.getSize(card), before);
+    saving.value = false;
+    await tester.pumpAndSettle();
+    expect(tester.getSize(card), before);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a mobile form is a bottom sheet with bare fields', (

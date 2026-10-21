@@ -607,14 +607,23 @@ class ProfilesAction extends _$ProfilesAction {
                 source.preset != null
             ? chosenSettings.copyWith(preset: source.preset)
             : chosenSettings;
+        final draft = _withClientSettings(
+          Profile.normal(
+            label: name,
+            url: url,
+          ).copyWith(ageSecretKey: ageSecretKey),
+          settings,
+        );
+        if (settings.sendDeviceIdentity case final send?) {
+          final store = await DeviceIdentityStore.create();
+          await store.setProfileSendOverride(draft.id, send);
+          if (cancellation?.cancelled == true ||
+              reviewContext != null && !reviewContext.mounted) {
+            throw const SubscriptionUpdateCancelled();
+          }
+        }
         profile = await _download(
-          _withClientSettings(
-            Profile.normal(
-              label: name,
-              url: url,
-            ).copyWith(ageSecretKey: ageSecretKey),
-            settings,
-          ),
+          draft,
           reviewContext: reviewContext,
           cancellation: cancellation,
           onCommitted: save,

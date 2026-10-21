@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
@@ -7,10 +8,12 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
 import 'common.dart';
+import 'routing.dart';
 
 const _headerInset = 10.0;
 const _headerButtonInset = 4.0;
@@ -395,8 +398,6 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     );
   }
 
-  /// The card reaches up behind the header's rounded bottom corners, so the
-  /// two read as one while the rows unfold or fold.
   Widget _buildUnfoldingRows(double extent, ShapeDecoration decoration) {
     final rows = widget.group.all.chunks(widget.columns).toList();
     final visible = min(
@@ -404,36 +405,27 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
       MediaQuery.sizeOf(context).height / extent,
     );
     final count = min(rows.length, visible.floor() + 1);
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          top: -AppCorner.xl.ap(context),
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: DecoratedBox(decoration: decoration),
-        ),
-        SizeTransition(
-          sizeFactor: _unfold,
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              for (var index = 0; index < count; index++)
-                UnfoldEntryTransition(
-                  animation: _unfold,
-                  index: index,
-                  visibleCount: visible,
-                  child: SizedBox(
-                    height: extent,
-                    child: _buildRow(context, rows[index]),
-                  ),
+    return DecoratedBox(
+      decoration: decoration,
+      child: SizeTransition(
+        sizeFactor: _unfold,
+        alignment: Alignment.topCenter,
+        child: Column(
+          children: [
+            for (var index = 0; index < count; index++)
+              UnfoldEntryTransition(
+                animation: _unfold,
+                index: index,
+                visibleCount: visible,
+                child: SizedBox(
+                  height: extent,
+                  child: _buildRow(context, rows[index]),
                 ),
-              if (count == rows.length) const SizedBox(height: _lastRowGrowth),
-            ],
-          ),
+              ),
+            if (count == rows.length) const SizedBox(height: _lastRowGrowth),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -479,28 +471,46 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     }
     Widget buildHeader({double floating = 0, double lift = 0}) => SizedBox(
       height: listHeaderHeight,
-      child: ListHeader(
-        enterAnimated: false,
-        floating: floating,
-        lift: lift,
-        onScrollToSelected: widget.onScrollToSelected,
-        key: ValueKey(groupName),
-        isExpand: isExpand,
-        unfolded: unfolded,
-        group: widget.group,
-        onChange: widget.onChange,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          if (rows != null)
+            Positioned(
+              top: listHeaderHeight / 2,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: ColoredBox(
+                color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
+              ),
+            ),
+          ListHeader(
+            enterAnimated: false,
+            floating: floating,
+            lift: lift,
+            onScrollToSelected: widget.onScrollToSelected,
+            key: ValueKey(groupName),
+            isExpand: isExpand,
+            unfolded: unfolded,
+            group: widget.group,
+            onChange: widget.onChange,
+          ),
+        ],
       ),
     );
     return SliverPadding(
       padding: EdgeInsets.only(bottom: widget.gap),
       sliver: SliverMainAxisGroup(
-        slivers: [_buildPinnedHeader(isExpand, buildHeader), ?rows],
+        slivers: [
+          _buildPinnedHeader(isExpand, buildHeader),
+          if (rows != null) _GroupRowsClip(sliver: rows),
+        ],
       ),
     );
   }
 
   /// Rounds the header and lifts it as its own rows scroll under it, and lets
-  /// the shadow go before the end of the group pushes it out. The page color
+  /// the shadow go before the end of the group pushes it out. The backdrop
   /// behind its upper half hides the rows that went under it, which would
   /// otherwise show around its top corners and above it. Every header is laid
   /// out on every pass, so one beyond the cache area builds nothing.
@@ -516,7 +526,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
         (_controller.isDismissed
             ? 0.0
             : _rowsExtent(rowCount, getRowExtent(widget.cardType)));
-    (double, double, double, Color)? headerState;
+    (double, double, double)? headerState;
     Widget? header;
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -535,7 +545,6 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
                   1.0,
                 ),
                 isExpand ? constraints.overlap : 0.0,
-                context.surfaceLevel.colorOf(context.colorScheme),
               );
         if (header != null && state == headerState) {
           return header!;
@@ -546,7 +555,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
             child: SizedBox(height: listHeaderHeight),
           );
         }
-        final (floating, lift, cover, pageColor) = state;
+        final (floating, lift, cover) = state;
         return header = PinnedHeaderSliver(
           child: RepaintBoundary(
             child: Stack(
@@ -557,7 +566,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
                   left: 0,
                   right: 0,
                   height: cover + listHeaderHeight / 2,
-                  child: ColoredBox(color: pageColor),
+                  child: const PageBackdrop(),
                 ),
                 buildHeader(floating: floating, lift: lift),
               ],
@@ -567,6 +576,53 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
       },
     );
   }
+}
+
+class _GroupRowsClip extends SingleChildRenderObjectWidget {
+  const _GroupRowsClip({required Widget sliver}) : super(child: sliver);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderGroupRowsClip();
+}
+
+class _RenderGroupRowsClip extends RenderProxySliver {
+  Rect get _paintClip {
+    final extent = geometry!.paintExtent;
+    return Rect.fromLTRB(
+      0,
+      constraints.overlap.clamp(0.0, extent),
+      constraints.crossAxisExtent,
+      extent,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      _paintClip,
+      super.paint,
+      oldLayer: layer as ClipRectLayer?,
+    );
+  }
+
+  @override
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) =>
+      mainAxisPosition >= constraints.overlap &&
+      super.hitTestChildren(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) => _paintClip;
 }
 
 class ListHeader extends ConsumerWidget {
@@ -606,6 +662,12 @@ class ListHeader extends ConsumerWidget {
     final isDelayTesting = ref.watch(
       delayTestingGroupsProvider.select((state) => state.contains(groupName)),
     );
+    final profile = ref.watch(
+      rcxGroupProvider(groupName).select(
+        (state) =>
+            state == null || state.control.isManual ? null : state.profile,
+      ),
+    );
     final colorScheme = context.colorScheme;
     final level = floating > 0
         ? SurfaceLevel.floatingOf(colorScheme)
@@ -637,7 +699,12 @@ class ListHeader extends ConsumerWidget {
             _GroupActions(
               isExpand: isExpand,
               isDelayTesting: isDelayTesting,
-              groupType: group.type.name,
+              groupType: profile == null
+                  ? group.type.name
+                  : rcxProfileTitle(context, ref, profile),
+              onRouting: group.type == GroupType.Selector
+                  ? () => unawaited(showRoutingSheet(context, groupName))
+                  : null,
               onScrollToSelected: () {
                 onScrollToSelected(groupName);
               },
@@ -797,8 +864,18 @@ class _SelectedProxyName extends ConsumerWidget {
     if (proxyName.isEmpty) {
       return const SizedBox.shrink();
     }
+    final control = ref.watch(
+      rcxGroupProvider(groupName).select((state) => state?.control),
+    );
+    final l = context.appLocalizations;
+    final mode = switch (control) {
+      null => null,
+      RcxControl(isManual: true) => null,
+      RcxControl(isPinned: true) => l.rcxPinnedLabel,
+      _ => l.rcxModeAuto,
+    };
     return EmojiText(
-      proxyName,
+      mode == null ? proxyName : '$mode · $proxyName',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,
@@ -814,6 +891,7 @@ class _GroupActions extends StatelessWidget {
     required this.onScrollToSelected,
     required this.onDelayTest,
     required this.onToggle,
+    this.onRouting,
   });
 
   final bool isExpand;
@@ -822,6 +900,7 @@ class _GroupActions extends StatelessWidget {
   final VoidCallback onScrollToSelected;
   final VoidCallback onDelayTest;
   final VoidCallback onToggle;
+  final VoidCallback? onRouting;
 
   @override
   Widget build(BuildContext context) {
@@ -846,6 +925,12 @@ class _GroupActions extends StatelessWidget {
                       ? CommonCircleLoading(size: TonalButtonSize.compact.icon)
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
+                if (onRouting != null)
+                  IconButton(
+                    tooltip: context.appLocalizations.rcxTitle,
+                    onPressed: onRouting,
+                    icon: const GlyphIcon(AppGlyphs.shuffle),
+                  ),
               ],
             )
           else

@@ -1,14 +1,31 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
+
+import 'src/test_select/graph.dart';
+import 'src/test_select/report.dart';
+import 'src/test_select/selection.dart';
 
 const _usage =
     '''
 Runs the root package tests from a few generated entrypoints.
 
 usage: dart run tool/test.dart [path ...] [-- flutter test arguments]
+       dart run tool/test.dart --changed [--list] [--summary-only] [-- ...]
+       dart run tool/test.dart --affected <path>... [--list] [--summary-only]
+
+  --changed           Run the tests the working tree can break: files changed
+                      against HEAD, staged or not, and untracked files under
+                      lib/ and test/.
+  --affected path...  Run the tests the given changed paths can break.
+  --list              Print the selected test files, each with the change
+                      that selects it, and run nothing.
+  --summary-only      Print no reporter output: only the counts and the
+                      failed tests.
 
 Every *_test.dart under the given paths (default: test) is imported into one of
 $_bundleCount entrypoints under $_bundleDir, so `flutter test` compiles and
@@ -19,12 +36,20 @@ Files in one entrypoint share an isolate. A file that fails there is run again
 on its own, and that run decides the result; the files that pass alone are
 listed, since they depend on or are broken by state another file left. A
 failure in a file that already ran on its own, or one the report ties to no
-file, fails the run whatever the rerun finds.''';
+file, fails the run whatever the rerun finds. A failing run ends with each
+failed test of that final outcome: its file:line, name, and first error lines.
+
+A changed Dart file selects the tests that import it, directly or through
+the libraries it reaches. Through a barrel's export, a file counts only when it
+names a declaration the change reaches. ARB and l10n changes select the l10n
+tests, any lib/ change test/lint/, a tool/<name> change test/tool/<name>*, and
+a pubspec change the whole suite; other paths are listed as unmapped.''';
 
 // Fixed, so a commit groups its files the same way on every machine.
 const _bundleCount = 32;
 const _bundleDir = '.dart_tool/test_bundles';
 const _reportPath = '$_bundleDir/report.json';
+const _rerunReportPath = '$_bundleDir/rerun.json';
 
 final _annotation = RegExp(r'^@(TestOn|Tags|Timeout|Skip|OnPlatform)\b');
 
@@ -45,18 +70,78 @@ class _Bundle {
   var size = 0;
 }
 
+class _Options {
+  final paths = <String>[];
+  final affected = <String>[];
+  var changed = false;
+  var affects = false;
+  var list = false;
+  var summaryOnly = false;
+  var help = false;
+
+  bool get selects => changed || affects;
+
+  factory _Options.parse(List<String> arguments) {
+    final options = _Options._();
+    for (final argument in arguments) {
+      switch (argument) {
+        case '-h' || '--help':
+          options.help = true;
+        case '--changed':
+          options.changed = true;
+        case '--affected':
+          options.affects = true;
+        case '--list':
+          options.list = true;
+        case '--summary-only':
+          options.summaryOnly = true;
+        case _ when argument.startsWith('-'):
+          _usageError('Unknown option: $argument');
+        case _:
+          (options.affects ? options.affected : options.paths).add(argument);
+      }
+    }
+    if (options.affects && options.affected.isEmpty) {
+      _usageError('--affected needs at least one path');
+    }
+    if (options.selects && options.paths.isNotEmpty) {
+      _usageError('Test paths cannot be combined with --changed or --affected');
+    }
+    return options;
+  }
+
+  _Options._();
+}
+
+Never _usageError(String message) {
+  stderr.writeln('$message\n\n$_usage');
+  exit(64);
+}
+
 Future<void> main(List<String> arguments) async {
   final split = arguments.indexOf('--');
-  final paths = split < 0 ? arguments : arguments.sublist(0, split);
+  final options = _Options.parse(
+    split < 0 ? arguments : arguments.sublist(0, split),
+  );
   final flutterArguments = split < 0
       ? const <String>[]
       : arguments.sublist(split + 1);
-  if (paths.contains('-h') || paths.contains('--help')) {
+  if (options.help) {
     stdout.writeln(_usage);
     return;
   }
 
-  final files = _collect(paths.isEmpty ? const ['test'] : paths);
+  final files = options.selects
+      ? await _select(options)
+      : _collect(options.paths.isEmpty ? const ['test'] : options.paths);
+  if (options.list) {
+    if (!options.selects) stdout.writeln(files.join('\n'));
+    return;
+  }
+  if (files.isEmpty) {
+    stdout.writeln('No test is affected.');
+    return;
+  }
   final standalone = files.where(_hasAnnotation).toList();
   final bundles = _writeBundles(
     files.where((file) => !standalone.contains(file)).toList(),
@@ -68,28 +153,55 @@ Future<void> main(List<String> arguments) async {
   final reports = !flutterArguments.any(
     (argument) => argument.startsWith('--file-reporter'),
   );
+  final silent = options.summaryOnly
+      ? const ['-r', 'silent']
+      : const <String>[];
 
-  final code = await _flutterTest([
+  final code = await _flutterTest(quiet: options.summaryOnly, [
     if (!setsConcurrency)
       '--concurrency=${min(_bundleCount, Platform.numberOfProcessors)}',
     if (reports) '--file-reporter=json:$_reportPath',
     ...flutterArguments,
+    ...silent,
     for (final bundle in bundles) bundle.path,
     ...standalone,
   ]);
-  if (code == 0 || !reports) exit(code);
+  if (!reports) exit(code);
+  final results = _readReport(_reportPath);
+  Never finish(List<TestResult> results, int code) {
+    if (options.summaryOnly || results.any((test) => test.failed)) {
+      stdout.writeln('\n${summarize(results, root: Directory.current.path)}');
+    }
+    exit(code);
+  }
 
-  final failures = _failures(bundles);
+  if (code == 0) finish(results, code);
+  final byPath = {
+    for (final bundle in bundles) p.canonicalize(bundle.path): bundle.files,
+  };
+  final failures = _failures(results, byPath);
   final failed = failures.files;
-  if (failed.isEmpty) exit(code);
+  if (failed.isEmpty) finish(results, code);
   stdout.writeln(
     '\n${failed.length} file(s) failed in a shared isolate; '
     'running them on their own:\n${failed.map((f) => '  $f').join('\n')}\n',
   );
-  final rerunCode = await _flutterTest([
+  final rerunCode = await _flutterTest(quiet: options.summaryOnly, [
     ..._rerunArguments(flutterArguments),
+    '--file-reporter=json:$_rerunReportPath',
+    ...silent,
     ...failed,
   ]);
+  final rerun = File(_rerunReportPath).existsSync()
+      ? _readReport(_rerunReportPath)
+      : null;
+  final outcome = rerun == null
+      ? results
+      : [
+          for (final test in results)
+            if (!_rerunOwns(_owners(test, byPath), failed)) test,
+          ...rerun,
+        ];
   if (rerunCode == 0) {
     stdout.writeln(
       '\nEvery file above passes on its own: each depends on, or is broken by, '
@@ -101,18 +213,149 @@ Future<void> main(List<String> arguments) async {
       '\nThe run still fails: other failures came from files that ran on '
       'their own, or from no file the report names.',
     );
-    exit(code);
+    finish(outcome, code);
   }
-  exit(rerunCode);
+  finish(outcome, rerunCode);
 }
 
-Future<int> _flutterTest(List<String> arguments) async {
+bool _rerunOwns(List<String> owners, List<String> rerun) =>
+    owners.isNotEmpty && owners.every(rerun.contains);
+
+Future<List<String>> _select(_Options options) async {
+  final watch = Stopwatch()..start();
+  final root = Directory.current.path;
+  final graph = SourceGraph.build(root, excluded: graphExcluded);
+  final built = watch.elapsedMilliseconds;
+  final changed = {
+    if (options.changed) ..._changedPaths(),
+    for (final path in options.affected) ..._expand(path, root),
+  }.toList()..sort();
+  final previous = await _committedSources(changed.where(graph.covers));
+  final selection = selectTests(
+    graph,
+    changed,
+    previousSource: (path) => previous[path],
+  );
+  for (final path in selection.unmapped) {
+    stdout.writeln('unmapped: $path');
+  }
+  if (selection.fullSuite case final path?) {
+    stdout.writeln('full suite recommended: $path changed');
+  }
+  final tests = selection.tests;
+  if (options.list) {
+    final width = tests.keys.fold(0, (width, test) => max(width, test.length));
+    for (final MapEntry(key: test, value: reason) in tests.entries) {
+      stdout.writeln(
+        '${test.padRight(width)}  ${reason.describe(selection.others(test))}',
+      );
+    }
+    stdout.writeln(
+      '${tests.length} test file(s) for ${changed.length} changed path(s); '
+      '${graph.libraries.length} libraries read in $built ms, '
+      'selected in ${watch.elapsedMilliseconds - built} ms',
+    );
+  } else if (tests.isNotEmpty) {
+    stdout.writeln(
+      'Running ${tests.length} test file(s) affected by '
+      '${changed.length} changed path(s).',
+    );
+  }
+  return tests.keys.toList();
+}
+
+List<String> _changedPaths() {
+  List<String> git(List<String> arguments) {
+    final result = Process.runSync('git', [
+      '-c',
+      'core.quotePath=false',
+      ...arguments,
+    ]);
+    if (result.exitCode != 0) {
+      stderr.writeln('git ${arguments.join(' ')} failed:\n${result.stderr}');
+      exit(70);
+    }
+    return const LineSplitter()
+        .convert(result.stdout as String)
+        .where((line) => line.isNotEmpty)
+        .toList();
+  }
+
+  return [
+    ...git(['diff', '--name-only', 'HEAD']),
+    ...git(['diff', '--name-only', '--cached']),
+    ...git(['ls-files', '--others', '--exclude-standard', '--', 'lib', 'test']),
+  ];
+}
+
+Iterable<String> _expand(String path, String root) {
+  final relative = _posix(p.normalize(p.relative(path, from: root)));
+  final directory = Directory(relative);
+  if (!directory.existsSync()) return [relative];
+  return directory
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map((file) => _posix(p.normalize(file.path)));
+}
+
+/// The committed text of [paths] that exist in HEAD, read by one
+/// `git cat-file --batch`.
+Future<Map<String, String>> _committedSources(Iterable<String> paths) async {
+  final requested = paths.toList();
+  if (requested.isEmpty) return const {};
+  final process = await Process.start('git', ['cat-file', '--batch']);
+  process.stdin.write(requested.map((path) => 'HEAD:$path\n').join());
+  unawaited(process.stdin.close());
+  unawaited(process.stderr.drain<void>());
+  final bytes = await process.stdout.fold(
+    BytesBuilder(copy: false),
+    (builder, chunk) => builder..add(chunk),
+  );
+  await process.exitCode;
+  final data = bytes.takeBytes();
+  final sources = <String, String>{};
+  var offset = 0;
+  for (final path in requested) {
+    final newline = data.indexOf(0x0A, offset);
+    if (newline < 0) break;
+    final header = ascii.decode(data.sublist(offset, newline)).split(' ');
+    offset = newline + 1;
+    if (header.length != 3 || header[1] != 'blob') continue;
+    final size = int.parse(header[2]);
+    sources[path] = utf8.decode(
+      data.sublist(offset, offset + size),
+      allowMalformed: true,
+    );
+    offset += size + 1;
+  }
+  return sources;
+}
+
+List<TestResult> _readReport(String path) {
+  final file = File(path);
+  return file.existsSync() ? readReport(file.readAsLinesSync()) : const [];
+}
+
+Future<int> _flutterTest(List<String> arguments, {bool quiet = false}) async {
   final process = await Process.start(
     'flutter',
     ['test', ...arguments],
-    mode: ProcessStartMode.inheritStdio,
+    mode: quiet ? ProcessStartMode.normal : ProcessStartMode.inheritStdio,
     runInShell: Platform.isWindows,
   );
+  if (quiet) {
+    // The silent reporter still lets flutter_tester's own `Shell:` log through,
+    // such as a Fontconfig warning per engine; the JSON report keeps failures.
+    Future<void> forward(Stream<List<int>> from, IOSink to) => from
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .where((line) => !line.startsWith('Shell: '))
+        .forEach(to.writeln);
+    await Future.wait([
+      forward(process.stdout, stdout),
+      forward(process.stderr, stderr),
+    ]);
+  }
   return process.exitCode;
 }
 
@@ -225,56 +468,28 @@ String _posix(String path) => p.posix.joinAll(p.split(path));
 /// The files behind every failed test in the JSON report; a bundle that failed
 /// to load stands for all of its files.
 ({List<String> files, bool failsOutsideBundles}) _failures(
-  List<({String path, List<String> files})> bundles,
+  List<TestResult> results,
+  Map<String, List<String>> byPath,
 ) {
-  final report = File(_reportPath);
-  if (!report.existsSync()) {
-    return (files: const [], failsOutsideBundles: false);
-  }
-  final byPath = {
-    for (final bundle in bundles) p.canonicalize(bundle.path): bundle.files,
-  };
-  final suites = <int, String>{};
-  final tests = <int, ({int suite, String name})>{};
-  final passed = <int>{};
   final failed = <String>{};
   var failsOutsideBundles = false;
-  void fail(int id) {
-    final test = tests[id];
-    final suite = test == null ? null : suites[test.suite];
-    final files = suite == null ? null : byPath[p.canonicalize(suite)];
-    final owners = test == null || files == null
-        ? const <String>[]
-        : test.name.startsWith('loading ')
-        ? files
-        : files.where((file) => test.name.startsWith('${_posix(file)} '));
+  for (final test in results.where((test) => test.failed)) {
+    final owners = _owners(test, byPath);
     if (owners.isEmpty) failsOutsideBundles = true;
     failed.addAll(owners);
-  }
-
-  for (final line in report.readAsLinesSync()) {
-    if (!line.startsWith('{')) continue;
-    final event = jsonDecode(line) as Map<String, dynamic>;
-    switch (event['type']) {
-      case 'suite':
-        final suite = event['suite'] as Map<String, dynamic>;
-        suites[suite['id'] as int] = suite['path'] as String;
-      case 'testStart':
-        final test = event['test'] as Map<String, dynamic>;
-        tests[test['id'] as int] = (
-          suite: test['suiteID'] as int,
-          name: test['name'] as String,
-        );
-      case 'error' when passed.contains(event['testID']):
-        fail(event['testID'] as int);
-      case 'testDone' when event['result'] == 'success':
-        passed.add(event['testID'] as int);
-      case 'testDone':
-        fail(event['testID'] as int);
-    }
   }
   return (
     files: failed.toList()..sort(),
     failsOutsideBundles: failsOutsideBundles,
   );
+}
+
+List<String> _owners(TestResult test, Map<String, List<String>> byPath) {
+  final files = byPath[p.canonicalize(test.suite)];
+  if (files == null) return const [];
+  if (test.name.startsWith('loading ')) return files;
+  return [
+    for (final file in files)
+      if (test.name.startsWith('${_posix(file)} ')) file,
+  ];
 }

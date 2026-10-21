@@ -135,6 +135,10 @@ chip-sized `sm` and the near-pill `md` on a 40 tall row. Reach for this only onc
   icon is an icon needs a `tooltip`; a field that constructs its own controller, notifier, or focus node is released in
   the same file; a public declaration nothing references is dead. `.agents/rules.md` explains each rule and its
   allowlist.
+- A visual change is checked by looking at it: write a scenario next to the scratch files, render it with
+  `dart run tool/preview.dart <scenario.dart> --theme light,dark`, and read the PNG. Copy
+  `tool/preview/examples/about_preview.dart`; the Flutter Development section of `.agents/commands.md` lists the
+  options and what the preview cannot show.
 
 ## Pitfalls
 

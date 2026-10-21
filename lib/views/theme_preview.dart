@@ -66,17 +66,18 @@ class PreviewChoiceGroup<T> extends StatelessWidget {
 class MiniScreenThumb extends StatelessWidget {
   const MiniScreenThumb({super.key, required this.screen});
 
-  static const Size _screenSize = Size(96, 128);
+  static const double _screenWidth = 96;
+  static const Size _screenSize = Size(_screenWidth, 128);
   static const double _shownHeight = 66;
   static const double _height = 30;
+  static const size = Size(_height * _screenWidth / _shownHeight, _height);
 
   final Widget screen;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _height,
-      width: _height * _screenSize.width / _shownHeight,
+    return SizedBox.fromSize(
+      size: size,
       child: ClipRSuperellipse(
         borderRadius: AppRadius.sm,
         child: FittedBox(
@@ -98,6 +99,98 @@ class MiniScreenThumb extends StatelessWidget {
   }
 }
 
+/// A page beside a sidebar, or above a bar when not [sidebar], drawn in the
+/// box of a [MiniScreenThumb].
+class MiniLayoutThumb extends StatelessWidget {
+  const MiniLayoutThumb({
+    super.key,
+    required this.colorScheme,
+    required this.sidebar,
+  });
+
+  final ColorScheme colorScheme;
+  final bool sidebar;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.fromSize(
+      size: MiniScreenThumb.size,
+      child: ClipRSuperellipse(
+        borderRadius: AppRadius.sm,
+        child: CustomPaint(
+          painter: _MiniLayoutPainter(colorScheme, sidebar: sidebar),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniLayoutPainter extends CustomPainter {
+  const _MiniLayoutPainter(this.colorScheme, {required this.sidebar});
+
+  static const int _destinations = 4;
+
+  final ColorScheme colorScheme;
+  final bool sidebar;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final unit = size.height / 10;
+    final navigation = SurfaceLevel.floatingOf(colorScheme);
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = SurfaceLevel.page.colorOf(colorScheme),
+    );
+    final rail = sidebar
+        ? Rect.fromLTWH(0, 0, unit * 3, size.height)
+        : Rect.fromLTWH(0, size.height - unit * 2.6, size.width, unit * 2.6);
+    canvas.drawRect(rail, Paint()..color = navigation.colorOf(colorScheme));
+    final page = sidebar
+        ? Rect.fromLTRB(rail.right, 0, size.width, size.height)
+        : Rect.fromLTRB(0, 0, size.width, rail.top);
+    final body = page.deflate(unit);
+    final card = SurfaceLevel.card.colorOf(colorScheme);
+    final cardHeight = (body.height - unit) / 2;
+    for (var i = 0; i < 2; i++) {
+      _MiniScreenPainter._fill(
+        canvas,
+        Rect.fromLTWH(
+          body.left,
+          body.top + i * (cardHeight + unit),
+          body.width,
+          cardHeight,
+        ),
+        card,
+        AppShape.all(AppCorner.fit(cardHeight)),
+      );
+    }
+    final step = sidebar ? unit * 2 : rail.width / _destinations;
+    for (var i = 0; i < _destinations; i++) {
+      final center = sidebar
+          ? Offset(rail.center.dx, unit * 1.6 + step * i)
+          : Offset(step * (i + 0.5), rail.center.dy);
+      if (i == 0) {
+        _MiniScreenPainter._fill(
+          canvas,
+          Rect.fromCenter(center: center, width: unit * 2, height: unit * 1.2),
+          navigation.next.colorOf(colorScheme),
+          AppShape.full,
+        );
+      }
+      _MiniScreenPainter._fill(
+        canvas,
+        Rect.fromCircle(center: center, radius: unit * 0.35),
+        i == 0 ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        AppShape.circle,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MiniLayoutPainter oldDelegate) =>
+      oldDelegate.colorScheme != colorScheme || oldDelegate.sidebar != sidebar;
+}
+
 class _ColorSchemeTween extends Tween<ColorScheme> {
   _ColorSchemeTween({super.end});
 
@@ -107,6 +200,9 @@ class _ColorSchemeTween extends Tween<ColorScheme> {
 
 /// The home page as the theme settings will draw it; its destinations can be
 /// tapped to try the tab animation.
+/// The preview is hidden for now; set this to bring it back.
+const showThemeLivePreview = false;
+
 class ThemeLivePreview extends ConsumerStatefulWidget {
   const ThemeLivePreview({super.key});
 
@@ -121,11 +217,11 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
 
   late final AnimationController _slide = AnimationController(
     vsync: this,
-    duration: kTabScrollDuration,
+    duration: slideTabDuration,
   );
   late final CurvedAnimation _slideCurve = CurvedAnimation(
     parent: _slide,
-    curve: Curves.easeOut,
+    curve: slideTabCurve,
   );
   int _selected = 0;
   int? _previous;
@@ -145,8 +241,8 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     }
     final tabAnimation = ref.read(appSettingProvider).tabAnimation;
     final fade = tabAnimation == TabAnimation.fade;
-    _slide.duration = fade ? fadeTabDuration : kTabScrollDuration;
-    _slideCurve.curve = fade ? fadeTabCurve : Curves.easeOut;
+    _slide.duration = fade ? fadeTabDuration : slideTabDuration;
+    _slideCurve.curve = fade ? fadeTabCurve : slideTabCurve;
     setState(() {
       _previous = _selected;
       _selected = index;

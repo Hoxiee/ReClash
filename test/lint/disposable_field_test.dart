@@ -20,9 +20,9 @@ const _allowed = {
   // `CoreEventManager` is a private-constructor singleton that fans core events
   // out for the whole run; closing its controller would end event delivery.
   'lib/core/event.dart#_controller',
-  // `App` is the process-wide Android plugin; the notifier relays keyboard
-  // state from the platform channel for the whole run.
+  // App живёт весь процесс: события клавиатуры и установщика приходят по одному каналу.
   'lib/plugins/app.dart#floatingKeyboard',
+  'lib/plugins/app.dart#_updateInstallChanges',
 };
 
 final _declaration = RegExp(
@@ -47,7 +47,37 @@ bool _isGenerated(String path) {
       path.endsWith('.freezed.dart');
 }
 
+bool _isReleased(String source, String field) {
+  final name = RegExp.escape(field);
+  return RegExp(
+        '\\b$name'
+        r'\s*\.(?:dispose|close)\s*\(\s*\)',
+      ).hasMatch(source) ||
+      RegExp(
+        '\\b$name'
+        r'\s*\??\.\.(?:[^;]*\.\.)?(?:dispose|close)\s*\(\s*\)',
+      ).hasMatch(source);
+}
+
 void main() {
+  test('direct and cascaded calls release their own fields', () {
+    for (final source in [
+      '_controller.dispose();',
+      '_controller.close();',
+      '_controller..dispose();',
+      '_controller?..close();',
+      '_controller\n  ..removeListener(listener)\n  ..dispose();',
+    ]) {
+      expect(_isReleased(source, '_controller'), isTrue, reason: source);
+    }
+    for (final source in [
+      '_other..dispose();',
+      '_controller..removeListener(listener); _other..dispose();',
+    ]) {
+      expect(_isReleased(source, '_controller'), isFalse, reason: source);
+    }
+  });
+
   test('every self-created disposable field is released in the same file', () {
     final root = Directory('lib');
     final offenders = <String>[];
@@ -75,9 +105,7 @@ void main() {
         if (_allowed.contains('$relative#$field')) {
           continue;
         }
-        final released =
-            source.contains('$field.dispose()') ||
-            source.contains('$field.close()');
+        final released = _isReleased(source, field);
         if (!released) {
           offenders.add('$relative:${i + 1} $field ($type)');
         }

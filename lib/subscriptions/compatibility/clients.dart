@@ -80,25 +80,33 @@ class SubscriptionClientSettings {
     this.preset = SubscriptionClientPreset.reclash,
     this.customUserAgent = '',
     this.importPolicy = const SubscriptionImportPolicy(),
+    this.sendDeviceIdentity,
   });
 
   const SubscriptionClientSettings.forNewProfile()
     : preset = SubscriptionClientPreset.auto,
       customUserAgent = '',
-      importPolicy = const SubscriptionImportPolicy();
+      importPolicy = const SubscriptionImportPolicy(),
+      sendDeviceIdentity = null;
 
   final SubscriptionClientPreset preset;
   final String customUserAgent;
   final SubscriptionImportPolicy importPolicy;
 
+  /// The new profile's HWID choice, applied once at import and kept in the
+  /// device identity store rather than in [toJson].
+  final bool? sendDeviceIdentity;
+
   SubscriptionClientSettings copyWith({
     SubscriptionClientPreset? preset,
     String? customUserAgent,
     SubscriptionImportPolicy? importPolicy,
+    bool? sendDeviceIdentity,
   }) => SubscriptionClientSettings(
     preset: preset ?? this.preset,
     customUserAgent: customUserAgent ?? this.customUserAgent,
     importPolicy: importPolicy ?? this.importPolicy,
+    sendDeviceIdentity: sendDeviceIdentity ?? this.sendDeviceIdentity,
   );
 
   bool get isValid =>

@@ -1402,6 +1402,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Bottom bar"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("Navigation"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage("Tab bar"),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage("Sidebar"),
     "network": MessageLookupByLibrary.simpleMessage("Network"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2575,9 +2578,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
       "Allow automatic installation",
     ),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "These preferences do not grant Android permission to install apps. You can change them at any time.",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash may install verified, eligible stable updates without asking each time. It will never disconnect your VPN. Android may still ask you to confirm an installation.",
     ),
@@ -2586,12 +2586,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
       "Install automatically",
-    ),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "Install eligible stable updates only when the VPN is off. Important changes always wait for you.",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "Closing this window does not stop the download.",
     ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
@@ -2603,16 +2597,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Check automatically",
     ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
-      "Couldn\'t check for updates.",
+      "Couldn\'t check for updates",
     ),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Check your connection and try again.",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "Check periodically while ReClash is running. An update appears on the dashboard, without opening a window.",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "Looking for a newer version on your selected channel.",
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Checking for updates…",
     ),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Close window"),
     "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
@@ -2648,29 +2639,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
       "Download again",
     ),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "You can close this window. Progress remains on the dashboard.",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "Couldn\'t download the update.",
+      "Couldn\'t download the update",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "The downloaded part is saved. Check your connection, then resume.",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "Your installed version remains unchanged.",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("Got it"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "Couldn\'t start the package installer.",
+      "Couldn\'t start the package installer",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android did not complete the installation. Try again when you\'re ready.",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("Install now"),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash is now using the new version.",
-    ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Update installed",
     ),
@@ -2682,16 +2664,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Installing the update",
     ),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
-      "You\'re already using the latest version.",
-    ),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Not now"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("What\'s new"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No release notes are available.",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "Downloading does not install the update or interrupt your VPN.",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
       "An update is available",
@@ -2710,11 +2685,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "Integrity, app identity and signature verified",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Version"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("Pause"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "The downloaded part is saved. Resume when you\'re ready.",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
       "Download paused",
     ),
@@ -2727,9 +2698,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "Choose checking, downloading and installation separately.",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "Updates, your way",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "Preferences weren\'t saved. Try saving again; automatic installation has not been enabled.",
     ),
@@ -2737,12 +2705,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Update preferences",
     ),
     "updatePreload": MessageLookupByLibrary.simpleMessage("Preload on Wi-Fi"),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Download available updates over Wi-Fi. Leaving Wi-Fi pauses automatic downloads.",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "The package has passed all checks. Install now or keep it for later.",
-    ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
       "Ready to install",
     ),
@@ -2766,9 +2728,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Updates"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "A package that fails verification will never be installed.",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "The downloaded update failed integrity verification.",
     ),
@@ -2778,17 +2737,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "This package can\'t be installed",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "Checking the file, app version and signing certificate before installation.",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
       "Checking the update",
     ),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "Installation will briefly close ReClash. Disconnect only if you\'re ready to interrupt the connection.",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "Installation will briefly close the app. Your VPN will not be stopped without your confirmation.",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
       "Your VPN is still on",
@@ -2800,18 +2753,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Action"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Add subscription"),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "Create a profile from an HTTP or HTTPS subscription URL, with an optional name.",
+      "Add a subscription URL with an optional name.",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "The encrypted link could not be authenticated. It may be damaged or use a different key.",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Build link"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Close application"),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.",
+      "Use your configured close behavior.",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -2825,11 +2775,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "External application command",
     ),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "External connection and close commands require confirmation. Finish setup before using connection commands.",
+      "External connection and close commands ask for confirmation.",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Connect"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Start the connection using the selected profile and your current coverage settings.",
+      "Connect with the selected profile.",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Connection"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
@@ -2847,7 +2797,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Disconnect"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Stop the current connection without changing the selected profile.",
+      "Stop the connection; keep the selected profile.",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
       "Embedded configuration",
@@ -2855,12 +2805,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
       "Example profile",
     ),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("Formats"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "Link formats. Replace placeholders with your URL or data.",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Import configuration",
     ),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "Import a UTF-8 configuration carried in the link as Base64, with an optional name.",
+      "Embed a YAML or JSON configuration in the link.",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("Inspect link"),
     "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
@@ -2879,10 +2833,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Install configuration",
     ),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Import a subscription using the install-config link format supported by Clash clients.",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.",
+      "Use the subscription link format shared by Clash clients.",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "The embedded configuration is not valid UTF-8 Base64 data.",
@@ -2904,21 +2855,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Show application"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "Bring ReClash to the foreground without changing the connection.",
+      "Bring ReClash to the foreground.",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Parameters"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "Could not read the clipboard. Paste the link manually.",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Link preview"),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Link"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "Fill in the required fields to preview the link.",
+      "Enter a URL or configuration to build the link.",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.",
+      "Links may contain tokens or credentials. Share with care.",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profiles"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
@@ -2933,14 +2881,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "Supported import links",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
       "Toggle connection",
     ),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "Connect when stopped; disconnect when running. Confirmation names the actual action.",
+      "Connect if stopped; disconnect if running.",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "The link contains too many nested wrappers.",
@@ -2955,9 +2900,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "This encryption version is not supported. Request a plain subscription link.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Use example"),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "Subscription links, embedded configs and INCY crypt1",
-    ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),

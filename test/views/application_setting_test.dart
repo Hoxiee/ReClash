@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/widgets/update_preferences.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
@@ -12,6 +13,7 @@ import 'package:reclash/providers/setup.dart';
 
 import '../helpers/test_profiles.dart';
 import 'package:reclash/views/application_setting.dart';
+import 'package:reclash/views/developer.dart';
 
 import '../helpers/test_app.dart';
 
@@ -114,17 +116,12 @@ void main() {
       await tester.ensureVisible(row);
       await tester.tap(row);
       await tester.pumpAndSettle();
-      expect(find.text('Updates, your way'), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('update-preferences-save')).hitTestable(),
-        findsOneWidget,
-      );
-      await tester.tap(find.byTooltip('Close'));
-      await tester.pumpAndSettle();
+      expect(find.byType(UpdatePreferences), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
     },
   );
 
-  testWidgets('reopening setup from application settings keeps a live run', (
+  testWidgets('reopening setup from developer tools keeps a live run', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 1800);
@@ -139,7 +136,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: ApplicationSettingView()),
+        child: const TestApp(child: DeveloperView()),
       ),
     );
     await tester.pumpAndSettle();

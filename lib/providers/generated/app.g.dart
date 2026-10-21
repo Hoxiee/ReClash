@@ -1166,7 +1166,7 @@ final class ViewModeProvider
         argument: null,
         retry: null,
         name: r'viewModeProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -1193,7 +1193,7 @@ final class ViewModeProvider
   }
 }
 
-String _$viewModeHash() => r'56f81d519e3835bddef4a3905182991169c17619';
+String _$viewModeHash() => r'f1cd30d51690cc3735069b22a986a10530c4a0b0';
 
 @ProviderFor(isMobileView)
 final isMobileViewProvider = IsMobileViewProvider._();
@@ -1206,7 +1206,7 @@ final class IsMobileViewProvider extends $FunctionalProvider<bool, bool, bool>
         argument: null,
         retry: null,
         name: r'isMobileViewProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -1233,7 +1233,7 @@ final class IsMobileViewProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$isMobileViewHash() => r'1d75bccb4f50ae206bf43b68df869a5d95e5ea5f';
+String _$isMobileViewHash() => r'554c9ed269a02af001e623e596622e2bb2d658e7';
 
 @ProviderFor(Init)
 final initProvider = InitProvider._();

@@ -73,7 +73,8 @@ class ToolsCatalogPanel extends ConsumerStatefulWidget {
     this.searchFocus,
   });
 
-  final Future<void> Function(ToolEntry entry) onSelect;
+  final Future<void> Function(ToolEntry entry, {ContainerOrigin? origin})
+  onSelect;
   final bool autofocus;
   final VoidCallback? onDismiss;
   final FocusNode? searchFocus;
@@ -140,11 +141,11 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
     if (_scroll?.hasClients == true) _scroll!.jumpTo(0);
   }
 
-  Future<void> _select(ToolEntry entry) async {
+  Future<void> _select(ToolEntry entry, {ContainerOrigin? origin}) async {
     if (_opening) return;
     _opening = true;
     try {
-      await widget.onSelect(entry);
+      await widget.onSelect(entry, origin: origin);
     } finally {
       _opening = false;
     }
@@ -224,6 +225,29 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
               .where((entry) => entry.showInCatalog && entry.route != null)
               .toList();
     Widget row(ToolEntry entry, {int? index}) {
+      final opens = entry.route != null && entry.command == null;
+      Widget tile(Widget Function(VoidCallback? open) build) {
+        void select() => unawaited(_select(entry));
+        if (!opens || !context.isMobileView) return build(select);
+        return Builder(
+          builder: (context) {
+            final position = ItemPositionProvider.of(context);
+            return OpenContainer<void>(
+              clipBehavior: Clip.none,
+              // The route hosts the closed tile outside the section's provider.
+              closedBuilder: (_, open) => position == null
+                  ? build(open)
+                  : ItemPositionProvider(
+                      position: position.position,
+                      child: build(open),
+                    ),
+              onOpen: (origin) => unawaited(_select(entry, origin: origin)),
+              openBuilder: (_, _) => const SizedBox.shrink(),
+            );
+          },
+        );
+      }
+
       final pinned = session.pinned.contains(entry.id);
       final selected = searching && _focus.hasFocus && index == _selected;
       final isActive = selected || session.path.lastOrNull?.id == entry.id;
@@ -244,35 +268,37 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
               ],
         child: Semantics(
           selected: isActive,
-          child: ListItem(
-            isSelected: isActive,
-            holdsSelection: true,
-            leading: GlyphIcon(entry.glyph),
-            title: Text(entry.title),
-            subtitle: searching || entry.route?.settingId != null
-                ? Text(
-                    [
-                      entry.command != null
-                          ? l.toolsAction
-                          : entry.route?.settingId != null
-                          ? l.toolsSetting
-                          : l.toolsSection,
-                      if (entry.path.isNotEmpty) entry.path,
-                      if (entry.unavailableReason != null)
-                        entry.unavailableReason!,
-                    ].join(' · '),
-                  )
-                : null,
-            trailing: busy.contains(entry.command)
-                ? const CommonCircleLoading(size: 20)
-                : entry.command != null
-                ? Text(l.toolsRun)
-                : null,
-            onTap:
-                busy.contains(entry.command) ||
-                    entry.unavailableReason != null && entry.fallback == null
-                ? null
-                : () => unawaited(_select(entry)),
+          child: tile(
+            (open) => ListItem(
+              isSelected: isActive,
+              holdsSelection: true,
+              leading: GlyphIcon(entry.glyph),
+              title: Text(entry.title),
+              subtitle: searching || entry.route?.settingId != null
+                  ? Text(
+                      [
+                        entry.command != null
+                            ? l.toolsAction
+                            : entry.route?.settingId != null
+                            ? l.toolsSetting
+                            : l.toolsSection,
+                        if (entry.path.isNotEmpty) entry.path,
+                        if (entry.unavailableReason != null)
+                          entry.unavailableReason!,
+                      ].join(' · '),
+                    )
+                  : null,
+              trailing: busy.contains(entry.command)
+                  ? const CommonCircleLoading(size: 20)
+                  : entry.command != null
+                  ? Text(l.toolsRun)
+                  : null,
+              onTap:
+                  busy.contains(entry.command) ||
+                      entry.unavailableReason != null && entry.fallback == null
+                  ? null
+                  : open,
+            ),
           ),
         ),
       );

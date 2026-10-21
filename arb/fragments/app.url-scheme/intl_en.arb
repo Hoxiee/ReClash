@@ -1,30 +1,26 @@
 {
   "urlScheme": "URL scheme",
-  "urlSchemeIntro": "Connect ReClash to shortcuts, websites and other apps. Build a ready-to-use link or inspect one before opening it.",
   "urlSchemeConnection": "Connection",
   "urlSchemeProfiles": "Profiles",
-  "urlSchemeConfirmationTip": "External connection and close commands require confirmation. Finish setup before using connection commands.",
-  "urlSchemeProfileCommandsTip": "Profile commands open the builder. Incoming imports ask for confirmation and keep the existing validation and conversion checks.",
+  "urlSchemeConfirmationTip": "External connection and close commands ask for confirmation.",
   "urlSchemeSupportedLinks": "Supported import links",
-  "urlSchemeSupportedLinksTip": "Clash links, INCY and Happ wrappers, and proxy share links also work in manual import and QR scanning. Unknown encryption versions are rejected.",
-  "urlSchemeWrappedLinks": "Subscription links, embedded configs and INCY crypt1",
   "urlSchemeProxyLinks": "Proxy share links",
   "urlSchemeConnect": "Connect",
-  "urlSchemeConnectDesc": "Start the connection using the selected profile and your current coverage settings.",
+  "urlSchemeConnectDesc": "Connect with the selected profile.",
   "urlSchemeDisconnect": "Disconnect",
-  "urlSchemeDisconnectDesc": "Stop the current connection without changing the selected profile.",
+  "urlSchemeDisconnectDesc": "Stop the connection; keep the selected profile.",
   "urlSchemeToggle": "Toggle connection",
-  "urlSchemeToggleDesc": "Connect when stopped; disconnect when running. Confirmation names the actual action.",
+  "urlSchemeToggleDesc": "Connect if stopped; disconnect if running.",
   "urlSchemeOpen": "Show application",
-  "urlSchemeOpenDesc": "Bring ReClash to the foreground without changing the connection.",
+  "urlSchemeOpenDesc": "Bring ReClash to the foreground.",
   "urlSchemeClose": "Close application",
-  "urlSchemeCloseDesc": "Follow your close behavior: hide the window or exit ReClash. Android follows its app close behavior.",
+  "urlSchemeCloseDesc": "Use your configured close behavior.",
   "urlSchemeAdd": "Add subscription",
-  "urlSchemeAddDesc": "Create a profile from an HTTP or HTTPS subscription URL, with an optional name.",
+  "urlSchemeAddDesc": "Add a subscription URL with an optional name.",
   "urlSchemeImport": "Import configuration",
-  "urlSchemeImportDesc": "Import a UTF-8 configuration carried in the link as Base64, with an optional name.",
+  "urlSchemeImportDesc": "Embed a YAML or JSON configuration in the link.",
   "urlSchemeInstallConfig": "Install configuration",
-  "urlSchemeInstallConfigDesc": "Import a subscription using the install-config link format supported by Clash clients.",
+  "urlSchemeInstallConfigDesc": "Use the subscription link format shared by Clash clients.",
   "urlSchemeBuild": "Build link",
   "urlSchemeInspect": "Inspect link",
   "urlSchemeAction": "Action",
@@ -33,10 +29,9 @@
   "urlSchemeUseExample": "Use example",
   "urlSchemeExampleProfile": "Example profile",
   "urlSchemeConfigHint": "Paste a YAML or JSON configuration",
-  "urlSchemeBuilderTip": "Only the fields needed by this action are included. Configuration links carry the full content; a link never bypasses confirmation.",
-  "urlSchemePreview": "Link preview",
-  "urlSchemePreviewEmpty": "Fill in the required fields to preview the link.",
-  "urlSchemePrivateLinkTip": "A link may contain access tokens or proxy credentials. Share it only with people you trust; ReClash keeps no link history.",
+  "urlSchemePreview": "Link",
+  "urlSchemePreviewEmpty": "Enter a URL or configuration to build the link.",
+  "urlSchemePrivateLinkTip": "Links may contain tokens or credentials. Share with care.",
   "urlSchemeCopyFailed": "Could not copy the link. Try again.",
   "urlSchemePasteFailed": "Could not read the clipboard. Paste the link manually.",
   "urlSchemeInspectTip": "Inspection stays on this device. It does not open a link, download a subscription or import a profile.",
@@ -48,13 +43,40 @@
   "urlSchemeContentFormat": "Content format",
   "urlSchemeConfigSummary": "Configuration contents",
   "urlSchemeConfigCounts": "{nodes} proxies, {groups} groups, {providers} remote providers",
-  "@urlSchemeConfigCounts": {"placeholders": {"nodes": {"type": "int"}, "groups": {"type": "int"}, "providers": {"type": "int"}}},
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
   "urlSchemeConversionWarning": "Conversion omits some content. Review and approve these changes during import.",
   "urlSchemeConfirmTitle": "External application command",
   "urlSchemeConfirmMessage": "This link requests “{action}”. Allow ReClash to perform this action?",
-  "@urlSchemeConfirmMessage": {"placeholders": {"action": {"type": "String"}}},
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeImportConfirm": "Import “{name}” from {source}? Profile validation and any conversion review follow your confirmation.",
-  "@urlSchemeImportConfirm": {"placeholders": {"name": {"type": "String"}, "source": {"type": "String"}}},
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeEmbeddedConfig": "Embedded configuration",
   "urlSchemeSetupRequired": "Finish the connection setup before using external connection commands.",
   "urlSchemeDeliveryError": "Could not deliver the link, or the pending link queue is full. Try again after the current action finishes.",
@@ -71,5 +93,7 @@
   "telegramLinkTitle": "Telegram",
   "telegramOpen": "Open Telegram",
   "telegramWebFallback": "Open in browser",
-  "telegramAppUnavailable": "Telegram could not be opened on this device."
+  "telegramAppUnavailable": "Telegram could not be opened on this device.",
+  "urlSchemeFormats": "Formats",
+  "urlSchemeFormatsTip": "Link formats. Replace placeholders with your URL or data."
 }

@@ -222,7 +222,6 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                       ),
                     ),
                   ],
-                  footer: l.webDashboardInstallTip,
                 ),
                 if (progress != null)
                   Padding(

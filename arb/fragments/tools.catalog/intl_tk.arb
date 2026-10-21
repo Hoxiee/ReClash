@@ -26,5 +26,6 @@
   "toolsUnpin": "Berkitmegi aýyr",
   "toolsUpdateResources": "Serişdeleri täzele",
   "toolsUpdateResourcesConfirm": "Düzgünleriň we skriptleriň täzelenmegi konfigurasiýany ýene-de ulanyp, baglanyşyklara täsir edip biler. Dowam edilsinmi?",
-  "applicationSettings": "Programma sazlamalary"
+  "applicationSettings": "Programma sazlamalary",
+  "tools": "Gurallar"
 }

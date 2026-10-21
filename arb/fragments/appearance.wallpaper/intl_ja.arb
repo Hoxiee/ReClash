@@ -43,5 +43,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navigationLayout": "ナビゲーション",
+  "navigationLayoutBar": "タブバー",
+  "navigationLayoutSidebar": "サイドバー"
 }

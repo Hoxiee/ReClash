@@ -138,7 +138,7 @@ void main() {
         );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('v0.8.96'), findsOneWidget);
+    expect(find.text('0.8.96'), findsOneWidget);
     expect(find.textContaining('Re-import backups'), findsOneWidget);
     expect(find.textContaining('Override scripts'), findsOneWidget);
     expect(find.textContaining('Breaking changes'), findsOneWidget);
@@ -231,7 +231,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.textContaining(currentAppLocalizations.updateNoUpdates),
+      find.textContaining(currentAppLocalizations.updateCurrentTitle),
       findsNothing,
     );
 
@@ -253,7 +253,12 @@ void main() {
       find.text(currentAppLocalizations.updateCurrentTitle),
       findsOneWidget,
     );
-    expect(find.textContaining('latest version'), findsOneWidget);
+    expect(
+      find.text(
+        currentAppLocalizations.updateInstalledVersion(_runningVersion),
+      ),
+      findsOneWidget,
+    );
 
     await tapCancel(tester);
     await shown;

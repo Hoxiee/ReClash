@@ -1500,6 +1500,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage(
       "Barre inférieure",
     ),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("Navigation"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage(
+      "Barre d’onglets",
+    ),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage(
+      "Barre latérale",
+    ),
     "network": MessageLookupByLibrary.simpleMessage("Réseau"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2745,9 +2752,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
       "Autoriser l’installation automatique",
     ),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "Ces préférences n’accordent pas l’autorisation Android d’installer des apps. Vous pouvez les modifier à tout moment.",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash pourra installer les mises à jour stables vérifiées et admissibles sans vous le demander à chaque fois. Votre VPN ne sera jamais déconnecté. Android peut encore demander une confirmation.",
     ),
@@ -2756,12 +2760,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
       "Installer automatiquement",
-    ),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "Installer les mises à jour stables admissibles uniquement lorsque le VPN est désactivé. Les changements importants attendent toujours votre décision.",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "Fermer cette fenêtre n’arrête pas le téléchargement.",
     ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Annuler le téléchargement",
@@ -2777,16 +2775,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Rechercher automatiquement",
     ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
-      "Impossible de rechercher des mises à jour.",
+      "Impossible de rechercher des mises à jour",
     ),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Vérifiez votre connexion et réessayez.",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "Vérifier régulièrement tant que ReClash fonctionne. La mise à jour apparaît dans le tableau de bord sans ouvrir de fenêtre.",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "Recherche d’une version plus récente dans le canal choisi.",
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Recherche de mises à jour…",
     ),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage(
       "Fermer la fenêtre",
@@ -2824,30 +2819,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
       "Télécharger à nouveau",
     ),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Vous pouvez fermer cette fenêtre. La progression reste dans le tableau de bord.",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "Impossible de télécharger la mise à jour.",
+      "Impossible de télécharger la mise à jour",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "La partie téléchargée est conservée. Vérifiez votre connexion puis reprenez.",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "Votre version installée reste inchangée.",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("Compris"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "Impossible de démarrer l’installateur de paquets.",
+      "Impossible de démarrer l’installateur de paquets",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android n’a pas terminé l’installation. Réessayez quand vous le souhaitez.",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage(
       "Installer maintenant",
-    ),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash utilise désormais la nouvelle version.",
     ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Mise à jour installée",
@@ -2860,16 +2846,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Installation de la mise à jour",
     ),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
-      "Vous utilisez déjà la dernière version.",
-    ),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Pas maintenant"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Nouveautés"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Aucune note de version disponible.",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "Le téléchargement n’installe pas la mise à jour et n’interrompt pas votre VPN.",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
       "Une mise à jour est disponible",
@@ -2892,12 +2871,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "Intégrité, identité de l’app et signature vérifiées",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Version"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage(
       "Mettre en pause",
-    ),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "La partie téléchargée est conservée. Reprenez quand vous le souhaitez.",
     ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
       "Téléchargement en pause",
@@ -2911,9 +2886,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "Réglez séparément la recherche, le téléchargement et l’installation.",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "Les mises à jour à votre rythme",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "Les préférences n’ont pas été enregistrées. Réessayez ; l’installation automatique n’a pas été activée.",
     ),
@@ -2922,12 +2894,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updatePreload": MessageLookupByLibrary.simpleMessage(
       "Télécharger par Wi-Fi",
-    ),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Télécharger les mises à jour disponibles par Wi-Fi. Les téléchargements automatiques se mettent en pause hors Wi-Fi.",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "Le paquet a passé toutes les vérifications. Installez-le maintenant ou gardez-le pour plus tard.",
     ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
       "Prête à être installée",
@@ -2954,9 +2920,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Mises à jour"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "Un paquet qui échoue à la vérification ne sera jamais installé.",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "L’intégrité de la mise à jour téléchargée n’a pas pu être vérifiée.",
     ),
@@ -2966,17 +2929,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "Ce paquet ne peut pas être installé",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "Vérification du fichier, de la version et du certificat de signature avant l’installation.",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
       "Vérification de la mise à jour",
     ),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "L’installation fermera brièvement ReClash. Déconnectez-vous uniquement si vous pouvez interrompre la connexion.",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "L’installation fermera brièvement l’app. Votre VPN ne sera pas arrêté sans votre confirmation.",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
       "Votre VPN est encore actif",
@@ -2992,20 +2949,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ajouter un abonnement",
     ),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "Crée un profil à partir d’une URL d’abonnement HTTP ou HTTPS, avec un nom facultatif.",
+      "Ajouter une URL d’abonnement et un nom facultatif.",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "Impossible d’authentifier le lien chiffré. Il peut être endommagé ou utiliser une autre clé.",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Créer un lien"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "Seuls les champs de cette action sont inclus. Un lien de configuration contient toutes les données et ne contourne jamais la confirmation.",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage(
       "Fermer l’application",
     ),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "Suit votre choix de fermeture : masquer la fenêtre ou quitter ReClash. Android utilise son comportement habituel de fermeture.",
+      "Utiliser le comportement de fermeture configuré.",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -3019,11 +2973,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Commande externe de l’application",
     ),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "Les commandes externes de connexion et de fermeture demandent confirmation. Terminez la configuration avant d’utiliser les commandes de connexion.",
+      "Les commandes externes de connexion et de fermeture demandent confirmation.",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Connecter"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Démarre la connexion avec le profil sélectionné et vos paramètres de couverture actuels.",
+      "Se connecter avec le profil sélectionné.",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Connexion"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
@@ -3041,7 +2995,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Déconnecter"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Arrête la connexion sans changer le profil sélectionné.",
+      "Arrêter la connexion sans changer de profil.",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
       "Configuration intégrée",
@@ -3049,12 +3003,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
       "Profil d’exemple",
     ),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("Formats"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "Formats de liens. Remplacez les espaces réservés par votre URL ou vos données.",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Importer une configuration",
     ),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "Importe une configuration UTF-8 intégrée au lien en Base64, avec un nom facultatif.",
+      "Intégrer une configuration YAML ou JSON au lien.",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
       "Vérifier un lien",
@@ -3075,10 +3033,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Installer une configuration",
     ),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Importe un abonnement au format de lien install-config pris en charge par les clients Clash.",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "Reliez ReClash à des raccourcis, des sites et d’autres applications. Créez un lien prêt à l’emploi ou vérifiez-le avant de l’ouvrir.",
+      "Utiliser le format de lien d’abonnement des clients Clash.",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "La configuration intégrée n’est pas un contenu UTF-8 Base64 valide.",
@@ -3102,21 +3057,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Afficher l’application",
     ),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "Place ReClash au premier plan sans modifier la connexion.",
+      "Afficher ReClash au premier plan.",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Paramètres"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "Impossible de lire le presse-papiers. Collez le lien manuellement.",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Aperçu du lien"),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Lien"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "Remplissez les champs obligatoires pour voir le lien.",
+      "Saisissez une URL ou une configuration pour créer le lien.",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "Un lien peut contenir des jetons d’accès ou des identifiants de proxy. Partagez-le uniquement avec des personnes de confiance ; ReClash ne conserve aucun historique.",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "Les commandes de profil ouvrent le générateur. Chaque importation entrante demande confirmation et conserve les contrôles de validation et de conversion.",
+      "Les liens peuvent contenir des jetons ou identifiants. Partagez-les avec prudence.",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profils"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
@@ -3129,14 +3081,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "Liens d’importation pris en charge",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Les liens Clash, les enveloppes INCY et Happ et les liens de proxy fonctionnent aussi lors d’un import manuel et d’un scan QR. Les versions de chiffrement inconnues sont refusées.",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
       "Basculer la connexion",
     ),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "Connecte si elle est arrêtée, déconnecte si elle est active. La confirmation indique l’action réelle.",
+      "Se connecter à l’arrêt, se déconnecter si actif.",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "Le lien contient trop d’enveloppes imbriquées.",
@@ -3152,9 +3101,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Utiliser l’exemple",
-    ),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "Liens d’abonnement, configurations intégrées et INCY crypt1",
     ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
