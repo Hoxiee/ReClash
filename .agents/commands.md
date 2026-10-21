@@ -92,6 +92,19 @@ flutter run --dart-define-from-file=env.json --dart-define=SAFE_MODE=true
 `status_4` bug icon with a menu of only show and exit and no traffic title, and the settings keep their values, so
 nothing has to be flipped back before a normal run. See the safe mode section of `architecture.md` for the owners that consult the flag.
 
+To look at a screen without launching the app, render it headless inside `flutter_test` with the app theme and real
+fonts, then open the PNG:
+
+```bash
+dart run tool/preview.dart <scenario.dart> [--size 412x915,1280x800] [--theme light,dark] [--locale en,ru]
+```
+
+A scenario defines `Widget preview()` and optionally `previewOverrides()`, `previewSetUp()`, and
+`previewAct(WidgetTester)`; `tool/preview/examples/about_preview.dart` is a template, and `--help` lists the rest.
+Images land in `.dart_tool/preview/out/`; a warm run takes about 4 s. Text painted without a theme or `fontFamily`
+still renders as boxes, and `system.isDesktop` reflects the host. Do not run it alongside another `flutter test` in the
+same checkout.
+
 ## Code Generation
 
 Run code generation after modifying models, providers, or database schema:
@@ -129,6 +142,19 @@ dart run tool/assemble_l10n.dart
 dart run intl_utils:generate
 dart run tool/assemble_l10n.dart --check
 ```
+
+`tool/l10n.dart` does the fragment edit and both steps in one call, and refuses a spec that misses a locale, mismatches
+placeholders, or claims a key another fragment owns:
+
+```bash
+dart run tool/l10n.dart apply spec.json            # {"fragment", "set": {key: {locale: text, "@": metadata}}, "remove"}
+dart run tool/l10n.dart apply spec.json --dry-run
+dart run tool/l10n.dart get <key>...               # owner and value per locale
+dart run tool/l10n.dart find '<text>'              # reuse an existing key before adding one
+dart run tool/l10n.dart audit [--fragment <f>]     # locale gaps, placeholders, Han text; exit 1 on errors
+```
+
+Metadata (`@key`) lives in the English fragment only; `intl_utils` reads it from the main ARB alone.
 
 `arb/intl_<locale>.arb` is generated output. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
 
@@ -190,6 +216,23 @@ core: about 60 s for the same run, and 67 s instead of 180–213 s with `--cover
 isolate, so a test can see state a file before it left behind; the script runs every file that failed there again on
 its own, lets that run decide, and names the files that only failed together. See the Shared Test Isolate section of
 `rules.md` before fixing one.
+
+To run only what a change can break, let the script select the tests from the import graph:
+
+```bash
+dart run tool/test.dart --changed --summary-only         # working tree against HEAD, staged and untracked
+dart run tool/test.dart --affected lib/views/about.dart  # explicit changed paths
+dart run tool/test.dart --changed --list                 # print the selection with a reason per file, run nothing
+```
+
+A barrel's export counts only when the dependent names a declaration the change reaches, so a leaf file selects a
+few dozen files while `lib/ui/shape.dart` or `lib/models/config.dart` still selects most of the suite. Any `lib/`
+change adds `test/lint/`, ARB changes add the l10n tests, a `pubspec` change selects everything, and paths no rule
+covers print as `unmapped:`; tests that read non-Dart fixtures are not traced. `--summary-only` prints only the counts
+and each failed test's `file:line`, name, and first error lines, after the shared-isolate rerun has decided.
+
+An agent reading `flutter test` output directly passes `-r failures-only`: passing tests then print nothing, while the
+default reporter writes a line per test once output is not a terminal.
 
 `plugins/setup/setup_hooks/` is a pure Dart package and is tested with `dart test` from its own directory, which is
 also what CI runs; `tool/check_plugins.sh` does not descend into it. It must stay out of `flutter test`, because a test

@@ -76,6 +76,18 @@ Read these only when the task touches their area:
 - Unknown paths are unclassified; critical decisions require explicit review, not a clean merge.
 - For vendor sync or maintenance policy, load `fork-maintenance`; details: [.agents/fork-maintenance.md](.agents/fork-maintenance.md).
 
+## Routine Delegation
+
+- Run the tests a change can break with `dart run tool/test.dart --changed --summary-only`, not the whole suite; a
+  single expected-green file runs directly with `flutter test -r failures-only`.
+- Change ARB messages only through `dart run tool/l10n.dart` (`apply`, `get`, `find`, `audit`), never by editing each
+  locale file.
+- Check a visual change by rendering it headless with `dart run tool/preview.dart <scenario.dart>` and reading the PNG.
+- In Claude Code, the leading session may hand routine work to the Haiku agents in `.claude/agents/` without being
+  asked: `test-runner` for runs whose output or repetitions are large, `test-writer` for tests whose behaviors the
+  leader has specified, `l10n-writer` for messages in every locale. Run `tool/fork.dart context` yourself: its packet
+  is smaller than an agent's start-up. The leader owns the spec, reviews the result, and runs the final checks.
+
 ## Repo Skills
 
 Use repo skills from `.agents/skills/` when a task matches their descriptions; `.claude/skills/` symlinks expose the

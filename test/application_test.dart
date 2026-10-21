@@ -7,6 +7,7 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/views/setup.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 import 'helpers/test_app.dart';
 import 'helpers/test_profiles.dart';
 import 'package:reclash/application.dart';
@@ -34,6 +35,7 @@ Widget? _childOf(Widget widget) {
     ConnectivityManager(:final child) => child,
     WindowHeaderContainer(:final child) => child,
     VpnManager(:final child) => child,
+    AppWallpaperScope(:final child) => child,
     _ => null,
   };
 }
@@ -81,6 +83,7 @@ void main() {
       CoreManager,
       ConnectivityManager,
       WindowHeaderContainer,
+      AppWallpaperScope,
     ]);
   });
 
@@ -96,6 +99,7 @@ void main() {
       CoreManager,
       ConnectivityManager,
       VpnManager,
+      AppWallpaperScope,
     ]);
   });
 

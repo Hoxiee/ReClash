@@ -1,30 +1,26 @@
 {
   "urlScheme": "Esquema de URL",
-  "urlSchemeIntro": "Conecta ReClash con atajos, sitios web y otras aplicaciones. Crea un enlace listo para usar o compruébalo antes de abrirlo.",
   "urlSchemeConnection": "Conexión",
   "urlSchemeProfiles": "Perfiles",
-  "urlSchemeConfirmationTip": "Los comandos externos de conexión y cierre requieren confirmación. Completa la configuración antes de usar los comandos de conexión.",
-  "urlSchemeProfileCommandsTip": "Los comandos de perfiles abren el generador. Las importaciones entrantes piden confirmación y mantienen las comprobaciones de validación y conversión.",
+  "urlSchemeConfirmationTip": "Los comandos externos de conexión y cierre piden confirmación.",
   "urlSchemeSupportedLinks": "Enlaces de importación compatibles",
-  "urlSchemeSupportedLinksTip": "Los enlaces Clash, los envoltorios INCY y Happ y los enlaces de proxy también funcionan en la importación manual y el escaneo QR. Se rechazan las versiones de cifrado desconocidas.",
-  "urlSchemeWrappedLinks": "Enlaces de suscripción, configuraciones integradas e INCY crypt1",
   "urlSchemeProxyLinks": "Enlaces de proxy",
   "urlSchemeConnect": "Conectar",
-  "urlSchemeConnectDesc": "Inicia la conexión con el perfil seleccionado y la cobertura actual.",
+  "urlSchemeConnectDesc": "Conectar con el perfil seleccionado.",
   "urlSchemeDisconnect": "Desconectar",
-  "urlSchemeDisconnectDesc": "Detiene la conexión sin cambiar el perfil seleccionado.",
+  "urlSchemeDisconnectDesc": "Detener la conexión sin cambiar el perfil.",
   "urlSchemeToggle": "Alternar conexión",
-  "urlSchemeToggleDesc": "Conecta si está detenida; desconecta si está activa. La confirmación indica la acción real.",
+  "urlSchemeToggleDesc": "Conectar si está detenido; desconectar si está activo.",
   "urlSchemeOpen": "Mostrar aplicación",
-  "urlSchemeOpenDesc": "Trae ReClash al primer plano sin cambiar la conexión.",
+  "urlSchemeOpenDesc": "Traer ReClash al primer plano.",
   "urlSchemeClose": "Cerrar aplicación",
-  "urlSchemeCloseDesc": "Sigue la opción de cierre: ocultar la ventana o salir de ReClash. Android usa su comportamiento habitual de cierre.",
+  "urlSchemeCloseDesc": "Usar el comportamiento de cierre configurado.",
   "urlSchemeAdd": "Añadir suscripción",
-  "urlSchemeAddDesc": "Crea un perfil desde una URL de suscripción HTTP o HTTPS, con un nombre opcional.",
+  "urlSchemeAddDesc": "Añadir una URL de suscripción con un nombre opcional.",
   "urlSchemeImport": "Importar configuración",
-  "urlSchemeImportDesc": "Importa una configuración UTF-8 incluida en el enlace como Base64, con un nombre opcional.",
+  "urlSchemeImportDesc": "Incluir una configuración YAML o JSON en el enlace.",
   "urlSchemeInstallConfig": "Instalar configuración",
-  "urlSchemeInstallConfigDesc": "Importa una suscripción con el formato de enlace install-config compatible con clientes Clash.",
+  "urlSchemeInstallConfigDesc": "Usar el formato de enlace de suscripción de los clientes Clash.",
   "urlSchemeBuild": "Crear enlace",
   "urlSchemeInspect": "Comprobar enlace",
   "urlSchemeAction": "Acción",
@@ -33,10 +29,9 @@
   "urlSchemeUseExample": "Usar ejemplo",
   "urlSchemeExampleProfile": "Perfil de ejemplo",
   "urlSchemeConfigHint": "Pega una configuración YAML o JSON",
-  "urlSchemeBuilderTip": "Solo se incluyen los campos de esta acción. Los enlaces de configuración contienen todos los datos y nunca omiten la confirmación.",
-  "urlSchemePreview": "Vista previa del enlace",
-  "urlSchemePreviewEmpty": "Completa los campos obligatorios para ver el enlace.",
-  "urlSchemePrivateLinkTip": "Un enlace puede contener tokens de acceso o credenciales de proxy. Compártelo solo con personas de confianza; ReClash no guarda un historial.",
+  "urlSchemePreview": "Enlace",
+  "urlSchemePreviewEmpty": "Introduce una URL o configuración para crear el enlace.",
+  "urlSchemePrivateLinkTip": "Los enlaces pueden contener tokens o credenciales. Compártelos con cuidado.",
   "urlSchemeCopyFailed": "No se pudo copiar el enlace. Inténtalo de nuevo.",
   "urlSchemePasteFailed": "No se pudo leer el portapapeles. Pega el enlace manualmente.",
   "urlSchemeInspectTip": "La comprobación es local. No abre el enlace, descarga suscripciones ni importa perfiles.",
@@ -48,13 +43,40 @@
   "urlSchemeContentFormat": "Formato del contenido",
   "urlSchemeConfigSummary": "Contenido de la configuración",
   "urlSchemeConfigCounts": "{nodes} proxies, {groups} grupos, {providers} proveedores remotos",
-  "@urlSchemeConfigCounts": {"placeholders": {"nodes": {"type": "int"}, "groups": {"type": "int"}, "providers": {"type": "int"}}},
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
   "urlSchemeConversionWarning": "La conversión omite parte del contenido. Revisa y aprueba los cambios durante la importación.",
   "urlSchemeConfirmTitle": "Comando externo de aplicación",
   "urlSchemeConfirmMessage": "Este enlace solicita «{action}». ¿Permitir que ReClash realice esta acción?",
-  "@urlSchemeConfirmMessage": {"placeholders": {"action": {"type": "String"}}},
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeImportConfirm": "¿Importar «{name}» desde {source}? Tras la confirmación se validará el perfil y se revisarán las conversiones necesarias.",
-  "@urlSchemeImportConfirm": {"placeholders": {"name": {"type": "String"}, "source": {"type": "String"}}},
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeEmbeddedConfig": "Configuración integrada",
   "urlSchemeSetupRequired": "Completa la configuración de conexión antes de usar comandos externos de conexión.",
   "urlSchemeDeliveryError": "No se pudo entregar el enlace o la cola está llena. Inténtalo de nuevo cuando termine la acción actual.",
@@ -71,5 +93,7 @@
   "telegramLinkTitle": "Telegram",
   "telegramOpen": "Abrir Telegram",
   "telegramWebFallback": "Abrir en el navegador",
-  "telegramAppUnavailable": "No se pudo abrir Telegram en este dispositivo."
+  "telegramAppUnavailable": "No se pudo abrir Telegram en este dispositivo.",
+  "urlSchemeFormats": "Formatos",
+  "urlSchemeFormatsTip": "Formatos de enlace. Sustituye los marcadores por tu URL o datos."
 }

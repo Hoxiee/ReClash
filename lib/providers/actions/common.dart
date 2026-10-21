@@ -110,12 +110,14 @@ class CommonAction extends _$CommonAction {
     }
   }
 
-  Future<void> checkForUpdates() async {
-    final context = globalState.navigatorKey.currentContext;
-    if (context == null) return;
-    final action = ref.read(appUpdateActionProvider.notifier);
-    final checking = action.check();
-    await UpdateSheet.show(context);
+  /// Opens the sheet on [context]'s navigator, the root's when the check
+  /// starts with no page behind it, and completes with the check itself.
+  Future<void> checkForUpdates([BuildContext? context]) async {
+    final checking = ref.read(appUpdateActionProvider.notifier).check();
+    final origin = context ?? globalState.navigatorKey.currentContext;
+    if (origin != null && origin.mounted) {
+      unawaited(UpdateSheet.show(origin));
+    }
     await checking;
   }
 
@@ -138,6 +140,6 @@ class CommonAction extends _$CommonAction {
     }
     if (!isUser) return;
     final context = globalState.navigatorKey.currentContext;
-    if (context != null) await UpdateSheet.show(context);
+    if (context != null && context.mounted) await UpdateSheet.show(context);
   }
 }

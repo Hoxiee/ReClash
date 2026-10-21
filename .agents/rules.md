@@ -1,6 +1,8 @@
 # Rules
 
-These are repository coding and testing conventions. Codex command permission rules belong in `.codex/rules/*.rules`; see `.agents/agent-config.md` before adding those.
+These are repository coding and testing conventions, read by the headings relevant to a task rather than as a
+startup checklist. `AGENTS.md` carries the always-on constraints; the applicable sections here remain binding.
+Codex command permission rules belong in `.codex/rules/*.rules`; see `.agents/agent-config.md` before adding those.
 
 ## Dart and Flutter Style
 
@@ -102,6 +104,7 @@ These directories are excluded from analysis:
 - `build/**`
 - `lib/l10n/intl/**`
 - `lib/**/generated/**`
+- `upstream_l10n/**` (vendor provenance, not application input)
 - `plugins/**`
 - the platform runner directories: `android/`, `ios/`, `web/`, `windows/`, `macos/`, `linux/`
 

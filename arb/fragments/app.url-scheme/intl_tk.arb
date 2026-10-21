@@ -1,30 +1,26 @@
 {
   "urlScheme": "URL shemasy",
-  "urlSchemeIntro": "ReClash-y gysga ýollar, web sahypalary we beýleki programmalar bilen baglanyşdyryň. Taýýar salgylanma dörediň ýa-da açmazdan öň barlaň.",
   "urlSchemeConnection": "Birikme",
   "urlSchemeProfiles": "Profiller",
-  "urlSchemeConfirmationTip": "Daşarky birikme we ýapmak buýruklary tassyklamagy talap edýär. Birikme buýruklaryny ulanmazdan öň başlangyç sazlamany tamamlaň.",
-  "urlSchemeProfileCommandsTip": "Profil buýruklary döredijini açýar. Daşarky import tassyklama soraýar we adaty barlaglary hem-de öwürmäni saklaýar.",
+  "urlSchemeConfirmationTip": "Daşarky birikme we ýapmak buýruklary tassyklama soraýar.",
   "urlSchemeSupportedLinks": "Goldanylýan import salgylanmalary",
-  "urlSchemeSupportedLinksTip": "Clash salgylanmalary, INCY we Happ örtükleri hem-de proksi salgylanmalary el bilen importda we QR skanerde hem işleýär. Näbelli şifrleme wersiýalary ret edilýär.",
-  "urlSchemeWrappedLinks": "Abunalyk salgylanmalary, goşulan konfigurasiýalar we INCY crypt1",
   "urlSchemeProxyLinks": "Proksi paýlaşma salgylanmalary",
   "urlSchemeConnect": "Birikdir",
-  "urlSchemeConnectDesc": "Saýlanan profil we häzirki gurşaw sazlamalary bilen birikmäni başlat.",
+  "urlSchemeConnectDesc": "Saýlanan profil bilen birikmek.",
   "urlSchemeDisconnect": "Birikmäni kes",
-  "urlSchemeDisconnectDesc": "Saýlanan profili üýtgetmän birikmäni sakla.",
+  "urlSchemeDisconnectDesc": "Profili üýtgetmän birikmäni duruzmak.",
   "urlSchemeToggle": "Birikmäni çalyş",
-  "urlSchemeToggleDesc": "Saklanan bolsa birikdir, işleýän bolsa kes. Tassyklamada hakyky hereket görkezilýär.",
+  "urlSchemeToggleDesc": "Duran bolsa birikmek, işleýän bolsa aýyrmak.",
   "urlSchemeOpen": "Programmany görkez",
-  "urlSchemeOpenDesc": "Birikmäni üýtgetmän ReClash-y öňe çykar.",
+  "urlSchemeOpenDesc": "ReClash-y öňe çykarmak.",
   "urlSchemeClose": "Programmany ýap",
-  "urlSchemeCloseDesc": "Ýapmak sazlamasyna eýer: penjiräni gizle ýa-da ReClash-dan çyk. Android adaty programma ýapmak hereketini ulanýar.",
+  "urlSchemeCloseDesc": "Sazlanan ýapmak hereketini ulanmak.",
   "urlSchemeAdd": "Abunalyk goş",
-  "urlSchemeAddDesc": "HTTP ýa-da HTTPS abunalyk salgysyndan profil döret. At hökmany däl.",
+  "urlSchemeAddDesc": "Abuna URL-ni goşmak; at hökmany däl.",
   "urlSchemeImport": "Konfigurasiýany import et",
-  "urlSchemeImportDesc": "Salgylanma Base64 görnüşinde goşulan UTF-8 konfigurasiýany import et. At hökmany däl.",
+  "urlSchemeImportDesc": "Baglanyşyga YAML ýa-da JSON konfigurasiýasyny girizmek.",
   "urlSchemeInstallConfig": "Konfigurasiýany gur",
-  "urlSchemeInstallConfigDesc": "Clash müşderileriniň goldaýan install-config salgylanma görnüşi bilen abunalygy import et.",
+  "urlSchemeInstallConfigDesc": "Clash müşderileriniň umumy abuna baglanyşyk formatyny ulanmak.",
   "urlSchemeBuild": "Salgylanma döret",
   "urlSchemeInspect": "Salgylanmany barla",
   "urlSchemeAction": "Hereket",
@@ -33,10 +29,9 @@
   "urlSchemeUseExample": "Mysaly ulan",
   "urlSchemeExampleProfile": "Mysal profil",
   "urlSchemeConfigHint": "YAML ýa-da JSON konfigurasiýasyny goýuň",
-  "urlSchemeBuilderTip": "Diňe şu herekete gerekli meýdanlar goşulýar. Konfigurasiýa salgylanmasy doly mazmuny saklaýar we tassyklamadan sowlup geçmeýär.",
-  "urlSchemePreview": "Salgylanmany öňünden görmek",
-  "urlSchemePreviewEmpty": "Salgylanmany görmek üçin hökmany meýdanlary dolduryň.",
-  "urlSchemePrivateLinkTip": "Salgylanmada giriş tokenleri ýa-da proksi giriş maglumatlary bolup biler. Diňe ynanýan adamlaryňyz bilen paýlaşyň; ReClash salgylanma taryhyny saklamaýar.",
+  "urlSchemePreview": "Baglanyşyk",
+  "urlSchemePreviewEmpty": "Baglanyşyk döretmek üçin URL ýa-da konfigurasiýa giriziň.",
+  "urlSchemePrivateLinkTip": "Baglanyşyklarda tokenler ýa-da giriş maglumatlary bolup biler. Seresap paýlaşyň.",
   "urlSchemeCopyFailed": "Salgylanmany göçürip bolmady. Täzeden synanyşyň.",
   "urlSchemePasteFailed": "Alyş-çalyş buferini okap bolmady. Salgylanmany el bilen goýuň.",
   "urlSchemeInspectTip": "Barlag şu enjamda ýerine ýetirilýär. Ol salgylanmany açmaýar, abunalygy ýüklemeýär we profili import etmeýär.",
@@ -48,13 +43,40 @@
   "urlSchemeContentFormat": "Mazmunyň görnüşi",
   "urlSchemeConfigSummary": "Konfigurasiýanyň mazmuny",
   "urlSchemeConfigCounts": "Proksiler: {nodes}, toparlar: {groups}, uzakdaky üpjün edijiler: {providers}",
-  "@urlSchemeConfigCounts": {"placeholders": {"nodes": {"type": "int"}, "groups": {"type": "int"}, "providers": {"type": "int"}}},
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
   "urlSchemeConversionWarning": "Öwürme käbir mazmuny aýyrýar. Import wagtynda üýtgeşmeleri gözden geçiriň we tassyklaň.",
   "urlSchemeConfirmTitle": "Daşarky programma buýrugy",
   "urlSchemeConfirmMessage": "Bu salgylanma «{action}» hereketini soraýar. ReClash-a ony ýerine ýetirmäge rugsat berilsinmi?",
-  "@urlSchemeConfirmMessage": {"placeholders": {"action": {"type": "String"}}},
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeImportConfirm": "{source} çeşmesinden «{name}» import edilsinmi? Tassyklamadan soň profil we öwürmeler barlanar.",
-  "@urlSchemeImportConfirm": {"placeholders": {"name": {"type": "String"}, "source": {"type": "String"}}},
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeEmbeddedConfig": "Goşulan konfigurasiýa",
   "urlSchemeSetupRequired": "Daşarky birikme buýruklaryny ulanmazdan öň birikme sazlamasyny tamamlaň.",
   "urlSchemeDeliveryError": "Salgylanmany ýetirip bolmady ýa-da nobat doldy. Häzirki hereket tamamlanandan soň täzeden synanyşyň.",
@@ -71,5 +93,7 @@
   "telegramLinkTitle": "Telegram",
   "telegramOpen": "Telegram-y aç",
   "telegramWebFallback": "Brauzerde aç",
-  "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady."
+  "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady.",
+  "urlSchemeFormats": "Formatlar",
+  "urlSchemeFormatsTip": "Baglanyşyk formatlary. Ýer tutujylary URL ýa-da maglumatlaryňyz bilen çalşyň."
 }

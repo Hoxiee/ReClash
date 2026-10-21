@@ -144,7 +144,9 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
           );
         },
       ),
-      child: SizedBox(height: widget.preferredSize.height),
+      child: SizedBox(
+        height: widget.preferredSize.height + MediaQuery.paddingOf(context).top,
+      ),
     );
   }
 }

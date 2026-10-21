@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
@@ -49,7 +50,11 @@ class AboutView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final isLoading = ref.watch(loadingProvider(LoadingTag.checkUpdate));
+    final isLoading = ref.watch(
+      appUpdateActionProvider.select(
+        (state) => state.phase == UpdatePhase.checking,
+      ),
+    );
     final gratitude = [
       _Credit(
         avatar: 'assets/images/avatar/chen08209.jpg',
@@ -99,7 +104,9 @@ class AboutView extends ConsumerWidget {
             isCheckingUpdate: isLoading,
             onCheckUpdate: () {
               unawaited(
-                ref.read(commonActionProvider.notifier).checkForUpdates(),
+                ref
+                    .read(commonActionProvider.notifier)
+                    .checkForUpdates(context),
               );
             },
             onEnterDeveloperMode: () {

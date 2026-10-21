@@ -26,21 +26,17 @@ class ThemeView extends ConsumerStatefulWidget {
   ConsumerState<ThemeView> createState() => _ThemeViewState();
 }
 
-typedef _AppearanceFrame = ({double offset, double opacity});
-
 class _ThemeViewState extends ConsumerState<ThemeView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _transition = AnimationController(
     vsync: this,
     value: 1,
-    duration: fadeTabDuration,
+    duration: slideTabDuration,
   )..addStatusListener(_onTransitionStatus);
 
   int _tab = 0;
   final _visited = <int>{};
-  Map<int, _AppearanceFrame> _starts = {};
-  Map<int, _AppearanceFrame> _ends = {};
-  Curve _curve = fadeTabCurve;
+  final _plan = TabMotionPlan<int>();
   bool _restored = false;
   (String?, int)? _handledReveal;
 
@@ -57,7 +53,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
       _visited.add(_tab);
     }
     final active = PageActivityScope.isActiveOf(context);
-    if ((!active || context.disableAnimations) && _starts.isNotEmpty) {
+    if ((!active || context.disableAnimations) && _plan.isActive) {
       _settleTransition();
     }
     final reveal = SettingsRevealScope.maybeOf(context);
@@ -89,39 +85,25 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     setState(() => _changeTab(index));
   }
 
-  _AppearanceFrame _frameOf(int index) {
-    final start = _starts[index];
-    if (start == null) {
-      return (offset: 0, opacity: index == _tab ? 1 : 0);
-    }
-    final end = _ends[index]!;
-    final t = _curve.transform(_transition.value);
-    return (
-      offset: start.offset + (end.offset - start.offset) * t,
-      opacity: start.opacity + (end.opacity - start.opacity) * t,
-    );
-  }
+  TabFrame _frameOf(int index) =>
+      _plan.frameOf(index, current: _tab, value: _transition.value);
 
   void _changeTab(int index, {bool animate = true}) {
     if (_tab == index) return;
     final previous = _tab;
-    final animation = ref.read(appSettingProvider).tabAnimation;
-    final fade = animation == TabAnimation.fade;
     final instant =
         !animate ||
         context.disableAnimations ||
         !PageActivityScope.isActiveOf(context);
-    final direction =
-        (index > previous ? 1.0 : -1.0) *
-        (Directionality.of(context) == TextDirection.ltr ? 1 : -1);
-    final visible = {..._starts.keys, previous};
-    final starts = <int, _AppearanceFrame>{
-      for (final page in visible) page: _frameOf(page),
-    };
-    starts.putIfAbsent(
-      index,
-      () => (offset: fade ? 0 : direction, opacity: fade ? 0 : 1),
-    );
+    if (!instant) {
+      _plan.retarget(
+        index,
+        current: previous,
+        value: _transition.value,
+        forward: index > previous,
+        fade: ref.read(appSettingProvider).tabAnimation == TabAnimation.fade,
+      );
+    }
     _transition.stop();
     _tab = index;
     _visited.add(index);
@@ -132,38 +114,25 @@ class _ThemeViewState extends ConsumerState<ThemeView>
       _settleTransition();
       return;
     }
-    _starts = starts;
-    _ends = {
-      for (final page in starts.keys)
-        page: (
-          offset: fade || page == index ? 0 : -direction,
-          opacity: !fade || page == index ? 1 : 0,
-        ),
-    };
-    _curve = fade ? fadeTabCurve : Curves.easeOut;
-    _transition.duration = fade ? fadeTabDuration : kTabScrollDuration;
+    _transition.duration = _plan.duration;
     _transition.forward(from: 0);
   }
 
   void _onTransitionStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed && _starts.isNotEmpty) {
-      setState(() {
-        _starts = {};
-        _ends = {};
-      });
+    if (status == AnimationStatus.completed && _plan.isActive) {
+      setState(_plan.clear);
     }
   }
 
   void _settleTransition() {
     _transition.stop();
-    _starts = {};
-    _ends = {};
+    _plan.clear();
     _transition.value = 1;
   }
 
   Widget _buildPages(SettingsRevealScope? reveal) {
     final active = PageActivityScope.isActiveOf(context);
-    final transitioning = _starts.isNotEmpty;
+    final transitioning = _plan.isActive;
     final order = [..._visited.where((index) => index != _tab), _tab];
     return ClipRect(
       child: Stack(
@@ -174,7 +143,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
               key: ValueKey(index),
               animation: _transition,
               frame: () => _frameOf(index),
-              visible: index == _tab || _starts.containsKey(index),
+              visible: index == _tab || _plan.contains(index),
               active: active && index == _tab,
               child: SettingsRevealScope(
                 targetId: reveal?.targetId,
@@ -272,26 +241,28 @@ class _ThemeViewState extends ConsumerState<ThemeView>
                 start: 0,
                 end: 0,
                 bottom: 0,
-                child: NavigationDock(
-                  destinations: [
-                    NavigationDockDestination(
-                      id: 'appearance-theme',
-                      glyph: AppGlyphs.sun,
-                      label: l.appearanceTheme,
-                    ),
-                    NavigationDockDestination(
-                      id: 'appearance-background',
-                      glyph: AppGlyphs.photos,
-                      label: l.appearanceBackground,
-                    ),
-                    NavigationDockDestination(
-                      id: 'appearance-interface',
-                      glyph: AppGlyphs.settings,
-                      label: l.appearanceInterface,
-                    ),
-                  ],
-                  selectedIndex: _tab,
-                  onSelected: _select,
+                child: _RouteDock(
+                  child: NavigationDock(
+                    destinations: [
+                      NavigationDockDestination(
+                        id: 'appearance-theme',
+                        glyph: AppGlyphs.sun,
+                        label: l.appearanceTheme,
+                      ),
+                      NavigationDockDestination(
+                        id: 'appearance-background',
+                        glyph: AppGlyphs.photos,
+                        label: l.appearanceBackground,
+                      ),
+                      NavigationDockDestination(
+                        id: 'appearance-interface',
+                        glyph: AppGlyphs.settings,
+                        label: l.appearanceInterface,
+                      ),
+                    ],
+                    selectedIndex: _tab,
+                    onSelected: _select,
+                  ),
                 ),
               ),
             ],
@@ -316,6 +287,8 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     _ => const _ThemeSettingsPage(
       id: 'interface',
       items: [
+        _NavigationLayoutItem(),
+        SizedBox(height: 16),
         _NavigationBarItem(),
         SizedBox(height: 16),
         _TabAnimationItem(),
@@ -331,6 +304,76 @@ class _ThemeViewState extends ConsumerState<ThemeView>
   };
 }
 
+/// The shell's bar sinks while this page opens and rises once it closes, so
+/// this bar comes up only after that one has gone and leaves before it
+/// returns, and the two never stand in the same place.
+class _RouteDock extends StatefulWidget {
+  const _RouteDock({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_RouteDock> createState() => _RouteDockState();
+}
+
+class _RouteDockState extends State<_RouteDock> {
+  static const _arrival = Interval(0.45, 1, curve: Easing.emphasizedDecelerate);
+
+  Animation<double>? _route;
+  CurvedAnimation? _opacity;
+  CurvedAnimation? _rise;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context)?.animation;
+    if (route == _route) return;
+    _route = route;
+    _opacity?.dispose();
+    _rise?.dispose();
+    // Leaving, the bar fades where it stands: the shell's bar, which rises
+    // over it, would otherwise cross it on the way down.
+    _opacity = route == null
+        ? null
+        : CurvedAnimation(
+            parent: route,
+            curve: _arrival,
+            reverseCurve: const Interval(0.9, 1),
+          );
+    _rise = route == null
+        ? null
+        : CurvedAnimation(
+            parent: route,
+            curve: _arrival,
+            reverseCurve: const Threshold(0),
+          );
+  }
+
+  @override
+  void dispose() {
+    _opacity?.dispose();
+    _rise?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final opacity = _opacity;
+    final rise = _rise;
+    if (opacity == null || rise == null) return widget.child;
+    return FadeTransition(
+      opacity: opacity,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(rise),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 class _AppearancePage extends StatelessWidget {
   const _AppearancePage({
     super.key,
@@ -342,7 +385,7 @@ class _AppearancePage extends StatelessWidget {
   });
 
   final Animation<double> animation;
-  final _AppearanceFrame Function() frame;
+  final TabFrame Function() frame;
   final bool visible;
   final bool active;
   final Widget child;
@@ -360,16 +403,11 @@ class _AppearancePage extends StatelessWidget {
             excluding: !active,
             child: IgnorePointer(
               ignoring: !active,
-              child: AnimatedBuilder(
+              child: TabMotionTransition(
                 animation: animation,
-                builder: (_, child) {
-                  final current = frame();
-                  return FractionalTranslation(
-                    translation: Offset(current.offset, 0),
-                    child: Opacity(opacity: current.opacity, child: child),
-                  );
-                },
-                child: RepaintBoundary(child: child),
+                frame: frame,
+                axis: Axis.horizontal,
+                child: child,
               ),
             ),
           ),
@@ -406,7 +444,8 @@ class _ThemeSettingsPageState extends State<_ThemeSettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: context.appBarInset),
-        if (ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
+        if (showThemeLivePreview &&
+            ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
           ThemeLivePreview(),
           SizedBox(height: 16),
         ],
@@ -999,6 +1038,56 @@ class _PureBlackItem extends ConsumerWidget {
           ref
               .read(themeSettingProvider.notifier)
               .update((state) => state.copyWith(pureBlack: value));
+        },
+      ),
+    );
+  }
+}
+
+class _NavigationLayoutItem extends ConsumerWidget {
+  const _NavigationLayoutItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final layout = ref.watch(
+      appSettingProvider.select((state) => state.navigationLayout),
+    );
+    final colorScheme = context.colorScheme;
+    final bar = MiniLayoutThumb(colorScheme: colorScheme, sidebar: false);
+    final sidebar = MiniLayoutThumb(colorScheme: colorScheme, sidebar: true);
+    return SettingTarget(
+      spec: themeToolSettings[9],
+      child: PreviewChoiceGroup<NavigationLayout>(
+        info: Info(
+          label: themeToolSettings[9].title(appLocalizations),
+          glyph: AppGlyphs.layers,
+        ),
+        value: layout,
+        choices: [
+          PreviewChoice(
+            value: NavigationLayout.auto,
+            label: appLocalizations.auto,
+            pictogram: SizedBox.fromSize(
+              size: MiniScreenThumb.size,
+              child: MiniSplitScreen(light: bar, dark: sidebar),
+            ),
+          ),
+          PreviewChoice(
+            value: NavigationLayout.bar,
+            label: appLocalizations.navigationLayoutBar,
+            pictogram: bar,
+          ),
+          PreviewChoice(
+            value: NavigationLayout.sidebar,
+            label: appLocalizations.navigationLayoutSidebar,
+            pictogram: sidebar,
+          ),
+        ],
+        onChanged: (value) {
+          ref
+              .read(appSettingProvider.notifier)
+              .update((state) => state.copyWith(navigationLayout: value));
         },
       ),
     );
@@ -1669,6 +1758,12 @@ final themeToolSettings = <SettingSpec>[
     page: ToolPage.theme,
     title: (l) => l.textScale,
     keywords: ['textScale'],
+  ),
+  SettingSpec(
+    id: 'theme.navigationLayout',
+    page: ToolPage.theme,
+    title: (l) => l.navigationLayout,
+    keywords: ['navigationLayout'],
   ),
   ...wallpaperToolSettings,
 ];

@@ -1187,6 +1187,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("더 보기"),
     "name": MessageLookupByLibrary.simpleMessage("이름"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("하단 바"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("내비게이션"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage("탭 바"),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage("사이드바"),
     "network": MessageLookupByLibrary.simpleMessage("네트워크"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2168,9 +2171,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "unpinWindow": MessageLookupByLibrary.simpleMessage("창 고정 해제"),
     "update": MessageLookupByLibrary.simpleMessage("업데이트"),
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage("자동 설치 허용"),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "이 설정은 Android의 앱 설치 권한을 부여하지 않습니다. 언제든 변경할 수 있습니다.",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash가 검증되고 조건에 맞는 안정 버전을 매번 묻지 않고 설치할 수 있습니다. VPN을 끊지는 않습니다. Android에서 설치 확인을 요청할 수 있습니다.",
     ),
@@ -2178,29 +2178,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "자동 설치를 허용할까요?",
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage("자동으로 설치"),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "VPN이 꺼져 있을 때만 조건에 맞는 안정 버전을 설치합니다. 중요한 변경 사항은 항상 결정을 기다립니다.",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "이 창을 닫아도 다운로드가 중지되지 않습니다.",
-    ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("다운로드 취소"),
     "updateChannel": MessageLookupByLibrary.simpleMessage("업데이트 채널"),
     "updateChannelPre": MessageLookupByLibrary.simpleMessage("사전 릴리스"),
     "updateChannelRelease": MessageLookupByLibrary.simpleMessage("정식 릴리스"),
     "updateCheckAutomatically": MessageLookupByLibrary.simpleMessage("자동으로 확인"),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
-      "업데이트를 확인할 수 없습니다.",
+      "업데이트를 확인할 수 없습니다",
     ),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "연결을 확인한 후 다시 시도하세요.",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "ReClash 실행 중 주기적으로 확인합니다. 창을 열지 않고 대시보드에 업데이트를 표시합니다.",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "선택한 채널에서 새 버전을 찾고 있습니다.",
-    ),
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage("업데이트 확인 중…"),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage("창 닫기"),
     "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
       "Android의 승인이 필요합니다. 계속하면 시스템 확인 화면이 열립니다.",
@@ -2223,29 +2212,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDoNotEnable": MessageLookupByLibrary.simpleMessage("수동 설치 유지"),
     "updateDownloadAction": MessageLookupByLibrary.simpleMessage("업데이트 다운로드"),
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage("다시 다운로드"),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "이 창을 닫아도 됩니다. 진행 상황은 대시보드에 남습니다.",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "업데이트를 다운로드할 수 없습니다.",
+      "업데이트를 다운로드할 수 없습니다",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "다운로드한 부분은 저장되었습니다. 연결을 확인하고 재개하세요.",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "설치된 버전은 변경되지 않습니다.",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("확인"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "패키지 설치 프로그램을 시작할 수 없습니다.",
+      "패키지 설치 프로그램을 시작할 수 없습니다",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android가 설치를 완료하지 못했습니다. 준비되면 다시 시도하세요.",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("지금 설치"),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash가 새 버전을 사용하고 있습니다.",
-    ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 완료"),
     "updateInstalledVersion": m99,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
@@ -2253,16 +2233,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 중"),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
-      "이미 최신 버전을 사용 중입니다.",
-    ),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("나중에"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("새로운 기능"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "릴리스 노트가 없습니다.",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "다운로드는 업데이트를 설치하거나 VPN을 중단하지 않습니다.",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage("업데이트가 있습니다"),
     "updateOpenAndroidSettings": MessageLookupByLibrary.simpleMessage(
@@ -2277,11 +2250,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "무결성, 앱 식별 정보 및 서명 검증 완료",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("버전"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("일시 중지"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "다운로드한 부분은 저장되었습니다. 준비되면 재개하세요.",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage("다운로드 일시 중지됨"),
     "updatePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ReClash가 이 출처의 앱을 설치하도록 허용한 다음 돌아와 계속하세요.",
@@ -2292,20 +2261,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "확인, 다운로드, 설치를 각각 설정하세요.",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "원하는 방식으로 업데이트",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "설정을 저장하지 못했습니다. 다시 저장해 주세요. 자동 설치는 활성화되지 않았습니다.",
     ),
     "updatePreferencesTitle": MessageLookupByLibrary.simpleMessage("업데이트 설정"),
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fi로 미리 다운로드"),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "사용 가능한 업데이트를 Wi-Fi로 다운로드합니다. Wi-Fi를 벗어나면 자동 다운로드가 일시 중지됩니다.",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "패키지가 모든 검증을 통과했습니다. 지금 설치하거나 나중에 설치하세요.",
-    ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("설치 준비 완료"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("릴리스 상세 정보"),
     "updateRemainingTime": m101,
@@ -2319,9 +2279,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("모든 변경 사항 보기"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("업데이트"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "검증에 실패한 패키지는 절대 설치하지 않습니다.",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "다운로드한 업데이트의 무결성을 확인할 수 없습니다.",
     ),
@@ -2331,15 +2288,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "이 패키지는 설치할 수 없습니다",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "설치 전에 파일, 앱 버전 및 서명 인증서를 확인합니다.",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage("업데이트 검증 중"),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "설치 중 ReClash가 잠시 닫힙니다. 연결을 중단해도 될 때만 끊으세요.",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "설치 중 앱이 잠시 닫힙니다. 확인 없이 VPN을 끊지 않습니다.",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage("VPN이 아직 켜져 있습니다"),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
@@ -2349,18 +2300,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("동작"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("구독 추가"),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "HTTP 또는 HTTPS 구독 URL에서 프로필을 만듭니다. 이름은 선택 사항입니다.",
+      "구독 URL을 추가합니다. 이름은 선택 사항입니다.",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "암호화 링크를 인증하지 못했습니다. 손상되었거나 다른 키를 사용할 수 있습니다.",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("링크 만들기"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "이 동작에 필요한 항목만 포함됩니다. 설정 링크에는 전체 내용이 들어가며 확인을 건너뛸 수 없습니다.",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage("앱 닫기"),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "닫기 설정에 따라 창을 숨기거나 ReClash를 종료합니다. Android에서는 일반 앱 닫기 동작을 따릅니다.",
+      "설정한 종료 동작을 사용합니다.",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -2370,11 +2318,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConfirmMessage": m105,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("외부 앱 명령"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "외부 연결 및 종료 명령은 확인이 필요합니다. 연결 명령을 사용하기 전에 초기 설정을 완료하세요.",
+      "외부 연결 및 종료 명령은 확인을 요청합니다.",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("연결"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "선택한 프로필과 현재 적용 범위 설정으로 연결을 시작합니다.",
+      "선택한 프로필로 연결합니다.",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("연결"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage("내용 형식"),
@@ -2390,14 +2338,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("연결 해제"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "선택한 프로필을 바꾸지 않고 연결을 중지합니다.",
+      "프로필을 유지하고 연결을 중지합니다.",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage("내장 설정"),
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage("예시 프로필"),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("형식"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요.",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "링크에 Base64로 포함된 UTF-8 설정을 가져옵니다. 이름은 선택 사항입니다.",
+      "링크에 YAML 또는 JSON 설정을 포함합니다.",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage("링크 확인"),
     "urlSchemeInspectHint": MessageLookupByLibrary.simpleMessage(
@@ -2412,10 +2364,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeInspectionResult": MessageLookupByLibrary.simpleMessage("확인 결과"),
     "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage("설정 설치"),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Clash 클라이언트에서 지원하는 install-config 링크 형식으로 구독을 가져옵니다.",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "ReClash를 단축키, 웹사이트, 다른 앱과 연결하세요. 바로 쓸 수 있는 링크를 만들거나 열기 전에 확인할 수 있습니다.",
+      "Clash 클라이언트의 공통 구독 링크 형식을 사용합니다.",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "내장 설정이 유효한 UTF-8 Base64 데이터가 아닙니다.",
@@ -2437,21 +2386,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("앱 표시"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "연결을 바꾸지 않고 ReClash를 앞으로 가져옵니다.",
+      "ReClash를 전면에 표시합니다.",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("매개변수"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "클립보드를 읽지 못했습니다. 링크를 직접 붙여넣으세요.",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("링크 미리보기"),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("링크"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "필수 항목을 입력하면 링크가 표시됩니다.",
+      "URL이나 설정을 입력하면 링크가 만들어집니다.",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "링크에는 접근 토큰이나 프록시 인증 정보가 포함될 수 있습니다. 신뢰하는 사람에게만 공유하세요. ReClash는 링크 기록을 저장하지 않습니다.",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "프로필 명령은 링크 생성기를 엽니다. 외부 가져오기는 확인을 요청하며 기존 검증과 변환 검사를 유지합니다.",
+      "링크에 토큰이나 인증 정보가 포함될 수 있습니다. 공유에 주의하세요.",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("프로필"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage("프록시 공유 링크"),
@@ -2462,12 +2408,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "지원하는 가져오기 링크",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Clash 링크, INCY 및 Happ 래퍼, 프록시 공유 링크는 수동 가져오기와 QR 스캔에서도 작동합니다. 알 수 없는 암호화 버전은 거부됩니다.",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("연결 전환"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "중지되어 있으면 연결하고 실행 중이면 해제합니다. 확인 화면에는 실제 동작이 표시됩니다.",
+      "중지 상태면 연결하고 실행 중이면 해제합니다.",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "링크에 중첩된 래퍼가 너무 많습니다.",
@@ -2482,9 +2425,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("예시 사용"),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "구독 링크, 내장 설정 및 INCY crypt1",
-    ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),

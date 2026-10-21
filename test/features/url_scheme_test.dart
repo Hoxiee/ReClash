@@ -199,6 +199,25 @@ void main() {
     );
   });
 
+  testWidgets('clearing input discards a pending preview and its busy state', (
+    tester,
+  ) async {
+    await _pump(tester, const UrlSchemeForm());
+    final l = currentAppLocalizations;
+    await tester.enterText(_field(l.url), 'https://example.com/sub');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.enterText(_field(l.url), '');
+    await _settleWork(tester);
+    expect(tester.widget<FormPage>(find.byType(FormPage)).saving, isFalse);
+    expect(
+      tester.widget<UrlSchemePreview>(find.byType(UrlSchemePreview)).link,
+      isNull,
+    );
+    expect(find.text(l.urlSchemePreviewEmpty), findsOneWidget);
+    expect(find.text(l.urlSchemeMissingPayload), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('builder copy failure stays in the form and a retry succeeds', (
     tester,
   ) async {

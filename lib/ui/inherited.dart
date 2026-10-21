@@ -1,4 +1,5 @@
 import 'package:reclash/ui/item_position.dart';
+import 'package:reclash/ui/open_container.dart';
 import 'package:reclash/ui/sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -284,7 +285,7 @@ class PageNavigationScope extends InheritedWidget {
   });
 
   final bool Function(Widget page) canOpen;
-  final void Function(Widget page) open;
+  final void Function(Widget page, {ContainerOrigin? origin}) open;
 
   static PageNavigationScope? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<PageNavigationScope>();

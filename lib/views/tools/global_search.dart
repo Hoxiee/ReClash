@@ -84,7 +84,8 @@ class _ToolsSearchLauncherState extends ConsumerState<ToolsSearchLauncher> {
         builder: (sheetContext) => ToolsCatalogPanel(
           autofocus: true,
           onDismiss: () => Navigator.of(sheetContext).pop(),
-          onSelect: (entry) async => Navigator.of(sheetContext).pop(entry),
+          onSelect: (entry, {origin}) async =>
+              Navigator.of(sheetContext).pop(entry),
         ),
       );
       if (!mounted) return;

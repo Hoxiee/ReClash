@@ -245,14 +245,7 @@ void main() {
     await tester.pump();
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
     expect(find.byType(UpdateSheet), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.byKey(const ValueKey('update-offer-accept')),
-          )
-          .onPressed,
-      isNull,
-    );
+    expect(find.byKey(const ValueKey('update-offer-accept')), findsNothing);
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(adapter.requests, 1);
@@ -271,7 +264,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LinearProgressIndicator), findsNothing);
-    expect(find.text(currentAppLocalizations.updateNoUpdates), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.updateCurrentTitle),
+      findsOneWidget,
+    );
     expect(tester.takeException(), null);
     await tester.tap(find.byTooltip(currentAppLocalizations.close));
     await tester.pumpAndSettle();

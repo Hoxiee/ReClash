@@ -6,6 +6,7 @@ analyzer:
     - project/**
     - lib/l10n/intl/**
     - lib/**/generated/**
+    - upstream_l10n/**
     - plugins/**
     - android/**
     - ios/**

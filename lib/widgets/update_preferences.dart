@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
@@ -7,30 +9,21 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
-import 'package:reclash/ui/icons/icons.dart';
 
 class UpdatePreferences extends ConsumerStatefulWidget {
-  const UpdatePreferences({
-    super.key,
-    required this.isAndroid,
-    required this.onSaved,
-    required this.onCanSaveChanged,
-  });
+  const UpdatePreferences({super.key, required this.isAndroid});
 
   final bool isAndroid;
-  final VoidCallback onSaved;
-  final ValueChanged<bool> onCanSaveChanged;
 
   @override
-  UpdatePreferencesState createState() => UpdatePreferencesState();
+  ConsumerState<UpdatePreferences> createState() => _UpdatePreferencesState();
 }
 
-class UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
+class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
   late bool _check;
   late bool _download;
   late bool _install;
   late UpdateChannel _channel;
-  bool _consent = false;
   bool _saving = false;
   bool _failed = false;
 
@@ -47,26 +40,28 @@ class UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
     );
   }
 
-  void _setAutomatic(bool enabled) {
-    if (enabled) {
-      setState(() => _consent = true);
-      widget.onCanSaveChanged(false);
-    } else {
-      setState(() {
-        _install = false;
-        _consent = false;
-      });
-      widget.onCanSaveChanged(true);
+  Future<void> _setAutomatic(bool enabled) async {
+    if (!enabled) {
+      setState(() => _install = false);
+      return;
     }
+    final l = context.appLocalizations;
+    final allowed = await dialogs.showMessage(
+      context: context,
+      title: l.updateAutoConsentTitle,
+      message: TextSpan(text: l.updateAutoConsentDescription),
+      confirmText: l.updateAllowAutomatic,
+      cancelText: l.updateDoNotEnable,
+    );
+    if (allowed == true && mounted) setState(() => _install = true);
   }
 
-  Future<void> save() async {
-    if (_saving || _consent) return;
+  Future<void> _save() async {
+    if (_saving) return;
     setState(() {
       _saving = true;
       _failed = false;
     });
-    widget.onCanSaveChanged(false);
     try {
       final saved = await ref
           .read(appUpdateActionProvider.notifier)
@@ -80,44 +75,31 @@ class UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
         if (mounted) setState(() => _failed = true);
         return;
       }
-      if (mounted) widget.onSaved();
+      if (mounted) Navigator.of(context).pop();
     } catch (error) {
       commonPrint.log('update preferences save failed: ${compactError(error)}');
       if (mounted) setState(() => _failed = true);
     } finally {
-      if (mounted) {
-        setState(() => _saving = false);
-        widget.onCanSaveChanged(!_consent);
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
-  Widget _toggle(String title, bool value, ValueChanged<bool>? onChanged) =>
-      FormRow(
-        title: title,
-        onPressed: onChanged == null || _saving
-            ? null
-            : () => onChanged(!value),
-        trailing: Switch(value: value, onChanged: _saving ? null : onChanged),
+  Widget _toggle(String title, bool value, ValueChanged<bool> onChanged) =>
+      ListItem.toggle(
+        title: Text(title),
+        value: value,
+        onChanged: _saving ? null : onChanged,
       );
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 16,
+    return FormPage(
+      title: l.updatePreferencesTitle,
+      onSave: () => unawaited(_save()),
+      saving: _saving,
+      error: _failed ? l.updatePreferencesSaveFailed : null,
       children: [
-        Text(
-          l.updatePreferencesIntro,
-          style: AppTextStyle.title1.of(context, emphasized: true),
-        ),
-        Text(
-          l.updatePreferencesDescription,
-          style: AppTextStyle.footnote
-              .of(context)
-              .copyWith(color: context.colorScheme.onSurfaceVariant),
-        ),
         generateSection(
           items: [
             _toggle(
@@ -125,121 +107,39 @@ class UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
               _check,
               (value) => setState(() => _check = value),
             ),
-          ],
-          footer: l.updateCheckQuietly,
-        ),
-        if (widget.isAndroid) ...[
-          generateSection(
-            items: [
+            if (widget.isAndroid) ...[
               _toggle(
                 l.updatePreload,
                 _download,
                 (value) => setState(() => _download = value),
               ),
-            ],
-            footer: l.updatePreloadDescription,
-          ),
-          generateSection(
-            items: [_toggle(l.updateAutoInstall, _install, _setAutomatic)],
-            footer: l.updateAutoInstallDescription,
-          ),
-          if (_consent)
-            CommonCard(
-              key: const ValueKey('update-auto-consent'),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 12,
-                children: [
-                  Text(
-                    l.updateAutoConsentTitle,
-                    style: AppTextStyle.headline.of(context),
-                  ),
-                  Text(
-                    l.updateAutoConsentDescription,
-                    style: AppTextStyle.footnote.of(context),
-                  ),
-                  FilledButton(
-                    key: const ValueKey('update-auto-allow'),
-                    onPressed: () {
-                      setState(() {
-                        _install = true;
-                        _consent = false;
-                      });
-                      widget.onCanSaveChanged(true);
-                    },
-                    child: Text(l.updateAllowAutomatic),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() => _consent = false);
-                      widget.onCanSaveChanged(true);
-                    },
-                    child: Text(l.updateDoNotEnable),
-                  ),
-                ],
+              _toggle(
+                l.updateAutoInstall,
+                _install,
+                (value) => unawaited(_setAutomatic(value)),
               ),
-            ),
-        ],
+            ],
+          ],
+        ),
         generateSection(
           items: [
-            CommonPopupBox(
-              targetBuilder: (open) => FormRow(
-                title: l.updateChannel,
-                onPressed: _saving ? null : open,
-                trailing: TextButton(
-                  onPressed: _saving ? null : open,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 4,
-                    children: [
-                      Flexible(
-                        child: PopupValueText(
-                          _channel == UpdateChannel.release
-                              ? l.updateChannelRelease
-                              : l.updateChannelPre,
-                          alignment: AlignmentDirectional.centerEnd,
-                        ),
-                      ),
-                      const GlyphIcon(AppGlyphs.picker),
-                    ],
-                  ),
-                ),
-              ),
-              popupBuilder: (_) => CommonPopupMenu(
-                items: [
-                  for (final channel in UpdateChannel.values)
-                    CommonPopupMenuItem(
-                      label: channel == UpdateChannel.release
-                          ? l.updateChannelRelease
-                          : l.updateChannelPre,
-                      checked: channel == _channel,
-                      onPressed: () {
-                        if (mounted && !_saving) {
-                          setState(() => _channel = channel);
-                        }
-                      },
-                    ),
-                ],
+            IgnorePointer(
+              ignoring: _saving,
+              child: ListItem<UpdateChannel>.options(
+                title: Text(l.updateChannel),
+                options: UpdateChannel.values,
+                value: _channel,
+                textBuilder: (channel) => channel == UpdateChannel.release
+                    ? l.updateChannelRelease
+                    : l.updateChannelPre,
+                onChanged: (channel) {
+                  if (mounted && !_saving) setState(() => _channel = channel);
+                },
               ),
             ),
           ],
+          footer: widget.isAndroid ? null : l.updateDesktopDescription,
         ),
-        Text(
-          widget.isAndroid
-              ? l.updateAndroidAutoNote
-              : l.updateDesktopDescription,
-          style: AppTextStyle.footnote
-              .of(context)
-              .copyWith(color: context.colorScheme.onSurfaceVariant),
-        ),
-        if (_failed)
-          Text(
-            l.updatePreferencesSaveFailed,
-            style: AppTextStyle.footnote
-                .of(context)
-                .copyWith(color: context.colorScheme.error),
-          ),
       ],
     );
   }

@@ -151,16 +151,16 @@ Future<void> _writeAndroidIcons(_Renderer renderer) async {
   final foreground = _androidVector(
     mark,
     viewport: 108,
-    scale: 0.18665,
-    translateX: 53.72921,
-    translateY: 54.22772,
+    scale: 0.145,
+    translateX: 53.78975,
+    translateY: 54.1769,
   );
   final monochrome = _androidVector(
     mark,
     viewport: 108,
-    scale: 0.18665,
-    translateX: 53.72921,
-    translateY: 54.22772,
+    scale: 0.145,
+    translateX: 53.78975,
+    translateY: 54.1769,
     monochrome: true,
   );
   for (final name in ['ic_launcher_foreground', 'ic_launcher_foreground_tv']) {

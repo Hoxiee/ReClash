@@ -1,30 +1,26 @@
 {
   "urlScheme": "URL схемасы",
-  "urlSchemeIntro": "ReClash қолданбасын жарлықтармен, сайттармен және басқа қолданбалармен байланыстырыңыз. Дайын сілтеме жасаңыз немесе оны ашпай тұрып тексеріңіз.",
   "urlSchemeConnection": "Қосылым",
   "urlSchemeProfiles": "Профильдер",
-  "urlSchemeConfirmationTip": "Сыртқы қосылу және жабу пәрмендері растауды талап етеді. Қосылым пәрмендерін қолданбас бұрын бастапқы баптауды аяқтаңыз.",
-  "urlSchemeProfileCommandsTip": "Профиль пәрмендері құрастыру құралын ашады. Сыртқы импорт келісімді сұрайды және қалыпты тексеру мен түрлендіруді сақтайды.",
+  "urlSchemeConfirmationTip": "Сыртқы қосылу және жабу пәрмендері растауды сұрайды.",
   "urlSchemeSupportedLinks": "Қолдау көрсетілетін импорт сілтемелері",
-  "urlSchemeSupportedLinksTip": "Clash сілтемелері, INCY және Happ орауыштары және прокси сілтемелері қолмен импорттауда және QR сканерлеуде де жұмыс істейді. Белгісіз шифрлау нұсқалары қабылданбайды.",
-  "urlSchemeWrappedLinks": "Жазылым сілтемелері, ендірілген конфигурациялар және INCY crypt1",
   "urlSchemeProxyLinks": "Прокси сілтемелері",
   "urlSchemeConnect": "Қосылу",
-  "urlSchemeConnectDesc": "Таңдалған профиль мен ағымдағы қамту баптауларын пайдаланып қосылымды бастау.",
+  "urlSchemeConnectDesc": "Таңдалған профильмен қосылу.",
   "urlSchemeDisconnect": "Ажырату",
-  "urlSchemeDisconnectDesc": "Таңдалған профильді өзгертпей қосылымды тоқтату.",
+  "urlSchemeDisconnectDesc": "Профильді өзгертпей қосылымды тоқтату.",
   "urlSchemeToggle": "Қосылымды ауыстыру",
-  "urlSchemeToggleDesc": "Тоқтап тұрса қосылу, жұмыс істеп тұрса ажырату. Растау терезесі нақты әрекетті көрсетеді.",
+  "urlSchemeToggleDesc": "Тоқтап тұрса қосылу, жұмыс істесе ажырату.",
   "urlSchemeOpen": "Қолданбаны көрсету",
-  "urlSchemeOpenDesc": "Қосылымды өзгертпей ReClash қолданбасын алдыңғы қатарға шығару.",
+  "urlSchemeOpenDesc": "ReClash қолданбасын алдыңғы қатарға шығару.",
   "urlSchemeClose": "Қолданбаны жабу",
-  "urlSchemeCloseDesc": "Жабу баптауына сай терезені жасыру немесе ReClash қолданбасынан шығу. Android қалыпты жабу тәртібін қолданады.",
+  "urlSchemeCloseDesc": "Бапталған жабу әрекетін қолдану.",
   "urlSchemeAdd": "Жазылым қосу",
-  "urlSchemeAddDesc": "HTTP немесе HTTPS жазылым сілтемесінен профиль жасау. Атау міндетті емес.",
+  "urlSchemeAddDesc": "Жазылым URL мекенжайын қосу; атау міндетті емес.",
   "urlSchemeImport": "Конфигурацияны импорттау",
-  "urlSchemeImportDesc": "Сілтемеге Base64 түрінде енгізілген UTF-8 конфигурациясын импорттау. Атау міндетті емес.",
+  "urlSchemeImportDesc": "Сілтемеге YAML не JSON конфигурациясын ендіру.",
   "urlSchemeInstallConfig": "Конфигурацияны орнату",
-  "urlSchemeInstallConfigDesc": "Clash клиенттері қолдайтын install-config сілтемесі арқылы жазылымды импорттау.",
+  "urlSchemeInstallConfigDesc": "Clash клиенттерінің ортақ жазылым сілтемесі пішімін қолдану.",
   "urlSchemeBuild": "Сілтеме жасау",
   "urlSchemeInspect": "Сілтемені тексеру",
   "urlSchemeAction": "Әрекет",
@@ -33,10 +29,9 @@
   "urlSchemeUseExample": "Мысалды қолдану",
   "urlSchemeExampleProfile": "Профиль мысалы",
   "urlSchemeConfigHint": "YAML немесе JSON конфигурациясын қойыңыз",
-  "urlSchemeBuilderTip": "Тек осы әрекетке қажетті өрістер қосылады. Конфигурация сілтемесі барлық мазмұнды қамтиды және растауды айналып өтпейді.",
-  "urlSchemePreview": "Сілтемені алдын ала қарау",
-  "urlSchemePreviewEmpty": "Сілтемені көру үшін міндетті өрістерді толтырыңыз.",
-  "urlSchemePrivateLinkTip": "Сілтемеде кіру токендері немесе прокси деректері болуы мүмкін. Оны тек сенімді адамдармен бөлісіңіз; ReClash сілтемелер тарихын сақтамайды.",
+  "urlSchemePreview": "Сілтеме",
+  "urlSchemePreviewEmpty": "Сілтеме жасау үшін URL не конфигурацияны енгізіңіз.",
+  "urlSchemePrivateLinkTip": "Сілтемеде токендер не тіркелгі деректері болуы мүмкін. Абайлап бөлісіңіз.",
   "urlSchemeCopyFailed": "Сілтемені көшіру мүмкін болмады. Қайталап көріңіз.",
   "urlSchemePasteFailed": "Алмасу буферін оқу мүмкін болмады. Сілтемені қолмен қойыңыз.",
   "urlSchemeInspectTip": "Тексеру осы құрылғыда орындалады. Ол сілтемені ашпайды, жазылымды жүктемейді және профильді импорттамайды.",
@@ -48,13 +43,40 @@
   "urlSchemeContentFormat": "Мазмұн пішімі",
   "urlSchemeConfigSummary": "Конфигурация құрамы",
   "urlSchemeConfigCounts": "Прокси: {nodes}, топтар: {groups}, қашықтағы провайдерлер: {providers}",
-  "@urlSchemeConfigCounts": {"placeholders": {"nodes": {"type": "int"}, "groups": {"type": "int"}, "providers": {"type": "int"}}},
+  "@urlSchemeConfigCounts": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      },
+      "providers": {
+        "type": "int"
+      }
+    }
+  },
   "urlSchemeConversionWarning": "Түрлендіру кезінде кейбір мазмұн өткізіледі. Импорт кезінде өзгерістерді қарап, растаңыз.",
   "urlSchemeConfirmTitle": "Қолданбаның сыртқы пәрмені",
   "urlSchemeConfirmMessage": "Сілтеме «{action}» әрекетін сұрайды. ReClash қолданбасына орындауға рұқсат бересіз бе?",
-  "@urlSchemeConfirmMessage": {"placeholders": {"action": {"type": "String"}}},
+  "@urlSchemeConfirmMessage": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeImportConfirm": "{source} көзінен «{name}» импортталсын ба? Растаудан кейін профиль мен түрлендіру тексеріледі.",
-  "@urlSchemeImportConfirm": {"placeholders": {"name": {"type": "String"}, "source": {"type": "String"}}},
+  "@urlSchemeImportConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "urlSchemeEmbeddedConfig": "Ендірілген конфигурация",
   "urlSchemeSetupRequired": "Сыртқы қосылым пәрмендерін қолданбас бұрын қосылым баптауын аяқтаңыз.",
   "urlSchemeDeliveryError": "Сілтеме жеткізілмеді немесе кезек толды. Ағымдағы әрекет аяқталған соң қайталап көріңіз.",
@@ -71,5 +93,7 @@
   "telegramLinkTitle": "Telegram",
   "telegramOpen": "Telegram ашу",
   "telegramWebFallback": "Браузерде ашу",
-  "telegramAppUnavailable": "Бұл құрылғыда Telegram ашылмады."
+  "telegramAppUnavailable": "Бұл құрылғыда Telegram ашылмады.",
+  "urlSchemeFormats": "Пішімдер",
+  "urlSchemeFormatsTip": "Сілтеме пішімдері. Толтырғыштарды URL не деректермен ауыстырыңыз."
 }

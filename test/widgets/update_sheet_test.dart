@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/update_card.dart';
 import 'package:reclash/widgets/update_content.dart';
+import 'package:reclash/widgets/update_preferences.dart';
 import 'package:reclash/widgets/update_sheet.dart';
 
 import '../helpers/test_app.dart';
@@ -98,20 +100,25 @@ void main() {
   }
 
   Future<void> close(WidgetTester tester) async {
-    await tester.tap(find.byTooltip(currentAppLocalizations.close));
+    await tester.tap(find.byTooltip(currentAppLocalizations.close).last);
     await tester.pumpAndSettle();
   }
 
   testWidgets('authored overview leads with complete visible warnings', (
     tester,
   ) async {
+    final release = testUpdateRelease(warning: true, breaking: true);
     await pump(
       tester,
       SingleChildScrollView(
         child: UpdateReleaseContent(
-          release: testUpdateRelease(warning: true, breaking: true),
+          release: release,
           currentVersion: '0.8.95',
           platform: SupportPlatform.Android,
+          asset: selectAndroidUpdateAsset(
+            release.assets,
+            supportedAbis: const ['arm64-v8a'],
+          ),
         ),
       ),
     );
@@ -120,7 +127,7 @@ void main() {
     expect(find.text('Make an explicit choice.'), findsOneWidget);
     expect(find.text('Review this change.'), findsOneWidget);
     expect(
-      find.text(currentAppLocalizations.updatePackageVersion),
+      find.text(currentAppLocalizations.updatePackageDevice),
       findsNothing,
     );
     final disclosure = find.byKey(const ValueKey('update-release-details'));
@@ -128,7 +135,7 @@ void main() {
     await tester.tap(disclosure);
     await tester.pump();
     expect(
-      find.text(currentAppLocalizations.updatePackageVersion),
+      find.text(currentAppLocalizations.updatePackageDevice),
       findsOneWidget,
     );
   });
@@ -193,8 +200,32 @@ void main() {
     expect(find.byKey(const ValueKey('app-update-card')), findsOneWidget);
   });
 
+  Future<void> openAutoInstallConsent(WidgetTester tester) async {
+    final toggle = find.text(currentAppLocalizations.updateAutoInstall);
+    await tester.ensureVisible(toggle);
+    await tester.pumpAndSettle();
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(currentAppLocalizations.updateAutoConsentTitle),
+      findsOneWidget,
+    );
+  }
+
+  bool autoInstallSwitch(WidgetTester tester) => tester
+      .widget<Switch>(
+        find.descendant(
+          of: find.ancestor(
+            of: find.text(currentAppLocalizations.updateAutoInstall),
+            matching: find.byType(ListItem),
+          ),
+          matching: find.byType(Switch),
+        ),
+      )
+      .value;
+
   testWidgets(
-    'automatic installation needs inline consent and a successful save',
+    'automatic installation needs confirmed consent and a successful save',
     (tester) async {
       runtime.saved = false;
       await pump(tester, const SizedBox.shrink());
@@ -203,23 +234,17 @@ void main() {
         preferences: true,
       );
       await tester.pumpAndSettle();
-      final toggle = find.byType(Switch).at(2);
-      await tester.ensureVisible(toggle);
-      await tester.tap(toggle);
-      await tester.pump();
-      expect(find.byKey(const ValueKey('update-auto-consent')), findsOneWidget);
-      final save = find.byKey(const ValueKey('update-preferences-save'));
-      expect(tester.widget<FilledButton>(save).onPressed, isNull);
+      await openAutoInstallConsent(tester);
       expect(container.read(appSettingProvider).autoInstallUpdate, isFalse);
-      final allow = find.byKey(const ValueKey('update-auto-allow'));
-      await tester.ensureVisible(allow);
-      await tester.tap(allow);
-      await tester.pump();
+      await tester.tap(find.text(currentAppLocalizations.updateAllowAutomatic));
+      await tester.pumpAndSettle();
+      expect(autoInstallSwitch(tester), isTrue);
+      final save = find.byTooltip(currentAppLocalizations.save);
       await tester.tap(save);
       await tester.runAsync(() async {
         await Future<void>.delayed(const Duration(milliseconds: 40));
       });
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(
         find.text(currentAppLocalizations.updatePreferencesSaveFailed),
         findsOneWidget,
@@ -236,6 +261,102 @@ void main() {
     },
   );
 
+  testWidgets('declining the consent keeps installation manual', (
+    tester,
+  ) async {
+    await pump(tester, const SizedBox.shrink());
+    final shown = UpdateSheet.show(
+      tester.element(find.byType(Scaffold)),
+      preferences: true,
+    );
+    await tester.pumpAndSettle();
+    await openAutoInstallConsent(tester);
+    await tester.tap(find.text(currentAppLocalizations.updateDoNotEnable));
+    await tester.pumpAndSettle();
+    expect(autoInstallSwitch(tester), isFalse);
+    await close(tester);
+    await shown;
+    expect(runtime.savedConfig, isNull);
+  });
+
+  testWidgets('a repeated request lands on the sheet already open', (
+    tester,
+  ) async {
+    await container
+        .read(appUpdateActionProvider.notifier)
+        .offer(testUpdateRelease());
+    await pump(tester, const SizedBox.shrink());
+    final context = tester.element(find.byType(Scaffold));
+    final shown = UpdateSheet.show(context);
+    unawaited(UpdateSheet.show(context));
+    await tester.pumpAndSettle();
+    unawaited(UpdateSheet.show(context));
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsOneWidget);
+
+    final settings = find.byTooltip(
+      currentAppLocalizations.updatePreferencesTitle,
+    );
+    await tester.tap(settings);
+    await tester.tap(settings, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdatePreferences), findsOneWidget);
+    await close(tester);
+    await close(tester);
+    await shown;
+
+    final reopened = UpdateSheet.show(context);
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsOneWidget);
+    await close(tester);
+    await reopened;
+  });
+
+  testWidgets('preferences stack over the offer and channel selection works', (
+    tester,
+  ) async {
+    final release = testUpdateRelease();
+    await container.read(appUpdateActionProvider.notifier).offer(release);
+    await pump(tester, const SizedBox.shrink());
+    final context = tester.element(find.byType(Scaffold));
+    final shown = UpdateSheet.show(context);
+    await tester.pumpAndSettle();
+    final l = currentAppLocalizations;
+    await tester.tap(find.byTooltip(l.updatePreferencesTitle));
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdateSheet), findsOneWidget);
+    expect(find.byType(UpdatePreferences), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text(l.updateChannel),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.ensureVisible(find.text(l.updateChannel));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.updateChannel));
+    await tester.pumpAndSettle();
+    final menu = find.byType(CommonPopupMenu);
+    expect(menu, findsOneWidget);
+    await tester.tap(
+      find.descendant(of: menu, matching: find.text(l.updateChannelPre)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(l.updateChannelPre), findsOneWidget);
+    expect(container.read(appSettingProvider).updateChannel, isNull);
+
+    await tester.tap(find.byTooltip(l.save));
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdatePreferences), findsNothing);
+    expect(container.read(appSettingProvider).updateChannel, UpdateChannel.pre);
+    expect(find.text(release.summary!.locales['en']!.headline), findsOneWidget);
+    await close(tester);
+    await shown;
+  });
+
   testWidgets('closing preferences discards an unsaved installation consent', (
     tester,
   ) async {
@@ -245,14 +366,9 @@ void main() {
       preferences: true,
     );
     await tester.pumpAndSettle();
-    final toggle = find.byType(Switch).at(2);
-    await tester.ensureVisible(toggle);
-    await tester.tap(toggle);
-    await tester.pump();
-    final allow = find.byKey(const ValueKey('update-auto-allow'));
-    await tester.ensureVisible(allow);
-    await tester.tap(allow);
-    await tester.pump();
+    await openAutoInstallConsent(tester);
+    await tester.tap(find.text(currentAppLocalizations.updateAllowAutomatic));
+    await tester.pumpAndSettle();
     await close(tester);
     await shown;
     expect(container.read(appSettingProvider).autoInstallUpdate, isFalse);
@@ -275,7 +391,10 @@ void main() {
     );
     expect(find.text(currentAppLocalizations.updateAutoInstall), findsNothing);
     expect(find.byType(Switch), findsOneWidget);
-    await close(tester);
+    await tester.tap(
+      find.widgetWithText(TextButton, currentAppLocalizations.cancel),
+    );
+    await tester.pumpAndSettle();
     await shown;
   });
 

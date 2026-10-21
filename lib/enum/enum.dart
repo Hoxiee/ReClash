@@ -827,6 +827,8 @@ enum RestoreStrategy { compatible, override }
 
 enum TabAnimation { slide, fade }
 
+enum NavigationLayout { auto, bar, sidebar }
+
 enum LiquidGlassMode { none, standard, ultra }
 
 enum Language { yaml, javaScript, json }
@@ -843,7 +845,6 @@ enum LoadingTag {
   backup_restore,
   access,
   proxies,
-  checkUpdate,
 }
 
 enum CoreStatus { connecting, connected, disconnected }

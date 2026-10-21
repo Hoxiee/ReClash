@@ -43,5 +43,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navigationLayout": "Навигация",
+  "navigationLayoutBar": "Қойынды тақтасы",
+  "navigationLayoutSidebar": "Бүйірлік панель"
 }

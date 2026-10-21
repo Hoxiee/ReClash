@@ -44,6 +44,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late bool _intervalOverride;
   late SubscriptionImportPolicy _importPolicy;
   late final SubscriptionClientPreview _preview;
+  final _compatibilityTick = ValueNotifier<int>(0);
+  bool _compatibilityPageOpen = false;
   SubscriptionClientPreset? _lastSuccessful;
   var _compatibilityRevision = 0;
   bool _profileChanged = false;
@@ -52,9 +54,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   bool _showUrl = false;
   bool _globalSendDeviceIdentity = false;
   bool? _sendDeviceIdentityOverride;
-  bool _sendDeviceDetails = false;
   bool _identityConsentLoading = true;
-  String? _identityOrigin;
   late bool _autoUpdate;
   String? _rawText;
   bool _attempted = false;
@@ -100,6 +100,12 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _updateFileInfo();
     unawaited(_loadDeviceIdentityConsent());
     unawaited(_loadLastSuccessful());
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _compatibilityTick.value++;
   }
 
   void _previewChanged() {
@@ -191,6 +197,53 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     unawaited(_loadLastSuccessful());
   }
 
+  String? _bannerMessage(({_ProfileField field, String message})? issue) =>
+      issue?.message ??
+      _compatibilityError ??
+      _preview.failure?.label ??
+      (_profileChanged
+          ? context.appLocalizations.subscriptionCompatibilitySuperseded
+          : null);
+
+  SubscriptionCompatibilityView _compatibilityView() {
+    final issue = _attempted ? _issue(context.appLocalizations) : null;
+    return SubscriptionCompatibilityView(
+      preset: _clientPreset,
+      error: _bannerMessage(issue),
+      lastSuccessful: _lastSuccessful,
+      prepared: _preview.prepared,
+      checking: _preview.checking,
+      saving: _saving,
+      invalid: issue?.field == _ProfileField.client,
+      hasConsent: !_candidate(
+        widget.profile,
+      ).subscriptionPreferences.client.importPolicy.isEmpty,
+      canCheck: _fileData == null && !_identityConsentLoading,
+    );
+  }
+
+  Future<void> _openCompatibility() async {
+    _compatibilityPageOpen = true;
+    try {
+      await BaseNavigator.push<void>(
+        context,
+        SubscriptionCompatibilityPage(
+          listenable: _compatibilityTick,
+          read: _compatibilityView,
+          userAgentController: _customUserAgentController,
+          onPresetChanged: _setClientPreset,
+          onUserAgentChanged: _handleChanged,
+          onCheck: _checkCompatibility,
+          onCancel: _preview.invalidate,
+          onApply: _applyCompatibility,
+          onForgetConsent: _forgetImportConsent,
+        ),
+      );
+    } finally {
+      _compatibilityPageOpen = false;
+    }
+  }
+
   void _forgetImportConsent() {
     if (_saving) return;
     _importPolicy = const SubscriptionImportPolicy();
@@ -261,6 +314,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       );
       if (!mounted) return;
       if (saved != null) {
+        if (_compatibilityPageOpen) Navigator.of(context).pop();
+        if (!mounted) return;
         Navigator.of(context).pop();
       } else {
         _preview.invalidate();
@@ -346,46 +401,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       setState(() {
         _globalSendDeviceIdentity = globalEnabled;
         _sendDeviceIdentityOverride = override;
-      });
-      final origin = normalizeIdentityOrigin(Uri.parse(_urlController.text));
-      final consent = await store.consent(widget.profile.id, Uri.parse(origin));
-      if (!mounted ||
-          normalizeIdentityOrigin(Uri.parse(_urlController.text)) != origin) {
-        return;
-      }
-      setState(() {
-        _identityOrigin = origin;
-        _globalSendDeviceIdentity = globalEnabled;
-        _sendDeviceIdentityOverride = override;
-        _sendDeviceDetails = consent?.sendDetails ?? false;
         _identityConsentLoading = false;
       });
     } on Object {
-      if (mounted) {
-        setState(() {
-          _identityOrigin = null;
-          _sendDeviceDetails = false;
-          _identityConsentLoading = false;
-        });
-      }
+      if (mounted) setState(() => _identityConsentLoading = false);
     }
-  }
-
-  void _handleUrlChanged(String value) {
-    _handleChanged(value);
-    String? origin;
-    try {
-      origin = normalizeIdentityOrigin(Uri.parse(value));
-    } on Object {
-      origin = null;
-    }
-    if (origin == _identityOrigin) return;
-    setState(() {
-      _identityOrigin = origin;
-      _sendDeviceDetails = false;
-      _identityConsentLoading = origin != null;
-    });
-    if (origin != null) unawaited(_loadDeviceIdentityConsent());
   }
 
   Future<void> _setDeviceIdentityOverride(bool? value) async {
@@ -407,40 +427,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       await store.setProfileSendOverride(widget.profile.id, value);
       if (!mounted) return;
       setState(() => _sendDeviceIdentityOverride = value);
-    } on Object catch (error) {
-      await globalState.safeRun<void>(() async => throw error);
-    } finally {
-      if (mounted) {
-        setState(() => _identityConsentLoading = false);
-        unawaited(_loadLastSuccessful());
-      }
-    }
-  }
-
-  Future<void> _setDeviceDetails(bool value) async {
-    if (_saving || _identityConsentLoading || !_sendDeviceIdentity) return;
-    final origin = Uri.tryParse(_urlController.text);
-    if (origin == null) return;
-    final l10n = context.appLocalizations;
-    if (value) {
-      final accepted = await dialogs.showMessage(
-        title: l10n.subscriptionIdentityDetails,
-        context: context,
-        message: TextSpan(text: l10n.subscriptionIdentityDetailsDisclosure),
-      );
-      if (accepted != true) return;
-    }
-    if (!mounted) return;
-    _invalidateCompatibility();
-    setState(() => _identityConsentLoading = true);
-    try {
-      final store = await DeviceIdentityStore.create();
-      if (value) {
-        await store.allow(widget.profile.id, origin, sendDetails: true);
-      } else {
-        await store.revoke(widget.profile.id, origin);
-      }
-      if (mounted) setState(() => _sendDeviceDetails = value);
     } on Object catch (error) {
       await globalState.safeRun<void>(() async => throw error);
     } finally {
@@ -637,6 +623,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     }
     _preview.removeListener(_previewChanged);
     _preview.dispose();
+    _compatibilityTick.dispose();
     _labelController.dispose();
     _urlController.dispose();
     _ageSecretKeyController.dispose();
@@ -677,7 +664,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               onToggleVisibility: hideUrl
                   ? () => setState(() => _showUrl = !_showUrl)
                   : null,
-              onChanged: _handleUrlChanged,
+              onChanged: _handleChanged,
             ),
           _AgeSecretKeyField(controller: _ageSecretKeyController),
         ],
@@ -710,11 +697,6 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                 }),
               ),
             ),
-          ],
-        ),
-      if (isUrl)
-        generateSection(
-          items: [
             ListItem<bool?>.options(
               title: Text(appLocalizations.subscriptionIdentityTitle),
               options: const [null, true, false],
@@ -727,42 +709,16 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
               onChanged: (value) =>
                   unawaited(_setDeviceIdentityOverride(value)),
             ),
-            if (_sendDeviceIdentity)
-              FormRow(
-                title: appLocalizations.subscriptionIdentityDetails,
-                onPressed: _identityConsentLoading || _saving
-                    ? null
-                    : () => _setDeviceDetails(!_sendDeviceDetails),
-                trailing: Checkbox(
-                  value: _sendDeviceDetails,
-                  onChanged: _identityConsentLoading || _saving
-                      ? null
-                      : (value) => _setDeviceDetails(value ?? false),
-                ),
-              ),
           ],
         ),
       if (isUrl)
-        SubscriptionCompatibilityEditor(
-          preset: _clientPreset,
-          userAgentController: _customUserAgentController,
-          onPresetChanged: _setClientPreset,
-          onUserAgentChanged: _handleChanged,
-          onCheck: _fileData != null || _identityConsentLoading
-              ? null
-              : _checkCompatibility,
-          onCancel: _preview.invalidate,
-          onApply: _applyCompatibility,
-          onPin: _setClientPreset,
-          onForgetConsent: _forgetImportConsent,
-          lastSuccessful: _lastSuccessful,
-          prepared: _preview.prepared,
-          checking: _preview.checking,
-          saving: _saving,
-          invalid: issue?.field == _ProfileField.client,
-          hasConsent: !_candidate(
-            widget.profile,
-          ).subscriptionPreferences.client.importPolicy.isEmpty,
+        generateSection(
+          items: [
+            SubscriptionCompatibilityEntryRow(
+              preset: _clientPreset,
+              onPressed: _openCompatibility,
+            ),
+          ],
         ),
       _ProfileFileItem(
         fileInfoNotifier: _fileInfoNotifier,
@@ -797,16 +753,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                   bottom: BottomInsetScope.of(context) + 16,
                 ),
                 children: [
-                  ErrorBanner(
-                    message:
-                        issue?.message ??
-                        _compatibilityError ??
-                        _preview.failure?.label ??
-                        (_profileChanged
-                            ? appLocalizations
-                                  .subscriptionCompatibilitySuperseded
-                            : null),
-                  ),
+                  ErrorBanner(message: _bannerMessage(issue)),
                   ...sections.separated(const SizedBox(height: 24)),
                 ],
               ),

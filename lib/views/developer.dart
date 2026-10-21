@@ -9,6 +9,7 @@ import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -86,6 +87,20 @@ class DeveloperView extends ConsumerWidget {
                 return;
               }
               await storeAction.handleClear();
+            },
+          ),
+        ),
+        SettingTarget(
+          spec: developerToolSettings[6],
+          child: ListItem(
+            title: Text(appLocalizations.setupRestart),
+            subtitle: Text(appLocalizations.setupFinishDescription),
+            onTap: () {
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).popUntil((route) => route.isFirst);
+              ref.read(setupSessionProvider.notifier).reopen();
             },
           ),
         ),
@@ -187,6 +202,12 @@ final developerToolSettings = <SettingSpec>[
     page: ToolPage.developer,
     title: (l) => l.developerMode,
     keywords: ['developerMode'],
+    condition: SettingCondition.developer,
+  ),
+  SettingSpec(
+    id: 'developer.setup',
+    page: ToolPage.developer,
+    title: (l) => l.setupRestart,
     condition: SettingCondition.developer,
   ),
 ];

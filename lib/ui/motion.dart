@@ -4,6 +4,19 @@ import 'package:flutter/physics.dart';
 const fadeTabDuration = Duration(milliseconds: 220);
 const fadeTabCurve = Curves.easeInOut;
 
+/// The spring settles within a hundredth of the way by 300 ms; the controller
+/// runs on to [slideTabDuration] only to ease out what is left.
+const slideTabDuration = Duration(milliseconds: 400);
+
+/// Critically damped, so the pages, which travel touching, never overshoot
+/// and open a gap between them.
+final slideTabCurve = SpringCurve(
+  SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 300),
+  ),
+  seconds: slideTabDuration.inMicroseconds / Duration.microsecondsPerSecond,
+);
+
 /// Plays [spring] over the first [seconds] of an animation, easing out the
 /// remaining residual so the curve still ends exactly at 1.
 class SpringCurve extends Curve {

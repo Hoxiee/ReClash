@@ -41,7 +41,7 @@ final class ToolCommandsProvider
   }
 }
 
-String _$toolCommandsHash() => r'a3364f0e18f28567b62de9bc8dde25a2a31ffba8';
+String _$toolCommandsHash() => r'99fb3e14af34c2cb4207bf809f64ae7f033adb4b';
 
 abstract class _$ToolCommands extends $Notifier<Set<ToolCommand>> {
   Set<ToolCommand> build();

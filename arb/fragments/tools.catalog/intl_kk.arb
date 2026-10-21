@@ -26,5 +26,6 @@
   "toolsUnpin": "Босату",
   "toolsUpdateResources": "Ресурстарды жаңарту",
   "toolsUpdateResourcesConfirm": "Ережелер мен скрипттерді жаңарту конфигурацияны қайта қолдана алады және қосылымдарға әсер етеді. Жалғастырасыз ба?",
-  "applicationSettings": "Қолданба баптаулары"
+  "applicationSettings": "Қолданба баптаулары",
+  "tools": "Құралдар"
 }

@@ -407,7 +407,14 @@ class NavigationDock extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: _shadowRoom + height + _bottomMarginOf(context),
-      child: RepaintBoundary(child: LayoutBuilder(builder: (_, _) => dock)),
+      child: RepaintBoundary(
+        child: LayoutBuilder(
+          // The bar tracks raw pointers, so without a drag recognizer of its
+          // own a sideways swipe on it would drag the page back.
+          builder: (_, _) =>
+              GestureDetector(onHorizontalDragUpdate: (_) {}, child: dock),
+        ),
+      ),
     );
   }
 }

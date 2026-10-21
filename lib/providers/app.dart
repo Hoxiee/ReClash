@@ -6,8 +6,10 @@ import 'dart:ui' show Locale;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
@@ -265,12 +267,18 @@ double viewWidth(Ref ref) {
   return ref.watch(viewSizeProvider).width;
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 ViewMode viewMode(Ref ref) {
-  return getViewMode(ref.watch(viewWidthProvider));
+  final layout = ref.watch(appSettingProvider).navigationLayout;
+  final viewSize = ref.watch(viewSizeProvider);
+  return resolveViewMode(
+    viewSize,
+    layout,
+    tablet: system.isAndroid && !system.isTV && isTabletSize(viewSize),
+  );
 }
 
-@Riverpod(keepAlive: true)
+@riverpod
 bool isMobileView(Ref ref) {
   return ref.watch(viewModeProvider) == ViewMode.mobile;
 }

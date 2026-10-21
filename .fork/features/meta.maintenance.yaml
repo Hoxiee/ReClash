@@ -7,6 +7,6 @@ must:
   provenance: Vendor trees retain the observed source identity and upstream gitlink values.
   skill-entry: The Claude maintenance skill resolves to the checked-in canonical agent skill.
   history: Each sync candidate uses a parentless product base matching the prepared vendor tree; downstream history is linear above it.
-watch: ['.fork/**', 'tool/fork.dart', 'tool/src/fork/**', 'test/tool/fork*', 'AGENTS.md', '.agents/**', '.claude/skills/fork-maintenance', .gitignore, analysis_options.yaml, lint_options.yaml, tool/check_format.dart, 'tool/hooks/**', test/tool/check_format_test.dart]
+watch: ['.fork/**', 'tool/fork.dart', 'tool/src/fork/**', 'test/tool/fork*', 'AGENTS.md', '.agents/**', '.claude/skills/fork-maintenance', '.claude/agents/**', tool/test.dart, 'tool/src/test_select/**', test/tool/test_select_test.dart, tool/preview.dart, 'tool/preview/**', test/tool/preview_test.dart, .gitignore, analysis_options.yaml, lint_options.yaml, tool/check_format.dart, 'tool/hooks/**', test/tool/check_format_test.dart]
 checks:
   fork-tests: [preserve, provenance, skill-entry, history]

@@ -10,7 +10,8 @@ const _entryPoints = ['lib/main.dart'];
 final _declaration = RegExp(
   r'^(?:abstract |sealed |final |base |mixin )*'
   r'(?:(?:class|enum|mixin)\s+([A-Za-z]\w*)'
-  r'|(?:final|const)\s+(?:[\w<>,\s\[\]?]+\s+)?([a-z]\w*)\s*=)',
+  r'|(?:final|const)\s+(?:[\w<>,\s\[\]?]+\s+)?([a-z]\w*)\s*='
+  r'|[A-Za-z][\w<>,\[\]? ]* +([a-z]\w*)(?:<[^>\n]+>)?\s*\()',
   multiLine: true,
 );
 
@@ -44,6 +45,22 @@ bool _isBarrel(String source) {
 }
 
 void main() {
+  test('top-level factories are recognized as public declarations', () {
+    const source = '''class Adapter {
+  void internalMethod() {}
+}
+const adapters = <Adapter>[];
+Adapter adapterFor(String name) => adapters.first;
+List<T> normalize<T>(List<T> values) => values;
+''';
+    expect(
+      _declaration
+          .allMatches(source)
+          .map((match) => match.group(1) ?? match.group(2) ?? match.group(3)!),
+      ['Adapter', 'adapters', 'adapterFor', 'normalize'],
+    );
+  });
+
   test('every file under lib declares something used outside itself', () {
     // Generated code counts as a consumer but never as a declarer: a riverpod
     // notifier is reached through the provider its annotation generates.
@@ -72,7 +89,7 @@ void main() {
       // this way.
       final names = _declaration
           .allMatches(source)
-          .map((match) => match.group(1) ?? match.group(2)!)
+          .map((match) => match.group(1) ?? match.group(2) ?? match.group(3)!)
           .toSet();
       if (names.isEmpty) continue;
 

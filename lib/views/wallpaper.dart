@@ -45,7 +45,8 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(height: context.appBarInset),
-          if (ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
+          if (showThemeLivePreview &&
+              ViewScope.sizeOf(context).width <= maxMobileWidth) ...const [
             ThemeLivePreview(),
             SizedBox(height: 16),
           ],

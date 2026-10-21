@@ -10,6 +10,7 @@ import 'package:reclash/l10n/intl/messages_ru.dart' as messages_ru;
 import 'package:reclash/l10n/intl/messages_zh_CN.dart' as messages_zh_cn;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/message_lookup_by_library.dart';
+import 'package:yaml/yaml.dart';
 
 void main() {
   final lookups = <String, MessageLookupByLibrary>{
@@ -21,6 +22,38 @@ void main() {
     'ru': messages_ru.messages,
     'zh_CN': messages_zh_cn.messages,
   };
+
+  test('vendor locale provenance stays outside application analysis', () {
+    final options =
+        loadYaml(File('analysis_options.yaml').readAsStringSync()) as YamlMap;
+    final analyzer = options['analyzer'] as YamlMap;
+    final excluded = analyzer['exclude'] as YamlList;
+    expect(excluded, contains('upstream_l10n/**'));
+    expect(excluded, isNot(contains('lib/**')));
+  });
+
+  test('application directives never reference vendor locale provenance', () {
+    final directive = RegExp(
+      r'''^\s*(?:import|export|part)\s+[^;]+;''',
+      multiLine: true,
+    );
+    final literal = RegExp(r'''[\'"]([^\'"]+)[\'"]''');
+    final offenders = <String>[];
+    for (final root in ['lib', 'test']) {
+      for (final file in Directory(root).listSync(recursive: true)) {
+        if (file is! File || !file.path.endsWith('.dart')) continue;
+        for (final statement in directive.allMatches(file.readAsStringSync())) {
+          for (final match in literal.allMatches(statement[0]!)) {
+            final uri = match[1]!;
+            if (Uri.parse(uri).pathSegments.contains('upstream_l10n')) {
+              offenders.add('${file.path}: $uri');
+            }
+          }
+        }
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
 
   test('every generated locale exposes and evaluates every source message', () {
     final arbByLocale = <String, Map<String, dynamic>>{

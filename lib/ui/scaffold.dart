@@ -598,9 +598,18 @@ class CommonScaffoldState extends State<CommonScaffold> {
           ),
           TextButton(
             onPressed: confirmation.isLoading ? null : confirmation.onPressed,
-            child: confirmation.isLoading
-                ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
-                : Text(confirmation.tooltip!),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(
+                  opacity: confirmation.isLoading ? 0 : 1,
+                  alwaysIncludeSemantics: true,
+                  child: Text(confirmation.tooltip!),
+                ),
+                if (confirmation.isLoading)
+                  CommonCircleLoading(size: TonalButtonSize.bar.icon),
+              ],
+            ),
           ),
         ],
       ),

@@ -1457,6 +1457,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("Ещё"),
     "name": MessageLookupByLibrary.simpleMessage("Название"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Нижняя панель"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("Навигация"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage(
+      "Панель вкладок",
+    ),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage(
+      "Боковая панель",
+    ),
     "network": MessageLookupByLibrary.simpleMessage("Сеть"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2678,9 +2685,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
       "Разрешить автоустановку",
     ),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "Эти настройки не дают системного разрешения на установку приложений. Их можно изменить в любой момент.",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash сможет устанавливать проверенные стабильные обновления без нового запроса каждый раз. Ваш VPN не будет отключён. Android всё ещё может попросить подтвердить установку.",
     ),
@@ -2689,12 +2693,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
       "Устанавливать автоматически",
-    ),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "Устанавливать подходящие стабильные обновления только при выключенном VPN. Важные изменения всегда ждут вашего решения.",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "Закрытие окна не остановит загрузку.",
     ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
@@ -2706,16 +2704,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проверять автоматически",
     ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось проверить обновления.",
+      "Не удалось проверить обновления",
     ),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Проверьте соединение и попробуйте ещё раз.",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "Периодически проверять, пока ReClash работает. Обновление появится на главной странице, без открытия окна.",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "Ищем новую версию в выбранном канале.",
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Проверка обновлений…",
     ),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage("Закрыть окно"),
     "updateConfirmationDescription": MessageLookupByLibrary.simpleMessage(
@@ -2751,30 +2746,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
       "Загрузить заново",
     ),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Окно можно закрыть. Прогресс останется на главной странице.",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось загрузить обновление.",
+      "Не удалось загрузить обновление",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Загруженная часть сохранена. Проверьте соединение и продолжите загрузку.",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "Установленная версия остаётся без изменений.",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("Понятно"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось запустить установщик пакетов.",
+      "Не удалось запустить установщик пакетов",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android не завершил установку. Попробуйте ещё раз, когда будет удобно.",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage(
       "Установить сейчас",
-    ),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash уже использует новую версию.",
     ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Обновление установлено",
@@ -2787,16 +2773,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Устанавливаем обновление",
     ),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
-      "У вас уже установлена последняя версия.",
-    ),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Не сейчас"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Что нового"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Описание изменений не опубликовано.",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "Загрузка не устанавливает обновление и не прерывает VPN.",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
       "Доступно обновление",
@@ -2819,11 +2798,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "Целостность, приложение и подпись проверены",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Версия"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("Пауза"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "Загруженная часть сохранена. Продолжите, когда будет удобно.",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
       "Загрузка на паузе",
     ),
@@ -2836,9 +2811,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "Настройте проверку, загрузку и установку независимо друг от друга.",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "Обновления по вашим правилам",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "Настройки не сохранены. Попробуйте ещё раз; автоустановка не включена.",
     ),
@@ -2846,12 +2818,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Настройки обновлений",
     ),
     "updatePreload": MessageLookupByLibrary.simpleMessage("Загружать по Wi-Fi"),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Загружать доступные обновления по Wi-Fi. При смене сети автоматическая загрузка приостанавливается.",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "Пакет прошёл все проверки. Установите сейчас или оставьте на потом.",
-    ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
       "Готово к установке",
     ),
@@ -2877,9 +2843,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Обновления"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "Пакет, не прошедший проверку, никогда не будет установлен.",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось проверить целостность загруженного обновления.",
     ),
@@ -2889,17 +2852,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "Этот пакет нельзя установить",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "Перед установкой проверяем файл, версию приложения и сертификат подписи.",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
       "Проверяем обновление",
     ),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "Для установки ReClash ненадолго закроется. Отключайте VPN, только если готовы прервать соединение.",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "При установке приложение ненадолго закроется. VPN не отключится без вашего подтверждения.",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
       "Ваш VPN ещё работает",
@@ -2911,20 +2868,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Действие"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Добавить подписку"),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "Создать профиль по HTTP- или HTTPS-ссылке подписки с необязательным именем.",
+      "Добавить URL подписки. Имя необязательно.",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось подтвердить подлинность зашифрованной ссылки. Она может быть повреждена или использовать другой ключ.",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Создать ссылку"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "В ссылку входят только поля выбранного действия. Ссылка конфигурации содержит все её данные и не позволяет обойти подтверждение.",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage(
       "Закрыть приложение",
     ),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "Следовать настройке закрытия: скрыть окно или выйти из ReClash. На Android используется обычное поведение закрытия приложения.",
+      "Закрыть приложение согласно настройке закрытия.",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -2938,11 +2892,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Внешняя команда приложения",
     ),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "Внешние команды подключения и закрытия требуют подтверждения. Сначала завершите настройку подключения.",
+      "Команды подключения и закрытия из внешних ссылок требуют подтверждения.",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Подключить"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Запустить подключение с выбранным профилем и текущими настройками охвата.",
+      "Подключиться с выбранным профилем.",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Подключение"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
@@ -2962,7 +2916,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Отключить"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Остановить подключение, не меняя выбранный профиль.",
+      "Остановить подключение, не меняя профиль.",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
       "Встроенная конфигурация",
@@ -2970,12 +2924,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
       "Пример профиля",
     ),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("Форматы"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "Форматы ссылок. Подставьте свой URL или данные.",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Импортировать конфигурацию",
     ),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "Импортировать встроенную в ссылку UTF-8-конфигурацию в Base64 с необязательным именем.",
+      "Встроить конфигурацию YAML или JSON в ссылку.",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
       "Проверить ссылку",
@@ -2996,10 +2954,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Установить конфигурацию",
     ),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Импортировать подписку через формат install-config, поддерживаемый клиентами Clash.",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "Свяжите ReClash с ярлыками, сайтами и другими приложениями. Создайте готовую ссылку или проверьте её перед открытием.",
+      "Создать ссылку подписки в формате клиентов Clash.",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "Встроенная конфигурация не является корректными UTF-8-данными в Base64.",
@@ -3023,23 +2978,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Показать приложение",
     ),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "Вывести ReClash на передний план, не меняя подключение.",
+      "Показать окно ReClash.",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Параметры"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось прочитать буфер обмена. Вставьте ссылку вручную.",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
-      "Предпросмотр ссылки",
-    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Ссылка"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "Заполните обязательные поля, чтобы увидеть ссылку.",
+      "Введите URL или конфигурацию, чтобы создать ссылку.",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "Ссылка может содержать токены доступа и учётные данные прокси. Делитесь ею только с теми, кому доверяете; ReClash не хранит историю ссылок.",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "Команды профилей открывают конструктор. Входящий импорт требует согласия и проходит обычные проверки и преобразование.",
+      "Ссылка может содержать токены или пароли. Делитесь осторожно.",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Профили"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
@@ -3054,14 +3004,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "Поддерживаемые ссылки импорта",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Ссылки Clash, обёртки INCY и Happ и ссылки на прокси работают также при ручном импорте и сканировании QR. Неизвестные версии шифрования отклоняются.",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage(
       "Переключить подключение",
     ),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "Подключить, если остановлено; отключить, если запущено. В подтверждении указано фактическое действие.",
+      "Подключиться, если выключено; отключиться, если работает.",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "В ссылке слишком много вложенных обёрток.",
@@ -3077,9 +3024,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Подставить пример",
-    ),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "Ссылки подписок, встроенные конфигурации и INCY crypt1",
     ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),

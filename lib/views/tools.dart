@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:flutter/scheduler.dart';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/tools.dart';
@@ -31,6 +34,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
   var _split = false;
   var _navigating = false;
   final _recentIds = <String>[];
+  ({ToolPage page, ContainerOrigin origin})? _origin;
 
   static const _recentLimit = 6;
 
@@ -61,8 +65,25 @@ class ToolsViewState extends ConsumerState<ToolsView> {
 
   @override
   void dispose() {
+    _observer.state.dispose();
     _searchFocus.dispose();
     super.dispose();
+  }
+
+  /// The tile the page grows from, handed over once by the tap that opened it.
+  ContainerOrigin? takeOrigin(ToolPage page) {
+    final offer = _origin;
+    if (offer == null || offer.page != page || !offer.origin.isMounted) {
+      return null;
+    }
+    _origin = null;
+    return offer.origin;
+  }
+
+  void _offerOrigin(ToolPage page, ContainerOrigin? origin) {
+    if (origin == null) return;
+    _origin = (page: page, origin: origin);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _origin = null);
   }
 
   Future<bool> handleBack() async {
@@ -102,7 +123,11 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     return mounted;
   }
 
-  Future<void> openEntry(ToolEntry entry, {bool push = false}) async {
+  Future<void> openEntry(
+    ToolEntry entry, {
+    bool push = false,
+    ContainerOrigin? origin,
+  }) async {
     if (_navigating) return;
     _navigating = true;
     try {
@@ -127,6 +152,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
       } else {
         _recordRecent(entry.id);
       }
+      _offerOrigin(route.page, origin);
       ref.read(toolsSessionProvider.notifier).open(route, push: push);
     } finally {
       _navigating = false;
@@ -146,6 +172,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
           .read(toolCommandsProvider.notifier)
           .execute(
             command,
+            context: context,
             confirm: () async =>
                 mounted &&
                 await dialogs.showMessage(
@@ -179,7 +206,8 @@ class ToolsViewState extends ConsumerState<ToolsView> {
       builder: (sheetContext) => ToolsCatalogPanel(
         autofocus: true,
         onDismiss: () => Navigator.of(sheetContext).pop(),
-        onSelect: (entry) async => Navigator.of(sheetContext).pop(entry),
+        onSelect: (entry, {origin}) async =>
+            Navigator.of(sheetContext).pop(entry),
       ),
     );
     if (mounted && entry != null) await openEntry(entry);
@@ -236,10 +264,11 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     });
   }
 
-  void _openWidget(Widget widget) {
+  void _openWidget(Widget widget, {ContainerOrigin? origin}) {
     final page = toolPageOf(widget);
     if (page == null) return;
     _recordRecent('page.${page.name}');
+    _offerOrigin(page, origin);
     ref.read(toolsSessionProvider.notifier).open(ToolRoute(page), push: true);
   }
 
@@ -330,28 +359,67 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                   top: 0,
                   bottom: 0,
                   width: catalogWidth,
-                  child: Offstage(
-                    offstage: !split && path.isNotEmpty,
-                    child: ExcludeFocus(
-                      excluding: !split && path.isNotEmpty,
-                      child: TickerMode(
-                        enabled: active && (split || path.isEmpty),
-                        child: PageActivityScope(
-                          isActive: active && (split || path.isEmpty),
-                          child: PageViewport(
-                            bounds: Rect.fromLTWH(
-                              rtl ? constraints.maxWidth - catalogWidth : 0,
-                              0,
-                              catalogWidth,
-                              constraints.maxHeight,
+                  child: ValueListenableBuilder(
+                    valueListenable: _observer.state,
+                    builder: (context, motion, catalog) {
+                      final covered =
+                          !split &&
+                          path.isNotEmpty &&
+                          !motion.overCatalog &&
+                          motion.settled != _ToolsRouteObserver.placeholder;
+                      final moving = _observer.moving;
+                      return AnimatedBuilder(
+                        animation:
+                            (moving is TransitionRoute
+                                ? moving.animation
+                                : null) ??
+                            kAlwaysCompleteAnimation,
+                        builder: (context, _) {
+                          // The bar floats above the page growing over it, so
+                          // it leaves once the container reaches its edge.
+                          final top = moving is ContainerRoute
+                              ? (moving as ContainerRoute).containerTop
+                              : null;
+                          final barHeight =
+                              pageToolbarHeight +
+                              MediaQuery.paddingOf(context).top;
+                          final barShown =
+                              split ||
+                              (top != null && motion.overCatalog
+                                  ? top > barHeight
+                                  : path.isEmpty ||
+                                        motion.closing ||
+                                        motion.settled ==
+                                            _ToolsRouteObserver.placeholder);
+                          return Offstage(
+                            offstage: covered,
+                            child: ExcludeFocus(
+                              excluding: covered,
+                              child: TickerMode(
+                                enabled: active && !covered,
+                                child: PageActivityScope(
+                                  isActive: active && !covered && barShown,
+                                  child: PageViewport(
+                                    bounds: Rect.fromLTWH(
+                                      rtl
+                                          ? constraints.maxWidth - catalogWidth
+                                          : 0,
+                                      0,
+                                      catalogWidth,
+                                      constraints.maxHeight,
+                                    ),
+                                    child: catalog!,
+                                  ),
+                                ),
+                              ),
                             ),
-                            child: ToolsCatalogPanel(
-                              searchFocus: _searchFocus,
-                              onSelect: openEntry,
-                            ),
-                          ),
-                        ),
-                      ),
+                          );
+                        },
+                      );
+                    },
+                    child: ToolsCatalogPanel(
+                      searchFocus: _searchFocus,
+                      onSelect: openEntry,
                     ),
                   ),
                 ),
@@ -371,8 +439,13 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                   end: 0,
                   top: 0,
                   bottom: 0,
-                  child: Offstage(
-                    offstage: !split && path.isEmpty,
+                  child: ValueListenableBuilder(
+                    valueListenable: _observer.state,
+                    // A popped page leaves the path at once but animates out.
+                    builder: (context, motion, detail) => Offstage(
+                      offstage: !split && path.isEmpty && !motion.overCatalog,
+                      child: detail,
+                    ),
                     child: PageViewport(
                       bounds: Rect.fromLTWH(
                         rtl ? 0 : detailStart,
@@ -456,8 +529,16 @@ class _ToolsPage extends Page<void> {
   final Widget child;
 
   @override
-  Route<void> createRoute(BuildContext context) =>
-      _ToolsPageRoute(settings: this);
+  Route<void> createRoute(BuildContext context) {
+    final origin = switch (key) {
+      ValueKey<ToolPage>(value: final page) =>
+        context.findAncestorStateOfType<ToolsViewState>()?.takeOrigin(page),
+      _ => null,
+    };
+    return origin == null
+        ? _ToolsPageRoute(settings: this)
+        : openContainerPageRoute(origin: origin, page: child, settings: this);
+  }
 }
 
 class _ToolsPageRoute extends PageRoute<void>
@@ -466,12 +547,6 @@ class _ToolsPageRoute extends PageRoute<void>
         DeferredPushRouteMixin<void>,
         SharedXPageRouteMixin<void> {
   _ToolsPageRoute({required super.settings});
-
-  static const _enterCurve = Interval(0.5, 1, curve: Cubic(0.16, 1, 0.3, 1));
-  static const _leaveCurve = Interval(0, 0.5, curve: Cubic(0.4, 0, 1, 1));
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 260);
 
   @override
   bool sharesMotionWith(Route<dynamic>? route) => route is _ToolsPageRoute;
@@ -484,34 +559,7 @@ class _ToolsPageRoute extends PageRoute<void>
   Color transitionColorOf(Color surface) => Colors.transparent;
 
   @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    if (isDragBackActive) {
-      return super.buildTransitions(
-        context,
-        animation,
-        secondaryAnimation,
-        child,
-      );
-    }
-    return dragBackDetector(
-      AnimatedBuilder(
-        animation: Listenable.merge([animation, secondaryAnimation]),
-        builder: (context, child) {
-          final entering = _enterCurve.transform(animation.value);
-          final covered = secondaryAnimation.status == AnimationStatus.reverse
-              ? _enterCurve.transform(1 - secondaryAnimation.value)
-              : 1 - _leaveCurve.transform(secondaryAnimation.value);
-          return Opacity(opacity: entering * covered, child: child);
-        },
-        child: child,
-      ),
-    );
-  }
+  bool get popGestureEnabled => !system.isDesktop && super.popGestureEnabled;
 
   @override
   Widget buildPage(
@@ -531,29 +579,122 @@ class _ToolsPageRoute extends PageRoute<void>
 }
 
 class _ToolsRouteObserver extends NavigatorObserver {
+  static const placeholder = ValueKey('tools.placeholder');
+
   final _routes = <Route<dynamic>>[];
+  final state =
+      ValueNotifier<({LocalKey? settled, bool overCatalog, bool closing})>((
+        settled: null,
+        overCatalog: false,
+        closing: false,
+      ));
+  Route<dynamic>? _moving;
+  Route<dynamic>? _below;
+  var _gesture = false;
+  var _closing = false;
+  var _flushScheduled = false;
+
   Route<dynamic>? get top => _routes.lastOrNull;
+  Route<dynamic>? get moving => _moving;
   Iterable<Route<dynamic>> get pages => _routes.where(
-    (route) =>
-        route.settings is Page &&
-        (route.settings as Page).key != const ValueKey('tools.placeholder'),
+    (route) => route.settings is Page && !_isPlaceholder(route),
   );
 
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _routes.add(route);
+  static bool _isPlaceholder(Route<dynamic>? route) =>
+      route?.settings is Page && (route!.settings as Page).key == placeholder;
+
+  // A push or removal can land mid-build, where listeners may not rebuild.
+  void _publish() {
+    final scheduler = SchedulerBinding.instance;
+    if (scheduler.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      _flush();
+    } else if (!_flushScheduled) {
+      _flushScheduled = true;
+      scheduler.addPostFrameCallback((_) {
+        _flushScheduled = false;
+        _flush();
+      });
+    }
+  }
+
+  void _flush() {
+    final moving = _moving;
+    final page = _routes.lastWhereOrNull((route) => route.settings is Page);
+    final animation = page is TransitionRoute ? page.animation : null;
+    state.value = (
+      settled: moving == null && animation?.isCompleted == true
+          ? (page!.settings as Page).key
+          : null,
+      overCatalog: moving != null && _isPlaceholder(_below),
+      closing: moving != null && _closing,
+    );
+  }
+
+  void _move(
+    Route<dynamic> route,
+    Route<dynamic>? below, {
+    required bool closing,
+  }) {
+    if (route.settings is! Page) return;
+    _closing = closing;
+    _moving = route;
+    _below = below;
+    _publish();
+  }
+
+  void _settle(Route<dynamic> route) {
+    if (!identical(_moving, route) || _gesture) return;
+    _moving = null;
+    _publish();
+  }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _routes.remove(route);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _routes.add(route);
+    if (route is TransitionRoute && route.settings is Page) {
+      route.animation?.addStatusListener((status) {
+        if (status.isCompleted || status.isDismissed) _settle(route);
+      });
+    }
+    final added =
+        route is TransitionRoute && route.animation?.isCompleted == true;
+    if (previousRoute == null || added) {
+      _publish();
+    } else {
+      _move(route, previousRoute, closing: false);
+    }
+  }
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      _routes.remove(route);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _routes.remove(route);
+    _move(route, previousRoute, closing: true);
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _routes.remove(route);
+    _publish();
+  }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     final index = oldRoute == null ? -1 : _routes.indexOf(oldRoute);
     if (index >= 0 && newRoute != null) _routes[index] = newRoute;
+    _publish();
+  }
+
+  @override
+  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previous) {
+    _gesture = route.settings is Page;
+    if (_gesture) _move(route, previous, closing: true);
+  }
+
+  @override
+  void didStopUserGesture() {
+    _gesture = false;
+    final moving = _moving;
+    final animation = moving is TransitionRoute ? moving.animation : null;
+    if (moving != null && animation?.isAnimating != true) _settle(moving);
   }
 }

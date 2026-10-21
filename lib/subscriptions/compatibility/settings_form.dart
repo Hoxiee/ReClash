@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/subscriptions/compatibility/client_picker.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/identity/device_identity.dart';
+import 'package:reclash/features/form/form.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -53,7 +57,6 @@ class _SubscriptionClientSettingsSectionState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.appLocalizations;
     return generateSection(
       items: [
         SubscriptionClientPresetRow(
@@ -70,8 +73,64 @@ class _SubscriptionClientSettingsSectionState
             onChanged: (_) => _changed(),
           ),
       ],
-      footer:
-          '${l10n.subscriptionClientUrlOnly} ${l10n.subscriptionClientDeviceDataHint}',
+    );
+  }
+}
+
+class SubscriptionSendHwidRow extends StatefulWidget {
+  const SubscriptionSendHwidRow({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool? value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<SubscriptionSendHwidRow> createState() =>
+      _SubscriptionSendHwidRowState();
+}
+
+class _SubscriptionSendHwidRowState extends State<SubscriptionSendHwidRow> {
+  bool _global = false;
+
+  bool get _enabled => widget.value ?? _global;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadGlobal());
+  }
+
+  Future<void> _loadGlobal() async {
+    final store = await DeviceIdentityStore.create();
+    final enabled = await store.globalSendEnabled();
+    if (mounted) setState(() => _global = enabled);
+  }
+
+  Future<void> _toggle(bool value) async {
+    if (value && !_enabled) {
+      final l10n = context.appLocalizations;
+      final accepted = await dialogs.showMessage(
+        title: l10n.subscriptionIdentityTitle,
+        context: context,
+        message: TextSpan(text: l10n.subscriptionIdentityDisclosure),
+      );
+      if (accepted != true) return;
+    }
+    widget.onChanged(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FormRow(
+      title: context.appLocalizations.subscriptionIdentityTitle,
+      onPressed: () => unawaited(_toggle(!_enabled)),
+      trailing: Switch(
+        value: _enabled,
+        onChanged: (value) => unawaited(_toggle(value)),
+      ),
     );
   }
 }

@@ -26,5 +26,6 @@
   "toolsUnpin": "Mahkamlashni olib tashlash",
   "toolsUpdateResources": "Resurslarni yangilash",
   "toolsUpdateResourcesConfirm": "Qoidalar va skriptlarni yangilash konfiguratsiyani qayta qoʻllashi va ulanishlarga taʼsir koʻrsatishi mumkin. Davom etasizmi?",
-  "applicationSettings": "Ilova sozlamalari"
+  "applicationSettings": "Ilova sozlamalari",
+  "tools": "Vositalar"
 }

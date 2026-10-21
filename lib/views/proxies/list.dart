@@ -7,6 +7,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
@@ -401,8 +402,6 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     );
   }
 
-  /// The card reaches up behind the header's rounded bottom corners, so the
-  /// two read as one while the rows unfold or fold.
   Widget _buildUnfoldingRows(double extent, ShapeDecoration decoration) {
     final rows = widget.group.all.chunks(widget.columns).toList();
     final visible = min(
@@ -410,36 +409,27 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
       MediaQuery.sizeOf(context).height / extent,
     );
     final count = min(rows.length, visible.floor() + 1);
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          top: -AppCorner.xl.ap(context),
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: DecoratedBox(decoration: decoration),
-        ),
-        SizeTransition(
-          sizeFactor: _unfold,
-          alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              for (var index = 0; index < count; index++)
-                UnfoldEntryTransition(
-                  animation: _unfold,
-                  index: index,
-                  visibleCount: visible,
-                  child: SizedBox(
-                    height: extent,
-                    child: _buildRow(context, rows[index]),
-                  ),
+    return DecoratedBox(
+      decoration: decoration,
+      child: SizeTransition(
+        sizeFactor: _unfold,
+        alignment: Alignment.topCenter,
+        child: Column(
+          children: [
+            for (var index = 0; index < count; index++)
+              UnfoldEntryTransition(
+                animation: _unfold,
+                index: index,
+                visibleCount: visible,
+                child: SizedBox(
+                  height: extent,
+                  child: _buildRow(context, rows[index]),
                 ),
-              if (count == rows.length) const SizedBox(height: _lastRowGrowth),
-            ],
-          ),
+              ),
+            if (count == rows.length) const SizedBox(height: _lastRowGrowth),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -485,30 +475,46 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     }
     Widget buildHeader({double floating = 0, double lift = 0}) => SizedBox(
       height: listHeaderHeight,
-      child: ListHeader(
-        enterAnimated: false,
-        floating: floating,
-        lift: lift,
-        onScrollToSelected: widget.onScrollToSelected,
-        key: ValueKey(groupName),
-        isExpand: isExpand,
-        unfolded: unfolded,
-        group: widget.group,
-        onChange: widget.onChange,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          if (rows != null)
+            Positioned(
+              top: listHeaderHeight / 2,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: ColoredBox(
+                color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
+              ),
+            ),
+          ListHeader(
+            enterAnimated: false,
+            floating: floating,
+            lift: lift,
+            onScrollToSelected: widget.onScrollToSelected,
+            key: ValueKey(groupName),
+            isExpand: isExpand,
+            unfolded: unfolded,
+            group: widget.group,
+            onChange: widget.onChange,
+          ),
+        ],
       ),
     );
     return SliverPadding(
       padding: EdgeInsets.only(bottom: widget.gap),
       sliver: SliverMainAxisGroup(
-        slivers: [_buildPinnedHeader(isExpand, buildHeader), ?rows],
+        slivers: [
+          _buildPinnedHeader(isExpand, buildHeader),
+          if (rows != null) _GroupRowsClip(sliver: rows),
+        ],
       ),
     );
   }
 
   /// Rounds the header and lifts it as its own rows scroll under it, and lets
-  /// the shadow go before the end of the group pushes it out. The page color
-  /// behind its upper half hides the rows that went under it, which would
-  /// otherwise show around its top corners and above it.
+  /// the shadow go before the end of the group pushes it out.
   Widget _buildPinnedHeader(
     bool isExpand,
     Widget Function({double floating, double lift}) buildHeader,
@@ -520,7 +526,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
             _rowExtent,
           )
         : 0.0;
-    (double, double, double, Color)? headerState;
+    (double, double)? headerState;
     Widget? header;
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -530,32 +536,65 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
         final state = (
           (under / _liftDistance).clamp(0.0, 1.0),
           (min(under, rowsExtent - under) / _liftDistance).clamp(0.0, 1.0),
-          isExpand ? constraints.overlap : 0.0,
-          context.surfaceLevel.colorOf(context.colorScheme),
         );
         if (state == headerState) {
           return header!;
         }
         headerState = state;
-        final (floating, lift, cover, pageColor) = state;
+        final (floating, lift) = state;
         return header = PinnedHeaderSliver(
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: -cover,
-                left: 0,
-                right: 0,
-                height: cover + listHeaderHeight / 2,
-                child: ColoredBox(color: pageColor),
-              ),
-              buildHeader(floating: floating, lift: lift),
-            ],
-          ),
+          child: buildHeader(floating: floating, lift: lift),
         );
       },
     );
   }
+}
+
+class _GroupRowsClip extends SingleChildRenderObjectWidget {
+  const _GroupRowsClip({required Widget sliver}) : super(child: sliver);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderGroupRowsClip();
+}
+
+class _RenderGroupRowsClip extends RenderProxySliver {
+  Rect get _paintClip {
+    final extent = geometry!.paintExtent;
+    return Rect.fromLTRB(
+      0,
+      constraints.overlap.clamp(0.0, extent),
+      constraints.crossAxisExtent,
+      extent,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    layer = context.pushClipRect(
+      needsCompositing,
+      offset,
+      _paintClip,
+      super.paint,
+      oldLayer: layer as ClipRectLayer?,
+    );
+  }
+
+  @override
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) =>
+      mainAxisPosition >= constraints.overlap &&
+      super.hitTestChildren(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) => _paintClip;
 }
 
 class ListHeader extends ConsumerWidget {

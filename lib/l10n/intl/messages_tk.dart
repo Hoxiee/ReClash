@@ -1446,6 +1446,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "more": MessageLookupByLibrary.simpleMessage("Giňişleýin"),
     "name": MessageLookupByLibrary.simpleMessage("Ad"),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Aşaky panel"),
+    "navigationLayout": MessageLookupByLibrary.simpleMessage("Nawigasiýa"),
+    "navigationLayoutBar": MessageLookupByLibrary.simpleMessage(
+      "Bellikler paneli",
+    ),
+    "navigationLayoutSidebar": MessageLookupByLibrary.simpleMessage(
+      "Gapdal panel",
+    ),
     "network": MessageLookupByLibrary.simpleMessage("Tor"),
     "networkAccessDeniedError": m51,
     "networkBadResponseError": m52,
@@ -2657,9 +2664,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateAllowAutomatic": MessageLookupByLibrary.simpleMessage(
       "Awtomatik gurnamaga rugsat bermek",
     ),
-    "updateAndroidAutoNote": MessageLookupByLibrary.simpleMessage(
-      "Bu sazlamalar Android-de programma gurnamaga rugsat bermeýär. Olary islendik wagt üýtgedip bilersiňiz.",
-    ),
     "updateAutoConsentDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash barlanan, laýyk durnukly täzelenmeleri her gezek soramazdan gurup biler. VPN hiç wagt kesilmez. Android gurnamany tassyklamagyňyzy sorap biler.",
     ),
@@ -2668,12 +2672,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateAutoInstall": MessageLookupByLibrary.simpleMessage(
       "Awtomatik gurmak",
-    ),
-    "updateAutoInstallDescription": MessageLookupByLibrary.simpleMessage(
-      "Diňe VPN öçük wagty laýyk durnukly täzelenmeleri gurmak. Möhüm üýtgeşmeler siziň kararyňyza garaşýar.",
-    ),
-    "updateBackgroundNote": MessageLookupByLibrary.simpleMessage(
-      "Bu penjiräni ýapmak ýüklemäni duruzmaýar.",
     ),
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Ýüklemäni ýatyrmak",
@@ -2687,16 +2685,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Awtomatik barlamak",
     ),
     "updateCheckFailed": MessageLookupByLibrary.simpleMessage(
-      "Täzelenmeleri barlap bolmady.",
+      "Täzelenmeleri barlap bolmady",
     ),
     "updateCheckFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Baglanyşygy barlap, täzeden synanyşyň.",
     ),
-    "updateCheckQuietly": MessageLookupByLibrary.simpleMessage(
-      "ReClash işleýän wagty wagtal-wagtal barlamak. Täzelenme penjire açmazdan baş sahypada görkezilýär.",
-    ),
-    "updateCheckingDescription": MessageLookupByLibrary.simpleMessage(
-      "Saýlanan kanalda täze wersiýa gözlenýär.",
+    "updateCheckingTitle": MessageLookupByLibrary.simpleMessage(
+      "Täzelenmeler barlanýar…",
     ),
     "updateCloseWindow": MessageLookupByLibrary.simpleMessage(
       "Penjiräni ýapmak",
@@ -2734,29 +2729,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateDownloadAgain": MessageLookupByLibrary.simpleMessage(
       "Täzeden ýüklemek",
     ),
-    "updateDownloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Bu penjiräni ýapyp bilersiňiz. Gidişat baş sahypada galýar.",
-    ),
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
-      "Täzelenmäni ýükläp bolmady.",
+      "Täzelenmäni ýükläp bolmady",
     ),
     "updateDownloadFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Ýüklenen bölek saklandy. Baglanyşygy barlap, ýüklemäni dowam ediň.",
     ),
-    "updateExistingVersionSafe": MessageLookupByLibrary.simpleMessage(
-      "Gurnalan wersiýa üýtgemeýär.",
-    ),
     "updateGotIt": MessageLookupByLibrary.simpleMessage("Düşnükli"),
     "updateInstallFailed": MessageLookupByLibrary.simpleMessage(
-      "Bukja gurnaýjysyny başlap bolmady.",
+      "Bukja gurnaýjysyny başlap bolmady",
     ),
     "updateInstallFailedDescription": MessageLookupByLibrary.simpleMessage(
       "Android gurnamany tamamlamady. Taýýar bolanyňyzda täzeden synanyşyň.",
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("Häzir gurmak"),
-    "updateInstalledDescription": MessageLookupByLibrary.simpleMessage(
-      "ReClash indi täze wersiýany ulanýar.",
-    ),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Täzelenme guruldy",
     ),
@@ -2768,16 +2754,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Täzelenme gurulýar",
     ),
     "updateMinutes": m100,
-    "updateNoUpdates": MessageLookupByLibrary.simpleMessage(
-      "Sizde eýýäm iň täze wersiýa bar.",
-    ),
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Häzir däl"),
-    "updateNotesHeading": MessageLookupByLibrary.simpleMessage("Näme täzelik"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Reliz bellikleri ýok.",
-    ),
-    "updateOfferDownloadNote": MessageLookupByLibrary.simpleMessage(
-      "Ýükleme täzelenmäni gurmaýar we VPN-i kesmeýär.",
     ),
     "updateOfferTitle": MessageLookupByLibrary.simpleMessage(
       "Täzelenme elýeterli",
@@ -2800,11 +2779,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePackageVerified": MessageLookupByLibrary.simpleMessage(
       "Bütewilik, programmanyň şahsyýeti we gol barlandy",
     ),
-    "updatePackageVersion": MessageLookupByLibrary.simpleMessage("Wersiýa"),
     "updatePauseAction": MessageLookupByLibrary.simpleMessage("Säginmek"),
-    "updatePausedDescription": MessageLookupByLibrary.simpleMessage(
-      "Ýüklenen bölek saklandy. Taýýar bolanyňyzda dowam ediň.",
-    ),
     "updatePausedTitle": MessageLookupByLibrary.simpleMessage(
       "Ýükleme säginýär",
     ),
@@ -2817,9 +2792,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreferencesDescription": MessageLookupByLibrary.simpleMessage(
       "Barlamagy, ýüklemegi we gurmagy aýratyn sazlaň.",
     ),
-    "updatePreferencesIntro": MessageLookupByLibrary.simpleMessage(
-      "Täzelenmeler siziň islegiňiz boýunça",
-    ),
     "updatePreferencesSaveFailed": MessageLookupByLibrary.simpleMessage(
       "Sazlamalar saklanmady. Täzeden synanyşyň; awtomatik gurnama açylmady.",
     ),
@@ -2828,12 +2800,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updatePreload": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi arkaly öňünden ýüklemek",
-    ),
-    "updatePreloadDescription": MessageLookupByLibrary.simpleMessage(
-      "Elýeterli täzelenmeleri Wi-Fi arkaly ýüklemek. Wi-Fi-dan çykylsa, awtomatik ýükleme säginýär.",
-    ),
-    "updateReadyDescription": MessageLookupByLibrary.simpleMessage(
-      "Bukja ähli barlaglardan geçdi. Häzir guruň ýa-da soňra goýuň.",
     ),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage(
       "Gurnamaga taýýar",
@@ -2860,9 +2826,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Täzelenmeler"),
     "updateTransferSpeed": m103,
-    "updateVerificationGuard": MessageLookupByLibrary.simpleMessage(
-      "Barlagdan geçmedik bukja hiç wagt gurulmaz.",
-    ),
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Ýüklenen täzelenmäniň bitewüligini barlap bolmady.",
     ),
@@ -2872,17 +2835,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateVerifyFailedTitle": MessageLookupByLibrary.simpleMessage(
       "Bu bukjany gurup bolmaýar",
     ),
-    "updateVerifyingDescription": MessageLookupByLibrary.simpleMessage(
-      "Gurnamazdan öň faýl, programma wersiýasy we gol şahadatnamasy barlanýar.",
-    ),
     "updateVerifyingTitle": MessageLookupByLibrary.simpleMessage(
       "Täzelenme barlanýar",
     ),
     "updateVpnDescription": MessageLookupByLibrary.simpleMessage(
       "Gurnama wagty ReClash gysga wagtlyk ýapylar. Baglanyşygy kesmäge taýýar bolsaňyz kesiň.",
-    ),
-    "updateVpnInstallNote": MessageLookupByLibrary.simpleMessage(
-      "Gurnama wagty programma gysga wagtlyk ýapylar. VPN tassyklamasyz duruzylmaz.",
     ),
     "updateVpnTitle": MessageLookupByLibrary.simpleMessage(
       "VPN henizem işleýär",
@@ -2894,18 +2851,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeAction": MessageLookupByLibrary.simpleMessage("Hereket"),
     "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Abunalyk goş"),
     "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
-      "HTTP ýa-da HTTPS abunalyk salgysyndan profil döret. At hökmany däl.",
+      "Abuna URL-ni goşmak; at hökmany däl.",
     ),
     "urlSchemeAuthenticationFailed": MessageLookupByLibrary.simpleMessage(
       "Şifrlenen salgylanmanyň hakykylygyny barlap bolmady. Ol zaýalanan ýa-da başga açar ulanýan bolup biler.",
     ),
     "urlSchemeBuild": MessageLookupByLibrary.simpleMessage("Salgylanma döret"),
-    "urlSchemeBuilderTip": MessageLookupByLibrary.simpleMessage(
-      "Diňe şu herekete gerekli meýdanlar goşulýar. Konfigurasiýa salgylanmasy doly mazmuny saklaýar we tassyklamadan sowlup geçmeýär.",
-    ),
     "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Programmany ýap"),
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
-      "Ýapmak sazlamasyna eýer: penjiräni gizle ýa-da ReClash-dan çyk. Android adaty programma ýapmak hereketini ulanýar.",
+      "Sazlanan ýapmak hereketini ulanmak.",
     ),
     "urlSchemeConfigCounts": m104,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
@@ -2919,11 +2873,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Daşarky programma buýrugy",
     ),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
-      "Daşarky birikme we ýapmak buýruklary tassyklamagy talap edýär. Birikme buýruklaryny ulanmazdan öň başlangyç sazlamany tamamlaň.",
+      "Daşarky birikme we ýapmak buýruklary tassyklama soraýar.",
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Birikdir"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Saýlanan profil we häzirki gurşaw sazlamalary bilen birikmäni başlat.",
+      "Saýlanan profil bilen birikmek.",
     ),
     "urlSchemeConnection": MessageLookupByLibrary.simpleMessage("Birikme"),
     "urlSchemeContentFormat": MessageLookupByLibrary.simpleMessage(
@@ -2945,7 +2899,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Birikmäni kes",
     ),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
-      "Saýlanan profili üýtgetmän birikmäni sakla.",
+      "Profili üýtgetmän birikmäni duruzmak.",
     ),
     "urlSchemeEmbeddedConfig": MessageLookupByLibrary.simpleMessage(
       "Goşulan konfigurasiýa",
@@ -2953,12 +2907,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeExampleProfile": MessageLookupByLibrary.simpleMessage(
       "Mysal profil",
     ),
+    "urlSchemeFormats": MessageLookupByLibrary.simpleMessage("Formatlar"),
+    "urlSchemeFormatsTip": MessageLookupByLibrary.simpleMessage(
+      "Baglanyşyk formatlary. Ýer tutujylary URL ýa-da maglumatlaryňyz bilen çalşyň.",
+    ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Konfigurasiýany import et",
     ),
     "urlSchemeImportConfirm": m106,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
-      "Salgylanma Base64 görnüşinde goşulan UTF-8 konfigurasiýany import et. At hökmany däl.",
+      "Baglanyşyga YAML ýa-da JSON konfigurasiýasyny girizmek.",
     ),
     "urlSchemeInspect": MessageLookupByLibrary.simpleMessage(
       "Salgylanmany barla",
@@ -2979,10 +2937,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Konfigurasiýany gur",
     ),
     "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
-      "Clash müşderileriniň goldaýan install-config salgylanma görnüşi bilen abunalygy import et.",
-    ),
-    "urlSchemeIntro": MessageLookupByLibrary.simpleMessage(
-      "ReClash-y gysga ýollar, web sahypalary we beýleki programmalar bilen baglanyşdyryň. Taýýar salgylanma dörediň ýa-da açmazdan öň barlaň.",
+      "Clash müşderileriniň umumy abuna baglanyşyk formatyny ulanmak.",
     ),
     "urlSchemeInvalidBase64": MessageLookupByLibrary.simpleMessage(
       "Goşulan konfigurasiýa dogry UTF-8 Base64 maglumatlary däl.",
@@ -3004,23 +2959,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Programmany görkez"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
-      "Birikmäni üýtgetmän ReClash-y öňe çykar.",
+      "ReClash-y öňe çykarmak.",
     ),
     "urlSchemeParameters": MessageLookupByLibrary.simpleMessage("Parametrler"),
     "urlSchemePasteFailed": MessageLookupByLibrary.simpleMessage(
       "Alyş-çalyş buferini okap bolmady. Salgylanmany el bilen goýuň.",
     ),
-    "urlSchemePreview": MessageLookupByLibrary.simpleMessage(
-      "Salgylanmany öňünden görmek",
-    ),
+    "urlSchemePreview": MessageLookupByLibrary.simpleMessage("Baglanyşyk"),
     "urlSchemePreviewEmpty": MessageLookupByLibrary.simpleMessage(
-      "Salgylanmany görmek üçin hökmany meýdanlary dolduryň.",
+      "Baglanyşyk döretmek üçin URL ýa-da konfigurasiýa giriziň.",
     ),
     "urlSchemePrivateLinkTip": MessageLookupByLibrary.simpleMessage(
-      "Salgylanmada giriş tokenleri ýa-da proksi giriş maglumatlary bolup biler. Diňe ynanýan adamlaryňyz bilen paýlaşyň; ReClash salgylanma taryhyny saklamaýar.",
-    ),
-    "urlSchemeProfileCommandsTip": MessageLookupByLibrary.simpleMessage(
-      "Profil buýruklary döredijini açýar. Daşarky import tassyklama soraýar we adaty barlaglary hem-de öwürmäni saklaýar.",
+      "Baglanyşyklarda tokenler ýa-da giriş maglumatlary bolup biler. Seresap paýlaşyň.",
     ),
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profiller"),
     "urlSchemeProxyLinks": MessageLookupByLibrary.simpleMessage(
@@ -3035,12 +2985,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeSupportedLinks": MessageLookupByLibrary.simpleMessage(
       "Goldanylýan import salgylanmalary",
     ),
-    "urlSchemeSupportedLinksTip": MessageLookupByLibrary.simpleMessage(
-      "Clash salgylanmalary, INCY we Happ örtükleri hem-de proksi salgylanmalary el bilen importda we QR skanerde hem işleýär. Näbelli şifrleme wersiýalary ret edilýär.",
-    ),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Birikmäni çalyş"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
-      "Saklanan bolsa birikdir, işleýän bolsa kes. Tassyklamada hakyky hereket görkezilýär.",
+      "Duran bolsa birikmek, işleýän bolsa aýyrmak.",
     ),
     "urlSchemeTooDeep": MessageLookupByLibrary.simpleMessage(
       "Salgylanmada iç-içe örtükler aşa köp.",
@@ -3055,9 +3002,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Mysaly ulan"),
-    "urlSchemeWrappedLinks": MessageLookupByLibrary.simpleMessage(
-      "Abunalyk salgylanmalary, goşulan konfigurasiýalar we INCY crypt1",
-    ),
     "urlTip": m107,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(

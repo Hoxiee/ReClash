@@ -249,6 +249,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readTabAnimation)
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
+    @Default(NavigationLayout.auto)
+    @JsonKey(unknownEnumValue: NavigationLayout.auto)
+    NavigationLayout navigationLayout,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool autoDownloadUpdate,
     @Default(false) bool autoInstallUpdate,

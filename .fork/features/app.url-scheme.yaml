@@ -12,7 +12,8 @@ must:
   safety: Parsing and external decoding are bounded and never log or display credential-bearing URLs or embedded payloads.
   delivery: OS and argv inputs serialize through one bounded queue, suppress only the startup echo and discard stale work after disposal.
   setup: Setup accepts the original profile link for review, but connection commands and imports remain gated by setup ownership and explicit consent.
-  tools: The builder, local inspector and supported-command catalog live inside the Tools workspace on desktop and mobile.
+  tools: The builder, local inspector and supported-command catalog live inside the Tools workspace on desktop and mobile. The compact catalog separates URI signatures from labels and reveals accepted import formats per link family without copying incomplete templates.
+  builder: A fresh builder is idle until input needs validation; preview revisions discard stale results and saving preserves the form action layout.
   platforms: Android, macOS, Windows and Linux advertise the same supported schemes without taking ownership of third-party default handlers; safe mode skips runtime registration.
   localization: URL-scheme UI and errors are owned by app.url-scheme fragments in every supported locale.
 watch:
@@ -53,5 +54,5 @@ watch:
   - test/widgets/tools_workspace_test.dart
   - test/tool/url_scheme_registration_test.dart
 checks:
-  url-scheme: [commands, imports, safety, delivery, setup, tools, platforms, localization, telegram, batch-results]
+  url-scheme: [commands, imports, safety, delivery, setup, tools, builder, platforms, localization, telegram, batch-results]
 drop: Remove only when the same commands, link families, safety gates and Tools workflow are supported upstream.

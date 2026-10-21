@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -15,27 +16,88 @@ import 'update_content.dart';
 import 'update_preferences.dart';
 
 class UpdateSheet extends ConsumerStatefulWidget {
-  const UpdateSheet({super.key, this.preferences = false, this.platform});
+  const UpdateSheet({super.key, this.platform});
 
-  final bool preferences;
   final SupportPlatform? platform;
 
-  static Future<void> show(BuildContext context, {bool preferences = false}) =>
-      showFormSheet<void>(
-        context: context,
-        props: const SheetProps(detents: [0.72, 0.94]),
-        builder: (_) => UpdateSheet(preferences: preferences),
+  static final _offer = _SingleSheet();
+  static final _preferences = _SingleSheet();
+
+  /// Opens the sheet unless it is already showing, so a repeated tap, the
+  /// dashboard card and a check from another page all land on the one sheet.
+  static Future<void> show(BuildContext context, {bool preferences = false}) {
+    if (preferences) {
+      return _preferences.open(
+        () => showFormSheet<void>(
+          context: context,
+          builder: (context) => _preferences.track(
+            UpdatePreferences(
+              isAndroid: ProviderScope.containerOf(
+                context,
+                listen: false,
+              ).read(appUpdateActionProvider.notifier).isSupported,
+            ),
+          ),
+        ),
       );
+    }
+    return _offer.open(
+      () => showSheet<void>(
+        context: context,
+        builder: (_) => _offer.track(const UpdateSheet()),
+      ),
+    );
+  }
 
   @override
   ConsumerState<UpdateSheet> createState() => _UpdateSheetState();
 }
 
+/// Tracks a sheet by its mounted content rather than by the route's future,
+/// which never completes when a layout change drops the navigator under it.
+class _SingleSheet {
+  bool _opening = false;
+  int _mounted = 0;
+
+  Future<void> open(Future<void> Function() present) {
+    if (_opening || _mounted > 0) return Future.value();
+    _opening = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _opening = false);
+    return present();
+  }
+
+  Widget track(Widget child) => _Tracked(sheet: this, child: child);
+}
+
+class _Tracked extends StatefulWidget {
+  const _Tracked({required this.sheet, required this.child});
+
+  final _SingleSheet sheet;
+  final Widget child;
+
+  @override
+  State<_Tracked> createState() => _TrackedState();
+}
+
+class _TrackedState extends State<_Tracked> {
+  @override
+  void initState() {
+    super.initState();
+    widget.sheet._mounted++;
+  }
+
+  @override
+  void dispose() {
+    widget.sheet._mounted--;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class _UpdateSheetState extends ConsumerState<UpdateSheet> {
-  late bool _preferences = widget.preferences;
   ScrollController? _scrollController;
-  final _preferencesKey = GlobalKey<UpdatePreferencesState>();
-  bool _canSave = true;
 
   @override
   void didChangeDependencies() {
@@ -57,327 +119,416 @@ class _UpdateSheetState extends ConsumerState<UpdateSheet> {
     final action = ref.read(appUpdateActionProvider.notifier);
     final l = context.appLocalizations;
     final platform = widget.platform ?? SupportPlatform.currentPlatform;
-    final note = _preferences
-        ? ''
-        : _updateNote(context, update, action.isSupported);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SheetToolBar(
-          appBar: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                if (_preferences && !widget.preferences)
-                  IconButton(
-                    tooltip: l.back,
-                    onPressed: () => setState(() => _preferences = false),
-                    icon: const GlyphIcon(AppGlyphs.arrowBack),
-                  ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8),
-                    child: Text(
-                      _preferences ? l.updatePreferencesTitle : l.updateTitle,
-                      style: AppTextStyle.headline.of(context),
-                    ),
-                  ),
-                ),
-                if (!_preferences)
-                  IconButton(
-                    key: const ValueKey('update-preferences'),
-                    tooltip: l.updatePreferencesTitle,
-                    onPressed: () => setState(() {
-                      _preferences = true;
-                      _canSave = true;
-                    }),
-                    icon: const GlyphIcon(AppGlyphs.settings),
-                  ),
-                IconButton(
-                  tooltip: l.close,
-                  onPressed: _close,
-                  icon: const GlyphIcon(AppGlyphs.close),
-                ),
-              ],
-            ),
-          ),
+    final release = update.release;
+    final offer = update.phase == UpdatePhase.offered && release != null;
+    return CommonScaffold(
+      title: l.updateTitle,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.settings,
+          tooltip: l.updatePreferencesTitle,
+          onPressed: () =>
+              unawaited(UpdateSheet.show(context, preferences: true)),
         ),
-        Flexible(
-          fit: FlexFit.loose,
-          child: SingleChildScrollView(
-            key: const ValueKey('update-offer-scroll'),
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 18,
-              children: [
-                _preferences
-                    ? UpdatePreferences(
-                        key: _preferencesKey,
-                        isAndroid: action.isSupported,
-                        onCanSaveChanged: (value) {
-                          if (mounted) setState(() => _canSave = value);
-                        },
-                        onSaved: () {
-                          if (widget.preferences) {
-                            _close();
-                          } else {
-                            setState(() => _preferences = false);
-                          }
-                        },
-                      )
-                    : update.phase == UpdatePhase.offered &&
-                          update.release != null
-                    ? UpdateReleaseContent(
-                        release: update.release!,
-                        currentVersion: globalState.packageInfo.version,
-                        platform: platform,
-                        asset: update.asset,
-                        verified: update.verified,
-                      )
-                    : _UpdateFlow(update: update),
-                if (note.isNotEmpty)
-                  Text(
-                    note,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyle.caption1
-                        .of(context)
-                        .copyWith(color: context.colorScheme.onSurfaceVariant),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        if (_preferences)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
-            child: FilledButton(
-              key: const ValueKey('update-preferences-save'),
-              onPressed: _canSave
-                  ? () => unawaited(_preferencesKey.currentState?.save())
-                  : null,
-              child: Text(l.save),
-            ),
-          )
-        else
-          _UpdateFooter(
-            update: update,
-            supported: action.isSupported,
-            onClose: _close,
-          ),
       ],
+      body: Builder(
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                key: const ValueKey('update-offer-scroll'),
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ).copyWith(top: context.contentTopPadding, bottom: 16),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.topCenter,
+                    children: [...previous, ?current],
+                  ),
+                  child: offer
+                      ? UpdateReleaseContent(
+                          key: const ValueKey('update-offer'),
+                          release: release,
+                          currentVersion: globalState.packageInfo.version,
+                          platform: platform,
+                          asset: update.asset,
+                          verified: update.verified,
+                          note:
+                              action.isSupported && update.asset?.sha256 == null
+                              ? l.updateDirectUnavailable
+                              : null,
+                        )
+                      : _UpdateStatus(
+                          key: const ValueKey('update-status'),
+                          update: update,
+                          currentVersion: globalState.packageInfo.version,
+                        ),
+                ),
+              ),
+            ),
+            if (update.phase != UpdatePhase.checking)
+              _UpdateFooter(
+                update: update,
+                supported: action.isSupported,
+                onClose: _close,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _UpdateFlow extends StatelessWidget {
-  const _UpdateFlow({required this.update});
+enum _Tone { accent, success, warning, error }
+
+class _UpdateStatus extends StatelessWidget {
+  const _UpdateStatus({
+    super.key,
+    required this.update,
+    required this.currentVersion,
+  });
+
   final AppUpdateState update;
+  final String currentVersion;
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final (title, description, glyph) = switch (update.phase) {
+    final tag = update.release?.tag;
+    final installed = l.updateInstalledVersion(currentVersion);
+    final (title, detail, glyph, tone) = switch (update.phase) {
       UpdatePhase.downloading => (
         l.downloadingUpdate,
-        l.updateDownloadDescription,
+        tag,
         AppGlyphs.cloudDownload,
+        _Tone.accent,
       ),
       UpdatePhase.paused => (
         l.updatePausedTitle,
-        l.updatePausedDescription,
+        tag,
         AppGlyphs.cloudDownload,
+        _Tone.accent,
       ),
       UpdatePhase.verifying => (
         l.updateVerifyingTitle,
-        l.updateVerifyingDescription,
+        tag,
         AppGlyphs.verified,
+        _Tone.accent,
       ),
       UpdatePhase.ready => (
         l.updateReadyTitle,
-        l.updateReadyDescription,
-        AppGlyphs.checkCircle,
+        tag,
+        AppGlyphs.check,
+        _Tone.success,
       ),
       UpdatePhase.vpnActive => (
         l.updateVpnTitle,
         l.updateVpnDescription,
         AppGlyphs.vpn,
+        _Tone.warning,
       ),
       UpdatePhase.permission => (
         l.updatePermissionTitle,
         l.updatePermissionRequired,
         AppGlyphs.appsList,
+        _Tone.accent,
       ),
       UpdatePhase.confirmation => (
         l.updateConfirmationTitle,
         l.updateConfirmationDescription,
         AppGlyphs.verified,
+        _Tone.accent,
       ),
       UpdatePhase.installing => (
         l.updateInstallingTitle,
         l.updateInstallingDescription,
-        AppGlyphs.cloudSync,
+        AppGlyphs.sync,
+        _Tone.accent,
       ),
       UpdatePhase.installed => (
         l.updateInstalledTitle,
-        l.updateInstalledDescription,
-        AppGlyphs.checkCircle,
+        tag,
+        AppGlyphs.check,
+        _Tone.success,
       ),
       UpdatePhase.upToDate => (
         l.updateCurrentTitle,
-        l.updateNoUpdates,
-        AppGlyphs.checkCircle,
+        installed,
+        AppGlyphs.check,
+        _Tone.success,
       ),
       UpdatePhase.checkFailed => (
         l.updateCheckFailed,
         l.updateCheckFailedDescription,
         AppGlyphs.wifiOff,
+        _Tone.error,
       ),
       UpdatePhase.downloadFailed => (
         l.updateDownloadFailed,
         l.updateDownloadFailedDescription,
         AppGlyphs.wifiOff,
+        _Tone.error,
       ),
       UpdatePhase.verifyFailed => (
         l.updateVerifyFailedTitle,
         l.updateVerifyFailedDescription,
         AppGlyphs.warning,
+        _Tone.error,
       ),
       UpdatePhase.installFailed => (
         l.updateInstallFailed,
         l.updateInstallFailedDescription,
         AppGlyphs.warning,
+        _Tone.error,
       ),
-      _ => (l.checkUpdate, l.updateCheckingDescription, AppGlyphs.cloudSync),
+      _ => (
+        l.updateCheckingTitle,
+        installed,
+        AppGlyphs.cloudSync,
+        _Tone.accent,
+      ),
     };
-    final failure = const {
-      UpdatePhase.checkFailed,
+    final transfer = const {
+      UpdatePhase.downloading,
+      UpdatePhase.paused,
       UpdatePhase.downloadFailed,
-      UpdatePhase.verifyFailed,
-      UpdatePhase.installFailed,
     }.contains(update.phase);
+    final muted = context.colorScheme.onSurfaceVariant;
     return Semantics(
       liveRegion: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 18,
-        children: [
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: ShapeDecoration(
-                color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
-                shape: AppShape.lg,
-              ),
-              child: GlyphIcon(
-                glyph,
-                size: 34,
-                color: failure
-                    ? context.colorScheme.error
-                    : context.colorScheme.primary,
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          spacing: 6,
+          children: [
+            _UpdateOrb(update: update, glyph: glyph, tone: tone),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.title2.of(context, emphasized: true),
             ),
-          ),
-          Text(title, style: AppTextStyle.title1.of(context, emphasized: true)),
-          Text(
-            description,
-            style: AppTextStyle.subheadline
-                .of(context)
-                .copyWith(color: context.colorScheme.onSurfaceVariant),
-          ),
-          if (update.release case final release?)
-            Text(release.tag, style: AppTextStyle.footnote.of(context)),
-          if (const {
-            UpdatePhase.downloading,
-            UpdatePhase.paused,
-            UpdatePhase.downloadFailed,
-          }.contains(update.phase))
-            _DownloadMeter(update: update),
-          if (update.phase == UpdatePhase.verifying ||
-              update.phase == UpdatePhase.installing ||
-              update.phase == UpdatePhase.checking)
-            const LinearProgressIndicator(),
-          if (update.verified)
-            CommonCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  GlyphIcon(
-                    AppGlyphs.verified,
-                    size: 20,
-                    color: context.colorScheme.success,
-                  ),
-                  Expanded(
-                    child: Text(
-                      l.updatePackageVerified,
-                      style: AppTextStyle.footnote.of(context),
+            if (detail != null)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 360),
+                child: Text(
+                  detail,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(color: muted),
+                ),
+              ),
+            if (transfer) _TransferLine(update: update),
+            if (update.verified)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    GlyphIcon(
+                      AppGlyphs.verified,
+                      size: 16,
+                      color: context.colorScheme.success,
                     ),
-                  ),
-                ],
+                    Flexible(
+                      child: Text(
+                        l.updatePackageVerified,
+                        style: AppTextStyle.footnote
+                            .of(context)
+                            .copyWith(color: muted),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A glyph well ringed by the update's progress: the download share while it
+/// transfers, a full ring once the package is in hand, a spinner while busy.
+class _UpdateOrb extends StatelessWidget {
+  const _UpdateOrb({
+    required this.update,
+    required this.glyph,
+    required this.tone,
+  });
+
+  static const _side = 112.0;
+  static const _well = 68.0;
+
+  final AppUpdateState update;
+  final Glyph glyph;
+  final _Tone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final color = switch (tone) {
+      _Tone.accent => colorScheme.primary,
+      _Tone.success => colorScheme.success,
+      _Tone.warning => colorScheme.warning,
+      _Tone.error => colorScheme.error,
+    };
+    final phase = update.phase;
+    final progress = update.progress;
+    final transfer = const {
+      UpdatePhase.downloading,
+      UpdatePhase.paused,
+      UpdatePhase.downloadFailed,
+    }.contains(phase);
+    final spinning =
+        const {
+          UpdatePhase.checking,
+          UpdatePhase.verifying,
+          UpdatePhase.installing,
+        }.contains(phase) ||
+        (phase == UpdatePhase.downloading && progress == null);
+    final filled =
+        update.verified ||
+        const {UpdatePhase.installed, UpdatePhase.upToDate}.contains(phase);
+    final value = transfer ? progress ?? 0.0 : (filled ? 1.0 : 0.0);
+    final percent = transfer && progress != null;
+    return SizedBox.square(
+      dimension: _side,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: _well,
+            height: _well,
+            decoration: ShapeDecoration(
+              color: context.raisedSurfaceLevel.colorOf(colorScheme),
+              shape: const CircleBorder(),
+            ),
+          ),
+          if (spinning)
+            CommonCircleLoading(size: _side, color: color)
+          else
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: value),
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) => CustomPaint(
+                size: const Size.square(_side),
+                painter: _RingPainter(value: value, color: color),
               ),
             ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween(begin: 0.7, end: 1.0).animate(animation),
+                child: child,
+              ),
+            ),
+            child: percent
+                ? Text(
+                    '${(progress * 100).floor()}%',
+                    key: const ValueKey('update-orb-percent'),
+                    style: AppTextStyle.headline
+                        .of(context, emphasized: true)
+                        .copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                  )
+                : GlyphIcon(
+                    glyph,
+                    key: ValueKey((glyph, tone)),
+                    size: 36,
+                    color: color,
+                  ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _DownloadMeter extends StatelessWidget {
-  const _DownloadMeter({required this.update});
+/// Matches the ring of [CommonCircleLoading] at the same size, so a spinner
+/// giving way to a measured download keeps its place.
+class _RingPainter extends CustomPainter {
+  _RingPainter({required this.value, required this.color});
+
+  final double value;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final side = size.shortestSide;
+    final strokeWidth = side / 12;
+    final radius = (side * 20 / 24 - strokeWidth) / 2;
+    final center = size.center(Offset.zero);
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, stroke..color = color.opacity12);
+    if (value <= 0) return;
+    stroke.color = color;
+    if (value >= 1) {
+      canvas.drawCircle(center, radius, stroke);
+      return;
+    }
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      value * 2 * math.pi,
+      false,
+      stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter oldDelegate) =>
+      oldDelegate.value != value || oldDelegate.color != color;
+}
+
+class _TransferLine extends StatelessWidget {
+  const _TransferLine({required this.update});
   final AppUpdateState update;
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final progress = update.progress;
     final remaining = update.remainingSeconds;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
-      children: [
-        if (progress != null)
-          Text(
-            '${(progress * 100).floor()}%',
-            style: AppTextStyle.largeTitle.of(context, emphasized: true),
+    final parts = [
+      update.total > 0
+          ? '${update.received.traffic.show} / ${update.total.traffic.show}'
+          : update.received.traffic.show,
+      if (update.phase == UpdatePhase.downloading &&
+          update.bytesPerSecond > 0) ...[
+        l.updateTransferSpeed(update.bytesPerSecond.round().traffic.show),
+        if (remaining != null)
+          l.updateRemainingTime(
+            remaining < 60
+                ? l.updateSeconds(remaining)
+                : l.updateMinutes((remaining / 60).ceil()),
           ),
-        LinearProgressIndicator(
-          value:
-              progress ?? (update.phase == UpdatePhase.downloading ? null : 0),
-        ),
-        Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          children: [
-            Text(
-              update.total > 0
-                  ? '${update.received.traffic.show} / ${update.total.traffic.show}'
-                  : update.received.traffic.show,
-              style: AppTextStyle.footnote.of(context),
-            ),
-            if (update.bytesPerSecond > 0)
-              Text(
-                l.updateTransferSpeed(
-                  update.bytesPerSecond.round().traffic.show,
-                ),
-                style: AppTextStyle.footnote.of(context),
-              ),
-            if (remaining != null)
-              Text(
-                l.updateRemainingTime(
-                  remaining < 60
-                      ? l.updateSeconds(remaining)
-                      : l.updateMinutes((remaining / 60).ceil()),
-                ),
-                style: AppTextStyle.footnote.of(context),
-              ),
-          ],
-        ),
       ],
+    ];
+    return Text(
+      parts.join('  ·  '),
+      textAlign: TextAlign.center,
+      style: AppTextStyle.footnote
+          .of(context)
+          .copyWith(
+            color: context.colorScheme.onSurfaceVariant,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
     );
   }
 }
@@ -396,11 +547,15 @@ class _UpdateFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
     final action = ref.read(appUpdateActionProvider.notifier);
+    final direct = supported && update.asset?.sha256 != null;
+    final size = update.asset?.size;
     final (primary, secondary) = switch (update.phase) {
       UpdatePhase.offered => (
-        supported && update.asset?.sha256 != null
-            ? l.updateDownloadAction
-            : l.goDownload,
+        !direct
+            ? l.goDownload
+            : size != null
+            ? '${l.updateDownloadAction}  ·  ${size.traffic.show}'
+            : l.updateDownloadAction,
         l.updateNotNow,
       ),
       UpdatePhase.downloading => (
@@ -420,10 +575,11 @@ class _UpdateFooter extends ConsumerWidget {
       UpdatePhase.checkFailed => (l.updateRetryCheck, l.updateNotNow),
       _ => (l.updateGotIt, ''),
     };
+    final external = update.phase == UpdatePhase.offered && !direct;
     void accept() {
       switch (update.phase) {
         case UpdatePhase.offered:
-          if (!supported || update.asset?.sha256 == null) {
+          if (!direct) {
             final release = update.release;
             if (release != null) {
               unawaited(
@@ -432,6 +588,7 @@ class _UpdateFooter extends ConsumerWidget {
                 ),
               );
             }
+            onClose();
           } else {
             unawaited(action.download());
           }
@@ -466,83 +623,33 @@ class _UpdateFooter extends ConsumerWidget {
       }
     }
 
-    final style = AppTextStyle.subheadline.of(context, emphasized: true);
-    final primaryButton = FilledButton(
-      key: const ValueKey('update-offer-accept'),
-      style: FilledButton.styleFrom(textStyle: style),
-      onPressed: update.phase == UpdatePhase.checking ? null : accept,
-      child: Text(primary, textAlign: TextAlign.center),
-    );
-    final secondaryButton = TextButton(
-      key: const ValueKey('update-offer-dismiss'),
-      style: TextButton.styleFrom(textStyle: style),
-      onPressed: dismiss,
-      child: Text(secondary, textAlign: TextAlign.center),
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          int buttonWidth(String label) {
-            final painter = TextPainter(
-              text: TextSpan(text: label, style: style),
-              textDirection: Directionality.of(context),
-              textScaler: MediaQuery.textScalerOf(context),
-            )..layout();
-            final width = (painter.width + 48).ceil();
-            painter.dispose();
-            return width;
-          }
-
-          final primaryWidth = buttonWidth(primary);
-          final secondaryWidth = buttonWidth(secondary);
-          final row =
-              secondary.isNotEmpty &&
-              (SheetProvider.of(context)?.type == SheetType.formSheet ||
-                  constraints.maxWidth >= 500) &&
-              primaryWidth + secondaryWidth + 12 <= constraints.maxWidth;
-          if (row) {
-            return Row(
-              spacing: 12,
-              children: [
-                Expanded(flex: secondaryWidth, child: secondaryButton),
-                Expanded(flex: primaryWidth, child: primaryButton),
-              ],
-            );
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              primaryButton,
-              if (secondary.isNotEmpty) secondaryButton,
-            ],
-          );
-        },
+    return SheetOverhangLift(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: AlertActions(
+          actions: [
+            if (secondary.isNotEmpty)
+              TextButton(
+                key: const ValueKey('update-offer-dismiss'),
+                onPressed: dismiss,
+                child: Text(secondary, textAlign: TextAlign.center),
+              ),
+            external
+                ? TextButton.icon(
+                    key: const ValueKey('update-offer-accept'),
+                    onPressed: accept,
+                    iconAlignment: IconAlignment.end,
+                    icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
+                    label: Text(primary, textAlign: TextAlign.center),
+                  )
+                : TextButton(
+                    key: const ValueKey('update-offer-accept'),
+                    onPressed: accept,
+                    child: Text(primary, textAlign: TextAlign.center),
+                  ),
+          ],
+        ),
       ),
     );
   }
-}
-
-String _updateNote(
-  BuildContext context,
-  AppUpdateState update,
-  bool supported,
-) {
-  final l = context.appLocalizations;
-  return switch (update.phase) {
-    UpdatePhase.offered =>
-      supported && update.asset?.sha256 != null
-          ? l.updateOfferDownloadNote
-          : supported
-          ? l.updateDirectUnavailable
-          : l.updateDesktopDescription,
-    UpdatePhase.downloading => l.updateBackgroundNote,
-    UpdatePhase.verifying ||
-    UpdatePhase.verifyFailed => l.updateVerificationGuard,
-    UpdatePhase.ready || UpdatePhase.vpnActive => l.updateVpnInstallNote,
-    UpdatePhase.downloadFailed ||
-    UpdatePhase.installFailed => l.updateExistingVersionSafe,
-    _ => '',
-  };
 }

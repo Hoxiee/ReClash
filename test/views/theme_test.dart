@@ -109,13 +109,16 @@ void main() {
       final themeElement = tester.element(page('theme'));
       final themeScroll = scrollOf(tester, 'theme');
       final preview = find.byType(ThemeLivePreview);
-      await tester.tap(
-        find
-            .descendant(of: preview, matching: find.byType(GestureDetector))
-            .at(2),
-      );
-      await tester.pumpAndSettle();
-      themeScroll.jumpTo(250);
+      final themeOffset = showThemeLivePreview ? 250.0 : 30.0;
+      if (showThemeLivePreview) {
+        await tester.tap(
+          find
+              .descendant(of: preview, matching: find.byType(GestureDetector))
+              .at(2),
+        );
+        await tester.pumpAndSettle();
+      }
+      themeScroll.jumpTo(themeOffset);
       await tester.pumpAndSettle();
 
       await tester.tap(destination('Background'));
@@ -136,15 +139,17 @@ void main() {
       await tester.tap(destination('Theme'));
       await tester.pumpAndSettle();
       expect(tester.element(page('theme')), same(themeElement));
-      expect(themeScroll.offset, 250);
-      expect(
-        tester
-            .widget<MiniScreen>(
-              find.descendant(of: preview, matching: find.byType(MiniScreen)),
-            )
-            .selected,
-        2,
-      );
+      expect(themeScroll.offset, themeOffset);
+      if (showThemeLivePreview) {
+        expect(
+          tester
+              .widget<MiniScreen>(
+                find.descendant(of: preview, matching: find.byType(MiniScreen)),
+              )
+              .selected,
+          2,
+        );
+      }
       await tester.tap(destination('Background'));
       await tester.pumpAndSettle();
       expect(tester.element(page('background')), same(backgroundElement));
@@ -152,6 +157,40 @@ void main() {
       await tester.tap(destination('Interface'));
       await tester.pumpAndSettle();
       expect(interfaceScroll.offset, 320);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the dock rises after the route has half opened and fades '
+        'before it closes', (tester) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(
+        navigator.push(MaterialPageRoute(builder: (_) => const ThemeView())),
+      );
+      await tester.pump();
+      double dockOpacity() => tester
+          .widget<FadeTransition>(
+            find
+                .ancestor(
+                  of: find.byType(NavigationDock).last,
+                  matching: find.byType(FadeTransition),
+                )
+                .first,
+          )
+          .opacity
+          .value;
+      final route = ModalRoute.of(
+        tester.element(find.byType(NavigationDock).last),
+      )!;
+      await tester.pump(route.transitionDuration * 0.4);
+      expect(dockOpacity(), 0);
+      await tester.pumpAndSettle();
+      expect(dockOpacity(), 1);
+      navigator.pop();
+      await tester.pump();
+      await tester.pump(route.reverseTransitionDuration * 0.2);
+      expect(dockOpacity(), 0);
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
@@ -576,7 +615,9 @@ void main() {
           await tester.pumpAndSettle();
           expect(
             find.byType(ThemeLivePreview),
-            size.width <= maxMobileWidth ? findsOneWidget : findsNothing,
+            showThemeLivePreview && size.width <= maxMobileWidth
+                ? findsOneWidget
+                : findsNothing,
           );
           if (label != 'Background') {
             expect(find.byType(MiniScreenThumb), findsWidgets);
@@ -886,6 +927,26 @@ void main() {
       expect(readSetting().floatingNavigationBar, isTrue);
     });
 
+    testWidgets('overrides the automatic navigation layout', (tester) async {
+      await pumpThemeView(tester, interface: true);
+
+      expect(readSetting().navigationLayout, NavigationLayout.auto);
+
+      await tester.tap(find.text('Sidebar'));
+      await tester.pumpAndSettle();
+      expect(readSetting().navigationLayout, NavigationLayout.sidebar);
+
+      await tester.tap(find.text('Tab bar'));
+      await tester.pumpAndSettle();
+      expect(readSetting().navigationLayout, NavigationLayout.bar);
+      expect(container.read(isMobileViewProvider), isTrue);
+
+      await tester.tap(find.text('Auto').first);
+      await tester.pumpAndSettle();
+      expect(readSetting().navigationLayout, NavigationLayout.auto);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('picks a sliding or fading tab switch', (tester) async {
       await pumpThemeView(tester, interface: true);
 
@@ -903,6 +964,7 @@ void main() {
     testWidgets('the preview switches to the destination tapped', (
       tester,
     ) async {
+      if (!showThemeLivePreview) return;
       await pumpThemeView(tester, interface: true, size: const Size(390, 844));
       Finder inPreview(Type type) => find.descendant(
         of: find.byType(ThemeLivePreview),

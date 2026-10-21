@@ -92,7 +92,7 @@ void main() {
     }
     final specs = toolSettingSpecs;
     expect(specs.map((s) => s.id).toSet().length, specs.length);
-    expect(specs.map((spec) => spec.id), contains('application.setup'));
+    expect(specs.map((spec) => spec.id), contains('developer.setup'));
     expect(specs.length, greaterThan(80));
   });
 
@@ -239,7 +239,6 @@ void main() {
     expect(
       app.map((s) => s.id),
       containsAll([
-        'application.setup',
         'application.autoRun',
         'application.openLogs',
         'application.checkCertificate',

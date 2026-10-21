@@ -9,6 +9,8 @@ import 'package:reclash/features/url_scheme/inspect.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/ui/code_label.dart';
+import 'package:reclash/widgets/url_scheme_supported_links.dart';
 import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/widgets/url_scheme_preview.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -71,6 +73,7 @@ void main() {
     Size size = const Size(1200, 1000),
     double scale = 1,
     Brightness brightness = Brightness.light,
+    GlobalKey<NavigatorState>? tabNavigator,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -91,7 +94,14 @@ void main() {
           theme: ThemeData(
             brightness: brightness,
           ).withAppShapes.withAppTypography,
-          child: const UrlSchemeView(),
+          child: tabNavigator == null
+              ? const UrlSchemeView()
+              : Navigator(
+                  key: tabNavigator,
+                  onGenerateRoute: (_) => MaterialPageRoute<void>(
+                    builder: (_) => const UrlSchemeView(),
+                  ),
+                ),
         ),
       ),
     );
@@ -99,7 +109,7 @@ void main() {
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
   }
 
-  testWidgets('the catalog shows all commands and only ready-to-use links', (
+  testWidgets('the catalog separates every command from its URI signature', (
     tester,
   ) async {
     await pump(tester);
@@ -107,10 +117,11 @@ void main() {
     expect(find.text(l.urlSchemeConnection), findsOneWidget);
     expect(find.text(l.urlSchemeProfiles), findsOneWidget);
     expect(find.text(l.urlSchemeSupportedLinks), findsOneWidget);
-    for (final action in ReClashCommand.values.where(
-      (action) => !action.isProfile,
-    )) {
-      expect(find.text('reclash://${action.host}'), findsOneWidget);
+    for (final action in ReClashCommand.values) {
+      expect(
+        find.widgetWithText(CodeLabel, 'reclash://${action.host}'),
+        findsOneWidget,
+      );
     }
     expect(find.textContaining('<'), findsNothing);
     expect(find.byTooltip(l.urlSchemeBuild), findsOneWidget);
@@ -123,19 +134,99 @@ void main() {
   ) async {
     await pump(tester);
     final l = currentAppLocalizations;
-    final copy = find.descendant(
-      of: find.widgetWithText(DecorationListItem, l.urlSchemeConnect),
-      matching: find.byType(IconButton),
-    );
-    await tester.tap(copy);
+    await tester.tap(find.text(l.urlSchemeConnect));
     await tester.pumpAndSettle();
     expect(copied, ['reclash://connect']);
     expect(find.text(l.copySuccess), findsOneWidget);
     copyFails = true;
-    await tester.tap(copy);
+    await tester.tap(find.text(l.urlSchemeConnect));
     await tester.pumpAndSettle();
     expect(copied, hasLength(1));
     expect(find.text(l.urlSchemeCopyFailed), findsOneWidget);
+  });
+
+  testWidgets('supported link families reveal their accepted formats', (
+    tester,
+  ) async {
+    await pump(tester);
+    final l = currentAppLocalizations;
+    final families = <String, List<String>>{
+      'Clash, ClashMeta, ReClash': [
+        for (final scheme in configProtocolSchemes)
+          '$scheme://install-config?url={url}',
+      ],
+      'INCY': [
+        'incy://add/{url-or-base64}',
+        'incy://import/{url-or-base64}',
+        'incy://crypt1/{encrypted}',
+      ],
+      'Happ': ['happ://add/{url-or-base64}'],
+      l.urlSchemeProxyLinks: [
+        for (final scheme in shareProtocolSchemes) '$scheme://{data}',
+      ],
+    };
+    for (final family in families.entries) {
+      final row = find.widgetWithText(UrlSchemeSupportedLinksRow, family.key);
+      await _reveal(tester, row);
+      await tester.tap(
+        find.descendant(of: row, matching: find.text(family.key)),
+      );
+      await tester.pumpAndSettle();
+      for (final format in family.value) {
+        expect(find.widgetWithText(CodeLabel, format), findsOneWidget);
+      }
+      expect(find.text(l.urlSchemeFormatsTip), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text(l.urlSchemeFormatsTip), findsNothing);
+    }
+    expect(copied, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('formats and builders stay on the desktop tab navigator', (
+    tester,
+  ) async {
+    final tabNavigator = GlobalKey<NavigatorState>();
+    await pump(tester, tabNavigator: tabNavigator);
+    await _reveal(tester, find.text('INCY'));
+    await tester.tap(find.text('INCY'));
+    await tester.pumpAndSettle();
+    expect(tabNavigator.currentState!.canPop(), isTrue);
+    expect(globalState.navigatorKey.currentState!.canPop(), isFalse);
+    tabNavigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    await _reveal(
+      tester,
+      find.text(currentAppLocalizations.urlSchemeInstallConfig),
+    );
+    await tester.tap(find.text(currentAppLocalizations.urlSchemeInstallConfig));
+    await _settleForm(tester);
+    expect(tabNavigator.currentState!.canPop(), isTrue);
+    expect(globalState.navigatorKey.currentState!.canPop(), isFalse);
+    tabNavigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(UrlSchemeForm), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opening a fresh builder never validates empty fields', (
+    tester,
+  ) async {
+    await pump(tester);
+    final l = currentAppLocalizations;
+    await tester.tap(find.byTooltip(l.urlSchemeBuild));
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 25));
+      final form = find.byType(FormPage);
+      if (form.evaluate().isNotEmpty) {
+        expect(tester.widget<FormPage>(form).saving, isFalse);
+      }
+    }
+    expect(find.byType(UrlSchemeForm), findsOneWidget);
+    expect(find.text(l.urlSchemeMissingPayload), findsNothing);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
   });
 
   testWidgets(
@@ -221,6 +312,14 @@ void main() {
           tester.widget<UrlSchemePreview>(find.byType(UrlSchemePreview)).link,
           isNotNull,
         );
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        await _reveal(tester, find.text(l.urlSchemeProxyLinks));
+        await tester.tap(find.text(l.urlSchemeProxyLinks));
+        await tester.pumpAndSettle();
+        final lastFormat = find.text('${shareProtocolSchemes.last}://{data}');
+        await _reveal(tester, lastFormat);
+        expect(lastFormat.hitTestable(), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );

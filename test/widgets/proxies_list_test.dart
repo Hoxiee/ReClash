@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -7,6 +9,7 @@ import 'package:reclash/views/proxies/card.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/widgets/widgets.dart' hide ListHeader;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -42,6 +45,8 @@ void main() {
     List<Group>? groups,
     Set<String> unfoldSet = const {'G0', 'G1', 'G2'},
     ValueListenable<Brightness>? brightness,
+    Color? backgroundColor,
+    GlobalKey? repaintKey,
   }) async {
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1;
@@ -71,13 +76,17 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          homeBuilder: (child) => Scaffold(
-            body: Builder(
-              builder: (context) => MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(padding: const EdgeInsets.only(top: 64)),
-                child: child,
+          homeBuilder: (child) => RepaintBoundary(
+            key: repaintKey,
+            child: Scaffold(
+              backgroundColor: backgroundColor,
+              body: Builder(
+                builder: (context) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(padding: const EdgeInsets.only(top: 64)),
+                  child: child,
+                ),
               ),
             ),
           ),
@@ -251,26 +260,79 @@ void main() {
     expect(surfaceOf(tester, 'G0').shadows, isNull);
   });
 
-  testWidgets('a folded pinned header takes the page color of a new theme', (
-    tester,
-  ) async {
+  testWidgets('pinned headers leave the wallpaper clear and the hidden '
+      'cards untappable across themes and folding', (tester) async {
+    const wallpaper = Color(0xFFBE6493);
+    final repaintKey = GlobalKey();
     final brightness = ValueNotifier(Brightness.light);
     addTearDown(brightness.dispose);
-    await pumpList(tester, unfoldSet: const {}, brightness: brightness);
+    await pumpList(
+      tester,
+      brightness: brightness,
+      backgroundColor: wallpaper,
+      repaintKey: repaintKey,
+    );
+    final position = tester.state<ScrollableState>(scrollable()).position;
+    position.jumpTo(200);
+    await tester.pumpAndSettle();
+
+    Future<void> expectHeaderBacking({bool hasRows = true}) async {
+      final header = tester.getRect(headerOf('G0'));
+      final boundary =
+          repaintKey.currentContext!.findRenderObject()!
+              as RenderRepaintBoundary;
+      await tester.runAsync(() async {
+        final image = await boundary.toImage();
+        try {
+          final data = (await image.toByteData(
+            format: ui.ImageByteFormat.rawRgba,
+          ))!;
+          Color colorAt(Offset point) {
+            final index =
+                (point.dy.floor() * image.width + point.dx.floor()) * 4;
+            return Color.fromARGB(
+              data.getUint8(index + 3),
+              data.getUint8(index),
+              data.getUint8(index + 1),
+              data.getUint8(index + 2),
+            );
+          }
+
+          for (final point in [
+            Offset(header.center.dx, header.top - 8),
+            header.topLeft + const Offset(1, 1),
+          ]) {
+            expect(colorAt(point), wallpaper, reason: 'Wallpaper at $point');
+          }
+          final backing = hasRows
+              ? colorAt(header.bottomLeft + const Offset(1, 2))
+              : wallpaper;
+          if (hasRows) {
+            expect(backing, isNot(wallpaper));
+          }
+          for (final point in [
+            header.bottomLeft + const Offset(1, -2),
+            header.bottomRight + const Offset(-2, -2),
+          ]) {
+            expect(colorAt(point), backing, reason: 'Group backing at $point');
+          }
+        } finally {
+          image.dispose();
+        }
+      });
+    }
+
+    await expectHeaderBacking();
+    expect(find.byKey(const ValueKey('G0.G0-0')).hitTestable(), findsNothing);
 
     brightness.value = Brightness.dark;
     await tester.pumpAndSettle();
+    await expectHeaderBacking();
 
-    final header = find.ancestor(
-      of: headerOf('G0'),
-      matching: find.byType(PinnedHeaderSliver),
-    );
-    final context = tester.element(header);
-    final cover = tester.widget<ColoredBox>(
-      find.descendant(of: header, matching: find.byType(ColoredBox)).first,
-    );
-    expect(context.colorScheme.brightness, Brightness.dark);
-    expect(cover.color, context.surfaceLevel.colorOf(context.colorScheme));
+    await tester.tap(find.text('G0'));
+    await tester.pumpAndSettle();
+    await expectHeaderBacking(hasRows: false);
+    expect(find.byKey(const ValueKey('G0.G0-0')), findsNothing);
   });
 
   testWidgets('the last row sits as far from the bottom of its group card as '
