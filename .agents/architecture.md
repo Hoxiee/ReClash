@@ -1463,16 +1463,22 @@ Platform projects copy the artifacts out of `libclash/`; application code must n
   flutter_tools otherwise builds a universal binary and every artifact ships one slice; the hook skips a non-host slice
   for the same reason. The `Stage Core` phase copies the Core after the hook may have rewritten it and fails when it is
   missing or lacks a slice for `ARCHS`, so a skipped hook cannot stage a stale Core silently.
-- Linux and Windows: `ReClashCore`, the Rust `ReClashHelperService`, and a `manifest.json` holding `coreSha256`; the
-  Core builds first because the Helper embeds its hash. The CMake `install` rules copy them, and the Windows bundle
-  places `manifest.json` beside the executable. A Helper running from a Debug build keeps its exe open and the install
-  fails behind an opaque `MSB3073`, so `windows/CMakeLists.txt` stops it from an `install(CODE)` step for the `Debug`
-  configuration only, and only when the staged Helper differs from the installed one; that step is where the
-  configuration is known, and a Release install never stops a registered service. The step matches the process by
-  executable path rather than image name, so a Helper registered from an installed release keeps running.
+- Linux: `ReClashCore`, the Rust `ReClashHelperService`, and a `manifest.json` holding the pair's hashes and Helper
+  protocol; the Core builds first because the Helper embeds its hash. CMake copies the verified pair.
+- Windows: `ReClashCore.exe` and `manifest.json` beside the GUI; no SCM Helper is bundled. CMake requires app-local
+  MSVC runtime DLLs. `setup.dart` validates the staged native dependencies before either package format and validates
+  the final ZIP. Release CI installs, launches, upgrades and uninstalls both native architectures, checks Core init
+  RPC and verifies owned shutdown before publication. `WINDOWS_SIGNING_REQUIRED=true` also requires valid Authenticode
+  signatures; this check does not supply a signing certificate.
 
-Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Windows and
-Linux, a Rust helper:
+Windows installer identity is `E642C6C1-B712-41C2-969E-3C2049CA883F`, shared with ReClash-Alpha and distinct from FlClash.
+The former inherited GUID is not treated as an upgrade identity: it cannot distinguish FlClash from older ReClash.
+Installation asks the exact installed runner to exit through `SystemExitCoordinator`, waits for it, and unregisters
+only a legacy service whose image points into that installation. It never terminates processes by name. Setup offers
+English, Russian, Simplified Chinese and Korean; x64 runs on x64-compatible hosts and the native ARM64 package requires ARM64.
+
+Setup keeps its own cache under `.dart_tool/setup_build_cache/v1/` because it builds a Go core and, on Linux,
+a Rust helper:
 
 - Go fingerprints cover the target-specific `go list -deps` inputs in `core/` and `core/mihomo`, module files, the
   effective build configuration, `setup_hooks` sources, target flags and the Go toolchain.
@@ -1485,43 +1491,16 @@ Linux, a Rust helper:
 - `flutter clean` removes `.dart_tool` and forces one full rebuild; deleting `.dart_tool/setup_build_cache/` does the
   same without a clean.
 
-Windows helper integrity/version check:
+Desktop artifact integrity:
 
-- `setup_hooks` constructs the Core first, calculates its SHA256, and always
-  builds the Rust Helper with release hardening and that expected hash.
-- Flutter reads the Core SHA256 from the bundled `manifest.json` and sends it with `/ping`. Debug, Profile, and Release
-  builds use the same Helper protocol and may use TUN through the same flow.
-- `/ping` is loopback-only and requires no request token. The Helper compares the requested SHA256 with its embedded value
-  and checks that the fixed `ReClashCore.exe` beside it exists; `/start` performs the actual Core SHA256 verification before
-  every launch. The response includes the running Helper path and protocol header; Dart checks both against the current
-  installation. The launcher selects the Helper only when `/ping` reports ready; any other readiness (missing manifest,
-  unavailable Helper, or a Helper built for a different Core) falls back to the direct Core without requesting elevation.
-  If `/start` reports a pre-spawn failure — `coreVerificationFailed` (the on-disk Core no longer matches the SHA the
-  Helper and manifest agree on) or `processLaunchFailed` (the Core process could not be spawned) — the launcher degrades
-  to the direct Core rather than failing the launch. `/start` releases the previously managed Core before it verifies,
-  so the Helper owns no Core when either code is reported and the direct retry cannot race a Helper-managed Core.
-  A mismatched Helper is reinstalled through the explicit TUN authorization flow, not at startup.
-- TUN is not a required run condition. A direct Core runs unelevated and cannot bring up TUN, so any degrade to the
-  direct Core — an unready Helper at resolve time, or a pre-spawn `/start` failure — silently drops TUN and keeps the
-  Core running. Degrading is preferred over failing the launch: an unverified Core carries no privilege the direct
-  launch path did not already have. `manifestMissing` is the one readiness that is surfaced to the user, because it
-  means the installation itself is incomplete.
-- Flutter creates a 128-bit lowercase-hex session ID and uses it as the random named-pipe suffix. `/start` receives only
-  that address and session ID, validates the fixed `ReClashCore_<session>` namespace, starts the fixed Core beside the
-  Helper, and returns the same session ID plus the spawned PID. Flutter verifies both the session and named-pipe peer PID.
-- `/stop` requires the same session ID. A missing process returns `notRunning`; a different owner returns
-  `sessionMismatch` without terminating that process. Session IDs are ownership tokens for lifecycle safety, not a claim
-  that the loopback HTTP endpoints are authenticated.
-- The Core must not outlive the Helper. On Linux the systemd unit's cgroup and `Restart=on-failure` cover that; on
-  Windows the Helper puts the Core in a Job Object with `KILL_ON_JOB_CLOSE`, so the kernel kills the Core when the Helper
-  process ends for any reason, and the `install` subcommand configures SCM failure actions (three restarts, 5 s apart,
-  reset after 24 h). Stopping a Core sends SIGTERM first on Linux, because only a shutdown removes the policy routes
-  sing-tun installed; the Core runs the same teardown itself when its IPC host disconnects or it receives a termination
-  signal. `HelperClient.stopTimeout` must stay above the Helper's graceful-plus-kill budget.
-- Never take `MANAGED_CORE` or `LOGS` with `lock().unwrap()`. The Helper is a long-lived service running as SYSTEM, so a
-  single panic while a lock is held would poison it and turn every later request into another panic — the service stays
-  dead until Windows restarts it. `lock_surviving_poison` recovers the guard through `PoisonError::into_inner` instead.
-  `hub.rs` uses it at every lock site, tests included, and two tests in that file pin the behaviour.
+- `setup_hooks` builds Core before the Linux Helper and records both final hashes and protocol `9`. Windows records
+  only the Core hash; its privileged runtime uses the verified managed UAC launch described under Desktop Privileged Core.
+- `tool/windows_package.dart` resolves imports, delay imports and forwarded exports from the app-local bundle, checks
+  reachable PE architecture and Core SHA256, and rejects an SCM Helper anywhere in the payload. `--compare-installed`
+  checks every installed file against the ZIP, allowing only Inno's own uninstaller files as additions.
+- `--require-signed` checks for embedded certificates in the primary app images; `check_windows_package.ps1` performs
+  Windows Authenticode trust verification of those images and the installer. `--finalize-manifest` is available when
+  a signing stage changes the Core image; signatures are verified separately from the manifest's consistency hash.
 
 Build configuration defaults live in `plugins/setup/setup_hooks/lib/src/options.dart` and can be overridden via the root
 `build_config.yaml`.
@@ -1577,7 +1556,7 @@ NDK version stands in for the hook's cache.
 ## Local Plugins
 
 - `setup`: build-time harness for Go core artifacts and the Rust helper, driven by a Dart build hook; no runtime Dart API.
-- `proxy`: system proxy configuration. On Windows the package installer and uninstaller kill the app, and then run
+- `proxy`: system proxy configuration. On Windows the package installer and uninstaller request owned app shutdown, then run
   `ReClash.exe --clear-stale-proxy`, the installer once the new files are in place; the runner hands it to the plugin
   before any engine starts, and it turns off only a proxy still set to ReClash's `127.0.0.1:<port>` with nothing
   listening on that port.

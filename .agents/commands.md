@@ -17,6 +17,17 @@ dart setup.dart windows
 dart setup.dart android
 ```
 
+On Windows, `setup.dart` checks the staged native dependencies and the final ZIP. Release CI also installs, launches,
+upgrades and uninstalls both architectures before publishing. To repeat that check in a disposable Windows account:
+
+```powershell
+./tool/check_windows_package.ps1 -ZipPath <archive.zip> -SetupPath <setup.exe> -Arch amd64 -AllowInstall
+```
+
+Omit `-AllowInstall` for payload/signature inspection alone; add `-RequireSigned` to require valid Authenticode signatures.
+The installation check refuses an existing installation or user data and seeds its own settings with TUN, proxy and
+autostart disabled. It exercises the shipped GUI and Core; UAC, TUN and clean-OS dependencies still need native acceptance.
+
 The desktop Go core and the Rust helper build automatically: Flutter runs
 `plugins/setup/hook/build.dart` on every `flutter build` and `flutter test`,
 and the hook drives `CoreBuilder` from the `setup_hooks` package in

@@ -4,7 +4,7 @@ state: active
 risk: critical
 must:
   android: Android namespace and applicationId remain com.reclash.
-  windows: Windows installer AppId and ReClash.exe retain installed-product compatibility.
+  windows: Windows uses ReClash.exe and the Alpha AppId E642C6C1-B712-41C2-969E-3C2049CA883F, distinct from FlClash.
 watch: ['android/**', 'linux/**', 'windows/**', 'macos/**', pubspec.yaml, distribute_options.yaml, 'plugins/**/README.md', 'plugins/**/LICENSE', services/helper/src/service/linux.rs, test/common/protocol_test.dart]
 checks:
   identity: [android, windows]

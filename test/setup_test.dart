@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import '../setup.dart' as setup;
@@ -134,5 +136,70 @@ hooks:
       );
       expect(env['PATH'], contains('pub-cache'));
     });
+
+    test(
+      'Windows packaging hook quotes spaces and apostrophes for sh',
+      () async {
+        if (Platform.isWindows) return;
+        final root = Directory.systemTemp.createTempSync("windows package's ");
+        addTearDown(() => root.deleteSync(recursive: true));
+        final hook = setup.createWindowsPackageHook(root.path, 'arm64');
+        final result = await Process.run('sh', [
+          '-c',
+          'set -- $hook; printf "%s\\n" "\$@"',
+        ]);
+        expect(result.exitCode, 0, reason: result.stderr.toString());
+        expect((result.stdout as String).trim().split('\n'), [
+          Platform.resolvedExecutable,
+          '${root.path}/tool/windows_package.dart',
+          '--arch',
+          'arm64',
+          '--from-environment',
+        ]);
+      },
+    );
+
+    test('Windows PATH keeps semicolon-separated directories', () {
+      final env = setup.createPackageProcessEnvironment(
+        rootDir: '/repo',
+        platform: 'windows',
+      );
+      expect(env['PATH'], contains(';${Platform.environment['PATH'] ?? ''}'));
+      expect(env['PATH']!.split(';').first, endsWith('bin'));
+    });
+
+    test(
+      'Windows artifacts reject missing installers and invalid final ZIPs',
+      () {
+        final root = Directory.systemTemp.createTempSync('windows-artifacts-');
+        addTearDown(() => root.deleteSync(recursive: true));
+        final dist = Directory('${root.path}/dist')..createSync();
+        expect(
+          () => setup.validateWindowsArtifacts(
+            root.path,
+            'amd64',
+            'exe',
+            '0.9.0',
+          ),
+          throwsStateError,
+        );
+        File(
+          '${dist.path}/ReClash-0.9.0-windows-amd64-setup.exe',
+        ).writeAsBytesSync([1]);
+        setup.validateWindowsArtifacts(root.path, 'amd64', 'exe', '0.9.0');
+        File(
+          '${dist.path}/ReClash-0.9.0-windows-amd64.zip',
+        ).writeAsBytesSync([1]);
+        expect(
+          () => setup.validateWindowsArtifacts(
+            root.path,
+            'amd64',
+            'zip',
+            '0.9.0',
+          ),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
   });
 }

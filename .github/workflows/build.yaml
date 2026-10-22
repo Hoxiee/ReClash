@@ -310,14 +310,32 @@ jobs:
           cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
 
   windows-helper-test:
-    name: Windows native backend test
+    name: Windows native backend test (${{ matrix.arch }})
     if: *checks
-    runs-on: windows-2022
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: amd64
+            msvc: x64
+          - os: windows-11-arm
+            arch: arm64
+            msvc: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc }}
 
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
@@ -347,7 +365,8 @@ jobs:
         working-directory: core
         env:
           CGO_ENABLED: 0
-        run: go test ./cmd/core
+          RECLASH_REQUIRE_WINDOWS_BOOTSTRAP: '1'
+        run: go test -v -count=1 -timeout=5m ./cmd/core
 
   build:
     # Releases publish where the release links point: the public repository.
@@ -477,11 +496,76 @@ jobs:
           name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
           path: ./dist
           overwrite: true
+          retention-days: 1
+
+  validate-windows-packages:
+    name: Validate Windows packages (${{ matrix.arch }})
+    needs: [ build ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: amd64
+          - os: windows-11-arm
+            arch: arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          architecture: x64
+          cache: ${{ env.BRANCH_CACHE }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-windows-${{ matrix.arch }}
+          path: ./dist/
+
+      - name: Skip native build hooks for package inspection
+        shell: pwsh
+        run: |
+          (Get-Content pubspec.yaml -Raw).Replace('build_assets: true', 'build_assets: false') |
+            Set-Content pubspec.yaml
+
+      - name: Validate, install, upgrade and launch the package
+        shell: pwsh
+        env:
+          REQUIRE_SIGNED: ${{ vars.WINDOWS_SIGNING_REQUIRED }}
+        run: |
+          if ($env:REQUIRE_SIGNED -notin @($null, '', 'false', 'true')) {
+            throw 'WINDOWS_SIGNING_REQUIRED must be empty, false or true'
+          }
+          $zips = @(Get-ChildItem dist -Filter '*-windows-${{ matrix.arch }}.zip')
+          $setups = @(Get-ChildItem dist -Filter '*-windows-${{ matrix.arch }}-setup.exe')
+          if ($zips.Count -ne 1 -or $setups.Count -ne 1) {
+            throw 'Expected exactly one ZIP and one installer for this architecture'
+          }
+          & ./tool/check_windows_package.ps1 -ZipPath $zips[0].FullName `
+            -SetupPath $setups[0].FullName -Arch '${{ matrix.arch }}' `
+            -RequireSigned:($env:REQUIRE_SIGNED -eq 'true') -AllowInstall
+
+      - name: Upload Windows package diagnostics
+        if: always() && env.WINDOWS_PACKAGE_LOGS != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package-logs-${{ matrix.arch }}
+          path: ${{ env.WINDOWS_PACKAGE_LOGS }}
+          if-no-files-found: warn
+          retention-days: 7
 
   upload:
     permissions:
       contents: write
-    needs: [ build, dart, plugins, go, android, rust, windows-helper-test ]
+    needs: [ build, validate-windows-packages, dart, plugins, go, android, rust, windows-helper-test ]
     runs-on: ubuntu-latest
     services:
       telegram-bot-api:
