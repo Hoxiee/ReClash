@@ -61,6 +61,36 @@ void main() {
       }
       expect(installer, contains('Name: "russian"'));
       expect(installer, contains('Name: "korean"'));
+      final customMessages = installer
+          .split('[CustomMessages]')
+          .last
+          .split('[Tasks]')
+          .first;
+      final messages = <String, Map<String, String>>{};
+      for (final match in RegExp(
+        r'^(\w+)\.(\w+)=(.+)$',
+        multiLine: true,
+      ).allMatches(customMessages)) {
+        (messages[match[1]!] ??= {})[match[2]!] = match[3]!;
+      }
+      expect(
+        messages.keys,
+        unorderedEquals(['english', 'russian', 'chineseSimplified', 'korean']),
+      );
+      for (final entries in messages.values) {
+        expect(
+          entries.keys,
+          unorderedEquals(['CloseInstalledApp', 'LegacyServiceRemovalFailed']),
+        );
+        for (final value in entries.values) {
+          expect(value, contains('%1'));
+        }
+      }
+      for (final language in messages.keys.where((key) => key != 'english')) {
+        for (final key in messages['english']!.keys) {
+          expect(messages[language]![key], isNot(messages['english']![key]));
+        }
+      }
       expect(installer, contains('MinVersion=10.0'));
       expect(
         installer,
@@ -130,7 +160,23 @@ void main() {
       expect(runner, contains('ReClash.InstalledProductMaintenance'));
       expect(runner, contains('"should-terminate"'));
       expect(runner, isNot(contains('TerminateProcess')));
-      expect(installer, contains('Close ReClash in this installation'));
+      expect(installer, contains("CustomMessage('CloseInstalledApp')"));
+      expect(
+        installer,
+        contains("CustomMessage('LegacyServiceRemovalFailed')"),
+      );
+      expect(installer, isNot(contains("Result := 'Close ReClash")));
+      final uninstall = installer
+          .split('function InitializeUninstall(): Boolean;')
+          .last
+          .split('procedure CurUninstallStepChanged')
+          .first;
+      expect(uninstall, contains('PrepareInstalledProduct()'));
+      expect(uninstall, contains('Log(ErrorMessage)'));
+      expect(
+        uninstall,
+        contains('SuppressibleMsgBox(ErrorMessage, mbError, MB_OK, IDOK)'),
+      );
     },
   );
 
