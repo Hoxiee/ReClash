@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/common/common.dart';
@@ -150,7 +152,7 @@ class _HomeShell extends ConsumerWidget {
                   Positioned.fill(
                     child: FocusTraversalGroup(
                       policy: PageTraversalPolicy(),
-                      child: BottomInsetScope(
+                      child: _AnimatedBottomInset(
                         inset: showNavigation && floating
                             ? NavigationDock.insetOf(context)
                             : 0,
@@ -212,6 +214,46 @@ class _HomeShell extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Lets the dock's room go only once a page opened over it has settled, so
+/// nothing shifts under the opening transition; room is added at once.
+class _AnimatedBottomInset extends StatefulWidget {
+  const _AnimatedBottomInset({required this.inset, required this.child});
+
+  final double inset;
+  final Widget child;
+
+  @override
+  State<_AnimatedBottomInset> createState() => _AnimatedBottomInsetState();
+}
+
+class _AnimatedBottomInsetState extends State<_AnimatedBottomInset> {
+  late double _inset = widget.inset;
+  Timer? _release;
+
+  @override
+  void didUpdateWidget(_AnimatedBottomInset oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _release?.cancel();
+    if (widget.inset >= _inset) {
+      _inset = widget.inset;
+      return;
+    }
+    _release = Timer(SharedXPageTransition.duration, () {
+      if (mounted) setState(() => _inset = widget.inset);
+    });
+  }
+
+  @override
+  void dispose() {
+    _release?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      BottomInsetScope(inset: _inset, child: widget.child);
 }
 
 class _BodyPadding extends StatelessWidget {

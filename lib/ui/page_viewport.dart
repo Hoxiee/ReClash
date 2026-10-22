@@ -75,6 +75,37 @@ class _PageViewportScope extends InheritedWidget {
       route != oldWidget.route;
 }
 
+/// A page growing over the one beneath: the beneath page's bar shows only
+/// above [top], the growing page's top edge, so the page covers it.
+class PageBarCover extends InheritedWidget {
+  const PageBarCover({
+    super.key,
+    required this.listenable,
+    required this.top,
+    required super.child,
+  });
+
+  final Listenable listenable;
+  final double? Function() top;
+
+  @override
+  bool updateShouldNotify(PageBarCover oldWidget) =>
+      listenable != oldWidget.listenable;
+}
+
+class _CoverClipper extends CustomClipper<Rect> {
+  const _CoverClipper(this.top);
+
+  final double top;
+
+  @override
+  Rect getClip(Size size) =>
+      Rect.fromLTRB(0, 0, size.width, top.clamp(0, size.height));
+
+  @override
+  bool shouldReclip(_CoverClipper oldClipper) => top != oldClipper.top;
+}
+
 class ViewportAppBar extends StatefulWidget implements PreferredSizeWidget {
   const ViewportAppBar({super.key, required this.appBar});
 
@@ -96,6 +127,7 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
         .dependOnInheritedWidgetOfExactType<_PageViewportScope>()!;
     final route = ModalRoute.of(context);
     final active = PageActivityScope.isActiveOf(context);
+    final cover = context.dependOnInheritedWidgetOfExactType<PageBarCover>();
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: (context) => LayoutBuilder(
@@ -120,6 +152,7 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
                   animation: Listenable.merge([
                     route?.animation,
                     route?.secondaryAnimation,
+                    cover?.listenable,
                   ]),
                   builder: (_, child) {
                     final secondary = route?.secondaryAnimation;
@@ -128,13 +161,16 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
                         (secondary?.value ?? 0) > 0;
                     final leaving =
                         route?.animation?.status == AnimationStatus.reverse;
+                    final top = cover?.top();
                     return Offstage(
                       offstage:
                           !active ||
                           covered ||
                           leaving ||
                           route?.offstage == true,
-                      child: child,
+                      child: top == null
+                          ? child
+                          : ClipRect(clipper: _CoverClipper(top), child: child),
                     );
                   },
                   child: widget.appBar,

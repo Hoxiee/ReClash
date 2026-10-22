@@ -375,20 +375,23 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                                 : null) ??
                             kAlwaysCompleteAnimation,
                         builder: (context, _) {
-                          // The bar floats above the page growing over it, so
-                          // it leaves once the container reaches its edge.
+                          // The bar stays while the page grows over it, which
+                          // covers the bar edge first.
                           final top = moving is ContainerRoute
                               ? (moving as ContainerRoute).containerTop
                               : null;
-                          final barHeight =
-                              pageToolbarHeight +
-                              MediaQuery.paddingOf(context).top;
+                          // A drag back leaves the page's own bar in place
+                          // until the pop starts, so the catalog's waits too.
+                          final closing =
+                              moving is TransitionRoute &&
+                              moving.animation?.status ==
+                                  AnimationStatus.reverse;
                           final barShown =
                               split ||
                               (top != null && motion.overCatalog
-                                  ? top > barHeight
+                                  ? true
                                   : path.isEmpty ||
-                                        motion.closing ||
+                                        closing ||
                                         motion.settled ==
                                             _ToolsRouteObserver.placeholder);
                           return Offstage(
@@ -408,7 +411,21 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                                       catalogWidth,
                                       constraints.maxHeight,
                                     ),
-                                    child: catalog!,
+                                    child: PageBarCover(
+                                      listenable:
+                                          (moving is TransitionRoute
+                                              ? moving.animation
+                                              : null) ??
+                                          kAlwaysCompleteAnimation,
+                                      top: () {
+                                        final moving = _observer.moving;
+                                        return moving is ContainerRoute
+                                            ? (moving as ContainerRoute)
+                                                  .containerTop
+                                            : null;
+                                      },
+                                      child: catalog!,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -582,16 +599,13 @@ class _ToolsRouteObserver extends NavigatorObserver {
   static const placeholder = ValueKey('tools.placeholder');
 
   final _routes = <Route<dynamic>>[];
-  final state =
-      ValueNotifier<({LocalKey? settled, bool overCatalog, bool closing})>((
-        settled: null,
-        overCatalog: false,
-        closing: false,
-      ));
+  final state = ValueNotifier<({LocalKey? settled, bool overCatalog})>((
+    settled: null,
+    overCatalog: false,
+  ));
   Route<dynamic>? _moving;
   Route<dynamic>? _below;
   var _gesture = false;
-  var _closing = false;
   var _flushScheduled = false;
 
   Route<dynamic>? get top => _routes.lastOrNull;
@@ -626,17 +640,11 @@ class _ToolsRouteObserver extends NavigatorObserver {
           ? (page!.settings as Page).key
           : null,
       overCatalog: moving != null && _isPlaceholder(_below),
-      closing: moving != null && _closing,
     );
   }
 
-  void _move(
-    Route<dynamic> route,
-    Route<dynamic>? below, {
-    required bool closing,
-  }) {
+  void _move(Route<dynamic> route, Route<dynamic>? below) {
     if (route.settings is! Page) return;
-    _closing = closing;
     _moving = route;
     _below = below;
     _publish();
@@ -661,14 +669,14 @@ class _ToolsRouteObserver extends NavigatorObserver {
     if (previousRoute == null || added) {
       _publish();
     } else {
-      _move(route, previousRoute, closing: false);
+      _move(route, previousRoute);
     }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _routes.remove(route);
-    _move(route, previousRoute, closing: true);
+    _move(route, previousRoute);
   }
 
   @override
@@ -687,7 +695,7 @@ class _ToolsRouteObserver extends NavigatorObserver {
   @override
   void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previous) {
     _gesture = route.settings is Page;
-    if (_gesture) _move(route, previous, closing: true);
+    if (_gesture) _move(route, previous);
   }
 
   @override
