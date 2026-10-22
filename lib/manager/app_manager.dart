@@ -66,6 +66,19 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(setupActionProvider.notifier).syncSuspend();
       }
     });
+    ref.listenManual(vpnSettingProvider, (prev, next) {
+      if (prev?.onDemandFullStop != next.onDemandFullStop) {
+        ref.read(setupActionProvider.notifier).syncSuspend();
+      }
+    });
+    ref.listenManual(onDemandNetworkAnchorProvider, (prev, next) {
+      final override = ref.read(onDemandOverrideProvider);
+      if (next.isNotEmpty &&
+          override.paused != null &&
+          !listEquals(next, override.anchor)) {
+        ref.read(onDemandOverrideProvider.notifier).clear();
+      }
+    });
     final systemDns = systemDnsCoordinator;
     if (systemDns != null) {
       ref.listenManual(shouldPatchSystemDnsProvider, (prev, next) {

@@ -457,6 +457,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Қосу"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("Прокси қосу"),
     "addFilters": MessageLookupByLibrary.simpleMessage("Сүзгілерді қосу"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Желі қосу"),
     "addNodes": MessageLookupByLibrary.simpleMessage("Түйіндерді қосу"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Ауыстыру жазбасын қосу",
@@ -672,6 +673,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "close": MessageLookupByLibrary.simpleMessage("Жабу"),
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Қосылымдарды жабу",
+    ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN кідіртілгенде ашық қосылымдардың бәрі үзіледі",
     ),
     "color": MessageLookupByLibrary.simpleMessage("Түс"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Түс стилі"),
@@ -1047,6 +1051,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Глобалдық ережелерді өңдеу",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Желіні өңдеу"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Проксиді өңдеу"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Прокси тобын өңдеу",
@@ -1061,6 +1066,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("Ағылшынша"),
     "enabled": MessageLookupByLibrary.simpleMessage("Қосулы"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("Қолмен енгізу"),
     "entries": MessageLookupByLibrary.simpleMessage(" жазба"),
     "error": MessageLookupByLibrary.simpleMessage("Қате"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Қате мәліметтері"),
@@ -1393,6 +1399,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "80 немесе 8000-9000 сияқты сандар мен ауқымдарды / арқылы ажыратып енгізіңіз",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID UTF-8 бойынша 32 байттан аспауы керек",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP мекенжай"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1595,6 +1604,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "Серверге қосылу мүмкін болмады. Желі байланысыңызды немесе прокси баптауларын тексеріңіз",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Үй Wi-Fi) немесе желі ауқымы (192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Сервер мекенжайы анықталмады. URL дұрыс және DNS жұмыс істеп тұрғанын тексеріңіз",
     ),
@@ -1639,6 +1651,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("Жұмыс істемей тұр"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Ағымдағы прокси тобын таңдау мүмкін емес",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Ағымдағы желі сенімді емес",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Хабарлама"),
     "notificationActive": MessageLookupByLibrary.simpleMessage(
@@ -1756,8 +1771,29 @@ class MessageLookup extends MessageLookupByLibrary {
       "Бүркемелеу құпиясөзі",
     ),
     "onDemand": MessageLookupByLibrary.simpleMessage("Қажет болғанда"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "Бұл ішкі желі көптеген желілерді сенімді деп санайды",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Қосылымдарды жабу",
+    ),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Қажет болғанда елемеу Wi-Fi-да проксиді кідіртеді.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("Толық тоқтату"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Кідірту кезінде TUN өшіріліп, жергілікті прокси порттары жабылады. Автоматты жалғастыру үшін желіні бақылау жалғасады.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("Кідірту"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("Жалғастыру"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi желілерін оқу мүмкін болмады. Қайталаңыз немесе желіні қолмен енгізіңіз.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "SSID мен ішкі желіні бірге талап ету",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "Екі түрлі ереже де болса, SSID пен ішкі желі сәйкес келгенде ғана кідірту",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Тек прокси трафигін есептеу",
@@ -1789,6 +1825,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Қою"),
     "peers": MessageLookupByLibrary.simpleMessage("Пирлер"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Галереядан таңдау"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Желіні таңдау"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Маңайдағы Wi-Fi желілері",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi желілері табылмады",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "Маңайдағы Wi-Fi желілерін көрсету үшін орналасу рұқсаты қажет",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Жаңарту"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Маңайдағы Wi-Fi желілері ізделуде…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Терезені бекіту"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "WebDAV-ты байланыстырыңыз",
@@ -3286,6 +3336,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Аударма түзетуін ұсыну",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Тасымал"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("Сенімді желілер"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Осы желілердің кез келгеніне қосылғанда VPN кідіртіледі",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Ағымдағы желі сенімді — VPN кідірілген",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN рұқсаттау сәтсіз болды, сондықтан ол өшірілді.",

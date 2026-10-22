@@ -46,6 +46,7 @@ enum CoreMethod {
   stopLog,
   startListener,
   stopListener,
+  setOnDemandPaused,
   getMemoryStats,
   crash,
   setupConfig,

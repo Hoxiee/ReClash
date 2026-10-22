@@ -34,6 +34,10 @@ class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
 
   @override
   Future<bool> stopListener() async => true;
+
+  @override
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop}) async =>
+      true;
 }
 
 void main() {
@@ -805,7 +809,7 @@ void main() {
       });
 
       test(
-        'keeps suspended startup local until the listener resumes',
+        'starts listeners while suspended and still honors a later stop',
         () async {
           final container = ProviderContainer(
             overrides: [
@@ -824,12 +828,12 @@ void main() {
 
           await action.setRunning(true);
 
-          expect(action.transitions, isEmpty);
+          expect(action.transitions, [true]);
           expect(container.read(isStartProvider), isTrue);
           expect(action.applyProfileDebounceCount, 1);
 
           await action.setRunning(false);
-          expect(action.transitions, [false]);
+          expect(action.transitions, [true, false]);
         },
       );
     });

@@ -11210,6 +11210,241 @@ class AppLocalizations {
     return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
   }
 
+  /// `Pick a network`
+  String get pickNetwork {
+    return Intl.message(
+      'Pick a network',
+      name: 'pickNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wi-Fi networks visible around you`
+  String get pickNetworkDesc {
+    return Intl.message(
+      'Wi-Fi networks visible around you',
+      name: 'pickNetworkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for nearby Wi-Fi networks…`
+  String get pickNetworkScanning {
+    return Intl.message(
+      'Looking for nearby Wi-Fi networks…',
+      name: 'pickNetworkScanning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Wi-Fi networks found`
+  String get pickNetworkEmpty {
+    return Intl.message(
+      'No Wi-Fi networks found',
+      name: 'pickNetworkEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission is required to list nearby Wi-Fi networks`
+  String get pickNetworkGrantLocation {
+    return Intl.message(
+      'Location permission is required to list nearby Wi-Fi networks',
+      name: 'pickNetworkGrantLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh`
+  String get pickNetworkRefresh {
+    return Intl.message(
+      'Refresh',
+      name: 'pickNetworkRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter manually`
+  String get enterManually {
+    return Intl.message(
+      'Enter manually',
+      name: 'enterManually',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `SSID (Home Wi-Fi) or subnet (192.168.1.0/24)`
+  String get networkEntryHint {
+    return Intl.message(
+      'SSID (Home Wi-Fi) or subnet (192.168.1.0/24)',
+      name: 'networkEntryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close connections`
+  String get onDemandCloseConnections {
+    return Intl.message(
+      'Close connections',
+      name: 'onDemandCloseConnections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Drop every open connection when the VPN pauses`
+  String get closeConnectionsDesc {
+    return Intl.message(
+      'Drop every open connection when the VPN pauses',
+      name: 'closeConnectionsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted networks`
+  String get trustedNetworks {
+    return Intl.message(
+      'Trusted networks',
+      name: 'trustedNetworks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The VPN pauses while connected to any of these networks`
+  String get trustedNetworksDesc {
+    return Intl.message(
+      'The VPN pauses while connected to any of these networks',
+      name: 'trustedNetworksDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current network is trusted`
+  String get trustedNow {
+    return Intl.message(
+      'Current network is trusted',
+      name: 'trustedNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current network is not trusted`
+  String get notTrustedNow {
+    return Intl.message(
+      'Current network is not trusted',
+      name: 'notTrustedNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Require SSID and subnet together`
+  String get onDemandStrict {
+    return Intl.message(
+      'Require SSID and subnet together',
+      name: 'onDemandStrict',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When both kinds of rules exist, pause only if an SSID and a subnet both match`
+  String get onDemandStrictDesc {
+    return Intl.message(
+      'When both kinds of rules exist, pause only if an SSID and a subnet both match',
+      name: 'onDemandStrictDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add network`
+  String get addNetwork {
+    return Intl.message('Add network', name: 'addNetwork', desc: '', args: []);
+  }
+
+  /// `Edit network`
+  String get editNetwork {
+    return Intl.message(
+      'Edit network',
+      name: 'editNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read Wi-Fi networks. Retry or enter a network manually.`
+  String get onDemandScanFailed {
+    return Intl.message(
+      'Could not read Wi-Fi networks. Retry or enter a network manually.',
+      name: 'onDemandScanFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An SSID cannot exceed 32 UTF-8 bytes`
+  String get invalidSsid {
+    return Intl.message(
+      'An SSID cannot exceed 32 UTF-8 bytes',
+      name: 'invalidSsid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This subnet trusts a wide range of networks`
+  String get onDemandBroadNetwork {
+    return Intl.message(
+      'This subnet trusts a wide range of networks',
+      name: 'onDemandBroadNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resume`
+  String get onDemandResume {
+    return Intl.message('Resume', name: 'onDemandResume', desc: '', args: []);
+  }
+
+  /// `Pause`
+  String get onDemandPause {
+    return Intl.message('Pause', name: 'onDemandPause', desc: '', args: []);
+  }
+
+  /// `Full stop`
+  String get onDemandFullStop {
+    return Intl.message(
+      'Full stop',
+      name: 'onDemandFullStop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove TUN and close local proxy ports while paused. The app keeps watching the network to resume automatically.`
+  String get onDemandFullStopDesc {
+    return Intl.message(
+      'Remove TUN and close local proxy ports while paused. The app keeps watching the network to resume automatically.',
+      name: 'onDemandFullStopDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Request as`
   String get subscriptionClientRequestAs {
     return Intl.message(

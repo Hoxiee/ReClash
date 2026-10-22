@@ -33,6 +33,7 @@ export 'log_payload.dart';
 export 'lock.dart';
 export 'mixin.dart';
 export 'network.dart';
+export 'on_demand.dart';
 export 'network_error.dart';
 export 'num.dart';
 export 'package.dart';

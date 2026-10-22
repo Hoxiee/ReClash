@@ -133,6 +133,8 @@ mixin CoreInterface {
 
   Future<bool> stopListener();
 
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop});
+
   Future<List<ExternalProvider>> getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(String externalProviderName);
@@ -783,6 +785,14 @@ abstract class CoreHandlerInterface with CoreInterface {
   Future<bool> stopListener() async {
     return await _invokeMethod<bool>(method: CoreMethod.stopListener) ?? false;
   }
+
+  @override
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop}) async =>
+      await _invokeMethod<bool>(
+        method: CoreMethod.setOnDemandPaused,
+        arguments: {'paused': paused, 'fullStop': fullStop},
+      ) ??
+      false;
 
   @override
   Future<Delay?> asyncTestDelay(String url, String proxyName) async {

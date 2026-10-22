@@ -158,6 +158,15 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
       const [],
   mtu: (json['mtu'] as num?)?.toInt() ?? 0,
   congestionController: json['congestionController'] as String? ?? '',
+  onDemandEnabled: json['onDemandEnabled'] as bool? ?? true,
+  onDemandFullStop: json['onDemandFullStop'] as bool? ?? false,
+  onDemandCloseConnections: json['onDemandCloseConnections'] as bool? ?? false,
+  onDemandStrict: json['onDemandStrict'] as bool? ?? false,
+  onDemandNetworks:
+      (json['onDemandNetworks'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
@@ -174,6 +183,11 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'routeAddress': instance.routeAddress,
       'mtu': instance.mtu,
       'congestionController': instance.congestionController,
+      'onDemandEnabled': instance.onDemandEnabled,
+      'onDemandFullStop': instance.onDemandFullStop,
+      'onDemandCloseConnections': instance.onDemandCloseConnections,
+      'onDemandStrict': instance.onDemandStrict,
+      'onDemandNetworks': instance.onDemandNetworks,
     };
 
 _InitParams _$InitParamsFromJson(Map<String, dynamic> json) => _InitParams(

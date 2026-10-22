@@ -357,9 +357,7 @@ func deliverEvent(data []byte) {
 func StopTun() {
 	defer recoverExport("stopTun")
 	handleStopTun()
-	if isRunning.Load() {
-		handleStopListener()
-	}
+	stopListenersAfterTunClose()
 }
 
 func StartListener() {
@@ -410,4 +408,13 @@ func GetNotificationServer(name string) string {
 		return ""
 	}
 	return activeNotificationServer(name, proxies)
+}
+
+func SetOnDemandPaused(paused, fullStop bool) (ok bool) {
+	defer func() {
+		if recover() != nil {
+			ok = false
+		}
+	}()
+	return handleSetOnDemandPaused(&OnDemandPauseParams{Paused: paused, FullStop: fullStop})
 }

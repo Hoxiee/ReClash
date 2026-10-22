@@ -21,6 +21,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'app.dart';
 import 'config.dart';
+import 'on_demand.dart';
 import 'core.dart';
 import 'database.dart';
 import 'routing.dart';

@@ -11,6 +11,9 @@ interface ManagedService {
     fun start()
 
     fun stop()
+
+    fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean =
+        Core.setOnDemandPaused(paused, fullStop)
 }
 
 internal fun Service.notifyVpnStartRequested() {

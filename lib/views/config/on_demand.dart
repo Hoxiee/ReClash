@@ -2,6 +2,7 @@ import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'dart:async';
+import 'on_demand_network_picker.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -97,27 +98,38 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
   }
 
   Future<void> _handleAddOrUpdate([String? ssid]) async {
+    if (ssid == null) {
+      if ((_isAndroid || _isMacOS) &&
+          ref.read(locationPermissionsProvider) != WifiSsidPermission.granted) {
+        await _handleRequestLocationPermission();
+        if (!mounted) return;
+      }
+      final selected = await showOnDemandNetworkPicker(
+        context,
+        selected: ref.read(excludeSSIDsProvider).toSet(),
+      );
+      if (selected != null && mounted) _addNetwork(selected);
+      return;
+    }
+    await _handleManualEntry(ssid);
+  }
+
+  void _addNetwork(String network) {
+    ref
+        .read(excludeSSIDsProvider.notifier)
+        .update(
+          (state) => state.contains(network) ? state : [...state, network],
+        );
+  }
+
+  Future<void> _handleManualEntry([String? ssid]) async {
     final ssids = ref.read(excludeSSIDsProvider);
-    final appLocalizations = context.appLocalizations;
-    final newSSID = await dialogs.showCommonDialog<String>(
-      child: InputDialog(
-        title: ssid == null
-            ? appLocalizations.addSsid
-            : appLocalizations.editSsid,
-        value: ssid ?? '',
-        maxLength: 32,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return appLocalizations.emptyTip('SSID').trim();
-          }
-          if (ssids.contains(value) && ssid != value) {
-            return appLocalizations.existsTip('SSID').trim();
-          }
-          return null;
-        },
-      ),
+    final newSSID = await showOnDemandNetworkEntry(
+      context,
+      selected: ssids.toSet(),
+      value: ssid,
     );
-    if (newSSID == null || ssid == newSSID) {
+    if (!mounted || newSSID == null || ssid == newSSID) {
       return;
     }
     ref.read(excludeSSIDsProvider.notifier).update((state) {
@@ -152,8 +164,23 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
           position: position,
           child: SelectedDecorationListItem(
             isEditing: isEditing,
-            title: TooltipText(
-              text: Text(ssid, maxLines: 2, overflow: TextOverflow.ellipsis),
+            title: Row(
+              children: [
+                Expanded(
+                  child: TooltipText(
+                    text: Text(
+                      ssid,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                if (onDemandIsBroadRule(ssid))
+                  Tooltip(
+                    message: context.appLocalizations.onDemandBroadNetwork,
+                    child: const GlyphIcon(AppGlyphs.warning),
+                  ),
+              ],
             ),
             isSelected: isSelected,
             onSelected: () {
@@ -367,17 +394,102 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     );
   }
 
+  Widget _buildOptions() => generateSection(
+    items: [
+      ConfigToggleItem(
+        selector: vpnSettingProvider.select((s) => s.onDemandEnabled),
+        title: (l) => l.onDemand,
+        setting: onDemandToolSettings[3],
+        onChanged: (ref, value) => ref
+            .read(vpnSettingProvider.notifier)
+            .update((s) => s.copyWith(onDemandEnabled: value)),
+      ),
+      ConfigToggleItem(
+        selector: vpnSettingProvider.select((s) => s.onDemandFullStop),
+        title: (l) => l.onDemandFullStop,
+        setting: onDemandToolSettings[4],
+        onChanged: (ref, value) => ref
+            .read(vpnSettingProvider.notifier)
+            .update((s) => s.copyWith(onDemandFullStop: value)),
+      ),
+      ConfigToggleItem(
+        selector: vpnSettingProvider.select((s) => s.onDemandCloseConnections),
+        title: (l) => l.onDemandCloseConnections,
+        setting: onDemandToolSettings[5],
+        onChanged: (ref, value) => ref
+            .read(vpnSettingProvider.notifier)
+            .update((s) => s.copyWith(onDemandCloseConnections: value)),
+      ),
+      ConfigToggleItem(
+        selector: vpnSettingProvider.select((s) => s.onDemandStrict),
+        title: (l) => l.onDemandStrict,
+        setting: onDemandToolSettings[6],
+        onChanged: (ref, value) => ref
+            .read(vpnSettingProvider.notifier)
+            .update((s) => s.copyWith(onDemandStrict: value)),
+      ),
+    ],
+    footer: [
+      context.appLocalizations.onDemandFullStopDesc,
+      context.appLocalizations.closeConnectionsDesc,
+      context.appLocalizations.onDemandStrictDesc,
+    ].join('\n'),
+  );
+
   @override
   Widget build(BuildContext context) {
     final excludeSSIDs = ref.watch(excludeSSIDsProvider);
     final selectedItems = ref.watch(itemsProvider(key));
+    final matched = ref.watch(onDemandMatchedNetworksProvider);
     return CommonScaffold(
       body: CustomScrollView(
         slivers: [
           SliverPadding(
+            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 0),
+            sliver: SliverToBoxAdapter(child: _buildOptions()),
+          ),
+          if (ref.watch(vpnSettingProvider).onDemandEnabled &&
+              excludeSSIDs.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: generateSection(
+                  items: [
+                    DecorationListItem(
+                      leading: GlyphIcon(
+                        matched.isEmpty
+                            ? AppGlyphs.wifi
+                            : AppGlyphs.playPause(1),
+                      ),
+                      title: Text(
+                        matched.isEmpty
+                            ? context.appLocalizations.notTrustedNow
+                            : context.appLocalizations.trustedNow,
+                      ),
+                      subtitle: matched.isEmpty
+                          ? null
+                          : Text(matched.join(', ')),
+                      trailing: ref.watch(isStartProvider)
+                          ? TextButton(
+                              onPressed: () => ref
+                                  .read(onDemandOverrideProvider.notifier)
+                                  .setPaused(!ref.read(suspendProvider)),
+                              child: Text(
+                                ref.watch(suspendProvider)
+                                    ? context.appLocalizations.onDemandResume
+                                    : context.appLocalizations.onDemandPause,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          SliverPadding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
-            ).copyWith(top: context.appBarInset),
+            ).copyWith(top: 12),
             sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
           ),
           SliverPadding(
@@ -396,7 +508,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
             ).copyWith(bottom: 16),
             sliver: SliverToBoxAdapter(
               child: ListFooter(
-                text: context.appLocalizations.excludeSsidsDesc,
+                text: context.appLocalizations.trustedNetworksDesc,
               ),
             ),
           ),
@@ -423,7 +535,27 @@ final onDemandToolSettings = <SettingSpec>[
   SettingSpec(
     id: 'onDemand.excludeSSIDs',
     page: ToolPage.onDemand,
-    title: (l) => l.excludeSsids,
+    title: (l) => l.trustedNetworks,
     keywords: ['wifi', 'ssid'],
+  ),
+  SettingSpec(
+    id: 'onDemand.enabled',
+    page: ToolPage.onDemand,
+    title: (l) => l.onDemand,
+  ),
+  SettingSpec(
+    id: 'onDemand.fullStop',
+    page: ToolPage.onDemand,
+    title: (l) => l.onDemandFullStop,
+  ),
+  SettingSpec(
+    id: 'onDemand.closeConnections',
+    page: ToolPage.onDemand,
+    title: (l) => l.onDemandCloseConnections,
+  ),
+  SettingSpec(
+    id: 'onDemand.strict',
+    page: ToolPage.onDemand,
+    title: (l) => l.onDemandStrict,
   ),
 ];

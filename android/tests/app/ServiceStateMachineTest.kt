@@ -5,6 +5,7 @@ import com.reclash.models.SetupParams
 import com.reclash.models.SharedState
 import com.reclash.service.models.AccessControlProps
 import com.reclash.service.models.NotificationParams
+import com.reclash.service.PhysicalNetworks
 import com.reclash.service.models.VpnOptions
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
@@ -160,14 +161,104 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
         return true
     }
 
+    override var onDemandPaused = false
+    val pauseCalls = mutableListOf<Pair<Boolean, Boolean>>()
+    var pauseGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
+    override suspend fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean {
+        pauseCalls += paused to fullStop
+        pauseGate?.await()
+        onDemandPaused = paused
+        return true
+    }
+
     override suspend fun stopService() {
         stopCalls++
         runtime = null
+        onDemandPaused = false
     }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServiceStateMachineTest {
+
+    @Test
+    fun `on demand pauses while keeping the run and resumes on another network`() = runTest {
+        val host = FakeHost(this)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState().copy(vpnOptions = vpnOptions().copy(
+            onDemandNetworks = listOf("Home", "192.168.1.0/24"), onDemandStrict = true,
+        )))
+        assertTrue(machine.requestStart().await())
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.2.3"), listOf("Home")))
+        assertFalse(host.onDemandPaused)
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.1.3"), listOf("Home")))
+        assertTrue(host.onDemandPaused)
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(0, host.stopCalls)
+        machine.reconcileOnDemand(PhysicalNetworks())
+        assertTrue(host.onDemandPaused)
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.2.3"), ssidUnknown = true))
+        assertTrue(host.onDemandPaused)
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("10.0.0.3"), listOf("Office")))
+        assertFalse(host.onDemandPaused)
+        assertEquals(listOf(true to false, false to false), host.pauseCalls)
+    }
+
+    @Test
+    fun `manual resume survives address renewal but clears on network change`() = runTest {
+        val host = FakeHost(this)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState().copy(vpnOptions = vpnOptions().copy(
+            onDemandNetworks = listOf("Home", "Office"),
+        )))
+        machine.requestStart().await()
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.1.3"), listOf("Home")))
+        machine.setManualOnDemandPause(false)
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.1.4"), listOf("Home")))
+        assertFalse(host.onDemandPaused)
+        machine.reconcileOnDemand(PhysicalNetworks(listOf("192.168.1.4"), listOf("Office")))
+        assertTrue(host.onDemandPaused)
+    }
+
+    @Test
+    fun `live full stop and disable reconcile without restarting service`() = runTest {
+        val host = FakeHost(this)
+        val machine = ServiceStateMachine(host)
+        val state = configuredState().copy(vpnOptions = vpnOptions().copy(onDemandNetworks = listOf("Home")))
+        machine.syncSharedState(state)
+        machine.requestStart().await()
+        val networks = PhysicalNetworks(ssids = listOf("Home"))
+        machine.reconcileOnDemand(networks)
+        machine.syncSharedState(state.copy(vpnOptions = state.vpnOptions!!.copy(onDemandFullStop = true)))
+        machine.reconcileOnDemand(networks)
+        assertEquals(true to true, host.pauseCalls.last())
+        machine.syncSharedState(state.copy(vpnOptions = state.vpnOptions!!.copy(onDemandEnabled = false)))
+        machine.reconcileOnDemand(networks)
+        assertFalse(host.onDemandPaused)
+        assertEquals(1, host.startCalls)
+        assertEquals(0, host.stopCalls)
+    }
+
+    @Test
+    fun `stop supersedes a pause in flight and clears manual intent for next run`() = runTest {
+        val host = FakeHost(this)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState().copy(vpnOptions = vpnOptions().copy(onDemandNetworks = listOf("Home"))))
+        machine.requestStart().await()
+        host.pauseGate = kotlinx.coroutines.CompletableDeferred()
+        val pause = launch { machine.setManualOnDemandPause(true) }
+        testScheduler.runCurrent()
+        val stop = machine.requestStop()
+        host.pauseGate!!.complete(Unit)
+        pause.join()
+        assertTrue(stop.await())
+        assertFalse(host.onDemandPaused)
+        host.pauseGate = null
+        machine.requestStart().await()
+        machine.reconcileOnDemand(PhysicalNetworks(ssids = listOf("Office")))
+        assertFalse(host.onDemandPaused)
+    }
 
     @Test
     fun `initParams spells the keys the Go wrapper expects`() {

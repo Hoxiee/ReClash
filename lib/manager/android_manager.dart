@@ -24,6 +24,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     with ServiceListener, WidgetsBindingObserver {
   Timer? _reminderTimer;
   bool _checkingReminders = false;
+  int _pauseRevision = 0;
   @override
   void initState() {
     super.initState();
@@ -69,6 +70,17 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       }
     });
     service?.addListener(this);
+    final revision = _pauseRevision;
+    unawaited(
+      service
+          ?.getOnDemandPaused()
+          .then((paused) {
+            if (mounted && revision == _pauseRevision) onOnDemandPause(paused);
+          })
+          .catchError((Object error) {
+            commonPrint.log('Unable to read on-demand state: $error');
+          }),
+    );
     app?.onPackagesChanged = _reloadPackages;
   }
 
@@ -142,6 +154,12 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   void onServiceEvent(CoreEvent event) {
     coreEventManager.sendEvent(event);
     super.onServiceEvent(event);
+  }
+
+  @override
+  void onOnDemandPause(bool paused) {
+    _pauseRevision++;
+    ref.read(nativeOnDemandPauseProvider.notifier).value = paused;
   }
 
   @override

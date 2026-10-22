@@ -429,6 +429,9 @@ class CoreController {
     return _interface.startListener();
   }
 
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop}) =>
+      _interface.setOnDemandPaused(paused, fullStop: fullStop);
+
   Future<bool> stopListener() async {
     return _interface.stopListener();
   }

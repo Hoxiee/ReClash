@@ -290,6 +290,10 @@ _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
       : AccessControlProps.fromJson(
           json['accessControlProps'] as Map<String, dynamic>,
         ),
+  onDemandEnabled: json['onDemandEnabled'] as bool? ?? true,
+  onDemandFullStop: json['onDemandFullStop'] as bool? ?? false,
+  onDemandCloseConnections: json['onDemandCloseConnections'] as bool? ?? false,
+  onDemandStrict: json['onDemandStrict'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
@@ -299,6 +303,10 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'allowBypass': instance.allowBypass,
   'dnsHijacking': instance.dnsHijacking,
   'accessControlProps': instance.accessControlProps,
+  'onDemandEnabled': instance.onDemandEnabled,
+  'onDemandFullStop': instance.onDemandFullStop,
+  'onDemandCloseConnections': instance.onDemandCloseConnections,
+  'onDemandStrict': instance.onDemandStrict,
 };
 
 _AuthenticationProps _$AuthenticationPropsFromJson(Map<String, dynamic> json) =>

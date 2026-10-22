@@ -25,6 +25,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -41,6 +42,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     @Volatile
     private var hasPendingSsid = false
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var scanExecutor = Executors.newSingleThreadExecutor()
     private var ssidTimeout: Runnable? = null
 
     private val permissionResultListener = RequestPermissionsResultListener { requestCode, _, _ ->
@@ -73,6 +75,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     companion object {
         private const val CHANNEL_NAME = "wifi_ssid"
         private const val METHOD_GET_SSID = "getSsid"
+        private const val METHOD_LIST_SSID = "listSsid"
         private const val METHOD_CHECK_PERMISSION = "checkPermission"
         private const val METHOD_REQUEST_PERMISSION = "requestPermission"
         private const val ERROR_UNAVAILABLE = "UNAVAILABLE"
@@ -91,6 +94,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         context = binding.applicationContext
+        if (scanExecutor.isShutdown) scanExecutor = Executors.newSingleThreadExecutor()
         channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME)
         channel.setMethodCallHandler(this)
         wifiManager = binding.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
@@ -110,6 +114,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         unregisterWifiNetworkCallback()
         detachFromActivity(cancelPermissionRequest = true)
         context = null
+        scanExecutor.shutdown()
         wifiManager = null
         connectivityManager = null
     }
@@ -136,6 +141,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             METHOD_GET_SSID -> getSsid(result)
+            METHOD_LIST_SSID -> listSsid(result)
             METHOD_CHECK_PERMISSION -> checkPermission(result)
             METHOD_REQUEST_PERMISSION -> requestPermission(result)
             else -> result.notImplemented()
@@ -324,6 +330,46 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val normalized = ssid?.removeSurrounding("\"")
         return normalized?.takeIf {
             it.isNotEmpty() && it != WifiManager.UNKNOWN_SSID && it != "0x"
+        }
+    }
+
+    private fun listSsid(result: Result) {
+        val ctx = context ?: run {
+            result.error(ERROR_UNAVAILABLE, "Context not available", null)
+            return
+        }
+        if (!hasForegroundLocation(ctx)) {
+            result.success(emptyList<String>())
+            return
+        }
+        val wm = wifiManager ?: run {
+            result.error(ERROR_UNAVAILABLE, "WifiManager not available", null)
+            return
+        }
+        registerWifiNetworkCallback()
+        scanExecutor.execute {
+            val scan = runCatching {
+                val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    currentSsid()
+                } else {
+                    @Suppress("DEPRECATION")
+                    normalizeSsid(wm.connectionInfo?.ssid)
+                }
+                val ssids = LinkedHashSet<String>()
+                current?.let(ssids::add)
+                @Suppress("DEPRECATION")
+                for (network in wm.scanResults.sortedByDescending { it.level }) {
+                    normalizeSsid(network.SSID)?.let(ssids::add)
+                }
+                ssids.toList()
+            }
+            mainHandler.post {
+                if (context !== ctx) result.error(ERROR_UNAVAILABLE, "Plugin detached during scan", null)
+                else scan.fold(
+                    onSuccess = { result.success(it) },
+                    onFailure = { result.error(ERROR_UNAVAILABLE, it.message, null) },
+                )
+            }
         }
     }
 

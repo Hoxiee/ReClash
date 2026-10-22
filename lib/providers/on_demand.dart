@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/battery.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
 import 'app.dart';
 import 'config.dart';
+import 'package:reclash/plugins/service.dart';
 
 part 'generated/on_demand.g.dart';
 
@@ -41,7 +44,7 @@ class LocationPermissions extends _$LocationPermissions {
         state != WifiSsidPermission.permanentlyDenied) {
       state = permission;
     }
-    if (ref.read(excludeSSIDsProvider).isEmpty) {
+    if (!ref.read(onDemandNeedsSsidProvider)) {
       _autoRequested = false;
       return;
     }
@@ -102,4 +105,74 @@ class BatteryOptimizationIgnored extends _$BatteryOptimizationIgnored {
       _requesting = false;
     }
   }
+}
+
+@riverpod
+bool onDemandNeedsSsid(Ref ref) =>
+    ref.watch(vpnSettingProvider.select((s) => s.onDemandEnabled)) &&
+    ref.watch(excludeSSIDsProvider).any((rule) => !isSubnetRule(rule));
+
+@Riverpod(keepAlive: true)
+class PhysicalAddresses extends _$PhysicalAddresses
+    with AutoDisposeNotifierMixin {
+  @override
+  List<String> build() => const [];
+}
+
+@Riverpod(keepAlive: true)
+class NativeOnDemandPause extends _$NativeOnDemandPause
+    with AutoDisposeNotifierMixin {
+  @override
+  bool build() => false;
+}
+
+@Riverpod(keepAlive: true)
+class OnDemandOverride extends _$OnDemandOverride
+    with AutoDisposeNotifierMixin {
+  @override
+  ({bool? paused, List<String> anchor}) build() =>
+      (paused: null, anchor: const []);
+
+  Future<void> setPaused(bool paused) async {
+    final previous = state;
+    state = (paused: paused, anchor: ref.read(onDemandNetworkAnchorProvider));
+    final intent = state;
+    await globalState.safeRun(() async {
+      try {
+        await service?.setOnDemandPaused(paused);
+      } catch (_) {
+        if (ref.mounted && state == intent) state = previous;
+        rethrow;
+      }
+    });
+  }
+
+  void clear() => state = (paused: null, anchor: const []);
+}
+
+@riverpod
+List<String> onDemandNetworkAnchor(Ref ref) => [
+  ?ref.watch(currentSSIDProvider),
+  ...ref
+      .watch(physicalAddressesProvider)
+      .map(
+        (ip) => ip.contains(':') ? ipv6ToSubnetCidr(ip) : ipv4ToSubnetCidr(ip),
+      )
+      .toSet()
+      .toList()
+    ..sort(),
+];
+
+@riverpod
+List<String> onDemandMatchedNetworks(Ref ref) {
+  final vpn = ref.watch(vpnSettingProvider);
+  if (!vpn.onDemandEnabled) return const [];
+  final addresses = ref.watch(physicalAddressesProvider);
+  return onDemandMatchedRules(
+    ref.watch(excludeSSIDsProvider),
+    ssid: ref.watch(currentSSIDProvider),
+    ipv4s: addresses.where((ip) => !ip.contains(':')).toList(),
+    ipv6s: addresses.where((ip) => ip.contains(':')).toList(),
+    strict: vpn.onDemandStrict,
+  );
 }

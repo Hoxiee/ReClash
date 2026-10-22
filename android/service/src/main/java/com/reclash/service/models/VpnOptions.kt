@@ -26,6 +26,11 @@ data class VpnOptions(
     val routeAddress: List<String>,
     val mtu: Int = 0,
     val congestionController: String? = null,
+    val onDemandEnabled: Boolean = true,
+    val onDemandFullStop: Boolean = false,
+    val onDemandCloseConnections: Boolean = false,
+    val onDemandStrict: Boolean = false,
+    val onDemandNetworks: List<String> = emptyList(),
 )
 
 private const val DEFAULT_TUN_MTU = 9000

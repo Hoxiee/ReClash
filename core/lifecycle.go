@@ -20,9 +20,11 @@ import (
 )
 
 var (
-	isInit     atomic.Bool
-	isRunning  atomic.Bool
-	sdkVersion atomic.Int32
+	isInit           atomic.Bool
+	isRunning        atomic.Bool
+	onDemandPaused   atomic.Bool
+	onDemandFullStop atomic.Bool
+	sdkVersion       atomic.Int32
 )
 
 func handleInitClash(params *InitParams) bool {
@@ -60,6 +62,7 @@ func handleStopListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
 	isRunning.Store(false)
+	onDemandPaused.Store(false)
 	listener.StopListener()
 	resolver.ResetConnection()
 	if e := rcxIfReady(); e != nil {
@@ -68,8 +71,24 @@ func handleStopListener() bool {
 	return true
 }
 
+func stopListenersAfterTunClose() {
+	if isRunning.Load() && !onDemandPaused.Load() {
+		handleStopListener()
+	}
+}
+
 func updateListeners(cfg *config.Config) {
 	if cfg == nil || !isRunning.Load() {
+		return
+	}
+	if onDemandPaused.Load() && onDemandFullStop.Load() {
+		if !features.Android {
+			tunConf := cfg.General.Tun
+			tunConf.Enable = false
+			listener.ReCreateTun(tunConf, tunnel.Tunnel)
+		}
+		listener.PatchInboundListeners(nil, tunnel.Tunnel, true)
+		listener.StopListener()
 		return
 	}
 	general := cfg.General
@@ -90,7 +109,11 @@ func updateListeners(cfg *config.Config) {
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
 	if !features.Android {
-		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
+		tunConf := general.Tun
+		if onDemandPaused.Load() {
+			tunConf.Enable = false
+		}
+		listener.ReCreateTun(tunConf, tunnel.Tunnel)
 	}
 }
 
@@ -100,6 +123,7 @@ func handleShutdown() bool {
 
 	configMu.Lock()
 	isRunning.Store(false)
+	onDemandPaused.Store(false)
 	listener.StopListener()
 	updater.StopGeoUpdater()
 	executor.Shutdown()
@@ -147,4 +171,23 @@ func handleGetMemoryStats() MemoryStats {
 		StackInuse:   stats.StackInuse,
 		RuntimeOther: stats.MSpanInuse + stats.MCacheInuse + stats.BuckHashSys + stats.GCSys + stats.OtherSys,
 	}
+}
+
+type OnDemandPauseParams struct {
+	Paused   bool `json:"paused"`
+	FullStop bool `json:"fullStop"`
+}
+
+func handleSetOnDemandPaused(params *OnDemandPauseParams) bool {
+	configMu.Lock()
+	defer configMu.Unlock()
+	if !isRunning.Load() {
+		return true
+	}
+	onDemandFullStop.Store(params.FullStop)
+	onDemandPaused.Store(params.Paused)
+	updateListeners(currentConfig)
+	resolver.ResetConnection()
+	bumpRouteEpoch()
+	return true
 }

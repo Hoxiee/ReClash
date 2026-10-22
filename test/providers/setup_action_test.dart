@@ -83,6 +83,14 @@ class TestCommonAction extends CommonAction {
 }
 
 class TestSetupAction extends SetupAction {
+  final pauseCalls = <(bool, bool)>[];
+
+  @override
+  Future<bool> setOnDemandPause(bool paused, {required bool fullStop}) async {
+    pauseCalls.add((paused, fullStop));
+    return true;
+  }
+
   final List<bool> coreRunningCalls = [];
   final List<Completer<void>> pendingCoreCalls = [];
   int trafficResets = 0;
@@ -555,68 +563,77 @@ void main() {
   });
 
   group('suspend', () {
-    test('skips starting the core on an excluded SSID', () async {
-      container.dispose();
-      action = TestSetupAction();
-      container = ProviderContainer(
-        overrides: [
-          coreHandlerProvider.overrideWithValue(
-            CoreController.scoped(_MockCoreHandlerInterface()),
-          ),
-          profilesProvider.overrideWith(TestProfiles.new),
-          setupActionProvider.overrideWith(() => action),
-          commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-        ],
-      );
-      globalState.container = container;
-      container.read(initProvider.notifier).value = true;
-      container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
+    test(
+      'starts the core and preserves the core on an excluded SSID',
+      () async {
+        container.dispose();
+        action = TestSetupAction();
+        container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupActionProvider.overrideWith(() => action),
+            commonActionProvider.overrideWith(TestCommonAction.new),
+            excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          ],
+        );
+        globalState.container = container;
+        container.read(initProvider.notifier).value = true;
+        container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
 
-      await container.read(setupActionProvider.notifier).setRunning(true);
+        await container.read(setupActionProvider.notifier).setRunning(true);
 
-      expect(action.coreRunningCalls, isEmpty);
-      expect(container.read(runningVpnOptionsProvider), isNull);
-    });
+        expect(action.coreRunningCalls, [true]);
+        expect(action.pauseCalls, [(true, false)]);
+        expect(container.read(runningVpnOptionsProvider), isNotNull);
+      },
+    );
 
-    test('an excluded SSID parks a run and leaving it resumes', () async {
-      container.dispose();
-      action = TestSetupAction();
-      container = ProviderContainer(
-        overrides: [
-          coreHandlerProvider.overrideWithValue(
-            CoreController.scoped(_MockCoreHandlerInterface()),
-          ),
-          profilesProvider.overrideWith(TestProfiles.new),
-          setupActionProvider.overrideWith(() => action),
-          commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-        ],
-      );
-      globalState.container = container;
-      container.read(initProvider.notifier).value = true;
-      final setup = container.read(setupActionProvider.notifier);
-      await setup.setRunning(true);
-      action.coreRunningCalls.clear();
+    test(
+      'an excluded SSID pauses without ending the run and leaving resumes',
+      () async {
+        container.dispose();
+        action = TestSetupAction();
+        container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(_MockCoreHandlerInterface()),
+            ),
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupActionProvider.overrideWith(() => action),
+            commonActionProvider.overrideWith(TestCommonAction.new),
+            excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          ],
+        );
+        globalState.container = container;
+        container.read(initProvider.notifier).value = true;
+        final setup = container.read(setupActionProvider.notifier);
+        await setup.setRunning(true);
+        action.coreRunningCalls.clear();
 
-      container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
-      setup.syncSuspend();
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+        container.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
+        setup.syncSuspend();
+        await Future<void>.delayed(const Duration(milliseconds: 700));
 
-      expect(action.coreRunningCalls, [false]);
-      expect(container.read(isStartProvider), isTrue);
-      expect(container.read(runningVpnOptionsProvider), isNull);
+        expect(action.coreRunningCalls, isEmpty);
+        expect(action.pauseCalls, [(true, false)]);
+        expect(container.read(isStartProvider), isTrue);
+        expect(container.read(runningVpnOptionsProvider), isNotNull);
 
-      container.read(currentSSIDProvider.notifier).value = 'Home';
-      setup.syncSuspend();
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+        container.read(currentSSIDProvider.notifier).value = 'Home';
+        setup.syncSuspend();
+        await Future<void>.delayed(const Duration(milliseconds: 700));
 
-      expect(action.coreRunningCalls, [false, true]);
-      expect(
-        container.read(runningVpnOptionsProvider),
-        await container.read(vpnOptionsProvider.future),
-      );
-    });
+        expect(action.coreRunningCalls, isEmpty);
+        expect(action.pauseCalls, [(true, false), (false, false)]);
+        expect(
+          container.read(runningVpnOptionsProvider),
+          await container.read(vpnOptionsProvider.future),
+        );
+      },
+    );
 
     test('an SSID change leaves a stopped run alone', () async {
       markInitialized();

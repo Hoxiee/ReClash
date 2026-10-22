@@ -94,6 +94,9 @@ object Core {
 
     fun stopListener() = Mobile.stopListener()
 
+    fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean =
+        Mobile.setOnDemandPaused(paused, fullStop)
+
     fun getNotificationServer(group: String): String = Mobile.getNotificationServer(group)
 
     fun getTraffic(onlyStatisticsProxy: Boolean): String = Mobile.getTraffic(onlyStatisticsProxy)

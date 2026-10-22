@@ -11,6 +11,7 @@ import com.reclash.plugins.AppPlugin
 import com.reclash.plugins.ServicePlugin
 import com.reclash.plugins.TilePlugin
 import com.reclash.service.ServiceConfig
+import com.reclash.service.PhysicalNetworks
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.VpnOptions
 import io.flutter.embedding.engine.FlutterEngine
@@ -52,6 +53,14 @@ internal interface ServiceStateHost {
     suspend fun quickSetup(initParams: String, setupParams: String): Result<String>
 
     suspend fun startService(options: VpnOptions): Boolean
+
+    val physicalNetworks: PhysicalNetworks? get() = null
+
+    val onDemandPaused: Boolean get() = false
+
+    suspend fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean = false
+
+    fun updateVpnOptions(options: VpnOptions) {}
 
     suspend fun stopService()
 }
@@ -144,6 +153,15 @@ internal object AndroidServiceStateHost : ServiceStateHost {
 
     override suspend fun startService(options: VpnOptions): Boolean =
         ServiceController.start(options)
+
+    override val physicalNetworks: PhysicalNetworks get() = ServiceConfig.physicalNetworks.value
+
+    override val onDemandPaused: Boolean get() = ServiceConfig.onDemandPaused.value
+
+    override suspend fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean =
+        ServiceController.setOnDemandPaused(paused, fullStop)
+
+    override fun updateVpnOptions(options: VpnOptions) = ServiceConfig.updateVpnOptions(options)
 
     override suspend fun stopService() = ServiceController.stop()
 }

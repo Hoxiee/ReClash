@@ -399,6 +399,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("添加"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("添加代理"),
     "addFilters": MessageLookupByLibrary.simpleMessage("添加筛选"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("添加网络"),
     "addNodes": MessageLookupByLibrary.simpleMessage("添加节点"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage("添加覆写项"),
     "addProfile": MessageLookupByLibrary.simpleMessage("添加配置"),
@@ -535,6 +536,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("关闭"),
     "closeConnections": MessageLookupByLibrary.simpleMessage("关闭连接"),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "暂停 VPN 时断开所有现有连接",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("颜色"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("配色风格"),
     "columns": MessageLookupByLibrary.simpleMessage("列数"),
@@ -819,6 +823,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("编辑仪表盘"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("编辑全局规则"),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("编辑网络"),
     "editProxy": MessageLookupByLibrary.simpleMessage("编辑代理"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("编辑策略组"),
     "editRule": MessageLookupByLibrary.simpleMessage("编辑规则"),
@@ -829,6 +834,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
     "enabled": MessageLookupByLibrary.simpleMessage("已开启"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("手动输入"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "error": MessageLookupByLibrary.simpleMessage("错误"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("错误详情"),
@@ -1071,6 +1077,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "请输入数字或范围，如 80 或 8000-9000，多个用 / 分隔",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID 不能超过 32 个 UTF-8 字节",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP 地址"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1213,6 +1222,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "无法连接到服务器，请检查网络连接或代理设置",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID（家庭 Wi-Fi）或网段（192.168.1.0/24）",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "无法解析服务器地址，请确认链接正确且 DNS 可用",
     ),
@@ -1248,6 +1260,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "none": MessageLookupByLibrary.simpleMessage("无"),
     "notRunning": MessageLookupByLibrary.simpleMessage("未运行"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage("当前代理组无法选中"),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage("当前网络不受信任"),
     "notification": MessageLookupByLibrary.simpleMessage("通知"),
     "notificationActive": MessageLookupByLibrary.simpleMessage("保护已启用"),
     "notificationAddComponent": MessageLookupByLibrary.simpleMessage("添加组件"),
@@ -1330,8 +1343,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("混淆参数"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("混淆密码"),
     "onDemand": MessageLookupByLibrary.simpleMessage("按需运行"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "此子网会信任大范围的网络",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage("断开连接"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "按需运行会在连上排除的 Wi-Fi 时暂停代理。",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("完全停止"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "暂停时移除 TUN 并关闭本地代理端口。继续监测网络以便自动恢复。",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("暂停"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("恢复"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "无法读取 Wi-Fi 网络。请重试或手动输入网络。",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage("同时要求 SSID 与网段匹配"),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "同时存在两种规则时，仅当 SSID 与网段都匹配才暂停",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("仅统计代理流量"),
     "optional": MessageLookupByLibrary.simpleMessage("可选"),
@@ -1355,6 +1385,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("粘贴"),
     "peers": MessageLookupByLibrary.simpleMessage("初始节点"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("从相册选择"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("选择网络"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("周围可见的 Wi-Fi 网络"),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage("未找到 Wi-Fi 网络"),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "列出附近的 Wi-Fi 网络需要位置权限",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("刷新"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "正在搜索附近的 Wi-Fi 网络…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("窗口置顶"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("请绑定WebDAV"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage("请输入脚本名称"),
@@ -2466,6 +2506,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("提交翻译修改建议"),
     "transport": MessageLookupByLibrary.simpleMessage("传输协议"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("受信任的网络"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "连接这些网络时 VPN 会自动暂停",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "当前网络受信任 — 在此网络中会暂停 VPN",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "虚拟网卡授权失败，已关闭。",

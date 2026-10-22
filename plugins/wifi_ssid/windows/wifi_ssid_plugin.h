@@ -28,6 +28,8 @@ class WifiSsidPlugin : public flutter::Plugin {
   void GetSsid(
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
+  void ListSsid(
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 };
 
 }  // namespace wifi_ssid

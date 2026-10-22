@@ -277,6 +277,11 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
     routeAddress: await routeAddress,
     mtu: tun.mtu,
     congestionController: tun.congestionController,
+    onDemandEnabled: vpnSetting.onDemandEnabled,
+    onDemandFullStop: vpnSetting.onDemandFullStop,
+    onDemandCloseConnections: vpnSetting.onDemandCloseConnections,
+    onDemandStrict: vpnSetting.onDemandStrict,
+    onDemandNetworks: ref.watch(excludeSSIDsProvider),
   );
 }
 
@@ -289,7 +294,7 @@ class AccessControlState extends _$AccessControlState
 
 @riverpod
 bool suspend(Ref ref) {
-  final currentSSID = ref.watch(currentSSIDProvider);
-  final excludeSSIDs = ref.watch(excludeSSIDsProvider);
-  return excludeSSIDs.contains(currentSSID);
+  if (system.isAndroid) return ref.watch(nativeOnDemandPauseProvider);
+  final override = ref.watch(onDemandOverrideProvider).paused;
+  return override ?? ref.watch(onDemandMatchedNetworksProvider).isNotEmpty;
 }

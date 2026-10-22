@@ -291,6 +291,7 @@ class SetupAction extends _$SetupAction {
     if (!_isCurrent(request)) {
       return true;
     }
+    ref.read(onDemandOverrideProvider.notifier).clear();
     resetCoreTraffic();
     ref.read(trafficsProvider.notifier).clear();
     ref.read(totalTrafficProvider.notifier).value = const Traffic();
@@ -304,9 +305,6 @@ class SetupAction extends _$SetupAction {
   Future<bool> _setCoreRunning(_RunRequest request) {
     return _listenerScheduler.run(() async {
       if (!_isCurrent(request)) {
-        return true;
-      }
-      if (request.running && ref.read(suspendProvider)) {
         return true;
       }
       if (ref.read(safeModeProvider)) {
@@ -324,6 +322,15 @@ class SetupAction extends _$SetupAction {
         : null;
     if (!running && ref.mounted) {
       ref.read(tunAppliedProvider.notifier).value = false;
+    }
+    if (running && answered && !system.isAndroid && ref.read(suspendProvider)) {
+      final vpn = ref.read(vpnSettingProvider);
+      final paused = await setOnDemandPause(
+        true,
+        fullStop: vpn.onDemandFullStop,
+      );
+      if (!paused) throw _unanswered(CoreMethod.setOnDemandPaused);
+      if (vpn.onDemandCloseConnections) await _core.closeConnections();
     }
     return answered;
   }
@@ -346,14 +353,23 @@ class SetupAction extends _$SetupAction {
     message: 'Core did not answer ${method.name}',
   );
 
-  /// An excluded SSID parks the listener without ending the run.
   void syncSuspend() {
     debouncer.call(FunctionTag.suspend, () {
       return _listenerScheduler.run(() async {
         if (!ref.read(isStartProvider) || ref.read(safeModeProvider)) {
           return;
         }
-        await _setListening(!ref.read(suspendProvider));
+        if (system.isAndroid) return;
+        final paused = ref.read(suspendProvider);
+        final vpn = ref.read(vpnSettingProvider);
+        final answered = await setOnDemandPause(
+          paused,
+          fullStop: vpn.onDemandFullStop,
+        );
+        if (!answered) throw _unanswered(CoreMethod.setOnDemandPaused);
+        if (paused && vpn.onDemandCloseConnections) {
+          await _core.closeConnections();
+        }
         await _syncTunApplied();
       });
     });
@@ -385,6 +401,10 @@ class SetupAction extends _$SetupAction {
   Future<bool> setCoreRunning(bool running) {
     return running ? _core.startListener() : _core.stopListener();
   }
+
+  @protected
+  Future<bool> setOnDemandPause(bool paused, {required bool fullStop}) =>
+      _core.setOnDemandPaused(paused, fullStop: fullStop);
 
   @protected
   void resetCoreTraffic() {

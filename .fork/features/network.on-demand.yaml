@@ -1,0 +1,17 @@
+v: 1
+kind: integration
+state: active
+risk: critical
+must:
+  pause: Ordinary on-demand pause removes TUN while keeping Core and local proxy ports; full stop closes listeners without ending network observation.
+  ownership: Android ServiceState serializes pause with start, stop, revoke and service loss; desktop requests use the existing listener scheduler.
+  networks: SSIDs retain exact case and whitespace; IPv4 and IPv6 subnets support strict matching and never trust a default route.
+  manual: Manual pause or resume lasts until the physical network changes or the run stops.
+  live-policy: Enabled, full stop, strict matching, close connections and trusted networks update live without requesting an Android VPN restart.
+  picker: Native network enumeration supports search, refresh and manual input with permission and failure handling.
+watch: [lib/common/on_demand.dart, lib/common/network.dart, lib/providers/on_demand.dart, lib/providers/state/system.dart, lib/providers/actions/setup.dart, lib/providers/actions/common.dart, lib/models/config.dart, lib/models/core.dart, lib/manager/app_manager.dart, lib/manager/android_manager.dart, lib/manager/connectivity_manager.dart, lib/plugins/service.dart, lib/views/config/on_demand.dart, lib/views/config/on_demand_network_picker.dart, lib/views/dashboard/widgets/current_outbound.dart, 'plugins/wifi_ssid/**', 'android/app/src/main/kotlin/com/reclash/Service*', android/app/src/main/kotlin/com/reclash/plugins/ServicePlugin.kt, 'android/service/**', core/lifecycle.go, core/on_demand_test.go, core/protocol.go, core/method.go, core/lib.go, core/mobile/mobile.go, 'arb/fragments/on-demand/**', test/common/on_demand_test.dart, test/widgets/on_demand_test.dart, test/widgets/on_demand_network_picker_test.dart, test/manager/connectivity_manager_test.dart, test/providers/setup_action_test.dart, test/providers/common_action_test.dart, test/providers/action_test.dart, test/plugins/service_test.dart, test/views/dashboard/current_outbound_test.dart, android/tests/service/OnDemandTest.kt, android/tests/app/ServiceStateMachineTest.kt]
+checks:
+  on-demand: [pause, networks, manual, live-policy, picker]
+  core-contracts: [pause, ownership]
+  android-notifications: [ownership, manual, live-policy, networks]
+drop: Upstream supplies compatible on-demand lifecycle and native network selection.

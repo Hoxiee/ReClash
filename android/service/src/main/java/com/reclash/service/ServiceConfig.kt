@@ -13,13 +13,26 @@ object ServiceConfig {
     val vpnOptions: VpnOptions?
         get() = currentVpnOptions
 
+    val physicalNetworks = MutableStateFlow(PhysicalNetworks())
+    val onDemandPaused = MutableStateFlow(false)
+    val onDemandRevision = MutableStateFlow(0L)
+
     val notificationParams = mutableNotificationParams.asStateFlow()
 
     fun updateVpnOptions(options: VpnOptions) {
+        if (currentVpnOptions == options) return
         currentVpnOptions = options
+        onDemandRevision.value++
     }
 
     fun updateNotificationParams(params: NotificationParams) {
         mutableNotificationParams.value = params
     }
 }
+
+
+data class PhysicalNetworks(
+    val ips: List<String> = emptyList(),
+    val ssids: List<String> = emptyList(),
+    val ssidUnknown: Boolean = false,
+)

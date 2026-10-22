@@ -608,7 +608,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'e305f3aaff2bef3b9f317bec875e453d351cb6e5';
+String _$vpnOptionsHash() => r'9e2f0139250c30b71b5d732d7267b2b25823ca1f';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -701,7 +701,7 @@ final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$suspendHash() => r'9ab9210f4f3c70f63d9858d492a9c09b3fb24bf1';
+String _$suspendHash() => r'bb60a8380275422ce6bd5c7592d791f75e70a52d';
 
 @ProviderFor(DynamicColor)
 final dynamicColorProvider = DynamicColorProvider._();

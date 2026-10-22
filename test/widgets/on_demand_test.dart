@@ -321,7 +321,14 @@ void main() {
     final appLocalizations = AppLocalizations.of(
       tester.element(find.byType(OnDemandView)),
     );
-    final row = tester.getRect(find.byType(DecorationListItem).first);
+    final row = tester.getRect(
+      find
+          .ancestor(
+            of: find.text(appLocalizations.locationPermission),
+            matching: find.byType(DecorationListItem),
+          )
+          .first,
+    );
     final desc = find.text(appLocalizations.locationPermissionDesc);
     final button = tester.getRect(
       find

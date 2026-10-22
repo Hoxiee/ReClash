@@ -34,6 +34,8 @@ abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
 
   void onServiceStopped() {}
+
+  void onOnDemandPause(bool paused) {}
 }
 
 class Service {
@@ -68,6 +70,12 @@ class Service {
               (listener) => listener.onServiceEvent(event),
             );
           }
+          break;
+        case 'onDemandPaused':
+          _dispatch(
+            'on-demand pause',
+            (listener) => listener.onOnDemandPause(call.arguments == true),
+          );
           break;
         case 'stopped':
           // A report stamped before the newest command no longer describes it.
@@ -124,6 +132,12 @@ class Service {
     return await methodChannel.invokeMethod<bool>('stop', ++_commandRevision) ??
         false;
   }
+
+  Future<void> setOnDemandPaused(bool paused) =>
+      methodChannel.invokeMethod<void>('setOnDemandPaused', paused);
+
+  Future<bool> getOnDemandPaused() async =>
+      await methodChannel.invokeMethod<bool>('getOnDemandPaused') ?? false;
 
   Future<String> init() async {
     return await methodChannel.invokeMethod<String>('init') ?? '';

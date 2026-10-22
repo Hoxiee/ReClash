@@ -3,9 +3,25 @@ package com.reclash
 import com.reclash.models.SharedState
 import io.flutter.embedding.engine.FlutterEngine
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import com.reclash.common.GlobalState
+import com.reclash.service.ServiceConfig
 
 object ServiceState {
     private val machine = ServiceStateMachine(AndroidServiceStateHost)
+
+    init {
+        GlobalState.launch {
+            while (true) {
+                delay(2_000)
+                runCatching { machine.reconcileOnDemand(ServiceConfig.physicalNetworks.value) }
+                    .onFailure { GlobalState.log("On-demand transition failed: $it") }
+            }
+        }
+    }
+
+    suspend fun setOnDemandPaused(paused: Boolean) = machine.setManualOnDemandPause(paused)
 
     val runState = machine.runState
 

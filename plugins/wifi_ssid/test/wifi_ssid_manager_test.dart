@@ -32,6 +32,18 @@ void main() {
     expect(await manager.getSsid(), isNull);
   });
 
+  test(
+    'listSsid preserves order and case while removing empty duplicates',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            expect(call.method, 'listSsid');
+            return ['Home', '', 'home', 'Office', 'Home'];
+          });
+      expect(await manager.listSsid(), ['Home', 'home', 'Office']);
+    },
+  );
+
   test('checkPermission maps every native permission state', () async {
     var nativeState = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
