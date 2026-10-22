@@ -156,6 +156,24 @@
       "available": true
     },
     {
+      "path": "routing.bundleUrl",
+      "name": "reclash-routing",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "routing",
+      "available": true
+    },
+    {
       "path": "presentation.hideUrl",
       "name": "reclash-hideurl",
       "type": "boolean",

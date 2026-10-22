@@ -118,6 +118,7 @@ void main() {
     expect(find.text(l.urlSchemeProfiles), findsOneWidget);
     expect(find.text(l.urlSchemeSupportedLinks), findsOneWidget);
     for (final action in ReClashCommand.values) {
+      if (action == ReClashCommand.routing) continue;
       expect(
         find.widgetWithText(CodeLabel, 'reclash://${action.host}'),
         findsOneWidget,

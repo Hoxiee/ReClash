@@ -560,6 +560,9 @@ _ProfileOverrides _$ProfileOverridesFromJson(Map<String, dynamic> json) =>
             ),
           ) ??
           const {},
+      routing: json['routing'] == null
+          ? const RcxUserLayer()
+          : RcxUserLayer.safeFromJson(json['routing']),
     );
 
 Map<String, dynamic> _$ProfileOverridesToJson(_ProfileOverrides instance) =>
@@ -581,6 +584,7 @@ Map<String, dynamic> _$ProfileOverridesToJson(_ProfileOverrides instance) =>
           .map((e) => _$TunOverrideKeyEnumMap[e]!)
           .toList(),
       'proxy-providers': instance.proxyProviders,
+      'routing': instance.routing,
     };
 
 const _$DnsOverrideKeyEnumMap = {

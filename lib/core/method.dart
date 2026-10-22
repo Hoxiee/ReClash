@@ -54,6 +54,14 @@ enum CoreMethod {
   watchRoute,
   fetchSubscription,
   cancelSubscriptionFetch,
+  rcxSetPolicy,
+  rcxStatus,
+  rcxExplain,
+  rcxJournal,
+  rcxAction,
+  rcxHints,
+  rcxProfiles,
+  rcxStudio,
 }
 
 class CoreMethodCall {

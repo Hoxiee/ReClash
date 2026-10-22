@@ -40,5 +40,6 @@
   "renewSubscription": "구독 갱신",
   "topUpTraffic": "트래픽 충전",
   "notificationActive": "보호 중",
-  "notificationLevelDescription": "상세 모드는 실시간 정보와 중지 버튼을 표시합니다. 최소 모드는 보호 상태만 표시합니다."
+  "notificationLevelDescription": "상세 모드는 실시간 정보와 중지 버튼을 표시합니다. 최소 모드는 보호 상태만 표시합니다.",
+  "extra": "기타"
 }

@@ -41,6 +41,7 @@ export 'picker.dart';
 export 'preferences.dart';
 export 'print.dart';
 export 'protocol.dart';
+export 'rcx_link.dart';
 export 'provider_reader.dart';
 export 'proxy.dart';
 export 'request.dart';

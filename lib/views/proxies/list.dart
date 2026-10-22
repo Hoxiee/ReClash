@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'card.dart';
 import 'common.dart';
+import 'routing.dart';
 
 const _pinnedHeaderGap = 8.0;
 const _headerInset = 10.0;
@@ -634,6 +636,12 @@ class ListHeader extends ConsumerWidget {
     final isDelayTesting = ref.watch(
       delayTestingGroupsProvider.select((state) => state.contains(groupName)),
     );
+    final profile = ref.watch(
+      rcxGroupProvider(groupName).select(
+        (state) =>
+            state == null || state.control.isManual ? null : state.profile,
+      ),
+    );
     final colorScheme = context.colorScheme;
     final level = floating > 0
         ? SurfaceLevel.floatingOf(colorScheme)
@@ -665,7 +673,12 @@ class ListHeader extends ConsumerWidget {
             _GroupActions(
               isExpand: isExpand,
               isDelayTesting: isDelayTesting,
-              groupType: group.type.name,
+              groupType: profile == null
+                  ? group.type.name
+                  : rcxProfileTitle(context, ref, profile),
+              onRouting: group.type == GroupType.Selector
+                  ? () => unawaited(showRoutingSheet(context, groupName))
+                  : null,
               onScrollToSelected: () {
                 onScrollToSelected(groupName);
               },
@@ -825,8 +838,18 @@ class _SelectedProxyName extends ConsumerWidget {
     if (proxyName.isEmpty) {
       return const SizedBox.shrink();
     }
+    final control = ref.watch(
+      rcxGroupProvider(groupName).select((state) => state?.control),
+    );
+    final l = context.appLocalizations;
+    final mode = switch (control) {
+      null => null,
+      RcxControl(isManual: true) => null,
+      RcxControl(isPinned: true) => l.rcxPinnedLabel,
+      _ => l.rcxModeAuto,
+    };
     return EmojiText(
-      proxyName,
+      mode == null ? proxyName : '$mode · $proxyName',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,
@@ -842,6 +865,7 @@ class _GroupActions extends StatelessWidget {
     required this.onScrollToSelected,
     required this.onDelayTest,
     required this.onToggle,
+    this.onRouting,
   });
 
   final bool isExpand;
@@ -850,6 +874,7 @@ class _GroupActions extends StatelessWidget {
   final VoidCallback onScrollToSelected;
   final VoidCallback onDelayTest;
   final VoidCallback onToggle;
+  final VoidCallback? onRouting;
 
   @override
   Widget build(BuildContext context) {
@@ -874,6 +899,12 @@ class _GroupActions extends StatelessWidget {
                       ? CommonCircleLoading(size: TonalButtonSize.compact.icon)
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
+                if (onRouting != null)
+                  IconButton(
+                    tooltip: context.appLocalizations.rcxTitle,
+                    onPressed: onRouting,
+                    icon: const GlyphIcon(AppGlyphs.shuffle),
+                  ),
               ],
             )
           else

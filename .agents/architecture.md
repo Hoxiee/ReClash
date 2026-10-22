@@ -1213,7 +1213,12 @@ action notifier, which is only ever read. A derived provider it listens to is ne
 of it returns a stale value. So an action that has to follow a signal listens to the keep-alive provider that holds
 it, as `SetupAction` does with `appVisibleProvider`, not to a provider derived from that.
 
-On Android the Core does not react to the screen or to Doze. Doze's firewall keeps apps without an exemption off the
+On Android the Core's tunnel does not react to the screen or to Doze. The routing engine (`core/rcx`) receives power and
+network hints from the service (on desktop the Core samples the battery itself and spots a resume by a late tick,
+`core/rcx_power*.go`), and uses them only to schedule its own checks; it never holds back or hides mihomo's
+health checks or their results. Advanced profiles add declared checks and exit-country echoes through a node, which dial
+the adapter itself so a site the node cannot reach never counts as a failed dial of the node, and direct network
+diagnostics, which leave through the `DIRECT` outbound so they see what direct rules see (`core/rcx_check.go`). Doze's firewall keeps apps without an exemption off the
 network before their traffic reaches the TUN, so what still arrives is traffic Doze allows, FCM among it; suspending the
 tunnel rejects exactly that and stalls push reconnects until their backoff runs out. The VPN service keeps its own
 network as a foreground service (`dumpsys netpolicy` shows its `DOZE` block allowed by `FOREGROUND`), so health checks
@@ -1222,6 +1227,20 @@ keep producing real results: holding them blocks the re-check mihomo runs after 
 every proxy group is a provider, `select` groups included, and checking one tests every node in it. Should a ROM be
 shown to cut the VPN's own network while the screen is off, holding back failures measured then needs only a screen
 on/off signal.
+
+Routing profiles are edited against the running engine: the `rcxStudio` method lints a draft with line-precise
+errors, compiles it beside the live library and decides the group under it from the same evidence, and formats,
+parses conditions for the builder and merges a fork with its changed source, all without changing what any group runs
+(`core/rcx/studio.go`). The user's own profiles live in `Config.rcxProfiles`, shared by every subscription, and reach
+the Core inside the user layer that `currentRoutingLayerProvider` builds, with the subscription's hosts, which a
+provider profile may contact without asking. A provider's routing bundle (`reclash-routing`) is saved beside the
+config as `<id>.routing.yaml`, and the Core reads it with the subscription.
+
+A scenario (`core/rcx/scenario.go`) is the second level above smart groups: chosen per subscription, it lays programs
+over the group bindings for the current network kind and publishes a tunnel mode through `Runtime.ApplyMode`.
+`core/rcx_runtime.go` keeps the user's mode and the scenario's wish apart and applies the scenario's over the user's
+in `updateConfig` and after setup, so `General.Mode` stays the user's. The host shows the mode in force through
+`effectiveModeProvider`; a mode the user picks sets `RcxUserLayer.manualMode` until they choose Auto.
 
 ## Database
 

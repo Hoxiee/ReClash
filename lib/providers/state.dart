@@ -23,6 +23,7 @@ import 'app.dart';
 import 'config.dart';
 import 'core.dart';
 import 'database.dart';
+import 'routing.dart';
 import 'web_dashboard.dart';
 
 part 'generated/state.g.dart';

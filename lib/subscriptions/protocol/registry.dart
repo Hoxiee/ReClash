@@ -115,6 +115,13 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'scheduler',
   ),
   SubscriptionField(
+    'routing.bundleUrl',
+    'reclash-routing',
+    SubscriptionFieldType.url,
+    trust: SubscriptionTrust.hint,
+    consumer: 'routing',
+  ),
+  SubscriptionField(
     'presentation.hideUrl',
     'reclash-hideurl',
     SubscriptionFieldType.boolean,

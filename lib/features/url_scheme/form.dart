@@ -183,7 +183,11 @@ class _UrlSchemeFormState extends State<UrlSchemeForm> {
               child: ListItem<ReClashCommand>.options(
                 title: Text(l.urlSchemeAction),
                 leading: GlyphIcon(urlSchemeCommandGlyph(_command)),
-                options: ReClashCommand.values,
+                // A routing link carries a profile, which its export builds.
+                options: [
+                  for (final command in ReClashCommand.values)
+                    if (command != ReClashCommand.routing) command,
+                ],
                 value: _command,
                 textBuilder: (value) => urlSchemeCommandLabel(value, l),
                 onChanged: (value) {

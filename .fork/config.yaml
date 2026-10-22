@@ -62,6 +62,10 @@ checks:
     argv: [flutter, test, test/manager/window_manager_test.dart, test/manager/window_header_test.dart, test/common/window_test.dart, test/common/window_visibility_test.dart]
   proxies-groups:
     argv: [flutter, test, test/providers/proxies_action_test.dart, test/views/dashboard/proxy_groups_card_test.dart]
+  routing-engine:
+    argv: [go, -C, core, test, ./rcx, -run, ., -count=1]
+  routing-ui:
+    argv: [flutter, test, test/views/proxies/routing_test.dart]
   fork-tests:
     argv: [flutter, test, test/tool/fork_registry_test.dart, test/tool/fork_context_test.dart, test/tool/fork_normalize_test.dart, test/tool/fork_sync_test.dart, test/tool/check_format_test.dart]
   pub:

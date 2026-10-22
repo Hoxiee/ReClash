@@ -9,6 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/route_state.dart';
+import 'package:reclash/providers/routing.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
@@ -39,6 +40,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     super.initState();
     coreEventManager.addListener(this);
     ref.read(updatingActionProvider.notifier);
+    ref.read(rcxStatusStateProvider.notifier);
     // A rejected profile stays selected on purpose: silently reverting to
     // the previous one hides the error and looks like the switch was lost.
     ref.listenManual(currentProfileIdProvider, (prev, next) {
@@ -195,5 +197,11 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   void onRouteChanged(RouteSnapshot snapshot) {
     ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
     super.onRouteChanged(snapshot);
+  }
+
+  @override
+  void onRcxStatus(RcxStatus status) {
+    ref.read(rcxStatusStateProvider.notifier).apply(status);
+    super.onRcxStatus(status);
   }
 }

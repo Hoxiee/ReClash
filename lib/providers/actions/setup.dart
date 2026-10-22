@@ -76,6 +76,7 @@ class SetupAction extends _$SetupAction {
       selectedMap: selectedMap,
       testUrl: appSetting.testUrl,
       skipCertVerify: !appSetting.checkCertificate,
+      rcx: ref.read(currentRoutingLayerProvider),
     );
   }
 
@@ -463,7 +464,13 @@ class SetupAction extends _$SetupAction {
     }, args: [silence]);
   }
 
+  /// A mode the user picks wins over a scenario's until they pick Auto.
   void changeMode(Mode mode) {
+    if (ref.read(rcxStatusStateProvider)?.autoMode ?? false) {
+      unawaited(
+        ref.read(rcxRoutingActionProvider.notifier).setManualMode(true),
+      );
+    }
     ref
         .read(patchClashConfigProvider.notifier)
         .update((state) => state.copyWith(mode: mode));

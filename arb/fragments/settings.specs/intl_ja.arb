@@ -40,5 +40,6 @@
   "renewSubscription": "サブスクリプションを更新",
   "topUpTraffic": "データ量を追加",
   "notificationActive": "保護中",
-  "notificationLevelDescription": "詳細ではライブ情報と停止ボタンを表示します。最小では保護状態のみを表示します。"
+  "notificationLevelDescription": "詳細ではライブ情報と停止ボタンを表示します。最小では保護状態のみを表示します。",
+  "extra": "その他"
 }

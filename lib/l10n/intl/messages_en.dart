@@ -201,110 +201,217 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m71(count, label) =>
       "${Intl.plural(count, one: '1 proxy group', other: '${label} proxy groups')}";
 
-  static String m72(region, bypassed, proxied) =>
+  static String m72(pick, now) => "Would pick ${pick} instead of ${now}";
+
+  static String m73(group) => "Check on ${group}";
+
+  static String m74(pick) => "Would keep ${pick}";
+
+  static String m75(number) => "Condition ${number}";
+
+  static String m76(profile) => "“${profile}” wants to check these sites";
+
+  static String m77(profile) => "Delete “${profile}”?";
+
+  static String m78(requests, used, cap) =>
+      "Checks today: ${requests} · ${used} of ${cap}";
+
+  static String m79(condition) => "except ${condition}";
+
+  static String m80(country) => "exit ${country}";
+
+  static String m81(member) => "Through ${member}";
+
+  static String m82(profile) => "Added “${profile}”";
+
+  static String m83(node) => "${node} stopped working";
+
+  static String m84(from, to) => "Mode ${from} → ${to}";
+
+  static String m85(line, text) => "Line ${line}: ${text}";
+
+  static String m86(check) => "Check ${check} is never used, so it never runs";
+
+  static String m87(hosts) => "Contacts third-party sites: ${hosts}";
+
+  static String m88(group) => "This config has no group ${group}";
+
+  static String m89(group) => "No server of ${group} passes the filter";
+
+  static String m90(tag) => "Tag ${tag} is never used";
+
+  static String m91(tier, group) =>
+      "No server of ${group} is in “${tier}” right now";
+
+  static String m92(tier, after) =>
+      "“${tier}” repeats the condition of “${after}”, so nothing lands in it";
+
+  static String m93(keys) =>
+      "Brought over; you changed these too, so yours were kept: ${keys}";
+
+  static String m94(mode) => "Mode: ${mode}";
+
+  static String m95(kind) => "Network: ${kind}";
+
+  static String m96(tier) => "may reach “${tier}” after a check";
+
+  static String m97(node) => "Pinned: ${node}";
+
+  static String m98(error) => "Profile error: ${error}";
+
+  static String m99(profile) =>
+      "Profile ${profile} was not found; the default is used";
+
+  static String m100(error) => "Routing state could not be saved: ${error}";
+
+  static String m101(tier) => "Moved to a server in “${tier}”";
+
+  static String m102(from) =>
+      "Changed server; ${from} is skipped for 15 minutes";
+
+  static String m103(from) =>
+      "${from} stopped working; switched to the best standby";
+
+  static String m104(from, gain) => "Switched from ${from}: ${gain} ms faster";
+
+  static String m105(node) => "The scenario holds ${node}";
+
+  static String m106(node) => "${node} is not in this group";
+
+  static String m107(limit) => "Switch limit reached (${limit} per hour)";
+
+  static String m108(mode) => "Not in use: mode ${mode}";
+
+  static String m109(from) => "${from} is no longer in the pool";
+
+  static String m110(kind) =>
+      "Paused while the network is “${kind}”: nothing is checked or switched";
+
+  static String m111(node) => "The scenario moves to ${node}";
+
+  static String m112(node) => "Switched to the pinned server ${node}";
+
+  static String m113(node) => "No working server; fell back to ${node}";
+
+  static String m114(scenario) =>
+      "The scenario «${scenario}» drives this group now.";
+
+  static String m115(count, total) => "${count} of ${total} match";
+
+  static String m116(node) => "Will switch to ${node} once a check confirms it";
+
+  static String m117(node, gain) =>
+      "Will switch to ${node} if it stays ${gain} ms faster";
+
+  static String m118(node, minutes) =>
+      "May switch to ${node} in ${minutes} min";
+
+  static String m119(name) => "check ${name}";
+
+  static String m120(name) => "network diagnostic ${name}";
+
+  static String m121(region, bypassed, proxied) =>
       "${region}: ${bypassed} apps in the VPN bypass list, ${proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.";
 
-  static String m73(region, value) =>
+  static String m122(region, value) =>
       "Region ${region} uses: ${value}. A custom list replaces the regional defaults.";
 
-  static String m74(region, source) => "Suggested: ${region} · ${source}";
+  static String m123(region, source) => "Suggested: ${region} · ${source}";
 
-  static String m75(region, value) =>
+  static String m124(region, value) =>
       "Region ${region} supplies DNS defaults: ${value}. Manual overrides here take priority.";
 
-  static String m76(region) => "Country profile: ${region}";
+  static String m125(region) => "Country profile: ${region}";
 
-  static String m77(value) => "TUN MTU: ${value}";
+  static String m126(value) => "TUN MTU: ${value}";
 
-  static String m78(value) => "Default service checks: ${value}";
+  static String m127(value) => "Default service checks: ${value}";
 
-  static String m79(region, value) =>
+  static String m128(region, value) =>
       "Region ${region} supplies MTU ${value}. Add an MTU override to use your own value.";
 
-  static String m80(count, label) =>
+  static String m129(count, label) =>
       "${Intl.plural(count, one: '1 rule', other: '${label} rules')}";
 
-  static String m81(appName) => "${appName} (Safe mode)";
+  static String m130(appName) => "${appName} (Safe mode)";
 
-  static String m82(count) =>
+  static String m131(count) =>
       "${Intl.plural(count, one: '1 second', other: '${count} seconds')}";
 
-  static String m83(count) => "${count} in effect";
+  static String m132(count) => "${count} in effect";
 
-  static String m84(count) =>
+  static String m133(count) =>
       "${Intl.plural(count, one: '1 issue', other: '${count} issues')}";
 
-  static String m85(time) => "Checked at ${time}";
+  static String m134(time) => "Checked at ${time}";
 
-  static String m86(count) =>
+  static String m135(count) =>
       "${Intl.plural(count, one: '1 setting', other: '${count} settings')}";
 
-  static String m87(count) => "${count} profiles available";
+  static String m136(count) => "${count} profiles available";
 
-  static String m88(step, total) => "${step} of ${total}";
+  static String m137(step, total) => "${step} of ${total}";
 
-  static String m89(server) => "Try ${server}";
+  static String m138(server) => "Try ${server}";
 
-  static String m90(link) => "No proxy could be read from ${link}";
+  static String m139(link) => "No proxy could be read from ${link}";
 
-  static String m91(label) => "${label} must be a single item";
+  static String m140(label) => "${label} must be a single item";
 
-  static String m92(client, format, count) =>
+  static String m141(client, format, count) =>
       "Received as ${client}: ${format}, ${count} proxy nodes.";
 
-  static String m93(count) =>
+  static String m142(count) =>
       "Your subscription expires in ${Intl.plural(count, one: '1 day', other: '${count} days')}";
 
-  static String m94(sections) =>
+  static String m143(sections) =>
       "The following source sections will not be transferred: ${sections}.";
 
-  static String m95(count, format) =>
+  static String m144(count, format) =>
       "${count} proxy nodes can be imported from ${format}.";
 
-  static String m96(count) => "${count} nodes cannot be converted.";
+  static String m145(count) => "${count} nodes cannot be converted.";
 
-  static String m97(percent) => "You have used ${percent}% of your traffic";
+  static String m146(percent) => "You have used ${percent}% of your traffic";
 
-  static String m98(count) => "${count} results";
+  static String m147(count) => "${count} results";
 
-  static String m99(value) => "Peak ${value}";
+  static String m148(value) => "Peak ${value}";
 
-  static String m100(value) => "Total ${value}";
+  static String m149(value) => "Total ${value}";
 
-  static String m101(version) => "Installed: ${version}";
+  static String m150(version) => "Installed: ${version}";
 
-  static String m102(count) =>
+  static String m151(count) =>
       "${Intl.plural(count, one: '1 min', other: '${count} min')}";
 
-  static String m103(time) => "${time} remaining";
+  static String m152(time) => "${time} remaining";
 
-  static String m104(count) =>
+  static String m153(count) =>
       "${Intl.plural(count, one: '1 sec', other: '${count} sec')}";
 
-  static String m105(speed) => "${speed}/s";
+  static String m154(speed) => "${speed}/s";
 
-  static String m106(nodes, groups, providers) =>
+  static String m155(nodes, groups, providers) =>
       "${nodes} proxies, ${groups} groups, ${providers} remote providers";
 
-  static String m107(action) =>
+  static String m156(action) =>
       "This link requests “${action}”. Allow ReClash to perform this action?";
 
-  static String m108(name, source) =>
+  static String m157(name, source) =>
       "Import “${name}” from ${source}? Profile validation and any conversion review follow your confirmation.";
 
-  static String m109(label) => "${label} must be a URL";
+  static String m158(label) => "${label} must be a URL";
 
-  static String m110(index) => "Background ${index}";
+  static String m159(index) => "Background ${index}";
 
-  static String m111(count) =>
+  static String m160(count) =>
       "You can keep up to ${count} backgrounds. Remove one to add another.";
 
-  static String m112(version) => "Installed version: ${version}";
-
-  static String m113(count) =>
+  static String m161(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m114(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m162(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -984,6 +1091,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "External controller secret",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
+    "extra": MessageLookupByLibrary.simpleMessage("Extra"),
     "extraLarge": MessageLookupByLibrary.simpleMessage("Extra large"),
     "fade": MessageLookupByLibrary.simpleMessage("Fade"),
     "failedCount": m26,
@@ -1718,6 +1826,407 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickActions": MessageLookupByLibrary.simpleMessage("Quick actions"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
+    "rcxAddGroup": MessageLookupByLibrary.simpleMessage("Add group"),
+    "rcxAddKind": MessageLookupByLibrary.simpleMessage("Add network kind"),
+    "rcxAddPool": MessageLookupByLibrary.simpleMessage("Add a pattern"),
+    "rcxAddTag": MessageLookupByLibrary.simpleMessage("Add tag"),
+    "rcxAddTier": MessageLookupByLibrary.simpleMessage("Add tier"),
+    "rcxAdvanced": MessageLookupByLibrary.simpleMessage("Advanced"),
+    "rcxAdvancedHint": MessageLookupByLibrary.simpleMessage(
+      "These parts are edited as YAML.",
+    ),
+    "rcxAllGroups": MessageLookupByLibrary.simpleMessage("Every group"),
+    "rcxAnyServer": MessageLookupByLibrary.simpleMessage("Any"),
+    "rcxAutoControl": MessageLookupByLibrary.simpleMessage("Auto control"),
+    "rcxAutoControlHint": MessageLookupByLibrary.simpleMessage(
+      "A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own profile.",
+    ),
+    "rcxBackToAuto": MessageLookupByLibrary.simpleMessage("Back to auto"),
+    "rcxBalanced": MessageLookupByLibrary.simpleMessage("Balanced"),
+    "rcxBasedOn": MessageLookupByLibrary.simpleMessage("Based on"),
+    "rcxBehaviour": MessageLookupByLibrary.simpleMessage("Behaviour"),
+    "rcxBringChanges": MessageLookupByLibrary.simpleMessage(
+      "Bring changes over",
+    ),
+    "rcxBringChangesHint": MessageLookupByLibrary.simpleMessage(
+      "Your own edits stay as they are",
+    ),
+    "rcxChangeServer": MessageLookupByLibrary.simpleMessage("Change server"),
+    "rcxChangeTo": MessageLookupByLibrary.simpleMessage("Change to"),
+    "rcxCheck": MessageLookupByLibrary.simpleMessage("Check"),
+    "rcxCheckDifferent": m72,
+    "rcxCheckGroup": MessageLookupByLibrary.simpleMessage("Against group"),
+    "rcxCheckNone": MessageLookupByLibrary.simpleMessage(
+      "Would find no server",
+    ),
+    "rcxCheckOn": m73,
+    "rcxCheckOpen": MessageLookupByLibrary.simpleMessage("opens blocked"),
+    "rcxCheckSame": m74,
+    "rcxChecks": MessageLookupByLibrary.simpleMessage("Checks"),
+    "rcxChecksDeclared": MessageLookupByLibrary.simpleMessage(
+      "Availability checks",
+    ),
+    "rcxCondAdd": MessageLookupByLibrary.simpleMessage("Add condition"),
+    "rcxCondAll": MessageLookupByLibrary.simpleMessage("All conditions"),
+    "rcxCondAlways": MessageLookupByLibrary.simpleMessage("Always"),
+    "rcxCondAny": MessageLookupByLibrary.simpleMessage("Any condition"),
+    "rcxCondAnyServer": MessageLookupByLibrary.simpleMessage("Any server"),
+    "rcxCondClause": m75,
+    "rcxCondField": MessageLookupByLibrary.simpleMessage("Field"),
+    "rcxCondIgnoreCase": MessageLookupByLibrary.simpleMessage("Ignore case"),
+    "rcxCondMatch": MessageLookupByLibrary.simpleMessage("Match"),
+    "rcxCondNoNames": MessageLookupByLibrary.simpleMessage("None declared"),
+    "rcxCondNotPrefix": MessageLookupByLibrary.simpleMessage("not"),
+    "rcxCondOp": MessageLookupByLibrary.simpleMessage("Operator"),
+    "rcxCondPattern": MessageLookupByLibrary.simpleMessage("Pattern"),
+    "rcxCondText": MessageLookupByLibrary.simpleMessage("As text"),
+    "rcxCondTooComplex": MessageLookupByLibrary.simpleMessage(
+      "This condition nests groups, so it is edited as text.",
+    ),
+    "rcxCondValue": MessageLookupByLibrary.simpleMessage("Value"),
+    "rcxCondValues": MessageLookupByLibrary.simpleMessage(
+      "Values, comma-separated",
+    ),
+    "rcxConsentAllow": MessageLookupByLibrary.simpleMessage("Allow"),
+    "rcxConsentAsk": m76,
+    "rcxConsentHint": MessageLookupByLibrary.simpleMessage(
+      "Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network.",
+    ),
+    "rcxConsentTitle": MessageLookupByLibrary.simpleMessage(
+      "Permission needed",
+    ),
+    "rcxContacts": MessageLookupByLibrary.simpleMessage("Sites it contacts"),
+    "rcxContactsHint": MessageLookupByLibrary.simpleMessage(
+      "Third-party sites belong neither to your provider nor to the built-in profiles.",
+    ),
+    "rcxControl": MessageLookupByLibrary.simpleMessage("Control"),
+    "rcxDeleteProfile": m77,
+    "rcxDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Network diagnostics",
+    ),
+    "rcxDirectSplit": MessageLookupByLibrary.simpleMessage(
+      "Direct sites through this group",
+    ),
+    "rcxDirectSplitActive": MessageLookupByLibrary.simpleMessage("On now"),
+    "rcxDirectSplitHint": MessageLookupByLibrary.simpleMessage(
+      "When sites your rules send direct stop opening, they go through this group. Local addresses always stay direct.",
+    ),
+    "rcxDirectSplitStandby": MessageLookupByLibrary.simpleMessage(
+      "Ready: direct sites still open",
+    ),
+    "rcxDuplicate": MessageLookupByLibrary.simpleMessage("Duplicate and edit"),
+    "rcxEnergyEco": MessageLookupByLibrary.simpleMessage("Economical"),
+    "rcxEnergyPrecise": MessageLookupByLibrary.simpleMessage("Precise"),
+    "rcxEnergyToday": m78,
+    "rcxExcept": m79,
+    "rcxExcludedByProfile": MessageLookupByLibrary.simpleMessage(
+      "Excluded by the profile",
+    ),
+    "rcxExcludedCooldown": MessageLookupByLibrary.simpleMessage(
+      "Skipped after “Change server”",
+    ),
+    "rcxExcludedNoMatch": MessageLookupByLibrary.simpleMessage(
+      "Not in the pool",
+    ),
+    "rcxExcludedNoTier": MessageLookupByLibrary.simpleMessage(
+      "Matches no preference",
+    ),
+    "rcxExcludedPending": MessageLookupByLibrary.simpleMessage(
+      "Not checked yet",
+    ),
+    "rcxExcludedUnroutable": MessageLookupByLibrary.simpleMessage(
+      "Not a server",
+    ),
+    "rcxExit": m80,
+    "rcxExitCheck": MessageLookupByLibrary.simpleMessage("Exit-country check"),
+    "rcxExport": MessageLookupByLibrary.simpleMessage("Export"),
+    "rcxFeelCalm": MessageLookupByLibrary.simpleMessage("Rarely"),
+    "rcxFeelEager": MessageLookupByLibrary.simpleMessage("Often"),
+    "rcxFieldAlive": MessageLookupByLibrary.simpleMessage("Working"),
+    "rcxFieldCurrent": MessageLookupByLibrary.simpleMessage("In use"),
+    "rcxFieldDead": MessageLookupByLibrary.simpleMessage("Not working"),
+    "rcxFieldDiag": MessageLookupByLibrary.simpleMessage("Network diagnostic"),
+    "rcxFieldEntry": MessageLookupByLibrary.simpleMessage("Entry country"),
+    "rcxFieldExit": MessageLookupByLibrary.simpleMessage("Exit country"),
+    "rcxFieldFails": MessageLookupByLibrary.simpleMessage("Fails check"),
+    "rcxFieldKind": MessageLookupByLibrary.simpleMessage("Network kind"),
+    "rcxFieldLatency": MessageLookupByLibrary.simpleMessage("Latency, ms"),
+    "rcxFieldMeasured": MessageLookupByLibrary.simpleMessage("Measured"),
+    "rcxFieldMetered": MessageLookupByLibrary.simpleMessage("Metered network"),
+    "rcxFieldName": MessageLookupByLibrary.simpleMessage("Name"),
+    "rcxFieldPasses": MessageLookupByLibrary.simpleMessage("Passes check"),
+    "rcxFieldPortal": MessageLookupByLibrary.simpleMessage("Sign-in page"),
+    "rcxFieldProvider": MessageLookupByLibrary.simpleMessage("Provider"),
+    "rcxFieldServer": MessageLookupByLibrary.simpleMessage("Server address"),
+    "rcxFieldTag": MessageLookupByLibrary.simpleMessage("Tag"),
+    "rcxFieldTransport": MessageLookupByLibrary.simpleMessage(
+      "Connection type",
+    ),
+    "rcxFieldType": MessageLookupByLibrary.simpleMessage("Protocol"),
+    "rcxFieldUdp": MessageLookupByLibrary.simpleMessage("Supports UDP"),
+    "rcxFixedHint": MessageLookupByLibrary.simpleMessage(
+      "The whole group goes through this member with no server search; pick a load balancer or a nested group to hand it everything.",
+    ),
+    "rcxFixedOn": m81,
+    "rcxGeneral": MessageLookupByLibrary.simpleMessage("General"),
+    "rcxGroupProfiles": MessageLookupByLibrary.simpleMessage("Group profiles"),
+    "rcxGroupProfilesHint": MessageLookupByLibrary.simpleMessage(
+      "How a smart group picks its server. Tap one of yours to edit it, any other to edit a copy.",
+    ),
+    "rcxHealthAlive": MessageLookupByLibrary.simpleMessage("Working"),
+    "rcxHealthDead": MessageLookupByLibrary.simpleMessage("Not working"),
+    "rcxHealthStale": MessageLookupByLibrary.simpleMessage("Worked before"),
+    "rcxHealthUnknown": MessageLookupByLibrary.simpleMessage("Not checked"),
+    "rcxHistory": MessageLookupByLibrary.simpleMessage("History"),
+    "rcxHistoryVersions": MessageLookupByLibrary.simpleMessage(
+      "Earlier versions",
+    ),
+    "rcxImportAdd": MessageLookupByLibrary.simpleMessage("Add to my profiles"),
+    "rcxImportNeedsCore": MessageLookupByLibrary.simpleMessage(
+      "Start the app\'s core to check this profile.",
+    ),
+    "rcxImportTitle": MessageLookupByLibrary.simpleMessage(
+      "Import routing profile",
+    ),
+    "rcxImported": m82,
+    "rcxJournalFailure": m83,
+    "rcxJournalMode": m84,
+    "rcxKindChecking": MessageLookupByLibrary.simpleMessage("checking"),
+    "rcxKindGroupsHint": MessageLookupByLibrary.simpleMessage(
+      "On this network these replace the scenario\'s groups of the same name; the others work as on every network.",
+    ),
+    "rcxKindName": MessageLookupByLibrary.simpleMessage("Name"),
+    "rcxKindNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Lowercase Latin letters, digits and dashes, up to 24",
+    ),
+    "rcxKindOpen": MessageLookupByLibrary.simpleMessage("open internet"),
+    "rcxKindPortal": MessageLookupByLibrary.simpleMessage("sign-in page"),
+    "rcxKindWhen": MessageLookupByLibrary.simpleMessage("Recognized when"),
+    "rcxKindWhenHint": MessageLookupByLibrary.simpleMessage(
+      "Kinds are tried top to bottom; the network gets the first that holds.",
+    ),
+    "rcxKindWhitelist": MessageLookupByLibrary.simpleMessage("whitelists only"),
+    "rcxLastResort": MessageLookupByLibrary.simpleMessage("Last resort"),
+    "rcxLastResortHint": MessageLookupByLibrary.simpleMessage(
+      "A last-resort tier is used only when no better tier has a server.",
+    ),
+    "rcxLevel": MessageLookupByLibrary.simpleMessage("Level"),
+    "rcxLevelAdvanced": MessageLookupByLibrary.simpleMessage("Advanced"),
+    "rcxLevelSimple": MessageLookupByLibrary.simpleMessage("Simple"),
+    "rcxLine": m85,
+    "rcxLintCheckUnused": m86,
+    "rcxLintConsent": m87,
+    "rcxLintGroupMissing": m88,
+    "rcxLintPoolEmpty": m89,
+    "rcxLintTagUnused": m90,
+    "rcxLintTierEmpty": m91,
+    "rcxLintTierUnreachable": m92,
+    "rcxMainGroup": MessageLookupByLibrary.simpleMessage("Main group"),
+    "rcxMakeSmart": MessageLookupByLibrary.simpleMessage(
+      "Make this group smart",
+    ),
+    "rcxMakeSmartHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.",
+    ),
+    "rcxManageHint": MessageLookupByLibrary.simpleMessage(
+      "Profiles and scenarios are made and edited in Advanced configuration → Auto routing.",
+    ),
+    "rcxMergeFailed": MessageLookupByLibrary.simpleMessage(
+      "Couldn\'t bring the changes over",
+    ),
+    "rcxMerged": MessageLookupByLibrary.simpleMessage("Changes brought over"),
+    "rcxMergedConflicts": m93,
+    "rcxModeAuto": MessageLookupByLibrary.simpleMessage("Auto"),
+    "rcxModeAutoHint": MessageLookupByLibrary.simpleMessage(
+      "Chooses and switches servers by the profile",
+    ),
+    "rcxModeBackToAuto": MessageLookupByLibrary.simpleMessage(
+      "Give the mode back to the scenario",
+    ),
+    "rcxModeByScenario": MessageLookupByLibrary.simpleMessage(
+      "The scenario sets the mode on this network",
+    ),
+    "rcxModeIs": m94,
+    "rcxModeKeep": MessageLookupByLibrary.simpleMessage("Don\'t change"),
+    "rcxModeManual": MessageLookupByLibrary.simpleMessage("Manual"),
+    "rcxModeManualHint": MessageLookupByLibrary.simpleMessage(
+      "You choose; auto routing never switches",
+    ),
+    "rcxModeManualNow": MessageLookupByLibrary.simpleMessage(
+      "You chose the mode yourself; the scenario waits until you pick Auto",
+    ),
+    "rcxModeYours": MessageLookupByLibrary.simpleMessage(
+      "The mode is yours on this network",
+    ),
+    "rcxMoveDown": MessageLookupByLibrary.simpleMessage("Move down"),
+    "rcxMoveUp": MessageLookupByLibrary.simpleMessage("Move up"),
+    "rcxNeedsConsent": MessageLookupByLibrary.simpleMessage(
+      "Needs your permission",
+    ),
+    "rcxNetwork": m95,
+    "rcxNetworkKinds": MessageLookupByLibrary.simpleMessage("Network kinds"),
+    "rcxNewProfile": MessageLookupByLibrary.simpleMessage("New profile"),
+    "rcxNewScenario": MessageLookupByLibrary.simpleMessage("New scenario"),
+    "rcxOnThisNetwork": MessageLookupByLibrary.simpleMessage("On this network"),
+    "rcxOpFail": MessageLookupByLibrary.simpleMessage("fails"),
+    "rcxOpIn": MessageLookupByLibrary.simpleMessage("is one of"),
+    "rcxOpIs": MessageLookupByLibrary.simpleMessage("is"),
+    "rcxOpIsNot": MessageLookupByLibrary.simpleMessage("is not"),
+    "rcxOpMatches": MessageLookupByLibrary.simpleMessage("matches"),
+    "rcxOpOk": MessageLookupByLibrary.simpleMessage("succeeds"),
+    "rcxOverrides": MessageLookupByLibrary.simpleMessage("Per-network changes"),
+    "rcxOwnProfile": MessageLookupByLibrary.simpleMessage(
+      "Group\'s own profile",
+    ),
+    "rcxPatternInvalid": MessageLookupByLibrary.simpleMessage(
+      "The pattern is not a valid regular expression",
+    ),
+    "rcxPendingTier": m96,
+    "rcxPinned": m97,
+    "rcxPinnedHint": MessageLookupByLibrary.simpleMessage(
+      "Left only when it fails, returned to when it recovers",
+    ),
+    "rcxPinnedLabel": MessageLookupByLibrary.simpleMessage("Pinned"),
+    "rcxPoolExclude": MessageLookupByLibrary.simpleMessage("Leave out"),
+    "rcxPoolInclude": MessageLookupByLibrary.simpleMessage("Use"),
+    "rcxProblemGroupEmpty": MessageLookupByLibrary.simpleMessage(
+      "The group has no servers",
+    ),
+    "rcxProblemGroupUnavailable": MessageLookupByLibrary.simpleMessage(
+      "This group is not a selector in the current config",
+    ),
+    "rcxProblemProfileInvalid": m98,
+    "rcxProblemProfileMissing": m99,
+    "rcxProblemStoreFailed": m100,
+    "rcxProfile": MessageLookupByLibrary.simpleMessage("Profile"),
+    "rcxProfileName": MessageLookupByLibrary.simpleMessage("Name"),
+    "rcxProfileProgramHint": MessageLookupByLibrary.simpleMessage(
+      "The group picks a server with this profile among the servers the pool keeps.",
+    ),
+    "rcxProgramAction": MessageLookupByLibrary.simpleMessage("Action"),
+    "rcxProgramFixed": MessageLookupByLibrary.simpleMessage(
+      "Hand to one member",
+    ),
+    "rcxProgramMember": MessageLookupByLibrary.simpleMessage("Member"),
+    "rcxProgramPick": MessageLookupByLibrary.simpleMessage("Pick a server"),
+    "rcxReasonBest": MessageLookupByLibrary.simpleMessage(
+      "This is the best server",
+    ),
+    "rcxReasonBetterTier": m101,
+    "rcxReasonChangeServer": m102,
+    "rcxReasonChecking": MessageLookupByLibrary.simpleMessage(
+      "Checking a better candidate",
+    ),
+    "rcxReasonConfirming": MessageLookupByLibrary.simpleMessage(
+      "A faster server needs another measurement",
+    ),
+    "rcxReasonDwell": MessageLookupByLibrary.simpleMessage(
+      "Switched recently; holding before the next change",
+    ),
+    "rcxReasonFailover": m103,
+    "rcxReasonFaster": m104,
+    "rcxReasonFixed": m105,
+    "rcxReasonFixedMissing": m106,
+    "rcxReasonFlapLimit": m107,
+    "rcxReasonHoldPinned": MessageLookupByLibrary.simpleMessage(
+      "Holding the pinned server",
+    ),
+    "rcxReasonIdle": m108,
+    "rcxReasonInitial": MessageLookupByLibrary.simpleMessage(
+      "Selected the best available server",
+    ),
+    "rcxReasonManual": MessageLookupByLibrary.simpleMessage(
+      "Controlled manually",
+    ),
+    "rcxReasonNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "Network changed",
+    ),
+    "rcxReasonNetworkSuspect": MessageLookupByLibrary.simpleMessage(
+      "The network looks down; no server is blamed",
+    ),
+    "rcxReasonNoAlternative": MessageLookupByLibrary.simpleMessage(
+      "No other working server to change to",
+    ),
+    "rcxReasonOutOfPool": m109,
+    "rcxReasonPaused": m110,
+    "rcxReasonSelectFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not select the server",
+    ),
+    "rcxReasonSplitOff": MessageLookupByLibrary.simpleMessage(
+      "Direct sites go direct again",
+    ),
+    "rcxReasonSplitOn": MessageLookupByLibrary.simpleMessage(
+      "Direct sites now go through this group",
+    ),
+    "rcxReasonStranded": MessageLookupByLibrary.simpleMessage(
+      "No working server in the pool; holding the current one",
+    ),
+    "rcxReasonSwitchFixed": m111,
+    "rcxReasonSwitchPinned": m112,
+    "rcxReasonSwitchStranded": m113,
+    "rcxReasonWorking": MessageLookupByLibrary.simpleMessage(
+      "Working; kept until it fails",
+    ),
+    "rcxScenario": MessageLookupByLibrary.simpleMessage("Scenario"),
+    "rcxScenarioDrives": m114,
+    "rcxScenarioGroups": MessageLookupByLibrary.simpleMessage("Groups"),
+    "rcxScenarioGroupsHint": MessageLookupByLibrary.simpleMessage(
+      "Main group is where the final rule sends traffic; Every group covers the select groups not named here.",
+    ),
+    "rcxScenarioKindsHint": MessageLookupByLibrary.simpleMessage(
+      "Recognize networks by direct diagnostics, then change the mode and groups on each.",
+    ),
+    "rcxScenarioMode": MessageLookupByLibrary.simpleMessage("Connection mode"),
+    "rcxScenarioOff": MessageLookupByLibrary.simpleMessage("Off"),
+    "rcxScenarios": MessageLookupByLibrary.simpleMessage("Scenarios"),
+    "rcxScenariosHint": MessageLookupByLibrary.simpleMessage(
+      "A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.",
+    ),
+    "rcxServers": MessageLookupByLibrary.simpleMessage("Servers"),
+    "rcxServersMatch": m115,
+    "rcxServersPattern": MessageLookupByLibrary.simpleMessage("Name pattern"),
+    "rcxSmartGroups": MessageLookupByLibrary.simpleMessage("Smart groups"),
+    "rcxSourceBuiltin": MessageLookupByLibrary.simpleMessage("Built-in"),
+    "rcxSourceChanged": MessageLookupByLibrary.simpleMessage(
+      "The original profile changed",
+    ),
+    "rcxSourceChanges": MessageLookupByLibrary.simpleMessage("What changed"),
+    "rcxSourceProvider": MessageLookupByLibrary.simpleMessage("From provider"),
+    "rcxSourceUser": MessageLookupByLibrary.simpleMessage("Mine"),
+    "rcxStranded": MessageLookupByLibrary.simpleMessage("When no server fits"),
+    "rcxStrandedDirect": MessageLookupByLibrary.simpleMessage("Go direct"),
+    "rcxStrandedHold": MessageLookupByLibrary.simpleMessage(
+      "Keep the current server",
+    ),
+    "rcxSwitching": MessageLookupByLibrary.simpleMessage("Switching"),
+    "rcxTagName": MessageLookupByLibrary.simpleMessage("Tag name"),
+    "rcxTagNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Latin letters, digits, - and _ only, up to 24",
+    ),
+    "rcxTags": MessageLookupByLibrary.simpleMessage("Tags"),
+    "rcxTagsHint": MessageLookupByLibrary.simpleMessage(
+      "A tag names a set of servers once, for use in tiers as tag(name).",
+    ),
+    "rcxThirdParty": MessageLookupByLibrary.simpleMessage("third party"),
+    "rcxTier": MessageLookupByLibrary.simpleMessage("Tier"),
+    "rcxTierLabel": MessageLookupByLibrary.simpleMessage("Label"),
+    "rcxTierWhen": MessageLookupByLibrary.simpleMessage("Servers in this tier"),
+    "rcxTiers": MessageLookupByLibrary.simpleMessage("Preference order"),
+    "rcxTiersHint": MessageLookupByLibrary.simpleMessage(
+      "A server lands in the first tier it fits; the best tier with servers wins. Long press to reorder.",
+    ),
+    "rcxTitle": MessageLookupByLibrary.simpleMessage("Auto routing"),
+    "rcxTranslations": MessageLookupByLibrary.simpleMessage("Translations"),
+    "rcxTurnOff": MessageLookupByLibrary.simpleMessage("Turn off auto routing"),
+    "rcxUntilCheck": m116,
+    "rcxUntilConfirm": m117,
+    "rcxUntilDwell": m118,
+    "rcxUseCheck": m119,
+    "rcxUseDiagnostic": m120,
+    "rcxUseEcho": MessageLookupByLibrary.simpleMessage("exit-country check"),
+    "rcxWarnings": MessageLookupByLibrary.simpleMessage("Warnings"),
+    "rcxWhy": MessageLookupByLibrary.simpleMessage("Why this server"),
+    "rcxYaml": MessageLookupByLibrary.simpleMessage("YAML"),
     "recentRequests": MessageLookupByLibrary.simpleMessage("Recent requests"),
     "recommendedIcons": MessageLookupByLibrary.simpleMessage("Suggested"),
     "recordType": MessageLookupByLibrary.simpleMessage("Record type"),
@@ -1731,22 +2240,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
       "No apps matched this region. Your lists are unchanged.",
     ),
-    "regionAppsPreview": m72,
+    "regionAppsPreview": m121,
     "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
       "App selection preview",
     ),
-    "regionBypassSettings": m73,
+    "regionBypassSettings": m122,
     "regionChina": MessageLookupByLibrary.simpleMessage("China"),
     "regionChoose": MessageLookupByLibrary.simpleMessage("Choose a country"),
     "regionCurrent": MessageLookupByLibrary.simpleMessage("Current region"),
     "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
       "Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.",
     ),
-    "regionDetected": m74,
+    "regionDetected": m123,
     "regionDetectionTitle": MessageLookupByLibrary.simpleMessage(
       "Device suggestion",
     ),
-    "regionDnsSettings": m75,
+    "regionDnsSettings": m124,
     "regionEgypt": MessageLookupByLibrary.simpleMessage("Egypt"),
     "regionIntro": MessageLookupByLibrary.simpleMessage(
       "Regional network defaults and service checks, independent of the interface language.",
@@ -1766,12 +2275,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
       "On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.",
     ),
-    "regionPreviewBase": m76,
-    "regionPreviewMtu": m77,
+    "regionPreviewBase": m125,
+    "regionPreviewMtu": m126,
     "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
       "Proxy selection and your routing rules stay unchanged.",
     ),
-    "regionPreviewServices": m78,
+    "regionPreviewServices": m127,
     "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("Preview"),
     "regionProfileDefaults": MessageLookupByLibrary.simpleMessage(
       "Profile defaults",
@@ -1791,7 +2300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regionSourceTimeZone": MessageLookupByLibrary.simpleMessage("time zone"),
     "regionTitle": MessageLookupByLibrary.simpleMessage("Region profile"),
-    "regionTunSettings": m79,
+    "regionTunSettings": m128,
     "regionUseDetected": MessageLookupByLibrary.simpleMessage(
       "Use detected region",
     ),
@@ -2014,12 +2523,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "The rule must start with a supported type, such as DOMAIN,example.com,DIRECT",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),
-    "rulesCount": m80,
+    "rulesCount": m129,
     "runTime": MessageLookupByLibrary.simpleMessage("Run time"),
     "running": MessageLookupByLibrary.simpleMessage("Running"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage("Runtime config"),
     "safeMode": MessageLookupByLibrary.simpleMessage("Safe mode"),
-    "safeModeAppTitle": m81,
+    "safeModeAppTitle": m130,
     "saturation": MessageLookupByLibrary.simpleMessage("Saturation"),
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save the changes?"),
@@ -2032,9 +2541,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seconds": MessageLookupByLibrary.simpleMessage("seconds"),
-    "secondsCount": m82,
+    "secondsCount": m131,
     "secretKey": MessageLookupByLibrary.simpleMessage("Key"),
-    "sectionsInEffect": m83,
+    "sectionsInEffect": m132,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage(
       "Please select a rule set",
@@ -2044,7 +2553,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
-    "serviceAbnormalCount": m84,
+    "serviceAbnormalCount": m133,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage(
       "All available",
     ),
@@ -2052,7 +2561,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Check"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Check all"),
-    "serviceCheckedAt": m85,
+    "serviceCheckedAt": m134,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Coming soon"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
       "Disallowed ISP",
@@ -2076,7 +2585,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("settings"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-    "settingsCount": m86,
+    "settingsCount": m135,
     "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
       "This profile is encrypted. Enter its age key to continue.",
     ),
@@ -2192,7 +2701,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupPhaseServices": MessageLookupByLibrary.simpleMessage(
       "Checking services",
     ),
-    "setupProfileCount": m87,
+    "setupProfileCount": m136,
     "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash does not provide servers. Import a subscription or a configuration from your provider.",
     ),
@@ -2243,13 +2752,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Your choices are saved. You can connect from the dashboard when you are ready.",
     ),
     "setupSavedTitle": MessageLookupByLibrary.simpleMessage("Connect later"),
-    "setupStepStatus": m88,
+    "setupStepStatus": m137,
     "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
       "Your choices are saved. The previous connection was not stopped.",
     ),
     "setupStoppedTitle": MessageLookupByLibrary.simpleMessage("Check stopped"),
     "setupTitle": MessageLookupByLibrary.simpleMessage("First connection"),
-    "setupTryServer": m89,
+    "setupTryServer": m138,
     "setupUnavailable": MessageLookupByLibrary.simpleMessage("No response"),
     "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
       "The connection started, but the selected route did not provide enough results.",
@@ -2260,7 +2769,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupUnknownError": MessageLookupByLibrary.simpleMessage(
       "The operation did not finish. Try again or open the details.",
     ),
-    "shareLinkUnreadable": m90,
+    "shareLinkUnreadable": m139,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "No proxy could be read from the links",
     ),
@@ -2284,7 +2793,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Enter one link here; edit several from the quick edit of the list",
     ),
-    "singleValueTip": m91,
+    "singleValueTip": m140,
     "size": MessageLookupByLibrary.simpleMessage("Size"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Skip certificate verification",
@@ -2416,7 +2925,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Use this client"),
-    "subscriptionCompatibilityPrepared": m92,
+    "subscriptionCompatibilityPrepared": m141,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core parsed this result. It has not been saved or applied.",
@@ -2449,7 +2958,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresInDays": m142,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Your subscription expires today",
     ),
@@ -2499,7 +3008,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "unknown format",
     ),
-    "subscriptionImportIgnoredSections": m94,
+    "subscriptionImportIgnoredSections": m143,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "No supported proxy nodes can be imported.",
     ),
@@ -2510,11 +3019,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Applies only to this source, format and the accepted loss types. New losses require consent again.",
         ),
-    "subscriptionImportReviewSummary": m95,
+    "subscriptionImportReviewSummary": m144,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Review subscription import",
     ),
-    "subscriptionImportSkippedNodes": m96,
+    "subscriptionImportSkippedNodes": m145,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
@@ -2542,7 +3051,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Website",
     ),
-    "subscriptionTrafficLow": m97,
+    "subscriptionTrafficLow": m146,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Use provider update interval",
     ),
@@ -2632,7 +3141,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("Pin"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("Restart core"),
-    "toolsResults": m98,
+    "toolsResults": m147,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Run"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Section"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Setting"),
@@ -2651,8 +3160,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Uploaded"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Traffic"),
-    "trafficPeak": m99,
-    "trafficTotal": m100,
+    "trafficPeak": m148,
+    "trafficTotal": m149,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -2770,14 +3279,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Update installed",
     ),
-    "updateInstalledVersion": m101,
+    "updateInstalledVersion": m150,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android is completing the installation. ReClash may close during this step.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Installing the update",
     ),
-    "updateMinutes": m102,
+    "updateMinutes": m151,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Not now"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No release notes are available.",
@@ -2825,7 +3334,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Release details",
     ),
-    "updateRemainingTime": m103,
+    "updateRemainingTime": m152,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Resume download",
     ),
@@ -2833,7 +3342,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Try installation again",
     ),
-    "updateSeconds": m104,
+    "updateSeconds": m153,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "See full release notes",
     ),
@@ -2841,7 +3350,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Show all changes",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Updates"),
-    "updateTransferSpeed": m105,
+    "updateTransferSpeed": m154,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "The downloaded update failed integrity verification.",
     ),
@@ -2877,14 +3386,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Use your configured close behavior.",
     ),
-    "urlSchemeConfigCounts": m106,
+    "urlSchemeConfigCounts": m155,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Paste a YAML or JSON configuration",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Configuration contents",
     ),
-    "urlSchemeConfirmMessage": m107,
+    "urlSchemeConfirmMessage": m156,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "External application command",
     ),
@@ -2926,7 +3435,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Import configuration",
     ),
-    "urlSchemeImportConfirm": m108,
+    "urlSchemeImportConfirm": m157,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Embed a YAML or JSON configuration in the link.",
     ),
@@ -3014,7 +3523,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This encryption version is not supported. Request a plain subscription link.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Use example"),
-    "urlTip": m109,
+    "urlTip": m158,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -3057,9 +3566,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Choose a valid PNG, JPEG or WebP image.",
     ),
-    "wallpaperImageLabel": m110,
+    "wallpaperImageLabel": m159,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperLibraryFull": m111,
+    "wallpaperLibraryFull": m160,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
@@ -3088,11 +3597,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Web dashboard"),
+    "webDashboardAccess": MessageLookupByLibrary.simpleMessage("Access"),
     "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
       "Dashboard access ended",
     ),
+    "webDashboardAccessInApp": MessageLookupByLibrary.simpleMessage(
+      "In the app",
+    ),
+    "webDashboardAccessInBrowser": MessageLookupByLibrary.simpleMessage(
+      "In the browser",
+    ),
+    "webDashboardAccessOff": MessageLookupByLibrary.simpleMessage("Off"),
     "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
-      "Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.",
+      "Access is local and protected by a secret. Opening a dashboard does not change your saved external controller settings.",
     ),
     "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Could not apply the dashboard configuration.",
@@ -3136,9 +3653,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
       "Extracting dashboard",
     ),
-    "webDashboardFiles": MessageLookupByLibrary.simpleMessage(
-      "Dashboard files",
-    ),
     "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Dashboard"),
     "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
       "Install dashboard",
@@ -3146,7 +3660,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
     ),
-    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Could not open the browser.",
     ),
@@ -3179,13 +3692,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
       "Verifying download",
     ),
+    "webDashboardVersion": MessageLookupByLibrary.simpleMessage("Version"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "writeToSystem": MessageLookupByLibrary.simpleMessage("Write to system"),
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it.",
     ),
-    "yearsAgo": m113,
-    "yearsAgoShort": m114,
+    "yearsAgo": m161,
+    "yearsAgoShort": m162,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

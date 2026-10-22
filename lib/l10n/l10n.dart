@@ -11904,6 +11904,2406 @@ class AppLocalizations {
     );
   }
 
+  /// `Auto routing`
+  String get rcxTitle {
+    return Intl.message('Auto routing', name: 'rcxTitle', desc: '', args: []);
+  }
+
+  /// `Make this group smart`
+  String get rcxMakeSmart {
+    return Intl.message(
+      'Make this group smart',
+      name: 'rcxMakeSmart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.`
+  String get rcxMakeSmartHint {
+    return Intl.message(
+      'ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.',
+      name: 'rcxMakeSmartHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn off auto routing`
+  String get rcxTurnOff {
+    return Intl.message(
+      'Turn off auto routing',
+      name: 'rcxTurnOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change server`
+  String get rcxChangeServer {
+    return Intl.message(
+      'Change server',
+      name: 'rcxChangeServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back to auto`
+  String get rcxBackToAuto {
+    return Intl.message(
+      'Back to auto',
+      name: 'rcxBackToAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Control`
+  String get rcxControl {
+    return Intl.message('Control', name: 'rcxControl', desc: '', args: []);
+  }
+
+  /// `Auto`
+  String get rcxModeAuto {
+    return Intl.message('Auto', name: 'rcxModeAuto', desc: '', args: []);
+  }
+
+  /// `Chooses and switches servers by the profile`
+  String get rcxModeAutoHint {
+    return Intl.message(
+      'Chooses and switches servers by the profile',
+      name: 'rcxModeAutoHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manual`
+  String get rcxModeManual {
+    return Intl.message('Manual', name: 'rcxModeManual', desc: '', args: []);
+  }
+
+  /// `You choose; auto routing never switches`
+  String get rcxModeManualHint {
+    return Intl.message(
+      'You choose; auto routing never switches',
+      name: 'rcxModeManualHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pinned: {node}`
+  String rcxPinned(String node) {
+    return Intl.message(
+      'Pinned: $node',
+      name: 'rcxPinned',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Pinned`
+  String get rcxPinnedLabel {
+    return Intl.message('Pinned', name: 'rcxPinnedLabel', desc: '', args: []);
+  }
+
+  /// `Left only when it fails, returned to when it recovers`
+  String get rcxPinnedHint {
+    return Intl.message(
+      'Left only when it fails, returned to when it recovers',
+      name: 'rcxPinnedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile`
+  String get rcxProfile {
+    return Intl.message('Profile', name: 'rcxProfile', desc: '', args: []);
+  }
+
+  /// `Built-in`
+  String get rcxSourceBuiltin {
+    return Intl.message(
+      'Built-in',
+      name: 'rcxSourceBuiltin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `From provider`
+  String get rcxSourceProvider {
+    return Intl.message(
+      'From provider',
+      name: 'rcxSourceProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mine`
+  String get rcxSourceUser {
+    return Intl.message('Mine', name: 'rcxSourceUser', desc: '', args: []);
+  }
+
+  /// `Simple`
+  String get rcxLevelSimple {
+    return Intl.message('Simple', name: 'rcxLevelSimple', desc: '', args: []);
+  }
+
+  /// `Advanced`
+  String get rcxLevelAdvanced {
+    return Intl.message(
+      'Advanced',
+      name: 'rcxLevelAdvanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Servers`
+  String get rcxServers {
+    return Intl.message('Servers', name: 'rcxServers', desc: '', args: []);
+  }
+
+  /// `Name pattern`
+  String get rcxServersPattern {
+    return Intl.message(
+      'Name pattern',
+      name: 'rcxServersPattern',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} of {total} match`
+  String rcxServersMatch(int count, int total) {
+    return Intl.message(
+      '$count of $total match',
+      name: 'rcxServersMatch',
+      desc: '',
+      args: [count, total],
+    );
+  }
+
+  /// `The pattern is not a valid regular expression`
+  String get rcxPatternInvalid {
+    return Intl.message(
+      'The pattern is not a valid regular expression',
+      name: 'rcxPatternInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switching`
+  String get rcxSwitching {
+    return Intl.message('Switching', name: 'rcxSwitching', desc: '', args: []);
+  }
+
+  /// `Rarely`
+  String get rcxFeelCalm {
+    return Intl.message('Rarely', name: 'rcxFeelCalm', desc: '', args: []);
+  }
+
+  /// `Often`
+  String get rcxFeelEager {
+    return Intl.message('Often', name: 'rcxFeelEager', desc: '', args: []);
+  }
+
+  /// `Balanced`
+  String get rcxBalanced {
+    return Intl.message('Balanced', name: 'rcxBalanced', desc: '', args: []);
+  }
+
+  /// `Checks`
+  String get rcxChecks {
+    return Intl.message('Checks', name: 'rcxChecks', desc: '', args: []);
+  }
+
+  /// `Economical`
+  String get rcxEnergyEco {
+    return Intl.message('Economical', name: 'rcxEnergyEco', desc: '', args: []);
+  }
+
+  /// `Precise`
+  String get rcxEnergyPrecise {
+    return Intl.message(
+      'Precise',
+      name: 'rcxEnergyPrecise',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checks today: {requests} · {used} of {cap}`
+  String rcxEnergyToday(int requests, String used, String cap) {
+    return Intl.message(
+      'Checks today: $requests · $used of $cap',
+      name: 'rcxEnergyToday',
+      desc: '',
+      args: [requests, used, cap],
+    );
+  }
+
+  /// `Why this server`
+  String get rcxWhy {
+    return Intl.message('Why this server', name: 'rcxWhy', desc: '', args: []);
+  }
+
+  /// `History`
+  String get rcxHistory {
+    return Intl.message('History', name: 'rcxHistory', desc: '', args: []);
+  }
+
+  /// `Working`
+  String get rcxHealthAlive {
+    return Intl.message('Working', name: 'rcxHealthAlive', desc: '', args: []);
+  }
+
+  /// `Worked before`
+  String get rcxHealthStale {
+    return Intl.message(
+      'Worked before',
+      name: 'rcxHealthStale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not checked`
+  String get rcxHealthUnknown {
+    return Intl.message(
+      'Not checked',
+      name: 'rcxHealthUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not working`
+  String get rcxHealthDead {
+    return Intl.message(
+      'Not working',
+      name: 'rcxHealthDead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Controlled manually`
+  String get rcxReasonManual {
+    return Intl.message(
+      'Controlled manually',
+      name: 'rcxReasonManual',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Holding the pinned server`
+  String get rcxReasonHoldPinned {
+    return Intl.message(
+      'Holding the pinned server',
+      name: 'rcxReasonHoldPinned',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switched to the pinned server {node}`
+  String rcxReasonSwitchPinned(String node) {
+    return Intl.message(
+      'Switched to the pinned server $node',
+      name: 'rcxReasonSwitchPinned',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `No working server in the pool; holding the current one`
+  String get rcxReasonStranded {
+    return Intl.message(
+      'No working server in the pool; holding the current one',
+      name: 'rcxReasonStranded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No working server; fell back to {node}`
+  String rcxReasonSwitchStranded(String node) {
+    return Intl.message(
+      'No working server; fell back to $node',
+      name: 'rcxReasonSwitchStranded',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Selected the best available server`
+  String get rcxReasonInitial {
+    return Intl.message(
+      'Selected the best available server',
+      name: 'rcxReasonInitial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Changed server; {from} is skipped for 15 minutes`
+  String rcxReasonChangeServer(String from) {
+    return Intl.message(
+      'Changed server; $from is skipped for 15 minutes',
+      name: 'rcxReasonChangeServer',
+      desc: '',
+      args: [from],
+    );
+  }
+
+  /// `{from} stopped working; switched to the best standby`
+  String rcxReasonFailover(String from) {
+    return Intl.message(
+      '$from stopped working; switched to the best standby',
+      name: 'rcxReasonFailover',
+      desc: '',
+      args: [from],
+    );
+  }
+
+  /// `{from} is no longer in the pool`
+  String rcxReasonOutOfPool(String from) {
+    return Intl.message(
+      '$from is no longer in the pool',
+      name: 'rcxReasonOutOfPool',
+      desc: '',
+      args: [from],
+    );
+  }
+
+  /// `No other working server to change to`
+  String get rcxReasonNoAlternative {
+    return Intl.message(
+      'No other working server to change to',
+      name: 'rcxReasonNoAlternative',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is the best server`
+  String get rcxReasonBest {
+    return Intl.message(
+      'This is the best server',
+      name: 'rcxReasonBest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking a better candidate`
+  String get rcxReasonChecking {
+    return Intl.message(
+      'Checking a better candidate',
+      name: 'rcxReasonChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Working; kept until it fails`
+  String get rcxReasonWorking {
+    return Intl.message(
+      'Working; kept until it fails',
+      name: 'rcxReasonWorking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switched recently; holding before the next change`
+  String get rcxReasonDwell {
+    return Intl.message(
+      'Switched recently; holding before the next change',
+      name: 'rcxReasonDwell',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch limit reached ({limit} per hour)`
+  String rcxReasonFlapLimit(int limit) {
+    return Intl.message(
+      'Switch limit reached ($limit per hour)',
+      name: 'rcxReasonFlapLimit',
+      desc: '',
+      args: [limit],
+    );
+  }
+
+  /// `A faster server needs another measurement`
+  String get rcxReasonConfirming {
+    return Intl.message(
+      'A faster server needs another measurement',
+      name: 'rcxReasonConfirming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moved to a server in “{tier}”`
+  String rcxReasonBetterTier(String tier) {
+    return Intl.message(
+      'Moved to a server in “$tier”',
+      name: 'rcxReasonBetterTier',
+      desc: '',
+      args: [tier],
+    );
+  }
+
+  /// `Switched from {from}: {gain} ms faster`
+  String rcxReasonFaster(String from, int gain) {
+    return Intl.message(
+      'Switched from $from: $gain ms faster',
+      name: 'rcxReasonFaster',
+      desc: '',
+      args: [from, gain],
+    );
+  }
+
+  /// `Could not select the server`
+  String get rcxReasonSelectFailed {
+    return Intl.message(
+      'Could not select the server',
+      name: 'rcxReasonSelectFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Will switch to {node} once a check confirms it`
+  String rcxUntilCheck(String node) {
+    return Intl.message(
+      'Will switch to $node once a check confirms it',
+      name: 'rcxUntilCheck',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `May switch to {node} in {minutes} min`
+  String rcxUntilDwell(String node, int minutes) {
+    return Intl.message(
+      'May switch to $node in $minutes min',
+      name: 'rcxUntilDwell',
+      desc: '',
+      args: [node, minutes],
+    );
+  }
+
+  /// `Will switch to {node} if it stays {gain} ms faster`
+  String rcxUntilConfirm(String node, int gain) {
+    return Intl.message(
+      'Will switch to $node if it stays $gain ms faster',
+      name: 'rcxUntilConfirm',
+      desc: '',
+      args: [node, gain],
+    );
+  }
+
+  /// `Not in the pool`
+  String get rcxExcludedNoMatch {
+    return Intl.message(
+      'Not in the pool',
+      name: 'rcxExcludedNoMatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Excluded by the profile`
+  String get rcxExcludedByProfile {
+    return Intl.message(
+      'Excluded by the profile',
+      name: 'rcxExcludedByProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not a server`
+  String get rcxExcludedUnroutable {
+    return Intl.message(
+      'Not a server',
+      name: 'rcxExcludedUnroutable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skipped after “Change server”`
+  String get rcxExcludedCooldown {
+    return Intl.message(
+      'Skipped after “Change server”',
+      name: 'rcxExcludedCooldown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matches no preference`
+  String get rcxExcludedNoTier {
+    return Intl.message(
+      'Matches no preference',
+      name: 'rcxExcludedNoTier',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile {profile} was not found; the default is used`
+  String rcxProblemProfileMissing(String profile) {
+    return Intl.message(
+      'Profile $profile was not found; the default is used',
+      name: 'rcxProblemProfileMissing',
+      desc: '',
+      args: [profile],
+    );
+  }
+
+  /// `Profile error: {error}`
+  String rcxProblemProfileInvalid(String error) {
+    return Intl.message(
+      'Profile error: $error',
+      name: 'rcxProblemProfileInvalid',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `This group is not a selector in the current config`
+  String get rcxProblemGroupUnavailable {
+    return Intl.message(
+      'This group is not a selector in the current config',
+      name: 'rcxProblemGroupUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The group has no servers`
+  String get rcxProblemGroupEmpty {
+    return Intl.message(
+      'The group has no servers',
+      name: 'rcxProblemGroupEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network looks down; no server is blamed`
+  String get rcxReasonNetworkSuspect {
+    return Intl.message(
+      'The network looks down; no server is blamed',
+      name: 'rcxReasonNetworkSuspect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network changed`
+  String get rcxReasonNetworkChanged {
+    return Intl.message(
+      'Network changed',
+      name: 'rcxReasonNetworkChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{node} stopped working`
+  String rcxJournalFailure(String node) {
+    return Intl.message(
+      '$node stopped working',
+      name: 'rcxJournalFailure',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Routing state could not be saved: {error}`
+  String rcxProblemStoreFailed(String error) {
+    return Intl.message(
+      'Routing state could not be saved: $error',
+      name: 'rcxProblemStoreFailed',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Change to`
+  String get rcxChangeTo {
+    return Intl.message('Change to', name: 'rcxChangeTo', desc: '', args: []);
+  }
+
+  /// `Any`
+  String get rcxAnyServer {
+    return Intl.message('Any', name: 'rcxAnyServer', desc: '', args: []);
+  }
+
+  /// `Add a pattern`
+  String get rcxAddPool {
+    return Intl.message(
+      'Add a pattern',
+      name: 'rcxAddPool',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network: {kind}`
+  String rcxNetwork(String kind) {
+    return Intl.message(
+      'Network: $kind',
+      name: 'rcxNetwork',
+      desc: '',
+      args: [kind],
+    );
+  }
+
+  /// `open internet`
+  String get rcxKindOpen {
+    return Intl.message(
+      'open internet',
+      name: 'rcxKindOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `whitelists only`
+  String get rcxKindWhitelist {
+    return Intl.message(
+      'whitelists only',
+      name: 'rcxKindWhitelist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `sign-in page`
+  String get rcxKindPortal {
+    return Intl.message(
+      'sign-in page',
+      name: 'rcxKindPortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `checking`
+  String get rcxKindChecking {
+    return Intl.message(
+      'checking',
+      name: 'rcxKindChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paused while the network is “{kind}”: nothing is checked or switched`
+  String rcxReasonPaused(String kind) {
+    return Intl.message(
+      'Paused while the network is “$kind”: nothing is checked or switched',
+      name: 'rcxReasonPaused',
+      desc: '',
+      args: [kind],
+    );
+  }
+
+  /// `Not checked yet`
+  String get rcxExcludedPending {
+    return Intl.message(
+      'Not checked yet',
+      name: 'rcxExcludedPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `may reach “{tier}” after a check`
+  String rcxPendingTier(String tier) {
+    return Intl.message(
+      'may reach “$tier” after a check',
+      name: 'rcxPendingTier',
+      desc: '',
+      args: [tier],
+    );
+  }
+
+  /// `opens blocked`
+  String get rcxCheckOpen {
+    return Intl.message(
+      'opens blocked',
+      name: 'rcxCheckOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `exit {country}`
+  String rcxExit(String country) {
+    return Intl.message(
+      'exit $country',
+      name: 'rcxExit',
+      desc: '',
+      args: [country],
+    );
+  }
+
+  /// `Direct sites now go through this group`
+  String get rcxReasonSplitOn {
+    return Intl.message(
+      'Direct sites now go through this group',
+      name: 'rcxReasonSplitOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct sites go direct again`
+  String get rcxReasonSplitOff {
+    return Intl.message(
+      'Direct sites go direct again',
+      name: 'rcxReasonSplitOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct sites through this group`
+  String get rcxDirectSplit {
+    return Intl.message(
+      'Direct sites through this group',
+      name: 'rcxDirectSplit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When sites your rules send direct stop opening, they go through this group. Local addresses always stay direct.`
+  String get rcxDirectSplitHint {
+    return Intl.message(
+      'When sites your rules send direct stop opening, they go through this group. Local addresses always stay direct.',
+      name: 'rcxDirectSplitHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On now`
+  String get rcxDirectSplitActive {
+    return Intl.message(
+      'On now',
+      name: 'rcxDirectSplitActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ready: direct sites still open`
+  String get rcxDirectSplitStandby {
+    return Intl.message(
+      'Ready: direct sites still open',
+      name: 'rcxDirectSplitStandby',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add tag`
+  String get rcxAddTag {
+    return Intl.message(
+      'Add tag',
+      name: 'rcxAddTag',
+      desc: 'Row: add a named server filter (tag) to a routing profile',
+      args: [],
+    );
+  }
+
+  /// `Add tier`
+  String get rcxAddTier {
+    return Intl.message(
+      'Add tier',
+      name: 'rcxAddTier',
+      desc: 'Row/title: add a preference tier to a routing profile',
+      args: [],
+    );
+  }
+
+  /// `Advanced`
+  String get rcxAdvanced {
+    return Intl.message(
+      'Advanced',
+      name: 'rcxAdvanced',
+      desc: 'Section title for advanced profile parts edited as YAML',
+      args: [],
+    );
+  }
+
+  /// `These parts are edited as YAML.`
+  String get rcxAdvancedHint {
+    return Intl.message(
+      'These parts are edited as YAML.',
+      name: 'rcxAdvancedHint',
+      desc: 'Footer under the advanced section',
+      args: [],
+    );
+  }
+
+  /// `Based on`
+  String get rcxBasedOn {
+    return Intl.message(
+      'Based on',
+      name: 'rcxBasedOn',
+      desc: 'Row: the profile this one extends',
+      args: [],
+    );
+  }
+
+  /// `Behaviour`
+  String get rcxBehaviour {
+    return Intl.message(
+      'Behaviour',
+      name: 'rcxBehaviour',
+      desc: 'Section title: switching, checks, no-candidate behaviour',
+      args: [],
+    );
+  }
+
+  /// `Bring changes over`
+  String get rcxBringChanges {
+    return Intl.message(
+      'Bring changes over',
+      name: 'rcxBringChanges',
+      desc: 'Action: merge changes of the source profile into the user\'s copy',
+      args: [],
+    );
+  }
+
+  /// `Your own edits stay as they are`
+  String get rcxBringChangesHint {
+    return Intl.message(
+      'Your own edits stay as they are',
+      name: 'rcxBringChangesHint',
+      desc: 'Subtitle of bring changes over',
+      args: [],
+    );
+  }
+
+  /// `Would pick {pick} instead of {now}`
+  String rcxCheckDifferent(String pick, String now) {
+    return Intl.message(
+      'Would pick $pick instead of $now',
+      name: 'rcxCheckDifferent',
+      desc: 'Simulation result',
+      args: [pick, now],
+    );
+  }
+
+  /// `Would find no server`
+  String get rcxCheckNone {
+    return Intl.message(
+      'Would find no server',
+      name: 'rcxCheckNone',
+      desc: 'Simulation result',
+      args: [],
+    );
+  }
+
+  /// `Check on {group}`
+  String rcxCheckOn(String group) {
+    return Intl.message(
+      'Check on $group',
+      name: 'rcxCheckOn',
+      desc: 'Section title: simulation of the profile on a proxy group',
+      args: [group],
+    );
+  }
+
+  /// `Would keep {pick}`
+  String rcxCheckSame(String pick) {
+    return Intl.message(
+      'Would keep $pick',
+      name: 'rcxCheckSame',
+      desc: 'Simulation result',
+      args: [pick],
+    );
+  }
+
+  /// `Availability checks`
+  String get rcxChecksDeclared {
+    return Intl.message(
+      'Availability checks',
+      name: 'rcxChecksDeclared',
+      desc: 'Row title: checks declared by the profile',
+      args: [],
+    );
+  }
+
+  /// `Add condition`
+  String get rcxCondAdd {
+    return Intl.message(
+      'Add condition',
+      name: 'rcxCondAdd',
+      desc: 'Row/title',
+      args: [],
+    );
+  }
+
+  /// `All conditions`
+  String get rcxCondAll {
+    return Intl.message(
+      'All conditions',
+      name: 'rcxCondAll',
+      desc: 'Join choice: all clauses must hold',
+      args: [],
+    );
+  }
+
+  /// `Always`
+  String get rcxCondAlways {
+    return Intl.message(
+      'Always',
+      name: 'rcxCondAlways',
+      desc: 'Empty network condition means always',
+      args: [],
+    );
+  }
+
+  /// `Any condition`
+  String get rcxCondAny {
+    return Intl.message(
+      'Any condition',
+      name: 'rcxCondAny',
+      desc: 'Join choice: one clause is enough',
+      args: [],
+    );
+  }
+
+  /// `Any server`
+  String get rcxCondAnyServer {
+    return Intl.message(
+      'Any server',
+      name: 'rcxCondAnyServer',
+      desc: 'Empty server condition means any server',
+      args: [],
+    );
+  }
+
+  /// `Field`
+  String get rcxCondField {
+    return Intl.message(
+      'Field',
+      name: 'rcxCondField',
+      desc: 'Row: which attribute a clause tests',
+      args: [],
+    );
+  }
+
+  /// `Ignore case`
+  String get rcxCondIgnoreCase {
+    return Intl.message(
+      'Ignore case',
+      name: 'rcxCondIgnoreCase',
+      desc: 'Switch for pattern matching',
+      args: [],
+    );
+  }
+
+  /// `Match`
+  String get rcxCondMatch {
+    return Intl.message(
+      'Match',
+      name: 'rcxCondMatch',
+      desc: 'Section title: how clauses combine',
+      args: [],
+    );
+  }
+
+  /// `None declared`
+  String get rcxCondNoNames {
+    return Intl.message(
+      'None declared',
+      name: 'rcxCondNoNames',
+      desc: 'Value when the profile declares no tags/checks/diagnostics',
+      args: [],
+    );
+  }
+
+  /// `not`
+  String get rcxCondNotPrefix {
+    return Intl.message(
+      'not',
+      name: 'rcxCondNotPrefix',
+      desc: 'Lowercase word placed before a negated clause, e.g. \'not Exit country is RU\'',
+      args: [],
+    );
+  }
+
+  /// `Operator`
+  String get rcxCondOp {
+    return Intl.message(
+      'Operator',
+      name: 'rcxCondOp',
+      desc: 'Row: comparison operator',
+      args: [],
+    );
+  }
+
+  /// `Pattern`
+  String get rcxCondPattern {
+    return Intl.message(
+      'Pattern',
+      name: 'rcxCondPattern',
+      desc: 'Row: regular expression',
+      args: [],
+    );
+  }
+
+  /// `As text`
+  String get rcxCondText {
+    return Intl.message(
+      'As text',
+      name: 'rcxCondText',
+      desc: 'Section title: the condition in the profile language',
+      args: [],
+    );
+  }
+
+  /// `This condition nests groups, so it is edited as text.`
+  String get rcxCondTooComplex {
+    return Intl.message(
+      'This condition nests groups, so it is edited as text.',
+      name: 'rcxCondTooComplex',
+      desc: 'Shown instead of the clause list',
+      args: [],
+    );
+  }
+
+  /// `Value`
+  String get rcxCondValue {
+    return Intl.message('Value', name: 'rcxCondValue', desc: 'Row', args: []);
+  }
+
+  /// `Values, comma-separated`
+  String get rcxCondValues {
+    return Intl.message(
+      'Values, comma-separated',
+      name: 'rcxCondValues',
+      desc: 'Row',
+      args: [],
+    );
+  }
+
+  /// `Allow`
+  String get rcxConsentAllow {
+    return Intl.message(
+      'Allow',
+      name: 'rcxConsentAllow',
+      desc: 'Button: allow the profile to contact the listed hosts',
+      args: [],
+    );
+  }
+
+  /// `“{profile}” wants to check these sites`
+  String rcxConsentAsk(String profile) {
+    return Intl.message(
+      '“$profile” wants to check these sites',
+      name: 'rcxConsentAsk',
+      desc: 'Consent prompt',
+      args: [profile],
+    );
+  }
+
+  /// `Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network.`
+  String get rcxConsentHint {
+    return Intl.message(
+      'Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network.',
+      name: 'rcxConsentHint',
+      desc: 'Footer of consent section',
+      args: [],
+    );
+  }
+
+  /// `Permission needed`
+  String get rcxConsentTitle {
+    return Intl.message(
+      'Permission needed',
+      name: 'rcxConsentTitle',
+      desc: 'Section title',
+      args: [],
+    );
+  }
+
+  /// `Sites it contacts`
+  String get rcxContacts {
+    return Intl.message(
+      'Sites it contacts',
+      name: 'rcxContacts',
+      desc: 'Section title: hosts the profile makes the app contact',
+      args: [],
+    );
+  }
+
+  /// `Third-party sites belong neither to your provider nor to the built-in profiles.`
+  String get rcxContactsHint {
+    return Intl.message(
+      'Third-party sites belong neither to your provider nor to the built-in profiles.',
+      name: 'rcxContactsHint',
+      desc: 'Footer',
+      args: [],
+    );
+  }
+
+  /// `Delete “{profile}”?`
+  String rcxDeleteProfile(String profile) {
+    return Intl.message(
+      'Delete “$profile”?',
+      name: 'rcxDeleteProfile',
+      desc: 'Confirmation',
+      args: [profile],
+    );
+  }
+
+  /// `Duplicate and edit`
+  String get rcxDuplicate {
+    return Intl.message(
+      'Duplicate and edit',
+      name: 'rcxDuplicate',
+      desc: 'Menu item',
+      args: [],
+    );
+  }
+
+  /// `Exit-country check`
+  String get rcxExitCheck {
+    return Intl.message(
+      'Exit-country check',
+      name: 'rcxExitCheck',
+      desc: 'Row title',
+      args: [],
+    );
+  }
+
+  /// `Export`
+  String get rcxExport {
+    return Intl.message(
+      'Export',
+      name: 'rcxExport',
+      desc: 'Menu item / sheet title',
+      args: [],
+    );
+  }
+
+  /// `Working`
+  String get rcxFieldAlive {
+    return Intl.message(
+      'Working',
+      name: 'rcxFieldAlive',
+      desc: 'Condition field: server is alive',
+      args: [],
+    );
+  }
+
+  /// `In use`
+  String get rcxFieldCurrent {
+    return Intl.message(
+      'In use',
+      name: 'rcxFieldCurrent',
+      desc: 'Condition field: the server in use now',
+      args: [],
+    );
+  }
+
+  /// `Not working`
+  String get rcxFieldDead {
+    return Intl.message(
+      'Not working',
+      name: 'rcxFieldDead',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Network diagnostic`
+  String get rcxFieldDiag {
+    return Intl.message(
+      'Network diagnostic',
+      name: 'rcxFieldDiag',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Entry country`
+  String get rcxFieldEntry {
+    return Intl.message(
+      'Entry country',
+      name: 'rcxFieldEntry',
+      desc: 'Condition field: country of the server address',
+      args: [],
+    );
+  }
+
+  /// `Exit country`
+  String get rcxFieldExit {
+    return Intl.message(
+      'Exit country',
+      name: 'rcxFieldExit',
+      desc: 'Condition field: verified country traffic exits in',
+      args: [],
+    );
+  }
+
+  /// `Fails check`
+  String get rcxFieldFails {
+    return Intl.message(
+      'Fails check',
+      name: 'rcxFieldFails',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Network kind`
+  String get rcxFieldKind {
+    return Intl.message(
+      'Network kind',
+      name: 'rcxFieldKind',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Latency, ms`
+  String get rcxFieldLatency {
+    return Intl.message(
+      'Latency, ms',
+      name: 'rcxFieldLatency',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Measured`
+  String get rcxFieldMeasured {
+    return Intl.message(
+      'Measured',
+      name: 'rcxFieldMeasured',
+      desc: 'Condition field: has a latency sample',
+      args: [],
+    );
+  }
+
+  /// `Metered network`
+  String get rcxFieldMetered {
+    return Intl.message(
+      'Metered network',
+      name: 'rcxFieldMetered',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Name`
+  String get rcxFieldName {
+    return Intl.message(
+      'Name',
+      name: 'rcxFieldName',
+      desc: 'Condition field: server name',
+      args: [],
+    );
+  }
+
+  /// `Passes check`
+  String get rcxFieldPasses {
+    return Intl.message(
+      'Passes check',
+      name: 'rcxFieldPasses',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Sign-in page`
+  String get rcxFieldPortal {
+    return Intl.message(
+      'Sign-in page',
+      name: 'rcxFieldPortal',
+      desc: 'Condition field: captive portal network',
+      args: [],
+    );
+  }
+
+  /// `Provider`
+  String get rcxFieldProvider {
+    return Intl.message(
+      'Provider',
+      name: 'rcxFieldProvider',
+      desc: 'Condition field: proxy provider name',
+      args: [],
+    );
+  }
+
+  /// `Server address`
+  String get rcxFieldServer {
+    return Intl.message(
+      'Server address',
+      name: 'rcxFieldServer',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Tag`
+  String get rcxFieldTag {
+    return Intl.message(
+      'Tag',
+      name: 'rcxFieldTag',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `Connection type`
+  String get rcxFieldTransport {
+    return Intl.message(
+      'Connection type',
+      name: 'rcxFieldTransport',
+      desc: 'Condition field: wifi, cellular, ethernet',
+      args: [],
+    );
+  }
+
+  /// `Protocol`
+  String get rcxFieldType {
+    return Intl.message(
+      'Protocol',
+      name: 'rcxFieldType',
+      desc: 'Condition field: proxy type',
+      args: [],
+    );
+  }
+
+  /// `Supports UDP`
+  String get rcxFieldUdp {
+    return Intl.message(
+      'Supports UDP',
+      name: 'rcxFieldUdp',
+      desc: 'Condition field',
+      args: [],
+    );
+  }
+
+  /// `General`
+  String get rcxGeneral {
+    return Intl.message(
+      'General',
+      name: 'rcxGeneral',
+      desc: 'Section title',
+      args: [],
+    );
+  }
+
+  /// `Earlier versions`
+  String get rcxHistoryVersions {
+    return Intl.message(
+      'Earlier versions',
+      name: 'rcxHistoryVersions',
+      desc: 'Menu item / sheet title',
+      args: [],
+    );
+  }
+
+  /// `Add to my profiles`
+  String get rcxImportAdd {
+    return Intl.message(
+      'Add to my profiles',
+      name: 'rcxImportAdd',
+      desc: 'Confirm button',
+      args: [],
+    );
+  }
+
+  /// `Start the app's core to check this profile.`
+  String get rcxImportNeedsCore {
+    return Intl.message(
+      'Start the app\'s core to check this profile.',
+      name: 'rcxImportNeedsCore',
+      desc: 'Error',
+      args: [],
+    );
+  }
+
+  /// `Import routing profile`
+  String get rcxImportTitle {
+    return Intl.message(
+      'Import routing profile',
+      name: 'rcxImportTitle',
+      desc: 'Page title',
+      args: [],
+    );
+  }
+
+  /// `Added “{profile}”`
+  String rcxImported(String profile) {
+    return Intl.message(
+      'Added “$profile”',
+      name: 'rcxImported',
+      desc: 'Toast',
+      args: [profile],
+    );
+  }
+
+  /// `Last resort`
+  String get rcxLastResort {
+    return Intl.message(
+      'Last resort',
+      name: 'rcxLastResort',
+      desc: 'Switch/label: tier used only when better tiers are empty',
+      args: [],
+    );
+  }
+
+  /// `A last-resort tier is used only when no better tier has a server.`
+  String get rcxLastResortHint {
+    return Intl.message(
+      'A last-resort tier is used only when no better tier has a server.',
+      name: 'rcxLastResortHint',
+      desc: 'Footer',
+      args: [],
+    );
+  }
+
+  /// `Level`
+  String get rcxLevel {
+    return Intl.message(
+      'Level',
+      name: 'rcxLevel',
+      desc: 'Row: simple or advanced',
+      args: [],
+    );
+  }
+
+  /// `Line {line}: {text}`
+  String rcxLine(int line, String text) {
+    return Intl.message(
+      'Line $line: $text',
+      name: 'rcxLine',
+      desc: 'Error with line number',
+      args: [line, text],
+    );
+  }
+
+  /// `Check {check} is never used, so it never runs`
+  String rcxLintCheckUnused(String check) {
+    return Intl.message(
+      'Check $check is never used, so it never runs',
+      name: 'rcxLintCheckUnused',
+      desc: 'Lint warning',
+      args: [check],
+    );
+  }
+
+  /// `Contacts third-party sites: {hosts}`
+  String rcxLintConsent(String hosts) {
+    return Intl.message(
+      'Contacts third-party sites: $hosts',
+      name: 'rcxLintConsent',
+      desc: 'Lint warning',
+      args: [hosts],
+    );
+  }
+
+  /// `No server of {group} passes the filter`
+  String rcxLintPoolEmpty(String group) {
+    return Intl.message(
+      'No server of $group passes the filter',
+      name: 'rcxLintPoolEmpty',
+      desc: 'Lint warning',
+      args: [group],
+    );
+  }
+
+  /// `Tag {tag} is never used`
+  String rcxLintTagUnused(String tag) {
+    return Intl.message(
+      'Tag $tag is never used',
+      name: 'rcxLintTagUnused',
+      desc: 'Lint warning',
+      args: [tag],
+    );
+  }
+
+  /// `No server of {group} is in “{tier}” right now`
+  String rcxLintTierEmpty(String tier, String group) {
+    return Intl.message(
+      'No server of $group is in “$tier” right now',
+      name: 'rcxLintTierEmpty',
+      desc: 'Lint warning',
+      args: [tier, group],
+    );
+  }
+
+  /// `“{tier}” repeats the condition of “{after}”, so nothing lands in it`
+  String rcxLintTierUnreachable(String tier, String after) {
+    return Intl.message(
+      '“$tier” repeats the condition of “$after”, so nothing lands in it',
+      name: 'rcxLintTierUnreachable',
+      desc: 'Lint warning',
+      args: [tier, after],
+    );
+  }
+
+  /// `Couldn't bring the changes over`
+  String get rcxMergeFailed {
+    return Intl.message(
+      'Couldn\'t bring the changes over',
+      name: 'rcxMergeFailed',
+      desc: 'Toast',
+      args: [],
+    );
+  }
+
+  /// `Changes brought over`
+  String get rcxMerged {
+    return Intl.message(
+      'Changes brought over',
+      name: 'rcxMerged',
+      desc: 'Toast',
+      args: [],
+    );
+  }
+
+  /// `Brought over; you changed these too, so yours were kept: {keys}`
+  String rcxMergedConflicts(String keys) {
+    return Intl.message(
+      'Brought over; you changed these too, so yours were kept: $keys',
+      name: 'rcxMergedConflicts',
+      desc: 'Toast',
+      args: [keys],
+    );
+  }
+
+  /// `Move down`
+  String get rcxMoveDown {
+    return Intl.message(
+      'Move down',
+      name: 'rcxMoveDown',
+      desc: 'Menu',
+      args: [],
+    );
+  }
+
+  /// `Move up`
+  String get rcxMoveUp {
+    return Intl.message('Move up', name: 'rcxMoveUp', desc: 'Menu', args: []);
+  }
+
+  /// `Needs your permission`
+  String get rcxNeedsConsent {
+    return Intl.message(
+      'Needs your permission',
+      name: 'rcxNeedsConsent',
+      desc: 'Subtitle/reason',
+      args: [],
+    );
+  }
+
+  /// `Network kinds`
+  String get rcxNetworkKinds {
+    return Intl.message(
+      'Network kinds',
+      name: 'rcxNetworkKinds',
+      desc: 'Row title',
+      args: [],
+    );
+  }
+
+  /// `New profile`
+  String get rcxNewProfile {
+    return Intl.message(
+      'New profile',
+      name: 'rcxNewProfile',
+      desc: 'Row / default title',
+      args: [],
+    );
+  }
+
+  /// `fails`
+  String get rcxOpFail {
+    return Intl.message(
+      'fails',
+      name: 'rcxOpFail',
+      desc: 'Operator: diagnostic fails',
+      args: [],
+    );
+  }
+
+  /// `is one of`
+  String get rcxOpIn {
+    return Intl.message(
+      'is one of',
+      name: 'rcxOpIn',
+      desc: 'Operator',
+      args: [],
+    );
+  }
+
+  /// `is`
+  String get rcxOpIs {
+    return Intl.message('is', name: 'rcxOpIs', desc: 'Operator', args: []);
+  }
+
+  /// `is not`
+  String get rcxOpIsNot {
+    return Intl.message(
+      'is not',
+      name: 'rcxOpIsNot',
+      desc: 'Operator',
+      args: [],
+    );
+  }
+
+  /// `matches`
+  String get rcxOpMatches {
+    return Intl.message(
+      'matches',
+      name: 'rcxOpMatches',
+      desc: 'Operator: regex',
+      args: [],
+    );
+  }
+
+  /// `succeeds`
+  String get rcxOpOk {
+    return Intl.message(
+      'succeeds',
+      name: 'rcxOpOk',
+      desc: 'Operator: diagnostic succeeds',
+      args: [],
+    );
+  }
+
+  /// `Per-network changes`
+  String get rcxOverrides {
+    return Intl.message(
+      'Per-network changes',
+      name: 'rcxOverrides',
+      desc: 'Row title: overrides by network kind',
+      args: [],
+    );
+  }
+
+  /// `Leave out`
+  String get rcxPoolExclude {
+    return Intl.message(
+      'Leave out',
+      name: 'rcxPoolExclude',
+      desc: 'Row: servers excluded from the pool',
+      args: [],
+    );
+  }
+
+  /// `Use`
+  String get rcxPoolInclude {
+    return Intl.message(
+      'Use',
+      name: 'rcxPoolInclude',
+      desc: 'Row: servers included in the pool',
+      args: [],
+    );
+  }
+
+  /// `Name`
+  String get rcxProfileName {
+    return Intl.message(
+      'Name',
+      name: 'rcxProfileName',
+      desc: 'Row: profile title',
+      args: [],
+    );
+  }
+
+  /// `The original profile changed`
+  String get rcxSourceChanged {
+    return Intl.message(
+      'The original profile changed',
+      name: 'rcxSourceChanged',
+      desc: 'Section title',
+      args: [],
+    );
+  }
+
+  /// `What changed`
+  String get rcxSourceChanges {
+    return Intl.message(
+      'What changed',
+      name: 'rcxSourceChanges',
+      desc: 'Row/page title: diff of the source',
+      args: [],
+    );
+  }
+
+  /// `When no server fits`
+  String get rcxStranded {
+    return Intl.message(
+      'When no server fits',
+      name: 'rcxStranded',
+      desc: 'Row',
+      args: [],
+    );
+  }
+
+  /// `Go direct`
+  String get rcxStrandedDirect {
+    return Intl.message(
+      'Go direct',
+      name: 'rcxStrandedDirect',
+      desc: 'Choice',
+      args: [],
+    );
+  }
+
+  /// `Keep the current server`
+  String get rcxStrandedHold {
+    return Intl.message(
+      'Keep the current server',
+      name: 'rcxStrandedHold',
+      desc: 'Choice',
+      args: [],
+    );
+  }
+
+  /// `Tag name`
+  String get rcxTagName {
+    return Intl.message(
+      'Tag name',
+      name: 'rcxTagName',
+      desc: 'Input label',
+      args: [],
+    );
+  }
+
+  /// `Latin letters, digits, - and _ only, up to 24`
+  String get rcxTagNameInvalid {
+    return Intl.message(
+      'Latin letters, digits, - and _ only, up to 24',
+      name: 'rcxTagNameInvalid',
+      desc: 'Validation',
+      args: [],
+    );
+  }
+
+  /// `Tags`
+  String get rcxTags {
+    return Intl.message(
+      'Tags',
+      name: 'rcxTags',
+      desc: 'Section title',
+      args: [],
+    );
+  }
+
+  /// `A tag names a set of servers once, for use in tiers as tag(name).`
+  String get rcxTagsHint {
+    return Intl.message(
+      'A tag names a set of servers once, for use in tiers as tag(name).',
+      name: 'rcxTagsHint',
+      desc: 'Footer',
+      args: [],
+    );
+  }
+
+  /// `third party`
+  String get rcxThirdParty {
+    return Intl.message(
+      'third party',
+      name: 'rcxThirdParty',
+      desc: 'Lowercase marker on a host',
+      args: [],
+    );
+  }
+
+  /// `Tier`
+  String get rcxTier {
+    return Intl.message('Tier', name: 'rcxTier', desc: 'Title', args: []);
+  }
+
+  /// `Label`
+  String get rcxTierLabel {
+    return Intl.message('Label', name: 'rcxTierLabel', desc: 'Row', args: []);
+  }
+
+  /// `Servers in this tier`
+  String get rcxTierWhen {
+    return Intl.message(
+      'Servers in this tier',
+      name: 'rcxTierWhen',
+      desc: 'Row: the tier\'s condition',
+      args: [],
+    );
+  }
+
+  /// `Preference order`
+  String get rcxTiers {
+    return Intl.message(
+      'Preference order',
+      name: 'rcxTiers',
+      desc: 'Section title: ordered tiers',
+      args: [],
+    );
+  }
+
+  /// `A server lands in the first tier it fits; the best tier with servers wins. Long press to reorder.`
+  String get rcxTiersHint {
+    return Intl.message(
+      'A server lands in the first tier it fits; the best tier with servers wins. Long press to reorder.',
+      name: 'rcxTiersHint',
+      desc: 'Footer',
+      args: [],
+    );
+  }
+
+  /// `Translations`
+  String get rcxTranslations {
+    return Intl.message(
+      'Translations',
+      name: 'rcxTranslations',
+      desc: 'Row title: languages of the profile\'s l10n',
+      args: [],
+    );
+  }
+
+  /// `check {name}`
+  String rcxUseCheck(String name) {
+    return Intl.message(
+      'check $name',
+      name: 'rcxUseCheck',
+      desc: 'Lowercase: endpoint used by a check',
+      args: [name],
+    );
+  }
+
+  /// `network diagnostic {name}`
+  String rcxUseDiagnostic(String name) {
+    return Intl.message(
+      'network diagnostic $name',
+      name: 'rcxUseDiagnostic',
+      desc: 'Lowercase',
+      args: [name],
+    );
+  }
+
+  /// `exit-country check`
+  String get rcxUseEcho {
+    return Intl.message(
+      'exit-country check',
+      name: 'rcxUseEcho',
+      desc: 'Lowercase',
+      args: [],
+    );
+  }
+
+  /// `Warnings`
+  String get rcxWarnings {
+    return Intl.message(
+      'Warnings',
+      name: 'rcxWarnings',
+      desc: 'Section title',
+      args: [],
+    );
+  }
+
+  /// `YAML`
+  String get rcxYaml {
+    return Intl.message(
+      'YAML',
+      name: 'rcxYaml',
+      desc: 'Action / page title',
+      args: [],
+    );
+  }
+
+  /// `Add group`
+  String get rcxAddGroup {
+    return Intl.message('Add group', name: 'rcxAddGroup', desc: '', args: []);
+  }
+
+  /// `Add network kind`
+  String get rcxAddKind {
+    return Intl.message(
+      'Add network kind',
+      name: 'rcxAddKind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every group`
+  String get rcxAllGroups {
+    return Intl.message(
+      'Every group',
+      name: 'rcxAllGroups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Main group`
+  String get rcxMainGroup {
+    return Intl.message('Main group', name: 'rcxMainGroup', desc: '', args: []);
+  }
+
+  /// `Auto control`
+  String get rcxAutoControl {
+    return Intl.message(
+      'Auto control',
+      name: 'rcxAutoControl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own profile.`
+  String get rcxAutoControlHint {
+    return Intl.message(
+      'A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own profile.',
+      name: 'rcxAutoControlHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check`
+  String get rcxCheck {
+    return Intl.message('Check', name: 'rcxCheck', desc: '', args: []);
+  }
+
+  /// `Against group`
+  String get rcxCheckGroup {
+    return Intl.message(
+      'Against group',
+      name: 'rcxCheckGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Condition {number}`
+  String rcxCondClause(int number) {
+    return Intl.message(
+      'Condition $number',
+      name: 'rcxCondClause',
+      desc: '',
+      args: [number],
+    );
+  }
+
+  /// `Network diagnostics`
+  String get rcxDiagnostics {
+    return Intl.message(
+      'Network diagnostics',
+      name: 'rcxDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `except {condition}`
+  String rcxExcept(String condition) {
+    return Intl.message(
+      'except $condition',
+      name: 'rcxExcept',
+      desc: '',
+      args: [condition],
+    );
+  }
+
+  /// `The whole group goes through this member with no server search; pick a load balancer or a nested group to hand it everything.`
+  String get rcxFixedHint {
+    return Intl.message(
+      'The whole group goes through this member with no server search; pick a load balancer or a nested group to hand it everything.',
+      name: 'rcxFixedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Through {member}`
+  String rcxFixedOn(String member) {
+    return Intl.message(
+      'Through $member',
+      name: 'rcxFixedOn',
+      desc: '',
+      args: [member],
+    );
+  }
+
+  /// `Group profiles`
+  String get rcxGroupProfiles {
+    return Intl.message(
+      'Group profiles',
+      name: 'rcxGroupProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How a smart group picks its server. Tap one of yours to edit it, any other to edit a copy.`
+  String get rcxGroupProfilesHint {
+    return Intl.message(
+      'How a smart group picks its server. Tap one of yours to edit it, any other to edit a copy.',
+      name: 'rcxGroupProfilesHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mode {from} → {to}`
+  String rcxJournalMode(String from, String to) {
+    return Intl.message(
+      'Mode $from → $to',
+      name: 'rcxJournalMode',
+      desc: '',
+      args: [from, to],
+    );
+  }
+
+  /// `On this network these replace the scenario's groups of the same name; the others work as on every network.`
+  String get rcxKindGroupsHint {
+    return Intl.message(
+      'On this network these replace the scenario\'s groups of the same name; the others work as on every network.',
+      name: 'rcxKindGroupsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name`
+  String get rcxKindName {
+    return Intl.message('Name', name: 'rcxKindName', desc: '', args: []);
+  }
+
+  /// `Lowercase Latin letters, digits and dashes, up to 24`
+  String get rcxKindNameInvalid {
+    return Intl.message(
+      'Lowercase Latin letters, digits and dashes, up to 24',
+      name: 'rcxKindNameInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recognized when`
+  String get rcxKindWhen {
+    return Intl.message(
+      'Recognized when',
+      name: 'rcxKindWhen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Kinds are tried top to bottom; the network gets the first that holds.`
+  String get rcxKindWhenHint {
+    return Intl.message(
+      'Kinds are tried top to bottom; the network gets the first that holds.',
+      name: 'rcxKindWhenHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This config has no group {group}`
+  String rcxLintGroupMissing(String group) {
+    return Intl.message(
+      'This config has no group $group',
+      name: 'rcxLintGroupMissing',
+      desc: '',
+      args: [group],
+    );
+  }
+
+  /// `Profiles and scenarios are made and edited in Advanced configuration → Auto routing.`
+  String get rcxManageHint {
+    return Intl.message(
+      'Profiles and scenarios are made and edited in Advanced configuration → Auto routing.',
+      name: 'rcxManageHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Give the mode back to the scenario`
+  String get rcxModeBackToAuto {
+    return Intl.message(
+      'Give the mode back to the scenario',
+      name: 'rcxModeBackToAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The scenario sets the mode on this network`
+  String get rcxModeByScenario {
+    return Intl.message(
+      'The scenario sets the mode on this network',
+      name: 'rcxModeByScenario',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mode: {mode}`
+  String rcxModeIs(String mode) {
+    return Intl.message(
+      'Mode: $mode',
+      name: 'rcxModeIs',
+      desc: '',
+      args: [mode],
+    );
+  }
+
+  /// `Don't change`
+  String get rcxModeKeep {
+    return Intl.message(
+      'Don\'t change',
+      name: 'rcxModeKeep',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You chose the mode yourself; the scenario waits until you pick Auto`
+  String get rcxModeManualNow {
+    return Intl.message(
+      'You chose the mode yourself; the scenario waits until you pick Auto',
+      name: 'rcxModeManualNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The mode is yours on this network`
+  String get rcxModeYours {
+    return Intl.message(
+      'The mode is yours on this network',
+      name: 'rcxModeYours',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New scenario`
+  String get rcxNewScenario {
+    return Intl.message(
+      'New scenario',
+      name: 'rcxNewScenario',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this network`
+  String get rcxOnThisNetwork {
+    return Intl.message(
+      'On this network',
+      name: 'rcxOnThisNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group's own profile`
+  String get rcxOwnProfile {
+    return Intl.message(
+      'Group\'s own profile',
+      name: 'rcxOwnProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The group picks a server with this profile among the servers the pool keeps.`
+  String get rcxProfileProgramHint {
+    return Intl.message(
+      'The group picks a server with this profile among the servers the pool keeps.',
+      name: 'rcxProfileProgramHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action`
+  String get rcxProgramAction {
+    return Intl.message('Action', name: 'rcxProgramAction', desc: '', args: []);
+  }
+
+  /// `Hand to one member`
+  String get rcxProgramFixed {
+    return Intl.message(
+      'Hand to one member',
+      name: 'rcxProgramFixed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Member`
+  String get rcxProgramMember {
+    return Intl.message('Member', name: 'rcxProgramMember', desc: '', args: []);
+  }
+
+  /// `Pick a server`
+  String get rcxProgramPick {
+    return Intl.message(
+      'Pick a server',
+      name: 'rcxProgramPick',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The scenario holds {node}`
+  String rcxReasonFixed(String node) {
+    return Intl.message(
+      'The scenario holds $node',
+      name: 'rcxReasonFixed',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `{node} is not in this group`
+  String rcxReasonFixedMissing(String node) {
+    return Intl.message(
+      '$node is not in this group',
+      name: 'rcxReasonFixedMissing',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Not in use: mode {mode}`
+  String rcxReasonIdle(String mode) {
+    return Intl.message(
+      'Not in use: mode $mode',
+      name: 'rcxReasonIdle',
+      desc: '',
+      args: [mode],
+    );
+  }
+
+  /// `The scenario moves to {node}`
+  String rcxReasonSwitchFixed(String node) {
+    return Intl.message(
+      'The scenario moves to $node',
+      name: 'rcxReasonSwitchFixed',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Scenario`
+  String get rcxScenario {
+    return Intl.message('Scenario', name: 'rcxScenario', desc: '', args: []);
+  }
+
+  /// `The scenario «{scenario}» drives this group now.`
+  String rcxScenarioDrives(String scenario) {
+    return Intl.message(
+      'The scenario «$scenario» drives this group now.',
+      name: 'rcxScenarioDrives',
+      desc: '',
+      args: [scenario],
+    );
+  }
+
+  /// `Groups`
+  String get rcxScenarioGroups {
+    return Intl.message(
+      'Groups',
+      name: 'rcxScenarioGroups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Main group is where the final rule sends traffic; Every group covers the select groups not named here.`
+  String get rcxScenarioGroupsHint {
+    return Intl.message(
+      'Main group is where the final rule sends traffic; Every group covers the select groups not named here.',
+      name: 'rcxScenarioGroupsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recognize networks by direct diagnostics, then change the mode and groups on each.`
+  String get rcxScenarioKindsHint {
+    return Intl.message(
+      'Recognize networks by direct diagnostics, then change the mode and groups on each.',
+      name: 'rcxScenarioKindsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection mode`
+  String get rcxScenarioMode {
+    return Intl.message(
+      'Connection mode',
+      name: 'rcxScenarioMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get rcxScenarioOff {
+    return Intl.message('Off', name: 'rcxScenarioOff', desc: '', args: []);
+  }
+
+  /// `Scenarios`
+  String get rcxScenarios {
+    return Intl.message('Scenarios', name: 'rcxScenarios', desc: '', args: []);
+  }
+
+  /// `A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.`
+  String get rcxScenariosHint {
+    return Intl.message(
+      'A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.',
+      name: 'rcxScenariosHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart groups`
+  String get rcxSmartGroups {
+    return Intl.message(
+      'Smart groups',
+      name: 'rcxSmartGroups',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Read to the end`
   String get disclaimerReadToEnd {
     return Intl.message(
@@ -12324,6 +14724,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Extra`
+  String get extra {
+    return Intl.message('Extra', name: 'extra', desc: '', args: []);
+  }
+
   /// `Application settings`
   String get applicationSettings {
     return Intl.message(
@@ -12639,16 +15044,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Dashboard files`
-  String get webDashboardFiles {
-    return Intl.message(
-      'Dashboard files',
-      name: 'webDashboardFiles',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Not installed`
   String get webDashboardNotInstalled {
     return Intl.message(
@@ -12656,16 +15051,6 @@ class AppLocalizations {
       name: 'webDashboardNotInstalled',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `Installed version: {version}`
-  String webDashboardInstalledVersion(String version) {
-    return Intl.message(
-      'Installed version: $version',
-      name: 'webDashboardInstalledVersion',
-      desc: '',
-      args: [version],
     );
   }
 
@@ -12679,10 +15064,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.`
+  /// `Access is local and protected by a secret. Opening a dashboard does not change your saved external controller settings.`
   String get webDashboardAccessTip {
     return Intl.message(
-      'Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.',
+      'Access is local and protected by a secret. Opening a dashboard does not change your saved external controller settings.',
       name: 'webDashboardAccessTip',
       desc: '',
       args: [],
@@ -12904,6 +15289,56 @@ class AppLocalizations {
     return Intl.message(
       'Dashboard operation cancelled.',
       name: 'webDashboardCancelled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Version`
+  String get webDashboardVersion {
+    return Intl.message(
+      'Version',
+      name: 'webDashboardVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access`
+  String get webDashboardAccess {
+    return Intl.message(
+      'Access',
+      name: 'webDashboardAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get webDashboardAccessOff {
+    return Intl.message(
+      'Off',
+      name: 'webDashboardAccessOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the app`
+  String get webDashboardAccessInApp {
+    return Intl.message(
+      'In the app',
+      name: 'webDashboardAccessInApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the browser`
+  String get webDashboardAccessInBrowser {
+    return Intl.message(
+      'In the browser',
+      name: 'webDashboardAccessInBrowser',
       desc: '',
       args: [],
     );

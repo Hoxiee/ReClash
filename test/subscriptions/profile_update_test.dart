@@ -34,6 +34,47 @@ class _SubscriptionTransport extends SubscriptionTransport {
   }
 }
 
+class _BundleTransport extends SubscriptionTransport {
+  _BundleTransport(this.bundle, {this.fail = false, this.header});
+
+  final List<int> bundle;
+  final bool fail;
+  final String? header;
+  final fetched = <Uri>[];
+  Map<String, String>? bundleHeaders;
+
+  @override
+  Future<SubscriptionResponse> fetch(
+    Uri source, {
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 30),
+    SubscriptionCancellation? cancellation,
+  }) async {
+    fetched.add(source);
+    if (source.path == '/routing') {
+      bundleHeaders = headers;
+      if (fail) throw const SubscriptionException(SubscriptionFailure.http);
+      return SubscriptionResponse(
+        bytes: Uint8List.fromList(bundle),
+        headers: const {},
+        status: 200,
+        uri: source,
+      );
+    }
+    return SubscriptionResponse(
+      bytes: Uint8List.fromList(utf8.encode(_nodeBody)),
+      headers: {
+        'reclash-routing': ?header == null ? null : [header!],
+      },
+      status: 200,
+      uri: source,
+    );
+  }
+}
+
+const _nodeBody =
+    'proxies:\n  - name: node\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\n';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -177,4 +218,101 @@ void main() {
       );
     },
   );
+
+  group('routing bundle', () {
+    const bundleUrl = 'https://subs.example.test/routing';
+
+    Future<File> bundleFile(Profile profile) async =>
+        File(await appPath.getProfileRoutingPath(profile.id.toString()));
+
+    test('is downloaded with the subscription headers and stored', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile')
+          .copyWith(
+            subscriptionPreferences: const SubscriptionPreferences(
+              headers: {'x-user-token': 'private'},
+            ),
+          );
+      final transport = _BundleTransport(
+        utf8.encode('rcx: 1\nprofiles: {}\n'),
+        header: bundleUrl,
+      );
+      await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: transport,
+        validate: (_, _) async => '',
+      );
+
+      expect(transport.bundleHeaders?['x-user-token'], 'private');
+      expect(
+        await (await bundleFile(profile)).readAsString(),
+        'rcx: 1\nprofiles: {}\n',
+      );
+    });
+
+    test('a failed download keeps the previous bundle', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile');
+      final file = await bundleFile(profile);
+      await file.parent.create(recursive: true);
+      await file.writeAsString('old');
+
+      final updated = await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: _BundleTransport(const [], fail: true, header: bundleUrl),
+        validate: (_, _) async => '',
+      );
+
+      expect(updated.lastUpdateDate, isNotNull);
+      expect(await file.readAsString(), 'old');
+    });
+
+    test('an oversized or non-UTF-8 bundle is rejected', () async {
+      for (final body in [
+        List.filled(256 * 1024 + 1, 0x61),
+        [0xff, 0xfe, 0xfd],
+      ]) {
+        final profile = Profile.normal(
+          url: 'https://subs.example.test/profile',
+        );
+        final updated = await profile.update(
+          defaultUserAgent: 'ReClash/test',
+          transport: _BundleTransport(body, header: bundleUrl),
+          validate: (_, _) async => '',
+        );
+
+        expect(updated.lastUpdateDate, isNotNull);
+        expect(await (await bundleFile(profile)).exists(), isFalse);
+      }
+    });
+
+    test('plain http bundles need an http subscription', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile');
+      final transport = _BundleTransport(
+        utf8.encode('rcx: 1\n'),
+        header: 'http://subs.example.test/routing',
+      );
+      await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: transport,
+        validate: (_, _) async => '',
+      );
+
+      expect(transport.fetched, hasLength(1));
+      expect(await (await bundleFile(profile)).exists(), isFalse);
+    });
+
+    test('an absent header keeps the existing bundle', () async {
+      final profile = Profile.normal(url: 'https://subs.example.test/profile');
+      final file = await bundleFile(profile);
+      await file.parent.create(recursive: true);
+      await file.writeAsString('kept');
+
+      await profile.update(
+        defaultUserAgent: 'ReClash/test',
+        transport: _BundleTransport(utf8.encode('new')),
+        validate: (_, _) async => '',
+      );
+
+      expect(await file.readAsString(), 'kept');
+    });
+  });
 }

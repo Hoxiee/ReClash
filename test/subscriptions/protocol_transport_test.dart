@@ -100,6 +100,7 @@ void main() {
       expect(subscriptionFields.map((field) => field.consumer).toSet(), {
         'panel',
         'scheduler',
+        'routing',
       });
       expect(
         subscriptionFields.map((field) => field.path).toSet(),

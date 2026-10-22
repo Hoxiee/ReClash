@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/proxies/list.dart';
@@ -7,6 +10,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'routing.dart';
 import 'setting.dart';
 import 'tab.dart';
 
@@ -70,6 +74,26 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     );
   }
 
+  IconButtonData? _buildRoutingAction() {
+    final groupName = ref.watch(
+      proxiesTabControllerStateProvider.select(
+        (state) => state.currentGroupName,
+      ),
+    );
+    final isSelector = ref.watch(
+      groupsProvider.select(
+        (groups) =>
+            groups.getGroup(groupName ?? '')?.type == GroupType.Selector,
+      ),
+    );
+    if (groupName == null || !isSelector) return null;
+    return IconButtonData(
+      glyph: AppGlyphs.shuffle,
+      onPressed: () => unawaited(showRoutingSheet(context, groupName)),
+      tooltip: context.appLocalizations.rcxTitle,
+    );
+  }
+
   void _onSearch(String value) {
     ref.read(queryProvider(QueryTag.proxies).notifier).value = value;
   }
@@ -106,6 +130,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       primaryAction: primaryAction,
       searchActions: [?primaryAction],
       iconActions: [
+        if (_isTab && !picker) ?_buildRoutingAction(),
         if (_isTab && !picker)
           IconButtonData(
             glyph: AppGlyphs.locate,

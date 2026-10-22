@@ -40,5 +40,6 @@
   "renewSubscription": "Renovar suscripción",
   "topUpTraffic": "Ampliar tráfico",
   "notificationActive": "Protección activa",
-  "notificationLevelDescription": "Detallado muestra información en tiempo real y el botón de detener. Mínimo solo muestra el estado de protección."
+  "notificationLevelDescription": "Detallado muestra información en tiempo real y el botón de detener. Mínimo solo muestra el estado de protección.",
+  "extra": "Extra"
 }

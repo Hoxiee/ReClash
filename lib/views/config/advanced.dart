@@ -9,6 +9,7 @@ import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'routing.dart';
 import 'rules.dart';
 
 class AdvancedConfigView extends StatelessWidget {
@@ -58,7 +59,21 @@ class AdvancedConfigView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
           ).copyWith(top: context.contentTopPadding, bottom: 16),
-          child: Column(children: [generateSection(items: items)]),
+          child: Column(
+            spacing: 16,
+            children: [
+              generateSection(items: items),
+              generateSection(
+                title: appLocalizations.extra,
+                items: [
+                  SettingTarget(
+                    spec: advancedToolSettings[3],
+                    child: routingSettingsItem(appLocalizations),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -85,6 +100,13 @@ final advancedToolSettings = <SettingSpec>[
     page: ToolPage.advanced,
     title: (l) => l.script,
     keywords: ['script'],
+    condition: SettingCondition.always,
+  ),
+  SettingSpec(
+    id: 'advanced.routing',
+    page: ToolPage.advanced,
+    title: (l) => l.rcxTitle,
+    keywords: ['rcxTitle', 'rcxScenarios', 'rcxGroupProfiles'],
     condition: SettingCondition.always,
   ),
 ];

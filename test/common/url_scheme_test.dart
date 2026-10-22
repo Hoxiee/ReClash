@@ -10,7 +10,9 @@ Matcher _issue(UrlSchemeIssue issue) =>
 void main() {
   group('parseUrlSchemeLink', () {
     test('parses every application command without parameters', () {
-      for (final command in ReClashCommand.values.where((c) => !c.isProfile)) {
+      for (final command in ReClashCommand.values.where(
+        (c) => !c.isProfile && c != ReClashCommand.routing,
+      )) {
         for (final suffix in ['', '/']) {
           final result = parseUrlSchemeLink(
             'reclash://${command.host}$suffix',
@@ -183,12 +185,73 @@ void main() {
     });
   });
 
+  group('routing links', () {
+    test('carry a payload or an https url only under reclash', () {
+      final inline = parseUrlSchemeLink('reclash://routing?p=abc_-')!;
+      expect(inline.command, ReClashCommand.routing);
+      expect(inline.payload, 'abc_-');
+      expect(inline.command.isProfile, isFalse);
+      expect(inline.command.changesConnection, isFalse);
+      final remote = parseUrlSchemeLink(
+        'reclash://routing?url=${Uri.encodeComponent('https://example.com/r.yaml')}',
+      )!;
+      expect(remote.payload, 'https://example.com/r.yaml');
+      expect(
+        () => parseUrlSchemeLink('clash://routing?p=abc'),
+        throwsA(_issue(UrlSchemeIssue.unknownCommand)),
+      );
+    });
+
+    test('reject malformed shapes', () {
+      final cases = {
+        'reclash://routing': UrlSchemeIssue.invalidLink,
+        'reclash://routing?p=a&url=https%3A%2F%2Fa.com':
+            UrlSchemeIssue.invalidLink,
+        'reclash://routing?p=a&p=b': UrlSchemeIssue.invalidLink,
+        'reclash://routing?x=a': UrlSchemeIssue.invalidLink,
+        'reclash://routing/extra?p=a': UrlSchemeIssue.invalidLink,
+        'reclash://routing?p=a#f': UrlSchemeIssue.invalidLink,
+        'reclash://routing?p=': UrlSchemeIssue.missingPayload,
+        'reclash://routing?url=http%3A%2F%2Fa.com%2Fr':
+            UrlSchemeIssue.invalidUrl,
+        'reclash://routing?url=ftp%3A%2F%2Fa.com': UrlSchemeIssue.invalidUrl,
+        'reclash://routing?p=${'a' * urlSchemeMaxRoutingPayloadLength}a':
+            UrlSchemeIssue.tooLarge,
+      };
+      for (final MapEntry(:key, :value) in cases.entries) {
+        expect(
+          () => parseUrlSchemeLink(key),
+          throwsA(_issue(value)),
+          reason: key,
+        );
+      }
+    });
+
+    test('are built and parsed back', () async {
+      final inline = await buildUrlSchemeLink(
+        ReClashCommand.routing,
+        payload: 'abc',
+      );
+      expect(inline, 'reclash://routing?p=abc');
+      final remote = await buildUrlSchemeLink(
+        ReClashCommand.routing,
+        payload: 'https://example.com/r.yaml',
+      );
+      expect(
+        (await readUrlSchemeLink(remote))!.payload,
+        'https://example.com/r.yaml',
+      );
+    });
+  });
+
   group('buildUrlSchemeLink', () {
     test('every command round-trips through the same parser', () async {
       const url = 'https://example.com/a%2Fb?token=a+b&part=%23#anchor';
       const config = 'proxies: []\nproxy-groups: []\nrules: [MATCH,DIRECT]\n';
       const name = 'Home 🦊 & 工作 # % +';
-      for (final command in ReClashCommand.values) {
+      for (final command in ReClashCommand.values.where(
+        (c) => c != ReClashCommand.routing,
+      )) {
         final link = await buildUrlSchemeLink(
           command,
           payload: command.isProfile

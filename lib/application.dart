@@ -13,6 +13,7 @@ import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/widgets/wallpaper.dart';
+import 'package:reclash/views/proxies/routing_import.dart';
 import 'package:reclash/views/setup.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/policy.dart';
@@ -132,6 +133,8 @@ class ApplicationState extends ConsumerState<Application> {
                 ) ==
                 true,
             confirmImport: (source) => showProfileImportDialog(context, source),
+            openRouting: (text, origin) =>
+                openRoutingImport(context, text: text, origin: origin),
           );
     } catch (error) {
       if (!mounted) return;

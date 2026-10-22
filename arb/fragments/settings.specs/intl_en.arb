@@ -54,5 +54,6 @@
   "renewSubscription": "Renew subscription",
   "topUpTraffic": "Top up traffic",
   "notificationActive": "Protection active",
-  "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status."
+  "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status.",
+  "extra": "Extra"
 }

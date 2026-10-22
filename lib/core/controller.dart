@@ -302,6 +302,48 @@ class CoreController {
     return _interface.watchRoute(watch);
   }
 
+  Future<RcxStatus> rcxSetPolicy(RcxUserLayer layer) {
+    return _interface.rcxSetPolicy(layer);
+  }
+
+  Future<RcxStatus> rcxStatus() {
+    return _interface.rcxStatus();
+  }
+
+  Future<RcxExplanation> rcxExplain(String group) {
+    return _interface.rcxExplain(group);
+  }
+
+  Future<List<RcxJournalEntry>> rcxJournal({String? group, int limit = 0}) {
+    return _interface.rcxJournal(group: group, limit: limit);
+  }
+
+  Future<RcxDecision> rcxAction({
+    required String group,
+    required RcxAction action,
+    String? node,
+    bool here = false,
+  }) {
+    return _interface.rcxAction(
+      group: group,
+      action: action,
+      node: node,
+      here: here,
+    );
+  }
+
+  Future<bool> rcxHints(Map<String, Object?> hints) {
+    return _interface.rcxHints(hints);
+  }
+
+  Future<List<RcxProfileInfo>> rcxProfiles() {
+    return _interface.rcxProfiles();
+  }
+
+  Future<RcxStudioResult> rcxStudio(Map<String, Object?> request) {
+    return _interface.rcxStudio(request);
+  }
+
   Future<List<TrackerInfo>> getConnections() async {
     return _interface.getConnections();
   }

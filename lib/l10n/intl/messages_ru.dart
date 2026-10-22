@@ -200,107 +200,218 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m71(count, label) =>
       "${Intl.plural(count, one: '${label} группа прокси', few: '${label} группы прокси', many: '${label} групп прокси', other: '${label} группы прокси')}";
 
-  static String m72(region, bypassed, proxied) =>
+  static String m72(pick, now) => "Выберет ${pick} вместо ${now}";
+
+  static String m73(group) => "Проверка для ${group}";
+
+  static String m74(pick) => "Оставит ${pick}";
+
+  static String m75(number) => "Условие ${number}";
+
+  static String m76(profile) => "«${profile}» хочет проверить эти сайты";
+
+  static String m77(profile) => "Удалить «${profile}»?";
+
+  static String m78(requests, used, cap) =>
+      "Проверок сегодня: ${requests} · ${used} из ${cap}";
+
+  static String m79(condition) => "кроме ${condition}";
+
+  static String m80(country) => "выход ${country}";
+
+  static String m81(member) => "Через ${member}";
+
+  static String m82(profile) => "Добавлен «${profile}»";
+
+  static String m83(node) => "${node} перестал работать";
+
+  static String m84(from, to) => "Режим ${from} → ${to}";
+
+  static String m85(line, text) => "Строка ${line}: ${text}";
+
+  static String m86(check) =>
+      "Проверка ${check} нигде не используется, поэтому не выполняется";
+
+  static String m87(hosts) => "Обращается к сторонним сайтам: ${hosts}";
+
+  static String m88(group) => "В этом конфиге нет группы ${group}";
+
+  static String m89(group) =>
+      "Ни один сервер группы ${group} не проходит фильтр";
+
+  static String m90(tag) => "Тег ${tag} нигде не используется";
+
+  static String m91(tier, group) =>
+      "Сейчас ни один сервер группы ${group} не входит в «${tier}»";
+
+  static String m92(tier, after) =>
+      "«${tier}» повторяет условие «${after}», поэтому в него ничего не попадает";
+
+  static String m93(keys) =>
+      "Перенесено; вы тоже меняли это, поэтому сохранены ваши значения: ${keys}";
+
+  static String m94(mode) => "Режим: ${mode}";
+
+  static String m95(kind) => "Сеть: ${kind}";
+
+  static String m96(tier) => "может попасть в «${tier}» после проверки";
+
+  static String m97(node) => "Закреплён: ${node}";
+
+  static String m98(error) => "Ошибка профиля: ${error}";
+
+  static String m99(profile) =>
+      "Профиль ${profile} не найден; используется стандартный";
+
+  static String m100(error) =>
+      "Не удалось сохранить состояние маршрутизации: ${error}";
+
+  static String m101(tier) => "Переключено на сервер из «${tier}»";
+
+  static String m102(from) => "Сервер сменён; ${from} пропускается 15 минут";
+
+  static String m103(from) =>
+      "${from} перестал работать; переключено на лучший запасной";
+
+  static String m104(from, gain) => "Ушёл с ${from}: быстрее на ${gain} мс";
+
+  static String m105(node) => "Сценарий держит ${node}";
+
+  static String m106(node) => "${node} нет в этой группе";
+
+  static String m107(limit) => "Достигнут лимит переключений (${limit} в час)";
+
+  static String m108(mode) => "Не используется: режим ${mode}";
+
+  static String m109(from) => "${from} больше не входит в список";
+
+  static String m110(kind) =>
+      "Пауза, пока сеть — «${kind}»: ничего не проверяется и не переключается";
+
+  static String m111(node) => "Сценарий переключает на ${node}";
+
+  static String m112(node) => "Переключено на закреплённый ${node}";
+
+  static String m113(node) =>
+      "Нет рабочих серверов; запасной вариант — ${node}";
+
+  static String m114(scenario) =>
+      "Сейчас этой группой управляет сценарий «${scenario}».";
+
+  static String m115(count, total) => "Подходят ${count} из ${total}";
+
+  static String m116(node) =>
+      "Перейдёт на ${node}, как только проверка это подтвердит";
+
+  static String m117(node, gain) =>
+      "Перейдёт на ${node}, если он останется быстрее на ${gain} мс";
+
+  static String m118(node, minutes) =>
+      "Может перейти на ${node} через ${minutes} мин";
+
+  static String m119(name) => "проверка ${name}";
+
+  static String m120(name) => "диагностика сети ${name}";
+
+  static String m121(region, bypassed, proxied) =>
       "${region}: в список обхода VPN попадут ${bypassed} приложений, в список VPN — ${proxied}. Оба списка будут заменены; режим и остальные параметры не изменятся. Совпадения пакетов и SDK — лишь подсказки: проверьте результат после применения.";
 
-  static String m73(region, value) =>
+  static String m122(region, value) =>
       "Регион ${region}: список обхода — ${value}. Ручной список заменяет региональные значения.";
 
-  static String m74(region, source) => "Рекомендуется: ${region} · ${source}";
+  static String m123(region, source) => "Рекомендуется: ${region} · ${source}";
 
-  static String m75(region, value) =>
+  static String m124(region, value) =>
       "Регион ${region}: базовые DNS — ${value}. Ручные переопределения на этом экране имеют приоритет.";
 
-  static String m76(region) => "Профиль страны: ${region}";
+  static String m125(region) => "Профиль страны: ${region}";
 
-  static String m77(value) => "MTU TUN: ${value}";
+  static String m126(value) => "MTU TUN: ${value}";
 
-  static String m78(value) => "Проверки сервисов по умолчанию: ${value}";
+  static String m127(value) => "Проверки сервисов по умолчанию: ${value}";
 
-  static String m79(region, value) =>
+  static String m128(region, value) =>
       "Регион ${region}: MTU ${value}. Добавьте переопределение MTU, чтобы задать своё значение.";
 
-  static String m80(count, label) =>
+  static String m129(count, label) =>
       "${Intl.plural(count, one: '${label} правило', few: '${label} правила', many: '${label} правил', other: '${label} правила')}";
 
-  static String m81(appName) => "${appName} (Безопасный режим)";
+  static String m130(appName) => "${appName} (Безопасный режим)";
 
-  static String m82(count) =>
+  static String m131(count) =>
       "${Intl.plural(count, one: '${count} секунда', few: '${count} секунды', many: '${count} секунд', other: '${count} секунды')}";
 
-  static String m83(count) => "Действуют: ${count}";
+  static String m132(count) => "Действуют: ${count}";
 
-  static String m84(count) => "Проблем: ${count}";
+  static String m133(count) => "Проблем: ${count}";
 
-  static String m85(time) => "Проверено в ${time}";
+  static String m134(time) => "Проверено в ${time}";
 
-  static String m86(count) =>
+  static String m135(count) =>
       "${Intl.plural(count, one: '${count} настройка', few: '${count} настройки', many: '${count} настроек', other: '${count} настройки')}";
 
-  static String m87(count) => "Доступно профилей: ${count}";
+  static String m136(count) => "Доступно профилей: ${count}";
 
-  static String m88(step, total) => "${step} из ${total}";
+  static String m137(step, total) => "${step} из ${total}";
 
-  static String m89(server) => "Попробовать ${server}";
+  static String m138(server) => "Попробовать ${server}";
 
-  static String m90(link) => "Не удалось прочитать прокси из ${link}";
+  static String m139(link) => "Не удалось прочитать прокси из ${link}";
 
-  static String m91(label) => "«${label}» — только одно значение";
+  static String m140(label) => "«${label}» — только одно значение";
 
-  static String m92(client, format, count) =>
+  static String m141(client, format, count) =>
       "Получено как ${client}: ${format}, узлов: ${count}.";
 
-  static String m93(count) =>
+  static String m142(count) =>
       "${Intl.plural(count, one: 'Подписка истекает через ${count} день', few: 'Подписка истекает через ${count} дня', many: 'Подписка истекает через ${count} дней', other: 'Подписка истекает через ${count} дней')}";
 
-  static String m94(sections) =>
+  static String m143(sections) =>
       "Не будут перенесены разделы исходной конфигурации: ${sections}.";
 
-  static String m95(count, format) =>
+  static String m144(count, format) =>
       "Из формата ${format} можно импортировать узлов: ${count}.";
 
-  static String m96(count) => "Не удалось преобразовать узлов: ${count}.";
+  static String m145(count) => "Не удалось преобразовать узлов: ${count}.";
 
-  static String m97(percent) => "Израсходовано ${percent}% трафика";
+  static String m146(percent) => "Израсходовано ${percent}% трафика";
 
-  static String m98(count) => "Результатов: ${count}";
+  static String m147(count) => "Результатов: ${count}";
 
-  static String m99(value) => "Пик ${value}";
+  static String m148(value) => "Пик ${value}";
 
-  static String m100(value) => "Всего ${value}";
+  static String m149(value) => "Всего ${value}";
 
-  static String m101(version) => "Установлена версия ${version}";
+  static String m150(version) => "Установлена версия ${version}";
 
-  static String m102(count) => "${count} мин";
+  static String m151(count) => "${count} мин";
 
-  static String m103(time) => "Осталось ${time}";
+  static String m152(time) => "Осталось ${time}";
 
-  static String m104(count) => "${count} с";
+  static String m153(count) => "${count} с";
 
-  static String m105(speed) => "${speed}/с";
+  static String m154(speed) => "${speed}/с";
 
-  static String m106(nodes, groups, providers) =>
+  static String m155(nodes, groups, providers) =>
       "Прокси: ${nodes}, группы: ${groups}, удалённые провайдеры: ${providers}";
 
-  static String m107(action) =>
+  static String m156(action) =>
       "Ссылка запрашивает действие «${action}». Разрешить ReClash выполнить его?";
 
-  static String m108(name, source) =>
+  static String m157(name, source) =>
       "Импортировать «${name}» из ${source}? После согласия выполнятся проверка профиля и рассмотрение преобразований.";
 
-  static String m109(label) => "Значение «${label}» должно быть URL";
+  static String m158(label) => "Значение «${label}» должно быть URL";
 
-  static String m110(index) => "Фон ${index}";
+  static String m159(index) => "Фон ${index}";
 
-  static String m111(count) =>
+  static String m160(count) =>
       "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
 
-  static String m112(version) => "Установленная версия: ${version}";
-
-  static String m113(count) =>
+  static String m161(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
-  static String m114(count) =>
+  static String m162(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1017,6 +1128,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Секрет внешнего контроллера",
     ),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
+    "extra": MessageLookupByLibrary.simpleMessage("Дополнительно"),
     "extraLarge": MessageLookupByLibrary.simpleMessage("Очень крупный"),
     "fade": MessageLookupByLibrary.simpleMessage("Растворение"),
     "failedCount": m26,
@@ -1787,6 +1899,425 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickActions": MessageLookupByLibrary.simpleMessage("Быстрые действия"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
+    "rcxAddGroup": MessageLookupByLibrary.simpleMessage("Добавить группу"),
+    "rcxAddKind": MessageLookupByLibrary.simpleMessage("Добавить тип сети"),
+    "rcxAddPool": MessageLookupByLibrary.simpleMessage("Добавить шаблон"),
+    "rcxAddTag": MessageLookupByLibrary.simpleMessage("Добавить тег"),
+    "rcxAddTier": MessageLookupByLibrary.simpleMessage("Добавить предпочтение"),
+    "rcxAdvanced": MessageLookupByLibrary.simpleMessage("Дополнительно"),
+    "rcxAdvancedHint": MessageLookupByLibrary.simpleMessage(
+      "Эти части правятся в YAML.",
+    ),
+    "rcxAllGroups": MessageLookupByLibrary.simpleMessage("Все группы"),
+    "rcxAnyServer": MessageLookupByLibrary.simpleMessage("Любой"),
+    "rcxAutoControl": MessageLookupByLibrary.simpleMessage("Автоуправление"),
+    "rcxAutoControlHint": MessageLookupByLibrary.simpleMessage(
+      "Сценарий управляет всем подключением: режимом в каждом типе сети и тем, что делает каждая группа. Группы, которых он не касается, работают по своему профилю.",
+    ),
+    "rcxBackToAuto": MessageLookupByLibrary.simpleMessage("Вернуть авто"),
+    "rcxBalanced": MessageLookupByLibrary.simpleMessage("Сбалансированно"),
+    "rcxBasedOn": MessageLookupByLibrary.simpleMessage("Основан на"),
+    "rcxBehaviour": MessageLookupByLibrary.simpleMessage("Поведение"),
+    "rcxBringChanges": MessageLookupByLibrary.simpleMessage(
+      "Перенести изменения",
+    ),
+    "rcxBringChangesHint": MessageLookupByLibrary.simpleMessage(
+      "Ваши правки останутся как есть",
+    ),
+    "rcxChangeServer": MessageLookupByLibrary.simpleMessage("Сменить сервер"),
+    "rcxChangeTo": MessageLookupByLibrary.simpleMessage("Сменить на"),
+    "rcxCheck": MessageLookupByLibrary.simpleMessage("Проверка"),
+    "rcxCheckDifferent": m72,
+    "rcxCheckGroup": MessageLookupByLibrary.simpleMessage("На группе"),
+    "rcxCheckNone": MessageLookupByLibrary.simpleMessage("Не найдёт сервер"),
+    "rcxCheckOn": m73,
+    "rcxCheckOpen": MessageLookupByLibrary.simpleMessage(
+      "открывает заблокированное",
+    ),
+    "rcxCheckSame": m74,
+    "rcxChecks": MessageLookupByLibrary.simpleMessage("Проверки"),
+    "rcxChecksDeclared": MessageLookupByLibrary.simpleMessage(
+      "Проверки доступности",
+    ),
+    "rcxCondAdd": MessageLookupByLibrary.simpleMessage("Добавить условие"),
+    "rcxCondAll": MessageLookupByLibrary.simpleMessage("Все условия"),
+    "rcxCondAlways": MessageLookupByLibrary.simpleMessage("Всегда"),
+    "rcxCondAny": MessageLookupByLibrary.simpleMessage("Любое условие"),
+    "rcxCondAnyServer": MessageLookupByLibrary.simpleMessage("Любой сервер"),
+    "rcxCondClause": m75,
+    "rcxCondField": MessageLookupByLibrary.simpleMessage("Поле"),
+    "rcxCondIgnoreCase": MessageLookupByLibrary.simpleMessage(
+      "Без учёта регистра",
+    ),
+    "rcxCondMatch": MessageLookupByLibrary.simpleMessage("Совпадение"),
+    "rcxCondNoNames": MessageLookupByLibrary.simpleMessage("Не заданы"),
+    "rcxCondNotPrefix": MessageLookupByLibrary.simpleMessage("не"),
+    "rcxCondOp": MessageLookupByLibrary.simpleMessage("Оператор"),
+    "rcxCondPattern": MessageLookupByLibrary.simpleMessage("Шаблон"),
+    "rcxCondText": MessageLookupByLibrary.simpleMessage("Как текст"),
+    "rcxCondTooComplex": MessageLookupByLibrary.simpleMessage(
+      "Условие содержит вложенные группы, поэтому правится как текст.",
+    ),
+    "rcxCondValue": MessageLookupByLibrary.simpleMessage("Значение"),
+    "rcxCondValues": MessageLookupByLibrary.simpleMessage(
+      "Значения через запятую",
+    ),
+    "rcxConsentAllow": MessageLookupByLibrary.simpleMessage("Разрешить"),
+    "rcxConsentAsk": m76,
+    "rcxConsentHint": MessageLookupByLibrary.simpleMessage(
+      "Пока вы не разрешите, группа работает по профилю «Простой». Сайты открываются только через ваши серверы или для проверки сети.",
+    ),
+    "rcxConsentTitle": MessageLookupByLibrary.simpleMessage("Нужно разрешение"),
+    "rcxContacts": MessageLookupByLibrary.simpleMessage(
+      "Сайты, к которым обращается",
+    ),
+    "rcxContactsHint": MessageLookupByLibrary.simpleMessage(
+      "Сторонние сайты не принадлежат ни вашему провайдеру, ни встроенным профилям.",
+    ),
+    "rcxControl": MessageLookupByLibrary.simpleMessage("Управление"),
+    "rcxDeleteProfile": m77,
+    "rcxDiagnostics": MessageLookupByLibrary.simpleMessage("Диагностика сети"),
+    "rcxDirectSplit": MessageLookupByLibrary.simpleMessage(
+      "Прямые сайты через эту группу",
+    ),
+    "rcxDirectSplitActive": MessageLookupByLibrary.simpleMessage(
+      "Включено сейчас",
+    ),
+    "rcxDirectSplitHint": MessageLookupByLibrary.simpleMessage(
+      "Если сайты, которые правила отправляют напрямую, перестанут открываться, они пойдут через эту группу. Локальные адреса всегда остаются прямыми.",
+    ),
+    "rcxDirectSplitStandby": MessageLookupByLibrary.simpleMessage(
+      "Ждёт: прямые сайты пока открываются",
+    ),
+    "rcxDuplicate": MessageLookupByLibrary.simpleMessage(
+      "Дублировать и изменить",
+    ),
+    "rcxEnergyEco": MessageLookupByLibrary.simpleMessage("Экономно"),
+    "rcxEnergyPrecise": MessageLookupByLibrary.simpleMessage("Точно"),
+    "rcxEnergyToday": m78,
+    "rcxExcept": m79,
+    "rcxExcludedByProfile": MessageLookupByLibrary.simpleMessage(
+      "Исключён профилем",
+    ),
+    "rcxExcludedCooldown": MessageLookupByLibrary.simpleMessage(
+      "Пропущен после «Сменить сервер»",
+    ),
+    "rcxExcludedNoMatch": MessageLookupByLibrary.simpleMessage(
+      "Не входит в список",
+    ),
+    "rcxExcludedNoTier": MessageLookupByLibrary.simpleMessage(
+      "Не подходит ни под одно предпочтение",
+    ),
+    "rcxExcludedPending": MessageLookupByLibrary.simpleMessage(
+      "Ещё не проверен",
+    ),
+    "rcxExcludedUnroutable": MessageLookupByLibrary.simpleMessage("Не сервер"),
+    "rcxExit": m80,
+    "rcxExitCheck": MessageLookupByLibrary.simpleMessage(
+      "Проверка страны выхода",
+    ),
+    "rcxExport": MessageLookupByLibrary.simpleMessage("Экспорт"),
+    "rcxFeelCalm": MessageLookupByLibrary.simpleMessage("Редко"),
+    "rcxFeelEager": MessageLookupByLibrary.simpleMessage("Часто"),
+    "rcxFieldAlive": MessageLookupByLibrary.simpleMessage("Работает"),
+    "rcxFieldCurrent": MessageLookupByLibrary.simpleMessage("Используется"),
+    "rcxFieldDead": MessageLookupByLibrary.simpleMessage("Не работает"),
+    "rcxFieldDiag": MessageLookupByLibrary.simpleMessage("Диагностика сети"),
+    "rcxFieldEntry": MessageLookupByLibrary.simpleMessage("Страна входа"),
+    "rcxFieldExit": MessageLookupByLibrary.simpleMessage("Страна выхода"),
+    "rcxFieldFails": MessageLookupByLibrary.simpleMessage(
+      "Не проходит проверку",
+    ),
+    "rcxFieldKind": MessageLookupByLibrary.simpleMessage("Тип сети"),
+    "rcxFieldLatency": MessageLookupByLibrary.simpleMessage("Задержка, мс"),
+    "rcxFieldMeasured": MessageLookupByLibrary.simpleMessage("Измерено"),
+    "rcxFieldMetered": MessageLookupByLibrary.simpleMessage("Лимитная сеть"),
+    "rcxFieldName": MessageLookupByLibrary.simpleMessage("Имя"),
+    "rcxFieldPasses": MessageLookupByLibrary.simpleMessage("Проходит проверку"),
+    "rcxFieldPortal": MessageLookupByLibrary.simpleMessage("Страница входа"),
+    "rcxFieldProvider": MessageLookupByLibrary.simpleMessage("Провайдер"),
+    "rcxFieldServer": MessageLookupByLibrary.simpleMessage("Адрес сервера"),
+    "rcxFieldTag": MessageLookupByLibrary.simpleMessage("Тег"),
+    "rcxFieldTransport": MessageLookupByLibrary.simpleMessage(
+      "Тип подключения",
+    ),
+    "rcxFieldType": MessageLookupByLibrary.simpleMessage("Протокол"),
+    "rcxFieldUdp": MessageLookupByLibrary.simpleMessage("Поддерживает UDP"),
+    "rcxFixedHint": MessageLookupByLibrary.simpleMessage(
+      "Вся группа идёт через этот элемент без перебора серверов; выберите балансировщик или вложенную группу, чтобы отдать им весь трафик.",
+    ),
+    "rcxFixedOn": m81,
+    "rcxGeneral": MessageLookupByLibrary.simpleMessage("Общие"),
+    "rcxGroupProfiles": MessageLookupByLibrary.simpleMessage("Профили групп"),
+    "rcxGroupProfilesHint": MessageLookupByLibrary.simpleMessage(
+      "Как смарт-группа выбирает сервер. Нажмите на свой, чтобы изменить его, на любой другой — чтобы изменить копию.",
+    ),
+    "rcxHealthAlive": MessageLookupByLibrary.simpleMessage("Работает"),
+    "rcxHealthDead": MessageLookupByLibrary.simpleMessage("Не работает"),
+    "rcxHealthStale": MessageLookupByLibrary.simpleMessage("Работал раньше"),
+    "rcxHealthUnknown": MessageLookupByLibrary.simpleMessage("Не проверялся"),
+    "rcxHistory": MessageLookupByLibrary.simpleMessage("История"),
+    "rcxHistoryVersions": MessageLookupByLibrary.simpleMessage(
+      "Прежние версии",
+    ),
+    "rcxImportAdd": MessageLookupByLibrary.simpleMessage(
+      "Добавить в мои профили",
+    ),
+    "rcxImportNeedsCore": MessageLookupByLibrary.simpleMessage(
+      "Запустите ядро приложения, чтобы проверить этот профиль.",
+    ),
+    "rcxImportTitle": MessageLookupByLibrary.simpleMessage(
+      "Импорт профиля маршрутизации",
+    ),
+    "rcxImported": m82,
+    "rcxJournalFailure": m83,
+    "rcxJournalMode": m84,
+    "rcxKindChecking": MessageLookupByLibrary.simpleMessage("проверяется"),
+    "rcxKindGroupsHint": MessageLookupByLibrary.simpleMessage(
+      "В этой сети они заменяют одноимённые группы сценария; остальные работают как во всех сетях.",
+    ),
+    "rcxKindName": MessageLookupByLibrary.simpleMessage("Название"),
+    "rcxKindNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Строчные латинские буквы, цифры и дефисы, до 24 символов",
+    ),
+    "rcxKindOpen": MessageLookupByLibrary.simpleMessage("открытый интернет"),
+    "rcxKindPortal": MessageLookupByLibrary.simpleMessage("страница входа"),
+    "rcxKindWhen": MessageLookupByLibrary.simpleMessage("Распознаётся, когда"),
+    "rcxKindWhenHint": MessageLookupByLibrary.simpleMessage(
+      "Типы проверяются сверху вниз; сеть получает первый подходящий.",
+    ),
+    "rcxKindWhitelist": MessageLookupByLibrary.simpleMessage(
+      "только белые списки",
+    ),
+    "rcxLastResort": MessageLookupByLibrary.simpleMessage("Запасной вариант"),
+    "rcxLastResortHint": MessageLookupByLibrary.simpleMessage(
+      "Запасное предпочтение используется, только если в лучших предпочтениях нет серверов.",
+    ),
+    "rcxLevel": MessageLookupByLibrary.simpleMessage("Уровень"),
+    "rcxLevelAdvanced": MessageLookupByLibrary.simpleMessage("Продвинутый"),
+    "rcxLevelSimple": MessageLookupByLibrary.simpleMessage("Простой"),
+    "rcxLine": m85,
+    "rcxLintCheckUnused": m86,
+    "rcxLintConsent": m87,
+    "rcxLintGroupMissing": m88,
+    "rcxLintPoolEmpty": m89,
+    "rcxLintTagUnused": m90,
+    "rcxLintTierEmpty": m91,
+    "rcxLintTierUnreachable": m92,
+    "rcxMainGroup": MessageLookupByLibrary.simpleMessage("Основная группа"),
+    "rcxMakeSmart": MessageLookupByLibrary.simpleMessage(
+      "Сделать группу умной",
+    ),
+    "rcxMakeSmartHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash держит в группе рабочий сервер и переключается, когда он перестаёт работать. Проверки идут только пока вы пользуетесь сетью.",
+    ),
+    "rcxManageHint": MessageLookupByLibrary.simpleMessage(
+      "Профили и сценарии создаются и редактируются в разделе «Расширенная конфигурация» → «Авто-маршрут».",
+    ),
+    "rcxMergeFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось перенести изменения",
+    ),
+    "rcxMerged": MessageLookupByLibrary.simpleMessage("Изменения перенесены"),
+    "rcxMergedConflicts": m93,
+    "rcxModeAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "rcxModeAutoHint": MessageLookupByLibrary.simpleMessage(
+      "Выбирает и переключает серверы по профилю",
+    ),
+    "rcxModeBackToAuto": MessageLookupByLibrary.simpleMessage(
+      "Вернуть режим сценарию",
+    ),
+    "rcxModeByScenario": MessageLookupByLibrary.simpleMessage(
+      "Режим в этой сети задаёт сценарий",
+    ),
+    "rcxModeIs": m94,
+    "rcxModeKeep": MessageLookupByLibrary.simpleMessage("Не менять"),
+    "rcxModeManual": MessageLookupByLibrary.simpleMessage("Вручную"),
+    "rcxModeManualHint": MessageLookupByLibrary.simpleMessage(
+      "Выбираете вы; авто-маршрут ничего не переключает",
+    ),
+    "rcxModeManualNow": MessageLookupByLibrary.simpleMessage(
+      "Режим выбран вручную; сценарий ждёт, пока вы не выберете «Авто»",
+    ),
+    "rcxModeYours": MessageLookupByLibrary.simpleMessage(
+      "В этой сети режим ваш",
+    ),
+    "rcxMoveDown": MessageLookupByLibrary.simpleMessage("Вниз"),
+    "rcxMoveUp": MessageLookupByLibrary.simpleMessage("Вверх"),
+    "rcxNeedsConsent": MessageLookupByLibrary.simpleMessage(
+      "Нужно ваше разрешение",
+    ),
+    "rcxNetwork": m95,
+    "rcxNetworkKinds": MessageLookupByLibrary.simpleMessage("Типы сетей"),
+    "rcxNewProfile": MessageLookupByLibrary.simpleMessage("Новый профиль"),
+    "rcxNewScenario": MessageLookupByLibrary.simpleMessage("Новый сценарий"),
+    "rcxOnThisNetwork": MessageLookupByLibrary.simpleMessage("В этой сети"),
+    "rcxOpFail": MessageLookupByLibrary.simpleMessage("не проходит"),
+    "rcxOpIn": MessageLookupByLibrary.simpleMessage("одно из"),
+    "rcxOpIs": MessageLookupByLibrary.simpleMessage("равно"),
+    "rcxOpIsNot": MessageLookupByLibrary.simpleMessage("не равно"),
+    "rcxOpMatches": MessageLookupByLibrary.simpleMessage("соответствует"),
+    "rcxOpOk": MessageLookupByLibrary.simpleMessage("проходит"),
+    "rcxOverrides": MessageLookupByLibrary.simpleMessage("Изменения по сетям"),
+    "rcxOwnProfile": MessageLookupByLibrary.simpleMessage(
+      "Свой профиль группы",
+    ),
+    "rcxPatternInvalid": MessageLookupByLibrary.simpleMessage(
+      "Шаблон — неверное регулярное выражение",
+    ),
+    "rcxPendingTier": m96,
+    "rcxPinned": m97,
+    "rcxPinnedHint": MessageLookupByLibrary.simpleMessage(
+      "Уходит с него только при сбое и возвращается, когда он оживёт",
+    ),
+    "rcxPinnedLabel": MessageLookupByLibrary.simpleMessage("Закреплён"),
+    "rcxPoolExclude": MessageLookupByLibrary.simpleMessage("Исключить"),
+    "rcxPoolInclude": MessageLookupByLibrary.simpleMessage("Использовать"),
+    "rcxProblemGroupEmpty": MessageLookupByLibrary.simpleMessage(
+      "В группе нет серверов",
+    ),
+    "rcxProblemGroupUnavailable": MessageLookupByLibrary.simpleMessage(
+      "В текущей конфигурации эта группа не селектор",
+    ),
+    "rcxProblemProfileInvalid": m98,
+    "rcxProblemProfileMissing": m99,
+    "rcxProblemStoreFailed": m100,
+    "rcxProfile": MessageLookupByLibrary.simpleMessage("Профиль"),
+    "rcxProfileName": MessageLookupByLibrary.simpleMessage("Название"),
+    "rcxProfileProgramHint": MessageLookupByLibrary.simpleMessage(
+      "Группа выбирает сервер по этому профилю среди серверов, которые оставляет пул.",
+    ),
+    "rcxProgramAction": MessageLookupByLibrary.simpleMessage("Действие"),
+    "rcxProgramFixed": MessageLookupByLibrary.simpleMessage(
+      "Отдать одному элементу",
+    ),
+    "rcxProgramMember": MessageLookupByLibrary.simpleMessage("Элемент"),
+    "rcxProgramPick": MessageLookupByLibrary.simpleMessage("Выбирать сервер"),
+    "rcxReasonBest": MessageLookupByLibrary.simpleMessage("Это лучший сервер"),
+    "rcxReasonBetterTier": m101,
+    "rcxReasonChangeServer": m102,
+    "rcxReasonChecking": MessageLookupByLibrary.simpleMessage(
+      "Проверяет лучшего кандидата",
+    ),
+    "rcxReasonConfirming": MessageLookupByLibrary.simpleMessage(
+      "Более быстрому серверу нужен ещё один замер",
+    ),
+    "rcxReasonDwell": MessageLookupByLibrary.simpleMessage(
+      "Недавно переключался; выжидает перед следующим",
+    ),
+    "rcxReasonFailover": m103,
+    "rcxReasonFaster": m104,
+    "rcxReasonFixed": m105,
+    "rcxReasonFixedMissing": m106,
+    "rcxReasonFlapLimit": m107,
+    "rcxReasonHoldPinned": MessageLookupByLibrary.simpleMessage(
+      "Держит закреплённый сервер",
+    ),
+    "rcxReasonIdle": m108,
+    "rcxReasonInitial": MessageLookupByLibrary.simpleMessage(
+      "Выбран лучший доступный сервер",
+    ),
+    "rcxReasonManual": MessageLookupByLibrary.simpleMessage(
+      "Управление вручную",
+    ),
+    "rcxReasonNetworkChanged": MessageLookupByLibrary.simpleMessage(
+      "Сеть сменилась",
+    ),
+    "rcxReasonNetworkSuspect": MessageLookupByLibrary.simpleMessage(
+      "Похоже, пропала сеть; серверы не виноваты",
+    ),
+    "rcxReasonNoAlternative": MessageLookupByLibrary.simpleMessage(
+      "Нет другого рабочего сервера",
+    ),
+    "rcxReasonOutOfPool": m109,
+    "rcxReasonPaused": m110,
+    "rcxReasonSelectFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось выбрать сервер",
+    ),
+    "rcxReasonSplitOff": MessageLookupByLibrary.simpleMessage(
+      "Прямые сайты снова идут напрямую",
+    ),
+    "rcxReasonSplitOn": MessageLookupByLibrary.simpleMessage(
+      "Прямые сайты теперь идут через эту группу",
+    ),
+    "rcxReasonStranded": MessageLookupByLibrary.simpleMessage(
+      "Нет рабочих серверов; держит текущий",
+    ),
+    "rcxReasonSwitchFixed": m111,
+    "rcxReasonSwitchPinned": m112,
+    "rcxReasonSwitchStranded": m113,
+    "rcxReasonWorking": MessageLookupByLibrary.simpleMessage(
+      "Работает; держится до сбоя",
+    ),
+    "rcxScenario": MessageLookupByLibrary.simpleMessage("Сценарий"),
+    "rcxScenarioDrives": m114,
+    "rcxScenarioGroups": MessageLookupByLibrary.simpleMessage("Группы"),
+    "rcxScenarioGroupsHint": MessageLookupByLibrary.simpleMessage(
+      "Основная группа — та, куда ведёт последнее правило; «Все группы» — остальные группы-селекторы, не названные здесь.",
+    ),
+    "rcxScenarioKindsHint": MessageLookupByLibrary.simpleMessage(
+      "Распознавайте сети по прямой диагностике и меняйте режим и группы в каждой.",
+    ),
+    "rcxScenarioMode": MessageLookupByLibrary.simpleMessage(
+      "Режим подключения",
+    ),
+    "rcxScenarioOff": MessageLookupByLibrary.simpleMessage("Выключено"),
+    "rcxScenarios": MessageLookupByLibrary.simpleMessage("Сценарии"),
+    "rcxScenariosHint": MessageLookupByLibrary.simpleMessage(
+      "Сценарий управляет всем подключением. Нажмите на свой, чтобы изменить его, на любой другой — чтобы изменить копию.",
+    ),
+    "rcxServers": MessageLookupByLibrary.simpleMessage("Серверы"),
+    "rcxServersMatch": m115,
+    "rcxServersPattern": MessageLookupByLibrary.simpleMessage("Шаблон имени"),
+    "rcxSmartGroups": MessageLookupByLibrary.simpleMessage("Смарт-группы"),
+    "rcxSourceBuiltin": MessageLookupByLibrary.simpleMessage("Встроенный"),
+    "rcxSourceChanged": MessageLookupByLibrary.simpleMessage(
+      "Исходный профиль изменился",
+    ),
+    "rcxSourceChanges": MessageLookupByLibrary.simpleMessage("Что изменилось"),
+    "rcxSourceProvider": MessageLookupByLibrary.simpleMessage("От провайдера"),
+    "rcxSourceUser": MessageLookupByLibrary.simpleMessage("Мои"),
+    "rcxStranded": MessageLookupByLibrary.simpleMessage(
+      "Если сервер не подходит",
+    ),
+    "rcxStrandedDirect": MessageLookupByLibrary.simpleMessage("Идти напрямую"),
+    "rcxStrandedHold": MessageLookupByLibrary.simpleMessage(
+      "Оставить текущий сервер",
+    ),
+    "rcxSwitching": MessageLookupByLibrary.simpleMessage("Переключения"),
+    "rcxTagName": MessageLookupByLibrary.simpleMessage("Имя тега"),
+    "rcxTagNameInvalid": MessageLookupByLibrary.simpleMessage(
+      "Только латинские буквы, цифры, - и _, до 24 символов",
+    ),
+    "rcxTags": MessageLookupByLibrary.simpleMessage("Теги"),
+    "rcxTagsHint": MessageLookupByLibrary.simpleMessage(
+      "Тег один раз называет набор серверов, чтобы использовать его в предпочтениях как tag(name).",
+    ),
+    "rcxThirdParty": MessageLookupByLibrary.simpleMessage("сторонний"),
+    "rcxTier": MessageLookupByLibrary.simpleMessage("Предпочтение"),
+    "rcxTierLabel": MessageLookupByLibrary.simpleMessage("Метка"),
+    "rcxTierWhen": MessageLookupByLibrary.simpleMessage(
+      "Серверы в этом предпочтении",
+    ),
+    "rcxTiers": MessageLookupByLibrary.simpleMessage("Порядок предпочтений"),
+    "rcxTiersHint": MessageLookupByLibrary.simpleMessage(
+      "Сервер попадает в первое подходящее предпочтение; побеждает лучшее предпочтение, где есть серверы. Для смены порядка зажмите и перетащите.",
+    ),
+    "rcxTitle": MessageLookupByLibrary.simpleMessage("Авто-маршрут"),
+    "rcxTranslations": MessageLookupByLibrary.simpleMessage("Переводы"),
+    "rcxTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Выключить авто-маршрут",
+    ),
+    "rcxUntilCheck": m116,
+    "rcxUntilConfirm": m117,
+    "rcxUntilDwell": m118,
+    "rcxUseCheck": m119,
+    "rcxUseDiagnostic": m120,
+    "rcxUseEcho": MessageLookupByLibrary.simpleMessage(
+      "проверка страны выхода",
+    ),
+    "rcxWarnings": MessageLookupByLibrary.simpleMessage("Предупреждения"),
+    "rcxWhy": MessageLookupByLibrary.simpleMessage("Почему этот сервер"),
+    "rcxYaml": MessageLookupByLibrary.simpleMessage("YAML"),
     "recentRequests": MessageLookupByLibrary.simpleMessage("Последние запросы"),
     "recommendedIcons": MessageLookupByLibrary.simpleMessage("Рекомендуемые"),
     "recordType": MessageLookupByLibrary.simpleMessage("Тип записи"),
@@ -1800,22 +2331,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionAppsEmpty": MessageLookupByLibrary.simpleMessage(
       "Приложения для этого региона не найдены. Ваши списки не изменены.",
     ),
-    "regionAppsPreview": m72,
+    "regionAppsPreview": m121,
     "regionAppsPreviewTitle": MessageLookupByLibrary.simpleMessage(
       "Предпросмотр подбора",
     ),
-    "regionBypassSettings": m73,
+    "regionBypassSettings": m122,
     "regionChina": MessageLookupByLibrary.simpleMessage("Китай"),
     "regionChoose": MessageLookupByLibrary.simpleMessage("Выберите страну"),
     "regionCurrent": MessageLookupByLibrary.simpleMessage("Текущий регион"),
     "regionCustomPreserved": MessageLookupByLibrary.simpleMessage(
       "Ручные DNS и MTU, список обхода, правила маршрутизации и выбор сервисов сохраняются.",
     ),
-    "regionDetected": m74,
+    "regionDetected": m123,
     "regionDetectionTitle": MessageLookupByLibrary.simpleMessage(
       "Подсказка устройства",
     ),
-    "regionDnsSettings": m75,
+    "regionDnsSettings": m124,
     "regionEgypt": MessageLookupByLibrary.simpleMessage("Египет"),
     "regionIntro": MessageLookupByLibrary.simpleMessage(
       "Базовые сетевые параметры и проверки сервисов для региона — независимо от языка интерфейса.",
@@ -1835,12 +2366,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "regionPreviewAndroid": MessageLookupByLibrary.simpleMessage(
       "На Android изменения MTU или обхода могут потребовать подтверждённого перезапуска VPN. Подбор приложений запускается отдельно.",
     ),
-    "regionPreviewBase": m76,
-    "regionPreviewMtu": m77,
+    "regionPreviewBase": m125,
+    "regionPreviewMtu": m126,
     "regionPreviewRules": MessageLookupByLibrary.simpleMessage(
       "Выбор прокси и ваши правила маршрутизации не изменятся.",
     ),
-    "regionPreviewServices": m78,
+    "regionPreviewServices": m127,
     "regionPreviewTitle": MessageLookupByLibrary.simpleMessage("Предпросмотр"),
     "regionProfileDefaults": MessageLookupByLibrary.simpleMessage(
       "Настройки профиля",
@@ -1862,7 +2393,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "часовой пояс",
     ),
     "regionTitle": MessageLookupByLibrary.simpleMessage("Региональный профиль"),
-    "regionTunSettings": m79,
+    "regionTunSettings": m128,
     "regionUseDetected": MessageLookupByLibrary.simpleMessage(
       "Выбрать определённый регион",
     ),
@@ -2099,14 +2630,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Правило должно начинаться с поддерживаемого типа, например DOMAIN,example.com,DIRECT",
     ),
     "rules": MessageLookupByLibrary.simpleMessage("Правила"),
-    "rulesCount": m80,
+    "rulesCount": m129,
     "runTime": MessageLookupByLibrary.simpleMessage("Время работы"),
     "running": MessageLookupByLibrary.simpleMessage("Работает"),
     "runtimeConfig": MessageLookupByLibrary.simpleMessage(
       "Конфигурация выполнения",
     ),
     "safeMode": MessageLookupByLibrary.simpleMessage("Безопасный режим"),
-    "safeModeAppTitle": m81,
+    "safeModeAppTitle": m130,
     "saturation": MessageLookupByLibrary.simpleMessage("Насыщенность"),
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Сохранить изменения?"),
@@ -2119,9 +2650,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Поиск"),
     "seconds": MessageLookupByLibrary.simpleMessage("секунд"),
-    "secondsCount": m82,
+    "secondsCount": m131,
     "secretKey": MessageLookupByLibrary.simpleMessage("Ключ"),
-    "sectionsInEffect": m83,
+    "sectionsInEffect": m132,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать всё"),
     "selectRuleSet": MessageLookupByLibrary.simpleMessage(
       "Выберите набор правил",
@@ -2131,13 +2662,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
     "server": MessageLookupByLibrary.simpleMessage("Сервер"),
-    "serviceAbnormalCount": m84,
+    "serviceAbnormalCount": m133,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage("Все доступны"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокировано"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Проверить"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Проверить все"),
-    "serviceCheckedAt": m85,
+    "serviceCheckedAt": m134,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Скоро появится"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
       "Недопустимый провайдер",
@@ -2163,7 +2694,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "settingEntries": MessageLookupByLibrary.simpleMessage("параметры"),
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
-    "settingsCount": m86,
+    "settingsCount": m135,
     "setupAgeKeyDescription": MessageLookupByLibrary.simpleMessage(
       "Этот профиль зашифрован. Укажите ключ age, чтобы продолжить.",
     ),
@@ -2279,7 +2810,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupPhaseServices": MessageLookupByLibrary.simpleMessage(
       "Проверка сервисов",
     ),
-    "setupProfileCount": m87,
+    "setupProfileCount": m136,
     "setupProfileDescription": MessageLookupByLibrary.simpleMessage(
       "ReClash не предоставляет серверы. Добавьте подписку или конфигурацию вашего провайдера.",
     ),
@@ -2334,7 +2865,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSavedTitle": MessageLookupByLibrary.simpleMessage(
       "Подключимся позже",
     ),
-    "setupStepStatus": m88,
+    "setupStepStatus": m137,
     "setupStoppedDescription": MessageLookupByLibrary.simpleMessage(
       "Ваш выбор сохранён. Прежнее подключение не остановлено.",
     ),
@@ -2342,7 +2873,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проверка остановлена",
     ),
     "setupTitle": MessageLookupByLibrary.simpleMessage("Первое подключение"),
-    "setupTryServer": m89,
+    "setupTryServer": m138,
     "setupUnavailable": MessageLookupByLibrary.simpleMessage("Нет ответа"),
     "setupUnconfirmedDescription": MessageLookupByLibrary.simpleMessage(
       "Подключение запущено, но выбранный маршрут не дал достаточных результатов.",
@@ -2353,7 +2884,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupUnknownError": MessageLookupByLibrary.simpleMessage(
       "Операция не завершилась. Повторите попытку или откройте подробности.",
     ),
-    "shareLinkUnreadable": m90,
+    "shareLinkUnreadable": m139,
     "shareLinksInvalid": MessageLookupByLibrary.simpleMessage(
       "Не удалось прочитать прокси из ссылок",
     ),
@@ -2379,7 +2910,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "Здесь укажите одну ссылку, несколько можно задать в быстром редактировании списка",
     ),
-    "singleValueTip": m91,
+    "singleValueTip": m140,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Пропускать проверку сертификата",
@@ -2517,7 +3048,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("Использовать этот клиент"),
-    "subscriptionCompatibilityPrepared": m92,
+    "subscriptionCompatibilityPrepared": m141,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core разобрал результат. Он ещё не сохранён и не применён.",
@@ -2550,7 +3081,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Подписка истекла",
     ),
-    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresInDays": m142,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Подписка истекает сегодня",
     ),
@@ -2600,7 +3131,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "неизвестный формат",
     ),
-    "subscriptionImportIgnoredSections": m94,
+    "subscriptionImportIgnoredSections": m143,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "Нет поддерживаемых прокси-узлов для импорта.",
     ),
@@ -2611,11 +3142,11 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Действует только для этого источника, формата и принятых видов потерь. Новые потери требуют повторного согласия.",
         ),
-    "subscriptionImportReviewSummary": m95,
+    "subscriptionImportReviewSummary": m144,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Проверка импорта подписки",
     ),
-    "subscriptionImportSkippedNodes": m96,
+    "subscriptionImportSkippedNodes": m145,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),
@@ -2639,7 +3170,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Поддержка",
     ),
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("Сайт"),
-    "subscriptionTrafficLow": m97,
+    "subscriptionTrafficLow": m146,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Использовать интервал провайдера",
     ),
@@ -2741,7 +3272,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро",
     ),
-    "toolsResults": m98,
+    "toolsResults": m147,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Выполнить"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Раздел"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Настройка"),
@@ -2760,8 +3291,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Отдано"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m99,
-    "trafficTotal": m100,
+    "trafficPeak": m148,
+    "trafficTotal": m149,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -2883,14 +3414,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Обновление установлено",
     ),
-    "updateInstalledVersion": m101,
+    "updateInstalledVersion": m150,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android завершает установку. На этом этапе ReClash может закрыться.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Устанавливаем обновление",
     ),
-    "updateMinutes": m102,
+    "updateMinutes": m151,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Не сейчас"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Описание изменений не опубликовано.",
@@ -2942,7 +3473,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Подробности релиза",
     ),
-    "updateRemainingTime": m103,
+    "updateRemainingTime": m152,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Продолжить загрузку",
     ),
@@ -2952,7 +3483,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Повторить установку",
     ),
-    "updateSeconds": m104,
+    "updateSeconds": m153,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Все примечания к релизу",
     ),
@@ -2960,7 +3491,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Показать все изменения",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Обновления"),
-    "updateTransferSpeed": m105,
+    "updateTransferSpeed": m154,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось проверить целостность загруженного обновления.",
     ),
@@ -2998,14 +3529,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Закрыть приложение согласно настройке закрытия.",
     ),
-    "urlSchemeConfigCounts": m106,
+    "urlSchemeConfigCounts": m155,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Вставьте конфигурацию YAML или JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Состав конфигурации",
     ),
-    "urlSchemeConfirmMessage": m107,
+    "urlSchemeConfirmMessage": m156,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Внешняя команда приложения",
     ),
@@ -3049,7 +3580,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Импортировать конфигурацию",
     ),
-    "urlSchemeImportConfirm": m108,
+    "urlSchemeImportConfirm": m157,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Встроить конфигурацию YAML или JSON в ссылку.",
     ),
@@ -3143,7 +3674,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Подставить пример",
     ),
-    "urlTip": m109,
+    "urlTip": m158,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -3194,9 +3725,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
-    "wallpaperImageLabel": m110,
+    "wallpaperImageLabel": m159,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m111,
+    "wallpaperLibraryFull": m160,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -3231,11 +3762,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "Настройка WebDAV",
     ),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Веб-панель"),
+    "webDashboardAccess": MessageLookupByLibrary.simpleMessage("Доступ"),
     "webDashboardAccessEnded": MessageLookupByLibrary.simpleMessage(
       "Доступ к панели завершён",
     ),
+    "webDashboardAccessInApp": MessageLookupByLibrary.simpleMessage(
+      "В приложении",
+    ),
+    "webDashboardAccessInBrowser": MessageLookupByLibrary.simpleMessage(
+      "В браузере",
+    ),
+    "webDashboardAccessOff": MessageLookupByLibrary.simpleMessage("Выключен"),
     "webDashboardAccessTip": MessageLookupByLibrary.simpleMessage(
-      "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера. Завершите доступ здесь, когда закончите работу в браузере.",
+      "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера.",
     ),
     "webDashboardApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось применить конфигурацию панели.",
@@ -3279,7 +3818,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardExtracting": MessageLookupByLibrary.simpleMessage(
       "Распаковка панели",
     ),
-    "webDashboardFiles": MessageLookupByLibrary.simpleMessage("Файлы панели"),
     "webDashboardFlavor": MessageLookupByLibrary.simpleMessage("Панель"),
     "webDashboardInstall": MessageLookupByLibrary.simpleMessage(
       "Установить панель",
@@ -3287,7 +3825,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
     ),
-    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось открыть браузер.",
     ),
@@ -3320,6 +3857,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardVerifying": MessageLookupByLibrary.simpleMessage(
       "Проверка загрузки",
     ),
+    "webDashboardVersion": MessageLookupByLibrary.simpleMessage("Версия"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
@@ -3329,8 +3867,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует.",
     ),
-    "yearsAgo": m113,
-    "yearsAgoShort": m114,
+    "yearsAgo": m161,
+    "yearsAgoShort": m162,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };

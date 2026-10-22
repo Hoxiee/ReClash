@@ -16,7 +16,7 @@ final notificationServerGroupProvider = Provider<String?>((ref) {
   if (component.group case final group?) {
     return groups.any((g) => g.name == group) ? group : null;
   }
-  final mode = ref.watch(patchClashConfigProvider.select((s) => s.mode));
+  final mode = ref.watch(effectiveModeProvider);
   if (mode == Mode.direct) return null;
   if (mode == Mode.global) {
     return groups.any((g) => g.name == 'GLOBAL') ? 'GLOBAL' : null;

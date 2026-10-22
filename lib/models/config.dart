@@ -537,6 +537,9 @@ abstract class Config with _$Config {
     WindowProps windowProps,
     @Default(defaultClashConfig) PatchClashConfig patchClashConfig,
     @Default([]) List<String> excludeSSIDs,
+
+    /// The user's own routing profiles, shared by every subscription.
+    @Default({}) Map<String, RcxUserProfile> rcxProfiles,
   }) = _Config;
 
   factory Config.fromJson(Map<String, Object?> json) =>

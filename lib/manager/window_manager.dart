@@ -666,10 +666,7 @@ final windowServerNameProvider = Provider<String>((ref) {
   if (ref.watch(windowStatusProvider) != WindowStatus.running) {
     return '';
   }
-  final mode = ref.watch(
-    patchClashConfigProvider.select((state) => state.mode),
-  );
-  if (mode != Mode.global) {
+  if (ref.watch(effectiveModeProvider) != Mode.global) {
     return '';
   }
   return _stripLeadingEmoji(
