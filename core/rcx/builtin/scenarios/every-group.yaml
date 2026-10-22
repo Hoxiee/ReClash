@@ -1,0 +1,6 @@
+rcx: 1
+title: Every group automatically
+groups:
+  '*': {}
+l10n:
+  ru: { Every group automatically: Все группы автоматически }

@@ -1,0 +1,19 @@
+rcx: 1
+title: Simple
+level: simple
+prefer:
+  - { label: Working, when: 'not dead' }
+rank: { by: latency, tolerance: 50 }
+switch: { improve: false, feel: calm }
+stranded: hold
+energy: balanced
+l10n:
+  es: { Simple: Simple, Working: Funcionando }
+  fr: { Simple: Simple, Working: Fonctionne }
+  ja: { Simple: シンプル, Working: 動作中 }
+  kk: { Simple: Қарапайым, Working: Жұмыс істейді }
+  ko: { Simple: 단순, Working: 작동 중 }
+  ru: { Simple: Простой, Working: Работает }
+  tk: { Simple: Ýönekeý, Working: Işleýär }
+  uz: { Simple: Oddiy, Working: Ishlayapti }
+  zh-CN: { Simple: 简单, Working: 可用 }

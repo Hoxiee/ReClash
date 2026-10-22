@@ -1,0 +1,19 @@
+rcx: 1
+title: Stable
+level: simple
+prefer:
+  - { label: Working, when: 'not dead' }
+rank: { by: stability, tolerance: 100 }
+switch: { improve: true, feel: calm }
+stranded: hold
+energy: balanced
+l10n:
+  es: { Stable: Estable, Working: Funcionando }
+  fr: { Stable: Stable, Working: Fonctionne }
+  ja: { Stable: 安定, Working: 動作中 }
+  kk: { Stable: Тұрақты, Working: Жұмыс істейді }
+  ko: { Stable: 안정적, Working: 작동 중 }
+  ru: { Stable: Стабильный, Working: Работает }
+  tk: { Stable: Durnukly, Working: Işleýär }
+  uz: { Stable: Barqaror, Working: Ishlayapti }
+  zh-CN: { Stable: 稳定, Working: 可用 }

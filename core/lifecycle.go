@@ -50,6 +50,9 @@ func handleStartListener() bool {
 	updateListeners(currentConfig)
 	resolver.ResetConnection()
 	refreshRoute()
+	if e := rcxReady(); e != nil {
+		e.SetRunning(true)
+	}
 	return true
 }
 
@@ -59,6 +62,9 @@ func handleStopListener() bool {
 	isRunning.Store(false)
 	listener.StopListener()
 	resolver.ResetConnection()
+	if e := rcxIfReady(); e != nil {
+		e.SetRunning(false)
+	}
 	return true
 }
 

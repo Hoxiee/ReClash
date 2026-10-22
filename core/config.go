@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 
+	"core/rcx"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/component/age"
@@ -111,8 +113,12 @@ func withPlatformLimits(cfg *config.Config) *config.Config {
 	return cfg
 }
 
+func setupConfigPath() string {
+	return filepath.Join(constant.Path.HomeDir(), "config.yaml")
+}
+
 func loadSetupConfig(params *SetupParams) (*config.Config, error) {
-	path := filepath.Join(constant.Path.HomeDir(), "config.yaml")
+	path := setupConfigPath()
 	if params.Base != nil {
 		return loadConfigWithBase(params.Base, path)
 	}
@@ -146,8 +152,17 @@ func applyConfig(params *SetupParams) error {
 
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
+	tunnel.SetMode(rcxSetUserMode(cfg.General.Mode))
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()
+	if params.Rcx != nil {
+		rcxSetUser(*params.Rcx)
+	}
+	if err == nil {
+		rcxApplySubscription(rcxReadSubscription(setupConfigPath()))
+	} else {
+		rcxApplySubscription(rcx.SubscriptionLayer{})
+	}
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	scheduleLoadMemoryRelease()
@@ -185,7 +200,7 @@ func updateConfig(params *UpdateParams) error {
 	if params.Mode != nil {
 		routeChanged = routeChanged || general.Mode != *params.Mode
 		general.Mode = *params.Mode
-		tunnel.SetMode(general.Mode)
+		tunnel.SetMode(rcxSetUserMode(general.Mode))
 	}
 	if params.LogLevel != nil {
 		general.LogLevel = *params.LogLevel

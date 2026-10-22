@@ -1,0 +1,50 @@
+rcx: 1
+title: China · bypass blocks
+level: advanced
+checks:
+  open: { http: 'https://www.google.com/generate_204', expect: [204] }
+network:
+  kinds:
+    - { kind: portal, when: network.portal, pause: true }
+prefer:
+  - { label: Opens blocked, when: 'passes(open) and exit.country != CN' }
+  - { label: Abroad, when: 'not dead and exit.country != CN' }
+  - { label: Home exit, when: 'not dead', last-resort: true }
+rank: { by: latency, tolerance: 40 }
+switch: { improve: true, feel: calm }
+stranded: hold
+energy: balanced
+l10n:
+  es:
+    China · bypass blocks: China · evitar bloqueos
+    Opens blocked: Abre bloqueados
+    Abroad: En el extranjero
+    Home exit: Salida local
+  fr:
+    China · bypass blocks: Chine · contourner les blocages
+    Opens blocked: Ouvre les bloqués
+    Abroad: À l’étranger
+    Home exit: Sortie locale
+  ja: { China · bypass blocks: 中国 · 遮断回避, Opens blocked: 遮断サイトを開く, Abroad: 国外, Home exit: 国内出口 }
+  kk:
+    China · bypass blocks: Қытай · бұғаттауды айналып өту
+    Opens blocked: Бұғатталғанды ашады
+    Abroad: Шетелде
+    Home exit: Ішкі шығыс
+  ko: { China · bypass blocks: 중국 · 차단 우회, Opens blocked: 차단 사이트 열림, Abroad: 해외, Home exit: 국내 출구 }
+  ru:
+    China · bypass blocks: Китай · обход блокировок
+    Opens blocked: Открывает заблокированное
+    Abroad: За рубежом
+    Home exit: Выход в своей стране
+  tk:
+    China · bypass blocks: Hytaý · petiklenmäni aýlanmak
+    Opens blocked: Petikleniňi açýar
+    Abroad: Daşary ýurtda
+    Home exit: Içerki çykyş
+  uz:
+    China · bypass blocks: Xitoy · bloklarni chetlab o‘tish
+    Opens blocked: Bloklanganni ochadi
+    Abroad: Chet elda
+    Home exit: Mahalliy chiqish
+  zh-CN: { China · bypass blocks: 中国 · 绕过封锁, Opens blocked: 可打开被屏蔽站点, Abroad: 境外, Home exit: 境内出口 }

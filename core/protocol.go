@@ -3,6 +3,8 @@ package core
 import (
 	"time"
 
+	"core/rcx"
+
 	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/adapter/provider"
 	P "github.com/metacubex/mihomo/component/process"
@@ -66,6 +68,14 @@ const (
 	watchRouteMethod               CoreMethod = "watchRoute"
 	fetchSubscriptionMethod        CoreMethod = "fetchSubscription"
 	cancelSubscriptionFetchMethod  CoreMethod = "cancelSubscriptionFetch"
+	rcxSetPolicyMethod             CoreMethod = "rcxSetPolicy"
+	rcxStatusMethod                CoreMethod = "rcxStatus"
+	rcxExplainMethod               CoreMethod = "rcxExplain"
+	rcxJournalMethod               CoreMethod = "rcxJournal"
+	rcxActionMethod                CoreMethod = "rcxAction"
+	rcxHintsMethod                 CoreMethod = "rcxHints"
+	rcxProfilesMethod              CoreMethod = "rcxProfiles"
+	rcxStudioMethod                CoreMethod = "rcxStudio"
 )
 
 type MessageType string
@@ -81,6 +91,7 @@ const (
 	RouteChangedMessage   MessageType = "routeChanged"
 	DialerLoopMessage     MessageType = "dialerLoop"
 	RequestTrafficMessage MessageType = "requestTraffic"
+	RcxStatusMessage      MessageType = "rcxStatus"
 )
 
 type Message struct {
@@ -103,6 +114,8 @@ type SetupParams struct {
 	TestURL        string            `json:"test-url"`
 	SkipCertVerify bool              `json:"skip-cert-verify"`
 	Base           *SetupBase        `json:"base,omitempty"`
+	// The host's routing choices; absent keeps the ones last sent.
+	Rcx *rcx.UserLayer `json:"rcx,omitempty"`
 }
 
 type SetupBase struct {

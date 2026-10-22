@@ -152,7 +152,19 @@ func selectableGroup(groupName string) (pickableGroup, error) {
 	return selector, nil
 }
 
+// A pick the user makes in a smart group pins it; the engine is told after
+// selectMu is released, since it takes that lock itself when it selects.
 func handleChangeProxy(params *ChangeProxyParams) *ChangeProxyResult {
+	result := changeProxy(params)
+	if result.Message == "" && params.ProxyName != "" {
+		if e := rcxIfReady(); e != nil {
+			e.NoteManualPick(rcxPickOf(params.GroupName, params.ProxyName))
+		}
+	}
+	return result
+}
+
+func changeProxy(params *ChangeProxyParams) *ChangeProxyResult {
 	selectMu.Lock()
 	defer selectMu.Unlock()
 

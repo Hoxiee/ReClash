@@ -74,6 +74,11 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             networkInfos[network]?.dnsList = linkProperties.dnsServers
             scheduleUpdateDns()
         }
+
+        // A captive portal or a metered flag can change without a new network.
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+            if (networkInfos.containsKey(network)) scheduleUpdateDns()
+        }
     }
 
     private val updateDnsTask = Runnable(::updateDns)
@@ -123,6 +128,18 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             Core.updateDNS(dnsList.joinToString(","))
         }
         val network = preferred?.key ?: return
+        connectivity?.getNetworkCapabilities(network)?.let { capabilities ->
+            sendNetworkHint(
+                transport = capabilities.transportName,
+                id = dnsList.joinToString(","),
+                metered = !capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_METERED,
+                ),
+                portal = capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL,
+                ),
+            )
+        }
         // Sockets protected onto the network we left stay bound to it; closing
         // them makes apps reconnect now instead of after a TCP timeout.
         if (currentNetwork != null && currentNetwork != network) {
@@ -142,6 +159,14 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         }
     }
 }
+
+private val NetworkCapabilities.transportName: String
+    get() = when {
+        hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+        hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+        hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+        else -> "other"
+    }
 
 private const val DNS_PORT = 53
 private const val DNS_UPDATE_DELAY_MILLIS = 200L

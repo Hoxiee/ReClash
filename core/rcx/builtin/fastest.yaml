@@ -1,0 +1,19 @@
+rcx: 1
+title: Fastest
+level: simple
+prefer:
+  - { label: Working, when: 'not dead' }
+rank: { by: latency, tolerance: 20 }
+switch: { improve: true, feel: balanced }
+stranded: hold
+energy: balanced
+l10n:
+  es: { Fastest: Más rápido, Working: Funcionando }
+  fr: { Fastest: Le plus rapide, Working: Fonctionne }
+  ja: { Fastest: 最速, Working: 動作中 }
+  kk: { Fastest: Ең жылдам, Working: Жұмыс істейді }
+  ko: { Fastest: 가장 빠름, Working: 작동 중 }
+  ru: { Fastest: Самый быстрый, Working: Работает }
+  tk: { Fastest: Iň çalt, Working: Işleýär }
+  uz: { Fastest: Eng tezkor, Working: Ishlayapti }
+  zh-CN: { Fastest: 最快, Working: 可用 }

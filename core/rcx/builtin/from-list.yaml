@@ -1,0 +1,14 @@
+rcx: 1
+title: From list
+level: simple
+extends: builtin/simple
+l10n:
+  es: { From list: De la lista }
+  fr: { From list: De la liste }
+  ja: { From list: リストから }
+  kk: { From list: Тізімнен }
+  ko: { From list: 목록에서 }
+  ru: { From list: Из списка }
+  tk: { From list: Sanawdan }
+  uz: { From list: Ro‘yxatdan }
+  zh-CN: { From list: 从列表选择 }
