@@ -23,6 +23,7 @@ class WebDashboardPage extends ConsumerStatefulWidget {
 class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
   late WebDashboardSession _session;
   WebViewController? _controller;
+  Color? _background;
   bool _loading = true;
   bool _launching = false;
   WebDashboardFailure? _failure;
@@ -31,7 +32,14 @@ class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
   void initState() {
     super.initState();
     _session = widget.session;
-    unawaited(_initialize());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final initial = _background == null;
+    _background = SurfaceLevel.page.colorOf(context.colorScheme);
+    if (initial) unawaited(_initialize());
   }
 
   Future<void> _initialize() async {
@@ -47,6 +55,9 @@ class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
     try {
       final controller = WebViewController();
       await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      try {
+        await controller.setBackgroundColor(_background!);
+      } catch (_) {}
       await controller.setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (_) {
@@ -178,19 +189,6 @@ class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
     }
   }
 
-  Future<bool> _back(BuildContext context) async {
-    try {
-      final controller = _controller;
-      if (_session.isActive() &&
-          controller != null &&
-          await controller.canGoBack()) {
-        await controller.goBack();
-        return false;
-      }
-    } catch (_) {}
-    return true;
-  }
-
   @override
   void dispose() {
     unawaited(_session.close());
@@ -205,51 +203,57 @@ class _WebDashboardPageState extends ConsumerState<WebDashboardPage> {
     final failure = _failure;
     final controller = _controller;
     final retryable = active || failure != null;
-    return CommonPopScope(
-      onPop: _back,
-      child: CommonScaffold(
-        title: _session.flavor.label,
-        iconActions: [
-          IconButtonData(
-            glyph: AppGlyphs.refresh,
-            tooltip: l.webDashboardReload,
-            onPressed: retryable && !_loading
-                ? () => unawaited(_reload())
-                : null,
-          ),
-          IconButtonData(
-            glyph: AppGlyphs.openExternal,
-            tooltip: l.webDashboardOpenInBrowser,
-            isLoading: _launching,
-            onPressed: active && !_launching
-                ? () => unawaited(_browser())
-                : null,
-          ),
-        ],
-        body: AppBarClearance(
-          child: !active || failure != null
-              ? NullStatus(
-                  illustration: NullStatusIllustration.error,
-                  label: failure != null
-                      ? l.webDashboard
-                      : l.webDashboardAccessEnded,
-                  description: failure?.label ?? l.webDashboardNoAccess,
-                  action: retryable
-                      ? FilledButton.tonal(
-                          onPressed: () => unawaited(_reload()),
-                          child: Text(l.webDashboardReload),
-                        )
-                      : null,
-                )
-              : Stack(
+    return CommonScaffold(
+      title: _session.flavor.label,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.refresh,
+          tooltip: l.webDashboardReload,
+          onPressed: retryable && !_loading ? () => unawaited(_reload()) : null,
+        ),
+        IconButtonData(
+          glyph: AppGlyphs.openExternal,
+          tooltip: l.webDashboardOpenInBrowser,
+          isLoading: _launching,
+          onPressed: active && !_launching ? () => unawaited(_browser()) : null,
+        ),
+      ],
+      body: AppBarClearance(
+        child: !active || failure != null
+            ? NullStatus(
+                illustration: NullStatusIllustration.error,
+                label: failure != null
+                    ? l.webDashboard
+                    : l.webDashboardAccessEnded,
+                description: failure?.label ?? l.webDashboardNoAccess,
+                action: retryable
+                    ? FilledButton.tonal(
+                        onPressed: () => unawaited(_reload()),
+                        child: Text(l.webDashboardReload),
+                      )
+                    : null,
+              )
+            : SafeArea(
+                top: false,
+                child: Stack(
                   fit: StackFit.expand,
                   children: [
                     if (controller != null)
                       WebViewWidget(controller: controller),
-                    if (_loading) const Center(child: CommonCircleLoading()),
+                    AnimatedSwitcher(
+                      duration: context.motionDuration(
+                        const Duration(milliseconds: 200),
+                      ),
+                      child: _loading
+                          ? ColoredBox(
+                              color: _background!,
+                              child: const Center(child: CommonCircleLoading()),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
                 ),
-        ),
+              ),
       ),
     );
   }

@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "Браузерде ашу",
   "webDashboardReload": "Қайта жүктеу",
   "webDashboardInstall": "Панельді орнату",
-  "webDashboardFiles": "Панель файлдары",
   "webDashboardNotInstalled": "Орнатылмаған",
-  "webDashboardInstalledVersion": "Орнатылған нұсқа: {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "Таңдалған панель алғаш ашылғанда жүктеледі. Бекітілген шығарылым SHA-256 арқылы тексеріледі.",
-  "webDashboardAccessTip": "Қолжетімділік жергілікті және аутентификациямен қорғалған. Сақталған сыртқы контроллер параметрлері өзгермейді. Браузерде жұмысты аяқтаған соң қолжетімділікті осы жерден тоқтатыңыз.",
+  "webDashboardAccessTip": "Қолжетімділік жергілікті және құпия кілтпен қорғалған. Панельді ашу сақталған сыртқы контроллер параметрлерін өзгертпейді.",
   "webDashboardNoAccess": "Белсенді панель сеансы жоқ",
   "webDashboardEmbeddedAccess": "Панель жабылғанда қолжетімділік тоқтайды",
   "webDashboardBrowserAccess": "Браузердің қолжетімділігі тоқтатылғанға немесе ReClash жабылғанға дейін сақталады",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "Ядро бұл панельді ұсынбайды.",
   "webDashboardAuthenticationFailed": "Ядро тіркелгі деректерін қабылдамады. Панельді қайта ашыңыз.",
   "webDashboardLaunchFailed": "Браузерді ашу мүмкін болмады.",
-  "webDashboardCancelled": "Панель әрекеті тоқтатылды."
+  "webDashboardCancelled": "Панель әрекеті тоқтатылды.",
+  "webDashboardVersion": "Нұсқа",
+  "webDashboardAccess": "Қолжетімділік",
+  "webDashboardAccessOff": "Өшірулі",
+  "webDashboardAccessInApp": "Қолданбада",
+  "webDashboardAccessInBrowser": "Браузерде"
 }

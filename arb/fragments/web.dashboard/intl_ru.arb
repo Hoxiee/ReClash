@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "Открыть в браузере",
   "webDashboardReload": "Перезагрузить",
   "webDashboardInstall": "Установить панель",
-  "webDashboardFiles": "Файлы панели",
   "webDashboardNotInstalled": "Не установлена",
-  "webDashboardInstalledVersion": "Установленная версия: {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "Выбранная панель загрузится при первом открытии. Используется закреплённый релиз с проверкой SHA-256.",
-  "webDashboardAccessTip": "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера. Завершите доступ здесь, когда закончите работу в браузере.",
+  "webDashboardAccessTip": "Доступ локальный и защищён секретом. Открытие панели не меняет сохранённые настройки внешнего контроллера.",
   "webDashboardNoAccess": "Нет активной сессии панели",
   "webDashboardEmbeddedAccess": "Доступ завершится при закрытии панели",
   "webDashboardBrowserAccess": "Доступ из браузера действует до его завершения здесь или выхода из ReClash",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "Ядро не отдаёт выбранную панель.",
   "webDashboardAuthenticationFailed": "Ядро отклонило секрет доступа. Откройте панель заново.",
   "webDashboardLaunchFailed": "Не удалось открыть браузер.",
-  "webDashboardCancelled": "Операция с панелью отменена."
+  "webDashboardCancelled": "Операция с панелью отменена.",
+  "webDashboardVersion": "Версия",
+  "webDashboardAccess": "Доступ",
+  "webDashboardAccessOff": "Выключен",
+  "webDashboardAccessInApp": "В приложении",
+  "webDashboardAccessInBrowser": "В браузере"
 }

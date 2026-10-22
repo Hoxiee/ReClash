@@ -279,7 +279,7 @@ void main() {
       await pump(tester);
       expect(action.calls, ['refresh']);
       expect(find.text('Not installed'), findsOneWidget);
-      expect(find.text('No dashboard session'), findsOneWidget);
+      expect(find.text('Off'), findsOneWidget);
       expect(find.byTooltip('Open in browser'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Open dashboard'), findsNothing);
       expect(
@@ -307,7 +307,7 @@ void main() {
     expect(find.text('Not installed'), findsOneWidget);
   });
 
-  testWidgets('install update and reload live in the app bar menu', (
+  testWidgets('install, update and storage retry live in the app bar menu', (
     tester,
   ) async {
     await pump(tester);
@@ -323,12 +323,32 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Installed version: test-version'), findsOneWidget);
+    final latest = WebDashboardFlavor.zashboard.release.version;
+    expect(find.text('test-version → $latest'), findsOneWidget);
     await menu(tester, 'Update');
     expect(
       action.calls.where((call) => call == 'install:zashboard'),
       hasLength(2),
     );
+    action.show(
+      WebDashboardState(
+        installations: {
+          WebDashboardFlavor.zashboard: WebDashboardInstallation(
+            version: latest,
+          ),
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text(latest), findsOneWidget);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('Update'), findsNothing);
+    expect(find.text('Reload'), findsNothing);
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+    action.show(const WebDashboardState(failure: WebDashboardFailure.storage));
+    await tester.pumpAndSettle();
     await menu(tester, 'Reload');
     expect(action.calls.where((call) => call == 'refresh'), hasLength(2));
   });
@@ -369,13 +389,19 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.textContaining('Downloading dashboard:'), findsOneWidget);
+    expect(find.text('Downloading dashboard'), findsOneWidget);
+    expect(
+      tester
+          .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator))
+          .value,
+      0.5,
+    );
     await tester.tap(find.byTooltip('Cancel'));
     expect(action.calls, contains('cancel'));
     action.show(const WebDashboardState(failure: WebDashboardFailure.checksum));
     await tester.pumpAndSettle();
     expect(find.textContaining('checksum does not match'), findsOneWidget);
-    expect(find.textContaining('Downloading dashboard:'), findsNothing);
+    expect(find.text('Downloading dashboard'), findsNothing);
     expect(find.byTooltip('Cancel'), findsNothing);
   });
 
@@ -717,21 +743,29 @@ void main() {
     expect(find.text('The Core is not serving this dashboard.'), findsNothing);
   });
 
-  testWidgets('back uses WebView history before leaving an active page', (
+  testWidgets('back leaves the page instead of replaying dashboard history', (
     tester,
   ) async {
     final active = session();
-    await pump(tester, child: WebDashboardPage(session: active));
-    final scope = tester.widget<CommonPopScope>(find.byType(CommonPopScope));
-    final context = tester.element(find.byType(CommonPopScope));
+    await pump(tester, child: const SizedBox.shrink());
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator).last);
+    unawaited(
+      navigator
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) => WebDashboardPage(session: active),
+            ),
+          )
+          .then((_) => active.close()),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('embedded dashboard'), findsOneWidget);
     platform.controller.hasBack = true;
-    expect(await scope.onPop!(context), isFalse);
-    expect(platform.controller.backs, 1);
-    expect(await scope.onPop!(context), isTrue);
-    await active.close();
-    platform.controller.hasBack = true;
-    expect(await scope.onPop!(context), isTrue);
-    expect(platform.controller.backs, 1);
+    expect(await navigator.maybePop(), isTrue);
+    await tester.pumpAndSettle();
+    expect(platform.controller.backs, 0);
+    expect(find.text('embedded dashboard'), findsNothing);
+    expect(active.isActive(), isFalse);
   });
 
   testWidgets('WebView load exception closes access and remains retryable', (

@@ -89,19 +89,6 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     if (confirmed == true && mounted) await _action.remove(flavor);
   }
 
-  String _progress(WebDashboardProgress progress) {
-    final l = context.appLocalizations;
-    return switch (progress.phase) {
-      WebDashboardPhase.downloading =>
-        progress.total > 0
-            ? '${l.webDashboardDownloading}: ${progress.received.traffic.show} / '
-                  '${progress.total.traffic.show}'
-            : '${l.webDashboardDownloading}: ${progress.received.traffic.show}',
-      WebDashboardPhase.verifying => l.webDashboardVerifying,
-      WebDashboardPhase.extracting => l.webDashboardExtracting,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
@@ -117,9 +104,12 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     ref.watch(currentProfileIdProvider);
     final unavailable = _action.unavailable;
     final installed = state.installations[flavor];
+    final latest = flavor.release.version;
+    final outdated = installed != null && installed.version != latest;
     final enabled = !state.loading && !state.busy;
     final failure = state.failure;
     final progress = state.progress;
+    final colorScheme = context.colorScheme;
     return CommonScaffold(
       title: l.webDashboard,
       primaryAction: IconButtonData(
@@ -153,13 +143,16 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                 ? () => unawaited(_open(flavor, browser: true))
                 : null,
           ),
-        CommonPopupMenuItem(
-          glyph: installed == null
-              ? AppGlyphs.cloudDownload
-              : AppGlyphs.refresh,
-          label: installed == null ? l.webDashboardInstall : l.update,
-          onPressed: enabled ? () => unawaited(_action.install(flavor)) : null,
-        ),
+        if (installed == null || outdated)
+          CommonPopupMenuItem(
+            glyph: installed == null
+                ? AppGlyphs.cloudDownload
+                : AppGlyphs.refresh,
+            label: installed == null ? l.webDashboardInstall : l.update,
+            onPressed: enabled
+                ? () => unawaited(_action.install(flavor))
+                : null,
+          ),
         if (installed != null)
           CommonPopupMenuItem(
             glyph: AppGlyphs.delete,
@@ -167,11 +160,12 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
             danger: true,
             onPressed: enabled ? () => unawaited(_remove(flavor)) : null,
           ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.refresh,
-          label: l.webDashboardReload,
-          onPressed: enabled ? () => unawaited(_action.refresh()) : null,
-        ),
+        if (failure == WebDashboardFailure.storage)
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.refresh,
+            label: l.webDashboardReload,
+            onPressed: enabled ? () => unawaited(_action.refresh()) : null,
+          ),
       ],
       body: NullStatusSwitcher(
         isLoading: state.loading,
@@ -183,7 +177,13 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
             ).copyWith(top: context.contentTopPadding, bottom: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 20,
               children: [
+                if (failure != null)
+                  _Notice(text: failure.label, error: true)
+                else if (unavailable != null)
+                  _Notice(text: unavailable.label),
+                if (progress != null) _Progress(progress: progress),
                 generateSection(
                   items: [
                     IgnorePointer(
@@ -203,49 +203,157 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                             ),
                       ),
                     ),
-                    ListItem(
-                      title: Text(l.webDashboardFiles),
-                      subtitle: Text(
-                        installed == null
-                            ? l.webDashboardNotInstalled
-                            : l.webDashboardInstalledVersion(installed.version),
-                      ),
-                    ),
-                    ListItem(
-                      title: Text(l.externalController),
-                      subtitle: Text(
-                        access.active
-                            ? access.browser
-                                  ? l.webDashboardBrowserAccess
-                                  : l.webDashboardEmbeddedAccess
-                            : l.webDashboardNoAccess,
-                      ),
+                    _ValueRow(
+                      title: l.webDashboardVersion,
+                      value: Text(switch (installed?.version) {
+                        null => l.webDashboardNotInstalled,
+                        final version when outdated => '$version → $latest',
+                        final version => version,
+                      }),
                     ),
                   ],
+                  footer: l.webDashboardInstallTip,
                 ),
-                if (progress != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(_progress(progress)),
-                  ),
-                if (failure != null || unavailable != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      (failure ?? unavailable!).label,
-                      style: AppTextStyle.footnote
-                          .of(context)
-                          .copyWith(color: context.colorScheme.error),
+                generateSection(
+                  items: [
+                    _ValueRow(
+                      title: l.webDashboardAccess,
+                      value: access.active
+                          ? TonalChip(
+                              label: access.browser
+                                  ? l.webDashboardAccessInBrowser
+                                  : l.webDashboardAccessInApp,
+                              color: colorScheme.successContainer,
+                              foregroundColor: colorScheme.onSuccessContainer,
+                            )
+                          : Text(l.webDashboardAccessOff),
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(l.webDashboardAccessTip),
+                  ],
+                  footer: access.active
+                      ? access.browser
+                            ? l.webDashboardBrowserAccess
+                            : l.webDashboardEmbeddedAccess
+                      : l.webDashboardAccessTip,
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Notice extends StatelessWidget {
+  const _Notice({required this.text, this.error = false});
+
+  final String text;
+  final bool error;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final foreground = error
+        ? colorScheme.onErrorContainer
+        : colorScheme.onSurfaceVariant;
+    return CommonCard(
+      isError: error,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          GlyphIcon(
+            error ? AppGlyphs.error : AppGlyphs.info,
+            size: 20,
+            color: foreground,
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyle.subheadline
+                  .of(context)
+                  .copyWith(
+                    color: error
+                        ? colorScheme.onErrorContainer
+                        : colorScheme.onSurface,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Progress extends StatelessWidget {
+  const _Progress({required this.progress});
+
+  final WebDashboardProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final downloading = progress.phase == WebDashboardPhase.downloading;
+    return CommonCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: Text(
+                  switch (progress.phase) {
+                    WebDashboardPhase.downloading => l.webDashboardDownloading,
+                    WebDashboardPhase.verifying => l.webDashboardVerifying,
+                    WebDashboardPhase.extracting => l.webDashboardExtracting,
+                  },
+                  style: AppTextStyle.subheadline.of(context, emphasized: true),
+                ),
+              ),
+              if (downloading)
+                Text(
+                  [
+                    progress.received.traffic.show,
+                    if (progress.total > 0) progress.total.traffic.show,
+                  ].join(' / '),
+                  style: AppTextStyle.footnote
+                      .of(context)
+                      .copyWith(color: context.colorScheme.onSurfaceVariant),
+                ),
+            ],
+          ),
+          LinearProgressIndicator(
+            value: downloading && progress.total > 0
+                ? (progress.received / progress.total).clamp(0, 1)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ValueRow extends StatelessWidget {
+  const _ValueRow({required this.title, required this.value});
+
+  final String title;
+  final Widget value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListItem(
+      title: Text(title),
+      trailing: DefaultTextStyle.merge(
+        style: context.listTitleStyle.copyWith(
+          color: context.colorScheme.onSurfaceVariant,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        child: value,
       ),
     );
   }

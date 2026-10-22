@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "Ouvrir dans le navigateur",
   "webDashboardReload": "Recharger",
   "webDashboardInstall": "Installer l’interface",
-  "webDashboardFiles": "Fichiers de l’interface",
   "webDashboardNotInstalled": "Non installée",
-  "webDashboardInstalledVersion": "Version installée : {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "L’interface sélectionnée est téléchargée à la première ouverture. La version est fixée et vérifiée par SHA-256.",
-  "webDashboardAccessTip": "L’accès est local et authentifié. L’ouverture ne modifie pas les réglages enregistrés du contrôleur externe. Terminez l’accès ici après utilisation du navigateur.",
+  "webDashboardAccessTip": "L’accès est local et protégé par un secret. L’ouverture d’une interface ne modifie pas les réglages enregistrés du contrôleur externe.",
   "webDashboardNoAccess": "Aucune session d’interface",
   "webDashboardEmbeddedAccess": "L’accès se termine à la fermeture de l’interface",
   "webDashboardBrowserAccess": "L’accès du navigateur reste actif jusqu’à son arrêt ou la fermeture de ReClash",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "Le cœur ne fournit pas cette interface.",
   "webDashboardAuthenticationFailed": "Le cœur a refusé les identifiants. Rouvrez l’interface.",
   "webDashboardLaunchFailed": "Impossible d’ouvrir le navigateur.",
-  "webDashboardCancelled": "Opération annulée."
+  "webDashboardCancelled": "Opération annulée.",
+  "webDashboardVersion": "Version",
+  "webDashboardAccess": "Accès",
+  "webDashboardAccessOff": "Désactivé",
+  "webDashboardAccessInApp": "Dans l’app",
+  "webDashboardAccessInBrowser": "Dans le navigateur"
 }
