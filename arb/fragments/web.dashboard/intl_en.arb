@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "Open in browser",
   "webDashboardReload": "Reload",
   "webDashboardInstall": "Install dashboard",
-  "webDashboardFiles": "Dashboard files",
   "webDashboardNotInstalled": "Not installed",
-  "webDashboardInstalledVersion": "Installed version: {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
-  "webDashboardAccessTip": "Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.",
+  "webDashboardAccessTip": "Access is local and protected by a secret. Opening a dashboard does not change your saved external controller settings.",
   "webDashboardNoAccess": "No dashboard session",
   "webDashboardEmbeddedAccess": "Access ends when the dashboard closes",
   "webDashboardBrowserAccess": "Browser access stays active until you end it or quit ReClash",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "The Core is not serving this dashboard.",
   "webDashboardAuthenticationFailed": "The Core rejected the dashboard credentials. Reopen the dashboard.",
   "webDashboardLaunchFailed": "Could not open the browser.",
-  "webDashboardCancelled": "Dashboard operation cancelled."
+  "webDashboardCancelled": "Dashboard operation cancelled.",
+  "webDashboardVersion": "Version",
+  "webDashboardAccess": "Access",
+  "webDashboardAccessOff": "Off",
+  "webDashboardAccessInApp": "In the app",
+  "webDashboardAccessInBrowser": "In the browser"
 }

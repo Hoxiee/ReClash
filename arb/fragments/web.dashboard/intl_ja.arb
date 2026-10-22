@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "ブラウザーで開く",
   "webDashboardReload": "再読み込み",
   "webDashboardInstall": "パネルをインストール",
-  "webDashboardFiles": "パネルのファイル",
   "webDashboardNotInstalled": "未インストール",
-  "webDashboardInstalledVersion": "インストール済みバージョン: {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
-  "webDashboardAccessTip": "アクセスはローカルで認証されます。保存された外部コントローラー設定は変更されません。ブラウザーの使用後はここでアクセスを終了してください。",
+  "webDashboardAccessTip": "アクセスはローカルで、シークレットによって保護されます。パネルを開いても、保存された外部コントローラー設定は変更されません。",
   "webDashboardNoAccess": "パネルのセッションなし",
   "webDashboardEmbeddedAccess": "パネルを閉じるとアクセスが終了します",
   "webDashboardBrowserAccess": "ブラウザーのアクセスは終了操作またはReClashの終了まで続きます",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "コアはこのパネルを提供していません。",
   "webDashboardAuthenticationFailed": "コアが認証情報を拒否しました。パネルを開き直してください。",
   "webDashboardLaunchFailed": "ブラウザーを開けませんでした。",
-  "webDashboardCancelled": "パネルの操作をキャンセルしました。"
+  "webDashboardCancelled": "パネルの操作をキャンセルしました。",
+  "webDashboardVersion": "バージョン",
+  "webDashboardAccess": "アクセス",
+  "webDashboardAccessOff": "オフ",
+  "webDashboardAccessInApp": "アプリ内",
+  "webDashboardAccessInBrowser": "ブラウザー"
 }

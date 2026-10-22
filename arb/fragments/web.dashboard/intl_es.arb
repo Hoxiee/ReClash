@@ -6,18 +6,9 @@
   "webDashboardOpenInBrowser": "Abrir en el navegador",
   "webDashboardReload": "Recargar",
   "webDashboardInstall": "Instalar panel",
-  "webDashboardFiles": "Archivos del panel",
   "webDashboardNotInstalled": "No instalado",
-  "webDashboardInstalledVersion": "Versión instalada: {version}",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "webDashboardInstallTip": "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
-  "webDashboardAccessTip": "El acceso es local y autenticado. Abrir el panel no cambia la configuración guardada del controlador externo. Finaliza el acceso aquí cuando termines en el navegador.",
+  "webDashboardAccessTip": "El acceso es local y está protegido por un secreto. Abrir el panel no cambia la configuración guardada del controlador externo.",
   "webDashboardNoAccess": "Sin sesión de panel",
   "webDashboardEmbeddedAccess": "El acceso termina al cerrar el panel",
   "webDashboardBrowserAccess": "El acceso del navegador permanece hasta finalizarlo o salir de ReClash",
@@ -39,5 +30,10 @@
   "webDashboardUnreachable": "El núcleo no sirve este panel.",
   "webDashboardAuthenticationFailed": "El núcleo rechazó las credenciales. Vuelve a abrir el panel.",
   "webDashboardLaunchFailed": "No se pudo abrir el navegador.",
-  "webDashboardCancelled": "Operación del panel cancelada."
+  "webDashboardCancelled": "Operación del panel cancelada.",
+  "webDashboardVersion": "Versión",
+  "webDashboardAccess": "Acceso",
+  "webDashboardAccessOff": "Desactivado",
+  "webDashboardAccessInApp": "En la app",
+  "webDashboardAccessInBrowser": "En el navegador"
 }
