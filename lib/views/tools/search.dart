@@ -141,6 +141,33 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
     if (_scroll?.hasClients == true) _scroll!.jumpTo(0);
   }
 
+  /// Grows the page out of the tile on mobile, as every catalog row does.
+  Widget _openTile(
+    BuildContext context,
+    ToolEntry entry,
+    Widget Function(VoidCallback? open) build,
+  ) {
+    void select() => unawaited(_select(entry));
+    if (!context.isMobileView) return build(select);
+    return Builder(
+      builder: (context) {
+        final position = ItemPositionProvider.of(context);
+        return OpenContainer<void>(
+          clipBehavior: Clip.none,
+          // The route hosts the closed tile outside the section's provider.
+          closedBuilder: (_, open) => position == null
+              ? build(open)
+              : ItemPositionProvider(
+                  position: position.position,
+                  child: build(open),
+                ),
+          onOpen: (origin) => unawaited(_select(entry, origin: origin)),
+          openBuilder: (_, _) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
   Future<void> _select(ToolEntry entry, {ContainerOrigin? origin}) async {
     if (_opening) return;
     _opening = true;
@@ -226,27 +253,9 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
               .toList();
     Widget row(ToolEntry entry, {int? index}) {
       final opens = entry.route != null && entry.command == null;
-      Widget tile(Widget Function(VoidCallback? open) build) {
-        void select() => unawaited(_select(entry));
-        if (!opens || !context.isMobileView) return build(select);
-        return Builder(
-          builder: (context) {
-            final position = ItemPositionProvider.of(context);
-            return OpenContainer<void>(
-              clipBehavior: Clip.none,
-              // The route hosts the closed tile outside the section's provider.
-              closedBuilder: (_, open) => position == null
-                  ? build(open)
-                  : ItemPositionProvider(
-                      position: position.position,
-                      child: build(open),
-                    ),
-              onOpen: (origin) => unawaited(_select(entry, origin: origin)),
-              openBuilder: (_, _) => const SizedBox.shrink(),
-            );
-          },
-        );
-      }
+      Widget tile(Widget Function(VoidCallback? open) build) => opens
+          ? _openTile(context, entry, build)
+          : build(() => unawaited(_select(entry)));
 
       final pinned = session.pinned.contains(entry.id);
       final selected = searching && _focus.hasFocus && index == _selected;
@@ -381,10 +390,10 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                             generateSection(
                               title: l.core,
                               items: [
-                                CoreSection(
-                                  onOpen: () => unawaited(
-                                    _select(byId['page.coreDetails']!),
-                                  ),
+                                _openTile(
+                                  context,
+                                  byId['page.coreDetails']!,
+                                  (open) => CoreSection(onOpen: open!),
                                 ),
                               ],
                             ),

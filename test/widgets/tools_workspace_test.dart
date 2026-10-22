@@ -1367,10 +1367,8 @@ void main() {
       expect(growing.top, greaterThan(0));
       expect(growing.top, lessThan(rowRect.top));
       expect(find.text('Tools'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text('Tools'), findsNothing);
-
       await tester.pumpAndSettle();
+      expect(find.text('Tools'), findsNothing);
       expect(container.read(toolsSessionProvider).path, [
         const ToolRoute(ToolPage.general),
       ]);
@@ -1382,8 +1380,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
       expect(find.byType(SearchField), findsOneWidget);
-      expect(find.text('Tools'), findsOneWidget);
+      expect(find.text('Tools'), findsNothing);
       await gesture.up();
+      await tester.pump(const Duration(milliseconds: 60));
+      expect(find.text('Tools'), findsOneWidget);
       await tester.pumpAndSettle();
       expect(container.read(toolsSessionProvider).path, isEmpty);
       expect(find.byType(SearchField), findsOneWidget);

@@ -308,14 +308,11 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
             const SizedBox(height: 16),
             generateSection(
               items: [
-                DecorationListItem(
+                ListItem.open(
                   leading: const GlyphIcon(AppGlyphs.code),
                   title: Text(l10n.coreOpenRuntimeConfig),
                   subtitle: Text(l10n.coreRuntimeConfigDescription),
-                  trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                  onPressed: () => PageNavigationScope.of(
-                    context,
-                  )?.open(const CoreRuntimeConfigView()),
+                  widget: const CoreRuntimeConfigView(),
                 ),
               ],
             ),
