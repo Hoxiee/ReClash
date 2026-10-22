@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -8,6 +10,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'routing.dart';
 import 'tab.dart';
 
 class ProxiesView extends ConsumerStatefulWidget {
@@ -35,6 +38,15 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     ref.read(proxiesStyleSettingProvider.notifier).update(update);
   }
 
+  String? _providerSubtitle(String id) =>
+      switch (ref.watch(providerSettingStatusProvider(id))) {
+        ProviderSettingStatus.managed =>
+          context.appLocalizations.providerSettingManaged,
+        ProviderSettingStatus.released =>
+          context.appLocalizations.providerSettingReturn,
+        ProviderSettingStatus.none => null,
+      };
+
   List<CommonPopupMenuItem> _buildMenuItems(
     BuildContext context,
     ProxiesStyleProps style,
@@ -44,6 +56,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       _optionsMenuItem(
         glyph: AppGlyphs.appsList,
         label: appLocalizations.style,
+        subtitle: _providerSubtitle('proxies.type'),
         section: const CommonPopupMenuSection(),
         options: ProxiesType.values,
         value: style.type,
@@ -54,6 +67,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       _optionsMenuItem(
         glyph: AppGlyphs.sort,
         label: appLocalizations.sort,
+        subtitle: _providerSubtitle('proxies.sort'),
         options: ProxiesSortType.values,
         value: style.sortType,
         textOf: (type) => switch (type) {
@@ -67,6 +81,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       _optionsMenuItem(
         glyph: AppGlyphs.dashboard,
         label: appLocalizations.layout,
+        subtitle: _providerSubtitle('proxies.layout'),
         options: ProxiesLayout.values,
         value: style.layout,
         textOf: (layout) => switch (layout) {
@@ -80,6 +95,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       _optionsMenuItem(
         glyph: AppGlyphs.textSize,
         label: appLocalizations.size,
+        subtitle: _providerSubtitle('proxies.card'),
         options: ProxyCardType.values,
         value: style.cardType,
         textOf: (type) => type.label,
@@ -90,6 +106,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         _optionsMenuItem(
           glyph: AppGlyphs.iconTile,
           label: appLocalizations.iconStyle,
+          subtitle: _providerSubtitle('proxies.icon'),
           options: ProxiesIconStyle.values,
           value: style.iconStyle,
           textOf: (iconStyle) => switch (iconStyle) {
@@ -100,6 +117,21 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
           onSelected: (iconStyle) =>
               _updateStyle((state) => state.copyWith(iconStyle: iconStyle)),
         ),
+      for (final (id, label) in [
+        ('proxies.type', appLocalizations.style),
+        ('proxies.sort', appLocalizations.sort),
+        ('proxies.layout', appLocalizations.layout),
+        ('proxies.card', appLocalizations.size),
+        ('proxies.icon', appLocalizations.iconStyle),
+      ])
+        if (ref.watch(providerSettingStatusProvider(id)) ==
+            ProviderSettingStatus.released)
+          CommonPopupMenuItem(
+            label: context.appLocalizations.providerSettingReturn,
+            subtitle: label,
+            onPressed: () =>
+                ref.read(providerSettingsActionProvider).returnToProvider([id]),
+          ),
       CommonPopupMenuItem(
         glyph: AppGlyphs.eyeOff,
         label: appLocalizations.hideTimeoutProxies,
@@ -125,6 +157,26 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       },
       tooltip: context.appLocalizations.delayTest,
       isLoading: isDelayTesting,
+    );
+  }
+
+  IconButtonData? _buildRoutingAction() {
+    final groupName = ref.watch(
+      proxiesTabControllerStateProvider.select(
+        (state) => state.currentGroupName,
+      ),
+    );
+    final isSelector = ref.watch(
+      groupsProvider.select(
+        (groups) =>
+            groups.getGroup(groupName ?? '')?.type == GroupType.Selector,
+      ),
+    );
+    if (groupName == null || !isSelector) return null;
+    return IconButtonData(
+      glyph: AppGlyphs.shuffle,
+      onPressed: () => unawaited(showRoutingSheet(context, groupName)),
+      tooltip: context.appLocalizations.rcxTitle,
     );
   }
 
@@ -162,6 +214,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       primaryAction: primaryAction,
       searchActions: [?primaryAction],
       iconActions: [
+        if (_isTab && !picker) ?_buildRoutingAction(),
         if (_isTab && !picker)
           IconButtonData(
             glyph: AppGlyphs.locate,
@@ -190,10 +243,12 @@ CommonPopupMenuItem _optionsMenuItem<T>({
   required String Function(T option) textOf,
   required ValueSetter<T> onSelected,
   CommonPopupMenuSection? section,
+  String? subtitle,
 }) {
   return CommonPopupMenuItem(
     glyph: glyph,
     label: label,
+    subtitle: subtitle,
     section: section,
     subItems: [
       for (final option in options)

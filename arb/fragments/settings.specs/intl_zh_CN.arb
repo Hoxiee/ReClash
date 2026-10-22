@@ -40,5 +40,6 @@
   "renewSubscription": "续订订阅",
   "topUpTraffic": "购买流量",
   "notificationActive": "保护已启用",
-  "notificationLevelDescription": "详细模式显示实时信息和停止按钮。最简模式仅显示保护状态。"
+  "notificationLevelDescription": "详细模式显示实时信息和停止按钮。最简模式仅显示保护状态。",
+  "extra": "其他"
 }

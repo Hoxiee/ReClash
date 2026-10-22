@@ -1072,6 +1072,9 @@ class ProfilesAction extends _$ProfilesAction {
     if (isExists) {
       await profileFile.safeDelete(recursive: true);
     }
+    await File(
+      await appPath.getProfileRoutingPath(profileId.toString()),
+    ).safeDelete();
     try {
       final error = await _core.clearEffect(profileId);
       if (error.isNotEmpty) {

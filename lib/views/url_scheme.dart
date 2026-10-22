@@ -123,6 +123,14 @@ class UrlSchemeView extends StatelessWidget {
                     formats: ['happ://add/{url-or-base64}'],
                   ),
                   UrlSchemeSupportedLinksRow(
+                    glyph: AppGlyphs.shuffle,
+                    title: l.rcxTitle,
+                    formats: const [
+                      'reclash://routing?p={data}',
+                      'reclash://routing?url={url}',
+                    ],
+                  ),
+                  UrlSchemeSupportedLinksRow(
                     glyph: AppGlyphs.vpn,
                     title: l.urlSchemeProxyLinks,
                     formats: [

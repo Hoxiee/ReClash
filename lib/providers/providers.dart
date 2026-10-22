@@ -6,6 +6,7 @@ export 'core.dart';
 export 'database.dart';
 export 'on_demand.dart';
 export 'route_state.dart';
+export 'routing.dart';
 export 'state.dart';
 export 'tools.dart';
 export 'web_dashboard.dart';

@@ -1574,6 +1574,949 @@
   "preventDuplicateProfiles": "Prevent duplicate subscriptions",
   "preventDuplicateProfilesDesc": "Refuse a subscription link that an existing profile already uses",
   "profileImportDuplicate": "A profile with this subscription URL already exists",
+  "rcxTitle": "Auto routing",
+  "rcxMakeSmart": "Make this group smart",
+  "rcxMakeSmartHint": "ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.",
+  "rcxTurnOff": "Turn off auto routing",
+  "rcxChangeServer": "Change server",
+  "rcxBackToAuto": "Back to auto",
+  "rcxControl": "Control",
+  "rcxModeAuto": "Auto",
+  "rcxModeAutoHint": "Chooses and switches servers by the profile",
+  "rcxModeManual": "Manual",
+  "rcxModeManualHint": "You choose; auto routing never switches",
+  "rcxPinned": "Pinned: {node}",
+  "rcxPinnedLabel": "Pinned",
+  "rcxPinnedHint": "Left only when it fails, returned to when it recovers",
+  "rcxProfile": "Profile",
+  "rcxSourceBuiltin": "Built-in",
+  "rcxSourceProvider": "From provider",
+  "rcxSourceUser": "Mine",
+  "rcxLevelSimple": "Simple",
+  "rcxLevelAdvanced": "Advanced",
+  "rcxServers": "Servers",
+  "rcxServersPattern": "Name pattern",
+  "rcxServersMatch": "{count} of {total} match",
+  "rcxPatternInvalid": "The pattern is not a valid regular expression",
+  "rcxSwitching": "Switching",
+  "rcxFeelCalm": "Rarely",
+  "rcxFeelEager": "Often",
+  "rcxBalanced": "Balanced",
+  "rcxChecks": "Checks",
+  "rcxEnergyEco": "Economical",
+  "rcxEnergyPrecise": "Precise",
+  "rcxEnergyToday": "Checks today: {requests} · {used} of {cap}",
+  "rcxWhy": "Why this server",
+  "rcxHistory": "History",
+  "rcxHealthAlive": "Working",
+  "rcxHealthStale": "Worked before",
+  "rcxHealthUnknown": "Not checked",
+  "rcxHealthDead": "Not working",
+  "rcxReasonManual": "Controlled manually",
+  "rcxReasonHoldPinned": "Holding the pinned server",
+  "rcxReasonSwitchPinned": "Switched to the pinned server {node}",
+  "rcxReasonStranded": "No working server in the pool; holding the current one",
+  "rcxReasonSwitchStranded": "No working server; fell back to {node}",
+  "rcxReasonInitial": "Selected the best available server",
+  "rcxReasonChangeServer": "Changed server; {from} is skipped for 15 minutes",
+  "rcxReasonFailover": "{from} stopped working; switched to the best standby",
+  "rcxReasonOutOfPool": "{from} is no longer in the pool",
+  "rcxReasonNoAlternative": "No other working server to change to",
+  "rcxReasonBest": "This is the best server",
+  "rcxReasonChecking": "Checking a better candidate",
+  "rcxReasonWorking": "Working; kept until it fails",
+  "rcxReasonDwell": "Switched recently; holding before the next change",
+  "rcxReasonFlapLimit": "Switch limit reached ({limit} per hour)",
+  "rcxReasonConfirming": "A faster server needs another measurement",
+  "rcxReasonBetterTier": "Moved to a server in “{tier}”",
+  "rcxReasonFaster": "Switched from {from}: {gain} ms faster",
+  "rcxReasonSelectFailed": "Could not select the server",
+  "rcxUntilCheck": "Will switch to {node} once a check confirms it",
+  "rcxUntilDwell": "May switch to {node} in {minutes} min",
+  "rcxUntilConfirm": "Will switch to {node} if it stays {gain} ms faster",
+  "rcxExcludedNoMatch": "Not in the pool",
+  "rcxExcludedByProfile": "Excluded by the profile",
+  "rcxExcludedUnroutable": "Not a server",
+  "rcxExcludedCooldown": "Skipped after “Change server”",
+  "rcxExcludedNoTier": "Matches no preference",
+  "rcxProblemProfileMissing": "Profile {profile} was not found; the default is used",
+  "rcxProblemProfileInvalid": "Profile error: {error}",
+  "rcxProblemGroupUnavailable": "This group is not a selector in the current config",
+  "rcxProblemGroupEmpty": "The group has no servers",
+  "rcxReasonNetworkSuspect": "The network looks down; no server is blamed",
+  "rcxReasonNetworkChanged": "Network changed",
+  "rcxJournalFailure": "{node} stopped working",
+  "rcxProblemStoreFailed": "Routing state could not be saved: {error}",
+  "rcxChangeTo": "Change to",
+  "rcxAnyServer": "Any",
+  "rcxAddPool": "Add a pattern",
+  "rcxNetwork": "Network: {kind}",
+  "rcxKindOpen": "open internet",
+  "rcxKindWhitelist": "whitelists only",
+  "rcxKindPortal": "sign-in page",
+  "rcxKindChecking": "checking",
+  "rcxReasonPaused": "Paused while the network is “{kind}”: nothing is checked or switched",
+  "rcxExcludedPending": "Not checked yet",
+  "rcxPendingTier": "may reach “{tier}” after a check",
+  "rcxCheckOpen": "opens blocked",
+  "rcxExit": "exit {country}",
+  "rcxReasonSplitOn": "Direct sites now go through this group",
+  "rcxReasonSplitOff": "Direct sites go direct again",
+  "rcxDirectSplit": "Direct sites through this group",
+  "rcxDirectSplitHint": "When sites your rules send direct stop opening, they go through this group. Local addresses always stay direct.",
+  "rcxDirectSplitActive": "On now",
+  "rcxDirectSplitStandby": "Ready: direct sites still open",
+  "rcxAddTag": "Add tag",
+  "rcxAddTier": "Add tier",
+  "rcxAdvanced": "Advanced",
+  "rcxAdvancedHint": "These parts are edited as YAML.",
+  "rcxBasedOn": "Based on",
+  "rcxBehaviour": "Behaviour",
+  "rcxBringChanges": "Bring changes over",
+  "rcxBringChangesHint": "Your own edits stay as they are",
+  "rcxCheckDifferent": "Would pick {pick} instead of {now}",
+  "rcxCheckNone": "Would find no server",
+  "rcxCheckOn": "Check on {group}",
+  "rcxCheckSame": "Would keep {pick}",
+  "rcxChecksDeclared": "Availability checks",
+  "rcxCondAdd": "Add condition",
+  "rcxCondAll": "All conditions",
+  "rcxCondAlways": "Always",
+  "rcxCondAny": "Any condition",
+  "rcxCondAnyServer": "Any server",
+  "rcxCondField": "Field",
+  "rcxCondIgnoreCase": "Ignore case",
+  "rcxCondMatch": "Match",
+  "rcxCondNoNames": "None declared",
+  "rcxCondNotPrefix": "not",
+  "rcxCondOp": "Operator",
+  "rcxCondPattern": "Pattern",
+  "rcxCondText": "As text",
+  "rcxCondTooComplex": "This condition nests groups, so it is edited as text.",
+  "rcxCondValue": "Value",
+  "rcxCondValues": "Values, comma-separated",
+  "rcxConsentAllow": "Allow",
+  "rcxConsentAsk": "“{profile}” wants to check these sites",
+  "rcxConsentHint": "Until you allow it, the group runs the Simple profile. The sites are contacted only through your servers or to test the network.",
+  "rcxConsentTitle": "Permission needed",
+  "rcxContacts": "Sites it contacts",
+  "rcxContactsHint": "Third-party sites belong neither to your provider nor to the built-in profiles.",
+  "rcxDeleteProfile": "Delete “{profile}”?",
+  "rcxDuplicate": "Duplicate and edit",
+  "rcxExitCheck": "Exit-country check",
+  "rcxExport": "Export",
+  "rcxFieldAlive": "Working",
+  "rcxFieldCurrent": "In use",
+  "rcxFieldDead": "Not working",
+  "rcxFieldDiag": "Network diagnostic",
+  "rcxFieldEntry": "Entry country",
+  "rcxFieldExit": "Exit country",
+  "rcxFieldFails": "Fails check",
+  "rcxFieldKind": "Network kind",
+  "rcxFieldLatency": "Latency, ms",
+  "rcxFieldMeasured": "Measured",
+  "rcxFieldMetered": "Metered network",
+  "rcxFieldName": "Name",
+  "rcxFieldPasses": "Passes check",
+  "rcxFieldPortal": "Sign-in page",
+  "rcxFieldProvider": "Provider",
+  "rcxFieldServer": "Server address",
+  "rcxFieldTag": "Tag",
+  "rcxFieldTransport": "Connection type",
+  "rcxFieldType": "Protocol",
+  "rcxFieldUdp": "Supports UDP",
+  "rcxGeneral": "General",
+  "rcxHistoryVersions": "Earlier versions",
+  "rcxImportAdd": "Add to my profiles",
+  "rcxImportNeedsCore": "Start the app's core to check this profile.",
+  "rcxImportTitle": "Import routing profile",
+  "rcxImported": "Added “{profile}”",
+  "rcxLastResort": "Last resort",
+  "rcxLastResortHint": "A last-resort tier is used only when no better tier has a server.",
+  "rcxLevel": "Level",
+  "rcxLine": "Line {line}: {text}",
+  "rcxLintCheckUnused": "Check {check} is never used, so it never runs",
+  "rcxLintConsent": "Contacts third-party sites: {hosts}",
+  "rcxLintPoolEmpty": "No server of {group} passes the filter",
+  "rcxLintTagUnused": "Tag {tag} is never used",
+  "rcxLintTierEmpty": "No server of {group} is in “{tier}” right now",
+  "rcxLintTierUnreachable": "“{tier}” repeats the condition of “{after}”, so nothing lands in it",
+  "rcxMergeFailed": "Couldn't bring the changes over",
+  "rcxMerged": "Changes brought over",
+  "rcxMergedConflicts": "Brought over; you changed these too, so yours were kept: {keys}",
+  "rcxMoveDown": "Move down",
+  "rcxMoveUp": "Move up",
+  "rcxNeedsConsent": "Needs your permission",
+  "rcxNetworkKinds": "Network kinds",
+  "rcxNewProfile": "New profile",
+  "rcxOpFail": "fails",
+  "rcxOpIn": "is one of",
+  "rcxOpIs": "is",
+  "rcxOpIsNot": "is not",
+  "rcxOpMatches": "matches",
+  "rcxOpOk": "succeeds",
+  "rcxOverrides": "Per-network changes",
+  "rcxPoolExclude": "Leave out",
+  "rcxPoolInclude": "Use",
+  "rcxProfileName": "Name",
+  "rcxSourceChanged": "The original profile changed",
+  "rcxSourceChanges": "What changed",
+  "rcxStranded": "When no server fits",
+  "rcxStrandedDirect": "Go direct",
+  "rcxStrandedHold": "Keep the current server",
+  "rcxTagName": "Tag name",
+  "rcxTagNameInvalid": "Latin letters, digits, - and _ only, up to 24",
+  "rcxTags": "Tags",
+  "rcxTagsHint": "A tag names a set of servers once, for use in tiers as tag(name).",
+  "rcxThirdParty": "third party",
+  "rcxTier": "Tier",
+  "rcxTierLabel": "Label",
+  "rcxTierWhen": "Servers in this tier",
+  "rcxTiers": "Preference order",
+  "rcxTiersHint": "A server lands in the first tier it fits; the best tier with servers wins. Long press to reorder.",
+  "rcxTranslations": "Translations",
+  "rcxUseCheck": "check {name}",
+  "rcxUseDiagnostic": "network diagnostic {name}",
+  "rcxUseEcho": "exit-country check",
+  "rcxWarnings": "Warnings",
+  "rcxYaml": "YAML",
+  "rcxAddGroup": "Add group",
+  "rcxAddKind": "Add network kind",
+  "rcxAllGroups": "Every group",
+  "rcxMainGroup": "Main group",
+  "rcxAutoControl": "Auto control",
+  "rcxAutoControlHint": "A scenario steers the whole connection: the mode on each kind of network and what every group does. Groups it does not name keep their own profile.",
+  "rcxCheck": "Check",
+  "rcxCheckGroup": "Against group",
+  "rcxCondClause": "Condition {number}",
+  "rcxDiagnostics": "Network diagnostics",
+  "rcxExcept": "except {condition}",
+  "rcxFixedHint": "The whole group goes through this member with no server search; pick a load balancer or a nested group to hand it everything.",
+  "rcxFixedOn": "Through {member}",
+  "rcxGroupProfiles": "Group profiles",
+  "rcxGroupProfilesHint": "How a smart group picks its server. Tap one of yours to edit it, any other to edit a copy.",
+  "rcxJournalMode": "Mode {from} → {to}",
+  "rcxKindGroupsHint": "On this network these replace the scenario's groups of the same name; the others work as on every network.",
+  "rcxKindName": "Name",
+  "rcxKindNameInvalid": "Lowercase Latin letters, digits and dashes, up to 24",
+  "rcxKindWhen": "Recognized when",
+  "rcxKindWhenHint": "Kinds are tried top to bottom; the network gets the first that holds.",
+  "rcxLintGroupMissing": "This config has no group {group}",
+  "rcxManageHint": "Profiles and scenarios are made and edited in Advanced configuration → Auto routing.",
+  "rcxModeBackToAuto": "Give the mode back to the scenario",
+  "rcxModeByScenario": "The scenario sets the mode on this network",
+  "rcxModeIs": "Mode: {mode}",
+  "rcxModeKeep": "Don't change",
+  "rcxModeManualNow": "You chose the mode yourself; the scenario waits until you pick Auto",
+  "rcxModeYours": "The mode is yours on this network",
+  "rcxNewScenario": "New scenario",
+  "rcxOnThisNetwork": "On this network",
+  "rcxOwnProfile": "Group's own profile",
+  "rcxProfileProgramHint": "The group picks a server with this profile among the servers the pool keeps.",
+  "rcxProgramAction": "Action",
+  "rcxProgramFixed": "Hand to one member",
+  "rcxProgramMember": "Member",
+  "rcxProgramPick": "Pick a server",
+  "rcxReasonFixed": "The scenario holds {node}",
+  "rcxReasonFixedMissing": "{node} is not in this group",
+  "rcxReasonIdle": "Not in use: mode {mode}",
+  "rcxReasonSwitchFixed": "The scenario moves to {node}",
+  "rcxScenario": "Scenario",
+  "rcxScenarioDrives": "The scenario «{scenario}» drives this group now.",
+  "rcxScenarioGroups": "Groups",
+  "rcxScenarioGroupsHint": "Main group is where the final rule sends traffic; Every group covers the select groups not named here.",
+  "rcxScenarioKindsHint": "Recognize networks by direct diagnostics, then change the mode and groups on each.",
+  "rcxScenarioMode": "Connection mode",
+  "rcxScenarioOff": "Off",
+  "rcxScenarios": "Scenarios",
+  "rcxScenariosHint": "A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.",
+  "rcxSmartGroups": "Smart groups",
+  "@rcxPinned": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxServersMatch": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxEnergyToday": {
+    "placeholders": {
+      "requests": {
+        "type": "int"
+      },
+      "used": {
+        "type": "String"
+      },
+      "cap": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonSwitchPinned": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonSwitchStranded": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonChangeServer": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonFailover": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonOutOfPool": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonFlapLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxReasonBetterTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonFaster": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "gain": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxUntilCheck": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxUntilDwell": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxUntilConfirm": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      },
+      "gain": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxProblemProfileMissing": {
+    "placeholders": {
+      "profile": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxProblemProfileInvalid": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxJournalFailure": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxProblemStoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxNetwork": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonPaused": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxPendingTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxExit": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxAddTag": {
+    "description": "Row: add a named server filter (tag) to a routing profile"
+  },
+  "@rcxAddTier": {
+    "description": "Row/title: add a preference tier to a routing profile"
+  },
+  "@rcxAdvanced": {
+    "description": "Section title for advanced profile parts edited as YAML"
+  },
+  "@rcxAdvancedHint": {
+    "description": "Footer under the advanced section"
+  },
+  "@rcxBasedOn": {
+    "description": "Row: the profile this one extends"
+  },
+  "@rcxBehaviour": {
+    "description": "Section title: switching, checks, no-candidate behaviour"
+  },
+  "@rcxBringChanges": {
+    "description": "Action: merge changes of the source profile into the user's copy"
+  },
+  "@rcxBringChangesHint": {
+    "description": "Subtitle of bring changes over"
+  },
+  "@rcxCheckDifferent": {
+    "description": "Simulation result",
+    "placeholders": {
+      "pick": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxCheckNone": {
+    "description": "Simulation result"
+  },
+  "@rcxCheckOn": {
+    "description": "Section title: simulation of the profile on a proxy group",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxCheckSame": {
+    "description": "Simulation result",
+    "placeholders": {
+      "pick": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxChecksDeclared": {
+    "description": "Row title: checks declared by the profile"
+  },
+  "@rcxCondAdd": {
+    "description": "Row/title"
+  },
+  "@rcxCondAll": {
+    "description": "Join choice: all clauses must hold"
+  },
+  "@rcxCondAlways": {
+    "description": "Empty network condition means always"
+  },
+  "@rcxCondAny": {
+    "description": "Join choice: one clause is enough"
+  },
+  "@rcxCondAnyServer": {
+    "description": "Empty server condition means any server"
+  },
+  "@rcxCondField": {
+    "description": "Row: which attribute a clause tests"
+  },
+  "@rcxCondIgnoreCase": {
+    "description": "Switch for pattern matching"
+  },
+  "@rcxCondMatch": {
+    "description": "Section title: how clauses combine"
+  },
+  "@rcxCondNoNames": {
+    "description": "Value when the profile declares no tags/checks/diagnostics"
+  },
+  "@rcxCondNotPrefix": {
+    "description": "Lowercase word placed before a negated clause, e.g. 'not Exit country is RU'"
+  },
+  "@rcxCondOp": {
+    "description": "Row: comparison operator"
+  },
+  "@rcxCondPattern": {
+    "description": "Row: regular expression"
+  },
+  "@rcxCondText": {
+    "description": "Section title: the condition in the profile language"
+  },
+  "@rcxCondTooComplex": {
+    "description": "Shown instead of the clause list"
+  },
+  "@rcxCondValue": {
+    "description": "Row"
+  },
+  "@rcxCondValues": {
+    "description": "Row"
+  },
+  "@rcxConsentAllow": {
+    "description": "Button: allow the profile to contact the listed hosts"
+  },
+  "@rcxConsentAsk": {
+    "description": "Consent prompt",
+    "placeholders": {
+      "profile": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxConsentHint": {
+    "description": "Footer of consent section"
+  },
+  "@rcxConsentTitle": {
+    "description": "Section title"
+  },
+  "@rcxContacts": {
+    "description": "Section title: hosts the profile makes the app contact"
+  },
+  "@rcxContactsHint": {
+    "description": "Footer"
+  },
+  "@rcxDeleteProfile": {
+    "description": "Confirmation",
+    "placeholders": {
+      "profile": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxDuplicate": {
+    "description": "Menu item"
+  },
+  "@rcxExitCheck": {
+    "description": "Row title"
+  },
+  "@rcxExport": {
+    "description": "Menu item / sheet title"
+  },
+  "@rcxFieldAlive": {
+    "description": "Condition field: server is alive"
+  },
+  "@rcxFieldCurrent": {
+    "description": "Condition field: the server in use now"
+  },
+  "@rcxFieldDead": {
+    "description": "Condition field"
+  },
+  "@rcxFieldDiag": {
+    "description": "Condition field"
+  },
+  "@rcxFieldEntry": {
+    "description": "Condition field: country of the server address"
+  },
+  "@rcxFieldExit": {
+    "description": "Condition field: verified country traffic exits in"
+  },
+  "@rcxFieldFails": {
+    "description": "Condition field"
+  },
+  "@rcxFieldKind": {
+    "description": "Condition field"
+  },
+  "@rcxFieldLatency": {
+    "description": "Condition field"
+  },
+  "@rcxFieldMeasured": {
+    "description": "Condition field: has a latency sample"
+  },
+  "@rcxFieldMetered": {
+    "description": "Condition field"
+  },
+  "@rcxFieldName": {
+    "description": "Condition field: server name"
+  },
+  "@rcxFieldPasses": {
+    "description": "Condition field"
+  },
+  "@rcxFieldPortal": {
+    "description": "Condition field: captive portal network"
+  },
+  "@rcxFieldProvider": {
+    "description": "Condition field: proxy provider name"
+  },
+  "@rcxFieldServer": {
+    "description": "Condition field"
+  },
+  "@rcxFieldTag": {
+    "description": "Condition field"
+  },
+  "@rcxFieldTransport": {
+    "description": "Condition field: wifi, cellular, ethernet"
+  },
+  "@rcxFieldType": {
+    "description": "Condition field: proxy type"
+  },
+  "@rcxFieldUdp": {
+    "description": "Condition field"
+  },
+  "@rcxGeneral": {
+    "description": "Section title"
+  },
+  "@rcxHistoryVersions": {
+    "description": "Menu item / sheet title"
+  },
+  "@rcxImportAdd": {
+    "description": "Confirm button"
+  },
+  "@rcxImportNeedsCore": {
+    "description": "Error"
+  },
+  "@rcxImportTitle": {
+    "description": "Page title"
+  },
+  "@rcxImported": {
+    "description": "Toast",
+    "placeholders": {
+      "profile": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLastResort": {
+    "description": "Switch/label: tier used only when better tiers are empty"
+  },
+  "@rcxLastResortHint": {
+    "description": "Footer"
+  },
+  "@rcxLevel": {
+    "description": "Row: simple or advanced"
+  },
+  "@rcxLine": {
+    "description": "Error with line number",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintCheckUnused": {
+    "description": "Lint warning",
+    "placeholders": {
+      "check": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintConsent": {
+    "description": "Lint warning",
+    "placeholders": {
+      "hosts": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintPoolEmpty": {
+    "description": "Lint warning",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintTagUnused": {
+    "description": "Lint warning",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintTierEmpty": {
+    "description": "Lint warning",
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintTierUnreachable": {
+    "description": "Lint warning",
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxMergeFailed": {
+    "description": "Toast"
+  },
+  "@rcxMerged": {
+    "description": "Toast"
+  },
+  "@rcxMergedConflicts": {
+    "description": "Toast",
+    "placeholders": {
+      "keys": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxMoveDown": {
+    "description": "Menu"
+  },
+  "@rcxMoveUp": {
+    "description": "Menu"
+  },
+  "@rcxNeedsConsent": {
+    "description": "Subtitle/reason"
+  },
+  "@rcxNetworkKinds": {
+    "description": "Row title"
+  },
+  "@rcxNewProfile": {
+    "description": "Row / default title"
+  },
+  "@rcxOpFail": {
+    "description": "Operator: diagnostic fails"
+  },
+  "@rcxOpIn": {
+    "description": "Operator"
+  },
+  "@rcxOpIs": {
+    "description": "Operator"
+  },
+  "@rcxOpIsNot": {
+    "description": "Operator"
+  },
+  "@rcxOpMatches": {
+    "description": "Operator: regex"
+  },
+  "@rcxOpOk": {
+    "description": "Operator: diagnostic succeeds"
+  },
+  "@rcxOverrides": {
+    "description": "Row title: overrides by network kind"
+  },
+  "@rcxPoolExclude": {
+    "description": "Row: servers excluded from the pool"
+  },
+  "@rcxPoolInclude": {
+    "description": "Row: servers included in the pool"
+  },
+  "@rcxProfileName": {
+    "description": "Row: profile title"
+  },
+  "@rcxSourceChanged": {
+    "description": "Section title"
+  },
+  "@rcxSourceChanges": {
+    "description": "Row/page title: diff of the source"
+  },
+  "@rcxStranded": {
+    "description": "Row"
+  },
+  "@rcxStrandedDirect": {
+    "description": "Choice"
+  },
+  "@rcxStrandedHold": {
+    "description": "Choice"
+  },
+  "@rcxTagName": {
+    "description": "Input label"
+  },
+  "@rcxTagNameInvalid": {
+    "description": "Validation"
+  },
+  "@rcxTags": {
+    "description": "Section title"
+  },
+  "@rcxTagsHint": {
+    "description": "Footer"
+  },
+  "@rcxThirdParty": {
+    "description": "Lowercase marker on a host"
+  },
+  "@rcxTier": {
+    "description": "Title"
+  },
+  "@rcxTierLabel": {
+    "description": "Row"
+  },
+  "@rcxTierWhen": {
+    "description": "Row: the tier's condition"
+  },
+  "@rcxTiers": {
+    "description": "Section title: ordered tiers"
+  },
+  "@rcxTiersHint": {
+    "description": "Footer"
+  },
+  "@rcxTranslations": {
+    "description": "Row title: languages of the profile's l10n"
+  },
+  "@rcxUseCheck": {
+    "description": "Lowercase: endpoint used by a check",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxUseDiagnostic": {
+    "description": "Lowercase",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxUseEcho": {
+    "description": "Lowercase"
+  },
+  "@rcxWarnings": {
+    "description": "Section title"
+  },
+  "@rcxYaml": {
+    "description": "Action / page title"
+  },
+  "@rcxCondClause": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcxExcept": {
+    "placeholders": {
+      "condition": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxFixedOn": {
+    "placeholders": {
+      "member": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxJournalMode": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxLintGroupMissing": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxModeIs": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonFixed": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonFixedMissing": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonIdle": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxReasonSwitchFixed": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcxScenarioDrives": {
+    "placeholders": {
+      "scenario": {
+        "type": "String"
+      }
+    }
+  },
   "disclaimerReadToEnd": "Read to the end",
   "customImportDroppedIncludeAll": "Dropped include-all from the proxy groups {groups}; add the proxies or proxy providers they use",
   "notification": "Notification",
@@ -1616,6 +2559,7 @@
   "topUpTraffic": "Top up traffic",
   "notificationActive": "Protection active",
   "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status.",
+  "extra": "Extra",
   "@subscriptionExpiresInDays": {
     "placeholders": {
       "count": {
@@ -1665,11 +2609,9 @@
   "webDashboardOpenInBrowser": "Open in browser",
   "webDashboardReload": "Reload",
   "webDashboardInstall": "Install dashboard",
-  "webDashboardFiles": "Dashboard files",
   "webDashboardNotInstalled": "Not installed",
-  "webDashboardInstalledVersion": "Installed version: {version}",
   "webDashboardInstallTip": "The selected dashboard is downloaded on first open. Downloads use a pinned release and SHA-256 verification.",
-  "webDashboardAccessTip": "Access is local and authenticated. Opening a dashboard does not change your saved external controller settings. For a browser, end access here when you are finished.",
+  "webDashboardAccessTip": "Access is local and protected by a secret. Opening a dashboard does not change your saved external controller settings.",
   "webDashboardNoAccess": "No dashboard session",
   "webDashboardEmbeddedAccess": "Access ends when the dashboard closes",
   "webDashboardBrowserAccess": "Browser access stays active until you end it or quit ReClash",
@@ -1692,11 +2634,9 @@
   "webDashboardAuthenticationFailed": "The Core rejected the dashboard credentials. Reopen the dashboard.",
   "webDashboardLaunchFailed": "Could not open the browser.",
   "webDashboardCancelled": "Dashboard operation cancelled.",
-  "@webDashboardInstalledVersion": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  }
+  "webDashboardVersion": "Version",
+  "webDashboardAccess": "Access",
+  "webDashboardAccessOff": "Off",
+  "webDashboardAccessInApp": "In the app",
+  "webDashboardAccessInBrowser": "In the browser"
 }

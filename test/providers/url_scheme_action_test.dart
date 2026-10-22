@@ -280,6 +280,7 @@ void main() {
       Future<bool> Function(ReClashCommand)? confirmCommand,
       Future<SubscriptionClientSettings?> Function(ProfileLinkSource)?
       confirmImport,
+      Future<void> Function(String, String)? openRouting,
       bool Function()? isCurrent,
     }) => container
         .read(urlSchemeActionProvider.notifier)
@@ -289,8 +290,44 @@ void main() {
           confirmImport:
               confirmImport ??
               (_) async => const SubscriptionClientSettings.forNewProfile(),
+          openRouting: openRouting ?? (_, _) async {},
           isCurrent: isCurrent,
         );
+
+    test('routing links open the review with the decoded text', () async {
+      const yaml = 'rcx: 1\nprofiles: {}\n';
+      final opened = <(String, String)>[];
+      var imports = 0;
+      await handle(
+        encodeRcxLink(yaml),
+        confirmImport: (_) async {
+          imports++;
+          return const SubscriptionClientSettings.forNewProfile();
+        },
+        openRouting: (text, origin) async => opened.add((text, origin)),
+      );
+      expect(opened, [(yaml, 'link')]);
+      expect(imports, 0);
+      expect(common.requests, isEmpty);
+    });
+
+    test('routing links with a bad payload surface a link error', () async {
+      var opened = 0;
+      await expectLater(
+        handle(
+          'reclash://routing?p=%2A%2A',
+          openRouting: (_, _) async => opened++,
+        ),
+        throwsA(
+          isA<UrlSchemeException>().having(
+            (e) => e.issue,
+            'issue',
+            UrlSchemeIssue.invalidBase64,
+          ),
+        ),
+      );
+      expect(opened, 0);
+    });
 
     test('commands never dispatch to the profile importer', () async {
       final confirmed = <ReClashCommand>[];

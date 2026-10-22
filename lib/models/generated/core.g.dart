@@ -13,6 +13,9 @@ _SetupParams _$SetupParamsFromJson(Map<String, dynamic> json) => _SetupParams(
   base: json['base'] == null
       ? null
       : SetupBase.fromJson(json['base'] as Map<String, dynamic>),
+  rcx: json['rcx'] == null
+      ? null
+      : RcxUserLayer.fromJson(json['rcx'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$SetupParamsToJson(_SetupParams instance) =>
@@ -21,6 +24,7 @@ Map<String, dynamic> _$SetupParamsToJson(_SetupParams instance) =>
       'test-url': instance.testUrl,
       'skip-cert-verify': instance.skipCertVerify,
       'base': ?instance.base,
+      'rcx': ?instance.rcx,
     };
 
 _SetupBase _$SetupBaseFromJson(Map<String, dynamic> json) => _SetupBase(
@@ -281,6 +285,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.geoUpdate: 'geoUpdate',
   CoreEventType.routeChanged: 'routeChanged',
   CoreEventType.dialerLoop: 'dialerLoop',
+  CoreEventType.rcxStatus: 'rcxStatus',
 };
 
 _Delay _$DelayFromJson(Map<String, dynamic> json) => _Delay(

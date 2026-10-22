@@ -40,5 +40,6 @@
   "renewSubscription": "Renouveler l’abonnement",
   "topUpTraffic": "Ajouter du trafic",
   "notificationActive": "Protection active",
-  "notificationLevelDescription": "Détaillé affiche les informations en direct et le bouton Arrêter. Minimal affiche seulement l’état de protection."
+  "notificationLevelDescription": "Détaillé affiche les informations en direct et le bouton Arrêter. Minimal affiche seulement l’état de protection.",
+  "extra": "Supplémentaire"
 }

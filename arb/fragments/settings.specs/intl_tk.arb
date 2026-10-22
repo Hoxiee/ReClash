@@ -40,5 +40,6 @@
   "renewSubscription": "Abunany uzalt",
   "topUpTraffic": "Trafigi doldur",
   "notificationActive": "Gorag işjeň",
-  "notificationLevelDescription": "Jikme-jik tertip janly maglumatlary we duruzmak düwmesini görkezýär. Iň az tertip diňe gorag ýagdaýyny görkezýär."
+  "notificationLevelDescription": "Jikme-jik tertip janly maglumatlary we duruzmak düwmesini görkezýär. Iň az tertip diňe gorag ýagdaýyny görkezýär.",
+  "extra": "Goşmaça"
 }

@@ -192,6 +192,7 @@ class PreparedSubscriptionUpdate {
     required this.label,
     required this.client,
     this.clientFingerprint = '',
+    this.routingBundle,
   });
 
   final int profileId;
@@ -205,6 +206,7 @@ class PreparedSubscriptionUpdate {
   final String label;
   final SubscriptionClientPreset client;
   final String clientFingerprint;
+  final String? routingBundle;
 
   SubscriptionImportSummary get summary => payload.summary;
 }
@@ -492,6 +494,22 @@ extension ProfileExtension on Profile {
                 subscriptionInfo,
                 decodedMetadata.metadata,
               );
+              final bundleUrl = decodedMetadata.metadata.text(
+                'routing.bundleUrl',
+              );
+              final routingBundle = bundleUrl == null
+                  ? null
+                  : await _fetchRoutingBundle(
+                      fetcher,
+                      bundleUrl,
+                      subscription: uri,
+                      headers: headers,
+                      timeout: timeout,
+                      cancellation: requestCancellation,
+                    );
+              if (requestCancellation.cancelled) {
+                throw const SubscriptionUpdateCancelled();
+              }
               final disposition =
                   response.headers['content-disposition']?.singleOrNull;
               final resolvedLabel = label.takeFirstValid([
@@ -513,6 +531,7 @@ extension ProfileExtension on Profile {
                   label: resolvedLabel,
                   client: preset,
                   clientFingerprint: requestFingerprint,
+                  routingBundle: routingBundle,
                 ),
                 requiresReview:
                     payload.summary.hasLosses &&
@@ -613,7 +632,25 @@ extension ProfileExtension on Profile {
             }
           },
         );
+    await _storeRoutingBundle(prepared.routingBundle);
     return saved;
+  }
+
+  Future<void> _storeRoutingBundle(String? bundle) async {
+    if (bundle == null) return;
+    try {
+      await serializeProfileMutation(
+        id,
+        () async => File(
+          await appPath.getProfileRoutingPath(id.toString()),
+        ).writeAsStringAtomically(bundle),
+      );
+    } on Object catch (error) {
+      commonPrint.log(
+        'Could not store the routing bundle: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
   }
 
   Future<Profile> update({
@@ -717,5 +754,49 @@ extension ProfileExtension on Profile {
     } finally {
       await tempFile.safeDelete();
     }
+  }
+}
+
+const routingBundleMaxBytes = 256 * 1024;
+
+Future<String?> _fetchRoutingBundle(
+  SubscriptionTransport fetcher,
+  String bundleUrl, {
+  required Uri subscription,
+  required Map<String, String> headers,
+  required Duration timeout,
+  required SubscriptionCancellation cancellation,
+}) async {
+  try {
+    final uri = Uri.tryParse(bundleUrl.trim());
+    final scheme = uri?.scheme.toLowerCase();
+    if (uri == null ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        scheme != 'https' &&
+            !(scheme == 'http' &&
+                subscription.scheme.toLowerCase() == 'http')) {
+      throw const FormatException('unsupported routing bundle URL');
+    }
+    final response = await fetcher.fetch(
+      uri,
+      headers: headers,
+      timeout: timeout,
+      cancellation: cancellation,
+    );
+    if (response.bytes.length > routingBundleMaxBytes) {
+      throw const FormatException('routing bundle is too large');
+    }
+    final text = utf8.decode(response.bytes);
+    if (text.trim().isEmpty) throw const FormatException('empty bundle');
+    return text;
+  } on Object catch (error) {
+    if (!cancellation.cancelled) {
+      commonPrint.log(
+        'Could not download the routing bundle: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
+    return null;
   }
 }

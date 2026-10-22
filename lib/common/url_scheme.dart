@@ -8,6 +8,7 @@ const urlSchemeMaxLength = 4 * 1024 * 1024;
 const urlSchemeMaxContentBytes = 2 * 1024 * 1024;
 const urlSchemeMaxDepth = 5;
 const urlSchemeMaxNameLength = 64;
+const urlSchemeMaxRoutingPayloadLength = 128 * 1024;
 
 final _invalidEscape = RegExp(r'%(?![0-9a-fA-F]{2})');
 final _controls = RegExp(r'[\x00-\x20\x7f]');
@@ -20,7 +21,8 @@ enum ReClashCommand {
   close('close'),
   add('add'),
   importProfile('import'),
-  installConfig('install-config');
+  installConfig('install-config'),
+  routing('routing');
 
   const ReClashCommand(this.host);
 
@@ -131,6 +133,7 @@ UrlSchemeLink? parseUrlSchemeLink(String input) {
   if (uri.userInfo.isNotEmpty || uri.hasPort) {
     throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
   }
+  if (command == ReClashCommand.routing) return _parseRoutingLink(uri);
   if (!command.isProfile) {
     if (uri.path.isNotEmpty && uri.path != '/' ||
         uri.hasQuery ||
@@ -182,6 +185,29 @@ UrlSchemeLink? parseUrlSchemeLink(String input) {
     payload: payload,
     name: checkedLinkName(parameters['name']?.single),
   );
+}
+
+UrlSchemeLink _parseRoutingLink(Uri uri) {
+  final parameters = checkedLinkParameters(uri);
+  if ((uri.path.isNotEmpty && uri.path != '/') ||
+      uri.hasFragment ||
+      parameters.length != 1 ||
+      !{'p', 'url'}.contains(parameters.keys.single) ||
+      parameters.values.single.length != 1) {
+    throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
+  }
+  final value = parameters.values.single.single.trim();
+  if (value.isEmpty) {
+    throw const UrlSchemeException(UrlSchemeIssue.missingPayload);
+  }
+  if (parameters.keys.single == 'url') {
+    if (!value.startsWith('https://') || !isSubscriptionUrl(value)) {
+      throw const UrlSchemeException(UrlSchemeIssue.invalidUrl);
+    }
+  } else if (value.length > urlSchemeMaxRoutingPayloadLength) {
+    throw const UrlSchemeException(UrlSchemeIssue.tooLarge);
+  }
+  return UrlSchemeLink(command: ReClashCommand.routing, payload: value);
 }
 
 bool isProfileLinkInput(String input) {
@@ -252,13 +278,24 @@ Future<String> buildUrlSchemeLink(
       }
       data = value;
     }
+  } else if (command == ReClashCommand.routing) {
+    final value = payload.trim();
+    if (value.isEmpty) {
+      throw const UrlSchemeException(UrlSchemeIssue.missingPayload);
+    }
+    if (label != null) {
+      throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
+    }
+    data = value;
   } else if (payload.isNotEmpty || label != null) {
     throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
   }
   final uri = Uri(
     scheme: 'reclash',
     host: command.host,
-    queryParameters: command.isProfile
+    queryParameters: command == ReClashCommand.routing
+        ? {data!.startsWith('https://') ? 'url' : 'p': data}
+        : command.isProfile
         ? {
             command == ReClashCommand.importProfile ? 'data' : 'url': data!,
             'name': ?label,

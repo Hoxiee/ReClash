@@ -107,10 +107,36 @@ mixin CoreInterface {
   Future<RouteSnapshot?> watchRoute(bool watch);
 
   Future<RouteCheck?> checkRoutes(CheckRoutesParams params);
+  Future<RcxStatus> rcxSetPolicy(RcxUserLayer layer);
+
+  Future<RcxStatus> rcxStatus();
+
+  Future<RcxExplanation> rcxExplain(String group);
+
+  Future<List<RcxJournalEntry>> rcxJournal({
+    int cursor = 0,
+    String? group,
+    int limit = 0,
+  });
+
+  Future<RcxDecision> rcxAction({
+    required String group,
+    required RcxAction action,
+    String? node,
+    bool here = false,
+  });
+
+  Future<bool> rcxHints(Map<String, Object?> hints);
+
+  Future<List<RcxProfileInfo>> rcxProfiles();
+
+  Future<RcxStudioResult> rcxStudio(Map<String, Object?> request);
 
   Future<bool> startListener();
 
   Future<bool> stopListener();
+
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop});
 
   Future<List<ExternalProvider>> getExternalProviders();
 
@@ -530,6 +556,103 @@ abstract class CoreHandlerInterface with CoreInterface {
     return ChangeProxyResult.fromJson(data);
   }
 
+  Future<Map<String, dynamic>> _invokeRcx(
+    CoreMethod method, [
+    Object? arguments,
+  ]) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: method,
+      arguments: arguments,
+    );
+    if (data == null) {
+      throw CoreMethodException(
+        code: 'no_response',
+        message: 'Core did not answer ${method.name}',
+      );
+    }
+    return data;
+  }
+
+  @override
+  Future<RcxStatus> rcxSetPolicy(RcxUserLayer layer) async {
+    return RcxStatus.fromJson(
+      await _invokeRcx(CoreMethod.rcxSetPolicy, layer.toJson()),
+    );
+  }
+
+  @override
+  Future<RcxStatus> rcxStatus() async {
+    return RcxStatus.fromJson(await _invokeRcx(CoreMethod.rcxStatus));
+  }
+
+  @override
+  Future<RcxExplanation> rcxExplain(String group) async {
+    return RcxExplanation.fromJson(
+      await _invokeRcx(CoreMethod.rcxExplain, group),
+    );
+  }
+
+  @override
+  Future<List<RcxJournalEntry>> rcxJournal({
+    int cursor = 0,
+    String? group,
+    int limit = 0,
+  }) async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.rcxJournal,
+      arguments: {'cursor': cursor, 'group': ?group, 'limit': limit},
+    );
+    return [
+      for (final item in data ?? const [])
+        RcxJournalEntry.fromJson(Map<String, Object?>.from(item as Map)),
+    ];
+  }
+
+  @override
+  Future<RcxDecision> rcxAction({
+    required String group,
+    required RcxAction action,
+    String? node,
+    bool here = false,
+  }) async {
+    final data = await _invokeRcx(CoreMethod.rcxAction, {
+      'group': group,
+      'action': action.name,
+      'node': ?node,
+      'here': here,
+    });
+    return RcxDecision.fromJson(
+      Map<String, Object?>.from(data['decision'] as Map),
+    );
+  }
+
+  @override
+  Future<bool> rcxHints(Map<String, Object?> hints) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.rcxHints,
+          arguments: hints,
+        ) ??
+        false;
+  }
+
+  @override
+  Future<List<RcxProfileInfo>> rcxProfiles() async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.rcxProfiles,
+    );
+    return [
+      for (final item in data ?? const [])
+        RcxProfileInfo.fromJson(Map<String, Object?>.from(item as Map)),
+    ];
+  }
+
+  @override
+  Future<RcxStudioResult> rcxStudio(Map<String, Object?> request) async {
+    return RcxStudioResult.fromJson(
+      await _invokeRcx(CoreMethod.rcxStudio, request),
+    );
+  }
+
   @override
   Future<RouteSnapshot?> watchRoute(bool watch) async {
     final data = await _invokeMethod<Map<String, dynamic>>(
@@ -690,6 +813,14 @@ abstract class CoreHandlerInterface with CoreInterface {
   Future<bool> stopListener() async {
     return await _invokeMethod<bool>(method: CoreMethod.stopListener) ?? false;
   }
+
+  @override
+  Future<bool> setOnDemandPaused(bool paused, {required bool fullStop}) async =>
+      await _invokeMethod<bool>(
+        method: CoreMethod.setOnDemandPaused,
+        arguments: {'paused': paused, 'fullStop': fullStop},
+      ) ??
+      false;
 
   @override
   Future<Delay?> asyncTestDelay(

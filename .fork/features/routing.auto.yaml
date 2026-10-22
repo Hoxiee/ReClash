@@ -1,0 +1,23 @@
+v: 1
+kind: feature
+state: active
+risk: critical
+must:
+  pure-decision: The routing decision is a pure function of policy, evidence and context, and its explanation is the ranking it decided on.
+  energy: No check runs with the screen off unless real traffic fails, nothing runs in Doze or sleep, simple profiles stay within 30 requests an hour and advanced ones within 80.
+  escrow: Failures seen while no traffic gets through condemn no node.
+  layers: Provider and user layers only narrow a profile's pool; an invalid profile or unusable group is a visible problem, never a silent fallback.
+  manual-control: A manual pick in a smart group pins it; manual mode never switches.
+  thin-fork: The mihomo fork carries only per-provider health-check suppression, the endpoint fingerprint and the direct-split hook for routing.
+  direct-split: Only the user turns direct-split on; local destinations and the final MATCH rule never leave through the tunnel.
+  consent: A provider profile contacts hosts beyond its provider's site and the built-in endpoints only after the user allows them; until then its group runs builtin/simple and says why.
+  studio: Lint, simulation, format and merge are read-only; a profile changes what a group runs only once saved.
+  profile-text: A profile carries its own translations; the app shows the user's language and falls back to the source text.
+  scenario: A scenario sets the tunnel mode only until the user picks one, and drives only the groups it names; the rest keep their own profile.
+watch: ['core/rcx/**', 'core/rcx_*.go', core/hooks.go, core/proxy.go, core/mihomo/adapter/provider/patch.go, core/mihomo/adapter/route_identity.go, core/mihomo/tunnel/patch.go, android/service/src/main/java/com/reclash/service/modules/NetworkObserveModule.kt, lib/models/rcx.dart, lib/providers/routing.dart, lib/views/proxies/routing.dart, 'lib/views/proxies/routing_*.dart', lib/views/config/routing.dart, lib/views/dashboard/widgets/outbound_mode.dart, lib/common/rcx_link.dart, rcx-profile.schema.json, tool/rcx.dart, android/service/src/main/java/com/reclash/service/modules/RoutingHintsModule.kt, 'arb/fragments/routing.auto/**', test/views/proxies/routing_test.dart, test/views/proxies/routing_studio_test.dart]
+checks:
+  routing-engine: [pure-decision, energy, escrow, layers, manual-control, direct-split, consent, studio, scenario]
+  routing-ui: [layers, manual-control, studio, profile-text, scenario]
+  fork-tests: [thin-fork]
+deps: [core.integration, proxies.groups]
+drop: Upstream ships an auto-routing engine with the same transparency, energy limits and provider tolerance.

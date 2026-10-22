@@ -95,6 +95,14 @@ class ExcludeSSIDs extends _$ExcludeSSIDs with AutoDisposeNotifierMixin {
   }
 }
 
+@riverpod
+class RcxProfiles extends _$RcxProfiles with AutoDisposeNotifierMixin {
+  @override
+  Map<String, RcxUserProfile> build() {
+    return const {};
+  }
+}
+
 @Riverpod(name: 'configProvider')
 Config _config(Ref ref) {
   final appSettingProps = ref.watch(appSettingProvider);
@@ -108,6 +116,7 @@ Config _config(Ref ref) {
   final proxiesStyleProps = ref.watch(proxiesStyleSettingProvider);
   final patchClashConfig = ref.watch(patchClashConfigProvider);
   final excludeSSIDs = ref.watch(excludeSSIDsProvider);
+  final rcxProfiles = ref.watch(rcxProfilesProvider);
   return Config(
     appSettingProps: appSettingProps,
     windowProps: windowProps,
@@ -120,6 +129,7 @@ Config _config(Ref ref) {
     proxiesStyleProps: proxiesStyleProps,
     patchClashConfig: patchClashConfig,
     excludeSSIDs: excludeSSIDs,
+    rcxProfiles: rcxProfiles,
   );
 }
 
@@ -137,6 +147,7 @@ void writeConfig(Ref ref, Config config) {
   ref.read(patchClashConfigProvider.notifier).value = config.patchClashConfig
       .ensureControllerSecret();
   ref.read(excludeSSIDsProvider.notifier).value = config.excludeSSIDs;
+  ref.read(rcxProfilesProvider.notifier).value = config.rcxProfiles;
 }
 
 List<Override> buildConfigOverrides(Config config) {
@@ -158,5 +169,6 @@ List<Override> buildConfigOverrides(Config config) {
       (_, _) => config.patchClashConfig,
     ),
     excludeSSIDsProvider.overrideWithBuild((_, _) => config.excludeSSIDs),
+    rcxProfilesProvider.overrideWithBuild((_, _) => config.rcxProfiles),
   ];
 }

@@ -12,12 +12,15 @@ class UrlSchemeAction extends _$UrlSchemeAction {
       ProfileLinkSource source,
     )
     confirmImport,
+    required Future<void> Function(String text, String origin) openRouting,
     bool Function()? isCurrent,
   }) async {
     bool current() => ref.mounted && (isCurrent?.call() ?? true);
     final link = await readUrlSchemeLink(input);
     if (!current()) return;
-    if (link != null && !link.command.isProfile) {
+    if (link != null &&
+        !link.command.isProfile &&
+        link.command != ReClashCommand.routing) {
       await execute(
         link.command,
         confirm: (action) async =>
@@ -29,6 +32,12 @@ class UrlSchemeAction extends _$UrlSchemeAction {
     if (!current()) return;
     if (ref.read(setupSessionProvider).active) {
       ref.read(setupSessionProvider.notifier).offerLink(input);
+      return;
+    }
+    if (link != null && link.command == ReClashCommand.routing) {
+      final (text, origin) = await _resolveRouting(link.payload!);
+      if (!current()) return;
+      await openRouting(text, origin);
       return;
     }
     final source = await resolveProfileLink(input);
@@ -43,11 +52,36 @@ class UrlSchemeAction extends _$UrlSchemeAction {
         .addProfileLinkSource(source, clientSettings: clientSettings);
   }
 
+  Future<(String, String)> _resolveRouting(String payload) async {
+    if (!payload.startsWith('https://')) {
+      try {
+        return (decodeRcxPayload(payload), 'link');
+      } on RcxPayloadTooLarge {
+        throw const UrlSchemeException(UrlSchemeIssue.tooLarge);
+      } on FormatException {
+        throw const UrlSchemeException(UrlSchemeIssue.invalidBase64);
+      }
+    }
+    final response = await request.getFileResponseForUrl(payload);
+    final bytes = response.data;
+    if (bytes == null || bytes.isEmpty) {
+      throw const UrlSchemeException(UrlSchemeIssue.missingPayload);
+    }
+    if (bytes.length > rcxLinkMaxBytes) {
+      throw const UrlSchemeException(UrlSchemeIssue.tooLarge);
+    }
+    try {
+      return (utf8.decode(bytes), Uri.parse(payload).host);
+    } on FormatException {
+      throw const UrlSchemeException(UrlSchemeIssue.invalidLink);
+    }
+  }
+
   Future<void> execute(
     ReClashCommand command, {
     required Future<bool> Function(ReClashCommand action) confirm,
   }) async {
-    if (command.isProfile) return;
+    if (command.isProfile || command == ReClashCommand.routing) return;
     await windowPort?.show();
     if (!ref.mounted) return;
     if (command == ReClashCommand.open) return;

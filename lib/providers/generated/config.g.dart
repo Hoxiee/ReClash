@@ -581,6 +581,63 @@ abstract class _$ExcludeSSIDs extends $Notifier<List<String>> {
   }
 }
 
+@ProviderFor(RcxProfiles)
+final rcxProfilesProvider = RcxProfilesProvider._();
+
+final class RcxProfilesProvider
+    extends $NotifierProvider<RcxProfiles, Map<String, RcxUserProfile>> {
+  RcxProfilesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rcxProfilesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rcxProfilesHash();
+
+  @$internal
+  @override
+  RcxProfiles create() => RcxProfiles();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, RcxUserProfile> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, RcxUserProfile>>(value),
+    );
+  }
+}
+
+String _$rcxProfilesHash() => r'96a412ff09f415e8c0206c00651ed21ba0b08f8f';
+
+abstract class _$RcxProfiles extends $Notifier<Map<String, RcxUserProfile>> {
+  Map<String, RcxUserProfile> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<Map<String, RcxUserProfile>, Map<String, RcxUserProfile>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                Map<String, RcxUserProfile>,
+                Map<String, RcxUserProfile>
+              >,
+              Map<String, RcxUserProfile>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(_config)
 final configProvider = _ConfigProvider._();
 
@@ -619,4 +676,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'a9e717216fc1ca6b3526907bd578c4982bb6961a';
+String _$_configHash() => r'02a0b9226f5982a4ae6667e7fd6d45eb747e584c';

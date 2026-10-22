@@ -23,6 +23,7 @@ Version: 1
 | `provider.buyTrafficUrl` | `reclash-buytraffic` | url | display | panel |
 | `account.title` | `profile-title` | text | display | panel |
 | `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler |
+| `routing.bundleUrl` | `reclash-routing` | url | hint | routing |
 | `presentation.hideUrl` | `reclash-hideurl` | boolean | display | panel |
 
 ## HTTP headers

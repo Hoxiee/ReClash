@@ -2,9 +2,7 @@ part of '../state.dart';
 
 @riverpod
 GroupsState currentGroupsState(Ref ref) {
-  final mode = ref.watch(
-    patchClashConfigProvider.select((state) => state.mode),
-  );
+  final mode = ref.watch(effectiveModeProvider);
   final groups = ref.watch(groupsProvider);
   final shown = switch (mode) {
     Mode.direct => const <Group>[],
