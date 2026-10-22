@@ -9,6 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/notification.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:reclash/views/navigation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -1067,6 +1068,78 @@ void main() {
     },
   );
 
+  test(
+    'notification group follows mode and preserves an explicit missing selection',
+    () {
+      container.listen(appSettingProvider, (_, _) {});
+      container
+          .read(groupsProvider.notifier)
+          .update(
+            (_) => const [
+              Group(name: 'Visible', type: GroupType.Selector, hidden: false),
+              Group(name: 'GLOBAL', type: GroupType.Selector, hidden: true),
+            ],
+          );
+      expect(container.read(notificationServerGroupProvider), 'Visible');
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((s) => s.copyWith(mode: Mode.global));
+      expect(container.read(notificationServerGroupProvider), 'GLOBAL');
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((s) => s.copyWith(mode: Mode.direct));
+      expect(container.read(notificationServerGroupProvider), isNull);
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((s) => s.copyWith(mode: Mode.rule));
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (s) => s.copyWith(
+              notificationSettings: s.notificationSettings.copyWith(
+                components: const [
+                  NotificationComponent(
+                    type: NotificationComponentType.currentServer,
+                    group: 'Missing',
+                  ),
+                ],
+              ),
+            ),
+          );
+      expect(container.read(notificationServerGroupProvider), isNull);
+      expect(
+        container
+            .read(appSettingProvider)
+            .notificationSettings
+            .components
+            .single
+            .group,
+        'Missing',
+      );
+    },
+  );
+
+  test('shared state projects minimal notification settings live', () {
+    container.listen(sharedStateProvider, (_, _) {});
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (s) => s.copyWith(
+            notificationSettings: s.notificationSettings.copyWith(
+              visibility: NotificationVisibility.minimal,
+            ),
+          ),
+        );
+    final shared = container.read(sharedStateProvider);
+    expect(shared.notificationSettings.components, isEmpty);
+    expect(shared.showStopAction, isFalse);
+    expect(shared.notificationServerGroup, isNull);
+    expect(
+      container.read(appSettingProvider).notificationSettings.components,
+      defaultNotificationComponents,
+    );
+  });
+
   test('shared state carries the notification stop action switch', () async {
     await AppLocalizations.load(const Locale('en'));
     container.listen(sharedStateProvider, (_, _) {});
@@ -1074,7 +1147,13 @@ void main() {
 
     container
         .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(showNotificationStopAction: false));
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              showStopAction: false,
+            ),
+          ),
+        );
     expect(container.read(sharedStateProvider).showStopAction, false);
   });
 

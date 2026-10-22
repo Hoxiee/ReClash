@@ -8,6 +8,10 @@ vendor: vendor/flclash
 budget: 6144
 owned: [CHANGELOG.md, changelog.json]
 checks:
+  android-notifications:
+    argv: [bash, tool/test_android_notifications.sh]
+  notifications:
+    argv: [flutter, test, test/models/notification_test.dart, test/subscriptions/notification_test.dart, test/views/notification_test.dart]
   navigation:
     argv: [flutter, test, test/common/layout_test.dart, test/pages/home_dynamic_navigation_test.dart, test/widgets/nav_slots_test.dart, test/widgets/navigation_bar_test.dart]
   hotkeys:

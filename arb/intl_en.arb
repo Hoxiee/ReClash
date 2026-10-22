@@ -1576,6 +1576,60 @@
   "profileImportDuplicate": "A profile with this subscription URL already exists",
   "disclaimerReadToEnd": "Read to the end",
   "customImportDroppedIncludeAll": "Dropped include-all from the proxy groups {groups}; add the proxies or proxy providers they use",
+  "notification": "Notification",
+  "notificationContent": "Content",
+  "notificationVisibility": "Notification level",
+  "notificationVisibilityDetailed": "Detailed",
+  "notificationVisibilityMinimal": "Minimal",
+  "notificationComponents": "Notification components",
+  "notificationComponentsDesc": "Build the notification from live status components.",
+  "notificationAddComponent": "Add component",
+  "notificationComponentsEmpty": "No components added",
+  "notificationCurrentServer": "Current server",
+  "notificationNetworkSpeed": "Network speed",
+  "notificationSessionTraffic": "Session traffic",
+  "notificationAutomaticGroup": "Automatic group",
+  "notificationHideIdleSpeed": "Hide idle speed",
+  "notificationPrivacy": "Privacy",
+  "notificationReminders": "Reminders",
+  "notificationHideSensitive": "Hide sensitive details on lock screen",
+  "notificationHideSensitiveDesc": "Uses Android's lock-screen privacy settings for service notifications and reminders. Details remain visible while unlocked.",
+  "notificationServiceChannel": "Service channel",
+  "notificationSubscriptionChannel": "Subscription reminders channel",
+  "notificationSubscriptionReminders": "Subscription reminders",
+  "notificationSubscriptionRemindersDesc": "Notify when a subscription needs attention",
+  "notificationDelivery": "Android delivery",
+  "notificationDeliveryChecking": "Checking Android notification access",
+  "notificationDeliveryPermissionDisabled": "Notifications are blocked for ReClash",
+  "notificationDeliveryServiceDisabled": "The ReClash service channel is disabled",
+  "notificationDeliverySubscriptionDisabled": "The subscription reminders channel is disabled",
+  "notificationDeliveryReady": "Notifications can be delivered",
+  "notificationServerGroupMissing": "The chosen group is missing from the profile",
+  "notificationBlockedNoServerGroup": "No server group is resolved, so this line is hidden",
+  "notificationComponentsEmptyDesc": "Without components the notification shows only the protection status.",
+  "subscriptionNoticeChannel": "Subscription reminders",
+  "subscriptionExpired": "Your subscription has expired",
+  "subscriptionExpiresToday": "Your subscription expires today",
+  "subscriptionExpiresInDays": "Your subscription expires in {count, plural, =1{1 day} other{{count} days}}",
+  "subscriptionTrafficLow": "You have used {percent}% of your traffic",
+  "renewSubscription": "Renew subscription",
+  "topUpTraffic": "Top up traffic",
+  "notificationActive": "Protection active",
+  "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status.",
+  "@subscriptionExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@subscriptionTrafficLow": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "applicationSettings": "Application settings",
   "toolsConfiguration": "Configuration",
   "toolsData": "Resources and data",

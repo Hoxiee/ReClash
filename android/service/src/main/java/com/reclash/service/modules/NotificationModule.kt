@@ -16,35 +16,13 @@ import com.reclash.common.quickIntent
 import com.reclash.common.receiveBroadcastFlow
 import com.reclash.common.startForeground
 import com.reclash.common.toPendingIntent
-import com.reclash.core.Core
 import com.reclash.service.R
 import com.reclash.service.ServiceConfig
-import com.reclash.service.models.NotificationParams
-import com.reclash.service.models.getSpeedTrafficText
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-
-private data class ExtendedNotificationParams(
-    val title: String,
-    val stopText: String,
-    val showStopAction: Boolean,
-    val contentText: String,
-)
-
-private val NotificationParams.extended: ExtendedNotificationParams
-    get() = ExtendedNotificationParams(
-        title,
-        stopText,
-        showStopAction,
-        Core.getSpeedTrafficText(onlyStatisticsProxy),
-    )
 
 internal class NotificationModule(
     private val service: Service,
@@ -54,33 +32,16 @@ internal class NotificationModule(
         service.ensureNotificationChannel()
         update(ServiceConfig.notificationParams.value.extended)
         scope.launch {
-            // Some ROMs, vivo's among them, drop updates posted behind the
-            // keyguard, so unlocking restarts the loop to post once more.
-            // SystemUI, an app, sends USER_PRESENT, which a receiver that is
-            // not exported never gets; all three actions are protected.
-            service.receiveBroadcastFlow(exported = true) {
+            val screenOn = service.receiveBroadcastFlow(exported = true) {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Intent.ACTION_USER_PRESENT)
-            }.map { intent ->
-                intent.action != Intent.ACTION_SCREEN_OFF
-            }.onStart {
-                emit(isScreenOn())
-            }.collectLatest { screenOn ->
-                if (!screenOn) return@collectLatest
-                combine(
-                    flow {
-                        while (true) {
-                            delay(1_000)
-                            emit(Unit)
-                        }
-                    },
-                    ServiceConfig.notificationParams,
-                ) { _, params ->
-                    params.extended
-                }.distinctUntilChanged()
-                    .collect(::update)
-            }
+            }.map { it.action != Intent.ACTION_SCREEN_OFF }
+                .onStart { emit(isScreenOn()) }
+            notificationUpdates(ServiceConfig.notificationParams, screenOn)
+                .map { it.extended }
+                .distinctUntilChanged()
+                .collect(::update)
         }
     }
 
@@ -114,7 +75,18 @@ internal class NotificationModule(
         service.startForeground(
             with(notificationBuilder) {
                 setContentTitle(params.title)
-                setContentText(params.contentText)
+                setContentText(params.contentText.lineSequence().firstOrNull())
+                setStyle(params.contentText.takeIf { it.contains('\n') }?.let(NotificationCompat.BigTextStyle()::bigText))
+                setVisibility(if (params.hideSensitive) NotificationCompat.VISIBILITY_PRIVATE else NotificationCompat.VISIBILITY_PUBLIC)
+                setPublicVersion(if (params.hideSensitive) {
+                    NotificationCompat.Builder(service, GlobalState.NOTIFICATION_CHANNEL)
+                        .setSmallIcon(R.drawable.ic)
+                        .setContentTitle("ReClash")
+                        .setContentText(params.publicText)
+                        .setOngoing(true)
+                        .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                        .build()
+                } else null)
                 clearActions()
                 if (params.showStopAction) {
                     addAction(0, params.stopText, stopIntent)

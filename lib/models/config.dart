@@ -238,7 +238,12 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: dashboardWidgetsFromJson)
     List<DashboardWidget> dashboardWidgets,
     @Default(false) bool onlyStatisticsProxy,
-    @Default(true) bool showNotificationStopAction,
+    @Default(NotificationSettings())
+    @JsonKey(
+      readValue: readNotificationSettings,
+      fromJson: NotificationSettings.safeFromJson,
+    )
+    NotificationSettings notificationSettings,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,
     @Default(false) bool autoRun,

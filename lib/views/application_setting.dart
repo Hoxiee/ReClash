@@ -14,6 +14,7 @@ import 'package:reclash/widgets/update_sheet.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/views/region.dart';
+import 'application_notification.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 
 class ApplicationSettings {
@@ -59,7 +60,7 @@ class ApplicationSettings {
     SettingSpec(
       id: 'application.notification',
       page: ToolPage.application,
-      title: (l) => l.showNotificationStopAction,
+      title: (l) => l.notification,
       condition: SettingCondition.android,
     ),
     SettingSpec(
@@ -167,10 +168,12 @@ class ApplicationSettingView extends ConsumerWidget {
           select: (s) => s.hidden,
           update: (s, v) => s.copyWith(hidden: v),
         ),
-        _toggle(
-          id: 'application.notification',
-          select: (s) => s.showNotificationStopAction,
-          update: (s, v) => s.copyWith(showNotificationStopAction: v),
+        SettingTarget(
+          spec: ApplicationSettings.spec('application.notification'),
+          child: ListItem.open(
+            title: Text(l.notification),
+            widget: const NotificationSettingsView(),
+          ),
         ),
       ],
     ];

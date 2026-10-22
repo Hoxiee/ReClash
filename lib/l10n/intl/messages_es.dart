@@ -258,52 +258,57 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m92(client, format, count) =>
       "Recibido como ${client}: ${format}, ${count} nodos proxy.";
 
-  static String m93(sections) =>
+  static String m93(count) =>
+      "${Intl.plural(count, one: 'Su suscripción caduca mañana', other: 'Su suscripción caduca en ${count} días')}";
+
+  static String m94(sections) =>
       "No se transferirán estas secciones de origen: ${sections}.";
 
-  static String m94(count, format) =>
+  static String m95(count, format) =>
       "Se pueden importar ${count} nodos proxy de ${format}.";
 
-  static String m95(count) => "No se pueden convertir ${count} nodos.";
+  static String m96(count) => "No se pueden convertir ${count} nodos.";
 
-  static String m96(count) => "${count} resultados";
+  static String m97(percent) => "Ha utilizado el ${percent}% de su tráfico";
 
-  static String m97(value) => "Pico: ${value}";
+  static String m98(count) => "${count} resultados";
 
-  static String m98(value) => "Total: ${value}";
+  static String m99(value) => "Pico: ${value}";
 
-  static String m99(version) => "Versión instalada: ${version}";
+  static String m100(value) => "Total: ${value}";
 
-  static String m100(count) => "${count} min";
+  static String m101(version) => "Versión instalada: ${version}";
 
-  static String m101(time) => "Quedan ${time}";
+  static String m102(count) => "${count} min";
 
-  static String m102(count) => "${count} s";
+  static String m103(time) => "Quedan ${time}";
 
-  static String m103(speed) => "${speed}/s";
+  static String m104(count) => "${count} s";
 
-  static String m104(nodes, groups, providers) =>
+  static String m105(speed) => "${speed}/s";
+
+  static String m106(nodes, groups, providers) =>
       "${nodes} proxies, ${groups} grupos, ${providers} proveedores remotos";
 
-  static String m105(action) =>
+  static String m107(action) =>
       "Este enlace solicita «${action}». ¿Permitir que ReClash realice esta acción?";
 
-  static String m106(name, source) =>
+  static String m108(name, source) =>
       "¿Importar «${name}» desde ${source}? Tras la confirmación se validará el perfil y se revisarán las conversiones necesarias.";
 
-  static String m107(label) => "${label} debe ser una URL";
+  static String m109(label) => "${label} debe ser una URL";
 
-  static String m108(index) => "Fondo ${index}";
-
-  static String m109(count) =>
-      "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
-
-  static String m110(version) => "Versión instalada: ${version}";
+  static String m110(index) => "Fondo ${index}";
 
   static String m111(count) =>
+      "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
+
+  static String m112(version) => "Versión instalada: ${version}";
+
+  static String m113(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m112(count) =>
+  static String m114(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1566,6 +1571,102 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "No se puede seleccionar el grupo de proxies actual",
     ),
+    "notification": MessageLookupByLibrary.simpleMessage("Notificaciones"),
+    "notificationActive": MessageLookupByLibrary.simpleMessage(
+      "Protección activa",
+    ),
+    "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
+      "Añadir componente",
+    ),
+    "notificationAutomaticGroup": MessageLookupByLibrary.simpleMessage(
+      "Grupo automático",
+    ),
+    "notificationBlockedNoServerGroup": MessageLookupByLibrary.simpleMessage(
+      "No hay grupo de servidores disponible",
+    ),
+    "notificationComponents": MessageLookupByLibrary.simpleMessage(
+      "Componentes de notificación",
+    ),
+    "notificationComponentsDesc": MessageLookupByLibrary.simpleMessage(
+      "Componga la notificación con datos en tiempo real.",
+    ),
+    "notificationComponentsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Sin componentes",
+    ),
+    "notificationComponentsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Añada componentes para mostrar datos en tiempo real.",
+    ),
+    "notificationContent": MessageLookupByLibrary.simpleMessage("Contenido"),
+    "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
+      "Servidor actual",
+    ),
+    "notificationDelivery": MessageLookupByLibrary.simpleMessage(
+      "Entrega en Android",
+    ),
+    "notificationDeliveryChecking": MessageLookupByLibrary.simpleMessage(
+      "Comprobando el acceso a notificaciones",
+    ),
+    "notificationDeliveryPermissionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "Las notificaciones de ReClash están bloqueadas",
+        ),
+    "notificationDeliveryReady": MessageLookupByLibrary.simpleMessage(
+      "Se pueden entregar notificaciones",
+    ),
+    "notificationDeliveryServiceDisabled": MessageLookupByLibrary.simpleMessage(
+      "El canal del servicio está desactivado",
+    ),
+    "notificationDeliverySubscriptionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "El canal de recordatorios está desactivado",
+        ),
+    "notificationHideIdleSpeed": MessageLookupByLibrary.simpleMessage(
+      "Ocultar velocidad inactiva",
+    ),
+    "notificationHideSensitive": MessageLookupByLibrary.simpleMessage(
+      "Ocultar detalles sensibles en la pantalla de bloqueo",
+    ),
+    "notificationHideSensitiveDesc": MessageLookupByLibrary.simpleMessage(
+      "Utiliza la privacidad de Android para las notificaciones del servicio y los recordatorios. Los detalles permanecen visibles al desbloquear.",
+    ),
+    "notificationLevelDescription": MessageLookupByLibrary.simpleMessage(
+      "Detallado muestra información en tiempo real y el botón de detener. Mínimo solo muestra el estado de protección.",
+    ),
+    "notificationNetworkSpeed": MessageLookupByLibrary.simpleMessage(
+      "Velocidad de red",
+    ),
+    "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Privacidad"),
+    "notificationReminders": MessageLookupByLibrary.simpleMessage(
+      "Recordatorios",
+    ),
+    "notificationServerGroupMissing": MessageLookupByLibrary.simpleMessage(
+      "El grupo elegido ya no existe",
+    ),
+    "notificationServiceChannel": MessageLookupByLibrary.simpleMessage(
+      "Canal del servicio",
+    ),
+    "notificationSessionTraffic": MessageLookupByLibrary.simpleMessage(
+      "Tráfico de la sesión",
+    ),
+    "notificationSubscriptionChannel": MessageLookupByLibrary.simpleMessage(
+      "Canal de recordatorios de suscripción",
+    ),
+    "notificationSubscriptionReminders": MessageLookupByLibrary.simpleMessage(
+      "Recordatorios de suscripción",
+    ),
+    "notificationSubscriptionRemindersDesc":
+        MessageLookupByLibrary.simpleMessage(
+          "Reciba avisos antes de que caduque su suscripción o se agote el tráfico.",
+        ),
+    "notificationVisibility": MessageLookupByLibrary.simpleMessage(
+      "Nivel de notificación",
+    ),
+    "notificationVisibilityDetailed": MessageLookupByLibrary.simpleMessage(
+      "Detallado",
+    ),
+    "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
+      "Mínimo",
+    ),
     "ntpInterval": MessageLookupByLibrary.simpleMessage(
       "Intervalo de sincronización (minutos)",
     ),
@@ -1834,6 +1935,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "remove": MessageLookupByLibrary.simpleMessage("Quitar"),
     "rename": MessageLookupByLibrary.simpleMessage("Renombrar"),
+    "renewSubscription": MessageLookupByLibrary.simpleMessage(
+      "Renovar suscripción",
+    ),
     "replace": MessageLookupByLibrary.simpleMessage("Reemplazar"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("Reemplazar todo"),
     "request": MessageLookupByLibrary.simpleMessage("Solicitud"),
@@ -2511,6 +2615,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDeviceRequired": MessageLookupByLibrary.simpleMessage(
       "Esta suscripción requiere registrar el dispositivo. Sigue las instrucciones del proveedor.",
     ),
+    "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
+      "Su suscripción ha caducado",
+    ),
+    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
+      "Su suscripción caduca hoy",
+    ),
     "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
       "Enviar también el sistema operativo y el modelo",
     ),
@@ -2557,7 +2668,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "formato desconocido",
     ),
-    "subscriptionImportIgnoredSections": m93,
+    "subscriptionImportIgnoredSections": m94,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "No hay nodos proxy compatibles para importar.",
     ),
@@ -2568,13 +2679,16 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Solo se aplica a este origen, formato y tipos de pérdida aceptados. Las nuevas pérdidas requieren otro consentimiento.",
         ),
-    "subscriptionImportReviewSummary": m94,
+    "subscriptionImportReviewSummary": m95,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Revisar importación de suscripción",
     ),
-    "subscriptionImportSkippedNodes": m95,
+    "subscriptionImportSkippedNodes": m96,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Información de la suscripción",
+    ),
+    "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
+      "Recordatorios de suscripción",
     ),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("Suscripción"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
@@ -2595,6 +2709,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Sitio web",
     ),
+    "subscriptionTrafficLow": m97,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Usar el intervalo del proveedor",
     ),
@@ -2692,7 +2807,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Reiniciar el núcleo",
     ),
-    "toolsResults": m96,
+    "toolsResults": m98,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Ejecutar"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Sección"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Ajuste"),
@@ -2703,6 +2818,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
       "Actualizar reglas y scripts puede volver a aplicar la configuración y afectar a las conexiones. ¿Continuar?",
     ),
+    "topUpTraffic": MessageLookupByLibrary.simpleMessage("Ampliar tráfico"),
     "torch": MessageLookupByLibrary.simpleMessage("Linterna"),
     "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Descargado"),
@@ -2710,8 +2826,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Subido"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Puerto TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Tráfico"),
-    "trafficPeak": m97,
-    "trafficTotal": m98,
+    "trafficPeak": m99,
+    "trafficTotal": m100,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Uso de tráfico"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash habla tu idioma para que nadie se quede fuera. Si alguna frase suena rara a oído nativo, dínoslo y la corregiremos.",
@@ -2835,14 +2951,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Actualización instalada",
     ),
-    "updateInstalledVersion": m99,
+    "updateInstalledVersion": m101,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android está completando la instalación. ReClash puede cerrarse durante este paso.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Instalando la actualización",
     ),
-    "updateMinutes": m100,
+    "updateMinutes": m102,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Ahora no"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No hay notas de la versión disponibles.",
@@ -2896,7 +3012,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Detalles de la versión",
     ),
-    "updateRemainingTime": m101,
+    "updateRemainingTime": m103,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Reanudar descarga",
     ),
@@ -2904,7 +3020,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Reintentar instalación",
     ),
-    "updateSeconds": m102,
+    "updateSeconds": m104,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Ver todas las notas de la versión",
     ),
@@ -2912,7 +3028,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mostrar todos los cambios",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Actualizaciones"),
-    "updateTransferSpeed": m103,
+    "updateTransferSpeed": m105,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo verificar la integridad de la actualización descargada.",
     ),
@@ -2950,14 +3066,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Usar el comportamiento de cierre configurado.",
     ),
-    "urlSchemeConfigCounts": m104,
+    "urlSchemeConfigCounts": m106,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Pega una configuración YAML o JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Contenido de la configuración",
     ),
-    "urlSchemeConfirmMessage": m105,
+    "urlSchemeConfirmMessage": m107,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Comando externo de aplicación",
     ),
@@ -2999,7 +3115,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Importar configuración",
     ),
-    "urlSchemeImportConfirm": m106,
+    "urlSchemeImportConfirm": m108,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Incluir una configuración YAML o JSON en el enlace.",
     ),
@@ -3089,7 +3205,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Esta versión de cifrado no es compatible. Solicita un enlace de suscripción sin cifrar.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Usar ejemplo"),
-    "urlTip": m107,
+    "urlTip": m109,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -3134,9 +3250,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Elige una imagen PNG, JPEG o WebP válida.",
     ),
-    "wallpaperImageLabel": m108,
+    "wallpaperImageLabel": m110,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Encuadre"),
-    "wallpaperLibraryFull": m109,
+    "wallpaperLibraryFull": m111,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Opacidad de imagen",
     ),
@@ -3229,7 +3345,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "El panel seleccionado se descarga al abrirlo por primera vez. Se utiliza una versión fijada con verificación SHA-256.",
     ),
-    "webDashboardInstalledVersion": m110,
+    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo abrir el navegador.",
     ),
@@ -3269,8 +3385,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m111,
-    "yearsAgoShort": m112,
+    "yearsAgo": m113,
+    "yearsAgoShort": m114,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

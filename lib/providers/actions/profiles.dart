@@ -39,6 +39,7 @@ class ProfilesAction extends _$ProfilesAction {
       await ref.read(profilesProvider.notifier).del(id);
       await clearEffect(id);
       await const SubscriptionClientCache().forget(id);
+      await subscriptionReminder.forget(id);
     });
     try {
       await (await DeviceIdentityStore.create()).revoke(id);

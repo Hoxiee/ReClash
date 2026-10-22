@@ -201,7 +201,7 @@ SharedState sharedState(Ref ref) {
     appSettingProvider.select(
       (state) => (
         onlyStatisticsProxy: state.onlyStatisticsProxy,
-        showStopAction: state.showNotificationStopAction,
+        notificationSettings: state.notificationSettings,
         testUrl: state.testUrl,
         checkCertificate: state.checkCertificate,
       ),
@@ -214,7 +214,12 @@ SharedState sharedState(Ref ref) {
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
-    showStopAction: appSetting.showStopAction,
+    showStopAction: appSetting.notificationSettings.projected.showStopAction,
+    notificationSettings: appSetting.notificationSettings.projected,
+    notificationActiveText: currentAppLocalizations.notificationActive,
+    notificationServerText: currentAppLocalizations.notificationCurrentServer,
+    notificationTrafficText: currentAppLocalizations.notificationSessionTraffic,
+    notificationServerGroup: ref.watch(notificationServerGroupProvider),
     stopText: currentAppLocalizations.stop,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,

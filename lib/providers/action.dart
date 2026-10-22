@@ -32,6 +32,7 @@ import 'package:reclash/subscriptions/compatibility/import_policy.dart';
 import 'package:reclash/subscriptions/compatibility/cache.dart';
 import 'package:reclash/subscriptions/compatibility/import_review.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
+import 'package:reclash/subscriptions/notification/reminder.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/protocol/registry.dart';
