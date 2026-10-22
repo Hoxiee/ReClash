@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 import 'tool/src/release_version.dart';
+import 'tool/src/windows_bundle.dart';
 
 const _appImageToolRelease = '12';
 const _appImageToolSha256 = <String, String>{
@@ -224,6 +225,8 @@ Future<int> _package(
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)
         '--flutter-build-args=${flutterBuildArgs.join(',')}',
+      if (platform == 'windows')
+        '--hook-pre=${createWindowsPackageHook(rootDir, arch)}',
       ...descriptionArgs,
     ],
     includeParentEnvironment: true,
@@ -248,7 +251,51 @@ Future<int> _package(
       targets.split(',').contains('pacman')) {
     await renamePacmanArtifacts(rootDir);
   }
+  if (exitCode == 0 && platform == 'windows') {
+    validateWindowsArtifacts(
+      rootDir,
+      arch,
+      targets,
+      ReleaseVersion.read(rootDir).name,
+    );
+  }
   return exitCode;
+}
+
+String createWindowsPackageHook(String rootDir, String arch) {
+  String quote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
+  String shellPath(String value) => value.replaceAll('\\', '/');
+  return '${quote(shellPath(Platform.resolvedExecutable))} '
+      '${quote(shellPath(p.join(rootDir, 'tool', 'windows_package.dart')))} '
+      '--arch $arch --from-environment';
+}
+
+void validateWindowsArtifacts(
+  String rootDir,
+  String arch,
+  String targets,
+  String version,
+) {
+  for (final target in targets.split(',')) {
+    final suffix = switch (target) {
+      'exe' => '-setup.exe',
+      'zip' => '.zip',
+      _ => null,
+    };
+    if (suffix == null) continue;
+    final file = File(
+      p.join(rootDir, 'dist', 'ReClash-$version-windows-$arch$suffix'),
+    );
+    if (!file.existsSync() || file.lengthSync() == 0) {
+      throw StateError('Missing Windows package: ${file.path}');
+    }
+    if (target == 'zip') {
+      final report = WindowsBundle.zip(
+        file,
+      ).validate(machine: windowsMachine(arch));
+      stdout.writeln('Final Windows ZIP verified: $report');
+    }
+  }
 }
 
 String _detectArch() {
@@ -313,7 +360,7 @@ Map<String, String> createPackageProcessEnvironment({
       p.join(rootDir, '.dart_tool', 'release_tools', 'bin'),
     _pubCacheBin(),
     Platform.environment['PATH'] ?? '',
-  ].join(':');
+  ].join(platform == 'windows' ? ';' : ':');
   return {'ANDROID_ARCH': ?androidArch, 'PATH': path};
 }
 

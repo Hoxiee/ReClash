@@ -18,7 +18,10 @@ void main() {
                 ).readAsStringSync(),
               )
               as YamlMap;
-      expect(config['app_id'], '728B3532-C74B-4870-9068-BE70FE12A3E6');
+      expect(config['app_id'], 'E642C6C1-B712-41C2-969E-3C2049CA883F');
+      expect(config['publisher_name'], 'Hoxiee');
+      expect(config.containsKey('publisher'), isFalse);
+      expect(config['create_desktop_icon'], isTrue);
       expect(config['executable_name'], 'ReClash.exe');
       expect(
         installer.split('[Run]').last,
@@ -30,6 +33,82 @@ void main() {
       ).readAsStringSync();
       expect(manifest, contains('level="asInvoker"'));
       expect(manifest, isNot(contains('requireAdministrator')));
+    },
+  );
+
+  test(
+    'installer offers every product language and supported architecture',
+    () {
+      final config =
+          loadYaml(
+                File(
+                  'windows/packaging/exe/make_config.yaml',
+                ).readAsStringSync(),
+              )
+              as YamlMap;
+      final locales = (config['locales'] as YamlList).cast<YamlMap>();
+      expect(locales.map((locale) => locale['lang']), ['en', 'ru', 'zh', 'ko']);
+      for (final locale in locales) {
+        final customFile = locale['file'] as String?;
+        if (customFile != null) {
+          expect(
+            File(
+              'windows/packaging/exe/${customFile.split('\\').last}',
+            ).existsSync(),
+            isTrue,
+          );
+        }
+      }
+      expect(installer, contains('Name: "russian"'));
+      expect(installer, contains('Name: "korean"'));
+      expect(installer, contains('MinVersion=10.0'));
+      expect(
+        installer,
+        contains("{% if ARCH == 'arm64' %}arm64{% else %}x64compatible"),
+      );
+      expect(installer, contains('SetupMutex=ReClashSetupMutex'));
+      expect(
+        installer,
+        contains('UninstallDisplayIcon={app}\\{{EXECUTABLE_NAME}}'),
+      );
+      expect(
+        installer,
+        contains('VersionInfoVersion={#GetVersionNumbersString'),
+      );
+      expect(installer, isNot(contains('FlClash')));
+    },
+  );
+
+  test(
+    'release gates inspect installed packages and require native bootstrap on both architectures',
+    () {
+      final workflow =
+          loadYaml(File('.github/workflows/build.yaml').readAsStringSync())
+              as YamlMap;
+      final jobs = workflow['jobs'] as YamlMap;
+      final native = jobs['windows-helper-test'] as YamlMap;
+      final packages = jobs['validate-windows-packages'] as YamlMap;
+      for (final job in [native, packages]) {
+        final targets = job['strategy']['matrix']['include'] as YamlList;
+        expect(
+          targets.map((dynamic target) => target['arch']),
+          unorderedEquals(['amd64', 'arm64']),
+        );
+      }
+      final bootstrap = (native['steps'] as YamlList)
+          .cast<YamlMap>()
+          .singleWhere(
+            (step) => step['name'] == 'Validate Windows Core bootstrap',
+          );
+      expect(bootstrap['env']['RECLASH_REQUIRE_WINDOWS_BOOTSTRAP'], '1');
+      expect(bootstrap['run'], contains('-count=1 -timeout=5m ./cmd/core'));
+      expect(jobs['upload']['needs'], contains('validate-windows-packages'));
+      final smoke = File('tool/check_windows_package.ps1').readAsStringSync();
+      expect(smoke, contains('upgrade.log'));
+      expect(smoke, contains('Confirm-OwnedExit'));
+      expect(smoke, contains('Get-AuthenticodeSignature'));
+      expect(smoke, isNot(contains('Stop-Process -Name')));
+      expect(smoke, isNot(contains('installed/config')));
     },
   );
 

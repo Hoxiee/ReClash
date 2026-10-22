@@ -12,13 +12,13 @@ void main() {
       expect(gradle, contains('applicationId = "com.reclash"'));
     },
   );
-  test('Windows installer retains its established AppId and executable', () {
+  test('Windows installer shares Alpha identity independently of FlClash', () {
     final installer =
         loadYaml(
               File('windows/packaging/exe/make_config.yaml').readAsStringSync(),
             )
             as Map;
-    expect(installer['app_id'], '728B3532-C74B-4870-9068-BE70FE12A3E6');
+    expect(installer['app_id'], 'E642C6C1-B712-41C2-969E-3C2049CA883F');
     expect(installer['executable_name'], 'ReClash.exe');
   });
   test(
