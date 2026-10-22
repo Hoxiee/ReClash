@@ -449,6 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Goş"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("Proksi goş"),
     "addFilters": MessageLookupByLibrary.simpleMessage("Süzgüçleri goş"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Tor goş"),
     "addNodes": MessageLookupByLibrary.simpleMessage("Düwünleri goş"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Ýazyp geçirme ýazgysyny goşmak",
@@ -672,6 +673,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "close": MessageLookupByLibrary.simpleMessage("Ýap"),
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Baglanyşyklary ýap",
+    ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN bes edilende ähli açyk baglanyşyklar ýapylýar",
     ),
     "color": MessageLookupByLibrary.simpleMessage("Reňk"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Reňk stili"),
@@ -1049,6 +1053,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Global düzgünleri düzet",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Tory düzet"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Proksini düzet"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Proksiler toparyny düzet",
@@ -1063,6 +1068,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("Iňlis dili"),
     "enabled": MessageLookupByLibrary.simpleMessage("Açyk"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("El bilen giriz"),
     "entries": MessageLookupByLibrary.simpleMessage(" ýazgy"),
     "error": MessageLookupByLibrary.simpleMessage("Ýalňyşlyk"),
     "errorDetails": MessageLookupByLibrary.simpleMessage(
@@ -1385,6 +1391,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "80 ýa-da 8000-9000 ýaly sanlary ýa-da aralyklary / bilen aýryp giriziň",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID 32 UTF-8 baýtdan uzyn bolup bilmez",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP salgy"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1575,6 +1584,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "Serwere birigip bolmady. Tor baglanyşygyny ýa-da proksi sazlamalaryny barlaň",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (öý Wi-Fi) ýa-da tor segmenti (192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Serwer salgysyny çözülmedi. URL-iň dogrulygyny we DNS-iň işleýändigini barlaň",
     ),
@@ -1621,6 +1633,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("Işlemeýär"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Häzirki proksi toparyny saýlap bolmaýar",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Häzirki tor ynamly däl",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Duýduryş"),
     "notificationActive": MessageLookupByLibrary.simpleMessage("Gorag işjeň"),
@@ -1734,8 +1749,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("Obfs parametri"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("Obfs paroly"),
     "onDemand": MessageLookupByLibrary.simpleMessage("Gerek bolanda"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "Bu kiçi tor giň tor aralygyna ynanýar",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Baglanyşyklary ýap",
+    ),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Gerek bolanda çykarylan Wi-Fi-ýa proksini wagtlaýyn bes edýär.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("Doly bes etmek"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Säginilende TUN aýrylýar we ýerli proksi portlary ýapylýar. Awtomatik dowam etmek üçin tor gözegçiligi dowam edýär.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("Säginmek"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("Dowam etmek"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi torlaryny okap bolmady. Gaýtadan synanyşyň ýa-da el bilen giriziň.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "SSID we tor segmentini bilelikde talap et",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "Iki görnüşli düzgün bar bolsa, diňe SSID we tor segmenti gabat gelse bes et",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Diňe proksi trafikini hasaba al",
@@ -1765,6 +1801,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Goý"),
     "peers": MessageLookupByLibrary.simpleMessage("Pirler"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Galereýadan saýla"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Tor saýla"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Golaýdaky Wi-Fi torlary",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi tor tapylmady",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "Golaýdaky Wi-Fi torlary görkezmek üçin ýer rugsaty gerek",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Täzele"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Golaýdaky Wi-Fi torlary gözlenýär…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Penjireni berkitle"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Ilki WebDAV-y baglaň",
@@ -3258,6 +3308,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Terjime düzedişini teklip et",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("Ynamly torlar"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu torlaryň birine baglanylanda VPN awtomatiki bes edilýär",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Häzirki tor ynamly — VPN şu ýerde bes edilen",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN rugsatlandyrylyp bilmedi, şonuň üçin öçürüldi.",

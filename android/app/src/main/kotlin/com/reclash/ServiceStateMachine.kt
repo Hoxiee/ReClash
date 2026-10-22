@@ -4,6 +4,12 @@ import com.reclash.common.RunIntentArbiter
 import com.reclash.models.SharedState
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.VpnOptions
+import com.reclash.service.PhysicalNetworks
+import com.reclash.service.modules.OnDemandConfig
+import com.reclash.service.modules.OnDemandSessionState
+import com.reclash.service.modules.OnDemandDecision
+import com.reclash.service.modules.TrustedNetworkMatcher
+import com.reclash.service.modules.evaluateOnDemand
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -56,6 +62,10 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
 
     @Volatile
     private var transition: RunState? = null
+    private var manualPause: Boolean? = null
+    private var manualAnchor: PhysicalNetworks? = null
+    private var lastNetworks = PhysicalNetworks()
+    private var appliedFullStop: Boolean? = null
 
     val runState = mutableRunState.asStateFlow()
 
@@ -85,7 +95,10 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             if (host.runtime != null) {
                 return@withLock false
             }
-            arbiter.resetToStopped(token).also { publish() }
+            arbiter.resetToStopped(token).also {
+                if (it) resetOnDemandSession()
+                publish()
+            }
         }
         if (dropped) {
             host.notifyStopped()
@@ -183,7 +196,63 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
 
     private fun applySharedState() {
         host.updateNotificationParams(notificationParams(sharedState))
+        sharedState.vpnOptions?.let(host::updateVpnOptions)
     }
+
+    suspend fun setManualOnDemandPause(paused: Boolean) = transitionLock.withLock {
+        if (!isRunRequested || host.runtime == null) return@withLock
+        manualPause = paused
+        manualAnchor = host.physicalNetworks ?: lastNetworks
+        applyOnDemandPause(paused)
+    }
+
+    suspend fun reconcileOnDemand(networks: PhysicalNetworks) = transitionLock.withLock {
+        lastNetworks = networks
+        val runtime = host.runtime ?: return@withLock
+        if (!isRunRequested) return@withLock
+        val options = sharedState.vpnOptions ?: return@withLock
+        val known = networks.ips.isNotEmpty() || networks.ssids.isNotEmpty()
+        if (manualAnchor != null && known && !networks.ssidUnknown && networkAnchor(networks) != networkAnchor(manualAnchor!!)) {
+            manualPause = null
+            manualAnchor = null
+        }
+        manualPause?.let { applyOnDemandPause(it); return@withLock }
+        val ssidHit = TrustedNetworkMatcher.matchSsid(networks.ssids, options.onDemandNetworks) != null
+        val subnetHit = TrustedNetworkMatcher.matchedIpRules(networks.ips, options.onDemandNetworks).isNotEmpty()
+        val decision = evaluateOnDemand(
+            OnDemandConfig(options.onDemandEnabled, options.onDemandNetworks, options.onDemandStrict),
+            OnDemandSessionState(true, host.onDemandPaused, System.currentTimeMillis() - runtime.startedAtMillis),
+            known && !(networks.ssidUnknown &&
+                options.onDemandNetworks.any { !TrustedNetworkMatcher.isSubnetRule(it) } &&
+                (options.onDemandStrict || !subnetHit)),
+            ssidHit || subnetHit, ssidHit, subnetHit,
+        )
+        when (decision) {
+            OnDemandDecision.PAUSE -> applyOnDemandPause(true)
+            OnDemandDecision.RESUME -> applyOnDemandPause(false)
+            OnDemandDecision.NONE -> if (host.onDemandPaused && appliedFullStop != options.onDemandFullStop) applyOnDemandPause(true)
+            OnDemandDecision.DEFER -> Unit
+        }
+    }
+
+    private fun resetOnDemandSession() {
+        manualPause = null
+        manualAnchor = null
+        appliedFullStop = null
+        lastNetworks = PhysicalNetworks()
+    }
+
+    private suspend fun applyOnDemandPause(paused: Boolean) {
+        val fullStop = sharedState.vpnOptions?.onDemandFullStop ?: false
+        if (host.onDemandPaused == paused && appliedFullStop == fullStop) return
+        if (host.setOnDemandPaused(paused, fullStop)) appliedFullStop = fullStop
+    }
+
+    private fun networkAnchor(networks: PhysicalNetworks): List<String> =
+        (networks.ssids + networks.ips.map { ip ->
+            if (ip.contains(':')) TrustedNetworkMatcher.parseIpNetwork("${ip.substringBefore('%')}/64")?.bytes?.joinToString() ?: ip
+            else "${ip.substringBeforeLast('.')}.0/24"
+        }).distinct().sorted()
 
     private suspend fun setupCore(): Boolean {
         applySharedState()
@@ -251,6 +320,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
                 !isCurrent(request) -> false
                 host.runtime?.vpn == options.enable -> true
                 else -> transitioning(RunState.STARTING) {
+                    resetOnDemandSession()
                     host.startService(withLocalNetworkFallback(options)) && isCurrent(request)
                 }
             }
@@ -286,6 +356,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             return@withLock false
         }
         abandonVpnPreparation()
+        resetOnDemandSession()
         if (host.runtime != null) {
             stopLocked()
         }

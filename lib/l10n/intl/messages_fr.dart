@@ -467,6 +467,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Ajouter"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("Ajouter un proxy"),
     "addFilters": MessageLookupByLibrary.simpleMessage("Ajouter des filtres"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Ajouter un réseau"),
     "addNodes": MessageLookupByLibrary.simpleMessage("Ajouter des nœuds"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Ajouter une entrée de remplacement",
@@ -694,6 +695,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "close": MessageLookupByLibrary.simpleMessage("Fermer"),
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Fermer les connexions",
+    ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "Fermer toutes les connexions quand la VPN se met en pause",
     ),
     "color": MessageLookupByLibrary.simpleMessage("Couleur"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Style de couleur"),
@@ -1085,6 +1089,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Modifier les règles globales",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Modifier le réseau"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Modifier le proxy"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Modifier le groupe de proxys",
@@ -1099,6 +1104,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("Anglais"),
     "enabled": MessageLookupByLibrary.simpleMessage("Activé"),
+    "enterManually": MessageLookupByLibrary.simpleMessage(
+      "Saisir manuellement",
+    ),
     "entries": MessageLookupByLibrary.simpleMessage(" entrées"),
     "error": MessageLookupByLibrary.simpleMessage("Erreur"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Détails de l’erreur"),
@@ -1435,6 +1443,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Saisissez des nombres ou des plages tels que 80 ou 8000-9000, séparés par /",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "Un SSID ne peut dépasser 32 octets UTF-8",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("Adresse IP"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1637,6 +1648,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "Impossible de se connecter au serveur. Vérifiez votre connexion réseau ou vos réglages de proxy",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Wi-Fi maison) ou sous-réseau (192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Impossible de résoudre l’adresse du serveur. Vérifiez que l’URL est correcte et que le DNS fonctionne",
     ),
@@ -1681,6 +1695,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("À l’arrêt"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Le groupe de proxys actuel n’est pas sélectionnable",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Le réseau actuel ne fait pas partie des réseaux de confiance",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Notifications"),
     "notificationActive": MessageLookupByLibrary.simpleMessage(
@@ -1800,8 +1817,29 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mot de passe d’obfuscation",
     ),
     "onDemand": MessageLookupByLibrary.simpleMessage("À la demande"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "Ce sous-réseau couvre de nombreux réseaux",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Fermer les connexions",
+    ),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "À la demande met le proxy en pause sur les Wi-Fi exclus.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("Arrêt complet"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Retirer TUN et fermer les ports proxy locaux pendant la pause. La surveillance du réseau continue pour reprendre automatiquement.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("Mettre en pause"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("Reprendre"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Impossible de lire les réseaux Wi-Fi. Réessayez ou saisissez un réseau.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "Exiger SSID et sous-réseau",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "Si les deux types sont présents, un SSID et un sous-réseau doivent correspondre",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Ne compter que le trafic proxy",
@@ -1836,6 +1874,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "peers": MessageLookupByLibrary.simpleMessage("Pairs"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage(
       "Choisir dans l’album",
+    ),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Choisir un réseau"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Réseaux Wi-Fi à proximité",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Aucun réseau Wi-Fi trouvé",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "La localisation est nécessaire pour lister les réseaux Wi-Fi",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Actualiser"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Recherche de réseaux Wi-Fi…",
     ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Épingler la fenêtre"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
@@ -3404,6 +3456,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Proposer une correction de traduction",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage(
+      "Réseaux de confiance",
+    ),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "La VPN se met en pause sur ces réseaux",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Le réseau actuel est de confiance",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN n’a pas pu être autorisé et a donc été désactivé.",

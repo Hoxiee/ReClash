@@ -2,6 +2,7 @@ package com.reclash.plugins
 
 import com.reclash.ServiceController
 import com.reclash.ServiceState
+import com.reclash.service.ServiceConfig
 import com.reclash.common.Components
 import com.reclash.models.SharedState
 import com.reclash.service.NetworkObserver
@@ -30,6 +31,11 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         messenger = binding.binaryMessenger
         channel = MethodChannel(messenger, SERVICE_CHANNEL)
         channel.setMethodCallHandler(this)
+        scope.launch {
+            ServiceConfig.onDemandPaused.collect { paused ->
+                launch(Dispatchers.Main) { channel.invokeMethod("onDemandPaused", paused) }
+            }
+        }
         // Serial: watchRoute keeps the latest intent by the order calls reach the Core.
         coreChannel = MethodChannel(
             messenger,
@@ -55,6 +61,17 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "syncState" -> syncState(call, result)
             "start" -> start(call, result)
             "stop" -> stop(call, result)
+            "getOnDemandPaused" -> result.success(ServiceConfig.onDemandPaused.value)
+            "setOnDemandPaused" -> {
+                scope.launch {
+                    try {
+                        ServiceState.setOnDemandPaused(call.arguments == true)
+                        result.success(null)
+                    } catch (error: Exception) {
+                        result.error("ON_DEMAND_FAILED", error.message, null)
+                    }
+                }
+            }
             else -> result.notImplemented()
         }
     }

@@ -87,6 +87,11 @@ abstract class VpnOptions with _$VpnOptions {
     @Default([]) List<String> routeAddress,
     @Default(0) int mtu,
     @Default('') String congestionController,
+    @Default(true) bool onDemandEnabled,
+    @Default(false) bool onDemandFullStop,
+    @Default(false) bool onDemandCloseConnections,
+    @Default(false) bool onDemandStrict,
+    @Default([]) List<String> onDemandNetworks,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>
@@ -94,7 +99,7 @@ abstract class VpnOptions with _$VpnOptions {
 }
 
 extension VpnOptionsExt on VpnOptions {
-  /// Only what `ServiceController.start` and `VpnService.handleStart` read.
+  /// Settings that require rebuilding the Android VPN, excluding live policy.
   VpnOptions get effective {
     if (!enable) {
       return const VpnOptions(
@@ -112,6 +117,11 @@ extension VpnOptionsExt on VpnOptions {
     final accessControl = accessControlProps;
     final accepts = accessControl.mode == AccessControlMode.acceptSelected;
     return copyWith(
+      onDemandEnabled: true,
+      onDemandFullStop: false,
+      onDemandCloseConnections: false,
+      onDemandStrict: false,
+      onDemandNetworks: const [],
       port: systemProxy ? port : 0,
       bypassDomain: systemProxy ? bypassDomain : const [],
       accessControlProps: accessControl.enable

@@ -5,6 +5,32 @@ import 'package:reclash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('live on-demand policy never changes effective VPN restart options', () {
+    const options = VpnOptions(
+      enable: true,
+      port: 7890,
+      ipv6: false,
+      dnsHijacking: false,
+      accessControlProps: AccessControlProps(),
+      allowBypass: false,
+      systemProxy: false,
+      bypassDomain: [],
+      stack: 'gvisor',
+    );
+    expect(
+      options
+          .copyWith(
+            onDemandEnabled: false,
+            onDemandFullStop: true,
+            onDemandStrict: true,
+            onDemandCloseConnections: true,
+            onDemandNetworks: ['Home', '192.168.1.0/24'],
+          )
+          .effective,
+      options.effective,
+    );
+  });
+
   group('SetupParams', () {
     test('fromJson uses snake-case keys', () {
       final json = {

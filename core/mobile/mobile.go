@@ -107,3 +107,7 @@ func GetTotalTraffic(onlyStatisticsProxy bool) string {
 func SetRcxHints(data string) {
 	core.SetRcxHints(data)
 }
+
+func SetOnDemandPaused(paused, fullStop bool) bool {
+	return core.SetOnDemandPaused(paused, fullStop)
+}

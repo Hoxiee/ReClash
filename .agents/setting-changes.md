@@ -58,7 +58,7 @@ Prefer update whenever Go has a setter for the setting, because an apply reloads
 `CoreManager` answers each change of `setupPatchProvider` with `applyProfileDebounce(silence: true)`. That call
 rebuilds the profile YAML and hands it to Go's `applyConfig` through `setupConfig`. The provider holds three values:
 
-- `regionalNetworkConfigProvider.patchConfig.setupOnly`: the effective config with every field that update carries reset to its default.
+- `patchClashConfigProvider.setupOnly`: the config with every field that update carries reset to its default.
 - `NetworkProps.appendSystemDns`.
 - `NetworkProps.bypassPrivateRoute` on desktop, where the task adds the private ranges to the TUN's final
   `route-exclude-address`.
@@ -103,7 +103,7 @@ database once instead of watching them. Content is applied explicitly by whateve
 
 ## Restart
 
-`VpnService.handleStart` builds the tunnel once from `VpnOptions` and never reads them again.
+`VpnService.handleStart` builds the tunnel from the session’s `VpnOptions`; resume restores those same options.
 `ServiceController.start` uses `enable` to choose between `VpnService` and `ProxyService`.
 
 `vpnOptionsProvider` derives the options the service would start with now. `runningVpnOptionsProvider` records what
@@ -111,7 +111,7 @@ the last listener start handed it. The route list is subtracted in an isolate by
 reruns only when the route lists or `bypassPrivateRoute` change, so `vpnOptionsProvider` is async: a start awaits it
 before recording, the Android Core awaits it before its first `syncState`, and the shared state keeps the last options
 while new routes compute rather than handing the service an empty list. `SetupAction` owns every start and stop: it
-sets the record on a start and clears it on a stop, on-demand SSID suspension included.
+sets the record on a start and clears it on a stop. On-demand pause preserves the run and its recorded options.
 
 `VpnManager` shows the notifier whenever a change leaves `VpnOptions.effective` different from the recorded options.
 Repeated changes refresh the same notifier instead of stacking new ones. Changing a setting back to the running value
@@ -126,9 +126,9 @@ asks for nothing. The tap runs `SetupAction.restartVpn`: a stop, then a start, a
 | `accessControlProps`   | `VpnProps.accessControlProps`                                 | `enable`, `mode` and that mode's list  |
 | `systemProxy`          | `VpnProps.systemProxy`, off under local auth or safe mode     | with the VPN                           |
 | `port`                 | `PatchClashConfig.mixedPort`                                  | with `systemProxy`                     |
-| `bypassDomain`         | `regionalNetworkConfigProvider.bypassDomain`                  | with `systemProxy`                     |
+| `bypassDomain`         | `NetworkProps.bypassDomain`                                   | with `systemProxy`                     |
 | `routeAddress`         | `Tun.routeAddress` and `bypassPrivateRoute`                   | with the VPN                           |
-| `mtu`                  | `regionalNetworkConfigProvider.patchConfig.tun.mtu`           | with the VPN                           |
+| `mtu`                  | `Tun.mtu`                                                     | with the VPN                           |
 | `congestionController` | `Tun`                                                         | with the VPN                           |
 
 The service never reads the access list's sort and filter fields. `effective` resets them, along with every field
@@ -159,12 +159,13 @@ Each path watches its own provider, so a single setting can take more than one o
 
 ## Региональные значения по умолчанию
 
-`AppSettingProps.regionCode` изменяет только производный `regionalNetworkConfigProvider`, не исходные настройки.
-DNS и MTU desktop проходят через `setupPatchProvider` и `setupStateProvider.overrides`; Android MTU и обход системного
-прокси — через `vpnOptionsProvider`. Ручные app/profile overrides и пользовательский bypass-список сохраняют приоритет.
-Смена или отключение региона заново строит overlay из исходных значений. Проверки сервисов остаются Flutter-настройкой,
-а Android-подбор приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается
-только через существующее подтверждение `VpnManager`.
+`SystemAction.applyRegion` записывает DNS, MTU и список обхода региона в обычные настройки (`PatchClashConfig`,
+`NetworkProps.bypassDomain`), поэтому редакторы показывают реальные значения. При смене региона заменяются только
+значения, совпадающие с умолчаниями прежнего региона; изменённые вручную остаются. «Восстановить по умолчанию» на
+страницах «Сеть» и DNS возвращает значения текущего региона. Пользовательские профили получают DNS региона из
+`regionCode` для ключей, которые они не задают. Проверки сервисов остаются Flutter-настройкой, а Android-подбор
+приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается только
+через существующее подтверждение `VpnManager`.
 
 ## Web Dashboard
 
@@ -202,4 +203,18 @@ Tests that hold these rules:
 - `test/providers/state_derived_test.dart` (the setup patch).
 - `test/manager/core_manager_test.dart` (update against apply).
 - `test/manager/vpn_manager_test.dart` (the restart notice).
-- `test/providers/setup_action_test.dart` (running options, suspension, `restartVpn`, the apply debounce).
+- `test/providers/setup_action_test.dart` (running options, suspension, `restartVpn`).
+
+## On-demand
+
+`VpnProps.onDemandEnabled`, `onDemandFullStop`, `onDemandCloseConnections`, `onDemandStrict` and the existing
+`excludeSSIDs` list form a live policy. `VpnOptions` carries it to Android, while `effective` excludes it from restart
+comparison. `ServiceState` serializes native pause/resume against run transitions and keeps monitoring physical
+networks when Flutter is detached. Ordinary pause removes TUN and retains Core and proxy ports; full stop also closes
+proxy listeners. Resume restores the session’s tunnel options, leaving unrelated changed VPN settings on the restart path.
+
+Desktop `SetupAction` sends pause changes through its listener scheduler. Go applies pause as runtime state without
+mutating saved TUN configuration, so profile reloads and listener updates preserve it. SSID reads are opted in only
+when the policy is enabled and includes SSID rules; subnet-only rules need no location access. Matching uses exact
+SSID names and IPv4/IPv6 CIDRs, with strict AND semantics when both rule kinds exist. Manual intent clears when the
+physical network changes or the run stops.

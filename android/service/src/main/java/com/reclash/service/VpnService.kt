@@ -29,6 +29,8 @@ class VpnService : SystemVpnService(), ManagedService {
     private val binder = LocalBinder()
     private val tunLock = Any()
     private var tunRunning = false
+    private var acceptingPause = false
+    private var startedOptions: VpnOptions? = null
 
     override fun onDestroy() {
         try {
@@ -256,13 +258,28 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     override fun start() {
+        synchronized(tunLock) { acceptingPause = true }
         try {
             modules.start()
-            handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
+            val options = requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" }
+            synchronized(tunLock) {
+                startedOptions = options
+                handleStart(options)
+            }
         } catch (error: Exception) {
             stop()
             throw error
         }
+    }
+
+    override fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean = synchronized(tunLock) {
+        if (!acceptingPause) return@synchronized false
+        if (!paused) {
+            if (!tunRunning) handleStart(requireNotNull(startedOptions))
+        }
+        val applied = Core.setOnDemandPaused(paused, fullStop)
+        if (applied && paused) stopTunLocked()
+        applied
     }
 
     override fun stop() {
@@ -274,6 +291,10 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     private fun cleanup() {
+        synchronized(tunLock) {
+            acceptingPause = false
+            startedOptions = null
+        }
         try {
             modules.stop()
         } finally {

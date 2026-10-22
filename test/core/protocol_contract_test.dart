@@ -36,7 +36,7 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
   }) async {
     calls[method] = arguments;
     final result = switch (method) {
-      CoreMethod.initClash => true as T,
+      CoreMethod.initClash || CoreMethod.setOnDemandPaused => true as T,
       CoreMethod.getCoreInfo => {
         'version': '1.19.31-2-gf77b7475',
         'goVersion': 'go1.27.0',
@@ -194,6 +194,20 @@ class _EmptyConfigCoreHandler extends _RecordingCoreHandler {
 }
 
 void main() {
+  test('on-demand sends structured pause and full-stop flags', () async {
+    final handler = _RecordingCoreHandler();
+    expect(await handler.setOnDemandPaused(true, fullStop: false), isTrue);
+    expect(handler.calls[CoreMethod.setOnDemandPaused], {
+      'paused': true,
+      'fullStop': false,
+    });
+    expect(await handler.setOnDemandPaused(false, fullStop: true), isTrue);
+    expect(handler.calls[CoreMethod.setOnDemandPaused], {
+      'paused': false,
+      'fullStop': true,
+    });
+  });
+
   test('method call keeps structured arguments', () async {
     final fixture =
         json.decode(

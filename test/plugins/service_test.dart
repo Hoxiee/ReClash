@@ -20,6 +20,13 @@ class _RecordingListener with ServiceListener {
   void onServiceEvent(CoreEvent event) => events.add(event);
 }
 
+class _RecordingPauseListener with ServiceListener {
+  final pauses = <bool>[];
+
+  @override
+  void onOnDemandPause(bool paused) => pauses.add(paused);
+}
+
 class _RecordingStopListener with ServiceListener {
   var stops = 0;
 
@@ -99,6 +106,30 @@ void main() {
           .setMockMethodCallHandler(target, null);
     }
   });
+
+  test(
+    'native on-demand events project the service flag and manual commands stay typed',
+    () async {
+      final bridge = Service();
+      final listener = _RecordingPauseListener();
+      bridge.addListener(listener);
+      addTearDown(() => bridge.removeListener(listener));
+      mockChannel(
+        (call) async => call.method == 'getOnDemandPaused' ? true : null,
+      );
+      expect(await bridge.getOnDemandPaused(), isTrue);
+      await bridge.setOnDemandPaused(false);
+      expect(calls.last.method, 'setOnDemandPaused');
+      expect(calls.last.arguments, isFalse);
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            channelName,
+            codec.encodeMethodCall(const MethodCall('onDemandPaused', true)),
+            null,
+          );
+      expect(listener.pauses, [true]);
+    },
+  );
 
   test('is a singleton so the platform handler is installed once', () {
     expect(Service(), same(Service()));

@@ -8,6 +8,8 @@ vendor: vendor/flclash
 budget: 6144
 owned: [CHANGELOG.md, changelog.json]
 checks:
+  on-demand:
+    argv: [flutter, test, test/common/on_demand_test.dart, test/widgets/on_demand_test.dart, test/widgets/on_demand_network_picker_test.dart, test/manager/connectivity_manager_test.dart, test/providers/setup_action_test.dart, test/models/core_test.dart]
   android-notifications:
     argv: [bash, tool/test_android_notifications.sh]
   notifications:

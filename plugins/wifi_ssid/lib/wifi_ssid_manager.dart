@@ -18,6 +18,14 @@ class WifiSsidManager {
     return _channel.invokeMethod<String>(_getSsidMethod);
   }
 
+  Future<List<String>> listSsid() async {
+    final result = await _channel.invokeListMethod<String>('listSsid');
+    return (result ?? const <String>[])
+        .where((ssid) => ssid.isNotEmpty)
+        .toSet()
+        .toList();
+  }
+
   Future<WifiSsidPermission> checkPermission() async {
     final result = await _channel.invokeMethod<int>(_checkPermissionMethod);
     return _decodePermission(result);

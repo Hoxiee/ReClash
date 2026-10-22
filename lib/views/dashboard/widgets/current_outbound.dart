@@ -1,6 +1,9 @@
 import 'dart:math' as math;
+import 'package:wifi_ssid/wifi_ssid.dart';
+import 'package:reclash/views/config/on_demand_network_picker.dart';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/features.dart';
@@ -769,7 +772,7 @@ class _StartToggleState extends ConsumerState<_StartToggle>
         : DashboardColors.of(context).tone2;
     final ink = enabled ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
     final tooltip = widget.suspended
-        ? appLocalizations.suspended
+        ? appLocalizations.onDemandResume
         : widget.running
         ? appLocalizations.stop
         : appLocalizations.start;
@@ -782,6 +785,29 @@ class _StartToggleState extends ConsumerState<_StartToggle>
         label: tooltip,
         child: InkResponse(
           onTap: enabled ? _toggle : null,
+          onLongPress: enabled
+              ? () => globalState.safeRun(() async {
+                  if ((system.isAndroid || system.isMacOS) &&
+                      ref.read(locationPermissionsProvider) !=
+                          WifiSsidPermission.granted) {
+                    await ref
+                        .read(locationPermissionsProvider.notifier)
+                        .request();
+                    if (!context.mounted) return;
+                  }
+                  final ssid = await showOnDemandNetworkPicker(
+                    context,
+                    selected: ref.read(excludeSSIDsProvider).toSet(),
+                  );
+                  if (!mounted || ssid == null) return;
+                  ref
+                      .read(excludeSSIDsProvider.notifier)
+                      .update(
+                        (state) =>
+                            state.contains(ssid) ? state : [...state, ssid],
+                      );
+                })
+              : null,
           onHover: (value) => setState(() => _hovered = value),
           onHighlightChanged: (value) => setState(() => _pressed = value),
           onFocusChange: (value) => setState(() => _focused = value),

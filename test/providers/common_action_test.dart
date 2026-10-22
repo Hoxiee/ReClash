@@ -8,11 +8,16 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/on_demand.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../helpers/test_profiles.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
@@ -74,6 +79,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        profilesProvider.overrideWith(TestProfiles.new),
         ...overrides,
       ],
     );
@@ -83,6 +89,24 @@ void main() {
   }
 
   group('CommonAction.toggleRunning', () {
+    test(
+      'a paused running session resumes without issuing a new run intent',
+      () async {
+        final setup = _SetupRunRecorder();
+        final container = buildContainer(
+          overrides: [
+            setupActionProvider.overrideWith(() => setup),
+            isStartProvider.overrideWithValue(true),
+            suspendProvider.overrideWithValue(true),
+          ],
+        );
+        container.read(commonActionProvider.notifier).toggleRunning();
+        await Future<void>.delayed(Duration.zero);
+        expect(container.read(onDemandOverrideProvider).paused, isFalse);
+        expect(setup.calls, isEmpty);
+      },
+    );
+
     test('starts a disconnected Core before an initialized run', () async {
       final coreAction = _CoreStartRecorder();
       final setupAction = _SetupRunRecorder();

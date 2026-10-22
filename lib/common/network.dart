@@ -58,3 +58,20 @@ Future<String?> getLocalIpAddress() async {
   }
   return '';
 }
+
+Future<List<String>> getPhysicalNetworkAddresses() async {
+  final interfaces = await listNetworkInterfaces(includeLoopback: false);
+  final virtual = RegExp(
+    r'^(tun|utun|tap|wg|tailscale|docker|veth|virbr)',
+    caseSensitive: false,
+  );
+  return [
+    for (final interface in interfaces)
+      if (!virtual.hasMatch(interface.name))
+        for (final address in interface.addresses)
+          if (!address.isLoopback &&
+              address.address != '198.18.0.1' &&
+              address.address != 'fdfe:dcba:9876::1')
+            address.address,
+  ];
+}

@@ -409,6 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("추가"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("프록시 추가"),
     "addFilters": MessageLookupByLibrary.simpleMessage("필터 추가"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("네트워크 추가"),
     "addNodes": MessageLookupByLibrary.simpleMessage("노드 추가"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage("덮어쓰기 항목 추가"),
     "addProfile": MessageLookupByLibrary.simpleMessage("프로필 추가"),
@@ -555,6 +556,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("닫기"),
     "closeConnections": MessageLookupByLibrary.simpleMessage("연결 종료"),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN이 일시 중지되면 열려 있는 모든 연결을 끊습니다",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("색상"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("색상 스타일"),
     "columns": MessageLookupByLibrary.simpleMessage("열"),
@@ -871,6 +875,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "edit": MessageLookupByLibrary.simpleMessage("편집"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("대시보드 편집"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("전역 규칙 편집"),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("네트워크 편집"),
     "editProxy": MessageLookupByLibrary.simpleMessage("프록시 편집"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("프록시 그룹 편집"),
     "editRule": MessageLookupByLibrary.simpleMessage("규칙 편집"),
@@ -881,6 +886,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("영어"),
     "enabled": MessageLookupByLibrary.simpleMessage("사용"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("직접 입력"),
     "entries": MessageLookupByLibrary.simpleMessage("개 항목"),
     "error": MessageLookupByLibrary.simpleMessage("오류"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("오류 세부 정보"),
@@ -1147,6 +1153,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "80 또는 8000-9000과 같은 숫자나 범위를 /로 구분하여 입력하세요",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID는 UTF-8 기준 32바이트를 초과할 수 없습니다",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP 주소"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1303,6 +1312,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "서버에 연결할 수 없습니다. 네트워크 연결이나 프록시 설정을 확인하세요",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID(집 와이파이) 또는 서브넷(192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "서버 주소를 확인할 수 없습니다. URL이 올바른지, DNS가 정상인지 확인하세요",
     ),
@@ -1341,6 +1353,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("실행 중 아님"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "현재 프록시 그룹은 선택할 수 없습니다",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "현재 네트워크는 신뢰 목록에 없습니다",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("알림"),
     "notificationActive": MessageLookupByLibrary.simpleMessage("보호 중"),
@@ -1430,8 +1445,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("난독화 매개변수"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("난독화 비밀번호"),
     "onDemand": MessageLookupByLibrary.simpleMessage("필요 시 실행"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "이 서브넷은 광범위한 네트워크를 신뢰합니다",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage("연결 끊기"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "필요 시 실행은 제외된 Wi-Fi에서 프록시를 일시 중지합니다.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("완전 중지"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "일시 정지 중 TUN을 해제하고 로컬 프록시 포트를 닫습니다. 자동 재개를 위해 네트워크 감시는 계속됩니다.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("일시 정지"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("재개"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi 네트워크를 읽을 수 없습니다. 다시 시도하거나 수동으로 입력하세요.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "SSID와 서브넷 함께 일치 요구",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "두 종류의 규칙이 모두 있으면 SSID와 서브넷이 모두 일치할 때만 일시 중지",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage("프록시 트래픽만 집계"),
     "optional": MessageLookupByLibrary.simpleMessage("선택 사항"),
@@ -1455,6 +1489,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("붙여넣기"),
     "peers": MessageLookupByLibrary.simpleMessage("피어"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("앨범에서 선택"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("네트워크 선택"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("주변 와이파이 네트워크"),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage("주변에 와이파이가 없습니다"),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "주변 와이파이 네트워크를 표시하려면 위치 권한이 필요합니다",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("새로 고침"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "주변 와이파이를 찾는 중…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("창 고정"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("WebDAV를 연결하세요"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
@@ -2680,6 +2724,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("번역 수정 제안하기"),
     "transport": MessageLookupByLibrary.simpleMessage("전송"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("신뢰할 수 있는 네트워크"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "여기에 등록한 네트워크에 연결되어 있으면 VPN이 일시 중지됩니다",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "신뢰하는 네트워크 · VPN 일시 중지됨",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN 권한을 얻지 못해 끄기로 되돌렸습니다.",

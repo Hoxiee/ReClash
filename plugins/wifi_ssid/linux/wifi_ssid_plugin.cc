@@ -331,6 +331,242 @@ static gchar* get_ssid_from_nmcli() {
   return nullptr;
 }
 
+static gchar* ssid_from_access_point_proxy(GDBusProxy* access_point) {
+  g_autoptr(GVariant) ssid_value =
+      get_dbus_property(access_point,
+                        "org.freedesktop.NetworkManager.AccessPoint", "Ssid");
+  return ssid_from_variant(ssid_value);
+}
+
+static void add_ssid_from_access_points(GPtrArray* output,
+                                        GDBusProxy* wireless) {
+  g_autoptr(GVariant) active_access_point = get_dbus_property(
+      wireless, "org.freedesktop.NetworkManager.Device.Wireless",
+      "ActiveAccessPoint");
+  const gchar* active_path =
+      active_access_point == nullptr
+          ? nullptr
+          : g_variant_get_string(active_access_point, nullptr);
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GVariant) response = g_dbus_proxy_call_sync(
+      wireless, "GetAllAccessPoints", nullptr, G_DBUS_CALL_FLAGS_NONE,
+      kDbusTimeoutMs, nullptr, &error);
+  if (response == nullptr) {
+    return;
+  }
+  GVariantIter* paths = nullptr;
+  g_variant_get(response, "(ao)", &paths);
+  if (paths == nullptr) {
+    return;
+  }
+  const gchar* path = nullptr;
+  while (g_variant_iter_loop(paths, "&o", &path)) {
+    g_autoptr(GDBusProxy) access_point = new_network_manager_proxy(
+        path, "org.freedesktop.NetworkManager.AccessPoint");
+    if (access_point == nullptr) {
+      continue;
+    }
+    gchar* ssid = ssid_from_access_point_proxy(access_point);
+    if (ssid == nullptr || strlen(ssid) == 0) {
+      g_free(ssid);
+      continue;
+    }
+    if (active_path != nullptr && g_strcmp0(path, active_path) == 0) {
+      g_ptr_array_insert(output, 0, ssid);
+    } else {
+      g_ptr_array_add(output, ssid);
+    }
+  }
+  g_variant_iter_free(paths);
+}
+
+static void add_ssids_from_network_manager(GPtrArray* output) {
+  g_autoptr(GDBusProxy) manager = new_network_manager_proxy(
+      "/org/freedesktop/NetworkManager", "org.freedesktop.NetworkManager");
+  if (manager == nullptr) {
+    return;
+  }
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GVariant) response =
+      g_dbus_proxy_call_sync(manager, "GetDevices", nullptr,
+                             G_DBUS_CALL_FLAGS_NONE, kDbusTimeoutMs, nullptr,
+                             &error);
+  if (response == nullptr) {
+    return;
+  }
+  GVariantIter* devices = nullptr;
+  g_variant_get(response, "(ao)", &devices);
+  if (devices == nullptr) {
+    return;
+  }
+  const gchar* device_path = nullptr;
+  while (g_variant_iter_loop(devices, "&o", &device_path)) {
+    g_autoptr(GDBusProxy) device = new_network_manager_proxy(
+        device_path, "org.freedesktop.NetworkManager.Device");
+    if (device == nullptr) {
+      continue;
+    }
+    g_autoptr(GVariant) device_type = get_dbus_property(
+        device, "org.freedesktop.NetworkManager.Device", "DeviceType");
+    if (device_type == nullptr ||
+        g_variant_get_uint32(device_type) != kNmDeviceTypeWifi) {
+      continue;
+    }
+    g_autoptr(GDBusProxy) wireless = new_network_manager_proxy(
+        device_path, "org.freedesktop.NetworkManager.Device.Wireless");
+    if (wireless == nullptr) {
+      continue;
+    }
+    add_ssid_from_access_points(output, wireless);
+  }
+  g_variant_iter_free(devices);
+}
+
+static void add_ssids_from_iwd(GPtrArray* output) {
+  g_autoptr(GDBusProxy) object_manager = new_system_proxy(
+      "net.connman.iwd", "/", "org.freedesktop.DBus.ObjectManager");
+  if (object_manager == nullptr) {
+    return;
+  }
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GVariant) response =
+      g_dbus_proxy_call_sync(object_manager, "GetManagedObjects", nullptr,
+                             G_DBUS_CALL_FLAGS_NONE, kDbusTimeoutMs, nullptr,
+                             &error);
+  if (response == nullptr) {
+    return;
+  }
+  GVariantIter* objects = nullptr;
+  g_variant_get(response, "(a{oa{sa{sv}}})", &objects);
+  if (objects == nullptr) {
+    return;
+  }
+  const gchar* object_path = nullptr;
+  GVariantIter* interfaces = nullptr;
+  while (g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path, &interfaces)) {
+    const gchar* interface_name = nullptr;
+    GVariantIter* properties = nullptr;
+    while (g_variant_iter_loop(interfaces, "{&sa{sv}}", &interface_name, &properties)) {
+      if (g_strcmp0(interface_name, "net.connman.iwd.Network") != 0) continue;
+      const gchar* property_name = nullptr;
+      GVariant* property_value = nullptr;
+      while (g_variant_iter_loop(properties, "{&sv}", &property_name, &property_value)) {
+        if (g_strcmp0(property_name, "Name") != 0) continue;
+        const gchar* name = g_variant_get_string(property_value, nullptr);
+        if (name != nullptr && strlen(name) > 0) g_ptr_array_add(output, g_strdup(name));
+      }
+    }
+  }
+  g_variant_iter_free(objects);
+}
+
+static void add_ssids_from_nmcli(GPtrArray* output) {
+  g_auto(GStrv) arguments = nullptr;
+  gint argument_count = 0;
+  g_autoptr(GError) error = nullptr;
+  if (!g_shell_parse_argv(
+          "nmcli --terse --fields ssid device wifi list",
+          &argument_count, &arguments, &error)) {
+    return;
+  }
+  g_auto(GStrv) environment = g_get_environ();
+  environment = g_environ_setenv(environment, "LC_ALL", "C", TRUE);
+  g_autofree gchar* standard_output = nullptr;
+  gint wait_status = 0;
+  const gboolean spawned = g_spawn_sync(
+      nullptr, arguments, environment,
+      static_cast<GSpawnFlags>(G_SPAWN_SEARCH_PATH |
+                               G_SPAWN_STDERR_TO_DEV_NULL),
+      nullptr, nullptr, &standard_output, nullptr, &wait_status, &error);
+  if (!spawned || standard_output == nullptr) {
+    return;
+  }
+  if (!g_spawn_check_wait_status(wait_status, &error)) {
+    return;
+  }
+  g_auto(GStrv) lines = g_strsplit(standard_output, "\n", -1);
+  for (gchar** line = lines; *line != nullptr; ++line) {
+    if (strlen(*line) == 0) {
+      continue;
+    }
+    gchar* ssid = unescape_nmcli_value(*line);
+    if (strlen(ssid) == 0) {
+      g_free(ssid);
+      continue;
+    }
+    g_ptr_array_add(output, ssid);
+  }
+}
+
+static void add_ssids_from_connman(GPtrArray* output) {
+  g_autoptr(GDBusProxy) manager = new_system_proxy(
+      "net.connman", "/", "net.connman.Manager");
+  if (manager == nullptr) return;
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GVariant) response = g_dbus_proxy_call_sync(
+      manager, "GetServices", nullptr, G_DBUS_CALL_FLAGS_NONE,
+      kDbusTimeoutMs, nullptr, &error);
+  if (response == nullptr) return;
+  GVariantIter* services = nullptr;
+  g_variant_get(response, "(a(oa{sv}))", &services);
+  const gchar* path = nullptr;
+  GVariantIter* properties = nullptr;
+  while (g_variant_iter_loop(services, "(&oa{sv})", &path, &properties)) {
+    const gchar* type = nullptr;
+    const gchar* name = nullptr;
+    const gchar* key = nullptr;
+    GVariant* value = nullptr;
+    while (g_variant_iter_loop(properties, "{&sv}", &key, &value)) {
+      if (g_strcmp0(key, "Type") == 0) type = g_variant_get_string(value, nullptr);
+      if (g_strcmp0(key, "Name") == 0) name = g_variant_get_string(value, nullptr);
+    }
+    if (g_strcmp0(type, "wifi") == 0 && name != nullptr && strlen(name) > 0) {
+      g_ptr_array_add(output, g_strdup(name));
+    }
+  }
+  g_variant_iter_free(services);
+}
+
+static FlValue* list_ssid_value() {
+  GPtrArray* output = g_ptr_array_new_with_free_func(g_free);
+  add_ssids_from_network_manager(output);
+  if (output->len == 0) {
+    add_ssids_from_iwd(output);
+  }
+  if (output->len == 0) {
+    add_ssids_from_connman(output);
+  }
+  if (output->len == 0) {
+    add_ssids_from_nmcli(output);
+  }
+
+  // SSIDs repeat per band and per access point, so keep the first sighting.
+  GPtrArray* unique = g_ptr_array_new_with_free_func(g_free);
+  GHashTable* seen =
+      g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
+  for (guint i = 0; i < output->len; ++i) {
+    gchar* ssid = static_cast<gchar*>(g_ptr_array_index(output, i));
+    gchar* key = g_strdup(ssid);
+    if (g_hash_table_contains(seen, key)) {
+      g_free(key);
+      continue;
+    }
+    g_hash_table_add(seen, key);
+    g_ptr_array_add(unique, g_strdup(ssid));
+  }
+  g_hash_table_destroy(seen);
+  g_ptr_array_free(output, TRUE);
+
+  g_autoptr(FlValue) list = fl_value_new_list();
+  for (guint i = 0; i < unique->len; ++i) {
+    fl_value_append_take(
+        list, fl_value_new_string(static_cast<gchar*>(g_ptr_array_index(
+                 unique, i))));
+  }
+  g_ptr_array_free(unique, TRUE);
+  return fl_value_ref(list);
+}
+
 static gchar* get_ssid_value() {
   g_autofree gchar* ssid = get_ssid_from_network_manager();
   if (ssid == nullptr || strlen(ssid) == 0) {
@@ -378,6 +614,28 @@ static void get_ssid_done(GObject* source_object, GAsyncResult* result,
   g_object_unref(method_call);
 }
 
+static void list_ssid_task(GTask* task, gpointer source_object,
+                           gpointer task_data, GCancellable* cancellable) {
+  g_task_return_pointer(task, list_ssid_value(),
+                        reinterpret_cast<GDestroyNotify>(fl_value_unref));
+}
+
+static void list_ssid_done(GObject* source_object, GAsyncResult* result,
+                           gpointer user_data) {
+  FlMethodCall* method_call = FL_METHOD_CALL(user_data);
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlValue) list = static_cast<FlValue*>(
+      g_task_propagate_pointer(G_TASK(result), &error));
+  if (list == nullptr) {
+    list = fl_value_new_list();
+  }
+
+  g_autoptr(FlMethodResponse) response =
+      FL_METHOD_RESPONSE(fl_method_success_response_new(list));
+  fl_method_call_respond(method_call, response, nullptr);
+  g_object_unref(method_call);
+}
+
 static void wifi_ssid_plugin_handle_method_call(FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = nullptr;
   const gchar* method = fl_method_call_get_name(method_call);
@@ -386,6 +644,11 @@ static void wifi_ssid_plugin_handle_method_call(FlMethodCall* method_call) {
     g_autoptr(GTask) task =
         g_task_new(nullptr, nullptr, get_ssid_done, g_object_ref(method_call));
     g_task_run_in_thread(task, get_ssid_task);
+    return;
+  } else if (strcmp(method, "listSsid") == 0) {
+    g_autoptr(GTask) task =
+        g_task_new(nullptr, nullptr, list_ssid_done, g_object_ref(method_call));
+    g_task_run_in_thread(task, list_ssid_task);
     return;
   } else if (strcmp(method, "checkPermission") == 0 ||
              strcmp(method, "requestPermission") == 0) {

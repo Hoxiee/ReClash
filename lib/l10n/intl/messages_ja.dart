@@ -404,6 +404,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("追加"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("プロキシを追加"),
     "addFilters": MessageLookupByLibrary.simpleMessage("フィルターを追加"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを追加"),
     "addNodes": MessageLookupByLibrary.simpleMessage("ノードを追加"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage("上書き項目を追加"),
     "addProfile": MessageLookupByLibrary.simpleMessage("プロファイルを追加"),
@@ -562,6 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("閉じる"),
     "closeConnections": MessageLookupByLibrary.simpleMessage("接続を閉じる"),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "VPNの一時停止時に開いている接続をすべて切断します",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("カラー"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("配色スタイル"),
     "columns": MessageLookupByLibrary.simpleMessage("列数"),
@@ -878,6 +882,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "edit": MessageLookupByLibrary.simpleMessage("編集"),
     "editDashboard": MessageLookupByLibrary.simpleMessage("ダッシュボードを編集"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage("グローバルルールを編集"),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを編集"),
     "editProxy": MessageLookupByLibrary.simpleMessage("プロキシを編集"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("プロキシグループを編集"),
     "editRule": MessageLookupByLibrary.simpleMessage("ルールを編集"),
@@ -888,6 +893,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("英語"),
     "enabled": MessageLookupByLibrary.simpleMessage("有効"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("手動で入力"),
     "entries": MessageLookupByLibrary.simpleMessage(" 件"),
     "error": MessageLookupByLibrary.simpleMessage("エラー"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("エラーの詳細"),
@@ -1158,6 +1164,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "80 や 8000-9000 のような数値または範囲を / 区切りで入力してください",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage("SSIDはUTF-8で32バイトまでです"),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP アドレス"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1316,6 +1323,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "サーバーに接続できませんでした。ネットワーク接続またはプロキシ設定を確認してください",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID（自宅Wi-Fi）またはサブネット（192.168.1.0/24）",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "サーバーのアドレスを解決できませんでした。URL が正しいこと、DNS が使えることを確認してください",
     ),
@@ -1354,6 +1364,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("停止中"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "現在のネットワークは信頼されていません",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("通知"),
     "notificationActive": MessageLookupByLibrary.simpleMessage("保護中"),
@@ -1451,8 +1464,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("難読化パラメータ"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("難読化パスワード"),
     "onDemand": MessageLookupByLibrary.simpleMessage("オンデマンド"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "このサブネットは広範囲のネットワークを信頼します",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage("接続を切断する"),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "オンデマンドは、除外した Wi-Fi に接続している間プロキシを一時停止します。",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage("完全停止"),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "一時停止中はTUNを解除し、ローカルプロキシポートも閉じます。自動再開のためネットワークの監視は続きます。",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("一時停止"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("再開"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fiネットワークを取得できません。再試行するか手動で入力してください。",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "SSIDとサブネットの両方を要求する",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "両方の種類のルールがある場合、SSIDとサブネットの両方が一致したときのみ一時停止します",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "プロキシトラフィックのみ集計",
@@ -1478,6 +1510,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("貼り付け"),
     "peers": MessageLookupByLibrary.simpleMessage("ピア"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("アルバムから選択"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("ネットワークを選択"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage("周囲の Wi-Fi ネットワーク"),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi ネットワークが見つかりません",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "近くの Wi-Fi ネットワークを一覧表示するには位置情報の権限が必要です",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("更新"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "近くの Wi-Fi ネットワークを検索中…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("最前面に固定"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("WebDAVを連携してください"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
@@ -2719,6 +2763,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("翻訳の修正を提案する"),
     "transport": MessageLookupByLibrary.simpleMessage("トランスポート"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("信頼できるネットワーク"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "これらのネットワークに接続中はVPNを一時停止します",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "現在のネットワークは信頼済み — ここではVPNを一時停止します",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUN の権限を取得できなかったため、オフにしました。",

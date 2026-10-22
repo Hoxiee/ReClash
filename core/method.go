@@ -185,6 +185,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	shutdownMethod:                 withoutArguments(func() bool { result := handleShutdown(); cancelSubscriptionFetches(); return result }),
 	startListenerMethod:            withoutArguments(handleStartListener),
 	stopListenerMethod:             withoutArguments(handleStopListener),
+	setOnDemandPausedMethod:        withArguments(handleSetOnDemandPaused),
 	getMemoryStatsMethod:           withoutArguments(handleGetMemoryStats),
 	startLogMethod:                 acknowledged(handleStartLog),
 	stopLogMethod:                  acknowledged(handleStopLog),

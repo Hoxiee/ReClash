@@ -461,6 +461,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Qoʻshish"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("Proksi qoʻshish"),
     "addFilters": MessageLookupByLibrary.simpleMessage("Filtrlar qoʻshish"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Tarmoq qoʻshish"),
     "addNodes": MessageLookupByLibrary.simpleMessage("Tugunlar qoʻshish"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Qayta belgilash yozuvini qoʻshish",
@@ -686,6 +687,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "close": MessageLookupByLibrary.simpleMessage("Yopish"),
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Ulanishlarni yopish",
+    ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN toʻxtatilganda barcha ochiq ulanishlar uziladi",
     ),
     "color": MessageLookupByLibrary.simpleMessage("Rang"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Rang uslubi"),
@@ -1063,6 +1067,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Global qoidalarni tahrirlash",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Tarmoqni tahrirlash"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Proksini tahrirlash"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Proksi guruhini tahrirlash",
@@ -1077,6 +1082,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("Ingliz tili"),
     "enabled": MessageLookupByLibrary.simpleMessage("Yoqilgan"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("Qoʻlda kiritish"),
     "entries": MessageLookupByLibrary.simpleMessage(" ta yozuv"),
     "error": MessageLookupByLibrary.simpleMessage("Xato"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Xato tafsilotlari"),
@@ -1415,6 +1421,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "80 yoki 8000-9000 kabi raqam yoki oraliqlarni / bilan ajratib kiriting",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID 32 UTF-8 baytdan oshmasligi kerak",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP manzil"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1613,6 +1622,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "Serverga ulanib boʻlmadi. Tarmoq ulanishingiz yoki proksi sozlamalarini tekshiring",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Uy Wi-Fi) yoki pastki tarmoq (192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Server manzilini aniqlab boʻlmadi. URL toʻgʻriligini va DNS ishlayotganini tekshiring",
     ),
@@ -1661,6 +1673,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("Ishlamayapti"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Joriy proksi guruhini tanlab boʻlmaydi.",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Hozirgi tarmoq ishonchli emas",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Bildirishnoma"),
     "notificationActive": MessageLookupByLibrary.simpleMessage("Himoya faol"),
@@ -1772,8 +1787,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("Obfuskatsiya parametri"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("Obfuskatsiya paroli"),
     "onDemand": MessageLookupByLibrary.simpleMessage("Talab boʻyicha"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "Bu quyi tarmoq keng tarmoq oraligʻiga ishonadi",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Ulanishlarni yopish",
+    ),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "Talab boʻyicha rejim chiqarilgan Wi-Fida proksini toʻxtatadi.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage(
+      "To‘liq to‘xtatish",
+    ),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "Pauzada TUN o‘chiriladi va mahalliy proksi portlari yopiladi. Avtomatik davom ettirish uchun tarmoq kuzatuvi davom etadi.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("Toʻxtatib turish"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("Davom ettirish"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi tarmoqlarini oʻqib boʻlmadi. Qayta urinib koʻring yoki qoʻlda kiriting.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "SSID va quyi tarmoqni birga talab qilish",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "Ikkala turdagi qoidalar bo‘lsa, faqat SSID va quyi tarmoq mos kelsa to‘xtatish",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Faqat proksi trafikini hisoblash",
@@ -1805,6 +1843,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Qoʻyish"),
     "peers": MessageLookupByLibrary.simpleMessage("Peerlar"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Albomdan tanlash"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Tarmoqni tanlash"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Atrofingizdagi Wi-Fi tarmoqlari",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi tarmoqlari topilmadi",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "Yaqindagi Wi-Fi tarmoqlarini koʻrsatish uchun joylashuv ruxsati kerak",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Yangilash"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Yaqindagi Wi-Fi tarmoqlari qidirilmoqda…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage(
       "Oynani doim yuqorida tutish",
     ),
@@ -3364,6 +3416,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tarjima tuzatishni taklif qilish",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage(
+      "Ishonchli tarmoqlar",
+    ),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu tarmoqlardan biriga ulanganda VPN toʻxtatiladi",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Hozirgi tarmoq ishonchli — VPN shu yerda toʻxtatilgan",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "TUNga ruxsat berib boʻlmadi, shu sababli u oʻchirildi.",

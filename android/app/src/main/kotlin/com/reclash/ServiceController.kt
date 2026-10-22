@@ -45,6 +45,7 @@ object ServiceController {
     private fun release() {
         clearBinding()
         runtime = null
+        ServiceConfig.onDemandPaused.value = false
         Core.stopListener()
     }
 
@@ -112,6 +113,19 @@ object ServiceController {
             startedAtMillis = runtime?.startedAtMillis ?: System.currentTimeMillis(),
         )
         true
+    }
+
+    suspend fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean = lock.withLock {
+        if (runtime == null) return@withLock false
+        val result = binding?.useService { it.setOnDemandPaused(paused, fullStop) }
+        val applied = result?.getOrNull() == true
+        if (applied) {
+            ServiceConfig.onDemandPaused.value = paused
+            if (paused && ServiceConfig.vpnOptions?.onDemandCloseConnections == true) {
+                Core.invokeMethod("{\"method\":\"closeConnections\",\"arguments\":null}") {}
+            }
+        }
+        applied
     }
 
     suspend fun stop() = lock.withLock {

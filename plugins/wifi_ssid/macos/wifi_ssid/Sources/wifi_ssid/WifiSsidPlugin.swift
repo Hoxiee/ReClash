@@ -18,6 +18,7 @@ public class WifiSsidPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate 
 
     private enum Method {
         static let getSsid = "getSsid"
+        static let listSsid = "listSsid"
         static let checkPermission = "checkPermission"
         static let requestPermission = "requestPermission"
     }
@@ -34,6 +35,8 @@ public class WifiSsidPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate 
         switch call.method {
         case Method.getSsid:
             getSsid(result: result)
+        case Method.listSsid:
+            listSsid(result: result)
         case Method.checkPermission:
             checkPermission(result: result)
         case Method.requestPermission:
@@ -113,6 +116,38 @@ public class WifiSsidPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate 
             let ssid = client.interface()?.ssid()
             DispatchQueue.main.async {
                 result(ssid)
+            }
+        }
+    }
+
+    private func listSsid(result: @escaping FlutterResult) {
+        if #available(macOS 14, *) {
+            guard mapAuthStatus(locationManager.authorizationStatus) == .granted else {
+                result([])
+                return
+            }
+        }
+        let client = wifiClient
+        ssidQueue.async {
+            let interface = client.interface()
+            let current = interface?.ssid()
+            let networks: Set<CWNetwork>
+            do {
+                networks = try interface?.scanForNetworks(withSSID: nil) ?? []
+            } catch {
+                DispatchQueue.main.async {
+                    result(FlutterError(code: "SCAN_FAILED", message: error.localizedDescription, details: nil))
+                }
+                return
+            }
+            var ssids = [current].compactMap { $0 }
+            for network in networks {
+                if let name = network.ssid, !ssids.contains(name) {
+                    ssids.append(name)
+                }
+            }
+            DispatchQueue.main.async {
+                result(ssids)
             }
         }
     }

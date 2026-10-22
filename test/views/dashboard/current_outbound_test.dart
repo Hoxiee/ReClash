@@ -556,7 +556,7 @@ void main() {
 
       final context = tester.element(find.byType(CurrentOutboundCard));
       expect(
-        find.byTooltip(context.appLocalizations.suspended),
+        find.byTooltip(context.appLocalizations.onDemandResume),
         findsOneWidget,
       );
       expect(find.text(context.appLocalizations.suspended), findsOneWidget);

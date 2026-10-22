@@ -43,6 +43,8 @@ class WifiSsidPlugin : public flutter::Plugin {
   int window_proc_id_ = -1;
   std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
       pending_permission_request_;
+  void ListSsid(
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 };
 
 }  // namespace wifi_ssid

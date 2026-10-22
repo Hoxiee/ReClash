@@ -454,6 +454,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addCustomProxy": MessageLookupByLibrary.simpleMessage("Добавить прокси"),
     "addFilters": MessageLookupByLibrary.simpleMessage("Добавить фильтры"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Добавить сеть"),
     "addNodes": MessageLookupByLibrary.simpleMessage("Добавить узлы"),
     "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
       "Добавить параметр",
@@ -669,6 +670,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Закрыть соединения",
+    ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "Разрывать все открытые соединения, когда VPN на паузе",
     ),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorStyle": MessageLookupByLibrary.simpleMessage("Стиль палитры"),
@@ -1054,6 +1058,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Редактировать глобальные правила",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Изменить сеть"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Редактировать прокси"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Редактировать группу прокси",
@@ -1070,6 +1075,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m24,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),
     "enabled": MessageLookupByLibrary.simpleMessage("Включено"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("Ввести вручную"),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "error": MessageLookupByLibrary.simpleMessage("Ошибка"),
     "errorDetails": MessageLookupByLibrary.simpleMessage("Подробности ошибки"),
@@ -1390,6 +1396,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Введите числа или диапазоны, например 80 или 8000-9000, через /",
     ),
     "invalidRuleSet": m40,
+    "invalidSsid": MessageLookupByLibrary.simpleMessage(
+      "SSID не может превышать 32 байта UTF-8",
+    ),
     "invalidSubRule": m41,
     "ipAddress": MessageLookupByLibrary.simpleMessage("IP-адрес"),
     "ipAsn": MessageLookupByLibrary.simpleMessage("ASN"),
@@ -1590,6 +1599,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkConnectionError": MessageLookupByLibrary.simpleMessage(
       "Не удалось подключиться к серверу. Проверьте подключение к сети или настройки прокси",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Home Wi-Fi) или подсеть (192.168.1.0/24)",
+    ),
     "networkHostLookupError": MessageLookupByLibrary.simpleMessage(
       "Не удалось определить адрес сервера. Проверьте правильность URL и работу DNS",
     ),
@@ -1634,6 +1646,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notRunning": MessageLookupByLibrary.simpleMessage("Не запущено"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущую группу прокси нельзя выбрать",
+    ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Текущая сеть не из доверенных",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Уведомление"),
     "notificationActive": MessageLookupByLibrary.simpleMessage(
@@ -1751,8 +1766,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "obfsParam": MessageLookupByLibrary.simpleMessage("Параметр обфускации"),
     "obfsPassword": MessageLookupByLibrary.simpleMessage("Пароль обфускации"),
     "onDemand": MessageLookupByLibrary.simpleMessage("По условию"),
+    "onDemandBroadNetwork": MessageLookupByLibrary.simpleMessage(
+      "Эта подсеть охватывает широкий диапазон сетей",
+    ),
+    "onDemandCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Закрывать соединения",
+    ),
     "onDemandDesc": MessageLookupByLibrary.simpleMessage(
       "«По условию» приостанавливает прокси в исключённых сетях Wi-Fi.",
+    ),
+    "onDemandFullStop": MessageLookupByLibrary.simpleMessage(
+      "Полная остановка",
+    ),
+    "onDemandFullStopDesc": MessageLookupByLibrary.simpleMessage(
+      "На паузе снимать TUN и закрывать локальные прокси-порты. Наблюдение за сетью продолжится для автоматического возобновления.",
+    ),
+    "onDemandPause": MessageLookupByLibrary.simpleMessage("Приостановить"),
+    "onDemandResume": MessageLookupByLibrary.simpleMessage("Возобновить"),
+    "onDemandScanFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось получить сети Wi-Fi. Повторите поиск или добавьте сеть вручную.",
+    ),
+    "onDemandStrict": MessageLookupByLibrary.simpleMessage(
+      "Требовать SSID и подсеть вместе",
+    ),
+    "onDemandStrictDesc": MessageLookupByLibrary.simpleMessage(
+      "Если заданы оба вида правил — пауза только при совпадении SSID и подсети",
     ),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Учитывать только трафик прокси",
@@ -1786,6 +1824,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
     "peers": MessageLookupByLibrary.simpleMessage("Пиры"),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Выбрать из галереи"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Выбор сети"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Сети Wi-Fi поблизости",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "Сети Wi-Fi не найдены",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "Чтобы увидеть сети Wi-Fi поблизости, нужно разрешение на геолокацию",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Обновить"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Поиск сетей Wi-Fi поблизости…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage(
       "Закрепить поверх всех окон",
     ),
@@ -3301,6 +3353,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Предложить правку перевода",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Транспорт"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("Доверенные сети"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "В этих сетях VPN ставится на паузу",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Текущая сеть доверенная",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAuthorizationFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось получить права для TUN, поэтому он выключен.",
