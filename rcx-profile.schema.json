@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/reclash/reclash/rcx-profile.schema.json",
+  "title": "ReClash routing profile",
+  "description": "One RCX routing profile. A routing bundle (see $defs.bundle) carries several. Keep it in sync with core/rcx/profile.go; core/rcx/schema_test.go checks the key sets.",
+  "$ref": "#/$defs/profile",
+  "$defs": {
+    "condition": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Condition in the RCX condition language (core/rcx/cond.go): tags, node properties and boolean operators."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,24}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^https?://[^/]+"
+    },
+    "hostPort": {
+      "type": "string",
+      "pattern": "^.+:[0-9]{1,5}$",
+      "description": "host:port"
+    },
+    "feel": {
+      "enum": ["calm", "balanced", "eager"]
+    },
+    "energy": {
+      "enum": ["eco", "balanced", "precise"]
+    },
+    "stranded": {
+      "type": "string",
+      "pattern": "^(hold|direct|group:.+)$"
+    },
+    "duration": {
+      "type": "string",
+      "pattern": "^([0-9.]+(ns|us|µs|ms|s|m|h))+$",
+      "description": "Go duration such as 10m or 1h30m."
+    },
+    "pool": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": { "$ref": "#/$defs/condition" },
+        "exclude": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "tier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "when"],
+      "properties": {
+        "label": { "$ref": "#/$defs/text" },
+        "when": { "$ref": "#/$defs/condition" },
+        "last-resort": { "type": "boolean" }
+      }
+    },
+    "rank": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "by": { "enum": ["latency", "stability"] },
+        "tolerance": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "switch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "feel": { "$ref": "#/$defs/feel" },
+        "improve": { "type": "boolean" },
+        "dwell": { "$ref": "#/$defs/duration" },
+        "min-gain-ms": { "type": "integer", "minimum": 0 },
+        "min-gain-pct": { "type": "integer", "minimum": 0 },
+        "confirm": { "type": "integer", "minimum": 0 },
+        "max-per-hour": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Exactly one of http, tcp or tls; expect applies to http only.",
+      "oneOf": [
+        { "required": ["http"] },
+        { "required": ["tcp"] },
+        { "required": ["tls"] }
+      ],
+      "properties": {
+        "http": { "$ref": "#/$defs/url" },
+        "tcp": { "$ref": "#/$defs/hostPort" },
+        "tls": { "$ref": "#/$defs/hostPort" },
+        "sni": { "type": "string" },
+        "expect": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 100, "maximum": 599 }
+        },
+        "optional": { "type": "boolean" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Succeeds when any target answers; 1 to 4 targets in total.",
+      "properties": {
+        "http": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/url" } },
+        "tcp": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/hostPort" } },
+        "tls": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/hostPort" } }
+      }
+    },
+    "kind": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "when"],
+      "properties": {
+        "kind": { "$ref": "#/$defs/name" },
+        "when": { "$ref": "#/$defs/condition" },
+        "pause": { "type": "boolean", "description": "On this network nothing is checked, switched or condemned." }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "diagnose": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "$ref": "#/$defs/diagnostic" }
+        },
+        "kinds": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/kind" },
+          "description": "The first kind whose condition holds wins."
+        }
+      }
+    },
+    "layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Overrides part of a profile on one network kind.",
+      "properties": {
+        "pool": { "$ref": "#/$defs/pool" },
+        "prefer": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/tier" } },
+        "rank": { "$ref": "#/$defs/rank" },
+        "switch": { "$ref": "#/$defs/switch" },
+        "stranded": { "$ref": "#/$defs/stranded" },
+        "energy": { "$ref": "#/$defs/energy" }
+      }
+    },
+    "egress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "echo": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/url" } },
+        "agree": { "type": "integer", "minimum": 0, "maximum": 3 }
+      }
+    },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$",
+      "description": "Language tag such as ru or zh-CN."
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A routing profile; at most 64 KiB as YAML.",
+      "properties": {
+        "rcx": { "type": "integer", "maximum": 1, "description": "Format version." },
+        "title": { "type": "string" },
+        "level": { "enum": ["simple", "advanced"] },
+        "extends": { "type": "string", "description": "Profile id such as builtin/simple or provider/<name>; at most 4 levels deep." },
+        "pool": { "$ref": "#/$defs/pool" },
+        "tags": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": { "$ref": "#/$defs/condition" },
+          "description": "Named conditions usable in other conditions."
+        },
+        "prefer": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/tier" } },
+        "rank": { "$ref": "#/$defs/rank" },
+        "switch": { "$ref": "#/$defs/switch" },
+        "stranded": { "$ref": "#/$defs/stranded" },
+        "energy": { "$ref": "#/$defs/energy" },
+        "checks": {
+          "type": "object",
+          "maxProperties": 8,
+          "additionalProperties": { "$ref": "#/$defs/check" }
+        },
+        "network": { "$ref": "#/$defs/network" },
+        "on": {
+          "type": "object",
+          "maxProperties": 8,
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "$ref": "#/$defs/layer" }
+        },
+        "direct-split": {
+          "$ref": "#/$defs/condition",
+          "description": "Network condition under which DIRECT rules go through the group. User profiles only; provider profiles cannot enable it."
+        },
+        "egress-verify": { "$ref": "#/$defs/egress" },
+        "l10n": {
+          "type": "object",
+          "maxProperties": 16,
+          "propertyNames": { "$ref": "#/$defs/language" },
+          "additionalProperties": {
+            "type": "object",
+            "maxProperties": 64,
+            "propertyNames": { "$ref": "#/$defs/text" },
+            "additionalProperties": { "$ref": "#/$defs/text" }
+          },
+          "description": "Translations of the profile's own text per language, keyed by the source string."
+        }
+      }
+    },
+    "chip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "include"],
+      "properties": {
+        "label": { "type": "string" },
+        "include": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Attaches profiles to one select group. A provider can only narrow the pool.",
+      "properties": {
+        "profiles": { "type": "array", "items": { "type": "string" }, "description": "Profile names offered for the group." },
+        "default": { "type": "string" },
+        "profile": { "type": "string", "description": "The user's choice; ignored from a provider." },
+        "pool": { "$ref": "#/$defs/pool" },
+        "feel": { "$ref": "#/$defs/feel" },
+        "energy": { "$ref": "#/$defs/energy" },
+        "chips": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/chip" },
+          "description": "One-tap pools the user can switch the group to."
+        }
+      }
+    },
+    "scenarioMode": {
+      "enum": ["rule", "global", "direct"],
+      "description": "Tunnel mode the scenario sets; empty leaves the user's mode."
+    },
+    "program": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What a scenario does with one group. `to` excludes profile and pool; an empty program drives the group with its own profile.",
+      "properties": {
+        "profile": { "type": "string", "description": "Group profile id that replaces the group's own." },
+        "pool": { "$ref": "#/$defs/pool" },
+        "to": { "type": "string", "description": "Hold the group on one member, a server or a whole nested group, with no search." }
+      }
+    },
+    "scenarioGroups": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "additionalProperties": { "$ref": "#/$defs/program" },
+      "description": "Keyed by target: a group name, $main (the select group the final MATCH rule routes to), * (every other select group, not GLOBAL) or GLOBAL. Own name wins over $main, which wins over *."
+    },
+    "scenarioLayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Overrides a scenario on one network kind; a group it names replaces the base program whole.",
+      "properties": {
+        "mode": { "$ref": "#/$defs/scenarioMode" },
+        "groups": { "$ref": "#/$defs/scenarioGroups" }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Connection-wide auto control above smart groups: the tunnel mode and a program per group, optionally per network kind.",
+      "properties": {
+        "rcx": { "type": "integer", "maximum": 1 },
+        "title": { "type": "string" },
+        "tags": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": { "$ref": "#/$defs/condition" },
+          "description": "Named conditions usable in program pools."
+        },
+        "network": { "$ref": "#/$defs/network" },
+        "mode": { "$ref": "#/$defs/scenarioMode" },
+        "groups": { "$ref": "#/$defs/scenarioGroups" },
+        "on": {
+          "type": "object",
+          "description": "Per network kind declared in network.kinds.",
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "$ref": "#/$defs/scenarioLayer" }
+        },
+        "l10n": { "$ref": "#/$defs/profile/properties/l10n" }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Routing bundle served at the reclash-routing URL: at most 256 KiB, binds to groups by name.",
+      "required": ["profiles"],
+      "properties": {
+        "rcx": { "type": "integer", "maximum": 1 },
+        "profiles": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "$ref": "#/$defs/profile" }
+        },
+        "groups": {
+          "type": "object",
+          "description": "Keyed by proxy-group name.",
+          "additionalProperties": { "$ref": "#/$defs/binding" }
+        },
+        "scenarios": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "$ref": "#/$defs/scenario" }
+        },
+        "scenario": { "type": "string", "description": "Name of the default scenario in scenarios." }
+      }
+    }
+  }
+}

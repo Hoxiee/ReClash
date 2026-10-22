@@ -1,0 +1,55 @@
+rcx: 1
+title: Russia · bypass blocks
+level: advanced
+checks:
+  open: { http: 'https://api.telegram.org/', expect: [200, 301, 302, 404] }
+network:
+  diagnose:
+    home: { tcp: ['77.88.8.8:443', '77.88.8.1:443'] }
+    foreign: { tls: ['1.1.1.1:443', '9.9.9.9:443'] }
+  kinds:
+    - { kind: portal, when: network.portal, pause: true }
+    - { kind: open, when: 'foreign ok' }
+prefer:
+  - { label: Opens blocked, when: 'passes(open) and exit.country != RU' }
+  - { label: Abroad, when: 'not dead and exit.country != RU' }
+  - { label: Home exit, when: 'not dead', last-resort: true }
+rank: { by: latency, tolerance: 40 }
+switch: { improve: true, feel: calm }
+stranded: hold
+direct-split: 'home fail and foreign ok'
+energy: balanced
+l10n:
+  es:
+    Russia · bypass blocks: Rusia · evitar bloqueos
+    Opens blocked: Abre bloqueados
+    Abroad: En el extranjero
+    Home exit: Salida local
+  fr:
+    Russia · bypass blocks: Russie · contourner les blocages
+    Opens blocked: Ouvre les bloqués
+    Abroad: À l’étranger
+    Home exit: Sortie locale
+  ja: { Russia · bypass blocks: ロシア · 遮断回避, Opens blocked: 遮断サイトを開く, Abroad: 国外, Home exit: 国内出口 }
+  kk:
+    Russia · bypass blocks: Ресей · бұғаттауды айналып өту
+    Opens blocked: Бұғатталғанды ашады
+    Abroad: Шетелде
+    Home exit: Ішкі шығыс
+  ko: { Russia · bypass blocks: 러시아 · 차단 우회, Opens blocked: 차단 사이트 열림, Abroad: 해외, Home exit: 국내 출구 }
+  ru:
+    Russia · bypass blocks: Россия · обход блокировок
+    Opens blocked: Открывает заблокированное
+    Abroad: За рубежом
+    Home exit: Выход в своей стране
+  tk:
+    Russia · bypass blocks: Russiýa · petiklenmäni aýlanmak
+    Opens blocked: Petikleniňi açýar
+    Abroad: Daşary ýurtda
+    Home exit: Içerki çykyş
+  uz:
+    Russia · bypass blocks: Rossiya · bloklarni chetlab o‘tish
+    Opens blocked: Bloklanganni ochadi
+    Abroad: Chet elda
+    Home exit: Mahalliy chiqish
+  zh-CN: { Russia · bypass blocks: 俄罗斯 · 绕过封锁, Opens blocked: 可打开被屏蔽站点, Abroad: 境外, Home exit: 境内出口 }

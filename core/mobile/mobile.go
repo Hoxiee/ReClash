@@ -103,3 +103,7 @@ func GetTraffic(onlyStatisticsProxy bool) string {
 func GetTotalTraffic(onlyStatisticsProxy bool) string {
 	return core.GetTotalTraffic(onlyStatisticsProxy)
 }
+
+func SetRcxHints(data string) {
+	core.SetRcxHints(data)
+}

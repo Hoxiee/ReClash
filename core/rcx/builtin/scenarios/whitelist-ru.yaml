@@ -1,0 +1,21 @@
+rcx: 1
+title: Russia · whitelists through GLOBAL
+tags:
+  bypass: 'name ~ /(?i)lte|bypass|whitelist|обход|белы[ей]/'
+network:
+  diagnose:
+    home: { tcp: ['77.88.8.8:443', '77.88.8.1:443'] }
+    foreign: { tls: ['1.1.1.1:443', '9.9.9.9:443'] }
+  kinds:
+    - { kind: portal, when: network.portal }
+    - { kind: whitelist, when: 'home ok and foreign fail' }
+    - { kind: open, when: 'foreign ok' }
+groups:
+  $main: { profile: builtin/bypass-ru, pool: { exclude: tag(bypass) } }
+on:
+  whitelist:
+    mode: global
+    groups:
+      GLOBAL: { profile: builtin/simple, pool: { include: tag(bypass) } }
+l10n:
+  ru: { Russia · whitelists through GLOBAL: Россия · белые списки через GLOBAL }

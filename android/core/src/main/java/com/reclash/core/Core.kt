@@ -16,6 +16,8 @@ object Core {
 
     fun resetNetwork() = Mobile.resetNetwork()
 
+    fun setRcxHints(json: String) = Mobile.setRcxHints(json)
+
     private fun parseInetSocketAddress(address: String): InetSocketAddress {
         val uri = URI("tcp://$address")
         val host = requireNotNull(uri.host) { "Missing host in address: $address" }

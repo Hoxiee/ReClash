@@ -1,0 +1,45 @@
+rcx: 1
+title: Russia · mobile whitelists
+level: advanced
+extends: builtin/bypass-ru
+tags:
+  bypass: 'name ~ /(?i)lte|bypass|whitelist|обход|белы[ей]/'
+network:
+  kinds:
+    - { kind: portal, when: network.portal, pause: true }
+    - { kind: whitelist, when: 'home ok and foreign fail' }
+    - { kind: open, when: 'foreign ok' }
+on:
+  whitelist:
+    prefer:
+      - { label: Bypass node, when: 'tag(bypass) and not dead' }
+      - { label: Opens blocked, when: 'passes(open)' }
+      - { label: Any working, when: 'not dead', last-resort: true }
+l10n:
+  es:
+    Russia · mobile whitelists: Rusia · listas blancas móviles
+    Bypass node: Nodo de bypass
+    Any working: Cualquiera que funcione
+  fr:
+    Russia · mobile whitelists: Russie · listes blanches mobiles
+    Bypass node: Nœud de contournement
+    Any working: Tout serveur actif
+  ja: { Russia · mobile whitelists: ロシア · モバイルホワイトリスト, Bypass node: バイパスノード, Any working: 動作中のもの }
+  kk:
+    Russia · mobile whitelists: Ресей · мобильді ақ тізімдер
+    Bypass node: Айналып өту түйіні
+    Any working: Кез келген жұмыс істейтіні
+  ko: { Russia · mobile whitelists: 러시아 · 모바일 화이트리스트, Bypass node: 우회 노드, Any working: 작동하는 아무거나 }
+  ru:
+    Russia · mobile whitelists: Россия · мобильные белые списки
+    Bypass node: Узел обхода
+    Any working: Любой рабочий
+  tk:
+    Russia · mobile whitelists: Russiýa · mobil ak sanawlar
+    Bypass node: Aýlanyp geçiş düwüni
+    Any working: Islendik işleýän
+  uz:
+    Russia · mobile whitelists: Rossiya · mobil oq ro‘yxatlar
+    Bypass node: Aylanib o‘tish tuguni
+    Any working: Istalgan ishlaydigani
+  zh-CN: { Russia · mobile whitelists: 俄罗斯 · 移动白名单, Bypass node: 绕过节点, Any working: 任意可用 }

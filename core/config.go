@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 
+	"core/rcx"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/provider"
@@ -174,8 +176,17 @@ func applyConfig(params *SetupParams) error {
 
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
+	tunnel.SetMode(rcxSetUserMode(cfg.General.Mode))
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()
+	if params.Rcx != nil {
+		rcxSetUser(*params.Rcx)
+	}
+	if err == nil {
+		rcxApplySubscription(rcxReadSubscription(runningConfigPath()))
+	} else {
+		rcxApplySubscription(rcx.SubscriptionLayer{})
+	}
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	scheduleLoadMemoryRelease()
@@ -214,7 +225,7 @@ func updateConfig(params *UpdateParams) error {
 			routeChange = routeMoved
 		}
 		general.Mode = *params.Mode
-		tunnel.SetMode(general.Mode)
+		tunnel.SetMode(rcxSetUserMode(general.Mode))
 	}
 	if params.LogLevel != nil {
 		general.LogLevel = *params.LogLevel

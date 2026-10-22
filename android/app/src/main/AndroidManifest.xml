@@ -87,6 +87,7 @@
                 <data android:host="close" />
                 <data android:host="add" />
                 <data android:host="import" />
+                <data android:host="routing" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
