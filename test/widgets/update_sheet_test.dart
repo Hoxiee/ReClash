@@ -301,7 +301,9 @@ void main() {
     await tester.tap(settings, warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.byType(UpdatePreferences), findsOneWidget);
-    await close(tester);
+    await tester.tap(find.byTooltip(UiLocalizations.of(context).back).last);
+    await tester.pumpAndSettle();
+    expect(find.byType(UpdatePreferences), findsNothing);
     await close(tester);
     await shown;
 
@@ -324,7 +326,7 @@ void main() {
     final l = currentAppLocalizations;
     await tester.tap(find.byTooltip(l.updatePreferencesTitle));
     await tester.pumpAndSettle();
-    expect(find.byType(UpdateSheet), findsOneWidget);
+    expect(find.byType(UpdateSheet, skipOffstage: false), findsOneWidget);
     expect(find.byType(UpdatePreferences), findsOneWidget);
 
     await tester.scrollUntilVisible(

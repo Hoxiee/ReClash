@@ -44,7 +44,9 @@ class UpdateSheet extends ConsumerStatefulWidget {
     return _offer.open(
       () => showSheet<void>(
         context: context,
-        builder: (_) => _offer.track(const UpdateSheet()),
+        props: nestedPagedSheetProps,
+        builder: (_) =>
+            _offer.track(NestedPagedSheet(builder: (_) => const UpdateSheet())),
       ),
     );
   }
@@ -127,8 +129,13 @@ class _UpdateSheetState extends ConsumerState<UpdateSheet> {
         IconButtonData(
           glyph: AppGlyphs.settings,
           tooltip: l.updatePreferencesTitle,
-          onPressed: () =>
-              unawaited(UpdateSheet.show(context, preferences: true)),
+          onPressed: () => unawaited(
+            showInSheet<void>(
+              context,
+              builder: (context) =>
+                  UpdatePreferences(isAndroid: action.isSupported),
+            ),
+          ),
         ),
       ],
       body: Builder(
@@ -623,32 +630,30 @@ class _UpdateFooter extends ConsumerWidget {
       }
     }
 
-    return SheetOverhangLift(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: AlertActions(
-          actions: [
-            if (secondary.isNotEmpty)
-              TextButton(
-                key: const ValueKey('update-offer-dismiss'),
-                onPressed: dismiss,
-                child: Text(secondary, textAlign: TextAlign.center),
-              ),
-            external
-                ? TextButton.icon(
-                    key: const ValueKey('update-offer-accept'),
-                    onPressed: accept,
-                    iconAlignment: IconAlignment.end,
-                    icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
-                    label: Text(primary, textAlign: TextAlign.center),
-                  )
-                : TextButton(
-                    key: const ValueKey('update-offer-accept'),
-                    onPressed: accept,
-                    child: Text(primary, textAlign: TextAlign.center),
-                  ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: AlertActions(
+        actions: [
+          if (secondary.isNotEmpty)
+            TextButton(
+              key: const ValueKey('update-offer-dismiss'),
+              onPressed: dismiss,
+              child: Text(secondary, textAlign: TextAlign.center),
+            ),
+          external
+              ? TextButton.icon(
+                  key: const ValueKey('update-offer-accept'),
+                  onPressed: accept,
+                  iconAlignment: IconAlignment.end,
+                  icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
+                  label: Text(primary, textAlign: TextAlign.center),
+                )
+              : TextButton(
+                  key: const ValueKey('update-offer-accept'),
+                  onPressed: accept,
+                  child: Text(primary, textAlign: TextAlign.center),
+                ),
+        ],
       ),
     );
   }
