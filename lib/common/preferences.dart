@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:reclash/common/boot_record.dart';
+import 'package:reclash/subscriptions/notification/record.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/enum/enum.dart';
@@ -200,6 +201,28 @@ class Preferences {
   Future<void> saveBootRecord(BootRecord record) async {
     final sharedPreferencesIns = await _store.value;
     await sharedPreferencesIns?.setString(bootRecordKey, json.encode(record));
+  }
+
+  Future<SubscriptionNoticeRecord> getSubscriptionNoticeRecord() async {
+    try {
+      final store = await _store.value;
+      final raw = store?.getString('subscription.notices');
+      return SubscriptionNoticeRecord.fromJson(
+        raw == null ? null : json.decode(raw),
+      );
+    } on Object {
+      return const SubscriptionNoticeRecord();
+    }
+  }
+
+  Future<void> saveSubscriptionNoticeRecord(
+    SubscriptionNoticeRecord record,
+  ) async {
+    final store = await _store.value;
+    await store?.setString(
+      'subscription.notices',
+      json.encode(record.toJson()),
+    );
   }
 
   Future<void> clearPreferences() async {

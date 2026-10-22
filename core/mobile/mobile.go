@@ -92,6 +92,10 @@ func ResetNetwork() {
 	core.ResetNetwork()
 }
 
+func GetNotificationServer(group string) string {
+	return core.GetNotificationServer(group)
+}
+
 func GetTraffic(onlyStatisticsProxy bool) string {
 	return core.GetTraffic(onlyStatisticsProxy)
 }

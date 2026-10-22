@@ -8,6 +8,7 @@ import 'clash_config.dart';
 import 'common.dart';
 import 'core.dart';
 import 'profile.dart';
+import 'notification.dart';
 
 part 'generated/state.freezed.dart';
 part 'generated/state.g.dart';
@@ -182,6 +183,11 @@ abstract class SharedState with _$SharedState {
     required String stopText,
     required bool onlyStatisticsProxy,
     @Default(true) bool showStopAction,
+    @Default(NotificationSettings()) NotificationSettings notificationSettings,
+    @Default('') String notificationActiveText,
+    @Default('') String notificationServerText,
+    @Default('') String notificationTrafficText,
+    String? notificationServerGroup,
   }) = _SharedState;
 
   factory SharedState.fromJson(Map<String, Object?> json) =>

@@ -228,48 +228,52 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m92(client, format, count) =>
       "${client} として取得：${format}、プロキシノード ${count} 件。";
 
-  static String m93(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
+  static String m93(count) => "サブスクリプションは ${count} 日後に期限切れになります";
 
-  static String m94(count, format) =>
+  static String m94(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
+
+  static String m95(count, format) =>
       "${format} から ${count} 個のプロキシノードをインポートできます。";
 
-  static String m95(count) => "変換できないノード: ${count} 個。";
+  static String m96(count) => "変換できないノード: ${count} 個。";
 
-  static String m96(count) => "${count} 件の結果";
+  static String m97(percent) => "データ通信量の ${percent}% を使用しました";
 
-  static String m97(value) => "ピーク ${value}";
+  static String m98(count) => "${count} 件の結果";
 
-  static String m98(value) => "累計 ${value}";
+  static String m99(value) => "ピーク ${value}";
 
-  static String m99(version) => "インストール済み: ${version}";
+  static String m100(value) => "累計 ${value}";
 
-  static String m100(count) => "${count}分";
+  static String m101(version) => "インストール済み: ${version}";
 
-  static String m101(time) => "残り${time}";
+  static String m102(count) => "${count}分";
 
-  static String m102(count) => "${count}秒";
+  static String m103(time) => "残り${time}";
 
-  static String m103(speed) => "${speed}/秒";
+  static String m104(count) => "${count}秒";
 
-  static String m104(nodes, groups, providers) =>
+  static String m105(speed) => "${speed}/秒";
+
+  static String m106(nodes, groups, providers) =>
       "プロキシ: ${nodes}、グループ: ${groups}、リモートプロバイダー: ${providers}";
 
-  static String m105(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
+  static String m107(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
 
-  static String m106(name, source) =>
+  static String m108(name, source) =>
       "${source}から「${name}」をインポートしますか？確認後にプロファイルの検証と変換内容の確認を行います。";
 
-  static String m107(label) => "${label}はURLである必要があります";
+  static String m109(label) => "${label}はURLである必要があります";
 
-  static String m108(index) => "背景 ${index}";
+  static String m110(index) => "背景 ${index}";
 
-  static String m109(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+  static String m111(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
 
-  static String m110(version) => "インストール済みバージョン: ${version}";
+  static String m112(version) => "インストール済みバージョン: ${version}";
 
-  static String m111(count) => "${count} 年前";
+  static String m113(count) => "${count} 年前";
 
-  static String m112(count) => "${count} 年前";
+  static String m114(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1253,6 +1257,86 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループは選択できません",
     ),
+    "notification": MessageLookupByLibrary.simpleMessage("通知"),
+    "notificationActive": MessageLookupByLibrary.simpleMessage("保護中"),
+    "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
+      "コンポーネントを追加",
+    ),
+    "notificationAutomaticGroup": MessageLookupByLibrary.simpleMessage(
+      "自動グループ",
+    ),
+    "notificationBlockedNoServerGroup": MessageLookupByLibrary.simpleMessage(
+      "サーバーグループが確定していないため、この行は表示されません",
+    ),
+    "notificationComponents": MessageLookupByLibrary.simpleMessage("通知コンポーネント"),
+    "notificationComponentsDesc": MessageLookupByLibrary.simpleMessage(
+      "リアルタイムのステータス部品で通知を構成します。",
+    ),
+    "notificationComponentsEmpty": MessageLookupByLibrary.simpleMessage(
+      "コンポーネントはありません",
+    ),
+    "notificationComponentsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "コンポーネントがない場合、通知は保護状態のみを表示します。",
+    ),
+    "notificationContent": MessageLookupByLibrary.simpleMessage("内容"),
+    "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
+      "現在のサーバー",
+    ),
+    "notificationDelivery": MessageLookupByLibrary.simpleMessage(
+      "Android 通知の配信",
+    ),
+    "notificationDeliveryChecking": MessageLookupByLibrary.simpleMessage(
+      "Android の通知アクセスを確認しています",
+    ),
+    "notificationDeliveryPermissionDisabled":
+        MessageLookupByLibrary.simpleMessage("ReClash の通知はブロックされています"),
+    "notificationDeliveryReady": MessageLookupByLibrary.simpleMessage(
+      "通知を配信できます",
+    ),
+    "notificationDeliveryServiceDisabled": MessageLookupByLibrary.simpleMessage(
+      "ReClash サービスチャンネルは無効です",
+    ),
+    "notificationDeliverySubscriptionDisabled":
+        MessageLookupByLibrary.simpleMessage("サブスクリプション通知チャンネルは無効です"),
+    "notificationHideIdleSpeed": MessageLookupByLibrary.simpleMessage(
+      "アイドル時の速度を隠す",
+    ),
+    "notificationHideSensitive": MessageLookupByLibrary.simpleMessage(
+      "ロック画面で機密情報を隠す",
+    ),
+    "notificationHideSensitiveDesc": MessageLookupByLibrary.simpleMessage(
+      "常駐通知とリマインダーにAndroidのロック画面のプライバシー設定を適用します。ロック解除後は詳細が表示されます。",
+    ),
+    "notificationLevelDescription": MessageLookupByLibrary.simpleMessage(
+      "詳細ではライブ情報と停止ボタンを表示します。最小では保護状態のみを表示します。",
+    ),
+    "notificationNetworkSpeed": MessageLookupByLibrary.simpleMessage(
+      "ネットワーク速度",
+    ),
+    "notificationPrivacy": MessageLookupByLibrary.simpleMessage("プライバシー"),
+    "notificationReminders": MessageLookupByLibrary.simpleMessage("リマインダー"),
+    "notificationServerGroupMissing": MessageLookupByLibrary.simpleMessage(
+      "選択したグループがプロファイルにありません",
+    ),
+    "notificationServiceChannel": MessageLookupByLibrary.simpleMessage(
+      "サービスチャンネル",
+    ),
+    "notificationSessionTraffic": MessageLookupByLibrary.simpleMessage(
+      "セッショントラフィック",
+    ),
+    "notificationSubscriptionChannel": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション通知チャンネル",
+    ),
+    "notificationSubscriptionReminders": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプション通知",
+    ),
+    "notificationSubscriptionRemindersDesc":
+        MessageLookupByLibrary.simpleMessage("サブスクリプションへの対応が必要なときに通知します"),
+    "notificationVisibility": MessageLookupByLibrary.simpleMessage("通知レベル"),
+    "notificationVisibilityDetailed": MessageLookupByLibrary.simpleMessage(
+      "詳細",
+    ),
+    "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage("最小"),
     "ntpInterval": MessageLookupByLibrary.simpleMessage("同期間隔（分）"),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
       "NTP を有効にすると、システムクロックではなく NTP サーバーから時刻を取得します。",
@@ -1471,6 +1555,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remoteDnsResolve": MessageLookupByLibrary.simpleMessage("リモート DNS 解決"),
     "remove": MessageLookupByLibrary.simpleMessage("削除"),
     "rename": MessageLookupByLibrary.simpleMessage("名前を変更"),
+    "renewSubscription": MessageLookupByLibrary.simpleMessage("サブスクリプションを更新"),
     "replace": MessageLookupByLibrary.simpleMessage("置換"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("すべて置換"),
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
@@ -2002,6 +2087,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDeviceRequired": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションでは端末の登録が必要です。プロバイダーの案内に従ってください。",
     ),
+    "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの有効期限が切れました",
+    ),
+    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションは本日期限切れになります",
+    ),
     "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
       "OSと端末モデルも送信",
     ),
@@ -2046,7 +2138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "不明な形式",
     ),
-    "subscriptionImportIgnoredSections": m93,
+    "subscriptionImportIgnoredSections": m94,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "インポートできる対応プロキシノードがありません。",
     ),
@@ -2057,12 +2149,15 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "この取得元、形式、同意した省略内容にのみ適用されます。新たな省略には再度の同意が必要です。",
         ),
-    "subscriptionImportReviewSummary": m94,
+    "subscriptionImportReviewSummary": m95,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのインポートを確認",
     ),
-    "subscriptionImportSkippedNodes": m95,
+    "subscriptionImportSkippedNodes": m96,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
+    "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションのリマインダー",
+    ),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("サブスクリプション"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
       "アカウント",
@@ -2078,6 +2173,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "ウェブサイト",
     ),
+    "subscriptionTrafficLow": m97,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "プロバイダーの更新間隔を使う",
     ),
@@ -2153,7 +2249,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
-    "toolsResults": m96,
+    "toolsResults": m98,
     "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
@@ -2162,6 +2258,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
       "ルールやスクリプトの更新により設定が再適用され、接続に影響する場合があります。続行しますか？",
     ),
+    "topUpTraffic": MessageLookupByLibrary.simpleMessage("データ量を追加"),
     "torch": MessageLookupByLibrary.simpleMessage("ライト"),
     "total": MessageLookupByLibrary.simpleMessage("合計"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("ダウンロード量"),
@@ -2169,8 +2266,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m97,
-    "trafficTotal": m98,
+    "trafficPeak": m99,
+    "trafficTotal": m100,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
@@ -2264,14 +2361,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "アップデートをインストールしました",
     ),
-    "updateInstalledVersion": m99,
+    "updateInstalledVersion": m101,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Androidがインストールを完了しています。この間にReClashが閉じる場合があります。",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "アップデートをインストール中",
     ),
-    "updateMinutes": m100,
+    "updateMinutes": m102,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("今はしない"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "リリースノートはありません。",
@@ -2309,17 +2406,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fiで事前ダウンロード"),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("インストールの準備完了"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("リリースの詳細"),
-    "updateRemainingTime": m101,
+    "updateRemainingTime": m103,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage("ダウンロードを再開"),
     "updateRetryCheck": MessageLookupByLibrary.simpleMessage("もう一度確認"),
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage("インストールを再試行"),
-    "updateSeconds": m102,
+    "updateSeconds": m104,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "リリースノート全文を見る",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("すべての変更を表示"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("アップデート"),
-    "updateTransferSpeed": m103,
+    "updateTransferSpeed": m105,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "ダウンロードした更新の整合性を確認できませんでした。",
     ),
@@ -2351,12 +2448,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "設定した終了時の動作を使います。",
     ),
-    "urlSchemeConfigCounts": m104,
+    "urlSchemeConfigCounts": m106,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAMLまたはJSONの設定を貼り付けてください",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("設定の内容"),
-    "urlSchemeConfirmMessage": m105,
+    "urlSchemeConfirmMessage": m107,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "外部からのアプリコマンド",
     ),
@@ -2392,7 +2489,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。",
     ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポートする"),
-    "urlSchemeImportConfirm": m106,
+    "urlSchemeImportConfirm": m108,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "YAMLまたはJSON設定をリンクに埋め込みます。",
     ),
@@ -2472,7 +2569,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("例を使う"),
-    "urlTip": m107,
+    "urlTip": m109,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2509,9 +2606,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
-    "wallpaperImageLabel": m108,
+    "wallpaperImageLabel": m110,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperLibraryFull": m109,
+    "wallpaperLibraryFull": m111,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
@@ -2584,7 +2681,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "選択したパネルは初回起動時にダウンロードされます。固定されたリリースをSHA-256で検証します。",
     ),
-    "webDashboardInstalledVersion": m110,
+    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "ブラウザーを開けませんでした。",
     ),
@@ -2616,8 +2713,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m111,
-    "yearsAgoShort": m112,
+    "yearsAgo": m113,
+    "yearsAgoShort": m114,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

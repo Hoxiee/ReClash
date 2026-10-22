@@ -9,16 +9,17 @@ Future<RegionDetectionResult?> detectedRegion(Ref ref) async {
   );
 }
 
-@riverpod
-({PatchClashConfig patchConfig, List<String> bypassDomain})
-regionalNetworkConfig(Ref ref) => regionalNetworkConfigFor(
-  regionCode: ref.watch(appSettingProvider.select((state) => state.regionCode)),
-  base: ref.watch(patchClashConfigProvider),
-  defaultBypassDomains: defaultBypassDomain,
-  bypassDomains: ref.watch(
-    networkSettingProvider.select((state) => state.bypassDomain),
-  ),
-);
+PatchClashConfig _providerPatchConfig(Ref ref) {
+  final config = ref.watch(patchClashConfigProvider);
+  if (!ref.watch(providerSecureNetworkProvider)) return config;
+  return config.copyWith(
+    mixedPort: 0,
+    port: 0,
+    socksPort: 0,
+    redirPort: 0,
+    tproxyPort: 0,
+  );
+}
 
 @riverpod
 UpdateParams updateParams(Ref ref) {
@@ -33,7 +34,8 @@ UpdateParams updateParams(Ref ref) {
     temporarySecret: ref.watch(
       webDashboardAccessProvider.select((state) => state.temporarySecret),
     ),
-    safeMode: ref.watch(safeModeProvider),
+    safeMode:
+        ref.watch(safeModeProvider) || ref.watch(providerSecureNetworkProvider),
   ).toUpdateParams(
     authentication: authentication.credentials,
     skipCertVerify: !checkCertificate,
@@ -44,7 +46,7 @@ UpdateParams updateParams(Ref ref) {
 ({PatchClashConfig patchConfig, bool appendSystemDns, bool bypassPrivateRoute})
 setupPatch(Ref ref) {
   return (
-    patchConfig: ref.watch(regionalNetworkConfigProvider).patchConfig.setupOnly,
+    patchConfig: _providerPatchConfig(ref).setupOnly,
     appendSystemDns: ref.watch(
       networkSettingProvider.select((state) => state.appendSystemDns),
     ),
@@ -81,14 +83,20 @@ TrayState trayState(Ref ref) {
       ),
     ),
   );
-  final groups = ref.watch(currentGroupsStateProvider).value;
-  final selectedMap = ref.watch(selectedMapProvider);
+  final listsGroups = system.isMacOS;
+  final groups = listsGroups
+      ? ref.watch(currentGroupsStateProvider).value
+      : const <Group>[];
+  final selectedMap = listsGroups
+      ? ref.watch(selectedMapProvider)
+      : const <String, String>{};
   final safeMode = ref.watch(safeModeProvider);
   final suspended = ref.watch(suspendProvider);
   final hotKeys = _trayHotKeys(ref);
 
   return TrayState(
     mode: clashConfig.mode,
+    modes: ref.watch(availableModesProvider),
     port: clashConfig.mixedPort,
     autoLaunch: appSetting.autoLaunch,
     systemProxy: systemProxy,
@@ -205,7 +213,7 @@ SharedState sharedState(Ref ref) {
     appSettingProvider.select(
       (state) => (
         onlyStatisticsProxy: state.onlyStatisticsProxy,
-        showStopAction: state.showNotificationStopAction,
+        notificationSettings: state.notificationSettings,
         checkCertificate: state.checkCertificate,
       ),
     ),
@@ -219,7 +227,12 @@ SharedState sharedState(Ref ref) {
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
-    showStopAction: appSetting.showStopAction,
+    showStopAction: appSetting.notificationSettings.projected.showStopAction,
+    notificationSettings: appSetting.notificationSettings.projected,
+    notificationActiveText: currentAppLocalizations.notificationActive,
+    notificationServerText: currentAppLocalizations.notificationCurrentServer,
+    notificationTrafficText: currentAppLocalizations.notificationSessionTraffic,
+    notificationServerGroup: ref.watch(notificationServerGroupProvider),
     stopText: currentAppLocalizations.stop,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,
@@ -256,27 +269,40 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
       (state) => state.authentication.credentials.isNotEmpty,
     ),
   );
-  final regionalNetwork = ref.watch(regionalNetworkConfigProvider);
-  final clashConfig = regionalNetwork.patchConfig;
+  final clashConfig = _providerPatchConfig(ref);
   final vpnSetting = ref.watch(vpnSettingProvider);
   final safeMode = ref.watch(safeModeProvider);
   final routeAddress = ref.watch(vpnRouteAddressProvider.future);
+  final providerApps = ref.watch(providerAppsProvider.future);
   final tun = clashConfig.tun;
   return VpnOptions(
     enable: vpnSetting.enable && !safeMode,
     stack: tun.stack.name,
     // VpnService.setHttpProxy cannot carry credentials, so an authenticated
     // mixed port is left to TUN instead of declared as the system proxy.
-    systemProxy: vpnSetting.systemProxy && !authenticated && !safeMode,
+    systemProxy:
+        vpnSetting.systemProxy &&
+        !authenticated &&
+        !safeMode &&
+        clashConfig.mixedPort != 0,
     port: clashConfig.mixedPort,
     ipv6: vpnSetting.ipv6,
     dnsHijacking: vpnSetting.dnsHijacking,
-    accessControlProps: vpnSetting.accessControlProps,
+    accessControlProps: vpnSetting.accessControlProps.withProviderApps(
+      await providerApps,
+    ),
     allowBypass: vpnSetting.allowBypass,
-    bypassDomain: regionalNetwork.bypassDomain,
+    bypassDomain: ref.watch(
+      networkSettingProvider.select((state) => state.bypassDomain),
+    ),
     routeAddress: await routeAddress,
     mtu: tun.mtu,
     congestionController: tun.congestionController,
+    onDemandEnabled: vpnSetting.onDemandEnabled,
+    onDemandFullStop: vpnSetting.onDemandFullStop,
+    onDemandCloseConnections: vpnSetting.onDemandCloseConnections,
+    onDemandStrict: vpnSetting.onDemandStrict,
+    onDemandNetworks: ref.watch(excludeSSIDsProvider),
   );
 }
 
@@ -289,7 +315,7 @@ class AccessControlState extends _$AccessControlState
 
 @riverpod
 bool suspend(Ref ref) {
-  final currentSSID = ref.watch(currentSSIDProvider);
-  final excludeSSIDs = ref.watch(excludeSSIDsProvider);
-  return excludeSSIDs.contains(currentSSID);
+  if (system.isAndroid) return ref.watch(nativeOnDemandPauseProvider);
+  final override = ref.watch(onDemandOverrideProvider).paused;
+  return override ?? ref.watch(onDemandMatchedNetworksProvider).isNotEmpty;
 }

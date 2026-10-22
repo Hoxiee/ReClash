@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/service.dart';
+import 'package:reclash/subscriptions/notification/reminder.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,10 +21,32 @@ class AndroidManager extends ConsumerStatefulWidget {
 }
 
 class _AndroidContainerState extends ConsumerState<AndroidManager>
-    with ServiceListener {
+    with ServiceListener, WidgetsBindingObserver {
+  Timer? _reminderTimer;
+  bool _checkingReminders = false;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _reminderTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => unawaited(_checkReminders()),
+    );
+    ref.listenManual(
+      profilesProvider,
+      (_, _) => unawaited(_checkReminders()),
+      fireImmediately: true,
+    );
+    ref.listenManual(
+      appSettingProvider.select(
+        (s) => s.notificationSettings.subscriptionReminders,
+      ),
+      (_, enabled) {
+        if (enabled) {
+          unawaited(_checkReminders());
+        }
+      },
+    );
     ref.listenManual(appSettingProvider.select((state) => state.hidden), (
       prev,
       next,
@@ -62,8 +85,51 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     }, duration: const Duration(seconds: 2));
   }
 
+  Future<void> _checkReminders() async {
+    if (_checkingReminders ||
+        !system.isAndroid ||
+        ref.read(safeModeProvider) ||
+        !ref
+            .read(appSettingProvider)
+            .notificationSettings
+            .subscriptionReminders) {
+      return;
+    }
+    _checkingReminders = true;
+    try {
+      for (final id in ref.read(profilesProvider).map((p) => p.id).toList()) {
+        if (!mounted) return;
+        final profile = ref.read(profilesProvider).getProfile(id);
+        if (profile == null) continue;
+        try {
+          await subscriptionReminder.check(
+            profile,
+            currentProfile: () =>
+                mounted ? ref.read(profilesProvider).getProfile(id) : null,
+          );
+        } on Object catch (error) {
+          commonPrint.log(
+            'Subscription reminder failed: ${compactError(error)}',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
+    } finally {
+      _checkingReminders = false;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_checkReminders());
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _reminderTimer?.cancel();
     debouncer.cancel(FunctionTag.reloadPackages);
     if (app?.onPackagesChanged == _reloadPackages) {
       app?.onPackagesChanged = null;

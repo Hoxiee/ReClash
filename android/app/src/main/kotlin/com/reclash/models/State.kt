@@ -1,6 +1,7 @@
 package com.reclash.models
 
 import com.reclash.service.models.VpnOptions
+import com.reclash.service.models.NotificationSettings
 import com.google.gson.annotations.SerializedName
 
 data class SharedState(
@@ -12,6 +13,11 @@ data class SharedState(
     val stopText: String = "Stop",
     val onlyStatisticsProxy: Boolean = false,
     val showStopAction: Boolean = true,
+    val notificationSettings: NotificationSettings = NotificationSettings(),
+    val notificationActiveText: String = "Protection active",
+    val notificationServerText: String = "Current server",
+    val notificationTrafficText: String = "Session traffic",
+    val notificationServerGroup: String? = null,
     val vpnOptions: VpnOptions? = null,
     val setupParams: SetupParams? = null,
 )

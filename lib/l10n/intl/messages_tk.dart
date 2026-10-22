@@ -251,51 +251,56 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m92(client, format, count) =>
       "${client} hökmünde alyndy: ${format}, proksi düwünleri: ${count}.";
 
-  static String m93(sections) => "Şu çeşme bölümleri geçirilmez: ${sections}.";
+  static String m93(count) =>
+      "${Intl.plural(count, one: 'Abunaňyz ertir gutarýar', other: 'Abunaňyz ${count} günden soň gutarýar')}";
 
-  static String m94(count, format) =>
+  static String m94(sections) => "Şu çeşme bölümleri geçirilmez: ${sections}.";
+
+  static String m95(count, format) =>
       "${format} formatyndan ${count} proksi düwünini import edip bolýar.";
 
-  static String m95(count) => "Öwrülip bilinmeýän düwünler: ${count}.";
+  static String m96(count) => "Öwrülip bilinmeýän düwünler: ${count}.";
 
-  static String m96(count) => "${count} netije";
+  static String m97(percent) => "Trafigiň ${percent}%-i ulanyldy";
 
-  static String m97(value) => "Ýokarky nokat ${value}";
+  static String m98(count) => "${count} netije";
 
-  static String m98(value) => "Jemi ${value}";
+  static String m99(value) => "Ýokarky nokat ${value}";
 
-  static String m99(version) => "Gurnalan wersiýa: ${version}";
+  static String m100(value) => "Jemi ${value}";
 
-  static String m100(count) => "${count} min";
+  static String m101(version) => "Gurnalan wersiýa: ${version}";
 
-  static String m101(time) => "${time} galdy";
+  static String m102(count) => "${count} min";
 
-  static String m102(count) => "${count} s";
+  static String m103(time) => "${time} galdy";
 
-  static String m103(speed) => "${speed}/s";
+  static String m104(count) => "${count} s";
 
-  static String m104(nodes, groups, providers) =>
+  static String m105(speed) => "${speed}/s";
+
+  static String m106(nodes, groups, providers) =>
       "Proksiler: ${nodes}, toparlar: ${groups}, uzakdaky üpjün edijiler: ${providers}";
 
-  static String m105(action) =>
+  static String m107(action) =>
       "Bu salgylanma «${action}» hereketini soraýar. ReClash-a ony ýerine ýetirmäge rugsat berilsinmi?";
 
-  static String m106(name, source) =>
+  static String m108(name, source) =>
       "${source} çeşmesinden «${name}» import edilsinmi? Tassyklamadan soň profil we öwürmeler barlanar.";
 
-  static String m107(label) => "${label} URL bolmaly";
+  static String m109(label) => "${label} URL bolmaly";
 
-  static String m108(index) => "Fon ${index}";
-
-  static String m109(count) =>
-      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
-
-  static String m110(version) => "Gurnalan wersiýa: ${version}";
+  static String m110(index) => "Fon ${index}";
 
   static String m111(count) =>
+      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
+
+  static String m112(version) => "Gurnalan wersiýa: ${version}";
+
+  static String m113(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
-  static String m112(count) => "${Intl.plural(count, other: '${count} ý öň')}";
+  static String m114(count) => "${Intl.plural(count, other: '${count} ý öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1509,6 +1514,100 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Häzirki proksi toparyny saýlap bolmaýar",
     ),
+    "notification": MessageLookupByLibrary.simpleMessage("Duýduryş"),
+    "notificationActive": MessageLookupByLibrary.simpleMessage("Gorag işjeň"),
+    "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
+      "Komponent goş",
+    ),
+    "notificationAutomaticGroup": MessageLookupByLibrary.simpleMessage(
+      "Awtomatiki topar",
+    ),
+    "notificationBlockedNoServerGroup": MessageLookupByLibrary.simpleMessage(
+      "Serwer topary kesgitlenmedik, şonuň üçin bu setir görkezilmeýär",
+    ),
+    "notificationComponents": MessageLookupByLibrary.simpleMessage(
+      "Duýduryş komponentleri",
+    ),
+    "notificationComponentsDesc": MessageLookupByLibrary.simpleMessage(
+      "Duýduryşy göni ýagdaý komponentlerinden düzüň.",
+    ),
+    "notificationComponentsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Komponent goşulmady",
+    ),
+    "notificationComponentsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Komponentler bolmasa, bildiriş diňe goragyň ýagdaýyny görkezýär.",
+    ),
+    "notificationContent": MessageLookupByLibrary.simpleMessage("Mazmun"),
+    "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
+      "Häzirki serwer",
+    ),
+    "notificationDelivery": MessageLookupByLibrary.simpleMessage(
+      "Android duýduryşynyň eltilmegi",
+    ),
+    "notificationDeliveryChecking": MessageLookupByLibrary.simpleMessage(
+      "Android duýduryş rugsady barlanýar",
+    ),
+    "notificationDeliveryPermissionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "ReClash duýduryşlary petiklenendir",
+        ),
+    "notificationDeliveryReady": MessageLookupByLibrary.simpleMessage(
+      "Duýduryşlary eltmek bolýar",
+    ),
+    "notificationDeliveryServiceDisabled": MessageLookupByLibrary.simpleMessage(
+      "ReClash hyzmat kanaly öçürilendir",
+    ),
+    "notificationDeliverySubscriptionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýazylma ýatlatmalary kanaly öçürilendir",
+        ),
+    "notificationHideIdleSpeed": MessageLookupByLibrary.simpleMessage(
+      "Boş wagty tizligi gizlemek",
+    ),
+    "notificationHideSensitive": MessageLookupByLibrary.simpleMessage(
+      "Gulp ekranynda gizlin maglumatlary gizlemek",
+    ),
+    "notificationHideSensitiveDesc": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat duýduryşlary we ýatlatmalar Android-iň gulp ekranynyň gizlinlik sazlamalaryna eýerýär. Gulp açylanda jikme-jiklikler görünýär.",
+    ),
+    "notificationLevelDescription": MessageLookupByLibrary.simpleMessage(
+      "Jikme-jik tertip janly maglumatlary we duruzmak düwmesini görkezýär. Iň az tertip diňe gorag ýagdaýyny görkezýär.",
+    ),
+    "notificationNetworkSpeed": MessageLookupByLibrary.simpleMessage(
+      "Tor tizligi",
+    ),
+    "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Gizlinlik"),
+    "notificationReminders": MessageLookupByLibrary.simpleMessage(
+      "Ýatlatmalar",
+    ),
+    "notificationServerGroupMissing": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan topar profilde ýok",
+    ),
+    "notificationServiceChannel": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat kanaly",
+    ),
+    "notificationSessionTraffic": MessageLookupByLibrary.simpleMessage(
+      "Sessiýa trafigi",
+    ),
+    "notificationSubscriptionChannel": MessageLookupByLibrary.simpleMessage(
+      "Ýazylma ýatlatmalary kanaly",
+    ),
+    "notificationSubscriptionReminders": MessageLookupByLibrary.simpleMessage(
+      "Ýazylma ýatlatmalary",
+    ),
+    "notificationSubscriptionRemindersDesc":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýazylma üns talap edende habar bermek",
+        ),
+    "notificationVisibility": MessageLookupByLibrary.simpleMessage(
+      "Duýduryş derejesi",
+    ),
+    "notificationVisibilityDetailed": MessageLookupByLibrary.simpleMessage(
+      "Jikme-jik",
+    ),
+    "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
+      "Minimal",
+    ),
     "ntpInterval": MessageLookupByLibrary.simpleMessage(
       "Sinhronlaşdyrma aralygy (minut)",
     ),
@@ -1765,6 +1864,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "remove": MessageLookupByLibrary.simpleMessage("Aýyr"),
     "rename": MessageLookupByLibrary.simpleMessage("Adyny üýtgetmek"),
+    "renewSubscription": MessageLookupByLibrary.simpleMessage("Abunany uzalt"),
     "replace": MessageLookupByLibrary.simpleMessage("Çalyşmak"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("Hemmesini çalyşmak"),
     "request": MessageLookupByLibrary.simpleMessage("Haýyş"),
@@ -2424,6 +2524,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDeviceRequired": MessageLookupByLibrary.simpleMessage(
       "Bu abuna ýazgysy enjamy hasaba almagy talap edýär. Üpjin edijiniň görkezmelerine eýeriň.",
     ),
+    "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
+      "Abunaňyz möhleti gutardy",
+    ),
+    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
+      "Abunaňyz şu gün gutarýar",
+    ),
     "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
       "Operasiýa ulgamyny we enjam modelini hem iber",
     ),
@@ -2470,7 +2577,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "näbelli format",
     ),
-    "subscriptionImportIgnoredSections": m93,
+    "subscriptionImportIgnoredSections": m94,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "Import edip boljak goldanylýan proksi düwünleri ýok.",
     ),
@@ -2481,12 +2588,15 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Diňe şu çeşmä, formata we kabul edilen ýitgi görnüşlerine degişlidir. Täze ýitgiler üçin ýene razylyk gerek.",
         ),
-    "subscriptionImportReviewSummary": m94,
+    "subscriptionImportReviewSummary": m95,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "Abunalyk importyny barla",
     ),
-    "subscriptionImportSkippedNodes": m95,
+    "subscriptionImportSkippedNodes": m96,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("Abuna maglumaty"),
+    "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
+      "Abuna ýatlatmalary",
+    ),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("Abunalyk"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage(
       "Hasap",
@@ -2506,6 +2616,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Web sahypasy",
     ),
+    "subscriptionTrafficLow": m97,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Üp üpjün edijiniň täzelenme aralygyny ulan",
     ),
@@ -2601,7 +2712,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Çekirdegi täzeden işlet",
     ),
-    "toolsResults": m96,
+    "toolsResults": m98,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Işlet"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Bölüm"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Sazlama"),
@@ -2612,6 +2723,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
       "Düzgünleriň we skriptleriň täzelenmegi konfigurasiýany ýene-de ulanyp, baglanyşyklara täsir edip biler. Dowam edilsinmi?",
     ),
+    "topUpTraffic": MessageLookupByLibrary.simpleMessage("Trafigi doldur"),
     "torch": MessageLookupByLibrary.simpleMessage("Fonar"),
     "total": MessageLookupByLibrary.simpleMessage("Jemi"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("Göçürip alnan"),
@@ -2619,8 +2731,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Ýüklenen"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy porty"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafik"),
-    "trafficPeak": m97,
-    "trafficTotal": m98,
+    "trafficPeak": m99,
+    "trafficTotal": m100,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
@@ -2746,14 +2858,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Täzelenme guruldy",
     ),
-    "updateInstalledVersion": m99,
+    "updateInstalledVersion": m101,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android gurnamany tamamlaýar. Bu ädimde ReClash ýapylyp biler.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Täzelenme gurulýar",
     ),
-    "updateMinutes": m100,
+    "updateMinutes": m102,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Häzir däl"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Reliz bellikleri ýok.",
@@ -2807,7 +2919,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Neşiriň jikme-jiklikleri",
     ),
-    "updateRemainingTime": m101,
+    "updateRemainingTime": m103,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Ýüklemäni dowam etmek",
     ),
@@ -2817,7 +2929,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Gurnamany gaýtalamak",
     ),
-    "updateSeconds": m102,
+    "updateSeconds": m104,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Doly reliz belliklerini gör",
     ),
@@ -2825,7 +2937,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ähli üýtgeşmeleri görkez",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Täzelenmeler"),
-    "updateTransferSpeed": m103,
+    "updateTransferSpeed": m105,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Ýüklenen täzelenmäniň bitewüligini barlap bolmady.",
     ),
@@ -2861,14 +2973,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Sazlanan ýapmak hereketini ulanmak.",
     ),
-    "urlSchemeConfigCounts": m104,
+    "urlSchemeConfigCounts": m106,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML ýa-da JSON konfigurasiýasyny goýuň",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Konfigurasiýanyň mazmuny",
     ),
-    "urlSchemeConfirmMessage": m105,
+    "urlSchemeConfirmMessage": m107,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Daşarky programma buýrugy",
     ),
@@ -2914,7 +3026,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Konfigurasiýany import et",
     ),
-    "urlSchemeImportConfirm": m106,
+    "urlSchemeImportConfirm": m108,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Baglanyşyga YAML ýa-da JSON konfigurasiýasyny girizmek.",
     ),
@@ -3002,7 +3114,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bu şifrleme wersiýasy goldanylmaýar. Adaty abunalyk salgylanmasyny soraň.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Mysaly ulan"),
-    "urlTip": m107,
+    "urlTip": m109,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -3047,9 +3159,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
     ),
-    "wallpaperImageLabel": m108,
+    "wallpaperImageLabel": m110,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
-    "wallpaperLibraryFull": m109,
+    "wallpaperLibraryFull": m111,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Suratyň dury dälligi",
     ),
@@ -3138,7 +3250,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "Saýlanan panel ilkinji açylyşda ýüklenýär. Bellenen goýberiliş SHA-256 arkaly barlanýar.",
     ),
-    "webDashboardInstalledVersion": m110,
+    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "Brauzeri açyp bolmady.",
     ),
@@ -3176,8 +3288,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgama ýazmak ulgam sagadyny hem düzýär; Android ony äsgermeýär.",
     ),
-    "yearsAgo": m111,
-    "yearsAgoShort": m112,
+    "yearsAgo": m113,
+    "yearsAgoShort": m114,
     "yes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };

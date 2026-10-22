@@ -9,7 +9,10 @@ private val gson = Gson()
 data class Traffic(
     val up: Long,
     val down: Long,
-)
+) {
+    val isIdle: Boolean
+        get() = up == 0L && down == 0L
+}
 
 private val Long.formatBytes: String
     get() {
@@ -30,10 +33,25 @@ private val Long.formatBytes: String
 val Traffic.speedText: String
     get() = "${up.formatBytes}/s↑  ${down.formatBytes}/s↓"
 
-fun Core.getSpeedTrafficText(onlyStatisticsProxy: Boolean): String {
+val Traffic.totalText: String
+    get() = "${up.formatBytes}↑  ${down.formatBytes}↓"
+
+fun Core.getTrafficState(onlyStatisticsProxy: Boolean): Traffic? {
     return runCatching {
-        gson.fromJson(getTraffic(onlyStatisticsProxy), Traffic::class.java).speedText
+        gson.fromJson(getTraffic(onlyStatisticsProxy), Traffic::class.java)
     }.onFailure { error ->
         GlobalState.log("Unable to read traffic: $error")
-    }.getOrDefault("")
+    }.getOrNull()
+}
+
+fun Core.getTotalTrafficState(onlyStatisticsProxy: Boolean): Traffic? {
+    return runCatching {
+        gson.fromJson(getTotalTraffic(onlyStatisticsProxy), Traffic::class.java)
+    }.onFailure { error ->
+        GlobalState.log("Unable to read total traffic: $error")
+    }.getOrNull()
+}
+
+fun Core.getSpeedTrafficText(onlyStatisticsProxy: Boolean): String {
+    return getTrafficState(onlyStatisticsProxy)?.speedText.orEmpty()
 }

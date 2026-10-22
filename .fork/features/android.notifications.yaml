@@ -1,0 +1,19 @@
+v: 1
+kind: feature
+state: active
+risk: routine
+must:
+  persistence: Legacy stop-button preferences migrate and malformed components retain known values; minimal mode preserves saved detailed contents.
+  content: Service notifications project ordered server, speed and session traffic components without introducing another lifecycle owner.
+  polling: Minimal or static content and screen-off state stop periodic notification polling; settings still propagate live.
+  delivery: Application permission and service/reminder channel status remain independent; denied deliveries can retry.
+  privacy: Lock-screen public versions omit profile names, selected servers, traffic and reminder contents.
+  reminders: Expiry and traffic reminders serialize durable markers, deduplicate successful delivery, retry failures and ignore stale or deleted profiles.
+  ui: Notification settings use shared ReClash controls and the component list uses the standard editor.
+watch: [tool/test_android_notifications.sh, lib/models/notification.dart, 'lib/models/generated/notification.*', lib/models/config.dart, lib/models/state.dart, lib/plugins/notification.dart, lib/providers/notification.dart, lib/providers/state/system.dart, lib/subscriptions/notification/**, lib/manager/android_manager.dart, lib/common/preferences.dart, lib/providers/actions/profiles.dart, lib/views/application_notification.dart, lib/views/notification_components.dart, lib/views/application_setting.dart, android/app/src/main/kotlin/com/reclash/Notices.kt, android/app/src/main/kotlin/com/reclash/plugins/AppPlugin.kt, android/app/src/main/kotlin/com/reclash/models/State.kt, android/app/src/main/kotlin/com/reclash/ServiceStateMachine.kt, android/core/src/main/java/com/reclash/core/Core.kt, 'android/service/src/main/java/com/reclash/service/models/Notification*', android/service/src/main/java/com/reclash/service/models/Traffic.kt, 'android/service/src/main/java/com/reclash/service/modules/Notification*', core/notification.go, core/notification_test.go, core/lib.go, core/mobile/mobile.go, test/models/notification_test.dart, test/subscriptions/notification_test.dart, test/views/notification_test.dart, android/tests/service/NotificationContentTest.kt, android/tests/app/NoticesTest.kt]
+checks:
+  notifications: [persistence, delivery, reminders, ui]
+  android-build: [content]
+  android-notifications: [polling, privacy]
+  core-tests: [content]
+why: Android service notifications and subscription reminders share preferences while retaining separate delivery channels.

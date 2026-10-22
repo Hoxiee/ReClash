@@ -11924,6 +11924,406 @@ class AppLocalizations {
     );
   }
 
+  /// `Notification`
+  String get notification {
+    return Intl.message(
+      'Notification',
+      name: 'notification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Content`
+  String get notificationContent {
+    return Intl.message(
+      'Content',
+      name: 'notificationContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notification level`
+  String get notificationVisibility {
+    return Intl.message(
+      'Notification level',
+      name: 'notificationVisibility',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed`
+  String get notificationVisibilityDetailed {
+    return Intl.message(
+      'Detailed',
+      name: 'notificationVisibilityDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimal`
+  String get notificationVisibilityMinimal {
+    return Intl.message(
+      'Minimal',
+      name: 'notificationVisibilityMinimal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notification components`
+  String get notificationComponents {
+    return Intl.message(
+      'Notification components',
+      name: 'notificationComponents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build the notification from live status components.`
+  String get notificationComponentsDesc {
+    return Intl.message(
+      'Build the notification from live status components.',
+      name: 'notificationComponentsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add component`
+  String get notificationAddComponent {
+    return Intl.message(
+      'Add component',
+      name: 'notificationAddComponent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No components added`
+  String get notificationComponentsEmpty {
+    return Intl.message(
+      'No components added',
+      name: 'notificationComponentsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current server`
+  String get notificationCurrentServer {
+    return Intl.message(
+      'Current server',
+      name: 'notificationCurrentServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network speed`
+  String get notificationNetworkSpeed {
+    return Intl.message(
+      'Network speed',
+      name: 'notificationNetworkSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session traffic`
+  String get notificationSessionTraffic {
+    return Intl.message(
+      'Session traffic',
+      name: 'notificationSessionTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic group`
+  String get notificationAutomaticGroup {
+    return Intl.message(
+      'Automatic group',
+      name: 'notificationAutomaticGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide idle speed`
+  String get notificationHideIdleSpeed {
+    return Intl.message(
+      'Hide idle speed',
+      name: 'notificationHideIdleSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Privacy`
+  String get notificationPrivacy {
+    return Intl.message(
+      'Privacy',
+      name: 'notificationPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reminders`
+  String get notificationReminders {
+    return Intl.message(
+      'Reminders',
+      name: 'notificationReminders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide sensitive details on lock screen`
+  String get notificationHideSensitive {
+    return Intl.message(
+      'Hide sensitive details on lock screen',
+      name: 'notificationHideSensitive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uses Android's lock-screen privacy settings for service notifications and reminders. Details remain visible while unlocked.`
+  String get notificationHideSensitiveDesc {
+    return Intl.message(
+      'Uses Android\'s lock-screen privacy settings for service notifications and reminders. Details remain visible while unlocked.',
+      name: 'notificationHideSensitiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service channel`
+  String get notificationServiceChannel {
+    return Intl.message(
+      'Service channel',
+      name: 'notificationServiceChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription reminders channel`
+  String get notificationSubscriptionChannel {
+    return Intl.message(
+      'Subscription reminders channel',
+      name: 'notificationSubscriptionChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription reminders`
+  String get notificationSubscriptionReminders {
+    return Intl.message(
+      'Subscription reminders',
+      name: 'notificationSubscriptionReminders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notify when a subscription needs attention`
+  String get notificationSubscriptionRemindersDesc {
+    return Intl.message(
+      'Notify when a subscription needs attention',
+      name: 'notificationSubscriptionRemindersDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android delivery`
+  String get notificationDelivery {
+    return Intl.message(
+      'Android delivery',
+      name: 'notificationDelivery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking Android notification access`
+  String get notificationDeliveryChecking {
+    return Intl.message(
+      'Checking Android notification access',
+      name: 'notificationDeliveryChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications are blocked for ReClash`
+  String get notificationDeliveryPermissionDisabled {
+    return Intl.message(
+      'Notifications are blocked for ReClash',
+      name: 'notificationDeliveryPermissionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The ReClash service channel is disabled`
+  String get notificationDeliveryServiceDisabled {
+    return Intl.message(
+      'The ReClash service channel is disabled',
+      name: 'notificationDeliveryServiceDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription reminders channel is disabled`
+  String get notificationDeliverySubscriptionDisabled {
+    return Intl.message(
+      'The subscription reminders channel is disabled',
+      name: 'notificationDeliverySubscriptionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications can be delivered`
+  String get notificationDeliveryReady {
+    return Intl.message(
+      'Notifications can be delivered',
+      name: 'notificationDeliveryReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The chosen group is missing from the profile`
+  String get notificationServerGroupMissing {
+    return Intl.message(
+      'The chosen group is missing from the profile',
+      name: 'notificationServerGroupMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No server group is resolved, so this line is hidden`
+  String get notificationBlockedNoServerGroup {
+    return Intl.message(
+      'No server group is resolved, so this line is hidden',
+      name: 'notificationBlockedNoServerGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Without components the notification shows only the protection status.`
+  String get notificationComponentsEmptyDesc {
+    return Intl.message(
+      'Without components the notification shows only the protection status.',
+      name: 'notificationComponentsEmptyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription reminders`
+  String get subscriptionNoticeChannel {
+    return Intl.message(
+      'Subscription reminders',
+      name: 'subscriptionNoticeChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription has expired`
+  String get subscriptionExpired {
+    return Intl.message(
+      'Your subscription has expired',
+      name: 'subscriptionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription expires today`
+  String get subscriptionExpiresToday {
+    return Intl.message(
+      'Your subscription expires today',
+      name: 'subscriptionExpiresToday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription expires in {count, plural, =1{1 day} other{{count} days}}`
+  String subscriptionExpiresInDays(int count) {
+    return Intl.message(
+      'Your subscription expires in ${Intl.plural(count, one: '1 day', other: '$count days')}',
+      name: 'subscriptionExpiresInDays',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `You have used {percent}% of your traffic`
+  String subscriptionTrafficLow(int percent) {
+    return Intl.message(
+      'You have used $percent% of your traffic',
+      name: 'subscriptionTrafficLow',
+      desc: '',
+      args: [percent],
+    );
+  }
+
+  /// `Renew subscription`
+  String get renewSubscription {
+    return Intl.message(
+      'Renew subscription',
+      name: 'renewSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Top up traffic`
+  String get topUpTraffic {
+    return Intl.message(
+      'Top up traffic',
+      name: 'topUpTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection active`
+  String get notificationActive {
+    return Intl.message(
+      'Protection active',
+      name: 'notificationActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed shows live information and the stop button. Minimal shows only protection status.`
+  String get notificationLevelDescription {
+    return Intl.message(
+      'Detailed shows live information and the stop button. Minimal shows only protection status.',
+      name: 'notificationLevelDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Application settings`
   String get applicationSettings {
     return Intl.message(

@@ -229,50 +229,55 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m92(client, format, count) =>
       "${client}로 수신: ${format}, 프록시 노드 ${count}개.";
 
-  static String m93(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
+  static String m93(count) =>
+      "${Intl.plural(count, one: '구독이 내일 만료됩니다', other: '구독이 ${count}일 후에 만료됩니다')}";
 
-  static String m94(count, format) =>
+  static String m94(sections) => "다음 원본 섹션은 이전되지 않습니다: ${sections}.";
+
+  static String m95(count, format) =>
       "${format}에서 프록시 노드 ${count}개를 가져올 수 있습니다.";
 
-  static String m95(count) => "변환할 수 없는 노드: ${count}개.";
+  static String m96(count) => "변환할 수 없는 노드: ${count}개.";
 
-  static String m96(count) => "결과 ${count}개";
+  static String m97(percent) => "트래픽의 ${percent}%를 사용했습니다";
 
-  static String m97(value) => "최고 ${value}";
+  static String m98(count) => "결과 ${count}개";
 
-  static String m98(value) => "합계 ${value}";
+  static String m99(value) => "최고 ${value}";
 
-  static String m99(version) => "설치된 버전: ${version}";
+  static String m100(value) => "합계 ${value}";
 
-  static String m100(count) => "${count}분";
+  static String m101(version) => "설치된 버전: ${version}";
 
-  static String m101(time) => "${time} 남음";
+  static String m102(count) => "${count}분";
 
-  static String m102(count) => "${count}초";
+  static String m103(time) => "${time} 남음";
 
-  static String m103(speed) => "${speed}/초";
+  static String m104(count) => "${count}초";
 
-  static String m104(nodes, groups, providers) =>
+  static String m105(speed) => "${speed}/초";
+
+  static String m106(nodes, groups, providers) =>
       "프록시 ${nodes}개, 그룹 ${groups}개, 원격 공급자 ${providers}개";
 
-  static String m105(action) =>
+  static String m107(action) =>
       "이 링크가 “${action}” 동작을 요청합니다. ReClash에서 실행하도록 허용할까요?";
 
-  static String m106(name, source) =>
+  static String m108(name, source) =>
       "${source}에서 “${name}”을 가져올까요? 확인 후 프로필 검증과 변환 검토가 진행됩니다.";
 
-  static String m107(label) => "${label}은(는) URL이어야 합니다";
+  static String m109(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m108(index) => "배경 ${index}";
+  static String m110(index) => "배경 ${index}";
 
-  static String m109(count) =>
+  static String m111(count) =>
       "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
 
-  static String m110(version) => "설치된 버전: ${version}";
+  static String m112(version) => "설치된 버전: ${version}";
 
-  static String m111(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m113(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
-  static String m112(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m114(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1238,6 +1243,80 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "현재 프록시 그룹은 선택할 수 없습니다",
     ),
+    "notification": MessageLookupByLibrary.simpleMessage("알림"),
+    "notificationActive": MessageLookupByLibrary.simpleMessage("보호 중"),
+    "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
+      "구성 요소 추가",
+    ),
+    "notificationAutomaticGroup": MessageLookupByLibrary.simpleMessage("자동 그룹"),
+    "notificationBlockedNoServerGroup": MessageLookupByLibrary.simpleMessage(
+      "서버 그룹이 확인되지 않아 이 줄은 표시되지 않습니다",
+    ),
+    "notificationComponents": MessageLookupByLibrary.simpleMessage("알림 구성 요소"),
+    "notificationComponentsDesc": MessageLookupByLibrary.simpleMessage(
+      "실시간 상태 구성 요소로 알림을 구성하세요.",
+    ),
+    "notificationComponentsEmpty": MessageLookupByLibrary.simpleMessage(
+      "추가된 구성 요소 없음",
+    ),
+    "notificationComponentsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "구성 요소가 없으면 알림에는 보호 상태만 표시됩니다.",
+    ),
+    "notificationContent": MessageLookupByLibrary.simpleMessage("내용"),
+    "notificationCurrentServer": MessageLookupByLibrary.simpleMessage("현재 서버"),
+    "notificationDelivery": MessageLookupByLibrary.simpleMessage(
+      "Android 알림 전달",
+    ),
+    "notificationDeliveryChecking": MessageLookupByLibrary.simpleMessage(
+      "Android 알림 권한을 확인하는 중",
+    ),
+    "notificationDeliveryPermissionDisabled":
+        MessageLookupByLibrary.simpleMessage("ReClash 알림이 차단되어 있습니다"),
+    "notificationDeliveryReady": MessageLookupByLibrary.simpleMessage(
+      "알림을 전달할 수 있습니다",
+    ),
+    "notificationDeliveryServiceDisabled": MessageLookupByLibrary.simpleMessage(
+      "ReClash 서비스 채널이 사용 중지되었습니다",
+    ),
+    "notificationDeliverySubscriptionDisabled":
+        MessageLookupByLibrary.simpleMessage("구독 알림 채널이 사용 중지되었습니다"),
+    "notificationHideIdleSpeed": MessageLookupByLibrary.simpleMessage(
+      "유휴 시 속도 숨기기",
+    ),
+    "notificationHideSensitive": MessageLookupByLibrary.simpleMessage(
+      "잠금 화면에서 민감한 정보 숨기기",
+    ),
+    "notificationHideSensitiveDesc": MessageLookupByLibrary.simpleMessage(
+      "서비스 알림과 리마인더는 Android 잠금 화면의 개인정보 설정을 따릅니다. 잠금을 해제하면 세부 정보가 표시됩니다.",
+    ),
+    "notificationLevelDescription": MessageLookupByLibrary.simpleMessage(
+      "상세 모드는 실시간 정보와 중지 버튼을 표시합니다. 최소 모드는 보호 상태만 표시합니다.",
+    ),
+    "notificationNetworkSpeed": MessageLookupByLibrary.simpleMessage("네트워크 속도"),
+    "notificationPrivacy": MessageLookupByLibrary.simpleMessage("개인정보"),
+    "notificationReminders": MessageLookupByLibrary.simpleMessage("리마인더"),
+    "notificationServerGroupMissing": MessageLookupByLibrary.simpleMessage(
+      "선택한 그룹이 프로필에 없습니다",
+    ),
+    "notificationServiceChannel": MessageLookupByLibrary.simpleMessage(
+      "서비스 채널",
+    ),
+    "notificationSessionTraffic": MessageLookupByLibrary.simpleMessage(
+      "세션 트래픽",
+    ),
+    "notificationSubscriptionChannel": MessageLookupByLibrary.simpleMessage(
+      "구독 알림 채널",
+    ),
+    "notificationSubscriptionReminders": MessageLookupByLibrary.simpleMessage(
+      "구독 알림",
+    ),
+    "notificationSubscriptionRemindersDesc":
+        MessageLookupByLibrary.simpleMessage("구독에 확인이 필요할 때 알립니다"),
+    "notificationVisibility": MessageLookupByLibrary.simpleMessage("알림 수준"),
+    "notificationVisibilityDetailed": MessageLookupByLibrary.simpleMessage(
+      "상세",
+    ),
+    "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage("최소"),
     "ntpInterval": MessageLookupByLibrary.simpleMessage("동기화 간격(분)"),
     "ntpStatusDesc": MessageLookupByLibrary.simpleMessage(
       "NTP는 시스템 시계 대신 NTP 서버에서 시간을 가져옵니다.",
@@ -1450,6 +1529,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "remoteDnsResolve": MessageLookupByLibrary.simpleMessage("원격 DNS 확인"),
     "remove": MessageLookupByLibrary.simpleMessage("제거"),
     "rename": MessageLookupByLibrary.simpleMessage("이름 변경"),
+    "renewSubscription": MessageLookupByLibrary.simpleMessage("구독 갱신"),
     "replace": MessageLookupByLibrary.simpleMessage("바꾸기"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("모두 바꾸기"),
     "request": MessageLookupByLibrary.simpleMessage("요청"),
@@ -1969,6 +2049,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDeviceRequired": MessageLookupByLibrary.simpleMessage(
       "이 구독은 기기 등록이 필요합니다. 제공업체의 안내를 따르세요.",
     ),
+    "subscriptionExpired": MessageLookupByLibrary.simpleMessage("구독이 만료됐습니다"),
+    "subscriptionExpiresInDays": m93,
+    "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
+      "구독이 오늘 만료됩니다",
+    ),
     "subscriptionIdentityDetails": MessageLookupByLibrary.simpleMessage(
       "운영 체제와 기기 모델도 보내기",
     ),
@@ -2013,7 +2098,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "알 수 없는 형식",
     ),
-    "subscriptionImportIgnoredSections": m93,
+    "subscriptionImportIgnoredSections": m94,
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
       "가져올 수 있는 지원 프록시 노드가 없습니다.",
     ),
@@ -2024,12 +2109,13 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "이 소스, 형식 및 동의한 손실 유형에만 적용됩니다. 새로운 손실에는 다시 동의해야 합니다.",
         ),
-    "subscriptionImportReviewSummary": m94,
+    "subscriptionImportReviewSummary": m95,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "구독 가져오기 검토",
     ),
-    "subscriptionImportSkippedNodes": m95,
+    "subscriptionImportSkippedNodes": m96,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
+    "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("구독 알림"),
     "subscriptionProvider": MessageLookupByLibrary.simpleMessage("구독"),
     "subscriptionProviderAccount": MessageLookupByLibrary.simpleMessage("계정"),
     "subscriptionProviderBuyPlan": MessageLookupByLibrary.simpleMessage(
@@ -2041,6 +2127,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage("로고 URL"),
     "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage("지원"),
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("웹사이트"),
+    "subscriptionTrafficLow": m97,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "제공자 업데이트 간격 사용",
     ),
@@ -2120,7 +2207,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
-    "toolsResults": m96,
+    "toolsResults": m98,
     "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
@@ -2129,6 +2216,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsUpdateResourcesConfirm": MessageLookupByLibrary.simpleMessage(
       "규칙과 스크립트를 업데이트하면 구성이 다시 적용되어 연결에 영향을 줄 수 있습니다. 계속할까요?",
     ),
+    "topUpTraffic": MessageLookupByLibrary.simpleMessage("트래픽 충전"),
     "torch": MessageLookupByLibrary.simpleMessage("손전등"),
     "total": MessageLookupByLibrary.simpleMessage("합계"),
     "totalDownload": MessageLookupByLibrary.simpleMessage("다운로드량"),
@@ -2136,8 +2224,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m97,
-    "trafficTotal": m98,
+    "trafficPeak": m99,
+    "trafficTotal": m100,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -2227,12 +2315,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("지금 설치"),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 완료"),
-    "updateInstalledVersion": m99,
+    "updateInstalledVersion": m101,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android가 설치를 마무리하고 있습니다. 이 과정에서 ReClash가 닫힐 수 있습니다.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 중"),
-    "updateMinutes": m100,
+    "updateMinutes": m102,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("나중에"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "릴리스 노트가 없습니다.",
@@ -2268,17 +2356,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fi로 미리 다운로드"),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("설치 준비 완료"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("릴리스 상세 정보"),
-    "updateRemainingTime": m101,
+    "updateRemainingTime": m103,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage("다운로드 재개"),
     "updateRetryCheck": MessageLookupByLibrary.simpleMessage("다시 확인"),
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage("설치 재시도"),
-    "updateSeconds": m102,
+    "updateSeconds": m104,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "전체 릴리스 노트 보기",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("모든 변경 사항 보기"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("업데이트"),
-    "updateTransferSpeed": m103,
+    "updateTransferSpeed": m105,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "다운로드한 업데이트의 무결성을 확인할 수 없습니다.",
     ),
@@ -2310,12 +2398,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "설정한 종료 동작을 사용합니다.",
     ),
-    "urlSchemeConfigCounts": m104,
+    "urlSchemeConfigCounts": m106,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML 또는 JSON 설정을 붙여넣으세요",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("설정 내용"),
-    "urlSchemeConfirmMessage": m105,
+    "urlSchemeConfirmMessage": m107,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("외부 앱 명령"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
       "외부 연결 및 종료 명령은 확인을 요청합니다.",
@@ -2347,7 +2435,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요.",
     ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
-    "urlSchemeImportConfirm": m106,
+    "urlSchemeImportConfirm": m108,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "링크에 YAML 또는 JSON 설정을 포함합니다.",
     ),
@@ -2425,7 +2513,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("예시 사용"),
-    "urlTip": m107,
+    "urlTip": m109,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -2462,9 +2550,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
-    "wallpaperImageLabel": m108,
+    "wallpaperImageLabel": m110,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m109,
+    "wallpaperLibraryFull": m111,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
@@ -2539,7 +2627,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
       "선택한 패널은 처음 열 때 다운로드됩니다. 고정된 릴리스를 SHA-256으로 검증합니다.",
     ),
-    "webDashboardInstalledVersion": m110,
+    "webDashboardInstalledVersion": m112,
     "webDashboardLaunchFailed": MessageLookupByLibrary.simpleMessage(
       "브라우저를 열지 못했습니다.",
     ),
@@ -2571,8 +2659,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m111,
-    "yearsAgoShort": m112,
+    "yearsAgo": m113,
+    "yearsAgoShort": m114,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

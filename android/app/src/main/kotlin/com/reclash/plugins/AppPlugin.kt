@@ -3,6 +3,12 @@ package com.reclash.plugins
 import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
+import androidx.core.app.NotificationManagerCompat
+import com.reclash.ensureSubscriptionChannel
+import com.reclash.isChannelEnabled
+import com.reclash.showNotice
+import com.reclash.SUBSCRIPTION_NOTICE_CHANNEL
+import com.reclash.common.ensureNotificationChannel
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -71,6 +77,8 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private val vpnPrepareCallback = PendingCallback<Boolean>()
 
     private val requestNotificationCallback = PendingCallback<Boolean>()
+
+    private val notificationSettingsCallback = PendingCallback<Boolean>()
 
     private val requestInstalledAppsCallback = PendingCallback<Boolean>()
 
@@ -229,6 +237,59 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 val message = call.argument<String>("message")
                 GlobalState.application.showToast(message)
                 result.success(true)
+            }
+
+            "getNotificationStatus" -> reply(result) {
+                val context = GlobalState.application
+                context.ensureNotificationChannel()
+                context.ensureSubscriptionChannel(call.argument<String>("channelName") ?: "Subscription reminders")
+                mapOf(
+                    "permissionGranted" to NotificationManagerCompat.from(context).areNotificationsEnabled(),
+                    "serviceChannelEnabled" to context.isChannelEnabled(GlobalState.NOTIFICATION_CHANNEL),
+                    "subscriptionChannelEnabled" to context.isChannelEnabled(SUBSCRIPTION_NOTICE_CHANNEL),
+                )
+            }
+
+            "openNotificationSettings" -> {
+                val context = GlobalState.application
+                val channelId = call.argument<String>("channelId")
+                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent(if (channelId == null) Settings.ACTION_APP_NOTIFICATION_SETTINGS else Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        .apply { if (channelId != null) putExtra(Settings.EXTRA_CHANNEL_ID, channelId) }
+                } else {
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:".plus(context.packageName).toUri())
+                }
+                result.success(runCatching {
+                    context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    true
+                }.getOrDefault(false))
+            }
+
+            "requestNotificationsPermission" -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(GlobalState.application, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    result.success(NotificationManagerCompat.from(GlobalState.application).areNotificationsEnabled())
+                } else if (activity == null) {
+                    result.success(false)
+                } else {
+                    notificationSettingsCallback.replace({ granted -> result.success(granted) }, supersededValue = false)
+                    ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_SETTINGS_PERMISSION_REQUEST_CODE)
+                }
+            }
+
+            "showNotice" -> reply(result) {
+                GlobalState.application.showNotice(
+                    channelName = call.argument<String>("channelName") ?: "Subscription reminders",
+                    notificationKey = call.argument<String>("notificationKey") ?: "subscription",
+                    title = call.argument<String>("title") ?: "ReClash",
+                    message = call.argument<String>("message") ?: "",
+                    hideSensitiveOnLockScreen = call.argument<Boolean>("hideSensitiveOnLockScreen") != false,
+                    publicMessage = call.argument<String>("publicMessage") ?: "Subscription reminders",
+                    actionLabel = call.argument("actionLabel"),
+                    actionUrl = call.argument("actionUrl"),
+                )
             }
 
             "openAppSettings" -> {
@@ -545,6 +606,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         scope.cancel()
         invokeVpnPrepareCallback(false)
         invokeRequestNotificationCallback(false)
+        notificationSettingsCallback.resolve(false)
         invokeRequestLocalNetworkCallback(false)
         invokeRequestInstalledAppsCallback(false)
     }
@@ -602,6 +664,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         detachFromActivity()
         invokeVpnPrepareCallback(false)
         invokeRequestNotificationCallback(false)
+        notificationSettingsCallback.resolve(false)
         invokeRequestLocalNetworkCallback(false)
         invokeRequestInstalledAppsCallback(false)
     }
@@ -619,6 +682,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         permissions: Array<String>,
         grantResults: IntArray,
     ): Boolean = when (requestCode) {
+        NOTIFICATION_SETTINGS_PERMISSION_REQUEST_CODE -> {
+            notificationSettingsCallback.resolve(grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED)
+            true
+        }
+
         NOTIFICATION_PERMISSION_REQUEST_CODE -> {
             skipNotificationPermissionRequest = true
             invokeRequestNotificationCallback(true)
@@ -651,5 +719,6 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
         const val INSTALLED_APPS_PERMISSION_REQUEST_CODE = 1003
         const val LOCAL_NETWORK_PERMISSION_REQUEST_CODE = 1004
+        const val NOTIFICATION_SETTINGS_PERMISSION_REQUEST_CODE = 1005
     }
 }

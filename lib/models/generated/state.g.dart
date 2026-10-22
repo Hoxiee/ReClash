@@ -20,6 +20,15 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
   stopText: json['stopText'] as String,
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool,
   showStopAction: json['showStopAction'] as bool? ?? true,
+  notificationSettings: json['notificationSettings'] == null
+      ? const NotificationSettings()
+      : NotificationSettings.fromJson(
+          json['notificationSettings'] as Map<String, dynamic>,
+        ),
+  notificationActiveText: json['notificationActiveText'] as String? ?? '',
+  notificationServerText: json['notificationServerText'] as String? ?? '',
+  notificationTrafficText: json['notificationTrafficText'] as String? ?? '',
+  notificationServerGroup: json['notificationServerGroup'] as String?,
 );
 
 Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
@@ -33,4 +42,9 @@ Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
       'stopText': instance.stopText,
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'showStopAction': instance.showStopAction,
+      'notificationSettings': instance.notificationSettings,
+      'notificationActiveText': instance.notificationActiveText,
+      'notificationServerText': instance.notificationServerText,
+      'notificationTrafficText': instance.notificationTrafficText,
+      'notificationServerGroup': instance.notificationServerGroup,
     };

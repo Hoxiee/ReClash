@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/tunnel"
 	"net"
 	"strings"
 	"sync"
@@ -398,4 +400,15 @@ func UpdateDns(value string) {
 func ResetNetwork() {
 	defer recoverExport("resetNetwork")
 	safeGo("resetNetwork", handleResetNetwork)
+}
+
+func GetNotificationServer(name string) string {
+	defer recoverExport("getNotificationServer")
+	selectMu.Lock()
+	defer selectMu.Unlock()
+	proxies := tunnel.AllProxies()
+	if _, ok := adapterAs[outboundgroup.ProxyGroup](proxies[name]); !ok {
+		return ""
+	}
+	return activeNotificationServer(name, proxies)
 }
