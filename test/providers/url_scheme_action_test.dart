@@ -40,7 +40,6 @@ class _ProfilesAction extends ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
-    ProfileLinkPreview? preview,
   }) async => sources.add(source);
 }
 

@@ -78,6 +78,7 @@ dependencies:
   setup:
     path: plugins/setup
   flutter_timezone: ^5.1.1
+  html: ^0.15.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1957,7 +1957,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Obuna tekshirilmoqda…",
+      "Obuna sahifasi yuklanmoqda…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Bu obuna havolasiga ega profil allaqachon mavjud",
@@ -1982,7 +1982,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Baʼzi qismlar qoʻllab-quvvatlanmaydi — qoʻshishdan oldin ularni koʻrsatamiz.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Obuna tarkibini koʻrib boʻlmadi. Uni baribir qoʻshishingiz mumkin.",
+      "Obuna sahifasini yuklab bo‘lmadi. Uni baribir qo‘shishingiz mumkin.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Serverlar"),

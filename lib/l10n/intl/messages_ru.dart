@@ -1932,7 +1932,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Проверяем подписку…",
+      "Загрузка страницы подписки…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Профиль с этим URL подписки уже добавлен",
@@ -1955,7 +1955,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Часть настроек не поддерживается — покажем их перед добавлением.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Не удалось заглянуть в подписку — добавить её всё равно можно.",
+      "Не удалось загрузить страницу подписки. Вы всё равно можете её добавить.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Серверы"),

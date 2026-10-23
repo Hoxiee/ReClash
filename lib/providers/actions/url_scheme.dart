@@ -51,7 +51,6 @@ class UrlSchemeAction extends _$UrlSchemeAction {
           source,
           label: choice.label,
           clientSettings: choice.clientSettings,
-          preview: choice.preview,
         );
   }
 

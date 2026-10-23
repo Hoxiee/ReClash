@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -11,9 +10,9 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
-import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
-import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/subscriptions/page_preview.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -55,41 +54,14 @@ Future<ProviderContainer> _pumpHost(
   return container;
 }
 
-ProfileLinkPreview _preview({String? announce}) {
-  final draft = Profile.normal(url: 'https://sub.example/sub');
-  final metadata = SubscriptionMetadata({
+SubscriptionPagePreview _preview({String? announce}) => SubscriptionPagePreview(
+  label: 'Acme Home',
+  metadata: SubscriptionMetadata({
     'provider.name': 'Acme VPN',
     'provider.announce': ?announce,
-  });
-  return (
-    draft: draft,
-    prepared: PreparedSubscriptionUpdate(
-      profileId: draft.id,
-      sourceUrl: draft.url,
-      sourceAgeSecretKey: '',
-      sourcePreferences: draft.subscriptionPreferences,
-      payload: SubscriptionImportResult(
-        bytes: Uint8List(0),
-        format: SubscriptionFormat.clash,
-        summary: const SubscriptionImportSummary(nodes: 14),
-      ),
-      metadata: SubscriptionMetadataResult(
-        metadata: metadata,
-        source: SubscriptionDataSource.http,
-      ),
-      subscriptionInfo: const SubscriptionInfo(
-        download: 1 << 30,
-        total: 100 << 30,
-      ),
-      snapshot: SubscriptionSnapshot(
-        metadata: metadata,
-        receivedAt: DateTime.utc(2026),
-      ),
-      label: 'Acme Home',
-      client: SubscriptionClientPreset.clash,
-    ),
-  );
-}
+  }),
+  info: const SubscriptionInfo(download: 1 << 30, total: 100 << 30),
+);
 
 FilledButton _disclaimerAgreeButton(WidgetTester tester) {
   return tester.widget<FilledButton>(
@@ -183,59 +155,57 @@ void main() {
       final choice = await result;
       expect(choice?.clientSettings.preset, SubscriptionClientPreset.auto);
       expect(choice?.label, 'Home');
-      expect(choice?.preview, isNull);
       expect(tester.takeException(), isNull);
     });
   }
 
-  testWidgets('import previews the subscription and hands the result on', (
-    tester,
-  ) async {
-    await _pumpHost(tester);
-    final l10n = currentAppLocalizations;
-    final requested = <SubscriptionClientPreset>[];
-    final pending = Completer<ProfileLinkPreview>();
-    final preview = _preview(announce: 'Welcome aboard');
-    final result = showProfileImportDialog(
-      const ProfileLinkSource(
-        url: 'https://sub.example/private?token=secret',
-        preset: SubscriptionClientPreset.happ,
-      ),
-      preview: (source, settings, {cancellation}) {
-        requested.add(settings.preset);
-        return pending.future;
-      },
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+  testWidgets(
+    'import previews only page metadata and switches clients locally',
+    (tester) async {
+      await _pumpHost(tester);
+      final l10n = currentAppLocalizations;
+      var requests = 0;
+      final pending = Completer<SubscriptionPagePreview>();
+      final preview = _preview(announce: 'Welcome aboard');
+      final result = showProfileImportDialog(
+        const ProfileLinkSource(
+          url: 'https://sub.example/private?token=secret',
+          preset: SubscriptionClientPreset.happ,
+        ),
+        preview: (source, {cancellation}) {
+          requests++;
+          return pending.future;
+        },
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
 
-    expect(requested, [SubscriptionClientPreset.happ]);
-    expect(find.text(l10n.profileImportChecking), findsWidgets);
+      expect(requests, 1);
+      expect(find.text(l10n.profileImportChecking), findsWidgets);
 
-    pending.complete(preview);
-    await tester.pumpAndSettle();
+      pending.complete(preview);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Acme VPN'), findsOneWidget);
-    expect(find.text('Welcome aboard'), findsOneWidget);
-    expect(find.text('14'), findsOneWidget);
-    expect(
-      find.textContaining(l10n.profileImportServerCount(14)),
-      findsOneWidget,
-    );
-    expect(
-      tester.widget<EditableText>(find.byType(EditableText)).controller.text,
-      'Acme Home',
-    );
-    await tester.enterText(find.byType(EditableText), 'Work');
-    await tester.tap(find.text(l10n.add));
-    await tester.pumpAndSettle();
+      expect(find.text('Acme VPN'), findsOneWidget);
+      expect(find.text('Welcome aboard'), findsOneWidget);
+      expect(find.text(l10n.profileImportServers), findsNothing);
+      await tester.tap(find.text(l10n.subscriptionClientReclash));
+      await tester.pumpAndSettle();
+      expect(requests, 1);
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+        'Acme Home',
+      );
+      await tester.enterText(find.byType(EditableText), 'Work');
+      await tester.tap(find.text(l10n.add));
+      await tester.pumpAndSettle();
 
-    final choice = await result;
-    expect(choice?.label, 'Work');
-    expect(choice?.clientSettings.preset, SubscriptionClientPreset.happ);
-    expect(choice?.preview, same(preview));
-    expect(tester.takeException(), isNull);
-  });
+      final choice = await result;
+      expect(choice?.label, 'Work');
+      expect(choice?.clientSettings.preset, SubscriptionClientPreset.auto);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('a failed preview can be retried and still imports', (
     tester,
@@ -245,7 +215,7 @@ void main() {
     var calls = 0;
     final result = showProfileImportDialog(
       const ProfileLinkSource(url: 'https://sub.example/sub'),
-      preview: (source, settings, {cancellation}) async {
+      preview: (source, {cancellation}) async {
         calls++;
         throw const SubscriptionUpdateCancelled();
       },
@@ -260,8 +230,32 @@ void main() {
     await tester.tap(find.text(l10n.add));
     await tester.pumpAndSettle();
     final choice = await result;
-    expect(choice?.preview, isNull);
     expect(choice?.clientSettings.preset, SubscriptionClientPreset.auto);
+  });
+
+  testWidgets('closing import cancels the page request and ignores late data', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final pending = Completer<SubscriptionPagePreview>();
+    SubscriptionCancellation? requestCancellation;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub'),
+      preview: (source, {cancellation}) {
+        requestCancellation = cancellation;
+        return pending.future;
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text(currentAppLocalizations.cancel));
+    await tester.pumpAndSettle();
+    expect(await result, isNull);
+    expect(requestCancellation?.cancelled, isTrue);
+    pending.complete(_preview());
+    await tester.pumpAndSettle();
+    expect(find.text('Acme VPN'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('an already added subscription is not fetched or offered', (
@@ -273,7 +267,7 @@ void main() {
     final result = showProfileImportDialog(
       const ProfileLinkSource(url: 'https://sub.example/sub'),
       duplicateOf: 'Home',
-      preview: (source, settings, {cancellation}) async {
+      preview: (source, {cancellation}) async {
         calls++;
         return _preview();
       },
@@ -295,7 +289,7 @@ void main() {
         url: 'https://sub.example/private?token=secret',
         preset: SubscriptionClientPreset.incy,
       ),
-      preview: (source, settings, {cancellation}) async =>
+      preview: (source, {cancellation}) async =>
           _preview(announce: 'A long provider message ' * 6),
     );
     await tester.pumpAndSettle();

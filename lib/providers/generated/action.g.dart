@@ -502,7 +502,7 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'26855fe5d6cf57e1e5e171805e8b86fc5fe5400b';
+String _$profilesActionHash() => r'4fc75b0ecf4d3ac175a361587eed6e31c2b40832';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
   void build();
@@ -554,7 +554,7 @@ final class UrlSchemeActionProvider
   }
 }
 
-String _$urlSchemeActionHash() => r'61e4eae52a056c0b67c2b994bcb87590937f4f12';
+String _$urlSchemeActionHash() => r'fd5127d86bc1196499c2cb8659539493344c3d06';
 
 abstract class _$UrlSchemeAction extends $Notifier<void> {
   void build();

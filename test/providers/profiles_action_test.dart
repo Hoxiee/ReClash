@@ -474,59 +474,77 @@ void main() {
       }
     }
 
-    testWidgets('a confirmed preview is committed without a second fetch', (
-      tester,
-    ) async {
-      await pumpHost(tester);
-      await tester.runAsync(() async {
-        final previousOverrides = HttpOverrides.current;
-        HttpOverrides.global = null;
-        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-        var requests = 0;
-        server.listen((request) async {
-          requests++;
-          request.response
-            ..headers.set(
-              'announce',
-              'base64:${base64.encode(utf8.encode('Привет'))}',
-            )
-            ..write(
+    testWidgets(
+      'page preview sends no client identity and import fetches after consent',
+      (tester) async {
+        await pumpHost(tester);
+        await tester.runAsync(() async {
+          final previousOverrides = HttpOverrides.current;
+          HttpOverrides.global = null;
+          final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          var requests = 0;
+          server.listen((request) async {
+            requests++;
+            if (requests == 1) {
+              expect(request.headers.value('accept'), contains('text/html'));
+              expect(
+                request.headers.value('user-agent'),
+                startsWith('Mozilla/'),
+              );
+              for (final name in [
+                'x-hwid',
+                'x-device-os',
+                'x-ver-os',
+                'x-device-model',
+                'x-device-locale',
+              ]) {
+                expect(request.headers.value(name), isNull);
+              }
+              request.response.headers.contentType = ContentType.html;
+              request.response.write(
+                '<html><head><title>Acme</title></head></html>',
+              );
+              await request.response.close();
+              return;
+            }
+            expect(
+              request.headers.value('user-agent'),
+              isNot(startsWith('Mozilla/')),
+            );
+            request.response.write(
               'proxies:\n  - name: test\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\nrules: [MATCH,DIRECT]',
             );
-          await request.response.close();
-        });
-        try {
-          final url = 'http://127.0.0.1:${server.port}/sub';
-          final source = await resolveProfileLink(
-            'happ://add/${Uri.encodeComponent(url)}',
-          );
-          final action = container.read(profilesActionProvider.notifier);
-          final settings = const SubscriptionClientSettings.forNewProfile()
-              .copyWith(preset: SubscriptionClientPreset.happ);
-          final preview = await action.previewProfileLinkSource(
-            source,
-            settings,
-          );
-          expect(requests, 1);
-          expect(preview.prepared.snapshot.metadata.announce, 'Привет');
+            await request.response.close();
+          });
+          try {
+            final url = 'http://127.0.0.1:${server.port}/sub';
+            final source = await resolveProfileLink(
+              'happ://add/${Uri.encodeComponent(url)}',
+            );
+            final action = container.read(profilesActionProvider.notifier);
+            final settings = const SubscriptionClientSettings.forNewProfile()
+                .copyWith(preset: SubscriptionClientPreset.happ);
+            final preview = await action.previewProfileLinkSource(source);
+            expect(requests, 1);
+            expect(preview.metadata.name, 'Acme');
+            expect(container.read(profilesProvider), isEmpty);
 
-          final profile = await action.importProfileLinkSource(
-            source,
-            label: 'Mine',
-            select: false,
-            clientSettings: settings,
-            preview: preview,
-          );
-          expect(requests, 1);
-          expect(profile.id, preview.draft.id);
-          expect(profile.label, 'Mine');
-          expect((await profile.file).existsSync(), isTrue);
-        } finally {
-          await server.close(force: true);
-          HttpOverrides.global = previousOverrides;
-        }
-      });
-    });
+            final profile = await action.importProfileLinkSource(
+              source,
+              label: 'Mine',
+              select: false,
+              clientSettings: settings,
+            );
+            expect(requests, 2);
+            expect(profile.label, 'Mine');
+            expect((await profile.file).existsSync(), isTrue);
+          } finally {
+            await server.close(force: true);
+            HttpOverrides.global = previousOverrides;
+          }
+        });
+      },
+    );
 
     for (final explicitLabel in [false, true]) {
       test(

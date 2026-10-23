@@ -1904,7 +1904,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Abunalyk barlanýar…",
+      "Abuna sahypasy ýüklenýär…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Bu abuna URL-li profil eýýäm bar",
@@ -1929,7 +1929,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Käbir bölekler goldanmaýar; goşmazdan öň olary görkezeris.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Abunalygyň mazmunyny görüp bolmady. Ony barybir goşup bilersiňiz.",
+      "Abuna sahypasyny ýükläp bolmady. Ony şonda-da goşup bilersiňiz.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Serwerler"),

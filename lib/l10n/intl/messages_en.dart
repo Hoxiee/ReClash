@@ -1857,7 +1857,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Checking the subscription…",
+      "Loading subscription page…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "A profile with this subscription URL already exists",
@@ -1880,7 +1880,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Some parts aren’t supported; you’ll review them before adding.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Couldn’t look inside the subscription. You can still add it.",
+      "Couldn’t load the subscription page. You can still add it.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Servers"),
