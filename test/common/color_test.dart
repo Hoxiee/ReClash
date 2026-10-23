@@ -162,6 +162,47 @@ void main() {
     expect(_hct(soft.primary).chroma, lessThan(_hct(blue).chroma * 0.6));
   });
 
+  test('raised contrast widens text and accent contrast in every style', () {
+    const blue = Color(0xFF007AFF);
+    for (final style in ColorStyle.values) {
+      for (final brightness in Brightness.values) {
+        final schemes = [
+          for (final contrast in ColorContrast.values)
+            seededColorScheme(
+              seedColor: blue,
+              brightness: brightness,
+              style: style,
+              contrast: contrast,
+            ),
+        ];
+        final reason = '$style $brightness';
+        for (final (lower, higher) in [
+          (schemes[0], schemes[1]),
+          (schemes[1], schemes[2]),
+        ]) {
+          for (final (role, measure) in [
+            ('onSurfaceVariant', (ColorScheme s) => s.onSurfaceVariant),
+            ('outline', (ColorScheme s) => s.outline),
+            ('primary', (ColorScheme s) => s.primary),
+          ]) {
+            expect(
+              _contrast(measure(higher), higher.surface),
+              greaterThanOrEqualTo(_contrast(measure(lower), lower.surface)),
+              reason: '$reason $role',
+            );
+          }
+        }
+        expect(
+          _contrast(schemes[2].onSurfaceVariant, schemes[2].surface),
+          greaterThan(
+            _contrast(schemes[0].onSurfaceVariant, schemes[0].surface),
+          ),
+          reason: reason,
+        );
+      }
+    }
+  });
+
   test('tinted washes the surfaces with the seed and keeps their tones', () {
     const blue = Color(0xFF007AFF);
     for (final brightness in Brightness.values) {

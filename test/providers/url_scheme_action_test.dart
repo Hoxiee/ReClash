@@ -40,6 +40,7 @@ class _ProfilesAction extends ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
+    ProfileLinkPreview? preview,
   }) async => sources.add(source);
 }
 
@@ -278,8 +279,7 @@ void main() {
     Future<void> handle(
       String input, {
       Future<bool> Function(ReClashCommand)? confirmCommand,
-      Future<SubscriptionClientSettings?> Function(ProfileLinkSource)?
-      confirmImport,
+      Future<ProfileLinkImport?> Function(ProfileLinkSource)? confirmImport,
       Future<void> Function(String, String)? openRouting,
       bool Function()? isCurrent,
     }) => container
@@ -288,8 +288,7 @@ void main() {
           input,
           confirmCommand: confirmCommand ?? (_) async => true,
           confirmImport:
-              confirmImport ??
-              (_) async => const SubscriptionClientSettings.forNewProfile(),
+              confirmImport ?? (_) async => const ProfileLinkImport(),
           openRouting: openRouting ?? (_, _) async {},
           isCurrent: isCurrent,
         );
@@ -302,7 +301,7 @@ void main() {
         encodeRcxLink(yaml),
         confirmImport: (_) async {
           imports++;
-          return const SubscriptionClientSettings.forNewProfile();
+          return const ProfileLinkImport();
         },
         openRouting: (text, origin) async => opened.add((text, origin)),
       );
@@ -340,7 +339,7 @@ void main() {
         },
         confirmImport: (_) async {
           imports++;
-          return const SubscriptionClientSettings.forNewProfile();
+          return const ProfileLinkImport();
         },
       );
       expect(confirmed, [ReClashCommand.disconnect]);
@@ -375,7 +374,7 @@ void main() {
           confirmImport: (source) async {
             expect(profiles.sources, isEmpty);
             confirmed = source;
-            return const SubscriptionClientSettings.forNewProfile();
+            return const ProfileLinkImport();
           },
         );
         expect(profiles.sources.single, same(confirmed));
@@ -418,7 +417,7 @@ void main() {
           input,
           confirmImport: (_) async {
             confirmations++;
-            return const SubscriptionClientSettings.forNewProfile();
+            return const ProfileLinkImport();
           },
         );
         expect(container.read(setupSessionProvider).pendingLink, input);
@@ -436,7 +435,7 @@ void main() {
           input,
           confirmImport: (_) async {
             session.setActive(true);
-            return const SubscriptionClientSettings.forNewProfile();
+            return const ProfileLinkImport();
           },
         );
         expect(container.read(setupSessionProvider).pendingLink, input);
@@ -459,7 +458,7 @@ void main() {
             },
             confirmImport: (_) async {
               confirmations++;
-              return const SubscriptionClientSettings.forNewProfile();
+              return const ProfileLinkImport();
             },
           ),
           throwsA(isA<UrlSchemeException>()),
@@ -479,7 +478,7 @@ void main() {
           isCurrent: () => current,
           confirmImport: (_) async {
             current = false;
-            return const SubscriptionClientSettings.forNewProfile();
+            return const ProfileLinkImport();
           },
         );
         expect(profiles.sources, isEmpty);
@@ -488,7 +487,7 @@ void main() {
 
     test('disposal prevents importing after confirmation', () async {
       final entered = Completer<void>();
-      final gate = Completer<SubscriptionClientSettings?>();
+      final gate = Completer<ProfileLinkImport?>();
       final pending = handle(
         'https://example.com/sub',
         confirmImport: (_) {
@@ -498,7 +497,7 @@ void main() {
       );
       await entered.future;
       container.dispose();
-      gate.complete(const SubscriptionClientSettings.forNewProfile());
+      gate.complete(const ProfileLinkImport());
       await pending;
       expect(profiles.sources, isEmpty);
     });

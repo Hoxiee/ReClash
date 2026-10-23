@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/秒",
   "updateRemainingTime": "残り{time}",
   "updateSeconds": "{count}秒",
-  "updateMinutes": "{count}分"
+  "updateMinutes": "{count}分",
+  "updateResumeShort": "再開"
 }

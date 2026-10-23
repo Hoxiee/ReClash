@@ -23,5 +23,6 @@
   "onDemandResume": "Resume",
   "onDemandPause": "Pause",
   "onDemandFullStop": "Full stop",
-  "onDemandFullStopDesc": "Remove TUN and close local proxy ports while paused. The app keeps watching the network to resume automatically."
+  "onDemandFullStopDesc": "Remove TUN and close local proxy ports while paused. The app keeps watching the network to resume automatically.",
+  "pickNetworkPermissionDesc": "Allow location access to see nearby Wi-Fi networks, or enter a network manually."
 }

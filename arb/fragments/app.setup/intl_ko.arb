@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "연결할 각 앱에 로컬 프록시 주소를 설정하세요.",
   "setupCoverageAndroidDescription": "Android에서 VPN 연결 생성 권한을 요청합니다. 앱 선택은 접근 설정에서 할 수 있습니다.",
   "setupCoverageNote": "모든 트래픽을 가로채도 전부 서버로 전송되는 것은 아닙니다. 직접 경로는 유지됩니다.",
-  "setupRegionConfirm": "이 지역 설정 사용",
-  "setupRegionDescription": "추천 지역은 인터페이스 언어가 아니라 이 기기에서 가져옵니다. 네트워크와 일치할 때만 적용하세요.",
   "setupRegionNeutral": "프로필 기본값 유지",
   "setupCheckAction": "연결 확인",
   "setupCheckingTitle": "연결 및 확인 중",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "서비스 확인 중",
   "setupPhaseAlternatives": "다른 서버 찾는 중",
   "setupStepStatus": "{total}개 중 {step}단계",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "결과는 모든 앱이나 웹사이트가 아니라 이 경로에만 해당합니다.",
   "setupConnectedTitle": "연결이 작동합니다",
   "setupConnectedDescription": "선택한 경로가 응답했습니다. 트래픽은 프로필 규칙을 따릅니다.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "연결하지 않고 저장",
   "setupRepeat": "다시 확인",
   "setupTryServer": "{server} 사용해 보기",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "이 서버는 별도 검사에 응답했습니다. 전환한 뒤 전체 경로를 다시 확인하세요.",
   "setupReport": "확인 보고서",
   "setupReceipt": "내 연결",
@@ -73,10 +86,38 @@
   "setupRestart": "연결 설정",
   "setupLaterNote": "설정이 완료되지 않았으며 연결도 확인되지 않았습니다.",
   "setupProfileCount": "사용 가능한 프로필 {count}개",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "이 프로필은 암호화되어 있습니다. 계속하려면 age 키를 입력하세요.",
   "setupFinishDescription": "설정에서 모든 선택을 변경할 수 있습니다.",
   "setupRouteChanged": "확인 중 경로가 변경되었습니다. 현재 연결을 다시 확인하세요.",
   "setupUnknownError": "작업이 완료되지 않았습니다. 다시 시도하거나 세부정보를 여세요.",
-  "setupRequestPermission": "연결 허용"
+  "setupRequestPermission": "연결 허용",
+  "setupReceiptRegion": "지역",
+  "setupRegionTitle": "어디에서 연결하나요?",
+  "setupRegionStepDescription": "ReClash가 DNS, MTU, 직접 경로를 해당 국가의 네트워크에 맞춥니다. 인터페이스 언어는 바뀌지 않습니다.",
+  "setupRegionNeutralDescription": "지역 설정을 바꾸지 않습니다.",
+  "setupRegionUnchosen": "선택하지 않으면 현재 지역 설정이 그대로 유지됩니다.",
+  "setupRecommended": "권장",
+  "setupDirectTitle": "국내 사이트와 앱은 직접 연결",
+  "setupDirectDescription": "국내 서비스는 서버 없이 열립니다. 더 빠르고, 은행이나 공공 사이트에서 차단되지 않습니다. 다음 규칙이 전역 규칙에 추가됩니다:",
+  "setupDirectAppsScanning": "국내 앱을 찾는 중…",
+  "setupDirectApps": "VPN을 우회하는 앱: {count}",
+  "setupDirectAppsReview": "이 앱들은 VPN 없이 작동합니다. 목록은 나중에 접근 제어에서 바꿀 수 있습니다.",
+  "setupDirectAppsNone": "국내 앱을 찾지 못했습니다. 사이트는 계속 직접 연결됩니다.",
+  "setupLeaveTitle": "설정을 종료할까요?",
+  "setupLeaveMessage": "ReClash가 종료됩니다. 선택한 내용은 저장되며 다음에 앱을 열면 설정이 이어집니다.",
+  "setupProfileContinueHint": "계속하려면 프로필을 추가하거나 선택하세요.",
+  "setupProfileImportHint": "제공자의 이메일, 봇 또는 계정 페이지의 링크를 붙여 넣거나 파일 또는 QR 코드를 선택하세요.",
+  "setupProfileImportAnother": "다른 프로필 추가",
+  "setupChangeSettings": "설정 변경",
+  "setupTipsTitle": "시도해 볼 수 있는 방법",
+  "setupTipNetwork": "ReClash 없이 인터넷이 되는지 확인하세요.",
+  "setupTipProfile": "프로필을 업데이트하거나 설정 후 다른 서버를 선택하세요.",
+  "setupTipCoverage": "다른 적용 범위를 선택하세요. 일부 네트워크는 VPN 연결을 차단합니다."
 }

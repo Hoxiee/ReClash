@@ -2,104 +2,23 @@
   "appRegion": "Región de la aplicación",
   "regionalAdaptation": "Adaptación regional",
   "regionTitle": "Perfil regional",
-  "regionIntro": "Valores de red y comprobaciones de servicios regionales, independientes del idioma de la interfaz.",
-  "regionWarning": "Elegir un país solo actualiza la vista previa. Los valores regionales cambian al aplicarla.",
-  "regionChoose": "Elige un país",
-  "regionDetected": "Sugerida: {region} · {source}",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "regionUseDetected": "Usar región detectada",
-  "regionPreviewTitle": "Vista previa",
-  "regionPreviewBase": "Perfil del país: {region}",
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewMtu": "MTU de TUN: {value}",
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewServices": "Comprobaciones de servicios predeterminadas: {value}",
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewRules": "La selección de proxy y tus reglas de enrutamiento no cambiarán.",
-  "regionPreviewAndroid": "En Android, los cambios de MTU o exclusiones pueden requerir confirmar el reinicio de la VPN. Las aplicaciones se seleccionan aparte.",
-  "regionCustomPreserved": "Se conservan tus DNS y MTU personalizados, lista de exclusiones, reglas y preferencias de servicios.",
-  "regionNoChanges": "Los valores de red y las comprobaciones no cambian.",
+  "regionIntro": "Elige servidores DNS, MTU de TUN, lista de exclusiones y comprobaciones de servicios para tu país. El idioma de la interfaz no cambia.",
+  "regionCustomPreserved": "Los valores que cambiaste tú se mantienen.",
+  "regionNoChanges": "Tus ajustes no cambian.",
   "regionApply": "Aplicar región",
-  "regionNoDetected": "No hay una sugerencia coincidente. Solo se usan la zona horaria y la configuración regional del sistema.",
   "regionSelectBeforeApps": "Elige una región compatible antes de usar las sugerencias regionales de aplicaciones.",
-  "regionNotSet": "Desactivada",
-  "regionOther": "Otra / general",
+  "regionNotSet": "Sin seleccionar",
+  "regionOther": "Otro país",
   "regionRussia": "Rusia",
   "regionIran": "Irán",
   "regionChina": "China",
   "regionEgypt": "Egipto",
-  "regionSourceTimeZone": "zona horaria",
-  "regionSourceLocaleCountry": "país de la configuración regional del sistema",
-  "regionSourceLocaleLanguage": "idioma del sistema",
-  "regionCurrent": "Región actual",
-  "regionDetectionTitle": "Sugerencia del dispositivo",
-  "regionProfileDefaults": "Valores del perfil",
   "regionNoServices": "Comprobaciones de servicios desactivadas",
-  "regionDnsSettings": "La región {region} propone estos DNS: {value}. Los ajustes manuales de esta pantalla tienen prioridad.",
-  "regionTunSettings": "La región {region} propone MTU {value}. Añade un ajuste de MTU para usar tu propio valor.",
-  "regionBypassSettings": "La región {region} usa: {value}. Una lista personalizada sustituye los valores regionales.",
   "regionSelectApps": "Seleccionar aplicaciones por región",
   "regionAppsPreviewTitle": "Vista previa de aplicaciones",
   "regionAppsPreview": "{region}: {bypassed} aplicaciones en la lista de exclusión de VPN y {proxied} en la lista de VPN. Se sustituirán ambas listas; el modo y los demás ajustes no cambian. Las coincidencias de paquetes y SDK son sugerencias: revisa el resultado al aplicarlo.",
   "regionAppsEmpty": "Ninguna aplicación coincide con esta región. Tus listas no cambian.",
   "regionAppsChanged": "La región o las listas cambiaron. Repite la selección con los ajustes actuales.",
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -112,5 +31,13 @@
         "type": "int"
       }
     }
-  }
+  },
+  "regionRecommended": "Recomendado para este dispositivo",
+  "regionChangesTitle": "Qué cambia",
+  "regionChangeDns": "Servidores DNS",
+  "regionChangeMtu": "MTU de TUN",
+  "regionChangeServices": "Comprobaciones de servicios",
+  "restoreDefaults": "Restaurar valores predeterminados",
+  "networkRestoreDefaultsTip": "La lista de exclusiones y el MTU de TUN vuelven a los valores de la región seleccionada.",
+  "dnsRestoreDefaultsTip": "Se eliminan todas las anulaciones de DNS y se vuelven a establecer los servidores DNS de la región seleccionada."
 }

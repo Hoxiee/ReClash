@@ -107,6 +107,9 @@ class _TestSetupSession extends SetupSession {
   int probeCalls = 0;
   int nativeRuntimeCalls = 0;
   final List<String> probedUrls = [];
+  final List<List<String>> directRules = [];
+  List<String> domesticApps = const [];
+  final List<String> scannedRegions = [];
 
   void setFinishReady() {
     state = state.copyWith(
@@ -127,6 +130,17 @@ class _TestSetupSession extends SetupSession {
       return gate.future;
     }
     return saveResult;
+  }
+
+  @override
+  Future<void> addDirectRules(List<String> rawRules) async {
+    directRules.add(rawRules);
+  }
+
+  @override
+  Future<List<String>> domesticPackages(String regionCode) async {
+    scannedRegions.add(regionCode);
+    return domesticApps;
   }
 
   @override
@@ -205,7 +219,7 @@ void main() {
     AppSettingProps settings = const AppSettingProps(
       setupCompleted: false,
       acceptedDisclaimerVersion: disclaimerVersion,
-      setupStep: 3,
+      setupStep: 4,
     ),
     bool running = false,
     bool safeMode = false,
@@ -458,10 +472,7 @@ void main() {
     await harness.container.read(setupSessionProvider.notifier).check();
 
     expect(harness.container.read(setupSessionProvider).report, isNull);
-    expect(
-      harness.container.read(setupSessionProvider).step,
-      SetupStep.coverage,
-    );
+    expect(harness.container.read(setupSessionProvider).step, SetupStep.region);
     expect(fake.prepareCalls, 0);
     expect(fake.startCalls, 0);
     expect(fake.probeCalls, 0);
@@ -617,7 +628,7 @@ void main() {
       vpnOptions: _vpnOptions,
       settings: const AppSettingProps(
         setupCompleted: false,
-        setupStep: 3,
+        setupStep: 4,
         acceptedDisclaimerVersion: disclaimerVersion,
         autoRun: true,
       ),
@@ -688,7 +699,7 @@ void main() {
         settings: const AppSettingProps(
           setupCompleted: false,
           acceptedDisclaimerVersion: disclaimerVersion,
-          setupStep: 3,
+          setupStep: 4,
           autoRun: true,
         ),
       );
@@ -955,5 +966,151 @@ void main() {
       const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
     );
     await operation;
+  });
+
+  group('regional direct routes', () {
+    const russia = AppSettingProps(
+      setupCompleted: false,
+      acceptedDisclaimerVersion: disclaimerVersion,
+      setupStep: 4,
+      setupCoverage: 'tun',
+      setupRegionCode: 'RU',
+      setupRegionChosen: true,
+    );
+
+    test('checking adds the region preset to the global rules', () async {
+      final harness = makeHarness(settings: russia);
+      addTearDown(harness.container.dispose);
+
+      await harness.container.read(setupSessionProvider.notifier).check();
+
+      expect(harness.session.directRules, [
+        ['GEOSITE,category-ru,DIRECT', 'GEOIP,RU,DIRECT,no-resolve'],
+      ]);
+      expect(harness.container.read(appSettingProvider).regionCode, 'RU');
+    });
+
+    test('a declined preset adds no rules and stays declined', () async {
+      final harness = makeHarness(settings: russia);
+      addTearDown(harness.container.dispose);
+      final session = harness.container.read(setupSessionProvider.notifier);
+
+      session.selectDirectRoutes(false);
+      await session.check();
+
+      expect(harness.session.directRules, isEmpty);
+      expect(
+        harness.container.read(appSettingProvider).setupDirectRoutes,
+        isFalse,
+      );
+    });
+
+    test('a neutral region adds no rules', () async {
+      final harness = makeHarness(
+        settings: russia.copyWith(setupRegionCode: null),
+      );
+      addTearDown(harness.container.dispose);
+
+      await harness.container.read(setupSessionProvider.notifier).check();
+
+      expect(harness.session.directRules, isEmpty);
+    });
+
+    test('Android VPN lets the found local apps bypass it', () async {
+      final fake = _TestSetupSession()
+        ..android = true
+        ..nativeAcknowledgement = DateTime.utc(2025)
+        ..domesticApps = ['ru.bank', 'ru.gov'];
+      final harness = makeHarness(session: fake, settings: russia);
+      addTearDown(harness.container.dispose);
+      harness.container
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (props) => props.copyWith(
+              accessControlProps: const AccessControlProps(
+                rejectList: ['org.game'],
+              ),
+            ),
+          );
+
+      await harness.container.read(setupSessionProvider.notifier).check();
+
+      final access = harness.container
+          .read(vpnSettingProvider)
+          .accessControlProps;
+      expect(fake.scannedRegions, ['RU']);
+      expect(access.enable, isTrue);
+      expect(access.mode, AccessControlMode.rejectSelected);
+      expect(access.rejectList, ['org.game', 'ru.bank', 'ru.gov']);
+    });
+
+    test('an allow list drops the local apps instead', () async {
+      final fake = _TestSetupSession()
+        ..android = true
+        ..nativeAcknowledgement = DateTime.utc(2025)
+        ..domesticApps = ['ru.bank'];
+      final harness = makeHarness(session: fake, settings: russia);
+      addTearDown(harness.container.dispose);
+      harness.container
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (props) => props.copyWith(
+              accessControlProps: const AccessControlProps(
+                enable: true,
+                mode: AccessControlMode.acceptSelected,
+                acceptList: ['ru.bank', 'org.browser'],
+              ),
+            ),
+          );
+
+      await harness.container.read(setupSessionProvider.notifier).check();
+
+      final access = harness.container
+          .read(vpnSettingProvider)
+          .accessControlProps;
+      expect(access.mode, AccessControlMode.acceptSelected);
+      expect(access.acceptList, ['org.browser']);
+    });
+
+    test('changing the region scans its apps again', () async {
+      final fake = _TestSetupSession()
+        ..android = true
+        ..domesticApps = ['ru.bank'];
+      final harness = makeHarness(session: fake, settings: russia);
+      addTearDown(harness.container.dispose);
+      final session = harness.container.read(setupSessionProvider.notifier);
+
+      await session.scanDirectApps();
+      expect(harness.container.read(setupSessionProvider).draft.directApps, [
+        'ru.bank',
+      ]);
+      fake.domesticApps = ['ir.bank'];
+      session.selectRegion('IR');
+      await session.scanDirectApps();
+
+      expect(fake.scannedRegions, ['RU', 'IR']);
+      expect(harness.container.read(setupSessionProvider).draft.directApps, [
+        'ir.bank',
+      ]);
+    });
+
+    test('local proxy coverage does not touch access control', () async {
+      final fake = _TestSetupSession()
+        ..android = true
+        ..domesticApps = ['ru.bank'];
+      final harness = makeHarness(
+        session: fake,
+        settings: russia.copyWith(setupCoverage: 'local'),
+      );
+      addTearDown(harness.container.dispose);
+
+      await harness.container.read(setupSessionProvider.notifier).check();
+
+      expect(fake.scannedRegions, isEmpty);
+      expect(
+        harness.container.read(vpnSettingProvider).accessControlProps.enable,
+        isFalse,
+      );
+    });
   });
 }

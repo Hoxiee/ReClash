@@ -954,104 +954,31 @@
   "appRegion": "Región de la aplicación",
   "regionalAdaptation": "Adaptación regional",
   "regionTitle": "Perfil regional",
-  "regionIntro": "Valores de red y comprobaciones de servicios regionales, independientes del idioma de la interfaz.",
-  "regionWarning": "Elegir un país solo actualiza la vista previa. Los valores regionales cambian al aplicarla.",
-  "regionChoose": "Elige un país",
-  "regionDetected": "Sugerida: {region} · {source}",
-  "regionUseDetected": "Usar región detectada",
-  "regionPreviewTitle": "Vista previa",
-  "regionPreviewBase": "Perfil del país: {region}",
-  "regionPreviewMtu": "MTU de TUN: {value}",
-  "regionPreviewServices": "Comprobaciones de servicios predeterminadas: {value}",
-  "regionPreviewRules": "La selección de proxy y tus reglas de enrutamiento no cambiarán.",
-  "regionPreviewAndroid": "En Android, los cambios de MTU o exclusiones pueden requerir confirmar el reinicio de la VPN. Las aplicaciones se seleccionan aparte.",
-  "regionCustomPreserved": "Se conservan tus DNS y MTU personalizados, lista de exclusiones, reglas y preferencias de servicios.",
-  "regionNoChanges": "Los valores de red y las comprobaciones no cambian.",
+  "regionIntro": "Elige servidores DNS, MTU de TUN, lista de exclusiones y comprobaciones de servicios para tu país. El idioma de la interfaz no cambia.",
+  "regionCustomPreserved": "Los valores que cambiaste tú se mantienen.",
+  "regionNoChanges": "Tus ajustes no cambian.",
   "regionApply": "Aplicar región",
-  "regionNoDetected": "No hay una sugerencia coincidente. Solo se usan la zona horaria y la configuración regional del sistema.",
   "regionSelectBeforeApps": "Elige una región compatible antes de usar las sugerencias regionales de aplicaciones.",
-  "regionNotSet": "Desactivada",
-  "regionOther": "Otra / general",
+  "regionNotSet": "Sin seleccionar",
+  "regionOther": "Otro país",
   "regionRussia": "Rusia",
   "regionIran": "Irán",
   "regionChina": "China",
   "regionEgypt": "Egipto",
-  "regionSourceTimeZone": "zona horaria",
-  "regionSourceLocaleCountry": "país de la configuración regional del sistema",
-  "regionSourceLocaleLanguage": "idioma del sistema",
-  "regionCurrent": "Región actual",
-  "regionDetectionTitle": "Sugerencia del dispositivo",
-  "regionProfileDefaults": "Valores del perfil",
   "regionNoServices": "Comprobaciones de servicios desactivadas",
-  "regionDnsSettings": "La región {region} propone estos DNS: {value}. Los ajustes manuales de esta pantalla tienen prioridad.",
-  "regionTunSettings": "La región {region} propone MTU {value}. Añade un ajuste de MTU para usar tu propio valor.",
-  "regionBypassSettings": "La región {region} usa: {value}. Una lista personalizada sustituye los valores regionales.",
   "regionSelectApps": "Seleccionar aplicaciones por región",
   "regionAppsPreviewTitle": "Vista previa de aplicaciones",
   "regionAppsPreview": "{region}: {bypassed} aplicaciones en la lista de exclusión de VPN y {proxied} en la lista de VPN. Se sustituirán ambas listas; el modo y los demás ajustes no cambian. Las coincidencias de paquetes y SDK son sugerencias: revisa el resultado al aplicarlo.",
   "regionAppsEmpty": "Ninguna aplicación coincide con esta región. Tus listas no cambian.",
   "regionAppsChanged": "La región o las listas cambiaron. Repite la selección con los ajustes actuales.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Recomendado para este dispositivo",
+  "regionChangesTitle": "Qué cambia",
+  "regionChangeDns": "Servidores DNS",
+  "regionChangeMtu": "MTU de TUN",
+  "regionChangeServices": "Comprobaciones de servicios",
+  "restoreDefaults": "Restaurar valores predeterminados",
+  "networkRestoreDefaultsTip": "La lista de exclusiones y el MTU de TUN vuelven a los valores de la región seleccionada.",
+  "dnsRestoreDefaultsTip": "Se eliminan todas las anulaciones de DNS y se vuelven a establecer los servidores DNS de la región seleccionada.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "Configura la dirección del proxy local en cada aplicación que quieras conectar.",
   "setupCoverageAndroidDescription": "Android solicitará permiso para crear una conexión VPN. La selección de aplicaciones está en los ajustes de acceso.",
   "setupCoverageNote": "Capturar todo el tráfico no significa enviarlo todo a través de un servidor. Las rutas directas se mantienen.",
-  "setupRegionConfirm": "Usar estos ajustes regionales",
-  "setupRegionDescription": "La región sugerida se basa en este dispositivo, no en el idioma de la interfaz. Aplícala solo si coincide con tu red.",
   "setupRegionNeutral": "Mantener los valores del perfil",
   "setupCheckAction": "Comprobar conexión",
   "setupCheckingTitle": "Conectando y comprobando",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "La ruta cambió durante la comprobación. Vuelve a comprobar la conexión actual.",
   "setupUnknownError": "La operación no se completó. Inténtalo de nuevo o consulta los detalles.",
   "setupRequestPermission": "Permitir conexión",
+  "setupReceiptRegion": "Región",
+  "setupRegionTitle": "¿Desde dónde te conectas?",
+  "setupRegionStepDescription": "ReClash ajusta el DNS, la MTU y las rutas directas a las redes de tu país. El idioma de la interfaz no cambia.",
+  "setupRegionNeutralDescription": "La configuración regional no cambia.",
+  "setupRegionUnchosen": "Si no eliges, tu configuración regional actual se mantiene.",
+  "setupRecommended": "Recomendado",
+  "setupDirectTitle": "Sitios y apps locales en conexión directa",
+  "setupDirectDescription": "Los servicios de tu país se abren sin el servidor: más rápido, y los bancos o sitios oficiales no te bloquean. Se añaden estas reglas globales:",
+  "setupDirectAppsScanning": "Buscando apps locales…",
+  "setupDirectApps": "Apps que evitan la VPN: {count}",
+  "setupDirectAppsReview": "Funcionarán sin la VPN. Puedes cambiar la lista más tarde en el control de acceso.",
+  "setupDirectAppsNone": "No se encontraron apps locales. Los sitios siguen yendo directos.",
+  "setupLeaveTitle": "¿Salir de la configuración?",
+  "setupLeaveMessage": "ReClash se cerrará. Tus elecciones se guardan y la configuración continuará la próxima vez que abras la app.",
+  "setupProfileContinueHint": "Añade o elige un perfil para continuar.",
+  "setupProfileImportHint": "Pega el enlace del correo, bot o cuenta de tu proveedor, o elige un archivo o código QR.",
+  "setupProfileImportAnother": "Añadir otro perfil",
+  "setupChangeSettings": "Cambiar ajustes",
+  "setupTipsTitle": "Qué puedes probar",
+  "setupTipNetwork": "Comprueba que internet funciona sin ReClash.",
+  "setupTipProfile": "Actualiza el perfil o elige otro servidor después de configurar.",
+  "setupTipCoverage": "Elige otra cobertura: algunas redes bloquean las conexiones VPN.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1237,6 +1184,7 @@
   "updateRemainingTime": "Quedan {time}",
   "updateSeconds": "{count} s",
   "updateMinutes": "{count} min",
+  "updateResumeShort": "Reanudar",
   "urlScheme": "Esquema de URL",
   "urlSchemeConnection": "Conexión",
   "urlSchemeProfiles": "Perfiles",
@@ -1304,6 +1252,22 @@
   "telegramAppUnavailable": "No se pudo abrir Telegram en este dispositivo.",
   "urlSchemeFormats": "Formatos",
   "urlSchemeFormatsTip": "Formatos de enlace. Sustituye los marcadores por tu URL o datos.",
+  "profileImportTitle": "Nueva suscripción",
+  "profileImportChecking": "Comprobando la suscripción…",
+  "profileImportPreviewFailed": "No se pudo ver el contenido de la suscripción. Aun así puedes añadirla.",
+  "profileImportEncrypted": "La suscripción está cifrada; se te pedirá la clave al añadirla.",
+  "profileImportFormat": "Formato de la suscripción",
+  "profileImportFormatClient": "Tal como la recibe la app {client}",
+  "profileImportFormatReclash": "El mejor formato para ReClash, elegido automáticamente",
+  "profileImportServerCount": "{count, plural, one{1 servidor} other{{count} servidores}}",
+  "profileImportAlreadyAdded": "Ya añadida como «{name}»",
+  "profileImportLosses": "Algunas partes no son compatibles; las revisarás antes de añadirla.",
+  "profileImportServers": "Servidores",
+  "profileImportValidUntil": "Válida hasta",
+  "profileImportUnlimited": "Ilimitado",
+  "profileImportExpired": "Caducada",
+  "profileImportFromProvider": "Del proveedor",
+  "profileImportSingleServer": "Un servidor",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1337,8 +1301,6 @@
   "appearanceTheme": "Tema",
   "appearanceBackground": "Fondo",
   "wallpaperTitle": "Fondo personalizado",
-  "wallpaperGalleryHint": "Toca un fondo guardado para usarlo o añade uno nuevo.",
-  "wallpaperChoose": "Elegir imagen",
   "wallpaperRemove": "Eliminar imagen",
   "wallpaperEnabled": "Usar fondo personalizado",
   "wallpaperFit": "Ajuste de imagen",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "Pausar",
   "onDemandFullStop": "Parada completa",
   "onDemandFullStopDesc": "Quitar TUN y cerrar los puertos proxy locales durante la pausa. La aplicación sigue vigilando la red para reanudar automáticamente.",
+  "pickNetworkPermissionDesc": "Permite el acceso a la ubicación para ver las redes Wi-Fi cercanas o introduce una red manualmente.",
   "subscriptionClientRequestAs": "Solicitar como",
   "subscriptionClientAuto": "Automáticamente",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "Enviar también el sistema operativo y el modelo",
   "subscriptionIdentityDetailsDisclosure": "Junto con el identificador se enviarán la versión del sistema operativo y el modelo del dispositivo.",
   "subscriptionIdentitySettingsTitle": "Identidad de suscripción",
-  "subscriptionIdentityGlobalHint": "Al activarlo, el identificador del dispositivo se envía en las solicitudes de todas las suscripciones URL, salvo que un perfil sobrescriba este ajuste. El sistema operativo y los datos del dispositivo se habilitan por separado para cada suscripción.",
   "subscriptionIdentityUseGlobal": "Usar ajuste global",
   "subscriptionProvider": "Suscripción",
   "subscriptionProviderWebsite": "Sitio web",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "No hay dispositivos disponibles para esta suscripción. Elimina uno de la cuenta del proveedor e inténtalo de nuevo.",
   "subscriptionDeviceRequired": "Esta suscripción requiere registrar el dispositivo. Sigue las instrucciones del proveedor.",
   "profileBatchResult": "Añadidos: {added}; omitidos: {skipped}; errores: {failed}.",
+  "subscriptionIdentityRegionWarning": "Muchas suscripciones dejarán de funcionar si desactivas el envío de HWID.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "Protección activa",
   "notificationLevelDescription": "Detallado muestra información en tiempo real y el botón de detener. Mínimo solo muestra el estado de protección.",
   "extra": "Extra",
+  "resetAllData": "Restablecer todos los datos",
+  "resetAllDataDescription": "Se eliminarán permanentemente todos los perfiles, ajustes, scripts, fondos de pantalla y datos en caché. Se conservarán los archivos de copia de seguridad. Después, la aplicación se cerrará. Esta acción no se puede deshacer.",
+  "resetAllDataConfirm": "Eliminar todo",
+  "resetAllDataWait": "Podrás confirmar en {seconds} s",
+  "resettingAllData": "Eliminando datos…",
+  "appIcon": "Icono de la app",
+  "appIconStandard": "Estándar",
+  "appIconVelvet": "Terciopelo",
+  "appIconSolar": "Solar",
+  "appIconCircuit": "Circuito",
+  "appIconEcho": "Eco",
+  "appIconInk": "Tinta",
+  "appIconBlueprint": "Plano",
+  "appIconStrata": "Estratos",
+  "appIconShatter": "Añicos",
+  "appIconTrace": "Trazo",
+  "appIconTopo": "Topo",
+  "appIconSpark": "Chispa",
+  "appIconApply": "Usar este icono",
+  "appIconChangeNote": "La pantalla de inicio puede tardar unos segundos en mostrar el nuevo icono, y algunos lanzadores eliminan el acceso directo; vuelve a añadirlo desde la lista de aplicaciones.",
+  "colorContrast": "Contraste",
+  "contrastMedium": "Medio",
+  "contrastHigh": "Alto",
+  "navigationLabels": "Etiquetas de pestañas",
+  "navigationLabelsAlways": "Siempre",
+  "navigationLabelsSelected": "Activa",
+  "navigationLabelsNever": "Nunca",
+  "trayIcon": "Icono de la bandeja",
+  "trayIconColor": "Color",
+  "trayIconLight": "Blanco",
+  "trayIconDark": "Negro",
   "applicationSettings": "Ajustes de la aplicación",
   "toolsConfiguration": "Configuración",
   "toolsData": "Recursos y datos",

@@ -1,4 +1,5 @@
 import 'package:reclash/common/tray.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -54,21 +55,51 @@ void main() {
       }
     });
 
-    test('macOS shows the color icons once monochrome is off', () {
-      for (final (isStart, tunEnable, safeMode, status) in [
-        (false, false, false, 1),
-        (true, false, false, 2),
-        (true, true, false, 3),
-        (true, true, true, 4),
+    test('monochrome styles load from the style subdirectory', () {
+      for (final (style, directory) in [
+        (TrayIconStyle.light, 'light'),
+        (TrayIconStyle.dark, 'dark'),
       ]) {
         expect(
-          macOS.getTrayIcon(
-            isStart: isStart,
-            tunEnable: tunEnable,
-            safeMode: safeMode,
-            monochrome: false,
+          windows.getTrayIcon(
+            isStart: true,
+            tunEnable: true,
+            safeMode: false,
+            style: style,
           ),
-          'assets/images/tray/unix/status_$status.png',
+          'assets/images/tray/windows/$directory/status_3.ico',
+        );
+        expect(
+          linux.getTrayIcon(
+            isStart: false,
+            tunEnable: false,
+            safeMode: false,
+            style: style,
+          ),
+          'assets/images/tray/unix/$directory/status_1.png',
+        );
+        expect(
+          linux.getTrayIcon(
+            isStart: true,
+            tunEnable: false,
+            safeMode: true,
+            style: style,
+          ),
+          'assets/images/tray/unix/$directory/status_4.png',
+        );
+      }
+    });
+
+    test('macOS ignores the style and keeps its template icons', () {
+      for (final style in TrayIconStyle.values) {
+        expect(
+          macOS.getTrayIcon(
+            isStart: true,
+            tunEnable: true,
+            safeMode: false,
+            style: style,
+          ),
+          'assets/images/tray/macos/status_1.png',
         );
       }
     });

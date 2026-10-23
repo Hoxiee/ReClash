@@ -32,7 +32,7 @@ ProxyState proxyState(Ref ref) {
     networkSettingProvider.select((state) => state.systemProxy),
   );
   final bypassDomain = ref.watch(
-    regionalNetworkConfigProvider.select((state) => state.bypassDomain),
+    networkSettingProvider.select((state) => state.bypassDomain),
   );
   final mixedPort = ref.watch(
     patchClashConfigProvider.select((state) => state.mixedPort),

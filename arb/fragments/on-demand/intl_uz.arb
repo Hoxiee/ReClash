@@ -23,5 +23,6 @@
   "onDemandResume": "Davom ettirish",
   "onDemandPause": "Toʻxtatib turish",
   "onDemandFullStop": "To‘liq to‘xtatish",
-  "onDemandFullStopDesc": "Pauzada TUN o‘chiriladi va mahalliy proksi portlari yopiladi. Avtomatik davom ettirish uchun tarmoq kuzatuvi davom etadi."
+  "onDemandFullStopDesc": "Pauzada TUN o‘chiriladi va mahalliy proksi portlari yopiladi. Avtomatik davom ettirish uchun tarmoq kuzatuvi davom etadi.",
+  "pickNetworkPermissionDesc": "Yaqin atrofdagi Wi-Fi tarmoqlarini koʻrish uchun joylashuvga ruxsat bering yoki tarmoqni qoʻlda kiriting."
 }

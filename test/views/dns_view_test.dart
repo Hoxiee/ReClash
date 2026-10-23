@@ -1,12 +1,13 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/editor.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
-import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -105,72 +106,60 @@ void main() {
       );
 
   testWidgets(
-    'regional DNS stays derived while manual entries retain priority',
+    'regional DNS shows as entries and Restore defaults brings it back',
     (tester) async {
       await pumpView(tester);
       final l = currentAppLocalizations;
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: 'RU'));
-      await tester.pumpAndSettle();
-      expect(
-        find.textContaining(
-          l.regionDnsSettings('Russia', 'tls://77.88.8.8, tls://77.88.8.1'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text(emptyLabel()), findsOneWidget);
-      expect(config().dnsOverrideKeys, isEmpty);
-      expect(config().dns, defaultDns);
-      setKeys({DnsOverrideKey.nameserver});
-      container
-          .read(patchClashConfigProvider.notifier)
-          .update(
-            (state) => state.copyWith.dns(
-              nameserver: ['https://manual.example/dns-query'],
-            ),
-          );
+      container.read(systemActionProvider.notifier).applyRegion('RU');
       await tester.pumpAndSettle();
       expect(
         find.widgetWithText(ConfigListEditItem, 'Nameserver'),
         findsOneWidget,
       );
-      expect(config().dns.nameserver, ['https://manual.example/dns-query']);
-      expect(
-        container
-            .read(regionalNetworkConfigProvider)
-            .patchConfig
-            .dns
-            .nameserver,
-        config().dns.nameserver,
-      );
-      expect(
-        find.textContaining(
-          l.regionDnsSettings('Russia', 'tls://77.88.8.8, tls://77.88.8.1'),
-        ),
-        findsOneWidget,
-      );
+      expect(config().dns.nameserver, ['tls://77.88.8.8', 'tls://77.88.8.1']);
+      expect(find.textContaining('Russia'), findsNothing);
+      expect(barButton(tester, l.restoreDefaults).onPressed, isNull);
+
       container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: 'IR'));
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              dns: state.dns.copyWith(
+                nameserver: ['https://manual.example/dns-query'],
+              ),
+              dnsOverrideKeys: {...state.dnsOverrideKeys, DnsOverrideKey.ipv6},
+            ),
+          );
       await tester.pumpAndSettle();
-      expect(config().dnsOverrideKeys, {DnsOverrideKey.nameserver});
-      expect(
-        container
-            .read(regionalNetworkConfigProvider)
-            .patchConfig
-            .dns
-            .nameserver,
-        config().dns.nameserver,
-      );
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: null));
+      container.read(systemActionProvider.notifier).applyRegion('IR');
       await tester.pumpAndSettle();
-      expect(find.textContaining('Region Iran'), findsNothing);
       expect(config().dns.nameserver, ['https://manual.example/dns-query']);
+      expect(config().dns.fallbackFilter.geoipCode, 'IR');
+
+      await tester.tap(find.byTooltip(l.restoreDefaults));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l.restore));
+      await tester.pumpAndSettle();
+      expect(config().dns.nameserver, ['https://free.shecan.ir/dns-query']);
+      expect(config().dnsOverrideKeys, regionDnsKeys('IR'));
+      expect(barButton(tester, l.restoreDefaults).onPressed, isNull);
     },
   );
+
+  testWidgets('Restore defaults clears every override without a region', (
+    tester,
+  ) async {
+    await pumpView(tester);
+    final l = currentAppLocalizations;
+    setKeys({DnsOverrideKey.ipv6});
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(l.restoreDefaults));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.restore));
+    await tester.pumpAndSettle();
+    expect(config().dnsOverrideKeys, isEmpty);
+    expect(find.text(emptyLabel()), findsOneWidget);
+  });
 
   testWidgets('a key picked from the sheet starts at its default', (
     tester,

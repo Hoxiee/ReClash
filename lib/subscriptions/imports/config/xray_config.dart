@@ -10,12 +10,13 @@ bool isXrayConfigInput(String body) {
   final trimmed = body.trimLeft();
   if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return false;
   try {
-    final decoded = jsonDecode(trimmed);
-    return _configsOf(decoded).isNotEmpty;
+    return isXrayConfigValue(jsonDecode(trimmed));
   } catch (_) {
     return false;
   }
 }
+
+bool isXrayConfigValue(Object? decoded) => _configsOf(decoded).isNotEmpty;
 
 class _XrayConfigResult implements ConvertedSubscription {
   const _XrayConfigResult({required this.config, this.skipped = const []});

@@ -2,8 +2,6 @@
   "appearanceTheme": "테마",
   "appearanceBackground": "배경",
   "wallpaperTitle": "사용자 지정 배경",
-  "wallpaperGalleryHint": "저장된 배경을 탭하여 적용하거나 새 배경을 추가하세요.",
-  "wallpaperChoose": "이미지 선택",
   "wallpaperRemove": "이미지 삭제",
   "wallpaperEnabled": "사용자 지정 배경 사용",
   "wallpaperFit": "이미지 맞춤",

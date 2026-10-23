@@ -239,9 +239,11 @@ class _ScenarioEditorState extends ConsumerState<ScenarioEditor> {
             : _save,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            context.bodyInsets,
         children: [
           ErrorBanner(
             message: errors.isEmpty ? null : rcxIssueText(l, errors.first),

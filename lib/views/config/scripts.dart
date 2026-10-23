@@ -64,10 +64,12 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         label: appLocalizations.nullTip(appLocalizations.script),
       ),
       child: ReorderableListView.builder(
-        padding: const EdgeInsets.all(16).copyWith(
-          top: context.contentTopPadding,
-          bottom: 16 + context.bottomInset,
-        ),
+        padding:
+            const EdgeInsets.all(16).copyWith(
+              top: context.contentTopPadding,
+              bottom: 16 + context.bottomInset,
+            ) +
+            context.bodyInsets,
         buildDefaultDragHandles: false,
         itemCount: scripts.length,
         itemBuilder: (_, index) => _buildItem(scripts, index),

@@ -23,5 +23,6 @@
   "onDemandResume": "재개",
   "onDemandPause": "일시 정지",
   "onDemandFullStop": "완전 중지",
-  "onDemandFullStopDesc": "일시 정지 중 TUN을 해제하고 로컬 프록시 포트를 닫습니다. 자동 재개를 위해 네트워크 감시는 계속됩니다."
+  "onDemandFullStopDesc": "일시 정지 중 TUN을 해제하고 로컬 프록시 포트를 닫습니다. 자동 재개를 위해 네트워크 감시는 계속됩니다.",
+  "pickNetworkPermissionDesc": "주변 Wi-Fi 네트워크를 보려면 위치 접근을 허용하거나 네트워크를 직접 입력하세요."
 }

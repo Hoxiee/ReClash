@@ -32,7 +32,6 @@ class WebDashboardItem extends StatelessWidget {
       spec: webDashboardSetting,
       child: ListItem.open(
         title: Text(l.webDashboard),
-        subtitle: Text(l.webDashboardDesc),
         widget: const WebDashboardView(),
       ),
     );

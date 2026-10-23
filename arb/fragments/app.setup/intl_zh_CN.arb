@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "在每个需要连接的应用中设置本地代理地址。",
   "setupCoverageAndroidDescription": "Android 将请求创建 VPN 连接。应用选择可在访问设置中进行。",
   "setupCoverageNote": "接管所有流量不代表将所有流量发送到服务器。直连路由仍会保留。",
-  "setupRegionConfirm": "使用这些区域设置",
-  "setupRegionDescription": "推荐区域来自此设备，而非界面语言。仅当其符合您的网络情况时才应用。",
   "setupRegionNeutral": "保留配置默认值",
   "setupCheckAction": "检查连接",
   "setupCheckingTitle": "正在连接并检查",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "正在检查服务",
   "setupPhaseAlternatives": "正在查找其他服务器",
   "setupStepStatus": "第 {step} 步，共 {total} 步",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "结果仅适用于此路由，并不代表所有应用或网站。",
   "setupConnectedTitle": "连接正常",
   "setupConnectedDescription": "选定路由已响应。流量将遵循配置规则。",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "保存但不连接",
   "setupRepeat": "重新检查",
   "setupTryServer": "尝试 {server}",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "此服务器通过了单独探测。切换后重新检查完整路由。",
   "setupReport": "检查报告",
   "setupReceipt": "您的连接",
@@ -73,10 +86,38 @@
   "setupRestart": "设置连接",
   "setupLaterNote": "设置未完成；连接尚未检查。",
   "setupProfileCount": "可用配置：{count} 个",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "此配置已加密。请输入 age 密钥以继续。",
   "setupFinishDescription": "您可以在设置中更改任何选择。",
   "setupRouteChanged": "检查期间路由已更改。请重新检查当前连接。",
   "setupUnknownError": "操作未完成。请重试或查看详情。",
-  "setupRequestPermission": "允许连接"
+  "setupRequestPermission": "允许连接",
+  "setupReceiptRegion": "地区",
+  "setupRegionTitle": "你在哪里连接？",
+  "setupRegionStepDescription": "ReClash 会根据你所在国家的网络调整 DNS、MTU 和直连路由。界面语言保持不变。",
+  "setupRegionNeutralDescription": "不更改地区设置。",
+  "setupRegionUnchosen": "如果不选择，当前的地区设置保持不变。",
+  "setupRecommended": "推荐",
+  "setupDirectTitle": "本地网站和应用直连",
+  "setupDirectDescription": "本国服务不经服务器直接打开：速度更快，银行和政务网站也不会拦截你。以下规则将加入全局规则：",
+  "setupDirectAppsScanning": "正在查找本地应用…",
+  "setupDirectApps": "绕过 VPN 的应用：{count}",
+  "setupDirectAppsReview": "这些应用将不经过 VPN。之后可在访问控制中更改列表。",
+  "setupDirectAppsNone": "未找到本地应用。网站仍会直连。",
+  "setupLeaveTitle": "退出设置？",
+  "setupLeaveMessage": "ReClash 将关闭。你的选择已保存，下次打开应用时将继续设置。",
+  "setupProfileContinueHint": "添加或选择一个配置文件以继续。",
+  "setupProfileImportHint": "粘贴服务商邮件、机器人或账户页面中的链接，或选择文件或二维码。",
+  "setupProfileImportAnother": "添加其他配置文件",
+  "setupChangeSettings": "更改设置",
+  "setupTipsTitle": "可以尝试",
+  "setupTipNetwork": "确认不使用 ReClash 时网络正常。",
+  "setupTipProfile": "更新配置文件，或在设置完成后选择其他服务器。",
+  "setupTipCoverage": "选择其他接管范围：有些网络会拦截 VPN 连接。"
 }

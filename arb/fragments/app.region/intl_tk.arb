@@ -2,104 +2,23 @@
   "appRegion": "Programma sebiti",
   "regionalAdaptation": "Sebitleýin uýgunlaşma",
   "regionTitle": "Sebit profili",
-  "regionIntro": "Interfeýsiň diline bagly bolmadyk sebitleýin tor sazlamalary we hyzmat barlaglary.",
-  "regionWarning": "Ýurdy saýlamak diňe deslapky syny täzeleýär. Sebit bahalary ulanylandan soň üýtgär.",
-  "regionChoose": "Ýurdy saýlaň",
-  "regionDetected": "Teklip: {region} · {source}",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "regionUseDetected": "Anyklanan sebiti saýla",
-  "regionPreviewTitle": "Öňünden syn",
-  "regionPreviewBase": "Ýurt profili: {region}",
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewServices": "Hyzmat barlaglarynyň başlangyç toplumy: {value}",
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewRules": "Proksi saýlawy we ugrukdyryş düzgünleriňiz üýtgemeýär.",
-  "regionPreviewAndroid": "Android-de MTU ýa-da aýlanyp geçiş üýtgeşmeleri VPN-i täzeden açmagy tassyklamagy talap edip biler. Programmalar aýratyn saýlanýar.",
-  "regionCustomPreserved": "El bilen girizilen DNS we MTU, aýlanyp geçiş sanawy, ugrukdyryş düzgünleri we hyzmat saýlawy saklanýar.",
-  "regionNoChanges": "Tor bahalary we hyzmat barlaglary üýtgemeýär.",
+  "regionIntro": "Ýurduňyz üçin DNS serwerlerini, TUN MTU-ny, aýlanyp geçiş sanawyny we hyzmat barlaglaryny saýlaýar. Interfeýsiň dili üýtgemeýär.",
+  "regionCustomPreserved": "Özüňiz üýtgeden bahalar şol durşuna galýar.",
+  "regionNoChanges": "Sazlamalar üýtgemeýär.",
   "regionApply": "Sebiti ulan",
-  "regionNoDetected": "Gabat gelýän teklip tapylmady. Diňe wagt zolagy we ulgamyň lokal sazlamasy ulanylýar.",
   "regionSelectBeforeApps": "Sebit programma tekliplerini ulanmak üçin ilki goldanylýan sebiti saýlaň.",
-  "regionNotSet": "Öçürilen",
-  "regionOther": "Beýleki / umumy",
+  "regionNotSet": "Saýlanmadyk",
+  "regionOther": "Başga ýurt",
   "regionRussia": "Russiýa",
   "regionIran": "Eýran",
   "regionChina": "Hytaý",
   "regionEgypt": "Müsür",
-  "regionSourceTimeZone": "wagt zolagy",
-  "regionSourceLocaleCountry": "ulgam dil sazlamasyndaky ýurt",
-  "regionSourceLocaleLanguage": "ulgam dili",
-  "regionCurrent": "Häzirki sebit",
-  "regionDetectionTitle": "Enjamyň teklibi",
-  "regionProfileDefaults": "Profiliň bahalary",
   "regionNoServices": "Hyzmat barlaglary öçürilen",
-  "regionDnsSettings": "{region} sebitiniň DNS bahalary: {value}. Bu ekrandaky el bilen girizilen bahalar ileri tutulýar.",
-  "regionTunSettings": "{region} sebitiniň MTU bahasy: {value}. Öz bahaňyzy ulanmak üçin MTU sazlamasyny goşuň.",
-  "regionBypassSettings": "{region} sebitiniň sanawy: {value}. Hususy sanaw sebit bahalarynyň ýerine ulanylýar.",
   "regionSelectApps": "Programmalary sebit boýunça saýlamak",
   "regionAppsPreviewTitle": "Programma saýlawynyň deslapky syny",
   "regionAppsPreview": "{region}: VPN-den aýlanyp geçiş sanawyna {bypassed} programma, VPN sanawyna {proxied} programma girer. Iki sanaw hem çalşylar; iş tertibi we beýleki sazlamalar üýtgemez. Paket we SDK gabat gelmeleri diňe teklipdir: ulananyňyzdan soň netijäni barlaň.",
   "regionAppsEmpty": "Bu sebite gabat gelýän programma tapylmady. Sanawlaryňyz üýtgemedi.",
   "regionAppsChanged": "Sebit ýa-da programma sanawlary üýtgedi. Häzirki sazlamalar bilen saýlawy gaýtalaň.",
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -112,5 +31,13 @@
         "type": "int"
       }
     }
-  }
+  },
+  "regionRecommended": "Bu enjam üçin maslahat berilýär",
+  "regionChangesTitle": "Näme üýtgeýär",
+  "regionChangeDns": "DNS serwerleri",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Hyzmat barlaglary",
+  "restoreDefaults": "Deslapky bahalary dikelt",
+  "networkRestoreDefaultsTip": "Aýlanyp geçiş sanawy we TUN MTU saýlanan sebitiň deslapky bahalaryna gaýdýar.",
+  "dnsRestoreDefaultsTip": "Ähli DNS çalyşmalary aýrylýar we saýlanan sebitiň DNS serwerleri täzeden bellenilýär."
 }

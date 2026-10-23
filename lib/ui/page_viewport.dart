@@ -4,9 +4,17 @@ import 'inherited.dart';
 import 'page_background.dart';
 
 class PageViewport extends StatefulWidget {
-  const PageViewport({super.key, this.bounds, required this.child});
+  const PageViewport({
+    super.key,
+    this.bounds,
+    this.routeHeader = false,
+    this.inlineHeaders = false,
+    required this.child,
+  });
 
   final Rect? bounds;
+  final bool routeHeader;
+  final bool inlineHeaders;
   final Widget child;
 
   static Widget inherit(BuildContext context, {required Widget child}) {
@@ -18,6 +26,8 @@ class PageViewport extends StatefulWidget {
       child: _PageViewportScope(
         viewport: viewport.viewport,
         bounds: viewport.bounds,
+        routeHeader: viewport.routeHeader,
+        inlineHeaders: viewport.inlineHeaders,
         route: ModalRoute.of(context),
         child: child,
       ),
@@ -27,7 +37,9 @@ class PageViewport extends StatefulWidget {
   static bool contains(BuildContext context) {
     final viewport = context
         .dependOnInheritedWidgetOfExactType<_PageViewportScope>();
-    return viewport != null && viewport.route == ModalRoute.of(context);
+    return viewport != null &&
+        !viewport.inlineHeaders &&
+        viewport.route == ModalRoute.of(context);
   }
 
   @override
@@ -49,6 +61,8 @@ class _PageViewportState extends State<PageViewport> {
         bounds: anchored
             ? widget.bounds!.shift(inherited.bounds?.topLeft ?? Offset.zero)
             : null,
+        routeHeader: widget.routeHeader,
+        inlineHeaders: widget.inlineHeaders,
         route: ModalRoute.of(context),
         child: widget.child,
       ),
@@ -60,50 +74,25 @@ class _PageViewportScope extends InheritedWidget {
   const _PageViewportScope({
     required this.viewport,
     required this.bounds,
+    required this.routeHeader,
+    required this.inlineHeaders,
     required this.route,
     required super.child,
   });
 
   final GlobalKey viewport;
   final Rect? bounds;
+  final bool routeHeader;
+  final bool inlineHeaders;
   final ModalRoute<dynamic>? route;
 
   @override
   bool updateShouldNotify(_PageViewportScope oldWidget) =>
       viewport != oldWidget.viewport ||
       bounds != oldWidget.bounds ||
+      routeHeader != oldWidget.routeHeader ||
+      inlineHeaders != oldWidget.inlineHeaders ||
       route != oldWidget.route;
-}
-
-/// A page growing over the one beneath: the beneath page's bar shows only
-/// above [top], the growing page's top edge, so the page covers it.
-class PageBarCover extends InheritedWidget {
-  const PageBarCover({
-    super.key,
-    required this.listenable,
-    required this.top,
-    required super.child,
-  });
-
-  final Listenable listenable;
-  final double? Function() top;
-
-  @override
-  bool updateShouldNotify(PageBarCover oldWidget) =>
-      listenable != oldWidget.listenable;
-}
-
-class _CoverClipper extends CustomClipper<Rect> {
-  const _CoverClipper(this.top);
-
-  final double top;
-
-  @override
-  Rect getClip(Size size) =>
-      Rect.fromLTRB(0, 0, size.width, top.clamp(0, size.height));
-
-  @override
-  bool shouldReclip(_CoverClipper oldClipper) => top != oldClipper.top;
 }
 
 class ViewportAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -127,7 +116,6 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
         .dependOnInheritedWidgetOfExactType<_PageViewportScope>()!;
     final route = ModalRoute.of(context);
     final active = PageActivityScope.isActiveOf(context);
-    final cover = context.dependOnInheritedWidgetOfExactType<PageBarCover>();
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: (context) => LayoutBuilder(
@@ -152,25 +140,24 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
                   animation: Listenable.merge([
                     route?.animation,
                     route?.secondaryAnimation,
-                    cover?.listenable,
                   ]),
                   builder: (_, child) {
                     final secondary = route?.secondaryAnimation;
-                    final covered =
-                        secondary?.status != AnimationStatus.reverse &&
-                        (secondary?.value ?? 0) > 0;
                     final leaving =
                         route?.animation?.status == AnimationStatus.reverse;
-                    final top = cover?.top();
+                    // The uncovered header waits for the popping route header.
+                    final covered =
+                        secondary?.status == AnimationStatus.forward ||
+                        (secondary?.value ?? 0) > 0 &&
+                            (viewport.routeHeader ||
+                                secondary?.status != AnimationStatus.reverse);
                     return Offstage(
                       offstage:
                           !active ||
                           covered ||
-                          leaving ||
+                          leaving && !viewport.routeHeader ||
                           route?.offstage == true,
-                      child: top == null
-                          ? child
-                          : ClipRect(clipper: _CoverClipper(top), child: child),
+                      child: child,
                     );
                   },
                   child: widget.appBar,

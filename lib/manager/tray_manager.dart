@@ -7,6 +7,7 @@ import 'package:reclash/common/window.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +26,7 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
   StreamSubscription<TrayEvent>? _subscription;
   bool _isUpdating = false;
   bool _hasPendingUpdate = false;
+  Timer? _delaysUpdate;
 
   @override
   void initState() {
@@ -35,15 +37,27 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
         _requestUpdate();
       }
     });
+    ref.listenManual(
+      appSettingProvider.select((state) => state.trayIconStyle),
+      (prev, next) {
+        if (prev != next) {
+          _requestUpdate();
+        }
+      },
+    );
     ref.listenManual(loadedLocaleProvider, (prev, next) {
       if (prev != null && prev != next) {
         _requestUpdate();
       }
     });
     if (system.isMacOS) {
+      // A health check lands result by result; one menu rebuild covers a run.
       ref.listenManual(trayDelaysProvider, (prev, next) {
         if (!const DeepCollectionEquality().equals(prev, next)) {
-          _requestUpdate();
+          _delaysUpdate ??= Timer(const Duration(seconds: 2), () {
+            _delaysUpdate = null;
+            if (mounted) _requestUpdate();
+          });
         }
       });
       ref.listenManual(trayTitleStateProvider, (prev, next) {
@@ -115,6 +129,7 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
 
   @override
   void dispose() {
+    _delaysUpdate?.cancel();
     _subscription?.cancel();
     super.dispose();
   }

@@ -10,6 +10,7 @@ class CountryProfile {
     this.tunMtu = regionalDefaultTunMtu,
     this.bypassDomains = const [],
     this.defaultServiceIds = const [],
+    this.directRules = const [],
   });
 
   final Dns dns;
@@ -17,6 +18,10 @@ class CountryProfile {
   final int tunMtu;
   final List<String> bypassDomains;
   final List<String> defaultServiceIds;
+
+  /// Added at the top of the rules, so an IP match must not resolve a domain
+  /// before the profile's own rules have seen it.
+  final List<String> directRules;
 }
 
 const otherCountryProfile = CountryProfile(
@@ -75,21 +80,25 @@ const _profiles = <String, CountryProfile>{
     tunMtu: defaultTunMtu,
     bypassDomains: _chinaBypassDomains,
     defaultServiceIds: ['google', 'youtube', 'chatgpt', 'claude', 'bilibili'],
+    directRules: ['GEOSITE,cn,DIRECT', 'GEOIP,CN,DIRECT,no-resolve'],
   ),
   'RU': CountryProfile(
     dns: _russiaDns,
     dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['youtube', 'discord', 'chatgpt', 'claude'],
+    directRules: ['GEOSITE,category-ru,DIRECT', 'GEOIP,RU,DIRECT,no-resolve'],
   ),
   'IR': CountryProfile(
     dns: _iranDns,
     dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['youtube', 'chatgpt', 'claude'],
+    directRules: ['GEOSITE,category-ir,DIRECT', 'GEOIP,IR,DIRECT,no-resolve'],
   ),
   'EG': CountryProfile(
     dns: _egyptDns,
     dnsOverrideKeys: _regionalDnsOverrideKeys,
     defaultServiceIds: ['google', 'youtube', 'chatgpt', 'claude'],
+    directRules: ['GEOIP,EG,DIRECT,no-resolve'],
   ),
 };
 
@@ -110,6 +119,9 @@ String? sanitizeRegionCode(Object? value) {
 
 CountryProfile profileForCode(String? code) =>
     _profiles[normalizedRegionCode(code)] ?? otherCountryProfile;
+
+List<String> directRulesForCode(String? code) =>
+    _profiles[normalizedRegionCode(code)]?.directRules ?? const [];
 
 bool hasProfileForCode(String? code) =>
     _profiles.containsKey(normalizedRegionCode(code));

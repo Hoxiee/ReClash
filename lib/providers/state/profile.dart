@@ -50,14 +50,14 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
   final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
   final profileType = profile?.type ?? ProfileType.file;
   final extendType = profile?.extendType ?? ExtendType.standard;
-  final appDnsOverrideKeys = ref.watch(
-    patchClashConfigProvider.select((state) => state.dnsOverrideKeys),
+  final regionCode = ref.watch(
+    appSettingProvider.select((state) => state.regionCode),
   );
   final overrides = ref.watch(
-    regionalNetworkConfigProvider.select(
+    patchClashConfigProvider.select(
       (state) => regionalProfileOverridesFor(
-        patchConfig: state.patchConfig,
-        appDnsOverrideKeys: appDnsOverrideKeys,
+        patchConfig: state,
+        regionCode: regionCode,
         customOverrides: profileType == ProfileType.custom
             ? profile?.overrides ?? const ProfileOverrides()
             : null,

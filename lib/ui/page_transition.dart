@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:reclash/ui/drag_back.dart';
 import 'package:reclash/ui/surface.dart';
 import 'package:flutter/rendering.dart';
@@ -214,6 +216,145 @@ class SharedXPageTransition extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The edge shadow separates pages over their shared wallpaper.
+class SlideOverPageTransition extends StatefulWidget {
+  const SlideOverPageTransition({
+    super.key,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.dragged,
+    required this.uncoveredByGesture,
+    required this.child,
+  });
+
+  static const duration = Duration(milliseconds: 500);
+  static const reverseDuration = Duration(milliseconds: 400);
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+
+  /// Whether a drag back drives [animation], so the page follows the finger.
+  final bool dragged;
+
+  /// Whether a drag on the page above drives [secondaryAnimation].
+  final bool uncoveredByGesture;
+  final Widget child;
+
+  @override
+  State<SlideOverPageTransition> createState() =>
+      _SlideOverPageTransitionState();
+}
+
+class _SlideOverPageTransitionState extends State<SlideOverPageTransition> {
+  static const _curve = Curves.easeInOutCubicEmphasized;
+  static final _enterSlide = Tween(begin: const Offset(1, 0), end: Offset.zero);
+  static final _coverSlide = Tween(
+    begin: Offset.zero,
+    end: const Offset(-0.25, 0),
+  );
+
+  late CurvedAnimation _enter = _curved(widget.animation);
+  late CurvedAnimation _cover = _curved(widget.secondaryAnimation);
+
+  // CurvedAnimation retains its initial direction, avoiding jumps on reversal.
+  static CurvedAnimation _curved(Animation<double> parent) => CurvedAnimation(
+    parent: parent,
+    curve: _curve,
+    reverseCurve: _curve.flipped,
+  );
+
+  @override
+  void didUpdateWidget(SlideOverPageTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animation != oldWidget.animation) {
+      _enter.dispose();
+      _enter = _curved(widget.animation);
+    }
+    if (widget.secondaryAnimation != oldWidget.secondaryAnimation) {
+      _cover.dispose();
+      _cover = _curved(widget.secondaryAnimation);
+    }
+  }
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    _cover.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enter = widget.dragged ? widget.animation : _enter;
+    final cover = widget.uncoveredByGesture
+        ? widget.secondaryAnimation
+        : _cover;
+    final direction = Directionality.of(context);
+    return SlideTransition(
+      position: _enterSlide.animate(enter),
+      textDirection: direction,
+      child: CustomPaint(
+        painter: _EdgeShadow(enter, direction),
+        child: SlideTransition(
+          position: _coverSlide.animate(cover),
+          textDirection: direction,
+          child: _PageFade(
+            opacity: ReverseAnimation(cover),
+            color: Colors.transparent,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EdgeShadow extends CustomPainter {
+  _EdgeShadow(this.progress, this.textDirection) : super(repaint: progress);
+
+  final Animation<double> progress;
+  final TextDirection textDirection;
+
+  static const _width = 24.0;
+  static const _alpha = 0.18;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = progress.value;
+    final strength = (math.min(t, 1 - t) * 8).clamp(0.0, 1.0);
+    if (strength == 0) {
+      return;
+    }
+    final ltr = textDirection == TextDirection.ltr;
+    final rect = Rect.fromLTWH(
+      ltr ? -_width : size.width,
+      0,
+      _width,
+      size.height,
+    );
+    final shadow = Colors.black.withValues(alpha: _alpha * strength);
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: ltr ? Alignment.centerRight : Alignment.centerLeft,
+          end: ltr ? Alignment.centerLeft : Alignment.centerRight,
+          colors: [
+            shadow,
+            shadow.withValues(alpha: shadow.a * 0.3),
+            shadow.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.3, 1],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_EdgeShadow oldDelegate) =>
+      progress != oldDelegate.progress ||
+      textDirection != oldDelegate.textDirection;
 }
 
 class _HandOver extends Curve {

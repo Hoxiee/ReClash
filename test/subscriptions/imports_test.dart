@@ -61,6 +61,67 @@ void main() {
       expect(result.summary.rejectCoreFallback, isTrue);
     });
 
+    test('converts a list of Xray subscription profiles', () {
+      final result = convertSubscriptionImport(
+        _bytes(
+          jsonEncode([
+            {
+              'remarks': 'First',
+              'outbounds': [
+                {
+                  'tag': 'edge',
+                  'protocol': 'vless',
+                  'settings': {
+                    'vnext': [
+                      {
+                        'address': 'first.example',
+                        'port': 443,
+                        'users': [
+                          {
+                            'id': '11111111-1111-4111-8111-111111111111',
+                            'encryption': 'none',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  'streamSettings': {'network': 'tcp'},
+                },
+              ],
+            },
+            {
+              'remarks': 'Second',
+              'outbounds': [
+                {
+                  'tag': 'edge',
+                  'protocol': 'vless',
+                  'settings': {
+                    'vnext': [
+                      {
+                        'address': 'second.example',
+                        'port': 443,
+                        'users': [
+                          {
+                            'id': '22222222-2222-4222-8222-222222222222',
+                            'encryption': 'none',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  'streamSettings': {'network': 'tcp'},
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      expect(result.format, SubscriptionFormat.xray);
+      expect(result.summary.nodes, 2);
+      expect(utf8.decode(result.bytes), contains('first.example'));
+      expect(utf8.decode(result.bytes), contains('second.example'));
+    });
+
     test('converts Xray nodes and records discarded config sections', () {
       const source =
           '{"inbounds":[{"port":1080}],"dns":{"servers":["1.1.1.1"]},"routing":{"rules":[]},"outbounds":[{"tag":"edge","protocol":"vless","settings":{"vnext":[{"address":"edge.example","port":443,"users":[{"id":"11111111-1111-4111-8111-111111111111","encryption":"none"}]}]},"streamSettings":{"network":"tcp"}}]}';

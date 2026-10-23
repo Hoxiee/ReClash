@@ -4,6 +4,7 @@ import 'package:reclash/ui/navigator.dart';
 import 'package:reclash/ui/sheet_navigator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 class _RouteMotion {
@@ -53,14 +54,18 @@ class _RouteMotion {
 bool isRouteMoving(BuildContext context) => _RouteMotion(context).isMoving;
 
 /// Holds list refreshes while the page's route is pushed, popped, covered,
-/// uncovered or dragged back, and replays the latest one once it settles.
+/// uncovered or dragged back, or while its tickers are muted (a kept-alive
+/// page off screen), and replays the latest one once it settles.
 mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   ModalRoute<Object?>? _route;
   _RouteMotion? _motion;
   VoidCallback? _heldUpdate;
+  bool _tickersEnabled = true;
+
+  bool get _holds => !_tickersEnabled || (_motion?.isMoving ?? false);
 
   void updateWhenRouteSettled(VoidCallback update) {
-    if (_motion?.isMoving ?? false) {
+    if (_holds) {
       _heldUpdate = update;
       return;
     }
@@ -71,6 +76,11 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final tickersEnabled = TickerMode.valuesOf(context).enabled;
+    if (tickersEnabled && !_tickersEnabled && _heldUpdate != null) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _releaseHeld());
+    }
+    _tickersEnabled = tickersEnabled;
     final route = ModalRoute.of(context);
     if (_motion != null && identical(route, _route)) {
       return;
@@ -96,7 +106,7 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
 
   void _releaseHeld() {
     final update = _heldUpdate;
-    if (update == null || !mounted || (_motion?.isMoving ?? false)) {
+    if (update == null || !mounted || _holds) {
       return;
     }
     _heldUpdate = null;

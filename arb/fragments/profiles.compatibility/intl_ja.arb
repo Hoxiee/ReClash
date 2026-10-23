@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "OSと端末モデルも送信",
   "subscriptionIdentityDetailsDisclosure": "識別子とともにOSバージョンと端末モデルを送信します。",
   "subscriptionIdentitySettingsTitle": "サブスクリプションの識別情報",
-  "subscriptionIdentityGlobalHint": "有効にすると、プロファイルで上書きされない限り、すべてのURLサブスクリプションのリクエストで端末識別子を送信します。OSと端末情報はサブスクリプションごとに個別に許可します。",
   "subscriptionIdentityUseGlobal": "全体設定を使用",
   "subscriptionProvider": "サブスクリプション",
   "subscriptionProviderWebsite": "ウェブサイト",
@@ -67,9 +66,16 @@
   "profileBatchResult": "追加: {added}、スキップ: {skipped}、失敗: {failed}。",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "HWID の送信をオフにすると、多くのサブスクリプションが利用できなくなります。"
 }

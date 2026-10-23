@@ -86,12 +86,20 @@ class PagedSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final type = SheetProvider.of(context)?.type;
+    // The side sheet route stays chromeless under a paged sheet, so its card
+    // corner and shadow are drawn here.
+    final side = type == SheetType.sideSheet;
     return Material(
       animationDuration: Duration.zero,
       color: _sheetColorOf(context),
-      shape: type == SheetType.bottomSheet
-          ? AppShape.top(AppCorner.xxl)
-          : AppShape.none,
+      elevation: side ? 3 : 0,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: side ? ColorScheme.of(context).shadow : Colors.transparent,
+      shape: switch (type) {
+        SheetType.bottomSheet => AppShape.top(AppCorner.xxl),
+        SheetType.sideSheet => AppShape.xl,
+        _ => AppShape.none,
+      },
       clipBehavior: Clip.antiAlias,
       child: NavigatorResizable(child: child),
     );

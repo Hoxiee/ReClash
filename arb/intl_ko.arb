@@ -954,104 +954,31 @@
   "appRegion": "앱 지역",
   "regionalAdaptation": "지역 맞춤 설정",
   "regionTitle": "지역 프로필",
-  "regionIntro": "인터페이스 언어와 별도로 지역 네트워크 기본값과 서비스 확인을 설정합니다.",
-  "regionWarning": "국가를 선택하면 미리 보기만 바뀝니다. 적용한 뒤에 지역 기본값이 변경됩니다.",
-  "regionChoose": "국가 선택",
-  "regionDetected": "추천: {region} · {source}",
-  "regionUseDetected": "감지된 지역 선택",
-  "regionPreviewTitle": "미리보기",
-  "regionPreviewBase": "국가 프로필: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "기본 서비스 확인: {value}",
-  "regionPreviewRules": "프록시 선택과 라우팅 규칙은 변경되지 않습니다.",
-  "regionPreviewAndroid": "Android에서는 MTU나 우회 변경 시 VPN 재시작 확인이 필요할 수 있습니다. 앱 선택은 별도로 실행합니다.",
-  "regionCustomPreserved": "수동 DNS 및 MTU 설정, 우회 목록, 라우팅 규칙, 서비스 선택은 유지됩니다.",
-  "regionNoChanges": "네트워크 기본값과 서비스 확인은 변경되지 않습니다.",
+  "regionIntro": "국가에 맞게 DNS 서버, TUN MTU, 우회 목록, 서비스 확인을 설정합니다. 인터페이스 언어는 바뀌지 않습니다.",
+  "regionCustomPreserved": "직접 변경한 값은 그대로 유지됩니다.",
+  "regionNoChanges": "설정이 변경되지 않습니다.",
   "regionApply": "지역 적용",
-  "regionNoDetected": "일치하는 추천이 없습니다. 시간대와 시스템 로캘만 사용합니다.",
   "regionSelectBeforeApps": "지역별 앱 추천을 사용하려면 지원되는 지역을 선택하세요.",
-  "regionNotSet": "꺼짐",
-  "regionOther": "기타 / 일반",
+  "regionNotSet": "선택 안 됨",
+  "regionOther": "기타 국가",
   "regionRussia": "러시아",
   "regionIran": "이란",
   "regionChina": "중국",
   "regionEgypt": "이집트",
-  "regionSourceTimeZone": "시간대",
-  "regionSourceLocaleCountry": "시스템 로캘의 국가",
-  "regionSourceLocaleLanguage": "시스템 언어",
-  "regionCurrent": "현재 지역",
-  "regionDetectionTitle": "기기 추천",
-  "regionProfileDefaults": "프로필 기본값",
   "regionNoServices": "서비스 확인이 꺼져 있습니다",
-  "regionDnsSettings": "지역 {region}의 기본 DNS: {value}. 이 화면의 수동 설정이 우선합니다.",
-  "regionTunSettings": "지역 {region}의 MTU는 {value}입니다. 직접 값을 지정하려면 MTU 설정을 추가하세요.",
-  "regionBypassSettings": "지역 {region}의 목록: {value}. 사용자 목록은 지역 기본값을 대체합니다.",
   "regionSelectApps": "지역별 앱 선택",
   "regionAppsPreviewTitle": "앱 선택 미리 보기",
   "regionAppsPreview": "{region}: VPN 우회 목록에 앱 {bypassed}개, VPN 목록에 {proxied}개가 들어갑니다. 두 목록이 교체되며 모드와 다른 설정은 유지됩니다. 패키지와 SDK 일치는 추천일 뿐이므로 적용 후 결과를 확인하세요.",
   "regionAppsEmpty": "이 지역에 일치하는 앱이 없습니다. 목록은 변경되지 않습니다.",
   "regionAppsChanged": "지역 또는 앱 목록이 바뀌었습니다. 현재 설정으로 다시 선택하세요.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "이 기기에 권장",
+  "regionChangesTitle": "변경 사항",
+  "regionChangeDns": "DNS 서버",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "서비스 확인",
+  "restoreDefaults": "기본값으로 복원",
+  "networkRestoreDefaultsTip": "우회 목록과 TUN MTU가 선택한 지역의 기본값으로 돌아갑니다.",
+  "dnsRestoreDefaultsTip": "모든 DNS 재정의가 삭제되고 선택한 지역의 DNS 서버가 다시 설정됩니다.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "연결할 각 앱에 로컬 프록시 주소를 설정하세요.",
   "setupCoverageAndroidDescription": "Android에서 VPN 연결 생성 권한을 요청합니다. 앱 선택은 접근 설정에서 할 수 있습니다.",
   "setupCoverageNote": "모든 트래픽을 가로채도 전부 서버로 전송되는 것은 아닙니다. 직접 경로는 유지됩니다.",
-  "setupRegionConfirm": "이 지역 설정 사용",
-  "setupRegionDescription": "추천 지역은 인터페이스 언어가 아니라 이 기기에서 가져옵니다. 네트워크와 일치할 때만 적용하세요.",
   "setupRegionNeutral": "프로필 기본값 유지",
   "setupCheckAction": "연결 확인",
   "setupCheckingTitle": "연결 및 확인 중",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "확인 중 경로가 변경되었습니다. 현재 연결을 다시 확인하세요.",
   "setupUnknownError": "작업이 완료되지 않았습니다. 다시 시도하거나 세부정보를 여세요.",
   "setupRequestPermission": "연결 허용",
+  "setupReceiptRegion": "지역",
+  "setupRegionTitle": "어디에서 연결하나요?",
+  "setupRegionStepDescription": "ReClash가 DNS, MTU, 직접 경로를 해당 국가의 네트워크에 맞춥니다. 인터페이스 언어는 바뀌지 않습니다.",
+  "setupRegionNeutralDescription": "지역 설정을 바꾸지 않습니다.",
+  "setupRegionUnchosen": "선택하지 않으면 현재 지역 설정이 그대로 유지됩니다.",
+  "setupRecommended": "권장",
+  "setupDirectTitle": "국내 사이트와 앱은 직접 연결",
+  "setupDirectDescription": "국내 서비스는 서버 없이 열립니다. 더 빠르고, 은행이나 공공 사이트에서 차단되지 않습니다. 다음 규칙이 전역 규칙에 추가됩니다:",
+  "setupDirectAppsScanning": "국내 앱을 찾는 중…",
+  "setupDirectApps": "VPN을 우회하는 앱: {count}",
+  "setupDirectAppsReview": "이 앱들은 VPN 없이 작동합니다. 목록은 나중에 접근 제어에서 바꿀 수 있습니다.",
+  "setupDirectAppsNone": "국내 앱을 찾지 못했습니다. 사이트는 계속 직접 연결됩니다.",
+  "setupLeaveTitle": "설정을 종료할까요?",
+  "setupLeaveMessage": "ReClash가 종료됩니다. 선택한 내용은 저장되며 다음에 앱을 열면 설정이 이어집니다.",
+  "setupProfileContinueHint": "계속하려면 프로필을 추가하거나 선택하세요.",
+  "setupProfileImportHint": "제공자의 이메일, 봇 또는 계정 페이지의 링크를 붙여 넣거나 파일 또는 QR 코드를 선택하세요.",
+  "setupProfileImportAnother": "다른 프로필 추가",
+  "setupChangeSettings": "설정 변경",
+  "setupTipsTitle": "시도해 볼 수 있는 방법",
+  "setupTipNetwork": "ReClash 없이 인터넷이 되는지 확인하세요.",
+  "setupTipProfile": "프로필을 업데이트하거나 설정 후 다른 서버를 선택하세요.",
+  "setupTipCoverage": "다른 적용 범위를 선택하세요. 일부 네트워크는 VPN 연결을 차단합니다.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1237,6 +1184,7 @@
   "updateRemainingTime": "{time} 남음",
   "updateSeconds": "{count}초",
   "updateMinutes": "{count}분",
+  "updateResumeShort": "재개",
   "urlScheme": "URL 스킴",
   "urlSchemeConnection": "연결",
   "urlSchemeProfiles": "프로필",
@@ -1304,6 +1252,22 @@
   "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다.",
   "urlSchemeFormats": "형식",
   "urlSchemeFormatsTip": "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요.",
+  "profileImportTitle": "새 구독",
+  "profileImportChecking": "구독을 확인하는 중…",
+  "profileImportPreviewFailed": "구독 내용을 확인하지 못했습니다. 그래도 추가할 수 있습니다.",
+  "profileImportEncrypted": "구독이 암호화되어 있습니다. 추가할 때 키를 묻습니다.",
+  "profileImportFormat": "구독 형식",
+  "profileImportFormatClient": "{client} 앱이 받는 형식 그대로",
+  "profileImportFormatReclash": "ReClash에 가장 적합한 형식을 자동으로 선택",
+  "profileImportServerCount": "{count, plural, other{서버 {count}개}}",
+  "profileImportAlreadyAdded": "이미 “{name}”(으)로 추가됨",
+  "profileImportLosses": "일부 항목은 지원되지 않습니다. 추가하기 전에 확인할 수 있습니다.",
+  "profileImportServers": "서버",
+  "profileImportValidUntil": "유효 기간",
+  "profileImportUnlimited": "무제한",
+  "profileImportExpired": "만료됨",
+  "profileImportFromProvider": "제공자 메시지",
+  "profileImportSingleServer": "단일 서버",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1337,8 +1301,6 @@
   "appearanceTheme": "테마",
   "appearanceBackground": "배경",
   "wallpaperTitle": "사용자 지정 배경",
-  "wallpaperGalleryHint": "저장된 배경을 탭하여 적용하거나 새 배경을 추가하세요.",
-  "wallpaperChoose": "이미지 선택",
   "wallpaperRemove": "이미지 삭제",
   "wallpaperEnabled": "사용자 지정 배경 사용",
   "wallpaperFit": "이미지 맞춤",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "일시 정지",
   "onDemandFullStop": "완전 중지",
   "onDemandFullStopDesc": "일시 정지 중 TUN을 해제하고 로컬 프록시 포트를 닫습니다. 자동 재개를 위해 네트워크 감시는 계속됩니다.",
+  "pickNetworkPermissionDesc": "주변 Wi-Fi 네트워크를 보려면 위치 접근을 허용하거나 네트워크를 직접 입력하세요.",
   "subscriptionClientRequestAs": "요청 클라이언트",
   "subscriptionClientAuto": "자동",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "운영 체제와 기기 모델도 보내기",
   "subscriptionIdentityDetailsDisclosure": "식별자와 함께 운영 체제 버전과 기기 모델도 보냅니다.",
   "subscriptionIdentitySettingsTitle": "구독 식별 정보",
-  "subscriptionIdentityGlobalHint": "활성화하면 프로필에서 재정의하지 않는 한 모든 URL 구독 요청에 기기 식별자를 보냅니다. 운영 체제와 기기 정보는 구독별로 별도 동의가 필요합니다.",
   "subscriptionIdentityUseGlobal": "전역 설정 사용",
   "subscriptionProvider": "구독",
   "subscriptionProviderWebsite": "웹사이트",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "이 구독에 사용할 수 있는 기기 슬롯이 없습니다. 제공업체 계정에서 기기를 삭제한 후 다시 시도하세요.",
   "subscriptionDeviceRequired": "이 구독은 기기 등록이 필요합니다. 제공업체의 안내를 따르세요.",
   "profileBatchResult": "추가: {added}, 건너뜀: {skipped}, 실패: {failed}.",
+  "subscriptionIdentityRegionWarning": "HWID 전송을 끄면 많은 구독이 작동하지 않게 됩니다.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "보호 중",
   "notificationLevelDescription": "상세 모드는 실시간 정보와 중지 버튼을 표시합니다. 최소 모드는 보호 상태만 표시합니다.",
   "extra": "기타",
+  "resetAllData": "모든 데이터 초기화",
+  "resetAllDataDescription": "모든 프로필, 설정, 스크립트, 배경화면 및 캐시 데이터가 영구적으로 삭제됩니다. 백업 파일은 유지됩니다. 이후 앱이 종료됩니다. 이 작업은 되돌릴 수 없습니다.",
+  "resetAllDataConfirm": "모두 삭제",
+  "resetAllDataWait": "{seconds}초 후 확인할 수 있습니다",
+  "resettingAllData": "데이터 삭제 중…",
+  "appIcon": "앱 아이콘",
+  "appIconStandard": "표준",
+  "appIconVelvet": "벨벳",
+  "appIconSolar": "태양",
+  "appIconCircuit": "회로",
+  "appIconEcho": "에코",
+  "appIconInk": "잉크",
+  "appIconBlueprint": "청사진",
+  "appIconStrata": "지층",
+  "appIconShatter": "파편",
+  "appIconTrace": "흔적",
+  "appIconTopo": "지형",
+  "appIconSpark": "스파크",
+  "appIconApply": "이 아이콘 사용",
+  "appIconChangeNote": "홈 화면에 새 아이콘이 나타나기까지 몇 초가 걸릴 수 있습니다. 일부 런처는 바로가기를 삭제하므로 앱 목록에서 다시 추가하세요.",
+  "colorContrast": "대비",
+  "contrastMedium": "중간",
+  "contrastHigh": "높음",
+  "navigationLabels": "탭 레이블",
+  "navigationLabelsAlways": "항상",
+  "navigationLabelsSelected": "선택됨",
+  "navigationLabelsNever": "안 함",
+  "trayIcon": "트레이 아이콘",
+  "trayIconColor": "컬러",
+  "trayIconLight": "흰색",
+  "trayIconDark": "검정",
   "applicationSettings": "앱 설정",
   "toolsConfiguration": "구성",
   "toolsData": "리소스 및 데이터",

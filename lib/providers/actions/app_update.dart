@@ -466,7 +466,11 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
       if (!ref.mounted || revision != _revision) return;
       if (automatic && !_automaticAllowed) return;
       final directory = await _runtime.directory();
+      if (!_current(revision)) return;
       final pending = _pending!;
+      // Hashing the package takes seconds; the phase says so meanwhile, rather
+      // than leaving the step that was tapped on screen and unresponsive.
+      state = state.copyWith(phase: UpdatePhase.verifying);
       final verified = await _runtime.verify(
         File(join(directory.path, pending.fileName)),
         pending.asset,
@@ -494,7 +498,11 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
         }
         return;
       }
-      if (!_current(revision) || automatic && !_automaticAllowed) return;
+      if (!_current(revision)) return;
+      if (automatic && !_automaticAllowed) {
+        state = state.copyWith(phase: UpdatePhase.ready);
+        return;
+      }
       state = state.copyWith(phase: UpdatePhase.installing);
       await _recordPhase(directory);
       if (!_current(revision)) return;
@@ -551,8 +559,11 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     try {
       _permissionOpened = true;
       _attachObservers();
-      await _recordPhase(await _runtime.directory());
+      // Android ends the process once the permission is granted, so the record
+      // only has to land before the reader gets there, not before settings open.
+      final recorded = _recordPhase(await _runtime.directory());
       final opened = await _runtime.openPermission();
+      await recorded;
       if (!_current(revision)) return;
       if (!opened) {
         _permissionOpened = false;
@@ -756,12 +767,29 @@ class AppUpdateAction extends _$AppUpdateAction with WidgetsBindingObserver {
     }
   }
 
+  /// Back from Android's settings, possibly in a process Android restarted
+  /// to apply the grant: the sheet the reader left from comes back either
+  /// way, and the install goes on only once the permission is there.
   Future<void> _resumePermission() async {
     if (!_permissionOpened || !ref.mounted) return;
+    _permissionOpened = false;
+    _revealSheet();
     if (await _runtime.installPermission()) {
-      _permissionOpened = false;
       await installNow();
+    } else {
+      await _recordPhase(await _runtime.directory());
     }
+  }
+
+  void _revealSheet() {
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        final context = globalState.navigatorKey.currentContext;
+        if (context != null && context.mounted) {
+          unawaited(UpdateSheet.show(context));
+        }
+      })
+      ..ensureVisualUpdate();
   }
 
   Future<bool> restorePendingInstall() async {

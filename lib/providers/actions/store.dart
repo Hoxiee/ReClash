@@ -2,6 +2,8 @@ part of '../action.dart';
 
 @Riverpod(keepAlive: true)
 class StoreAction extends _$StoreAction {
+  bool _resetting = false;
+
   CoreController get _core => ref.read(coreHandlerProvider);
 
   @override
@@ -31,9 +33,26 @@ class StoreAction extends _$StoreAction {
   }
 
   void savePreferencesDebounce() {
+    if (_resetting) return;
     debouncer.call(FunctionTag.savePreferences, () async {
       await preferences.saveConfig(ref.read(configProvider));
     });
+  }
+
+  Future<void> resetAllData() async {
+    if (_resetting) return;
+    _resetting = true;
+    debouncer.cancel(FunctionTag.savePreferences);
+    debouncer.cancel(FunctionTag.autoLaunch);
+    try {
+      final dashboard = ref.read(webDashboardActionProvider.notifier);
+      await dashboard.endAccess();
+      await dashboard.cancelAndWait();
+      await ref.read(systemActionProvider.notifier).resetAllDataAndExit();
+    } catch (_) {
+      _resetting = false;
+      rethrow;
+    }
   }
 
   Future handleClear() async {

@@ -23,5 +23,6 @@
   "onDemandResume": "再開",
   "onDemandPause": "一時停止",
   "onDemandFullStop": "完全停止",
-  "onDemandFullStopDesc": "一時停止中はTUNを解除し、ローカルプロキシポートも閉じます。自動再開のためネットワークの監視は続きます。"
+  "onDemandFullStopDesc": "一時停止中はTUNを解除し、ローカルプロキシポートも閉じます。自動再開のためネットワークの監視は続きます。",
+  "pickNetworkPermissionDesc": "近くのWi-Fiネットワークを表示するには位置情報へのアクセスを許可するか、ネットワークを手動で入力してください。"
 }

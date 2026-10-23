@@ -45,19 +45,27 @@ class AppTray implements TrayPort {
 
   bool _isTemplate(bool monochrome) => isMacOS && monochrome;
 
-  String _trayIconDir(bool monochrome) {
-    if (isWindows) {
-      return 'assets/images/tray/windows';
+  String _trayIconDir(TrayIconStyle style, bool monochrome) {
+    if (isMacOS) {
+      return monochrome
+          ? 'assets/images/tray/macos'
+          : 'assets/images/tray/unix';
     }
-    return _isTemplate(monochrome)
-        ? 'assets/images/tray/macos'
+    final platformDir = isWindows
+        ? 'assets/images/tray/windows'
         : 'assets/images/tray/unix';
+    return switch (style) {
+      TrayIconStyle.color => platformDir,
+      TrayIconStyle.light => '$platformDir/light',
+      TrayIconStyle.dark => '$platformDir/dark',
+    };
   }
 
   String getTrayIcon({
     required bool isStart,
     required bool tunEnable,
     required bool safeMode,
+    TrayIconStyle style = TrayIconStyle.color,
     bool monochrome = true,
   }) {
     final status = switch ((
@@ -70,7 +78,7 @@ class AppTray implements TrayPort {
       (false, false, false) => 2,
       (false, false, true) => 3,
     };
-    return '${_trayIconDir(monochrome)}/status_$status.$_trayIconSuffix';
+    return '${_trayIconDir(style, monochrome)}/status_$status.$_trayIconSuffix';
   }
 
   @override
@@ -100,6 +108,7 @@ class AppTray implements TrayPort {
             isStart: trayState.isStart && !trayState.suspended,
             tunEnable: trayState.tunEnable,
             safeMode: trayState.safeMode,
+            style: read(appSettingProvider).trayIconStyle,
             monochrome: trayState.monochromeTrayIcon,
           ),
           isTemplate: _isTemplate(trayState.monochromeTrayIcon),
@@ -171,7 +180,7 @@ class AppTray implements TrayPort {
         ),
       ],
       const TrayMenuSeparator(),
-      for (final mode in Mode.values)
+      for (final mode in trayState.modes)
         TrayMenuCheckbox(
           label: mode.label,
           checked: mode == trayState.mode,

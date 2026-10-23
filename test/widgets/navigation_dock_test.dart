@@ -1013,4 +1013,121 @@ void main() {
       );
     },
   );
+
+  group('label behaviour', () {
+    const names = ['Home', 'Apps', 'Logs'];
+    late StateSetter rebuild;
+    var selected = 0;
+
+    Future<void> pumpDock(
+      WidgetTester tester,
+      NavigationDestinationLabelBehavior behavior, {
+      bool disableAnimations = false,
+    }) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      selected = 0;
+      await tester.pumpWidget(
+        TestApp(
+          child: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(disableAnimations: disableAnimations),
+              child: Scaffold(
+                body: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      rebuild = setState;
+                      return NavigationDock(
+                        labelBehavior: behavior,
+                        destinations: [
+                          for (final name in names)
+                            NavigationDockDestination(
+                              glyph: AppGlyphs.tools,
+                              label: name,
+                            ),
+                        ],
+                        selectedIndex: selected,
+                        onSelected: (_) {},
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Finder inBar(Finder finder) => find.descendant(
+      of: find.byType(FloatingNavigationBar),
+      matching: finder,
+    );
+
+    double alphaOf(WidgetTester tester, String name) =>
+        tester.widget<Text>(inBar(find.text(name))).style!.color!.a;
+
+    double glyphDrop(WidgetTester tester, int index) =>
+        tester.getCenter(inBar(find.byType(GlyphIcon)).at(index)).dy -
+        tester.getCenter(find.byType(FloatingNavigationBar)).dy;
+
+    testWidgets('only the selected destination shows its label', (
+      tester,
+    ) async {
+      await pumpDock(tester, NavigationDestinationLabelBehavior.alwaysShow);
+      final height = tester.getSize(find.byType(FloatingNavigationBar)).height;
+      final raised = glyphDrop(tester, 1);
+      expect(raised, lessThan(-4));
+
+      await pumpDock(
+        tester,
+        NavigationDestinationLabelBehavior.onlyShowSelected,
+      );
+      expect(tester.getSize(find.byType(FloatingNavigationBar)).height, height);
+      expect(alphaOf(tester, 'Home'), greaterThan(0.5));
+      expect(alphaOf(tester, 'Apps'), 0);
+      expect(glyphDrop(tester, 0), closeTo(raised, 0.01));
+      expect(glyphDrop(tester, 1), closeTo(0, 0.01));
+      expect(find.bySemanticsLabel('Apps'), findsOneWidget);
+      expect(inBar(find.byType(Tooltip)), findsNWidgets(names.length));
+
+      rebuild(() => selected = 1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(glyphDrop(tester, 0), inExclusiveRange(raised, 0));
+      expect(glyphDrop(tester, 1), inExclusiveRange(raised, 0));
+      await tester.pumpAndSettle();
+      expect(alphaOf(tester, 'Home'), 0);
+      expect(alphaOf(tester, 'Apps'), greaterThan(0.5));
+      expect(glyphDrop(tester, 0), closeTo(0, 0.01));
+      expect(glyphDrop(tester, 1), closeTo(raised, 0.01));
+    });
+
+    testWidgets('hidden labels leave every glyph centred', (tester) async {
+      await pumpDock(tester, NavigationDestinationLabelBehavior.alwaysHide);
+      for (var index = 0; index < names.length; index++) {
+        expect(alphaOf(tester, names[index]), 0);
+        expect(glyphDrop(tester, index), closeTo(0, 0.01));
+      }
+      expect(find.bySemanticsLabel('Home'), findsOneWidget);
+    });
+
+    testWidgets('reduced motion moves the label in one frame', (tester) async {
+      await pumpDock(
+        tester,
+        NavigationDestinationLabelBehavior.onlyShowSelected,
+        disableAnimations: true,
+      );
+      rebuild(() => selected = 2);
+      await tester.pump();
+      expect(alphaOf(tester, 'Home'), 0);
+      expect(alphaOf(tester, 'Logs'), greaterThan(0.5));
+      expect(tester.binding.hasScheduledFrame, isFalse);
+    });
+  });
 }

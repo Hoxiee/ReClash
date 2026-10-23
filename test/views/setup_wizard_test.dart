@@ -473,7 +473,7 @@ void main() {
     tester,
   ) async {
     final harness = _harness(
-      step: SetupStep.coverage,
+      step: SetupStep.region,
       acceptedDisclaimerVersion: disclaimerVersion,
       safeMode: true,
     );
@@ -586,6 +586,12 @@ void main() {
     expect(automatic.reviewContext?.mounted, isTrue);
     expect(automatic.cancellation?.cancelled, isFalse);
     automatic.completion.complete(harness.profile);
+    await tester.pumpAndSettle();
+    expect(
+      harness.container.read(setupSessionProvider).step,
+      SetupStep.coverage,
+    );
+    await tester.tap(find.byTooltip(currentAppLocalizations.back));
     await tester.pumpAndSettle();
 
     await _chooseRequestClient(
@@ -836,6 +842,7 @@ void main() {
         step: SetupStep.result,
         acceptedDisclaimerVersion: disclaimerVersion,
         regionCode: 'RU',
+        regionChosen: true,
         report: SetupReport(
           verdict: SetupVerdict.connected,
           chains: const ['DIRECT', 'Route Alpha'],
@@ -904,10 +911,12 @@ void main() {
         currentAppLocalizations.setupPhaseConnection,
         currentAppLocalizations.setupPhaseRoute,
       ]) {
-        final label = find.text(phase);
-        expect(label, findsOneWidget);
-        await tester.ensureVisible(label);
+        expect(find.text(phase), findsOneWidget);
       }
+      await tester.ensureVisible(
+        find.text(currentAppLocalizations.setupPhaseCore),
+      );
+      await tester.pumpAndSettle();
       for (final phase in [
         currentAppLocalizations.setupPhaseCore,
         currentAppLocalizations.setupPhaseProfile,
@@ -936,6 +945,7 @@ void main() {
         step: SetupStep.result,
         acceptedDisclaimerVersion: disclaimerVersion,
         regionCode: 'RU',
+        regionChosen: true,
         report: SetupReport(
           verdict: SetupVerdict.connected,
           chains: const ['DIRECT', 'Route Alpha'],
@@ -953,7 +963,7 @@ void main() {
       await tester.dragFrom(const Offset(195, 520), const Offset(0, -1200));
       await tester.pumpAndSettle();
 
-      final receiptTitle = find.text(currentAppLocalizations.setupReceipt);
+      final receiptTitle = find.byTooltip(currentAppLocalizations.setupReceipt);
       expect(receiptTitle.hitTestable(), findsOneWidget);
       await tester.tap(receiptTitle);
       await tester.pumpAndSettle();
@@ -988,13 +998,12 @@ void main() {
         initialSettings.setupCompleted,
       );
 
+      expect(find.text(currentAppLocalizations.server), findsOneWidget);
+
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(
-        find.text(currentAppLocalizations.setupReceiptCoverage),
-        findsNothing,
-      );
+      expect(find.text(currentAppLocalizations.server), findsNothing);
       expect(receiptTitle.hitTestable(), findsOneWidget);
       expect(
         harness.container.read(setupSessionProvider).draft.profileId,
@@ -1046,34 +1055,98 @@ void main() {
     expect(find.text('http://127.0.0.1:$port'), findsOneWidget);
   });
 
-  testWidgets('suggested region preview cancellation preserves draft', (
+  testWidgets('region step suggests the detected region as a draft only', (
     tester,
   ) async {
     final harness = _harness(
-      step: SetupStep.coverage,
+      step: SetupStep.region,
       acceptedDisclaimerVersion: disclaimerVersion,
-      coverage: SetupCoverage.local,
-      regionCode: 'CN',
+      coverage: SetupCoverage.system,
       regionChosen: false,
       actualRegionCode: 'RU',
       suggestedRegionCode: 'IR',
     );
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);
+    final savedConfig = harness.container.read(patchClashConfigProvider);
+    final l = currentAppLocalizations;
 
-    final preview = find.text(currentAppLocalizations.regionPreviewTitle);
-    await tester.ensureVisible(preview);
-    await tester.tap(preview);
-    await tester.pumpAndSettle();
-    expect(find.text('Country profile: Iran'), findsOneWidget);
-    expect(harness.container.read(appSettingProvider).regionCode, 'RU');
-    expect(harness.container.read(setupSessionProvider).draft.regionCode, 'CN');
+    expect(find.byType(SelectionCheck), findsNothing);
+    expect(find.text(l.setupRecommended), findsOneWidget);
+    expect(find.text(l.setupDirectTitle), findsNothing);
 
-    await tester.tap(find.byTooltip('Close'));
+    await tester.tap(find.text('Iran'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(SelectionCheck), findsOneWidget);
+    expect(find.text('GEOSITE,category-ir,DIRECT'), findsOneWidget);
+    expect(find.text(l.regionChangesTitle), findsOneWidget);
+    expect(harness.container.read(setupSessionProvider).draft.regionCode, 'IR');
     expect(harness.container.read(appSettingProvider).regionCode, 'RU');
-    expect(harness.container.read(setupSessionProvider).draft.regionCode, 'CN');
+    expect(harness.container.read(patchClashConfigProvider), savedConfig);
+
+    final neutral = find.text(l.setupRegionNeutral);
+    await tester.ensureVisible(neutral);
+    await tester.tap(neutral);
+    await tester.pumpAndSettle();
+
+    final draft = harness.container.read(setupSessionProvider).draft;
+    expect(draft.regionChosen, isTrue);
+    expect(draft.regionCode, isNull);
+    expect(find.text(l.setupDirectTitle), findsNothing);
+    expect(harness.container.read(appSettingProvider).regionCode, 'RU');
+  });
+
+  testWidgets('direct routes switch keeps the region and drops the preset', (
+    tester,
+  ) async {
+    final harness = _harness(
+      step: SetupStep.region,
+      acceptedDisclaimerVersion: disclaimerVersion,
+      regionCode: 'RU',
+      regionChosen: true,
+    );
+    addTearDown(harness.container.dispose);
+    await _pumpWizard(tester, harness.container);
+
+    final toggle = find.byType(Switch);
+    await tester.ensureVisible(toggle);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+
+    final draft = harness.container.read(setupSessionProvider).draft;
+    expect(draft.directRoutes, isFalse);
+    expect(draft.regionCode, 'RU');
+    expect(
+      harness.container.read(appSettingProvider).setupDirectRoutes,
+      isFalse,
+    );
+  });
+
+  testWidgets('back from region returns to coverage with the draft kept', (
+    tester,
+  ) async {
+    final harness = _harness(
+      step: SetupStep.region,
+      acceptedDisclaimerVersion: disclaimerVersion,
+      coverage: SetupCoverage.system,
+      regionCode: 'CN',
+      regionChosen: true,
+    );
+    addTearDown(harness.container.dispose);
+    await _pumpWizard(tester, harness.container);
+
+    await tester.tap(find.byTooltip(currentAppLocalizations.back));
+    await tester.pumpAndSettle();
+
+    final state = harness.container.read(setupSessionProvider);
+    expect(state.step, SetupStep.coverage);
+    expect(state.draft.regionCode, 'CN');
+    expect(state.draft.coverage, SetupCoverage.system);
+
+    await tester.tap(find.text(currentAppLocalizations.setupLanguageContinue));
+    await tester.pumpAndSettle();
+    expect(harness.container.read(setupSessionProvider).step, SetupStep.region);
   });
 
   testWidgets('confirmed and saved results hide save-without-connection', (
@@ -1107,13 +1180,11 @@ void main() {
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);
 
-    expect(find.text(currentAppLocalizations.back), findsOneWidget);
-    await tester.tap(find.text(currentAppLocalizations.back));
+    final change = find.text(currentAppLocalizations.setupChangeSettings);
+    expect(change, findsOneWidget);
+    await tester.tap(change);
     await tester.pumpAndSettle();
-    expect(
-      harness.container.read(setupSessionProvider).step,
-      SetupStep.coverage,
-    );
+    expect(harness.container.read(setupSessionProvider).step, SetupStep.region);
   });
 
   testWidgets('failed result offers the localized back action', (tester) async {
@@ -1125,41 +1196,10 @@ void main() {
     addTearDown(harness.container.dispose);
     await _pumpWizard(tester, harness.container);
 
-    expect(find.text(currentAppLocalizations.back), findsOneWidget);
-  });
-
-  testWidgets('cancelling the setup region preview preserves saved settings', (
-    tester,
-  ) async {
-    final harness = _harness(
-      step: SetupStep.coverage,
-      acceptedDisclaimerVersion: disclaimerVersion,
-      coverage: SetupCoverage.system,
-      regionCode: 'CN',
-      regionChosen: true,
-      actualRegionCode: 'RU',
+    expect(
+      find.text(currentAppLocalizations.setupChangeSettings),
+      findsOneWidget,
     );
-    addTearDown(harness.container.dispose);
-    await _pumpWizard(tester, harness.container);
-    final savedConfig = harness.container.read(configProvider);
-
-    final setupRegion = find.text('Choose a country').first;
-    await tester.ensureVisible(setupRegion);
-    await tester.tap(setupRegion);
-    await tester.pumpAndSettle();
-    final regionChoice = find.text('Choose a country').last;
-    await tester.ensureVisible(regionChoice);
-    await tester.tap(regionChoice);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Iran').last);
-    await tester.pumpAndSettle();
-    expect(find.text('Country profile: Iran'), findsOneWidget);
-    await tester.tap(find.byTooltip('Close'));
-    await tester.pumpAndSettle();
-
-    expect(harness.container.read(appSettingProvider).regionCode, 'RU');
-    expect(harness.container.read(configProvider), savedConfig);
-    expect(harness.container.read(setupSessionProvider).draft.regionCode, 'CN');
   });
 }
 

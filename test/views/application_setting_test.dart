@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:reclash/widgets/update_preferences.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/widgets/update_preferences.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -13,6 +13,7 @@ import 'package:reclash/providers/setup.dart';
 
 import '../helpers/test_profiles.dart';
 import 'package:reclash/views/application_setting.dart';
+import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/developer.dart';
 
 import '../helpers/test_app.dart';
@@ -39,6 +40,7 @@ void main() {
       ],
     );
     container.listen(appSettingProvider, (_, _) {}, fireImmediately: true);
+    container.listen(patchClashConfigProvider, (_, _) {});
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(1200, 1800));
@@ -47,55 +49,6 @@ void main() {
   tearDown(() {
     container.dispose();
     globalState.appEnv = previousAppEnv;
-  });
-
-  testWidgets('a prerelease build defaults the selector to Pre', (
-    tester,
-  ) async {
-    globalState.appEnv = 'pre';
-    tester.view.physicalSize = const Size(1200, 1800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: ApplicationSettingView()),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Pre-release'), findsOneWidget);
-    expect(container.read(appSettingProvider).updateChannel, isNull);
-  });
-
-  testWidgets('channel selector defaults from the build and stores a choice', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(1200, 1800);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: ApplicationSettingView()),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Update channel'), findsOneWidget);
-    expect(find.text('Release'), findsOneWidget);
-    expect(container.read(appSettingProvider).updateChannel, isNull);
-
-    await tester.tap(find.text('Update channel'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Pre-release').last);
-    await tester.pumpAndSettle();
-
-    expect(container.read(appSettingProvider).updateChannel, UpdateChannel.pre);
   });
 
   testWidgets(
@@ -120,6 +73,83 @@ void main() {
       expect(find.text('Save'), findsOneWidget);
     },
   );
+
+  testWidgets('log settings are grouped only in application settings', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(logLevel: LogLevel.warning));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: ApplicationSettingView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final capture = find.text('Logcat');
+    final level = find.text('Log level');
+    final captureSwitch = find.descendant(
+      of: find.widgetWithText(ListTile, 'Logcat'),
+      matching: find.byType(Switch),
+    );
+    expect(capture, findsOneWidget);
+    expect(level, findsOneWidget);
+    expect(find.text('warning'), findsOneWidget);
+    expect(tester.widget<Switch>(captureSwitch).value, isFalse);
+    await tester.ensureVisible(level);
+    await tester.tap(level);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('debug'));
+    await tester.pumpAndSettle();
+    expect(container.read(patchClashConfigProvider).logLevel, LogLevel.debug);
+    expect(container.read(appSettingProvider).openLogs, isFalse);
+
+    await tester.ensureVisible(capture);
+    await tester.tap(capture);
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).openLogs, isTrue);
+    expect(tester.widget<Switch>(captureSwitch).value, isTrue);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: GeneralView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(level, findsNothing);
+    expect(capture, findsNothing);
+    expect(find.text('Logs and diagnostics'), findsNothing);
+    expect(find.text('Turning off Logcat hides the logs entry.'), findsNothing);
+    expect(container.read(appSettingProvider).openLogs, isTrue);
+    expect(container.read(patchClashConfigProvider).logLevel, LogLevel.debug);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: ApplicationSettingView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(level, findsOneWidget);
+    expect(find.text('debug'), findsOneWidget);
+    expect(tester.widget<Switch>(captureSwitch).value, isTrue);
+    await tester.ensureVisible(capture);
+    await tester.tap(capture);
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).openLogs, isFalse);
+    expect(tester.widget<Switch>(captureSwitch).value, isFalse);
+    expect(container.read(patchClashConfigProvider).logLevel, LogLevel.debug);
+  });
 
   testWidgets('reopening setup from developer tools keeps a live run', (
     tester,
@@ -174,6 +204,6 @@ void main() {
     await tester.tap(regionRow);
     await tester.pumpAndSettle();
 
-    expect(find.text('Region profile'), findsOneWidget);
+    expect(find.text('Russia'), findsOneWidget);
   });
 }

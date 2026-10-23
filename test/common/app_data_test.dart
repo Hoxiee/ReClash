@@ -64,4 +64,53 @@ void main() {
     );
     expect(profilesDir.parent.existsSync(), isFalse);
   });
+  test(
+    'full reset removes local data but keeps nested backup archives',
+    () async {
+      await mockPreferences();
+      final previous = db.database;
+      db.database = db.Database(
+        LazyDatabase(() async => throw const FileSystemException('corrupt')),
+      );
+      addTearDown(() => db.database = previous);
+      final files = [
+        'config.yaml',
+        'database.sqlite-wal',
+        'database.sqlite-shm',
+        'scripts/1.js',
+        'wallpapers/image.png',
+        'providers/rules/cache',
+        'inputs/temp',
+        'dashboard/index.html',
+        'identity.json',
+      ];
+      for (final path in files) {
+        final file = File(join(home.path, path));
+        await file.parent.create(recursive: true);
+        await file.writeAsString('private data');
+      }
+      final backup = File(join(home.path, 'backups', 'ReClash_backup.ZIP'));
+      await backup.parent.create(recursive: true);
+      await backup.writeAsString('backup archive');
+      final outside = await Directory.systemTemp.createTemp(
+        'reclash-reset-outside-',
+      );
+      addTearDown(() => outside.delete(recursive: true));
+      final outsideFile = File(join(outside.path, 'untouched'));
+      await outsideFile.writeAsString('keep');
+      await Link(join(home.path, 'outside')).create(outside.path);
+
+      await clearAppData(all: true);
+      await preferences.setVersion(42);
+      await preferences.savePinnedTools(['backup']);
+
+      for (final path in files) {
+        expect(File(join(home.path, path)).existsSync(), isFalse, reason: path);
+      }
+      expect(backup.readAsStringSync(), 'backup archive');
+      expect(outsideFile.readAsStringSync(), 'keep');
+      expect(await preferences.getVersion(), 0);
+      expect(await preferences.getPinnedTools(), isEmpty);
+    },
+  );
 }

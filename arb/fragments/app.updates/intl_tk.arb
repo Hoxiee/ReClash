@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/s",
   "updateRemainingTime": "{time} galdy",
   "updateSeconds": "{count} s",
-  "updateMinutes": "{count} min"
+  "updateMinutes": "{count} min",
+  "updateResumeShort": "Dowam et"
 }

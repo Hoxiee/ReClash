@@ -25,11 +25,13 @@ class AnimatedNavigationBar extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
   });
 
   final List<NavigationBarEntry> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final NavigationDestinationLabelBehavior labelBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,10 @@ class AnimatedNavigationBar extends StatelessWidget {
             child: Semantics(
               selected: true,
               button: true,
+              label:
+                  labelBehavior == NavigationDestinationLabelBehavior.alwaysHide
+                  ? destination.label
+                  : null,
               child: InkWell(
                 onTap: () => onSelected(0),
                 child: Center(
@@ -81,11 +87,14 @@ class AnimatedNavigationBar extends StatelessWidget {
                           child: destination.icon,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        destination.label,
-                        style: AppTextStyle.caption1.of(context),
-                      ),
+                      if (labelBehavior !=
+                          NavigationDestinationLabelBehavior.alwaysHide) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          destination.label,
+                          style: AppTextStyle.caption1.of(context),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -106,6 +115,8 @@ class AnimatedNavigationBar extends StatelessWidget {
         ],
         selectedIndex: selected,
         onDestinationSelected: onSelected,
+        labelBehavior: labelBehavior,
+        animationDuration: context.disableAnimations ? Duration.zero : null,
       );
     }
     if (context.disableAnimations) return bar;

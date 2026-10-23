@@ -2,8 +2,6 @@
   "appearanceTheme": "Thème",
   "appearanceBackground": "Fond",
   "wallpaperTitle": "Fond personnalisé",
-  "wallpaperGalleryHint": "Touchez un fond enregistré pour l’utiliser ou ajoutez-en un nouveau.",
-  "wallpaperChoose": "Choisir une image",
   "wallpaperRemove": "Supprimer l’image",
   "wallpaperEnabled": "Utiliser un fond personnalisé",
   "wallpaperFit": "Ajustement de l’image",

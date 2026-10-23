@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Операциялық жүйе мен құрылғы моделін де жіберу",
   "subscriptionIdentityDetailsDisclosure": "Идентификатормен бірге операциялық жүйе нұсқасы мен құрылғы моделі жіберіледі.",
   "subscriptionIdentitySettingsTitle": "Жазылым идентификаторы",
-  "subscriptionIdentityGlobalHint": "Қосылғанда, профиль бұл параметрді өзгертпесе, құрылғы идентификаторы барлық URL жазылымдарының сұрауларымен жіберіледі. Операциялық жүйе мен құрылғы мәліметтерін әр жазылым үшін бөлек қосуға болады.",
   "subscriptionIdentityUseGlobal": "Жалпы параметрді қолдану",
   "subscriptionProvider": "Жазылым",
   "subscriptionProviderWebsite": "Веб-сайт",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Қосылды: {added}; өткізілді: {skipped}; сәтсіз: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "HWID жіберуді өшірсеңіз, көптеген жазылымдар жұмыс істемей қалады."
 }

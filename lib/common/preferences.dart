@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Preferences {
   static Preferences? _instance;
   var _store = ResolveOnce(_open);
+  bool _preventWrites = false;
 
   Future<bool> get isInit async => await _store.value != null;
 
@@ -28,6 +29,7 @@ class Preferences {
 
   @visibleForTesting
   Future<void> rebind() async {
+    _preventWrites = false;
     _store = ResolveOnce(_open);
     await _store.value;
   }
@@ -49,6 +51,7 @@ class Preferences {
 
   Future<void> savePinnedTools(List<String> pinned) async {
     final store = await _store.value;
+    if (_preventWrites) return;
     await store?.setStringList('tools.pinned', pinned);
   }
 
@@ -59,6 +62,7 @@ class Preferences {
 
   Future<void> setVersion(int version) async {
     final preferences = await _store.value;
+    if (_preventWrites) return;
     await preferences?.setInt('version', version);
   }
 
@@ -69,11 +73,13 @@ class Preferences {
 
   Future<void> setUpgradeVersion(int version) async {
     final preferences = await _store.value;
+    if (_preventWrites) return;
     await preferences?.setInt('upgradeVersion', version);
   }
 
   Future<void> saveShareState(SharedState shareState) async {
     final preferences = await _store.value;
+    if (_preventWrites) return;
     await preferences?.setString('sharedState', json.encode(shareState));
   }
 
@@ -148,6 +154,7 @@ class Preferences {
 
   Future<bool> saveConfig(Config config) async {
     final preferences = await _store.value;
+    if (_preventWrites) return false;
     return preferences?.setString(configKey, json.encode(config)) ?? false;
   }
 
@@ -170,6 +177,7 @@ class Preferences {
 
   Future<void> saveSystemDnsRecord(SystemDnsRecord record) async {
     final sharedPreferencesIns = await _store.value;
+    if (_preventWrites) return;
     await sharedPreferencesIns?.setString(
       systemDnsRecordKey,
       json.encode(record),
@@ -178,6 +186,7 @@ class Preferences {
 
   Future<void> clearSystemDnsRecord() async {
     final sharedPreferencesIns = await _store.value;
+    if (_preventWrites) return;
     await sharedPreferencesIns?.remove(systemDnsRecordKey);
   }
 
@@ -200,6 +209,7 @@ class Preferences {
 
   Future<void> saveBootRecord(BootRecord record) async {
     final sharedPreferencesIns = await _store.value;
+    if (_preventWrites) return;
     await sharedPreferencesIns?.setString(bootRecordKey, json.encode(record));
   }
 
@@ -219,15 +229,19 @@ class Preferences {
     SubscriptionNoticeRecord record,
   ) async {
     final store = await _store.value;
+    if (_preventWrites) return;
     await store?.setString(
       'subscription.notices',
       json.encode(record.toJson()),
     );
   }
 
-  Future<void> clearPreferences() async {
+  Future<void> clearPreferences({bool preventWrites = false}) async {
+    _preventWrites = preventWrites;
     final sharedPreferencesIns = await _store.value;
-    await sharedPreferencesIns?.clear();
+    if (sharedPreferencesIns == null || !await sharedPreferencesIns.clear()) {
+      throw StateError('Unable to clear preferences');
+    }
   }
 }
 

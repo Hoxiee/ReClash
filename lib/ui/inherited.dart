@@ -1,5 +1,4 @@
 import 'package:reclash/ui/item_position.dart';
-import 'package:reclash/ui/open_container.dart';
 import 'package:reclash/ui/sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -53,6 +52,34 @@ class BottomInsetScope extends InheritedWidget {
   }
 }
 
+class NavigationDockScope extends InheritedWidget {
+  const NavigationDockScope({
+    super.key,
+    required this.navigation,
+    required this.floating,
+    required this.held,
+    required this.bottomPadding,
+    required super.child,
+  });
+
+  final Widget navigation;
+  final bool floating;
+
+  /// Whether this page shows [navigation], which the shell then leaves out.
+  final bool held;
+  final double bottomPadding;
+
+  static NavigationDockScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NavigationDockScope>();
+
+  @override
+  bool updateShouldNotify(NavigationDockScope oldWidget) =>
+      navigation != oldWidget.navigation ||
+      floating != oldWidget.floating ||
+      held != oldWidget.held ||
+      bottomPadding != oldWidget.bottomPadding;
+}
+
 /// The room content still has to leave at its top, where the scaffold has
 /// already placed something of its own there.
 class TopInsetScope extends InheritedWidget {
@@ -68,6 +95,41 @@ class TopInsetScope extends InheritedWidget {
   bool updateShouldNotify(TopInsetScope oldWidget) {
     return inset != oldWidget.inset;
   }
+}
+
+/// Insets content while scroll views and their bars span the entire pane.
+class BodyInsetScope extends InheritedWidget {
+  final double inset;
+
+  const BodyInsetScope({super.key, required this.inset, required super.child});
+
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BodyInsetScope>()?.inset ?? 0;
+
+  @override
+  bool updateShouldNotify(BodyInsetScope oldWidget) => inset != oldWidget.inset;
+}
+
+/// Place above the page so its scaffold can read the centered content inset.
+class CappedBodyScope extends StatelessWidget {
+  const CappedBodyScope({
+    super.key,
+    required this.maxWidth,
+    required this.child,
+  });
+
+  final double maxWidth;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (_, constraints) => BodyInsetScope(
+      inset: constraints.maxWidth > maxWidth
+          ? (constraints.maxWidth - maxWidth) / 2
+          : 0,
+      child: child,
+    ),
+  );
 }
 
 /// How far a page's app bar reaches over the body floating under it.
@@ -281,18 +343,25 @@ class PageNavigationScope extends InheritedWidget {
     super.key,
     required this.canOpen,
     required this.open,
+    this.push,
     required super.child,
   });
 
   final bool Function(Widget page) canOpen;
-  final void Function(Widget page, {ContainerOrigin? origin}) open;
+  final void Function(Widget page) open;
+
+  /// Pushes a page that is not one of the host's own, or returns null when
+  /// the host does not own the navigator of `context`.
+  final Future<T?>? Function<T>(BuildContext context, Widget page)? push;
 
   static PageNavigationScope? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<PageNavigationScope>();
 
   @override
   bool updateShouldNotify(PageNavigationScope oldWidget) =>
-      canOpen != oldWidget.canOpen || open != oldWidget.open;
+      canOpen != oldWidget.canOpen ||
+      open != oldWidget.open ||
+      push != oldWidget.push;
 }
 
 class GlobalSearchScope extends InheritedWidget {
@@ -316,17 +385,27 @@ class PagePresentationScope extends InheritedWidget {
   const PagePresentationScope({
     super.key,
     this.title,
-    this.maxBodyWidth = double.infinity,
+    this.previousTitle,
+    this.transitionTitle,
+    this.onTitleSelect,
+    this.previousHasBack = false,
     required super.child,
   });
 
   final Widget? title;
-  final double maxBodyWidth;
+  final String? previousTitle;
+  final String? transitionTitle;
+  final ValueChanged<int>? onTitleSelect;
+  final bool previousHasBack;
 
   static PagePresentationScope? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<PagePresentationScope>();
 
   @override
   bool updateShouldNotify(PagePresentationScope oldWidget) =>
-      title != oldWidget.title || maxBodyWidth != oldWidget.maxBodyWidth;
+      title != oldWidget.title ||
+      previousTitle != oldWidget.previousTitle ||
+      transitionTitle != oldWidget.transitionTitle ||
+      onTitleSelect != oldWidget.onTitleSelect ||
+      previousHasBack != oldWidget.previousHasBack;
 }

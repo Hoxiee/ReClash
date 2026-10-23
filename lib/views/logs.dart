@@ -155,10 +155,12 @@ class _LogsViewState extends ConsumerState<LogsView>
                     reverse: true,
                     shrinkWrap: true,
                     controller: _scrollController,
-                    padding: EdgeInsets.only(
-                      top: context.contentTopPadding,
-                      bottom: 16 + context.bottomInset,
-                    ),
+                    padding:
+                        EdgeInsets.only(
+                          top: context.contentTopPadding,
+                          bottom: 16 + context.bottomInset,
+                        ) +
+                        context.bodyInsets,
                     itemCount: logs.length,
                     extentEstimation: recordListExtentEstimation,
                     separatorBuilder: (_, _) =>

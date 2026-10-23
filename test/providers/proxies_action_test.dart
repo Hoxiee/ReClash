@@ -350,7 +350,9 @@ void main() {
       ]);
     });
 
-    test('ignores a result after the runtime token changes', () async {
+    Future<List<String>> refreshAcross(
+      void Function(ProviderContainer container) during,
+    ) async {
       final response = Completer<ProxiesData>();
       when(core.getProxies).thenAnswer((_) => response.future);
       final container = runningContainer();
@@ -359,13 +361,13 @@ void main() {
       ];
       final refresh = actionOf(container).updateGroups();
       await Future<void>.delayed(Duration.zero);
-      container.read(runTimeProvider.notifier).value = 2;
+      during(container);
       response.complete(
         ProxiesData(
-          all: const ['Stale', 'Direct'],
+          all: const ['Fresh', 'Direct'],
           proxies: Map<String, dynamic>.from({
-            'Stale': Map<String, dynamic>.from({
-              'name': 'Stale',
+            'Fresh': Map<String, dynamic>.from({
+              'name': 'Fresh',
               'type': 'Selector',
               'now': 'HK-01',
               'all': ['HK-01'],
@@ -379,10 +381,42 @@ void main() {
         ),
       );
       await refresh;
+      return [for (final group in container.read(groupsProvider)) group.name];
+    }
 
-      expect(container.read(groupsProvider).map((group) => group.name), [
-        'Current',
-      ]);
+    test('keeps a result while the run time only ticks', () async {
+      final names = await refreshAcross(
+        (container) => container.read(runTimeProvider.notifier).value = 2,
+      );
+
+      expect(names, ['Fresh']);
+    });
+
+    test('ignores a result after the Core restarts', () async {
+      final names = await refreshAcross((container) {
+        container.read(runTimeProvider.notifier).value = null;
+        container.read(runTimeProvider.notifier).value = 2;
+      });
+
+      expect(names, ['Current']);
+    });
+
+    test('defers a health-check refresh until the app is shown', () async {
+      when(
+        core.getProxies,
+      ).thenAnswer((_) async => const ProxiesData(all: [], proxies: {}));
+      final container = runningContainer();
+      container.listen(appVisibleProvider, (_, _) {});
+      container.read(appVisibleProvider.notifier).value = false;
+      final action = actionOf(container);
+
+      action.updateGroupsWhenVisible(hiddenConsumer: false);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      verifyNever(core.getProxies);
+
+      container.read(appVisibleProvider.notifier).value = true;
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      verify(core.getProxies).called(greaterThan(0));
     });
 
     test('ignores a result after the current profile changes', () async {

@@ -277,6 +277,9 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     final tabAnimation = ref.watch(
       appSettingProvider.select((state) => state.tabAnimation),
     );
+    final labels = ref.watch(
+      appSettingProvider.select((state) => state.navigationLabels),
+    );
     final liquidGlass = ref.watch(
       themeSettingProvider.select(
         (state) => state.liquidGlass != LiquidGlassMode.none,
@@ -307,7 +310,7 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
               builder: (_, colorScheme, _) => AnimatedSwitcher(
                 duration: _duration,
                 child: AnimatedBuilder(
-                  key: ValueKey((floatingBar, liquidGlass)),
+                  key: ValueKey((floatingBar, liquidGlass, labels)),
                   animation: _slideCurve,
                   builder: (_, _) => MiniScreen(
                     colorScheme: colorScheme,
@@ -319,6 +322,7 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
                     previous: _previous,
                     progress: _previous == null ? 1 : _slideCurve.value,
                     tabAnimation: tabAnimation,
+                    labels: labels,
                     onSelect: _select,
                   ),
                 ),
@@ -349,6 +353,7 @@ class MiniScreen extends StatelessWidget {
     this.previous,
     this.progress = 1,
     this.tabAnimation = TabAnimation.slide,
+    this.labels = NavigationLabels.always,
     this.onSelect,
   });
 
@@ -367,6 +372,7 @@ class MiniScreen extends StatelessWidget {
   final int? previous;
   final double progress;
   final TabAnimation tabAnimation;
+  final NavigationLabels labels;
   final ValueChanged<int>? onSelect;
 
   @override
@@ -384,6 +390,7 @@ class MiniScreen extends StatelessWidget {
           previous: previous,
           progress: progress,
           tabAnimation: tabAnimation,
+          labels: labels,
           cardOpacity: active ? wallpaper.cardOpacity : 1,
         ),
         child: const SizedBox.expand(),
@@ -492,6 +499,7 @@ class _MiniScreenPainter extends CustomPainter {
     required this.previous,
     required this.progress,
     required this.tabAnimation,
+    required this.labels,
     required this.cardOpacity,
   });
 
@@ -502,6 +510,7 @@ class _MiniScreenPainter extends CustomPainter {
   final int? previous;
   final double progress;
   final TabAnimation tabAnimation;
+  final NavigationLabels labels;
   final double cardOpacity;
 
   bool get _glass => floatingBar && liquidGlass;
@@ -665,8 +674,13 @@ class _MiniScreenPainter extends CustomPainter {
         : SurfaceLevel.floatingOf(colorScheme).next.colorOf(colorScheme);
     for (var i = 0; i < MiniScreen.destinationCount; i++) {
       final center = Offset(bar.left + cell * i + cell / 2, bar.center.dy);
-      final icon = center.translate(0, -unit * 0.4);
       final isSelected = i == selected;
+      final labeled = switch (labels) {
+        NavigationLabels.always => true,
+        NavigationLabels.selected => isSelected,
+        NavigationLabels.never => false,
+      };
+      final icon = labeled ? center.translate(0, -unit * 0.4) : center;
       if (isSelected) {
         _fill(
           canvas,
@@ -694,6 +708,7 @@ class _MiniScreenPainter extends CustomPainter {
         ink,
         AppShape.circle,
       );
+      if (!labeled) continue;
       _fill(
         canvas,
         Rect.fromCenter(
@@ -716,6 +731,7 @@ class _MiniScreenPainter extends CustomPainter {
         oldDelegate.previous != previous ||
         oldDelegate.progress != progress ||
         oldDelegate.tabAnimation != tabAnimation ||
+        oldDelegate.labels != labels ||
         oldDelegate.cardOpacity != cardOpacity;
   }
 }

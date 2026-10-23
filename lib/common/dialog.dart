@@ -44,6 +44,9 @@ class Dialogs {
     );
   }
 
+  Future<T?> showForm<T>({required WidgetBuilder builder}) =>
+      showFormSheet<T>(context: _context, builder: builder);
+
   Future<bool?> showMessage({
     required InlineSpan message,
     BuildContext? context,

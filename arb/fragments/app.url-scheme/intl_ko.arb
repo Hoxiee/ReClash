@@ -95,5 +95,21 @@
   "telegramWebFallback": "브라우저에서 열기",
   "telegramAppUnavailable": "이 기기에서 Telegram을 열 수 없습니다.",
   "urlSchemeFormats": "형식",
-  "urlSchemeFormatsTip": "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요."
+  "urlSchemeFormatsTip": "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요.",
+  "profileImportTitle": "새 구독",
+  "profileImportChecking": "구독을 확인하는 중…",
+  "profileImportPreviewFailed": "구독 내용을 확인하지 못했습니다. 그래도 추가할 수 있습니다.",
+  "profileImportEncrypted": "구독이 암호화되어 있습니다. 추가할 때 키를 묻습니다.",
+  "profileImportFormat": "구독 형식",
+  "profileImportFormatClient": "{client} 앱이 받는 형식 그대로",
+  "profileImportFormatReclash": "ReClash에 가장 적합한 형식을 자동으로 선택",
+  "profileImportServerCount": "{count, plural, other{서버 {count}개}}",
+  "profileImportAlreadyAdded": "이미 “{name}”(으)로 추가됨",
+  "profileImportLosses": "일부 항목은 지원되지 않습니다. 추가하기 전에 확인할 수 있습니다.",
+  "profileImportServers": "서버",
+  "profileImportValidUntil": "유효 기간",
+  "profileImportUnlimited": "무제한",
+  "profileImportExpired": "만료됨",
+  "profileImportFromProvider": "제공자 메시지",
+  "profileImportSingleServer": "단일 서버"
 }

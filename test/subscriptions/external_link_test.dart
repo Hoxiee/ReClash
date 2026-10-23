@@ -69,6 +69,15 @@ void main() {
     },
   );
 
+  test('fully percent-encoded Happ links are accepted and resolved', () async {
+    const encoded = 'happ%3A%2F%2Fadd%2Fhttps%3A%2F%2Fexample.test%2Fsub';
+    const url = 'https://example.test/sub';
+    expect(isProfileLinkInput(encoded), isTrue);
+    final result = await resolveProfileLink(encoded);
+    expect(result.url, url);
+    expect(result.preset, SubscriptionClientPreset.happ);
+  });
+
   test('raw and encoded wrapper URLs are decoded only once', () async {
     const url = 'https://example.com/a%2Fb?token=a%2Bb&name=source#anchor';
     for (final scheme in ['incy', 'happ']) {

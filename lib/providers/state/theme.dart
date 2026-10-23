@@ -42,12 +42,14 @@ ColorScheme genColorScheme(
   Color? color,
   bool ignoreConfig = false,
   bool? pureBlack,
+  ColorContrast? contrast,
 }) {
   final themeSetting = ref.watch(
     themeSettingProvider.select(
       (state) => (
         primaryColor: state.primaryColor,
         colorStyle: state.colorStyle,
+        contrast: state.contrast,
         pureBlack: state.pureBlack,
       ),
     ),
@@ -64,27 +66,31 @@ ColorScheme genColorScheme(
     seedColor,
     brightness,
     themeSetting.colorStyle,
+    contrast ?? themeSetting.contrast,
     pureBlack ?? themeSetting.pureBlack,
   );
 }
 
 const _maxCachedColorSchemes = 64;
 
-final _colorSchemes = <(Color, Brightness, ColorStyle, bool), ColorScheme>{};
+final _colorSchemes =
+    <(Color, Brightness, ColorStyle, ColorContrast, bool), ColorScheme>{};
 
 ColorScheme _cachedColorScheme(
   Color seedColor,
   Brightness brightness,
   ColorStyle style,
+  ColorContrast contrast,
   bool pureBlack,
 ) {
-  final key = (seedColor, brightness, style, pureBlack);
+  final key = (seedColor, brightness, style, contrast, pureBlack);
   final colorScheme =
       _colorSchemes.remove(key) ??
       seededColorScheme(
         seedColor: seedColor,
         brightness: brightness,
         style: style,
+        contrast: contrast,
       ).toPureBlack(pureBlack);
   _colorSchemes[key] = colorScheme;
   if (_colorSchemes.length > _maxCachedColorSchemes) {

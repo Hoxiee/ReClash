@@ -11,7 +11,7 @@ import 'subscription/subscription_links.dart';
 
 const maxSubscriptionImportBytes = 16 * 1024 * 1024;
 const maxSubscriptionImportDecompressedBytes = 32 * 1024 * 1024;
-const maxSubscriptionImportNodes = 10000;
+const maxSubscriptionImportNodes = 20000;
 
 enum SubscriptionFormat {
   clash,
@@ -218,6 +218,9 @@ SubscriptionFormat _detectFormat(String content, Object? json, Object? yaml) {
         : SubscriptionFormat.shareLinks;
   }
   if (isWireguardConfInput(content)) return SubscriptionFormat.wireguard;
+  if (json is List && isXrayConfigValue(json)) {
+    return SubscriptionFormat.xray;
+  }
   if (json is Map<String, Object?>) {
     final outbounds = json['outbounds'];
     final xray =

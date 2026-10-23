@@ -23,5 +23,6 @@
   "onDemandResume": "Reprendre",
   "onDemandPause": "Mettre en pause",
   "onDemandFullStop": "Arrêt complet",
-  "onDemandFullStopDesc": "Retirer TUN et fermer les ports proxy locaux pendant la pause. La surveillance du réseau continue pour reprendre automatiquement."
+  "onDemandFullStopDesc": "Retirer TUN et fermer les ports proxy locaux pendant la pause. La surveillance du réseau continue pour reprendre automatiquement.",
+  "pickNetworkPermissionDesc": "Autorisez l’accès à la localisation pour voir les réseaux Wi-Fi à proximité, ou saisissez un réseau manuellement."
 }

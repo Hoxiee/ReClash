@@ -5,16 +5,16 @@ risk: routine
 must:
   selection: App region is independent of interface locale; detection never applies a profile without explicit user confirmation.
   detection: Region detection uses only local time zone and system locale, never SIM or mobile network data.
-  preview: Country changes are previewed before apply and cancellation leaves stored and runtime configuration unchanged.
+  preview: Country changes show a plain summary of affected areas before apply; cancellation leaves stored and runtime configuration unchanged.
   layout: Region settings share the settings workspace width constraints, responsive layout and navigation.
-  preservation: Applying or switching a regional overlay preserves custom DNS, routes, MTU, bypass, and service preferences.
+  preservation: Applying or switching a region replaces only values still at the previous region's defaults; custom DNS, routes, MTU, bypass, and service preferences stay.
   reversibility: Removing or switching the region does not duplicate rules or lose underlying user settings.
   android: Domestic app matching is country-specific, honors shared exclusions, and unknown regions match nothing.
   localization: All region labels, impact summaries, warnings, and apply actions are owned by region feature ARB fragments.
-  settings: Regional DNS and MTU reach final profile generation while raw editors retain ownership of manual overrides.
+  settings: Applying a region writes its DNS, MTU and bypass list into the regular settings shown by the editors; Restore defaults on Network and DNS returns them to the region's values.
   services: Explicitly enabled and disabled checks survive region changes, including an empty enabled set.
   app-selection: Native app matches require confirmation; errors, empty matches, cancellation, changed inputs and disposal never replace lists.
-  setup-preview: Wizard region preview changes only the draft; cancellation preserves active settings.
+  setup-preview: The wizard region step changes only the draft until a check or save commits it; going back or leaving preserves active settings.
 watch: [lib/common/regional/**, lib/common/service_probe.dart, lib/models/config.dart, lib/models/state.dart, lib/models/generated/config.freezed.dart, lib/models/generated/config.g.dart, lib/models/generated/state.freezed.dart, lib/providers/config.dart, lib/providers/state.dart, lib/providers/state/system.dart, lib/providers/state/proxies.dart, lib/providers/generated/state.g.dart, lib/providers/actions/setup.dart, lib/providers/service_status.dart, lib/views/application_setting.dart, lib/views/region.dart, lib/models/tool_route.dart, lib/views/tools/navigation.dart, lib/views/tools/catalog.dart, test/views/tools_catalog_test.dart, test/widgets/tools_workspace_test.dart, lib/views/access.dart, lib/views/dashboard/widgets/service_status.dart, lib/plugins/app.dart, pubspec.yaml, pubspec.lock, android/app/src/main/kotlin/com/reclash/packages/**, android/app/src/main/assets/domestic/**, android/app/src/main/kotlin/com/reclash/plugins/AppPlugin.kt, android/tests/app/*Domestic*Test.kt, 'arb/fragments/app.region/**', test/common/regional_test.dart, test/common/service_probe_test.dart, test/models/config_test.dart, test/providers/state_derived_test.dart, test/views/region_view_test.dart, test/views/application_setting_test.dart, lib/providers/state/profile.dart, lib/providers/actions/system.dart, lib/providers/generated/action.g.dart, lib/providers/generated/service_status.g.dart, lib/views/config/dns.dart, lib/views/config/network.dart, lib/views/config/override.dart, test/plugins/app_test.dart, test/providers/service_status_test.dart, test/views/access_test.dart, test/views/network_config_test.dart, test/views/dns_view_test.dart, test/views/dashboard/service_status_test.dart, .agents/setting-changes.md, lib/providers/setup.dart, lib/views/setup.dart, test/views/setup_wizard_test.dart, test/providers/setup_session_test.dart]
 checks:
   config: [selection, preservation, reversibility, settings, services]

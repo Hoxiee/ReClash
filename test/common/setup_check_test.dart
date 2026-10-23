@@ -21,9 +21,13 @@ void main() {
       );
       expect(
         resumableSetupStep(SetupStep.checking.index, accepted: true),
+        SetupStep.region,
+      );
+      expect(
+        resumableSetupStep(SetupStep.coverage.index, accepted: true),
         SetupStep.coverage,
       );
-      expect(resumableSetupStep(99, accepted: true), SetupStep.coverage);
+      expect(resumableSetupStep(99, accepted: true), SetupStep.region);
     });
   });
 

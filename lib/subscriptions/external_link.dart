@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:reclash/common/url_scheme.dart';
 import 'package:reclash/common/protocol.dart';
+import 'package:reclash/models/profile.dart';
 
 import 'compatibility/clients.dart';
 
@@ -33,12 +34,41 @@ class ProfileLinkSource {
       : '';
 }
 
+typedef ProfileLinkPreview = ({
+  Profile draft,
+  PreparedSubscriptionUpdate prepared,
+});
+
+/// A [preview] for this draft lets import reuse the confirmed download.
+class ProfileLinkImport {
+  const ProfileLinkImport({
+    this.clientSettings = const SubscriptionClientSettings.forNewProfile(),
+    this.label,
+    this.preview,
+  });
+
+  final SubscriptionClientSettings clientSettings;
+  final String? label;
+  final ProfileLinkPreview? preview;
+}
+
 Future<ProfileLinkSource> resolveProfileLink(String input) => Isolate.run(() {
   if (input.length > urlSchemeMaxLength) {
     throw const UrlSchemeException(UrlSchemeIssue.tooLarge);
   }
-  return _resolve(input.trim(), 0);
+  return _resolve(_decodeEncodedProtocolLink(input.trim()), 0);
 });
+
+String _decodeEncodedProtocolLink(String input) {
+  if (Uri.tryParse(input)?.hasScheme == true) return input;
+  try {
+    final decoded = Uri.decodeComponent(input);
+    final scheme = Uri.tryParse(decoded)?.scheme;
+    return protocolSchemes.contains(scheme) ? decoded : input;
+  } on FormatException {
+    return input;
+  }
+}
 
 Future<ProfileLinkSource> _resolve(String input, int depth) async {
   if (depth > urlSchemeMaxDepth) {

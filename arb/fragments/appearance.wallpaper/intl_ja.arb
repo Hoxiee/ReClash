@@ -2,8 +2,6 @@
   "appearanceTheme": "テーマ",
   "appearanceBackground": "背景",
   "wallpaperTitle": "カスタム背景",
-  "wallpaperGalleryHint": "保存済みの背景をタップして適用するか、新しい背景を追加します。",
-  "wallpaperChoose": "画像を選択",
   "wallpaperRemove": "画像を削除",
   "wallpaperEnabled": "カスタム背景を使用",
   "wallpaperFit": "画像の配置",

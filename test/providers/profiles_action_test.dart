@@ -474,6 +474,60 @@ void main() {
       }
     }
 
+    testWidgets('a confirmed preview is committed without a second fetch', (
+      tester,
+    ) async {
+      await pumpHost(tester);
+      await tester.runAsync(() async {
+        final previousOverrides = HttpOverrides.current;
+        HttpOverrides.global = null;
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        var requests = 0;
+        server.listen((request) async {
+          requests++;
+          request.response
+            ..headers.set(
+              'announce',
+              'base64:${base64.encode(utf8.encode('Привет'))}',
+            )
+            ..write(
+              'proxies:\n  - name: test\n    type: ss\n    server: example.test\n    port: 443\n    cipher: aes-128-gcm\n    password: token\nrules: [MATCH,DIRECT]',
+            );
+          await request.response.close();
+        });
+        try {
+          final url = 'http://127.0.0.1:${server.port}/sub';
+          final source = await resolveProfileLink(
+            'happ://add/${Uri.encodeComponent(url)}',
+          );
+          final action = container.read(profilesActionProvider.notifier);
+          final settings = const SubscriptionClientSettings.forNewProfile()
+              .copyWith(preset: SubscriptionClientPreset.happ);
+          final preview = await action.previewProfileLinkSource(
+            source,
+            settings,
+          );
+          expect(requests, 1);
+          expect(preview.prepared.snapshot.metadata.announce, 'Привет');
+
+          final profile = await action.importProfileLinkSource(
+            source,
+            label: 'Mine',
+            select: false,
+            clientSettings: settings,
+            preview: preview,
+          );
+          expect(requests, 1);
+          expect(profile.id, preview.draft.id);
+          expect(profile.label, 'Mine');
+          expect((await profile.file).existsSync(), isTrue);
+        } finally {
+          await server.close(force: true);
+          HttpOverrides.global = previousOverrides;
+        }
+      });
+    });
+
     for (final explicitLabel in [false, true]) {
       test(
         'embedded imports preserve names with override=$explicitLabel',

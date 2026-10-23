@@ -59,98 +59,194 @@ void main() {
     });
   });
 
-  group('regional network overlay', () {
-    test(
-      'applies only profile DNS fields without replacing user overrides',
-      () {
-        const base = PatchClashConfig(
-          dns: Dns(
-            nameserver: ['https://user.example/dns-query'],
-            fallbackFilter: FallbackFilter(geoipCode: 'US'),
-          ),
-          dnsOverrideKeys: {
-            DnsOverrideKey.nameserver,
-            DnsOverrideKey.fallbackFilterGeoipCode,
-          },
-        );
-
-        final result = regionalNetworkConfigFor(
-          regionCode: 'RU',
-          base: base,
-          defaultBypassDomains: defaultBypassDomain,
-          bypassDomains: defaultBypassDomain,
-        );
-
-        expect(result.patchConfig.dns.nameserver, [
-          'https://user.example/dns-query',
-        ]);
-        expect(result.patchConfig.dns.fallbackFilter.geoipCode, 'US');
-        expect(result.patchConfig.dns.defaultNameserver, [
-          '77.88.8.8',
-          '77.88.8.1',
-        ]);
-        expect(result.patchConfig.dns.fallback, [
-          'https://dns.adguard-dns.com/dns-query',
-          'https://dns.quad9.net/dns-query',
-        ]);
-        expect(result.patchConfig.dns.fakeIpFilter, base.dns.fakeIpFilter);
-        expect(result.patchConfig.tun.mtu, regionalDefaultTunMtu);
-        expect(
-          result.patchConfig.tunOverrideKeys,
-          contains(TunOverrideKey.mtu),
-        );
-        expect(
-          result.patchConfig.dnsOverrideKeys,
-          containsAll(base.dnsOverrideKeys),
-        );
-        expect(result.bypassDomain, isNot(contains('*zhihu.com')));
-      },
+  group('regional defaults', () {
+    RegionalNetwork switchRegion(
+      String? from,
+      String? to, {
+      PatchClashConfig patchConfig = const PatchClashConfig(),
+      List<String>? bypassDomain,
+    }) => withRegionDefaults(
+      from: from,
+      to: to,
+      patchConfig: patchConfig,
+      bypassDomain: bypassDomain ?? regionBypassDomains(from),
     );
 
-    test('keeps custom MTU and bypass lists unchanged', () {
-      const base = PatchClashConfig(
-        tun: Tun(mtu: 1400),
-        tunOverrideKeys: {TunOverrideKey.mtu},
-      );
-      final customBypass = ['custom.example'];
+    test('writes the region DNS, MTU and bypass list into settings', () {
+      final result = switchRegion(null, 'RU');
 
-      final result = regionalNetworkConfigFor(
-        regionCode: 'CN',
-        base: base,
-        defaultBypassDomains: defaultBypassDomain,
-        bypassDomains: customBypass,
-      );
-
-      expect(result.patchConfig.tun.mtu, 1400);
-      expect(result.bypassDomain, customBypass);
+      expect(result.patchConfig.dnsOverrideKeys, regionDnsKeys('RU'));
+      expect(result.patchConfig.dns.nameserver, [
+        'tls://77.88.8.8',
+        'tls://77.88.8.1',
+      ]);
+      expect(result.patchConfig.dns.fallbackFilter.geoipCode, 'RU');
+      expect(result.patchConfig.tun.mtu, regionalDefaultTunMtu);
+      expect(result.patchConfig.tunOverride.mtu, regionalDefaultTunMtu);
+      expect(result.patchConfig.tunOverrideKeys, {TunOverrideKey.mtu});
+      expect(result.bypassDomain, defaultBypassDomain);
     });
 
-    test('unset or unsupported region leaves network settings untouched', () {
+    test('keeps values the user changed', () {
       const base = PatchClashConfig(
-        dns: Dns(nameserver: ['https://user.example/dns-query']),
+        dns: Dns(
+          nameserver: ['https://user.example/dns-query'],
+          fallbackFilter: FallbackFilter(geoipCode: 'US'),
+        ),
+        dnsOverrideKeys: {
+          DnsOverrideKey.nameserver,
+          DnsOverrideKey.fallbackFilterGeoipCode,
+          DnsOverrideKey.ipv6,
+        },
+        tun: Tun(mtu: 1400),
+        tunOverride: ProfileTun(mtu: 1400),
+        tunOverrideKeys: {TunOverrideKey.mtu},
       );
-      for (final region in [null, 'US']) {
-        final result = regionalNetworkConfigFor(
-          regionCode: region,
-          base: base,
-          defaultBypassDomains: defaultBypassDomain,
-          bypassDomains: const ['custom.example'],
+
+      final result = switchRegion(
+        null,
+        'RU',
+        patchConfig: base,
+        bypassDomain: const ['custom.example'],
+      );
+
+      expect(result.patchConfig.dns.nameserver, [
+        'https://user.example/dns-query',
+      ]);
+      expect(result.patchConfig.dns.fallbackFilter.geoipCode, 'US');
+      expect(result.patchConfig.dns.defaultNameserver, [
+        '77.88.8.8',
+        '77.88.8.1',
+      ]);
+      expect(
+        result.patchConfig.dnsOverrideKeys,
+        containsAll(base.dnsOverrideKeys),
+      );
+      expect(result.patchConfig.tun.mtu, 1400);
+      expect(result.bypassDomain, ['custom.example']);
+    });
+
+    test('switching replaces only the previous region defaults', () {
+      final russia = switchRegion(null, 'RU');
+      final edited = russia.patchConfig.copyWith(
+        dns: russia.patchConfig.dns.copyWith(
+          fallback: const ['https://user.example/dns-query'],
+        ),
+      );
+
+      final egypt = switchRegion(
+        'RU',
+        'EG',
+        patchConfig: edited,
+        bypassDomain: russia.bypassDomain,
+      );
+
+      expect(egypt.patchConfig.dns.nameserver, [
+        'https://cloudflare-dns.com/dns-query',
+        'https://dns.google/dns-query',
+      ]);
+      expect(egypt.patchConfig.dns.fallbackFilter.geoipCode, 'EG');
+      expect(egypt.patchConfig.dns.fallback, [
+        'https://user.example/dns-query',
+      ]);
+    });
+
+    test('switching away and back never accumulates', () {
+      const base = PatchClashConfig(
+        dns: Dns(ipv6: true),
+        dnsOverrideKeys: {DnsOverrideKey.ipv6},
+      );
+      var current = (patchConfig: base, bypassDomain: defaultBypassDomain);
+      String? from;
+      for (final code in ['RU', 'CN', 'IR', 'EG', 'OTHER', null, 'RU']) {
+        current = switchRegion(
+          from,
+          code,
+          patchConfig: current.patchConfig,
+          bypassDomain: current.bypassDomain,
         );
-        expect(result.patchConfig, base);
-        expect(result.bypassDomain, ['custom.example']);
+        from = code;
+        expect(current.patchConfig.dnsOverrideKeys, {
+          DnsOverrideKey.ipv6,
+          ...regionDnsKeys(code),
+        });
+        expect(current.bypassDomain, regionBypassDomains(code));
+        expect(current.patchConfig.tun.mtu, regionTunMtu(code));
       }
+      final cleared = switchRegion(
+        'RU',
+        null,
+        patchConfig: current.patchConfig,
+        bypassDomain: current.bypassDomain,
+      );
+      expect(cleared.patchConfig, base);
+      expect(cleared.bypassDomain, defaultBypassDomain);
+    });
+
+    test('China adds its bypass domains and keeps the core MTU', () {
+      final result = switchRegion(null, 'CN');
+      expect(result.bypassDomain, contains('*zhihu.com'));
+      expect(result.patchConfig.tun.mtu, defaultTunMtu);
+      expect(result.patchConfig.tunOverrideKeys, isEmpty);
+      expect(defaultBypassDomain, isNot(contains('*zhihu.com')));
+    });
+
+    test('an untouched list from any region follows the new region', () {
+      final result = switchRegion(
+        'RU',
+        'EG',
+        bypassDomain: regionBypassDomains('CN'),
+      );
+      expect(result.bypassDomain, regionBypassDomains('EG'));
+    });
+
+    test('an empty custom bypass list stays empty', () {
+      expect(
+        switchRegion(null, 'CN', bypassDomain: const []).bypassDomain,
+        isEmpty,
+      );
+    });
+
+    test('preserves Android MTU changed without desktop override keys', () {
+      const base = PatchClashConfig(tun: Tun(mtu: 1420));
+      final patch = switchRegion(null, 'RU', patchConfig: base).patchConfig;
+      expect(patch.tun.mtu, 1420);
+      expect(patch.tunOverrideKeys, isEmpty);
+    });
+
+    test('keeps explicit desktop MTU even when Android is at its default', () {
+      const base = PatchClashConfig(
+        tunOverride: ProfileTun(mtu: 1280),
+        tunOverrideKeys: {TunOverrideKey.mtu},
+      );
+      final patch = switchRegion(null, 'RU', patchConfig: base).patchConfig;
+      expect(patch.tunOverride.mtu, 1280);
+      expect(patch.tun.mtu, defaultTunMtu);
+    });
+
+    test('restoring network defaults resets the bypass list and MTU', () {
+      const edited = PatchClashConfig(
+        tun: Tun(mtu: 1400),
+        tunOverride: ProfileTun(mtu: 1400),
+        tunOverrideKeys: {TunOverrideKey.mtu},
+      );
+      final russia = regionNetworkDefaults('RU', edited);
+      expect(russia.patchConfig.tun.mtu, regionalDefaultTunMtu);
+      expect(russia.patchConfig.tunOverride.mtu, regionalDefaultTunMtu);
+      expect(russia.bypassDomain, defaultBypassDomain);
+      final china = regionNetworkDefaults('CN', edited);
+      expect(china.patchConfig.tun.mtu, defaultTunMtu);
+      expect(china.patchConfig.tunOverrideKeys, isEmpty);
+      expect(china.bypassDomain, contains('*zhihu.com'));
     });
   });
 
   group('regional profile generation', () {
-    PatchClashConfig regional(
-      String? code, [
-      PatchClashConfig base = const PatchClashConfig(),
-    ]) => regionalNetworkConfigFor(
-      regionCode: code,
-      base: base,
-      defaultBypassDomains: defaultBypassDomain,
-      bypassDomains: defaultBypassDomain,
+    PatchClashConfig regional(String? code) => withRegionDefaults(
+      from: null,
+      to: code,
+      patchConfig: const PatchClashConfig(),
+      bypassDomain: defaultBypassDomain,
     ).patchConfig;
 
     test(
@@ -159,7 +255,7 @@ void main() {
         final patch = regional('RU');
         final overrides = regionalProfileOverridesFor(
           patchConfig: patch,
-          appDnsOverrideKeys: const {},
+          regionCode: 'RU',
         );
         final result = await makeRealProfileTask(
           MakeRealProfileState(
@@ -206,7 +302,7 @@ void main() {
       );
       final overrides = regionalProfileOverridesFor(
         patchConfig: regional('RU'),
-        appDnsOverrideKeys: const {},
+        regionCode: 'RU',
         customOverrides: own,
       );
       expect(overrides.dns.nameserver, own.dns.nameserver);
@@ -217,48 +313,18 @@ void main() {
       expect(own.dnsOverrideKeys, {DnsOverrideKey.nameserver});
     });
 
-    test('regional changes are reversible and never accumulate', () {
-      const base = PatchClashConfig(dnsOverrideKeys: {DnsOverrideKey.ipv6});
-      for (final code in ['RU', 'CN', 'IR', 'EG', 'OTHER', null, 'RU']) {
-        final patch = regional(code, base);
-        expect(base.dnsOverrideKeys, {DnsOverrideKey.ipv6});
-        final overrides = regionalProfileOverridesFor(
-          patchConfig: patch,
-          appDnsOverrideKeys: base.dnsOverrideKeys,
-        );
-        expect(
-          overrides.tunOverrideKeys.length,
-          code != null && code != 'CN' ? 1 : 0,
-        );
-      }
-      expect(regional(null, base), base);
-      expect(regional('CN').dns.nameserver, defaultDns.nameserver);
-    });
-
-    test('preserves Android MTU changed without desktop override keys', () {
-      const base = PatchClashConfig(tun: Tun(mtu: 1420));
-      expect(regional('RU', base).tun.mtu, 1420);
-      expect(regional('RU', base).tunOverrideKeys, isEmpty);
-    });
-
-    test('keeps explicit desktop MTU even when Android is at its default', () {
-      const base = PatchClashConfig(
-        tunOverride: ProfileTun(mtu: 1280),
-        tunOverrideKeys: {TunOverrideKey.mtu},
+    test('custom profiles take no regional DNS without a region', () {
+      const own = ProfileOverrides(
+        dns: Dns(nameserver: ['https://custom.example/dns-query']),
+        dnsOverrideKeys: {DnsOverrideKey.nameserver},
       );
-      final patch = regional('RU', base);
-      expect(patch.tunOverride.mtu, 1280);
-      expect(patch.tun.mtu, defaultTunMtu);
-    });
-
-    test('an empty custom bypass list stays empty', () {
-      final config = regionalNetworkConfigFor(
-        regionCode: 'CN',
-        base: const PatchClashConfig(),
-        defaultBypassDomains: defaultBypassDomain,
-        bypassDomains: const [],
+      final overrides = regionalProfileOverridesFor(
+        patchConfig: const PatchClashConfig(),
+        regionCode: null,
+        customOverrides: own,
       );
-      expect(config.bypassDomain, isEmpty);
+      expect(overrides.dnsOverrideKeys, own.dnsOverrideKeys);
+      expect(overrides.dns, own.dns);
     });
   });
 

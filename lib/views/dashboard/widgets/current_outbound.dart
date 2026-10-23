@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'package:wifi_ssid/wifi_ssid.dart';
 import 'package:reclash/views/config/on_demand_network_picker.dart';
 
 import 'package:reclash/common/common.dart';
@@ -787,14 +786,6 @@ class _StartToggleState extends ConsumerState<_StartToggle>
           onTap: enabled ? _toggle : null,
           onLongPress: enabled
               ? () => globalState.safeRun(() async {
-                  if ((system.isAndroid || system.isMacOS) &&
-                      ref.read(locationPermissionsProvider) !=
-                          WifiSsidPermission.granted) {
-                    await ref
-                        .read(locationPermissionsProvider.notifier)
-                        .request();
-                    if (!context.mounted) return;
-                  }
                   final ssid = await showOnDemandNetworkPicker(
                     context,
                     selected: ref.read(excludeSSIDsProvider).toSet(),

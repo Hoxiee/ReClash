@@ -163,7 +163,7 @@ const proxiesListStoreKey = PageStorageKey<String>('proxies_list');
 const toolsStoreKey = PageStorageKey<String>('tools');
 const profilesStoreKey = PageStorageKey<String>('profiles');
 
-const defaultPrimaryColor = 0xFF007AFF;
+const defaultPrimaryColor = 0xFFFF9500;
 
 const maxLogsLength = 5000;
 const maxRequestsLength = 2000;

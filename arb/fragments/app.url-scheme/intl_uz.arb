@@ -95,5 +95,21 @@
   "telegramWebFallback": "Brauzerda ochish",
   "telegramAppUnavailable": "Bu qurilmada Telegramni ochib bo‘lmadi.",
   "urlSchemeFormats": "Formatlar",
-  "urlSchemeFormatsTip": "Havola formatlari. Belgilangan joylarni URL yoki ma’lumotlaringiz bilan almashtiring."
+  "urlSchemeFormatsTip": "Havola formatlari. Belgilangan joylarni URL yoki ma’lumotlaringiz bilan almashtiring.",
+  "profileImportTitle": "Yangi obuna",
+  "profileImportChecking": "Obuna tekshirilmoqda…",
+  "profileImportPreviewFailed": "Obuna tarkibini koʻrib boʻlmadi. Uni baribir qoʻshishingiz mumkin.",
+  "profileImportEncrypted": "Obuna shifrlangan — kalit qoʻshishda soʻraladi.",
+  "profileImportFormat": "Obuna formati",
+  "profileImportFormatClient": "{client} ilovasi qabul qilgandek",
+  "profileImportFormatReclash": "ReClash uchun eng yaxshi format, avtomatik tanlanadi",
+  "profileImportServerCount": "{count, plural, other{{count} ta server}}",
+  "profileImportAlreadyAdded": "Allaqachon «{name}» sifatida qoʻshilgan",
+  "profileImportLosses": "Baʼzi qismlar qoʻllab-quvvatlanmaydi — qoʻshishdan oldin ularni koʻrsatamiz.",
+  "profileImportServers": "Serverlar",
+  "profileImportValidUntil": "Amal qilish muddati",
+  "profileImportUnlimited": "Cheksiz",
+  "profileImportExpired": "Muddati tugagan",
+  "profileImportFromProvider": "Provayderdan",
+  "profileImportSingleServer": "Bitta server"
 }

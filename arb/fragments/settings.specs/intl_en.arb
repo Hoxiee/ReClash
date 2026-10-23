@@ -55,5 +55,43 @@
   "topUpTraffic": "Top up traffic",
   "notificationActive": "Protection active",
   "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status.",
-  "extra": "Extra"
+  "extra": "Extra",
+  "resetAllData": "Reset all data",
+  "resetAllDataDescription": "All profiles, settings, scripts, wallpapers, and cached data will be permanently deleted. Backup archives will be kept. The app will then close. This cannot be undone.",
+  "resetAllDataConfirm": "Delete everything",
+  "resetAllDataWait": "You can confirm in {seconds} s",
+  "@resetAllDataWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "resettingAllData": "Deleting data…",
+  "appIcon": "App icon",
+  "appIconStandard": "Standard",
+  "appIconVelvet": "Velvet",
+  "appIconSolar": "Solar",
+  "appIconCircuit": "Circuit",
+  "appIconEcho": "Echo",
+  "appIconInk": "Ink",
+  "appIconBlueprint": "Blueprint",
+  "appIconStrata": "Strata",
+  "appIconShatter": "Shatter",
+  "appIconTrace": "Trace",
+  "appIconTopo": "Topo",
+  "appIconSpark": "Spark",
+  "appIconApply": "Use this icon",
+  "appIconChangeNote": "The home screen may take a few seconds to show the new icon, and some launchers remove the shortcut — add it again from the app list.",
+  "colorContrast": "Contrast",
+  "contrastMedium": "Medium",
+  "contrastHigh": "High",
+  "navigationLabels": "Tab labels",
+  "navigationLabelsAlways": "Always",
+  "navigationLabelsSelected": "Selected",
+  "navigationLabelsNever": "Never",
+  "trayIcon": "Tray icon",
+  "trayIconColor": "Color",
+  "trayIconLight": "White",
+  "trayIconDark": "Black"
 }

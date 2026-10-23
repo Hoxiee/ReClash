@@ -48,6 +48,8 @@ extension BuildContextExtension on BuildContext {
   /// the scaffold that docks it.
   double get bottomInset =>
       BottomInsetScope.of(this) + MediaQuery.paddingOf(this).bottom;
+  EdgeInsets get bodyInsets =>
+      EdgeInsets.symmetric(horizontal: BodyInsetScope.of(this));
 
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 

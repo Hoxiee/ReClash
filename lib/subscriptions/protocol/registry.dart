@@ -98,6 +98,12 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'panel',
   ),
   SubscriptionField(
+    'provider.announce',
+    'announce',
+    SubscriptionFieldType.text,
+    consumer: 'panel',
+  ),
+  SubscriptionField(
     'account.title',
     'profile-title',
     SubscriptionFieldType.text,

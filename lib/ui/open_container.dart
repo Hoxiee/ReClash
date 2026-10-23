@@ -28,12 +28,8 @@ class OpenContainer<T extends Object?> extends StatefulWidget {
     required this.closedBuilder,
     required this.openBuilder,
     this.clipBehavior = Clip.antiAlias,
-    this.onOpen,
   });
 
-  /// Hands the tapped tile over instead of pushing a route, for a caller whose
-  /// navigator builds the route itself through [openContainerPageRoute].
-  final ValueChanged<ContainerOrigin>? onOpen;
   final Color? closedColor;
   final ShapeBorder? closedShape;
   final ClosedCallback<T?>? onClosed;
@@ -50,18 +46,6 @@ class _OpenContainerState<T> extends State<OpenContainer<T?>> {
   final GlobalKey _closedBuilderKey = GlobalKey();
 
   Future<void> openContainer() async {
-    if (widget.onOpen case final onOpen?) {
-      onOpen(
-        ContainerOrigin._(
-          closedColor: widget.closedColor,
-          closedShape: widget.closedShape,
-          closedBuilder: widget.closedBuilder,
-          hideableKey: _hideableKey,
-          closedBuilderKey: _closedBuilderKey,
-        ),
-      );
-      return;
-    }
     final T? data = await Navigator.of(context).push(
       _OpenContainerRoute<T>(
         closedColor: widget.closedColor,
@@ -95,48 +79,6 @@ class _OpenContainerState<T> extends State<OpenContainer<T?>> {
     );
   }
 }
-
-/// A tile an [OpenContainer] hands over to grow into a page.
-class ContainerOrigin {
-  const ContainerOrigin._({
-    required this.closedColor,
-    required this.closedShape,
-    required this.closedBuilder,
-    required GlobalKey<_HideableState> hideableKey,
-    required GlobalKey closedBuilderKey,
-  }) : _hideableKey = hideableKey,
-       _closedBuilderKey = closedBuilderKey;
-
-  final Color? closedColor;
-  final ShapeBorder? closedShape;
-  final CloseContainerBuilder closedBuilder;
-  final GlobalKey<_HideableState> _hideableKey;
-  final GlobalKey _closedBuilderKey;
-
-  bool get isMounted => _hideableKey.currentContext != null;
-}
-
-/// A route whose page grows out of a tile.
-abstract interface class ContainerRoute {
-  /// Where the container's top edge lies in its navigator, or null while the
-  /// page fills it, as it does once settled or under a drag back.
-  double? get containerTop;
-}
-
-/// The route an [OpenContainer] would push, for a page of [settings].
-Route<void> openContainerPageRoute({
-  required ContainerOrigin origin,
-  required Widget page,
-  required RouteSettings settings,
-}) => _OpenContainerRoute<void>(
-  settings: settings,
-  closedColor: origin.closedColor,
-  closedShape: origin.closedShape,
-  closedBuilder: origin.closedBuilder,
-  openBuilder: (_, _) => page,
-  hideableKey: origin._hideableKey,
-  closedBuilderKey: origin._closedBuilderKey,
-);
 
 class _Hideable extends StatefulWidget {
   const _Hideable({super.key, required this.child});
@@ -190,10 +132,8 @@ class _HideableState extends State<_Hideable> {
 }
 
 class _OpenContainerRoute<T> extends ModalRoute<T>
-    with DragBackRouteMixin<T>, DeferredPushRouteMixin<T>
-    implements ContainerRoute {
+    with DragBackRouteMixin<T>, DeferredPushRouteMixin<T> {
   _OpenContainerRoute({
-    super.settings,
     required this.closedColor,
     required ShapeBorder? closedShape,
     required this.closedBuilder,
@@ -232,12 +172,6 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
 
   bool get _settled => animation!.isCompleted || isDragBackActive;
 
-  @override
-  double? get containerTop {
-    final closed = _closedRect.value;
-    return _settled || closed == null ? null : closed.top * (1 - _progress);
-  }
-
   bool get _closing =>
       animation!.status == AnimationStatus.reverse &&
       !_transitionWasInterrupted;
@@ -263,7 +197,7 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
 
   @override
   TickerFuture didPush() {
-    _takeMeasurements();
+    _takeMeasurements(navigatorContext: hideableKey.currentContext!);
 
     animation!.addStatusListener((AnimationStatus status) {
       _lastAnimationStatus = _currentAnimationStatus;
@@ -291,7 +225,10 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
     if (isDragBackActive) {
       return super.didPop(result);
     }
-    _takeMeasurements(delayForSourceRoute: true);
+    _takeMeasurements(
+      navigatorContext: subtreeContext!,
+      delayForSourceRoute: true,
+    );
     return super.didPop(result);
   }
 
@@ -321,9 +258,12 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
     _hostsClosed.value = false;
   }
 
-  void _takeMeasurements({bool delayForSourceRoute = false}) {
+  void _takeMeasurements({
+    required BuildContext navigatorContext,
+    bool delayForSourceRoute = false,
+  }) {
     final RenderBox navigator =
-        this.navigator!.context.findRenderObject()! as RenderBox;
+        Navigator.of(navigatorContext).context.findRenderObject()! as RenderBox;
 
     void takeMeasurementsInSourceRoute([Duration? _]) {
       if (!navigator.attached || hideableKey.currentContext == null) {
@@ -331,23 +271,8 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
       }
       final rect = _getRect(hideableKey, navigator);
       _closedRect.value = rect;
-      void hostClosed([Duration? _]) {
-        final hideable = hideableKey.currentState;
-        if (hideable == null || !navigator.attached) {
-          return;
-        }
-        hideable.placeholderSize = rect.size;
-        _hostsClosed.value = true;
-      }
-
-      // A page-driven navigator pushes the route while it builds, when the
-      // tile cannot be rebuilt yet.
-      if (SchedulerBinding.instance.schedulerPhase ==
-          SchedulerPhase.persistentCallbacks) {
-        SchedulerBinding.instance.addPostFrameCallback(hostClosed);
-      } else {
-        hostClosed();
-      }
+      hideableKey.currentState!.placeholderSize = rect.size;
+      _hostsClosed.value = true;
     }
 
     if (delayForSourceRoute) {

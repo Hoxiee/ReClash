@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "Birikdirmek isleýän her programmaňyzda ýerli proksi salgysyny görkeziň.",
   "setupCoverageAndroidDescription": "Android VPN birikmesini döretmäge rugsat sorar. Programmalary elýeterlilik sazlamalarynda saýlap bolýar.",
   "setupCoverageNote": "Ähli traffigi tutmak onuň hemmesini serwer arkaly ibermek diýmek däldir. Göni ugurlar saklanýar.",
-  "setupRegionConfirm": "Şu sebit sazlamalaryny ulan",
-  "setupRegionDescription": "Teklip edilýän sebit interfeýs diline däl-de, şu enjama esaslanýar. Diňe toruňyza laýyk bolsa ulanyň.",
   "setupRegionNeutral": "Profiliň başlangyç sazlamalaryny sakla",
   "setupCheckAction": "Birikmäni barla",
   "setupCheckingTitle": "Birikme barlanýar",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "Hyzmatlar barlanýar",
   "setupPhaseAlternatives": "Başga serwer gözlenýär",
   "setupStepStatus": "{step} / {total}",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "Netije ähli programma ýa-da web sahypasyna däl-de, şu ugra degişlidir.",
   "setupConnectedTitle": "Birikme işleýär",
   "setupConnectedDescription": "Saýlanan ugur jogap berdi. Traffik profil düzgünlerine eýerýär.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "Birikmän sakla",
   "setupRepeat": "Gaýtadan barla",
   "setupTryServer": "{server} serwerini syna",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "Bu serwer aýratyn synaga jogap berdi. Oňa geçip, tutuş ugry täzeden barlaň.",
   "setupReport": "Barlag hasabaty",
   "setupReceipt": "Birikmäňiz",
@@ -73,10 +86,38 @@
   "setupRestart": "Birikmäni sazla",
   "setupLaterNote": "Sazlama tamamlanmady; birikme barlanmady.",
   "setupProfileCount": "Elýeterli profiller: {count}",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "Bu profil şifrlenen. Dowam etmek üçin age açaryny giriziň.",
   "setupFinishDescription": "Islendik saýlawy sazlamalarda üýtgedip bilersiňiz.",
   "setupRouteChanged": "Barlag wagtynda ugur üýtgedi. Häzirki birikmäni täzeden barlaň.",
   "setupUnknownError": "Amal tamamlanmady. Gaýtadan synanyşyň ýa-da maglumatlary açyň.",
-  "setupRequestPermission": "Birikmä rugsat ber"
+  "setupRequestPermission": "Birikmä rugsat ber",
+  "setupReceiptRegion": "Sebit",
+  "setupRegionTitle": "Nireden birikýärsiňiz?",
+  "setupRegionStepDescription": "ReClash DNS-i, MTU-ny we göni ugurlary ýurduňyzyň torlaryna laýyklaşdyrýar. Interfeýsiň dili üýtgemeýär.",
+  "setupRegionNeutralDescription": "Sebit sazlamalary üýtgemeýär.",
+  "setupRegionUnchosen": "Hiç zat saýlamasaňyz, häzirki sebit sazlamalary öňküsi ýaly galar.",
+  "setupRecommended": "Maslahat berilýär",
+  "setupDirectTitle": "Ýerli saýtlar we programmalar — göni",
+  "setupDirectDescription": "Ýurduňyzyň hyzmatlary serwersiz açylar: has çalt, banklar we döwlet saýtlary sizi petiklemez. Umumy düzgünlere şular goşular:",
+  "setupDirectAppsScanning": "Ýerli programmalary gözleýäris…",
+  "setupDirectApps": "VPN-den daşary programmalar: {count}",
+  "setupDirectAppsReview": "Olar VPN-siz işlär. Sanawy soňra elýeterlilik dolandyryşynda üýtgedip bilersiňiz.",
+  "setupDirectAppsNone": "Ýerli programmalar tapylmady. Saýtlar barybir göni açylar.",
+  "setupLeaveTitle": "Sazlamadan çykmalymy?",
+  "setupLeaveMessage": "ReClash ýapylar. Saýlawyňyz saklanar we sazlama indiki gezek açylanda dowam eder.",
+  "setupProfileContinueHint": "Dowam etmek üçin profil goşuň ýa-da saýlaň.",
+  "setupProfileImportHint": "Üpjün edijiň hatyndan, botundan ýa-da şahsy otagyndan salgyny goýuň ýa-da faýl ýa QR-kod saýlaň.",
+  "setupProfileImportAnother": "Başga profil goş",
+  "setupChangeSettings": "Sazlamalary üýtget",
+  "setupTipsTitle": "Näme synap görüp bolar",
+  "setupTipNetwork": "Internetiň ReClash-syz işleýändigine göz ýetiriň.",
+  "setupTipProfile": "Profili täzeläň ýa-da sazlamadan soň başga serwer saýlaň.",
+  "setupTipCoverage": "Başga gerimi saýlaň: käbir torlar VPN-i petikleýär."
 }

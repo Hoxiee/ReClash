@@ -315,7 +315,16 @@ class _UpdateStatus extends StatelessWidget {
         child: Column(
           spacing: 6,
           children: [
-            _UpdateOrb(update: update, glyph: glyph, tone: tone),
+            UpdateOrb(
+              update: update,
+              glyph: glyph,
+              color: switch (tone) {
+                _Tone.accent => context.colorScheme.primary,
+                _Tone.success => context.colorScheme.success,
+                _Tone.warning => context.colorScheme.warning,
+                _Tone.error => context.colorScheme.error,
+              },
+            ),
             const SizedBox(height: 10),
             Text(
               title,
@@ -366,29 +375,22 @@ class _UpdateStatus extends StatelessWidget {
 
 /// A glyph well ringed by the update's progress: the download share while it
 /// transfers, a full ring once the package is in hand, a spinner while busy.
-class _UpdateOrb extends StatelessWidget {
-  const _UpdateOrb({
+class UpdateOrb extends StatelessWidget {
+  const UpdateOrb({
+    super.key,
     required this.update,
     required this.glyph,
-    required this.tone,
+    required this.color,
+    this.side = 112,
   });
-
-  static const _side = 112.0;
-  static const _well = 68.0;
 
   final AppUpdateState update;
   final Glyph glyph;
-  final _Tone tone;
+  final Color color;
+  final double side;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final color = switch (tone) {
-      _Tone.accent => colorScheme.primary,
-      _Tone.success => colorScheme.success,
-      _Tone.warning => colorScheme.warning,
-      _Tone.error => colorScheme.error,
-    };
     final phase = update.phase;
     final progress = update.progress;
     final transfer = const {
@@ -407,29 +409,33 @@ class _UpdateOrb extends StatelessWidget {
         update.verified ||
         const {UpdatePhase.installed, UpdatePhase.upToDate}.contains(phase);
     final value = transfer ? progress ?? 0.0 : (filled ? 1.0 : 0.0);
-    final percent = transfer && progress != null;
+    // A small orb keeps its glyph instead of the percentage, and draws the
+    // glyph larger so it still reads inside the narrower well.
+    final large = side >= 80;
+    final percent = transfer && progress != null && large;
+    final well = side * 0.6;
     return SizedBox.square(
-      dimension: _side,
+      dimension: side,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Container(
-            width: _well,
-            height: _well,
+            width: well,
+            height: well,
             decoration: ShapeDecoration(
-              color: context.raisedSurfaceLevel.colorOf(colorScheme),
+              color: context.raisedSurfaceLevel.colorOf(context.colorScheme),
               shape: const CircleBorder(),
             ),
           ),
           if (spinning)
-            CommonCircleLoading(size: _side, color: color)
+            CommonCircleLoading(size: side, color: color)
           else
             TweenAnimationBuilder<double>(
               tween: Tween(end: value),
               duration: const Duration(milliseconds: 450),
               curve: Curves.easeOutCubic,
               builder: (context, value, _) => CustomPaint(
-                size: const Size.square(_side),
+                size: Size.square(side),
                 painter: _RingPainter(value: value, color: color),
               ),
             ),
@@ -454,8 +460,8 @@ class _UpdateOrb extends StatelessWidget {
                   )
                 : GlyphIcon(
                     glyph,
-                    key: ValueKey((glyph, tone)),
-                    size: 36,
+                    key: ValueKey((glyph, color)),
+                    size: side * (large ? 0.32 : 0.4),
                     color: color,
                   ),
           ),

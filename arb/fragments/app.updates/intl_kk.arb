@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/с",
   "updateRemainingTime": "{time} қалды",
   "updateSeconds": "{count} с",
-  "updateMinutes": "{count} мин"
+  "updateMinutes": "{count} мин",
+  "updateResumeShort": "Жалғастыру"
 }

@@ -954,104 +954,31 @@
   "appRegion": "Регион приложения",
   "regionalAdaptation": "Региональная адаптация",
   "regionTitle": "Региональный профиль",
-  "regionIntro": "Базовые сетевые параметры и проверки сервисов для региона — независимо от языка интерфейса.",
-  "regionWarning": "Выбор страны обновляет только предпросмотр. Региональные значения изменятся после применения.",
-  "regionChoose": "Выберите страну",
-  "regionDetected": "Рекомендуется: {region} · {source}",
-  "regionUseDetected": "Выбрать определённый регион",
-  "regionPreviewTitle": "Предпросмотр",
-  "regionPreviewBase": "Профиль страны: {region}",
-  "regionPreviewMtu": "MTU TUN: {value}",
-  "regionPreviewServices": "Проверки сервисов по умолчанию: {value}",
-  "regionPreviewRules": "Выбор прокси и ваши правила маршрутизации не изменятся.",
-  "regionPreviewAndroid": "На Android изменения MTU или обхода могут потребовать подтверждённого перезапуска VPN. Подбор приложений запускается отдельно.",
-  "regionCustomPreserved": "Ручные DNS и MTU, список обхода, правила маршрутизации и выбор сервисов сохраняются.",
-  "regionNoChanges": "Сетевые значения и набор проверок не изменятся.",
+  "regionIntro": "Подбирает DNS-серверы, MTU для TUN, список обхода и проверки сервисов под вашу страну. Язык интерфейса не меняется.",
+  "regionCustomPreserved": "Значения, которые вы меняли сами, останутся как есть.",
+  "regionNoChanges": "Настройки не изменятся.",
   "regionApply": "Применить регион",
-  "regionNoDetected": "Подходящая подсказка не найдена. Используются только часовой пояс и системная локаль.",
   "regionSelectBeforeApps": "Сначала выберите поддерживаемый регион, чтобы использовать региональный подбор приложений.",
-  "regionNotSet": "Отключён",
-  "regionOther": "Другой / общий",
+  "regionNotSet": "Не выбран",
+  "regionOther": "Другая страна",
   "regionRussia": "Россия",
   "regionIran": "Иран",
   "regionChina": "Китай",
   "regionEgypt": "Египет",
-  "regionSourceTimeZone": "часовой пояс",
-  "regionSourceLocaleCountry": "страна системной локали",
-  "regionSourceLocaleLanguage": "язык системы",
-  "regionCurrent": "Текущий регион",
-  "regionDetectionTitle": "Подсказка устройства",
-  "regionProfileDefaults": "Настройки профиля",
   "regionNoServices": "Проверки сервисов отключены",
-  "regionDnsSettings": "Регион {region}: базовые DNS — {value}. Ручные переопределения на этом экране имеют приоритет.",
-  "regionTunSettings": "Регион {region}: MTU {value}. Добавьте переопределение MTU, чтобы задать своё значение.",
-  "regionBypassSettings": "Регион {region}: список обхода — {value}. Ручной список заменяет региональные значения.",
   "regionSelectApps": "Подбор приложений по региону",
   "regionAppsPreviewTitle": "Предпросмотр подбора",
   "regionAppsPreview": "{region}: в список обхода VPN попадут {bypassed} приложений, в список VPN — {proxied}. Оба списка будут заменены; режим и остальные параметры не изменятся. Совпадения пакетов и SDK — лишь подсказки: проверьте результат после применения.",
   "regionAppsEmpty": "Приложения для этого региона не найдены. Ваши списки не изменены.",
   "regionAppsChanged": "Регион или списки приложений изменились. Повторите подбор для актуальных настроек.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Рекомендуется для этого устройства",
+  "regionChangesTitle": "Что изменится",
+  "regionChangeDns": "DNS-серверы",
+  "regionChangeMtu": "MTU для TUN",
+  "regionChangeServices": "Проверки сервисов",
+  "restoreDefaults": "Восстановить по умолчанию",
+  "networkRestoreDefaultsTip": "Список обхода и MTU для TUN вернутся к значениям выбранного региона.",
+  "dnsRestoreDefaultsTip": "Все переопределения DNS будут удалены, а DNS-серверы выбранного региона — установлены заново.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "Укажите адрес локального прокси в каждом приложении, которое хотите подключить.",
   "setupCoverageAndroidDescription": "Android запросит разрешение на VPN-подключение. Выбор приложений доступен в настройках доступа.",
   "setupCoverageNote": "Перехват всего трафика не означает отправку всего через сервер. Прямые маршруты сохраняются.",
-  "setupRegionConfirm": "Применить настройки региона",
-  "setupRegionDescription": "Регион предложен по данным устройства, а не по выбранному языку интерфейса. Примените его, если он соответствует вашей сети.",
   "setupRegionNeutral": "Оставить настройки профиля",
   "setupCheckAction": "Проверить подключение",
   "setupCheckingTitle": "Подключаемся и проверяем",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "Маршрут изменился во время проверки. Проверьте текущее подключение ещё раз.",
   "setupUnknownError": "Операция не завершилась. Повторите попытку или откройте подробности.",
   "setupRequestPermission": "Разрешить подключение",
+  "setupReceiptRegion": "Регион",
+  "setupRegionTitle": "Откуда вы подключаетесь?",
+  "setupRegionStepDescription": "ReClash подстроит DNS, MTU и прямые маршруты под сети вашей страны. Язык интерфейса не изменится.",
+  "setupRegionNeutralDescription": "Региональные настройки не меняются.",
+  "setupRegionUnchosen": "Если ничего не выбрать, текущие региональные настройки останутся прежними.",
+  "setupRecommended": "Рекомендуется",
+  "setupDirectTitle": "Местные сайты и приложения — напрямую",
+  "setupDirectDescription": "Сервисы вашей страны откроются без сервера: быстрее, и банки или госсервисы не будут вас блокировать. В общие правила добавится:",
+  "setupDirectAppsScanning": "Ищем местные приложения…",
+  "setupDirectApps": "Приложений в обход VPN: {count}",
+  "setupDirectAppsReview": "Они будут работать без VPN. Список можно изменить позже в управлении доступом.",
+  "setupDirectAppsNone": "Местные приложения не найдены. Сайты всё равно пойдут напрямую.",
+  "setupLeaveTitle": "Выйти из настройки?",
+  "setupLeaveMessage": "ReClash закроется. Выбор сохранится, и настройка продолжится при следующем запуске.",
+  "setupProfileContinueHint": "Добавьте или выберите профиль, чтобы продолжить.",
+  "setupProfileImportHint": "Вставьте ссылку из письма, бота или личного кабинета провайдера либо выберите файл или QR-код.",
+  "setupProfileImportAnother": "Добавить другой профиль",
+  "setupChangeSettings": "Изменить настройки",
+  "setupTipsTitle": "Что можно попробовать",
+  "setupTipNetwork": "Убедитесь, что интернет работает без ReClash.",
+  "setupTipProfile": "Обновите профиль или выберите другой сервер после настройки.",
+  "setupTipCoverage": "Выберите другой охват: некоторые сети блокируют VPN.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1237,6 +1184,7 @@
   "updateRemainingTime": "Осталось {time}",
   "updateSeconds": "{count} с",
   "updateMinutes": "{count} мин",
+  "updateResumeShort": "Продолжить",
   "urlScheme": "URL-схема",
   "urlSchemeConnection": "Подключение",
   "urlSchemeProfiles": "Профили",
@@ -1304,6 +1252,22 @@
   "telegramAppUnavailable": "Не удалось открыть Telegram на этом устройстве.",
   "urlSchemeFormats": "Форматы",
   "urlSchemeFormatsTip": "Форматы ссылок. Подставьте свой URL или данные.",
+  "profileImportTitle": "Новая подписка",
+  "profileImportChecking": "Проверяем подписку…",
+  "profileImportPreviewFailed": "Не удалось заглянуть в подписку — добавить её всё равно можно.",
+  "profileImportEncrypted": "Подписка зашифрована — ключ спросим при добавлении.",
+  "profileImportFormat": "Формат подписки",
+  "profileImportFormatClient": "Как её получает приложение {client}",
+  "profileImportFormatReclash": "Лучший формат для ReClash, подбирается автоматически",
+  "profileImportServerCount": "{count, plural, one{{count} сервер} few{{count} сервера} many{{count} серверов} other{{count} сервера}}",
+  "profileImportAlreadyAdded": "Уже добавлена как «{name}»",
+  "profileImportLosses": "Часть настроек не поддерживается — покажем их перед добавлением.",
+  "profileImportServers": "Серверы",
+  "profileImportValidUntil": "Действует до",
+  "profileImportUnlimited": "Безлимит",
+  "profileImportExpired": "Истекла",
+  "profileImportFromProvider": "От провайдера",
+  "profileImportSingleServer": "Один сервер",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1337,8 +1301,6 @@
   "appearanceTheme": "Тема",
   "appearanceBackground": "Фон",
   "wallpaperTitle": "Пользовательский фон",
-  "wallpaperGalleryHint": "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
-  "wallpaperChoose": "Выбрать изображение",
   "wallpaperRemove": "Удалить изображение",
   "wallpaperEnabled": "Использовать свой фон",
   "wallpaperFit": "Размещение изображения",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "Приостановить",
   "onDemandFullStop": "Полная остановка",
   "onDemandFullStopDesc": "На паузе снимать TUN и закрывать локальные прокси-порты. Наблюдение за сетью продолжится для автоматического возобновления.",
+  "pickNetworkPermissionDesc": "Разрешите доступ к геолокации, чтобы увидеть ближайшие сети Wi-Fi, или добавьте сеть вручную.",
   "subscriptionClientRequestAs": "Запрашивать как",
   "subscriptionClientAuto": "Автоматически",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "Также отправлять ОС и модель устройства",
   "subscriptionIdentityDetailsDisclosure": "Вместе с идентификатором будут отправляться версия ОС и модель устройства.",
   "subscriptionIdentitySettingsTitle": "Идентификатор устройства",
-  "subscriptionIdentityGlobalHint": "Если включено, идентификатор устройства отправляется в запросах всех URL-подписок, кроме профилей с переопределением. Отправка ОС и сведений об устройстве отдельно включается для каждой подписки.",
   "subscriptionIdentityUseGlobal": "Как в настройках",
   "subscriptionProvider": "Подписка",
   "subscriptionProviderWebsite": "Сайт",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "Для этой подписки не осталось свободных мест для устройств. Удалите устройство в аккаунте провайдера и повторите попытку.",
   "subscriptionDeviceRequired": "Для этой подписки требуется зарегистрировать устройство. Следуйте инструкциям провайдера.",
   "profileBatchResult": "Добавлено: {added}; пропущено: {skipped}; ошибок: {failed}.",
+  "subscriptionIdentityRegionWarning": "Многие подписки перестанут работать, если отключить отправку HWID.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "Защита активна",
   "notificationLevelDescription": "Подробный режим показывает текущие данные и кнопку остановки. Минимальный — только состояние защиты.",
   "extra": "Дополнительно",
+  "resetAllData": "Сбросить все данные",
+  "resetAllDataDescription": "Все профили, настройки, скрипты, обои и кэш будут безвозвратно удалены. Архивы резервных копий сохранятся. После сброса приложение закроется. Это действие нельзя отменить.",
+  "resetAllDataConfirm": "Удалить всё",
+  "resetAllDataWait": "Подтверждение через {seconds} с",
+  "resettingAllData": "Удаление данных…",
+  "appIcon": "Иконка приложения",
+  "appIconStandard": "Стандартная",
+  "appIconVelvet": "Бархат",
+  "appIconSolar": "Солнце",
+  "appIconCircuit": "Схема",
+  "appIconEcho": "Эхо",
+  "appIconInk": "Чернила",
+  "appIconBlueprint": "Чертёж",
+  "appIconStrata": "Пласты",
+  "appIconShatter": "Осколки",
+  "appIconTrace": "След",
+  "appIconTopo": "Рельеф",
+  "appIconSpark": "Искра",
+  "appIconApply": "Установить иконку",
+  "appIconChangeNote": "Новая иконка может появиться на рабочем столе через несколько секунд. Некоторые лаунчеры убирают ярлык — добавьте его снова из списка приложений.",
+  "colorContrast": "Контрастность",
+  "contrastMedium": "Средняя",
+  "contrastHigh": "Высокая",
+  "navigationLabels": "Подписи вкладок",
+  "navigationLabelsAlways": "Всегда",
+  "navigationLabelsSelected": "Активная",
+  "navigationLabelsNever": "Никогда",
+  "trayIcon": "Иконка в трее",
+  "trayIconColor": "Цветная",
+  "trayIconLight": "Белая",
+  "trayIconDark": "Чёрная",
   "applicationSettings": "Настройки приложения",
   "toolsConfiguration": "Конфигурация",
   "toolsData": "Ресурсы и данные",

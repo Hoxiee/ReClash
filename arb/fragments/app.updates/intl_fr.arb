@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/s",
   "updateRemainingTime": "Encore {time}",
   "updateSeconds": "{count} s",
-  "updateMinutes": "{count} min"
+  "updateMinutes": "{count} min",
+  "updateResumeShort": "Reprendre"
 }

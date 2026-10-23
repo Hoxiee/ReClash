@@ -12,7 +12,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
-import 'package:reclash/widgets/update_card.dart';
+import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:reclash/widgets/update_content.dart';
 import 'package:reclash/widgets/update_preferences.dart';
 import 'package:reclash/widgets/update_sheet.dart';
@@ -64,6 +64,7 @@ void main() {
     Size size = const Size(390, 844),
     ThemeMode mode = ThemeMode.light,
     Locale locale = const Locale('en'),
+    bool includeNavigatorKey = false,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -74,7 +75,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          includeNavigatorKey: false,
+          includeNavigatorKey: includeNavigatorKey,
           locale: locale,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
@@ -154,6 +155,60 @@ void main() {
     expect(find.byType(UpdateSheet), findsOneWidget);
     await close(tester);
     expect(container.read(appSettingProvider).autoCheckUpdate, isTrue);
+  });
+
+  AppUpdateState current() => container.read(appUpdateActionProvider);
+
+  Future<void> settleIo(WidgetTester tester, bool Function() done) async {
+    for (var i = 0; i < 100 && !done(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    expect(done(), isTrue);
+  }
+
+  testWidgets('the card installs a ready package without the sheet', (
+    tester,
+  ) async {
+    final action = container.read(appUpdateActionProvider.notifier);
+    await action.offer(testUpdateRelease());
+    unawaited(action.download());
+    await settleIo(tester, () => current().phase == UpdatePhase.ready);
+    await pump(tester, const UpdateCard());
+    await tester.tap(find.byKey(const ValueKey('app-update-card-step')));
+    await settleIo(tester, () => runtime.installations == 1);
+    expect(find.byType(UpdateSheet), findsNothing);
+  });
+
+  testWidgets('returning from Android settings brings the sheet back', (
+    tester,
+  ) async {
+    final action = container.read(appUpdateActionProvider.notifier);
+    runtime.permission = false;
+    await action.offer(testUpdateRelease());
+    Future<void> run(Future<void> Function() step) async {
+      var done = false;
+      unawaited(step().whenComplete(() => done = true));
+      await settleIo(tester, () => done);
+    }
+
+    await run(action.download);
+    await run(action.installNow);
+    expect(current().phase, UpdatePhase.permission);
+    await run(action.openPermission);
+    expect(runtime.permissionRequests, 1);
+    await pump(tester, const SizedBox.shrink(), includeNavigatorKey: true);
+    expect(find.byType(UpdateSheet), findsNothing);
+    runtime.permission = true;
+    container.read(initProvider.notifier).value = true;
+    action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await settleIo(tester, () => runtime.installations == 1);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(find.byType(UpdateSheet), findsOneWidget);
+    await tester.tap(find.byTooltip(currentAppLocalizations.close).last);
+    await tester.pump(const Duration(milliseconds: 700));
   });
 
   testWidgets('closing the sheet leaves its provider-owned transfer visible', (

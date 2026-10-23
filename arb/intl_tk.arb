@@ -949,104 +949,31 @@
   "appRegion": "Programma sebiti",
   "regionalAdaptation": "Sebitleýin uýgunlaşma",
   "regionTitle": "Sebit profili",
-  "regionIntro": "Interfeýsiň diline bagly bolmadyk sebitleýin tor sazlamalary we hyzmat barlaglary.",
-  "regionWarning": "Ýurdy saýlamak diňe deslapky syny täzeleýär. Sebit bahalary ulanylandan soň üýtgär.",
-  "regionChoose": "Ýurdy saýlaň",
-  "regionDetected": "Teklip: {region} · {source}",
-  "regionUseDetected": "Anyklanan sebiti saýla",
-  "regionPreviewTitle": "Öňünden syn",
-  "regionPreviewBase": "Ýurt profili: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "Hyzmat barlaglarynyň başlangyç toplumy: {value}",
-  "regionPreviewRules": "Proksi saýlawy we ugrukdyryş düzgünleriňiz üýtgemeýär.",
-  "regionPreviewAndroid": "Android-de MTU ýa-da aýlanyp geçiş üýtgeşmeleri VPN-i täzeden açmagy tassyklamagy talap edip biler. Programmalar aýratyn saýlanýar.",
-  "regionCustomPreserved": "El bilen girizilen DNS we MTU, aýlanyp geçiş sanawy, ugrukdyryş düzgünleri we hyzmat saýlawy saklanýar.",
-  "regionNoChanges": "Tor bahalary we hyzmat barlaglary üýtgemeýär.",
+  "regionIntro": "Ýurduňyz üçin DNS serwerlerini, TUN MTU-ny, aýlanyp geçiş sanawyny we hyzmat barlaglaryny saýlaýar. Interfeýsiň dili üýtgemeýär.",
+  "regionCustomPreserved": "Özüňiz üýtgeden bahalar şol durşuna galýar.",
+  "regionNoChanges": "Sazlamalar üýtgemeýär.",
   "regionApply": "Sebiti ulan",
-  "regionNoDetected": "Gabat gelýän teklip tapylmady. Diňe wagt zolagy we ulgamyň lokal sazlamasy ulanylýar.",
   "regionSelectBeforeApps": "Sebit programma tekliplerini ulanmak üçin ilki goldanylýan sebiti saýlaň.",
-  "regionNotSet": "Öçürilen",
-  "regionOther": "Beýleki / umumy",
+  "regionNotSet": "Saýlanmadyk",
+  "regionOther": "Başga ýurt",
   "regionRussia": "Russiýa",
   "regionIran": "Eýran",
   "regionChina": "Hytaý",
   "regionEgypt": "Müsür",
-  "regionSourceTimeZone": "wagt zolagy",
-  "regionSourceLocaleCountry": "ulgam dil sazlamasyndaky ýurt",
-  "regionSourceLocaleLanguage": "ulgam dili",
-  "regionCurrent": "Häzirki sebit",
-  "regionDetectionTitle": "Enjamyň teklibi",
-  "regionProfileDefaults": "Profiliň bahalary",
   "regionNoServices": "Hyzmat barlaglary öçürilen",
-  "regionDnsSettings": "{region} sebitiniň DNS bahalary: {value}. Bu ekrandaky el bilen girizilen bahalar ileri tutulýar.",
-  "regionTunSettings": "{region} sebitiniň MTU bahasy: {value}. Öz bahaňyzy ulanmak üçin MTU sazlamasyny goşuň.",
-  "regionBypassSettings": "{region} sebitiniň sanawy: {value}. Hususy sanaw sebit bahalarynyň ýerine ulanylýar.",
   "regionSelectApps": "Programmalary sebit boýunça saýlamak",
   "regionAppsPreviewTitle": "Programma saýlawynyň deslapky syny",
   "regionAppsPreview": "{region}: VPN-den aýlanyp geçiş sanawyna {bypassed} programma, VPN sanawyna {proxied} programma girer. Iki sanaw hem çalşylar; iş tertibi we beýleki sazlamalar üýtgemez. Paket we SDK gabat gelmeleri diňe teklipdir: ulananyňyzdan soň netijäni barlaň.",
   "regionAppsEmpty": "Bu sebite gabat gelýän programma tapylmady. Sanawlaryňyz üýtgemedi.",
   "regionAppsChanged": "Sebit ýa-da programma sanawlary üýtgedi. Häzirki sazlamalar bilen saýlawy gaýtalaň.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Bu enjam üçin maslahat berilýär",
+  "regionChangesTitle": "Näme üýtgeýär",
+  "regionChangeDns": "DNS serwerleri",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Hyzmat barlaglary",
+  "restoreDefaults": "Deslapky bahalary dikelt",
+  "networkRestoreDefaultsTip": "Aýlanyp geçiş sanawy we TUN MTU saýlanan sebitiň deslapky bahalaryna gaýdýar.",
+  "dnsRestoreDefaultsTip": "Ähli DNS çalyşmalary aýrylýar we saýlanan sebitiň DNS serwerleri täzeden bellenilýär.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1080,8 +1007,6 @@
   "setupCoverageLocalDescription": "Birikdirmek isleýän her programmaňyzda ýerli proksi salgysyny görkeziň.",
   "setupCoverageAndroidDescription": "Android VPN birikmesini döretmäge rugsat sorar. Programmalary elýeterlilik sazlamalarynda saýlap bolýar.",
   "setupCoverageNote": "Ähli traffigi tutmak onuň hemmesini serwer arkaly ibermek diýmek däldir. Göni ugurlar saklanýar.",
-  "setupRegionConfirm": "Şu sebit sazlamalaryny ulan",
-  "setupRegionDescription": "Teklip edilýän sebit interfeýs diline däl-de, şu enjama esaslanýar. Diňe toruňyza laýyk bolsa ulanyň.",
   "setupRegionNeutral": "Profiliň başlangyç sazlamalaryny sakla",
   "setupCheckAction": "Birikmäni barla",
   "setupCheckingTitle": "Birikme barlanýar",
@@ -1137,6 +1062,28 @@
   "setupRouteChanged": "Barlag wagtynda ugur üýtgedi. Häzirki birikmäni täzeden barlaň.",
   "setupUnknownError": "Amal tamamlanmady. Gaýtadan synanyşyň ýa-da maglumatlary açyň.",
   "setupRequestPermission": "Birikmä rugsat ber",
+  "setupReceiptRegion": "Sebit",
+  "setupRegionTitle": "Nireden birikýärsiňiz?",
+  "setupRegionStepDescription": "ReClash DNS-i, MTU-ny we göni ugurlary ýurduňyzyň torlaryna laýyklaşdyrýar. Interfeýsiň dili üýtgemeýär.",
+  "setupRegionNeutralDescription": "Sebit sazlamalary üýtgemeýär.",
+  "setupRegionUnchosen": "Hiç zat saýlamasaňyz, häzirki sebit sazlamalary öňküsi ýaly galar.",
+  "setupRecommended": "Maslahat berilýär",
+  "setupDirectTitle": "Ýerli saýtlar we programmalar — göni",
+  "setupDirectDescription": "Ýurduňyzyň hyzmatlary serwersiz açylar: has çalt, banklar we döwlet saýtlary sizi petiklemez. Umumy düzgünlere şular goşular:",
+  "setupDirectAppsScanning": "Ýerli programmalary gözleýäris…",
+  "setupDirectApps": "VPN-den daşary programmalar: {count}",
+  "setupDirectAppsReview": "Olar VPN-siz işlär. Sanawy soňra elýeterlilik dolandyryşynda üýtgedip bilersiňiz.",
+  "setupDirectAppsNone": "Ýerli programmalar tapylmady. Saýtlar barybir göni açylar.",
+  "setupLeaveTitle": "Sazlamadan çykmalymy?",
+  "setupLeaveMessage": "ReClash ýapylar. Saýlawyňyz saklanar we sazlama indiki gezek açylanda dowam eder.",
+  "setupProfileContinueHint": "Dowam etmek üçin profil goşuň ýa-da saýlaň.",
+  "setupProfileImportHint": "Üpjün edijiň hatyndan, botundan ýa-da şahsy otagyndan salgyny goýuň ýa-da faýl ýa QR-kod saýlaň.",
+  "setupProfileImportAnother": "Başga profil goş",
+  "setupChangeSettings": "Sazlamalary üýtget",
+  "setupTipsTitle": "Näme synap görüp bolar",
+  "setupTipNetwork": "Internetiň ReClash-syz işleýändigine göz ýetiriň.",
+  "setupTipProfile": "Profili täzeläň ýa-da sazlamadan soň başga serwer saýlaň.",
+  "setupTipCoverage": "Başga gerimi saýlaň: käbir torlar VPN-i petikleýär.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1232,6 +1179,7 @@
   "updateRemainingTime": "{time} galdy",
   "updateSeconds": "{count} s",
   "updateMinutes": "{count} min",
+  "updateResumeShort": "Dowam et",
   "urlScheme": "URL shemasy",
   "urlSchemeConnection": "Birikme",
   "urlSchemeProfiles": "Profiller",
@@ -1299,6 +1247,22 @@
   "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady.",
   "urlSchemeFormats": "Formatlar",
   "urlSchemeFormatsTip": "Baglanyşyk formatlary. Ýer tutujylary URL ýa-da maglumatlaryňyz bilen çalşyň.",
+  "profileImportTitle": "Täze abunalyk",
+  "profileImportChecking": "Abunalyk barlanýar…",
+  "profileImportPreviewFailed": "Abunalygyň mazmunyny görüp bolmady. Ony barybir goşup bilersiňiz.",
+  "profileImportEncrypted": "Abunalyk şifrlenen; açar goşulanda soralar.",
+  "profileImportFormat": "Abunalygyň formaty",
+  "profileImportFormatClient": "{client} programmasy alşy ýaly",
+  "profileImportFormatReclash": "ReClash üçin iň gowy format, awtomatik saýlanýar",
+  "profileImportServerCount": "{count, plural, other{{count} serwer}}",
+  "profileImportAlreadyAdded": "Eýýäm «{name}» hökmünde goşuldy",
+  "profileImportLosses": "Käbir bölekler goldanmaýar; goşmazdan öň olary görkezeris.",
+  "profileImportServers": "Serwerler",
+  "profileImportValidUntil": "Möhleti",
+  "profileImportUnlimited": "Çäksiz",
+  "profileImportExpired": "Möhleti geçdi",
+  "profileImportFromProvider": "Üpjün edijiden",
+  "profileImportSingleServer": "Bir serwer",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1332,8 +1296,6 @@
   "appearanceTheme": "Tema",
   "appearanceBackground": "Fon",
   "wallpaperTitle": "Ýörite fon",
-  "wallpaperGalleryHint": "Ulanmak üçin ýatda saklanan fona basyň ýa-da täzesini goşuň.",
-  "wallpaperChoose": "Surat saýla",
   "wallpaperRemove": "Suraty aýyr",
   "wallpaperEnabled": "Ýörite fony ulan",
   "wallpaperFit": "Suraty ýerleşdirmek",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "Säginmek",
   "onDemandFullStop": "Doly bes etmek",
   "onDemandFullStopDesc": "Säginilende TUN aýrylýar we ýerli proksi portlary ýapylýar. Awtomatik dowam etmek üçin tor gözegçiligi dowam edýär.",
+  "pickNetworkPermissionDesc": "Golaýdaky Wi-Fi torlaryny görmek üçin ýerleşişe rugsat beriň ýa-da tory el bilen giriziň.",
   "subscriptionClientRequestAs": "Soragyň müşderisi",
   "subscriptionClientAuto": "Awtomatiki",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "Operasiýa ulgamyny we enjam modelini hem iber",
   "subscriptionIdentityDetailsDisclosure": "ID bilen bilelikde operasiýa ulgamynyň wersiýasy we enjam modeli iberiler.",
   "subscriptionIdentitySettingsTitle": "Abunalyk şahsyýet maglumatlary",
-  "subscriptionIdentityGlobalHint": "Işledilende, profil bu sazlamany üýtgetmese, enjam şahsyýeti ähli URL abunalyklarynyň isleglerinde iberilýär. Operasiýa ulgamy we enjam maglumatlary her abunalyk üçin aýratyn rugsat berilýär.",
   "subscriptionIdentityUseGlobal": "Umumy sazlamany ulan",
   "subscriptionProvider": "Abunalyk",
   "subscriptionProviderWebsite": "Web sahypasy",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "Bu abuna ýazgysy üçin boş enjam ýeri ýok. Üpjin edijiniň hasabyndan bir enjamy aýryp, gaýtadan synanyşyň.",
   "subscriptionDeviceRequired": "Bu abuna ýazgysy enjamy hasaba almagy talap edýär. Üpjin edijiniň görkezmelerine eýeriň.",
   "profileBatchResult": "Goşuldy: {added}; geçirildi: {skipped}; şowsuz: {failed}.",
+  "subscriptionIdentityRegionWarning": "HWID iberişi öçürilse, köp abunalar işlemez.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "Gorag işjeň",
   "notificationLevelDescription": "Jikme-jik tertip janly maglumatlary we duruzmak düwmesini görkezýär. Iň az tertip diňe gorag ýagdaýyny görkezýär.",
   "extra": "Goşmaça",
+  "resetAllData": "Ähli maglumatlary arassalamak",
+  "resetAllDataDescription": "Ähli profiller, sazlamalar, skriptler, diwar kagyzlary we keş maglumatlary hemişelik öçüriler. Ätiýaçlyk nusga arhiwleri saklanar. Soňra programma ýapylar. Bu amaly yzyna gaýtaryp bolmaýar.",
+  "resetAllDataConfirm": "Ählisini öçürmek",
+  "resetAllDataWait": "{seconds} sekuntdan tassyklap bilersiňiz",
+  "resettingAllData": "Maglumatlar öçürilýär…",
+  "appIcon": "Programma nyşany",
+  "appIconStandard": "Standart",
+  "appIconVelvet": "Barhat",
+  "appIconSolar": "Günüş",
+  "appIconCircuit": "Zynjyr",
+  "appIconEcho": "Ýañrama",
+  "appIconInk": "Siýa",
+  "appIconBlueprint": "Çyzgy",
+  "appIconStrata": "Gatlaklar",
+  "appIconShatter": "Böleklär",
+  "appIconTrace": "Yzy",
+  "appIconTopo": "Relýef",
+  "appIconSpark": "Uçgun",
+  "appIconApply": "Bu nyşany ulan",
+  "appIconChangeNote": "Baş ekrana täze nyşany görkezmek üçin birnäçe sekunt gerek bolup biler. Käbir launcherler gysgaltmany aýyrýar — ony programmalar sanawyndan ýene goşuň.",
+  "colorContrast": "Kontrast",
+  "contrastMedium": "Orta",
+  "contrastHigh": "Ýokary",
+  "navigationLabels": "Tab etiketleri",
+  "navigationLabelsAlways": "Hemişe",
+  "navigationLabelsSelected": "Saýlanan",
+  "navigationLabelsNever": "Hiç haçan",
+  "trayIcon": "Tray nyşany",
+  "trayIconColor": "Reňkli",
+  "trayIconLight": "Ak",
+  "trayIconDark": "Gara",
   "toolsAction": "Hereket",
   "toolsChoose": "Bölümü saýlaň ýa-da sazlamany gözleň",
   "toolsCloseConnectionsConfirm": "Bu hereket ähli işleýän baglanyşyklary ýapar. Dowam edilsinmi?",

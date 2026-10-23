@@ -95,5 +95,21 @@
   "telegramWebFallback": "Ouvrir dans le navigateur",
   "telegramAppUnavailable": "Impossible d’ouvrir Telegram sur cet appareil.",
   "urlSchemeFormats": "Formats",
-  "urlSchemeFormatsTip": "Formats de liens. Remplacez les espaces réservés par votre URL ou vos données."
+  "urlSchemeFormatsTip": "Formats de liens. Remplacez les espaces réservés par votre URL ou vos données.",
+  "profileImportTitle": "Nouvel abonnement",
+  "profileImportChecking": "Vérification de l’abonnement…",
+  "profileImportPreviewFailed": "Impossible d’afficher le contenu de l’abonnement. Vous pouvez quand même l’ajouter.",
+  "profileImportEncrypted": "L’abonnement est chiffré ; la clé vous sera demandée lors de l’ajout.",
+  "profileImportFormat": "Format de l’abonnement",
+  "profileImportFormatClient": "Tel que l’application {client} le reçoit",
+  "profileImportFormatReclash": "Le meilleur format pour ReClash, choisi automatiquement",
+  "profileImportServerCount": "{count, plural, one{{count} serveur} other{{count} serveurs}}",
+  "profileImportAlreadyAdded": "Déjà ajouté sous le nom « {name} »",
+  "profileImportLosses": "Certaines parties ne sont pas prises en charge ; vous les examinerez avant l’ajout.",
+  "profileImportServers": "Serveurs",
+  "profileImportValidUntil": "Valable jusqu’au",
+  "profileImportUnlimited": "Illimité",
+  "profileImportExpired": "Expiré",
+  "profileImportFromProvider": "Du fournisseur",
+  "profileImportSingleServer": "Un seul serveur"
 }

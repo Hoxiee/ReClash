@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/秒",
   "updateRemainingTime": "剩余 {time}",
   "updateSeconds": "{count} 秒",
-  "updateMinutes": "{count} 分钟"
+  "updateMinutes": "{count} 分钟",
+  "updateResumeShort": "继续"
 }

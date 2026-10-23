@@ -272,7 +272,7 @@ Map<String, dynamic> _$SnifferConfigToJson(_SnifferConfig instance) =>
     };
 
 _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
-  enable: json['enable'] as bool? ?? false,
+  enable: json['enable'] as bool? ?? true,
   device: json['device'] as String? ?? appName,
   stack: $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.mips,
   routeAddress:
@@ -875,7 +875,7 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
       logLevel:
           $enumDecodeNullable(_$LogLevelEnumMap, json['log-level']) ??
           LogLevel.error,
-      ipv6: json['ipv6'] as bool? ?? false,
+      ipv6: json['ipv6'] as bool? ?? true,
       findProcessMode:
           $enumDecodeNullable(
             _$FindProcessModeEnumMap,

@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Operasiýa ulgamyny we enjam modelini hem iber",
   "subscriptionIdentityDetailsDisclosure": "ID bilen bilelikde operasiýa ulgamynyň wersiýasy we enjam modeli iberiler.",
   "subscriptionIdentitySettingsTitle": "Abunalyk şahsyýet maglumatlary",
-  "subscriptionIdentityGlobalHint": "Işledilende, profil bu sazlamany üýtgetmese, enjam şahsyýeti ähli URL abunalyklarynyň isleglerinde iberilýär. Operasiýa ulgamy we enjam maglumatlary her abunalyk üçin aýratyn rugsat berilýär.",
   "subscriptionIdentityUseGlobal": "Umumy sazlamany ulan",
   "subscriptionProvider": "Abunalyk",
   "subscriptionProviderWebsite": "Web sahypasy",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Goşuldy: {added}; geçirildi: {skipped}; şowsuz: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "HWID iberişi öçürilse, köp abunalar işlemez."
 }

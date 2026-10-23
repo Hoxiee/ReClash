@@ -7797,7 +7797,8 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one:
+          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -7941,130 +7942,30 @@ class AppLocalizations {
     );
   }
 
-  /// `Regional network defaults and service checks, independent of the interface language.`
+  /// `Picks DNS servers, TUN MTU, the bypass list and service checks for your country. The interface language does not change.`
   String get regionIntro {
     return Intl.message(
-      'Regional network defaults and service checks, independent of the interface language.',
+      'Picks DNS servers, TUN MTU, the bypass list and service checks for your country. The interface language does not change.',
       name: 'regionIntro',
       desc: '',
       args: [],
     );
   }
 
-  /// `Choosing a country only updates this preview. Regional defaults change when you apply it.`
-  String get regionWarning {
-    return Intl.message(
-      'Choosing a country only updates this preview. Regional defaults change when you apply it.',
-      name: 'regionWarning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose a country`
-  String get regionChoose {
-    return Intl.message(
-      'Choose a country',
-      name: 'regionChoose',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Suggested: {region} · {source}`
-  String regionDetected(String region, String source) {
-    return Intl.message(
-      'Suggested: $region · $source',
-      name: 'regionDetected',
-      desc: '',
-      args: [region, source],
-    );
-  }
-
-  /// `Use detected region`
-  String get regionUseDetected {
-    return Intl.message(
-      'Use detected region',
-      name: 'regionUseDetected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Preview`
-  String get regionPreviewTitle {
-    return Intl.message(
-      'Preview',
-      name: 'regionPreviewTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Country profile: {region}`
-  String regionPreviewBase(String region) {
-    return Intl.message(
-      'Country profile: $region',
-      name: 'regionPreviewBase',
-      desc: '',
-      args: [region],
-    );
-  }
-
-  /// `TUN MTU: {value}`
-  String regionPreviewMtu(String value) {
-    return Intl.message(
-      'TUN MTU: $value',
-      name: 'regionPreviewMtu',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Default service checks: {value}`
-  String regionPreviewServices(String value) {
-    return Intl.message(
-      'Default service checks: $value',
-      name: 'regionPreviewServices',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Proxy selection and your routing rules stay unchanged.`
-  String get regionPreviewRules {
-    return Intl.message(
-      'Proxy selection and your routing rules stay unchanged.',
-      name: 'regionPreviewRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.`
-  String get regionPreviewAndroid {
-    return Intl.message(
-      'On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.',
-      name: 'regionPreviewAndroid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.`
+  /// `Values you changed yourself stay as they are.`
   String get regionCustomPreserved {
     return Intl.message(
-      'Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.',
+      'Values you changed yourself stay as they are.',
       name: 'regionCustomPreserved',
       desc: '',
       args: [],
     );
   }
 
-  /// `Network defaults and service checks stay unchanged.`
+  /// `Your settings stay unchanged.`
   String get regionNoChanges {
     return Intl.message(
-      'Network defaults and service checks stay unchanged.',
+      'Your settings stay unchanged.',
       name: 'regionNoChanges',
       desc: '',
       args: [],
@@ -8081,16 +7982,6 @@ class AppLocalizations {
     );
   }
 
-  /// `No matching suggestion. Only the time zone and system locale are used.`
-  String get regionNoDetected {
-    return Intl.message(
-      'No matching suggestion. Only the time zone and system locale are used.',
-      name: 'regionNoDetected',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Choose a supported region before using regional app suggestions.`
   String get regionSelectBeforeApps {
     return Intl.message(
@@ -8101,15 +7992,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Off`
+  /// `Not selected`
   String get regionNotSet {
-    return Intl.message('Off', name: 'regionNotSet', desc: '', args: []);
+    return Intl.message(
+      'Not selected',
+      name: 'regionNotSet',
+      desc: '',
+      args: [],
+    );
   }
 
-  /// `Other / general`
+  /// `Other country`
   String get regionOther {
     return Intl.message(
-      'Other / general',
+      'Other country',
       name: 'regionOther',
       desc: '',
       args: [],
@@ -8136,66 +8032,6 @@ class AppLocalizations {
     return Intl.message('Egypt', name: 'regionEgypt', desc: '', args: []);
   }
 
-  /// `time zone`
-  String get regionSourceTimeZone {
-    return Intl.message(
-      'time zone',
-      name: 'regionSourceTimeZone',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `system locale country`
-  String get regionSourceLocaleCountry {
-    return Intl.message(
-      'system locale country',
-      name: 'regionSourceLocaleCountry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `system language`
-  String get regionSourceLocaleLanguage {
-    return Intl.message(
-      'system language',
-      name: 'regionSourceLocaleLanguage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Current region`
-  String get regionCurrent {
-    return Intl.message(
-      'Current region',
-      name: 'regionCurrent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Device suggestion`
-  String get regionDetectionTitle {
-    return Intl.message(
-      'Device suggestion',
-      name: 'regionDetectionTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Profile defaults`
-  String get regionProfileDefaults {
-    return Intl.message(
-      'Profile defaults',
-      name: 'regionProfileDefaults',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Service checks are off`
   String get regionNoServices {
     return Intl.message(
@@ -8203,36 +8039,6 @@ class AppLocalizations {
       name: 'regionNoServices',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `Region {region} supplies DNS defaults: {value}. Manual overrides here take priority.`
-  String regionDnsSettings(String region, String value) {
-    return Intl.message(
-      'Region $region supplies DNS defaults: $value. Manual overrides here take priority.',
-      name: 'regionDnsSettings',
-      desc: '',
-      args: [region, value],
-    );
-  }
-
-  /// `Region {region} supplies MTU {value}. Add an MTU override to use your own value.`
-  String regionTunSettings(String region, String value) {
-    return Intl.message(
-      'Region $region supplies MTU $value. Add an MTU override to use your own value.',
-      name: 'regionTunSettings',
-      desc: '',
-      args: [region, value],
-    );
-  }
-
-  /// `Region {region} uses: {value}. A custom list replaces the regional defaults.`
-  String regionBypassSettings(String region, String value) {
-    return Intl.message(
-      'Region $region uses: $value. A custom list replaces the regional defaults.',
-      name: 'regionBypassSettings',
-      desc: '',
-      args: [region, value],
     );
   }
 
@@ -8281,6 +8087,81 @@ class AppLocalizations {
     return Intl.message(
       'The region or app lists changed. Run selection again for the current settings.',
       name: 'regionAppsChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recommended for this device`
+  String get regionRecommended {
+    return Intl.message(
+      'Recommended for this device',
+      name: 'regionRecommended',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What changes`
+  String get regionChangesTitle {
+    return Intl.message(
+      'What changes',
+      name: 'regionChangesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS servers`
+  String get regionChangeDns {
+    return Intl.message(
+      'DNS servers',
+      name: 'regionChangeDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN MTU`
+  String get regionChangeMtu {
+    return Intl.message('TUN MTU', name: 'regionChangeMtu', desc: '', args: []);
+  }
+
+  /// `Service checks`
+  String get regionChangeServices {
+    return Intl.message(
+      'Service checks',
+      name: 'regionChangeServices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore defaults`
+  String get restoreDefaults {
+    return Intl.message(
+      'Restore defaults',
+      name: 'restoreDefaults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The bypass list and TUN MTU return to the defaults of the selected region.`
+  String get networkRestoreDefaultsTip {
+    return Intl.message(
+      'The bypass list and TUN MTU return to the defaults of the selected region.',
+      name: 'networkRestoreDefaultsTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All DNS overrides are removed, and the DNS servers of the selected region are set again.`
+  String get dnsRestoreDefaultsTip {
+    return Intl.message(
+      'All DNS overrides are removed, and the DNS servers of the selected region are set again.',
+      name: 'dnsRestoreDefaultsTip',
       desc: '',
       args: [],
     );
@@ -8481,26 +8362,6 @@ class AppLocalizations {
     return Intl.message(
       'Capturing all traffic does not mean sending all of it through a server. Direct routes remain in place.',
       name: 'setupCoverageNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use these regional settings`
-  String get setupRegionConfirm {
-    return Intl.message(
-      'Use these regional settings',
-      name: 'setupRegionConfirm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The suggested region comes from this device, not the interface language. Apply it only if it matches your network.`
-  String get setupRegionDescription {
-    return Intl.message(
-      'The suggested region comes from this device, not the interface language. Apply it only if it matches your network.',
-      name: 'setupRegionDescription',
       desc: '',
       args: [],
     );
@@ -9041,6 +8902,226 @@ class AppLocalizations {
     return Intl.message(
       'Allow connection',
       name: 'setupRequestPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region`
+  String get setupReceiptRegion {
+    return Intl.message(
+      'Region',
+      name: 'setupReceiptRegion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Where are you connecting from?`
+  String get setupRegionTitle {
+    return Intl.message(
+      'Where are you connecting from?',
+      name: 'setupRegionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash adjusts DNS, MTU and direct routes to the networks of your country. The interface language stays the same.`
+  String get setupRegionStepDescription {
+    return Intl.message(
+      'ReClash adjusts DNS, MTU and direct routes to the networks of your country. The interface language stays the same.',
+      name: 'setupRegionStepDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Regional settings are not changed.`
+  String get setupRegionNeutralDescription {
+    return Intl.message(
+      'Regional settings are not changed.',
+      name: 'setupRegionNeutralDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you skip the choice, your current regional settings stay as they are.`
+  String get setupRegionUnchosen {
+    return Intl.message(
+      'If you skip the choice, your current regional settings stay as they are.',
+      name: 'setupRegionUnchosen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recommended`
+  String get setupRecommended {
+    return Intl.message(
+      'Recommended',
+      name: 'setupRecommended',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local sites and apps go direct`
+  String get setupDirectTitle {
+    return Intl.message(
+      'Local sites and apps go direct',
+      name: 'setupDirectTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Services of your country open without the server: faster, and banks or government sites do not block you. These rules are added to the global rules:`
+  String get setupDirectDescription {
+    return Intl.message(
+      'Services of your country open without the server: faster, and banks or government sites do not block you. These rules are added to the global rules:',
+      name: 'setupDirectDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for local apps…`
+  String get setupDirectAppsScanning {
+    return Intl.message(
+      'Looking for local apps…',
+      name: 'setupDirectAppsScanning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apps that bypass the VPN: {count}`
+  String setupDirectApps(int count) {
+    return Intl.message(
+      'Apps that bypass the VPN: $count',
+      name: 'setupDirectApps',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `They will work without the VPN. You can change the list later in access control.`
+  String get setupDirectAppsReview {
+    return Intl.message(
+      'They will work without the VPN. You can change the list later in access control.',
+      name: 'setupDirectAppsReview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No local apps found. Sites still go direct.`
+  String get setupDirectAppsNone {
+    return Intl.message(
+      'No local apps found. Sites still go direct.',
+      name: 'setupDirectAppsNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave setup?`
+  String get setupLeaveTitle {
+    return Intl.message(
+      'Leave setup?',
+      name: 'setupLeaveTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash will close. Your choices are saved, and setup continues the next time you open the app.`
+  String get setupLeaveMessage {
+    return Intl.message(
+      'ReClash will close. Your choices are saved, and setup continues the next time you open the app.',
+      name: 'setupLeaveMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add or choose a profile to continue.`
+  String get setupProfileContinueHint {
+    return Intl.message(
+      'Add or choose a profile to continue.',
+      name: 'setupProfileContinueHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste the link from your provider's email, bot or account page, or pick a file or QR code.`
+  String get setupProfileImportHint {
+    return Intl.message(
+      'Paste the link from your provider\'s email, bot or account page, or pick a file or QR code.',
+      name: 'setupProfileImportHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add another profile`
+  String get setupProfileImportAnother {
+    return Intl.message(
+      'Add another profile',
+      name: 'setupProfileImportAnother',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change settings`
+  String get setupChangeSettings {
+    return Intl.message(
+      'Change settings',
+      name: 'setupChangeSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What you can try`
+  String get setupTipsTitle {
+    return Intl.message(
+      'What you can try',
+      name: 'setupTipsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Make sure the internet works without ReClash.`
+  String get setupTipNetwork {
+    return Intl.message(
+      'Make sure the internet works without ReClash.',
+      name: 'setupTipNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update the profile, or pick another server after setup.`
+  String get setupTipProfile {
+    return Intl.message(
+      'Update the profile, or pick another server after setup.',
+      name: 'setupTipProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a different coverage: some networks block VPN connections.`
+  String get setupTipCoverage {
+    return Intl.message(
+      'Choose a different coverage: some networks block VPN connections.',
+      name: 'setupTipCoverage',
       desc: '',
       args: [],
     );
@@ -9740,6 +9821,17 @@ class AppLocalizations {
     );
   }
 
+  /// `Resume`
+  String get updateResumeShort {
+    return Intl.message(
+      'Resume',
+      name: 'updateResumeShort',
+      desc:
+          'Short button on the dashboard update banner that resumes a paused or failed update download.',
+      args: [],
+    );
+  }
+
   /// `URL scheme`
   String get urlScheme {
     return Intl.message('URL scheme', name: 'urlScheme', desc: '', args: []);
@@ -10395,6 +10487,168 @@ class AppLocalizations {
     );
   }
 
+  /// `New subscription`
+  String get profileImportTitle {
+    return Intl.message(
+      'New subscription',
+      name: 'profileImportTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the subscription…`
+  String get profileImportChecking {
+    return Intl.message(
+      'Checking the subscription…',
+      name: 'profileImportChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn’t look inside the subscription. You can still add it.`
+  String get profileImportPreviewFailed {
+    return Intl.message(
+      'Couldn’t look inside the subscription. You can still add it.',
+      name: 'profileImportPreviewFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription is encrypted; you’ll be asked for the key when adding it.`
+  String get profileImportEncrypted {
+    return Intl.message(
+      'The subscription is encrypted; you’ll be asked for the key when adding it.',
+      name: 'profileImportEncrypted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription format`
+  String get profileImportFormat {
+    return Intl.message(
+      'Subscription format',
+      name: 'profileImportFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `As the {client} app receives it`
+  String profileImportFormatClient(String client) {
+    return Intl.message(
+      'As the $client app receives it',
+      name: 'profileImportFormatClient',
+      desc: '',
+      args: [client],
+    );
+  }
+
+  /// `The best format for ReClash, picked automatically`
+  String get profileImportFormatReclash {
+    return Intl.message(
+      'The best format for ReClash, picked automatically',
+      name: 'profileImportFormatReclash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{1 server} other{{count} servers}}`
+  String profileImportServerCount(int count) {
+    return Intl.plural(
+      count,
+      one: '1 server',
+      other: '$count servers',
+      name: 'profileImportServerCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Already added as “{name}”`
+  String profileImportAlreadyAdded(String name) {
+    return Intl.message(
+      'Already added as “$name”',
+      name: 'profileImportAlreadyAdded',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Some parts aren’t supported; you’ll review them before adding.`
+  String get profileImportLosses {
+    return Intl.message(
+      'Some parts aren’t supported; you’ll review them before adding.',
+      name: 'profileImportLosses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Servers`
+  String get profileImportServers {
+    return Intl.message(
+      'Servers',
+      name: 'profileImportServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Valid until`
+  String get profileImportValidUntil {
+    return Intl.message(
+      'Valid until',
+      name: 'profileImportValidUntil',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlimited`
+  String get profileImportUnlimited {
+    return Intl.message(
+      'Unlimited',
+      name: 'profileImportUnlimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expired`
+  String get profileImportExpired {
+    return Intl.message(
+      'Expired',
+      name: 'profileImportExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `From the provider`
+  String get profileImportFromProvider {
+    return Intl.message(
+      'From the provider',
+      name: 'profileImportFromProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Single server`
+  String get profileImportSingleServer {
+    return Intl.message(
+      'Single server',
+      name: 'profileImportSingleServer',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Theme`
   String get appearanceTheme {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
@@ -10415,26 +10669,6 @@ class AppLocalizations {
     return Intl.message(
       'Custom background',
       name: 'wallpaperTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tap a saved background to use it, or add a new one.`
-  String get wallpaperGalleryHint {
-    return Intl.message(
-      'Tap a saved background to use it, or add a new one.',
-      name: 'wallpaperGalleryHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose image`
-  String get wallpaperChoose {
-    return Intl.message(
-      'Choose image',
-      name: 'wallpaperChoose',
       desc: '',
       args: [],
     );
@@ -11445,6 +11679,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Allow location access to see nearby Wi-Fi networks, or enter a network manually.`
+  String get pickNetworkPermissionDesc {
+    return Intl.message(
+      'Allow location access to see nearby Wi-Fi networks, or enter a network manually.',
+      name: 'pickNetworkPermissionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Request as`
   String get subscriptionClientRequestAs {
     return Intl.message(
@@ -11979,16 +12223,6 @@ class AppLocalizations {
     );
   }
 
-  /// `When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.`
-  String get subscriptionIdentityGlobalHint {
-    return Intl.message(
-      'When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.',
-      name: 'subscriptionIdentityGlobalHint',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Use global`
   String get subscriptionIdentityUseGlobal {
     return Intl.message(
@@ -12106,6 +12340,16 @@ class AppLocalizations {
       name: 'profileBatchResult',
       desc: '',
       args: [added, skipped, failed],
+    );
+  }
+
+  /// `Many subscriptions will stop working if HWID sending is turned off.`
+  String get subscriptionIdentityRegionWarning {
+    return Intl.message(
+      'Many subscriptions will stop working if HWID sending is turned off.',
+      name: 'subscriptionIdentityRegionWarning',
+      desc: '',
+      args: [],
     );
   }
 
@@ -13184,7 +13428,8 @@ class AppLocalizations {
     return Intl.message(
       'not',
       name: 'rcxCondNotPrefix',
-      desc: 'Lowercase word placed before a negated clause, e.g. \'not Exit country is RU\'',
+      desc:
+          'Lowercase word placed before a negated clause, e.g. \'not Exit country is RU\'',
       args: [],
     );
   }
@@ -14962,6 +15207,226 @@ class AppLocalizations {
   /// `Extra`
   String get extra {
     return Intl.message('Extra', name: 'extra', desc: '', args: []);
+  }
+
+  /// `Reset all data`
+  String get resetAllData {
+    return Intl.message(
+      'Reset all data',
+      name: 'resetAllData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All profiles, settings, scripts, wallpapers, and cached data will be permanently deleted. Backup archives will be kept. The app will then close. This cannot be undone.`
+  String get resetAllDataDescription {
+    return Intl.message(
+      'All profiles, settings, scripts, wallpapers, and cached data will be permanently deleted. Backup archives will be kept. The app will then close. This cannot be undone.',
+      name: 'resetAllDataDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete everything`
+  String get resetAllDataConfirm {
+    return Intl.message(
+      'Delete everything',
+      name: 'resetAllDataConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can confirm in {seconds} s`
+  String resetAllDataWait(int seconds) {
+    return Intl.message(
+      'You can confirm in $seconds s',
+      name: 'resetAllDataWait',
+      desc: '',
+      args: [seconds],
+    );
+  }
+
+  /// `Deleting data…`
+  String get resettingAllData {
+    return Intl.message(
+      'Deleting data…',
+      name: 'resettingAllData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App icon`
+  String get appIcon {
+    return Intl.message('App icon', name: 'appIcon', desc: '', args: []);
+  }
+
+  /// `Standard`
+  String get appIconStandard {
+    return Intl.message(
+      'Standard',
+      name: 'appIconStandard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Velvet`
+  String get appIconVelvet {
+    return Intl.message('Velvet', name: 'appIconVelvet', desc: '', args: []);
+  }
+
+  /// `Solar`
+  String get appIconSolar {
+    return Intl.message('Solar', name: 'appIconSolar', desc: '', args: []);
+  }
+
+  /// `Circuit`
+  String get appIconCircuit {
+    return Intl.message('Circuit', name: 'appIconCircuit', desc: '', args: []);
+  }
+
+  /// `Echo`
+  String get appIconEcho {
+    return Intl.message('Echo', name: 'appIconEcho', desc: '', args: []);
+  }
+
+  /// `Ink`
+  String get appIconInk {
+    return Intl.message('Ink', name: 'appIconInk', desc: '', args: []);
+  }
+
+  /// `Blueprint`
+  String get appIconBlueprint {
+    return Intl.message(
+      'Blueprint',
+      name: 'appIconBlueprint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strata`
+  String get appIconStrata {
+    return Intl.message('Strata', name: 'appIconStrata', desc: '', args: []);
+  }
+
+  /// `Shatter`
+  String get appIconShatter {
+    return Intl.message('Shatter', name: 'appIconShatter', desc: '', args: []);
+  }
+
+  /// `Trace`
+  String get appIconTrace {
+    return Intl.message('Trace', name: 'appIconTrace', desc: '', args: []);
+  }
+
+  /// `Topo`
+  String get appIconTopo {
+    return Intl.message('Topo', name: 'appIconTopo', desc: '', args: []);
+  }
+
+  /// `Spark`
+  String get appIconSpark {
+    return Intl.message('Spark', name: 'appIconSpark', desc: '', args: []);
+  }
+
+  /// `Use this icon`
+  String get appIconApply {
+    return Intl.message(
+      'Use this icon',
+      name: 'appIconApply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The home screen may take a few seconds to show the new icon, and some launchers remove the shortcut — add it again from the app list.`
+  String get appIconChangeNote {
+    return Intl.message(
+      'The home screen may take a few seconds to show the new icon, and some launchers remove the shortcut — add it again from the app list.',
+      name: 'appIconChangeNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contrast`
+  String get colorContrast {
+    return Intl.message('Contrast', name: 'colorContrast', desc: '', args: []);
+  }
+
+  /// `Medium`
+  String get contrastMedium {
+    return Intl.message('Medium', name: 'contrastMedium', desc: '', args: []);
+  }
+
+  /// `High`
+  String get contrastHigh {
+    return Intl.message('High', name: 'contrastHigh', desc: '', args: []);
+  }
+
+  /// `Tab labels`
+  String get navigationLabels {
+    return Intl.message(
+      'Tab labels',
+      name: 'navigationLabels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Always`
+  String get navigationLabelsAlways {
+    return Intl.message(
+      'Always',
+      name: 'navigationLabelsAlways',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected`
+  String get navigationLabelsSelected {
+    return Intl.message(
+      'Selected',
+      name: 'navigationLabelsSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never`
+  String get navigationLabelsNever {
+    return Intl.message(
+      'Never',
+      name: 'navigationLabelsNever',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tray icon`
+  String get trayIcon {
+    return Intl.message('Tray icon', name: 'trayIcon', desc: '', args: []);
+  }
+
+  /// `Color`
+  String get trayIconColor {
+    return Intl.message('Color', name: 'trayIconColor', desc: '', args: []);
+  }
+
+  /// `White`
+  String get trayIconLight {
+    return Intl.message('White', name: 'trayIconLight', desc: '', args: []);
+  }
+
+  /// `Black`
+  String get trayIconDark {
+    return Intl.message('Black', name: 'trayIconDark', desc: '', args: []);
   }
 
   /// `Application settings`

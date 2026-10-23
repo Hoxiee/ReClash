@@ -949,104 +949,31 @@
   "appRegion": "Ilova hududi",
   "regionalAdaptation": "Hududiy moslashuv",
   "regionTitle": "Hudud profili",
-  "regionIntro": "Interfeys tilidan mustaqil hududiy tarmoq sozlamalari va xizmat tekshiruvlari.",
-  "regionWarning": "Mamlakatni tanlash faqat oldindan ko‘rishni yangilaydi. Hududiy qiymatlar qo‘llangandan keyin o‘zgaradi.",
-  "regionChoose": "Mamlakatni tanlang",
-  "regionDetected": "Tavsiya: {region} · {source}",
-  "regionUseDetected": "Aniqlangan hududni tanlash",
-  "regionPreviewTitle": "Ko‘rib chiqish",
-  "regionPreviewBase": "Mamlakat profili: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "Standart xizmat tekshiruvlari: {value}",
-  "regionPreviewRules": "Proksi tanlovi va marshrutlash qoidalaringiz o‘zgarmaydi.",
-  "regionPreviewAndroid": "Android tizimida MTU yoki chetlab o‘tish o‘zgarishlari VPN qayta ishga tushirilishini tasdiqlashni talab qilishi mumkin. Ilovalar alohida tanlanadi.",
-  "regionCustomPreserved": "Qo‘lda kiritilgan DNS va MTU, chetlab o‘tish ro‘yxati, marshrutlash qoidalari va xizmat tanlovi saqlanadi.",
-  "regionNoChanges": "Tarmoq qiymatlari va xizmat tekshiruvlari o‘zgarmaydi.",
+  "regionIntro": "Mamlakatingiz uchun DNS serverlari, TUN MTU, chetlab o‘tish ro‘yxati va xizmat tekshiruvlarini tanlaydi. Interfeys tili o‘zgarmaydi.",
+  "regionCustomPreserved": "O‘zingiz o‘zgartirgan qiymatlar o‘z holicha qoladi.",
+  "regionNoChanges": "Sozlamalar o‘zgarmaydi.",
   "regionApply": "Hududni qo‘llash",
-  "regionNoDetected": "Mos tavsiya topilmadi. Faqat vaqt mintaqasi va tizim lokali ishlatiladi.",
   "regionSelectBeforeApps": "Hududiy ilova tavsiyalaridan foydalanish uchun avval qo‘llab-quvvatlanadigan hududni tanlang.",
-  "regionNotSet": "O‘chirilgan",
-  "regionOther": "Boshqa / umumiy",
+  "regionNotSet": "Tanlanmagan",
+  "regionOther": "Boshqa mamlakat",
   "regionRussia": "Rossiya",
   "regionIran": "Eron",
   "regionChina": "Xitoy",
   "regionEgypt": "Misr",
-  "regionSourceTimeZone": "vaqt zonasi",
-  "regionSourceLocaleCountry": "tizim tili sozlamasidagi mamlakat",
-  "regionSourceLocaleLanguage": "tizim tili",
-  "regionCurrent": "Joriy hudud",
-  "regionDetectionTitle": "Qurilma tavsiyasi",
-  "regionProfileDefaults": "Profil qiymatlari",
   "regionNoServices": "Xizmat tekshiruvlari o‘chirilgan",
-  "regionDnsSettings": "{region} hududining DNS qiymatlari: {value}. Bu ekrandagi qo‘lda kiritilgan qiymatlar ustun.",
-  "regionTunSettings": "{region} hududining MTU qiymati: {value}. O‘z qiymatingizni ishlatish uchun MTU sozlamasini qo‘shing.",
-  "regionBypassSettings": "{region} hududining ro‘yxati: {value}. Maxsus ro‘yxat hududiy qiymatlarni almashtiradi.",
   "regionSelectApps": "Ilovalarni hudud bo‘yicha tanlash",
   "regionAppsPreviewTitle": "Ilova tanlovini oldindan ko‘rish",
   "regionAppsPreview": "{region}: VPNni chetlab o‘tish ro‘yxatiga {bypassed} ta, VPN ro‘yxatiga {proxied} ta ilova kiradi. Ikkala ro‘yxat almashtiriladi; rejim va boshqa sozlamalar o‘zgarmaydi. Paket va SDK mosligi faqat tavsiya: qo‘llagandan keyin natijani tekshiring.",
   "regionAppsEmpty": "Bu hududga mos ilovalar topilmadi. Ro‘yxatlaringiz o‘zgarmadi.",
   "regionAppsChanged": "Hudud yoki ilova ro‘yxatlari o‘zgardi. Joriy sozlamalar bilan tanlovni takrorlang.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Ushbu qurilma uchun tavsiya etiladi",
+  "regionChangesTitle": "Nima o‘zgaradi",
+  "regionChangeDns": "DNS serverlari",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Xizmat tekshiruvlari",
+  "restoreDefaults": "Standart qiymatlarni tiklash",
+  "networkRestoreDefaultsTip": "Chetlab o‘tish ro‘yxati va TUN MTU tanlangan hududning standart qiymatlariga qaytadi.",
+  "dnsRestoreDefaultsTip": "Barcha DNS qayta belgilashlari o‘chiriladi va tanlangan hududning DNS serverlari qayta o‘rnatiladi.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1080,8 +1007,6 @@
   "setupCoverageLocalDescription": "Ulamoqchi bo‘lgan har bir ilovada mahalliy proksi manzilini belgilang.",
   "setupCoverageAndroidDescription": "Android VPN ulanishini yaratish uchun ruxsat so‘raydi. Ilovalarni kirish sozlamalarida tanlash mumkin.",
   "setupCoverageNote": "Barcha trafikni ushlash uni server orqali yuborish degani emas. To‘g‘ridan-to‘g‘ri yo‘nalishlar saqlanadi.",
-  "setupRegionConfirm": "Ushbu hudud sozlamalaridan foydalanish",
-  "setupRegionDescription": "Tavsiya etilgan hudud interfeys tilidan emas, qurilmadan olinadi. Faqat tarmog‘ingizga mos bo‘lsa qo‘llang.",
   "setupRegionNeutral": "Profil standartlarini saqlash",
   "setupCheckAction": "Ulanishni tekshirish",
   "setupCheckingTitle": "Ulanish va tekshirish",
@@ -1137,6 +1062,28 @@
   "setupRouteChanged": "Tekshiruv vaqtida yo‘nalish o‘zgardi. Joriy ulanishni qayta tekshiring.",
   "setupUnknownError": "Amal yakunlanmadi. Qayta urinib ko‘ring yoki tafsilotlarni oching.",
   "setupRequestPermission": "Ulanishga ruxsat berish",
+  "setupReceiptRegion": "Hudud",
+  "setupRegionTitle": "Qayerdan ulanasiz?",
+  "setupRegionStepDescription": "ReClash DNS, MTU va to‘g‘ridan-to‘g‘ri yo‘nalishlarni mamlakatingiz tarmoqlariga moslaydi. Interfeys tili o‘zgarmaydi.",
+  "setupRegionNeutralDescription": "Hududiy sozlamalar o‘zgarmaydi.",
+  "setupRegionUnchosen": "Hech narsa tanlamasangiz, joriy hududiy sozlamalar o‘zgarmaydi.",
+  "setupRecommended": "Tavsiya etiladi",
+  "setupDirectTitle": "Mahalliy saytlar va ilovalar — to‘g‘ridan-to‘g‘ri",
+  "setupDirectDescription": "Mamlakatingiz xizmatlari serversiz ochiladi: tezroq, banklar va davlat saytlari sizni bloklamaydi. Umumiy qoidalarga quyidagilar qo‘shiladi:",
+  "setupDirectAppsScanning": "Mahalliy ilovalar qidirilmoqda…",
+  "setupDirectApps": "VPN’ni chetlab o‘tadigan ilovalar: {count}",
+  "setupDirectAppsReview": "Ular VPN’siz ishlaydi. Ro‘yxatni keyinroq kirish nazoratida o‘zgartirishingiz mumkin.",
+  "setupDirectAppsNone": "Mahalliy ilovalar topilmadi. Saytlar baribir to‘g‘ridan-to‘g‘ri ochiladi.",
+  "setupLeaveTitle": "Sozlashdan chiqasizmi?",
+  "setupLeaveMessage": "ReClash yopiladi. Tanlovingiz saqlanadi va sozlash keyingi ishga tushirishda davom etadi.",
+  "setupProfileContinueHint": "Davom etish uchun profil qo‘shing yoki tanlang.",
+  "setupProfileImportHint": "Provayder xati, boti yoki shaxsiy kabinetidagi havolani qo‘ying yoki fayl yoxud QR-kod tanlang.",
+  "setupProfileImportAnother": "Boshqa profil qo‘shish",
+  "setupChangeSettings": "Sozlamalarni o‘zgartirish",
+  "setupTipsTitle": "Nimalarni sinab ko‘rish mumkin",
+  "setupTipNetwork": "Internet ReClash’siz ishlayotganiga ishonch hosil qiling.",
+  "setupTipProfile": "Profilni yangilang yoki sozlashdan keyin boshqa serverni tanlang.",
+  "setupTipCoverage": "Boshqa qamrovni tanlang: ba’zi tarmoqlar VPN’ni bloklaydi.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1232,6 +1179,7 @@
   "updateRemainingTime": "{time} qoldi",
   "updateSeconds": "{count} s",
   "updateMinutes": "{count} daq",
+  "updateResumeShort": "Davom ettirish",
   "urlScheme": "URL sxemasi",
   "urlSchemeConnection": "Ulanish",
   "urlSchemeProfiles": "Profillar",
@@ -1299,6 +1247,22 @@
   "telegramAppUnavailable": "Bu qurilmada Telegramni ochib bo‘lmadi.",
   "urlSchemeFormats": "Formatlar",
   "urlSchemeFormatsTip": "Havola formatlari. Belgilangan joylarni URL yoki ma’lumotlaringiz bilan almashtiring.",
+  "profileImportTitle": "Yangi obuna",
+  "profileImportChecking": "Obuna tekshirilmoqda…",
+  "profileImportPreviewFailed": "Obuna tarkibini koʻrib boʻlmadi. Uni baribir qoʻshishingiz mumkin.",
+  "profileImportEncrypted": "Obuna shifrlangan — kalit qoʻshishda soʻraladi.",
+  "profileImportFormat": "Obuna formati",
+  "profileImportFormatClient": "{client} ilovasi qabul qilgandek",
+  "profileImportFormatReclash": "ReClash uchun eng yaxshi format, avtomatik tanlanadi",
+  "profileImportServerCount": "{count, plural, other{{count} ta server}}",
+  "profileImportAlreadyAdded": "Allaqachon «{name}» sifatida qoʻshilgan",
+  "profileImportLosses": "Baʼzi qismlar qoʻllab-quvvatlanmaydi — qoʻshishdan oldin ularni koʻrsatamiz.",
+  "profileImportServers": "Serverlar",
+  "profileImportValidUntil": "Amal qilish muddati",
+  "profileImportUnlimited": "Cheksiz",
+  "profileImportExpired": "Muddati tugagan",
+  "profileImportFromProvider": "Provayderdan",
+  "profileImportSingleServer": "Bitta server",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1332,8 +1296,6 @@
   "appearanceTheme": "Mavzu",
   "appearanceBackground": "Fon",
   "wallpaperTitle": "Maxsus fon",
-  "wallpaperGalleryHint": "Qoʻllash uchun saqlangan fonni bosing yoki yangisini qoʻshing.",
-  "wallpaperChoose": "Rasm tanlash",
   "wallpaperRemove": "Rasmni olib tashlash",
   "wallpaperEnabled": "Maxsus fondan foydalanish",
   "wallpaperFit": "Rasmni joylashtirish",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "Toʻxtatib turish",
   "onDemandFullStop": "To‘liq to‘xtatish",
   "onDemandFullStopDesc": "Pauzada TUN o‘chiriladi va mahalliy proksi portlari yopiladi. Avtomatik davom ettirish uchun tarmoq kuzatuvi davom etadi.",
+  "pickNetworkPermissionDesc": "Yaqin atrofdagi Wi-Fi tarmoqlarini koʻrish uchun joylashuvga ruxsat bering yoki tarmoqni qoʻlda kiriting.",
   "subscriptionClientRequestAs": "So‘rov mijozi",
   "subscriptionClientAuto": "Avtomatik",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "Operatsion tizim va qurilma modelini ham yuborish",
   "subscriptionIdentityDetailsDisclosure": "Identifikator bilan birga operatsion tizim versiyasi va qurilma modeli yuboriladi.",
   "subscriptionIdentitySettingsTitle": "Obuna identifikatori",
-  "subscriptionIdentityGlobalHint": "Yoqilganda, profil bu sozlamani bekor qilmasa, qurilma identifikatori barcha URL obunalari so‘rovlarida yuboriladi. Operatsion tizim va qurilma tafsilotlari har bir obuna uchun alohida yoqiladi.",
   "subscriptionIdentityUseGlobal": "Umumiy sozlamadan foydalanish",
   "subscriptionProvider": "Obuna",
   "subscriptionProviderWebsite": "Veb-sayt",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "Bu obuna uchun bo‘sh qurilma joyi qolmagan. Provayder hisobidan qurilmani olib tashlab, qayta urinib ko‘ring.",
   "subscriptionDeviceRequired": "Bu obuna qurilmani ro‘yxatdan o‘tkazishni talab qiladi. Provayder ko‘rsatmalariga amal qiling.",
   "profileBatchResult": "Qo‘shildi: {added}; o‘tkazib yuborildi: {skipped}; xatolar: {failed}.",
+  "subscriptionIdentityRegionWarning": "HWID yuborish o‘chirilsa, ko‘plab obunalar ishlamay qoladi.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "Himoya faol",
   "notificationLevelDescription": "Batafsil rejim jonli ma’lumot va to‘xtatish tugmasini ko‘rsatadi. Minimal rejim faqat himoya holatini ko‘rsatadi.",
   "extra": "Qo‘shimcha",
+  "resetAllData": "Barcha maʼlumotlarni tiklash",
+  "resetAllDataDescription": "Barcha profillar, sozlamalar, skriptlar, fon rasmlari va kesh butunlay oʻchiriladi. Zaxira nusxa arxivlari saqlanadi. Shundan soʻng ilova yopiladi. Bu amalni bekor qilib boʻlmaydi.",
+  "resetAllDataConfirm": "Hammasini oʻchirish",
+  "resetAllDataWait": "{seconds} soniyadan keyin tasdiqlash mumkin",
+  "resettingAllData": "Maʼlumotlar oʻchirilmoqda…",
+  "appIcon": "Ilova belgisi",
+  "appIconStandard": "Standart",
+  "appIconVelvet": "Baxmal",
+  "appIconSolar": "Quyosh",
+  "appIconCircuit": "Sxema",
+  "appIconEcho": "Aks-sado",
+  "appIconInk": "Siyoh",
+  "appIconBlueprint": "Chizma",
+  "appIconStrata": "Qatlamlar",
+  "appIconShatter": "Parchalar",
+  "appIconTrace": "Iz",
+  "appIconTopo": "Relyef",
+  "appIconSpark": "Uchqun",
+  "appIconApply": "Bu belgidan foydalanish",
+  "appIconChangeNote": "Bosh ekranda yangi belgi chiqishi uchun bir necha soniya kerak bo‘lishi mumkin. Ba‘zi launcherlar yorliqni olib tashlaydi — uni ilovalar ro‘yxatidan qayta qo‘shing.",
+  "colorContrast": "Kontrast",
+  "contrastMedium": "O‘rtacha",
+  "contrastHigh": "Yuqori",
+  "navigationLabels": "Tab yorliqlari",
+  "navigationLabelsAlways": "Doim",
+  "navigationLabelsSelected": "Tanlangan",
+  "navigationLabelsNever": "Hech qachon",
+  "trayIcon": "Tray belgisi",
+  "trayIconColor": "Rangli",
+  "trayIconLight": "Oq",
+  "trayIconDark": "Qora",
   "toolsAction": "Amal",
   "toolsChoose": "Boʻlim tanlang yoki sozlama qidiring",
   "toolsCloseConnectionsConfirm": "Bu barcha faol ulanishlarni yopadi. Davom etasizmi?",

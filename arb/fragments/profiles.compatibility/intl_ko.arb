@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "운영 체제와 기기 모델도 보내기",
   "subscriptionIdentityDetailsDisclosure": "식별자와 함께 운영 체제 버전과 기기 모델도 보냅니다.",
   "subscriptionIdentitySettingsTitle": "구독 식별 정보",
-  "subscriptionIdentityGlobalHint": "활성화하면 프로필에서 재정의하지 않는 한 모든 URL 구독 요청에 기기 식별자를 보냅니다. 운영 체제와 기기 정보는 구독별로 별도 동의가 필요합니다.",
   "subscriptionIdentityUseGlobal": "전역 설정 사용",
   "subscriptionProvider": "구독",
   "subscriptionProviderWebsite": "웹사이트",
@@ -67,9 +66,16 @@
   "profileBatchResult": "추가: {added}, 건너뜀: {skipped}, 실패: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "HWID 전송을 끄면 많은 구독이 작동하지 않게 됩니다."
 }

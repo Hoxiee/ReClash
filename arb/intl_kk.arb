@@ -949,104 +949,31 @@
   "appRegion": "Қолданба аймағы",
   "regionalAdaptation": "Аймақтық бейімдеу",
   "regionTitle": "Аймақ профилі",
-  "regionIntro": "Интерфейс тіліне тәуелсіз аймақтық желі параметрлері мен қызмет тексерістері.",
-  "regionWarning": "Елді таңдау тек алдын ала қарауды жаңартады. Аймақтық параметрлер қолданғаннан кейін өзгереді.",
-  "regionChoose": "Елді таңдаңыз",
-  "regionDetected": "Ұсыныс: {region} · {source}",
-  "regionUseDetected": "Анықталған аймақты таңдау",
-  "regionPreviewTitle": "Алдын ала қарау",
-  "regionPreviewBase": "Ел профилі: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "Әдепкі қызмет тексерістері: {value}",
-  "regionPreviewRules": "Прокси таңдауы мен бағыттау ережелері өзгермейді.",
-  "regionPreviewAndroid": "Android жүйесінде MTU не айналып өту өзгерістері VPN қайта іске қосылуын растауды талап етуі мүмкін. Қолданбалар бөлек таңдалады.",
-  "regionCustomPreserved": "Қолмен орнатылған DNS пен MTU, айналып өту тізімі, бағыттау ережелері және қызмет таңдауы сақталады.",
-  "regionNoChanges": "Желі параметрлері мен қызмет тексерістері өзгермейді.",
+  "regionIntro": "Еліңізге сай DNS серверлерін, TUN MTU мәнін, айналып өту тізімін және қызмет тексерістерін таңдайды. Интерфейс тілі өзгермейді.",
+  "regionCustomPreserved": "Өзіңіз өзгерткен мәндер сол күйінде қалады.",
+  "regionNoChanges": "Баптаулар өзгермейді.",
   "regionApply": "Аймақты қолдану",
-  "regionNoDetected": "Сәйкес ұсыныс табылмады. Тек уақыт белдеуі мен жүйе локалі пайдаланылады.",
   "regionSelectBeforeApps": "Аймақтық қолданба ұсыныстарын пайдалану үшін алдымен қолдау көрсетілетін аймақты таңдаңыз.",
-  "regionNotSet": "Өшірулі",
-  "regionOther": "Басқа / жалпы",
+  "regionNotSet": "Таңдалмаған",
+  "regionOther": "Басқа ел",
   "regionRussia": "Ресей",
   "regionIran": "Иран",
   "regionChina": "Қытай",
   "regionEgypt": "Мысыр",
-  "regionSourceTimeZone": "уақыт белдеуі",
-  "regionSourceLocaleCountry": "жүйелік тіл параметріндегі ел",
-  "regionSourceLocaleLanguage": "жүйе тілі",
-  "regionCurrent": "Ағымдағы аймақ",
-  "regionDetectionTitle": "Құрылғы ұсынысы",
-  "regionProfileDefaults": "Профиль параметрлері",
   "regionNoServices": "Қызмет тексерістері өшірулі",
-  "regionDnsSettings": "{region} аймағының DNS параметрлері: {value}. Осы экрандағы қолмен орнатылған мәндер басым.",
-  "regionTunSettings": "{region} аймағының MTU мәні: {value}. Өз мәніңізді қолдану үшін MTU параметрін қосыңыз.",
-  "regionBypassSettings": "{region} аймағының тізімі: {value}. Қолмен жасалған тізім аймақтық мәндерді ауыстырады.",
   "regionSelectApps": "Қолданбаларды аймақ бойынша таңдау",
   "regionAppsPreviewTitle": "Қолданба таңдауының алдын ала қарауы",
   "regionAppsPreview": "{region}: VPN айналып өту тізіміне {bypassed} қолданба, VPN тізіміне {proxied} қолданба кіреді. Екі тізім де ауыстырылады; режим мен басқа параметрлер өзгермейді. Пакет пен SDK сәйкестігі — тек ұсыныс: қолданғаннан кейін нәтижені тексеріңіз.",
   "regionAppsEmpty": "Бұл аймаққа сәйкес қолданбалар табылмады. Тізімдеріңіз өзгермеді.",
   "regionAppsChanged": "Аймақ немесе қолданба тізімдері өзгерді. Ағымдағы параметрлермен таңдауды қайталаңыз.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Осы құрылғы үшін ұсынылады",
+  "regionChangesTitle": "Не өзгереді",
+  "regionChangeDns": "DNS серверлері",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Қызмет тексерістері",
+  "restoreDefaults": "Әдепкі мәндерді қалпына келтіру",
+  "networkRestoreDefaultsTip": "Айналып өту тізімі мен TUN MTU таңдалған аймақтың әдепкі мәндеріне оралады.",
+  "dnsRestoreDefaultsTip": "Барлық DNS қайта анықтаулары жойылып, таңдалған аймақтың DNS серверлері қайта орнатылады.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1080,8 +1007,6 @@
   "setupCoverageLocalDescription": "Қосқыңыз келетін әр қолданбада жергілікті прокси мекенжайын көрсетіңіз.",
   "setupCoverageAndroidDescription": "Android VPN қосылымын жасауға рұқсат сұрайды. Қолданбаларды таңдауды қолжетімділік баптауларынан жасауға болады.",
   "setupCoverageNote": "Барлық трафикті ұстау оның бәрін сервер арқылы жіберу дегенді білдірмейді. Тікелей маршруттар сақталады.",
-  "setupRegionConfirm": "Осы аймақтық параметрлерді қолдану",
-  "setupRegionDescription": "Ұсынылған аймақ интерфейс тіліне емес, осы құрылғыға негізделген. Оны желіңізге сәйкес келсе ғана қолданыңыз.",
   "setupRegionNeutral": "Профильдің әдепкі мәндерін сақтау",
   "setupCheckAction": "Қосылымды тексеру",
   "setupCheckingTitle": "Қосылып, тексерілуде",
@@ -1137,6 +1062,28 @@
   "setupRouteChanged": "Тексеру кезінде маршрут өзгерді. Ағымдағы қосылымды қайта тексеріңіз.",
   "setupUnknownError": "Әрекет аяқталмады. Қайталап көріңіз немесе мәліметтерді ашыңыз.",
   "setupRequestPermission": "Қосылымға рұқсат беру",
+  "setupReceiptRegion": "Аймақ",
+  "setupRegionTitle": "Қай жерден қосыласыз?",
+  "setupRegionStepDescription": "ReClash DNS, MTU және тікелей бағыттарды еліңіздің желілеріне бейімдейді. Интерфейс тілі өзгермейді.",
+  "setupRegionNeutralDescription": "Аймақтық баптаулар өзгермейді.",
+  "setupRegionUnchosen": "Ештеңе таңдамасаңыз, қазіргі аймақтық баптаулар сол күйінде қалады.",
+  "setupRecommended": "Ұсынылады",
+  "setupDirectTitle": "Жергілікті сайттар мен қолданбалар — тікелей",
+  "setupDirectDescription": "Еліңіздің сервистері серверсіз ашылады: жылдамырақ, әрі банктер мен мемлекеттік сайттар сізді бұғаттамайды. Жалпы ережелерге мыналар қосылады:",
+  "setupDirectAppsScanning": "Жергілікті қолданбаларды іздеп жатырмыз…",
+  "setupDirectApps": "VPN-ді айналып өтетін қолданбалар: {count}",
+  "setupDirectAppsReview": "Олар VPN-сіз жұмыс істейді. Тізімді кейін қолжетімділікті басқаруда өзгертуге болады.",
+  "setupDirectAppsNone": "Жергілікті қолданбалар табылмады. Сайттар бәрібір тікелей ашылады.",
+  "setupLeaveTitle": "Баптаудан шығасыз ба?",
+  "setupLeaveMessage": "ReClash жабылады. Таңдауыңыз сақталады, баптау келесі іске қосқанда жалғасады.",
+  "setupProfileContinueHint": "Жалғастыру үшін профиль қосыңыз немесе таңдаңыз.",
+  "setupProfileImportHint": "Провайдердің хатынан, ботынан немесе жеке кабинетінен сілтемені қойыңыз не файл немесе QR-кодты таңдаңыз.",
+  "setupProfileImportAnother": "Басқа профиль қосу",
+  "setupChangeSettings": "Баптауларды өзгерту",
+  "setupTipsTitle": "Не істеп көруге болады",
+  "setupTipNetwork": "Интернет ReClash-сыз жұмыс істейтініне көз жеткізіңіз.",
+  "setupTipProfile": "Профильді жаңартыңыз немесе баптаудан кейін басқа серверді таңдаңыз.",
+  "setupTipCoverage": "Басқа қамтуды таңдаңыз: кейбір желілер VPN-ді бұғаттайды.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1232,6 +1179,7 @@
   "updateRemainingTime": "{time} қалды",
   "updateSeconds": "{count} с",
   "updateMinutes": "{count} мин",
+  "updateResumeShort": "Жалғастыру",
   "urlScheme": "URL схемасы",
   "urlSchemeConnection": "Қосылым",
   "urlSchemeProfiles": "Профильдер",
@@ -1299,6 +1247,22 @@
   "telegramAppUnavailable": "Бұл құрылғыда Telegram ашылмады.",
   "urlSchemeFormats": "Пішімдер",
   "urlSchemeFormatsTip": "Сілтеме пішімдері. Толтырғыштарды URL не деректермен ауыстырыңыз.",
+  "profileImportTitle": "Жаңа жазылым",
+  "profileImportChecking": "Жазылым тексерілуде…",
+  "profileImportPreviewFailed": "Жазылым мазмұнын көру мүмкін болмады. Оны бәрібір қосуға болады.",
+  "profileImportEncrypted": "Жазылым шифрланған — кілт қосу кезінде сұралады.",
+  "profileImportFormat": "Жазылым форматы",
+  "profileImportFormatClient": "{client} қолданбасы алатындай",
+  "profileImportFormatReclash": "ReClash үшін ең жақсы формат, автоматты түрде таңдалады",
+  "profileImportServerCount": "{count, plural, other{{count} сервер}}",
+  "profileImportAlreadyAdded": "«{name}» ретінде қосылған",
+  "profileImportLosses": "Кейбір бөліктерге қолдау жоқ — қосар алдында оларды көрсетеміз.",
+  "profileImportServers": "Серверлер",
+  "profileImportValidUntil": "Жарамды мерзімі",
+  "profileImportUnlimited": "Шексіз",
+  "profileImportExpired": "Мерзімі өтті",
+  "profileImportFromProvider": "Провайдерден",
+  "profileImportSingleServer": "Бір сервер",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1332,8 +1296,6 @@
   "appearanceTheme": "Тақырып",
   "appearanceBackground": "Фон",
   "wallpaperTitle": "Жеке фон",
-  "wallpaperGalleryHint": "Қолдану үшін сақталған фонды түртіңіз немесе жаңасын қосыңыз.",
-  "wallpaperChoose": "Суретті таңдау",
   "wallpaperRemove": "Суретті жою",
   "wallpaperEnabled": "Жеке фонды пайдалану",
   "wallpaperFit": "Суретті орналастыру",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "Кідірту",
   "onDemandFullStop": "Толық тоқтату",
   "onDemandFullStopDesc": "Кідірту кезінде TUN өшіріліп, жергілікті прокси порттары жабылады. Автоматты жалғастыру үшін желіні бақылау жалғасады.",
+  "pickNetworkPermissionDesc": "Маңайдағы Wi-Fi желілерін көру үшін геолокацияға рұқсат беріңіз немесе желіні қолмен енгізіңіз.",
   "subscriptionClientRequestAs": "Сұрау клиенті",
   "subscriptionClientAuto": "Автоматты",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "Операциялық жүйе мен құрылғы моделін де жіберу",
   "subscriptionIdentityDetailsDisclosure": "Идентификатормен бірге операциялық жүйе нұсқасы мен құрылғы моделі жіберіледі.",
   "subscriptionIdentitySettingsTitle": "Жазылым идентификаторы",
-  "subscriptionIdentityGlobalHint": "Қосылғанда, профиль бұл параметрді өзгертпесе, құрылғы идентификаторы барлық URL жазылымдарының сұрауларымен жіберіледі. Операциялық жүйе мен құрылғы мәліметтерін әр жазылым үшін бөлек қосуға болады.",
   "subscriptionIdentityUseGlobal": "Жалпы параметрді қолдану",
   "subscriptionProvider": "Жазылым",
   "subscriptionProviderWebsite": "Веб-сайт",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "Бұл жазылымда бос құрылғы орны жоқ. Провайдер тіркелгісінен құрылғыны өшіріп, қайта көріңіз.",
   "subscriptionDeviceRequired": "Бұл жазылым құрылғыны тіркеуді талап етеді. Провайдердің нұсқауларын орындаңыз.",
   "profileBatchResult": "Қосылды: {added}; өткізілді: {skipped}; сәтсіз: {failed}.",
+  "subscriptionIdentityRegionWarning": "HWID жіберуді өшірсеңіз, көптеген жазылымдар жұмыс істемей қалады.",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "Қорғаныс қосулы",
   "notificationLevelDescription": "Толық режимде ағымдағы ақпарат пен тоқтату түймесі көрсетіледі. Ең аз режимде тек қорғаныс күйі көрсетіледі.",
   "extra": "Қосымша",
+  "resetAllData": "Барлық деректерді қалпына келтіру",
+  "resetAllDataDescription": "Барлық профильдер, параметрлер, скрипттер, тұсқағаздар және кэштелген деректер біржола жойылады. Сақтық көшірме мұрағаттары сақталады. Содан кейін қолданба жабылады. Бұл әрекетті қайтару мүмкін емес.",
+  "resetAllDataConfirm": "Барлығын жою",
+  "resetAllDataWait": "{seconds} секундтан кейін растауға болады",
+  "resettingAllData": "Деректер жойылуда…",
+  "appIcon": "Қолданба таңбашасы",
+  "appIconStandard": "Қалыпты",
+  "appIconVelvet": "Барқыт",
+  "appIconSolar": "Күн",
+  "appIconCircuit": "Схема",
+  "appIconEcho": "Жаңғырық",
+  "appIconInk": "Сия",
+  "appIconBlueprint": "Сызба",
+  "appIconStrata": "Қабаттар",
+  "appIconShatter": "Сынық",
+  "appIconTrace": "Із",
+  "appIconTopo": "Рельеф",
+  "appIconSpark": "Ұшқын",
+  "appIconApply": "Осы таңбашаны қолдану",
+  "appIconChangeNote": "Басты экранда жаңа таңбаша бірнеше секундтан кейін көрінуі мүмкін. Кейбір лаунчерлер жарлықты жояды — оны қолданбалар тізімінен қайта қосыңыз.",
+  "colorContrast": "Контраст",
+  "contrastMedium": "Орташа",
+  "contrastHigh": "Жоғары",
+  "navigationLabels": "Қойынды белгілері",
+  "navigationLabelsAlways": "Әрқашан",
+  "navigationLabelsSelected": "Таңдалған",
+  "navigationLabelsNever": "Ешқашан",
+  "trayIcon": "Трей таңбашасы",
+  "trayIconColor": "Түрлі",
+  "trayIconLight": "Ақ",
+  "trayIconDark": "Қара",
   "toolsAction": "Әрекет",
   "toolsChoose": "Бөлімді таңдаңыз немесе баптауды іздеңіз",
   "toolsCloseConnectionsConfirm": "Бұл барлық белсенді қосылымдарды жабады. Жалғастырасыз ба?",

@@ -95,5 +95,21 @@
   "telegramWebFallback": "Открыть в браузере",
   "telegramAppUnavailable": "Не удалось открыть Telegram на этом устройстве.",
   "urlSchemeFormats": "Форматы",
-  "urlSchemeFormatsTip": "Форматы ссылок. Подставьте свой URL или данные."
+  "urlSchemeFormatsTip": "Форматы ссылок. Подставьте свой URL или данные.",
+  "profileImportTitle": "Новая подписка",
+  "profileImportChecking": "Проверяем подписку…",
+  "profileImportPreviewFailed": "Не удалось заглянуть в подписку — добавить её всё равно можно.",
+  "profileImportEncrypted": "Подписка зашифрована — ключ спросим при добавлении.",
+  "profileImportFormat": "Формат подписки",
+  "profileImportFormatClient": "Как её получает приложение {client}",
+  "profileImportFormatReclash": "Лучший формат для ReClash, подбирается автоматически",
+  "profileImportServerCount": "{count, plural, one{{count} сервер} few{{count} сервера} many{{count} серверов} other{{count} сервера}}",
+  "profileImportAlreadyAdded": "Уже добавлена как «{name}»",
+  "profileImportLosses": "Часть настроек не поддерживается — покажем их перед добавлением.",
+  "profileImportServers": "Серверы",
+  "profileImportValidUntil": "Действует до",
+  "profileImportUnlimited": "Безлимит",
+  "profileImportExpired": "Истекла",
+  "profileImportFromProvider": "От провайдера",
+  "profileImportSingleServer": "Один сервер"
 }
