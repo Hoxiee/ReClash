@@ -58,6 +58,8 @@ SubscriptionPagePreview _preview({String? announce}) => SubscriptionPagePreview(
   label: 'Acme Home',
   metadata: SubscriptionMetadata({
     'provider.name': 'Acme VPN',
+    'account.title': 'Account Alice',
+    'provider.supportUrl': 'https://support.example/help',
     'provider.announce': ?announce,
   }),
   info: const SubscriptionInfo(download: 1 << 30, total: 100 << 30),
@@ -147,6 +149,8 @@ void main() {
           : l10n.subscriptionClientIncy;
       expect(find.text(native), findsOneWidget);
       expect(find.text(l10n.profileImportFormatClient(native)), findsOne);
+      await tester.ensureVisible(find.text(l10n.subscriptionClientReclash));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.subscriptionClientReclash));
       await tester.pump();
       await tester.tap(find.text(l10n.add));
@@ -186,15 +190,19 @@ void main() {
       pending.complete(preview);
       await tester.pumpAndSettle();
 
-      expect(find.text('Acme VPN'), findsOneWidget);
+      expect(find.text('Acme VPN'), findsNWidgets(2));
+      expect(find.text('Account Alice'), findsOneWidget);
+      expect(find.byTooltip(l10n.subscriptionProviderSupport), findsOneWidget);
       expect(find.text('Welcome aboard'), findsOneWidget);
       expect(find.text(l10n.profileImportServers), findsNothing);
+      await tester.ensureVisible(find.text(l10n.subscriptionClientReclash));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.subscriptionClientReclash));
       await tester.pumpAndSettle();
       expect(requests, 1);
       expect(
         tester.widget<EditableText>(find.byType(EditableText)).controller.text,
-        'Acme Home',
+        'Acme VPN',
       );
       await tester.enterText(find.byType(EditableText), 'Work');
       await tester.tap(find.text(l10n.add));
@@ -206,6 +214,55 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('provider name fills the profile name without an account label', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final pending = Completer<SubscriptionPagePreview>();
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/private'),
+      preview: (source, {cancellation}) => pending.future,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    pending.complete(
+      const SubscriptionPagePreview(
+        metadata: SubscriptionMetadata({'provider.name': 'Provider VPN'}),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+      'Provider VPN',
+    );
+    await tester.tap(find.text(currentAppLocalizations.add));
+    await tester.pumpAndSettle();
+    expect((await result)?.label, 'Provider VPN');
+  });
+
+  testWidgets('late provider name preserves a manually edited profile name', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final pending = Completer<SubscriptionPagePreview>();
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/private'),
+      preview: (source, {cancellation}) => pending.future,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.enterText(find.byType(EditableText), 'Personal');
+    pending.complete(_preview());
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+      'Personal',
+    );
+    await tester.tap(find.text(currentAppLocalizations.add));
+    await tester.pumpAndSettle();
+    expect((await result)?.label, 'Personal');
+  });
 
   testWidgets('a failed preview can be retried and still imports', (
     tester,
@@ -294,7 +351,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Acme VPN'), findsOneWidget);
+    expect(find.text('Acme VPN'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
     Navigator.of(globalState.navigatorKey.currentContext!).pop();
     await tester.pumpAndSettle();

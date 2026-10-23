@@ -51,9 +51,9 @@ Real Android VPN protection and a desktop TUN interface binding still require pl
 
 ## Browser-only link preview
 
-- Preview uses a fixed browser User-Agent and HTML Accept header, never the subscription identity store, client presets or custom profile headers.
-- It fetches only the supplied URL through the bounded transport; HTML is parsed in an isolate without running scripts or loading assets. No guessed API endpoints, client-format retries or config validation run before consent.
-- Remnawave's `#sbpg[data-panel]` contains base64 JSON account data. 3x-ui's `window.__SUB_PAGE_DATA__` carries JSON usage fields and is parsed without executing JavaScript. Marzban's default page exposes labeled account fields. Custom pages fall back to HTML title and description; missing values stay unknown rather than becoming zero/unlimited.
+- Preview uses a fixed browser User-Agent without client-format keywords such as `clash` (Remnawave may prioritize them over browser detection) and HTML Accept header, never the subscription identity store, client presets or custom profile headers.
+- It fetches the supplied page through the bounded transport; HTML is parsed in an isolate without running scripts. A recognized Remnawave page may request `/assets/.app-config-v2.json` with only its ephemeral browser session; a declared logo may load without cookies, Referer or device headers. No client-format retries or config validation run before consent.
+- Remnawave's `#sbpg[data-panel]` contains base64 JSON account data. 3x-ui's `window.__SUB_PAGE_DATA__` carries JSON usage fields and is parsed without executing JavaScript. Marzban's default page exposes labeled account fields. Branding settings supply Remnawave title, logo and support; 3x-ui supplies title, support and a unique account email. Custom pages fall back to HTML title, description, declared icon/image and explicit support anchors; missing values stay unknown rather than becoming zero/unlimited.
 - Preview metadata is never a prepared update and cannot be committed. Add performs the ordinary authenticated/device-aware subscription import.
 - Browser requests still reach the server. Arbitrary provider implementations may count any request; the client cannot guarantee a side-effect-free page on every deployment.
 
@@ -63,3 +63,7 @@ References checked for the browser routes:
 - https://github.com/Gozargah/Marzban/blob/master/app/routers/subscription.py
 - https://github.com/Gozargah/Marzban/blob/master/app/templates/subscription/index.html
 - https://github.com/MHSanaei/3x-ui/blob/main/internal/sub/controller.go
+
+## Provider-owned preview API
+
+[`PROVIDER_PREVIEW_API.md`](../PROVIDER_PREVIEW_API.md) defines the opt-in version 1 contract. A single `link[rel="reclash-preview"]` declares a same-origin JSON endpoint; no endpoint is guessed. Valid presentation fields override panel metadata. Requests carry no cookies, authorization or device identity. Account names are displayed separately, support is a top-bar action, and only one declared logo is requested. Failures preserve the page preview and never initiate a configuration download.

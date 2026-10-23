@@ -7,7 +7,7 @@ deps: [app.setup, localization.catalog, profiles.no-duplicates, subscription.com
 must:
   commands: Known connection and window commands use existing lifecycle owners and explicit confirmation; unknown commands never dispatch.
   imports: Subscription URLs, embedded configs, INCY/Happ wrappers and proxy links resolve locally, retain names and presets, and reuse validation, encryption-key retry, loss approval and durable save. Happ/INCY presets only seed selection; an explicit Auto choice is retained.
-  preview: Before consent, import requests only the browser subscription page without device identity, client negotiation, config validation or remote assets. Remnawave and 3x-ui page data, Marzban page fields and generic HTML metadata are display-only; unknown pages never trigger a config fallback. Client selection is local and config download starts only after Add; already-added URLs skip preview.
+  preview: Before consent, import starts with the browser subscription page without device identity, client negotiation or config validation. Recognized Remnawave pages may fetch their browser branding configuration with an ephemeral same-origin session; an explicitly linked same-origin versioned ReClash preview API may override display metadata, and one declared logo may load without cookies or device headers. Panel branding, account names and validated support links are display-only; unknown pages never trigger a config fallback. Client selection is local and config download starts only after Add; already-added URLs skip preview.
   telegram: Telegram support links use a destination-aware confirmation, preserve parameters, and offer HTTPS fallback only for convertible tg destinations.
   batch-results: Batch profile imports report added, skipped and failed counts once, with details available for failed entries.
   safety: Parsing and external decoding are bounded and never log or display credential-bearing URLs or embedded payloads.
@@ -26,6 +26,7 @@ watch:
   - lib/application.dart
   - lib/providers/actions/url_scheme.dart
   - lib/providers/actions/profiles.dart
+  - PROVIDER_PREVIEW_API.md
   - lib/subscriptions/external_link.dart
   - lib/features/url_scheme/**
   - lib/features/form/named_url_form.dart
