@@ -33,6 +33,7 @@ import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
@@ -539,6 +540,203 @@ void main() {
         }
       }
       expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final floating in [true, false]) {
+    testWidgets('forced bar stays reachable in Tools across window sizes '
+        'with floating=$floating', (tester) async {
+      final container = await pumpTools(tester, home: true);
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              navigationLayout: NavigationLayout.bar,
+              floatingNavigationBar: floating,
+            ),
+          );
+      container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+      await tester.pumpAndSettle();
+      final navigation = find.byType(
+        floating ? FloatingNavigationBar : NavigationBar,
+      );
+      for (final width in [1200.0, 600.0, 1400.0, 500.0, 1000.0]) {
+        tester.view.physicalSize = Size(width, 900);
+        container.read(viewSizeProvider.notifier).value = Size(width, 900);
+        await tester.pumpAndSettle();
+        expect(navigation, findsOneWidget);
+        expect(tester.getCenter(navigation).dx, closeTo(width / 2, 0.01));
+        final destination = find
+            .descendant(of: navigation, matching: find.text('Dashboard'))
+            .hitTestable();
+        expect(destination, findsOneWidget);
+        await tester.tap(destination);
+        await tester.pumpAndSettle();
+        expect(container.read(shownPageLabelProvider), PageLabel.dashboard);
+        expect(find.text('Origin').hitTestable(), findsOneWidget);
+        container
+            .read(currentPageLabelProvider.notifier)
+            .toPage(PageLabel.tools);
+        await tester.pumpAndSettle();
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('wide Tools panes leave together under the full-width bar', (
+    tester,
+  ) async {
+    final container = await pumpTools(
+      tester,
+      home: true,
+      size: const Size(1400, 900),
+    );
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            navigationLayout: NavigationLayout.bar,
+            tabAnimation: TabAnimation.slide,
+          ),
+        );
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pumpAndSettle();
+    final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
+    final divider = find.byKey(const ValueKey('tools-pane-divider'));
+    final initialRow = tester.getRect(row);
+    final initialDivider = tester.getRect(divider);
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 160));
+    final rowOffset = tester.getRect(row).left - initialRow.left;
+    final dividerOffset = tester.getRect(divider).left - initialDivider.left;
+    expect(rowOffset.abs(), greaterThan(360));
+    expect(dividerOffset, closeTo(rowOffset, 0.01));
+    expect(tester.getCenter(find.byType(FloatingNavigationBar)).dx, 700);
+    await tester.pumpAndSettle();
+    expect(find.text('Second').hitTestable(), findsOneWidget);
+    expect(find.byType(ToolsCatalogPanel), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final animation in TabAnimation.values) {
+    testWidgets(
+      'desktop Tools divider moves with its content during $animation',
+      (tester) async {
+        final container = await pumpTools(
+          tester,
+          home: true,
+          wallpaper: true,
+          size: const Size(1400, 900),
+        );
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(tabAnimation: animation));
+        container
+            .read(currentPageLabelProvider.notifier)
+            .toPage(PageLabel.tools);
+        await tester.pumpAndSettle();
+        final divider = find.byKey(const ValueKey('tools-pane-divider'));
+        final rect = tester.getRect(divider);
+        final boundary = find.byKey(const ValueKey('workspace-render'));
+        final sample = Offset(rect.center.dx, rect.top + 150);
+        final before = await _pixelAt(tester, boundary, sample);
+        container
+            .read(currentPageLabelProvider.notifier)
+            .toPage(PageLabel.dashboard);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 160));
+        if (animation == TabAnimation.slide) {
+          expect(tester.getRect(divider).top, greaterThan(rect.top));
+        }
+        expect(await _pixelAt(tester, boundary, sample), isNot(before));
+        await tester.pumpAndSettle();
+        expect(divider, findsNothing);
+        expect(find.text('Origin').hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final size in [const Size(420, 860), const Size(1400, 900)]) {
+    testWidgets(
+      'returning from Tools paints and exposes the destination header '
+      'at $size',
+      (tester) async {
+        final container = await pumpTools(
+          tester,
+          home: true,
+          wallpaper: true,
+          size: size,
+        );
+        await tester.pumpAndSettle();
+        final boundary = find.byKey(const ValueKey('workspace-render'));
+        final title = find.text('Origin');
+        final rect = tester.getRect(title);
+        final samples = [
+          for (var x = rect.left + 2; x < rect.right; x += 4)
+            for (var y = rect.top + 2; y < rect.bottom; y += 4) Offset(x, y),
+        ];
+        final before = [
+          for (final sample in samples)
+            await _pixelAt(tester, boundary, sample),
+        ];
+        for (final target in [PageLabel.dashboard, PageLabel.proxies]) {
+          container
+              .read(currentPageLabelProvider.notifier)
+              .toPage(PageLabel.tools);
+          await tester.pumpAndSettle();
+          container
+              .read(toolsSessionProvider.notifier)
+              .open(const ToolRoute(ToolPage.general));
+          await tester.pumpAndSettle();
+          container.read(currentPageLabelProvider.notifier).toPage(target);
+          await tester.pumpAndSettle();
+          expect(
+            find
+                .text(target == PageLabel.dashboard ? 'Origin' : 'Second')
+                .hitTestable(),
+            findsOneWidget,
+          );
+          expect(
+            find
+                .descendant(
+                  of: find.byType(FloatingHeader),
+                  matching: find.text('Tools'),
+                )
+                .hitTestable(),
+            findsNothing,
+          );
+          if (target == PageLabel.dashboard) {
+            for (var index = 0; index < samples.length; index++) {
+              expect(
+                await _pixelAt(tester, boundary, samples[index]),
+                before[index],
+              );
+            }
+          }
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('Tools removes outgoing app bar actions as soon as Back starts '
+        'at $size', (tester) async {
+      final container = await pumpTools(tester, size: size);
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.hotkey));
+      await tester.pumpAndSettle();
+      final tooltip = AppLocalizations.current.hotkeyRestoreDefaults;
+      expect(find.byTooltip(tooltip).hitTestable(), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
+      await tester.pump();
+      expect(find.byTooltip(tooltip), findsNothing);
+      await tester.pump(const Duration(milliseconds: 180));
+      expect(find.byTooltip(tooltip), findsNothing);
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, isEmpty);
       expect(tester.takeException(), isNull);
     });
   }

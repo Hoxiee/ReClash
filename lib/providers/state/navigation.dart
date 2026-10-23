@@ -22,9 +22,11 @@ NavigationItemsState navigationItemsState(Ref ref) {
 
 @riverpod
 NavigationItemsState currentNavigationItemsState(Ref ref) {
-  final isMobileView = ref.watch(isMobileViewProvider);
+  final compact =
+      getViewMode(ref.watch(viewSizeProvider).width) == ViewMode.mobile &&
+      ref.watch(isMobileViewProvider);
   final navigationItemsState = ref.watch(navigationItemsStateProvider);
-  final navigationItemMode = switch (isMobileView) {
+  final navigationItemMode = switch (compact) {
     true => NavigationItemMode.mobile,
     false => NavigationItemMode.desktop,
   };

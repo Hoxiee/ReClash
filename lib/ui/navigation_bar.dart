@@ -12,11 +12,13 @@ class NavigationBarEntry {
     required this.id,
     required this.icon,
     required this.label,
+    this.group = 0,
   });
 
   final Object id;
   final Widget icon;
   final String label;
+  final int group;
 }
 
 class AnimatedNavigationBar extends StatelessWidget {
@@ -104,19 +106,54 @@ class AnimatedNavigationBar extends StatelessWidget {
         ),
       );
     } else {
-      bar = NavigationBar(
-        destinations: [
-          for (final destination in destinations)
-            NavigationDestination(
-              key: ValueKey(destination.id),
-              icon: destination.icon,
-              label: destination.label,
+      bar = Stack(
+        children: [
+          NavigationBar(
+            destinations: [
+              for (final destination in destinations)
+                NavigationDestination(
+                  key: ValueKey(destination.id),
+                  icon: destination.icon,
+                  label: destination.label,
+                ),
+            ],
+            selectedIndex: selected,
+            onDestinationSelected: onSelected,
+            labelBehavior: labelBehavior,
+            animationDuration: context.disableAnimations ? Duration.zero : null,
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    for (final (index, destination) in destinations.indexed)
+                      Expanded(
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child:
+                              index > 0 &&
+                                  destination.group !=
+                                      destinations[index - 1].group
+                              ? SizedBox(
+                                  width: 1,
+                                  height: 24,
+                                  child: ColoredBox(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outlineVariant,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
+          ),
         ],
-        selectedIndex: selected,
-        onDestinationSelected: onSelected,
-        labelBehavior: labelBehavior,
-        animationDuration: context.disableAnimations ? Duration.zero : null,
       );
     }
     if (context.disableAnimations) return bar;

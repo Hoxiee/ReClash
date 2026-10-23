@@ -243,6 +243,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     final sidebar = find.byType(NavigationSidebar);
+    expect(tester.getSize(sidebar).width, 48);
+
+    await tester.tap(find.byTooltip('Expand'));
+    await tester.pumpAndSettle();
     expect(tester.getSize(sidebar).width, 220);
 
     await tester.tap(find.byTooltip('Collapse'));

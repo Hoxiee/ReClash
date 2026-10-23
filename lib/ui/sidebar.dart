@@ -564,7 +564,9 @@ class _SidebarPaneState extends State<_SidebarPane>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: widget.windowControls.height + _verticalInset),
+          SizedBox(
+            height: widget.windowControls.height + _verticalInset + stride / 2,
+          ),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) => AnimatedBuilder(

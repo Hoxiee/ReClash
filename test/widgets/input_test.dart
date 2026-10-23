@@ -621,7 +621,7 @@ void main() {
     await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     final fields = find.byType(TextFormField);
-    await tester.tap(find.byTooltip('Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(find.text('Key cannot be empty'), findsOneWidget);
     await tester.enterText(fields.first, 'a');
@@ -629,7 +629,7 @@ void main() {
     expect(find.text('Key already exists'), findsOneWidget);
     await tester.enterText(fields.first, 'ccccc');
     await tester.enterText(fields.last, '33333');
-    await tester.tap(find.byTooltip('Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(find.text('cccc'), findsOneWidget);
     expect(find.text('3333'), findsOneWidget);
@@ -729,7 +729,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'c 3\na 9\nd');
     await tester.pumpAndSettle();
     expect(find.text('Line 3: Value cannot be empty'), findsOneWidget);
-    await tester.tap(find.byTooltip('Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(find.text('Line 3: Value cannot be empty'), findsOneWidget);
 
@@ -739,7 +739,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('1 to add, 1 skipped as existing'), findsOneWidget);
-    await tester.tap(find.byTooltip('Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(find.text('geosite:cn'), findsOneWidget);
     expect(find.text('tls://1.1.1.1:853'), findsOneWidget);

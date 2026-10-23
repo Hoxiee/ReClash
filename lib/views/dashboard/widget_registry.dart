@@ -2,6 +2,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/widgets/widgets.dart';
+import 'package:reclash/widgets/announcement_card.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension DashboardWidgetView on DashboardWidget {
@@ -17,6 +18,7 @@ extension DashboardWidgetView on DashboardWidget {
     DashboardWidget.connectionStats => const ConnectionStatsCard(),
     DashboardWidget.intranetIp => const IntranetIpCard(),
     DashboardWidget.memoryInfo => const MemoryInfo(),
+    DashboardWidget.announcement => const AnnouncementCard(),
   };
 
   Glyph get glyph => switch (this) {
@@ -31,6 +33,7 @@ extension DashboardWidgetView on DashboardWidget {
     DashboardWidget.connectionStats => AppGlyphs.connections,
     DashboardWidget.intranetIp => AppGlyphs.devices,
     DashboardWidget.memoryInfo => AppGlyphs.memory,
+    DashboardWidget.announcement => AppGlyphs.info,
   };
 
   String label(BuildContext context) {
@@ -47,6 +50,7 @@ extension DashboardWidgetView on DashboardWidget {
       DashboardWidget.connectionStats => appLocalizations.connectionStats,
       DashboardWidget.intranetIp => appLocalizations.intranetIP,
       DashboardWidget.memoryInfo => appLocalizations.memoryInfo,
+      DashboardWidget.announcement => appLocalizations.providerAnnouncement,
     };
   }
 
@@ -60,6 +64,7 @@ extension DashboardWidgetView on DashboardWidget {
     };
   }
 
-  /// It holds the start button, which has nowhere else to go.
-  bool get removable => this != DashboardWidget.currentOutbound;
+  bool get removable =>
+      this != DashboardWidget.currentOutbound &&
+      this != DashboardWidget.announcement;
 }

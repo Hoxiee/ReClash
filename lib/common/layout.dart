@@ -38,6 +38,17 @@ ViewMode getViewMode(double viewWidth) {
   return ViewMode.desktop;
 }
 
+int navigationGroupOf(PageLabel label) => switch (label) {
+  PageLabel.dashboard => 0,
+  PageLabel.proxies || PageLabel.profiles => 1,
+  PageLabel.requests ||
+  PageLabel.connections ||
+  PageLabel.dns ||
+  PageLabel.logs ||
+  PageLabel.resources => 2,
+  PageLabel.tools => 3,
+};
+
 ViewMode resolveViewMode(
   Size viewSize,
   NavigationLayout layout, {

@@ -7,11 +7,13 @@ class PageViewport extends StatefulWidget {
   const PageViewport({
     super.key,
     this.bounds,
+    this.animation,
     this.routeHeader = false,
     this.inlineHeaders = false,
     required this.child,
   });
 
+  final Listenable? animation;
   final Rect? bounds;
   final bool routeHeader;
   final bool inlineHeaders;
@@ -25,6 +27,7 @@ class PageViewport extends StatefulWidget {
       context,
       child: _PageViewportScope(
         viewport: viewport.viewport,
+        animation: viewport.animation,
         bounds: viewport.bounds,
         routeHeader: viewport.routeHeader,
         inlineHeaders: viewport.inlineHeaders,
@@ -58,6 +61,7 @@ class _PageViewportState extends State<PageViewport> {
       key: _viewport,
       child: _PageViewportScope(
         viewport: anchored ? inherited.viewport : _viewport,
+        animation: widget.animation ?? inherited?.animation,
         bounds: anchored
             ? widget.bounds!.shift(inherited.bounds?.topLeft ?? Offset.zero)
             : null,
@@ -73,6 +77,7 @@ class _PageViewportState extends State<PageViewport> {
 class _PageViewportScope extends InheritedWidget {
   const _PageViewportScope({
     required this.viewport,
+    required this.animation,
     required this.bounds,
     required this.routeHeader,
     required this.inlineHeaders,
@@ -81,6 +86,7 @@ class _PageViewportScope extends InheritedWidget {
   });
 
   final GlobalKey viewport;
+  final Listenable? animation;
   final Rect? bounds;
   final bool routeHeader;
   final bool inlineHeaders;
@@ -89,6 +95,7 @@ class _PageViewportScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_PageViewportScope oldWidget) =>
       viewport != oldWidget.viewport ||
+      animation != oldWidget.animation ||
       bounds != oldWidget.bounds ||
       routeHeader != oldWidget.routeHeader ||
       inlineHeaders != oldWidget.inlineHeaders ||
@@ -118,54 +125,57 @@ class _ViewportAppBarState extends State<ViewportAppBar> {
     final active = PageActivityScope.isActiveOf(context);
     return OverlayPortal(
       controller: _portal,
-      overlayChildBuilder: (context) => LayoutBuilder(
-        builder: (_, constraints) {
-          final box = viewport.viewport.currentContext?.findRenderObject();
-          final overlay = Overlay.of(context).context.findRenderObject();
-          if (box is! RenderBox || overlay is! RenderBox) {
-            return const SizedBox.shrink();
-          }
-          final rect = MatrixUtils.transformRect(
-            box.getTransformTo(overlay),
-            viewport.bounds ?? Offset.zero & box.size,
-          );
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned(
-                left: rect.left,
-                top: rect.top,
-                width: rect.width,
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([
-                    route?.animation,
-                    route?.secondaryAnimation,
-                  ]),
-                  builder: (_, child) {
-                    final secondary = route?.secondaryAnimation;
-                    final leaving =
-                        route?.animation?.status == AnimationStatus.reverse;
-                    // The uncovered header waits for the popping route header.
-                    final covered =
-                        secondary?.status == AnimationStatus.forward ||
-                        (secondary?.value ?? 0) > 0 &&
-                            (viewport.routeHeader ||
-                                secondary?.status != AnimationStatus.reverse);
-                    return Offstage(
-                      offstage:
-                          !active ||
-                          covered ||
-                          leaving && !viewport.routeHeader ||
-                          route?.offstage == true,
-                      child: child,
-                    );
-                  },
-                  child: widget.appBar,
+      overlayChildBuilder: (context) => AnimatedBuilder(
+        animation: viewport.animation ?? kAlwaysCompleteAnimation,
+        builder: (context, _) => LayoutBuilder(
+          builder: (_, constraints) {
+            final box = viewport.viewport.currentContext?.findRenderObject();
+            final overlay = Overlay.of(context).context.findRenderObject();
+            if (box is! RenderBox || overlay is! RenderBox) {
+              return const SizedBox.shrink();
+            }
+            final rect = MatrixUtils.transformRect(
+              box.getTransformTo(overlay),
+              viewport.bounds ?? Offset.zero & box.size,
+            );
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned(
+                  left: rect.left,
+                  top: rect.top,
+                  width: rect.width,
+                  child: AnimatedBuilder(
+                    animation: Listenable.merge([
+                      route?.animation,
+                      route?.secondaryAnimation,
+                    ]),
+                    builder: (_, child) {
+                      final secondary = route?.secondaryAnimation;
+                      final leaving =
+                          route?.animation?.status == AnimationStatus.reverse;
+                      // The uncovered header waits for the popping route header.
+                      final covered =
+                          secondary?.status == AnimationStatus.forward ||
+                          (secondary?.value ?? 0) > 0 &&
+                              (viewport.routeHeader ||
+                                  secondary?.status != AnimationStatus.reverse);
+                      return Offstage(
+                        offstage:
+                            !active ||
+                            covered ||
+                            leaving && !viewport.routeHeader ||
+                            route?.offstage == true,
+                        child: child,
+                      );
+                    },
+                    child: widget.appBar,
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
       child: SizedBox(
         height: widget.preferredSize.height + MediaQuery.paddingOf(context).top,

@@ -6,7 +6,7 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/liquid_glass.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
-import 'package:reclash/ui/tooltip.dart';
+import 'package:reclash/ui/navigation_dock.dart';
 import 'package:reclash/ui/typography.dart';
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
@@ -176,162 +176,31 @@ class GlyphSegmentedControl<T> extends StatelessWidget {
   final AnimationController position;
   final ValueChanged<T> onChanged;
 
-  Widget _glyphs(Color color) => IconTheme.merge(
-    data: IconThemeData(size: _size.icon, color: color),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final segment in segments)
-          SizedBox(
-            width: _segment,
-            child: Center(
-              child: AnimatedGlyph(
+  @override
+  Widget build(BuildContext context) => LiquidGlassScope(
+    enabled: TonalButtonTheme.glassOf(context),
+    quality: LiquidGlassScope.qualityOf(context),
+    child: SizedBox(
+      width: segments.length * _segment + _inset * 2,
+      height: _size.button + _inset * 2,
+      child: GestureDetector(
+        onHorizontalDragUpdate: (_) {},
+        child: FloatingNavigationBar(
+          compact: true,
+          position: position,
+          destinations: [
+            for (final segment in segments)
+              NavigationDockDestination(
+                id: segment.value,
                 glyph: segment.glyph,
-                filled: segment.value == value,
+                label: segment.label,
               ),
-            ),
+          ],
+          selectedIndex: segments.indexWhere(
+            (segment) => segment.value == value,
           ),
-      ],
-    ),
-  );
-
-  Rect _indicator(TextDirection direction) {
-    final last = segments.length - 1;
-    final at = position.value;
-    // Past either end it squashes against the edge instead of leaving it.
-    final overshoot = at < 0 ? -at : (at > last ? at - last : 0.0);
-    final stretch = (position.velocity.abs() * 0.035).clamp(0.0, 0.45);
-    final width = _segment * (1 + stretch - overshoot * 1.5);
-    final height = _size.button * (1 - stretch * 0.18);
-    final center = (at.clamp(0, last) + 0.5) * _segment;
-    final start = (center - width / 2).clamp(0.0, segments.length * _segment);
-    final end = (center + width / 2).clamp(0.0, segments.length * _segment);
-    final left = direction == TextDirection.rtl
-        ? segments.length * _segment - end
-        : start;
-    return Rect.fromLTWH(
-      left,
-      (_size.button - height) / 2,
-      end - start,
-      height,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final direction = Directionality.of(context);
-    final track = SizedBox(
-      width: segments.length * _segment,
-      height: _size.button,
-      child: Stack(
-        children: [
-          _glyphs(colorScheme.onSurfaceVariant),
-          AnimatedBuilder(
-            animation: position,
-            builder: (context, child) {
-              final indicator = _indicator(direction);
-              return Stack(
-                children: [
-                  Positioned.fromRect(
-                    rect: indicator,
-                    child: DecoratedBox(
-                      decoration: ShapeDecoration(
-                        color: colorScheme.primary,
-                        shape: AppShape.full,
-                      ),
-                    ),
-                  ),
-                  ClipPath(clipper: _IndicatorClipper(indicator), child: child),
-                ],
-              );
-            },
-            child: _glyphs(colorScheme.onPrimary),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final segment in segments)
-                _GlyphSegmentTarget(
-                  label: segment.label,
-                  selected: segment.value == value,
-                  width: _segment,
-                  height: _size.button,
-                  onPressed: () => onChanged(segment.value),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-    final padded = Padding(padding: const EdgeInsets.all(_inset), child: track);
-    return TonalButtonTheme.glassOf(context)
-        ? LiquidGlass(
-            style: LiquidGlassStyle.regular(colorScheme),
-            child: padded,
-          )
-        : DecoratedBox(
-            decoration: ShapeDecoration(
-              color: context.raisedSurfaceLevel.colorOf(colorScheme),
-              shape: AppShape.full,
-            ),
-            child: padded,
-          );
-  }
-}
-
-class _IndicatorClipper extends CustomClipper<Path> {
-  const _IndicatorClipper(this.rect);
-
-  final Rect rect;
-
-  @override
-  Path getClip(Size size) => AppShape.full.getOuterPath(rect);
-
-  @override
-  bool shouldReclip(_IndicatorClipper oldClipper) => rect != oldClipper.rect;
-}
-
-class _GlyphSegmentTarget extends StatelessWidget {
-  const _GlyphSegmentTarget({
-    required this.label,
-    required this.selected,
-    required this.width,
-    required this.height,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool selected;
-  final double width;
-  final double height;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => AppTooltip(
-    message: label,
-    child: Semantics(
-      label: label,
-      selected: selected,
-      button: true,
-      excludeSemantics: true,
-      child: FocusRing(
-        shape: AppShape.full,
-        standsOff: selected,
-        child: Material(
-          type: MaterialType.transparency,
-          shape: AppShape.full,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            customBorder: AppShape.full,
-            mouseCursor: selected ? SystemMouseCursors.basic : null,
-            splashFactory: NoSplash.splashFactory,
-            highlightColor: Colors.transparent,
-            hoverColor: selected ? Colors.transparent : null,
-            // A null onTap would unfocus the selected segment.
-            onTap: selected ? () {} : onPressed,
-            child: SizedBox(width: width, height: height),
-          ),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+          onSelected: (index) => onChanged(segments[index].value),
         ),
       ),
     ),

@@ -95,12 +95,14 @@ class TabContentMotion extends InheritedWidget {
     required this.animation,
     required this.frame,
     required this.axis,
+    this.extent,
     required super.child,
   });
 
   final Listenable animation;
   final TabFrame Function() frame;
   final Axis axis;
+  final Size? extent;
 
   static Widget wrap(BuildContext context, Widget child) {
     final motion = context
@@ -111,6 +113,7 @@ class TabContentMotion extends InheritedWidget {
             animation: motion.animation,
             frame: motion.frame,
             axis: motion.axis,
+            extent: motion.extent,
             child: child,
           );
   }
@@ -119,7 +122,8 @@ class TabContentMotion extends InheritedWidget {
   bool updateShouldNotify(TabContentMotion oldWidget) =>
       animation != oldWidget.animation ||
       frame != oldWidget.frame ||
-      axis != oldWidget.axis;
+      axis != oldWidget.axis ||
+      extent != oldWidget.extent;
 }
 
 class TabMotionTransition extends StatelessWidget {
@@ -128,12 +132,14 @@ class TabMotionTransition extends StatelessWidget {
     required this.animation,
     required this.frame,
     required this.axis,
+    this.extent,
     required this.child,
   });
 
   final Listenable animation;
   final TabFrame Function() frame;
   final Axis axis;
+  final Size? extent;
   final Widget child;
 
   @override
@@ -148,12 +154,21 @@ class TabMotionTransition extends StatelessWidget {
       builder: (_, child) {
         final current = frame();
         final offset = current.offset * sign;
-        return FractionalTranslation(
-          translation: axis == Axis.horizontal
-              ? Offset(offset, 0)
-              : Offset(0, offset),
-          child: Opacity(opacity: current.opacity, child: child),
-        );
+        final faded = Opacity(opacity: current.opacity, child: child);
+        final size = extent;
+        return size == null
+            ? FractionalTranslation(
+                translation: axis == Axis.horizontal
+                    ? Offset(offset, 0)
+                    : Offset(0, offset),
+                child: faded,
+              )
+            : Transform.translate(
+                offset: axis == Axis.horizontal
+                    ? Offset(offset * size.width, 0)
+                    : Offset(0, offset * size.height),
+                child: faded,
+              );
       },
       child: RepaintBoundary(child: child),
     );

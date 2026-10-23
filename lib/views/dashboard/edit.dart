@@ -116,7 +116,9 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
     final result = [...shown];
     var at = 0;
     for (final card in saved) {
-      if (card.platforms.contains(widget.platform)) {
+      if (card.platforms.contains(widget.platform) &&
+          (card != DashboardWidget.announcement ||
+              ref.read(providerAnnouncementProvider) != null)) {
         final index = result.indexOf(card);
         if (index != -1) at = index + 1;
       } else {
@@ -159,7 +161,9 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
     final shown = _shown;
     final addable = [
       for (final card in DashboardWidget.values)
-        if (card.platforms.contains(widget.platform) && !shown.contains(card))
+        if (card != DashboardWidget.announcement &&
+            card.platforms.contains(widget.platform) &&
+            !shown.contains(card))
           card,
     ];
     final scale = DashboardDensityScope.scaleOf(context);
