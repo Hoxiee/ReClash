@@ -157,7 +157,7 @@ void main() {
       expect(restored.setupCoverage, isNull);
       expect(restored.setupRegionCode, isNull);
       expect(restored.setupRegionChosen, isFalse);
-      expect(restored.sidebarExpanded, true);
+      expect(restored.sidebarExpanded, false);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.userAgents, defaultUserAgents);
@@ -429,7 +429,7 @@ void main() {
         }).sidebarExpanded,
         true,
       );
-      expect(AppSettingProps.fromJson({}).sidebarExpanded, true);
+      expect(AppSettingProps.fromJson({}).sidebarExpanded, false);
     });
 
     test('safeFromJson returns default on null', () {

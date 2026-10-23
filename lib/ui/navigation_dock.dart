@@ -4,6 +4,7 @@ import 'package:reclash/ui/context.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/surface.dart';
+import 'package:reclash/ui/tooltip.dart';
 import 'package:reclash/ui/typography.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -268,10 +269,12 @@ class _DockSurface extends StatelessWidget {
     required this.style,
     required this.shadows,
     required this.glow,
+    this.compact = false,
     required this.child,
   });
 
   final bool glass;
+  final bool compact;
   final LiquidGlassStyle style;
   final List<BoxShadow> shadows;
   final ValueListenable<LiquidGlassGlow> glow;
@@ -291,6 +294,9 @@ class _DockSurface extends StatelessWidget {
         ),
         child: child,
       );
+    }
+    if (compact) {
+      return child;
     }
     return DecoratedBox(
       decoration: ShapeDecoration(
@@ -323,11 +329,13 @@ class NavigationDockDestination {
     required this.glyph,
     required this.label,
     this.id,
+    this.group = 0,
   });
 
   final Glyph glyph;
   final String label;
   final Object? id;
+  final int group;
 
   Object get identity => id ?? glyph;
 }
@@ -380,7 +388,14 @@ class NavigationDock extends StatelessWidget {
                 child: _HitSlop(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final targetWidth = destinations.length >= _fullWidthCount
+                      final grouped =
+                          destinations
+                              .map((item) => item.group)
+                              .toSet()
+                              .length >
+                          1;
+                      final targetWidth =
+                          destinations.length >= _fullWidthCount && !grouped
                           ? constraints.maxWidth
                           : math.min(
                               constraints.maxWidth,
@@ -804,12 +819,16 @@ class FloatingNavigationBar extends StatefulWidget {
     required this.selectedIndex,
     required this.onSelected,
     this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
+    this.compact = false,
+    this.position,
   });
 
   final List<NavigationDockDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final NavigationDestinationLabelBehavior labelBehavior;
+  final bool compact;
+  final Animation<double>? position;
 
   @override
   State<FloatingNavigationBar> createState() => _FloatingNavigationBarState();
@@ -858,10 +877,23 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   int get _selectedIndex => widget.selectedIndex.clamp(0, _lastIndex);
 
-  ({double pitch, double lens, double inset}) get _layout => _dockLayout(
-    context.size!.width - _barPadding * 2,
-    widget.destinations.length,
-  );
+  ({double pitch, double lens, double inset}) _layoutFor(double span) {
+    if (widget.compact) {
+      final pitch = span / math.max(1, widget.destinations.length);
+      return (pitch: pitch, lens: pitch, inset: 0);
+    }
+    return _dockLayout(span, widget.destinations.length);
+  }
+
+  ({double pitch, double lens, double inset}) get _layout =>
+      _layoutFor(context.size!.width - _barPadding * 2);
+
+  void _syncPosition() {
+    final position = widget.position;
+    if (_pointer == null && !_dropping && !_lifted && position != null) {
+      _lens.jumpTo(position.value);
+    }
+  }
 
   @override
   void initState() {
@@ -876,6 +908,8 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _glowSpread.addListener(_shine);
     _hoverAt.addListener(_leanContent);
     _slots.addListener(_slotsChanged);
+    widget.position?.addListener(_syncPosition);
+    _syncPosition();
     _syncDestinations(seed: true);
     _syncParallax();
     _syncReveal();
@@ -884,6 +918,11 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   @override
   void didUpdateWidget(covariant FloatingNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.position != widget.position) {
+      oldWidget.position?.removeListener(_syncPosition);
+      widget.position?.addListener(_syncPosition);
+      _syncPosition();
+    }
     _syncDestinations();
     _syncParallax();
     _syncReveal();
@@ -908,6 +947,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
 
   @override
   void dispose() {
+    widget.position?.removeListener(_syncPosition);
     for (final parallax in _parallax) {
       parallax.dispose();
     }
@@ -1083,6 +1123,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final lifted = _lift.value > 0;
     if (lifted != _lifted) {
       setState(() => _lifted = lifted);
+      if (!lifted) _syncPosition();
     }
   }
 
@@ -1415,11 +1456,16 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final bar = _DockSurface(
       glass: glass,
       style: LiquidGlassStyle.pill(colorScheme),
-      shadows: ultra ? dockGlassShadows(colorScheme) : const [],
+      shadows: ultra && !widget.compact
+          ? dockGlassShadows(colorScheme)
+          : const [],
+      compact: widget.compact,
       glow: _touchGlow,
       child: Material(
         color: glass
             ? Colors.transparent
+            : widget.compact
+            ? context.raisedSurfaceLevel.colorOf(colorScheme)
             : SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
         shape: AppShape.full,
         // Raw pointers rather than recognizers: a drag has nothing to win the
@@ -1440,10 +1486,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
               child: RepaintBoundary(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final layout = _dockLayout(
-                      constraints.maxWidth,
-                      widget.destinations.length,
-                    );
+                    final layout = _layoutFor(constraints.maxWidth);
                     final room = layout.pitch - _labelInset * 2;
                     final labelScale = widest <= room
                         ? 1.0
@@ -1492,6 +1535,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
                                     excluding: slots[index].leaving,
                                     child: _FloatingBarItem(
                                       destination: destination,
+                                      compact: widget.compact,
                                       selected:
                                           !slots[index].leaving &&
                                           _activeIndexFor(slots[index].key) ==
@@ -1549,6 +1593,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
                               rect: lensRect(),
                               lift: _lift.value,
                               glass: glass,
+                              filled: widget.compact,
                             ),
                           ),
                         if (slots.isNotEmpty)
@@ -1571,6 +1616,50 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
                             builder: (_, _) =>
                                 _GlassLens(rect: lensRect(), lift: _lift.value),
                           ),
+                        IgnorePointer(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: layout.inset,
+                            ),
+                            child: Row(
+                              children: [
+                                for (final (index, destination)
+                                    in destinations.indexed)
+                                  SizedBox(
+                                    width: totalWeight == 0
+                                        ? 0
+                                        : contentWidth *
+                                              slots[index].weight.value.clamp(
+                                                0.0,
+                                                1.0,
+                                              ) /
+                                              totalWeight,
+                                    child: Align(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child:
+                                          index > 0 &&
+                                              destination.group !=
+                                                  destinations[index - 1].group
+                                          ? Opacity(
+                                              opacity: slots[index].weight.value
+                                                  .clamp(0.0, 1.0),
+                                              child: SizedBox(
+                                                width: 1,
+                                                height: _iconSize,
+                                                child: ColoredBox(
+                                                  color: colorScheme
+                                                      .outlineVariant,
+                                                ),
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
                         items(lensed ? _LensPart.outside : _LensPart.both),
                         if (lensed)
                           AnimatedBuilder(
@@ -1593,6 +1682,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         ),
       ),
     );
+    if (widget.compact) return bar;
     return AnimatedBuilder(
       animation: _barMotion,
       builder: (_, child) => _PressTransform(
@@ -1642,10 +1732,16 @@ class _HoverHighlight extends StatelessWidget {
 }
 
 class _Lens extends StatelessWidget {
-  const _Lens({required this.rect, required this.lift, required this.glass});
+  const _Lens({
+    required this.rect,
+    required this.lift,
+    required this.glass,
+    this.filled = false,
+  });
 
   final Rect rect;
   final double lift;
+  final bool filled;
 
   /// On glass the lens rests as a platter in the secondary hue, sunk in dark
   /// mode as iOS's tab bar marks its selection, and clears as it lifts into
@@ -1668,6 +1764,8 @@ class _Lens extends StatelessWidget {
         decoration: ShapeDecoration(
           color: glass
               ? platter.withValues(alpha: platter.a * (1 - lifted))
+              : filled
+              ? colorScheme.primary
               : Color.alphaBlend(
                   colorScheme.onSurface.withValues(alpha: 0.08 * lifted),
                   SurfaceLevel.floatingOf(
@@ -1812,6 +1910,7 @@ enum _LensPart { both, outside, inside }
 class _FloatingBarItem extends StatefulWidget {
   const _FloatingBarItem({
     required this.destination,
+    required this.compact,
     required this.selected,
     required this.index,
     required this.part,
@@ -1828,6 +1927,7 @@ class _FloatingBarItem extends StatefulWidget {
   });
 
   final NavigationDockDestination destination;
+  final bool compact;
   final bool selected;
   final int index;
 
@@ -1866,7 +1966,9 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final color = colorScheme.onSurfaceVariant;
-    var tint = colorScheme.primary;
+    var tint = widget.compact && !LiquidGlassScope.of(context)
+        ? colorScheme.onPrimary
+        : colorScheme.primary;
     if (widget.part == _LensPart.inside &&
         LiquidGlassScope.qualityOf(context) == LiquidGlassQuality.standard) {
       // Without a pane of its own the copy takes the light that one adds.
@@ -1880,7 +1982,7 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
     }
     final glyph = GlyphIcon(
       widget.destination.glyph,
-      size: _iconSize,
+      size: widget.compact ? 20 : _iconSize,
       color: color,
       fill: 1,
     );
@@ -1894,52 +1996,56 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
       index: widget.index,
       color: tint,
       textDirection: Directionality.of(context),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: _labelInset),
-        child: ListenableBuilder(
-          listenable: widget.reveal,
-          builder: (context, _) {
-            final reveal = widget.reveal.value;
-            final drop = Offset(
-              0,
-              (1 - reveal) * (_labelGap + widget.labelHeight) / 2,
-            );
-            final shown = Curves.easeOut.transform(
-              ((reveal - 0.3) / 0.7).clamp(0.0, 1.0),
-            );
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Transform.translate(offset: drop, child: glyph),
-                const SizedBox(height: _labelGap),
-                // Fading by the text's own alpha: an Opacity layer would
-                // composite the item and escape the lens tint's saveLayer.
-                Transform.translate(
-                  offset: drop,
-                  child: Transform.scale(
-                    scale: 0.8 + 0.2 * shown,
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      height: widget.labelHeight,
-                      child: Center(
-                        child: Text(
-                          widget.destination.label,
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: widget.labelStyle?.copyWith(
-                            color: color.withValues(alpha: color.a * shown),
+      child: widget.compact
+          ? Center(child: glyph)
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _labelInset),
+              child: ListenableBuilder(
+                listenable: widget.reveal,
+                builder: (context, _) {
+                  final reveal = widget.reveal.value;
+                  final drop = Offset(
+                    0,
+                    (1 - reveal) * (_labelGap + widget.labelHeight) / 2,
+                  );
+                  final shown = Curves.easeOut.transform(
+                    ((reveal - 0.3) / 0.7).clamp(0.0, 1.0),
+                  );
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Transform.translate(offset: drop, child: glyph),
+                      const SizedBox(height: _labelGap),
+                      // Fading by the text's own alpha: an Opacity layer would
+                      // composite the item and escape the lens tint's saveLayer.
+                      Transform.translate(
+                        offset: drop,
+                        child: Transform.scale(
+                          scale: 0.8 + 0.2 * shown,
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            height: widget.labelHeight,
+                            child: Center(
+                              child: Text(
+                                widget.destination.label,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                style: widget.labelStyle?.copyWith(
+                                  color: color.withValues(
+                                    alpha: color.a * shown,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+                    ],
+                  );
+                },
+              ),
+            ),
     );
     if (widget.part == _LensPart.inside) {
       return content;
@@ -1965,7 +2071,12 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
             ),
           ),
           child: widget.tooltip
-              ? Tooltip(message: widget.destination.label, child: content)
+              ? widget.compact
+                    ? AppTooltip(
+                        message: widget.destination.label,
+                        child: content,
+                      )
+                    : Tooltip(message: widget.destination.label, child: content)
               : content,
         ),
       ),

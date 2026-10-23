@@ -373,6 +373,7 @@ class _MobileDashboard extends ConsumerWidget {
     final saved = ref.watch(
       dashboardStateProvider.select((state) => state.dashboardWidgets),
     );
+    final hasAnnouncement = ref.watch(providerAnnouncementProvider) != null;
     final top = MediaQuery.paddingOf(context).top + 4;
     final bottom = 16 + BottomInsetScope.of(context);
     return CustomScrollView(
@@ -385,8 +386,13 @@ class _MobileDashboard extends ConsumerWidget {
           builder: (context, constraints) {
             final side = dashboardMobileSideOf(constraints.crossAxisExtent);
             final widgets = [
+              if (hasAnnouncement &&
+                  !saved.contains(DashboardWidget.announcement))
+                DashboardWidget.announcement,
               for (final widget in saved)
-                if (widget.platforms.contains(platform)) widget,
+                if (widget.platforms.contains(platform) &&
+                    (widget != DashboardWidget.announcement || hasAnnouncement))
+                  widget,
             ];
             if (editing) {
               return DashboardEditor(
@@ -414,8 +420,6 @@ class _MobileDashboard extends ConsumerWidget {
                       const UpdateCard(),
                     if (ref.watch(providerNoticeProvider) != null)
                       const NoticeCard(),
-                    if (ref.watch(providerAnnouncementProvider) != null)
-                      const AnnouncementCard(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),

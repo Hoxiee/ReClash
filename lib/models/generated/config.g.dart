@@ -75,7 +75,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   autoInstallUpdate: json['autoInstallUpdate'] as bool? ?? false,
   updateChannel: updateChannelFromJson(json['updateChannel']),
   sidebarExpanded:
-      _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? true,
+      _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? false,
   acceptedDisclaimerVersion:
       (json['acceptedDisclaimerVersion'] as num?)?.toInt() ?? 0,
   setupCompleted: json['setupCompleted'] as bool?,
@@ -263,6 +263,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.connectionStats: 'connectionStats',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
+  DashboardWidget.announcement: 'announcement',
 };
 
 const _$UpdateChannelEnumMap = {

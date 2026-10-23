@@ -53,6 +53,7 @@ class CommonScaffold extends StatefulWidget {
   /// Holds the trailing edge past the overflow menu, so menus that come and
   /// go with a page leave it in place.
   final Widget? trailing;
+  final bool animateTrailingPress;
 
   final IconButtonData? primaryAction;
 
@@ -90,6 +91,7 @@ class CommonScaffold extends StatefulWidget {
     this.titleMenuItems = const [],
     this.actions,
     this.trailing,
+    this.animateTrailingPress = true,
     this.backAction,
     this.isLoading = false,
     this.searchState,
@@ -580,7 +582,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
       for (final action in widgets) ElasticPress(child: action),
       if (fold.overflow.isNotEmpty)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
-      if (trailing != null) ElasticPress(child: trailing),
+      if (trailing != null)
+        ElasticPress(enabled: widget.animateTrailingPress, child: trailing),
       if (pairedPrimary != null)
         TonalButtonGroup(
           children: [
@@ -686,7 +689,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
                   ? route?.animation
                   : null;
               return AnimatedBuilder(
-                animation: motion ?? kAlwaysCompleteAnimation,
+                animation: Listenable.merge([motion, route?.animation]),
                 builder: (context, _) {
                   final progress = context.disableAnimations
                       ? 1.0
@@ -769,13 +772,14 @@ class CommonScaffoldState extends State<CommonScaffold> {
                               child: title,
                             ),
                       actions: [
-                        for (final action in _buildActions(
-                          state.searchState != null,
-                          widget.primaryAction,
-                          backAction,
-                          form,
-                        ))
-                          FadeTransition(opacity: uncovered, child: action),
+                        if (route?.animation?.status != AnimationStatus.reverse)
+                          for (final action in _buildActions(
+                            state.searchState != null,
+                            widget.primaryAction,
+                            backAction,
+                            form,
+                          ))
+                            FadeTransition(opacity: uncovered, child: action),
                       ],
                     ),
                   );

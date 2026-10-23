@@ -133,6 +133,8 @@ class _HomeShellState extends ConsumerState<_HomeShell> {
     final state = ref.watch(navigationStateProvider);
     final isMobile = state.viewMode == ViewMode.mobile;
     final navigationItems = state.navigationItems;
+    final grouped =
+        getViewMode(ref.watch(viewSizeProvider).width) != ViewMode.mobile;
     final floating = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
@@ -167,6 +169,7 @@ class _HomeShellState extends ConsumerState<_HomeShell> {
                         id: item.label,
                         glyph: item.glyph,
                         label: item.label.label,
+                        group: grouped ? navigationGroupOf(item.label) : 0,
                       ),
                   ],
                   selectedIndex: state.currentIndex,
@@ -184,6 +187,7 @@ class _HomeShellState extends ConsumerState<_HomeShell> {
                           filled: index == state.currentIndex,
                         ),
                         label: item.label.label,
+                        group: grouped ? navigationGroupOf(item.label) : 0,
                       ),
                   ],
                   selectedIndex: state.currentIndex,
@@ -466,7 +470,12 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) =>
+        _buildPages(context, constraints.biggest),
+  );
+
+  Widget _buildPages(BuildContext context, Size extent) {
     final active = _active;
     final dock = NavigationDockScope.maybeOf(context);
     var toolsHolds = false;
@@ -486,27 +495,33 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       final page = Offstage(
         key: ValueKey(label),
         offstage: !shown,
-        child: tools
-            ? TabContentMotion(
-                animation: _transition,
-                frame: frame,
-                axis: widget.axis,
-                child: dock == null
-                    ? content
-                    : NavigationDockScope(
-                        navigation: dock.navigation,
-                        floating: dock.floating,
-                        held: active == label,
-                        bottomPadding: dock.bottomPadding,
-                        child: content,
-                      ),
-              )
-            : TabMotionTransition(
-                animation: _transition,
-                frame: frame,
-                axis: widget.axis,
-                child: content,
-              ),
+        child: Overlay.wrap(
+          child: PageViewport(
+            animation: _transition,
+            child: tools
+                ? TabContentMotion(
+                    extent: extent,
+                    animation: _transition,
+                    frame: frame,
+                    axis: widget.axis,
+                    child: dock == null
+                        ? content
+                        : NavigationDockScope(
+                            navigation: dock.navigation,
+                            floating: dock.floating,
+                            held: active == label,
+                            bottomPadding: dock.bottomPadding,
+                            child: content,
+                          ),
+                  )
+                : TabMotionTransition(
+                    animation: _transition,
+                    frame: frame,
+                    axis: widget.axis,
+                    child: content,
+                  ),
+          ),
+        ),
       );
       (shown ? moving : idle).add(page);
     }

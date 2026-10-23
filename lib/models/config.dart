@@ -266,7 +266,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool autoDownloadUpdate,
     @Default(false) bool autoInstallUpdate,
     @JsonKey(fromJson: updateChannelFromJson) UpdateChannel? updateChannel,
-    @Default(true)
+    @Default(false)
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,
     @Default(0) int acceptedDisclaimerVersion,

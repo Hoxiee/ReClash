@@ -163,6 +163,81 @@ void main() {
   final profiles = _item(PageLabel.profiles);
   final proxies = _item(PageLabel.proxies);
 
+  for (final floating in [true, false]) {
+    testWidgets('wide bar matches sidebar destinations and groups '
+        'with floating=$floating', (tester) async {
+      final requests = NavigationItem(
+        glyph: AppGlyphs.requests,
+        label: PageLabel.requests,
+        modes: [NavigationItemMode.desktop],
+        builder: (_) => const Text('requests content'),
+      );
+      final harness = await _mount(
+        tester,
+        items: [dashboard, profiles, requests, tools],
+        size: const Size(1200, 800),
+      );
+      await harness.settle();
+      final sidebarItems = harness.container
+          .read(currentNavigationItemsStateProvider)
+          .value;
+      harness.container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              navigationLayout: NavigationLayout.bar,
+              floatingNavigationBar: floating,
+            ),
+          );
+      await harness.settle();
+      expect(
+        harness.container.read(currentNavigationItemsStateProvider).value,
+        sidebarItems,
+      );
+      if (floating) {
+        final destinations = tester
+            .widget<NavigationDock>(find.byType(NavigationDock))
+            .destinations;
+        expect(
+          destinations.map((item) => item.id),
+          sidebarItems.map((item) => item.label),
+        );
+        expect(destinations.map((item) => item.group), [0, 1, 2, 3]);
+      } else {
+        final destinations = tester
+            .widget<AnimatedNavigationBar>(find.byType(AnimatedNavigationBar))
+            .destinations;
+        expect(
+          destinations.map((item) => item.id),
+          sidebarItems.map((item) => item.label),
+        );
+        expect(destinations.map((item) => item.group), [0, 1, 2, 3]);
+      }
+      await tester.tap(find.byGlyph(AppGlyphs.requests));
+      await harness.settle();
+      expect(
+        harness.container.read(shownPageLabelProvider),
+        PageLabel.requests,
+      );
+      expect(find.text('requests content'), findsOneWidget);
+      tester.view.physicalSize = const Size(500, 800);
+      harness.container.read(viewSizeProvider.notifier).value = const Size(
+        500,
+        800,
+      );
+      await harness.settle();
+      expect(
+        harness.container
+            .read(currentNavigationItemsStateProvider)
+            .value
+            .map((item) => item.label),
+        [PageLabel.dashboard, PageLabel.profiles, PageLabel.tools],
+      );
+      expect(find.byGlyph(AppGlyphs.requests), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('inserting and removing before selected keeps tools selected', (
     tester,
   ) async {

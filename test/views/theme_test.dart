@@ -113,6 +113,103 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    for (final glass in LiquidGlassMode.values) {
+      testWidgets('$glass switcher drags the lens and commits on release', (
+        tester,
+      ) async {
+        container
+            .read(themeSettingProvider.notifier)
+            .update((state) => state.copyWith(liquidGlass: glass));
+        await pumpThemeView(tester, size: const Size(390, 844));
+        final gesture = await tester.startGesture(
+          tester.getCenter(destination('Theme')),
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+        await gesture.moveTo(tester.getCenter(destination('Interface')));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(page('theme'), findsOneWidget);
+        expect(page('interface'), findsNothing);
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(page('theme'), findsNothing);
+        expect(page('interface'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('switcher stays stationary while dragging its selection', (
+      tester,
+    ) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      final target = destination('Theme');
+      final box = tester.renderObject<RenderBox>(target);
+      Rect painted() => ElasticPress.paintBoundsOf(box);
+      final resting = painted();
+      final gesture = await tester.startGesture(tester.getCenter(target));
+      await tester.pumpAndSettle();
+      final pressed = painted();
+      expect(pressed, resting);
+      await gesture.moveBy(const Offset(35, 25));
+      await tester.pumpAndSettle();
+      final pulled = painted();
+      expect(pulled, resting);
+      await gesture.cancel();
+      await tester.pumpAndSettle();
+      expect(painted(), resting);
+      expect(page('theme'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('switcher drag respects right-to-left category order', (
+      tester,
+    ) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: ThemeView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getCenter(destination('Theme')).dx,
+        greaterThan(tester.getCenter(destination('Interface')).dx),
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(destination('Theme')),
+      );
+      await gesture.moveTo(tester.getCenter(destination('Interface')));
+      await tester.pump(const Duration(milliseconds: 300));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(page('interface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('cancelling a switcher drag keeps the selected category', (
+      tester,
+    ) async {
+      await pumpThemeView(tester, size: const Size(390, 844));
+      final gesture = await tester.startGesture(
+        tester.getCenter(destination('Theme')),
+      );
+      await gesture.moveTo(tester.getCenter(destination('Interface')));
+      await tester.pump(const Duration(milliseconds: 300));
+      await gesture.cancel();
+      await tester.pumpAndSettle();
+      expect(page('theme'), findsOneWidget);
+      expect(page('interface'), findsNothing);
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      expect(page('background'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     for (final animation in TabAnimation.values) {
       testWidgets('$animation swipes follow the finger and cancel or commit', (
         tester,

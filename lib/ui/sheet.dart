@@ -37,6 +37,11 @@ enum SheetType {
   bool get isCompact => this == bottomSheet || this == formSheet;
 }
 
+const _compactSheetMaxWidth = 600.0;
+
+bool _usesBottomSheet(BuildContext context) =>
+    ViewScope.sizeOf(context).width <= _compactSheetMaxWidth;
+
 const stackedSheetPeek = 14.0;
 
 /// Flutter's Cupertino sheet measured this on iOS 18.
@@ -47,7 +52,7 @@ Future<T?> showSheet<T>({
   required WidgetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  if (context.isMobileView) {
+  if (_usesBottomSheet(context)) {
     return _showBottomSheet<T>(context, builder: builder, props: props);
   }
   return _showSideSheet<T>(
@@ -57,14 +62,14 @@ Future<T?> showSheet<T>({
   );
 }
 
-/// Opens a form: a bottom sheet in the mobile layout, and elsewhere a card
+/// Opens a form: a bottom sheet in a narrow window, and elsewhere a card
 /// centered over the navigator, as iPad and macOS present a form sheet.
 Future<T?> showFormSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   SheetProps props = const SheetProps(),
 }) {
-  if (context.isMobileView) {
+  if (_usesBottomSheet(context)) {
     return _showBottomSheet<T>(context, builder: builder, props: props);
   }
   final navigator = sheetNavigatorOf(context);
@@ -118,7 +123,7 @@ Future<T?> showExtend<T>(
   required WidgetBuilder builder,
   ExtendProps props = const ExtendProps(),
 }) {
-  final isMobile = context.isMobileView;
+  final isMobile = _usesBottomSheet(context);
   return switch (isMobile || props.forceFull) {
     true => BaseNavigator.push(
       context,
@@ -154,7 +159,7 @@ Future<T?> showSnapSheet<T>(
       crossed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          open(isMobile: context.isMobileView);
+          open(isMobile: _usesBottomSheet(context));
         } else {
           completer.complete();
         }
@@ -210,7 +215,7 @@ Future<T?> showSnapSheet<T>(
     );
   }
 
-  open(isMobile: context.isMobileView);
+  open(isMobile: _usesBottomSheet(context));
   return completer.future;
 }
 
@@ -240,7 +245,7 @@ class _SnapSheetHomeState extends State<_SnapSheetHome> {
 
   @override
   Widget build(BuildContext context) {
-    if (ViewScope.isMobileOf(context) != widget.isMobile) {
+    if (_usesBottomSheet(context) != widget.isMobile) {
       WidgetsBinding.instance.addPostFrameCallback((_) => widget.onCross());
     }
     return widget.child;

@@ -2938,7 +2938,7 @@ final class CurrentNavigationItemsStateProvider
 }
 
 String _$currentNavigationItemsStateHash() =>
-    r'a4357d389f34aa8b8f3a7ab76fb4339e74716844';
+    r'a60b1e1866d699e8676349e1ebd4ef7f91fc2f15';
 
 @ProviderFor(shownPageLabel)
 final shownPageLabelProvider = ShownPageLabelProvider._();

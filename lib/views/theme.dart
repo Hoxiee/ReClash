@@ -284,6 +284,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
         labels: [for (final segment in segments) segment.label],
         position: _position,
       ),
+      animateTrailingPress: false,
       trailing: GlyphSegmentedControl<int>(
         segments: segments,
         value: _tab,

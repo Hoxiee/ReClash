@@ -1,6 +1,9 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/widgets/announcement_card.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/edit.dart';
 import 'package:reclash/views/dashboard/widgets/widgets.dart';
@@ -18,7 +21,10 @@ void main() {
 
   setUp(() {
     container = ProviderContainer(
-      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(ProviderHints.empty),
+      ],
     );
     globalState.container = container;
   });
@@ -115,6 +121,78 @@ void main() {
     expect(find.byTooltip('Add Traffic takeover'), findsNothing);
     expect(tester.takeException(), isNull);
 
+    await teardown(tester);
+  });
+
+  testWidgets(
+    'announcement reorders, stays mandatory and keeps its saved place',
+    (tester) async {
+      seed(const [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.networkSpeed,
+        DashboardWidget.announcement,
+      ]);
+      container.updateOverrides([
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(
+          ProviderHints(
+            readSubscriptionMetadata({
+              'announce': ['Your subscription description'],
+            }).metadata,
+          ),
+        ),
+      ]);
+      await pumpEditor(tester);
+      final card = find.byType(AnnouncementCard);
+      expect(card, findsOneWidget);
+      expect(find.byTooltip('Remove Announcement'), findsNothing);
+      expect(find.byTooltip('Add Announcement'), findsNothing);
+      final distance =
+          top(tester, find.byType(NetworkSpeedCard)) - top(tester, card) - 10;
+      final gesture = await tester.startGesture(tester.getCenter(card));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      for (var step = 0; step < 4; step++) {
+        await gesture.moveBy(Offset(0, distance / 4));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await gesture.up();
+      await settle(tester);
+      expect(saved(), const [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.announcement,
+        DashboardWidget.networkSpeed,
+      ]);
+      await tester.tap(find.byTooltip('Done'));
+      await settle(tester);
+      expect(
+        top(tester, card),
+        greaterThan(top(tester, find.byType(CurrentOutboundCard))),
+      );
+      expect(
+        top(tester, card),
+        lessThan(top(tester, find.byType(NetworkSpeedCard))),
+      );
+      await teardown(tester);
+    },
+  );
+
+  testWidgets('an absent announcement keeps its position through other edits', (
+    tester,
+  ) async {
+    seed(const [
+      DashboardWidget.currentOutbound,
+      DashboardWidget.announcement,
+      DashboardWidget.networkSpeed,
+    ]);
+    await pumpEditor(tester);
+    expect(find.byType(AnnouncementCard), findsNothing);
+    expect(find.byTooltip('Add Announcement'), findsNothing);
+    await tester.tap(find.byTooltip('Remove Network speed'));
+    await settle(tester);
+    expect(saved(), const [
+      DashboardWidget.currentOutbound,
+      DashboardWidget.announcement,
+    ]);
     await teardown(tester);
   });
 

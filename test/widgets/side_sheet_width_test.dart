@@ -1,8 +1,11 @@
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/ui/inherited.dart';
 import 'package:reclash/ui/paged_sheet.dart';
 import 'package:reclash/ui/scaffold.dart';
 import 'package:reclash/ui/sheet.dart';
+import 'package:reclash/ui/sheet_header.dart';
 import 'package:reclash/ui/side_sheet.dart';
+import 'package:reclash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,6 +43,7 @@ void main() {
     Size view,
     _Opener opener, {
     double sidebarWidth = 0,
+    bool? mobileLayout,
   }) async {
     tester.view.physicalSize = view;
     tester.view.devicePixelRatio = 1;
@@ -47,24 +51,30 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         overrides: [viewSizeProvider.overrideWithBuild((_, _) => view)],
-        child: Row(
-          children: [
-            SizedBox(width: sidebarWidth),
-            Expanded(
-              child: Navigator(
-                onGenerateInitialRoutes: (_, _) => [
-                  MaterialPageRoute<void>(
-                    builder: (context) => Scaffold(
-                      body: TextButton(
-                        onPressed: () => opener(context),
-                        child: const Text('open'),
+        child: Builder(
+          builder: (context) => ViewScope(
+            size: MediaQuery.sizeOf(context),
+            isMobile: mobileLayout ?? view.width <= 600,
+            child: Row(
+              children: [
+                SizedBox(width: sidebarWidth),
+                Expanded(
+                  child: Navigator(
+                    onGenerateInitialRoutes: (_, _) => [
+                      MaterialPageRoute<void>(
+                        builder: (context) => Scaffold(
+                          body: TextButton(
+                            onPressed: () => opener(context),
+                            child: const Text('open'),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -90,6 +100,99 @@ void main() {
       });
     }
   }
+
+  for (final MapEntry(key: name, value: opener) in _openers.entries) {
+    testWidgets('$name uses window width instead of the navigation layout', (
+      tester,
+    ) async {
+      await open(tester, const Size(1280, 800), opener, mobileLayout: true);
+      expect(sheetRect(tester).width, 512);
+      expect(find.byType(SheetDragHandle), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('$name stays compact in a narrow sidebar layout', (
+      tester,
+    ) async {
+      await open(tester, const Size(500, 800), opener, mobileLayout: false);
+      expect(find.byType(SideSheet), findsNothing);
+      expect(
+        find.byType(SheetDragHandle),
+        name == 'showExtend' ? findsNothing : findsOneWidget,
+      );
+      expect(find.text('title'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('a wide form remains a form sheet with bar navigation', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      const Size(1280, 800),
+      (context) =>
+          showFormSheet<void>(context: context, builder: (_) => _page()),
+      mobileLayout: true,
+    );
+    expect(
+      SheetProvider.of(tester.element(find.text('title')))?.type,
+      SheetType.formSheet,
+    );
+    expect(find.byType(SheetDragHandle), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a narrow form stays a bottom sheet with sidebar navigation', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      const Size(500, 800),
+      (context) =>
+          showFormSheet<void>(context: context, builder: (_) => _page()),
+      mobileLayout: false,
+    );
+    expect(
+      SheetProvider.of(tester.element(find.text('title')))?.type,
+      SheetType.bottomSheet,
+    );
+    expect(find.byType(SheetDragHandle), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a snap sheet crosses the width breakpoint with bar navigation '
+      'and completes only when dismissed', (tester) async {
+    late Future<String?> result;
+    var completed = false;
+    String? value;
+    await open(tester, const Size(1280, 800), (context) {
+      result = showSnapSheet<String>(context, builder: (_, _) => _page());
+      result.then((result) {
+        completed = true;
+        value = result;
+      });
+    }, mobileLayout: true);
+    expect(find.byType(SideSheet), findsOneWidget);
+
+    tester.view.physicalSize = const Size(500, 800);
+    await tester.pumpAndSettle();
+    expect(find.byType(SideSheet), findsNothing);
+    expect(find.byType(SheetDragHandle), findsOneWidget);
+    expect(completed, isFalse);
+
+    tester.view.physicalSize = const Size(1280, 800);
+    await tester.pumpAndSettle();
+    expect(find.byType(SideSheet), findsOneWidget);
+    expect(find.byType(SheetDragHandle), findsNothing);
+    expect(completed, isFalse);
+
+    Navigator.of(tester.element(find.text('title'))).pop('done');
+    await tester.pumpAndSettle();
+    expect(completed, isTrue);
+    expect(value, 'done');
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('the side sheet follows the window as it resizes', (
     tester,

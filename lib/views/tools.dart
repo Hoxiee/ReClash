@@ -382,141 +382,167 @@ class ToolsViewState extends ConsumerState<ToolsView> {
         final catalogWidth = split ? 360.0 : constraints.maxWidth;
         final detailStart = split ? catalogWidth + 1 : 0.0;
         final rtl = Directionality.of(context) == TextDirection.rtl;
-        return ViewScope(
-          size: ViewScope.sizeOf(context),
-          isMobile: !split,
-          windowControls: ViewScope.windowControlsOf(context),
-          child: PageBackground(
-            baseColor: SurfaceLevel.page.colorOf(context.colorScheme),
-            child: Stack(
-              children: [
+        final workspace = PageBackground(
+          baseColor: SurfaceLevel.page.colorOf(context.colorScheme),
+          child: Stack(
+            children: [
+              PositionedDirectional(
+                start: 0,
+                top: 0,
+                bottom: 0,
+                width: catalogWidth,
+                child: split
+                    ? PageViewport(
+                        routeHeader: true,
+                        bounds: Rect.fromLTWH(
+                          rtl ? constraints.maxWidth - catalogWidth : 0,
+                          0,
+                          catalogWidth,
+                          constraints.maxHeight,
+                        ),
+                        child: ToolsCatalogPanel(
+                          searchFocus: _searchFocus,
+                          onSelect: openEntry,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              if (split)
                 PositionedDirectional(
-                  start: 0,
+                  start: catalogWidth,
                   top: 0,
                   bottom: 0,
-                  width: catalogWidth,
-                  child: split
-                      ? PageViewport(
-                          routeHeader: true,
-                          bounds: Rect.fromLTWH(
-                            rtl ? constraints.maxWidth - catalogWidth : 0,
-                            0,
-                            catalogWidth,
-                            constraints.maxHeight,
-                          ),
-                          child: ToolsCatalogPanel(
-                            searchFocus: _searchFocus,
-                            onSelect: openEntry,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                if (split)
-                  PositionedDirectional(
-                    start: catalogWidth,
-                    top: 0,
-                    bottom: 0,
-                    width: 1,
-                    child: ColoredBox(
+                  width: 1,
+                  child: TabContentMotion.wrap(
+                    context,
+                    ColoredBox(
                       key: const ValueKey('tools-pane-divider'),
                       color: context.colorScheme.outlineVariant,
                     ),
                   ),
-                PositionedDirectional(
-                  start: detailStart,
-                  end: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: PageViewport(
-                    routeHeader: split,
-                    inlineHeaders: !split,
-                    bounds: Rect.fromLTWH(
-                      rtl ? 0 : detailStart,
-                      0,
-                      constraints.maxWidth - detailStart,
-                      constraints.maxHeight,
-                    ),
-                    child: Navigator(
-                      key: _navigator,
-                      observers: [_observer],
-                      onDidRemovePage: (page) {
-                        if (!_navigator.currentState!.widget.pages.contains(
-                          page,
-                        )) {
-                          return;
-                        }
-                        final state = ref.read(toolsSessionProvider);
-                        final index = state.path.indexWhere(
-                          (route) => page.key == ValueKey(route.page),
-                        );
-                        if (index >= 0) {
-                          ref.read(toolsSessionProvider.notifier).popTo(index);
-                        }
-                      },
-                      pages: [
+                ),
+              PositionedDirectional(
+                start: detailStart,
+                end: 0,
+                top: 0,
+                bottom: 0,
+                child: PageViewport(
+                  routeHeader: split,
+                  inlineHeaders: !split,
+                  bounds: Rect.fromLTWH(
+                    rtl ? 0 : detailStart,
+                    0,
+                    constraints.maxWidth - detailStart,
+                    constraints.maxHeight,
+                  ),
+                  child: Navigator(
+                    key: _navigator,
+                    observers: [_observer],
+                    onDidRemovePage: (page) {
+                      if (!_navigator.currentState!.widget.pages.contains(
+                        page,
+                      )) {
+                        return;
+                      }
+                      final state = ref.read(toolsSessionProvider);
+                      final index = state.path.indexWhere(
+                        (route) => page.key == ValueKey(route.page),
+                      );
+                      if (index >= 0) {
+                        ref.read(toolsSessionProvider.notifier).popTo(index);
+                      }
+                    },
+                    pages: [
+                      _ToolsPage(
+                        key: const ValueKey('tools.placeholder'),
+                        headerTitle: split ? l.toolsLastUsed : l.tools,
+                        child: split
+                            ? _RetainedLanding(
+                                child: path.isEmpty
+                                    ? _landing(recentEntries)
+                                    : null,
+                              )
+                            : _catalog(navigation),
+                      ),
+                      for (final route in path)
                         _ToolsPage(
-                          key: const ValueKey('tools.placeholder'),
-                          headerTitle: split ? l.toolsLastUsed : l.tools,
-                          child: split
-                              ? _RetainedLanding(
-                                  child: path.isEmpty
-                                      ? _landing(recentEntries)
-                                      : null,
-                                )
-                              : _catalog(navigation),
-                        ),
-                        for (final route in path)
-                          _ToolsPage(
-                            key: ValueKey(route.page),
-                            headerTitle: path
+                          key: ValueKey(route.page),
+                          headerTitle: path
+                              .take(path.indexOf(route) + 1)
+                              .map((item) => pages[item.page]!.title)
+                              .join(' › '),
+                          child: PagePresentationScope(
+                            previousTitle: !split
+                                ? null
+                                : path.indexOf(route) == 0
+                                ? l.toolsLastUsed
+                                : path
+                                      .take(path.indexOf(route))
+                                      .map((item) => pages[item.page]!.title)
+                                      .join(' › '),
+                            previousHasBack: path.indexOf(route) > 0,
+                            transitionTitle: path
                                 .take(path.indexOf(route) + 1)
                                 .map((item) => pages[item.page]!.title)
                                 .join(' › '),
-                            child: PagePresentationScope(
-                              previousTitle: !split
-                                  ? null
-                                  : path.indexOf(route) == 0
-                                  ? l.toolsLastUsed
-                                  : path
-                                        .take(path.indexOf(route))
-                                        .map((item) => pages[item.page]!.title)
-                                        .join(' › '),
-                              previousHasBack: path.indexOf(route) > 0,
-                              transitionTitle: path
-                                  .take(path.indexOf(route) + 1)
-                                  .map((item) => pages[item.page]!.title)
-                                  .join(' › '),
-                              onTitleSelect: split
-                                  ? (index) => unawaited(_popTo(index + 1))
-                                  : null,
-                              child: CappedBodyScope(
-                                maxWidth:
-                                    split &&
-                                        route.page != ToolPage.coreRuntimeConfig
-                                    ? _maxBodyWidth
-                                    : double.infinity,
-                                child: PageNavigationScope(
-                                  canOpen: (widget) =>
-                                      toolPageOf(widget) != null,
-                                  open: _openWidget,
-                                  push: _pushDetail,
-                                  child: SettingsRevealScope(
-                                    targetId: route.settingId,
-                                    nonce: session.focusNonce,
-                                    active: active && route == path.last,
-                                    child: buildToolPage(route.page, context),
-                                  ),
+                            onTitleSelect: split
+                                ? (index) => unawaited(_popTo(index + 1))
+                                : null,
+                            child: CappedBodyScope(
+                              maxWidth:
+                                  split &&
+                                      route.page != ToolPage.coreRuntimeConfig
+                                  ? _maxBodyWidth
+                                  : double.infinity,
+                              child: PageNavigationScope(
+                                canOpen: (widget) => toolPageOf(widget) != null,
+                                open: _openWidget,
+                                push: _pushDetail,
+                                child: SettingsRevealScope(
+                                  targetId: route.settingId,
+                                  nonce: session.focusNonce,
+                                  active: active && route == path.last,
+                                  child: buildToolPage(route.page, context),
                                 ),
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        );
+        final bar = navigation?.held == true
+            ? navigation!.navigation
+            : const SizedBox.shrink();
+        return ViewScope(
+          size: ViewScope.sizeOf(context),
+          isMobile: !split,
+          windowControls: ViewScope.windowControlsOf(context),
+          child: !split || navigation == null
+              ? workspace
+              : navigation.floating
+              ? Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    workspace,
+                    PositionedDirectional(
+                      start: 0,
+                      end: 0,
+                      bottom: 0,
+                      child: bar,
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    Expanded(child: workspace),
+                    bar,
+                  ],
+                ),
         );
       },
     );
