@@ -5,7 +5,7 @@ ReClash supports a native provider contract described in `provider_standard.g.js
 ## Supported
 
 - Fetching subscriptions through the dedicated transport, with bounded redirects and managed request-header policy.
-- Common subscription response headers, including `Subscription-Userinfo`, `Content-Disposition`, and `profile-title`.
+- Common subscription response headers, including `Subscription-Userinfo`, `Content-Disposition`, `profile-title`, and `announce`, the provider message shown when a subscription is added.
 - Native metadata decoding through the versioned registry and codec.
 - Device identity with global opt-in, per-profile overrides, and origin-scoped consent for device details.
 - Client compatibility presets, automatic negotiation, and import adapters for supported configuration formats.

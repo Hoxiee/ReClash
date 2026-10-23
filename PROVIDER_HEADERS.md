@@ -21,6 +21,7 @@ Version: 1
 | `provider.webUrl` | `reclash-webpageurl` | url | display | panel |
 | `provider.buyPlanUrl` | `reclash-buyplan` | url | display | panel |
 | `provider.buyTrafficUrl` | `reclash-buytraffic` | url | display | panel |
+| `provider.announce` | `announce` | text | display | panel |
 | `account.title` | `profile-title` | text | display | panel |
 | `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler |
 | `routing.bundleUrl` | `reclash-routing` | url | hint | routing |

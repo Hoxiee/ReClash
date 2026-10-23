@@ -20,7 +20,7 @@ func init() {
 	mihomoHttp.TLSConfigHook = relaxCertVerify
 	adapter.UrlTestHook = func(url string, name string, delay uint16, timedOut bool) {
 		sendMessage(DelayMessage, &Delay{Url: url, Name: name, Value: delayValue(delay, timedOut)})
-		if e := rcxIfReady(); e != nil && url == currentTestURL() {
+		if e := rcxIfReady(); e != nil && url == currentTestURL() && !rcxOwnProbes.owns(name) {
 			e.NoteURLTest(name, int(delay))
 		}
 	}
@@ -54,7 +54,7 @@ func init() {
 		}
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
-		go rcxRefreshTopology()
+		requestRcxTopologyRefresh()
 		scheduleReclaimOwnership()
 		scheduleLoadMemoryRelease()
 		sendMessage(LoadedMessage, providerName)

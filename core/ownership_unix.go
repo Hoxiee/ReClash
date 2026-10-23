@@ -185,9 +185,9 @@ func scheduleReclaimOwnership() {
 	if !reclaimPending.CompareAndSwap(false, true) {
 		return
 	}
-	go func() {
+	safeGo("reclaimOwnership", func() {
 		time.Sleep(reclaimDebounce)
 		reclaimPending.Store(false)
 		reclaimOwnership(homeDir)
-	}()
+	})
 }

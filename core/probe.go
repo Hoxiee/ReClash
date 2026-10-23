@@ -90,7 +90,7 @@ func (d *probeDialer) dial(ctx context.Context, _ string, address string) (net.C
 	attempt.Conn = local
 	attempt.metadata = metadata
 	pendingProbeRoutes.Store(metadata, attempt)
-	go tunnel.Tunnel.HandleTCPConn(remote, metadata)
+	safeGo("probeTunnelConn", func() { tunnel.Tunnel.HandleTCPConn(remote, metadata) })
 	d.remember(attempt)
 	return attempt, nil
 }
@@ -277,14 +277,14 @@ func runProbe(parent context.Context, req probeRequest) *ProbeResult {
 	if req.proxyName != "" {
 		dialer.proxy = lookupProxy(req.proxyName)
 		if dialer.proxy == nil {
-			result.hits = []RouteHit{{Proxy: req.proxyName}}
-			req.recorder.add(result.hits)
+			result.Hits = []RouteHit{{Proxy: req.proxyName}}
+			req.recorder.add(result.Hits)
 			return fail(fmt.Errorf("proxy %q is not part of the applied config", req.proxyName))
 		}
 	}
 	defer func() {
-		result.hits = dialer.hits(req.proxyName)
-		req.recorder.add(result.hits)
+		result.Hits = dialer.hits(req.proxyName)
+		req.recorder.add(result.Hits)
 	}()
 	tlsConfig, err := ca.GetTLSConfig(ca.Option{})
 	if err != nil {

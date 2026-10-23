@@ -34,6 +34,7 @@ final class Tray {
       StreamController<TrayEvent>.broadcast();
 
   Map<int, TrayMenuItem> _itemsById = const {};
+  final Map<String, List<Map<String, Object?>>> _representations = {};
   Future<void> _queue = Future<void>.value();
   String? _signature;
   String _title = '';
@@ -202,7 +203,8 @@ final class Tray {
     };
     switch (defaultTargetPlatform) {
       case TargetPlatform.macOS:
-        resolved['reps'] = await _loadRepresentations(icon.asset);
+        resolved['reps'] = _representations[icon.asset] ??=
+            await _loadRepresentations(icon.asset);
       case TargetPlatform.linux:
         resolved['path'] = _largestBundledVariant(icon.asset);
       default:

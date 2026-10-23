@@ -17,10 +17,10 @@ func releaseOnExit() {
 		return
 	}
 	done := make(chan struct{})
-	go func() {
+	safeGo("releaseOnExit", func() {
 		defer close(done)
 		handleShutdown()
-	}()
+	})
 	select {
 	case <-done:
 	case <-time.After(exitCleanupTimeout):

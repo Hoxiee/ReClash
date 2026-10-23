@@ -450,30 +450,28 @@ func prepareDesktopStartup(args []string) (string, func(), error) {
 	if string(commit[:]) != "RCXGO001" {
 		return "", nil, errors.New("windows_launch_not_committed")
 	}
+	stop, err := windows.CreateEvent(nil, 1, 0, nil)
+	if err != nil {
+		return "", nil, fmt.Errorf("windows_stop_event_failed: %w", err)
+	}
+	handles = append(handles, stop)
 	identity := &windowsParent{handle: parent, pid: launch.parentPID, created: launch.parentCreated, home: launch.home}
 	if err := core.ConfigureDesktopLaunch(launch.home, windowsRPCVerifier(identity)); err != nil {
 		return "", nil, err
 	}
 	keepParent = true
-	stop, done := make(chan struct{}), make(chan struct{})
+	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		for {
-			select {
-			case <-stop:
-				return
-			default:
-			}
-			status, err := windows.WaitForSingleObject(parent, 100)
-			if err != nil || status != uint32(windows.WAIT_TIMEOUT) {
-				os.Exit(1)
-			}
+		event, err := windows.WaitForMultipleObjects([]windows.Handle{parent, stop}, false, windows.INFINITE)
+		if err != nil || event != windows.WAIT_OBJECT_0+1 {
+			os.Exit(1)
 		}
 	}()
 	var cleanup sync.Once
 	return launch.address, func() {
 		cleanup.Do(func() {
-			close(stop)
+			_ = windows.SetEvent(stop)
 			<-done
 			_ = windows.CloseHandle(parent)
 			closeWindowsHandles(handles)

@@ -106,7 +106,7 @@ func (rcxRuntime) Select(group string, via []string, node string) error {
 			err = selector.Set(chain[i+1])
 		}
 		if err != nil {
-			go rcxRefreshTopology()
+			requestRcxTopologyRefresh()
 			return err
 		}
 	}
@@ -146,7 +146,7 @@ func (rcxRuntime) ApplyMode(mode string) {
 	}
 	if target := rcxEffectiveMode(user); tunnel.Mode() != target {
 		tunnel.SetMode(target)
-		go bumpRouteEpoch()
+		safeGo("bumpRouteEpoch", bumpRouteEpoch)
 	}
 }
 
@@ -162,7 +162,8 @@ func rcxEffectiveMode(user tunnel.TunnelMode) tunnel.TunnelMode {
 func rcxSetUserMode(mode tunnel.TunnelMode) tunnel.TunnelMode {
 	rcxUserMode.Store(&mode)
 	if e := rcxIfReady(); e != nil {
-		go e.SetUserMode(mode.String())
+		name := mode.String()
+		safeGo("rcxSetUserMode", func() { e.SetUserMode(name) })
 	}
 	return rcxEffectiveMode(mode)
 }
@@ -174,8 +175,38 @@ func (rcxProber) Probe(ctx context.Context, node string) (int, error) {
 	if proxy == nil {
 		return 0, errors.New("proxy not found")
 	}
+	rcxOwnProbes.begin(proxy.Name())
+	defer rcxOwnProbes.end(proxy.Name())
 	delay, err := proxy.URLTest(ctx, currentTestURL(), anyDelayTestStatus)
 	return int(delay), err
+}
+
+// URLTest also calls adapter.UrlTestHook; the engine must not count its own probes twice.
+var rcxOwnProbes = nodeProbes{running: map[string]int{}}
+
+type nodeProbes struct {
+	mu      sync.Mutex
+	running map[string]int
+}
+
+func (p *nodeProbes) begin(node string) {
+	p.mu.Lock()
+	p.running[node]++
+	p.mu.Unlock()
+}
+
+func (p *nodeProbes) end(node string) {
+	p.mu.Lock()
+	if p.running[node]--; p.running[node] <= 0 {
+		delete(p.running, node)
+	}
+	p.mu.Unlock()
+}
+
+func (p *nodeProbes) owns(node string) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.running[node] > 0
 }
 
 type rcxHost struct{}
@@ -204,8 +235,36 @@ func (s rcxFileStore) Save(data []byte) error {
 	return os.Rename(tmp, s.path())
 }
 
-// rcxRefreshTopology runs on its own goroutine: callers may hold selectMu,
-// which the engine takes when it selects.
+type coalescedRun struct {
+	pending, running atomic.Bool
+}
+
+func (c *coalescedRun) request(name string, run func()) {
+	c.pending.Store(true)
+	if c.running.CompareAndSwap(false, true) {
+		safeGo(name, func() { c.loop(name, run) })
+	}
+}
+
+func (c *coalescedRun) loop(name string, run func()) {
+	defer func() {
+		c.running.Store(false)
+		if c.pending.Load() {
+			c.request(name, run)
+		}
+	}()
+	for c.pending.Swap(false) {
+		run()
+	}
+}
+
+var rcxTopologyRefresh coalescedRun
+
+// Run asynchronously: callers may hold selectMu, which the engine takes when it selects.
+func requestRcxTopologyRefresh() {
+	rcxTopologyRefresh.request("rcxRefreshTopology", rcxRefreshTopology)
+}
+
 func rcxRefreshTopology() {
 	e := rcxReady()
 	if e == nil {
@@ -262,7 +321,7 @@ func rcxRefreshTopology() {
 	// The scenario was read from the library before this topology rebuilt
 	// it; a new subscription may name other groups.
 	if again, fixedAgain := e.Targets(rcxSelectors(proxies, names), main); !slices.Equal(again, targets) || !slices.Equal(fixedAgain, fixed) {
-		go rcxRefreshTopology()
+		requestRcxTopologyRefresh()
 	}
 }
 
@@ -503,7 +562,7 @@ func rcxApplySubscription(layer rcx.SubscriptionLayer) {
 	rcxMu.Lock()
 	rcxSubscription = layer
 	rcxMu.Unlock()
-	go rcxRefreshTopology()
+	requestRcxTopologyRefresh()
 }
 
 func rcxSetUser(layer rcx.UserLayer) {
@@ -517,5 +576,5 @@ func rcxSetUser(layer rcx.UserLayer) {
 		e.SetUserLayer(layer)
 	}
 	// Which nested selectors flatten depends on which groups are smart.
-	go rcxRefreshTopology()
+	requestRcxTopologyRefresh()
 }

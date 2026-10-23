@@ -67,9 +67,9 @@ func handleOutboundIp(params *OutboundIpParams) *OutboundIpResult {
 		url := params.Urls[next]
 		next++
 		inFlight++
-		go func() {
+		safeGo("outboundIpSource", func() {
 			answers <- probeOutboundIpSource(ctx, url, params.ProxyName, timeout, hits)
-		}()
+		})
 	}
 
 	start()
@@ -137,8 +137,8 @@ func probeOutboundIpSource(ctx context.Context, url string, proxyName string, ti
 		Chains:       result.Chains,
 		CoreEpoch:    result.CoreEpoch,
 		RouteVersion: result.RouteVersion,
-		Hits:         result.hits,
-		NodeHits:     nodeHits(result.Chains, proxyName, result.hits),
+		Hits:         result.Hits,
+		NodeHits:     nodeHits(result.Chains, proxyName, result.Hits),
 	}
 }
 

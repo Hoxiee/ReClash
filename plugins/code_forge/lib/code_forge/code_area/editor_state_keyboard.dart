@@ -62,16 +62,25 @@ extension _EditorStateKeyboard on _CodeForgeState {
       ..setEditingState(_controller.currentTextEditingValue);
   }
 
+  // A repeating animation would ask for every vsync to show two changes a
+  // second; the renderer only reads which side of 0.5 the value is on.
   void _resetCursorBlink() {
     if (!mounted) return;
-    _caretBlinkController.stop();
+    _caretBlinkTimer?.cancel();
+    _caretBlinkTimer = null;
     if (!_focusNode.hasFocus || _readOnly) {
       _caretBlinkController.value = 0.0;
       return;
     }
-    _caretBlinkController
-      ..value = 1.0
-      ..repeat(reverse: true);
+    _caretBlinkController.value = 1.0;
+    _caretBlinkTimer = Timer.periodic(_caretBlinkController.duration!, (_) {
+      if (!mounted || !TickerMode.getValuesNotifier(context).value.enabled) {
+        return;
+      }
+      _caretBlinkController.value = _caretBlinkController.value > 0.5
+          ? 0.0
+          : 1.0;
+    });
   }
 
   List<({ShortcutActivator? keys, bool edits, VoidCallback run})>

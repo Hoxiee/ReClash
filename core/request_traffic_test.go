@@ -137,3 +137,75 @@ func TestRequestTrafficGivesUpOnAClosedRequestItCannotReport(t *testing.T) {
 		t.Fatal("a closed request outlived its retries")
 	}
 }
+
+func TestRequestTrafficResumeReportsTotalsTheHostMissed(t *testing.T) {
+	tracker := newPipeTracker(t)
+	if _, err := tracker.Write([]byte("hidden")); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	watch := requestTrafficWatch{requests: map[string]*watchedRequest{}}
+	open := func(string) bool { return true }
+
+	if !watch.resume(tracker) {
+		t.Fatal("resuming an idle watch did not start it")
+	}
+	changed, _ := collectDelivered(&watch, open)
+	if len(changed) != 1 || changed[0].Upload != 6 {
+		t.Fatalf("first report after resume: %v", changed)
+	}
+	if changed, _ := collectDelivered(&watch, open); len(changed) != 0 {
+		t.Fatalf("unchanged totals reported again: %v", changed)
+	}
+}
+
+func TestRequestTrafficResumeKeepsAWatchedRequest(t *testing.T) {
+	tracker := newPipeTracker(t)
+	watch := requestTrafficWatch{requests: map[string]*watchedRequest{}}
+	open := func(string) bool { return true }
+
+	watch.add(tracker)
+	collectDelivered(&watch, open)
+	if watch.resume(tracker) {
+		t.Fatal("resume restarted a running watch")
+	}
+	if changed, _ := collectDelivered(&watch, open); len(changed) != 0 {
+		t.Fatalf("resume reset the totals of a watched request: %v", changed)
+	}
+}
+
+func TestRequestTrafficClearsOnlyWhenNotWanted(t *testing.T) {
+	tracker := newPipeTracker(t)
+	watch := requestTrafficWatch{requests: map[string]*watchedRequest{}}
+	watch.add(tracker)
+
+	if watch.clearUnless(func() bool { return true }) || len(watch.requests) != 1 {
+		t.Fatal("a wanted watch was cleared")
+	}
+	if !watch.clearUnless(func() bool { return false }) || len(watch.requests) != 0 || watch.running {
+		t.Fatal("an unwanted watch kept its requests")
+	}
+	if !watch.add(tracker) {
+		t.Fatal("a request after the clear did not restart the watch")
+	}
+}
+
+func TestHiddenHostWatchesNoRequestTraffic(t *testing.T) {
+	hostForegroundMu.Lock()
+	seq := hostForegroundSeq
+	hostForegroundMu.Unlock()
+	t.Cleanup(func() { hostForeground.Store(true) })
+
+	setHostForeground(false, seq+2)
+	setHostForeground(true, seq+1)
+	if hostForeground.Load() {
+		t.Fatal("an older visibility hint overrode a newer one")
+	}
+	tracker := newPipeTracker(t)
+	watchRequestTraffic(tracker)
+	currentRequestTraffic.mu.Lock()
+	_, watched := currentRequestTraffic.requests[tracker.ID()]
+	currentRequestTraffic.mu.Unlock()
+	if watched {
+		t.Fatal("a hidden host watched a new request")
+	}
+}

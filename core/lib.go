@@ -302,6 +302,7 @@ func QuickSetup(initParamsString, setupParamsString string, answer func(string))
 			return
 		}
 		isRunning.Store(true)
+		signalListenersStarted()
 		if err := handleSetupConfig(setupParams); err != nil {
 			answer(err.Error())
 			return

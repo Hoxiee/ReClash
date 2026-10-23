@@ -5,7 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"core/rcx"
 
@@ -198,5 +200,48 @@ func TestSubscriptionScenarioAndMainGroup(t *testing.T) {
 	}
 	if main := rcxMainGroup(cfg.Proxies, cfg.Rules); main != "g" {
 		t.Fatalf("main = %q", main)
+	}
+}
+
+func TestCoalescedRunCoversABurstWithOneMoreRun(t *testing.T) {
+	var c coalescedRun
+	var runs atomic.Int32
+	entered, release := make(chan struct{}), make(chan struct{})
+	run := func() {
+		if runs.Add(1) == 1 {
+			close(entered)
+			<-release
+		}
+	}
+
+	c.request("test", run)
+	<-entered
+	for range 100 {
+		c.request("test", run)
+	}
+	close(release)
+	deadline := time.Now().Add(2 * time.Second)
+	for c.running.Load() || c.pending.Load() {
+		if time.Now().After(deadline) {
+			t.Fatal("the coalesced run never finished")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if got := runs.Load(); got != 2 {
+		t.Fatalf("a burst during one run took %d runs, want 2", got)
+	}
+}
+
+func TestEngineProbesStayOwnedUntilTheLastOneEnds(t *testing.T) {
+	probes := nodeProbes{running: map[string]int{}}
+	probes.begin("a")
+	probes.begin("a")
+	probes.end("a")
+	if !probes.owns("a") {
+		t.Fatal("a node still probed by the engine was released by the other probe")
+	}
+	probes.end("a")
+	if probes.owns("a") || len(probes.running) != 0 {
+		t.Fatal("a node kept its mark after every probe ended")
 	}
 }
