@@ -20,7 +20,7 @@ if [[ "$mode" != "major" && "$mode" != "minor" && "$mode" != "all" ]]; then
   exit 64
 fi
 
-version_line="$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+\+[0-9]{10}$' "$pubspec_file" || true)"
+version_line="$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+(-pre\.[1-9][0-9]*)?\+[0-9]{10}$' "$pubspec_file" || true)"
 if [[ -z "$version_line" ]]; then
   echo "No valid version line found in $pubspec_file" >&2
   exit 1
