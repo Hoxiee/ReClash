@@ -37,6 +37,16 @@ impl Registry {
 
     fn replace(&mut self, specs: Vec<HotKeySpec>) -> Result<Vec<HotKeyFailure>, String> {
         let previous = std::mem::take(&mut self.registered);
+        // The X11 manager polls its display every 50 ms for as long as it lives.
+        if specs.is_empty() {
+            if let Some(manager) = self.manager.take() {
+                let _ = manager.unregister_all(&previous);
+            }
+            IDS.lock()
+                .map_err(|e| format!("Hotkey id lock poisoned: {e}"))?
+                .clear();
+            return Ok(Vec::new());
+        }
         let manager = self.ensure_manager()?;
         let _ = manager.unregister_all(&previous);
 

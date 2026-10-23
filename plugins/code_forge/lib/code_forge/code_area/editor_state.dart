@@ -7,6 +7,7 @@ class _CodeForgeState extends State<CodeForge>
   late CodeForgeController _controller;
   late final FocusNode _focusNode;
   late final AnimationController _caretBlinkController;
+  Timer? _caretBlinkTimer;
   late final AnimationController _lineHighlightController;
   late CodeSelectionStyle _selectionStyle;
   late GutterStyle _gutterStyle;
@@ -182,6 +183,7 @@ class _CodeForgeState extends State<CodeForge>
     WidgetsBinding.instance.removeObserver(this);
     _vscrollController.removeListener(_scrollbarLineNumberListener);
     _detachController();
+    _caretBlinkTimer?.cancel();
     _caretBlinkController.dispose();
     _lineHighlightController.dispose();
     _selectionActiveNotifier.dispose();

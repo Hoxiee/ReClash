@@ -166,8 +166,25 @@ func stopRoutePollLocked() {
 	}
 }
 
-// With the listeners down the host pins every probe to DIRECT, so the picks
-// do not matter until they come back.
+var listenersStarted = struct {
+	mu sync.Mutex
+	ch chan struct{}
+}{ch: make(chan struct{})}
+
+// Call it after isRunning turns true.
+func signalListenersStarted() {
+	listenersStarted.mu.Lock()
+	close(listenersStarted.ch)
+	listenersStarted.ch = make(chan struct{})
+	listenersStarted.mu.Unlock()
+}
+
+func nextListenersStart() <-chan struct{} {
+	listenersStarted.mu.Lock()
+	defer listenersStarted.mu.Unlock()
+	return listenersStarted.ch
+}
+
 func pollRoute(ctx context.Context) {
 	ticker := time.NewTicker(routePollInterval)
 	defer ticker.Stop()
@@ -176,9 +193,18 @@ func pollRoute(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			if isRunning.Load() {
-				refreshRoute()
-			}
 		}
+		started := nextListenersStart()
+		if isRunning.Load() {
+			refreshRoute()
+			continue
+		}
+		ticker.Stop()
+		select {
+		case <-ctx.Done():
+			return
+		case <-started:
+		}
+		ticker.Reset(routePollInterval)
 	}
 }

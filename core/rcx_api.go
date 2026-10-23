@@ -33,12 +33,19 @@ func init() {
 	registerMethod(rcxActionMethod, withFallible(func(req rcx.ActionRequest) (rcx.ActionResult, error) {
 		return rcxCall(func(e *rcx.Engine) (rcx.ActionResult, error) { return e.Act(req) })
 	}))
-	registerMethod(rcxHintsMethod, withFallible(func(hints rcx.Hints) (bool, error) {
+	registerMethod(rcxHintsMethod, func(call *MethodCall) (any, error) {
+		hints, err := decodeArguments[rcx.Hints](call)
+		if err != nil {
+			return nil, err
+		}
+		if hints.Foreground != nil {
+			setHostForeground(*hints.Foreground, call.seq)
+		}
 		return rcxCall(func(e *rcx.Engine) (bool, error) {
 			e.SetHints(hints)
 			return true, nil
 		})
-	}))
+	})
 	registerMethod(rcxProfilesMethod, func(*MethodCall) (any, error) {
 		return rcxCall(func(e *rcx.Engine) ([]rcx.ProfileInfo, error) { return e.Profiles(), nil })
 	})

@@ -2,6 +2,7 @@ package core
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/tunnel/statistic"
@@ -40,15 +41,37 @@ var currentRequestTraffic = requestTrafficWatch{
 	requests: map[string]*watchedRequest{},
 }
 
+// rcxHints pauses watching while the host is hidden; its request list retains the last totals.
+var (
+	hostForeground    atomic.Bool
+	hostForegroundMu  sync.Mutex
+	hostForegroundSeq uint64
+)
+
+func init() {
+	hostForeground.Store(true)
+}
+
 func (w *requestTrafficWatch) add(tracker statistic.Tracker) (start bool) {
 	info := tracker.Info()
+	return w.insert(tracker, info.UploadTotal.Load(), info.DownloadTotal.Load())
+}
+
+// The host may have missed these totals, so the first report carries them.
+func (w *requestTrafficWatch) resume(tracker statistic.Tracker) (start bool) {
+	return w.insert(tracker, -1, -1)
+}
+
+func (w *requestTrafficWatch) insert(tracker statistic.Tracker, upload, download int64) (start bool) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	w.requests[tracker.ID()] = &watchedRequest{
-		tracker:  tracker,
-		upload:   info.UploadTotal.Load(),
-		download: info.DownloadTotal.Load(),
-		fresh:    true,
+	if _, watched := w.requests[tracker.ID()]; !watched {
+		w.requests[tracker.ID()] = &watchedRequest{
+			tracker:  tracker,
+			upload:   upload,
+			download: download,
+			fresh:    true,
+		}
 	}
 	start = !w.running
 	w.running = true
@@ -89,25 +112,53 @@ func (w *requestTrafficWatch) collect(
 	return w.running
 }
 
-func (w *requestTrafficWatch) clear() {
+// Recheck under the lock so a stale condition cannot clear a newly added request.
+func (w *requestTrafficWatch) clearUnless(keep func() bool) (cleared bool) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+	if keep() {
+		return false
+	}
 	clear(w.requests)
 	w.running = false
+	return true
 }
 
 func watchRequestTraffic(tracker statistic.Tracker) {
-	if currentRequestTraffic.add(tracker) {
-		go runRequestTrafficWatch()
+	if hostForeground.Load() && currentRequestTraffic.add(tracker) {
+		safeGo("requestTrafficWatch", runRequestTrafficWatch)
 	}
+}
+
+func setHostForeground(foreground bool, seq uint64) {
+	hostForegroundMu.Lock()
+	defer hostForegroundMu.Unlock()
+	if seq < hostForegroundSeq {
+		return
+	}
+	hostForegroundSeq = seq
+	if hostForeground.Swap(foreground) == foreground || !foreground || !hasEventListener() {
+		return
+	}
+	start := false
+	statistic.DefaultManager.Range(func(tracker statistic.Tracker) bool {
+		start = currentRequestTraffic.resume(tracker) || start
+		return true
+	})
+	if start {
+		safeGo("requestTrafficWatch", runRequestTrafficWatch)
+	}
+}
+
+func requestTrafficWanted() bool {
+	return hasEventListener() && hostForeground.Load()
 }
 
 func runRequestTrafficWatch() {
 	ticker := time.NewTicker(requestTrafficInterval)
 	defer ticker.Stop()
 	for range ticker.C {
-		if !hasEventListener() {
-			currentRequestTraffic.clear()
+		if currentRequestTraffic.clearUnless(requestTrafficWanted) {
 			return
 		}
 		watching := currentRequestTraffic.collect(

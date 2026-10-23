@@ -49,6 +49,7 @@ func handleStartListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
 	isRunning.Store(true)
+	signalListenersStarted()
 	updateListeners(currentConfig)
 	resolver.ResetConnection()
 	refreshRoute()
