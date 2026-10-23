@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/features/form/form_row.dart';
 import 'package:reclash/models/common.dart' show TrafficShowExt;
@@ -8,6 +10,7 @@ import 'package:reclash/subscriptions/compatibility/client_labels.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -113,8 +116,9 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
               if (!mounted || cancellation.cancelled) return;
               setState(() {
                 _preview = _Preview(value: value);
-                if (!_nameEdited && value.label != null) {
-                  _nameController.text = value.label!;
+                final name = value.metadata.name ?? value.label;
+                if (!_nameEdited && name != null) {
+                  _nameController.text = name;
                 }
               });
             },
@@ -172,10 +176,20 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
       ],
       if (format != null) format.label,
     ].where((part) => part.isNotEmpty).join('  ·  ');
+    final support = safeSubscriptionSupportLink(
+      metadata?.text('provider.supportUrl') ?? '',
+    );
     final duplicateOf = widget.duplicateOf;
     final state = _preview;
     return CommonScaffold(
       title: source.url != null ? l10n.profileImportTitle : l10n.addProfile,
+      primaryAction: support == null
+          ? null
+          : IconButtonData(
+              glyph: AppGlyphs.openExternal,
+              tooltip: l10n.subscriptionProviderSupport,
+              onPressed: () => dialogs.openUrl(support.toString()),
+            ),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -190,6 +204,9 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                 children: [
                   _Hero(
                     monogram: metadata?.name,
+                    logoBytes: current?.logoBytes,
+                    logoIsSvg: current?.logoIsSvg ?? false,
+                    account: metadata?.accountTitle,
                     glyph: source.bytes != null
                         ? AppGlyphs.code
                         : source.shareLink != null
@@ -310,6 +327,9 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
 class _Hero extends StatelessWidget {
   const _Hero({
     required this.monogram,
+    required this.logoBytes,
+    required this.logoIsSvg,
+    required this.account,
     required this.glyph,
     required this.loading,
     required this.title,
@@ -320,6 +340,9 @@ class _Hero extends StatelessWidget {
   static const _well = 76.0;
 
   final String? monogram;
+  final Uint8List? logoBytes;
+  final bool logoIsSvg;
+  final String? account;
   final Glyph glyph;
   final bool loading;
   final String title;
@@ -365,7 +388,25 @@ class _Hero extends StatelessWidget {
                 ),
                 ClipPath(
                   clipper: const ShapeBorderClipper(shape: AppShape.lg),
-                  child: SizedBox.square(dimension: _well, child: fallback),
+                  child: SizedBox.square(
+                    dimension: _well,
+                    child: logoBytes == null
+                        ? fallback
+                        : logoIsSvg
+                        ? SvgPicture.memory(
+                            logoBytes!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => fallback,
+                          )
+                        : Image.memory(
+                            logoBytes!,
+                            fit: BoxFit.contain,
+                            cacheWidth:
+                                (_well * MediaQuery.devicePixelRatioOf(context))
+                                    .round(),
+                            errorBuilder: (_, _, _) => fallback,
+                          ),
+                  ),
                 ),
               ],
             ),
@@ -382,6 +423,16 @@ class _Hero extends StatelessWidget {
               style: AppTextStyle.title2.of(context, emphasized: true),
             ),
           ),
+          if (account case final account?) ...[
+            const SizedBox(height: 4),
+            Text(
+              account,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subheadline.of(context),
+            ),
+          ],
           if (caption.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
