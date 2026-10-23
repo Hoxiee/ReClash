@@ -321,8 +321,15 @@ CI validates the pubspec version against a release tag with `tool/check_release_
 empty, or unexpected packages with `tool/check_release_assets.dart`. Linux pacman packages are queried and the x64
 package is installed in an isolated Arch container; Windows packages retain the install/upgrade/launch checks on both
 architectures. Every tag run produces `SHA256SUMS`, available as a separate Actions artifact. Stable tags publish a
-GitHub release; prerelease tags retain the existing Actions-artifact and optional Telegram delivery policy.
-Homebrew, F-Droid, and Telegram publishing require their configured secrets; manual builds never publish.
+GitHub release; prerelease tags publish a GitHub prerelease without changing the latest stable release.
+Homebrew and F-Droid publishing require their configured secrets and remain stable-only; manual builds never publish.
+Telegram announcements use the public Bot API with `TELEGRAM_BOT_TOKEN` only. The bot must be a channel administrator
+with permission to post. `TELEGRAM_CHAT_ID` is an optional Actions variable (default `@ReClashApp`). No API ID, API hash,
+local Bot API container, Python dependencies, or file uploads are needed. Each announcement includes versioned direct
+asset buttons, full release notes, and SHA256SUMS, and runs only after GitHub release assets have been published.
+Preview without sending: `TAG=v0.1.0-pre.1 python3 -I release_telegram.py --dry-run` (requires `telegram.md` and the
+complete release asset set plus SHA256SUMS in `dist/`). Offline tests run with
+`python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py`.
 
 The changelog is derived from Conventional Commits by `tool/changelog.dart` and written to two committed files:
 `CHANGELOG.md` for readers and `changelog.json` for the renderers. See `.agents/rules.md` for the `Changelog:` trailers
@@ -378,7 +385,7 @@ skipped and moves on instead of reporting drift that does not exist. Checking me
 branch fail on an unrelated release.
 
 Prerelease tags (`v0.8.96-pre.N`) skip the release commit, and CI renders their notes with `build --unreleased` for the
-Telegram post. They publish no GitHub release, so the update dialog never sees them. `build --unreleased` reads the
+Telegram post. GitHub marks them as prereleases, not latest stable releases. `build --unreleased` reads the
 version from `pubspec.yaml` rather than the tag, so the patch has to be bumped before the first `-pre.N` of a cycle:
 while `v<pubspec version>` is still tagged it refuses to collect anything and the release job fails.
 

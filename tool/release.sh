@@ -44,7 +44,8 @@ while (($#)); do
       mode="$1"
       ;;
     --version)
-      shift || die "--version needs a value"
+      (($# > 1)) || die "--version needs a value"
+      shift
       want_version="$1"
       ;;
     --version=*) want_version="${1#*=}" ;;
@@ -90,7 +91,6 @@ fi
 current="$(pubspec_version)"
 [[ -n "$current" ]] || die "could not read the version from pubspec.yaml"
 
-bumped=0
 if [[ -n "$want_version" ]]; then
   version="$want_version"
 elif git rev-parse -q --verify "refs/tags/v$current" >/dev/null; then
@@ -104,10 +104,6 @@ fi
 git rev-parse -q --verify "refs/tags/v$version" >/dev/null &&
   die "v$version is already tagged; pass --version with the next one"
 
-if [[ "$version" != "$current" ]]; then
-  bumped=1
-fi
-
 if [[ "$mode" == "pre" ]]; then
   last="$(git tag --list "v$version-pre.*" |
     sed -n "s/^v$version-pre\.\([0-9]*\)$/\1/p" | sort -n | tail -1)"
@@ -115,15 +111,16 @@ if [[ "$mode" == "pre" ]]; then
 else
   tag="v$version"
 fi
+package_version="${tag#v}"
 
 echo
 echo "mode      : $mode"
 echo "branch    : $branch"
-echo "version   : $current -> $version$([[ $bumped == 1 ]] && echo ' (pubspec will be rewritten)')"
+echo "version   : $(sed -n 's/^version: //p' pubspec.yaml) -> $package_version (build number will be bumped)"
 echo "tag       : $tag"
 if [[ "$mode" == "pre" ]]; then
   echo "changelog : rendered by CI from build --unreleased; nothing committed"
-  echo "publishes : build artifacts + Telegram only, no GitHub release"
+  echo "publishes : GitHub prerelease with downloads + optional Telegram post"
 else
   echo "changelog : CHANGELOG.md + changelog.json regenerated and committed"
   echo "publishes : GitHub release with artifacts, SHA256SUMS, Homebrew cask"
@@ -138,10 +135,8 @@ restore() {
 }
 trap restore EXIT
 
-if ((bumped)); then
-  sed -i.bak "s/^version: [0-9]*\.[0-9]*\.[0-9]*/version: $version/" pubspec.yaml
-  rm -f pubspec.yaml.bak
-fi
+sed -i.bak -E "s/^(version: )[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?/\1$package_version/" pubspec.yaml
+rm -f pubspec.yaml.bak
 tool/bump_version.sh minor
 
 echo "--- release notes for $tag ---"

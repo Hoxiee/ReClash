@@ -90,6 +90,15 @@ void main() {
     }
   });
 
+  test('Debian package identity matches the metadata adapter', () {
+    final config =
+        loadYaml(
+              File('linux/packaging/deb/make_config.yaml').readAsStringSync(),
+            )
+            as YamlMap;
+    expect(config['package_name'], 'reclash');
+  });
+
   test('rpm keeps the Core bytes the Helper was built against', () {
     final config =
         loadYaml(

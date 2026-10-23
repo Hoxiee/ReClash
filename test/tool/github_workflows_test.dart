@@ -38,6 +38,26 @@ void main() {
     );
   });
 
+  test('Telegram download buttons follow published prerelease assets', () {
+    final uploadSteps = jobs['upload']['steps'] as YamlList;
+    final release = uploadSteps.firstWhere((step) => step['name'] == 'Release');
+    expect(release['if'], isNull);
+    expect(release['with']['prerelease'], contains("IS_STABLE != 'true'"));
+    expect(release['with']['make_latest'], contains("'false'"));
+    expect(release['with']['fail_on_unmatched_files'], true);
+    expect(
+      uploadSteps.indexOf(release),
+      lessThan(
+        uploadSteps.indexWhere((step) => step['name'] == 'Push to telegram'),
+      ),
+    );
+    final commands = steps('upload');
+    expect(commands, contains('python3 -I release_telegram.py'));
+    expect(commands, isNot(contains('telegram-bot-api')));
+    expect(commands, isNot(contains('pip install requests')));
+    expect(steps('dart'), contains('changelog_telegram_test.py'));
+  });
+
   test('localization is assembled before generation and before tests', () {
     final commands = steps('dart');
     expect(

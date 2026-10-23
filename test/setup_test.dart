@@ -78,9 +78,17 @@ hooks:
       expect(setup.packagesNotBuildingAssets('name: x\n'), isEmpty);
     });
 
-    test('packages every Linux format on every architecture', () {
+    test('selects Linux formats supported by each architecture', () {
       expect(
         setup.createPackageTargets('linux', null),
+        'deb,appimage,rpm,pacman',
+      );
+      expect(
+        setup.createPackageTargets('linux', null, arch: 'arm64'),
+        'deb,rpm,pacman',
+      );
+      expect(
+        setup.createPackageTargets('linux', null, arch: 'amd64'),
         'deb,appimage,rpm,pacman',
       );
       expect(setup.createPackageTargets('linux', 'deb'), 'deb');

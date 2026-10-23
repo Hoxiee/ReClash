@@ -31,7 +31,7 @@ app_version="${version%%+*}"
 build_number="${version##*+}"
 
 if [[ "$mode" == "major" || "$mode" == "all" ]]; then
-  IFS='.' read -r major minor patch <<<"$app_version"
+  IFS='.' read -r major minor patch <<<"${app_version%%-*}"
   patch=$((patch + 1))
   app_version="$major.$minor.$patch"
 fi
