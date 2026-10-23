@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -14,6 +13,8 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/setup.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
+import 'package:reclash/subscriptions/transport/transport.dart';
+import 'package:reclash/models/profile.dart';
 
 class _Window extends Mock implements WindowPort {}
 
@@ -34,13 +35,22 @@ class _SystemAction extends SystemAction {
 class _ProfilesAction extends ProfilesAction {
   final sources = <ProfileLinkSource>[];
 
+  int reveals = 0;
+
   @override
-  Future<void> addProfileLinkSource(
+  Future<Profile> addConfirmedLinkSource(
     ProfileLinkSource source, {
     String? label,
-    String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
-  }) async => sources.add(source);
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) async {
+    sources.add(source);
+    return Profile.normal(label: label);
+  }
+
+  @override
+  void showProfiles() => reveals++;
 }
 
 class _Session extends SetupSession {
@@ -286,8 +296,14 @@ void main() {
         .handleLink(
           input,
           confirmCommand: confirmCommand ?? (_) async => true,
-          confirmImport:
-              confirmImport ?? (_) async => const ProfileLinkImport(),
+          confirmImport: (source, commit) async {
+            final choice =
+                await (confirmImport ?? (_) async => const ProfileLinkImport())(
+                  source,
+                );
+            if (choice != null) await commit(choice);
+            return choice;
+          },
           openRouting: openRouting ?? (_, _) async {},
           isCurrent: isCurrent,
         );
@@ -377,6 +393,7 @@ void main() {
           },
         );
         expect(profiles.sources.single, same(confirmed));
+        expect(profiles.reveals, 1);
         expect(confirmed!.url, url);
         expect(confirmed!.name, 'Home');
         expect(confirmed!.preset, SubscriptionClientPreset.happ);
@@ -439,6 +456,7 @@ void main() {
         );
         expect(container.read(setupSessionProvider).pendingLink, input);
         expect(profiles.sources, isEmpty);
+        expect(profiles.reveals, 0);
       },
     );
 

@@ -111,5 +111,7 @@
   "profileImportUnlimited": "Ilimitado",
   "profileImportExpired": "Caducada",
   "profileImportFromProvider": "Del proveedor",
-  "profileImportSingleServer": "Un servidor"
+  "profileImportSingleServer": "Un servidor",
+  "profileImportDownloading": "Descargando la suscripción…",
+  "profileImportTryOtherFormat": "No se añadió nada. Puedes elegir otro formato e intentarlo de nuevo."
 }

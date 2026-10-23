@@ -101,6 +101,9 @@ mixin RoutedProbe<K, V>
   Future<Map<K, ProbeAnswer<V>>> probe(K target, RouteState route);
 
   @protected
+  bool get automaticChecks => true;
+
+  @protected
   bool isFailure(V value) => false;
 
   @protected
@@ -152,7 +155,8 @@ mixin RoutedProbe<K, V>
     if (_watchers.length == 1) {
       ref.read(routeTrackerProvider.notifier).attach();
     }
-    if (_entryOf(target).phase != ProbePhase.fresh &&
+    if (automaticChecks &&
+        _entryOf(target).phase != ProbePhase.fresh &&
         !_landed.containsKey(target)) {
       _mark(target);
     }
@@ -397,7 +401,8 @@ mixin RoutedProbe<K, V>
       }
       if (next.hasMovedSince(stamp)) {
         _invalidate(target, entries);
-      } else if (resumed &&
+      } else if (automaticChecks &&
+          resumed &&
           entry.phase == ProbePhase.failed &&
           _watchers.containsKey(target)) {
         _due[target] = (
@@ -527,7 +532,7 @@ mixin RoutedProbe<K, V>
   void _invalidate(K target, Map<K, ProbeEntry<V>> entries) {
     _landed.remove(target);
     _unverified.remove(target);
-    if (_watchers.containsKey(target)) {
+    if (automaticChecks && _watchers.containsKey(target)) {
       entries[target] = ProbeEntry(phase: ProbePhase.probing);
       _due[target] = (
         keepValue: false,

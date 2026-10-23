@@ -777,14 +777,9 @@ void main() {
           expect(storedFiles(), filesBefore);
           final l10n = currentAppLocalizations;
           if (accept) {
-            final confirmation = find.widgetWithText(
-              TextButton,
-              l10n.subscriptionImportAccept,
+            await tester.tap(
+              find.widgetWithText(TextButton, l10n.subscriptionImportAdd(1)),
             );
-            expect(tester.widget<TextButton>(confirmation).onPressed, isNull);
-            await tester.tap(find.text(l10n.subscriptionImportAcceptSections));
-            await tester.pumpAndSettle();
-            await tester.tap(confirmation);
           } else {
             await tester.tap(find.widgetWithText(TextButton, l10n.cancel));
           }

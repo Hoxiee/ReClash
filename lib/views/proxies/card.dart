@@ -164,9 +164,7 @@ class ProxyCard extends ConsumerWidget {
               children: [
                 Flexible(
                   flex: 1,
-                  child: TooltipText(
-                    text: Text(proxy.type, maxLines: 1, style: typeStyle),
-                  ),
+                  child: _ProxyTypeText(proxy: proxy, style: typeStyle),
                 ),
                 delayText,
               ],
@@ -255,6 +253,29 @@ class _ProxyDesc extends ConsumerWidget {
       overflow: TextOverflow.ellipsis,
       style: style,
     );
+  }
+}
+
+class _ProxyTypeText extends ConsumerWidget {
+  const _ProxyTypeText({required this.proxy, required this.style});
+
+  final Proxy proxy;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isGroup = GroupType.values.any((type) => type.name == proxy.type);
+    final nodeName = isGroup
+        ? ref.watch(
+            realSelectedProxyStateProvider(
+              proxy.name,
+            ).select((state) => state.proxyName),
+          )
+        : proxy.name;
+    final label = nodeName.isEmpty || nodeName == proxy.name
+        ? proxy.type
+        : nodeName;
+    return TooltipText(text: Text(label, maxLines: 1, style: style));
   }
 }
 

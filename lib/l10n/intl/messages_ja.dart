@@ -325,48 +325,51 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m141(count) => "サブスクリプションは ${count} 日後に期限切れになります";
 
-  static String m142(sections) => "次の元設定セクションは引き継がれません: ${sections}。";
+  static String m142(count) => "${count}台を追加";
 
-  static String m143(count, format) =>
-      "${format} から ${count} 個のプロキシノードをインポートできます。";
+  static String m143(count) => "${count}台のサーバーをすべて追加します";
 
-  static String m144(count) => "変換できないノード: ${count} 個。";
+  static String m144(count, total) => "${total}台中${count}台のサーバーを追加します";
 
-  static String m145(percent) => "データ通信量の ${percent}% を使用しました";
+  static String m145(count) => "すべて表示（${count}）";
 
-  static String m146(count) => "${count} 件の結果";
+  static String m146(format) => "形式: ${format}";
 
-  static String m147(value) => "ピーク ${value}";
+  static String m147(percent) => "データ通信量の ${percent}% を使用しました";
 
-  static String m148(value) => "累計 ${value}";
+  static String m148(count) => "${count} 件の結果";
 
-  static String m149(version) => "インストール済み: ${version}";
+  static String m149(value) => "ピーク ${value}";
 
-  static String m150(count) => "${count}分";
+  static String m150(value) => "累計 ${value}";
 
-  static String m151(time) => "残り${time}";
+  static String m151(version) => "インストール済み: ${version}";
 
-  static String m152(count) => "${count}秒";
+  static String m152(count) => "${count}分";
 
-  static String m153(speed) => "${speed}/秒";
+  static String m153(time) => "残り${time}";
 
-  static String m154(nodes, groups, providers) =>
+  static String m154(count) => "${count}秒";
+
+  static String m155(speed) => "${speed}/秒";
+
+  static String m156(nodes, groups, providers) =>
       "プロキシ: ${nodes}、グループ: ${groups}、リモートプロバイダー: ${providers}";
 
-  static String m155(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
+  static String m157(action) => "このリンクは「${action}」を要求しています。ReClashで実行しますか？";
 
-  static String m156(name, source) =>
+  static String m158(name, source) =>
       "${source}から「${name}」をインポートしますか？確認後にプロファイルの検証と変換内容の確認を行います。";
 
-  static String m157(label) => "${label}はURLである必要があります";
+  static String m159(label) => "${label}はURLである必要があります";
 
-  static String m158(index) => "背景 ${index}";
+  static String m160(index) => "背景 ${index}";
 
-  static String m159(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+  static String m161(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
 
-  static String m160(count) => "${count} 年前";
+  static String m162(count) => "${count} 年前";
 
-  static String m161(count) => "${count} 年前";
+  static String m163(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1604,6 +1607,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションページを読み込み中…",
     ),
+    "profileImportDownloading": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションをダウンロード中…",
+    ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションURLのプロファイルは既に存在します",
     ),
@@ -1629,6 +1635,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportServers": MessageLookupByLibrary.simpleMessage("サーバー"),
     "profileImportSingleServer": MessageLookupByLibrary.simpleMessage("単一サーバー"),
     "profileImportTitle": MessageLookupByLibrary.simpleMessage("新しいサブスクリプション"),
+    "profileImportTryOtherFormat": MessageLookupByLibrary.simpleMessage(
+      "何も追加されていません。別の形式を選んで再試行できます。",
+    ),
     "profileImportUnlimited": MessageLookupByLibrary.simpleMessage("無制限"),
     "profileImportValidUntil": MessageLookupByLibrary.simpleMessage("有効期限"),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
@@ -1655,6 +1664,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "protocolVersion": MessageLookupByLibrary.simpleMessage("プロトコルバージョン"),
     "providerAnnouncement": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage("詳細"),
+    "providerAnnouncementRead": MessageLookupByLibrary.simpleMessage("読む"),
     "providerInUse": m69,
     "providerNotice": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage("プロバイダー設定"),
@@ -2298,10 +2308,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
     "serviceAbnormalCount": m131,
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage("すべて利用可能"),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "有効なサービスを自動確認",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage("すべてのサービスを確認"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("利用可能"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("ブロック済み"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("検査"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("すべて検査"),
+    "serviceCheckOnlyWhenConnected": MessageLookupByLibrary.simpleMessage(
+      "接続時のみ確認",
+    ),
     "serviceCheckedAt": m132,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("近日提供予定"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
@@ -2703,18 +2720,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "全体設定を使用",
     ),
-    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
-      "承認してインポート",
-    ),
-    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
-      "一部の元データが保持されないことを理解しました。",
-    ),
-    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
-      "対応ノードのみをインポートする。",
-    ),
-    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
-      "元クライアントの設定が省略されることを理解しました。",
-    ),
+    "subscriptionImportAdd": m142,
+    "subscriptionImportAllAdded": m143,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "Clash 設定",
     ),
@@ -2727,22 +2734,44 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "不明な形式",
     ),
-    "subscriptionImportIgnoredSections": m142,
+    "subscriptionImportIgnoredSections": MessageLookupByLibrary.simpleMessage(
+      "設定セクション",
+    ),
+    "subscriptionImportLeftOutHint": MessageLookupByLibrary.simpleMessage(
+      "これらの部分の代わりに ReClash 独自の設定が適用されます。",
+    ),
+    "subscriptionImportLeftOutTitle": MessageLookupByLibrary.simpleMessage(
+      "引き継がれない項目",
+    ),
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
-      "インポートできる対応プロキシノードがありません。",
+      "対応しているサーバーがありません",
+    ),
+    "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "一部のサーバー設定は非対応のため省略されます",
+    ),
+    "subscriptionImportPartial": m144,
+    "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
+      "上り・下りの速度が未指定",
+    ),
+    "subscriptionImportReasonProtocol": MessageLookupByLibrary.simpleMessage(
+      "プロトコルに非対応",
+    ),
+    "subscriptionImportReasonTransport": MessageLookupByLibrary.simpleMessage(
+      "トランスポートに非対応",
     ),
     "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
-      "このサブスクリプションの同意を記憶",
+      "このサブスクリプションでは今後確認しない",
     ),
     "subscriptionImportRememberConsentHint":
-        MessageLookupByLibrary.simpleMessage(
-          "この取得元、形式、同意した省略内容にのみ適用されます。新たな省略には再度の同意が必要です。",
-        ),
-    "subscriptionImportReviewSummary": m143,
+        MessageLookupByLibrary.simpleMessage("ほかにも引き継げない項目が出た場合は、再度確認します。"),
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
-      "サブスクリプションのインポートを確認",
+      "一部は引き継がれません",
     ),
-    "subscriptionImportSkippedNodes": m144,
+    "subscriptionImportShowAll": m145,
+    "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
+      "追加されないサーバー",
+    ),
+    "subscriptionImportSourceFormat": m146,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのリマインダー",
@@ -2762,7 +2791,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "ウェブサイト",
     ),
-    "subscriptionTrafficLow": m145,
+    "subscriptionTrafficLow": m147,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "プロバイダーの更新間隔を使う",
     ),
@@ -2838,7 +2867,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("ピン留めする"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("ピン留め"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("コアを再起動"),
-    "toolsResults": m146,
+    "toolsResults": m148,
     "toolsRun": MessageLookupByLibrary.simpleMessage("実行"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("セクション"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("設定"),
@@ -2855,8 +2884,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("アップロード量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "traffic": MessageLookupByLibrary.simpleMessage("通信量"),
-    "trafficPeak": m147,
-    "trafficTotal": m148,
+    "trafficPeak": m149,
+    "trafficTotal": m150,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("翻訳の修正を提案する"),
     "transport": MessageLookupByLibrary.simpleMessage("トランスポート"),
@@ -2958,14 +2987,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "アップデートをインストールしました",
     ),
-    "updateInstalledVersion": m149,
+    "updateInstalledVersion": m151,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Androidがインストールを完了しています。この間にReClashが閉じる場合があります。",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "アップデートをインストール中",
     ),
-    "updateMinutes": m150,
+    "updateMinutes": m152,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("今はしない"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "リリースノートはありません。",
@@ -3003,18 +3032,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fiで事前ダウンロード"),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("インストールの準備完了"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("リリースの詳細"),
-    "updateRemainingTime": m151,
+    "updateRemainingTime": m153,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage("ダウンロードを再開"),
     "updateResumeShort": MessageLookupByLibrary.simpleMessage("再開"),
     "updateRetryCheck": MessageLookupByLibrary.simpleMessage("もう一度確認"),
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage("インストールを再試行"),
-    "updateSeconds": m152,
+    "updateSeconds": m154,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "リリースノート全文を見る",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("すべての変更を表示"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("アップデート"),
-    "updateTransferSpeed": m153,
+    "updateTransferSpeed": m155,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "ダウンロードした更新の整合性を確認できませんでした。",
     ),
@@ -3046,12 +3075,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "設定した終了時の動作を使います。",
     ),
-    "urlSchemeConfigCounts": m154,
+    "urlSchemeConfigCounts": m156,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAMLまたはJSONの設定を貼り付けてください",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("設定の内容"),
-    "urlSchemeConfirmMessage": m155,
+    "urlSchemeConfirmMessage": m157,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "外部からのアプリコマンド",
     ),
@@ -3087,7 +3116,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。",
     ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポートする"),
-    "urlSchemeImportConfirm": m156,
+    "urlSchemeImportConfirm": m158,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "YAMLまたはJSON設定をリンクに埋め込みます。",
     ),
@@ -3167,7 +3196,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "この暗号化バージョンには対応していません。通常のサブスクリプションリンクを依頼してください。",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("例を使う"),
-    "urlTip": m157,
+    "urlTip": m159,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -3200,9 +3229,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
-    "wallpaperImageLabel": m158,
+    "wallpaperImageLabel": m160,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperLibraryFull": m159,
+    "wallpaperLibraryFull": m161,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
@@ -3315,8 +3344,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m160,
-    "yearsAgoShort": m161,
+    "yearsAgo": m162,
+    "yearsAgoShort": m163,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

@@ -339,6 +339,120 @@ void main() {
     expect(await result, isNull);
   });
 
+  testWidgets('import stays open while the commit runs, then closes', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    final gate = Completer<void>();
+    BuildContext? commitContext;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub', name: 'Home'),
+      commit: (choice, {reviewContext, cancellation}) {
+        commitContext = reviewContext;
+        return gate.future;
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text(l10n.profileImportDownloading), findsOneWidget);
+    expect(commitContext?.mounted, isTrue);
+    final add = find.widgetWithText(TextButton, l10n.add);
+    expect(tester.widget<TextButton>(add).onPressed, isNull);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect((await result)?.label, 'Home');
+    expect(find.text(l10n.profileImportDownloading), findsNothing);
+  });
+
+  testWidgets('a declined review keeps the sheet to retry in another format', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    final presets = <SubscriptionClientPreset>[];
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(
+        url: 'https://sub.example/sub',
+        preset: SubscriptionClientPreset.happ,
+      ),
+      commit: (choice, {reviewContext, cancellation}) async {
+        presets.add(choice.clientSettings.preset);
+        if (presets.length == 1) throw const SubscriptionUpdateCancelled();
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.profileImportTryOtherFormat), findsOneWidget);
+    await tester.ensureVisible(find.text(l10n.subscriptionClientReclash));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.subscriptionClientReclash));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add));
+    await tester.pumpAndSettle();
+
+    expect(presets, [
+      SubscriptionClientPreset.happ,
+      SubscriptionClientPreset.auto,
+    ]);
+    expect(
+      (await result)?.clientSettings.preset,
+      SubscriptionClientPreset.auto,
+    );
+  });
+
+  testWidgets('a failed commit is shown in the sheet and can be retried', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    var calls = 0;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub'),
+      commit: (choice, {reviewContext, cancellation}) async {
+        if (++calls == 1) throw const MessageException('Server is down');
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Server is down'), findsOneWidget);
+    await tester.tap(find.text(l10n.retry));
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+    expect(await result, isNotNull);
+  });
+
+  testWidgets('closing during the commit cancels it', (tester) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    final gate = Completer<void>();
+    SubscriptionCancellation? commitCancellation;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub'),
+      commit: (choice, {reviewContext, cancellation}) {
+        commitCancellation = cancellation;
+        return gate.future;
+      },
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.add));
+    await tester.pump();
+    await tester.tap(find.text(l10n.cancel));
+    expect(commitCancellation?.cancelled, isTrue);
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(await result, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('profile import dialog fits a narrow viewport', (tester) async {
     await _pumpHost(tester, size: const Size(320, 640));
     final result = showProfileImportDialog(

@@ -124,7 +124,7 @@ class TestUpdateRuntime extends AppUpdateRuntime {
   bool? lastAutomatic;
   Config? savedConfig;
   AppUpdateRelease? available;
-  Object? checkFailure;
+  Exception? checkFailure;
   ApkInstallStatus nativeStatus = ApkInstallStatus.installing;
   Future<String?> Function(String, CancelToken, ProgressCallback)?
   downloadOperation;

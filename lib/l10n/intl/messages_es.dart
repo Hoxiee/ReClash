@@ -371,52 +371,57 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m141(count) =>
       "${Intl.plural(count, one: 'Su suscripción caduca mañana', other: 'Su suscripción caduca en ${count} días')}";
 
-  static String m142(sections) =>
-      "No se transferirán estas secciones de origen: ${sections}.";
+  static String m142(count) =>
+      "${Intl.plural(count, one: 'Añadir 1 servidor', other: 'Añadir ${count} servidores')}";
 
-  static String m143(count, format) =>
-      "Se pueden importar ${count} nodos proxy de ${format}.";
+  static String m143(count) =>
+      "${Intl.plural(count, one: 'Se añadirá el servidor', other: 'Se añadirán los ${count} servidores')}";
 
-  static String m144(count) => "No se pueden convertir ${count} nodos.";
+  static String m144(count, total) =>
+      "Se añadirán ${count} de ${Intl.plural(total, one: '1 servidor', other: '${total} servidores')}";
 
-  static String m145(percent) => "Ha utilizado el ${percent}% de su tráfico";
+  static String m145(count) => "Mostrar todos (${count})";
 
-  static String m146(count) => "${count} resultados";
+  static String m146(format) => "Formato: ${format}";
 
-  static String m147(value) => "Pico: ${value}";
+  static String m147(percent) => "Ha utilizado el ${percent}% de su tráfico";
 
-  static String m148(value) => "Total: ${value}";
+  static String m148(count) => "${count} resultados";
 
-  static String m149(version) => "Versión instalada: ${version}";
+  static String m149(value) => "Pico: ${value}";
 
-  static String m150(count) => "${count} min";
+  static String m150(value) => "Total: ${value}";
 
-  static String m151(time) => "Quedan ${time}";
+  static String m151(version) => "Versión instalada: ${version}";
 
-  static String m152(count) => "${count} s";
+  static String m152(count) => "${count} min";
 
-  static String m153(speed) => "${speed}/s";
+  static String m153(time) => "Quedan ${time}";
 
-  static String m154(nodes, groups, providers) =>
+  static String m154(count) => "${count} s";
+
+  static String m155(speed) => "${speed}/s";
+
+  static String m156(nodes, groups, providers) =>
       "${nodes} proxies, ${groups} grupos, ${providers} proveedores remotos";
 
-  static String m155(action) =>
+  static String m157(action) =>
       "Este enlace solicita «${action}». ¿Permitir que ReClash realice esta acción?";
 
-  static String m156(name, source) =>
+  static String m158(name, source) =>
       "¿Importar «${name}» desde ${source}? Tras la confirmación se validará el perfil y se revisarán las conversiones necesarias.";
 
-  static String m157(label) => "${label} debe ser una URL";
+  static String m159(label) => "${label} debe ser una URL";
 
-  static String m158(index) => "Fondo ${index}";
-
-  static String m159(count) =>
-      "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
-
-  static String m160(count) =>
-      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+  static String m160(index) => "Fondo ${index}";
 
   static String m161(count) =>
+      "Puedes guardar hasta ${count} fondos. Elimina uno para añadir otro.";
+
+  static String m162(count) =>
+      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+
+  static String m163(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1981,6 +1986,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
       "Cargando la página de suscripción…",
     ),
+    "profileImportDownloading": MessageLookupByLibrary.simpleMessage(
+      "Descargando la suscripción…",
+    ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Ya existe un perfil con esta URL de suscripción",
     ),
@@ -2011,6 +2019,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportTitle": MessageLookupByLibrary.simpleMessage(
       "Nueva suscripción",
+    ),
+    "profileImportTryOtherFormat": MessageLookupByLibrary.simpleMessage(
+      "No se añadió nada. Puedes elegir otro formato e intentarlo de nuevo.",
     ),
     "profileImportUnlimited": MessageLookupByLibrary.simpleMessage("Ilimitado"),
     "profileImportValidUntil": MessageLookupByLibrary.simpleMessage(
@@ -2046,6 +2057,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage(
       "Más información",
     ),
+    "providerAnnouncementRead": MessageLookupByLibrary.simpleMessage("Leer"),
     "providerInUse": m69,
     "providerNotice": MessageLookupByLibrary.simpleMessage("Aviso"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
@@ -2869,10 +2881,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage(
       "Todo disponible",
     ),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Comprobar automáticamente los servicios activos",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Comprobar todos los servicios",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Disponible"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloqueado"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Comprobar"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage("Comprobar todo"),
+    "serviceCheckOnlyWhenConnected": MessageLookupByLibrary.simpleMessage(
+      "Comprobar solo al conectar",
+    ),
     "serviceCheckedAt": m132,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Próximamente"),
     "serviceDisallowedIsp": MessageLookupByLibrary.simpleMessage(
@@ -3378,18 +3399,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Usar ajuste global",
     ),
-    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
-      "Aceptar e importar",
-    ),
-    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
-      "Entiendo que no se conservarán algunos datos de origen.",
-    ),
-    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
-      "Continuar solo con los nodos compatibles.",
-    ),
-    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
-      "Entiendo que se omitirán los ajustes de origen.",
-    ),
+    "subscriptionImportAdd": m142,
+    "subscriptionImportAllAdded": m143,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "configuración de Clash",
     ),
@@ -3402,22 +3413,46 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "formato desconocido",
     ),
-    "subscriptionImportIgnoredSections": m142,
+    "subscriptionImportIgnoredSections": MessageLookupByLibrary.simpleMessage(
+      "Secciones de la configuración",
+    ),
+    "subscriptionImportLeftOutHint": MessageLookupByLibrary.simpleMessage(
+      "ReClash aplica su propia configuración en lugar de estas partes del origen.",
+    ),
+    "subscriptionImportLeftOutTitle": MessageLookupByLibrary.simpleMessage(
+      "Se omite",
+    ),
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
-      "No hay nodos proxy compatibles para importar.",
+      "Ninguno de los servidores es compatible",
+    ),
+    "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "Algunas opciones de los servidores no son compatibles y se omiten",
+    ),
+    "subscriptionImportPartial": m144,
+    "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
+      "Faltan las velocidades de subida y bajada",
+    ),
+    "subscriptionImportReasonProtocol": MessageLookupByLibrary.simpleMessage(
+      "El protocolo no es compatible",
+    ),
+    "subscriptionImportReasonTransport": MessageLookupByLibrary.simpleMessage(
+      "El transporte no es compatible",
     ),
     "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
-      "Recordar este consentimiento para la suscripción",
+      "No volver a preguntar para esta suscripción",
     ),
     "subscriptionImportRememberConsentHint":
         MessageLookupByLibrary.simpleMessage(
-          "Solo se aplica a este origen, formato y tipos de pérdida aceptados. Las nuevas pérdidas requieren otro consentimiento.",
+          "Si algo más deja de transferirse, se te volverá a preguntar.",
         ),
-    "subscriptionImportReviewSummary": m143,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
-      "Revisar importación de suscripción",
+      "No todo se transfiere",
     ),
-    "subscriptionImportSkippedNodes": m144,
+    "subscriptionImportShowAll": m145,
+    "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
+      "No se añadirán",
+    ),
+    "subscriptionImportSourceFormat": m146,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Información de la suscripción",
     ),
@@ -3443,7 +3478,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Sitio web",
     ),
-    "subscriptionTrafficLow": m145,
+    "subscriptionTrafficLow": m147,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Usar el intervalo del proveedor",
     ),
@@ -3541,7 +3576,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Reiniciar el núcleo",
     ),
-    "toolsResults": m146,
+    "toolsResults": m148,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Ejecutar"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Sección"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Ajuste"),
@@ -3560,8 +3595,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Subido"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Puerto TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Tráfico"),
-    "trafficPeak": m147,
-    "trafficTotal": m148,
+    "trafficPeak": m149,
+    "trafficTotal": m150,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Uso de tráfico"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Sugerir una corrección de traducción",
@@ -3695,14 +3730,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Actualización instalada",
     ),
-    "updateInstalledVersion": m149,
+    "updateInstalledVersion": m151,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android está completando la instalación. ReClash puede cerrarse durante este paso.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Instalando la actualización",
     ),
-    "updateMinutes": m150,
+    "updateMinutes": m152,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Ahora no"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "No hay notas de la versión disponibles.",
@@ -3756,7 +3791,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Detalles de la versión",
     ),
-    "updateRemainingTime": m151,
+    "updateRemainingTime": m153,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Reanudar descarga",
     ),
@@ -3765,7 +3800,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "Reintentar instalación",
     ),
-    "updateSeconds": m152,
+    "updateSeconds": m154,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "Ver todas las notas de la versión",
     ),
@@ -3773,7 +3808,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mostrar todos los cambios",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Actualizaciones"),
-    "updateTransferSpeed": m153,
+    "updateTransferSpeed": m155,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo verificar la integridad de la actualización descargada.",
     ),
@@ -3811,14 +3846,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Usar el comportamiento de cierre configurado.",
     ),
-    "urlSchemeConfigCounts": m154,
+    "urlSchemeConfigCounts": m156,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "Pega una configuración YAML o JSON",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Contenido de la configuración",
     ),
-    "urlSchemeConfirmMessage": m155,
+    "urlSchemeConfirmMessage": m157,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Comando externo de aplicación",
     ),
@@ -3860,7 +3895,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Importar configuración",
     ),
-    "urlSchemeImportConfirm": m156,
+    "urlSchemeImportConfirm": m158,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Incluir una configuración YAML o JSON en el enlace.",
     ),
@@ -3950,7 +3985,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Esta versión de cifrado no es compatible. Solicita un enlace de suscripción sin cifrar.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("Usar ejemplo"),
-    "urlTip": m157,
+    "urlTip": m159,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -3991,9 +4026,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "Elige una imagen PNG, JPEG o WebP válida.",
     ),
-    "wallpaperImageLabel": m158,
+    "wallpaperImageLabel": m160,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Encuadre"),
-    "wallpaperLibraryFull": m159,
+    "wallpaperLibraryFull": m161,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Opacidad de imagen",
     ),
@@ -4136,8 +4171,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m160,
-    "yearsAgoShort": m161,
+    "yearsAgo": m162,
+    "yearsAgoShort": m163,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

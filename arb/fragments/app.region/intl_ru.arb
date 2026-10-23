@@ -39,5 +39,8 @@
   "regionChangeServices": "Проверки сервисов",
   "restoreDefaults": "Восстановить по умолчанию",
   "networkRestoreDefaultsTip": "Список обхода и MTU для TUN вернутся к значениям выбранного региона.",
-  "dnsRestoreDefaultsTip": "Все переопределения DNS будут удалены, а DNS-серверы выбранного региона — установлены заново."
+  "dnsRestoreDefaultsTip": "Все переопределения DNS будут удалены, а DNS-серверы выбранного региона — установлены заново.",
+  "serviceAutoCheckActive": "Автоматически проверять активные",
+  "serviceAutoCheckAll": "Проверять все",
+  "serviceCheckOnlyWhenConnected": "Проверять только при подключении"
 }

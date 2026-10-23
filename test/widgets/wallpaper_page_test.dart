@@ -14,11 +14,11 @@ void main() {
             backgroundCount++;
             return ColoredBox(color: color, child: child);
           },
-          child: PageBackground(
+          child: const PageBackground(
             baseColor: Colors.white,
             child: PageBackground(
               baseColor: Colors.white,
-              child: const Text('one route'),
+              child: Text('one route'),
             ),
           ),
         ),

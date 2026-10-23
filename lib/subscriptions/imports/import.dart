@@ -176,7 +176,8 @@ SubscriptionImportResult _convert(Uint8List input, {required bool encrypted}) {
         remoteProviders: outputSummary.remoteProviders,
         hasOtherLosses:
             format == SubscriptionFormat.wireguard ||
-            format == SubscriptionFormat.amnezia,
+            format == SubscriptionFormat.amnezia ||
+            converted is LossyConversion && converted.hasOtherLosses,
       ),
     );
   } on SubscriptionImportException {

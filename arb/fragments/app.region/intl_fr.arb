@@ -39,5 +39,8 @@
   "regionChangeServices": "Vérifications des services",
   "restoreDefaults": "Restaurer les valeurs par défaut",
   "networkRestoreDefaultsTip": "La liste d’exclusions et le MTU TUN reviennent aux valeurs de la région sélectionnée.",
-  "dnsRestoreDefaultsTip": "Toutes les substitutions DNS sont supprimées et les serveurs DNS de la région sélectionnée sont rétablis."
+  "dnsRestoreDefaultsTip": "Toutes les substitutions DNS sont supprimées et les serveurs DNS de la région sélectionnée sont rétablis.",
+  "serviceAutoCheckActive": "Vérifier automatiquement les services actifs",
+  "serviceAutoCheckAll": "Vérifier tous les services",
+  "serviceCheckOnlyWhenConnected": "Vérifier uniquement en connexion"
 }

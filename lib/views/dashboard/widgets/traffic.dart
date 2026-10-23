@@ -98,9 +98,10 @@ class _SpeedChart extends StatelessWidget {
 
 /// The upload or the download on its own desktop card.
 class SpeedCard extends ConsumerWidget {
-  const SpeedCard({super.key, required this.direction});
+  const SpeedCard({super.key, required this.direction, this.embedded = false});
 
   final TrafficDirection direction;
+  final bool embedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,71 +120,104 @@ class SpeedCard extends ConsumerWidget {
       (peak, traffic) => math.max(peak, direction.of(traffic)),
     );
     final speed = current.traffic;
+    final content = Stack(
+      children: [
+        Positioned(
+          left: -_chartBleed,
+          right: -_chartBleed,
+          bottom: -_chartBleed,
+          height: embedded ? 28 : (compact ? 62 : 88),
+          child: RepaintBoundary(
+            child: _SpeedChart(direction: direction, traffics: traffics),
+          ),
+        ),
+        Padding(
+          padding: embedded ? EdgeInsets.zero : padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 24 * scale,
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    GlyphIcon(
+                      direction.glyph,
+                      size: 18,
+                      color: direction.glyphColorOf(context),
+                    ),
+                    Text(
+                      direction.labelOf(context),
+                      maxLines: 1,
+                      style: DashboardText.cardTitle(context),
+                    ),
+                    Expanded(
+                      child: Text(
+                        appLocalizations.trafficPeak(
+                          '${dashboardTraffic(peak)}/s',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: DashboardText.label(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: embedded ? 0 : (compact ? 6 : 10)),
+              _Figure(
+                show: speed,
+                unit: _speedUnit(speed),
+                style: embedded
+                    ? AppTextStyle.title2
+                    : (compact
+                          ? AppTextStyle.largeTitle
+                          : AppTextStyle.display),
+                unitStyle: AppTextStyle.subheadline,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                appLocalizations.trafficTotal(dashboardTraffic(total)),
+                maxLines: 1,
+                style: DashboardText.label(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    if (embedded) return ClipRect(child: content);
     return DashboardCard(
       padding: EdgeInsets.zero,
       semanticLabel: direction.labelOf(context),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: content,
+    );
+  }
+}
+
+class CombinedSpeedCard extends StatelessWidget {
+  const CombinedSpeedCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = dashboardCardPadding(DashboardDensityScope.of(context));
+    return DashboardCard(
+      padding: EdgeInsets.symmetric(horizontal: padding.left, vertical: 12),
+      child: const Column(
+        spacing: 8,
         children: [
-          Positioned(
-            left: -_chartBleed,
-            right: -_chartBleed,
-            bottom: -_chartBleed,
-            height: compact ? 62 : 88,
-            child: RepaintBoundary(
-              child: _SpeedChart(direction: direction, traffics: traffics),
+          Expanded(
+            child: SpeedCard(
+              direction: TrafficDirection.upload,
+              embedded: true,
             ),
           ),
-          Padding(
-            padding: padding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 24 * scale,
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      GlyphIcon(
-                        direction.glyph,
-                        size: 18,
-                        color: direction.glyphColorOf(context),
-                      ),
-                      Text(
-                        direction.labelOf(context),
-                        maxLines: 1,
-                        style: DashboardText.cardTitle(context),
-                      ),
-                      Expanded(
-                        child: Text(
-                          appLocalizations.trafficPeak(
-                            '${dashboardTraffic(peak)}/s',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                          style: DashboardText.label(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: compact ? 6 : 10),
-                _Figure(
-                  show: speed,
-                  unit: _speedUnit(speed),
-                  style: compact
-                      ? AppTextStyle.largeTitle
-                      : AppTextStyle.display,
-                  unitStyle: AppTextStyle.subheadline,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  appLocalizations.trafficTotal(dashboardTraffic(total)),
-                  maxLines: 1,
-                  style: DashboardText.label(context),
-                ),
-              ],
+          Expanded(
+            child: SpeedCard(
+              direction: TrafficDirection.download,
+              embedded: true,
             ),
           ),
         ],

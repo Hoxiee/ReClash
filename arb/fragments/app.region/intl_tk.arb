@@ -39,5 +39,8 @@
   "regionChangeServices": "Hyzmat barlaglary",
   "restoreDefaults": "Deslapky bahalary dikelt",
   "networkRestoreDefaultsTip": "Aýlanyp geçiş sanawy we TUN MTU saýlanan sebitiň deslapky bahalaryna gaýdýar.",
-  "dnsRestoreDefaultsTip": "Ähli DNS çalyşmalary aýrylýar we saýlanan sebitiň DNS serwerleri täzeden bellenilýär."
+  "dnsRestoreDefaultsTip": "Ähli DNS çalyşmalary aýrylýar we saýlanan sebitiň DNS serwerleri täzeden bellenilýär.",
+  "serviceAutoCheckActive": "Işjeň hyzmatlary awtomatik barla",
+  "serviceAutoCheckAll": "Ähli hyzmatlary barla",
+  "serviceCheckOnlyWhenConnected": "Diňe birikdirilende barla"
 }

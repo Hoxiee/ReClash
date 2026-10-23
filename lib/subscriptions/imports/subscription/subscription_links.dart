@@ -33,6 +33,10 @@ abstract interface class ConvertedSubscription {
   List<SkippedNode> get skipped;
 }
 
+abstract interface class LossyConversion implements ConvertedSubscription {
+  bool get hasOtherLosses;
+}
+
 class ShareLinksResult implements ConvertedSubscription {
   const ShareLinksResult({required this.config, this.skipped = const []});
 
@@ -124,7 +128,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           skipped.add(
             SkippedNode(
               name: hashIdx >= 0
-                  ? _decodeComponent(trimmed.substring(hashIdx + 1))
+                  ? _displayName(trimmed.substring(hashIdx + 1))
                   : scheme,
               kind: scheme,
               reason: SkippedNodeReason.protocol,
@@ -163,12 +167,34 @@ class _UnsupportedLink implements Exception {
 
 String? _tryDecodeFragment(String fragment) {
   try {
-    return Uri.decodeComponent(fragment);
+    return _stripLinkExtras(Uri.decodeComponent(fragment));
   } catch (_) {}
   final decoded = tryBase64Decode(fragment);
   if (decoded == null) return null;
   final printable = decoded.replaceAll(RegExp(r'[^\x20-\x7eЀ-ӿ]'), '');
   return printable.length >= 2 ? printable : null;
+}
+
+const _linkExtraKeys = {
+  'serverDescription',
+  'resolve-address',
+  'host',
+  'insecure',
+  'fragment',
+  'noises',
+};
+
+String _displayName(String fragment) =>
+    _stripLinkExtras(_decodeComponent(fragment));
+
+String _stripLinkExtras(String name) {
+  final cut = name.indexOf('?');
+  if (cut < 0) return name;
+  final extras = name.substring(cut + 1).split('&').every((pair) {
+    final eq = pair.indexOf('=');
+    return eq > 0 && _linkExtraKeys.contains(pair.substring(0, eq));
+  });
+  return extras ? name.substring(0, cut) : name;
 }
 
 Map<String, Object?>? _parseUri(String uri) {
@@ -405,6 +431,7 @@ Map<String, Object?>? _parseVmess(String uri) {
     fingerprint: j['fp']?.toString() ?? '',
     alpn: j['alpn']?.toString() ?? '',
     allowInsecure: false,
+    emulateXray: true,
   );
   return proxy;
 }
@@ -428,7 +455,7 @@ Map<String, Object?>? _parseVless(String uri) {
   if (security == 'reality') {
     proxy['tls'] = true;
     proxy['servername'] = sni;
-    proxy['reality-opts'] = {
+    proxy['reality-opts'] = <String, Object?>{
       'public-key': params['pbk'] ?? '',
       if ((params['sid'] ?? '').isNotEmpty) 'short-id': params['sid'],
     };
@@ -449,6 +476,7 @@ Map<String, Object?>? _parseVless(String uri) {
     fingerprint: params['fp'] ?? '',
     alpn: params['alpn'] ?? '',
     allowInsecure: params['allowInsecure'] == '1',
+    emulateXray: true,
   );
 
   final network = params['type'] ?? 'tcp';
@@ -482,7 +510,7 @@ Map<String, Object?>? _parseShadowsocks(String uri) {
   final noScheme = uri.substring('ss://'.length);
   final hashIdx = noScheme.indexOf('#');
   final name = hashIdx >= 0
-      ? _decodeComponent(noScheme.substring(hashIdx + 1))
+      ? _displayName(noScheme.substring(hashIdx + 1))
       : '';
   final withoutName = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
   final queryIdx = withoutName.indexOf('?');
@@ -598,6 +626,7 @@ Map<String, Object?>? _parseTrojan(String uri) {
     fingerprint: params['fp'] ?? '',
     alpn: params['alpn'] ?? '',
     allowInsecure: params['allowInsecure'] == '1',
+    emulateXray: true,
   );
   final network = params['type'] ?? 'tcp';
   if (network == 'xhttp' || network == 'splithttp') {
@@ -743,7 +772,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
 
   final hashIdx = noScheme.indexOf('#');
   final name = hashIdx >= 0
-      ? _decodeComponent(noScheme.substring(hashIdx + 1))
+      ? _displayName(noScheme.substring(hashIdx + 1))
       : '';
   final withoutName = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
 
@@ -811,7 +840,7 @@ _splitUserinfoUri(String uri) {
 
   final hashIdx = noScheme.indexOf('#');
   final name = hashIdx >= 0
-      ? _decodeComponent(noScheme.substring(hashIdx + 1))
+      ? _displayName(noScheme.substring(hashIdx + 1))
       : '';
   final withoutName = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
 
@@ -985,13 +1014,81 @@ String _withTopLevelEarlyData(String path, String ed, String eh) {
   );
 }
 
+const _mihomoFingerprints = {
+  'chrome',
+  'firefox',
+  'safari',
+  'ios',
+  'android',
+  'edge',
+  '360',
+  'qq',
+  'random',
+  'randomized',
+  'chrome120',
+  'firefox120',
+  'safari16',
+  'chrome_psk',
+  'chrome_psk_shuffle',
+  'chrome_padding_psk_shuffle',
+  'chrome_pq',
+  'chrome_pq_psk',
+};
+
+const _fingerprintFamilies = [
+  ('hellochrome', 'chrome'),
+  ('hellofirefox', 'firefox'),
+  ('hellosafari', 'safari'),
+  ('helloios', 'ios'),
+  ('helloedge', 'edge'),
+  ('hello360', '360'),
+  ('helloqq', 'qq'),
+  ('helloandroid', 'android'),
+  ('hellorandomized', 'randomized'),
+  ('randomized', 'randomized'),
+];
+
+// Xray reads an empty fingerprint as Chrome; mihomo reads it, and any name it
+// does not know, as Go TLS. REALITY needs uTLS, so only plain TLS keeps opt-outs.
+String? resolveClientFingerprint(String raw, {required bool reality}) {
+  final name = raw.trim().toLowerCase();
+  if (name.isEmpty) return 'chrome';
+  if (name == 'unsafe' || name == 'none') return reality ? 'chrome' : null;
+  if (_mihomoFingerprints.contains(name)) return name;
+  if (name == 'hellochrome_120') return 'chrome120';
+  if (name == 'hellofirefox_120') return 'firefox120';
+  if (name == 'hellosafari_16_0') return 'safari16';
+  for (final (prefix, target) in _fingerprintFamilies) {
+    if (name.startsWith(prefix)) return target;
+  }
+  return 'chrome';
+}
+
+void applyClientFingerprint(Map<String, Object?> proxy, String raw) {
+  final reality = proxy['reality-opts'];
+  final fingerprint = resolveClientFingerprint(raw, reality: reality is Map);
+  if (fingerprint == null) return;
+  proxy['client-fingerprint'] = fingerprint;
+  // mihomo strips X25519MLKEM768 from REALITY hellos unless this is set.
+  if (fingerprint == 'chrome' && reality is Map<String, Object?>) {
+    reality['support-x25519mlkem768'] = true;
+  }
+}
+
 void _applyTlsExtras(
   Map<String, Object?> proxy, {
   required String fingerprint,
   required String alpn,
   required bool allowInsecure,
+  bool emulateXray = false,
 }) {
-  if (fingerprint.isNotEmpty) proxy['client-fingerprint'] = fingerprint;
+  if (emulateXray) {
+    if (proxy['tls'] == true || proxy['type'] == 'trojan') {
+      applyClientFingerprint(proxy, fingerprint);
+    }
+  } else if (fingerprint.isNotEmpty) {
+    proxy['client-fingerprint'] = fingerprint;
+  }
   if (alpn.isNotEmpty) {
     proxy['alpn'] = alpn.split(',').map((e) => e.trim()).toList();
   }
@@ -1027,6 +1124,31 @@ bool _applyPlugin(Map<String, Object?> proxy, String pluginParam) {
       return false;
   }
   return true;
+}
+
+final _goDurationPart = RegExp(r'(\d+(?:\.\d+)?)(ns|us|µs|ms|s|m|h)');
+
+int? goDurationMilliseconds(Object? value) {
+  final text = value?.toString().trim() ?? '';
+  final parts = _goDurationPart.allMatches(text).toList();
+  if (parts.isEmpty ||
+      parts.fold(0, (n, m) => n + m.end - m.start) != text.length) {
+    return null;
+  }
+  var total = 0.0;
+  for (final part in parts) {
+    total +=
+        double.parse(part[1]!) *
+        switch (part[2]) {
+          'ns' => 1e-6,
+          'us' || 'µs' => 1e-3,
+          'ms' => 1,
+          's' => 1000,
+          'm' => 60000,
+          _ => 3600000,
+        };
+  }
+  return total.round();
 }
 
 String? tryBase64Decode(String input) {
@@ -1071,6 +1193,7 @@ String emitProxiesConfig(
   List<Map<String, Object?>> proxies, {
   List<Map<String, Object?>> groups = const [],
   List<String> rules = const [],
+  List<String>? entries,
 }) {
   final buffer = StringBuffer()..writeln('proxies:');
   for (final proxy in proxies) {
@@ -1082,12 +1205,16 @@ String emitProxiesConfig(
       ...?(group['proxies'] as List?)?.map((e) => e.toString()),
   };
   final groupEntries = [
-    for (final group in groups)
-      if (!claimed.contains(group['name']))
-        _yamlString(group['name']! as String),
-    for (final proxy in proxies)
-      if (!claimed.contains(proxy['name']))
-        _yamlString(proxy['name']! as String),
+    if (entries != null)
+      for (final entry in entries) _yamlString(entry)
+    else ...[
+      for (final group in groups)
+        if (!claimed.contains(group['name']))
+          _yamlString(group['name']! as String),
+      for (final proxy in proxies)
+        if (!claimed.contains(proxy['name']))
+          _yamlString(proxy['name']! as String),
+    ],
     'DIRECT',
   ].join(', ');
   buffer.writeln('proxy-groups:');
@@ -1102,7 +1229,7 @@ String emitProxiesConfig(
   for (final rule in rules) {
     buffer.writeln('  - ${_yamlString(rule)}');
   }
-  if (!rules.any((rule) => rule == 'MATCH,PROXY')) {
+  if (!rules.any((rule) => rule.startsWith('MATCH,'))) {
     buffer.writeln('  - MATCH,PROXY');
   }
   return buffer.toString();

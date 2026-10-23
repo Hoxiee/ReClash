@@ -111,5 +111,7 @@
   "profileImportUnlimited": "Cheksiz",
   "profileImportExpired": "Muddati tugagan",
   "profileImportFromProvider": "Provayderdan",
-  "profileImportSingleServer": "Bitta server"
+  "profileImportSingleServer": "Bitta server",
+  "profileImportDownloading": "Obuna yuklanmoqda…",
+  "profileImportTryOtherFormat": "Hech narsa qo‘shilmadi. Boshqa formatni tanlab, qayta urinib ko‘rishingiz mumkin."
 }

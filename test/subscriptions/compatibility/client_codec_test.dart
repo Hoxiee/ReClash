@@ -15,7 +15,7 @@ void main() {
     });
 
     test('round-trips the selected preset and custom user-agent', () {
-      final settings = SubscriptionClientSettings(
+      const settings = SubscriptionClientSettings(
         preset: SubscriptionClientPreset.custom,
         customUserAgent: 'ExampleClient/2.4',
       );

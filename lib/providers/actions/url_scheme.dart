@@ -8,7 +8,10 @@ class UrlSchemeAction extends _$UrlSchemeAction {
   Future<void> handleLink(
     String input, {
     required Future<bool> Function(ReClashCommand action) confirmCommand,
-    required Future<ProfileLinkImport?> Function(ProfileLinkSource source)
+    required Future<ProfileLinkImport?> Function(
+      ProfileLinkSource source,
+      ProfileLinkCommit commit,
+    )
     confirmImport,
     required Future<void> Function(String text, String origin) openRouting,
     bool Function()? isCurrent,
@@ -39,19 +42,30 @@ class UrlSchemeAction extends _$UrlSchemeAction {
       return;
     }
     final source = await resolveProfileLink(input);
-    final choice = await confirmImport(source);
+    var imported = false;
+    final choice = await confirmImport(source, (
+      choice, {
+      reviewContext,
+      cancellation,
+    }) async {
+      if (!current() || ref.read(setupSessionProvider).active) return;
+      await ref
+          .read(profilesActionProvider.notifier)
+          .addConfirmedLinkSource(
+            source,
+            label: choice.label,
+            clientSettings: choice.clientSettings,
+            reviewContext: reviewContext,
+            cancellation: cancellation,
+          );
+      imported = true;
+    });
     if (!current() || choice == null) return;
-    if (ref.read(setupSessionProvider).active) {
+    if (imported) {
+      ref.read(profilesActionProvider.notifier).showProfiles();
+    } else if (ref.read(setupSessionProvider).active) {
       ref.read(setupSessionProvider.notifier).offerLink(input);
-      return;
     }
-    await ref
-        .read(profilesActionProvider.notifier)
-        .addProfileLinkSource(
-          source,
-          label: choice.label,
-          clientSettings: choice.clientSettings,
-        );
   }
 
   Future<(String, String)> _resolveRouting(String payload) async {

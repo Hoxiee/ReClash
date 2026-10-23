@@ -132,5 +132,7 @@
   "profileImportUnlimited": "Unlimited",
   "profileImportExpired": "Expired",
   "profileImportFromProvider": "From the provider",
-  "profileImportSingleServer": "Single server"
+  "profileImportSingleServer": "Single server",
+  "profileImportDownloading": "Downloading the subscription…",
+  "profileImportTryOtherFormat": "Nothing was added. You can pick another format and try again."
 }

@@ -8166,6 +8166,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Automatically check enabled services`
+  String get serviceAutoCheckActive {
+    return Intl.message(
+      'Automatically check enabled services',
+      name: 'serviceAutoCheckActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check all services`
+  String get serviceAutoCheckAll {
+    return Intl.message(
+      'Check all services',
+      name: 'serviceAutoCheckAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only check when connected`
+  String get serviceCheckOnlyWhenConnected {
+    return Intl.message(
+      'Only check when connected',
+      name: 'serviceCheckOnlyWhenConnected',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `First connection`
   String get setupTitle {
     return Intl.message(
@@ -10647,6 +10677,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Downloading the subscription…`
+  String get profileImportDownloading {
+    return Intl.message(
+      'Downloading the subscription…',
+      name: 'profileImportDownloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing was added. You can pick another format and try again.`
+  String get profileImportTryOtherFormat {
+    return Intl.message(
+      'Nothing was added. You can pick another format and try again.',
+      name: 'profileImportTryOtherFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Theme`
   String get appearanceTheme {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
@@ -11807,91 +11857,31 @@ class AppLocalizations {
     );
   }
 
-  /// `Review subscription import`
+  /// `Not everything carries over`
   String get subscriptionImportReviewTitle {
     return Intl.message(
-      'Review subscription import',
+      'Not everything carries over',
       name: 'subscriptionImportReviewTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `{count} proxy nodes can be imported from {format}.`
-  String subscriptionImportReviewSummary(Object count, Object format) {
-    return Intl.message(
-      '$count proxy nodes can be imported from $format.',
-      name: 'subscriptionImportReviewSummary',
-      desc: '',
-      args: [count, format],
-    );
-  }
-
-  /// `No supported proxy nodes can be imported.`
+  /// `None of the servers are supported`
   String get subscriptionImportNoNodes {
     return Intl.message(
-      'No supported proxy nodes can be imported.',
+      'None of the servers are supported',
       name: 'subscriptionImportNoNodes',
       desc: '',
       args: [],
     );
   }
 
-  /// `The following source sections will not be transferred: {sections}.`
-  String subscriptionImportIgnoredSections(Object sections) {
+  /// `Config sections`
+  String get subscriptionImportIgnoredSections {
     return Intl.message(
-      'The following source sections will not be transferred: $sections.',
+      'Config sections',
       name: 'subscriptionImportIgnoredSections',
-      desc: '',
-      args: [sections],
-    );
-  }
-
-  /// `{count} nodes cannot be converted.`
-  String subscriptionImportSkippedNodes(Object count) {
-    return Intl.message(
-      '$count nodes cannot be converted.',
-      name: 'subscriptionImportSkippedNodes',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `I understand that source settings will be omitted.`
-  String get subscriptionImportAcceptSections {
-    return Intl.message(
-      'I understand that source settings will be omitted.',
-      name: 'subscriptionImportAcceptSections',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Continue with only the supported nodes.`
-  String get subscriptionImportAcceptPartial {
-    return Intl.message(
-      'Continue with only the supported nodes.',
-      name: 'subscriptionImportAcceptPartial',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `I understand that some source data will not be preserved.`
-  String get subscriptionImportAcceptOtherLosses {
-    return Intl.message(
-      'I understand that some source data will not be preserved.',
-      name: 'subscriptionImportAcceptOtherLosses',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Accept and import`
-  String get subscriptionImportAccept {
-    return Intl.message(
-      'Accept and import',
-      name: 'subscriptionImportAccept',
       desc: '',
       args: [],
     );
@@ -12121,20 +12111,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Remember this consent for this subscription`
+  /// `Don’t ask again for this subscription`
   String get subscriptionImportRememberConsent {
     return Intl.message(
-      'Remember this consent for this subscription',
+      'Don’t ask again for this subscription',
       name: 'subscriptionImportRememberConsent',
       desc: '',
       args: [],
     );
   }
 
-  /// `Applies only to this source, format and the accepted loss types. New losses require consent again.`
+  /// `If anything else stops carrying over, you’ll be asked again.`
   String get subscriptionImportRememberConsentHint {
     return Intl.message(
-      'Applies only to this source, format and the accepted loss types. New losses require consent again.',
+      'If anything else stops carrying over, you’ll be asked again.',
       name: 'subscriptionImportRememberConsentHint',
       desc: '',
       args: [],
@@ -12338,6 +12328,130 @@ class AppLocalizations {
       name: 'subscriptionIdentityRegionWarning',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `{count} of {total, plural, one{1 server} other{{total} servers}} will be added`
+  String subscriptionImportPartial(int count, int total) {
+    return Intl.message(
+      '$count of ${Intl.plural(total, one: '1 server', other: '$total servers')} will be added',
+      name: 'subscriptionImportPartial',
+      desc: '',
+      args: [count, total],
+    );
+  }
+
+  /// `{count, plural, one{The server will be added} other{All {count} servers will be added}}`
+  String subscriptionImportAllAdded(int count) {
+    return Intl.plural(
+      count,
+      one: 'The server will be added',
+      other: 'All $count servers will be added',
+      name: 'subscriptionImportAllAdded',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Format: {format}`
+  String subscriptionImportSourceFormat(String format) {
+    return Intl.message(
+      'Format: $format',
+      name: 'subscriptionImportSourceFormat',
+      desc: '',
+      args: [format],
+    );
+  }
+
+  /// `Won’t be added`
+  String get subscriptionImportSkippedTitle {
+    return Intl.message(
+      'Won’t be added',
+      name: 'subscriptionImportSkippedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protocol isn’t supported`
+  String get subscriptionImportReasonProtocol {
+    return Intl.message(
+      'Protocol isn’t supported',
+      name: 'subscriptionImportReasonProtocol',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transport isn’t supported`
+  String get subscriptionImportReasonTransport {
+    return Intl.message(
+      'Transport isn’t supported',
+      name: 'subscriptionImportReasonTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload and download speeds are missing`
+  String get subscriptionImportReasonBandwidth {
+    return Intl.message(
+      'Upload and download speeds are missing',
+      name: 'subscriptionImportReasonBandwidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show all ({count})`
+  String subscriptionImportShowAll(int count) {
+    return Intl.message(
+      'Show all ($count)',
+      name: 'subscriptionImportShowAll',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Left out`
+  String get subscriptionImportLeftOutTitle {
+    return Intl.message(
+      'Left out',
+      name: 'subscriptionImportLeftOutTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some server options aren’t supported and are dropped`
+  String get subscriptionImportOtherLosses {
+    return Intl.message(
+      'Some server options aren’t supported and are dropped',
+      name: 'subscriptionImportOtherLosses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash applies its own settings in place of these parts of the source.`
+  String get subscriptionImportLeftOutHint {
+    return Intl.message(
+      'ReClash applies its own settings in place of these parts of the source.',
+      name: 'subscriptionImportLeftOutHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{Add 1 server} other{Add {count} servers}}`
+  String subscriptionImportAdd(int count) {
+    return Intl.plural(
+      count,
+      one: 'Add 1 server',
+      other: 'Add $count servers',
+      name: 'subscriptionImportAdd',
+      desc: '',
+      args: [count],
     );
   }
 
@@ -15509,6 +15623,16 @@ class AppLocalizations {
   /// `Notice`
   String get providerNotice {
     return Intl.message('Notice', name: 'providerNotice', desc: '', args: []);
+  }
+
+  /// `Read`
+  String get providerAnnouncementRead {
+    return Intl.message(
+      'Read',
+      name: 'providerAnnouncementRead',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Application settings`

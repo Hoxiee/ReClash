@@ -5,6 +5,7 @@ import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/widgets/announcement_card.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
+import 'package:reclash/views/dashboard/widgets/traffic.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -95,14 +96,85 @@ void main() {
           ),
         ),
       ]);
-      final position = await pumpDashboard(tester, size, SupportPlatform.MacOS);
+      final pagePosition = await pumpDashboard(
+        tester,
+        size,
+        SupportPlatform.MacOS,
+      );
       expect(find.byType(AnnouncementCard), findsOneWidget);
       expect(find.byType(NoticeCard), findsOneWidget);
+      ScrollPosition position;
+      if (size.width < 640) {
+        position = pagePosition;
+      } else {
+        expect(
+          find.descendant(
+            of: find.byType(AnnouncementCard),
+            matching: find.byType(Scrollable),
+          ),
+          findsNothing,
+        );
+        await tester.tap(find.text('Read'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.byType(SelectableText), findsOneWidget);
+        position = tester
+            .state<ScrollableState>(
+              find
+                  .descendant(
+                    of: find.ancestor(
+                      of: find.byType(SelectableText),
+                      matching: find.byType(SingleChildScrollView),
+                    ),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+            )
+            .position;
+      }
       final end = position.maxScrollExtent;
       expect(end, greaterThan(0));
       position.jumpTo(end);
       await tester.pump();
       expect(position.maxScrollExtent, closeTo(end, 1));
+      expect(tester.takeException(), isNull);
+      await teardown(tester);
+    });
+  }
+
+  for (final size in [const Size(760, 900), const Size(1100, 750)]) {
+    testWidgets('desktop traffic combines only with an announcement at $size', (
+      tester,
+    ) async {
+      await pumpDashboard(tester, size, SupportPlatform.MacOS);
+      expect(find.byType(CombinedSpeedCard), findsNothing);
+      expect(find.byType(SpeedCard), findsNWidgets(2));
+      expect(find.byType(AnnouncementCard), findsNothing);
+
+      container.updateOverrides([
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(
+          ProviderHints(
+            readSubscriptionMetadata({
+              'announce': ['Your subscription description.'],
+            }).metadata,
+          ),
+        ),
+      ]);
+      await tester.pump();
+      expect(find.byType(CombinedSpeedCard), findsOneWidget);
+      expect(find.byType(AnnouncementCard), findsOneWidget);
+      expect(find.byType(SpeedCard), findsNWidgets(2));
+      expect(tester.takeException(), isNull);
+
+      container.updateOverrides([
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(ProviderHints.empty),
+      ]);
+      await tester.pump();
+      expect(find.byType(CombinedSpeedCard), findsNothing);
+      expect(find.byType(AnnouncementCard), findsNothing);
+      expect(find.byType(SpeedCard), findsNWidgets(2));
       expect(tester.takeException(), isNull);
       await teardown(tester);
     });

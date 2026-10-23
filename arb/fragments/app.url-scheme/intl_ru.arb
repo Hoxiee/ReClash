@@ -111,5 +111,7 @@
   "profileImportUnlimited": "Безлимит",
   "profileImportExpired": "Истекла",
   "profileImportFromProvider": "От провайдера",
-  "profileImportSingleServer": "Один сервер"
+  "profileImportSingleServer": "Один сервер",
+  "profileImportDownloading": "Загружаем подписку…",
+  "profileImportTryOtherFormat": "Ничего не добавлено. Можно выбрать другой формат и попробовать снова."
 }

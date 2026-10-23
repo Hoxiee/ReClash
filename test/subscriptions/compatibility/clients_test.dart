@@ -13,14 +13,71 @@ void main() {
       );
     });
 
-    test('uses the FlClashX 0.4.2 user-agent', () {
+    test('names the FlClash X release, its core and the platform', () {
       expect(
         subscriptionClientRequestHeaders(
           SubscriptionClientPreset.flClashX,
           defaultUserAgent: 'ReClash/test',
+          operatingSystem: 'windows',
         ),
-        {'User-Agent': 'FlClashX/0.4.2'},
+        {'User-Agent': 'FlClash X/v0.4.2 core/v1.19.28 Platform/windows'},
       );
+    });
+
+    test(
+      'builds the Happ user-agent per platform with the locale language',
+      () {
+        const expected = {
+          'android': 'Android',
+          'ios': 'iOS',
+          'windows': 'Windows',
+          'macos': 'macOS',
+          'linux': 'Linux',
+        };
+        for (final MapEntry(key: os, value: name) in expected.entries) {
+          expect(
+            subscriptionClientRequestHeaders(
+              SubscriptionClientPreset.happ,
+              defaultUserAgent: 'ReClash/test',
+              locale: 'ru_RU',
+              operatingSystem: os,
+            ),
+            {
+              'User-Agent': 'Happ/4.7.1/$name/17912103176801703650',
+              'x-device-locale': 'ru',
+            },
+          );
+        }
+      },
+    );
+
+    test('sends no Happ locale header without a usable locale', () {
+      for (final locale in [null, '', '_US']) {
+        expect(
+          subscriptionClientRequestHeaders(
+            SubscriptionClientPreset.happ,
+            defaultUserAgent: 'ReClash/test',
+            locale: locale,
+            operatingSystem: 'android',
+          ).keys,
+          ['User-Agent'],
+        );
+      }
+    });
+
+    test('pins the released versions of the other client presets', () {
+      String agent(SubscriptionClientPreset preset) =>
+          subscriptionClientRequestHeaders(
+            preset,
+            defaultUserAgent: 'ReClash/test',
+            operatingSystem: 'android',
+          )['User-Agent']!;
+      expect(
+        agent(SubscriptionClientPreset.clashMeta),
+        'ClashMetaForAndroid/2.11.36.Meta',
+      );
+      expect(agent(SubscriptionClientPreset.v2rayng), 'v2rayNG/2.3.11');
+      expect(agent(SubscriptionClientPreset.singbox), 'Karing/1.2.25.2802');
     });
 
     test('keeps INCY client headers separate from device identity', () {

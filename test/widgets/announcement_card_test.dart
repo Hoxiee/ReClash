@@ -38,6 +38,73 @@ Future<void> _pump(WidgetTester tester, ProviderContainer container) async {
 }
 
 void main() {
+  testWidgets('desktop announcement expands and returns on close or scrim', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1100, 750);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final text = List.filled(30, 'Subscription news and details.').join('\n');
+    final container = _container({
+      'announce': [text],
+      'reclash-announceurl': ['https://example.test/news'],
+    });
+    addTearDown(container.dispose);
+    globalState.container = container;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                width: 250,
+                height: 208,
+                child: AnnouncementCard(expandable: true),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Scrollable), findsNothing);
+    expect(find.byType(SelectableText), findsNothing);
+    expect(find.byTooltip('Learn more'), findsOneWidget);
+    await tester.tap(find.text('Announcement'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SelectableText), findsNothing);
+    expect(find.text('Read'), findsOneWidget);
+    await tester.tap(find.text('Read'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 180));
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      text,
+    );
+    expect(find.text('Learn more'), findsOneWidget);
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.text('Read'), findsOneWidget);
+    expect(find.byType(SelectableText), findsNothing);
+    await tester.tap(find.text('Read'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(20, 400));
+    await tester.pumpAndSettle();
+    expect(find.text('Read'), findsOneWidget);
+    expect(find.byType(SelectableText), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('description has full selectable text and cannot be dismissed', (
     tester,
   ) async {

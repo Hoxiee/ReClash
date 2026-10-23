@@ -6,6 +6,8 @@ import '../routing/skipped_node.dart';
 import '../subscription/subscription_links.dart';
 
 const _serviceTypes = {'selector', 'urltest', 'direct', 'block', 'dns'};
+const _groupTypes = {'selector', 'urltest'};
+const _defaultUrlTestUrl = 'https://www.gstatic.com/generate_204';
 
 bool isSingboxConfigInput(String body) {
   final trimmed = body.trimLeft();
@@ -48,9 +50,18 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
   final seen = {...reservedProxyNames};
+  final targets = <String, String>{};
+  final groupDefs = <String, Map<String, Object?>>{};
   for (final outbound in outbounds) {
     if (outbound is! Map<String, Object?>) continue;
-    if (_serviceTypes.contains(outbound['type'])) continue;
+    final type = outbound['type'];
+    final tag = outbound['tag']?.toString() ?? '';
+    if (tag.isNotEmpty) {
+      if (_groupTypes.contains(type)) groupDefs[tag] = outbound;
+      if (type == 'direct') targets[tag] = 'DIRECT';
+      if (type == 'block') targets[tag] = 'REJECT';
+    }
+    if (_serviceTypes.contains(type)) continue;
     final Map<String, Object?>? proxy;
     try {
       proxy = _convertOutbound(outbound);
@@ -69,13 +80,302 @@ ConvertedSubscription? tryConvertSingboxConfigValue(Object? decoded) {
     }
     proxy['name'] = name;
     proxies.add(proxy);
+    if (tag.isNotEmpty) targets[tag] = name;
   }
 
   if (proxies.isEmpty && skipped.isEmpty) return null;
+  seen.add('PROXY');
+  final route = _asMap(decoded['route']);
+  final plan = _planGroups(
+    groupDefs,
+    targets,
+    proxies,
+    seen,
+    route?['final']?.toString() ?? '',
+  );
   return _SingboxConfigResult(
-    config: emitProxiesConfig(proxies),
+    config: emitProxiesConfig(
+      proxies,
+      groups: plan?.groups ?? const [],
+      rules: _convertRules(route, plan, targets),
+      entries: plan?.entries,
+    ),
     skipped: skipped,
   );
+}
+
+class _GroupPlan {
+  const _GroupPlan({
+    required this.groups,
+    required this.entries,
+    required this.mainTag,
+    required this.groupNames,
+  });
+
+  final List<Map<String, Object?>> groups;
+  final List<String> entries;
+  final String mainTag;
+  final Map<String, String> groupNames;
+}
+
+_GroupPlan? _planGroups(
+  Map<String, Map<String, Object?>> groupDefs,
+  Map<String, String> targets,
+  List<Map<String, Object?>> proxies,
+  Set<String> seen,
+  String finalTag,
+) {
+  final members = {
+    for (final entry in groupDefs.entries)
+      entry.key: [
+        for (final member in _listOf(entry.value['outbounds']))
+          if (member.toString() != entry.key) member.toString(),
+      ],
+  };
+  final alive = {...groupDefs.keys};
+  var changed = true;
+  while (changed) {
+    changed = false;
+    for (final tag in alive.toList()) {
+      final reachable = members[tag]!.any(
+        (member) => targets.containsKey(member) || alive.contains(member),
+      );
+      if (!reachable) {
+        alive.remove(tag);
+        changed = true;
+      }
+    }
+  }
+
+  String? firstAlive(String type) {
+    for (final tag in alive) {
+      if (groupDefs[tag]!['type'] == type) return tag;
+    }
+    return null;
+  }
+
+  final mainTag = alive.contains(finalTag)
+      ? finalTag
+      : firstAlive('selector') ?? firstAlive('urltest');
+  if (mainTag == null) return null;
+  final mainIsSelector = groupDefs[mainTag]!['type'] == 'selector';
+
+  final groupNames = <String, String>{};
+  for (final tag in alive) {
+    if (tag == mainTag && mainIsSelector) {
+      groupNames[tag] = 'PROXY';
+      continue;
+    }
+    var name = tag;
+    var suffix = 2;
+    while (!seen.add(name)) {
+      name = '$tag $suffix';
+      suffix++;
+    }
+    groupNames[tag] = name;
+  }
+
+  List<String> memberNames(String tag) {
+    final names = <String>{
+      for (final member in members[tag]!)
+        if (alive.contains(member)) groupNames[member]! else ?targets[member],
+    };
+    final defaultTag = groupDefs[tag]!['default']?.toString() ?? '';
+    final defaultName = alive.contains(defaultTag)
+        ? groupNames[defaultTag]
+        : targets[defaultTag];
+    if (groupDefs[tag]!['type'] == 'selector' && names.contains(defaultName)) {
+      return [defaultName!, ...names.where((name) => name != defaultName)];
+    }
+    return names.toList();
+  }
+
+  final resolved = {for (final tag in alive) tag: memberNames(tag)};
+  final List<String> entries;
+  if (mainIsSelector) {
+    entries = [
+      for (final name in resolved[mainTag]!)
+        if (name != 'DIRECT') name,
+    ];
+  } else {
+    final grouped = {for (final names in resolved.values) ...names};
+    entries = [
+      groupNames[mainTag]!,
+      for (final proxy in proxies)
+        if (!grouped.contains(proxy['name'])) proxy['name']! as String,
+    ];
+  }
+
+  final hidden = entries.toSet();
+  final groups = <Map<String, Object?>>[];
+  for (final tag in alive) {
+    if (tag == mainTag && mainIsSelector) continue;
+    final def = groupDefs[tag]!;
+    final name = groupNames[tag]!;
+    final isUrlTest = def['type'] == 'urltest';
+    groups.add(<String, Object?>{
+      'name': name,
+      'type': isUrlTest ? 'url-test' : 'select',
+      'proxies': resolved[tag],
+      if (isUrlTest) ...{
+        'url': _nonEmpty(def['url']) ?? _defaultUrlTestUrl,
+        'interval': _urlTestInterval(def['interval']),
+        'tolerance': _toInt(def['tolerance']) ?? 50,
+      },
+      if (hidden.contains(name)) 'hidden': true,
+    });
+  }
+  return _GroupPlan(
+    groups: groups,
+    entries: entries,
+    mainTag: mainTag,
+    groupNames: groupNames,
+  );
+}
+
+String? _nonEmpty(Object? value) {
+  final text = value?.toString() ?? '';
+  return text.isEmpty ? null : text;
+}
+
+int _urlTestInterval(Object? value) {
+  final milliseconds = goDurationMilliseconds(value);
+  return milliseconds == null || milliseconds <= 0
+      ? 180
+      : (milliseconds / 1000).round().clamp(30, 1 << 30);
+}
+
+typedef _Predicate = ({String text, bool ip});
+
+List<String> _convertRules(
+  Map<String, Object?>? route,
+  _GroupPlan? plan,
+  Map<String, String> targets,
+) {
+  if (route == null) return const [];
+  String? target(String tag) {
+    if (tag == plan?.mainTag) return 'PROXY';
+    return plan?.groupNames[tag] ?? targets[tag];
+  }
+
+  final rules = <String>{};
+  for (final rule in _listOf(route['rules'])) {
+    if (rule is! Map<String, Object?>) continue;
+    final action = rule['action']?.toString() ?? 'route';
+    final String? ruleTarget;
+    if (action == 'reject') {
+      ruleTarget = 'REJECT';
+    } else if (action == 'route') {
+      ruleTarget = target(rule['outbound']?.toString() ?? '');
+    } else {
+      ruleTarget = null;
+    }
+    if (ruleTarget == null) continue;
+    final predicates = _rulePredicates(rule);
+    if (predicates == null || predicates.isEmpty) continue;
+    rules.addAll(_combineRulePredicates(predicates, ruleTarget));
+  }
+
+  final finalTag = route['final']?.toString() ?? '';
+  if (finalTag.isNotEmpty && finalTag != plan?.mainTag) {
+    final finalTarget = plan?.groupNames[finalTag] ?? targets[finalTag];
+    if (finalTarget != null) rules.add('MATCH,$finalTarget');
+  }
+  return rules.toList();
+}
+
+const _ruleMetadataKeys = {'type', 'outbound', 'action', 'method', 'no_drop'};
+
+List<List<_Predicate>>? _rulePredicates(Map<String, Object?> rule) {
+  if (rule['type'] != null && rule['type'] != 'default') return null;
+  final predicates = <List<_Predicate>>[];
+  for (final entry in rule.entries) {
+    final key = entry.key;
+    if (_ruleMetadataKeys.contains(key) || entry.value == null) continue;
+    final values = entry.value is List ? entry.value as List : [entry.value];
+    if (values.isEmpty) continue;
+    final List<_Predicate>? field;
+    if (key == 'ip_is_private') {
+      if (entry.value != true) return null;
+      field = [(text: 'GEOIP,lan', ip: true)];
+    } else {
+      field = _fieldPredicates(key, [for (final v in values) v.toString()]);
+    }
+    if (field == null) return null;
+    predicates.add(field);
+  }
+  return predicates;
+}
+
+List<_Predicate>? _fieldPredicates(String key, List<String> values) {
+  final predicates = <_Predicate>[];
+  for (final value in values) {
+    final predicate = switch (key) {
+      'domain' => (text: 'DOMAIN,$value', ip: false),
+      'domain_suffix' => (
+        text:
+            'DOMAIN-SUFFIX,${value.startsWith('.') ? value.substring(1) : value}',
+        ip: false,
+      ),
+      'domain_keyword' => (text: 'DOMAIN-KEYWORD,$value', ip: false),
+      'domain_regex' => (text: 'DOMAIN-REGEX,$value', ip: false),
+      'ip_cidr' => (
+        text:
+            '${value.contains(':') ? 'IP-CIDR6' : 'IP-CIDR'},${_withPrefix(value)}',
+        ip: true,
+      ),
+      'geosite' => (text: 'GEOSITE,$value', ip: false),
+      'geoip' => (
+        text: 'GEOIP,${value == 'private' ? 'lan' : value}',
+        ip: true,
+      ),
+      'port' when int.tryParse(value) != null => (
+        text: 'DST-PORT,$value',
+        ip: false,
+      ),
+      'port_range' => _portRange(value),
+      'network' when value == 'tcp' || value == 'udp' => (
+        text: 'NETWORK,$value',
+        ip: false,
+      ),
+      _ => null,
+    };
+    if (predicate == null) return null;
+    predicates.add(predicate);
+  }
+  return predicates;
+}
+
+String _withPrefix(String cidr) =>
+    cidr.contains('/') ? cidr : '$cidr/${cidr.contains(':') ? 128 : 32}';
+
+_Predicate? _portRange(String value) {
+  final bounds = value.split(':');
+  if (bounds.length != 2) return null;
+  final low = bounds[0].isEmpty ? 0 : int.tryParse(bounds[0]);
+  final high = bounds[1].isEmpty ? 65535 : int.tryParse(bounds[1]);
+  if (low == null || high == null) return null;
+  return (text: 'DST-PORT,$low-$high', ip: false);
+}
+
+List<String> _combineRulePredicates(
+  List<List<_Predicate>> fields,
+  String target,
+) {
+  String bare(_Predicate p) => p.ip ? '${p.text},no-resolve' : p.text;
+  if (fields.length == 1) {
+    return [
+      for (final p in fields.single)
+        p.ip ? '${p.text},$target,no-resolve' : '${p.text},$target',
+    ];
+  }
+  final parts = [
+    for (final alternatives in fields)
+      alternatives.length == 1
+          ? bare(alternatives.single)
+          : 'OR,(${alternatives.map((p) => '(${bare(p)})').join(',')})',
+  ];
+  return ['AND,(${parts.map((part) => '($part)').join(',')}),$target'];
 }
 
 Object? _tryJson(String body) {

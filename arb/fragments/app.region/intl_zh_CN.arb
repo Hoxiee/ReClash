@@ -39,5 +39,8 @@
   "regionChangeServices": "服务检查",
   "restoreDefaults": "恢复默认",
   "networkRestoreDefaultsTip": "绕过列表和 TUN MTU 将恢复为所选地区的默认值。",
-  "dnsRestoreDefaultsTip": "将删除所有 DNS 覆写，并重新设置所选地区的 DNS 服务器。"
+  "dnsRestoreDefaultsTip": "将删除所有 DNS 覆写，并重新设置所选地区的 DNS 服务器。",
+  "serviceAutoCheckActive": "自动检查已启用的服务",
+  "serviceAutoCheckAll": "检查所有服务",
+  "serviceCheckOnlyWhenConnected": "仅在连接时检查"
 }

@@ -42,6 +42,27 @@ void main() {
       expect(ids, hasLength(ServiceTarget.values.length));
     });
 
+    test('includes all requested public services', () {
+      expect(
+        [
+          'telegram',
+          'sberbank',
+          'gosuslugi',
+          'vk',
+          'kinopoisk',
+          'yandex',
+        ].map(ServiceTarget.byId),
+        [
+          ServiceTarget.telegram,
+          ServiceTarget.sberbank,
+          ServiceTarget.gosuslugi,
+          ServiceTarget.vk,
+          ServiceTarget.kinopoisk,
+          ServiceTarget.yandex,
+        ],
+      );
+    });
+
     test('resolves an id back to its target', () {
       expect(ServiceTarget.byId('disney-plus'), ServiceTarget.disneyPlus);
       expect(ServiceTarget.byId('nope'), isNull);

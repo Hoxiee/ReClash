@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'import_policy.dart';
 
 enum SubscriptionClientPreset {
@@ -29,22 +31,28 @@ Map<String, String> subscriptionClientRequestHeaders(
   required String defaultUserAgent,
   String customUserAgent = '',
   String? locale,
+  String? operatingSystem,
 }) {
+  final os = operatingSystem ?? Platform.operatingSystem;
   final headers = <String, String>{
     'User-Agent': switch (preset) {
       SubscriptionClientPreset.auto => defaultUserAgent,
       SubscriptionClientPreset.reclash => defaultUserAgent,
-      SubscriptionClientPreset.flClashX => 'FlClashX/0.4.2',
-      SubscriptionClientPreset.clashMeta => 'ClashMetaForAndroid/2.11.7.Meta',
+      SubscriptionClientPreset.flClashX =>
+        'FlClash X/v0.4.2 core/v1.19.28 Platform/$os',
+      SubscriptionClientPreset.clashMeta => 'ClashMetaForAndroid/2.11.36.Meta',
       SubscriptionClientPreset.clash => 'ClashForAndroid/2.5.12',
-      SubscriptionClientPreset.happ => 'Happ/4.6.0',
+      SubscriptionClientPreset.happ =>
+        'Happ/4.7.1/${_happPlatform(os)}/17912103176801703650',
       SubscriptionClientPreset.incy => 'INCY/3.3.1',
-      SubscriptionClientPreset.singbox => 'Karing/1.0.0',
-      SubscriptionClientPreset.v2rayng => 'v2rayNG/1.9.24',
+      SubscriptionClientPreset.singbox => 'Karing/1.2.25.2802',
+      SubscriptionClientPreset.v2rayng => 'v2rayNG/2.3.11',
       SubscriptionClientPreset.custom => _validatedCustomSubscriptionUserAgent(
         customUserAgent,
       ),
     },
+    if (preset == SubscriptionClientPreset.happ)
+      'x-device-locale': ?_languageSubtag(locale),
     if (preset == SubscriptionClientPreset.incy) ...{
       'x-client': 'INCY',
       'x-app-version': '3.3.1',
@@ -55,6 +63,20 @@ Map<String, String> subscriptionClientRequestHeaders(
     },
   };
   return Map.unmodifiable(headers);
+}
+
+String _happPlatform(String operatingSystem) => switch (operatingSystem) {
+  'android' => 'Android',
+  'ios' => 'iOS',
+  'windows' => 'Windows',
+  'macos' => 'macOS',
+  'linux' => 'Linux',
+  final other => other,
+};
+
+String? _languageSubtag(String? locale) {
+  final language = locale?.split(RegExp('[_-]')).first.toLowerCase() ?? '';
+  return language.isEmpty ? null : language;
 }
 
 String? validateCustomSubscriptionUserAgent(String value) {

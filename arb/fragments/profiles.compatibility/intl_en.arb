@@ -12,15 +12,9 @@
   "subscriptionClientCustomUserAgent": "User-Agent",
   "subscriptionClientCustomUserAgentInvalid": "Enter a valid User-Agent without control characters.",
   "subscriptionClientDeviceDataHint": "Client selection does not send device identity.",
-  "subscriptionImportReviewTitle": "Review subscription import",
-  "subscriptionImportReviewSummary": "{count} proxy nodes can be imported from {format}.",
-  "subscriptionImportNoNodes": "No supported proxy nodes can be imported.",
-  "subscriptionImportIgnoredSections": "The following source sections will not be transferred: {sections}.",
-  "subscriptionImportSkippedNodes": "{count} nodes cannot be converted.",
-  "subscriptionImportAcceptSections": "I understand that source settings will be omitted.",
-  "subscriptionImportAcceptPartial": "Continue with only the supported nodes.",
-  "subscriptionImportAcceptOtherLosses": "I understand that some source data will not be preserved.",
-  "subscriptionImportAccept": "Accept and import",
+  "subscriptionImportReviewTitle": "Not everything carries over",
+  "subscriptionImportNoNodes": "None of the servers are supported",
+  "subscriptionImportIgnoredSections": "Config sections",
   "subscriptionImportFormatClash": "Clash configuration",
   "subscriptionImportFormatShareLinks": "proxy links",
   "subscriptionImportFormatEncrypted": "encrypted subscription",
@@ -43,8 +37,8 @@
   "subscriptionCompatibilityTransport": "Connection failed. Client negotiation stopped.",
   "subscriptionCompatibilitySuperseded": "The form or profile changed. Check the subscription again.",
   "subscriptionCompatibilityAgeKey": "Enter the AGE key to check this subscription.",
-  "subscriptionImportRememberConsent": "Remember this consent for this subscription",
-  "subscriptionImportRememberConsentHint": "Applies only to this source, format and the accepted loss types. New losses require consent again.",
+  "subscriptionImportRememberConsent": "Don’t ask again for this subscription",
+  "subscriptionImportRememberConsentHint": "If anything else stops carrying over, you’ll be asked again.",
   "@subscriptionCompatibilityPrepared": {
     "placeholders": {
       "client": {
@@ -90,5 +84,55 @@
       }
     }
   },
-  "subscriptionIdentityRegionWarning": "Many subscriptions will stop working if HWID sending is turned off."
+  "subscriptionIdentityRegionWarning": "Many subscriptions will stop working if HWID sending is turned off.",
+  "subscriptionImportPartial": "{count} of {total, plural, one{1 server} other{{total} servers}} will be added",
+  "@subscriptionImportPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionImportAllAdded": "{count, plural, one{The server will be added} other{All {count} servers will be added}}",
+  "@subscriptionImportAllAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionImportSourceFormat": "Format: {format}",
+  "@subscriptionImportSourceFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionImportSkippedTitle": "Won’t be added",
+  "subscriptionImportReasonProtocol": "Protocol isn’t supported",
+  "subscriptionImportReasonTransport": "Transport isn’t supported",
+  "subscriptionImportReasonBandwidth": "Upload and download speeds are missing",
+  "subscriptionImportShowAll": "Show all ({count})",
+  "@subscriptionImportShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionImportLeftOutTitle": "Left out",
+  "subscriptionImportOtherLosses": "Some server options aren’t supported and are dropped",
+  "subscriptionImportLeftOutHint": "ReClash applies its own settings in place of these parts of the source.",
+  "subscriptionImportAdd": "{count, plural, one{Add 1 server} other{Add {count} servers}}",
+  "@subscriptionImportAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

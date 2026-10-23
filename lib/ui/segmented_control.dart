@@ -168,7 +168,7 @@ class GlyphSegmentedControl<T> extends StatelessWidget {
   });
 
   static const double _inset = 4;
-  static const double _segment = 44;
+  static const double _segment = 56;
   static const _size = TonalButtonSize.section;
 
   final List<GlyphSegment<T>> segments;

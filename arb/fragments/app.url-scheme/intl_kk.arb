@@ -111,5 +111,7 @@
   "profileImportUnlimited": "Шексіз",
   "profileImportExpired": "Мерзімі өтті",
   "profileImportFromProvider": "Провайдерден",
-  "profileImportSingleServer": "Бір сервер"
+  "profileImportSingleServer": "Бір сервер",
+  "profileImportDownloading": "Жазылым жүктелуде…",
+  "profileImportTryOtherFormat": "Ештеңе қосылмады. Басқа пішімді таңдап, қайталап көріңіз."
 }
