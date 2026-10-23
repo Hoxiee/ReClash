@@ -209,6 +209,7 @@ void main() {
     expect(find.byType(UpdateSheet), findsOneWidget);
     await tester.tap(find.byTooltip(currentAppLocalizations.close).last);
     await tester.pump(const Duration(milliseconds: 700));
+    container.dispose();
   });
 
   testWidgets('closing the sheet leaves its provider-owned transfer visible', (
