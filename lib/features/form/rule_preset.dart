@@ -1,4 +1,6 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
+import 'package:reclash/common/regional/region_labels.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -33,12 +35,24 @@ enum RulePreset {
     'GEOSITE,category-public-tracker,DIRECT',
     'GEOSITE,category-pt,DIRECT',
     r'PROCESS-NAME-REGEX,(?i)^(qbittorrent|transmission.*|deluge.*|aria2c|motrix|utorrent|bitcomet)(\.exe)?$,DIRECT',
-  ]);
+  ]),
+  russiaDirect.region('RU'),
+  iranDirect.region('IR'),
+  chinaDirect.region('CN'),
+  egyptDirect.region('EG');
 
   final Glyph glyph;
-  final List<String> rawRules;
+  final List<String> _rawRules;
+  final String? regionCode;
 
-  const RulePreset(this.glyph, this.rawRules);
+  const RulePreset(this.glyph, this._rawRules) : regionCode = null;
+
+  const RulePreset.region(this.regionCode)
+    : glyph = AppGlyphs.language,
+      _rawRules = const [];
+
+  List<String> get rawRules =>
+      regionCode == null ? _rawRules : directRulesForCode(regionCode);
 
   String label(AppLocalizations appLocalizations) => switch (this) {
     RulePreset.blockQuic => appLocalizations.rulePresetBlockQuic,
@@ -49,6 +63,10 @@ enum RulePreset {
     RulePreset.systemServicesDirect =>
       appLocalizations.rulePresetSystemServicesDirect,
     RulePreset.bittorrentDirect => appLocalizations.rulePresetBittorrentDirect,
+    RulePreset.russiaDirect ||
+    RulePreset.iranDirect ||
+    RulePreset.chinaDirect ||
+    RulePreset.egyptDirect => regionLabel(appLocalizations, regionCode),
   };
 
   List<Rule> get rules => rawRules.map(Rule.parse).toList();

@@ -4,7 +4,8 @@ state: active
 risk: routine
 must:
   rules: Rule forms validate submissions and preserve rule metadata when existing rules are edited.
+  regional-presets: Quick actions offer country-specific direct routes from the regional catalog and add only confirmed selections.
   editors: Map and named-URL editors validate and preserve structured values through editing and batch input.
-watch: ['lib/features/form/**', test/features/rule_dialog_test.dart, test/features/named_url_form_test.dart, test/widgets/input_test.dart]
+watch: ['lib/features/form/**', test/features/rule_dialog_test.dart, test/features/rule_preset_test.dart, test/features/custom_rule_form_test.dart, test/features/named_url_form_test.dart, test/widgets/input_test.dart]
 checks:
-  tests: [rules, editors]
+  tests: [rules, editors, regional-presets]
