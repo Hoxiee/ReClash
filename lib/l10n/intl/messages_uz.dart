@@ -3542,9 +3542,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "trafficPeak": m147,
     "trafficTotal": m148,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
-    "translationNotice": MessageLookupByLibrary.simpleMessage(
-      "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
-    ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Tarjima tuzatishni taklif qilish",
     ),

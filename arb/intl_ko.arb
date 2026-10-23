@@ -1401,7 +1401,6 @@
   "desktopHelperSystemdFailed": "systemd가 TUN Helper를 시작하지 못했습니다. 서비스 로그를 확인하세요. 설치 프로그램은 이전 설치 복원을 시도했습니다.",
   "desktopHelperProtocolMismatch": "설치된 Helper가 다른 프로토콜을 사용합니다. 다른 설치 또는 서비스 재정의 설정을 확인한 다음 전체 패키지를 다시 설치하세요.",
   "desktopHelperSystemdRequired": "TUN에는 systemd가 관리하는 Linux 세션이 필요합니다. 이 시스템에서는 네트워크 Helper를 실행할 수 없습니다.",
-  "translationNotice": "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
   "translationSuggestFix": "번역 수정 제안하기",
   "kk": "카자흐어",
   "tk": "투르크멘어",

@@ -1401,7 +1401,6 @@
   "desktopHelperSystemdFailed": "systemd no pudo iniciar el Helper de TUN. Revisa el registro del servicio; el instalador intentó restaurar la instalación anterior.",
   "desktopHelperProtocolMismatch": "El Helper instalado usa otro protocolo. Comprueba si hay otra instalación o una configuración que anule el servicio y reinstala el paquete completo.",
   "desktopHelperSystemdRequired": "TUN requiere una sesión de Linux gestionada por systemd. Este sistema no puede ejecutar el Helper de red.",
-  "translationNotice": "ReClash habla tu idioma para que nadie se quede fuera. Si alguna frase suena rara a oído nativo, dínoslo y la corregiremos.",
   "translationSuggestFix": "Sugerir una corrección de traducción",
   "kk": "Kazajo",
   "tk": "Turcomano",
