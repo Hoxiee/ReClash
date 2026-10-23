@@ -1356,7 +1356,7 @@ void main() {
           TrackerInfo(
             id: 'workspace-request',
             start: DateTime.utc(2026),
-            metadata: Metadata(host: 'example.test', network: 'tcp'),
+            metadata: const Metadata(host: 'example.test', network: 'tcp'),
             chains: const ['Proxy'],
             rule: 'DOMAIN',
             rulePayload: 'example.test',

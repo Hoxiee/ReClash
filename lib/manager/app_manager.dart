@@ -6,6 +6,7 @@ import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
@@ -39,6 +40,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         _updateVisible(WidgetsBinding.instance.lifecycleState);
       }
     });
+    ref.listenManual(serviceStatusProvider, (_, _) {});
     ref.listenManual(providerSettingsSyncProvider, (_, _) {});
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {

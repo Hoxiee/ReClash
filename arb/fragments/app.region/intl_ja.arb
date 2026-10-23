@@ -39,5 +39,8 @@
   "regionChangeServices": "サービス確認",
   "restoreDefaults": "デフォルトに戻す",
   "networkRestoreDefaultsTip": "バイパス一覧と TUN の MTU を、選択中の地域の既定値に戻します。",
-  "dnsRestoreDefaultsTip": "DNS のオーバーライドをすべて削除し、選択中の地域の DNS サーバーを再設定します。"
+  "dnsRestoreDefaultsTip": "DNS のオーバーライドをすべて削除し、選択中の地域の DNS サーバーを再設定します。",
+  "serviceAutoCheckActive": "有効なサービスを自動確認",
+  "serviceAutoCheckAll": "すべてのサービスを確認",
+  "serviceCheckOnlyWhenConnected": "接続時のみ確認"
 }

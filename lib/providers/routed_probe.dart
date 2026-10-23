@@ -89,6 +89,9 @@ mixin RoutedProbe<K, V>
   Future<Map<K, ProbeAnswer<V>>> probe(K target, RouteState route);
 
   @protected
+  bool get automaticChecks => true;
+
+  @protected
   bool isFailure(V value) => false;
 
   @protected
@@ -112,7 +115,7 @@ mixin RoutedProbe<K, V>
     if (_watchers.length == 1) {
       ref.read(routeTrackerProvider.notifier).attach();
     }
-    if (_entryOf(target).phase != ProbePhase.fresh) {
+    if (automaticChecks && _entryOf(target).phase != ProbePhase.fresh) {
       _mark(target);
     }
   }
@@ -314,7 +317,8 @@ mixin RoutedProbe<K, V>
       }
       if (!next.isFresh(stamp)) {
         _invalidate(target, entries);
-      } else if (resumed &&
+      } else if (automaticChecks &&
+          resumed &&
           entry.phase == ProbePhase.failed &&
           _watchers.containsKey(target)) {
         _due[target] = (keepValue: false, forced: false, supersede: false);
@@ -331,7 +335,7 @@ mixin RoutedProbe<K, V>
   /// A stale entry is asked again while someone watches it and forgotten
   /// otherwise; either way its old value is never shown.
   void _invalidate(K target, Map<K, ProbeEntry<V>> entries) {
-    if (_watchers.containsKey(target)) {
+    if (automaticChecks && _watchers.containsKey(target)) {
       entries[target] = ProbeEntry(phase: ProbePhase.probing);
       _due[target] = (keepValue: false, forced: false, supersede: true);
     } else {

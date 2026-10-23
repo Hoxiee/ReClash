@@ -130,11 +130,6 @@ void main() {
     );
   }
 
-  /// The card shows the first four enabled services.
-  final shownIds = [
-    for (final target in ServiceTarget.values.take(4)) target.id,
-  ];
-
   AppSettingProps only(List<ServiceTarget> targets) => AppSettingProps(
     disabledServices: [
       for (final target in ServiceTarget.values)
@@ -151,6 +146,12 @@ void main() {
     expect(DashboardWidget.serviceStatus.card, isA<ServiceStatusCard>());
   });
 
+  Future<void> settleChecks(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('holds the latency with a skeleton until checked', (
     tester,
   ) async {
@@ -158,19 +159,22 @@ void main() {
     answer((_) => completion.future);
     await tester.pumpWidget(app(settings: only([ServiceTarget.google])));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
     expect(find.byType(SkeletonText), findsOneWidget);
 
     completion.complete([
       _item('google', ServiceProbeStatus.available, delay: 123),
     ]);
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(find.byType(SkeletonText), findsNothing);
     expect(find.text('123 ms'), findsOneWidget);
     expect(find.text('All available'), findsOneWidget);
   });
 
-  testWidgets('checks the first four services, and only those', (tester) async {
+  testWidgets('checks all enabled services while showing only four', (
+    tester,
+  ) async {
     final asked = <String>[];
     answer((params) {
       asked.addAll(params.names);
@@ -180,9 +184,12 @@ void main() {
       ];
     });
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
-    expect(asked, unorderedEquals(shownIds));
+    expect(
+      asked,
+      unorderedEquals(ServiceTarget.values.map((target) => target.id)),
+    );
     for (final target in ServiceTarget.values.take(4)) {
       expect(tile(target), findsOneWidget);
     }
@@ -190,7 +197,7 @@ void main() {
     expect(find.text('45 ms'), findsNWidgets(4));
   });
 
-  testWidgets('a desktop card checks the same four services', (tester) async {
+  testWidgets('a desktop card checks all enabled services', (tester) async {
     final asked = <String>[];
     answer((params) {
       asked.addAll(params.names);
@@ -199,9 +206,12 @@ void main() {
     await tester.pumpWidget(
       app(width: 320, density: DashboardDensity.standard),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
-    expect(asked, unorderedEquals(shownIds));
+    expect(
+      asked,
+      unorderedEquals(ServiceTarget.values.map((target) => target.id)),
+    );
     expect(find.byTooltip('Check all'), findsOneWidget);
     expect(find.text('Check all'), findsNothing);
     expect(tester.takeException(), isNull);
@@ -220,7 +230,7 @@ void main() {
     answer((_) => const []);
     final [first, second, third, ...] = ServiceTarget.values;
     await tester.pumpWidget(app(settings: only([first, second, third])));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(cellWidth(tester, first), lessThan(rowWidth(tester) / 2));
     expect(cellWidth(tester, third), rowWidth(tester));
@@ -238,7 +248,7 @@ void main() {
         density: DashboardDensity.standard,
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     Rect cell(ServiceTarget target) => tester.getRect(
       find.ancestor(of: tile(target), matching: find.byType(DashboardBlock)),
@@ -261,7 +271,7 @@ void main() {
     await tester.pumpWidget(
       app(width: 320, density: DashboardDensity.standard),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     final button = tester.getSize(
       find.ancestor(
@@ -288,7 +298,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     final youtube = tester.getTopLeft(tile(ServiceTarget.youtube));
     final google = tester.getTopLeft(tile(ServiceTarget.google));
@@ -299,7 +309,7 @@ void main() {
     expect(find.text('All available'), findsNothing);
   });
 
-  testWidgets('checks the shown service directly while the proxy is off', (
+  testWidgets('checks directly when connected-only is disabled', (
     tester,
   ) async {
     final asked = <ServiceCheckParams>[];
@@ -308,9 +318,14 @@ void main() {
       return [_item('google', ServiceProbeStatus.available, delay: 45)];
     });
     await tester.pumpWidget(
-      app(started: false, settings: only([ServiceTarget.google])),
+      app(
+        started: false,
+        settings: only([
+          ServiceTarget.google,
+        ]).copyWith(serviceCheckOnlyWhenConnected: false),
+      ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(asked.single.proxyName, directOutbound);
     expect(find.text('45 ms'), findsOneWidget);
@@ -333,12 +348,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(app(outboundIp: outboundIp));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byTooltip('Check all'));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     return find.byType(ServiceStatusSheet);
   }
 
@@ -428,9 +443,9 @@ void main() {
             ipQuality: loaded ? quality : null,
           ),
         );
-        await tester.pumpAndSettle();
+        await settleChecks(tester);
         await tester.tap(find.byType(ServiceStatusCard));
-        await tester.pumpAndSettle();
+        await settleChecks(tester);
         final sheet = find.byType(ServiceStatusSheet);
         double height() => tester.getSize(find.byType(PagedSheet)).height;
 
@@ -470,9 +485,9 @@ void main() {
           settings: only([ServiceTarget.google]),
         ),
       );
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       await tester.tap(find.byType(ServiceStatusCard));
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       await tester.tap(find.text('\u{1F1FA}\u{1F1F8}').first);
       await tester.pump();
       await tester.pump(commonDuration * 2);
@@ -523,14 +538,17 @@ void main() {
       ];
     });
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(find.byType(ServiceStatusSheet), findsOneWidget);
-    expect(asked, unorderedEquals(shownIds));
-    expect(find.text('Not checked'), findsWidgets);
+    expect(
+      asked,
+      unorderedEquals(ServiceTarget.values.map((target) => target.id)),
+    );
+    expect(find.text('Not checked'), findsNothing);
     expect(
       find.descendant(
         of: find.byType(ServiceStatusSheet),
@@ -580,9 +598,9 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     final sheet = tester.getSize(find.byType(ServiceStatusSheet)).height;
     final row = tester.getSize(find.byType(ListTile)).height;
@@ -601,28 +619,31 @@ void main() {
     final sweep = Completer<void>();
     answer((params) async {
       asked.add(params.names);
-      if (asked.length > 4) await sweep.future;
+      if (asked.length > ServiceTarget.values.length) await sweep.future;
       return [
         for (final name in params.names)
           _item(name, ServiceProbeStatus.available, delay: 30),
       ];
     });
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
-    expect(asked.expand((names) => names), unorderedEquals(shownIds));
+    await settleChecks(tester);
+    expect(
+      asked.expand((names) => names),
+      unorderedEquals(ServiceTarget.values.map((target) => target.id)),
+    );
 
     await tester.tap(checkAllButton());
     await tester.pump();
-    expect(asked.skip(4), [
+    expect(asked.skip(ServiceTarget.values.length), [
       for (final target in ServiceTarget.values) [target.id],
     ]);
     expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNull);
 
     sweep.complete();
-    await tester.pumpAndSettle();
-    expect(asked, hasLength(ServiceTarget.values.length + 4));
+    await settleChecks(tester);
+    expect(asked, hasLength(ServiceTarget.values.length * 2));
     expect(find.text('Not checked'), findsNothing);
     expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNotNull);
   });
@@ -637,9 +658,9 @@ void main() {
       ];
     });
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     await tester.tap(
       find.descendant(
@@ -647,10 +668,10 @@ void main() {
         matching: find.text(ServiceTarget.chatgpt.label),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(find.byType(ServiceStatusSheet), findsOneWidget);
-    expect(asked.skip(4), [ServiceTarget.chatgpt.id]);
+    expect(asked.skip(ServiceTarget.values.length), [ServiceTarget.chatgpt.id]);
   });
   testWidgets('a route change checks the shown service again once', (
     tester,
@@ -665,14 +686,14 @@ void main() {
       ];
     });
     await tester.pumpWidget(app(settings: only([ServiceTarget.google])));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(asked, ['google']);
 
     epoch = 2;
     ProviderScope.containerOf(tester.element(find.byType(ServiceStatusCard)))
         .read(routeTrackerProvider.notifier)
         .applySnapshot(const RouteSnapshot(coreEpoch: 2, picksVersion: 1));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(asked, ['google', 'google']);
     expect(find.text('Available'), findsOneWidget);
@@ -690,9 +711,9 @@ void main() {
     await tester.pumpWidget(
       app(settings: only([ServiceTarget.google, ServiceTarget.github])),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(asked, unorderedEquals(['google', 'github']));
 
     await tester.tap(
@@ -701,15 +722,18 @@ void main() {
         matching: find.byTooltip('Check'),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(asked, hasLength(3));
     expect(asked.last, 'github');
   });
 
   testWidgets('a row keeps its height through a check', (tester) async {
     final claude = Completer<void>();
+    var claudeChecks = 0;
     answer((params) async {
-      if (params.names.contains('claude')) await claude.future;
+      if (params.names.contains('claude') && ++claudeChecks > 1) {
+        await claude.future;
+      }
       return [
         for (final name in params.names)
           _item(
@@ -726,13 +750,13 @@ void main() {
         settings: only(ServiceTarget.values.take(5).toList()),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     final row = find.widgetWithText(ListTile, ServiceTarget.claude.label);
     await tester.ensureVisible(row);
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     final unchecked = tester.getSize(row).height;
     await tester.tap(
       find.descendant(of: row, matching: find.byTooltip('Check')),
@@ -741,7 +765,7 @@ void main() {
     expect(tester.getSize(row).height, unchecked);
 
     claude.complete();
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(
       find.descendant(of: row, matching: find.text('203.0.113.7')),
       findsOne,
@@ -754,9 +778,9 @@ void main() {
   ) async {
     answer((params) => const []);
     await tester.pumpWidget(app(started: false));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     final buttons = tester.widgetList<IconButton>(
       find.ancestor(
@@ -775,9 +799,9 @@ void main() {
 
   Future<void> openManage(WidgetTester tester) async {
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await tester.tap(find.byTooltip('Manage services'));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
   }
 
   Finder switchOf(ServiceTarget target) => find.descendant(
@@ -806,18 +830,18 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       expect(find.text('Service checks are off'), findsOneWidget);
       expect(find.text('All available'), findsNothing);
       expect(asked, isEmpty);
       await tester.tap(find.byType(ServiceStatusCard));
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       expect(find.text('Service checks are off'), findsNWidgets(2));
       expect(tester.widget<IconButton>(checkAllButton()).onPressed, isNull);
       await tester.tap(find.byTooltip('Manage services'));
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       await tester.tap(switchOf(ServiceTarget.google));
-      await tester.pumpAndSettle();
+      await settleChecks(tester);
       final settings = settingsOf(tester);
       expect(settings.enabledServices, ['google']);
       expect(settings.disabledServices, isNot(contains('google')));
@@ -842,15 +866,16 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
-    expect(asked, ['claude', 'google', 'youtube', 'chatgpt']);
+    await settleChecks(tester);
+    expect(asked.take(4), ['claude', 'google', 'youtube', 'chatgpt']);
+    expect(asked, hasLength(ServiceTarget.values.length - 1));
     expect(
       tester.getCenter(tile(ServiceTarget.claude)).dx,
       lessThan(tester.getCenter(tile(ServiceTarget.google)).dx),
     );
 
     await tester.tap(find.byType(ServiceStatusCard));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     final labels = tester
         .widgetList<Text>(
           find.descendant(
@@ -875,22 +900,22 @@ void main() {
   ) async {
     answer((params) => const []);
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await openManage(tester);
 
     expect(find.text('Manage services'), findsOneWidget);
     expect(find.byType(ServiceStatusSheet), findsNothing);
     await tester.tap(switchOf(ServiceTarget.youtube));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(settingsOf(tester).disabledServices, ['youtube']);
 
     await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(find.byType(ServiceStatusSheet), findsOneWidget);
     expect(find.text(ServiceTarget.youtube.label), findsNothing);
 
     await tester.tap(find.byTooltip('Close'));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(find.byType(ServiceStatusSheet), findsNothing);
     expect(find.byType(ServiceStatusCard), findsOneWidget);
   });
@@ -902,7 +927,7 @@ void main() {
     await tester.pumpWidget(
       app(settings: const AppSettingProps(disabledServices: ['github'])),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await openManage(tester);
 
     Finder marked(ServiceTarget target) => find.descendant(
@@ -921,6 +946,33 @@ void main() {
     expect(marked(ServiceTarget.gemini), findsNothing);
   });
 
+  testWidgets('the more menu persists automatic check options', (tester) async {
+    answer((_) => const []);
+    await tester.pumpWidget(app());
+    await settleChecks(tester);
+    await openManage(tester);
+
+    Future<void> toggleOption(String label) async {
+      await tester.tap(find.byTooltip('More'));
+      await tester.pumpAndSettle();
+      expect(find.text('Automatically check enabled services'), findsOneWidget);
+      expect(find.text('Check all services'), findsOneWidget);
+      expect(find.text('Only check when connected'), findsOneWidget);
+      await tester.tap(find.text(label));
+      await settleChecks(tester);
+    }
+
+    expect(settingsOf(tester).autoCheckActiveServices, isTrue);
+    expect(settingsOf(tester).autoCheckAllServices, isFalse);
+    expect(settingsOf(tester).serviceCheckOnlyWhenConnected, isTrue);
+    await toggleOption('Automatically check enabled services');
+    expect(settingsOf(tester).autoCheckActiveServices, isFalse);
+    await toggleOption('Check all services');
+    expect(settingsOf(tester).autoCheckAllServices, isTrue);
+    await toggleOption('Only check when connected');
+    expect(settingsOf(tester).serviceCheckOnlyWhenConnected, isFalse);
+  });
+
   testWidgets('the last enabled service cannot be turned off', (tester) async {
     answer((params) => const []);
     await tester.pumpWidget(
@@ -933,7 +985,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await openManage(tester);
 
     expect(
@@ -951,7 +1003,7 @@ void main() {
   ) async {
     answer((params) => const []);
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     await openManage(tester);
 
     expect(find.byGlyph(AppGlyphs.dragHandle), findsNothing);
@@ -974,7 +1026,7 @@ void main() {
       await tester.pump();
     }
     await gesture.up();
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(settingsOf(tester).serviceOrder.take(2), ['github', 'google']);
   });
@@ -991,18 +1043,24 @@ void main() {
       ];
     });
     await tester.pumpWidget(app());
-    await tester.pumpAndSettle();
-    expect(asked, unorderedEquals(shownIds));
+    await settleChecks(tester);
+    expect(
+      asked,
+      unorderedEquals(ServiceTarget.values.map((target) => target.id)),
+    );
 
     ProviderScope.containerOf(
       tester.element(find.byType(ServiceStatusCard)),
     ).read(appSettingProvider.notifier).value = const AppSettingProps(
       disabledServices: ['google'],
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     expect(tile(ServiceTarget.google), findsNothing);
-    expect(asked.skip(4), [ServiceTarget.values[4].id]);
+    expect(asked.skip(ServiceTarget.values.length), [
+      for (final target in ServiceTarget.values)
+        if (target != ServiceTarget.google) target.id,
+    ]);
   });
 
   testWidgets('an unexpected error shows the check as failed', (tester) async {
@@ -1012,7 +1070,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(app(settings: only([ServiceTarget.google])));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(find.text('Check failed'), findsOneWidget);
   });
 
@@ -1023,12 +1081,13 @@ void main() {
     answer((_) => completion.future);
     await tester.pumpWidget(app(settings: only([ServiceTarget.google])));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
     final title = find.text(ServiceTarget.google.label);
     final checking = tester.getTopLeft(title).dy;
 
     completion.complete([_item('google', ServiceProbeStatus.failed)]);
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     expect(find.text('Check failed'), findsOneWidget);
     expect(tester.getTopLeft(title).dy, checking);
   });
@@ -1064,10 +1123,11 @@ void main() {
     await tester.pumpWidget(
       app(started: false, settings: only([ServiceTarget.google])),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     setStarted(tester, true);
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
     expect(checkPhase(tester), ProbePhase.failed);
     expect(find.text('Check failed'), findsNothing);
@@ -1078,6 +1138,7 @@ void main() {
         .read(routeTrackerProvider.notifier)
         .applySnapshot(const RouteSnapshot(coreEpoch: 2, picksVersion: 1));
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
     expect(find.text('Available'), findsOneWidget);
     expect(find.byType(SkeletonText), findsNothing);
@@ -1098,7 +1159,7 @@ void main() {
     await tester.pumpWidget(
       app(started: false, settings: only([ServiceTarget.google])),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     setStarted(tester, true);
     await tester.pump();
@@ -1110,9 +1171,7 @@ void main() {
     expect(find.text('Check failed'), findsOneWidget);
   });
 
-  testWidgets('stopping the proxy shows a failure without waiting', (
-    tester,
-  ) async {
+  testWidgets('stopping the proxy drops its stale failure', (tester) async {
     answer(
       (params) => [
         for (final name in params.names) _item(name, ServiceProbeStatus.failed),
@@ -1121,18 +1180,20 @@ void main() {
     await tester.pumpWidget(
       app(started: false, settings: only([ServiceTarget.google])),
     );
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
 
     setStarted(tester, true);
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
     expect(checkPhase(tester), ProbePhase.failed);
     expect(find.text('Check failed'), findsNothing);
 
     setStarted(tester, false);
     await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pump(commonDuration);
-    expect(find.text('Check failed'), findsOneWidget);
+    expect(find.text('Check failed'), findsNothing);
   });
 
   testWidgets('leaving the dashboard releases the shown services', (
@@ -1147,7 +1208,7 @@ void main() {
       ];
     });
     await tester.pumpWidget(app(settings: only([ServiceTarget.google])));
-    await tester.pumpAndSettle();
+    await settleChecks(tester);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(ServiceStatusCard)),
     );
@@ -1184,7 +1245,7 @@ void main() {
         await tester.pumpWidget(
           app(width: width, density: density, locale: locale),
         );
-        await tester.pumpAndSettle();
+        await settleChecks(tester);
         expect(tester.takeException(), isNull, reason: '$locale at $width');
       }
     }

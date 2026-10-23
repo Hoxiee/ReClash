@@ -83,7 +83,7 @@ void main() {
       MaterialApp(
         home: WallpaperBackdrop(
           image: _pixel,
-          settings: WallpaperProps(enabled: true),
+          settings: const WallpaperProps(enabled: true),
           baseColor: Colors.white,
           builder: (_, _) => const Text('page remains'),
         ),
@@ -95,7 +95,7 @@ void main() {
       MaterialApp(
         home: WallpaperBackdrop(
           image: replacement,
-          settings: WallpaperProps(enabled: true),
+          settings: const WallpaperProps(enabled: true),
           baseColor: Colors.white,
           builder: (_, _) => const Text('page remains'),
         ),
@@ -108,7 +108,7 @@ void main() {
       MaterialApp(
         home: WallpaperBackdrop(
           image: null,
-          settings: WallpaperProps(enabled: false),
+          settings: const WallpaperProps(enabled: false),
           baseColor: Colors.white,
           builder: (_, _) => const Text('page remains'),
         ),
@@ -129,7 +129,7 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: WallpaperBackdrop(
             image: _pixel,
-            settings: WallpaperProps(enabled: true),
+            settings: const WallpaperProps(enabled: true),
             baseColor: Colors.white,
             builder: (_, active) => Text('active:$active'),
           ),

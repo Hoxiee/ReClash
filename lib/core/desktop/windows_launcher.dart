@@ -135,6 +135,7 @@ final class _WindowsLaunchAttempt implements CoreLaunchAttempt {
   final Completer<void> _spawned = Completer<void>();
   final Completer<void> _settled = Completer<void>();
   final Completer<CoreProcessLease> _result = Completer<CoreProcessLease>();
+  // ignore: cancel_subscriptions
   StreamSubscription<List<String>>? _subscription;
   WindowsCoreLease? _lease;
   bool _cancelled = false;

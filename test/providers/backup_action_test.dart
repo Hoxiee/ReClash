@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/exception.dart';
 import 'package:archive/archive.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
@@ -97,7 +96,7 @@ void main() {
       const name = '0123456789abcdef0123456789abcdef.png';
       final source = buildContainer()..listen(configProvider, (_, _) {});
       const oldName = 'fedcba9876543210fedcba9876543210.png';
-      final oldTheme = const ThemeProps(
+      const oldTheme = ThemeProps(
         wallpaper: WallpaperProps(
           enabled: true,
           fileName: oldName,
@@ -163,7 +162,7 @@ void main() {
       'onlyProfiles leaves wallpaper settings and files untouched',
       () async {
         const name = '0123456789abcdef0123456789abcdef.png';
-        final wallpaper = const WallpaperProps(
+        const wallpaper = WallpaperProps(
           enabled: true,
           fileName: name,
           library: [name],
@@ -172,7 +171,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsBytesSync(_wallpaperPng);
         final container = buildContainer()..listen(configProvider, (_, _) {});
-        container.read(themeSettingProvider.notifier).value = ThemeProps(
+        container.read(themeSettingProvider.notifier).value = const ThemeProps(
           wallpaper: wallpaper,
         );
 

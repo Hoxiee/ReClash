@@ -738,7 +738,6 @@ Future<void> showServiceStatusSheet(BuildContext context) {
   );
 }
 
-/// Every enabled service, read from the cache and checked only on request.
 class ServiceStatusSheet extends ConsumerWidget {
   const ServiceStatusSheet({super.key});
 
@@ -807,6 +806,8 @@ class ServiceManageView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final targets = ref.watch(serviceTargetsProvider);
+    final preferences = ref.watch(appSettingProvider);
+    final localizations = context.appLocalizations;
     final enabled = ref.watch(enabledServiceTargetsProvider);
     final settings = ref.read(appSettingProvider.notifier);
 
@@ -857,7 +858,37 @@ class ServiceManageView extends ConsumerWidget {
     }
 
     return CommonScaffold(
-      title: context.appLocalizations.serviceManage,
+      title: localizations.serviceManage,
+      menuItems: [
+        CommonPopupMenuItem(
+          label: localizations.serviceAutoCheckActive,
+          checked: preferences.autoCheckActiveServices,
+          onPressed: () => settings.update(
+            (state) => state.copyWith(
+              autoCheckActiveServices: !state.autoCheckActiveServices,
+            ),
+          ),
+        ),
+        CommonPopupMenuItem(
+          label: localizations.serviceAutoCheckAll,
+          checked: preferences.autoCheckAllServices,
+          onPressed: () => settings.update(
+            (state) => state.copyWith(
+              autoCheckAllServices: !state.autoCheckAllServices,
+            ),
+          ),
+        ),
+        CommonPopupMenuItem(
+          label: localizations.serviceCheckOnlyWhenConnected,
+          checked: preferences.serviceCheckOnlyWhenConnected,
+          onPressed: () => settings.update(
+            (state) => state.copyWith(
+              serviceCheckOnlyWhenConnected:
+                  !state.serviceCheckOnlyWhenConnected,
+            ),
+          ),
+        ),
+      ],
       body: CustomScrollView(
         shrinkWrap: true,
         slivers: [

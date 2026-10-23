@@ -21,5 +21,6 @@
     }
   },
   "webDashboardRestricted": "Dashboard access is disabled by your provider.",
-  "providerNotice": "Notice"
+  "providerNotice": "Notice",
+  "providerAnnouncementRead": "Read"
 }

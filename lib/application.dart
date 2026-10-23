@@ -132,12 +132,13 @@ class ApplicationState extends ConsumerState<Application> {
                   ),
                 ) ==
                 true,
-            confirmImport: (source) {
+            confirmImport: (source, commit) {
               final profiles = ref.read(profilesActionProvider.notifier);
               return showProfileImportDialog(
                 source,
                 preview: profiles.previewProfileLinkSource,
                 duplicateOf: profiles.duplicateProfileLabel(source),
+                commit: commit,
               );
             },
             openRouting: (text, origin) =>

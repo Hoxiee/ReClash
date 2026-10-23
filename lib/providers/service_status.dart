@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import 'app.dart';
 import 'config.dart';
 import 'core.dart';
 import 'route_state.dart';
@@ -13,8 +16,71 @@ part 'generated/service_status.g.dart';
 @Riverpod(keepAlive: true)
 class ServiceStatus extends _$ServiceStatus
     with RoutedProbe<ServiceTarget, ServiceCheck> {
+  Timer? _automaticTimer;
+
   @override
-  RoutedProbeState<ServiceTarget, ServiceCheck> build() => buildProbe();
+  bool get automaticChecks => false;
+
+  @override
+  RoutedProbeState<ServiceTarget, ServiceCheck> build() {
+    final initial = buildProbe();
+    ref.listen(routeTrackerProvider, (previous, next) {
+      if (previous?.coreEpoch != next.coreEpoch ||
+          previous?.hostEpoch != next.hostEpoch ||
+          previous?.picksVersion != next.picksVersion ||
+          previous?.proxied != next.proxied ||
+          previous?.live != next.live ||
+          previous?.synced != next.synced) {
+        _scheduleAutomatic();
+      }
+    });
+    ref.listen(appVisibleProvider, (_, _) => _scheduleAutomatic());
+    ref.listen(
+      appSettingProvider.select(
+        (settings) => (
+          settings.autoCheckActiveServices,
+          settings.autoCheckAllServices,
+          settings.serviceCheckOnlyWhenConnected,
+        ),
+      ),
+      (_, _) => _scheduleAutomatic(),
+    );
+    ref.listen(enabledServiceTargetsProvider, (_, _) => _scheduleAutomatic());
+    final tracker = ref.read(routeTrackerProvider.notifier);
+    var attached = false;
+    scheduleMicrotask(() {
+      if (!ref.mounted) return;
+      attached = true;
+      tracker.attach();
+      _scheduleAutomatic();
+    });
+    ref.onDispose(() {
+      _automaticTimer?.cancel();
+      if (attached) scheduleMicrotask(tracker.detach);
+    });
+    return initial;
+  }
+
+  void _scheduleAutomatic() {
+    _automaticTimer?.cancel();
+    final settings = ref.read(appSettingProvider);
+    final route = ref.read(routeTrackerProvider);
+    if ((!settings.autoCheckActiveServices && !settings.autoCheckAllServices) ||
+        !route.live ||
+        !route.synced ||
+        !ref.read(appVisibleProvider) ||
+        (settings.serviceCheckOnlyWhenConnected && !route.proxied)) {
+      return;
+    }
+    _automaticTimer = Timer(const Duration(seconds: 3), () {
+      if (!ref.mounted) return;
+      refresh(
+        settings.autoCheckAllServices
+            ? ref.read(serviceTargetsProvider)
+            : ref.read(enabledServiceTargetsProvider),
+      );
+    });
+  }
 
   @override
   bool isFailure(ServiceCheck value) =>

@@ -109,6 +109,10 @@ _AppSettingProps _$AppSettingPropsFromJson(
       $enumDecodeNullable(_$EditorFontSizeEnumMap, json['editorFontSize']) ??
       EditorFontSize.standard,
   preventDuplicateProfiles: json['preventDuplicateProfiles'] as bool? ?? true,
+  autoCheckActiveServices: json['autoCheckActiveServices'] as bool? ?? true,
+  autoCheckAllServices: json['autoCheckAllServices'] as bool? ?? false,
+  serviceCheckOnlyWhenConnected:
+      json['serviceCheckOnlyWhenConnected'] as bool? ?? true,
   serviceOrder:
       (json['serviceOrder'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -189,6 +193,9 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'editorLineWrap': instance.editorLineWrap,
       'editorFontSize': _$EditorFontSizeEnumMap[instance.editorFontSize]!,
       'preventDuplicateProfiles': instance.preventDuplicateProfiles,
+      'autoCheckActiveServices': instance.autoCheckActiveServices,
+      'autoCheckAllServices': instance.autoCheckAllServices,
+      'serviceCheckOnlyWhenConnected': instance.serviceCheckOnlyWhenConnected,
       'serviceOrder': instance.serviceOrder,
       'enabledServices': instance.enabledServices,
       'disabledServices': instance.disabledServices,

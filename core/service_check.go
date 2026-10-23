@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -99,6 +100,12 @@ type serviceChecker struct {
 var serviceCheckers = []serviceChecker{
 	{name: "google", check: checkReachable("https://www.google.com/generate_204")},
 	{name: "github", check: checkReachable("https://github.com/")},
+	{name: "telegram", check: checkPublicWebsite("https://web.telegram.org/")},
+	{name: "sberbank", check: checkPublicWebsite("https://online.sberbank.ru/CSAFront/index.do")},
+	{name: "gosuslugi", check: checkPublicWebsite("https://www.gosuslugi.ru/")},
+	{name: "vk", check: checkPublicWebsite("https://vk.com/")},
+	{name: "kinopoisk", check: checkPublicWebsite("https://www.kinopoisk.ru/")},
+	{name: "yandex", check: checkPublicWebsite("https://ya.ru/")},
 	{name: "youtube", check: checkYouTubePremium},
 	{name: "chatgpt", check: checkChatGpt},
 	{name: "claude", check: checkClaude},
@@ -241,6 +248,52 @@ func checkReachable(url string) func(serviceEnv) ServiceCheckItem {
 		item.Status = statusFromCode(result.StatusCode)
 		return item
 	}
+}
+
+// These checks cover the public web surface, not login, media, or app protocols.
+func checkPublicWebsite(target string) func(serviceEnv) ServiceCheckItem {
+	return func(env serviceEnv) ServiceCheckItem {
+		result := env.get(target, serviceHtmlMaxBody)
+		item := itemFrom(result)
+		if item.Status == "" {
+			item.Status = publicWebsiteStatus(target, result)
+		}
+		return item
+	}
+}
+
+func publicWebsiteStatus(target string, result *ProbeResult) string {
+	status := statusFromCode(result.StatusCode)
+	if status != serviceAvailable {
+		return status
+	}
+	requested, err := url.Parse(target)
+	if err != nil {
+		return serviceFailed
+	}
+	final, err := url.Parse(result.Url)
+	if err != nil || final.Hostname() == "" {
+		return serviceFailed
+	}
+	// An SSO or cookie-install bridge can return 200 without serving the site.
+	if !strings.EqualFold(requested.Hostname(), final.Hostname()) {
+		return serviceRestricted
+	}
+	path := strings.ToLower(final.Path)
+	if strings.Contains(path, "showcaptcha") || strings.Contains(path, "checkcaptcha") ||
+		strings.Contains(path, "/captcha") || strings.Contains(path, "/challenge") {
+		return serviceRestricted
+	}
+	if bodyContains(result,
+		"<title>access denied", "<title>just a moment", "<title>captcha",
+		"<title>проверка браузера", "<title>ой!", "<title>доступ ограничен",
+		"/cdn-cgi/challenge-platform/", "smartcaptcha.yandexcloud.net/captcha.js",
+		"id=\"challenge-form\"", "id=\"checkbox-captcha-form\"",
+		"id=\"advanced-captcha-form\"",
+	) {
+		return serviceRestricted
+	}
+	return serviceAvailable
 }
 
 func itemFrom(result *ProbeResult) ServiceCheckItem {

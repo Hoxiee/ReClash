@@ -1,6 +1,5 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/ui/ui.dart';
-import 'package:reclash/ui/page_background.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 import 'package:material_ui/material_ui.dart';
 

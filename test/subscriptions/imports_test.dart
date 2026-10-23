@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../lib/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/imports/import.dart';
 
 Uint8List _bytes(String value) => Uint8List.fromList(utf8.encode(value));
 

@@ -23,7 +23,7 @@ void main() {
       blur: 4,
       cardOpacity: 0.6,
     );
-    final config = Config(themeProps: ThemeProps(wallpaper: wallpaper));
+    const config = Config(themeProps: ThemeProps(wallpaper: wallpaper));
     final decoded =
         jsonDecode(jsonEncode(config.toJson())) as Map<String, Object?>;
     expect(Config.fromJson(decoded).themeProps.wallpaper, wallpaper);

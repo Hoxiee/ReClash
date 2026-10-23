@@ -265,6 +265,7 @@ class _ThemeViewState extends ConsumerState<ThemeView>
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final reveal = SettingsRevealScope.maybeOf(context);
+    final split = !ViewScope.isMobileOf(context);
     final segments = [
       GlyphSegment(value: 0, glyph: AppGlyphs.sun, label: l.appearanceTheme),
       GlyphSegment(
@@ -278,12 +279,23 @@ class _ThemeViewState extends ConsumerState<ThemeView>
         label: l.appearanceInterface,
       ),
     ];
+    final tabTitle = RollingTitle(
+      labels: [for (final segment in segments) segment.label],
+      position: _position,
+    );
     return CommonScaffold(
-      title: segments[_tab].label,
-      titleWidget: RollingTitle(
-        labels: [for (final segment in segments) segment.label],
-        position: _position,
-      ),
+      title: split
+          ? '${l.theme} • ${segments[_tab].label}'
+          : segments[_tab].label,
+      titleWidget: split
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(child: Text('${l.theme} • ', maxLines: 1)),
+                Flexible(child: tabTitle),
+              ],
+            )
+          : tabTitle,
       animateTrailingPress: false,
       trailing: GlyphSegmentedControl<int>(
         segments: segments,

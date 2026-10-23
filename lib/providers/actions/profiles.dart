@@ -864,7 +864,7 @@ class ProfilesAction extends _$ProfilesAction {
           ),
         );
 
-  void _showProfiles() {
+  void showProfiles() {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
@@ -893,7 +893,7 @@ class ProfilesAction extends _$ProfilesAction {
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
   }) async {
-    _showProfiles();
+    showProfiles();
     await globalState.loadingRun(
       tag: LoadingTag.profiles,
       () => _saveProfileLinkSource(
@@ -919,17 +919,38 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
+  /// Imports a link the user confirmed in a sheet that stays open meanwhile:
+  /// a loss review opens over [reviewContext], and failures reach the caller
+  /// instead of a dialog.
+  Future<Profile> addConfirmedLinkSource(
+    ProfileLinkSource source, {
+    String? label,
+    SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
+  }) => _saveProfileLinkSource(
+    source,
+    label: label,
+    clientSettings: clientSettings,
+    reviewContext: reviewContext,
+    cancellation: cancellation,
+  );
+
   Future<Profile> _saveProfileLinkSource(
     ProfileLinkSource source, {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
+    BuildContext? reviewContext,
+    SubscriptionCancellation? cancellation,
   }) async {
     Future<Profile> save(String key) => importProfileLinkSource(
       source,
       label: label,
       ageSecretKey: key,
       clientSettings: clientSettings,
+      reviewContext: reviewContext,
+      cancellation: cancellation,
     );
     try {
       return await save(ageSecretKey);
@@ -947,7 +968,7 @@ class ProfilesAction extends _$ProfilesAction {
     SubscriptionClientSettings? clientSettings,
     int skippedExisting = 0,
   }) async {
-    _showProfiles();
+    showProfiles();
     final shareLinks = [
       for (final input in links)
         if (input.url.isShareLink) input.url,

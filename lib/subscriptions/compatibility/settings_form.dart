@@ -138,14 +138,14 @@ class _SubscriptionSendHwidRowState
         context: context,
         message: TextSpan(text: l10n.subscriptionIdentityDisclosure),
       );
-      if (accepted != true) return;
+      if (!mounted || accepted != true) return;
     }
     if (!value && _enabled) {
       final confirmed = await confirmDeviceIdentityOff(
         context,
         ref.read(appSettingProvider).regionCode,
       );
-      if (!confirmed) return;
+      if (!mounted || !confirmed) return;
     }
     widget.onChanged(value);
   }

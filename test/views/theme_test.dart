@@ -74,6 +74,36 @@ void main() {
   ThemeProps readTheme() => container.read(themeSettingProvider);
 
   group('appearance tabs', () {
+    for (final split in [false, true]) {
+      testWidgets('title keeps a static prefix only in split mode: $split', (
+        tester,
+      ) async {
+        await pumpThemeView(
+          tester,
+          size: split ? const Size(1400, 2400) : const Size(390, 844),
+        );
+        final prefix = find.text('Theme • ');
+        expect(prefix, split ? findsOneWidget : findsNothing);
+        final prefixPosition = split ? tester.getTopLeft(prefix) : null;
+        await tester.tap(destination('Background'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 70));
+        if (split) {
+          expect(tester.getTopLeft(prefix), prefixPosition);
+          expect(
+            find.ancestor(of: prefix, matching: find.byType(RollingTitle)),
+            findsNothing,
+          );
+        }
+        final scaffold = tester.widget<CommonScaffold>(
+          find.byType(CommonScaffold).first,
+        );
+        expect(scaffold.title, split ? 'Theme • Background' : 'Background');
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     Finder page(String id, {bool skipOffstage = true}) =>
         find.byKey(PageStorageKey('theme-tab-$id'), skipOffstage: skipOffstage);
 
@@ -277,7 +307,7 @@ void main() {
         expect(find.text('open'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
-      variant: TargetPlatformVariant({
+      variant: const TargetPlatformVariant({
         TargetPlatform.android,
         TargetPlatform.linux,
       }),
@@ -414,7 +444,7 @@ void main() {
       final themeElement = tester.element(page('theme'));
       final themeScroll = scrollOf(tester, 'theme');
       final preview = find.byType(ThemeLivePreview);
-      final themeOffset = showThemeLivePreview ? 250.0 : 30.0;
+      const themeOffset = showThemeLivePreview ? 250.0 : 30.0;
       if (showThemeLivePreview) {
         await tester.tap(
           find
@@ -739,7 +769,10 @@ void main() {
       expect(page('theme'), findsNothing);
       expect(page('background'), findsOneWidget);
       expect(page('interface', skipOffstage: false), findsNothing);
-      expect(TickerMode.of(tester.element(page('background'))), isFalse);
+      expect(
+        TickerMode.valuesOf(tester.element(page('background'))).enabled,
+        isFalse,
+      );
       visible.value = true;
       await tester.pumpAndSettle();
       expect(page('interface'), findsOneWidget);

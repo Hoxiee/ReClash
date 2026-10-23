@@ -8,5 +8,6 @@
   "accessReturnToProvider": "将应用交还给服务商",
   "accessProviderDisabledDesc": "服务商让 {count} 个应用绕过 VPN。打开访问控制即可修改列表。",
   "webDashboardRestricted": "控制面板访问已被您的服务商禁用。",
-  "providerNotice": "通知"
+  "providerNotice": "通知",
+  "providerAnnouncementRead": "阅读"
 }

@@ -96,6 +96,7 @@ dev_dependencies:
   cross_file: ^0.3.5+5
   mocktail: ^1.0.5
   webview_flutter_platform_interface: ^2.15.1
+  flutter_rust_bridge: 2.13.0
 
 flutter:
   uses-material-design: true

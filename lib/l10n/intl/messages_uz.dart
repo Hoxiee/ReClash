@@ -368,52 +368,55 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m141(count) =>
       "${Intl.plural(count, one: 'Obunangiz muddati ertaga tugaydi', other: 'Obunangiz muddati ${count} kundan soʻng tugaydi')}";
 
-  static String m142(sections) =>
-      "Quyidagi manba bo‘limlari ko‘chirilmaydi: ${sections}.";
+  static String m142(count) => "${count} ta serverni qo‘shish";
 
-  static String m143(count, format) =>
-      "${format} formatidan ${count} ta proksi tugunini import qilish mumkin.";
+  static String m143(count) => "Barcha ${count} ta server qo‘shiladi";
 
-  static String m144(count) => "O‘zgartirib bo‘lmaydigan tugunlar: ${count}.";
+  static String m144(count, total) =>
+      "${total} ta serverdan ${count} tasi qo‘shiladi";
 
-  static String m145(percent) => "Trafikning ${percent}% ishlatildi";
+  static String m145(count) => "Hammasini ko‘rsatish (${count})";
 
-  static String m146(count) => "${count} ta natija";
+  static String m146(format) => "Format: ${format}";
 
-  static String m147(value) => "Eng yuqori ${value}";
+  static String m147(percent) => "Trafikning ${percent}% ishlatildi";
 
-  static String m148(value) => "Jami ${value}";
+  static String m148(count) => "${count} ta natija";
 
-  static String m149(version) => "Oʻrnatilgan versiya: ${version}";
+  static String m149(value) => "Eng yuqori ${value}";
 
-  static String m150(count) => "${count} daq";
+  static String m150(value) => "Jami ${value}";
 
-  static String m151(time) => "${time} qoldi";
+  static String m151(version) => "Oʻrnatilgan versiya: ${version}";
 
-  static String m152(count) => "${count} s";
+  static String m152(count) => "${count} daq";
 
-  static String m153(speed) => "${speed}/s";
+  static String m153(time) => "${time} qoldi";
 
-  static String m154(nodes, groups, providers) =>
+  static String m154(count) => "${count} s";
+
+  static String m155(speed) => "${speed}/s";
+
+  static String m156(nodes, groups, providers) =>
       "Proksilar: ${nodes}, guruhlar: ${groups}, masofaviy provayderlar: ${providers}";
 
-  static String m155(action) =>
+  static String m157(action) =>
       "Bu havola «${action}» amalini so‘raydi. ReClash’ga uni bajarishga ruxsat berilsinmi?";
 
-  static String m156(name, source) =>
+  static String m158(name, source) =>
       "${source} manbasidan «${name}» import qilinsinmi? Tasdiqlashdan so‘ng profil va o‘girishlar tekshiriladi.";
 
-  static String m157(label) => "${label} URL boʻlishi kerak";
+  static String m159(label) => "${label} URL boʻlishi kerak";
 
-  static String m158(index) => "Fon ${index}";
-
-  static String m159(count) =>
-      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
-
-  static String m160(count) =>
-      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+  static String m160(index) => "Fon ${index}";
 
   static String m161(count) =>
+      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+
+  static String m162(count) =>
+      "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
+
+  static String m163(count) =>
       "${Intl.plural(count, other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1962,6 +1965,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
       "Obuna sahifasi yuklanmoqda…",
     ),
+    "profileImportDownloading": MessageLookupByLibrary.simpleMessage(
+      "Obuna yuklanmoqda…",
+    ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Bu obuna havolasiga ega profil allaqachon mavjud",
     ),
@@ -1993,6 +1999,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bitta server",
     ),
     "profileImportTitle": MessageLookupByLibrary.simpleMessage("Yangi obuna"),
+    "profileImportTryOtherFormat": MessageLookupByLibrary.simpleMessage(
+      "Hech narsa qo‘shilmadi. Boshqa formatni tanlab, qayta urinib ko‘rishingiz mumkin.",
+    ),
     "profileImportUnlimited": MessageLookupByLibrary.simpleMessage("Cheksiz"),
     "profileImportValidUntil": MessageLookupByLibrary.simpleMessage(
       "Amal qilish muddati",
@@ -2027,6 +2036,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage(
       "Batafsil",
     ),
+    "providerAnnouncementRead": MessageLookupByLibrary.simpleMessage("O‘qish"),
     "providerInUse": m69,
     "providerNotice": MessageLookupByLibrary.simpleMessage("Bildirishnoma"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
@@ -2848,11 +2858,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "serviceAllAvailable": MessageLookupByLibrary.simpleMessage(
       "Barchasi mavjud",
     ),
+    "serviceAutoCheckActive": MessageLookupByLibrary.simpleMessage(
+      "Faol xizmatlarni avtomatik tekshirish",
+    ),
+    "serviceAutoCheckAll": MessageLookupByLibrary.simpleMessage(
+      "Barcha xizmatlarni tekshirish",
+    ),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Mavjud"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Bloklangan"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Tekshirish"),
     "serviceCheckAll": MessageLookupByLibrary.simpleMessage(
       "Hammasini tekshirish",
+    ),
+    "serviceCheckOnlyWhenConnected": MessageLookupByLibrary.simpleMessage(
+      "Faqat ulanganda tekshirish",
     ),
     "serviceCheckedAt": m132,
     "serviceComingSoon": MessageLookupByLibrary.simpleMessage("Tez orada"),
@@ -3351,18 +3370,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "Umumiy sozlamadan foydalanish",
     ),
-    "subscriptionImportAccept": MessageLookupByLibrary.simpleMessage(
-      "Qabul qilish va import qilish",
-    ),
-    "subscriptionImportAcceptOtherLosses": MessageLookupByLibrary.simpleMessage(
-      "Manba ma’lumotlarining bir qismi saqlanmasligini tushunaman.",
-    ),
-    "subscriptionImportAcceptPartial": MessageLookupByLibrary.simpleMessage(
-      "Faqat qo‘llab-quvvatlanadigan tugunlar bilan davom etish.",
-    ),
-    "subscriptionImportAcceptSections": MessageLookupByLibrary.simpleMessage(
-      "Manba mijoz sozlamalari ko‘chirilmasligini tushunaman.",
-    ),
+    "subscriptionImportAdd": m142,
+    "subscriptionImportAllAdded": m143,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "Clash konfiguratsiyasi",
     ),
@@ -3375,22 +3384,46 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportFormatUnknown": MessageLookupByLibrary.simpleMessage(
       "nomaʼlum format",
     ),
-    "subscriptionImportIgnoredSections": m142,
+    "subscriptionImportIgnoredSections": MessageLookupByLibrary.simpleMessage(
+      "Konfiguratsiya bo‘limlari",
+    ),
+    "subscriptionImportLeftOutHint": MessageLookupByLibrary.simpleMessage(
+      "Manbaning bu qismlari o‘rniga ReClash o‘z sozlamalarini qo‘llaydi.",
+    ),
+    "subscriptionImportLeftOutTitle": MessageLookupByLibrary.simpleMessage(
+      "Ko‘chirilmaydi",
+    ),
     "subscriptionImportNoNodes": MessageLookupByLibrary.simpleMessage(
-      "Import qilinadigan qo‘llab-quvvatlangan proksi tugunlari yo‘q.",
+      "Serverlarning hech biri qo‘llab-quvvatlanmaydi",
+    ),
+    "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
+      "Ba’zi server sozlamalari qo‘llab-quvvatlanmaydi va tashlab yuboriladi",
+    ),
+    "subscriptionImportPartial": m144,
+    "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
+      "Yuklash va yuborish tezligi ko‘rsatilmagan",
+    ),
+    "subscriptionImportReasonProtocol": MessageLookupByLibrary.simpleMessage(
+      "Protokol qo‘llab-quvvatlanmaydi",
+    ),
+    "subscriptionImportReasonTransport": MessageLookupByLibrary.simpleMessage(
+      "Transport qo‘llab-quvvatlanmaydi",
     ),
     "subscriptionImportRememberConsent": MessageLookupByLibrary.simpleMessage(
-      "Bu obuna uchun rozilikni eslab qolish",
+      "Bu obuna uchun boshqa so‘ramaslik",
     ),
     "subscriptionImportRememberConsentHint":
         MessageLookupByLibrary.simpleMessage(
-          "Faqat shu manba, format va qabul qilingan yo‘qotish turlariga tegishli. Yangi yo‘qotishlar qayta rozilik talab qiladi.",
+          "Yana biror narsa ko‘chirilmay qolsa, qayta so‘raladi.",
         ),
-    "subscriptionImportReviewSummary": m143,
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
-      "Obuna importini ko‘rib chiqish",
+      "Hammasi ko‘chirilmaydi",
     ),
-    "subscriptionImportSkippedNodes": m144,
+    "subscriptionImportShowAll": m145,
+    "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
+      "Qo‘shilmaydi",
+    ),
+    "subscriptionImportSourceFormat": m146,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Obuna ma’lumotlari",
     ),
@@ -3416,7 +3449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage(
       "Veb-sayt",
     ),
-    "subscriptionTrafficLow": m145,
+    "subscriptionTrafficLow": m147,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "Provayder yangilash intervalidan foydalanish",
     ),
@@ -3522,7 +3555,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage(
       "Yadroni qayta ishga tushirish",
     ),
-    "toolsResults": m146,
+    "toolsResults": m148,
     "toolsRun": MessageLookupByLibrary.simpleMessage("Ishga tushirish"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("Boʻlim"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("Sozlama"),
@@ -3543,8 +3576,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Yuklab yuborilgan"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "traffic": MessageLookupByLibrary.simpleMessage("Trafik"),
-    "trafficPeak": m147,
-    "trafficTotal": m148,
+    "trafficPeak": m149,
+    "trafficTotal": m150,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Tarjima tuzatishni taklif qilish",
@@ -3678,14 +3711,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage(
       "Yangilanish o‘rnatildi",
     ),
-    "updateInstalledVersion": m149,
+    "updateInstalledVersion": m151,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android o‘rnatishni yakunlamoqda. Bu bosqichda ReClash yopilishi mumkin.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage(
       "Yangilanish o‘rnatilmoqda",
     ),
-    "updateMinutes": m150,
+    "updateMinutes": m152,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("Hozir emas"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "Reliz qaydlari mavjud emas.",
@@ -3737,7 +3770,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage(
       "Reliz tafsilotlari",
     ),
-    "updateRemainingTime": m151,
+    "updateRemainingTime": m153,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage(
       "Yuklashni davom ettirish",
     ),
@@ -3748,7 +3781,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage(
       "O‘rnatishni qayta urinish",
     ),
-    "updateSeconds": m152,
+    "updateSeconds": m154,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "To‘liq reliz qaydlarini ko‘rish",
     ),
@@ -3756,7 +3789,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Barcha oʻzgarishlarni koʻrsatish",
     ),
     "updateTitle": MessageLookupByLibrary.simpleMessage("Yangilanishlar"),
-    "updateTransferSpeed": m153,
+    "updateTransferSpeed": m155,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "Yuklab olingan yangilanish yaxlitligini tekshirib bo‘lmadi.",
     ),
@@ -3794,14 +3827,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "Sozlangan yopish amalini bajarish.",
     ),
-    "urlSchemeConfigCounts": m154,
+    "urlSchemeConfigCounts": m156,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML yoki JSON konfiguratsiyasini joylashtiring",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage(
       "Konfiguratsiya tarkibi",
     ),
-    "urlSchemeConfirmMessage": m155,
+    "urlSchemeConfirmMessage": m157,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Ilovaning tashqi buyrug‘i",
     ),
@@ -3845,7 +3878,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage(
       "Konfiguratsiyani import qilish",
     ),
-    "urlSchemeImportConfirm": m156,
+    "urlSchemeImportConfirm": m158,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "Havolaga YAML yoki JSON konfiguratsiyasini joylash.",
     ),
@@ -3937,7 +3970,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage(
       "Misoldan foydalanish",
     ),
-    "urlTip": m157,
+    "urlTip": m159,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlardan foydalanish"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Tizim hostlaridan foydalanish",
@@ -3980,9 +4013,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
-    "wallpaperImageLabel": m158,
+    "wallpaperImageLabel": m160,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperLibraryFull": m159,
+    "wallpaperLibraryFull": m161,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -4123,8 +4156,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Tizimga yozish tizim soatini ham oʻrnatadi; Android bunga eʼtibor bermaydi.",
     ),
-    "yearsAgo": m160,
-    "yearsAgoShort": m161,
+    "yearsAgo": m162,
+    "yearsAgoShort": m163,
     "yes": MessageLookupByLibrary.simpleMessage("Ha"),
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",

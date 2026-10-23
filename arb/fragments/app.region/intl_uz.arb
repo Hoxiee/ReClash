@@ -39,5 +39,8 @@
   "regionChangeServices": "Xizmat tekshiruvlari",
   "restoreDefaults": "Standart qiymatlarni tiklash",
   "networkRestoreDefaultsTip": "Chetlab o‘tish ro‘yxati va TUN MTU tanlangan hududning standart qiymatlariga qaytadi.",
-  "dnsRestoreDefaultsTip": "Barcha DNS qayta belgilashlari o‘chiriladi va tanlangan hududning DNS serverlari qayta o‘rnatiladi."
+  "dnsRestoreDefaultsTip": "Barcha DNS qayta belgilashlari o‘chiriladi va tanlangan hududning DNS serverlari qayta o‘rnatiladi.",
+  "serviceAutoCheckActive": "Faol xizmatlarni avtomatik tekshirish",
+  "serviceAutoCheckAll": "Barcha xizmatlarni tekshirish",
+  "serviceCheckOnlyWhenConnected": "Faqat ulanganda tekshirish"
 }

@@ -8,6 +8,7 @@ import 'package:reclash/models/common.dart' show TrafficShowExt;
 import 'package:reclash/models/profile.dart';
 import 'package:reclash/subscriptions/compatibility/client_labels.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
+import 'package:reclash/subscriptions/compatibility/policy.dart';
 import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
@@ -24,17 +25,31 @@ typedef ProfileLinkPreviewer =
       SubscriptionCancellation? cancellation,
     });
 
+/// With [commit], the sheet stays open while the profile is imported, so a
+/// loss review opens over it and a failure is shown in it. Resolves once the
+/// sheet has left the screen, so what the caller does next does not run
+/// under its exit.
 Future<ProfileLinkImport?> showProfileImportDialog(
   ProfileLinkSource source, {
   ProfileLinkPreviewer? preview,
   String? duplicateOf,
-}) => dialogs.showForm<ProfileLinkImport>(
-  builder: (_) => _ProfileImportSheet(
-    source: source,
-    preview: preview,
-    duplicateOf: duplicateOf,
-  ),
-);
+  ProfileLinkCommit? commit,
+}) async {
+  TransitionRoute<Object?>? route;
+  final choice = await dialogs.showForm<ProfileLinkImport>(
+    builder: (context) {
+      route ??= ModalRoute.of(context);
+      return _ProfileImportSheet(
+        source: source,
+        preview: preview,
+        duplicateOf: duplicateOf,
+        commit: commit,
+      );
+    },
+  );
+  await route?.completed;
+  return choice;
+}
 
 class _Preview {
   const _Preview({this.value, this.failure});
@@ -50,11 +65,13 @@ class _ProfileImportSheet extends StatefulWidget {
     required this.source,
     required this.preview,
     required this.duplicateOf,
+    required this.commit,
   });
 
   final ProfileLinkSource source;
   final ProfileLinkPreviewer? preview;
   final String? duplicateOf;
+  final ProfileLinkCommit? commit;
 
   @override
   State<_ProfileImportSheet> createState() => _ProfileImportSheetState();
@@ -70,6 +87,9 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
   final _cancellations = <SubscriptionCancellation>{};
   SubscriptionImportResult? _embedded;
   bool _nameEdited = false;
+  bool _committing = false;
+  Object? _commitFailure;
+  bool _declined = false;
 
   SubscriptionPagePreview? get _current => _preview?.value;
 
@@ -88,11 +108,15 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
 
   @override
   void dispose() {
+    _cancelAll();
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _cancelAll() {
     for (final cancellation in _cancellations) {
       cancellation.cancel();
     }
-    _nameController.dispose();
-    super.dispose();
   }
 
   SubscriptionClientSettings _settings(SubscriptionClientPreset preset) =>
@@ -141,15 +165,55 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
     setState(() => _preset = preset);
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_committing) return;
     final label = _nameController.text.trim();
-    Navigator.of(context).pop(
-      ProfileLinkImport(
-        clientSettings: _settings(_preset),
-        label: label.isEmpty ? null : label,
-      ),
+    final choice = ProfileLinkImport(
+      clientSettings: _settings(_preset),
+      label: label.isEmpty ? null : label,
     );
+    final commit = widget.commit;
+    if (commit == null) {
+      Navigator.of(context).pop(choice);
+      return;
+    }
+    final cancellation = SubscriptionCancellation();
+    _cancellations.add(cancellation);
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _committing = true;
+      _commitFailure = null;
+      _declined = false;
+    });
+    try {
+      await commit(choice, reviewContext: context, cancellation: cancellation);
+      if (mounted && !cancellation.cancelled) {
+        Navigator.of(context).pop(choice);
+      }
+    } catch (error) {
+      if (!mounted || cancellation.cancelled) return;
+      setState(() {
+        if (_isCancellation(error)) {
+          _declined = widget.source.preset != null;
+        } else {
+          _commitFailure = error;
+        }
+      });
+    } finally {
+      _cancellations.remove(cancellation);
+      if (mounted) setState(() => _committing = false);
+    }
   }
+
+  static bool _isCancellation(Object error) => switch (error) {
+    SubscriptionUpdateCancelled() || SubscriptionUpdateSuperseded() => true,
+    SubscriptionException(:final failure) =>
+      failure == SubscriptionFailure.cancelled ||
+          failure == SubscriptionFailure.superseded,
+    SubscriptionUpdateRejected(:final reason) =>
+      reason == SubscriptionRetryReason.cancelled,
+    _ => false,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +245,11 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
     );
     final duplicateOf = widget.duplicateOf;
     final state = _preview;
-    return CommonScaffold(
+    final failure = _commitFailure;
+    final supportUri = failure is SubscriptionException
+        ? failure.supportUri
+        : null;
+    final scaffold = CommonScaffold(
       title: source.url != null ? l10n.profileImportTitle : l10n.addProfile,
       primaryAction: support == null
           ? null
@@ -212,94 +280,133 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                         : source.shareLink != null
                         ? AppGlyphs.link
                         : AppGlyphs.cloudDownload,
-                    loading: state?.loading ?? false,
+                    loading: (state?.loading ?? false) || _committing,
                     title: title,
                     caption: caption,
                   ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 260),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (metadata?.announce case final announce?
-                            when announce.trim().isNotEmpty)
-                          _Announce(text: announce.trim()),
-                        if ((summary != null || current?.info != null) &&
-                            source.shareLink == null)
-                          _Stats(summary: summary, info: current?.info),
-                        if (duplicateOf != null)
-                          _Notice(
-                            glyph: AppGlyphs.info,
-                            text: l10n.profileImportAlreadyAdded(duplicateOf),
-                          )
-                        else if (state?.loading == true)
-                          _Notice(
-                            glyph: AppGlyphs.cloudSync,
-                            text: l10n.profileImportChecking,
-                          )
-                        else if (state?.failure case final failure?)
-                          _Notice(
-                            glyph: failure is AgeSecretKeyRequiredException
-                                ? AppGlyphs.key
-                                : AppGlyphs.wifiOff,
-                            text: failure is AgeSecretKeyRequiredException
-                                ? l10n.profileImportEncrypted
-                                : l10n.profileImportPreviewFailed,
-                            action: failure is AgeSecretKeyRequiredException
-                                ? null
-                                : (l10n.retry, _retry),
-                          ),
-                        if (summary?.hasLosses == true)
-                          _Notice(
-                            glyph: AppGlyphs.warning,
-                            text: l10n.profileImportLosses,
-                            warning: true,
-                          ),
-                      ],
-                    ),
+                  AnimatedEntries(
+                    children: [
+                      if (metadata?.announce case final announce?
+                          when announce.trim().isNotEmpty)
+                        _Announce(
+                          key: const ValueKey('announce'),
+                          text: announce.trim(),
+                        ),
+                      if ((summary != null || current?.info != null) &&
+                          source.shareLink == null)
+                        _Stats(
+                          key: const ValueKey('stats'),
+                          summary: summary,
+                          info: current?.info,
+                        ),
+                      if (duplicateOf != null)
+                        _Notice(
+                          key: const ValueKey('duplicate'),
+                          glyph: AppGlyphs.info,
+                          text: l10n.profileImportAlreadyAdded(duplicateOf),
+                        )
+                      else if (_committing)
+                        _Notice(
+                          key: const ValueKey('committing'),
+                          glyph: AppGlyphs.cloudDownload,
+                          text: l10n.profileImportDownloading,
+                        )
+                      else if (failure != null)
+                        _Notice(
+                          key: const ValueKey('commitFailure'),
+                          glyph: AppGlyphs.error,
+                          text: userFacingErrorMessage(failure, l10n),
+                          tone: _NoticeTone.error,
+                          action: supportUri == null
+                              ? (l10n.retry, () => unawaited(_submit()))
+                              : (
+                                  l10n.subscriptionProviderSupport,
+                                  () => dialogs.openUrl(supportUri.toString()),
+                                ),
+                        )
+                      else if (_declined)
+                        _Notice(
+                          key: const ValueKey('declined'),
+                          glyph: AppGlyphs.swap,
+                          text: l10n.profileImportTryOtherFormat,
+                        )
+                      else if (state?.loading == true)
+                        _Notice(
+                          key: const ValueKey('checking'),
+                          glyph: AppGlyphs.cloudSync,
+                          text: l10n.profileImportChecking,
+                        )
+                      else if (state?.failure case final failure?)
+                        _Notice(
+                          key: ValueKey(failure.runtimeType),
+                          glyph: failure is AgeSecretKeyRequiredException
+                              ? AppGlyphs.key
+                              : AppGlyphs.wifiOff,
+                          text: failure is AgeSecretKeyRequiredException
+                              ? l10n.profileImportEncrypted
+                              : l10n.profileImportPreviewFailed,
+                          action: failure is AgeSecretKeyRequiredException
+                              ? null
+                              : (l10n.retry, _retry),
+                        ),
+                      if (summary?.hasLosses == true)
+                        _Notice(
+                          key: const ValueKey('losses'),
+                          glyph: AppGlyphs.warning,
+                          text: l10n.profileImportLosses,
+                          tone: _NoticeTone.warning,
+                        ),
+                    ],
                   ),
                   if (duplicateOf == null) ...[
                     const SizedBox(height: 12),
-                    generateSection(
-                      items: [
-                        FormRow(
-                          title: l10n.name,
-                          trailing: FormRowTextField(
-                            controller: _nameController,
-                            hintText: host ?? l10n.unnamed,
-                            inputFormatters: TextInputLimits.limit(
-                              TextInputLimits.name,
-                            ),
-                            onChanged: (_) => _nameEdited = true,
+                    _Locked(
+                      locked: _committing,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          generateSection(
+                            items: [
+                              FormRow(
+                                title: l10n.name,
+                                trailing: FormRowTextField(
+                                  controller: _nameController,
+                                  hintText: host ?? l10n.unnamed,
+                                  inputFormatters: TextInputLimits.limit(
+                                    TextInputLimits.name,
+                                  ),
+                                  onChanged: (_) => _nameEdited = true,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    if (source.preset case final native?)
-                      generateSection(
-                        title: l10n.profileImportFormat,
-                        items: [
-                          for (final preset in [
-                            native,
-                            SubscriptionClientPreset.auto,
-                          ])
-                            _FormatOption(
-                              title: preset == SubscriptionClientPreset.auto
-                                  ? l10n.subscriptionClientReclash
-                                  : preset.label,
-                              description:
-                                  preset == SubscriptionClientPreset.auto
-                                  ? l10n.profileImportFormatReclash
-                                  : l10n.profileImportFormatClient(
-                                      preset.label,
-                                    ),
-                              selected: preset == _preset,
-                              onPressed: () => _select(preset),
+                          if (source.preset case final native?)
+                            generateSection(
+                              title: l10n.profileImportFormat,
+                              items: [
+                                for (final preset in [
+                                  native,
+                                  SubscriptionClientPreset.auto,
+                                ])
+                                  _FormatOption(
+                                    title:
+                                        preset == SubscriptionClientPreset.auto
+                                        ? l10n.subscriptionClientReclash
+                                        : preset.label,
+                                    description:
+                                        preset == SubscriptionClientPreset.auto
+                                        ? l10n.profileImportFormatReclash
+                                        : l10n.profileImportFormatClient(
+                                            preset.label,
+                                          ),
+                                    selected: preset == _preset,
+                                    onPressed: () => _select(preset),
+                                  ),
+                              ],
                             ),
                         ],
                       ),
+                    ),
                   ],
                 ],
               ),
@@ -314,14 +421,40 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                   child: Text(duplicateOf == null ? l10n.cancel : l10n.close),
                 ),
                 if (duplicateOf == null)
-                  TextButton(onPressed: _submit, child: Text(l10n.add)),
+                  TextButton(
+                    onPressed: _committing ? null : () => unawaited(_submit()),
+                    child: Text(l10n.add),
+                  ),
               ],
             ),
           ),
         ],
       ),
     );
+    return PopScope<Object?>(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop && result is! ProfileLinkImport) _cancelAll();
+      },
+      child: scaffold,
+    );
   }
+}
+
+class _Locked extends StatelessWidget {
+  const _Locked({required this.locked, required this.child});
+
+  final bool locked;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    ignoring: locked,
+    child: AnimatedOpacity(
+      opacity: locked ? 0.5 : 1,
+      duration: context.motionDuration(commonDuration),
+      child: child,
+    ),
+  );
 }
 
 class _Hero extends StatelessWidget {
@@ -368,6 +501,29 @@ class _Hero extends StatelessWidget {
                   .copyWith(color: colorScheme.onPrimaryContainer),
             ),
     );
+    final duration = context.motionDuration(commonDuration);
+    final logo = logoBytes;
+    final well = logo == null
+        ? KeyedSubtree(key: ValueKey(initial ?? glyph), child: fallback)
+        : KeyedSubtree(
+            key: ObjectKey(logo),
+            child: logoIsSvg
+                ? SvgPicture.memory(
+                    logo,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => fallback,
+                  )
+                : Image.memory(
+                    logo,
+                    fit: BoxFit.contain,
+                    cacheWidth: (_well * MediaQuery.devicePixelRatioOf(context))
+                        .round(),
+                    errorBuilder: (_, _, _) => fallback,
+                  ),
+          );
+    final muted = AppTextStyle.subheadline
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 8),
       child: Column(
@@ -378,7 +534,7 @@ class _Hero extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
+                  duration: duration,
                   child: loading
                       ? CommonCircleLoading(
                           size: _side,
@@ -390,61 +546,69 @@ class _Hero extends StatelessWidget {
                   clipper: const ShapeBorderClipper(shape: AppShape.lg),
                   child: SizedBox.square(
                     dimension: _well,
-                    child: logoBytes == null
-                        ? fallback
-                        : logoIsSvg
-                        ? SvgPicture.memory(
-                            logoBytes!,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => fallback,
-                          )
-                        : Image.memory(
-                            logoBytes!,
-                            fit: BoxFit.contain,
-                            cacheWidth:
-                                (_well * MediaQuery.devicePixelRatioOf(context))
-                                    .round(),
-                            errorBuilder: (_, _, _) => fallback,
-                          ),
+                    child: AnimatedSwitcher(
+                      duration: duration,
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(
+                          scale: Tween(begin: 0.8, end: 1.0).animate(animation),
+                          child: child,
+                        ),
+                      ),
+                      child: well,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            child: Text(
-              title,
-              key: ValueKey(title),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.title2.of(context, emphasized: true),
+          AnimatedSize(
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: duration,
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topCenter,
+                children: [...previous, ?current],
+              ),
+              child: Column(
+                key: ValueKey((title, account, caption)),
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.title2.of(context, emphasized: true),
+                  ),
+                  if (account case final account?) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      account,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subheadline.of(context),
+                    ),
+                  ],
+                  if (caption.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      caption,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: muted,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
-          if (account case final account?) ...[
-            const SizedBox(height: 4),
-            Text(
-              account,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.subheadline.of(context),
-            ),
-          ],
-          if (caption.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              caption,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ],
         ],
       ),
     );
@@ -452,7 +616,7 @@ class _Hero extends StatelessWidget {
 }
 
 class _Announce extends StatelessWidget {
-  const _Announce({required this.text});
+  const _Announce({super.key, required this.text});
 
   final String text;
 
@@ -501,7 +665,7 @@ class _Announce extends StatelessWidget {
 }
 
 class _Stats extends StatelessWidget {
-  const _Stats({required this.summary, required this.info});
+  const _Stats({super.key, required this.summary, required this.info});
 
   final SubscriptionImportSummary? summary;
   final SubscriptionInfo? info;
@@ -587,7 +751,6 @@ class _StatTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
             spacing: 2,
             children: [
               Text(
@@ -629,23 +792,30 @@ class _StatTile extends StatelessWidget {
   }
 }
 
+enum _NoticeTone { plain, warning, error }
+
 class _Notice extends StatelessWidget {
   const _Notice({
+    super.key,
     required this.glyph,
     required this.text,
     this.action,
-    this.warning = false,
+    this.tone = _NoticeTone.plain,
   });
 
   final Glyph glyph;
   final String text;
   final (String, VoidCallback)? action;
-  final bool warning;
+  final _NoticeTone tone;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final color = warning ? colorScheme.warning : colorScheme.onSurfaceVariant;
+    final color = switch (tone) {
+      _NoticeTone.plain => colorScheme.onSurfaceVariant,
+      _NoticeTone.warning => colorScheme.warning,
+      _NoticeTone.error => colorScheme.error,
+    };
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Row(

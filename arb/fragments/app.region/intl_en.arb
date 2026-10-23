@@ -39,5 +39,8 @@
   "regionChangeServices": "Service checks",
   "restoreDefaults": "Restore defaults",
   "networkRestoreDefaultsTip": "The bypass list and TUN MTU return to the defaults of the selected region.",
-  "dnsRestoreDefaultsTip": "All DNS overrides are removed, and the DNS servers of the selected region are set again."
+  "dnsRestoreDefaultsTip": "All DNS overrides are removed, and the DNS servers of the selected region are set again.",
+  "serviceAutoCheckActive": "Automatically check enabled services",
+  "serviceAutoCheckAll": "Check all services",
+  "serviceCheckOnlyWhenConnected": "Only check when connected"
 }

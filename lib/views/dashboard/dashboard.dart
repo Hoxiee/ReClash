@@ -205,16 +205,20 @@ class _DesktopDashboard extends ConsumerWidget {
               children: [
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
                 if (hasNotice) const NoticeCard(),
-                if (hasAnnouncement) const AnnouncementCard(),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
                 ),
                 sized(
                   topHeight,
-                  row(const [
-                    (1, SpeedCard(direction: TrafficDirection.upload)),
-                    (1, SpeedCard(direction: TrafficDirection.download)),
+                  row([
+                    if (hasAnnouncement) ...const [
+                      (1, CombinedSpeedCard()),
+                      (1, AnnouncementCard(expandable: true)),
+                    ] else ...const [
+                      (1, SpeedCard(direction: TrafficDirection.upload)),
+                      (1, SpeedCard(direction: TrafficDirection.download)),
+                    ],
                   ]),
                 ),
                 sized(
@@ -239,10 +243,15 @@ class _DesktopDashboard extends ConsumerWidget {
           if (hasUpdate) sized(updateHeight, const UpdateCard()),
           sized(
             topHeight,
-            row(const [
-              (2, CurrentOutboundCard()),
-              (1, SpeedCard(direction: TrafficDirection.upload)),
-              (1, SpeedCard(direction: TrafficDirection.download)),
+            row([
+              (2, const CurrentOutboundCard()),
+              if (hasAnnouncement) ...const [
+                (1, CombinedSpeedCard()),
+                (1, AnnouncementCard(expandable: true)),
+              ] else ...const [
+                (1, SpeedCard(direction: TrafficDirection.upload)),
+                (1, SpeedCard(direction: TrafficDirection.download)),
+              ],
             ]),
           ),
           sized(
@@ -279,11 +288,6 @@ class _DesktopDashboard extends ConsumerWidget {
                       Padding(
                         padding: EdgeInsets.only(bottom: gap),
                         child: const NoticeCard(),
-                      ),
-                    if (hasAnnouncement)
-                      Padding(
-                        padding: EdgeInsets.only(bottom: gap),
-                        child: const AnnouncementCard(),
                       ),
                   ],
                 ),

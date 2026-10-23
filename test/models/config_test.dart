@@ -132,6 +132,31 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
+    test('service automation defaults and choices survive JSON', () {
+      final defaults = AppSettingProps.fromJson({});
+      expect(defaults.autoCheckActiveServices, isTrue);
+      expect(defaults.autoCheckAllServices, isFalse);
+      expect(defaults.serviceCheckOnlyWhenConnected, isTrue);
+      for (final active in [false, true]) {
+        for (final all in [false, true]) {
+          for (final connected in [false, true]) {
+            final settings = AppSettingProps(
+              autoCheckActiveServices: active,
+              autoCheckAllServices: all,
+              serviceCheckOnlyWhenConnected: connected,
+            );
+            final restored = roundTrip(
+              settings.toJson,
+              AppSettingProps.fromJson,
+            );
+            expect(restored.autoCheckActiveServices, active);
+            expect(restored.autoCheckAllServices, all);
+            expect(restored.serviceCheckOnlyWhenConnected, connected);
+          }
+        }
+      }
+    });
+
     test('default values survive round-trip', () {
       const props = AppSettingProps();
       final restored = roundTrip(

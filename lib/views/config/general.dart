@@ -401,8 +401,10 @@ class _SubscriptionIdentityItemState
     try {
       await (await DeviceIdentityStore.create()).setGlobalSendEnabled(value);
       if (mounted) setState(() => _enabled = value);
-    } on Object catch (error) {
-      await globalState.safeRun<void>(() async => throw error);
+    } on Object catch (error, stack) {
+      await globalState.safeRun<void>(
+        () => Error.throwWithStackTrace(error, stack),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

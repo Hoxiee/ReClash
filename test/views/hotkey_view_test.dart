@@ -1,5 +1,4 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/desktop/hotkeys.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/ui/ui.dart';

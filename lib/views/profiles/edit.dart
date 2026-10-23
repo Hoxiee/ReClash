@@ -8,8 +8,6 @@ import 'package:reclash/features/form/form.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/editor.dart';
-import 'package:reclash/providers/action.dart';
-import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/client_labels.dart';
@@ -173,8 +171,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     if (_saving ||
         _preview.checking ||
         _identityConsentLoading ||
-        _fileData != null)
+        _fileData != null) {
       return;
+    }
     if (_issue(context.appLocalizations) != null) {
       setState(() => _attempted = true);
       return;
@@ -423,14 +422,14 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         context: context,
         message: TextSpan(text: l10n.subscriptionIdentityDisclosure),
       );
-      if (accepted != true) return;
+      if (!mounted || accepted != true) return;
     }
     if (value == false && _sendDeviceIdentity) {
       final confirmed = await confirmDeviceIdentityOff(
         context,
         ref.read(appSettingProvider).regionCode,
       );
-      if (!confirmed) return;
+      if (!mounted || !confirmed) return;
     }
     if (!mounted) return;
     _invalidateCompatibility();
@@ -440,8 +439,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       await store.setProfileSendOverride(widget.profile.id, value);
       if (!mounted) return;
       setState(() => _sendDeviceIdentityOverride = value);
-    } on Object catch (error) {
-      await globalState.safeRun<void>(() async => throw error);
+    } on Object catch (error, stack) {
+      await globalState.safeRun<void>(
+        () => Error.throwWithStackTrace(error, stack),
+      );
     } finally {
       if (mounted) {
         setState(() => _identityConsentLoading = false);
@@ -511,7 +512,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       unawaited(
         globalState.safeRun(() async {
           await Future.delayed(commonDuration);
-          if (hasUpdate && reviewRoute.navigator.mounted) {
+          if (hasUpdate && reviewContext.mounted) {
             await profilesAction.updateProfile(
               profile,
               allowLossReview: true,

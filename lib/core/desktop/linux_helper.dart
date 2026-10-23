@@ -63,8 +63,9 @@ final class LinuxHelperEnvironment {
     try {
       if (FileSystemEntity.typeSync(marker.path, followLinks: false) !=
               FileSystemEntityType.file ||
-          marker.lengthSync() > 4)
+          marker.lengthSync() > 4) {
         return null;
+      }
       return nativePackageFor(bundleDirectory, marker.readAsStringSync());
     } on FileSystemException {
       return null;

@@ -209,7 +209,7 @@ class RouteTracker extends _$RouteTracker {
     if (_watchers == 0) {
       return;
     }
-    if (--_watchers == 0) {
+    if (--_watchers == 0 && ref.mounted) {
       _unsubscribe();
     }
   }

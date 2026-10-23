@@ -355,7 +355,7 @@ void main() {
         jsonEncode({
           'coreSha256': '0' * 64,
           'helperSha256': '1' * 64,
-          if (protocol != null) 'helperProtocolVersion': protocol,
+          'helperProtocolVersion': ?protocol,
         }),
       );
       await expectLater(environment.stageBundle(), throwsFormatException);

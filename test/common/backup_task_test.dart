@@ -618,11 +618,11 @@ void main() {
           behavior: RuleProviderBehavior.classical,
           format: RuleProviderFormat.yaml,
         );
-        final preferences = SubscriptionPreferences(
-          headers: const {'x-fake-subscription': 'fake-subscription-header'},
+        const preferences = SubscriptionPreferences(
+          headers: {'x-fake-subscription': 'fake-subscription-header'},
           intervalOverride: false,
-          trustedOrigins: const ['https://consent.example'],
-          client: const SubscriptionClientSettings(
+          trustedOrigins: ['https://consent.example'],
+          client: SubscriptionClientSettings(
             preset: SubscriptionClientPreset.custom,
             customUserAgent: 'FakePortableClient/1.0',
           ),

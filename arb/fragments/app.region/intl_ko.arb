@@ -39,5 +39,8 @@
   "regionChangeServices": "서비스 확인",
   "restoreDefaults": "기본값으로 복원",
   "networkRestoreDefaultsTip": "우회 목록과 TUN MTU가 선택한 지역의 기본값으로 돌아갑니다.",
-  "dnsRestoreDefaultsTip": "모든 DNS 재정의가 삭제되고 선택한 지역의 DNS 서버가 다시 설정됩니다."
+  "dnsRestoreDefaultsTip": "모든 DNS 재정의가 삭제되고 선택한 지역의 DNS 서버가 다시 설정됩니다.",
+  "serviceAutoCheckActive": "활성 서비스를 자동으로 확인",
+  "serviceAutoCheckAll": "모든 서비스 확인",
+  "serviceCheckOnlyWhenConnected": "연결 시에만 확인"
 }

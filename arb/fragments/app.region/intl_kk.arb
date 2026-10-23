@@ -39,5 +39,8 @@
   "regionChangeServices": "Қызмет тексерістері",
   "restoreDefaults": "Әдепкі мәндерді қалпына келтіру",
   "networkRestoreDefaultsTip": "Айналып өту тізімі мен TUN MTU таңдалған аймақтың әдепкі мәндеріне оралады.",
-  "dnsRestoreDefaultsTip": "Барлық DNS қайта анықтаулары жойылып, таңдалған аймақтың DNS серверлері қайта орнатылады."
+  "dnsRestoreDefaultsTip": "Барлық DNS қайта анықтаулары жойылып, таңдалған аймақтың DNS серверлері қайта орнатылады.",
+  "serviceAutoCheckActive": "Белсенді қызметтерді автоматты тексеру",
+  "serviceAutoCheckAll": "Барлық қызметтерді тексеру",
+  "serviceCheckOnlyWhenConnected": "Тек қосылғанда тексеру"
 }

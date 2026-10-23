@@ -272,9 +272,9 @@ void main() {
         expect(old.headers, isEmpty);
         expect(old.client.preset.name, 'reclash');
 
-        final saved = SubscriptionPreferences(
+        const saved = SubscriptionPreferences(
           headers: {'x-token': 'secret'},
-          client: const SubscriptionClientSettings(customUserAgent: 'Custom/1'),
+          client: SubscriptionClientSettings(customUserAgent: 'Custom/1'),
         );
         final restored = SubscriptionPreferences.safeFromJson(saved.toJson());
         expect(restored.headers, saved.headers);

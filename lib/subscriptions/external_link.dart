@@ -4,12 +4,21 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:reclash/common/url_scheme.dart';
 import 'package:reclash/common/protocol.dart';
 
 import 'compatibility/clients.dart';
+import 'transport/transport.dart';
 
 typedef ProfileLinkInput = ({String label, String url, String ageSecretKey});
+
+typedef ProfileLinkCommit =
+    Future<void> Function(
+      ProfileLinkImport choice, {
+      BuildContext? reviewContext,
+      SubscriptionCancellation? cancellation,
+    });
 
 class ProfileLinkSource {
   const ProfileLinkSource({
