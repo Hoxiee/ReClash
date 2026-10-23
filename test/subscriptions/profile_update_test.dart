@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
@@ -66,6 +67,33 @@ class _BundleTransport extends SubscriptionTransport {
       headers: {
         'reclash-routing': ?header == null ? null : [header!],
       },
+      status: 200,
+      uri: source,
+    );
+  }
+}
+
+class _HostTransport extends SubscriptionTransport {
+  _HostTransport(this.hosts);
+
+  final Map<String, Map<String, List<String>>?> hosts;
+  final fetched = <Uri>[];
+
+  @override
+  Future<SubscriptionResponse> fetch(
+    Uri source, {
+    Map<String, String> headers = const {},
+    Duration timeout = const Duration(seconds: 30),
+    SubscriptionCancellation? cancellation,
+  }) async {
+    fetched.add(source);
+    final responseHeaders = hosts[source.authority];
+    if (responseHeaders == null) {
+      throw const SubscriptionException(SubscriptionFailure.transport);
+    }
+    return SubscriptionResponse(
+      bytes: Uint8List.fromList(utf8.encode(_nodeBody)),
+      headers: responseHeaders,
       status: 200,
       uri: source,
     );
@@ -313,6 +341,93 @@ void main() {
       );
 
       expect(await file.readAsString(), 'kept');
+    });
+  });
+
+  group('provider hosts', () {
+    Profile profile([String? fallback]) =>
+        Profile.normal(url: 'https://main.example.test/sub?token=1').copyWith(
+          subscriptionSnapshot: fallback == null
+              ? null
+              : SubscriptionSnapshot(
+                  metadata: SubscriptionMetadata({
+                    'transport.fallbackHosts': [fallback],
+                  }),
+                  receivedAt: DateTime.utc(2026),
+                ),
+        );
+
+    test('a fallback host serves an update the main host cannot', () async {
+      final transport = _HostTransport({'backup.example.test': const {}});
+
+      final prepared = await profile(
+        'backup.example.test',
+      ).prepareUpdate(defaultUserAgent: 'ReClash/test', transport: transport);
+
+      expect(prepared.migratedUrl, isNull);
+      expect(
+        transport.fetched.last.toString(),
+        startsWith('https://backup.example.test/sub?token=1'),
+      );
+    });
+
+    test('without a fallback the failure is reported', () async {
+      final transport = _HostTransport({});
+
+      await expectLater(
+        profile().prepareUpdate(
+          defaultUserAgent: 'ReClash/test',
+          transport: transport,
+        ),
+        throwsA(isA<SubscriptionUpdateRejected>()),
+      );
+    });
+
+    test('a validated new domain moves the profile', () async {
+      final transport = _HostTransport({
+        'main.example.test': {
+          'reclash-newdomain': ['new.example.test'],
+        },
+        'new.example.test': const {},
+      });
+
+      final prepared = await profile().prepareUpdate(
+        defaultUserAgent: 'ReClash/test',
+        transport: transport,
+      );
+
+      expect(prepared.migratedUrl, 'https://new.example.test/sub?token=1');
+    });
+
+    test('a new domain that fails validation is ignored', () async {
+      final transport = _HostTransport({
+        'main.example.test': {
+          'reclash-newdomain': ['new.example.test'],
+        },
+      });
+
+      final prepared = await profile().prepareUpdate(
+        defaultUserAgent: 'ReClash/test',
+        transport: transport,
+      );
+
+      expect(prepared.migratedUrl, isNull);
+    });
+
+    test('hints on a plain http subscription are not followed', () async {
+      final transport = _HostTransport({
+        'main.example.test': {
+          'reclash-newdomain': ['new.example.test'],
+        },
+        'new.example.test': const {},
+      });
+
+      final prepared = await Profile.normal(
+        url: 'http://main.example.test/sub',
+      ).prepareUpdate(defaultUserAgent: 'ReClash/test', transport: transport);
+
+      expect(prepared.migratedUrl, isNull);
+      expect(transport.fetched, hasLength(1));
     });
   });
 }

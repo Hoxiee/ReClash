@@ -10,9 +10,14 @@ must:
   safe-import: Unknown and encrypted bytes pass through; conversions report every unsupported section and skipped node.
   staged-update: Invalid, empty, stale or superseded downloads never replace the saved profile file.
   portable-secrets: Device identity and consent stay outside portable profile backups.
-watch: [lib/subscriptions/**, tool/gen_provider_standard.dart, provider_standard.g.json, PROVIDER_HEADERS.md, PROVIDER_FEATURES.md, lib/models/profile.dart, lib/database/profiles.dart, lib/database/database.dart, lib/providers/actions/profiles.dart, lib/views/config/general.dart, lib/views/profiles/edit.dart, arb/fragments/profiles.compatibility/**, lib/core/interface.dart, lib/core/method.dart, lib/core/controller.dart, core/subscription_fetch.go, core/subscription_fetch_android.go, core/subscription_fetch_desktop.go, core/subscription_fetch_test.go, core/protocol.go, core/method.go, core/rule_set.go, test/subscriptions/**]
+  provider-settings: A subscription's app settings apply by default and carry a provider tag; a user change takes the setting from the provider until it is handed back, and withdrawing a header restores the user's value.
+  provider-apps: Provider app lists add to the user's list in the same access-control mode; modes are never mixed and an app the user unticks stays released.
+  provider-hosts: Fallback hosts never replace the stored URL; a new domain is adopted only after it serves a valid profile; both require an https subscription.
+  provider-restrictions: Restrictions only remove options (Global mode, local ports on Android, dashboard editing) and never grant access.
+watch: [lib/subscriptions/**, lib/models/provider_settings.dart, lib/providers/provider_settings.dart, lib/widgets/provider_setting.dart, lib/widgets/announcement_card.dart, 'arb/fragments/subscriptions.providers/**', tool/gen_provider_standard.dart, provider_standard.g.json, PROVIDER_HEADERS.md, PROVIDER_FEATURES.md, lib/models/profile.dart, lib/database/profiles.dart, lib/database/database.dart, lib/providers/actions/profiles.dart, lib/views/config/general.dart, lib/views/profiles/edit.dart, arb/fragments/profiles.compatibility/**, lib/core/interface.dart, lib/core/method.dart, lib/core/controller.dart, core/subscription_fetch.go, core/subscription_fetch_android.go, core/subscription_fetch_desktop.go, core/subscription_fetch_test.go, core/protocol.go, core/method.go, core/rule_set.go, test/subscriptions/**]
 checks:
   subscription-foundation: [single-protocol, opt-in-identity, transport-safety, route-fallback, safe-import]
   subscription-standard: [single-protocol]
   profiles: [staged-update, portable-secrets]
-drop: Provider-controlled appearance, settings, routing, reports, and telemetry are not implemented.
+  provider-controls: [provider-settings, provider-apps, provider-hosts, provider-restrictions]
+drop: Provider-triggered reports and telemetry are not implemented.

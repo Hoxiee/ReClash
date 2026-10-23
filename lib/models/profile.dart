@@ -193,6 +193,7 @@ class PreparedSubscriptionUpdate {
     required this.client,
     this.clientFingerprint = '',
     this.routingBundle,
+    this.migratedUrl,
   });
 
   final int profileId;
@@ -208,7 +209,27 @@ class PreparedSubscriptionUpdate {
   final String clientFingerprint;
   final String? routingBundle;
 
+  /// The subscription URL the profile moves to once this update commits.
+  final String? migratedUrl;
+
   SubscriptionImportSummary get summary => payload.summary;
+
+  PreparedSubscriptionUpdate copyWithUrl(String url) =>
+      PreparedSubscriptionUpdate(
+        profileId: profileId,
+        sourceUrl: sourceUrl,
+        sourceAgeSecretKey: sourceAgeSecretKey,
+        sourcePreferences: sourcePreferences,
+        payload: payload,
+        metadata: metadata,
+        subscriptionInfo: subscriptionInfo,
+        snapshot: snapshot,
+        label: label,
+        client: client,
+        clientFingerprint: clientFingerprint,
+        routingBundle: routingBundle,
+        migratedUrl: url,
+      );
 }
 
 class SubscriptionUpdateCancelled implements Exception {
@@ -232,6 +253,33 @@ class SubscriptionUpdateRejected implements Exception {
 
   @override
   String toString() => 'Subscription update failed (${reason.name})';
+}
+
+/// Failures another host of the same provider may not share.
+bool _hostCanBeReplaced(SubscriptionRetryReason reason) => switch (reason) {
+  SubscriptionRetryReason.transport ||
+  SubscriptionRetryReason.timeout ||
+  SubscriptionRetryReason.tls ||
+  SubscriptionRetryReason.rateLimited ||
+  SubscriptionRetryReason.invalidResponse => true,
+  _ => false,
+};
+
+Uri? _withAuthority(Uri uri, String authority) {
+  final colon = authority.lastIndexOf(':');
+  final port = colon == -1
+      ? null
+      : int.tryParse(authority.substring(colon + 1));
+  final host = colon == -1 ? authority : authority.substring(0, colon);
+  if (host.isEmpty || (colon != -1 && port == null)) return null;
+  return Uri(
+    scheme: uri.scheme,
+    userInfo: uri.userInfo,
+    host: host,
+    port: port,
+    path: uri.path,
+    query: uri.hasQuery ? uri.query : null,
+  );
 }
 
 bool _looksLikeAgeEncrypted(Uint8List bytes) {
@@ -360,6 +408,64 @@ extension ProfileExtension on Profile {
         !const {'http', 'https'}.contains(uri.scheme.toLowerCase())) {
       throw const SubscriptionException(SubscriptionFailure.invalid);
     }
+    Future<PreparedSubscriptionUpdate> prepareAt(Uri source) => _prepareAt(
+      source,
+      defaultUserAgent: defaultUserAgent,
+      transport: transport,
+      cancellation: cancellation,
+      identityHeaders: identityHeaders,
+      decrypt: decrypt,
+      validate: validate,
+      locale: locale,
+    );
+    final stored = subscriptionSnapshot?.metadata;
+    final hosts = uri.scheme == 'https'
+        ? [
+            ...?stored?.strings('transport.newDomain'),
+            ...?stored?.strings('transport.fallbackHosts'),
+          ]
+        : const <String>[];
+    PreparedSubscriptionUpdate prepared;
+    try {
+      prepared = await prepareAt(uri);
+    } on SubscriptionUpdateRejected catch (error) {
+      if (!_hostCanBeReplaced(error.reason)) rethrow;
+      PreparedSubscriptionUpdate? served;
+      for (final host in hosts) {
+        final candidate = _withAuthority(uri, host);
+        if (candidate == null || candidate.authority == uri.authority) continue;
+        try {
+          served = await prepareAt(candidate);
+          break;
+        } on SubscriptionUpdateRejected catch (fallback) {
+          if (!_hostCanBeReplaced(fallback.reason)) rethrow;
+        }
+      }
+      if (served == null) rethrow;
+      prepared = served;
+    }
+    final target = uri.scheme == 'https'
+        ? prepared.metadata.metadata.strings('transport.newDomain').firstOrNull
+        : null;
+    final moved = target == null ? null : _withAuthority(uri, target);
+    if (moved == null || moved.authority == uri.authority) return prepared;
+    try {
+      return (await prepareAt(moved)).copyWithUrl(moved.toString());
+    } on SubscriptionUpdateRejected {
+      return prepared;
+    }
+  }
+
+  Future<PreparedSubscriptionUpdate> _prepareAt(
+    Uri uri, {
+    required String defaultUserAgent,
+    SubscriptionTransport? transport,
+    SubscriptionCancellation? cancellation,
+    Map<String, String> identityHeaders = const {},
+    DecryptProfilePayload? decrypt,
+    ValidateConfig? validate,
+    String? locale,
+  }) async {
     final preferences = subscriptionPreferences;
     if (!preferences.client.isValid) {
       throw const SubscriptionUpdateRejected(
@@ -445,12 +551,16 @@ extension ProfileExtension on Profile {
                   SubscriptionRetryReason.invalidResponse,
                 );
               }
-              final decodedMetadata = readSubscriptionMetadata(
-                response.headers,
-                body: body,
-                clientPreset: preset,
-              );
               final payload = await prepareSubscriptionImport(content);
+              final decodedMetadata = withConfigPackages(
+                readSubscriptionMetadata(
+                  response.headers,
+                  body: body,
+                  clientPreset: preset,
+                ),
+                excluded: payload.summary.excludedPackages,
+                included: payload.summary.includedPackages,
+              );
               if (payload.summary.rejectCoreFallback ||
                   payload.format == SubscriptionFormat.unknown) {
                 return const SubscriptionClientRejected(
@@ -599,6 +709,7 @@ extension ProfileExtension on Profile {
         : prepared.metadata.metadata.count('update.intervalMinutes');
     final saved =
         await copyWith(
+          url: prepared.migratedUrl ?? url,
           subscriptionPreferences: importPolicy == null
               ? subscriptionPreferences
               : subscriptionPreferences.copyWith(

@@ -24,6 +24,7 @@ import 'config.dart';
 import 'on_demand.dart';
 import 'core.dart';
 import 'database.dart';
+import 'provider_settings.dart';
 import 'routing.dart';
 import 'web_dashboard.dart';
 

@@ -46,12 +46,18 @@ String _markdown() {
     ..writeln()
     ..writeln('## Metadata fields')
     ..writeln()
-    ..writeln('| Path | Header | Type | Trust | Consumer |')
-    ..writeln('| --- | --- | --- | --- | --- |');
+    ..writeln('| Path | Header | Type | Trust | Consumer | Notes |')
+    ..writeln('| --- | --- | --- | --- | --- | --- |');
   for (final field in subscriptionFields) {
+    final notes = [
+      for (final alias in field.aliases)
+        'alias `${alias.header}`${alias.scale == 1 ? '' : ' x${alias.scale}'}',
+      if (field.suffix case final suffix?)
+        'suffix `${suffix.path}` ${suffix.minimum}-${suffix.maximum}',
+    ];
     out.writeln(
       '| `${field.path}` | `${field.header}` | ${field.type.name} | '
-      '${field.trust.name} | ${field.consumer} |',
+      '${field.trust.name} | ${field.consumer} | ${notes.join('; ')} |',
     );
   }
   out

@@ -638,6 +638,58 @@ abstract class _$RcxProfiles extends $Notifier<Map<String, RcxUserProfile>> {
   }
 }
 
+@ProviderFor(ProviderSettings)
+final providerSettingsProvider = ProviderSettingsProvider._();
+
+final class ProviderSettingsProvider
+    extends $NotifierProvider<ProviderSettings, ProviderSettingsState> {
+  ProviderSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'providerSettingsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$providerSettingsHash();
+
+  @$internal
+  @override
+  ProviderSettings create() => ProviderSettings();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProviderSettingsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProviderSettingsState>(value),
+    );
+  }
+}
+
+String _$providerSettingsHash() => r'50cc018a77357b83913ee360dd7a72ebdc61b9f4';
+
+abstract class _$ProviderSettings extends $Notifier<ProviderSettingsState> {
+  ProviderSettingsState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<ProviderSettingsState, ProviderSettingsState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ProviderSettingsState, ProviderSettingsState>,
+              ProviderSettingsState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(_config)
 final configProvider = _ConfigProvider._();
 
@@ -676,4 +728,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'02a0b9226f5982a4ae6667e7fd6d45eb747e584c';
+String _$_configHash() => r'1001faf81bb1ee916de59f7d41529955b9b59112';

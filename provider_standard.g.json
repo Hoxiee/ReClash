@@ -56,6 +56,11 @@
       "encoding": "url",
       "multiplicity": "singleton",
       "limit": 1024,
+      "aliases": [
+        {
+          "name": "support-url"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "retain-last-known-stale",
@@ -74,6 +79,11 @@
       "encoding": "url",
       "multiplicity": "singleton",
       "limit": 1024,
+      "aliases": [
+        {
+          "name": "profile-web-page-url"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "retain-last-known-stale",
@@ -89,9 +99,14 @@
         "http-response",
         "body-comment"
       ],
-      "encoding": "url",
+      "encoding": "url-with-suffix",
       "multiplicity": "singleton",
       "limit": 1024,
+      "suffix": {
+        "path": "provider.buyPlanDays",
+        "minimum": 1,
+        "maximum": 3650
+      },
       "trust": "display",
       "introduced": 1,
       "absence": "retain-last-known-stale",
@@ -107,9 +122,14 @@
         "http-response",
         "body-comment"
       ],
-      "encoding": "url",
+      "encoding": "url-with-suffix",
       "multiplicity": "singleton",
       "limit": 1024,
+      "suffix": {
+        "path": "provider.buyTrafficPercent",
+        "minimum": 1,
+        "maximum": 100
+      },
       "trust": "display",
       "introduced": 1,
       "absence": "retain-last-known-stale",
@@ -118,7 +138,7 @@
     },
     {
       "path": "provider.announce",
-      "name": "announce",
+      "name": "reclash-announce",
       "type": "text",
       "direction": "response",
       "context": [
@@ -126,6 +146,29 @@
         "body-comment"
       ],
       "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "aliases": [
+        {
+          "name": "announce"
+        }
+      ],
+      "trust": "display",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "panel",
+      "available": true
+    },
+    {
+      "path": "provider.announceUrl",
+      "name": "reclash-announceurl",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "url",
       "multiplicity": "singleton",
       "limit": 1024,
       "trust": "display",
@@ -167,6 +210,12 @@
       "minimum": 5,
       "maximum": 43200,
       "unit": "minutes",
+      "aliases": [
+        {
+          "name": "profile-update-interval",
+          "scale": 60
+        }
+      ],
       "trust": "hint",
       "introduced": 1,
       "absence": "retain-last-known-stale",
@@ -203,10 +252,260 @@
       "encoding": "boolean",
       "multiplicity": "singleton",
       "limit": 1024,
+      "aliases": [
+        {
+          "name": "hide-url"
+        }
+      ],
       "trust": "display",
       "introduced": 1,
       "absence": "retain-last-known-stale",
       "consumer": "panel",
+      "available": true
+    },
+    {
+      "path": "presentation.serverGroup",
+      "name": "reclash-serverinfo",
+      "type": "text",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limit": 256,
+      "trust": "display",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "panel",
+      "available": true
+    },
+    {
+      "path": "presentation.widgets",
+      "name": "reclash-widgets",
+      "type": "tokens",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-tokens",
+      "multiplicity": "singleton",
+      "limit": 32,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "appearance",
+      "available": true
+    },
+    {
+      "path": "presentation.background",
+      "name": "reclash-background",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "url-with-suffix",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "suffix": {
+        "path": "presentation.backgroundOpacity",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "appearance",
+      "available": true
+    },
+    {
+      "path": "presentation.view",
+      "name": "reclash-view",
+      "type": "pairs",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "semicolon-separated-pairs",
+      "multiplicity": "singleton",
+      "limit": 32,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "appearance",
+      "available": true
+    },
+    {
+      "path": "reminder.expireDays",
+      "name": "reclash-expiredays",
+      "type": "numbers",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-decimals",
+      "multiplicity": "singleton",
+      "limit": 8,
+      "minimum": 0,
+      "maximum": 365,
+      "unit": "days",
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "reminder",
+      "available": true
+    },
+    {
+      "path": "reminder.trafficPercent",
+      "name": "reclash-trafficpercent",
+      "type": "numbers",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-decimals",
+      "multiplicity": "singleton",
+      "limit": 8,
+      "minimum": 1,
+      "maximum": 100,
+      "unit": "percent",
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "reminder",
+      "available": true
+    },
+    {
+      "path": "settings.flags",
+      "name": "reclash-settings",
+      "type": "tokens",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-tokens",
+      "multiplicity": "singleton",
+      "limit": 16,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "settings",
+      "available": true
+    },
+    {
+      "path": "settings.restrictions",
+      "name": "reclash-restrictions",
+      "type": "tokens",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-tokens",
+      "multiplicity": "singleton",
+      "limit": 16,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "settings",
+      "available": true
+    },
+    {
+      "path": "transport.fallbackHosts",
+      "name": "reclash-fallbackhosts",
+      "type": "hosts",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-authorities",
+      "multiplicity": "singleton",
+      "limit": 5,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "transport",
+      "available": true
+    },
+    {
+      "path": "transport.newDomain",
+      "name": "reclash-newdomain",
+      "type": "hosts",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-authorities",
+      "multiplicity": "singleton",
+      "limit": 1,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "transport",
+      "available": true
+    },
+    {
+      "path": "apps.exclude",
+      "name": "reclash-excludeapps",
+      "type": "packages",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-packages",
+      "multiplicity": "singleton",
+      "limit": 512,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "apps",
+      "available": true
+    },
+    {
+      "path": "apps.include",
+      "name": "reclash-includeapps",
+      "type": "packages",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-packages",
+      "multiplicity": "singleton",
+      "limit": 512,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "apps",
+      "available": true
+    },
+    {
+      "path": "apps.routing",
+      "name": "reclash-approuting",
+      "type": "tokens",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "comma-separated-tokens",
+      "multiplicity": "singleton",
+      "limit": 1,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "apps",
       "available": true
     }
   ],

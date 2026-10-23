@@ -158,6 +158,13 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
                             tone: chipTone,
                             dot: isStart,
                           ),
+                          if (ref.watch(providerServerNodeProvider)
+                              case final node?)
+                            DashboardChip(
+                              label: node.length > 28
+                                  ? '${node.substring(0, 27)}…'
+                                  : node,
+                            ),
                         ],
                       ),
                       SizedBox(height: metrics.ipTop),

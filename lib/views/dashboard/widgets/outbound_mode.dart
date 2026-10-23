@@ -35,7 +35,7 @@ _ModeChoices _watchChoices(WidgetRef ref) {
     ),
   );
   return (
-    items: [if (scenario.offered) null, ...Mode.values],
+    items: [if (scenario.offered) null, ...ref.watch(availableModesProvider)],
     selected: scenario.auto ? null : own,
   );
 }

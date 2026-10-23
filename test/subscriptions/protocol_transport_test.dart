@@ -101,6 +101,11 @@ void main() {
         'panel',
         'scheduler',
         'routing',
+        'appearance',
+        'apps',
+        'reminder',
+        'settings',
+        'transport',
       });
       expect(
         subscriptionFields.map((field) => field.path).toSet(),
@@ -112,29 +117,25 @@ void main() {
       );
     });
 
-    test('unsupported domain and fallback hints cannot enter metadata', () {
+    test('provider hosts are kept as validated authorities', () {
       final result = readSubscriptionMetadata({
-        'reclash-servicename': ['Provider'],
-        'reclash-newdomain': ['other.example.test'],
-        'reclash-fallbackhosts': ['one.example.test,two.example.test'],
-      }, body: '# reclash-newdomain: body.example.test\nproxies: []');
-      expect(result.metadata.fields, {'provider.name': 'Provider'});
+        'reclash-newdomain': ['https://Other.example.test/'],
+        'reclash-fallbackhosts': ['one.example.test, two.example.test:8443'],
+      });
+      expect(result.metadata.strings('transport.newDomain'), [
+        'other.example.test',
+      ]);
+      expect(result.metadata.strings('transport.fallbackHosts'), [
+        'one.example.test',
+        'two.example.test:8443',
+      ]);
+      final invalid = readSubscriptionMetadata({
+        'reclash-fallbackhosts': ['one.example.test/path'],
+      });
+      expect(invalid.metadata.fields, isEmpty);
       expect(
-        result.warnings,
-        contains('Unsupported provider field: reclash-newdomain'),
-      );
-      expect(
-        result.warnings,
-        contains('Unsupported provider field: reclash-fallbackhosts'),
-      );
-      expect(
-        SubscriptionMetadata.fromJson({
-          'update': {
-            'newDomain': 'other.example.test',
-            'fallbackHosts': ['one.example.test'],
-          },
-        }).fields,
-        isEmpty,
+        invalid.warnings,
+        contains('Invalid provider field: reclash-fallbackhosts'),
       );
     });
 

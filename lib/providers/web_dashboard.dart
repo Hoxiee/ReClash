@@ -10,6 +10,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/provider_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -84,6 +85,12 @@ class WebDashboardAccess extends _$WebDashboardAccess {
     );
     ref.listen(coreStatusProvider, (_, next) {
       if (next != CoreStatus.connected) end();
+    });
+    ref.listen(providerSecureNetworkProvider, (_, next) {
+      if (next) {
+        end();
+        unawaited(_sync());
+      }
     });
     ref.listen(safeModeProvider, (_, next) {
       if (next) {
@@ -248,6 +255,9 @@ class WebDashboardAction extends _$WebDashboardAction {
 
   WebDashboardFailure? get unavailable {
     if (ref.read(safeModeProvider)) return WebDashboardFailure.safeMode;
+    if (ref.read(providerSecureNetworkProvider)) {
+      return WebDashboardFailure.restricted;
+    }
     if (ref.read(coreStatusProvider) != CoreStatus.connected ||
         !ref.read(initProvider)) {
       return WebDashboardFailure.coreUnavailable;
@@ -385,7 +395,9 @@ class WebDashboardAction extends _$WebDashboardAction {
       final config = webDashboardEffectiveConfig(
         ref.read(patchClashConfigProvider),
         temporarySecret: ref.read(webDashboardAccessProvider).temporarySecret,
-        safeMode: ref.read(safeModeProvider),
+        safeMode:
+            ref.read(safeModeProvider) ||
+            ref.read(providerSecureNetworkProvider),
       );
       if (!acquiredAccess.contains(owner) || config.secret.isEmpty) {
         throw const WebDashboardException(WebDashboardFailure.cancelled);

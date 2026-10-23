@@ -30,6 +30,15 @@ const _flClashXAdapter = SubscriptionCompatibilityAdapter(
     'flclashx-buytraffic': 'reclash-buytraffic',
     'flclashx-autoupdateinterval': 'reclash-autoupdateinterval',
     'flclashx-hideurl': 'reclash-hideurl',
+    'flclashx-serverinfo': 'reclash-serverinfo',
+    'flclashx-widgets': 'reclash-widgets',
+    'flclashx-background': 'reclash-background',
+    'flclashx-view': 'reclash-view',
+    'flclashx-settings': 'reclash-settings',
+    'flclashx-special': 'reclash-restrictions',
+    // FlClashX moves a profile to a spare panel address after a hard failure,
+    // which is what ReClash's fallback hosts do.
+    'flclashx-newdomain': 'reclash-fallbackhosts',
   },
 );
 

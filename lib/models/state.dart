@@ -49,6 +49,7 @@ abstract class ProfilesState with _$ProfilesState {
 abstract class TrayState with _$TrayState {
   const factory TrayState({
     required Mode mode,
+    @Default(Mode.values) List<Mode> modes,
     required int port,
     required bool autoLaunch,
     required bool systemProxy,

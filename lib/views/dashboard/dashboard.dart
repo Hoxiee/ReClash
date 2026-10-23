@@ -4,8 +4,10 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/announcement_card.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -51,7 +53,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     final sideWidth = ref.watch(sideWidthProvider);
     final scale = math.max(1.0, MediaQuery.textScalerOf(context).scale(1));
     final size = Size(viewSize.width - sideWidth, viewSize.height) / scale;
-    final editable = !DashboardDensity.of(size).isDesktop;
+    final editable =
+        !DashboardDensity.of(size).isDesktop &&
+        !ref.watch(
+          providerRestrictionsProvider.select(
+            (restrictions) =>
+                restrictions.contains(ProviderRestriction.denyWidgets),
+          ),
+        );
     if (!editable) {
       _editing = false;
     }
@@ -63,7 +72,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
       title: editing
           ? appLocalizations.editDashboard
           : appLocalizations.dashboard,
-      actions: [if (!editing && coreLib == null) const CoreStatusButton()],
+      actions: [
+        if (!editing && coreLib == null) const CoreStatusButton(),
+        if (editing) ?providerSettingTag(ref, const ['widgets']),
+      ],
       confirmationAction: editing
           ? IconButtonData(
               glyph: AppGlyphs.check,
@@ -126,6 +138,12 @@ class _DesktopDashboard extends ConsumerWidget {
     final hasUpdate = ref.watch(
       appUpdateActionProvider.select((state) => state.hasUpdate),
     );
+    final hasAnnouncement = ref.watch(
+      providerAnnouncementProvider.select((card) => card != null),
+    );
+    final hasNotice = ref.watch(
+      providerNoticeProvider.select((card) => card != null),
+    );
     final density = DashboardDensityScope.of(context);
     final compact = density.isCompact;
     final scale = DashboardDensityScope.scaleOf(context);
@@ -185,15 +203,21 @@ class _DesktopDashboard extends ConsumerWidget {
               spacing: gap,
               children: [
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
+                if (hasNotice) const NoticeCard(),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
                 ),
                 sized(
                   topHeight,
-                  row(const [
-                    (1, SpeedCard(direction: TrafficDirection.upload)),
-                    (1, SpeedCard(direction: TrafficDirection.download)),
+                  row([
+                    if (hasAnnouncement) ...const [
+                      (1, CombinedSpeedCard()),
+                      (1, AnnouncementCard(expandable: true)),
+                    ] else ...const [
+                      (1, SpeedCard(direction: TrafficDirection.upload)),
+                      (1, SpeedCard(direction: TrafficDirection.download)),
+                    ],
                   ]),
                 ),
                 sized(
@@ -218,10 +242,15 @@ class _DesktopDashboard extends ConsumerWidget {
           if (hasUpdate) sized(updateHeight, const UpdateCard()),
           sized(
             topHeight,
-            row(const [
-              (2, CurrentOutboundCard()),
-              (1, SpeedCard(direction: TrafficDirection.upload)),
-              (1, SpeedCard(direction: TrafficDirection.download)),
+            row([
+              (2, const CurrentOutboundCard()),
+              if (hasAnnouncement) ...const [
+                (1, CombinedSpeedCard()),
+                (1, AnnouncementCard(expandable: true)),
+              ] else ...const [
+                (1, SpeedCard(direction: TrafficDirection.upload)),
+                (1, SpeedCard(direction: TrafficDirection.download)),
+              ],
             ]),
           ),
           sized(
@@ -243,52 +272,86 @@ class _DesktopDashboard extends ConsumerWidget {
             ]),
           ),
         ];
-        final rowsHeight =
-            padding.vertical +
-            topHeight +
-            controlHeight +
-            middleHeight +
-            gap * 3 +
-            (hasUpdate ? updateHeight + gap : 0);
-        final tablesFit = constraints.maxHeight >= rowsHeight + tablesHeight;
-        final fills = constraints.maxHeight >= rowsHeight + summaryHeight;
-        return SingleChildScrollView(
+        return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: fills ? constraints.maxHeight : null,
-            child: Padding(
-              padding: padding,
-              child: Column(
-                spacing: gap,
-                children: [
-                  ...rows,
-                  if (tablesFit)
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: gap,
-                        children: const [
-                          Expanded(
-                            flex: 3,
-                            child: RepaintBoundary(
-                              child: ConnectionsTableCard(),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: RepaintBoundary(child: ProxyGroupsCard()),
-                          ),
-                        ],
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsetsDirectional.only(
+                start: padding.start,
+                end: padding.end,
+                top: padding.top,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (hasNotice)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: const NoticeCard(),
                       ),
-                    )
-                  else if (fills)
-                    Expanded(child: summaries)
-                  else
-                    sized(summaryHeight, summaries),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+            SliverLayoutBuilder(
+              builder: (context, constraints) {
+                final available = math.max(
+                  0.0,
+                  constraints.viewportMainAxisExtent -
+                      constraints.precedingScrollExtent,
+                );
+                final rowsHeight =
+                    padding.bottom +
+                    topHeight +
+                    controlHeight +
+                    middleHeight +
+                    gap * 3 +
+                    (hasUpdate ? updateHeight + gap : 0);
+                final tablesFit = available >= rowsHeight + tablesHeight;
+                final fills = available >= rowsHeight + summaryHeight;
+                return SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: fills ? available : null,
+                    child: Padding(
+                      padding: padding.copyWith(top: 0),
+                      child: Column(
+                        spacing: gap,
+                        children: [
+                          ...rows,
+                          if (tablesFit)
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                spacing: gap,
+                                children: const [
+                                  Expanded(
+                                    flex: 3,
+                                    child: RepaintBoundary(
+                                      child: ConnectionsTableCard(),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: RepaintBoundary(
+                                      child: ProxyGroupsCard(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else if (fills)
+                            Expanded(child: summaries)
+                          else
+                            sized(summaryHeight, summaries),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );
@@ -315,6 +378,7 @@ class _MobileDashboard extends ConsumerWidget {
     final saved = ref.watch(
       dashboardStateProvider.select((state) => state.dashboardWidgets),
     );
+    final hasAnnouncement = ref.watch(providerAnnouncementProvider) != null;
     final top = context.contentTopPadding;
     final bottom = 16 + context.bottomInset;
     return CustomScrollView(
@@ -327,8 +391,13 @@ class _MobileDashboard extends ConsumerWidget {
           builder: (context, constraints) {
             final side = dashboardMobileSideOf(constraints.crossAxisExtent);
             final widgets = [
+              if (hasAnnouncement &&
+                  !saved.contains(DashboardWidget.announcement))
+                DashboardWidget.announcement,
               for (final widget in saved)
-                if (widget.platforms.contains(platform)) widget,
+                if (widget.platforms.contains(platform) &&
+                    (widget != DashboardWidget.announcement || hasAnnouncement))
+                  widget,
             ];
             if (editing) {
               return DashboardEditor(
@@ -354,6 +423,8 @@ class _MobileDashboard extends ConsumerWidget {
                       ),
                     ))
                       const UpdateCard(),
+                    if (ref.watch(providerNoticeProvider) != null)
+                      const NoticeCard(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),
