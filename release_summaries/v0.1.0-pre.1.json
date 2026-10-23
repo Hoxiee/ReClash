@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.1",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "ReClash starts a new release line",
+      "spotlight": {
+        "title": "Auto-routing",
+        "description": "Profiles, scenarios and import choose the route for each connection without manual rules.",
+        "kind": "speed"
+      },
+      "highlights": [
+        {
+          "title": "On-demand network selection",
+          "description": "Pick the networks that keep the proxy active; ports survive a pause.",
+          "kind": "shield"
+        },
+        {
+          "title": "Provider headers and settings",
+          "description": "Subscription providers can send settings, and the app controls which ones apply.",
+          "kind": "link"
+        },
+        {
+          "title": "Launcher icons",
+          "description": "Choose an app icon from the new variants on Android.",
+          "kind": "wallpaper",
+          "platforms": ["android"]
+        },
+        {
+          "title": "Refreshed navigation",
+          "description": "New page transitions and navigation titles across the app.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Previous releases are retired",
+          "description": "Version history restarts at 0.1.0; reinstall from this release rather than updating from older builds."
+        }
+      ]
+    },
+    "ru": {
+      "headline": "ReClash начинает новую линейку релизов",
+      "spotlight": {
+        "title": "Авто-маршрутизация",
+        "description": "Профили, сценарии и импорт выбирают маршрут для каждого соединения без ручных правил.",
+        "kind": "speed"
+      },
+      "highlights": [
+        {
+          "title": "Выбор сетей для On-demand",
+          "description": "Укажите сети, в которых прокси остаётся активным; порты сохраняются при паузе.",
+          "kind": "shield"
+        },
+        {
+          "title": "Заголовки и настройки провайдера",
+          "description": "Провайдеры подписок могут передавать настройки, а приложение решает, какие применять.",
+          "kind": "link"
+        },
+        {
+          "title": "Иконки лаунчера",
+          "description": "Выберите значок приложения из новых вариантов на Android.",
+          "kind": "wallpaper",
+          "platforms": ["android"]
+        },
+        {
+          "title": "Обновлённая навигация",
+          "description": "Новые переходы между страницами и заголовки навигации по всему приложению.",
+          "kind": "dashboard"
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Прежние релизы сняты",
+          "description": "История версий начинается с 0.1.0; установите этот релиз заново, а не обновляйтесь со старых сборок."
+        }
+      ]
+    }
+  }
+}

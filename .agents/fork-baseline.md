@@ -76,4 +76,4 @@ from settings specifications and the Tools catalog.
 Before activating: commit the intended maintenance source, inspect that exact dev/source/recipe combination, require no
 markers or unexplained residuals, and run full plus affected-platform checks. A temporary-repository structural
 bootstrap rehearsal is not final candidate verification, acceptance, native-platform evidence or publication authority.
-The normalized product line starts at `0.1.0-pre.1`; ReClash-Alpha version history is unrelated. Existing release tags remain untouched.
+The normalized product line starts at `0.1.0-pre.1`; ReClash-Alpha version history is unrelated. No release tags exist before `v0.1.0-pre.1`; the earlier tags and GitHub releases were removed.

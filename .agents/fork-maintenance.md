@@ -196,7 +196,7 @@ are inputs to the fragment assembler. ReClash feature fragments live under `arb/
 `arb/intl_<locale>.arb` inputs for app localization codegen. A recipe path change requires a reviewed recipe migration;
 never resolve an upstream locale conflict by editing assembled outputs alone.
 
-The normalized product line starts at `0.1.0-pre.1`; ReClash-Alpha version history is unrelated. Existing release tags remain untouched.
+The normalized product line starts at `0.1.0-pre.1`; ReClash-Alpha version history is unrelated. No release tags exist before `v0.1.0-pre.1`; the earlier tags and GitHub releases were removed.
 Website/package destinations and their external availability remain product policy; no test here claims that a hosting
 account, F-Droid signing fingerprint, app store or update channel is actually published or controlled.
 No fixed sync schedule, new release topology, replay queue, release ledger, automatic agent fan-out or automatic
