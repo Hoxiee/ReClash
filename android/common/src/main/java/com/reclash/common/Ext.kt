@@ -74,7 +74,7 @@ fun Context.ensureNotificationChannel() {
         NotificationChannel(
             GlobalState.NOTIFICATION_CHANNEL,
             getString(R.string.service_channel_name),
-            NotificationManager.IMPORTANCE_LOW,
+            NotificationManager.IMPORTANCE_MIN,
         ),
     )
 }

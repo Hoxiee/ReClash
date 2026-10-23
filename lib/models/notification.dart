@@ -31,7 +31,7 @@ abstract class NotificationComponent with _$NotificationComponent {
 @freezed
 abstract class NotificationSettings with _$NotificationSettings {
   const factory NotificationSettings({
-    @Default(NotificationVisibility.detailed) NotificationVisibility visibility,
+    @Default(NotificationVisibility.minimal) NotificationVisibility visibility,
     @Default(defaultNotificationComponents)
     List<NotificationComponent> components,
     @Default(true) bool showStopAction,
@@ -70,9 +70,9 @@ abstract class NotificationSettings with _$NotificationSettings {
       }
     }
     return NotificationSettings(
-      visibility: value['visibility'] == 'minimal'
-          ? NotificationVisibility.minimal
-          : NotificationVisibility.detailed,
+      visibility: value['visibility'] == 'detailed'
+          ? NotificationVisibility.detailed
+          : NotificationVisibility.minimal,
       components: rawComponents is List
           ? components
           : defaultNotificationComponents,

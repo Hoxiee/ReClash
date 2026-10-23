@@ -83,6 +83,15 @@ void main() {
   testWidgets('minimal hides detailed controls and preserves their settings', (
     tester,
   ) async {
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              visibility: NotificationVisibility.detailed,
+            ),
+          ),
+        );
     await mount(
       tester,
       NotificationSettingsView(loadStatus: () async => ready),

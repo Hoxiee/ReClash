@@ -3,6 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/models/models.dart';
 
 void main() {
+  test(
+    'missing visibility defaults to minimal without overriding saved detail',
+    () {
+      expect(
+        NotificationSettings.safeFromJson({}).visibility,
+        NotificationVisibility.minimal,
+      );
+      expect(
+        NotificationSettings.safeFromJson({
+          'visibility': 'detailed',
+        }).visibility,
+        NotificationVisibility.detailed,
+      );
+    },
+  );
+
   test('legacy stop preference migrates without changing other settings', () {
     final settings = AppSettingProps.fromJson({
       'showNotificationStopAction': false,
@@ -47,7 +63,7 @@ void main() {
         group: 'Auto',
       ),
     ]);
-    expect(settings.detailed, isTrue);
+    expect(settings.detailed, isFalse);
     expect(settings.showStopAction, isFalse);
     expect(NotificationSettings.safeFromJson(7), const NotificationSettings());
   });

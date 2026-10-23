@@ -36,7 +36,7 @@ _NotificationSettings _$NotificationSettingsFromJson(
         _$NotificationVisibilityEnumMap,
         json['visibility'],
       ) ??
-      NotificationVisibility.detailed,
+      NotificationVisibility.minimal,
   components:
       (json['components'] as List<dynamic>?)
           ?.map(
