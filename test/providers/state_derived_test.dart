@@ -1049,6 +1049,15 @@ void main() {
   test(
     'notification group follows mode and preserves an explicit missing selection',
     () {
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              notificationSettings: state.notificationSettings.copyWith(
+                visibility: NotificationVisibility.detailed,
+              ),
+            ),
+          );
       container.listen(appSettingProvider, (_, _) {});
       container
           .read(groupsProvider.notifier)
@@ -1120,6 +1129,15 @@ void main() {
 
   test('shared state carries the notification stop action switch', () async {
     await AppLocalizations.load(const Locale('en'));
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              visibility: NotificationVisibility.detailed,
+            ),
+          ),
+        );
     container.listen(sharedStateProvider, (_, _) {});
     expect(container.read(sharedStateProvider).showStopAction, true);
 
