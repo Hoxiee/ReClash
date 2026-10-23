@@ -20,5 +20,6 @@
       }
     }
   },
-  "webDashboardRestricted": "Dashboard access is disabled by your provider."
+  "webDashboardRestricted": "Dashboard access is disabled by your provider.",
+  "providerNotice": "Notice"
 }

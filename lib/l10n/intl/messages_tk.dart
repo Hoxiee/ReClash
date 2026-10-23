@@ -1968,6 +1968,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Giňişleýin",
     ),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("Bildiriş"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
       "Üpjün edijiden",
     ),

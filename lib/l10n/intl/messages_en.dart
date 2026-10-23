@@ -1923,6 +1923,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Learn more",
     ),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("Notice"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
       "From provider",
     ),

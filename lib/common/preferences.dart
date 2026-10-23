@@ -55,18 +55,18 @@ class Preferences {
     await store?.setStringList('tools.pinned', pinned);
   }
 
-  Future<List<String>> getDismissedAnnouncements() async {
+  Future<List<String>> getDismissedNotices() async {
     try {
       final store = await _store.value;
-      return store?.getStringList('provider.announcements') ?? const [];
+      return store?.getStringList('provider.notices') ?? const [];
     } on Object {
       return const [];
     }
   }
 
-  Future<void> saveDismissedAnnouncements(List<String> dismissed) async {
+  Future<void> saveDismissedNotices(List<String> dismissed) async {
     final store = await _store.value;
-    await store?.setStringList('provider.announcements', dismissed);
+    await store?.setStringList('provider.notices', dismissed);
   }
 
   Future<int> getVersion() async {

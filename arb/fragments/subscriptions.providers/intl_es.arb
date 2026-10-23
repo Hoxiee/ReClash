@@ -7,5 +7,6 @@
   "providerAnnouncementOpen": "Más información",
   "accessReturnToProvider": "Devolver las apps al proveedor",
   "accessProviderDisabledDesc": "Apps que tu proveedor deja fuera de la VPN: {count}. Activa el control de acceso para cambiar la lista.",
-  "webDashboardRestricted": "El acceso al panel está desactivado por tu proveedor."
+  "webDashboardRestricted": "El acceso al panel está desactivado por tu proveedor.",
+  "providerNotice": "Aviso"
 }

@@ -2639,6 +2639,7 @@
   "accessReturnToProvider": "Return apps to provider",
   "accessProviderDisabledDesc": "Apps your provider keeps out of the VPN: {count}. Turn on access control to change the list.",
   "webDashboardRestricted": "Dashboard access is disabled by your provider.",
+  "providerNotice": "Notice",
   "@providerSettingManaged": {
     "description": "Tag on a setting or app that the subscription provider currently sets"
   },

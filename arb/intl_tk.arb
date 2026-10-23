@@ -1853,6 +1853,7 @@
   "accessReturnToProvider": "Programmalary üpjün edijä gaýtar",
   "accessProviderDisabledDesc": "Üpjün edijiňiziň VPN-den daşarda goýýan programmalary: {count}. Sanawy üýtgetmek üçin elýeterlilik dolandyryşyny açyň.",
   "webDashboardRestricted": "Paneli ulanmak üpjünçi tarapyndan öçürilen.",
+  "providerNotice": "Bildiriş",
   "toolsAction": "Hereket",
   "toolsChoose": "Bölümü saýlaň ýa-da sazlamany gözleň",
   "toolsCloseConnectionsConfirm": "Bu hereket ähli işleýän baglanyşyklary ýapar. Dowam edilsinmi?",

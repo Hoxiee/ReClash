@@ -152,10 +152,14 @@ class ProviderHints {
 
   String? get serverGroup => metadata.text('presentation.serverGroup');
 
-  ProviderAnnouncement? get announcement {
-    final text = metadata.text('provider.announce')?.trim();
+  ProviderAnnouncement? get announcement => _message('announce', 'announceUrl');
+
+  ProviderAnnouncement? get notice => _message('notice', 'noticeUrl');
+
+  ProviderAnnouncement? _message(String textKey, String linkKey) {
+    final text = metadata.text('provider.$textKey')?.trim();
     if (text == null || text.isEmpty) return null;
-    final link = metadata.text('provider.announceUrl');
+    final link = metadata.text('provider.$linkKey');
     return ProviderAnnouncement(
       text,
       link == null ? null : safeSubscriptionLink(link),

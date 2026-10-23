@@ -2025,6 +2025,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Batafsil",
     ),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("Bildirishnoma"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
       "Provayderdan",
     ),

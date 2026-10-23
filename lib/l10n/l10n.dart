@@ -15506,6 +15506,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Notice`
+  String get providerNotice {
+    return Intl.message('Notice', name: 'providerNotice', desc: '', args: []);
+  }
+
   /// `Application settings`
   String get applicationSettings {
     return Intl.message(

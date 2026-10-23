@@ -1653,6 +1653,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerAnnouncement": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage("詳細"),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("お知らせ"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage("プロバイダー設定"),
     "providerSettingReturn": MessageLookupByLibrary.simpleMessage("プロバイダーに戻す"),
     "providerSettingsReturnAll": MessageLookupByLibrary.simpleMessage(

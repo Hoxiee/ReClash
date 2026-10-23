@@ -7,5 +7,6 @@
   "providerAnnouncementOpen": "詳細",
   "accessReturnToProvider": "アプリをプロバイダー設定に戻す",
   "accessProviderDisabledDesc": "プロバイダーが VPN を経由させないアプリ: {count}。リストを変更するにはアクセス制御をオンにしてください。",
-  "webDashboardRestricted": "プロバイダーによりダッシュボードへのアクセスが無効にされています。"
+  "webDashboardRestricted": "プロバイダーによりダッシュボードへのアクセスが無効にされています。",
+  "providerNotice": "お知らせ"
 }
