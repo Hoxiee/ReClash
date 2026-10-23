@@ -32,7 +32,7 @@ final class HelperCoreOwner: NSObject, RCHelperListenerDelegate {
         self.queue = queue
     }
 
-    func handleRequest(_ request: Data, fromPeer peer: RCHelperPeer,
+    func handleRequest(_ request: Data, from peer: RCHelperPeer,
                        reply: @escaping (Data) -> Void) {
         do {
             try CodeTrust.validate(peer.code, requirement: identity.appRequirement)
