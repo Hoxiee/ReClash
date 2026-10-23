@@ -14,6 +14,7 @@ import 'subscription/subscription_links.dart';
 const maxSubscriptionImportBytes = 16 * 1024 * 1024;
 const maxSubscriptionImportDecompressedBytes = 32 * 1024 * 1024;
 const maxSubscriptionImportNodes = 20000;
+const maxSubscriptionImportValues = 256 * 1024;
 
 enum SubscriptionFormat {
   clash,
@@ -305,7 +306,7 @@ void _checkValueLimits(Object? root) {
       pending.addAll(value.values);
     }
     visited++;
-    if (visited > maxSubscriptionImportNodes) {
+    if (visited > maxSubscriptionImportValues) {
       throw const SubscriptionImportException('Import exceeds node limit');
     }
   }
