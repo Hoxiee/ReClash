@@ -2,7 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/route_state.dart';
 
-enum SetupStep { language, agreement, profile, coverage, checking, result }
+enum SetupStep {
+  language,
+  agreement,
+  profile,
+  coverage,
+  region,
+  checking,
+  result,
+}
 
 enum SetupCoverage { tun, system, local }
 
@@ -34,7 +42,8 @@ SetupStep resumableSetupStep(int step, {required bool accepted}) {
   if (step <= SetupStep.language.index) return SetupStep.language;
   if (!accepted) return SetupStep.agreement;
   if (step <= SetupStep.profile.index) return SetupStep.profile;
-  return SetupStep.coverage;
+  if (step == SetupStep.coverage.index) return SetupStep.coverage;
+  return SetupStep.region;
 }
 
 AppSettingProps initializeSetupSettings(
@@ -55,33 +64,49 @@ class SetupDraft {
     required this.coverage,
     this.regionCode,
     this.regionChosen = false,
+    this.directRoutes = true,
+    this.directApps,
   });
 
   final int? profileId;
   final SetupCoverage coverage;
   final String? regionCode;
   final bool regionChosen;
+  final bool directRoutes;
 
-  SetupDraft withProfile(int? id) => SetupDraft(
-    profileId: id,
-    coverage: coverage,
-    regionCode: regionCode,
-    regionChosen: regionChosen,
+  /// Packages of [regionCode] found on the device, or null before a scan.
+  final List<String>? directApps;
+
+  SetupDraft _copy({
+    int? Function()? profileId,
+    SetupCoverage? coverage,
+    String? Function()? regionCode,
+    bool? regionChosen,
+    bool? directRoutes,
+    List<String>? Function()? directApps,
+  }) => SetupDraft(
+    profileId: profileId != null ? profileId() : this.profileId,
+    coverage: coverage ?? this.coverage,
+    regionCode: regionCode != null ? regionCode() : this.regionCode,
+    regionChosen: regionChosen ?? this.regionChosen,
+    directRoutes: directRoutes ?? this.directRoutes,
+    directApps: directApps != null ? directApps() : this.directApps,
   );
 
-  SetupDraft withCoverage(SetupCoverage value) => SetupDraft(
-    profileId: profileId,
-    coverage: value,
-    regionCode: regionCode,
-    regionChosen: regionChosen,
-  );
+  SetupDraft withProfile(int? id) => _copy(profileId: () => id);
 
-  SetupDraft withRegion(String? code) => SetupDraft(
-    profileId: profileId,
-    coverage: coverage,
-    regionCode: code,
+  SetupDraft withCoverage(SetupCoverage value) => _copy(coverage: value);
+
+  SetupDraft withRegion(String? code) => _copy(
+    regionCode: () => code,
     regionChosen: true,
+    directApps: code == regionCode ? null : () => null,
   );
+
+  SetupDraft withDirectRoutes(bool value) => _copy(directRoutes: value);
+
+  SetupDraft withDirectApps(List<String>? packages) =>
+      _copy(directApps: () => packages);
 }
 
 @immutable

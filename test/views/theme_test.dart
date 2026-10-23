@@ -40,6 +40,13 @@ void main() {
 
   tearDown(() => container.dispose());
 
+  Finder destination(String label) => find.descendant(
+    of: find.byType(GlyphSegmentedControl<int>),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is Semantics && widget.properties.label == label,
+    ),
+  );
+
   Future<void> pumpThemeView(
     WidgetTester tester, {
     bool interface = false,
@@ -59,7 +66,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     if (interface) {
-      await tester.tap(find.text('Interface'));
+      await tester.tap(destination('Interface'));
       await tester.pumpAndSettle();
     }
   }
@@ -67,11 +74,6 @@ void main() {
   ThemeProps readTheme() => container.read(themeSettingProvider);
 
   group('appearance tabs', () {
-    Finder destination(String label) => find.descendant(
-      of: find.byType(NavigationDock),
-      matching: find.text(label),
-    );
-
     Finder page(String id, {bool skipOffstage = true}) =>
         find.byKey(PageStorageKey('theme-tab-$id'), skipOffstage: skipOffstage);
 
@@ -102,10 +104,216 @@ void main() {
         )
         .focusNode!;
 
+    Future<void> swipe(WidgetTester tester, double distance) async {
+      await tester.timedDragFrom(
+        const Offset(195, 150),
+        Offset(distance, 0),
+        const Duration(seconds: 1),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    for (final animation in TabAnimation.values) {
+      testWidgets('$animation swipes follow the finger and cancel or commit', (
+        tester,
+      ) async {
+        container
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(tabAnimation: animation));
+        await pumpThemeView(tester, size: const Size(390, 844));
+        final start = tester.getTopLeft(page('theme'));
+        final gesture = await tester.startGesture(const Offset(195, 150));
+        await gesture.moveBy(const Offset(-30, 0));
+        await gesture.moveBy(const Offset(-100, 0));
+        await tester.pump();
+        expect(tester.getTopLeft(page('theme')).dx, closeTo(start.dx - 100, 1));
+        expect(page('background'), findsOneWidget);
+        await tester.pump(const Duration(seconds: 1));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(page('theme'), findsOneWidget);
+        expect(page('background'), findsNothing);
+        expect(tester.getTopLeft(page('theme')), start);
+
+        await swipe(tester, -260);
+        expect(page('background'), findsOneWidget);
+        await swipe(tester, -260);
+        expect(page('interface'), findsOneWidget);
+        await swipe(tester, -260);
+        expect(page('interface'), findsOneWidget);
+        await swipe(tester, 260);
+        expect(page('background'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets(
+      'previous categories win over drag back until the first tab',
+      (tester) async {
+        await pumpThemeView(tester, size: const Size(390, 844));
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: TestApp(
+              child: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).push(CommonRoute<void>(builder: (_) => const ThemeView())),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+        await tester.tap(destination('Interface'));
+        await tester.pumpAndSettle();
+        await swipe(tester, 260);
+        expect(page('background'), findsOneWidget);
+        expect(find.byType(ThemeView), findsOneWidget);
+        await swipe(tester, 260);
+        expect(page('theme'), findsOneWidget);
+        await swipe(tester, 260);
+        expect(find.byType(ThemeView), findsNothing);
+        expect(find.text('open'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+      variant: TargetPlatformVariant({
+        TargetPlatform.android,
+        TargetPlatform.linux,
+      }),
+    );
+
+    testWidgets('sliders retain their horizontal drag on a swipeable tab', (
+      tester,
+    ) async {
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(textScale: const TextScale(enable: true)),
+          );
+      await pumpThemeView(tester, interface: true, size: const Size(390, 844));
+      final slider = find.byType(Slider);
+      await tester.ensureVisible(slider);
+      await tester.pumpAndSettle();
+      final before = readTheme().textScale.scale;
+      await tester.timedDrag(
+        slider,
+        const Offset(80, 0),
+        const Duration(seconds: 1),
+      );
+      await tester.pumpAndSettle();
+      expect(readTheme().textScale.scale, greaterThan(before));
+      expect(page('interface'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('reduced motion settles a swipe without a release animation', (
+      tester,
+    ) async {
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      await pumpThemeView(tester, size: const Size(390, 844));
+      await tester.timedDragFrom(
+        const Offset(195, 150),
+        const Offset(-260, 0),
+        const Duration(seconds: 1),
+      );
+      await tester.pump();
+      expect(page('theme'), findsNothing);
+      expect(page('background'), findsOneWidget);
+      expect(tester.getTopLeft(page('background')).dx, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('background header resets affect only their own settings', (
+      tester,
+    ) async {
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          wallpaperSaveProvider.overrideWithValue(() async => true),
+        ],
+      );
+      globalState.container = container;
+      const original = WallpaperProps(
+        scale: 2,
+        positionX: 0.5,
+        blur: 12,
+        cardOpacity: 0.7,
+      );
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(wallpaper: original));
+      await pumpThemeView(tester);
+      await tester.tap(destination('Background'));
+      await tester.pumpAndSettle();
+      final framing = find.byTooltip('Reset framing');
+      final effects = find.byTooltip('Reset effects');
+      expect(
+        find.ancestor(of: framing, matching: find.byType(InfoHeader)),
+        findsOneWidget,
+      );
+      expect(
+        find.ancestor(of: effects, matching: find.byType(InfoHeader)),
+        findsOneWidget,
+      );
+      await tester.tap(framing);
+      await tester.pumpAndSettle();
+      expect(readTheme().wallpaper.scale, 1);
+      expect(readTheme().wallpaper.positionX, 0);
+      expect(readTheme().wallpaper.blur, original.blur);
+      expect(readTheme().wallpaper.cardOpacity, original.cardOpacity);
+      expect(framing, findsNothing);
+      await tester.tap(effects);
+      await tester.pumpAndSettle();
+      expect(readTheme().wallpaper, const WallpaperProps());
+      expect(effects, findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'a failed header reset restores settings and clears busy state',
+      (tester) async {
+        var saveSucceeds = false;
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
+            wallpaperSaveProvider.overrideWithValue(() async => saveSucceeds),
+          ],
+        );
+        globalState.container = container;
+        const original = WallpaperProps(scale: 2, blur: 12);
+        container
+            .read(themeSettingProvider.notifier)
+            .update((state) => state.copyWith(wallpaper: original));
+        await pumpThemeView(tester);
+        await tester.tap(destination('Background'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Reset framing'));
+        await tester.pumpAndSettle();
+        expect(readTheme().wallpaper, original);
+        expect(container.read(wallpaperActionProvider), isFalse);
+        saveSucceeds = true;
+        await tester.tap(find.byTooltip('Reset framing'));
+        await tester.pumpAndSettle();
+        expect(readTheme().wallpaper.scale, 1);
+        expect(readTheme().wallpaper.blur, original.blur);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('each category retains its own scroll and preview state', (
       tester,
     ) async {
-      await pumpThemeView(tester, size: const Size(390, 844));
+      await pumpThemeView(tester, size: const Size(390, 640));
       final themeElement = tester.element(page('theme'));
       final themeScroll = scrollOf(tester, 'theme');
       final preview = find.byType(ThemeLivePreview);
@@ -160,54 +368,22 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the dock rises after the route has half opened and fades '
-        'before it closes', (tester) async {
-      await pumpThemeView(tester, size: const Size(390, 844));
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      unawaited(
-        navigator.push(MaterialPageRoute(builder: (_) => const ThemeView())),
-      );
-      await tester.pump();
-      double dockOpacity() => tester
-          .widget<FadeTransition>(
-            find
-                .ancestor(
-                  of: find.byType(NavigationDock).last,
-                  matching: find.byType(FadeTransition),
-                )
-                .first,
-          )
-          .opacity
-          .value;
-      final route = ModalRoute.of(
-        tester.element(find.byType(NavigationDock).last),
-      )!;
-      await tester.pump(route.transitionDuration * 0.4);
-      expect(dockOpacity(), 0);
-      await tester.pumpAndSettle();
-      expect(dockOpacity(), 1);
-      navigator.pop();
-      await tester.pump();
-      await tester.pump(route.reverseTransitionDuration * 0.2);
-      expect(dockOpacity(), 0);
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    });
-
     for (final animation in TabAnimation.values) {
-      testWidgets('$animation animates category changes and keeps the dock '
-          'stationary', (tester) async {
+      testWidgets('$animation animates category changes and keeps the '
+          'switcher stationary', (tester) async {
         container
             .read(appSettingProvider.notifier)
             .update((state) => state.copyWith(tabAnimation: animation));
         await pumpThemeView(tester, size: const Size(390, 844));
-        final dock = tester.getRect(find.byType(NavigationDock));
+        Offset switcherEnd() =>
+            tester.getTopRight(find.byType(GlyphSegmentedControl<int>));
+        final switcher = switcherEnd();
         await tester.tap(destination('Background'));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 70));
         expect(page('theme'), findsOneWidget);
         expect(page('background'), findsOneWidget);
-        expect(tester.getRect(find.byType(NavigationDock)), dock);
+        expect(switcherEnd(), switcher);
         if (animation == TabAnimation.fade) {
           expect(opacityOf(tester, 'theme'), inExclusiveRange(0, 1));
           expect(opacityOf(tester, 'background'), inExclusiveRange(0, 1));
@@ -288,8 +464,10 @@ void main() {
           }
           expect(
             tester
-                .widget<NavigationDock>(find.byType(NavigationDock))
-                .selectedIndex,
+                .widget<GlyphSegmentedControl<int>>(
+                  find.byType(GlyphSegmentedControl<int>),
+                )
+                .value,
             2,
           );
           expect(tester.takeException(), isNull);
@@ -533,10 +711,11 @@ void main() {
       await pumpThemeView(tester);
       await tester.tap(destination('Background'));
       await tester.pumpAndSettle();
-      final choose = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.tooltip == 'Choose image',
+      final add = find.descendant(
+        of: find.byType(WallpaperView),
+        matching: find.text('Add'),
       );
-      expect(tester.widget<IconButton>(choose).onPressed, isNotNull);
+      expect(add, findsOneWidget);
       container
           .read(themeSettingProvider.notifier)
           .update(
@@ -545,7 +724,7 @@ void main() {
             ),
           );
       await tester.pumpAndSettle();
-      expect(tester.widget<IconButton>(choose).onPressed, isNull);
+      expect(add, findsNothing);
       expect(find.text('Background 4'), findsOneWidget);
       await tester.tap(find.text('Background 4'));
       await tester.pumpAndSettle();
@@ -578,23 +757,22 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('bottom tabs preserve visited page state', (tester) async {
+    testWidgets('tabs preserve visited page state', (tester) async {
       await pumpThemeView(tester);
-      expect(find.text('Theme').last, findsOneWidget);
-      await tester.tap(find.text('Background'));
+      await tester.tap(destination('Background'));
       await tester.pumpAndSettle();
       expect(find.byType(WallpaperView), findsOneWidget);
-      await tester.tap(find.text('Interface'));
+      await tester.tap(destination('Interface'));
       await tester.pumpAndSettle();
       expect(find.text('Bottom bar'), findsOneWidget);
-      await tester.tap(find.text('Theme').first);
+      await tester.tap(destination('Theme'));
       await tester.pumpAndSettle();
       expect(find.text('Light'), findsOneWidget);
     });
 
     testWidgets('wallpaper tab fits a phone-width layout', (tester) async {
       await pumpThemeView(tester, size: const Size(390, 844));
-      await tester.tap(find.text('Background'));
+      await tester.tap(destination('Background'));
       await tester.pumpAndSettle();
 
       expect(find.byType(WallpaperView), findsOneWidget);
@@ -679,13 +857,13 @@ void main() {
           widget is Semantics && widget.properties.label == Color(color).hex,
     );
 
-    testWidgets('starts on blue among the system colors', (tester) async {
+    testWidgets('starts on orange among the system colors', (tester) async {
       container
           .read(themeSettingProvider.notifier)
           .update((_) => defaultThemeProps);
       await pumpThemeView(tester);
 
-      expect(readTheme().primaryColor, 0xFF007AFF);
+      expect(readTheme().primaryColor, 0xFFFF9500);
       for (final color in defaultPrimaryColors) {
         expect(swatch(color), findsOneWidget);
       }
@@ -717,19 +895,19 @@ void main() {
 
     testWidgets('deletes a color from its context menu', (tester) async {
       await pumpThemeView(tester);
-      await tester.tap(swatch(0xFFFF9500));
+      await tester.tap(swatch(0xFF007AFF));
       await tester.pumpAndSettle();
 
-      await tester.longPress(swatch(0xFFFF9500));
+      await tester.longPress(swatch(0xFF007AFF));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
 
-      expect(readTheme().primaryColors, isNot(contains(0xFFFF9500)));
+      expect(readTheme().primaryColors, isNot(contains(0xFF007AFF)));
       expect(readTheme().primaryColor, defaultPrimaryColor);
-      expect(swatch(0xFFFF9500), findsNothing);
+      expect(swatch(0xFF007AFF), findsNothing);
     });
 
     Future<void> editColor(WidgetTester tester, int color, String hex) async {

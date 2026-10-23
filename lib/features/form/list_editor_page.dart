@@ -240,12 +240,14 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
     );
   }
 
-  EdgeInsets _listPadding(BuildContext context) => EdgeInsets.fromLTRB(
-    16,
-    context.contentTopPadding,
-    16,
-    24 + BottomInsetScope.of(context),
-  );
+  EdgeInsets _listPadding(BuildContext context) =>
+      EdgeInsets.fromLTRB(
+        16,
+        context.contentTopPadding,
+        16,
+        24 + BottomInsetScope.of(context),
+      ) +
+      context.bodyInsets;
 
   /// Reuses each row it builds, so the list settling on its own rebuilds none.
   Widget Function(int index) _rowsOf(

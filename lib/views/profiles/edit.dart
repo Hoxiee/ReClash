@@ -10,12 +10,14 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/pages/editor.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/compatibility/client_labels.dart';
 import 'package:reclash/subscriptions/compatibility/editor_section.dart';
 import 'package:reclash/subscriptions/compatibility/import_policy.dart';
 import 'package:reclash/subscriptions/compatibility/import_review.dart';
 import 'package:reclash/subscriptions/compatibility/preview.dart';
+import 'package:reclash/subscriptions/compatibility/settings_form.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/ui/icons/icons.dart';
@@ -395,7 +397,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   Future<void> _loadDeviceIdentityConsent() async {
     try {
       final store = await DeviceIdentityStore.create();
-      final globalEnabled = await store.globalSendEnabled();
+      final globalEnabled = await store.globalSendEnabled(
+        byDefault: sendsDeviceIdentityByDefault(
+          ref.read(appSettingProvider).regionCode,
+        ),
+      );
       final override = await store.profileSendOverride(widget.profile.id);
       if (!mounted) return;
       setState(() {
@@ -418,6 +424,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         message: TextSpan(text: l10n.subscriptionIdentityDisclosure),
       );
       if (accepted != true) return;
+    }
+    if (value == false && _sendDeviceIdentity) {
+      final confirmed = await confirmDeviceIdentityOff(
+        context,
+        ref.read(appSettingProvider).regionCode,
+      );
+      if (!confirmed) return;
     }
     if (!mounted) return;
     _invalidateCompatibility();

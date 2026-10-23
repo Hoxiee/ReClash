@@ -447,12 +447,14 @@ class _CustomProxiesViewState extends ConsumerState<CustomProxiesView> {
                   child: SizedBox(height: context.contentTopPadding),
                 ),
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    0,
-                    16,
-                    16 + BottomInsetScope.of(context),
-                  ),
+                  padding:
+                      EdgeInsets.fromLTRB(
+                        16,
+                        0,
+                        16,
+                        16 + BottomInsetScope.of(context),
+                      ) +
+                      context.bodyInsets,
                   sliver: reorderable
                       ? SliverReorderableList(
                           itemCount: visible.length,

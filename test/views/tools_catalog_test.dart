@@ -231,7 +231,32 @@ void main() {
     },
   );
 
-  test('application and core settings have disjoint owners', () {
+  test('localized log search leads to application settings', () async {
+    for (final locale in ['en', 'ru']) {
+      final l = await AppLocalizations.load(Locale(locale));
+      final catalog = buildToolCatalog(l, _environment());
+      final search = ToolsSearch(catalog.map((entry) => entry.document));
+      for (final (id, title) in [
+        ('application.openLogs', l.logcat),
+        ('application.logLevel', l.logLevel),
+      ]) {
+        final entry = catalog.singleWhere((entry) => entry.id == id);
+        expect(entry.route, ToolRoute(ToolPage.application, settingId: id));
+        expect(entry.category, ToolCategory.application);
+        expect(entry.path, contains(l.applicationSettings));
+        expect(
+          search.search(title).map((match) => match.document.id),
+          contains(id),
+        );
+      }
+      expect(
+        catalog.map((entry) => entry.id),
+        isNot(contains('general.logLevel')),
+      );
+    }
+  });
+
+  test('application and general settings have disjoint destinations', () {
     final app = ApplicationSettings.all;
     final general = GeneralSettings.all;
     expect(app.every((s) => s.page == ToolPage.application), isTrue);
@@ -241,17 +266,13 @@ void main() {
       containsAll([
         'application.autoRun',
         'application.openLogs',
+        'application.logLevel',
         'application.checkCertificate',
       ]),
     );
     expect(
       general.map((s) => s.id),
-      containsAll([
-        'general.port',
-        'general.logLevel',
-        'general.testUrl',
-        'general.userAgent',
-      ]),
+      containsAll(['general.port', 'general.testUrl', 'general.userAgent']),
     );
     expect(
       app

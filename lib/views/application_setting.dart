@@ -2,12 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/region_labels.dart';
-import 'package:reclash/common/update.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/update_sheet.dart';
@@ -89,11 +87,6 @@ class ApplicationSettings {
       title: (l) => l.autoCheckUpdate,
     ),
     SettingSpec(
-      id: 'application.updateChannel',
-      page: ToolPage.application,
-      title: (l) => l.updateChannel,
-    ),
-    SettingSpec(
       id: 'application.updatePreferences',
       page: ToolPage.application,
       title: (l) => l.updatePreferencesTitle,
@@ -102,6 +95,11 @@ class ApplicationSettings {
       id: 'application.openLogs',
       page: ToolPage.application,
       title: (l) => l.logcat,
+    ),
+    SettingSpec(
+      id: 'application.logLevel',
+      page: ToolPage.application,
+      title: (l) => l.logLevel,
     ),
   ];
 
@@ -204,29 +202,9 @@ class ApplicationSettingView extends ConsumerWidget {
         update: (s, v) => s.copyWith(autoCheckUpdate: v),
       ),
       SettingTarget(
-        spec: ApplicationSettings.spec('application.updateChannel'),
-        child: ListItem<UpdateChannel>.options(
-          title: Text(l.updateChannel),
-          options: UpdateChannel.values,
-          value: effectiveUpdateChannel(
-            configured: ref.watch(
-              appSettingProvider.select((state) => state.updateChannel),
-            ),
-            isPreBuild: globalState.isPre,
-          ),
-          textBuilder: (value) => value == UpdateChannel.release
-              ? l.updateChannelRelease
-              : l.updateChannelPre,
-          onChanged: (value) => ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(updateChannel: value)),
-        ),
-      ),
-      SettingTarget(
         spec: ApplicationSettings.spec('application.updatePreferences'),
         child: ListItem(
           title: Text(l.updatePreferencesTitle),
-          subtitle: Text(l.updatePreferencesDescription),
           trailing: const GlyphIcon(AppGlyphs.chevronForward),
           onTap: () => UpdateSheet.show(context, preferences: true),
         ),
@@ -235,6 +213,16 @@ class ApplicationSettingView extends ConsumerWidget {
         id: 'application.openLogs',
         select: (s) => s.openLogs,
         update: (s, v) => s.copyWith(openLogs: v),
+      ),
+      ConfigOptionsItem<LogLevel>(
+        setting: ApplicationSettings.spec('application.logLevel'),
+        title: (l) => l.logLevel,
+        options: LogLevel.values,
+        textBuilder: (logLevel) => logLevel.name,
+        selector: patchClashConfigProvider.select((state) => state.logLevel),
+        onChanged: (ref, value) => ref
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith(logLevel: value)),
       ),
     ];
     return BaseScaffold(
@@ -285,12 +273,12 @@ class ApplicationSettingView extends ConsumerWidget {
               ),
               generateSection(
                 title: l.requestsAndUpdates,
-                items: appOptions.skip(3).take(4),
+                items: appOptions.skip(3).take(3),
                 footer: l.checkCertificateDesc,
               ),
               generateSection(
                 title: l.logsAndDiagnostics,
-                items: appOptions.skip(7),
+                items: appOptions.skip(6),
                 footer: [l.logcatDesc].join('\n'),
               ),
             ],

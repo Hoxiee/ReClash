@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/common/common.dart';
@@ -112,32 +110,90 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-class _HomeShell extends ConsumerWidget {
+class _HomeShell extends ConsumerStatefulWidget {
   const _HomeShell({required this.child});
 
   final Widget child;
+
+  @override
+  ConsumerState<_HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<_HomeShell> {
+  // The Tools catalog takes the bar into its route, so moving between it and
+  // the shell keeps one bar whose selection animations carry on.
+  final _navigationKey = GlobalKey(debugLabel: 'navigation');
 
   void _handleToPage(PageLabel pageLabel, WidgetRef ref) {
     ref.read(currentPageLabelProvider.notifier).toPage(pageLabel);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(navigationStateProvider);
     final isMobile = state.viewMode == ViewMode.mobile;
     final navigationItems = state.navigationItems;
     final floating = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
-    final toolsDetail =
+    final labelBehavior = switch (ref.watch(
+      appSettingProvider.select((state) => state.navigationLabels),
+    )) {
+      NavigationLabels.always => NavigationDestinationLabelBehavior.alwaysShow,
+      NavigationLabels.selected =>
+        NavigationDestinationLabelBehavior.onlyShowSelected,
+      NavigationLabels.never => NavigationDestinationLabelBehavior.alwaysHide,
+    };
+    final tools =
         state.pageLabel == PageLabel.tools &&
-        ref.watch(
-          toolsSessionProvider.select((state) => state.path.isNotEmpty),
+        navigationItems.any(
+          (item) =>
+              item.label == PageLabel.tools &&
+              item.builder(context) is ToolsView,
         );
     final showNavigation =
-        isMobile &&
-        !toolsDetail &&
-        MediaQuery.viewInsetsOf(context).bottom == 0;
+        isMobile && MediaQuery.viewInsetsOf(context).bottom == 0;
+    final navigation = MediaQuery(
+      key: _navigationKey,
+      data: MediaQuery.of(context),
+      child: AnimatedVisibility.bottomNavigation(
+        visible: showNavigation,
+        child: _NavigationPadding(
+          child: floating
+              ? NavigationDock(
+                  destinations: [
+                    for (final item in navigationItems)
+                      NavigationDockDestination(
+                        id: item.label,
+                        glyph: item.glyph,
+                        label: item.label.label,
+                      ),
+                  ],
+                  selectedIndex: state.currentIndex,
+                  onSelected: (index) =>
+                      _handleToPage(navigationItems[index].label, ref),
+                  labelBehavior: labelBehavior,
+                )
+              : AnimatedNavigationBar(
+                  destinations: [
+                    for (final (index, item) in navigationItems.indexed)
+                      NavigationBarEntry(
+                        id: item.label,
+                        icon: AnimatedGlyph(
+                          glyph: item.glyph,
+                          filled: index == state.currentIndex,
+                        ),
+                        label: item.label.label,
+                      ),
+                  ],
+                  selectedIndex: state.currentIndex,
+                  onSelected: (index) =>
+                      _handleToPage(navigationItems[index].label, ref),
+                  labelBehavior: labelBehavior,
+                ),
+        ),
+      ),
+    );
     return Material(
       color: PageBackgroundRegistration.maybeOf(context) == null
           ? SurfaceLevel.page.colorOf(context.colorScheme)
@@ -152,34 +208,19 @@ class _HomeShell extends ConsumerWidget {
                   Positioned.fill(
                     child: FocusTraversalGroup(
                       policy: PageTraversalPolicy(),
-                      child: _AnimatedBottomInset(
-                        inset: showNavigation && floating
-                            ? NavigationDock.insetOf(context)
-                            : 0,
-                        child: _BodyPadding(isMobile: isMobile, child: child),
-                      ),
-                    ),
-                  ),
-                  PositionedDirectional(
-                    start: 0,
-                    end: 0,
-                    bottom: 0,
-                    child: AnimatedVisibility.bottomNavigation(
-                      visible: showNavigation && floating,
-                      child: _NavigationPadding(
-                        child: NavigationDock(
-                          destinations: [
-                            for (final item in navigationItems)
-                              NavigationDockDestination(
-                                id: item.label,
-                                glyph: item.glyph,
-                                label: item.label.label,
-                              ),
-                          ],
-                          selectedIndex: state.currentIndex,
-                          onSelected: (index) {
-                            _handleToPage(navigationItems[index].label, ref);
-                          },
+                      child: NavigationDockScope(
+                        navigation: navigation,
+                        floating: floating,
+                        held: false,
+                        bottomPadding: MediaQuery.paddingOf(context).bottom,
+                        child: BottomInsetScope(
+                          inset: isMobile && floating
+                              ? NavigationDock.insetOf(context)
+                              : 0,
+                          child: _BodyPadding(
+                            isMobile: isMobile,
+                            child: widget.child,
+                          ),
                         ),
                       ),
                     ),
@@ -188,72 +229,11 @@ class _HomeShell extends ConsumerWidget {
               ),
             ),
           ),
-          AnimatedVisibility.bottomNavigation(
-            visible: showNavigation && !floating,
-            child: _NavigationPadding(
-              child: AnimatedNavigationBar(
-                destinations: [
-                  for (final (index, item) in navigationItems.indexed)
-                    NavigationBarEntry(
-                      id: item.label,
-                      icon: AnimatedGlyph(
-                        glyph: item.glyph,
-                        filled: index == state.currentIndex,
-                      ),
-                      label: item.label.label,
-                    ),
-                ],
-                selectedIndex: state.currentIndex,
-                onSelected: (index) {
-                  _handleToPage(navigationItems[index].label, ref);
-                },
-              ),
-            ),
-          ),
+          if (!tools && !floating) navigation,
         ],
       ),
     );
   }
-}
-
-/// Lets the dock's room go only once a page opened over it has settled, so
-/// nothing shifts under the opening transition; room is added at once.
-class _AnimatedBottomInset extends StatefulWidget {
-  const _AnimatedBottomInset({required this.inset, required this.child});
-
-  final double inset;
-  final Widget child;
-
-  @override
-  State<_AnimatedBottomInset> createState() => _AnimatedBottomInsetState();
-}
-
-class _AnimatedBottomInsetState extends State<_AnimatedBottomInset> {
-  late double _inset = widget.inset;
-  Timer? _release;
-
-  @override
-  void didUpdateWidget(_AnimatedBottomInset oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _release?.cancel();
-    if (widget.inset >= _inset) {
-      _inset = widget.inset;
-      return;
-    }
-    _release = Timer(SharedXPageTransition.duration, () {
-      if (mounted) setState(() => _inset = widget.inset);
-    });
-  }
-
-  @override
-  void dispose() {
-    _release?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) =>
-      BottomInsetScope(inset: _inset, child: widget.child);
 }
 
 class _BodyPadding extends StatelessWidget {
@@ -488,22 +468,45 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
   @override
   Widget build(BuildContext context) {
     final active = _active;
+    final dock = NavigationDockScope.maybeOf(context);
+    var toolsHolds = false;
     final idle = <Widget>[];
     final moving = <Widget>[];
     for (var index = 0; index < widget.navigationItems.length; index++) {
       final label = widget.navigationItems[index].label;
+      final tools =
+          label == PageLabel.tools &&
+          widget.navigationItems[index].builder(context) is ToolsView;
+      if (tools && active == label) toolsHolds = true;
       if (!_mounted.contains(label)) continue;
       final shown = label == active || _plan.contains(label);
+      final content = widget.pageBuilder(context, index);
+      TabFrame frame() =>
+          _plan.frameOf(label, current: active!, value: _transition.value);
       final page = Offstage(
         key: ValueKey(label),
         offstage: !shown,
-        child: TabMotionTransition(
-          animation: _transition,
-          frame: () =>
-              _plan.frameOf(label, current: active!, value: _transition.value),
-          axis: widget.axis,
-          child: widget.pageBuilder(context, index),
-        ),
+        child: tools
+            ? TabContentMotion(
+                animation: _transition,
+                frame: frame,
+                axis: widget.axis,
+                child: dock == null
+                    ? content
+                    : NavigationDockScope(
+                        navigation: dock.navigation,
+                        floating: dock.floating,
+                        held: active == label,
+                        bottomPadding: dock.bottomPadding,
+                        child: content,
+                      ),
+              )
+            : TabMotionTransition(
+                animation: _transition,
+                frame: frame,
+                axis: widget.axis,
+                child: content,
+              ),
       );
       (shown ? moving : idle).add(page);
     }
@@ -512,7 +515,20 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       clipBehavior: _plan.isActive && widget.axis == Axis.vertical
           ? Clip.hardEdge
           : Clip.none,
-      child: Stack(fit: StackFit.expand, children: [...idle, ...moving]),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ...idle,
+          ...moving,
+          if (dock != null && dock.floating && !toolsHolds)
+            PositionedDirectional(
+              start: 0,
+              end: 0,
+              bottom: 0,
+              child: dock.navigation,
+            ),
+        ],
+      ),
     );
   }
 }

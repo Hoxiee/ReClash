@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/с",
   "updateRemainingTime": "Осталось {time}",
   "updateSeconds": "{count} с",
-  "updateMinutes": "{count} мин"
+  "updateMinutes": "{count} мин",
+  "updateResumeShort": "Продолжить"
 }

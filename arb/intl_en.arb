@@ -954,104 +954,31 @@
   "appRegion": "App region",
   "regionalAdaptation": "Regional adaptation",
   "regionTitle": "Region profile",
-  "regionIntro": "Regional network defaults and service checks, independent of the interface language.",
-  "regionWarning": "Choosing a country only updates this preview. Regional defaults change when you apply it.",
-  "regionChoose": "Choose a country",
-  "regionDetected": "Suggested: {region} · {source}",
-  "regionUseDetected": "Use detected region",
-  "regionPreviewTitle": "Preview",
-  "regionPreviewBase": "Country profile: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "Default service checks: {value}",
-  "regionPreviewRules": "Proxy selection and your routing rules stay unchanged.",
-  "regionPreviewAndroid": "On Android, MTU or bypass changes may need a confirmed VPN restart. App selection is a separate action.",
-  "regionCustomPreserved": "Your manual DNS and MTU overrides, bypass list, routing rules, and service choices are preserved.",
-  "regionNoChanges": "Network defaults and service checks stay unchanged.",
+  "regionIntro": "Picks DNS servers, TUN MTU, the bypass list and service checks for your country. The interface language does not change.",
+  "regionCustomPreserved": "Values you changed yourself stay as they are.",
+  "regionNoChanges": "Your settings stay unchanged.",
   "regionApply": "Apply region",
-  "regionNoDetected": "No matching suggestion. Only the time zone and system locale are used.",
   "regionSelectBeforeApps": "Choose a supported region before using regional app suggestions.",
-  "regionNotSet": "Off",
-  "regionOther": "Other / general",
+  "regionNotSet": "Not selected",
+  "regionOther": "Other country",
   "regionRussia": "Russia",
   "regionIran": "Iran",
   "regionChina": "China",
   "regionEgypt": "Egypt",
-  "regionSourceTimeZone": "time zone",
-  "regionSourceLocaleCountry": "system locale country",
-  "regionSourceLocaleLanguage": "system language",
-  "regionCurrent": "Current region",
-  "regionDetectionTitle": "Device suggestion",
-  "regionProfileDefaults": "Profile defaults",
   "regionNoServices": "Service checks are off",
-  "regionDnsSettings": "Region {region} supplies DNS defaults: {value}. Manual overrides here take priority.",
-  "regionTunSettings": "Region {region} supplies MTU {value}. Add an MTU override to use your own value.",
-  "regionBypassSettings": "Region {region} uses: {value}. A custom list replaces the regional defaults.",
   "regionSelectApps": "Select apps by region",
   "regionAppsPreviewTitle": "App selection preview",
   "regionAppsPreview": "{region}: {bypassed} apps in the VPN bypass list, {proxied} in the VPN list. Both lists will be replaced; the mode and other settings stay unchanged. Package and SDK matches are suggestions: review them after applying.",
   "regionAppsEmpty": "No apps matched this region. Your lists are unchanged.",
   "regionAppsChanged": "The region or app lists changed. Run selection again for the current settings.",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "Recommended for this device",
+  "regionChangesTitle": "What changes",
+  "regionChangeDns": "DNS servers",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Service checks",
+  "restoreDefaults": "Restore defaults",
+  "networkRestoreDefaultsTip": "The bypass list and TUN MTU return to the defaults of the selected region.",
+  "dnsRestoreDefaultsTip": "All DNS overrides are removed, and the DNS servers of the selected region are set again.",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "Set the local proxy address in each app you want to connect.",
   "setupCoverageAndroidDescription": "Android will ask to create a VPN connection. App selection stays in access settings.",
   "setupCoverageNote": "Capturing all traffic does not mean sending all of it through a server. Direct routes remain in place.",
-  "setupRegionConfirm": "Use these regional settings",
-  "setupRegionDescription": "The suggested region comes from this device, not the interface language. Apply it only if it matches your network.",
   "setupRegionNeutral": "Keep profile defaults",
   "setupCheckAction": "Check connection",
   "setupCheckingTitle": "Connecting and checking",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "The route changed during the check. Check the current connection again.",
   "setupUnknownError": "The operation did not finish. Try again or open the details.",
   "setupRequestPermission": "Allow connection",
+  "setupReceiptRegion": "Region",
+  "setupRegionTitle": "Where are you connecting from?",
+  "setupRegionStepDescription": "ReClash adjusts DNS, MTU and direct routes to the networks of your country. The interface language stays the same.",
+  "setupRegionNeutralDescription": "Regional settings are not changed.",
+  "setupRegionUnchosen": "If you skip the choice, your current regional settings stay as they are.",
+  "setupRecommended": "Recommended",
+  "setupDirectTitle": "Local sites and apps go direct",
+  "setupDirectDescription": "Services of your country open without the server: faster, and banks or government sites do not block you. These rules are added to the global rules:",
+  "setupDirectAppsScanning": "Looking for local apps…",
+  "setupDirectApps": "Apps that bypass the VPN: {count}",
+  "setupDirectAppsReview": "They will work without the VPN. You can change the list later in access control.",
+  "setupDirectAppsNone": "No local apps found. Sites still go direct.",
+  "setupLeaveTitle": "Leave setup?",
+  "setupLeaveMessage": "ReClash will close. Your choices are saved, and setup continues the next time you open the app.",
+  "setupProfileContinueHint": "Add or choose a profile to continue.",
+  "setupProfileImportHint": "Paste the link from your provider's email, bot or account page, or pick a file or QR code.",
+  "setupProfileImportAnother": "Add another profile",
+  "setupChangeSettings": "Change settings",
+  "setupTipsTitle": "What you can try",
+  "setupTipNetwork": "Make sure the internet works without ReClash.",
+  "setupTipProfile": "Update the profile, or pick another server after setup.",
+  "setupTipCoverage": "Choose a different coverage: some networks block VPN connections.",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1160,6 +1107,13 @@
     }
   },
   "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setupDirectApps": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -1237,6 +1191,7 @@
   "updateRemainingTime": "{time} remaining",
   "updateSeconds": "{count, plural, one{1 sec} other{{count} sec}}",
   "updateMinutes": "{count, plural, one{1 min} other{{count} min}}",
+  "updateResumeShort": "Resume",
   "@updateInstalledVersion": {
     "placeholders": {
       "version": {
@@ -1271,6 +1226,9 @@
         "type": "int"
       }
     }
+  },
+  "@updateResumeShort": {
+    "description": "Short button on the dashboard update banner that resumes a paused or failed update download."
   },
   "urlScheme": "URL scheme",
   "urlSchemeConnection": "Connection",
@@ -1339,6 +1297,22 @@
   "telegramAppUnavailable": "Telegram could not be opened on this device.",
   "urlSchemeFormats": "Formats",
   "urlSchemeFormatsTip": "Link formats. Replace placeholders with your URL or data.",
+  "profileImportTitle": "New subscription",
+  "profileImportChecking": "Checking the subscription…",
+  "profileImportPreviewFailed": "Couldn’t look inside the subscription. You can still add it.",
+  "profileImportEncrypted": "The subscription is encrypted; you’ll be asked for the key when adding it.",
+  "profileImportFormat": "Subscription format",
+  "profileImportFormatClient": "As the {client} app receives it",
+  "profileImportFormatReclash": "The best format for ReClash, picked automatically",
+  "profileImportServerCount": "{count, plural, one{1 server} other{{count} servers}}",
+  "profileImportAlreadyAdded": "Already added as “{name}”",
+  "profileImportLosses": "Some parts aren’t supported; you’ll review them before adding.",
+  "profileImportServers": "Servers",
+  "profileImportValidUntil": "Valid until",
+  "profileImportUnlimited": "Unlimited",
+  "profileImportExpired": "Expired",
+  "profileImportFromProvider": "From the provider",
+  "profileImportSingleServer": "Single server",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1369,11 +1343,30 @@
       }
     }
   },
+  "@profileImportFormatClient": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "@profileImportServerCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileImportAlreadyAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "appearanceTheme": "Theme",
   "appearanceBackground": "Background",
   "wallpaperTitle": "Custom background",
-  "wallpaperGalleryHint": "Tap a saved background to use it, or add a new one.",
-  "wallpaperChoose": "Choose image",
   "wallpaperRemove": "Remove image",
   "wallpaperEnabled": "Use custom background",
   "wallpaperFit": "Image fit",
@@ -1504,6 +1497,7 @@
   "onDemandPause": "Pause",
   "onDemandFullStop": "Full stop",
   "onDemandFullStopDesc": "Remove TUN and close local proxy ports while paused. The app keeps watching the network to resume automatically.",
+  "pickNetworkPermissionDesc": "Allow location access to see nearby Wi-Fi networks, or enter a network manually.",
   "subscriptionClientRequestAs": "Request as",
   "subscriptionClientAuto": "Automatically",
   "subscriptionClientReclash": "ReClash",
@@ -1557,7 +1551,6 @@
   "subscriptionIdentityDetails": "Also send operating system and device model",
   "subscriptionIdentityDetailsDisclosure": "This also sends the operating system version and device model with the identifier.",
   "subscriptionIdentitySettingsTitle": "Subscription identity",
-  "subscriptionIdentityGlobalHint": "When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.",
   "subscriptionIdentityUseGlobal": "Use global",
   "subscriptionProvider": "Subscription",
   "subscriptionProviderWebsite": "Website",
@@ -1570,6 +1563,7 @@
   "subscriptionDeviceLimit": "No device slots are available for this subscription. Remove a device from the provider account and try again.",
   "subscriptionDeviceRequired": "This subscription requires device registration. Follow the provider's instructions.",
   "profileBatchResult": "Added: {added}; skipped: {skipped}; failed: {failed}.",
+  "subscriptionIdentityRegionWarning": "Many subscriptions will stop working if HWID sending is turned off.",
   "@subscriptionCompatibilityPrepared": {
     "placeholders": {
       "client": {
@@ -2585,6 +2579,37 @@
   "notificationActive": "Protection active",
   "notificationLevelDescription": "Detailed shows live information and the stop button. Minimal shows only protection status.",
   "extra": "Extra",
+  "resetAllData": "Reset all data",
+  "resetAllDataDescription": "All profiles, settings, scripts, wallpapers, and cached data will be permanently deleted. Backup archives will be kept. The app will then close. This cannot be undone.",
+  "resetAllDataConfirm": "Delete everything",
+  "resetAllDataWait": "You can confirm in {seconds} s",
+  "resettingAllData": "Deleting data…",
+  "appIcon": "App icon",
+  "appIconStandard": "Standard",
+  "appIconVelvet": "Velvet",
+  "appIconSolar": "Solar",
+  "appIconCircuit": "Circuit",
+  "appIconEcho": "Echo",
+  "appIconInk": "Ink",
+  "appIconBlueprint": "Blueprint",
+  "appIconStrata": "Strata",
+  "appIconShatter": "Shatter",
+  "appIconTrace": "Trace",
+  "appIconTopo": "Topo",
+  "appIconSpark": "Spark",
+  "appIconApply": "Use this icon",
+  "appIconChangeNote": "The home screen may take a few seconds to show the new icon, and some launchers remove the shortcut — add it again from the app list.",
+  "colorContrast": "Contrast",
+  "contrastMedium": "Medium",
+  "contrastHigh": "High",
+  "navigationLabels": "Tab labels",
+  "navigationLabelsAlways": "Always",
+  "navigationLabelsSelected": "Selected",
+  "navigationLabelsNever": "Never",
+  "trayIcon": "Tray icon",
+  "trayIconColor": "Color",
+  "trayIconLight": "White",
+  "trayIconDark": "Black",
   "@subscriptionExpiresInDays": {
     "placeholders": {
       "count": {
@@ -2595,6 +2620,13 @@
   "@subscriptionTrafficLow": {
     "placeholders": {
       "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@resetAllDataWait": {
+    "placeholders": {
+      "seconds": {
         "type": "int"
       }
     }

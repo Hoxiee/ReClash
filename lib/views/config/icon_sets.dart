@@ -197,9 +197,9 @@ class _IconSetsViewState extends ConsumerState<IconSetsView> {
         illustration: NullStatusIllustration.icons,
       ),
       child: ReorderableListView.builder(
-        padding: const EdgeInsets.all(
-          16,
-        ).copyWith(top: context.contentTopPadding),
+        padding:
+            const EdgeInsets.all(16).copyWith(top: context.contentTopPadding) +
+            context.bodyInsets,
         buildDefaultDragHandles: false,
         itemCount: iconSets.length,
         itemBuilder: (_, index) => _buildItem(iconSets, index),

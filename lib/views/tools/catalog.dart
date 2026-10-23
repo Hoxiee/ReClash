@@ -159,6 +159,14 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     root: false,
   );
   page(
+    ToolPage.notifications,
+    l.notification,
+    ToolCategory.application,
+    AppGlyphs.settings,
+    available: env.android,
+    root: false,
+  );
+  page(
     ToolPage.theme,
     l.theme,
     ToolCategory.application,
@@ -269,6 +277,34 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     AppGlyphs.customize,
   );
   page(
+    ToolPage.customProxies,
+    l.proxies,
+    ToolCategory.configuration,
+    AppGlyphs.proxies,
+    root: false,
+  );
+  page(
+    ToolPage.ruleProviders,
+    l.ruleProviders,
+    ToolCategory.configuration,
+    AppGlyphs.resources,
+    root: false,
+  );
+  page(
+    ToolPage.filters,
+    l.filters,
+    ToolCategory.configuration,
+    AppGlyphs.filter,
+    root: false,
+  );
+  page(
+    ToolPage.iconSets,
+    l.iconSets,
+    ToolCategory.configuration,
+    AppGlyphs.photos,
+    root: false,
+  );
+  page(
     ToolPage.rules,
     l.addedRules,
     ToolCategory.configuration,
@@ -280,6 +316,13 @@ List<ToolEntry> buildToolCatalog(AppLocalizations l, ToolEnvironment env) {
     l.script,
     ToolCategory.configuration,
     AppGlyphs.code,
+    root: false,
+  );
+  page(
+    ToolPage.routing,
+    l.rcxTitle,
+    ToolCategory.configuration,
+    AppGlyphs.shuffle,
     root: false,
   );
   page(

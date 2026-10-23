@@ -104,5 +104,9 @@
         "type": "int"
       }
     }
+  },
+  "updateResumeShort": "Resume",
+  "@updateResumeShort": {
+    "description": "Short button on the dashboard update banner that resumes a paused or failed update download."
   }
 }

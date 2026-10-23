@@ -36,6 +36,9 @@ extension BuildContextExtension on BuildContext {
       TopInsetScope.of(this) ??
       (isInCompactSheet ? sheetAppBarHeight : appBarInset + 12);
 
+  EdgeInsets get bodyInsets =>
+      EdgeInsets.symmetric(horizontal: BodyInsetScope.of(this));
+
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 
   bool get disableAnimations => MediaQuery.disableAnimationsOf(this);

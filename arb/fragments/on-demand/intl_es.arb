@@ -23,5 +23,6 @@
   "onDemandResume": "Reanudar",
   "onDemandPause": "Pausar",
   "onDemandFullStop": "Parada completa",
-  "onDemandFullStopDesc": "Quitar TUN y cerrar los puertos proxy locales durante la pausa. La aplicación sigue vigilando la red para reanudar automáticamente."
+  "onDemandFullStopDesc": "Quitar TUN y cerrar los puertos proxy locales durante la pausa. La aplicación sigue vigilando la red para reanudar automáticamente.",
+  "pickNetworkPermissionDesc": "Permite el acceso a la ubicación para ver las redes Wi-Fi cercanas o introduce una red manualmente."
 }

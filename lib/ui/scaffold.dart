@@ -27,12 +27,14 @@ import 'inherited.dart';
 import 'liquid_glass.dart';
 import 'loading.dart';
 import 'navigation_dock.dart';
+import 'navigation_title.dart';
 import 'popup.dart';
 import 'search_field.dart';
 import 'sheet.dart';
 import 'sheet_header.dart';
 import 'sheet_navigator.dart';
 import 'sortable.dart';
+import 'tab_motion.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -47,6 +49,10 @@ class CommonScaffold extends StatefulWidget {
   final List<CommonPopupMenuItem> titleMenuItems;
   final bool isLoading;
   final List<Widget>? actions;
+
+  /// Holds the trailing edge past the overflow menu, so menus that come and
+  /// go with a page leave it in place.
+  final Widget? trailing;
 
   final IconButtonData? primaryAction;
 
@@ -83,6 +89,7 @@ class CommonScaffold extends StatefulWidget {
     this.titleWidget,
     this.titleMenuItems = const [],
     this.actions,
+    this.trailing,
     this.backAction,
     this.isLoading = false,
     this.searchState,
@@ -120,7 +127,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
         widget.iconActions.isNotEmpty ||
         widget.confirmationAction != null ||
         widget.menuItems.isNotEmpty ||
-        widget.actions?.isNotEmpty == true;
+        widget.actions?.isNotEmpty == true ||
+        widget.trailing != null;
   }
 
   @override
@@ -508,6 +516,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     final widgets = _isSearch
         ? const <Widget>[]
         : widget.actions ?? const <Widget>[];
+    final trailing = _isSearch ? null : widget.trailing;
     final selection = widget.selectionActions;
     final selectionGroup = selection.take(_maxGroupedActions);
     final selectionSingles = selection.skip(_maxGroupedActions);
@@ -538,6 +547,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
             confirmation: atFoot ? null : widget.confirmationAction,
             widgetCount:
                 widgets.length +
+                (trailing == null ? 0 : 1) +
                 selectionCount +
                 (pairedPrimary == null ? 0 : 1),
             menuItems: widget.menuItems,
@@ -570,6 +580,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
       for (final action in widgets) ElasticPress(child: action),
       if (fold.overflow.isNotEmpty)
         ElasticPress(child: _OverflowMenuButton(items: fold.overflow)),
+      if (trailing != null) ElasticPress(child: trailing),
       if (pairedPrimary != null)
         TonalButtonGroup(
           children: [
@@ -644,7 +655,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     final isMobileView = ViewScope.isMobileOf(context);
     final pushed =
         form.pop == null &&
-        widget.titleWidget == null &&
+        (widget.titleWidget == null || widget.title != null) &&
         PagePresentationScope.of(context)?.title == null &&
         ViewScope.isMobileOf(context) &&
         ModalRoute.of(context)?.impliesAppBarDismissal == true;
@@ -666,50 +677,115 @@ class CommonScaffoldState extends State<CommonScaffold> {
             valueListenable: _appBarState,
             builder: (_, state, _) {
               final leading = _buildLeading(backAction, pop: form.pop);
-              final appBar = _buildAppBarWrap(
-                AppBar(
-                  clipBehavior: Clip.none,
-                  automaticallyImplyLeading: false,
-                  animateColor: true,
-                  // A searching bar carries its own opaque theme.
-                  forceMaterialTransparency: isCompact || !_isSearch,
-                  toolbarHeight: isCompact ? sheetToolbarHeight : null,
-                  centerTitle: isCompact,
-                  titleTextStyle: _isSearch
-                      ? null
-                      : compactTitle
+              final presentation = PagePresentationScope.of(context);
+              final route = ModalRoute.of(context);
+              final motion =
+                  !isCompact &&
+                      !_isSearch &&
+                      presentation?.previousTitle != null
+                  ? route?.animation
+                  : null;
+              return AnimatedBuilder(
+                animation: motion ?? kAlwaysCompleteAnimation,
+                builder: (context, _) {
+                  final progress = context.disableAnimations
+                      ? 1.0
+                      : motion?.value ?? 1.0;
+                  final position = Curves.easeInOutCubicEmphasized.transform(
+                    progress,
+                  );
+                  final hasPreviousBack = presentation?.previousHasBack == true;
+                  final leadingProgress = motion == null || hasPreviousBack
+                      ? 1.0
+                      : progress;
+                  final width = appBarLeadingWidth(
+                    _isCompactBar(context, isMobileView),
+                  );
+                  final titleStyle = compactTitle
                       ? AppTextStyle.headline.of(context)
-                      : AppTextStyle.pageTitle.of(context),
-                  leading: leading,
-                  // The leading slot already trails its button by a margin.
-                  titleSpacing: leading == null ? null : 0,
-                  title: leading == null || isCompact || _isSearch
-                      ? _buildTitle(state.searchState, compact: compactTitle)
-                      : Padding(
-                          padding: EdgeInsetsDirectional.only(
-                            end: titleEndInset,
-                          ),
-                          child: _buildTitle(
-                            state.searchState,
-                            compact: compactTitle,
-                          ),
-                        ),
-                  actions: [
-                    for (final action in _buildActions(
-                      state.searchState != null,
-                      widget.primaryAction,
-                      backAction,
-                      form,
-                    ))
-                      FadeTransition(opacity: uncovered, child: action),
-                  ],
-                ),
+                      : AppTextStyle.pageTitle.of(context);
+                  final title =
+                      motion != null &&
+                          (presentation?.transitionTitle != null ||
+                              widget.title != null)
+                      ? NavigationTitle(
+                          previous: presentation!.previousTitle!,
+                          title:
+                              presentation.transitionTitle ??
+                              '${presentation.previousTitle} › ${widget.title}',
+                          progress: progress,
+                          onSelect: presentation.onTitleSelect,
+                          previousStyle: isMobileView && hasPreviousBack
+                              ? AppTextStyle.headline.of(context)
+                              : AppTextStyle.pageTitle.of(context),
+                          style: titleStyle,
+                        )
+                      : _buildTitle(state.searchState, compact: compactTitle);
+                  final appBar = _buildAppBarWrap(
+                    AppBar(
+                      clipBehavior: Clip.none,
+                      automaticallyImplyLeading: false,
+                      animateColor: true,
+                      // A searching bar carries its own opaque theme.
+                      forceMaterialTransparency: isCompact || !_isSearch,
+                      toolbarHeight: isCompact ? sheetToolbarHeight : null,
+                      centerTitle: isCompact,
+                      titleTextStyle: _isSearch
+                          ? null
+                          : compactTitle
+                          ? AppTextStyle.headline.of(context)
+                          : AppTextStyle.pageTitle.of(context),
+                      leading: leading == null || motion == null
+                          ? leading
+                          : OverflowBox(
+                              minWidth: width,
+                              maxWidth: width,
+                              child: Transform.scale(
+                                scale:
+                                    1 -
+                                    (1 - leadingProgress) *
+                                        (1 - leadingProgress) *
+                                        (1 - 2.5 * leadingProgress),
+                                child: Opacity(
+                                  opacity: leadingProgress,
+                                  child: leading,
+                                ),
+                              ),
+                            ),
+                      leadingWidth: motion == null || leading == null
+                          ? null
+                          : width * (hasPreviousBack ? 1 : position),
+                      titleSpacing: leading == null
+                          ? null
+                          : motion == null || hasPreviousBack
+                          ? 0
+                          : 16 * (1 - position),
+                      title: leading == null || isCompact || _isSearch
+                          ? title
+                          : Padding(
+                              padding: EdgeInsetsDirectional.only(
+                                end: titleEndInset,
+                              ),
+                              child: title,
+                            ),
+                      actions: [
+                        for (final action in _buildActions(
+                          state.searchState != null,
+                          widget.primaryAction,
+                          backAction,
+                          form,
+                        ))
+                          FadeTransition(opacity: uncovered, child: action),
+                      ],
+                    ),
+                  );
+                  return isCompact
+                      ? appBar
+                      : _buildFloatingHeader(
+                          _WindowControlsClearance(child: appBar),
+                        );
+                },
               );
-              return isCompact
-                  ? appBar
-                  : _buildFloatingHeader(
-                      _WindowControlsClearance(child: appBar),
-                    );
             },
           ),
           ValueListenableBuilder(
@@ -770,27 +846,12 @@ class CommonScaffoldState extends State<CommonScaffold> {
     // its top through MediaQuery padding, as extendBodyBehindAppBar does.
     final barFloats = !isBottomSheet;
     final presentation = PagePresentationScope.of(context);
-    final contentBody = SortModeScope(
+    final sortableBody = SortModeScope(
       sorting: _sorting,
       child: presentation == null
           ? widget.body
           : PagePresentationScope(child: widget.body),
     );
-    final sortableBody = presentation == null
-        ? contentBody
-        : LayoutBuilder(
-            builder: (_, constraints) => Align(
-              alignment: Alignment.topCenter,
-              child: SizedBox(
-                width: math.min(
-                  constraints.maxWidth,
-                  presentation.maxBodyWidth,
-                ),
-                height: constraints.maxHeight,
-                child: contentBody,
-              ),
-            ),
-          );
     final body = SafeArea(
       top: !barFloats,
       child: ValueListenableBuilder(
@@ -864,7 +925,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
     final appBar = _buildAppBar(backAction, form);
     final header = !isCompact && PageViewport.contains(context)
         ? ViewportAppBar(appBar: appBar)
-        : appBar;
+        : _PageAppBar(appBar: appBar);
     final content = form.hasDockedSearch
         ? BottomInsetScope(
             inset: bottomInset + BottomInsetScope.dockedSearchInset,
@@ -878,7 +939,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
           child: Scaffold(
             appBar: header,
             extendBodyBehindAppBar: barFloats,
-            body: _BodyScope(child: content),
+            body: TabContentMotion.wrap(context, _BodyScope(child: content)),
             resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
             backgroundColor: _scaffoldBackgroundColor(context),
           ),
@@ -1415,5 +1476,28 @@ class BaseScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(body: body, title: title);
+  }
+}
+
+/// A bar laid out in its page hides as soon as the page's tab is left, as a
+/// [ViewportAppBar] does, while the tab switch carries the page body away.
+class _PageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _PageAppBar({required this.appBar});
+
+  final PreferredSizeWidget appBar;
+
+  @override
+  Size get preferredSize => appBar.preferredSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = PageActivityScope.isActiveOf(context);
+    return IgnorePointer(
+      ignoring: !active,
+      child: ExcludeSemantics(
+        excluding: !active,
+        child: Opacity(opacity: active ? 1 : 0, child: appBar),
+      ),
+    );
   }
 }

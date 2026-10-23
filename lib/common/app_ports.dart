@@ -41,3 +41,5 @@ abstract interface class NavigationPort {
 WindowPort? windowPort;
 TrayPort? trayPort;
 NavigationPort? navigationPort;
+
+Future<void> Function()? disableAutoLaunchPort;

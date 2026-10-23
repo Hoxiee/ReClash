@@ -255,12 +255,14 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
       title: l10n.core,
       body: Builder(
         builder: (context) => ListView(
-          padding: EdgeInsets.only(
-            left: 16,
-            top: context.appBarInset,
-            right: 16,
-            bottom: BottomInsetScope.of(context),
-          ),
+          padding:
+              EdgeInsets.only(
+                left: 16,
+                top: context.appBarInset,
+                right: 16,
+                bottom: BottomInsetScope.of(context),
+              ) +
+              context.bodyInsets,
           children: [
             generateSection(
               items: [

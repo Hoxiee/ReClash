@@ -6,7 +6,6 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:reclash/widgets/update_card.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -137,7 +136,7 @@ class _DesktopDashboard extends ConsumerWidget {
       24,
       24 + MediaQuery.paddingOf(context).bottom,
     );
-    final updateHeight = 112 * scale;
+    final updateHeight = 64 * scale;
     final topHeight = (compact ? 176 : 208) * scale;
     final controlHeight = (compact ? 56 : 64) * scale;
     final middleHeight = (compact ? 152 : 176) * scale;

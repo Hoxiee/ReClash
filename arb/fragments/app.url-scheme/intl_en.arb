@@ -95,5 +95,42 @@
   "telegramWebFallback": "Open in browser",
   "telegramAppUnavailable": "Telegram could not be opened on this device.",
   "urlSchemeFormats": "Formats",
-  "urlSchemeFormatsTip": "Link formats. Replace placeholders with your URL or data."
+  "urlSchemeFormatsTip": "Link formats. Replace placeholders with your URL or data.",
+  "profileImportTitle": "New subscription",
+  "profileImportChecking": "Checking the subscription…",
+  "profileImportPreviewFailed": "Couldn’t look inside the subscription. You can still add it.",
+  "profileImportEncrypted": "The subscription is encrypted; you’ll be asked for the key when adding it.",
+  "profileImportFormat": "Subscription format",
+  "profileImportFormatClient": "As the {client} app receives it",
+  "@profileImportFormatClient": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      }
+    }
+  },
+  "profileImportFormatReclash": "The best format for ReClash, picked automatically",
+  "profileImportServerCount": "{count, plural, one{1 server} other{{count} servers}}",
+  "@profileImportServerCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileImportAlreadyAdded": "Already added as “{name}”",
+  "@profileImportAlreadyAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileImportLosses": "Some parts aren’t supported; you’ll review them before adding.",
+  "profileImportServers": "Servers",
+  "profileImportValidUntil": "Valid until",
+  "profileImportUnlimited": "Unlimited",
+  "profileImportExpired": "Expired",
+  "profileImportFromProvider": "From the provider",
+  "profileImportSingleServer": "Single server"
 }

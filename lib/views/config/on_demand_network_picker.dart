@@ -1,14 +1,81 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/plugins/app.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
 typedef SsidListReader = Future<List<String>> Function();
+
+Future<void> requestLocationPermission(
+  BuildContext context,
+  WidgetRef ref, {
+  bool? isAndroid,
+  bool? isMacOS,
+}) async {
+  final l = context.appLocalizations;
+  final android = isAndroid ?? system.isAndroid;
+  final macOS = isMacOS ?? system.isMacOS;
+  void handlePermanentlyDenied() {
+    if (macOS) {
+      dialogs.showMessage(
+        title: l.locationPermissionRequired,
+        cancelable: false,
+        message: TextSpan(
+          style: AppTextStyle.subheadline.of(context),
+          text: l.locationPermissionGuide(appName),
+        ),
+      );
+    } else if (android) {
+      app?.openAppSettings();
+    }
+  }
+
+  final permission = ref.read(locationPermissionsProvider);
+  if (permission == WifiSsidPermission.granted) {
+    return;
+  }
+  if (permission == WifiSsidPermission.permanentlyDenied) {
+    handlePermanentlyDenied();
+    return;
+  }
+  final WifiSsidPermission? res;
+  try {
+    res = await ref.read(locationPermissionsProvider.notifier).request();
+  } on PlatformException catch (e) {
+    commonPrint.log('requestPermission error $e', logLevel: LogLevel.warning);
+    return;
+  }
+  if (res == null || !context.mounted) {
+    return;
+  }
+  switch (res) {
+    case WifiSsidPermission.granted:
+      return;
+    case WifiSsidPermission.permanentlyDenied:
+      handlePermanentlyDenied();
+      return;
+    case WifiSsidPermission.denied:
+      break;
+  }
+  final needGo = await dialogs.showMessage(
+    title: l.locationPermissionRequired,
+    message: TextSpan(text: l.locationPermissionDeniedMessage),
+    confirmText: l.go,
+  );
+  if (needGo != true) {
+    return;
+  }
+  unawaited(app?.openAppSettings());
+}
 
 Future<String?> showOnDemandNetworkPicker(
   BuildContext context, {
@@ -60,35 +127,50 @@ Future<String?> showOnDemandNetworkEntry(
   );
 }
 
-class OnDemandNetworkPicker extends StatefulWidget {
+class OnDemandNetworkPicker extends ConsumerStatefulWidget {
   const OnDemandNetworkPicker({
     super.key,
     required this.selected,
     required this.onSelected,
     this.onEnterManually,
     this.listSsid,
+    this.requiresLocation,
   });
 
   final Set<String> selected;
   final ValueChanged<String> onSelected;
   final VoidCallback? onEnterManually;
   final SsidListReader? listSsid;
+  final bool? requiresLocation;
 
   @override
-  State<OnDemandNetworkPicker> createState() => _OnDemandNetworkPickerState();
+  ConsumerState<OnDemandNetworkPicker> createState() =>
+      _OnDemandNetworkPickerState();
 }
 
-class _OnDemandNetworkPickerState extends State<OnDemandNetworkPicker> {
+class _OnDemandNetworkPickerState extends ConsumerState<OnDemandNetworkPicker> {
   bool _loading = true;
   bool _failed = false;
   List<String> _ssids = const [];
-  String _query = '';
   bool _scanning = false;
+
+  bool get _requiresLocation =>
+      widget.requiresLocation ?? (system.isAndroid || system.isMacOS);
+
+  bool get _permissionMissing =>
+      _requiresLocation &&
+      ref.read(locationPermissionsProvider) != WifiSsidPermission.granted;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_scan());
+    ref.listenManual(locationPermissionsProvider, (previous, next) {
+      if (next == WifiSsidPermission.granted &&
+          previous != WifiSsidPermission.granted) {
+        unawaited(_scan());
+      }
+    });
+    if (!_permissionMissing) unawaited(_scan());
   }
 
   Future<void> _scan() async {
@@ -110,79 +192,105 @@ class _OnDemandNetworkPickerState extends State<OnDemandNetworkPicker> {
     }
   }
 
+  Widget _buildRefreshButton() => TonalButton(
+    size: TonalButtonSize.bar,
+    glyph: AppGlyphs.refresh,
+    label: context.appLocalizations.pickNetworkRefresh,
+    onPressed: _scan,
+  );
+
+  Widget _buildContent(List<String> visible) {
+    final l = context.appLocalizations;
+    final permissionMissing =
+        _requiresLocation &&
+        ref.watch(locationPermissionsProvider) != WifiSsidPermission.granted;
+    if (permissionMissing) {
+      return NullStatus(
+        label: l.locationPermissionRequired,
+        description: l.pickNetworkPermissionDesc,
+        illustration: NullStatusIllustration.permission,
+        action: TonalButton(
+          size: TonalButtonSize.bar,
+          glyph: AppGlyphs.lockOpen,
+          label: l.authorize,
+          onPressed: () => requestLocationPermission(context, ref),
+        ),
+      );
+    }
+    if (_loading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CommonCircleLoading(),
+            const SizedBox(height: 12),
+            Text(
+              l.pickNetworkScanning,
+              style: AppTextStyle.subheadline.of(context),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_failed) {
+      return NullStatus(
+        label: l.onDemandScanFailed,
+        illustration: NullStatusIllustration.wifi,
+        action: _buildRefreshButton(),
+      );
+    }
+    if (visible.isEmpty) {
+      return NullStatus(
+        label: l.pickNetworkEmpty,
+        illustration: NullStatusIllustration.wifi,
+        action: _buildRefreshButton(),
+      );
+    }
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: visible.length,
+      itemBuilder: (_, index) => ItemPositionProvider(
+        position: ItemPosition.get(index, visible.length),
+        child: DecorationListItem(
+          leading: const GlyphIcon(AppGlyphs.wifi),
+          title: Text(
+            visible[index],
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          onPressed: () => widget.onSelected(visible[index]),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final onEnterManually = widget.onEnterManually;
     final visible = _ssids
-        .where(
-          (ssid) =>
-              !widget.selected.contains(ssid) &&
-              ssid.toLowerCase().contains(_query.toLowerCase()),
-        )
+        .where((ssid) => !widget.selected.contains(ssid))
         .toList();
     return CommonScaffold(
       title: l.pickNetwork,
-      iconActions: [
-        IconButtonData(
-          glyph: AppGlyphs.refresh,
-          tooltip: l.pickNetworkRefresh,
-          onPressed: _scan,
-        ),
-        if (widget.onEnterManually != null)
-          IconButtonData(
-            glyph: AppGlyphs.keyboard,
-            tooltip: l.enterManually,
-            onPressed: widget.onEnterManually,
-          ),
-      ],
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
         child: Column(
           children: [
-            SearchField(onChanged: (query) => setState(() => _query = query)),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _loading
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CommonCircleLoading(),
-                          const SizedBox(height: 12),
-                          Text(
-                            l.pickNetworkScanning,
-                            style: AppTextStyle.subheadline.of(context),
-                          ),
-                        ],
-                      ),
-                    )
-                  : _failed
-                  ? NullStatus(
-                      label: l.onDemandScanFailed,
-                      illustration: NullStatusIllustration.wifi,
-                    )
-                  : visible.isEmpty
-                  ? NullStatus(
-                      label: l.pickNetworkEmpty,
-                      description: l.networkEntryHint,
-                      illustration: NullStatusIllustration.wifi,
-                    )
-                  : ListView.builder(
-                      itemCount: visible.length,
-                      itemBuilder: (_, index) => ItemPositionProvider(
-                        position: ItemPosition.get(index, visible.length),
-                        child: DecorationListItem(
-                          leading: const GlyphIcon(AppGlyphs.wifi),
-                          title: Text(
-                            visible[index],
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          onPressed: () => widget.onSelected(visible[index]),
-                        ),
-                      ),
-                    ),
-            ),
+            if (onEnterManually != null) ...[
+              generateSection(
+                items: [
+                  DecorationListItem(
+                    leading: const GlyphIcon(AppGlyphs.keyboard),
+                    title: Text(l.enterManually),
+                    subtitle: Text(l.networkEntryHint),
+                    onPressed: onEnterManually,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            Expanded(child: _buildContent(visible)),
           ],
         ),
       ),

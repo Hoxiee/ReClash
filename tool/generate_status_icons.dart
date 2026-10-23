@@ -8,6 +8,8 @@ const pngOutputDir = 'assets/images/tray/unix';
 const icoOutputDir = 'assets/images/tray/windows';
 const macosOutputDir = 'assets/images/tray/macos';
 const statusIconNames = ['status_1', 'status_2', 'status_3', 'status_4'];
+const monochromeTrayStyles = {'light': '#FFFFFF', 'dark': '#1C1B1F'};
+const stoppedTrayOpacity = 0.45;
 const macosStatusIconSources = {
   'status_1': '$sourceDir/glyph.svg',
   'status_4': '$sourceDir/status_4.svg',
@@ -61,6 +63,21 @@ Future<void> main() async {
         File('$icoOutputDir/$name.ico'),
         sizes: trayIcoSizes,
       );
+      for (final MapEntry(key: style, value: color)
+          in monochromeTrayStyles.entries) {
+        final mono = await renderer.monochrome(
+          source,
+          color: color,
+          opacity: name == 'status_1' ? stoppedTrayOpacity : null,
+        );
+        await _writeTrayVariants(renderer, mono, name, '$pngOutputDir/$style');
+        await _writeIco(
+          renderer,
+          mono,
+          File('$icoOutputDir/$style/$name.ico'),
+          sizes: trayIcoSizes,
+        );
+      }
     }
     for (final MapEntry(key: name, value: path)
         in macosStatusIconSources.entries) {
@@ -387,14 +404,29 @@ class _Renderer {
     return wrapper;
   }
 
-  Future<File> monochrome(File source) async {
-    final copy = File('${tempDir.path}/mono-${_basename(source)}');
-    await copy.writeAsString(
-      (await source.readAsString()).replaceAllMapped(
-        RegExp(r'\b(fill|stroke)="(?!none")[^"]*"'),
-        (match) => '${match[1]}="#000000"',
-      ),
+  // Paint inside <defs> and <mask> is coverage, not color: recoloring a mask's
+  // black cutout would erase the badge gap in status_3.
+  Future<File> monochrome(
+    File source, {
+    String color = '#000000',
+    double? opacity,
+  }) async {
+    final copy = File(
+      '${tempDir.path}/${_sequence++}-mono-${_basename(source)}',
     );
+    var svg = (await source.readAsString()).replaceAllMapped(
+      RegExp(r'(<(defs|mask)\b[\s\S]*?</\2>)|\b(fill|stroke)="(?!none")[^"]*"'),
+      (match) => match[1] ?? '${match[3]}="$color"',
+    );
+    if (opacity != null) {
+      svg = svg
+          .replaceFirstMapped(
+            RegExp(r'<svg\b[^>]*>'),
+            (match) => '${match[0]}<g opacity="$opacity">',
+          )
+          .replaceFirst(RegExp(r'</svg>\s*$'), '</g></svg>\n');
+    }
+    await copy.writeAsString(svg);
     return copy;
   }
 

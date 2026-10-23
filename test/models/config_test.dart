@@ -657,13 +657,13 @@ void main() {
 
     test('drops every field the update params patch live', () {
       final live = defaultClashConfig.copyWith(
-        tun: const Tun(enable: true, stack: TunStack.gvisor, mtu: 1500),
+        tun: const Tun(enable: false, stack: TunStack.gvisor, mtu: 1500),
         mixedPort: 8899,
         allowLan: true,
         findProcessMode: FindProcessMode.always,
         mode: Mode.global,
         logLevel: LogLevel.debug,
-        ipv6: true,
+        ipv6: false,
         tcpConcurrent: false,
         externalController: ExternalControllerStatus.open,
         secret: 'secret',

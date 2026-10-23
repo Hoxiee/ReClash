@@ -954,104 +954,31 @@
   "appRegion": "应用地区",
   "regionalAdaptation": "地区适配",
   "regionTitle": "地区配置",
-  "regionIntro": "地区网络默认值和服务检查，与界面语言无关。",
-  "regionWarning": "选择国家仅更新预览。应用后才会更改地区默认值。",
-  "regionChoose": "选择国家或地区",
-  "regionDetected": "建议：{region} · {source}",
-  "regionUseDetected": "使用检测到的地区",
-  "regionPreviewTitle": "预览",
-  "regionPreviewBase": "国家配置：{region}",
-  "regionPreviewMtu": "TUN MTU：{value}",
-  "regionPreviewServices": "默认服务检查：{value}",
-  "regionPreviewRules": "代理选择和你的路由规则保持不变。",
-  "regionPreviewAndroid": "在 Android 上，更改 MTU 或绕过设置可能需要确认重启 VPN。应用选择是单独的操作。",
-  "regionCustomPreserved": "保留手动 DNS 和 MTU 设置、绕过列表、路由规则及服务选择。",
-  "regionNoChanges": "网络默认值和服务检查保持不变。",
+  "regionIntro": "根据你所在的国家选择 DNS 服务器、TUN MTU、绕过列表和服务检查。界面语言不会改变。",
+  "regionCustomPreserved": "你自己修改过的值会保持不变。",
+  "regionNoChanges": "设置不会改变。",
   "regionApply": "应用地区配置",
-  "regionNoDetected": "未找到匹配建议。仅使用时区和系统区域设置。",
   "regionSelectBeforeApps": "请先选择受支持的地区，再使用地区应用建议。",
-  "regionNotSet": "关闭",
-  "regionOther": "其他 / 通用",
+  "regionNotSet": "未选择",
+  "regionOther": "其他国家",
   "regionRussia": "俄罗斯",
   "regionIran": "伊朗",
   "regionChina": "中国",
   "regionEgypt": "埃及",
-  "regionSourceTimeZone": "时区",
-  "regionSourceLocaleCountry": "系统区域设置中的国家",
-  "regionSourceLocaleLanguage": "系统语言",
-  "regionCurrent": "当前地区",
-  "regionDetectionTitle": "设备建议",
-  "regionProfileDefaults": "配置文件默认值",
   "regionNoServices": "服务检查已关闭",
-  "regionDnsSettings": "地区 {region} 的默认 DNS：{value}。此页面的手动覆盖设置优先。",
-  "regionTunSettings": "地区 {region} 的 MTU 为 {value}。添加 MTU 覆盖设置可使用自定义值。",
-  "regionBypassSettings": "地区 {region} 的列表：{value}。自定义列表替换地区默认值。",
   "regionSelectApps": "按地区选择应用",
   "regionAppsPreviewTitle": "应用选择预览",
   "regionAppsPreview": "{region}：VPN 绕过列表将有 {bypassed} 个应用，VPN 列表将有 {proxied} 个应用。两个列表都会被替换，模式及其他设置保持不变。软件包和 SDK 匹配仅为建议，请在应用后检查结果。",
   "regionAppsEmpty": "没有应用匹配此地区。列表保持不变。",
   "regionAppsChanged": "地区或应用列表已更改。请根据当前设置重新选择。",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "推荐用于此设备",
+  "regionChangesTitle": "将要更改",
+  "regionChangeDns": "DNS 服务器",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "服务检查",
+  "restoreDefaults": "恢复默认",
+  "networkRestoreDefaultsTip": "绕过列表和 TUN MTU 将恢复为所选地区的默认值。",
+  "dnsRestoreDefaultsTip": "将删除所有 DNS 覆写，并重新设置所选地区的 DNS 服务器。",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "在每个需要连接的应用中设置本地代理地址。",
   "setupCoverageAndroidDescription": "Android 将请求创建 VPN 连接。应用选择可在访问设置中进行。",
   "setupCoverageNote": "接管所有流量不代表将所有流量发送到服务器。直连路由仍会保留。",
-  "setupRegionConfirm": "使用这些区域设置",
-  "setupRegionDescription": "推荐区域来自此设备，而非界面语言。仅当其符合您的网络情况时才应用。",
   "setupRegionNeutral": "保留配置默认值",
   "setupCheckAction": "检查连接",
   "setupCheckingTitle": "正在连接并检查",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "检查期间路由已更改。请重新检查当前连接。",
   "setupUnknownError": "操作未完成。请重试或查看详情。",
   "setupRequestPermission": "允许连接",
+  "setupReceiptRegion": "地区",
+  "setupRegionTitle": "你在哪里连接？",
+  "setupRegionStepDescription": "ReClash 会根据你所在国家的网络调整 DNS、MTU 和直连路由。界面语言保持不变。",
+  "setupRegionNeutralDescription": "不更改地区设置。",
+  "setupRegionUnchosen": "如果不选择，当前的地区设置保持不变。",
+  "setupRecommended": "推荐",
+  "setupDirectTitle": "本地网站和应用直连",
+  "setupDirectDescription": "本国服务不经服务器直接打开：速度更快，银行和政务网站也不会拦截你。以下规则将加入全局规则：",
+  "setupDirectAppsScanning": "正在查找本地应用…",
+  "setupDirectApps": "绕过 VPN 的应用：{count}",
+  "setupDirectAppsReview": "这些应用将不经过 VPN。之后可在访问控制中更改列表。",
+  "setupDirectAppsNone": "未找到本地应用。网站仍会直连。",
+  "setupLeaveTitle": "退出设置？",
+  "setupLeaveMessage": "ReClash 将关闭。你的选择已保存，下次打开应用时将继续设置。",
+  "setupProfileContinueHint": "添加或选择一个配置文件以继续。",
+  "setupProfileImportHint": "粘贴服务商邮件、机器人或账户页面中的链接，或选择文件或二维码。",
+  "setupProfileImportAnother": "添加其他配置文件",
+  "setupChangeSettings": "更改设置",
+  "setupTipsTitle": "可以尝试",
+  "setupTipNetwork": "确认不使用 ReClash 时网络正常。",
+  "setupTipProfile": "更新配置文件，或在设置完成后选择其他服务器。",
+  "setupTipCoverage": "选择其他接管范围：有些网络会拦截 VPN 连接。",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1237,6 +1184,7 @@
   "updateRemainingTime": "剩余 {time}",
   "updateSeconds": "{count} 秒",
   "updateMinutes": "{count} 分钟",
+  "updateResumeShort": "继续",
   "urlScheme": "URL 方案",
   "urlSchemeConnection": "连接",
   "urlSchemeProfiles": "配置文件",
@@ -1304,6 +1252,22 @@
   "telegramAppUnavailable": "无法在此设备上打开 Telegram。",
   "urlSchemeFormats": "格式",
   "urlSchemeFormatsTip": "链接格式。请将占位符替换为你的 URL 或数据。",
+  "profileImportTitle": "新订阅",
+  "profileImportChecking": "正在检查订阅…",
+  "profileImportPreviewFailed": "无法查看订阅内容，但仍可添加。",
+  "profileImportEncrypted": "订阅已加密，添加时会要求输入密钥。",
+  "profileImportFormat": "订阅格式",
+  "profileImportFormatClient": "与 {client} 应用收到的一致",
+  "profileImportFormatReclash": "为 ReClash 自动选择最佳格式",
+  "profileImportServerCount": "{count, plural, other{{count} 个服务器}}",
+  "profileImportAlreadyAdded": "已作为“{name}”添加",
+  "profileImportLosses": "部分内容不受支持，添加前会让你查看。",
+  "profileImportServers": "服务器",
+  "profileImportValidUntil": "有效期至",
+  "profileImportUnlimited": "不限",
+  "profileImportExpired": "已过期",
+  "profileImportFromProvider": "来自服务商",
+  "profileImportSingleServer": "单个服务器",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1337,8 +1301,6 @@
   "appearanceTheme": "主题",
   "appearanceBackground": "背景",
   "wallpaperTitle": "自定义背景",
-  "wallpaperGalleryHint": "点按已保存的背景即可应用，或添加新背景。",
-  "wallpaperChoose": "选择图片",
   "wallpaperRemove": "移除图片",
   "wallpaperEnabled": "使用自定义背景",
   "wallpaperFit": "图片适配方式",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "暂停",
   "onDemandFullStop": "完全停止",
   "onDemandFullStopDesc": "暂停时移除 TUN 并关闭本地代理端口。继续监测网络以便自动恢复。",
+  "pickNetworkPermissionDesc": "允许访问位置信息以查看附近的 Wi-Fi 网络，或手动输入网络。",
   "subscriptionClientRequestAs": "请求客户端",
   "subscriptionClientAuto": "自动",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "同时发送操作系统和设备型号",
   "subscriptionIdentityDetailsDisclosure": "设备标识符还会附带操作系统版本和设备型号。",
   "subscriptionIdentitySettingsTitle": "订阅身份信息",
-  "subscriptionIdentityGlobalHint": "启用后，除非某个配置文件覆盖此设置，否则所有 URL 订阅请求都会发送设备标识符。操作系统和设备信息仍需按订阅单独授权。",
   "subscriptionIdentityUseGlobal": "使用全局设置",
   "subscriptionProvider": "订阅",
   "subscriptionProviderWebsite": "网站",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "此订阅没有可用的设备名额。请在服务提供商账户中移除一台设备后重试。",
   "subscriptionDeviceRequired": "此订阅需要注册设备，请按照服务提供商的说明操作。",
   "profileBatchResult": "已添加：{added}；已跳过：{skipped}；失败：{failed}。",
+  "subscriptionIdentityRegionWarning": "关闭 HWID 发送后，许多订阅将无法使用。",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "保护已启用",
   "notificationLevelDescription": "详细模式显示实时信息和停止按钮。最简模式仅显示保护状态。",
   "extra": "其他",
+  "resetAllData": "重置所有数据",
+  "resetAllDataDescription": "所有配置、设置、脚本、壁纸和缓存数据将被永久删除。备份归档将保留。随后应用将关闭。此操作无法撤销。",
+  "resetAllDataConfirm": "全部删除",
+  "resetAllDataWait": "{seconds} 秒后可确认",
+  "resettingAllData": "正在删除数据…",
+  "appIcon": "应用图标",
+  "appIconStandard": "标准",
+  "appIconVelvet": "天鹅绒",
+  "appIconSolar": "太阳",
+  "appIconCircuit": "电路",
+  "appIconEcho": "回声",
+  "appIconInk": "墨",
+  "appIconBlueprint": "蓝图",
+  "appIconStrata": "地层",
+  "appIconShatter": "碎片",
+  "appIconTrace": "轨迹",
+  "appIconTopo": "地形",
+  "appIconSpark": "火花",
+  "appIconApply": "使用此图标",
+  "appIconChangeNote": "新图标可能需要几秒钟才会显示在桌面上，部分桌面启动器会移除快捷方式，请从应用列表中重新添加。",
+  "colorContrast": "对比度",
+  "contrastMedium": "中",
+  "contrastHigh": "高",
+  "navigationLabels": "标签文字",
+  "navigationLabelsAlways": "始终",
+  "navigationLabelsSelected": "选中时",
+  "navigationLabelsNever": "从不",
+  "trayIcon": "托盘图标",
+  "trayIconColor": "彩色",
+  "trayIconLight": "白色",
+  "trayIconDark": "黑色",
   "applicationSettings": "应用设置",
   "toolsConfiguration": "配置",
   "toolsData": "资源与数据",

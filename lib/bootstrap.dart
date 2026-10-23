@@ -45,6 +45,9 @@ class Bootstrap {
     windowPort = window;
     trayPort = appTray;
     navigationPort = navigation;
+    disableAutoLaunchPort = () async {
+      if (!safeModeBuild) await autoLaunch?.disable();
+    };
     final dynamicColor = await _initDynamicColor();
     unawaited(registerAppLicenses());
     return _initData(version, dynamicColor);

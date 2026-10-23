@@ -24,6 +24,8 @@ class SubscriptionMetadata {
 
   String? get name => text('provider.name');
   String? get accountTitle => text('account.title');
+  String? get announce => text('provider.announce');
+  String? get logo => text('provider.logo');
   bool get hideUrl => flag('presentation.hideUrl') ?? false;
   bool get unlimited => flag('subscription.unlimited') ?? false;
   bool get perpetual => flag('subscription.perpetual') ?? false;

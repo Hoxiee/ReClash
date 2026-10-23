@@ -65,7 +65,6 @@
   "subscriptionIdentityDetails": "Also send operating system and device model",
   "subscriptionIdentityDetailsDisclosure": "This also sends the operating system version and device model with the identifier.",
   "subscriptionIdentitySettingsTitle": "Subscription identity",
-  "subscriptionIdentityGlobalHint": "When enabled, the device identifier is sent with requests for all URL subscriptions unless a profile overrides this setting. Operating system and device details remain separately opt-in per subscription.",
   "subscriptionIdentityUseGlobal": "Use global",
   "subscriptionProvider": "Subscription",
   "subscriptionProviderWebsite": "Website",
@@ -80,9 +79,16 @@
   "profileBatchResult": "Added: {added}; skipped: {skipped}; failed: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "Many subscriptions will stop working if HWID sending is turned off."
 }

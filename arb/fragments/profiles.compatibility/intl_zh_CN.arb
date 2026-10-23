@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "同时发送操作系统和设备型号",
   "subscriptionIdentityDetailsDisclosure": "设备标识符还会附带操作系统版本和设备型号。",
   "subscriptionIdentitySettingsTitle": "订阅身份信息",
-  "subscriptionIdentityGlobalHint": "启用后，除非某个配置文件覆盖此设置，否则所有 URL 订阅请求都会发送设备标识符。操作系统和设备信息仍需按订阅单独授权。",
   "subscriptionIdentityUseGlobal": "使用全局设置",
   "subscriptionProvider": "订阅",
   "subscriptionProviderWebsite": "网站",
@@ -67,9 +66,16 @@
   "profileBatchResult": "已添加：{added}；已跳过：{skipped}；失败：{failed}。",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "关闭 HWID 发送后，许多订阅将无法使用。"
 }

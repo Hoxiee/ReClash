@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/ui/context.dart';
 import 'package:reclash/ui/shape.dart';
 import 'package:reclash/ui/inherited.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
@@ -33,7 +34,7 @@ class SettingsPageScroll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(child: child);
+    return SingleChildScrollView(padding: context.bodyInsets, child: child);
   }
 }
 

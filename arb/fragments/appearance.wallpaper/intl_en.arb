@@ -2,8 +2,6 @@
   "appearanceTheme": "Theme",
   "appearanceBackground": "Background",
   "wallpaperTitle": "Custom background",
-  "wallpaperGalleryHint": "Tap a saved background to use it, or add a new one.",
-  "wallpaperChoose": "Choose image",
   "wallpaperRemove": "Remove image",
   "wallpaperEnabled": "Use custom background",
   "wallpaperFit": "Image fit",

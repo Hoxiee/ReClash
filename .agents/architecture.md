@@ -270,7 +270,10 @@ Application exit is centralized in `SystemAction` and `SystemExitCoordinator`:
 4. Exit the application exactly once.
 
 The coordinator is idempotent, continues later cleanup steps after an earlier error, preserves the first error for the
-caller, and uses a three-second watchdog as an emergency application-exit path. `Application.dispose()` and
+caller, and uses a three-second watchdog as an emergency application-exit path. Full data reset first confirms a Core
+stop, cleans up host resources, and terminally closes Core before deleting local data. It preserves ZIP archives and
+the live instance lock, blocks preference writes until exit, and never sweeps the shared desktop temporary directory.
+Autostart removal is wired through `disableAutoLaunchPort` at bootstrap so shared actions do not import desktop plugins. `Application.dispose()` and
 `CoreManager.onCrash()` do not independently destroy Core; this avoids competing shutdown owners.
 
 ### Applying Setting Changes
@@ -839,7 +842,26 @@ few keys of a `tun` section the network settings own, so its spec does not mix i
 ## Where A Route Opens
 
 On desktop each navigation destination has its own `Navigator` (`_NavigationPage` in `lib/pages/home.dart`); on mobile
-there is none, and everything goes on the root navigator, `rootNavigatorKey` in `lib/ui/navigator.dart`. A route
+ordinary destinations use the root navigator, `rootNavigatorKey` in `lib/ui/navigator.dart`. Tools owns its workspace
+navigator on both layouts: its mobile catalog is the first route, while the split catalog stays outside the detail
+navigator. Navigator route state owns catalog coverage, not a Tools observer. Every Tools page covers the routes beneath
+with `PageBackdrop`, the shared wallpaper painted through a `CompositedTransformFollower` at the place the shared
+`PageBackground` paints it, so it holds still while the page slides or changes tabs. `SlideOverPageTransition` in
+`lib/ui/page_transition.dart` moves Tools pages: a page slides in from the trailing edge over the one beneath, which
+trails it by a quarter of the width and fades, the same motion a drag back plays under the finger, and a shadow on the
+page's leading edge keeps the two apart over the wallpaper they share. Compact detail pages carry
+inline app bars and cover the catalog and its navigation together; `_HomePageView` moves the floating bar into or out of Tools only
+once a tab switch settles. Only split Tools panes anchor app bars outside page transforms, in their own navigator's
+overlay so a menu or dialog above the page still covers the bar; `PagePresentationScope` supplies the full previous path
+and back-button state for route-driven header motion. A split pane keeps a page's content to a centered 840-wide column
+through `CappedBodyScope`, yet its body spans the pane so the scrollbar sits at the window edge and the margins scroll:
+each page adds `context.bodyInsets` to its scroll view's padding, and pads anything outside one by it too, as
+`SettingsPageScroll` and `RecordTableFrame` do. `capped pages scroll across their pane inside one column` in
+`test/widgets/tools_workspace_test.dart` fails a page that misses it. A section a Tools page lists, such as a custom
+resource list, is a `ToolPage` of its own beneath that page. A page one opens with arguments, such as an auto-routing
+group, a scenario or an editor, still goes through `BaseNavigator.push`: the `push` of the workspace's
+`PageNavigationScope` turns it into one more step of the opener's path, with the same backdrop, slide, header and
+column, while `ListItem.open` editors keep their sheets. A route
 takes the navigator of the context it opens from: `BaseNavigator.push`, `showExtend`, `showSheet`, `showFormSheet` and
 `showSnapSheet` all do, so a page or sheet opened from a destination stays beside the navigation rail, leaves the rail usable, and
 stays in that destination's stack when the user switches away and back. `sheetNavigatorOf` lifts a sheet out of a
@@ -872,7 +894,7 @@ rebuilds one row instead of the whole section. Titles and subtitles are `ConfigL
 `AppLocalizations`, which keeps literal labels such as `IPv6` and localized labels in the same shape.
 
 Build settings screens from these directly, or from a file-local helper that binds one provider once — see `_networkToggle`
-in `lib/views/config/network.dart` and `_appSettingToggle` in `lib/views/config/general.dart`. Declare a named
+in `lib/views/config/network.dart` and `_clashToggle` in `lib/views/config/general.dart`. Declare a named
 `ConsumerWidget` only when a row is genuinely reused across screens. Rows with bespoke behaviour — a custom dialog, a derived value, or a
 second provider write — stay hand-written rather than growing extra parameters on the shared items.
 

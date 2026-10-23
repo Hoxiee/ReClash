@@ -95,5 +95,21 @@
   "telegramWebFallback": "ブラウザーで開く",
   "telegramAppUnavailable": "この端末でTelegramを開けませんでした。",
   "urlSchemeFormats": "形式",
-  "urlSchemeFormatsTip": "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。"
+  "urlSchemeFormatsTip": "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。",
+  "profileImportTitle": "新しいサブスクリプション",
+  "profileImportChecking": "サブスクリプションを確認しています…",
+  "profileImportPreviewFailed": "サブスクリプションの内容を確認できませんでした。このまま追加することもできます。",
+  "profileImportEncrypted": "サブスクリプションは暗号化されています。追加時にキーを入力してください。",
+  "profileImportFormat": "サブスクリプションの形式",
+  "profileImportFormatClient": "{client} アプリが受け取る形式",
+  "profileImportFormatReclash": "ReClash に最適な形式を自動で選択",
+  "profileImportServerCount": "{count, plural, other{{count} 台のサーバー}}",
+  "profileImportAlreadyAdded": "「{name}」として追加済みです",
+  "profileImportLosses": "一部の項目は非対応です。追加前に確認できます。",
+  "profileImportServers": "サーバー",
+  "profileImportValidUntil": "有効期限",
+  "profileImportUnlimited": "無制限",
+  "profileImportExpired": "期限切れ",
+  "profileImportFromProvider": "プロバイダーから",
+  "profileImportSingleServer": "単一サーバー"
 }

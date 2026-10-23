@@ -399,7 +399,9 @@ class _AccessViewState extends ConsumerState<AccessView>
             controller: _controller,
             child: ListView.builder(
               controller: _controller,
-              padding: EdgeInsets.only(bottom: BottomInsetScope.of(context)),
+              padding:
+                  EdgeInsets.only(bottom: BottomInsetScope.of(context)) +
+                  context.bodyInsets,
               scrollCacheExtent: arrivalScrollCacheExtent(routeSettled),
               itemCount: packages.length,
               itemExtent: 72,
@@ -569,10 +571,13 @@ class _AccessViewState extends ConsumerState<AccessView>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildBannerBar(
-                enable: accessControl.enable,
-                mode: mode,
-                count: valueList.length,
+              Padding(
+                padding: context.bodyInsets,
+                child: _buildBannerBar(
+                  enable: accessControl.enable,
+                  mode: mode,
+                  count: valueList.length,
+                ),
               ),
               const SizedBox(height: 8),
               Expanded(

@@ -8,6 +8,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/backup_and_restore.dart';
+import 'package:reclash/widgets/reset_data_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,6 +76,41 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Save'));
     await tester.pumpAndSettle();
   }
+
+  testWidgets(
+    'backup options expose the reset confirmation without deleting on cancel',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: BackupAndRestore()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final reset = find.text('Reset all data');
+      await tester.ensureVisible(reset);
+      await tester.tap(reset);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(ResetDataDialog), findsOneWidget);
+      expect(
+        tester
+            .widget<TextButton>(
+              find.widgetWithText(TextButton, 'Delete everything'),
+            )
+            .onPressed,
+        isNull,
+      );
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ResetDataDialog), findsNothing);
+      expect(find.byType(BackupAndRestore), findsOneWidget);
+    },
+  );
 
   group('RestoreOptionsDialog', () {
     Future<RestoreOption?> openAndChoose(

@@ -11,3 +11,11 @@ String regionLabel(AppLocalizations l, String? value) =>
       otherRegionCode => l.regionOther,
       _ => l.regionNotSet,
     };
+
+String regionFlag(String? value) => switch (sanitizeRegionCode(value)) {
+  'RU' => '🇷🇺',
+  'IR' => '🇮🇷',
+  'CN' => '🇨🇳',
+  'EG' => '🇪🇬',
+  _ => '🌐',
+};

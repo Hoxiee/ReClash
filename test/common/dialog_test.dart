@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
@@ -8,6 +11,9 @@ import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
+import 'package:reclash/subscriptions/imports/import.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/views/disclaimer.dart';
 import 'package:reclash/widgets/profile_import_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -47,6 +53,42 @@ Future<ProviderContainer> _pumpHost(
   );
   await tester.pump();
   return container;
+}
+
+ProfileLinkPreview _preview({String? announce}) {
+  final draft = Profile.normal(url: 'https://sub.example/sub');
+  final metadata = SubscriptionMetadata({
+    'provider.name': 'Acme VPN',
+    'provider.announce': ?announce,
+  });
+  return (
+    draft: draft,
+    prepared: PreparedSubscriptionUpdate(
+      profileId: draft.id,
+      sourceUrl: draft.url,
+      sourceAgeSecretKey: '',
+      sourcePreferences: draft.subscriptionPreferences,
+      payload: SubscriptionImportResult(
+        bytes: Uint8List(0),
+        format: SubscriptionFormat.clash,
+        summary: const SubscriptionImportSummary(nodes: 14),
+      ),
+      metadata: SubscriptionMetadataResult(
+        metadata: metadata,
+        source: SubscriptionDataSource.http,
+      ),
+      subscriptionInfo: const SubscriptionInfo(
+        download: 1 << 30,
+        total: 100 << 30,
+      ),
+      snapshot: SubscriptionSnapshot(
+        metadata: metadata,
+        receivedAt: DateTime.utc(2026),
+      ),
+      label: 'Acme Home',
+      client: SubscriptionClientPreset.clash,
+    ),
+  );
 }
 
 FilledButton _disclaimerAgreeButton(WidgetTester tester) {
@@ -110,45 +152,155 @@ Future<void> _pumpStatusManagerHost(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets(
-    'Happ import dialog lets the user choose Auto without showing URL secrets',
-    (tester) async {
+  for (final scheme in ['happ', 'incy']) {
+    testWidgets('$scheme import offers its own format beside the ReClash one', (
+      tester,
+    ) async {
       await _pumpHost(tester);
       final l10n = currentAppLocalizations;
-      final result = showProfileImportDialog(
-        globalState.navigatorKey.currentContext!,
-        const ProfileLinkSource(
-          url: 'https://sub.example/private?token=secret',
-          name: 'Home',
-          preset: SubscriptionClientPreset.happ,
+      const url = 'https://sub.example/private?token=secret';
+      final source = await tester.runAsync(
+        () => resolveProfileLink(
+          '$scheme://add/${Uri.encodeComponent(url)}?name=Home',
         ),
       );
+      final result = showProfileImportDialog(source!);
       await tester.pumpAndSettle();
 
-      expect(find.text('Home'), findsOneWidget);
-      expect(find.text('sub.example'), findsOneWidget);
+      expect(find.text('Home'), findsWidgets);
+      expect(find.text('sub.example'), findsWidgets);
       expect(find.textContaining('secret'), findsNothing);
-      await tester.tap(find.text(l10n.subscriptionClientAuto));
+      final native = scheme == 'happ'
+          ? l10n.subscriptionClientHapp
+          : l10n.subscriptionClientIncy;
+      expect(find.text(native), findsOneWidget);
+      expect(find.text(l10n.profileImportFormatClient(native)), findsOne);
+      await tester.tap(find.text(l10n.subscriptionClientReclash));
       await tester.pump();
-      await tester.tap(find.text(l10n.import));
+      await tester.tap(find.text(l10n.add));
       await tester.pumpAndSettle();
 
-      expect((await result)?.preset, SubscriptionClientPreset.auto);
-    },
-  );
+      final choice = await result;
+      expect(choice?.clientSettings.preset, SubscriptionClientPreset.auto);
+      expect(choice?.label, 'Home');
+      expect(choice?.preview, isNull);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('import previews the subscription and hands the result on', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    final requested = <SubscriptionClientPreset>[];
+    final pending = Completer<ProfileLinkPreview>();
+    final preview = _preview(announce: 'Welcome aboard');
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(
+        url: 'https://sub.example/private?token=secret',
+        preset: SubscriptionClientPreset.happ,
+      ),
+      preview: (source, settings, {cancellation}) {
+        requested.add(settings.preset);
+        return pending.future;
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(requested, [SubscriptionClientPreset.happ]);
+    expect(find.text(l10n.profileImportChecking), findsWidgets);
+
+    pending.complete(preview);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Acme VPN'), findsOneWidget);
+    expect(find.text('Welcome aboard'), findsOneWidget);
+    expect(find.text('14'), findsOneWidget);
+    expect(
+      find.textContaining(l10n.profileImportServerCount(14)),
+      findsOneWidget,
+    );
+    expect(
+      tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+      'Acme Home',
+    );
+    await tester.enterText(find.byType(EditableText), 'Work');
+    await tester.tap(find.text(l10n.add));
+    await tester.pumpAndSettle();
+
+    final choice = await result;
+    expect(choice?.label, 'Work');
+    expect(choice?.clientSettings.preset, SubscriptionClientPreset.happ);
+    expect(choice?.preview, same(preview));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a failed preview can be retried and still imports', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    var calls = 0;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub'),
+      preview: (source, settings, {cancellation}) async {
+        calls++;
+        throw const SubscriptionUpdateCancelled();
+      },
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.profileImportPreviewFailed), findsOneWidget);
+    await tester.tap(find.text(l10n.retry));
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+
+    await tester.tap(find.text(l10n.add));
+    await tester.pumpAndSettle();
+    final choice = await result;
+    expect(choice?.preview, isNull);
+    expect(choice?.clientSettings.preset, SubscriptionClientPreset.auto);
+  });
+
+  testWidgets('an already added subscription is not fetched or offered', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+    final l10n = currentAppLocalizations;
+    var calls = 0;
+    final result = showProfileImportDialog(
+      const ProfileLinkSource(url: 'https://sub.example/sub'),
+      duplicateOf: 'Home',
+      preview: (source, settings, {cancellation}) async {
+        calls++;
+        return _preview();
+      },
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.profileImportAlreadyAdded('Home')), findsOneWidget);
+    expect(find.text(l10n.add), findsNothing);
+    expect(calls, 0);
+    await tester.tap(find.text(l10n.close));
+    await tester.pumpAndSettle();
+    expect(await result, isNull);
+  });
 
   testWidgets('profile import dialog fits a narrow viewport', (tester) async {
     await _pumpHost(tester, size: const Size(320, 640));
     final result = showProfileImportDialog(
-      globalState.navigatorKey.currentContext!,
       const ProfileLinkSource(
         url: 'https://sub.example/private?token=secret',
         preset: SubscriptionClientPreset.incy,
       ),
+      preview: (source, settings, {cancellation}) async =>
+          _preview(announce: 'A long provider message ' * 6),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('sub.example'), findsOneWidget);
+    expect(find.text('Acme VPN'), findsOneWidget);
     expect(tester.takeException(), isNull);
     Navigator.of(globalState.navigatorKey.currentContext!).pop();
     await tester.pumpAndSettle();

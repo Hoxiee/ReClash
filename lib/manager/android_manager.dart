@@ -30,7 +30,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _reminderTimer = Timer.periodic(
-      const Duration(minutes: 1),
+      const Duration(hours: 1),
       (_) => unawaited(_checkReminders()),
     );
     ref.listenManual(
@@ -54,6 +54,11 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     ) {
       app?.updateExcludeFromRecents(next);
     }, fireImmediately: true);
+    ref.listenManual(
+      appSettingProvider.select((state) => state.appIcon),
+      (_, icon) => unawaited(_applyAppIcon(icon)),
+      fireImmediately: true,
+    );
     ref.listenManual(loadedLocaleProvider, (prev, next) {
       if (prev != null && prev != next && !safeModeBuild) {
         app?.initShortcuts();
@@ -82,6 +87,18 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
           }),
     );
     app?.onPackagesChanged = _reloadPackages;
+  }
+
+  // Disabling the launcher alias drops the dynamic shortcuts bound to it.
+  Future<void> _applyAppIcon(AppIcon icon) async {
+    try {
+      await app?.setAppIcon(icon);
+      if (!safeModeBuild) {
+        await app?.initShortcuts();
+      }
+    } catch (error) {
+      commonPrint.log('Unable to set the app icon: $error');
+    }
   }
 
   /// A reload reads every installed app's label, and a round of store updates

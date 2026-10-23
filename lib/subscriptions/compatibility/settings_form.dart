@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/compatibility/client_picker.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
@@ -77,7 +79,21 @@ class _SubscriptionClientSettingsSectionState
   }
 }
 
-class SubscriptionSendHwidRow extends StatefulWidget {
+Future<bool> confirmDeviceIdentityOff(
+  BuildContext context,
+  String? regionCode,
+) async {
+  if (!sendsDeviceIdentityByDefault(regionCode)) return true;
+  final l10n = context.appLocalizations;
+  return await dialogs.showMessage(
+        title: l10n.subscriptionIdentityTitle,
+        context: context,
+        message: TextSpan(text: l10n.subscriptionIdentityRegionWarning),
+      ) ==
+      true;
+}
+
+class SubscriptionSendHwidRow extends ConsumerStatefulWidget {
   const SubscriptionSendHwidRow({
     super.key,
     required this.value,
@@ -88,11 +104,12 @@ class SubscriptionSendHwidRow extends StatefulWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  State<SubscriptionSendHwidRow> createState() =>
+  ConsumerState<SubscriptionSendHwidRow> createState() =>
       _SubscriptionSendHwidRowState();
 }
 
-class _SubscriptionSendHwidRowState extends State<SubscriptionSendHwidRow> {
+class _SubscriptionSendHwidRowState
+    extends ConsumerState<SubscriptionSendHwidRow> {
   bool _global = false;
 
   bool get _enabled => widget.value ?? _global;
@@ -105,7 +122,11 @@ class _SubscriptionSendHwidRowState extends State<SubscriptionSendHwidRow> {
 
   Future<void> _loadGlobal() async {
     final store = await DeviceIdentityStore.create();
-    final enabled = await store.globalSendEnabled();
+    final enabled = await store.globalSendEnabled(
+      byDefault: sendsDeviceIdentityByDefault(
+        ref.read(appSettingProvider).regionCode,
+      ),
+    );
     if (mounted) setState(() => _global = enabled);
   }
 
@@ -118,6 +139,13 @@ class _SubscriptionSendHwidRowState extends State<SubscriptionSendHwidRow> {
         message: TextSpan(text: l10n.subscriptionIdentityDisclosure),
       );
       if (accepted != true) return;
+    }
+    if (!value && _enabled) {
+      final confirmed = await confirmDeviceIdentityOff(
+        context,
+        ref.read(appSettingProvider).regionCode,
+      );
+      if (!confirmed) return;
     }
     widget.onChanged(value);
   }

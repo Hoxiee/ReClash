@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "Ulamoqchi bo‘lgan har bir ilovada mahalliy proksi manzilini belgilang.",
   "setupCoverageAndroidDescription": "Android VPN ulanishini yaratish uchun ruxsat so‘raydi. Ilovalarni kirish sozlamalarida tanlash mumkin.",
   "setupCoverageNote": "Barcha trafikni ushlash uni server orqali yuborish degani emas. To‘g‘ridan-to‘g‘ri yo‘nalishlar saqlanadi.",
-  "setupRegionConfirm": "Ushbu hudud sozlamalaridan foydalanish",
-  "setupRegionDescription": "Tavsiya etilgan hudud interfeys tilidan emas, qurilmadan olinadi. Faqat tarmog‘ingizga mos bo‘lsa qo‘llang.",
   "setupRegionNeutral": "Profil standartlarini saqlash",
   "setupCheckAction": "Ulanishni tekshirish",
   "setupCheckingTitle": "Ulanish va tekshirish",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "Xizmatlar tekshirilmoqda",
   "setupPhaseAlternatives": "Boshqa server qidirilmoqda",
   "setupStepStatus": "{total} tadan {step}-qadam",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "Natija barcha ilova yoki saytlarga emas, shu yo‘nalishga tegishli.",
   "setupConnectedTitle": "Ulanish ishlayapti",
   "setupConnectedDescription": "Tanlangan yo‘nalish javob berdi. Trafik profil qoidalariga amal qiladi.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "Ulanmasdan saqlash",
   "setupRepeat": "Qayta tekshirish",
   "setupTryServer": "{server}ni sinash",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "Bu server alohida tekshiruvga javob berdi. Unga o‘ting va to‘liq yo‘nalishni qayta tekshiring.",
   "setupReport": "Tekshiruv hisoboti",
   "setupReceipt": "Ulanishingiz",
@@ -73,10 +86,38 @@
   "setupRestart": "Ulanishni sozlash",
   "setupLaterNote": "Sozlash tugallanmagan; ulanish tekshirilmagan.",
   "setupProfileCount": "Mavjud profillar: {count}",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "Bu profil shifrlangan. Davom etish uchun age kalitini kiriting.",
   "setupFinishDescription": "Har qanday tanlovni sozlamalarda o‘zgartirishingiz mumkin.",
   "setupRouteChanged": "Tekshiruv vaqtida yo‘nalish o‘zgardi. Joriy ulanishni qayta tekshiring.",
   "setupUnknownError": "Amal yakunlanmadi. Qayta urinib ko‘ring yoki tafsilotlarni oching.",
-  "setupRequestPermission": "Ulanishga ruxsat berish"
+  "setupRequestPermission": "Ulanishga ruxsat berish",
+  "setupReceiptRegion": "Hudud",
+  "setupRegionTitle": "Qayerdan ulanasiz?",
+  "setupRegionStepDescription": "ReClash DNS, MTU va to‘g‘ridan-to‘g‘ri yo‘nalishlarni mamlakatingiz tarmoqlariga moslaydi. Interfeys tili o‘zgarmaydi.",
+  "setupRegionNeutralDescription": "Hududiy sozlamalar o‘zgarmaydi.",
+  "setupRegionUnchosen": "Hech narsa tanlamasangiz, joriy hududiy sozlamalar o‘zgarmaydi.",
+  "setupRecommended": "Tavsiya etiladi",
+  "setupDirectTitle": "Mahalliy saytlar va ilovalar — to‘g‘ridan-to‘g‘ri",
+  "setupDirectDescription": "Mamlakatingiz xizmatlari serversiz ochiladi: tezroq, banklar va davlat saytlari sizni bloklamaydi. Umumiy qoidalarga quyidagilar qo‘shiladi:",
+  "setupDirectAppsScanning": "Mahalliy ilovalar qidirilmoqda…",
+  "setupDirectApps": "VPN’ni chetlab o‘tadigan ilovalar: {count}",
+  "setupDirectAppsReview": "Ular VPN’siz ishlaydi. Ro‘yxatni keyinroq kirish nazoratida o‘zgartirishingiz mumkin.",
+  "setupDirectAppsNone": "Mahalliy ilovalar topilmadi. Saytlar baribir to‘g‘ridan-to‘g‘ri ochiladi.",
+  "setupLeaveTitle": "Sozlashdan chiqasizmi?",
+  "setupLeaveMessage": "ReClash yopiladi. Tanlovingiz saqlanadi va sozlash keyingi ishga tushirishda davom etadi.",
+  "setupProfileContinueHint": "Davom etish uchun profil qo‘shing yoki tanlang.",
+  "setupProfileImportHint": "Provayder xati, boti yoki shaxsiy kabinetidagi havolani qo‘ying yoki fayl yoxud QR-kod tanlang.",
+  "setupProfileImportAnother": "Boshqa profil qo‘shish",
+  "setupChangeSettings": "Sozlamalarni o‘zgartirish",
+  "setupTipsTitle": "Nimalarni sinab ko‘rish mumkin",
+  "setupTipNetwork": "Internet ReClash’siz ishlayotganiga ishonch hosil qiling.",
+  "setupTipProfile": "Profilni yangilang yoki sozlashdan keyin boshqa serverni tanlang.",
+  "setupTipCoverage": "Boshqa qamrovni tanlang: ba’zi tarmoqlar VPN’ni bloklaydi."
 }

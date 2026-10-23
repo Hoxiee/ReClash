@@ -23,5 +23,6 @@
   "onDemandResume": "恢复",
   "onDemandPause": "暂停",
   "onDemandFullStop": "完全停止",
-  "onDemandFullStopDesc": "暂停时移除 TUN 并关闭本地代理端口。继续监测网络以便自动恢复。"
+  "onDemandFullStopDesc": "暂停时移除 TUN 并关闭本地代理端口。继续监测网络以便自动恢复。",
+  "pickNetworkPermissionDesc": "允许访问位置信息以查看附近的 Wi-Fi 网络，或手动输入网络。"
 }

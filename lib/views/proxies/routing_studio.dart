@@ -312,9 +312,11 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
             : _save,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            context.bodyInsets,
         children: [
           ErrorBanner(
             message: errors.isEmpty ? null : rcxIssueText(l, errors.first),
@@ -869,9 +871,11 @@ class _DiffPage extends StatelessWidget {
     return CommonScaffold(
       title: title,
       body: ListView.builder(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            context.bodyInsets,
         itemCount: lines.length,
         itemBuilder: (context, index) {
           final (mark, text) = lines[index];

@@ -214,7 +214,8 @@ class _RecordTableFrameState<T> extends ConsumerState<RecordTableFrame<T>>
   Widget build(BuildContext context) {
     return WidthBuilder(
       builder: (context, width) {
-        final table = _tableOf(context, width);
+        final insets = context.bodyInsets;
+        final table = _tableOf(context, width - insets.horizontal);
         if (table == null) {
           return widget.builder(context, null, widget.items);
         }
@@ -236,19 +237,23 @@ class _RecordTableFrameState<T> extends ConsumerState<RecordTableFrame<T>>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _RecordTableHeader(
-                      table: table,
-                      sort: _sort,
-                      onSort: (column) =>
-                          setState(() => _sort = nextRecordSort(_sort, column)),
-                      onResize: (boundary, delta) => resizeColumn(
-                        table.layouts,
-                        table.widths,
-                        boundary,
-                        delta,
+                    Padding(
+                      padding: insets,
+                      child: _RecordTableHeader(
+                        table: table,
+                        sort: _sort,
+                        onSort: (column) => setState(
+                          () => _sort = nextRecordSort(_sort, column),
+                        ),
+                        onResize: (boundary, delta) => resizeColumn(
+                          table.layouts,
+                          table.widths,
+                          boundary,
+                          delta,
+                        ),
+                        onResizeEnd: saveColumnWidths,
+                        onReset: resetColumnWidths,
                       ),
-                      onResizeEnd: saveColumnWidths,
-                      onReset: resetColumnWidths,
                     ),
                     Expanded(
                       child: Builder(

@@ -149,4 +149,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the label behaviour reaches the bar and a singleton strip', (
+    tester,
+  ) async {
+    var entries = [_entry('dashboard'), _entry('tools')];
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      TestApp(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            rebuild = setState;
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedNavigationBar(
+                destinations: entries,
+                selectedIndex: 0,
+                onSelected: (_) {},
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).labelBehavior,
+      NavigationDestinationLabelBehavior.alwaysHide,
+    );
+    rebuild(() => entries = [_entry('dashboard')]);
+    await tester.pumpAndSettle();
+    expect(find.text('dashboard'), findsNothing);
+    expect(find.bySemanticsLabel('dashboard'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -212,7 +212,17 @@ UrlSchemeLink _parseRoutingLink(Uri uri) {
 
 bool isProfileLinkInput(String input) {
   if (input.length > urlSchemeMaxLength) return false;
-  final text = input.trim();
+  var text = input.trim();
+  if (Uri.tryParse(text)?.hasScheme != true) {
+    try {
+      final decoded = Uri.decodeComponent(text);
+      if (protocolSchemes.contains(Uri.tryParse(decoded)?.scheme)) {
+        text = decoded;
+      }
+    } on FormatException {
+      return false;
+    }
+  }
   try {
     final uri = checkedLinkUri(text);
     if (isSubscriptionUrl(text)) return true;

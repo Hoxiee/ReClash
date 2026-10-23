@@ -279,6 +279,41 @@ void main() {
     expect(runtime.lastAutomatic, isFalse);
   });
 
+  test('a grant that restarts the process resumes the install once', () async {
+    runtime.permission = false;
+    await action.offer(testUpdateRelease());
+    await action.download();
+    await action.installNow();
+    await action.openPermission();
+    container.dispose();
+    recreate();
+    runtime.permission = true;
+    expect(await action.restorePendingInstall(), isTrue);
+    expect(current().phase, UpdatePhase.permission);
+    container.read(initProvider.notifier).value = true;
+    await settleUntil(() => runtime.installations == 1);
+    expect(runtime.downloads, 1);
+    action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(runtime.installations, 1);
+  });
+
+  test('returning without the permission keeps the step offered', () async {
+    runtime.permission = false;
+    await action.offer(testUpdateRelease());
+    await action.download();
+    await action.installNow();
+    await action.openPermission();
+    container.read(initProvider.notifier).value = true;
+    action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(current().phase, UpdatePhase.permission);
+    runtime.permission = true;
+    action.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(runtime.installations, 0);
+  });
+
   test('active native VPN and Flutter run intent block installation', () async {
     await action.offer(testUpdateRelease());
     await action.download();

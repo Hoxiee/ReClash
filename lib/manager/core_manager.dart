@@ -102,7 +102,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     final proxiesAction = ref.read(proxiesActionProvider.notifier);
     proxiesAction.setDelay(delay);
     debouncer.call(FunctionTag.updateDelay, () async {
-      proxiesAction.updateGroupsDebounce();
+      proxiesAction.updateGroupsWhenVisible(hiddenConsumer: system.isMacOS);
     }, duration: const Duration(milliseconds: 5000));
   }
 
@@ -158,7 +158,16 @@ class _CoreContainerState extends ConsumerState<CoreManager>
 
   @override
   Future<void> onLoaded(String providerName) async {
-    final provider = await _core.getExternalProvider(providerName);
+    ExternalProvider? provider;
+    try {
+      provider = await _core.getExternalProvider(providerName);
+    } catch (e) {
+      commonPrint.log(
+        'getExternalProvider failed: $e',
+        logLevel: coreFailureLogLevel(e),
+      );
+      provider = null;
+    }
     if (!mounted) {
       return;
     }

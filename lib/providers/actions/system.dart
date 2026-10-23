@@ -5,6 +5,7 @@ class SystemAction extends _$SystemAction {
   CoreController get _core => ref.read(coreHandlerProvider);
 
   SystemExitCoordinator? _exitCoordinator;
+  bool _resetPrepared = false;
 
   @override
   void build() {}
@@ -12,6 +13,23 @@ class SystemAction extends _$SystemAction {
   Future<List<Package>> getPackages() async {
     ref.read(packagesProvider.notifier).value = await app?.getPackages() ?? [];
     return ref.read(packagesProvider);
+  }
+
+  void applyRegion(String? code) {
+    final regionCode = sanitizeRegionCode(code);
+    final next = withRegionDefaults(
+      from: ref.read(appSettingProvider).regionCode,
+      to: regionCode,
+      patchConfig: ref.read(patchClashConfigProvider),
+      bypassDomain: ref.read(networkSettingProvider).bypassDomain,
+    );
+    ref.read(patchClashConfigProvider.notifier).value = next.patchConfig;
+    ref
+        .read(networkSettingProvider.notifier)
+        .update((state) => state.copyWith(bypassDomain: next.bypassDomain));
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(regionCode: regionCode));
   }
 
   Future<List<String>> getDomesticPackageNames(String regionCode) async {
@@ -37,6 +55,29 @@ class SystemAction extends _$SystemAction {
     );
     return coordinator.exit(cleanup: () => cleanupExitResources(needSave));
   }
+
+  Future<void> resetAllDataAndExit() async {
+    if (!_resetPrepared) {
+      final stopped = await _core.stop();
+      if (stopped.outcome == CoreLifecycleOutcome.superseded) {
+        throw StateError('Core stop was superseded');
+      }
+      await cleanupExitResources(false);
+      await closeCore();
+      _resetPrepared = true;
+    }
+    await disableAutoLaunch();
+    await deleteAllData();
+    await handleExit(false);
+  }
+
+  @protected
+  Future<void> disableAutoLaunch() async {
+    await disableAutoLaunchPort?.call();
+  }
+
+  @protected
+  Future<void> deleteAllData() => clearAppData(all: true);
 
   @protected
   Duration get exitWatchdogDuration => const Duration(seconds: 3);

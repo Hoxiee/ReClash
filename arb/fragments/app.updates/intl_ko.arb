@@ -69,5 +69,6 @@
   "updateTransferSpeed": "{speed}/초",
   "updateRemainingTime": "{time} 남음",
   "updateSeconds": "{count}초",
-  "updateMinutes": "{count}분"
+  "updateMinutes": "{count}분",
+  "updateResumeShort": "재개"
 }

@@ -63,6 +63,10 @@ class App {
     return methodChannel.invokeMethod<bool>('moveTaskToBack');
   }
 
+  Future<bool?> setAppIcon(AppIcon icon) async {
+    return methodChannel.invokeMethod<bool>('setAppIcon', icon.name);
+  }
+
   Future<List<Package>> getPackages() async {
     final packagesString = await methodChannel.invokeMethod<String>(
       'getPackages',

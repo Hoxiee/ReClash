@@ -832,6 +832,25 @@ enum NavigationLayout { auto, bar, sidebar }
 
 enum LiquidGlassMode { none, standard, ultra }
 
+enum NavigationLabels { always, selected, never }
+
+enum TrayIconStyle { color, light, dark }
+
+enum AppIcon {
+  standard,
+  velvet,
+  solar,
+  circuit,
+  echo,
+  ink,
+  blueprint,
+  strata,
+  shatter,
+  trace,
+  topo,
+  spark,
+}
+
 enum Language { yaml, javaScript, json }
 
 enum ScrollPositionCacheKey { proxiesTabList }

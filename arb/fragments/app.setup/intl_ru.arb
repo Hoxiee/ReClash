@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "Укажите адрес локального прокси в каждом приложении, которое хотите подключить.",
   "setupCoverageAndroidDescription": "Android запросит разрешение на VPN-подключение. Выбор приложений доступен в настройках доступа.",
   "setupCoverageNote": "Перехват всего трафика не означает отправку всего через сервер. Прямые маршруты сохраняются.",
-  "setupRegionConfirm": "Применить настройки региона",
-  "setupRegionDescription": "Регион предложен по данным устройства, а не по выбранному языку интерфейса. Примените его, если он соответствует вашей сети.",
   "setupRegionNeutral": "Оставить настройки профиля",
   "setupCheckAction": "Проверить подключение",
   "setupCheckingTitle": "Подключаемся и проверяем",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "Проверка сервисов",
   "setupPhaseAlternatives": "Поиск другого сервера",
   "setupStepStatus": "{step} из {total}",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "Результат относится к этому маршруту, а не ко всем приложениям и сайтам.",
   "setupConnectedTitle": "Подключение работает",
   "setupConnectedDescription": "Выбранный маршрут ответил. Трафик следует правилам профиля.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "Сохранить без подключения",
   "setupRepeat": "Проверить ещё раз",
   "setupTryServer": "Попробовать {server}",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "Этот сервер ответил на отдельную пробу. Переключитесь и проверьте весь маршрут снова.",
   "setupReport": "Отчёт проверки",
   "setupReceipt": "Ваше подключение",
@@ -73,10 +86,38 @@
   "setupRestart": "Настроить подключение",
   "setupLaterNote": "Настройка не завершена; подключение не проверено.",
   "setupProfileCount": "Доступно профилей: {count}",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "Этот профиль зашифрован. Укажите ключ age, чтобы продолжить.",
   "setupFinishDescription": "Любой выбор можно изменить в настройках.",
   "setupRouteChanged": "Маршрут изменился во время проверки. Проверьте текущее подключение ещё раз.",
   "setupUnknownError": "Операция не завершилась. Повторите попытку или откройте подробности.",
-  "setupRequestPermission": "Разрешить подключение"
+  "setupRequestPermission": "Разрешить подключение",
+  "setupReceiptRegion": "Регион",
+  "setupRegionTitle": "Откуда вы подключаетесь?",
+  "setupRegionStepDescription": "ReClash подстроит DNS, MTU и прямые маршруты под сети вашей страны. Язык интерфейса не изменится.",
+  "setupRegionNeutralDescription": "Региональные настройки не меняются.",
+  "setupRegionUnchosen": "Если ничего не выбрать, текущие региональные настройки останутся прежними.",
+  "setupRecommended": "Рекомендуется",
+  "setupDirectTitle": "Местные сайты и приложения — напрямую",
+  "setupDirectDescription": "Сервисы вашей страны откроются без сервера: быстрее, и банки или госсервисы не будут вас блокировать. В общие правила добавится:",
+  "setupDirectAppsScanning": "Ищем местные приложения…",
+  "setupDirectApps": "Приложений в обход VPN: {count}",
+  "setupDirectAppsReview": "Они будут работать без VPN. Список можно изменить позже в управлении доступом.",
+  "setupDirectAppsNone": "Местные приложения не найдены. Сайты всё равно пойдут напрямую.",
+  "setupLeaveTitle": "Выйти из настройки?",
+  "setupLeaveMessage": "ReClash закроется. Выбор сохранится, и настройка продолжится при следующем запуске.",
+  "setupProfileContinueHint": "Добавьте или выберите профиль, чтобы продолжить.",
+  "setupProfileImportHint": "Вставьте ссылку из письма, бота или личного кабинета провайдера либо выберите файл или QR-код.",
+  "setupProfileImportAnother": "Добавить другой профиль",
+  "setupChangeSettings": "Изменить настройки",
+  "setupTipsTitle": "Что можно попробовать",
+  "setupTipNetwork": "Убедитесь, что интернет работает без ReClash.",
+  "setupTipProfile": "Обновите профиль или выберите другой сервер после настройки.",
+  "setupTipCoverage": "Выберите другой охват: некоторые сети блокируют VPN."
 }

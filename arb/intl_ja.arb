@@ -954,104 +954,31 @@
   "appRegion": "アプリの地域",
   "regionalAdaptation": "地域設定",
   "regionTitle": "地域プロファイル",
-  "regionIntro": "表示言語とは別に、地域のネットワーク既定値とサービス確認を設定します。",
-  "regionWarning": "国の選択はプレビューだけを更新します。地域の既定値は適用後に変更されます。",
-  "regionChoose": "国を選択",
-  "regionDetected": "候補: {region} · {source}",
-  "regionUseDetected": "検出した地域を選択",
-  "regionPreviewTitle": "プレビュー",
-  "regionPreviewBase": "国のプロファイル: {region}",
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "regionPreviewServices": "既定のサービス確認: {value}",
-  "regionPreviewRules": "プロキシの選択とルーティングルールは変更されません。",
-  "regionPreviewAndroid": "Android では MTU やバイパスの変更に VPN の再起動確認が必要な場合があります。アプリの選択は別途実行します。",
-  "regionCustomPreserved": "手動の DNS・MTU 設定、バイパス一覧、ルーティングルール、サービスの選択は保持されます。",
-  "regionNoChanges": "ネットワーク既定値とサービス確認は変更されません。",
+  "regionIntro": "お住まいの国に合わせて DNS サーバー、TUN の MTU、バイパス一覧、サービス確認を設定します。表示言語は変わりません。",
+  "regionCustomPreserved": "自分で変更した値はそのまま残ります。",
+  "regionNoChanges": "設定は変更されません。",
   "regionApply": "地域を適用",
-  "regionNoDetected": "一致する候補がありません。タイムゾーンとシステムロケールのみを使用します。",
   "regionSelectBeforeApps": "地域別アプリ候補を使うには、対応する地域を選択してください。",
-  "regionNotSet": "オフ",
-  "regionOther": "その他 / 共通",
+  "regionNotSet": "未選択",
+  "regionOther": "その他の国",
   "regionRussia": "ロシア",
   "regionIran": "イラン",
   "regionChina": "中国",
   "regionEgypt": "エジプト",
-  "regionSourceTimeZone": "タイムゾーン",
-  "regionSourceLocaleCountry": "システムロケールの国",
-  "regionSourceLocaleLanguage": "システム言語",
-  "regionCurrent": "現在の地域",
-  "regionDetectionTitle": "デバイスからの候補",
-  "regionProfileDefaults": "プロファイルの既定値",
   "regionNoServices": "サービス確認はオフです",
-  "regionDnsSettings": "地域 {region} の既定 DNS: {value}。この画面の手動設定が優先されます。",
-  "regionTunSettings": "地域 {region} の MTU は {value} です。独自の値を使うには MTU 設定を追加してください。",
-  "regionBypassSettings": "地域 {region} の一覧: {value}。カスタム一覧は地域の既定値を置き換えます。",
   "regionSelectApps": "地域別にアプリを選択",
   "regionAppsPreviewTitle": "アプリ選択のプレビュー",
   "regionAppsPreview": "{region}: VPN バイパス一覧に {bypassed} 個、VPN 一覧に {proxied} 個のアプリを追加します。両方の一覧が置き換わり、モードや他の設定は変更されません。パッケージと SDK の一致は候補にすぎません。適用後に結果を確認してください。",
   "regionAppsEmpty": "この地域に一致するアプリはありません。一覧は変更されません。",
   "regionAppsChanged": "地域またはアプリ一覧が変更されました。現在の設定で選択をやり直してください。",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
+  "regionRecommended": "このデバイスにおすすめ",
+  "regionChangesTitle": "変更される項目",
+  "regionChangeDns": "DNS サーバー",
+  "regionChangeMtu": "TUN の MTU",
+  "regionChangeServices": "サービス確認",
+  "restoreDefaults": "デフォルトに戻す",
+  "networkRestoreDefaultsTip": "バイパス一覧と TUN の MTU を、選択中の地域の既定値に戻します。",
+  "dnsRestoreDefaultsTip": "DNS のオーバーライドをすべて削除し、選択中の地域の DNS サーバーを再設定します。",
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -1085,8 +1012,6 @@
   "setupCoverageLocalDescription": "接続したい各アプリにローカルプロキシのアドレスを設定します。",
   "setupCoverageAndroidDescription": "Android は VPN 接続の作成許可を求めます。アプリの選択はアクセス設定で行います。",
   "setupCoverageNote": "すべての通信を取得しても、すべてをサーバー経由で送るわけではありません。直接ルートは維持されます。",
-  "setupRegionConfirm": "この地域設定を使う",
-  "setupRegionDescription": "地域の候補は表示言語ではなく端末情報に基づきます。ネットワークに合う場合のみ適用してください。",
   "setupRegionNeutral": "プロファイルの既定値を維持",
   "setupCheckAction": "接続を確認",
   "setupCheckingTitle": "接続と確認中",
@@ -1142,6 +1067,28 @@
   "setupRouteChanged": "確認中にルートが変更されました。現在の接続をもう一度確認してください。",
   "setupUnknownError": "処理が完了しませんでした。再試行するか詳細を開いてください。",
   "setupRequestPermission": "接続を許可",
+  "setupReceiptRegion": "地域",
+  "setupRegionTitle": "どこから接続しますか？",
+  "setupRegionStepDescription": "ReClash は DNS、MTU、直接ルートをお住まいの国のネットワークに合わせます。表示言語は変わりません。",
+  "setupRegionNeutralDescription": "地域の設定は変更しません。",
+  "setupRegionUnchosen": "選択しない場合、現在の地域設定はそのままです。",
+  "setupRecommended": "おすすめ",
+  "setupDirectTitle": "国内のサイトとアプリは直接接続",
+  "setupDirectDescription": "国内のサービスはサーバーを経由せずに開きます。より速く、銀行や行政サイトにブロックされません。次のルールが全体のルールに追加されます：",
+  "setupDirectAppsScanning": "国内アプリを検索しています…",
+  "setupDirectApps": "VPN を経由しないアプリ：{count}",
+  "setupDirectAppsReview": "これらは VPN を経由せずに動作します。一覧は後でアクセス制御で変更できます。",
+  "setupDirectAppsNone": "国内アプリは見つかりませんでした。サイトは引き続き直接接続します。",
+  "setupLeaveTitle": "設定を終了しますか？",
+  "setupLeaveMessage": "ReClash を終了します。選択内容は保存され、次回の起動時に設定を続けられます。",
+  "setupProfileContinueHint": "続けるにはプロファイルを追加または選択してください。",
+  "setupProfileImportHint": "プロバイダのメール、ボット、アカウントページのリンクを貼り付けるか、ファイルや QR コードを選んでください。",
+  "setupProfileImportAnother": "別のプロファイルを追加",
+  "setupChangeSettings": "設定を変更",
+  "setupTipsTitle": "試せること",
+  "setupTipNetwork": "ReClash なしでインターネットにつながるか確認してください。",
+  "setupTipProfile": "プロファイルを更新するか、設定後に別のサーバーを選んでください。",
+  "setupTipCoverage": "別の対象範囲を選んでください。VPN 接続をブロックするネットワークもあります。",
   "@setupStepStatus": {
     "placeholders": {
       "step": {
@@ -1237,6 +1184,7 @@
   "updateRemainingTime": "残り{time}",
   "updateSeconds": "{count}秒",
   "updateMinutes": "{count}分",
+  "updateResumeShort": "再開",
   "urlScheme": "URLスキーム",
   "urlSchemeConnection": "接続",
   "urlSchemeProfiles": "プロファイル",
@@ -1304,6 +1252,22 @@
   "telegramAppUnavailable": "この端末でTelegramを開けませんでした。",
   "urlSchemeFormats": "形式",
   "urlSchemeFormatsTip": "リンクの形式です。プレースホルダーをURLやデータに置き換えてください。",
+  "profileImportTitle": "新しいサブスクリプション",
+  "profileImportChecking": "サブスクリプションを確認しています…",
+  "profileImportPreviewFailed": "サブスクリプションの内容を確認できませんでした。このまま追加することもできます。",
+  "profileImportEncrypted": "サブスクリプションは暗号化されています。追加時にキーを入力してください。",
+  "profileImportFormat": "サブスクリプションの形式",
+  "profileImportFormatClient": "{client} アプリが受け取る形式",
+  "profileImportFormatReclash": "ReClash に最適な形式を自動で選択",
+  "profileImportServerCount": "{count, plural, other{{count} 台のサーバー}}",
+  "profileImportAlreadyAdded": "「{name}」として追加済みです",
+  "profileImportLosses": "一部の項目は非対応です。追加前に確認できます。",
+  "profileImportServers": "サーバー",
+  "profileImportValidUntil": "有効期限",
+  "profileImportUnlimited": "無制限",
+  "profileImportExpired": "期限切れ",
+  "profileImportFromProvider": "プロバイダーから",
+  "profileImportSingleServer": "単一サーバー",
   "@urlSchemeConfigCounts": {
     "placeholders": {
       "nodes": {
@@ -1337,8 +1301,6 @@
   "appearanceTheme": "テーマ",
   "appearanceBackground": "背景",
   "wallpaperTitle": "カスタム背景",
-  "wallpaperGalleryHint": "保存済みの背景をタップして適用するか、新しい背景を追加します。",
-  "wallpaperChoose": "画像を選択",
   "wallpaperRemove": "画像を削除",
   "wallpaperEnabled": "カスタム背景を使用",
   "wallpaperFit": "画像の配置",
@@ -1469,6 +1431,7 @@
   "onDemandPause": "一時停止",
   "onDemandFullStop": "完全停止",
   "onDemandFullStopDesc": "一時停止中はTUNを解除し、ローカルプロキシポートも閉じます。自動再開のためネットワークの監視は続きます。",
+  "pickNetworkPermissionDesc": "近くのWi-Fiネットワークを表示するには位置情報へのアクセスを許可するか、ネットワークを手動で入力してください。",
   "subscriptionClientRequestAs": "クライアントとして要求",
   "subscriptionClientAuto": "自動",
   "subscriptionClientReclash": "ReClash",
@@ -1522,7 +1485,6 @@
   "subscriptionIdentityDetails": "OSと端末モデルも送信",
   "subscriptionIdentityDetailsDisclosure": "識別子とともにOSバージョンと端末モデルを送信します。",
   "subscriptionIdentitySettingsTitle": "サブスクリプションの識別情報",
-  "subscriptionIdentityGlobalHint": "有効にすると、プロファイルで上書きされない限り、すべてのURLサブスクリプションのリクエストで端末識別子を送信します。OSと端末情報はサブスクリプションごとに個別に許可します。",
   "subscriptionIdentityUseGlobal": "全体設定を使用",
   "subscriptionProvider": "サブスクリプション",
   "subscriptionProviderWebsite": "ウェブサイト",
@@ -1535,6 +1497,7 @@
   "subscriptionDeviceLimit": "このサブスクリプションで使用できる端末枠がありません。プロバイダーのアカウントから端末を削除して、もう一度お試しください。",
   "subscriptionDeviceRequired": "このサブスクリプションでは端末の登録が必要です。プロバイダーの案内に従ってください。",
   "profileBatchResult": "追加: {added}、スキップ: {skipped}、失敗: {failed}。",
+  "subscriptionIdentityRegionWarning": "HWID の送信をオフにすると、多くのサブスクリプションが利用できなくなります。",
   "@profileBatchResult": {
     "placeholders": {
       "added": {
@@ -1851,6 +1814,37 @@
   "notificationActive": "保護中",
   "notificationLevelDescription": "詳細ではライブ情報と停止ボタンを表示します。最小では保護状態のみを表示します。",
   "extra": "その他",
+  "resetAllData": "すべてのデータをリセット",
+  "resetAllDataDescription": "すべてのプロファイル、設定、スクリプト、壁紙、キャッシュデータが完全に削除されます。バックアップアーカイブは保持されます。その後、アプリは終了します。この操作は取り消せません。",
+  "resetAllDataConfirm": "すべて削除",
+  "resetAllDataWait": "{seconds} 秒後に確認できます",
+  "resettingAllData": "データを削除中…",
+  "appIcon": "アプリアイコン",
+  "appIconStandard": "標準",
+  "appIconVelvet": "ベルベット",
+  "appIconSolar": "ソーラー",
+  "appIconCircuit": "回路",
+  "appIconEcho": "エコー",
+  "appIconInk": "インク",
+  "appIconBlueprint": "設計図",
+  "appIconStrata": "地層",
+  "appIconShatter": "破片",
+  "appIconTrace": "軌跡",
+  "appIconTopo": "地形",
+  "appIconSpark": "火花",
+  "appIconApply": "このアイコンを使う",
+  "appIconChangeNote": "ホーム画面に新しいアイコンが表示されるまで数秒かかることがあります。一部のランチャーではショートカットが削除されるため、アプリ一覧から再度追加してください。",
+  "colorContrast": "コントラスト",
+  "contrastMedium": "中",
+  "contrastHigh": "高",
+  "navigationLabels": "タブのラベル",
+  "navigationLabelsAlways": "常に",
+  "navigationLabelsSelected": "選択中のみ",
+  "navigationLabelsNever": "表示しない",
+  "trayIcon": "トレイアイコン",
+  "trayIconColor": "カラー",
+  "trayIconLight": "白",
+  "trayIconDark": "黒",
   "applicationSettings": "アプリの設定",
   "toolsConfiguration": "設定",
   "toolsData": "リソースとデータ",

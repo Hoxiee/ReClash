@@ -107,10 +107,12 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                       shrinkWrap: true,
                       physics: _physics,
                       controller: _scrollController,
-                      padding: EdgeInsets.only(
-                        top: context.contentTopPadding,
-                        bottom: 16 + BottomInsetScope.of(context),
-                      ),
+                      padding:
+                          EdgeInsets.only(
+                            top: context.contentTopPadding,
+                            bottom: 16 + BottomInsetScope.of(context),
+                          ) +
+                          context.bodyInsets,
                       trackerInfos: requests,
                       table: table,
                       detailTitle: appLocalizations.details(

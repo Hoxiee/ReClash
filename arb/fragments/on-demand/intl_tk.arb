@@ -23,5 +23,6 @@
   "onDemandResume": "Dowam etmek",
   "onDemandPause": "Säginmek",
   "onDemandFullStop": "Doly bes etmek",
-  "onDemandFullStopDesc": "Säginilende TUN aýrylýar we ýerli proksi portlary ýapylýar. Awtomatik dowam etmek üçin tor gözegçiligi dowam edýär."
+  "onDemandFullStopDesc": "Säginilende TUN aýrylýar we ýerli proksi portlary ýapylýar. Awtomatik dowam etmek üçin tor gözegçiligi dowam edýär.",
+  "pickNetworkPermissionDesc": "Golaýdaky Wi-Fi torlaryny görmek üçin ýerleşişe rugsat beriň ýa-da tory el bilen giriziň."
 }

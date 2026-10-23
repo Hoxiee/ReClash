@@ -201,3 +201,18 @@ Website/package destinations and their external availability remain product poli
 account, F-Droid signing fingerprint, app store or update channel is actually published or controlled.
 No fixed sync schedule, new release topology, replay queue, release ledger, automatic agent fan-out or automatic
 publication is introduced. Root tests do not replace native builds on affected platforms.
+
+## Engine Fork (mihomo)
+
+The engine fork (`Hoxiee/mihomo`, branch `ReClash`) always has exactly this history, top first, regardless of what is
+patched or why:
+
+```
+feat: support ReClash
+feat: support FlClash
+<upstream release tag>
+```
+
+New engine changes are folded into one of the two commits, never added as a third. An upstream bump rebases both
+commits onto the new release tag. After any history rewrite, check that `git log --oneline <tag>..HEAD` lists exactly two
+commits, keep a local backup branch, and push with `--force-with-lease` pinned to the previous remote SHA.

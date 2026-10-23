@@ -12,11 +12,6 @@ part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
 
 const defaultBypassDomain = [
-  '*zhihu.com',
-  '*zhimg.com',
-  '*jd.com',
-  '100ime-iat-api.xfyun.cn',
-  '*360buyimg.com',
   'localhost',
   '*.local',
   '127.*',
@@ -257,6 +252,15 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(NavigationLayout.auto)
     @JsonKey(unknownEnumValue: NavigationLayout.auto)
     NavigationLayout navigationLayout,
+    @Default(NavigationLabels.always)
+    @JsonKey(unknownEnumValue: NavigationLabels.always)
+    NavigationLabels navigationLabels,
+    @Default(AppIcon.standard)
+    @JsonKey(unknownEnumValue: AppIcon.standard)
+    AppIcon appIcon,
+    @Default(TrayIconStyle.color)
+    @JsonKey(unknownEnumValue: TrayIconStyle.color)
+    TrayIconStyle trayIconStyle,
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool autoDownloadUpdate,
     @Default(false) bool autoInstallUpdate,
@@ -271,6 +275,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     String? setupCoverage,
     String? setupRegionCode,
     @Default(false) bool setupRegionChosen,
+    @Default(true) bool setupDirectRoutes,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
@@ -497,6 +502,9 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(ColorStyle.vivid)
     @JsonKey(readValue: _readColorStyle)
     ColorStyle colorStyle,
+    @Default(ColorContrast.standard)
+    @JsonKey(unknownEnumValue: ColorContrast.standard)
+    ColorContrast contrast,
     @Default(false) bool pureBlack,
     @Default(true) bool sidebarBlur,
     @Default(LiquidGlassMode.none)

@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/setup_check.dart';
 
 import 'package:reclash/core/core.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -29,7 +30,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../helpers/app_paths.dart';
 import '../helpers/test_profiles.dart';
 
-class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async => DesktopPrivilegeDecision.notRequired;
+}
 
 class _TestSetupSession extends SetupSession {
   _TestSetupSession(this.active);

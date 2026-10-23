@@ -8,9 +8,7 @@ class UrlSchemeAction extends _$UrlSchemeAction {
   Future<void> handleLink(
     String input, {
     required Future<bool> Function(ReClashCommand action) confirmCommand,
-    required Future<SubscriptionClientSettings?> Function(
-      ProfileLinkSource source,
-    )
+    required Future<ProfileLinkImport?> Function(ProfileLinkSource source)
     confirmImport,
     required Future<void> Function(String text, String origin) openRouting,
     bool Function()? isCurrent,
@@ -41,15 +39,20 @@ class UrlSchemeAction extends _$UrlSchemeAction {
       return;
     }
     final source = await resolveProfileLink(input);
-    final clientSettings = await confirmImport(source);
-    if (!current() || clientSettings == null) return;
+    final choice = await confirmImport(source);
+    if (!current() || choice == null) return;
     if (ref.read(setupSessionProvider).active) {
       ref.read(setupSessionProvider.notifier).offerLink(input);
       return;
     }
     await ref
         .read(profilesActionProvider.notifier)
-        .addProfileLinkSource(source, clientSettings: clientSettings);
+        .addProfileLinkSource(
+          source,
+          label: choice.label,
+          clientSettings: choice.clientSettings,
+          preview: choice.preview,
+        );
   }
 
   Future<(String, String)> _resolveRouting(String payload) async {

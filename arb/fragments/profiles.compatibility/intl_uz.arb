@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Operatsion tizim va qurilma modelini ham yuborish",
   "subscriptionIdentityDetailsDisclosure": "Identifikator bilan birga operatsion tizim versiyasi va qurilma modeli yuboriladi.",
   "subscriptionIdentitySettingsTitle": "Obuna identifikatori",
-  "subscriptionIdentityGlobalHint": "Yoqilganda, profil bu sozlamani bekor qilmasa, qurilma identifikatori barcha URL obunalari so‘rovlarida yuboriladi. Operatsion tizim va qurilma tafsilotlari har bir obuna uchun alohida yoqiladi.",
   "subscriptionIdentityUseGlobal": "Umumiy sozlamadan foydalanish",
   "subscriptionProvider": "Obuna",
   "subscriptionProviderWebsite": "Veb-sayt",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Qo‘shildi: {added}; o‘tkazib yuborildi: {skipped}; xatolar: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "HWID yuborish o‘chirilsa, ko‘plab obunalar ishlamay qoladi."
 }

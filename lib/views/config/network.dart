@@ -2,20 +2,21 @@ import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/regional/country_profile.dart';
-import 'package:reclash/common/regional/region_labels.dart';
+import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/form/form.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/action.dart';
-import 'package:reclash/providers/state.dart';
+import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/override.dart';
 import 'package:reclash/views/config/tun.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
@@ -331,16 +332,17 @@ class _MtuItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
     final value = ref.watch(
-      regionalNetworkConfigProvider.select(
-        (state) => state.patchConfig.tun.mtu,
-      ),
+      patchClashConfigProvider.select((state) => state.tun.mtu),
+    );
+    final regionMtu = regionTunMtu(
+      ref.watch(appSettingProvider.select((state) => state.regionCode)),
     );
     return ListItem.input(
       title: Text(networkToolSettings[13].title(l)),
       subtitle: Text('$value'),
       dialogTitle: networkToolSettings[13].title(l),
       value: '$value',
-      resetValue: '$defaultTunMtu',
+      resetValue: '$regionMtu',
       maxLength: TextInputLimits.number,
       keyboardType: TextInputType.number,
       validator: (value) {
@@ -508,19 +510,6 @@ class TunSection extends ConsumerWidget {
       footer: [
         appLocalizations.bypassPrivateRouteDesc,
         appLocalizations.tunOverrideDesc,
-        if (!picked.contains(TunOverrideKey.mtu) &&
-            ref
-                .watch(regionalNetworkConfigProvider)
-                .patchConfig
-                .tunOverrideKeys
-                .contains(TunOverrideKey.mtu))
-          appLocalizations.regionTunSettings(
-            regionLabel(
-              appLocalizations,
-              ref.watch(appSettingProvider).regionCode,
-            ),
-            '${ref.watch(regionalNetworkConfigProvider).patchConfig.tunOverride.mtu}',
-          ),
         ?spec.footerOf(listed, appLocalizations),
       ].join('\n'),
     );
@@ -601,7 +590,6 @@ class VpnSections extends ConsumerWidget {
     final authenticationEnable = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
-    final bypass = ref.watch(regionalNetworkConfigProvider).bypassDomain;
     return Column(
       children: [
         generateSection(
@@ -621,12 +609,6 @@ class VpnSections extends ConsumerWidget {
             if (authenticationEnable)
               appLocalizations.authenticationSystemProxyDesc,
             appLocalizations.bypassDomainDesc,
-            if (sanitizeRegionCode(ref.watch(appSettingProvider).regionCode)
-                case final code?)
-              appLocalizations.regionBypassSettings(
-                regionLabel(appLocalizations, code),
-                bypass.isEmpty ? appLocalizations.none : bypass.join(', '),
-              ),
             appLocalizations.ipv6InboundDesc,
           ].join('\n'),
         ),
@@ -641,7 +623,6 @@ class SystemProxySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final bypass = ref.watch(regionalNetworkConfigProvider).bypassDomain;
     return generateSection(
       title: appLocalizations.system,
       items: [
@@ -649,15 +630,7 @@ class SystemProxySection extends ConsumerWidget {
         const BypassDomainItem(),
         if (system.isWindows) const LoopbackItem(),
       ],
-      footer: [
-        appLocalizations.bypassDomainDesc,
-        if (sanitizeRegionCode(ref.watch(appSettingProvider).regionCode)
-            case final code?)
-          appLocalizations.regionBypassSettings(
-            regionLabel(appLocalizations, code),
-            bypass.isEmpty ? appLocalizations.none : bypass.join(', '),
-          ),
-      ].join('\n'),
+      footer: appLocalizations.bypassDomainDesc,
     );
   }
 }
@@ -691,15 +664,68 @@ class NetworkOptionsSection extends ConsumerWidget {
   }
 }
 
+class NetworkView extends ConsumerWidget {
+  const NetworkView({super.key});
+
+  Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {
+    final l = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      title: l.restoreDefaults,
+      message: TextSpan(text: l.networkRestoreDefaultsTip),
+      confirmText: l.restore,
+    );
+    if (confirmed != true || !context.mounted) return;
+    final defaults = regionNetworkDefaults(
+      ref.read(appSettingProvider).regionCode,
+      ref.read(patchClashConfigProvider),
+    );
+    ref.read(patchClashConfigProvider.notifier).value = defaults.patchConfig;
+    ref
+        .read(networkSettingProvider.notifier)
+        .update((state) => state.copyWith(bypassDomain: defaults.bypassDomain));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final regionCode = ref.watch(
+      appSettingProvider.select((state) => state.regionCode),
+    );
+    final patchConfig = ref.watch(patchClashConfigProvider);
+    final bypassDomain = ref.watch(
+      networkSettingProvider.select((state) => state.bypassDomain),
+    );
+    final defaults = regionNetworkDefaults(regionCode, patchConfig);
+    final isDefault =
+        defaults.patchConfig == patchConfig &&
+        listEquals(defaults.bypassDomain, bypassDomain);
+    return CommonScaffold(
+      title: l.network,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.reset,
+          tooltip: l.restoreDefaults,
+          onPressed: isDefault
+              ? null
+              : () => unawaited(_restoreDefaults(context, ref)),
+        ),
+      ],
+      body: const NetworkListView(),
+    );
+  }
+}
+
 class NetworkListView extends StatelessWidget {
   const NetworkListView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-      ).copyWith(top: context.contentTopPadding, bottom: 16),
+      padding:
+          const EdgeInsets.symmetric(
+            horizontal: 16,
+          ).copyWith(top: context.contentTopPadding, bottom: 16) +
+          context.bodyInsets,
       children: [
         if (system.isAndroid) const VpnSections(),
         if (system.isDesktop) const SystemProxySection(),

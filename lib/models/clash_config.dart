@@ -997,7 +997,7 @@ Map<Object?, Object?> _rawSniff(Map<String, dynamic> raw) {
 @freezed
 abstract class Tun with _$Tun {
   const factory Tun({
-    @Default(false) bool enable,
+    @Default(true) bool enable,
     @Default(appName) String device,
     @Default(TunStack.mips) TunStack stack,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
@@ -1967,7 +1967,7 @@ abstract class PatchClashConfig with _$PatchClashConfig {
     @Default(Mode.rule) Mode mode,
     @Default(false) @JsonKey(name: 'allow-lan') bool allowLan,
     @Default(LogLevel.error) @JsonKey(name: 'log-level') LogLevel logLevel,
-    @Default(false) bool ipv6,
+    @Default(true) bool ipv6,
     @Default(FindProcessMode.off)
     @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)
     FindProcessMode findProcessMode,

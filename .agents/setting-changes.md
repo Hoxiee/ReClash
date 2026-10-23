@@ -54,7 +54,7 @@ Prefer update whenever Go has a setter for the setting, because an apply reloads
 `CoreManager` answers each change of `setupPatchProvider` with `applyProfileDebounce(silence: true)`. That call
 rebuilds the profile YAML and hands it to Go's `applyConfig` through `setupConfig`. The provider holds three values:
 
-- `regionalNetworkConfigProvider.patchConfig.setupOnly`: the effective config with every field that update carries reset to its default.
+- `patchClashConfigProvider.setupOnly`: the config with every field that update carries reset to its default.
 - `NetworkProps.appendSystemDns`.
 - `NetworkProps.bypassPrivateRoute` on desktop, where the task adds the private ranges to the TUN's final
   `route-exclude-address`.
@@ -103,9 +103,9 @@ asks for nothing. The tap runs `SetupAction.restartVpn`: a stop, then a start, a
 | `accessControlProps`   | `VpnProps.accessControlProps`                                 | `enable`, `mode` and that mode's list  |
 | `systemProxy`          | `VpnProps.systemProxy`, off under local auth or safe mode     | with the VPN                           |
 | `port`                 | `PatchClashConfig.mixedPort`                                  | with `systemProxy`                     |
-| `bypassDomain`         | `regionalNetworkConfigProvider.bypassDomain`                  | with `systemProxy`                     |
+| `bypassDomain`         | `NetworkProps.bypassDomain`                                   | with `systemProxy`                     |
 | `routeAddress`         | `Tun.routeAddress` and `bypassPrivateRoute`                   | with the VPN                           |
-| `mtu`                  | `regionalNetworkConfigProvider.patchConfig.tun.mtu`           | with the VPN                           |
+| `mtu`                  | `Tun.mtu`                                                     | with the VPN                           |
 | `congestionController` | `Tun`                                                         | with the VPN                           |
 
 The service never reads the access list's sort and filter fields. `effective` resets them, along with every field
@@ -136,12 +136,13 @@ Each path watches its own provider, so a single setting can take more than one o
 
 ## Региональные значения по умолчанию
 
-`AppSettingProps.regionCode` изменяет только производный `regionalNetworkConfigProvider`, не исходные настройки.
-DNS и MTU desktop проходят через `setupPatchProvider` и `setupStateProvider.overrides`; Android MTU и обход системного
-прокси — через `vpnOptionsProvider`. Ручные app/profile overrides и пользовательский bypass-список сохраняют приоритет.
-Смена или отключение региона заново строит overlay из исходных значений. Проверки сервисов остаются Flutter-настройкой,
-а Android-подбор приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается
-только через существующее подтверждение `VpnManager`.
+`SystemAction.applyRegion` записывает DNS, MTU и список обхода региона в обычные настройки (`PatchClashConfig`,
+`NetworkProps.bypassDomain`), поэтому редакторы показывают реальные значения. При смене региона заменяются только
+значения, совпадающие с умолчаниями прежнего региона; изменённые вручную остаются. «Восстановить по умолчанию» на
+страницах «Сеть» и DNS возвращает значения текущего региона. Пользовательские профили получают DNS региона из
+`regionCode` для ключей, которые они не задают. Проверки сервисов остаются Flutter-настройкой, а Android-подбор
+приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается только
+через существующее подтверждение `VpnManager`.
 
 ## Web Dashboard
 

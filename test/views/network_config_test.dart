@@ -1,10 +1,11 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
-import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/tun.dart';
@@ -35,6 +36,7 @@ final _toggleCases = <_ToggleCase>[
     'TUN',
     const TUNItem(),
     (c) => c.read(patchClashConfigProvider).tun.enable,
+    initial: true,
   ),
   _ToggleCase(
     'allow bypass',
@@ -132,116 +134,115 @@ void main() {
   });
 
   group('regional settings', () {
-    void region(String? code) => container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(regionCode: code));
+    void region(String? code) =>
+        container.read(systemActionProvider.notifier).applyRegion(code);
 
-    testWidgets(
-      'Android shows effective MTU and preserves an explicit choice',
-      (tester) async {
-        region('RU');
-        await pumpItem(tester, tunItems(isMipsStack: false).first);
-        expect(find.text('1500'), findsOneWidget);
-        expect(container.read(patchClashConfigProvider).tun.mtu, defaultTunMtu);
-        expect(
-          container.read(patchClashConfigProvider).tunOverrideKeys,
-          isEmpty,
-        );
-        await tester.tap(find.text('MTU'));
+    testWidgets('Android shows the region MTU and keeps an explicit choice', (
+      tester,
+    ) async {
+      region('RU');
+      await pumpItem(tester, tunItems(isMipsStack: false).first);
+      expect(find.text('1500'), findsOneWidget);
+      await tester.tap(find.text('MTU'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '1420');
+      await tester.tap(find.text(currentAppLocalizations.submit));
+      await tester.pumpAndSettle();
+      final patch = container.read(patchClashConfigProvider);
+      expect(patch.tun.mtu, 1420);
+      expect(patch.tunOverride.mtu, 1420);
+      expect(patch.tunOverrideKeys, {TunOverrideKey.mtu});
+      for (final code in ['CN', 'IR', null]) {
+        region(code);
         await tester.pumpAndSettle();
-        await tester.enterText(find.byType(TextField), '1420');
-        await tester.tap(find.text(currentAppLocalizations.submit));
-        await tester.pumpAndSettle();
-        final patch = container.read(patchClashConfigProvider);
-        expect(patch.tun.mtu, 1420);
-        expect(patch.tunOverride.mtu, 1420);
-        expect(patch.tunOverrideKeys, {TunOverrideKey.mtu});
-        for (final code in ['CN', 'IR', null]) {
-          region(code);
-          await tester.pumpAndSettle();
-          expect(find.text('1420'), findsOneWidget);
-          expect(
-            container.read(regionalNetworkConfigProvider).patchConfig.tun.mtu,
-            1420,
+        expect(find.text('1420'), findsOneWidget);
+      }
+    });
+
+    testWidgets('desktop lists the region MTU as an ordinary entry', (
+      tester,
+    ) async {
+      region('RU');
+      await pumpItem(
+        tester,
+        const TunSection(isDesktop: true, isLinux: false, isWindows: false),
+      );
+      expect(find.text('1500'), findsOneWidget);
+      expect(find.textContaining('Russia'), findsNothing);
+      expect(container.read(patchClashConfigProvider).tunOverrideKeys, {
+        TunOverrideKey.mtu,
+      });
+    });
+
+    testWidgets('bypass footers no longer list domains', (tester) async {
+      region('CN');
+      await pumpItem(tester, const SystemProxySection());
+      expect(find.textContaining('zhihu'), findsNothing);
+      expect(
+        container.read(networkSettingProvider).bypassDomain,
+        contains('*zhihu.com'),
+      );
+      container
+          .read(networkSettingProvider.notifier)
+          .update((state) => state.copyWith(bypassDomain: ['manual.example']));
+      region('RU');
+      expect(container.read(networkSettingProvider).bypassDomain, [
+        'manual.example',
+      ]);
+    });
+
+    testWidgets('Restore defaults returns the bypass list and MTU', (
+      tester,
+    ) async {
+      final l = currentAppLocalizations;
+      region('RU');
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: NetworkView()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      IconButton restore() => tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byTooltip(l.restoreDefaults),
+          matching: find.byType(IconButton),
+        ),
+      );
+      expect(restore().onPressed, isNull);
+
+      container
+          .read(networkSettingProvider.notifier)
+          .update((state) => state.copyWith(bypassDomain: ['manual.example']));
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              tun: state.tun.copyWith(mtu: 1380),
+              tunOverride: state.tunOverride.copyWith(mtu: 1380),
+            ),
           );
-        }
-      },
-    );
+      await tester.pumpAndSettle();
+      expect(restore().onPressed, isNotNull);
 
-    testWidgets(
-      'desktop describes the regional MTU without adding a user entry',
-      (tester) async {
-        region('RU');
-        await pumpItem(
-          tester,
-          const TunSection(isDesktop: true, isLinux: false, isWindows: false),
-        );
-        final notice = currentAppLocalizations.regionTunSettings(
-          'Russia',
-          '1500',
-        );
-        expect(find.textContaining(notice), findsOneWidget);
-        expect(find.text('MTU'), findsNothing);
-        expect(
-          container.read(patchClashConfigProvider).tunOverrideKeys,
-          isEmpty,
-        );
-        container
-            .read(patchClashConfigProvider.notifier)
-            .update(
-              (state) => state.copyWith(
-                tunOverride: const ProfileTun(mtu: 1360),
-                tunOverrideKeys: {TunOverrideKey.mtu},
-              ),
-            );
-        await tester.pumpAndSettle();
-        expect(find.text('1360'), findsOneWidget);
-        expect(find.textContaining(notice), findsNothing);
-        expect(
-          container
-              .read(regionalNetworkConfigProvider)
-              .patchConfig
-              .tunOverride
-              .mtu,
-          1360,
-        );
-      },
-    );
-
-    testWidgets(
-      'system proxy keeps a custom bypass list and explains its effect',
-      (tester) async {
-        container
-            .read(networkSettingProvider.notifier)
-            .update(
-              (state) => state.copyWith(bypassDomain: ['manual.example']),
-            );
-        region('RU');
-        await pumpItem(tester, const SystemProxySection());
-        expect(find.textContaining('manual.example'), findsOneWidget);
-        expect(container.read(networkSettingProvider).bypassDomain, [
-          'manual.example',
-        ]);
-        region('CN');
-        await tester.pumpAndSettle();
-        expect(container.read(regionalNetworkConfigProvider).bypassDomain, [
-          'manual.example',
-        ]);
-        expect(
-          find.textContaining('Region China uses: manual.example'),
-          findsOneWidget,
-        );
-        container
-            .read(networkSettingProvider.notifier)
-            .update((state) => state.copyWith(bypassDomain: []));
-        await tester.pumpAndSettle();
-        expect(find.textContaining('Region China uses: None'), findsOneWidget);
-        region(null);
-        await tester.pumpAndSettle();
-        expect(find.textContaining('Region China'), findsNothing);
-        expect(container.read(networkSettingProvider).bypassDomain, isEmpty);
-      },
-    );
+      await tester.tap(find.byTooltip(l.restoreDefaults));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l.restore));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(networkSettingProvider).bypassDomain,
+        defaultBypassDomain,
+      );
+      expect(
+        container.read(patchClashConfigProvider).tun.mtu,
+        regionalDefaultTunMtu,
+      );
+      expect(restore().onPressed, isNull);
+    });
   });
 
   group('option pickers', () {

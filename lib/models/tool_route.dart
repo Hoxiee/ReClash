@@ -8,6 +8,7 @@ enum ToolPage {
   dns,
   onDemand,
   appRegion,
+  notifications,
   userAgents,
   webDashboard,
   theme,
@@ -18,6 +19,10 @@ enum ToolPage {
   access,
   resources,
   customResources,
+  customProxies,
+  ruleProviders,
+  filters,
+  iconSets,
   backup,
   about,
   disclaimer,
@@ -28,6 +33,7 @@ enum ToolPage {
   logs,
   rules,
   scripts,
+  routing,
   coreDetails,
   coreRuntimeConfig,
 }
@@ -37,9 +43,16 @@ extension ToolPageHierarchy on ToolPage {
     ToolPage.network ||
     ToolPage.dns ||
     ToolPage.rules ||
-    ToolPage.scripts => ToolPage.advanced,
+    ToolPage.scripts ||
+    ToolPage.routing => ToolPage.advanced,
     ToolPage.userAgents || ToolPage.webDashboard => ToolPage.general,
-    ToolPage.onDemand || ToolPage.appRegion => ToolPage.application,
+    ToolPage.onDemand ||
+    ToolPage.appRegion ||
+    ToolPage.notifications => ToolPage.application,
+    ToolPage.customProxies ||
+    ToolPage.ruleProviders ||
+    ToolPage.filters ||
+    ToolPage.iconSets => ToolPage.customResources,
     ToolPage.coreRuntimeConfig => ToolPage.coreDetails,
     ToolPage.hotkeyDesktop => ToolPage.hotkey,
     _ => null,

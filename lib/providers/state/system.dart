@@ -10,17 +10,6 @@ Future<RegionDetectionResult?> detectedRegion(Ref ref) async {
 }
 
 @riverpod
-({PatchClashConfig patchConfig, List<String> bypassDomain})
-regionalNetworkConfig(Ref ref) => regionalNetworkConfigFor(
-  regionCode: ref.watch(appSettingProvider.select((state) => state.regionCode)),
-  base: ref.watch(patchClashConfigProvider),
-  defaultBypassDomains: defaultBypassDomain,
-  bypassDomains: ref.watch(
-    networkSettingProvider.select((state) => state.bypassDomain),
-  ),
-);
-
-@riverpod
 UpdateParams updateParams(Ref ref) {
   final authentication = ref.watch(
     networkSettingProvider.select((state) => state.authentication),
@@ -44,7 +33,7 @@ UpdateParams updateParams(Ref ref) {
 ({PatchClashConfig patchConfig, bool appendSystemDns, bool bypassPrivateRoute})
 setupPatch(Ref ref) {
   return (
-    patchConfig: ref.watch(regionalNetworkConfigProvider).patchConfig.setupOnly,
+    patchConfig: ref.watch(patchClashConfigProvider).setupOnly,
     appendSystemDns: ref.watch(
       networkSettingProvider.select((state) => state.appendSystemDns),
     ),
@@ -78,8 +67,13 @@ TrayState trayState(Ref ref) {
           (autoLaunch: state.autoLaunch, showTrayTitle: state.showTrayTitle),
     ),
   );
-  final groups = ref.watch(currentGroupsStateProvider).value;
-  final selectedMap = ref.watch(selectedMapProvider);
+  final listsGroups = system.isMacOS;
+  final groups = listsGroups
+      ? ref.watch(currentGroupsStateProvider).value
+      : const <Group>[];
+  final selectedMap = listsGroups
+      ? ref.watch(selectedMapProvider)
+      : const <String, String>{};
   final safeMode = ref.watch(safeModeProvider);
   final suspended = ref.watch(suspendProvider);
   final hotKeys = _trayHotKeys(ref);
@@ -256,8 +250,7 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
       (state) => state.authentication.credentials.isNotEmpty,
     ),
   );
-  final regionalNetwork = ref.watch(regionalNetworkConfigProvider);
-  final clashConfig = regionalNetwork.patchConfig;
+  final clashConfig = ref.watch(patchClashConfigProvider);
   final vpnSetting = ref.watch(vpnSettingProvider);
   final safeMode = ref.watch(safeModeProvider);
   final routeAddress = ref.watch(vpnRouteAddressProvider.future);
@@ -273,7 +266,9 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
     dnsHijacking: vpnSetting.dnsHijacking,
     accessControlProps: vpnSetting.accessControlProps,
     allowBypass: vpnSetting.allowBypass,
-    bypassDomain: regionalNetwork.bypassDomain,
+    bypassDomain: ref.watch(
+      networkSettingProvider.select((state) => state.bypassDomain),
+    ),
     routeAddress: await routeAddress,
     mtu: tun.mtu,
     congestionController: tun.congestionController,

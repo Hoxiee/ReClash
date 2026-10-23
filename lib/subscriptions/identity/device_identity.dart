@@ -13,6 +13,10 @@ import 'package:win32_registry/win32_registry.dart';
 
 const _appChannel = MethodChannel('$packageName/app');
 
+/// Russian providers commonly refuse subscriptions to clients without an
+/// HWID, so that region starts with sending on until the user chooses.
+bool sendsDeviceIdentityByDefault(String? regionCode) => regionCode == 'RU';
+
 class DeviceIdentity {
   const DeviceIdentity({
     required this.hwid,
@@ -150,14 +154,15 @@ class DeviceIdentityStore {
     );
   }
 
-  Future<bool> globalSendEnabled() => _serialized(() async {
-    try {
-      final document = await _load();
-      return document['globalSendEnabled'] as bool? ?? false;
-    } on Object {
-      return false;
-    }
-  });
+  Future<bool> globalSendEnabled({bool byDefault = false}) =>
+      _serialized(() async {
+        try {
+          final document = await _load();
+          return document['globalSendEnabled'] as bool? ?? byDefault;
+        } on Object {
+          return byDefault;
+        }
+      });
 
   Future<void> setGlobalSendEnabled(bool enabled) => _serialized(() async {
     final document = await _load();
@@ -247,32 +252,36 @@ class DeviceIdentityStore {
         return null;
       });
 
-  Future<Map<String, String>?> requestFields(int profileId, Uri origin) =>
-      _serialized(() async {
-        try {
-          final document = await _load();
-          final overrides =
-              document['profileSendOverrides'] as Map<String, dynamic>;
-          final enabled =
-              overrides['$profileId'] as bool? ??
-              document['globalSendEnabled'] as bool;
-          if (!enabled) return null;
-          final permission = await _consentLocked(profileId, origin);
-          final value = await _identityLocked();
-          if (value == null) return null;
-          final fields = <String, String>{'x-hwid': value.hwid};
-          if (permission?.sendDetails == true) {
-            if (value.os.isNotEmpty) fields['x-device-os'] = value.os;
-            if (value.osVersion.isNotEmpty) {
-              fields['x-ver-os'] = value.osVersion;
-            }
-            if (value.model.isNotEmpty) fields['x-device-model'] = value.model;
-          }
-          return fields;
-        } on Object {
-          return null;
+  Future<Map<String, String>?> requestFields(
+    int profileId,
+    Uri origin, {
+    bool sendByDefault = false,
+  }) => _serialized(() async {
+    try {
+      final document = await _load();
+      final overrides =
+          document['profileSendOverrides'] as Map<String, dynamic>;
+      final enabled =
+          overrides['$profileId'] as bool? ??
+          document['globalSendEnabled'] as bool? ??
+          sendByDefault;
+      if (!enabled) return null;
+      final permission = await _consentLocked(profileId, origin);
+      final value = await _identityLocked();
+      if (value == null) return null;
+      final fields = <String, String>{'x-hwid': value.hwid};
+      if (permission?.sendDetails == true) {
+        if (value.os.isNotEmpty) fields['x-device-os'] = value.os;
+        if (value.osVersion.isNotEmpty) {
+          fields['x-ver-os'] = value.osVersion;
         }
-      });
+        if (value.model.isNotEmpty) fields['x-device-model'] = value.model;
+      }
+      return fields;
+    } on Object {
+      return null;
+    }
+  });
 
   Future<DeviceIdentity?> _identityLocked() async {
     try {
@@ -332,12 +341,12 @@ class DeviceIdentityStore {
     final value = raw == null
         ? <String, dynamic>{'version': 1, 'consents': <dynamic>[]}
         : jsonDecode(raw) as Map<String, dynamic>;
-    value.putIfAbsent('globalSendEnabled', () => false);
     value.putIfAbsent('profileSendOverrides', () => <String, dynamic>{});
     if (value['version'] != 1 ||
         value['consents'] is! List ||
         (value['consents'] as List).length > 512 ||
-        value['globalSendEnabled'] is! bool ||
+        (value['globalSendEnabled'] != null &&
+            value['globalSendEnabled'] is! bool) ||
         value['profileSendOverrides'] is! Map ||
         (value['profileSendOverrides'] as Map).length > 512 ||
         (value['profileSendOverrides'] as Map).entries.any(

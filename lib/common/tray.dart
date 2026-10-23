@@ -43,17 +43,25 @@ class AppTray implements TrayPort {
     return isWindows ? 'ico' : 'png';
   }
 
-  String get _trayIconDir {
-    if (isWindows) {
-      return 'assets/images/tray/windows';
+  String _trayIconDir(TrayIconStyle style) {
+    if (isMacOS) {
+      return 'assets/images/tray/macos';
     }
-    return isMacOS ? 'assets/images/tray/macos' : 'assets/images/tray/unix';
+    final platformDir = isWindows
+        ? 'assets/images/tray/windows'
+        : 'assets/images/tray/unix';
+    return switch (style) {
+      TrayIconStyle.color => platformDir,
+      TrayIconStyle.light => '$platformDir/light',
+      TrayIconStyle.dark => '$platformDir/dark',
+    };
   }
 
   String getTrayIcon({
     required bool isStart,
     required bool tunEnable,
     required bool safeMode,
+    TrayIconStyle style = TrayIconStyle.color,
   }) {
     final status = switch ((safeMode, isMacOS || !isStart, tunEnable)) {
       (true, _, _) => 4,
@@ -61,7 +69,7 @@ class AppTray implements TrayPort {
       (false, false, false) => 2,
       (false, false, true) => 3,
     };
-    return '$_trayIconDir/status_$status.$_trayIconSuffix';
+    return '${_trayIconDir(style)}/status_$status.$_trayIconSuffix';
   }
 
   @override
@@ -91,6 +99,7 @@ class AppTray implements TrayPort {
             isStart: trayState.isStart && !trayState.suspended,
             tunEnable: trayState.tunEnable,
             safeMode: trayState.safeMode,
+            style: read(appSettingProvider).trayIconStyle,
           ),
           isTemplate: isMacOS,
           size: isMacOS ? 18 : 16,

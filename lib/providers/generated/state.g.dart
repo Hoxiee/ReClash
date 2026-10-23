@@ -50,59 +50,6 @@ final class DetectedRegionProvider
 
 String _$detectedRegionHash() => r'1fb79ec4e3e3c88a3dd1865a6f73ae000b9471e6';
 
-@ProviderFor(regionalNetworkConfig)
-final regionalNetworkConfigProvider = RegionalNetworkConfigProvider._();
-
-final class RegionalNetworkConfigProvider
-    extends
-        $FunctionalProvider<
-          ({List<String> bypassDomain, PatchClashConfig patchConfig}),
-          ({List<String> bypassDomain, PatchClashConfig patchConfig}),
-          ({List<String> bypassDomain, PatchClashConfig patchConfig})
-        >
-    with
-        $Provider<({List<String> bypassDomain, PatchClashConfig patchConfig})> {
-  RegionalNetworkConfigProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'regionalNetworkConfigProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$regionalNetworkConfigHash();
-
-  @$internal
-  @override
-  $ProviderElement<({List<String> bypassDomain, PatchClashConfig patchConfig})>
-  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
-
-  @override
-  ({List<String> bypassDomain, PatchClashConfig patchConfig}) create(Ref ref) {
-    return regionalNetworkConfig(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(
-    ({List<String> bypassDomain, PatchClashConfig patchConfig}) value,
-  ) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride:
-          $SyncValueProvider<
-            ({List<String> bypassDomain, PatchClashConfig patchConfig})
-          >(value),
-    );
-  }
-}
-
-String _$regionalNetworkConfigHash() =>
-    r'7406efaf365a1005672fe1fe2a797c3661978f08';
-
 @ProviderFor(updateParams)
 final updateParamsProvider = UpdateParamsProvider._();
 
@@ -232,7 +179,7 @@ final class SetupPatchProvider
   }
 }
 
-String _$setupPatchHash() => r'9818c8f9a04e270c7b9a545e91282e4b85a1f7ce';
+String _$setupPatchHash() => r'd00226339d4e544208e40155c966a66d844dc621';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -273,7 +220,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'b7da57e41143cd8c284260d33b368b1be044bd01';
+String _$trayStateHash() => r'a5551c7170639c7b1839e28508d633014fd72f45';
 
 /// Measured delays of the proxies the tray lists, by group and then proxy
 /// name. Resolved like a proxy card, so a nested group shows its selection.
@@ -608,7 +555,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'9e2f0139250c30b71b5d732d7267b2b25823ca1f';
+String _$vpnOptionsHash() => r'8611cf1b35bb407c776e7346974fa90644fdd053';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -763,7 +710,13 @@ final class GenColorSchemeProvider
     with $Provider<ColorScheme> {
   GenColorSchemeProvider._({
     required GenColorSchemeFamily super.from,
-    required (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+    required (
+      Brightness, {
+      Color? color,
+      bool ignoreConfig,
+      bool? pureBlack,
+      ColorContrast? contrast,
+    })
     super.argument,
   }) : super(
          retry: null,
@@ -792,13 +745,20 @@ final class GenColorSchemeProvider
   ColorScheme create(Ref ref) {
     final argument =
         this.argument
-            as (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack});
+            as (
+              Brightness, {
+              Color? color,
+              bool ignoreConfig,
+              bool? pureBlack,
+              ColorContrast? contrast,
+            });
     return genColorScheme(
       ref,
       argument.$1,
       color: argument.color,
       ignoreConfig: argument.ignoreConfig,
       pureBlack: argument.pureBlack,
+      contrast: argument.contrast,
     );
   }
 
@@ -821,13 +781,19 @@ final class GenColorSchemeProvider
   }
 }
 
-String _$genColorSchemeHash() => r'c6838e224d41780617f7338c5e56173a7620cd87';
+String _$genColorSchemeHash() => r'05ba832e6914dc15cdf01f2a6d8faf057ed0ded4';
 
 final class GenColorSchemeFamily extends $Family
     with
         $FunctionalFamilyOverride<
           ColorScheme,
-          (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+          (
+            Brightness, {
+            Color? color,
+            bool ignoreConfig,
+            bool? pureBlack,
+            ColorContrast? contrast,
+          })
         > {
   GenColorSchemeFamily._()
     : super(
@@ -843,12 +809,14 @@ final class GenColorSchemeFamily extends $Family
     Color? color,
     bool ignoreConfig = false,
     bool? pureBlack,
+    ColorContrast? contrast,
   }) => GenColorSchemeProvider._(
     argument: (
       brightness,
       color: color,
       ignoreConfig: ignoreConfig,
       pureBlack: pureBlack,
+      contrast: contrast,
     ),
     from: this,
   );
@@ -1887,7 +1855,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'4675bf02e6357535dd1232f7cb65dd113b43b5ee';
+String _$proxyStateHash() => r'429190e584a04ddbccce2877830f13935c011729';
 
 /// Watching the delay map instead would drop nodes one probe at a time, and
 /// reading it on any other rebuild would drop them whenever something
@@ -3550,7 +3518,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'a511dfc7b8efe2348718c313a5085106c899e3e6';
+String _$setupStateHash() => r'f0dae5f50d393c12a348c2eb865bec62ebb212f3';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

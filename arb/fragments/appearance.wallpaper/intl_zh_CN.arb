@@ -2,8 +2,6 @@
   "appearanceTheme": "主题",
   "appearanceBackground": "背景",
   "wallpaperTitle": "自定义背景",
-  "wallpaperGalleryHint": "点按已保存的背景即可应用，或添加新背景。",
-  "wallpaperChoose": "选择图片",
   "wallpaperRemove": "移除图片",
   "wallpaperEnabled": "使用自定义背景",
   "wallpaperFit": "图片适配方式",

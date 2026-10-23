@@ -7,6 +7,7 @@ deps: [app.setup, localization.catalog, profiles.no-duplicates, subscription.com
 must:
   commands: Known connection and window commands use existing lifecycle owners and explicit confirmation; unknown commands never dispatch.
   imports: Subscription URLs, embedded configs, INCY/Happ wrappers and proxy links resolve locally, retain names and presets, and reuse validation, encryption-key retry, loss approval and durable save. Happ/INCY presets only seed selection; an explicit Auto choice is retained.
+  preview: The import confirmation previews a wrapped or plain subscription with the chosen client before consent, offers the wrapper's own format beside ReClash's, skips already-added URLs, and the import commits that preview instead of fetching again when its request still matches.
   telegram: Telegram support links use a destination-aware confirmation, preserve parameters, and offer HTTPS fallback only for convertible tg destinations.
   batch-results: Batch profile imports report added, skipped and failed counts once, with details available for failed entries.
   safety: Parsing and external decoding are bounded and never log or display credential-bearing URLs or embedded payloads.
@@ -35,6 +36,7 @@ watch:
   - lib/models/tool_route.dart
   - lib/widgets/url_scheme_*.dart
   - lib/widgets/profile_import_dialog.dart
+  - lib/widgets/provider_logo.dart
   - android/app/src/main/AndroidManifest.xml
   - macos/Runner/Info.plist
   - windows/packaging/exe/inno_setup.iss
@@ -54,5 +56,5 @@ watch:
   - test/widgets/tools_workspace_test.dart
   - test/tool/url_scheme_registration_test.dart
 checks:
-  url-scheme: [commands, imports, safety, delivery, setup, tools, builder, platforms, localization, telegram, batch-results]
+  url-scheme: [commands, imports, preview, safety, delivery, setup, tools, builder, platforms, localization, telegram, batch-results]
 drop: Remove only when the same commands, link families, safety gates and Tools workflow are supported upstream.

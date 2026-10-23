@@ -1,15 +1,17 @@
 import 'dart:async';
 
+import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/regional/region_detection.dart';
-import 'package:reclash/enum/enum.dart';
+import 'package:reclash/common/regional/regional_network.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/ui/sheet.dart';
 import 'package:reclash/views/region.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,8 +55,6 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(1200, 1800),
     Locale locale = const Locale('en'),
-    bool isAndroid = false,
-    RegionView? regionView,
     bool inSheet = false,
   }) async {
     tester.view.physicalSize = size;
@@ -72,13 +72,12 @@ void main() {
                   builder: (context) => FilledButton(
                     onPressed: () => showFormSheet<void>(
                       context: context,
-                      builder: (_) =>
-                          regionView ?? RegionView(isAndroid: isAndroid),
+                      builder: (_) => const RegionView(),
                     ),
                     child: const Text('Open region'),
                   ),
                 )
-              : regionView ?? RegionView(isAndroid: isAndroid),
+              : const RegionView(),
         ),
       ),
     );
@@ -90,9 +89,7 @@ void main() {
   }
 
   Future<void> choose(WidgetTester tester, String name) async {
-    await tester.ensureVisible(find.text('Choose a country'));
-    await tester.tap(find.text('Choose a country'));
-    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(name).last);
     await tester.tap(find.text(name).last);
     await tester.pumpAndSettle();
   }
@@ -102,75 +99,48 @@ void main() {
     matching: find.byType(IconButton),
   );
 
-  testWidgets(
-    'a device suggestion remains a preview until explicitly applied',
-    (tester) async {
-      await pumpRegionView(tester);
-      expect(find.text('Suggested: China · time zone'), findsOneWidget);
-      expect(find.text('Country profile: Off'), findsOneWidget);
-      expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
-      await tester.tap(find.text('Use detected region'));
-      await tester.pumpAndSettle();
-      expect(find.text('Country profile: China'), findsOneWidget);
-      expect(container.read(appSettingProvider).regionCode, isNull);
-      await tester.tap(find.byTooltip('Apply region'));
-      await tester.pumpAndSettle();
-      expect(container.read(appSettingProvider).regionCode, 'CN');
-    },
-  );
-
-  testWidgets(
-    'wizard region preview cancellation leaves actual region unchanged',
-    (tester) async {
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: 'RU'));
-      String? applied;
-      await pumpRegionView(
-        tester,
-        regionView: RegionView(
-          initialRegionCode: null,
-          onApply: (code) => applied = code,
-        ),
-        inSheet: true,
-      );
-
-      expect(find.text('Country profile: Off'), findsOneWidget);
-      await choose(tester, 'Iran');
-      await tester.tap(find.byTooltip('Close'));
-      await tester.pumpAndSettle();
-
-      expect(applied, isNull);
-      expect(container.read(appSettingProvider).regionCode, 'RU');
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
-
-  testWidgets('wizard region apply calls back with draft only', (tester) async {
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(regionCode: 'RU'));
-    final stored = container.read(configProvider);
-    final effective = container.read(regionalNetworkConfigProvider);
-    final applied = <String?>[];
-    await pumpRegionView(
-      tester,
-      regionView: RegionView(initialRegionCode: null, onApply: applied.add),
+  testWidgets('a device suggestion is only marked until a country is applied', (
+    tester,
+  ) async {
+    await pumpRegionView(tester);
+    expect(find.text('Recommended for this device'), findsOneWidget);
+    expect(find.text('What changes'), findsNothing);
+    expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
+    await choose(tester, 'China');
+    expect(find.text('What changes'), findsOneWidget);
+    expect(container.read(appSettingProvider).regionCode, isNull);
+    await tester.tap(find.byTooltip('Apply region'));
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).regionCode, 'CN');
+    expect(
+      container.read(networkSettingProvider).bypassDomain,
+      contains('*zhihu.com'),
     );
+  });
 
-    expect(find.text('Country profile: Off'), findsOneWidget);
-    await choose(tester, 'Iran');
-    expect(container.read(appSettingProvider).regionCode, 'RU');
-    expect(container.read(configProvider), stored);
-    expect(container.read(regionalNetworkConfigProvider), effective);
+  testWidgets('applying a country writes its defaults into settings', (
+    tester,
+  ) async {
+    await pumpRegionView(tester);
+    await choose(tester, 'Russia');
+    expect(find.text('DNS servers'), findsOneWidget);
+    expect(find.text('TUN MTU'), findsOneWidget);
+    expect(
+      find.text('Values you changed yourself stay as they are.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('77.88.8.8'), findsNothing);
     await tester.tap(find.byTooltip('Apply region'));
     await tester.pumpAndSettle();
 
-    expect(applied, ['IR']);
-    expect(container.read(appSettingProvider).regionCode, 'RU');
-    expect(container.read(configProvider), stored);
-    expect(container.read(regionalNetworkConfigProvider), effective);
-    await tester.pumpWidget(const SizedBox.shrink());
+    final patch = container.read(patchClashConfigProvider);
+    expect(patch.dns.nameserver, ['tls://77.88.8.8', 'tls://77.88.8.1']);
+    expect(patch.dnsOverrideKeys, regionDnsKeys('RU'));
+    expect(patch.tun.mtu, regionalDefaultTunMtu);
+    expect(
+      container.read(networkSettingProvider).bypassDomain,
+      defaultBypassDomain,
+    );
   });
 
   testWidgets(
@@ -211,69 +181,34 @@ void main() {
   );
 
   testWidgets('unchanged saved region disables apply', (tester) async {
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(regionCode: 'RU'));
+    container.read(systemActionProvider.notifier).applyRegion('RU');
     await pumpRegionView(tester);
     expect(tester.widget<IconButton>(applyButton()).onPressed, isNull);
-    expect(container.read(appSettingProvider).regionCode, 'RU');
+    expect(find.text('What changes'), findsNothing);
   });
 
-  testWidgets(
-    'cancelling a country preview leaves stored and effective state unchanged',
-    (tester) async {
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: 'RU'));
-      final stored = container.read(configProvider);
-      final effective = container.read(regionalNetworkConfigProvider);
-      await pumpRegionView(tester, inSheet: true);
-      await choose(tester, 'Iran');
-      expect(find.text('Country profile: Iran'), findsOneWidget);
-      expect(container.read(configProvider), stored);
-      expect(container.read(regionalNetworkConfigProvider), effective);
-      await tester.tap(find.byTooltip('Close'));
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(const SizedBox.shrink());
-      expect(container.read(configProvider), stored);
-      expect(container.read(regionalNetworkConfigProvider), effective);
-    },
-  );
-
-  testWidgets('turning adaptation off restores raw network settings', (
+  testWidgets('cancelling a country preview leaves stored settings unchanged', (
     tester,
   ) async {
-    container
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(regionCode: 'RU'));
-    final raw = container.read(patchClashConfigProvider);
-    await pumpRegionView(tester);
-    await choose(tester, 'Off');
-    expect(container.read(appSettingProvider).regionCode, 'RU');
-    expect(find.textContaining('Profile defaults'), findsWidgets);
-    await tester.tap(find.byTooltip('Apply region'));
+    container.read(systemActionProvider.notifier).applyRegion('RU');
+    final stored = container.read(configProvider);
+    await pumpRegionView(tester, inSheet: true);
+    await choose(tester, 'Iran');
+    expect(find.text('What changes'), findsOneWidget);
+    expect(container.read(configProvider), stored);
+    await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
-    expect(container.read(appSettingProvider).regionCode, isNull);
-    expect(container.read(regionalNetworkConfigProvider).patchConfig, raw);
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(container.read(configProvider), stored);
   });
 
-  testWidgets('empty and failed detection do not block a manual choice', (
+  testWidgets('failed detection does not block a manual choice', (
     tester,
   ) async {
-    detect = () async => null;
-    await pumpRegionView(tester);
-    expect(
-      find.text(
-        'No matching suggestion. Only the time zone and system locale are used.',
-      ),
-      findsOneWidget,
-    );
-    await choose(tester, 'Egypt');
-    expect(find.text('Country profile: Egypt'), findsOneWidget);
     detect = () => Future.error(StateError('unavailable'));
-    await tester.tap(find.byTooltip('Update'));
-    await tester.pumpAndSettle();
-    expect(find.text('Country profile: Egypt'), findsOneWidget);
+    await pumpRegionView(tester);
+    expect(find.text('Recommended for this device'), findsNothing);
+    await choose(tester, 'Egypt');
     expect(tester.widget<IconButton>(applyButton()).onPressed, isNotNull);
   });
 
@@ -288,12 +223,18 @@ void main() {
       const RegionDetectionResult('RU', RegionDetectionSource.localeCountry),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Country profile: Iran'), findsOneWidget);
+    final iran = tester.widget<DecorationListItem>(
+      find.ancestor(
+        of: find.text('Iran'),
+        matching: find.byType(DecorationListItem),
+      ),
+    );
+    expect(iran.isSelected, isTrue);
     expect(container.read(appSettingProvider).regionCode, isNull);
   });
 
   testWidgets(
-    'a Russian mobile preview scrolls to apply without changing interface locale',
+    'a Russian mobile choice applies without changing interface locale',
     (tester) async {
       container
           .read(appSettingProvider.notifier)
@@ -302,52 +243,14 @@ void main() {
         tester,
         size: const Size(390, 700),
         locale: const Locale('ru'),
-        isAndroid: true,
       );
-      await tester.tap(find.text('Выбрать определённый регион'));
-      await tester.pumpAndSettle();
-      final button = find.byTooltip('Применить регион');
-      await tester.ensureVisible(button);
-      await tester.pumpAndSettle();
-      await tester.tap(button);
+      expect(find.text('Рекомендуется для этого устройства'), findsOneWidget);
+      await choose(tester, 'Китай');
+      await tester.tap(find.byTooltip('Применить регион'));
       await tester.pumpAndSettle();
       expect(container.read(appSettingProvider).regionCode, 'CN');
       expect(container.read(appSettingProvider).locale, 'ru');
       expect(tester.takeException(), isNull);
     },
   );
-
-  testWidgets('preview respects the current custom-profile DNS and MTU', (
-    tester,
-  ) async {
-    container
-        .read(profilesProvider.notifier)
-        .put(
-          const Profile(
-            id: 9,
-            type: ProfileType.custom,
-            autoUpdateDuration: Duration.zero,
-            overrides: ProfileOverrides(
-              dns: Dns(nameserver: ['https://private.example/dns-query']),
-              dnsOverrideKeys: {DnsOverrideKey.nameserver},
-              tun: ProfileTun(mtu: 1360),
-              tunOverrideKeys: {TunOverrideKey.mtu},
-            ),
-          ),
-        );
-    container.read(currentProfileIdProvider.notifier).value = 9;
-    await pumpRegionView(tester);
-    await choose(tester, 'Russia');
-    expect(
-      find.textContaining(
-        RegExp(r'^nameserver: tls://77\.88\.8\.8', multiLine: true),
-      ),
-      findsNothing,
-    );
-    expect(
-      find.textContaining('default-nameserver: 77.88.8.8'),
-      findsOneWidget,
-    );
-    expect(find.text('TUN MTU: 1500'), findsNothing);
-  });
 }

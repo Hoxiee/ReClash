@@ -6,6 +6,7 @@ import 'package:reclash/common/preferences.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/desktop/privilege.dart';
+import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/web_dashboard.dart';
@@ -55,6 +56,21 @@ class TestSystemAction extends SystemAction {
 
   @override
   Future<void> exitApplication() async => calls.add('exit');
+}
+
+class _ResetSystemAction extends TestSystemAction {
+  Object? deleteError;
+
+  @override
+  Future<void> disableAutoLaunch() async => calls.add('disable autolaunch');
+
+  @override
+  Future<void> deleteAllData() async {
+    calls.add('delete');
+    if (deleteError case final error?) {
+      Error.throwWithStackTrace(error, StackTrace.current);
+    }
+  }
 }
 
 class _TunCore extends Mock implements CoreHandlerInterface {
@@ -127,6 +143,118 @@ class _GeometryWindowPort implements WindowPort {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'full reset stops Core before deletion and exits without saving',
+    () async {
+      final core = _TunCore();
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          systemActionProvider.overrideWith(_ResetSystemAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final action =
+          container.read(systemActionProvider.notifier) as _ResetSystemAction;
+      when(() => core.stop()).thenAnswer((_) async {
+        action.calls.add('stop');
+        return const CoreLifecycleResult(
+          revision: 1,
+          outcome: CoreLifecycleOutcome.applied,
+        );
+      });
+
+      await action.resetAllDataAndExit();
+
+      expect(action.calls, [
+        'stop',
+        'cleanup',
+        'core',
+        'disable autolaunch',
+        'delete',
+        'cleanup',
+        'window',
+        'core',
+        'exit',
+      ]);
+      expect(action.cleanupNeedSave, [false, false]);
+    },
+  );
+
+  test('reset never deletes files when stopping Core fails', () async {
+    final core = _TunCore();
+    when(() => core.stop()).thenThrow(StateError('Core still running'));
+    final container = ProviderContainer(
+      overrides: [
+        coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        systemActionProvider.overrideWith(_ResetSystemAction.new),
+      ],
+    );
+    addTearDown(container.dispose);
+    final action =
+        container.read(systemActionProvider.notifier) as _ResetSystemAction;
+
+    await expectLater(action.resetAllDataAndExit(), throwsStateError);
+    expect(action.calls, isEmpty);
+  });
+
+  test(
+    'failed deletion is reported without claiming reset or exiting',
+    () async {
+      final core = _TunCore();
+      when(() => core.stop()).thenAnswer(
+        (_) async => const CoreLifecycleResult(
+          revision: 1,
+          outcome: CoreLifecycleOutcome.applied,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          systemActionProvider.overrideWith(_ResetSystemAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final action =
+          container.read(systemActionProvider.notifier) as _ResetSystemAction;
+      action.deleteError = StateError('permission denied');
+
+      await expectLater(action.resetAllDataAndExit(), throwsStateError);
+      expect(action.calls, ['cleanup', 'core', 'disable autolaunch', 'delete']);
+    },
+  );
+
+  test(
+    'reset retries deletion without stopping a terminally closed Core',
+    () async {
+      final core = _TunCore();
+      when(() => core.stop()).thenAnswer(
+        (_) async => const CoreLifecycleResult(
+          revision: 1,
+          outcome: CoreLifecycleOutcome.applied,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          systemActionProvider.overrideWith(_ResetSystemAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final action =
+          container.read(systemActionProvider.notifier) as _ResetSystemAction;
+      action.deleteError = StateError('permission denied');
+      await expectLater(action.resetAllDataAndExit(), throwsStateError);
+      action.deleteError = null;
+
+      await action.resetAllDataAndExit();
+
+      verify(() => core.stop()).called(1);
+      expect(action.calls.where((call) => call == 'delete'), hasLength(2));
+      expect(action.calls.last, 'exit');
+    },
+  );
 
   test('coalesces repeated exit requests and runs cleanup once', () async {
     final closeCoreCompleter = Completer<void>();

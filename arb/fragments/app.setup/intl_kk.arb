@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "Қосқыңыз келетін әр қолданбада жергілікті прокси мекенжайын көрсетіңіз.",
   "setupCoverageAndroidDescription": "Android VPN қосылымын жасауға рұқсат сұрайды. Қолданбаларды таңдауды қолжетімділік баптауларынан жасауға болады.",
   "setupCoverageNote": "Барлық трафикті ұстау оның бәрін сервер арқылы жіберу дегенді білдірмейді. Тікелей маршруттар сақталады.",
-  "setupRegionConfirm": "Осы аймақтық параметрлерді қолдану",
-  "setupRegionDescription": "Ұсынылған аймақ интерфейс тіліне емес, осы құрылғыға негізделген. Оны желіңізге сәйкес келсе ғана қолданыңыз.",
   "setupRegionNeutral": "Профильдің әдепкі мәндерін сақтау",
   "setupCheckAction": "Қосылымды тексеру",
   "setupCheckingTitle": "Қосылып, тексерілуде",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "Қызметтер тексерілуде",
   "setupPhaseAlternatives": "Басқа сервер ізделуде",
   "setupStepStatus": "{step} / {total}",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "Нәтиже барлық қолданбаға немесе веб-сайтқа емес, осы маршрутқа қатысты.",
   "setupConnectedTitle": "Қосылым жұмыс істеп тұр",
   "setupConnectedDescription": "Таңдалған маршрут жауап берді. Трафик профиль ережелеріне сай жүреді.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "Қоспай сақтау",
   "setupRepeat": "Қайта тексеру",
   "setupTryServer": "{server} серверін көру",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "Бұл сервер бөлек сынаққа жауап берді. Оған ауысып, бүкіл маршрутты қайта тексеріңіз.",
   "setupReport": "Тексеру есебі",
   "setupReceipt": "Қосылымыңыз",
@@ -73,10 +86,38 @@
   "setupRestart": "Қосылымды баптау",
   "setupLaterNote": "Баптау аяқталмады; қосылым тексерілген жоқ.",
   "setupProfileCount": "Қолжетімді профильдер: {count}",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "Бұл профиль шифрланған. Жалғастыру үшін age кілтін енгізіңіз.",
   "setupFinishDescription": "Кез келген таңдауды баптаулардан өзгертуге болады.",
   "setupRouteChanged": "Тексеру кезінде маршрут өзгерді. Ағымдағы қосылымды қайта тексеріңіз.",
   "setupUnknownError": "Әрекет аяқталмады. Қайталап көріңіз немесе мәліметтерді ашыңыз.",
-  "setupRequestPermission": "Қосылымға рұқсат беру"
+  "setupRequestPermission": "Қосылымға рұқсат беру",
+  "setupReceiptRegion": "Аймақ",
+  "setupRegionTitle": "Қай жерден қосыласыз?",
+  "setupRegionStepDescription": "ReClash DNS, MTU және тікелей бағыттарды еліңіздің желілеріне бейімдейді. Интерфейс тілі өзгермейді.",
+  "setupRegionNeutralDescription": "Аймақтық баптаулар өзгермейді.",
+  "setupRegionUnchosen": "Ештеңе таңдамасаңыз, қазіргі аймақтық баптаулар сол күйінде қалады.",
+  "setupRecommended": "Ұсынылады",
+  "setupDirectTitle": "Жергілікті сайттар мен қолданбалар — тікелей",
+  "setupDirectDescription": "Еліңіздің сервистері серверсіз ашылады: жылдамырақ, әрі банктер мен мемлекеттік сайттар сізді бұғаттамайды. Жалпы ережелерге мыналар қосылады:",
+  "setupDirectAppsScanning": "Жергілікті қолданбаларды іздеп жатырмыз…",
+  "setupDirectApps": "VPN-ді айналып өтетін қолданбалар: {count}",
+  "setupDirectAppsReview": "Олар VPN-сіз жұмыс істейді. Тізімді кейін қолжетімділікті басқаруда өзгертуге болады.",
+  "setupDirectAppsNone": "Жергілікті қолданбалар табылмады. Сайттар бәрібір тікелей ашылады.",
+  "setupLeaveTitle": "Баптаудан шығасыз ба?",
+  "setupLeaveMessage": "ReClash жабылады. Таңдауыңыз сақталады, баптау келесі іске қосқанда жалғасады.",
+  "setupProfileContinueHint": "Жалғастыру үшін профиль қосыңыз немесе таңдаңыз.",
+  "setupProfileImportHint": "Провайдердің хатынан, ботынан немесе жеке кабинетінен сілтемені қойыңыз не файл немесе QR-кодты таңдаңыз.",
+  "setupProfileImportAnother": "Басқа профиль қосу",
+  "setupChangeSettings": "Баптауларды өзгерту",
+  "setupTipsTitle": "Не істеп көруге болады",
+  "setupTipNetwork": "Интернет ReClash-сыз жұмыс істейтініне көз жеткізіңіз.",
+  "setupTipProfile": "Профильді жаңартыңыз немесе баптаудан кейін басқа серверді таңдаңыз.",
+  "setupTipCoverage": "Басқа қамтуды таңдаңыз: кейбір желілер VPN-ді бұғаттайды."
 }

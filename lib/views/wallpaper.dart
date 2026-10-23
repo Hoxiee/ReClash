@@ -31,16 +31,29 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final selected = ref.watch(
-      themeSettingProvider.select((theme) => theme.wallpaper.fileName),
+    final wallpaper = ref.watch(
+      themeSettingProvider.select((theme) => theme.wallpaper),
     );
+    final selected = wallpaper.fileName;
     final imageState = ref.watch(wallpaperImageProvider);
     final image = imageState.asData?.value;
     final busy = ref.watch(wallpaperActionProvider);
     final editable = selected != null && image != null && !busy;
+    const defaults = WallpaperProps();
+    final framingChanged =
+        wallpaper.fit != defaults.fit ||
+        wallpaper.scale != defaults.scale ||
+        wallpaper.positionX != defaults.positionX ||
+        wallpaper.positionY != defaults.positionY;
+    final effectsChanged =
+        wallpaper.opacity != defaults.opacity ||
+        wallpaper.dimming != defaults.dimming ||
+        wallpaper.blur != defaults.blur ||
+        wallpaper.cardOpacity != defaults.cardOpacity;
     return SingleChildScrollView(
       key: const PageStorageKey('theme-tab-background'),
       controller: _controller,
+      padding: context.bodyInsets,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -86,6 +99,19 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
           const SizedBox(height: 16),
           _WallpaperSection(
             info: Info(label: l.wallpaperLayout, glyph: AppGlyphs.layers),
+            actions: [
+              if (framingChanged)
+                _WallpaperResetButton(
+                  tooltip: l.wallpaperResetLayout,
+                  onPressed: busy
+                      ? null
+                      : () => globalState.safeRun(
+                          ref
+                              .read(wallpaperActionProvider.notifier)
+                              .resetFraming,
+                        ),
+                ),
+            ],
             child: generateSection(
               items: [
                 _WallpaperControl(
@@ -143,6 +169,19 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
           const SizedBox(height: 16),
           _WallpaperSection(
             info: Info(label: l.wallpaperEffects, glyph: AppGlyphs.sliders),
+            actions: [
+              if (effectsChanged)
+                _WallpaperResetButton(
+                  tooltip: l.wallpaperReset,
+                  onPressed: busy
+                      ? null
+                      : () => globalState.safeRun(
+                          ref
+                              .read(wallpaperActionProvider.notifier)
+                              .resetEffects,
+                        ),
+                ),
+            ],
             child: generateSection(
               items: [
                 _WallpaperSlider(
@@ -197,18 +236,42 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
 }
 
 class _WallpaperSection extends StatelessWidget {
-  const _WallpaperSection({required this.info, required this.child});
+  const _WallpaperSection({
+    required this.info,
+    this.actions = const [],
+    required this.child,
+  });
 
   final Info info;
+  final List<Widget> actions;
   final Widget child;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      InfoHeader(info: info),
+      InfoHeader(info: info, actions: actions),
       Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 0), child: child),
     ],
+  );
+}
+
+class _WallpaperResetButton extends StatelessWidget {
+  const _WallpaperResetButton({required this.tooltip, required this.onPressed});
+
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => TonalButtonTheme(
+    size: TonalButtonSize.section,
+    child: ElasticPress(
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: const GlyphIcon(AppGlyphs.reset),
+      ),
+    ),
   );
 }
 
@@ -333,53 +396,96 @@ class _WallpaperGallery extends ConsumerWidget {
     final library = ref.watch(
       themeSettingProvider.select((theme) => theme.wallpaper.library),
     );
+    final full = library.length >= maxWallpaperLibrary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (library.isEmpty)
-          CommonCard(
-            padding: const EdgeInsets.all(24),
-            child: Column(
+        LayoutBuilder(
+          builder: (_, constraints) {
+            final columns = constraints.maxWidth >= 480 ? 3 : 2;
+            final width = (constraints.maxWidth - (columns - 1) * 12) / columns;
+            return Wrap(
               spacing: 12,
+              runSpacing: 12,
               children: [
-                GlyphIcon(
-                  AppGlyphs.photos,
-                  size: 40,
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-                Text(
-                  l.wallpaperGalleryHint,
-                  textAlign: TextAlign.center,
-                  style: context.listSubtitleStyle,
-                ),
-              ],
-            ),
-          )
-        else ...[
-          LayoutBuilder(
-            builder: (_, constraints) {
-              final columns = constraints.maxWidth >= 480 ? 3 : 2;
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (var index = 0; index < library.length; index++)
-                    SizedBox(
-                      width:
-                          (constraints.maxWidth - (columns - 1) * 12) / columns,
-                      child: _WallpaperTile(
-                        fileName: library[index],
-                        index: index,
-                      ),
+                for (var index = 0; index < library.length; index++)
+                  SizedBox(
+                    width: width,
+                    child: _WallpaperTile(
+                      fileName: library[index],
+                      index: index,
                     ),
-                ],
-              );
-            },
-          ),
-          if (library.length >= maxWallpaperLibrary)
-            ListFooter(text: l.wallpaperLibraryFull(maxWallpaperLibrary)),
-        ],
+                  ),
+                if (!full)
+                  SizedBox(width: width, child: const _AddWallpaperTile()),
+              ],
+            );
+          },
+        ),
+        if (full) ListFooter(text: l.wallpaperLibraryFull(maxWallpaperLibrary)),
       ],
+    );
+  }
+}
+
+class _AddWallpaperTile extends ConsumerWidget {
+  const _AddWallpaperTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = context.colorScheme;
+    final busy = ref.watch(wallpaperActionProvider);
+    return Semantics(
+      button: true,
+      enabled: !busy,
+      child: Material(
+        color: context.raisedSurfaceLevel.colorOf(colorScheme),
+        shape: AppShape.lg,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: AppShape.lg,
+          onTap: busy
+              ? null
+              : () => globalState.safeRun(
+                  ref.read(wallpaperActionProvider.notifier).chooseImage,
+                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Center(
+                  child: busy
+                      ? const CommonCircleLoading()
+                      : DecoratedBox(
+                          decoration: ShapeDecoration(
+                            color: colorScheme.primary,
+                            shape: AppShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: GlyphIcon(
+                              AppGlyphs.add,
+                              fill: 1,
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+                child: Text(
+                  context.appLocalizations.add,
+                  style: AppTextStyle.footnote.of(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

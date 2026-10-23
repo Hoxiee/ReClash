@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/on_demand.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -16,6 +17,9 @@ class ConnectivityManager extends ConsumerStatefulWidget {
   final Function(List<ConnectivityResult> results)? onConnectivityChanged;
   final Stream<List<ConnectivityResult>>? connectivityStream;
   final SsidReader? readSsid;
+
+  /// Android owns on-demand natively, so its UI poll can pause while hidden.
+  final bool? pollsWhileHidden;
   final Widget child;
 
   const ConnectivityManager({
@@ -23,6 +27,7 @@ class ConnectivityManager extends ConsumerStatefulWidget {
     this.onConnectivityChanged,
     this.connectivityStream,
     this.readSsid,
+    this.pollsWhileHidden,
     required this.child,
   });
 
@@ -35,6 +40,8 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   late final StreamSubscription subscription;
   late final SsidReader _readSsid =
       widget.readSsid ?? WifiSsidManager.instance.getSsid;
+  late final bool _pollsWhileHidden =
+      widget.pollsWhileHidden ?? !system.isAndroid;
 
   int _ssidRequestId = 0;
   bool _onWifi = false;
@@ -60,6 +67,11 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
       (_, _) => _syncPolicy(),
     );
     ref.listenManual(excludeSSIDsProvider, (_, _) => _syncPolicy());
+    if (!_pollsWhileHidden) {
+      ref.listenManual(appVisibleProvider, (previous, next) {
+        if (previous != next) _syncPolicy();
+      });
+    }
     _syncPolicy();
     ref.listenManual(
       locationPermissionsProvider.select(
@@ -112,11 +124,14 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
     }
 
     _pollTimer?.cancel();
+    _pollTimer = null;
     if (ref.read(safeModeProvider) ||
         !ref.read(vpnSettingProvider).onDemandEnabled ||
-        ref.read(excludeSSIDsProvider).isEmpty) {
+        ref.read(excludeSSIDsProvider).isEmpty ||
+        !_pollsWhileHidden && !ref.read(appVisibleProvider)) {
       return;
     }
+    if (!_pollsWhileHidden) unawaited(_updateSsid());
     unawaited(_updateAddresses());
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       unawaited(_updateSsid());
@@ -133,7 +148,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
     }
     try {
       final addresses = await getPhysicalNetworkAddresses();
-      if (mounted && requestId == _addressRequestId) {
+      if (mounted &&
+          requestId == _addressRequestId &&
+          !listEquals(addresses, ref.read(physicalAddressesProvider))) {
         ref.read(physicalAddressesProvider.notifier).value = addresses;
       }
     } catch (error) {

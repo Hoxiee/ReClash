@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Также отправлять ОС и модель устройства",
   "subscriptionIdentityDetailsDisclosure": "Вместе с идентификатором будут отправляться версия ОС и модель устройства.",
   "subscriptionIdentitySettingsTitle": "Идентификатор устройства",
-  "subscriptionIdentityGlobalHint": "Если включено, идентификатор устройства отправляется в запросах всех URL-подписок, кроме профилей с переопределением. Отправка ОС и сведений об устройстве отдельно включается для каждой подписки.",
   "subscriptionIdentityUseGlobal": "Как в настройках",
   "subscriptionProvider": "Подписка",
   "subscriptionProviderWebsite": "Сайт",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Добавлено: {added}; пропущено: {skipped}; ошибок: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "Многие подписки перестанут работать, если отключить отправку HWID."
 }

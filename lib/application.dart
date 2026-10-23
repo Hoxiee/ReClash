@@ -132,7 +132,14 @@ class ApplicationState extends ConsumerState<Application> {
                   ),
                 ) ==
                 true,
-            confirmImport: (source) => showProfileImportDialog(context, source),
+            confirmImport: (source) {
+              final profiles = ref.read(profilesActionProvider.notifier);
+              return showProfileImportDialog(
+                source,
+                preview: profiles.previewProfileLinkSource,
+                duplicateOf: profiles.duplicateProfileLabel(source),
+              );
+            },
             openRouting: (text, origin) =>
                 openRoutingImport(context, text: text, origin: origin),
           );
@@ -163,14 +170,16 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _autoUpdateProfilesTask() {
     _autoUpdateProfilesTaskTimer = Timer(const Duration(minutes: 20), () async {
-      if (!ref.read(setupSessionProvider).active) {
-        await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
-        await ref.read(resourcesActionProvider.notifier).autoUpdate();
+      try {
+        if (!ref.read(setupSessionProvider).active) {
+          await ref.read(profilesActionProvider.notifier).autoUpdateProfiles();
+          await ref.read(resourcesActionProvider.notifier).autoUpdate();
+        }
+      } catch (e) {
+        commonPrint.log('autoUpdate failed: $e');
+      } finally {
+        if (mounted) _autoUpdateProfilesTask();
       }
-      if (!mounted) {
-        return;
-      }
-      _autoUpdateProfilesTask();
     });
   }
 
@@ -204,7 +213,9 @@ class ApplicationState extends ConsumerState<Application> {
         final locale = ref.watch(
           appSettingProvider.select((state) => state.locale),
         );
-        final themeProps = ref.watch(themeSettingProvider);
+        final themeMode = ref.watch(
+          themeSettingProvider.select((state) => state.themeMode),
+        );
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
@@ -233,7 +244,7 @@ class ApplicationState extends ConsumerState<Application> {
           title: appName,
           locale: getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,
-          themeMode: themeProps.themeMode,
+          themeMode: themeMode,
           theme: watchAppTheme(ref, Brightness.light),
           darkTheme: watchAppTheme(ref, Brightness.dark),
           themeAnimationStyle: AnimationStyle.noAnimation,

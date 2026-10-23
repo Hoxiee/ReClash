@@ -26,6 +26,7 @@ class RcxStatusState extends _$RcxStatusState {
   RcxStatus? build() {
     ref.listen(coreStatusProvider, (_, next) {
       if (next == CoreStatus.connected) {
+        _sendForeground(ref.read(appVisibleProvider));
         unawaited(refresh());
       } else {
         state = null;
@@ -49,23 +50,25 @@ class RcxStatusState extends _$RcxStatusState {
   /// through every nested selector it took.
   void apply(RcxStatus status) {
     state = status;
-    final profiles = ref.read(profilesActionProvider.notifier);
+    final picks = <String, String>{};
     for (final group in status.groups) {
       if (group.control.isManual || group.now.isEmpty) continue;
       final chain = [group.name, ...group.via, group.now];
       for (var i = 0; i + 1 < chain.length; i++) {
-        profiles.updateCurrentSelectedMap(chain[i], chain[i + 1]);
+        picks[chain[i]] = chain[i + 1];
       }
     }
+    ref.read(profilesActionProvider.notifier).mergeCurrentSelectedMap(picks);
   }
 
+  /// The Core also pauses per-request traffic reports on this hint, so it
+  /// goes out on every connection, before the engine may be ready to take it.
   void _sendForeground(bool visible) {
     if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
     unawaited(
-      ref
-          .read(coreHandlerProvider)
-          .rcxHints({'foreground': visible})
-          .catchError((_) => false),
+      Future.sync(
+        () => ref.read(coreHandlerProvider).rcxHints({'foreground': visible}),
+      ).catchError((_) => false),
     );
   }
 }

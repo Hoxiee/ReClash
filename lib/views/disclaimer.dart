@@ -393,7 +393,7 @@ class _ConsentBar extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return Row(
       children: [
-        Expanded(child: _buildExitButton(context)),
+        _buildExitButton(context),
         const SizedBox(width: 12),
         Expanded(
           child: _buildAgreeButton(

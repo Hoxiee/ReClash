@@ -36,6 +36,12 @@ import '../helpers/test_profiles.dart';
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {
   @override
   Future<CoreInfo?> getCoreInfo() async => null;
+
+  @override
+  Future<DesktopPrivilegeDecision> preparePrivilege({
+    required bool tunEnabled,
+    bool allowPrompt = false,
+  }) async => DesktopPrivilegeDecision.notRequired;
 }
 
 class _NoopProxiesAction extends ProxiesAction {
@@ -992,7 +998,11 @@ void main() {
       scoped
           .read(patchClashConfigProvider.notifier)
           .update(
-            (state) => state.copyWith(mode: Mode.global, mixedPort: 8899),
+            (state) => state.copyWith(
+              mode: Mode.global,
+              mixedPort: 8899,
+              tun: state.tun.copyWith(enable: false),
+            ),
           );
 
       await scopedAction.updateConfig();

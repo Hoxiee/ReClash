@@ -526,9 +526,7 @@ class SetupAction extends _$SetupAction {
     return applied ==
         (
           setupState,
-          _effectivePatchConfig(
-            ref.read(regionalNetworkConfigProvider).patchConfig,
-          ),
+          _effectivePatchConfig(ref.read(patchClashConfigProvider)),
           ref.read(networkSettingProvider),
           _appliedParams,
         );
@@ -753,9 +751,7 @@ class SetupAction extends _$SetupAction {
   Future<String> getProfileWithId(int profileId) async {
     try {
       final setupState = await ref.read(setupStateProvider(profileId).future);
-      final patchClashConfig = ref
-          .read(regionalNetworkConfigProvider)
-          .patchConfig;
+      final patchClashConfig = ref.read(patchClashConfigProvider);
       final res = await getProfile(
         setupState: setupState,
         patchConfig: patchClashConfig,
@@ -901,7 +897,7 @@ class SetupAction extends _$SetupAction {
       }
     }
     commonPrint.log('setup ===> ${profile?.realLabel}');
-    final patchConfig = ref.read(regionalNetworkConfigProvider).patchConfig;
+    final patchConfig = ref.read(patchClashConfigProvider);
     final shouldContinueSetup = await requestAdmin(
       patchConfig.tun.enable,
       silence: suppressErrors,

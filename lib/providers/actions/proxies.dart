@@ -42,6 +42,8 @@ class ProxiesAction extends _$ProxiesAction {
 
   int _groupsRevision = 0;
   int _profileRevision = 0;
+  int _runRevision = 0;
+  bool _groupsStale = false;
 
   @override
   void build() {
@@ -54,6 +56,19 @@ class ProxiesAction extends _$ProxiesAction {
     ref.listen(currentProfileIdProvider, (previous, next) {
       if (previous != next) {
         _profileRevision++;
+      }
+    });
+    ref.listen(runTimeProvider.select((state) => state != null), (
+      previous,
+      next,
+    ) {
+      if (previous != next) {
+        _runRevision++;
+      }
+    });
+    ref.listen(appVisibleProvider, (_, visible) {
+      if (visible && _groupsStale) {
+        updateGroupsDebounce();
       }
     });
   }
@@ -98,6 +113,15 @@ class ProxiesAction extends _$ProxiesAction {
     debouncer.call(FunctionTag.updateGroups, updateGroups, duration: duration);
   }
 
+  /// [hiddenConsumer] keeps the macOS tray current while the app is hidden.
+  void updateGroupsWhenVisible({required bool hiddenConsumer}) {
+    if (hiddenConsumer || ref.read(appVisibleProvider)) {
+      updateGroupsDebounce();
+    } else {
+      _groupsStale = true;
+    }
+  }
+
   void changeProxyDebounce(String groupName, String proxyName) {
     _pendingSelectedRollback.putIfAbsent(
       groupName,
@@ -123,7 +147,9 @@ class ProxiesAction extends _$ProxiesAction {
     final revision = ++_groupsRevision;
     final profileId = ref.read(currentProfileIdProvider);
     final profileRevision = _profileRevision;
+    final runRevision = _runRevision;
     final runTime = ref.read(runTimeProvider);
+    _groupsStale = false;
     try {
       final result = await retry(
         task: () async {
@@ -163,7 +189,7 @@ class ProxiesAction extends _$ProxiesAction {
       if (revision != _groupsRevision ||
           profileRevision != _profileRevision ||
           profileId != ref.read(currentProfileIdProvider) ||
-          runTime != ref.read(runTimeProvider)) {
+          runRevision != _runRevision) {
         return;
       }
       if (result.failed &&

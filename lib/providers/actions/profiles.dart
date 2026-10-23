@@ -20,16 +20,56 @@ class ProfilesAction extends _$ProfilesAction {
     Profile candidate,
   ) => _lastSuccessfulProfileClient(candidate);
 
-  void updateCurrentSelectedMap(String groupName, String proxyName) {
-    final currentProfile = ref.read(currentProfileProvider);
-    if (currentProfile != null &&
-        currentProfile.selectedMap[groupName] != proxyName) {
-      final selectedMap = Map<String, String>.from(currentProfile.selectedMap)
-        ..[groupName] = proxyName;
-      ref
-          .read(profilesProvider.notifier)
-          .put(currentProfile.copyWith(selectedMap: selectedMap));
+  Future<ProfileLinkPreview> previewProfileLinkSource(
+    ProfileLinkSource source,
+    SubscriptionClientSettings settings, {
+    SubscriptionCancellation? cancellation,
+  }) async {
+    final draft = _linkSourceDraft(
+      source.url!,
+      label: source.name,
+      ageSecretKey: '',
+      settings: settings,
+    );
+    return (
+      draft: draft,
+      prepared: await _prepareProfileCompatibility(
+        draft,
+        cancellation: cancellation,
+      ),
+    );
+  }
+
+  String? duplicateProfileLabel(ProfileLinkSource source) {
+    final url = source.url?.trim();
+    if (url == null || !ref.read(appSettingProvider).preventDuplicateProfiles) {
+      return null;
     }
+    return ref
+        .read(profilesProvider)
+        .where((profile) => profile.url.trim() == url)
+        .firstOrNull
+        ?.realLabel;
+  }
+
+  void updateCurrentSelectedMap(String groupName, String proxyName) {
+    mergeCurrentSelectedMap({groupName: proxyName});
+  }
+
+  /// Saves several picks as one profile write.
+  void mergeCurrentSelectedMap(Map<String, String> picks) {
+    final currentProfile = ref.read(currentProfileProvider);
+    if (currentProfile == null ||
+        picks.entries.every(
+          (pick) => currentProfile.selectedMap[pick.key] == pick.value,
+        )) {
+      return;
+    }
+    final selectedMap = Map<String, String>.from(currentProfile.selectedMap)
+      ..addAll(picks);
+    ref
+        .read(profilesProvider.notifier)
+        .put(currentProfile.copyWith(selectedMap: selectedMap));
   }
 
   Future<void> deleteProfile(int id) async {
@@ -191,7 +231,14 @@ class ProfilesAction extends _$ProfilesAction {
     }
     try {
       final store = await DeviceIdentityStore.create();
-      return await store.requestFields(profile.id, origin) ?? const {};
+      return await store.requestFields(
+            profile.id,
+            origin,
+            sendByDefault: sendsDeviceIdentityByDefault(
+              ref.read(appSettingProvider).regionCode,
+            ),
+          ) ??
+          const {};
     } on Object {
       return const {};
     }
@@ -566,6 +613,7 @@ class ProfilesAction extends _$ProfilesAction {
     String ageSecretKey = '',
     bool select = true,
     SubscriptionClientSettings? clientSettings,
+    ProfileLinkPreview? preview,
     BuildContext? reviewContext,
     SubscriptionCancellation? cancellation,
   }) async {
@@ -608,12 +656,12 @@ class ProfilesAction extends _$ProfilesAction {
                 source.preset != null
             ? chosenSettings.copyWith(preset: source.preset)
             : chosenSettings;
-        final draft = _withClientSettings(
-          Profile.normal(
-            label: name,
-            url: url,
-          ).copyWith(ageSecretKey: ageSecretKey),
-          settings,
+        final draft = _linkSourceDraft(
+          url,
+          label: name,
+          ageSecretKey: ageSecretKey,
+          settings: settings,
+          id: preview?.draft.id,
         );
         if (settings.sendDeviceIdentity case final send?) {
           final store = await DeviceIdentityStore.create();
@@ -625,6 +673,7 @@ class ProfilesAction extends _$ProfilesAction {
         }
         profile = await _download(
           draft,
+          prepared: preview?.prepared,
           reviewContext: reviewContext,
           cancellation: cancellation,
           onCommitted: save,
@@ -804,6 +853,20 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
+  Profile _linkSourceDraft(
+    String url, {
+    required String? label,
+    required String ageSecretKey,
+    required SubscriptionClientSettings settings,
+    int? id,
+  }) {
+    final profile = Profile.normal(label: label, url: url);
+    return _withClientSettings(
+      profile.copyWith(id: id ?? profile.id, ageSecretKey: ageSecretKey),
+      settings,
+    );
+  }
+
   Profile _withClientSettings(
     Profile profile,
     SubscriptionClientSettings? settings,
@@ -843,6 +906,7 @@ class ProfilesAction extends _$ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
+    ProfileLinkPreview? preview,
   }) async {
     _showProfiles();
     await globalState.loadingRun(
@@ -852,6 +916,7 @@ class ProfilesAction extends _$ProfilesAction {
         label: label,
         ageSecretKey: ageSecretKey,
         clientSettings: clientSettings,
+        preview: preview,
       ),
       title: currentAppLocalizations.addProfile,
     );
@@ -875,12 +940,14 @@ class ProfilesAction extends _$ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
+    ProfileLinkPreview? preview,
   }) async {
     Future<Profile> save(String key) => importProfileLinkSource(
       source,
       label: label,
       ageSecretKey: key,
       clientSettings: clientSettings,
+      preview: preview,
     );
     try {
       return await save(ageSecretKey);
@@ -951,12 +1018,20 @@ class ProfilesAction extends _$ProfilesAction {
 
   Future<Profile> _download(
     Profile profile, {
+    PreparedSubscriptionUpdate? prepared,
     BuildContext? reviewContext,
     SubscriptionCancellation? cancellation,
     Future<void> Function(Profile saved)? onCommitted,
   }) async {
     final request = await _subscriptionRequestInputs(profile);
-    final prepared = await _prepareProfileCompatibility(
+    if (prepared != null) {
+      try {
+        _ensurePreparedSubscriptionCurrent(profile, prepared, request);
+      } on SubscriptionUpdateSuperseded {
+        prepared = null;
+      }
+    }
+    prepared ??= await _prepareProfileCompatibility(
       profile,
       request: request,
       cancellation: cancellation,

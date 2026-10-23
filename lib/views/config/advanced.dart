@@ -24,10 +24,7 @@ class AdvancedConfigView extends StatelessWidget {
         child: ListItem.open(
           title: Text(advancedToolSettings[0].title(appLocalizations)),
           leading: const GlyphIcon(AppGlyphs.key),
-          widget: BaseScaffold(
-            title: appLocalizations.network,
-            body: const NetworkListView(),
-          ),
+          widget: const NetworkView(),
         ),
       ),
       ListItem.open(

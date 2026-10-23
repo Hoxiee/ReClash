@@ -95,5 +95,21 @@
   "telegramWebFallback": "Brauzerde aç",
   "telegramAppUnavailable": "Bu enjamda Telegram-y açyp bolmady.",
   "urlSchemeFormats": "Formatlar",
-  "urlSchemeFormatsTip": "Baglanyşyk formatlary. Ýer tutujylary URL ýa-da maglumatlaryňyz bilen çalşyň."
+  "urlSchemeFormatsTip": "Baglanyşyk formatlary. Ýer tutujylary URL ýa-da maglumatlaryňyz bilen çalşyň.",
+  "profileImportTitle": "Täze abunalyk",
+  "profileImportChecking": "Abunalyk barlanýar…",
+  "profileImportPreviewFailed": "Abunalygyň mazmunyny görüp bolmady. Ony barybir goşup bilersiňiz.",
+  "profileImportEncrypted": "Abunalyk şifrlenen; açar goşulanda soralar.",
+  "profileImportFormat": "Abunalygyň formaty",
+  "profileImportFormatClient": "{client} programmasy alşy ýaly",
+  "profileImportFormatReclash": "ReClash üçin iň gowy format, awtomatik saýlanýar",
+  "profileImportServerCount": "{count, plural, other{{count} serwer}}",
+  "profileImportAlreadyAdded": "Eýýäm «{name}» hökmünde goşuldy",
+  "profileImportLosses": "Käbir bölekler goldanmaýar; goşmazdan öň olary görkezeris.",
+  "profileImportServers": "Serwerler",
+  "profileImportValidUntil": "Möhleti",
+  "profileImportUnlimited": "Çäksiz",
+  "profileImportExpired": "Möhleti geçdi",
+  "profileImportFromProvider": "Üpjün edijiden",
+  "profileImportSingleServer": "Bir serwer"
 }

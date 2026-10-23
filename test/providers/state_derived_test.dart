@@ -5,6 +5,7 @@ import 'package:reclash/common/system.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
@@ -1006,67 +1007,44 @@ void main() {
     );
   });
 
-  test(
-    'regional profiles affect effective config without rewriting settings',
-    () async {
-      container.listen(appSettingProvider, (_, _) {});
-      container.listen(patchClashConfigProvider, (_, _) {});
-      container.listen(networkSettingProvider, (_, _) {});
-      final rawPatchConfig = container.read(patchClashConfigProvider);
-      final rawBypassDomains = container
-          .read(networkSettingProvider)
-          .bypassDomain;
-      container.listen(setupPatchProvider, (_, _) {});
-      final setupPatch = container.read(setupPatchProvider);
-      await container.read(vpnOptionsProvider.future);
+  test('an applied region reaches the generated profile and VPN', () async {
+    container.listen(appSettingProvider, (_, _) {});
+    container.listen(patchClashConfigProvider, (_, _) {});
+    container.listen(networkSettingProvider, (_, _) {});
+    final rawPatchConfig = container.read(patchClashConfigProvider);
+    container.listen(setupPatchProvider, (_, _) {});
+    final setupPatch = container.read(setupPatchProvider);
+    await container.read(vpnOptionsProvider.future);
 
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: 'RU'));
+    container.read(systemActionProvider.notifier).applyRegion('RU');
 
-      final regionalNetwork = container.read(regionalNetworkConfigProvider);
-      expect(container.read(patchClashConfigProvider), rawPatchConfig);
-      expect(
-        container.read(networkSettingProvider).bypassDomain,
-        rawBypassDomains,
-      );
-      expect(regionalNetwork.patchConfig.dns.defaultNameserver, [
-        '77.88.8.8',
-        '77.88.8.1',
-      ]);
-      expect(regionalNetwork.patchConfig.dns.fallbackFilter.geoipCode, 'RU');
-      expect(regionalNetwork.bypassDomain, isNot(contains('*zhihu.com')));
-      expect(container.read(setupPatchProvider), isNot(setupPatch));
-      final setupState = await container.read(setupStateProvider(null).future);
-      expect(setupState.overrides.dns.nameserver, [
-        'tls://77.88.8.8',
-        'tls://77.88.8.1',
-      ]);
-      expect(
-        setupState.overrides.dnsOverrideKeys,
-        contains(DnsOverrideKey.fallbackFilterGeoipCode),
-      );
-      expect(setupState.overrides.tun.mtu, 1500);
-      expect(
-        (await container.read(
-          vpnOptionsProvider.future,
-        )).effective.bypassDomain,
-        regionalNetwork.bypassDomain,
-      );
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(regionCode: null));
-      expect(
-        container.read(regionalNetworkConfigProvider).patchConfig,
-        rawPatchConfig,
-      );
-      expect(container.read(setupPatchProvider), setupPatch);
-      expect(
-        (await container.read(vpnOptionsProvider.future)).mtu,
-        rawPatchConfig.tun.mtu,
-      );
-    },
-  );
+    final patchConfig = container.read(patchClashConfigProvider);
+    expect(patchConfig.dns.defaultNameserver, ['77.88.8.8', '77.88.8.1']);
+    expect(patchConfig.dns.fallbackFilter.geoipCode, 'RU');
+    expect(container.read(setupPatchProvider), isNot(setupPatch));
+    final setupState = await container.read(setupStateProvider(null).future);
+    expect(setupState.overrides.dns.nameserver, [
+      'tls://77.88.8.8',
+      'tls://77.88.8.1',
+    ]);
+    expect(
+      setupState.overrides.dnsOverrideKeys,
+      contains(DnsOverrideKey.fallbackFilterGeoipCode),
+    );
+    expect(setupState.overrides.tun.mtu, 1500);
+    expect(
+      (await container.read(vpnOptionsProvider.future)).effective.bypassDomain,
+      container.read(networkSettingProvider).bypassDomain,
+    );
+
+    container.read(systemActionProvider.notifier).applyRegion(null);
+    expect(container.read(patchClashConfigProvider), rawPatchConfig);
+    expect(container.read(setupPatchProvider), setupPatch);
+    expect(
+      (await container.read(vpnOptionsProvider.future)).mtu,
+      rawPatchConfig.tun.mtu,
+    );
+  });
 
   test(
     'notification group follows mode and preserves an explicit missing selection',

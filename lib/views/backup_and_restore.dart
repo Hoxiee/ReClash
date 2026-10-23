@@ -16,6 +16,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/config_item.dart';
+import 'package:reclash/widgets/reset_data_dialog.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -297,6 +298,26 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                         .update(
                           (state) => state.copyWith(restoreStrategy: value),
                         ),
+                  ),
+                  SettingTarget(
+                    spec: backupToolSettings[9],
+                    child: ListItem(
+                      title: Text(
+                        appLocalizations.resetAllData,
+                        style: TextStyle(
+                          color: context.colorScheme.destructive,
+                        ),
+                      ),
+                      onTap: () => dialogs.showCommonDialog<void>(
+                        context: context,
+                        dismissible: false,
+                        child: ResetDataDialog(
+                          onReset: ref
+                              .read(storeActionProvider.notifier)
+                              .resetAllData,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -601,5 +622,11 @@ final backupToolSettings = <SettingSpec>[
     page: ToolPage.backup,
     title: (l) => l.restore,
     keywords: ['local restore', 'file'],
+  ),
+  SettingSpec(
+    id: 'backup.resetAllData',
+    page: ToolPage.backup,
+    title: (l) => l.resetAllData,
+    keywords: ['reset', 'delete', 'clear data'],
   ),
 ];

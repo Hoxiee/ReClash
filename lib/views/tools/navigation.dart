@@ -1,17 +1,21 @@
 import 'package:reclash/views/config/override.dart';
-import 'package:reclash/common/common.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/views/about.dart';
 import 'package:reclash/views/access.dart';
+import 'package:reclash/views/application_notification.dart';
 import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/backup_and_restore.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/custom_resources.dart';
 import 'package:reclash/views/config/dns.dart';
+import 'package:reclash/views/config/filters.dart';
 import 'package:reclash/views/config/general.dart';
+import 'package:reclash/views/config/icon_sets.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/views/config/providers.dart';
+import 'package:reclash/views/config/routing.dart';
 import 'package:reclash/views/config/rules.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/config/user_agents.dart';
@@ -24,12 +28,12 @@ import 'package:reclash/views/hotkey.dart';
 import 'package:reclash/views/hotkey_desktop.dart';
 import 'package:reclash/views/language.dart';
 import 'package:reclash/views/logs.dart';
+import 'package:reclash/views/profiles/custom/custom_proxies.dart';
 import 'package:reclash/views/region.dart';
 import 'package:reclash/views/resources.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/tools/core.dart';
 import 'package:reclash/views/url_scheme.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 ToolPage? toolPageOf(Widget widget) => switch (widget) {
@@ -37,12 +41,12 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   GeneralView() => ToolPage.general,
   WebDashboardView() => ToolPage.webDashboard,
   AdvancedConfigView() => ToolPage.advanced,
-  BaseScaffold(body: NetworkListView()) ||
-  NetworkListView() => ToolPage.network,
+  NetworkView() || NetworkListView() => ToolPage.network,
   DnsView(spec: final spec) when spec.target is PatchOverrideTarget =>
     ToolPage.dns,
   OnDemandView() => ToolPage.onDemand,
   RegionView() => ToolPage.appRegion,
+  NotificationSettingsView() => ToolPage.notifications,
   UserAgentsView() => ToolPage.userAgents,
   ThemeView() => ToolPage.theme,
   LanguageView() => ToolPage.locale,
@@ -52,6 +56,10 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   AccessView() => ToolPage.access,
   ResourcesView() => ToolPage.resources,
   CustomResourcesView() => ToolPage.customResources,
+  CustomProxiesView() => ToolPage.customProxies,
+  ClashProvidersView() => ToolPage.ruleProviders,
+  FiltersView() => ToolPage.filters,
+  IconSetsView() => ToolPage.iconSets,
   BackupAndRestore() => ToolPage.backup,
   AboutView() => ToolPage.about,
   DisclaimerView() => ToolPage.disclaimer,
@@ -62,6 +70,7 @@ ToolPage? toolPageOf(Widget widget) => switch (widget) {
   LogsView() => ToolPage.logs,
   AddedRulesView() => ToolPage.rules,
   ScriptsView() => ToolPage.scripts,
+  RoutingSettingsView() => ToolPage.routing,
   CoreDetailView() => ToolPage.coreDetails,
   CoreRuntimeConfigView() => ToolPage.coreRuntimeConfig,
   _ => null,
@@ -72,13 +81,11 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.general => const GeneralView(),
   ToolPage.webDashboard => const WebDashboardView(),
   ToolPage.advanced => const AdvancedConfigView(),
-  ToolPage.network => BaseScaffold(
-    title: context.appLocalizations.network,
-    body: const NetworkListView(),
-  ),
+  ToolPage.network => const NetworkView(),
   ToolPage.dns => const DnsView(),
   ToolPage.onDemand => const OnDemandView(),
   ToolPage.appRegion => const RegionView(),
+  ToolPage.notifications => const NotificationSettingsView(),
   ToolPage.userAgents => const UserAgentsView(),
   ToolPage.theme => const ThemeView(),
   ToolPage.locale => const LanguageView(),
@@ -88,6 +95,10 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.access => const AccessView(),
   ToolPage.resources => const ResourcesView(),
   ToolPage.customResources => const CustomResourcesView(),
+  ToolPage.customProxies => const CustomProxiesView(),
+  ToolPage.ruleProviders => const ClashProvidersView(),
+  ToolPage.filters => const FiltersView(),
+  ToolPage.iconSets => const IconSetsView(),
   ToolPage.backup => const BackupAndRestore(),
   ToolPage.about => const AboutView(),
   ToolPage.disclaimer => const DisclaimerView(),
@@ -98,6 +109,7 @@ Widget buildToolPage(ToolPage page, BuildContext context) => switch (page) {
   ToolPage.logs => const LogsView(),
   ToolPage.rules => const AddedRulesView(),
   ToolPage.scripts => const ScriptsView(),
+  ToolPage.routing => const RoutingSettingsView(),
   ToolPage.coreDetails => const CoreDetailView(),
   ToolPage.coreRuntimeConfig => const CoreRuntimeConfigView(),
 };

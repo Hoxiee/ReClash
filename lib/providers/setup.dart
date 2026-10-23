@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/common/setup_check.dart';
+import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/service.dart';
@@ -24,6 +25,7 @@ class SetupSessionState {
     required this.draft,
     this.busy = false,
     this.checking = false,
+    this.scanningApps = false,
     this.phases = const [],
     this.report,
     this.error,
@@ -37,6 +39,7 @@ class SetupSessionState {
   final SetupDraft draft;
   final bool busy;
   final bool checking;
+  final bool scanningApps;
   final List<SetupPhaseResult> phases;
   final SetupReport? report;
   final String? error;
@@ -50,6 +53,7 @@ class SetupSessionState {
     SetupDraft? draft,
     bool? busy,
     bool? checking,
+    bool? scanningApps,
     List<SetupPhaseResult>? phases,
     SetupReport? report,
     String? error,
@@ -65,6 +69,7 @@ class SetupSessionState {
     draft: draft ?? this.draft,
     busy: busy ?? this.busy,
     checking: checking ?? this.checking,
+    scanningApps: scanningApps ?? this.scanningApps,
     phases: phases ?? this.phases,
     report: clearReport ? null : report ?? this.report,
     error: clearError ? null : error ?? this.error,
@@ -135,6 +140,41 @@ class _SetupRouteProbe extends Notifier<RoutedProbeState<String, ProbeResult>>
 
 class _SetupCancelled implements Exception {}
 
+AccessControlProps _bypassing(AccessControlProps props, List<String> apps) {
+  if (props.enable && props.mode == AccessControlMode.acceptSelected) {
+    final bypassed = apps.toSet();
+    return props.copyWith(
+      acceptList: [
+        for (final app in props.acceptList)
+          if (!bypassed.contains(app)) app,
+      ],
+    );
+  }
+  return props.copyWith(
+    enable: true,
+    mode: AccessControlMode.rejectSelected,
+    rejectList: ({...props.rejectList, ...apps}.toList()..sort()),
+  );
+}
+
+SetupDraft _draftOf(
+  AppSettingProps settings, {
+  required int? profileId,
+  required SetupCoverage coverage,
+}) => SetupDraft(
+  profileId: settings.setupProfileId ?? profileId,
+  coverage:
+      SetupCoverage.values
+          .where((value) => value.name == settings.setupCoverage)
+          .firstOrNull ??
+      coverage,
+  regionCode: settings.setupRegionChosen
+      ? sanitizeRegionCode(settings.setupRegionCode)
+      : settings.regionCode,
+  regionChosen: settings.setupRegionChosen || settings.regionCode != null,
+  directRoutes: settings.setupDirectRoutes,
+);
+
 class SetupSession extends Notifier<SetupSessionState> {
   int _generation = 0;
   bool _committing = false;
@@ -144,6 +184,7 @@ class SetupSession extends Notifier<SetupSessionState> {
   RouteTracker? _routeWatcher;
   final Object _connectionOwner = Object();
   Future<void>? _operation;
+  Future<void>? _scan;
   Completer<void>? _cancellation;
   Future<bool> _saveTail = Future.value(true);
 
@@ -205,18 +246,10 @@ class SetupSession extends Notifier<SetupSessionState> {
         settings.setupStep,
         accepted: settings.acceptedDisclaimerVersion >= disclaimerVersion,
       ),
-      draft: SetupDraft(
-        profileId:
-            settings.setupProfileId ?? ref.read(currentProfileIdProvider),
-        coverage:
-            SetupCoverage.values
-                .where((value) => value.name == settings.setupCoverage)
-                .firstOrNull ??
-            currentCoverage,
-        regionCode: settings.setupRegionChosen
-            ? sanitizeRegionCode(settings.setupRegionCode)
-            : settings.regionCode,
-        regionChosen: settings.setupRegionChosen || settings.regionCode != null,
+      draft: _draftOf(
+        settings,
+        profileId: ref.read(currentProfileIdProvider),
+        coverage: currentCoverage,
       ),
     );
   }
@@ -261,6 +294,7 @@ class SetupSession extends Notifier<SetupSessionState> {
             setupCoverage: draft.coverage.name,
             setupRegionCode: draft.regionCode,
             setupRegionChosen: draft.regionChosen,
+            setupDirectRoutes: draft.directRoutes,
           ),
         );
     final saved = await _save();
@@ -278,6 +312,7 @@ class SetupSession extends Notifier<SetupSessionState> {
     }
     final previous = state.step;
     state = state.copyWith(step: step, clearError: true);
+    if (step == SetupStep.region) unawaited(scanDirectApps());
     if (await persist()) return true;
     if (ref.mounted) state = state.copyWith(step: previous);
     return false;
@@ -325,6 +360,94 @@ class SetupSession extends Notifier<SetupSessionState> {
       clearError: true,
     );
     unawaited(persist());
+    unawaited(scanDirectApps());
+  }
+
+  void selectDirectRoutes(bool value) {
+    _invalidate();
+    state = state.copyWith(
+      draft: state.draft.withDirectRoutes(value),
+      clearError: true,
+    );
+    unawaited(persist());
+    unawaited(scanDirectApps());
+  }
+
+  bool get _wantsDirectApps {
+    final draft = state.draft;
+    return isAndroid &&
+        draft.coverage == SetupCoverage.tun &&
+        draft.regionChosen &&
+        draft.directRoutes &&
+        directRulesForCode(draft.regionCode).isNotEmpty;
+  }
+
+  @protected
+  Future<List<String>> domesticPackages(String regionCode) async {
+    final system = ref.read(systemActionProvider.notifier);
+    if (!await system.isInstalledAppsPermissionGranted() &&
+        !await system.requestInstalledAppsPermission()) {
+      return const [];
+    }
+    return system.getDomesticPackageNames(regionCode);
+  }
+
+  /// Finds the region's apps once per chosen region; a region changed while
+  /// the scan ran is scanned again before the future completes.
+  Future<void> scanDirectApps() {
+    if (!_wantsDirectApps || state.draft.directApps != null) {
+      return Future.value();
+    }
+    return _scan ??= _scanDirectApps().whenComplete(() => _scan = null);
+  }
+
+  Future<void> _scanDirectApps() async {
+    state = state.copyWith(scanningApps: true);
+    try {
+      while (ref.mounted &&
+          _wantsDirectApps &&
+          state.draft.directApps == null) {
+        final regionCode = state.draft.regionCode!;
+        List<String> packages;
+        try {
+          packages = await domesticPackages(regionCode);
+        } catch (_) {
+          packages = const [];
+        }
+        if (ref.mounted && state.draft.regionCode == regionCode) {
+          state = state.copyWith(
+            draft: state.draft.withDirectApps(List.unmodifiable(packages)),
+          );
+        }
+      }
+    } finally {
+      if (ref.mounted) state = state.copyWith(scanningApps: false);
+    }
+  }
+
+  /// Puts the region's direct rules above the global rules, skipping those
+  /// already present so a repeated check does not stack copies.
+  @protected
+  Future<void> addDirectRules(List<String> rawRules) async {
+    final existing = await database.rulesDao.queryGlobalRules().get();
+    final present = {for (final rule in existing) rule.rawValue};
+    final missing = [
+      for (final raw in rawRules)
+        if (Rule.parse(raw) case final rule
+            when !present.contains(rule.rawValue))
+          rule,
+    ];
+    if (missing.isEmpty) return;
+    final orders = indexing.generateNKeysBetween(
+      null,
+      existing.firstOrNull?.order,
+      missing.length,
+    );
+    await database.transaction(() async {
+      for (final (index, rule) in missing.indexed) {
+        await database.rulesDao.putRule(rule.copyWith(order: orders[index]));
+      }
+    });
   }
 
   void offerLink(String link) => state = state.copyWith(pendingLink: link);
@@ -426,24 +549,33 @@ class SetupSession extends Notifier<SetupSessionState> {
       throw MessageException(currentAppLocalizations.nullProfileDesc);
     }
     if (preserveRunning && ref.read(isStartProvider)) return persist();
+    final directRules = draft.regionChosen && draft.directRoutes
+        ? directRulesForCode(draft.regionCode)
+        : const <String>[];
+    if (directRules.isNotEmpty) await addDirectRules(directRules);
+    if (_wantsDirectApps && state.draft.directApps == null) {
+      await scanDirectApps();
+    }
+    if (!ref.mounted) return false;
+    final directApps = _wantsDirectApps
+        ? state.draft.directApps ?? const <String>[]
+        : const <String>[];
     _committing = true;
     try {
       ref.read(currentProfileIdProvider.notifier).value = draft.profileId;
-      ref
-          .read(appSettingProvider.notifier)
-          .update(
-            (settings) => settings.copyWith(
-              regionCode: draft.regionChosen
-                  ? draft.regionCode
-                  : settings.regionCode,
-            ),
-          );
+      if (draft.regionChosen &&
+          draft.regionCode != ref.read(appSettingProvider).regionCode) {
+        ref.read(systemActionProvider.notifier).applyRegion(draft.regionCode);
+      }
       if (isAndroid) {
         ref
             .read(vpnSettingProvider.notifier)
             .update(
               (settings) => settings.copyWith(
                 enable: draft.coverage == SetupCoverage.tun,
+                accessControlProps: directApps.isEmpty
+                    ? settings.accessControlProps
+                    : _bypassing(settings.accessControlProps, directApps),
               ),
             );
       } else {
@@ -569,7 +701,7 @@ class SetupSession extends Notifier<SetupSessionState> {
   Future<void> check({bool restartVpn = false}) {
     if (!state.active ||
         ref.read(appSettingProvider).setupCompleted != false ||
-        (state.step != SetupStep.coverage &&
+        (state.step != SetupStep.region &&
             state.step != SetupStep.result &&
             !state.checking) ||
         (state.busy && !state.checking) ||
@@ -619,7 +751,7 @@ class SetupSession extends Notifier<SetupSessionState> {
       _guard(generation);
       if (!await persist()) {
         _guard(generation);
-        state = state.copyWith(step: SetupStep.coverage);
+        state = state.copyWith(step: SetupStep.region);
         return;
       }
       _guard(generation);
@@ -639,7 +771,7 @@ class SetupSession extends Notifier<SetupSessionState> {
       _guard(generation);
       if (!await _commitDraft(preserveRunning: false)) {
         _guard(generation);
-        state = state.copyWith(step: SetupStep.coverage);
+        state = state.copyWith(step: SetupStep.region);
         return;
       }
       _guard(generation);
@@ -898,18 +1030,10 @@ class SetupSession extends Notifier<SetupSessionState> {
       step: settings.acceptedDisclaimerVersion >= disclaimerVersion
           ? SetupStep.profile
           : SetupStep.language,
-      draft: SetupDraft(
-        profileId:
-            settings.setupProfileId ?? ref.read(currentProfileIdProvider),
-        coverage:
-            SetupCoverage.values
-                .where((value) => value.name == settings.setupCoverage)
-                .firstOrNull ??
-            currentCoverage,
-        regionCode: settings.setupRegionChosen
-            ? settings.setupRegionCode
-            : settings.regionCode,
-        regionChosen: settings.setupRegionChosen || settings.regionCode != null,
+      draft: _draftOf(
+        settings,
+        profileId: ref.read(currentProfileIdProvider),
+        coverage: currentCoverage,
       ),
     );
     return persist();

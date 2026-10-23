@@ -91,6 +91,10 @@ final _hoverSpring = SpringDescription.withDurationAndBounce(
 final _fadeSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 200),
 );
+final _revealSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 380),
+  bounce: 0.18,
+);
 final _glowInSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 100),
 );
@@ -334,11 +338,13 @@ class NavigationDock extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
   });
 
   final List<NavigationDockDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final NavigationDestinationLabelBehavior labelBehavior;
 
   static double heightOf(BuildContext context) {
     return _barHeight +
@@ -391,6 +397,7 @@ class NavigationDock extends StatelessWidget {
                           destinations: destinations,
                           selectedIndex: selectedIndex,
                           onSelected: onSelected,
+                          labelBehavior: labelBehavior,
                         ),
                       );
                     },
@@ -796,11 +803,13 @@ class FloatingNavigationBar extends StatefulWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onSelected,
+    this.labelBehavior = NavigationDestinationLabelBehavior.alwaysShow,
   });
 
   final List<NavigationDockDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final NavigationDestinationLabelBehavior labelBehavior;
 
   @override
   State<FloatingNavigationBar> createState() => _FloatingNavigationBarState();
@@ -825,6 +834,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
   late final Listenable _motion = Listenable.merge([_lens, _lift, _jelly]);
   late final Listenable _hoverMotion = Listenable.merge([_hover, _hoverShow]);
   final List<_Spring> _parallax = [];
+  final Map<Object, _Spring> _reveal = {};
   late final _Spring _stillParallax = _Spring(this, 0);
   late final NavSlots<Object> _slots = NavSlots<Object>(
     vsync: this,
@@ -868,6 +878,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     _slots.addListener(_slotsChanged);
     _syncDestinations(seed: true);
     _syncParallax();
+    _syncReveal();
   }
 
   @override
@@ -875,6 +886,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     super.didUpdateWidget(oldWidget);
     _syncDestinations();
     _syncParallax();
+    _syncReveal();
     final pressedIdentity = _pressedIdentity;
     if (pressedIdentity != null) {
       final livePressedIndex = _activeIndexFor(pressedIdentity);
@@ -900,6 +912,9 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
       parallax.dispose();
     }
     _stillParallax.dispose();
+    for (final reveal in _reveal.values) {
+      reveal.dispose();
+    }
     _slots
       ..removeListener(_slotsChanged)
       ..dispose();
@@ -953,6 +968,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
       _glowSpread,
       ..._parallax,
       _stillParallax,
+      ..._reveal.values,
     ];
     for (final spring in springs) {
       spring.reduceMotion = reduceMotion;
@@ -965,6 +981,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     final live = _slots.slots.map((slot) => slot.key).toSet();
     _snapshots.removeWhere((key, _) => !live.contains(key));
     _syncParallax();
+    _syncReveal();
     setState(() {});
   }
 
@@ -1020,6 +1037,32 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
     }
     while (_parallax.length < count) {
       _parallax.add(_Spring(this, 0));
+    }
+  }
+
+  void _syncReveal() {
+    final slots = _slots.slots;
+    final live = {for (final slot in slots) slot.key};
+    _reveal.removeWhere((key, reveal) {
+      if (live.contains(key)) return false;
+      reveal.dispose();
+      return true;
+    });
+    final liveKeys = _liveKeys;
+    for (final slot in slots) {
+      if (slot.leaving) continue;
+      final target = switch (widget.labelBehavior) {
+        NavigationDestinationLabelBehavior.alwaysShow => 1.0,
+        NavigationDestinationLabelBehavior.alwaysHide => 0.0,
+        NavigationDestinationLabelBehavior.onlyShowSelected =>
+          liveKeys.indexOf(slot.key) == _selectedIndex ? 1.0 : 0.0,
+      };
+      final reveal = _reveal[slot.key];
+      if (reveal == null) {
+        _reveal[slot.key] = _Spring(this, target);
+      } else if (reveal.target != target) {
+        reveal.springTo(target, _revealSpring);
+      }
     }
   }
 
@@ -1470,9 +1513,15 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
                                         fontSize: _labelSize * labelScale,
                                       ),
                                       labelHeight: lineHeight,
-                                      labelOverflows:
+                                      reveal:
+                                          _reveal[slots[index].key] ??
+                                          kAlwaysCompleteAnimation,
+                                      tooltip:
+                                          widget.labelBehavior !=
+                                              NavigationDestinationLabelBehavior
+                                                  .alwaysShow ||
                                           labels[index].width * labelScale >
-                                          room,
+                                              room,
                                       onActivate: () {
                                         final liveIndex = _activeIndexFor(
                                           slots[index].key,
@@ -1773,7 +1822,8 @@ class _FloatingBarItem extends StatefulWidget {
     required this.lift,
     required this.labelStyle,
     required this.labelHeight,
-    required this.labelOverflows,
+    required this.reveal,
+    required this.tooltip,
     required this.onActivate,
   });
 
@@ -1791,7 +1841,10 @@ class _FloatingBarItem extends StatefulWidget {
   final ValueListenable<double> lift;
   final TextStyle? labelStyle;
   final double labelHeight;
-  final bool labelOverflows;
+
+  /// How far the label shows, from 0, the glyph alone and centred, to 1.
+  final ValueListenable<double> reveal;
+  final bool tooltip;
   final VoidCallback onActivate;
 
   @override
@@ -1825,6 +1878,12 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
         blue: math.min(tint.b * brightness, 1),
       );
     }
+    final glyph = GlyphIcon(
+      widget.destination.glyph,
+      size: _iconSize,
+      color: color,
+      fill: 1,
+    );
     final content = _LensTint(
       part: widget.part,
       lens: widget.lens,
@@ -1837,29 +1896,48 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
       textDirection: Directionality.of(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: _labelInset),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GlyphIcon(
-              widget.destination.glyph,
-              size: _iconSize,
-              color: color,
-              fill: 1,
-            ),
-            const SizedBox(height: _labelGap),
-            SizedBox(
-              height: widget.labelHeight,
-              child: Center(
-                child: Text(
-                  widget.destination.label,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: widget.labelStyle?.copyWith(color: color),
+        child: ListenableBuilder(
+          listenable: widget.reveal,
+          builder: (context, _) {
+            final reveal = widget.reveal.value;
+            final drop = Offset(
+              0,
+              (1 - reveal) * (_labelGap + widget.labelHeight) / 2,
+            );
+            final shown = Curves.easeOut.transform(
+              ((reveal - 0.3) / 0.7).clamp(0.0, 1.0),
+            );
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Transform.translate(offset: drop, child: glyph),
+                const SizedBox(height: _labelGap),
+                // Fading by the text's own alpha: an Opacity layer would
+                // composite the item and escape the lens tint's saveLayer.
+                Transform.translate(
+                  offset: drop,
+                  child: Transform.scale(
+                    scale: 0.8 + 0.2 * shown,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      height: widget.labelHeight,
+                      child: Center(
+                        child: Text(
+                          widget.destination.label,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: widget.labelStyle?.copyWith(
+                            color: color.withValues(alpha: color.a * shown),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -1886,7 +1964,7 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
               side: _focused ? focusRingSide(colorScheme) : BorderSide.none,
             ),
           ),
-          child: widget.labelOverflows
+          child: widget.tooltip
               ? Tooltip(message: widget.destination.label, child: content)
               : content,
         ),

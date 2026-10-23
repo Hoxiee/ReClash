@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Enviar también el sistema operativo y el modelo",
   "subscriptionIdentityDetailsDisclosure": "Junto con el identificador se enviarán la versión del sistema operativo y el modelo del dispositivo.",
   "subscriptionIdentitySettingsTitle": "Identidad de suscripción",
-  "subscriptionIdentityGlobalHint": "Al activarlo, el identificador del dispositivo se envía en las solicitudes de todas las suscripciones URL, salvo que un perfil sobrescriba este ajuste. El sistema operativo y los datos del dispositivo se habilitan por separado para cada suscripción.",
   "subscriptionIdentityUseGlobal": "Usar ajuste global",
   "subscriptionProvider": "Suscripción",
   "subscriptionProviderWebsite": "Sitio web",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Añadidos: {added}; omitidos: {skipped}; errores: {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "Muchas suscripciones dejarán de funcionar si desactivas el envío de HWID."
 }

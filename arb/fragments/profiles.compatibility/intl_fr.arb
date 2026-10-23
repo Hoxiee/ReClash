@@ -52,7 +52,6 @@
   "subscriptionIdentityDetails": "Envoyer aussi le système et le modèle de l’appareil",
   "subscriptionIdentityDetailsDisclosure": "La version du système et le modèle de l’appareil seront également envoyés avec l’identifiant.",
   "subscriptionIdentitySettingsTitle": "Identité des abonnements",
-  "subscriptionIdentityGlobalHint": "Si cette option est activée, l’identifiant de l’appareil est envoyé avec les requêtes de tous les abonnements URL, sauf si un profil remplace ce réglage. Le système et les informations de l’appareil restent activés séparément pour chaque abonnement.",
   "subscriptionIdentityUseGlobal": "Utiliser le réglage global",
   "subscriptionProvider": "Abonnement",
   "subscriptionProviderWebsite": "Site web",
@@ -67,9 +66,16 @@
   "profileBatchResult": "Ajoutés : {added} ; ignorés : {skipped} ; échecs : {failed}.",
   "@profileBatchResult": {
     "placeholders": {
-      "added": {"type": "int"},
-      "skipped": {"type": "int"},
-      "failed": {"type": "int"}
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
-  }
+  },
+  "subscriptionIdentityRegionWarning": "De nombreux abonnements cesseront de fonctionner si l'envoi du HWID est désactivé."
 }

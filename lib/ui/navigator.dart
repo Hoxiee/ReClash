@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:reclash/ui/context.dart';
 import 'package:reclash/ui/deferred_push.dart';
 import 'package:reclash/ui/drag_back.dart';
+import 'package:reclash/ui/inherited.dart';
 import 'package:reclash/ui/keyboard_inset_hold.dart';
 import 'package:reclash/ui/page_transition.dart';
 import 'package:reclash/ui/sheet_navigator.dart';
@@ -23,6 +24,11 @@ class BaseNavigator {
   /// The mobile layout drops a home page's navigator, pages and all, so a
   /// desktop page left open reopens in the mobile form while its opener stays.
   static Future<T?> push<T>(BuildContext context, Widget child) {
+    final hosted = context
+        .getInheritedWidgetOfExactType<PageNavigationScope>()
+        ?.push
+        ?.call<T>(context, child);
+    if (hosted != null) return hosted;
     final navigator = Navigator.of(context);
     if (context.isMobileView) {
       return navigator.push<T>(_routeOf(context, child));

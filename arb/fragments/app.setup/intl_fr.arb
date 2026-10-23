@@ -19,8 +19,6 @@
   "setupCoverageLocalDescription": "Indiquez l’adresse du proxy local dans chaque application que vous souhaitez connecter.",
   "setupCoverageAndroidDescription": "Android demandera l’autorisation de créer une connexion VPN. La sélection des applications se trouve dans les paramètres d’accès.",
   "setupCoverageNote": "Intercepter tout le trafic ne signifie pas tout envoyer via un serveur. Les routes directes restent actives.",
-  "setupRegionConfirm": "Utiliser ces paramètres régionaux",
-  "setupRegionDescription": "La région suggérée provient de cet appareil, et non de la langue de l’interface. Appliquez-la uniquement si elle correspond à votre réseau.",
   "setupRegionNeutral": "Conserver les valeurs du profil",
   "setupCheckAction": "Vérifier la connexion",
   "setupCheckingTitle": "Connexion et vérification",
@@ -33,7 +31,16 @@
   "setupPhaseServices": "Vérification des services",
   "setupPhaseAlternatives": "Recherche d’un autre serveur",
   "setupStepStatus": "{step} sur {total}",
-  "@setupStepStatus": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@setupStepStatus": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "setupCheckLimit": "Le résultat concerne cette route, pas toutes les applications ni tous les sites web.",
   "setupConnectedTitle": "La connexion fonctionne",
   "setupConnectedDescription": "La route sélectionnée a répondu. Le trafic suit les règles de votre profil.",
@@ -49,7 +56,13 @@
   "setupSaveWithoutConnection": "Enregistrer sans se connecter",
   "setupRepeat": "Vérifier à nouveau",
   "setupTryServer": "Essayer {server}",
-  "@setupTryServer": { "placeholders": { "server": { "type": "String" } } },
+  "@setupTryServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "setupAlternativeDescription": "Ce serveur a répondu à une sonde distincte. Basculez dessus et vérifiez à nouveau toute la route.",
   "setupReport": "Rapport de vérification",
   "setupReceipt": "Votre connexion",
@@ -73,10 +86,38 @@
   "setupRestart": "Configurer la connexion",
   "setupLaterNote": "La configuration est incomplète ; la connexion n’a pas été vérifiée.",
   "setupProfileCount": "{count} profils disponibles",
-  "@setupProfileCount": { "placeholders": { "count": { "type": "int" } } },
+  "@setupProfileCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "setupAgeKeyDescription": "Ce profil est chiffré. Saisissez sa clé age pour continuer.",
   "setupFinishDescription": "Vous pouvez modifier chaque choix dans les paramètres.",
   "setupRouteChanged": "La route a changé pendant la vérification. Vérifiez à nouveau la connexion actuelle.",
   "setupUnknownError": "L’opération n’a pas abouti. Réessayez ou consultez les détails.",
-  "setupRequestPermission": "Autoriser la connexion"
+  "setupRequestPermission": "Autoriser la connexion",
+  "setupReceiptRegion": "Région",
+  "setupRegionTitle": "D’où vous connectez-vous ?",
+  "setupRegionStepDescription": "ReClash adapte le DNS, la MTU et les routes directes aux réseaux de votre pays. La langue de l’interface ne change pas.",
+  "setupRegionNeutralDescription": "Les réglages régionaux ne changent pas.",
+  "setupRegionUnchosen": "Sans choix, vos réglages régionaux actuels restent tels quels.",
+  "setupRecommended": "Recommandé",
+  "setupDirectTitle": "Sites et applications locaux en direct",
+  "setupDirectDescription": "Les services de votre pays s’ouvrent sans le serveur : plus vite, et les banques ou sites publics ne vous bloquent pas. Ces règles globales sont ajoutées :",
+  "setupDirectAppsScanning": "Recherche des applications locales…",
+  "setupDirectApps": "Applications hors VPN : {count}",
+  "setupDirectAppsReview": "Elles fonctionneront sans le VPN. Vous pourrez modifier la liste plus tard dans le contrôle d’accès.",
+  "setupDirectAppsNone": "Aucune application locale trouvée. Les sites passent tout de même en direct.",
+  "setupLeaveTitle": "Quitter la configuration ?",
+  "setupLeaveMessage": "ReClash va se fermer. Vos choix sont enregistrés et la configuration reprendra à la prochaine ouverture.",
+  "setupProfileContinueHint": "Ajoutez ou choisissez un profil pour continuer.",
+  "setupProfileImportHint": "Collez le lien reçu par e-mail, bot ou espace client de votre fournisseur, ou choisissez un fichier ou un QR code.",
+  "setupProfileImportAnother": "Ajouter un autre profil",
+  "setupChangeSettings": "Modifier les réglages",
+  "setupTipsTitle": "Ce que vous pouvez essayer",
+  "setupTipNetwork": "Vérifiez qu’Internet fonctionne sans ReClash.",
+  "setupTipProfile": "Mettez le profil à jour ou choisissez un autre serveur après la configuration.",
+  "setupTipCoverage": "Choisissez une autre portée : certains réseaux bloquent les connexions VPN."
 }

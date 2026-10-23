@@ -259,6 +259,27 @@ void main() {
       },
     );
 
+    test('an unset global setting follows the regional default', () async {
+      final store = DeviceIdentityStore(
+        storage: _MemoryStorage(),
+        source: () async => _material('stable'),
+      );
+      final origin = Uri.parse(_origin);
+
+      expect(await store.globalSendEnabled(), isFalse);
+      expect(await store.globalSendEnabled(byDefault: true), isTrue);
+      expect(
+        await store.requestFields(3, origin, sendByDefault: true),
+        isNotNull,
+      );
+      await store.setGlobalSendEnabled(false);
+      expect(await store.globalSendEnabled(byDefault: true), isFalse);
+      expect(await store.requestFields(3, origin, sendByDefault: true), isNull);
+      expect(sendsDeviceIdentityByDefault('RU'), isTrue);
+      expect(sendsDeviceIdentityByDefault('CN'), isFalse);
+      expect(sendsDeviceIdentityByDefault(null), isFalse);
+    });
+
     test('normalizes origins and rejects non-web or credentialed values', () {
       expect(
         normalizeIdentityOrigin(Uri.parse('HTTPS://Example.test:443/path')),

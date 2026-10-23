@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -11,14 +10,13 @@ import 'package:reclash/providers/tool_commands.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/views/tools/navigation.dart';
 import 'package:reclash/views/tools/search.dart';
-import 'package:reclash/ui/deferred_push.dart';
-import 'package:reclash/ui/drag_back.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/ui/page_transition.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _maxBodyWidth = 840.0;
 
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
@@ -34,7 +32,6 @@ class ToolsViewState extends ConsumerState<ToolsView> {
   var _split = false;
   var _navigating = false;
   final _recentIds = <String>[];
-  ({ToolPage page, ContainerOrigin origin})? _origin;
 
   static const _recentLimit = 6;
 
@@ -65,25 +62,8 @@ class ToolsViewState extends ConsumerState<ToolsView> {
 
   @override
   void dispose() {
-    _observer.state.dispose();
     _searchFocus.dispose();
     super.dispose();
-  }
-
-  /// The tile the page grows from, handed over once by the tap that opened it.
-  ContainerOrigin? takeOrigin(ToolPage page) {
-    final offer = _origin;
-    if (offer == null || offer.page != page || !offer.origin.isMounted) {
-      return null;
-    }
-    _origin = null;
-    return offer.origin;
-  }
-
-  void _offerOrigin(ToolPage page, ContainerOrigin? origin) {
-    if (origin == null) return;
-    _origin = (page: page, origin: origin);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _origin = null);
   }
 
   Future<bool> handleBack() async {
@@ -108,10 +88,11 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     return false;
   }
 
-  Future<bool> _dismissEditors() async {
+  Future<bool> _dismissEditors({Route<dynamic>? until}) async {
     final navigator = _navigator.currentState;
     while (navigator != null &&
         _observer.top?.settings is! Page &&
+        !identical(_observer.top, until) &&
         navigator.canPop()) {
       final previous = _observer.top;
       if (previous == null || !await canLeaveRoute(previous) || !mounted) {
@@ -123,11 +104,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     return mounted;
   }
 
-  Future<void> openEntry(
-    ToolEntry entry, {
-    bool push = false,
-    ContainerOrigin? origin,
-  }) async {
+  Future<void> openEntry(ToolEntry entry, {bool push = false}) async {
     if (_navigating) return;
     _navigating = true;
     try {
@@ -152,7 +129,6 @@ class ToolsViewState extends ConsumerState<ToolsView> {
       } else {
         _recordRecent(entry.id);
       }
-      _offerOrigin(route.page, origin);
       ref.read(toolsSessionProvider.notifier).open(route, push: push);
     } finally {
       _navigating = false;
@@ -206,8 +182,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
       builder: (sheetContext) => ToolsCatalogPanel(
         autofocus: true,
         onDismiss: () => Navigator.of(sheetContext).pop(),
-        onSelect: (entry, {origin}) async =>
-            Navigator.of(sheetContext).pop(entry),
+        onSelect: (entry) async => Navigator.of(sheetContext).pop(entry),
       ),
     );
     if (mounted && entry != null) await openEntry(entry);
@@ -228,30 +203,87 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     }
   }
 
-  Widget _breadcrumbs(List<ToolRoute> path, Map<ToolPage, ToolEntry> pages) =>
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final (index, route) in path.indexed) ...[
-              if (index > 0)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Text('›'),
-                ),
-              if (index == path.length - 1)
-                Text(pages[route.page]!.title)
-              else
-                TextButton(
-                  onPressed: () => unawaited(_popTo(index + 1)),
-                  child: Text(pages[route.page]!.title),
-                ),
+  Future<void> _popToDetail(Route<dynamic> target) async {
+    if (_navigating) return;
+    _navigating = true;
+    try {
+      await _dismissEditors(until: target);
+    } finally {
+      _navigating = false;
+    }
+  }
+
+  void _selectPathSegment(int index) {
+    if (index < _observer.pages.length) {
+      unawaited(_popTo(index + 1));
+      return;
+    }
+    final target = _observer._routes
+        .whereType<_ToolsDetailRoute<dynamic>>()
+        .where((route) => route.depth == index)
+        .lastOrNull;
+    if (target != null) unawaited(_popToDetail(target));
+  }
+
+  /// The path header of [route], ending in its own title where it has one.
+  String? _pathOf(Route<dynamic> route) {
+    if (route is _ToolsDetailRoute) {
+      final segments = [?route.parent, ?_scaffoldTitleIn(route.subtreeContext)];
+      return segments.isEmpty ? null : segments.join(' › ');
+    }
+    final page = route.settings;
+    return page is _ToolsPage && !_ToolsRouteObserver._isPlaceholder(route)
+        ? page.headerTitle
+        : null;
+  }
+
+  /// Pushes a page a Tools page opens on its own, such as an editor, as a
+  /// page of the workspace beneath that page's path.
+  Future<T?>? _pushDetail<T>(BuildContext context, Widget page) {
+    final navigator = _navigator.currentState;
+    final below = ModalRoute.of(context);
+    if (navigator == null ||
+        below == null ||
+        !identical(Navigator.of(context), navigator)) {
+      return null;
+    }
+    final parent = _pathOf(below);
+    return navigator.push<T>(
+      _ToolsDetailRoute<T>(
+        host: this,
+        parent: parent,
+        parentHasBack:
+            below is _ToolsDetailRoute ||
+            _observer.pages.toList().indexOf(below) > 0,
+        page: page,
+      ),
+    );
+  }
+
+  Widget _catalog(NavigationDockScope? navigation) {
+    final catalog = ToolsCatalogPanel(
+      searchFocus: _searchFocus,
+      onSelect: openEntry,
+    );
+    if (navigation == null) return catalog;
+    final bar = navigation.held
+        ? navigation.navigation
+        : const SizedBox.shrink();
+    return navigation.floating
+        ? Stack(
+            fit: StackFit.expand,
+            children: [
+              catalog,
+              PositionedDirectional(start: 0, end: 0, bottom: 0, child: bar),
             ],
-          ],
-        ),
-      );
+          )
+        : Column(
+            children: [
+              Expanded(child: catalog),
+              bar,
+            ],
+          );
+  }
 
   void _recordRecent(String id) {
     setState(() {
@@ -264,53 +296,56 @@ class ToolsViewState extends ConsumerState<ToolsView> {
     });
   }
 
-  void _openWidget(Widget widget, {ContainerOrigin? origin}) {
+  void _openWidget(Widget widget) {
     final page = toolPageOf(widget);
     if (page == null) return;
     _recordRecent('page.${page.name}');
-    _offerOrigin(page, origin);
     ref.read(toolsSessionProvider.notifier).open(ToolRoute(page), push: true);
   }
 
   Widget _landing(List<ToolEntry> entries) {
     final l = context.appLocalizations;
     return PagePresentationScope(
-      maxBodyWidth: 840,
-      child: CommonScaffold(
-        title: l.toolsLastUsed,
-        body: entries.isEmpty
-            ? AppBarClearance(
-                child: NullStatus(
-                  label: l.toolsChoose,
-                  illustration: NullStatusIllustration.data,
-                ),
-              )
-            : Builder(
-                builder: (context) => ListView(
-                  padding: EdgeInsets.only(
-                    left: 16,
-                    top: context.contentTopPadding,
-                    right: 16,
-                    bottom: 20 + BottomInsetScope.of(context),
+      child: CappedBodyScope(
+        maxWidth: _maxBodyWidth,
+        child: CommonScaffold(
+          title: l.toolsLastUsed,
+          body: entries.isEmpty
+              ? AppBarClearance(
+                  child: NullStatus(
+                    label: l.toolsChoose,
+                    illustration: NullStatusIllustration.data,
                   ),
-                  children: [
-                    generateSection(
-                      items: [
-                        for (final entry in entries)
-                          ListItem(
-                            key: ValueKey('tools-recent-${entry.id}'),
-                            leading: GlyphIcon(entry.glyph),
-                            title: Text(entry.title),
-                            subtitle: entry.path.isEmpty
-                                ? null
-                                : Text(entry.path),
-                            onTap: () => unawaited(openEntry(entry)),
-                          ),
-                      ],
-                    ),
-                  ],
+                )
+              : Builder(
+                  builder: (context) => ListView(
+                    padding:
+                        EdgeInsets.only(
+                          left: 16,
+                          top: context.contentTopPadding,
+                          right: 16,
+                          bottom: 20 + BottomInsetScope.of(context),
+                        ) +
+                        context.bodyInsets,
+                    children: [
+                      generateSection(
+                        items: [
+                          for (final entry in entries)
+                            ListItem(
+                              key: ValueKey('tools-recent-${entry.id}'),
+                              leading: GlyphIcon(entry.glyph),
+                              title: Text(entry.title),
+                              subtitle: entry.path.isEmpty
+                                  ? null
+                                  : Text(entry.path),
+                              onTap: () => unawaited(openEntry(entry)),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -335,6 +370,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
         .where((route) => pages.containsKey(route.page))
         .toList();
     final active = PageActivityScope.isActiveOf(context);
+    final navigation = NavigationDockScope.maybeOf(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
@@ -359,86 +395,21 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                   top: 0,
                   bottom: 0,
                   width: catalogWidth,
-                  child: ValueListenableBuilder(
-                    valueListenable: _observer.state,
-                    builder: (context, motion, catalog) {
-                      final covered =
-                          !split &&
-                          path.isNotEmpty &&
-                          !motion.overCatalog &&
-                          motion.settled != _ToolsRouteObserver.placeholder;
-                      final moving = _observer.moving;
-                      return AnimatedBuilder(
-                        animation:
-                            (moving is TransitionRoute
-                                ? moving.animation
-                                : null) ??
-                            kAlwaysCompleteAnimation,
-                        builder: (context, _) {
-                          // The bar stays while the page grows over it, which
-                          // covers the bar edge first.
-                          final top = moving is ContainerRoute
-                              ? (moving as ContainerRoute).containerTop
-                              : null;
-                          // A drag back leaves the page's own bar in place
-                          // until the pop starts, so the catalog's waits too.
-                          final closing =
-                              moving is TransitionRoute &&
-                              moving.animation?.status ==
-                                  AnimationStatus.reverse;
-                          final barShown =
-                              split ||
-                              (top != null && motion.overCatalog
-                                  ? true
-                                  : path.isEmpty ||
-                                        closing ||
-                                        motion.settled ==
-                                            _ToolsRouteObserver.placeholder);
-                          return Offstage(
-                            offstage: covered,
-                            child: ExcludeFocus(
-                              excluding: covered,
-                              child: TickerMode(
-                                enabled: active && !covered,
-                                child: PageActivityScope(
-                                  isActive: active && !covered && barShown,
-                                  child: PageViewport(
-                                    bounds: Rect.fromLTWH(
-                                      rtl
-                                          ? constraints.maxWidth - catalogWidth
-                                          : 0,
-                                      0,
-                                      catalogWidth,
-                                      constraints.maxHeight,
-                                    ),
-                                    child: PageBarCover(
-                                      listenable:
-                                          (moving is TransitionRoute
-                                              ? moving.animation
-                                              : null) ??
-                                          kAlwaysCompleteAnimation,
-                                      top: () {
-                                        final moving = _observer.moving;
-                                        return moving is ContainerRoute
-                                            ? (moving as ContainerRoute)
-                                                  .containerTop
-                                            : null;
-                                      },
-                                      child: catalog!,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: ToolsCatalogPanel(
-                      searchFocus: _searchFocus,
-                      onSelect: openEntry,
-                    ),
-                  ),
+                  child: split
+                      ? PageViewport(
+                          routeHeader: true,
+                          bounds: Rect.fromLTWH(
+                            rtl ? constraints.maxWidth - catalogWidth : 0,
+                            0,
+                            catalogWidth,
+                            constraints.maxHeight,
+                          ),
+                          child: ToolsCatalogPanel(
+                            searchFocus: _searchFocus,
+                            onSelect: openEntry,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
                 if (split)
                   PositionedDirectional(
@@ -456,67 +427,79 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                   end: 0,
                   top: 0,
                   bottom: 0,
-                  child: ValueListenableBuilder(
-                    valueListenable: _observer.state,
-                    // A popped page leaves the path at once but animates out.
-                    builder: (context, motion, detail) => Offstage(
-                      offstage: !split && path.isEmpty && !motion.overCatalog,
-                      child: detail,
+                  child: PageViewport(
+                    routeHeader: split,
+                    inlineHeaders: !split,
+                    bounds: Rect.fromLTWH(
+                      rtl ? 0 : detailStart,
+                      0,
+                      constraints.maxWidth - detailStart,
+                      constraints.maxHeight,
                     ),
-                    child: PageViewport(
-                      bounds: Rect.fromLTWH(
-                        rtl ? 0 : detailStart,
-                        0,
-                        constraints.maxWidth - detailStart,
-                        constraints.maxHeight,
-                      ),
-                      child: Navigator(
-                        key: _navigator,
-                        observers: [_observer],
-                        onDidRemovePage: (page) {
-                          if (!_navigator.currentState!.widget.pages.contains(
-                            page,
-                          )) {
-                            return;
-                          }
-                          final state = ref.read(toolsSessionProvider);
-                          final index = state.path.indexWhere(
-                            (route) => page.key == ValueKey(route.page),
-                          );
-                          if (index >= 0) {
-                            ref
-                                .read(toolsSessionProvider.notifier)
-                                .popTo(index);
-                          }
-                        },
-                        pages: [
+                    child: Navigator(
+                      key: _navigator,
+                      observers: [_observer],
+                      onDidRemovePage: (page) {
+                        if (!_navigator.currentState!.widget.pages.contains(
+                          page,
+                        )) {
+                          return;
+                        }
+                        final state = ref.read(toolsSessionProvider);
+                        final index = state.path.indexWhere(
+                          (route) => page.key == ValueKey(route.page),
+                        );
+                        if (index >= 0) {
+                          ref.read(toolsSessionProvider.notifier).popTo(index);
+                        }
+                      },
+                      pages: [
+                        _ToolsPage(
+                          key: const ValueKey('tools.placeholder'),
+                          headerTitle: split ? l.toolsLastUsed : l.tools,
+                          child: split
+                              ? _RetainedLanding(
+                                  child: path.isEmpty
+                                      ? _landing(recentEntries)
+                                      : null,
+                                )
+                              : _catalog(navigation),
+                        ),
+                        for (final route in path)
                           _ToolsPage(
-                            key: const ValueKey('tools.placeholder'),
-                            child: split && path.isEmpty
-                                ? _landing(recentEntries)
-                                : const SizedBox.expand(),
-                          ),
-                          for (final route in path)
-                            _ToolsPage(
-                              key: ValueKey(route.page),
-                              child: PagePresentationScope(
-                                title: split
-                                    ? _breadcrumbs(
-                                        path
-                                            .take(path.indexOf(route) + 1)
-                                            .toList(),
-                                        pages,
-                                      )
-                                    : null,
-                                maxBodyWidth:
+                            key: ValueKey(route.page),
+                            headerTitle: path
+                                .take(path.indexOf(route) + 1)
+                                .map((item) => pages[item.page]!.title)
+                                .join(' › '),
+                            child: PagePresentationScope(
+                              previousTitle: !split
+                                  ? null
+                                  : path.indexOf(route) == 0
+                                  ? l.toolsLastUsed
+                                  : path
+                                        .take(path.indexOf(route))
+                                        .map((item) => pages[item.page]!.title)
+                                        .join(' › '),
+                              previousHasBack: path.indexOf(route) > 0,
+                              transitionTitle: path
+                                  .take(path.indexOf(route) + 1)
+                                  .map((item) => pages[item.page]!.title)
+                                  .join(' › '),
+                              onTitleSelect: split
+                                  ? (index) => unawaited(_popTo(index + 1))
+                                  : null,
+                              child: CappedBodyScope(
+                                maxWidth:
                                     split &&
                                         route.page != ToolPage.coreRuntimeConfig
-                                    ? 840
+                                    ? _maxBodyWidth
                                     : double.infinity,
                                 child: PageNavigationScope(
                                   canOpen: (widget) =>
                                       toolPageOf(widget) != null,
                                   open: _openWidget,
+                                  push: _pushDetail,
                                   child: SettingsRevealScope(
                                     targetId: route.settingId,
                                     nonce: session.focusNonce,
@@ -526,8 +509,8 @@ class ToolsViewState extends ConsumerState<ToolsView> {
                                 ),
                               ),
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -540,43 +523,135 @@ class ToolsViewState extends ConsumerState<ToolsView> {
   }
 }
 
+/// Keeps the landing under the first page while that page fades in, then
+/// empties, so a later replacement never uncovers it.
+class _RetainedLanding extends StatefulWidget {
+  const _RetainedLanding({required this.child});
+
+  final Widget? child;
+
+  @override
+  State<_RetainedLanding> createState() => _RetainedLandingState();
+}
+
+class _RetainedLandingState extends State<_RetainedLanding> {
+  Widget? _shown;
+  Animation<double>? _cover;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(_RetainedLanding oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  void _sync() {
+    _cover?.removeStatusListener(_onCover);
+    _cover = null;
+    if (widget.child case final child?) {
+      _shown = child;
+      return;
+    }
+    final cover = ModalRoute.of(context)?.secondaryAnimation;
+    if (cover == null || cover.isCompleted) {
+      _shown = null;
+    } else {
+      _cover = cover..addStatusListener(_onCover);
+    }
+  }
+
+  void _onCover(AnimationStatus status) {
+    if (status.isCompleted) setState(_sync);
+  }
+
+  @override
+  void dispose() {
+    _cover?.removeStatusListener(_onCover);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => _shown ?? const SizedBox.expand();
+}
+
 class _ToolsPage extends Page<void> {
-  const _ToolsPage({super.key, required this.child});
+  const _ToolsPage({super.key, required this.headerTitle, required this.child});
+
+  final String headerTitle;
 
   final Widget child;
 
   @override
   Route<void> createRoute(BuildContext context) {
-    final origin = switch (key) {
-      ValueKey<ToolPage>(value: final page) =>
-        context.findAncestorStateOfType<ToolsViewState>()?.takeOrigin(page),
-      _ => null,
-    };
-    return origin == null
-        ? _ToolsPageRoute(settings: this)
-        : openContainerPageRoute(origin: origin, page: child, settings: this);
+    final previous = context
+        .findAncestorStateOfType<ToolsViewState>()
+        ?._observer
+        .top
+        ?.settings;
+    return _ToolsPageRoute(
+      settings: this,
+      previousTitle: previous is _ToolsPage ? previous.headerTitle : null,
+      previousHasBack:
+          previous is _ToolsPage &&
+          previous.key != const ValueKey('tools.placeholder'),
+    );
   }
 }
 
-class _ToolsPageRoute extends PageRoute<void>
-    with
-        DragBackRouteMixin<void>,
-        DeferredPushRouteMixin<void>,
-        SharedXPageRouteMixin<void> {
-  _ToolsPageRoute({required super.settings});
+abstract class _ToolsRoute<T> extends PageRoute<T>
+    with DragBackRouteMixin<T>, DeferredPushRouteMixin<T> {
+  _ToolsRoute({super.settings});
 
   @override
-  bool sharesMotionWith(Route<dynamic>? route) => route is _ToolsPageRoute;
+  bool get maintainState => true;
 
   @override
-  Color backdropOf(Color surface, {required bool dragging}) =>
-      Colors.transparent;
+  Color? get barrierColor => null;
 
   @override
-  Color transitionColorOf(Color surface) => Colors.transparent;
+  String? get barrierLabel => null;
 
   @override
-  bool get popGestureEnabled => !system.isDesktop && super.popGestureEnabled;
+  Duration get transitionDuration => SlideOverPageTransition.duration;
+
+  @override
+  Duration get reverseTransitionDuration =>
+      SlideOverPageTransition.reverseDuration;
+
+  // A desktop pan in the split layout selects text and resizes panes.
+  @override
+  bool get popGestureEnabled =>
+      (!system.isDesktop ||
+          navigator?.context
+                  .findAncestorStateOfType<ToolsViewState>()
+                  ?._split ==
+              false) &&
+      super.popGestureEnabled;
+
+  bool get coversBelow => true;
+
+  Widget buildContent(BuildContext context, Animation<double> animation);
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => dragBackDetector(
+    SlideOverPageTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      dragged: isDragBackActive,
+      uncoveredByGesture: navigator!.userGestureInProgress,
+      child: child,
+    ),
+  );
 
   @override
   Widget buildPage(
@@ -589,27 +664,126 @@ class _ToolsPageRoute extends PageRoute<void>
     child: KeyboardInsetHold(
       child: PageViewport.inherit(
         context,
-        child: (settings as _ToolsPage).child,
+        child: coversBelow
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  const _ToolsBackdrop(),
+                  buildContent(context, animation),
+                ],
+              )
+            : buildContent(context, animation),
       ),
     ),
   );
+}
+
+class _ToolsPageRoute extends _ToolsRoute<void> {
+  _ToolsPageRoute({
+    required super.settings,
+    required this.previousTitle,
+    required this.previousHasBack,
+  });
+
+  final String? previousTitle;
+  final bool previousHasBack;
+
+  @override
+  bool get coversBelow => !_ToolsRouteObserver._isPlaceholder(this);
+
+  @override
+  Widget buildContent(BuildContext context, Animation<double> animation) {
+    final child = (settings as _ToolsPage).child;
+    if (!coversBelow ||
+        child is! PagePresentationScope ||
+        child.previousTitle == null) {
+      return child;
+    }
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (_, _) {
+        final returning = animation.status == AnimationStatus.reverse;
+        return PagePresentationScope(
+          title: child.title,
+          onTitleSelect: child.onTitleSelect,
+          transitionTitle: child.transitionTitle,
+          previousTitle: returning
+              ? child.previousTitle
+              : previousTitle ?? child.previousTitle,
+          previousHasBack: returning ? child.previousHasBack : previousHasBack,
+          child: child.child,
+        );
+      },
+    );
+  }
+}
+
+/// A page a Tools page pushes itself, presented as one more step of its path.
+class _ToolsDetailRoute<T> extends _ToolsRoute<T> {
+  _ToolsDetailRoute({
+    required this.host,
+    required this.parent,
+    required this.parentHasBack,
+    required this.page,
+  });
+
+  final ToolsViewState host;
+  final String? parent;
+  final bool parentHasBack;
+  final Widget page;
+
+  /// The index of this page's own title in its path header.
+  int get depth => parent?.split(' › ').length ?? 0;
+
+  @override
+  Widget buildContent(BuildContext context, Animation<double> animation) {
+    final split = !ViewScope.isMobileOf(context);
+    return PagePresentationScope(
+      previousTitle: split ? parent : null,
+      previousHasBack: parentHasBack,
+      onTitleSelect: split ? host._selectPathSegment : null,
+      child: CappedBodyScope(
+        maxWidth: split ? _maxBodyWidth : double.infinity,
+        child: PageNavigationScope(
+          canOpen: (_) => false,
+          open: (_) {},
+          push: host._pushDetail,
+          child: page,
+        ),
+      ),
+    );
+  }
+}
+
+String? _scaffoldTitleIn(BuildContext? context) {
+  CommonScaffold? scaffold;
+  void visit(Element element) {
+    if (element.widget case final CommonScaffold found) {
+      scaffold = found;
+    } else if (scaffold == null) {
+      element.visitChildren(visit);
+    }
+  }
+
+  context?.visitChildElements(visit);
+  return scaffold?.title;
+}
+
+/// Covers the pages beneath with the workspace wallpaper, which holds still as
+/// the page slides in or back, or changes tabs.
+class _ToolsBackdrop extends StatelessWidget {
+  const _ToolsBackdrop();
+
+  @override
+  Widget build(BuildContext context) =>
+      TabContentMotion.wrap(context, const PageBackdrop());
 }
 
 class _ToolsRouteObserver extends NavigatorObserver {
   static const placeholder = ValueKey('tools.placeholder');
 
   final _routes = <Route<dynamic>>[];
-  final state = ValueNotifier<({LocalKey? settled, bool overCatalog})>((
-    settled: null,
-    overCatalog: false,
-  ));
-  Route<dynamic>? _moving;
-  Route<dynamic>? _below;
-  var _gesture = false;
-  var _flushScheduled = false;
-
   Route<dynamic>? get top => _routes.lastOrNull;
-  Route<dynamic>? get moving => _moving;
   Iterable<Route<dynamic>> get pages => _routes.where(
     (route) => route.settings is Page && !_isPlaceholder(route),
   );
@@ -617,92 +791,24 @@ class _ToolsRouteObserver extends NavigatorObserver {
   static bool _isPlaceholder(Route<dynamic>? route) =>
       route?.settings is Page && (route!.settings as Page).key == placeholder;
 
-  // A push or removal can land mid-build, where listeners may not rebuild.
-  void _publish() {
-    final scheduler = SchedulerBinding.instance;
-    if (scheduler.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      _flush();
-    } else if (!_flushScheduled) {
-      _flushScheduled = true;
-      scheduler.addPostFrameCallback((_) {
-        _flushScheduled = false;
-        _flush();
-      });
-    }
-  }
-
-  void _flush() {
-    final moving = _moving;
-    final page = _routes.lastWhereOrNull((route) => route.settings is Page);
-    final animation = page is TransitionRoute ? page.animation : null;
-    state.value = (
-      settled: moving == null && animation?.isCompleted == true
-          ? (page!.settings as Page).key
-          : null,
-      overCatalog: moving != null && _isPlaceholder(_below),
-    );
-  }
-
-  void _move(Route<dynamic> route, Route<dynamic>? below) {
-    if (route.settings is! Page) return;
-    _moving = route;
-    _below = below;
-    _publish();
-  }
-
-  void _settle(Route<dynamic> route) {
-    if (!identical(_moving, route) || _gesture) return;
-    _moving = null;
-    _publish();
-  }
-
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _routes.add(route);
-    if (route is TransitionRoute && route.settings is Page) {
-      route.animation?.addStatusListener((status) {
-        if (status.isCompleted || status.isDismissed) _settle(route);
-      });
-    }
-    final added =
-        route is TransitionRoute && route.animation?.isCompleted == true;
-    if (previousRoute == null || added) {
-      _publish();
-    } else {
-      _move(route, previousRoute);
-    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _routes.remove(route);
-    _move(route, previousRoute);
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _routes.remove(route);
-    _publish();
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     final index = oldRoute == null ? -1 : _routes.indexOf(oldRoute);
     if (index >= 0 && newRoute != null) _routes[index] = newRoute;
-    _publish();
-  }
-
-  @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previous) {
-    _gesture = route.settings is Page;
-    if (_gesture) _move(route, previous);
-  }
-
-  @override
-  void didStopUserGesture() {
-    _gesture = false;
-    final moving = _moving;
-    final animation = moving is TransitionRoute ? moving.animation : null;
-    if (moving != null && animation?.isAnimating != true) _settle(moving);
   }
 }

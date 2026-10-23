@@ -125,6 +125,7 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
   ImageStream? _stream;
   ImageStreamListener? _listener;
   bool _failed = false;
+  bool _built = false;
 
   bool get _active => widget.settings.enabled && _image != null && !_failed;
 
@@ -179,7 +180,14 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
           }
           _failed = false;
         });
-        _setVisibility(_requested == image && widget.settings.enabled);
+        final visible = _requested == image && widget.settings.enabled;
+        // An image decoded before the first frame shows with the page it
+        // backs, as a page backdrop finds it in the image cache.
+        if (_built) {
+          _setVisibility(visible);
+        } else {
+          _visibility.value = visible ? 1 : 0;
+        }
         if (MediaQuery.disableAnimationsOf(context)) {
           _replacement.value = 1;
           _outgoing = null;
@@ -247,6 +255,7 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
 
   @override
   Widget build(BuildContext context) {
+    _built = true;
     final image = _image;
     final outgoing = _outgoing;
     return ColoredBox(

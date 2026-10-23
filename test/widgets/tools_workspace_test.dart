@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:code_forge/code_forge.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:reclash/core/controller.dart';
@@ -21,7 +22,10 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/pages/home.dart';
 import 'package:reclash/ui/icons/icons.dart';
+import 'package:reclash/ui/navigation_title.dart';
 
+import 'package:reclash/views/config/filters.dart';
+import 'package:reclash/views/config/routing.dart';
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/common/common.dart';
@@ -31,8 +35,10 @@ import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/region.dart';
 import 'package:reclash/views/tools/global_search.dart';
+import 'package:reclash/views/tools/navigation.dart';
 import 'package:reclash/views/tools/search.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
@@ -41,6 +47,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/app_paths.dart';
@@ -125,17 +132,31 @@ void main() {
     await root.delete(recursive: true);
   });
 
+  Rect settingsColumn(WidgetTester tester, Finder scroll) => tester.getRect(
+    find.byWidget(tester.widget<SettingsPageScroll>(scroll).child),
+  );
+
   Future<ProviderContainer> pumpTools(
     WidgetTester tester, {
     Size size = const Size(1200, 900),
     bool home = false,
     bool wallpaper = false,
+    bool safeArea = false,
     ThemeData? theme,
+    ScrollBehavior? scrollBehavior,
+    List<Script> scripts = const [],
+    List<Rule> rules = const [],
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    if (safeArea) {
+      tester.view.padding = const FakeViewPadding(top: 32, bottom: 24);
+      tester.view.viewPadding = const FakeViewPadding(top: 32, bottom: 24);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+    }
     final container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(
@@ -163,6 +184,15 @@ void main() {
                   ),
                 ),
                 NavigationItem(
+                  glyph: AppGlyphs.dashboard,
+                  label: PageLabel.proxies,
+                  builder: (_) => const CommonScaffold(
+                    key: GlobalObjectKey(PageLabel.proxies),
+                    title: 'Second',
+                    body: Text('second content'),
+                  ),
+                ),
+                NavigationItem(
                   glyph: AppGlyphs.tools,
                   label: PageLabel.tools,
                   builder: (_) =>
@@ -173,8 +203,8 @@ void main() {
           ),
         detectedRegionProvider.overrideWith((ref) async => null),
         profilesProvider.overrideWith(TestProfiles.new),
-        scriptsProvider.overrideWith(TestScripts.new),
-        globalRulesProvider.overrideWith(TestGlobalRules.new),
+        scriptsProvider.overrideWith(() => TestScripts(scripts)),
+        globalRulesProvider.overrideWith(() => TestGlobalRules(rules)),
         iconSetsProvider.overrideWith(TestIconSets.new),
         clashProvidersProvider.overrideWith(TestClashProviders.new),
       ],
@@ -189,12 +219,17 @@ void main() {
     container.read(viewSizeProvider.notifier).value = size;
     final app = TestApp(
       theme: theme,
-      homeBuilder: (child) => wallpaper
-          ? PageBackgroundRegistration(
-              builder: (_, _, content) => _WorkspaceBackdrop(child: content),
-              child: child,
-            )
-          : child,
+      homeBuilder: (child) {
+        final home = wallpaper
+            ? PageBackgroundRegistration(
+                builder: (_, _, content) => _WorkspaceBackdrop(child: content),
+                child: child,
+              )
+            : child;
+        return scrollBehavior == null
+            ? home
+            : ScrollConfiguration(behavior: scrollBehavior, child: home);
+      },
       child: home ? const HomePage() : const ToolsView(),
     );
     await tester.pumpWidget(
@@ -278,7 +313,7 @@ void main() {
   }
 
   for (final size in [const Size(390, 844), const Size(1800, 1000)]) {
-    testWidgets('Tools shares one wallpaper across its routes at $size', (
+    testWidgets('Tools paints wallpaper on its routes at $size', (
       tester,
     ) async {
       final container = await pumpTools(
@@ -294,7 +329,7 @@ void main() {
           .read(toolsSessionProvider.notifier)
           .open(const ToolRoute(ToolPage.general));
       await tester.pumpAndSettle();
-      expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+      expect(find.byType(_WorkspaceBackdrop), findsNWidgets(2));
       expect(
         PageBackgroundScope.opacityOf(
           tester.element(find.byType(SettingsPageScroll)),
@@ -337,7 +372,7 @@ void main() {
 
     for (final brightness in Brightness.values) {
       testWidgets(
-        'Tools header stays fixed through replacement at $size in $brightness',
+        'Tools header follows layout through replacement at $size in $brightness',
         (tester) async {
           final container = await pumpTools(
             tester,
@@ -372,11 +407,17 @@ void main() {
               of: find.byType(CommonScaffold).last,
               matching: find.byType(FloatingHeader),
             );
-            expect(tester.getRect(headers), rect);
-            expect(await _pixelAt(tester, boundary, sample), before);
+            if (size.width >= 960) {
+              expect(tester.getRect(headers), rect);
+              expect(await _pixelAt(tester, boundary, sample), before);
+            } else {
+              expect(tester.getRect(headers).top, rect.top);
+              expect(find.byType(NavigationTitle), findsNothing);
+            }
             expect(find.text('Recently used'), findsNothing);
           }
-          expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
+          await tester.pumpAndSettle();
+          expect(find.byType(_WorkspaceBackdrop), findsNWidgets(2));
           expect(tester.takeException(), isNull);
         },
       );
@@ -421,7 +462,11 @@ void main() {
             matching: find.byType(AppBar),
           );
           expect(header, findsNothing);
-          expect(await _pixelAt(tester, boundary, sample), before);
+          if (size.width >= 960) {
+            expect(await _pixelAt(tester, boundary, sample), before);
+          } else {
+            expect(find.byType(NavigationTitle), findsNothing);
+          }
         }
         expect(
           container.read(toolsSessionProvider).path.last.page,
@@ -441,22 +486,57 @@ void main() {
         size: const Size(390, 844),
         home: true,
         wallpaper: true,
+        safeArea: true,
       );
       container
           .read(appSettingProvider.notifier)
           .update((state) => state.copyWith(tabAnimation: animation));
       await tester.pumpAndSettle();
       final rect = tester.getRect(find.byType(FloatingHeader));
+      final origin = tester.getRect(find.text('origin content'));
       final boundary = find.byKey(const ValueKey('workspace-render'));
-      final sample = Offset(rect.right - 2, rect.top + 1);
-      final before = await _pixelAt(tester, boundary, sample);
-      container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
-      await tester.pump();
-      for (var frame = 0; frame < 30; frame++) {
-        await tester.pump(const Duration(milliseconds: 16));
-        expect(find.byType(FloatingHeader), findsOneWidget);
-        expect(tester.getRect(find.byType(FloatingHeader)), rect);
-        expect(await _pixelAt(tester, boundary, sample), before);
+      final samples = [
+        Offset(rect.right - 2, rect.top + 1),
+        const Offset(2, 400),
+      ];
+      final before = [
+        for (final sample in samples) await _pixelAt(tester, boundary, sample),
+      ];
+      for (final target in [
+        PageLabel.proxies,
+        PageLabel.tools,
+        PageLabel.proxies,
+        PageLabel.dashboard,
+      ]) {
+        container.read(currentPageLabelProvider.notifier).toPage(target);
+        await tester.pump();
+        for (var frame = 0; frame < 30; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          final headers = find.byType(FloatingHeader);
+          expect(headers, findsAtLeastNWidgets(1));
+          for (final element in headers.evaluate()) {
+            expect(tester.getRect(find.byWidget(element.widget)), rect);
+          }
+          final dock = find.byType(FloatingNavigationBar);
+          if (dock.evaluate().isNotEmpty) {
+            expect(tester.getRect(dock).left, greaterThanOrEqualTo(0));
+            expect(tester.getRect(dock).right, lessThanOrEqualTo(390));
+          }
+          final body = target == PageLabel.dashboard
+              ? find.text('origin content')
+              : target == PageLabel.proxies
+              ? find.text('second content')
+              : null;
+          if (body != null) {
+            expect(tester.getRect(body).top, origin.top);
+          }
+          for (var index = 1; index < samples.length; index++) {
+            expect(
+              await _pixelAt(tester, boundary, samples[index]),
+              before[index],
+            );
+          }
+        }
       }
       expect(find.byType(_WorkspaceBackdrop), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -536,12 +616,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(container.read(shownPageLabelProvider), PageLabel.tools);
       expect(
+        container.read(toolsSessionProvider).path.last.page,
+        ToolPage.application,
+      );
+      expect(
         container.read(toolsSessionProvider).path.last.settingId,
-        'general.logLevel',
+        'application.logLevel',
       );
       expect(
         find.byWidgetPredicate(
-          (w) => w is SettingTarget && w.spec.id == 'general.logLevel',
+          (w) => w is SettingTarget && w.spec.id == 'application.logLevel',
         ),
         findsOneWidget,
       );
@@ -567,12 +651,17 @@ void main() {
         final navigation = find.byType(
           floating ? FloatingNavigationBar : NavigationBar,
         );
-        expect(navigation, findsOneWidget);
+        bool shown() => navigation.evaluate().isNotEmpty;
+
+        expect(shown(), isTrue);
         await tester.tap(find.text('General').first);
         await tester.pumpAndSettle();
-        expect(navigation, findsNothing);
+        expect(shown(), isFalse);
         final detail = find.byType(SettingsPageScroll);
-        expect(BottomInsetScope.of(tester.element(detail)), 0);
+        expect(
+          BottomInsetScope.of(tester.element(detail)),
+          floating ? NavigationDock.insetOf(tester.element(detail)) : 0,
+        );
         final host = tester.state<ToolsViewState>(find.byType(ToolsView));
         await host.openEntry(
           const ToolEntry(
@@ -585,23 +674,52 @@ void main() {
         );
         for (var frame = 0; frame < 30; frame++) {
           await tester.pump(const Duration(milliseconds: 16));
-          expect(navigation, findsNothing);
+          expect(shown(), isFalse);
         }
         container.read(currentPageLabelProvider.notifier).value =
             PageLabel.dashboard;
         await tester.pumpAndSettle();
-        expect(navigation, findsOneWidget);
+        expect(shown(), isTrue);
         container.read(currentPageLabelProvider.notifier).value =
             PageLabel.tools;
         await tester.pumpAndSettle();
-        expect(navigation, findsNothing);
+        expect(shown(), isFalse);
         await host.handleBack();
         await tester.pumpAndSettle();
-        expect(navigation, findsOneWidget);
+        expect(shown(), isTrue);
         expect(container.read(toolsSessionProvider).path, isEmpty);
         expect(tester.takeException(), isNull);
       },
     );
+
+    testWidgets('switching to and from Tools keeps one ticking navigation '
+        'bar with floating=$floating', (tester) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(390, 844),
+        home: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(floatingNavigationBar: floating));
+      await tester.pumpAndSettle();
+      final navigation = find.byType(
+        floating ? FloatingNavigationBar : NavigationBar,
+      );
+      final bar = tester.element(navigation);
+
+      for (final label in [PageLabel.tools, PageLabel.dashboard]) {
+        container.read(currentPageLabelProvider.notifier).value = label;
+        for (var frame = 0; frame < 10; frame++) {
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(identical(tester.element(navigation), bar), isTrue);
+          expect(TickerMode.valuesOf(bar).enabled, isTrue);
+        }
+        await tester.pumpAndSettle();
+        expect(identical(tester.element(navigation), bar), isTrue);
+      }
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('mobile keyboard hides navigation with floating=$floating', (
       tester,
@@ -965,6 +1083,10 @@ void main() {
         .open(const ToolRoute(ToolPage.general));
     await tester.pumpAndSettle();
     final paneWidth = tester.getSize(find.byType(SettingsPageScroll)).width;
+    final columnWidth = settingsColumn(
+      tester,
+      find.byType(SettingsPageScroll),
+    ).width;
     container
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(openLogs: true));
@@ -998,7 +1120,7 @@ void main() {
             .widget<CodeForge>(find.byType(CodeForge))
             .controller;
         expect(controller.text, 'mode: rule\n');
-        expect(tester.getSize(editor).width, greaterThan(paneWidth));
+        expect(tester.getSize(editor).width, greaterThan(columnWidth));
         expect(tester.getSize(editor).height, greaterThan(600));
       } else if (page == ToolPage.coreDetails) {
         final body = find.descendant(
@@ -1065,13 +1187,344 @@ void main() {
     final panel = find.byType(ToolsCatalogPanel);
     expect(tester.getSize(panel).width, 360);
     final body = find.byType(SettingsPageScroll);
-    expect(tester.getSize(body).width, lessThanOrEqualTo(840));
-    expect(tester.getCenter(body).dx, closeTo(1080, 1));
+    expect(tester.getRect(body).right, 1800);
+    final column = settingsColumn(tester, body);
+    expect(column.width, lessThanOrEqualTo(840));
+    expect(column.center.dx, closeTo(1080, 1));
     final titles = find.text('Tools');
     final detailTitle = find.text('General');
     expect(
       tester.getCenter(titles.first).dy,
       closeTo(tester.getCenter(detailTitle.last).dy, 1),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('capped pages scroll across their pane inside one column', (
+    tester,
+  ) async {
+    final container = await pumpTools(
+      tester,
+      size: const Size(1800, 1000),
+      scrollBehavior: const BaseScrollBehavior(),
+      scripts: [Script(id: 1, label: 'script', lastUpdateTime: DateTime(2026))],
+      rules: [const Rule(id: 1, content: 'DOMAIN,example.test', order: '1')],
+    );
+    container
+        .read(requestsProvider.notifier)
+        .addRequest(
+          TrackerInfo(
+            id: 'request',
+            start: DateTime.utc(2026),
+            metadata: const Metadata(host: 'example.test', network: 'tcp'),
+            chains: const ['Proxy'],
+            rule: 'DOMAIN',
+            rulePayload: 'example.test',
+          ),
+        );
+    container
+        .read(logsProvider.notifier)
+        .add(const Log(payload: 'log line', dateTime: '2026-01-01 12:00:00'));
+    container
+        .read(dnsQueriesProvider.notifier)
+        .addQuery(
+          DnsQuery(
+            domain: 'example.test',
+            type: 'A',
+            answers: const ['1.1.1.1'],
+            rcode: 'NOERROR',
+            time: DateTime.utc(2026),
+          ),
+        );
+    globalState.packageInfo = PackageInfo(
+      appName: 'ReClash',
+      packageName: 'com.reclash',
+      version: '0.1.0',
+      buildNumber: '1',
+    );
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(openLogs: true, developerMode: true));
+    final context = tester.element(find.byType(ToolsView));
+    final failures = <String>[];
+    for (final page in ToolPage.values) {
+      // Access control and notifications are Android's alone, and the
+      // runtime editor is uncapped.
+      if (page == ToolPage.access ||
+          page == ToolPage.notifications ||
+          page == ToolPage.coreRuntimeConfig) {
+        continue;
+      }
+      container.read(toolsSessionProvider.notifier).open(ToolRoute(page));
+      await tester.pumpAndSettle();
+      final view = find.byType(buildToolPage(page, context).runtimeType);
+      final scaffold = find.descendant(
+        of: view,
+        matching: find.byType(Scaffold),
+      );
+      if (!tester.any(scaffold)) {
+        failures.add('${page.name}: not shown');
+        continue;
+      }
+      final pane = tester.getRect(scaffold.first);
+      final row = switch (page) {
+        ToolPage.requests ||
+        ToolPage.dnsQueries ||
+        ToolPage.rules => 'example.test',
+        ToolPage.logs => 'log line',
+        ToolPage.scripts => 'script',
+        _ => null,
+      };
+      if (row != null &&
+          !tester.any(
+            find.descendant(of: view, matching: find.textContaining(row)),
+          )) {
+        failures.add('${page.name}: no rows');
+      }
+      final column = Rect.fromCenter(
+        center: pane.center,
+        width: 840,
+        height: pane.height,
+      ).inflate(0.5);
+      for (final text
+          in find
+              .descendant(of: view, matching: find.byType(RichText))
+              .evaluate()) {
+        if (text.findAncestorWidgetOfExactType<AppBar>() != null) continue;
+        final box = text.renderObject! as RenderBox;
+        final rect = box.localToGlobal(Offset.zero) & box.size;
+        if (rect.left < column.left || rect.right > column.right) {
+          failures.add('${page.name}: ${text.widget} at $rect');
+          break;
+        }
+      }
+      final scrollables = find
+          .descendant(of: view, matching: find.byType(Scrollable))
+          .evaluate()
+          .where(
+            (element) =>
+                (element.widget as Scrollable).axis == Axis.vertical &&
+                element.findAncestorWidgetOfExactType<AppBar>() == null &&
+                element.findAncestorWidgetOfExactType<NullStatus>() == null,
+          );
+      if (scrollables.isNotEmpty) {
+        final width = tester.getSize(find.byWidget(scrollables.first.widget));
+        if ((width.width - pane.width).abs() > 0.5) {
+          failures.add('${page.name}: scroll view $width in a $pane pane');
+        }
+      }
+      expect(tester.takeException(), isNull, reason: page.name);
+    }
+    expect(failures, isEmpty);
+  });
+
+  testWidgets('a capped page scrolls from its margins, not their rows', (
+    tester,
+  ) async {
+    final container = await pumpTools(
+      tester,
+      size: const Size(1800, 600),
+      scrollBehavior: const BaseScrollBehavior(),
+    );
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final body = find.byType(SettingsPageScroll);
+    final position = tester
+        .state<ScrollableState>(
+          find.descendant(of: body, matching: find.byType(Scrollable)).first,
+        )
+        .position;
+
+    tester.binding.handlePointerEvent(
+      const PointerScrollEvent(
+        position: Offset(1700, 400),
+        scrollDelta: Offset(0, 120),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(position.pixels, 120);
+
+    final row = find.text('User-Agent').last;
+    await tester.ensureVisible(row);
+    await tester.pumpAndSettle();
+    final scrolled = position.pixels;
+    await tester.tapAt(Offset(400, tester.getCenter(row).dy));
+    await tester.pumpAndSettle();
+    expect(find.byType(UserAgentsView), findsNothing);
+    expect(position.pixels, scrolled);
+
+    position.jumpTo(1);
+    position.jumpTo(0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final bar = find
+        .descendant(
+          of: body,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is CustomPaint &&
+                widget.foregroundPainter is ScrollbarPainter,
+          ),
+        )
+        .first;
+    final painter =
+        tester.widget<CustomPaint>(bar).foregroundPainter! as ScrollbarPainter;
+    final barBox = tester.renderObject<RenderBox>(bar);
+    final thumb = [for (var y = 0.0; y < 600; y++) Offset(1795, y)].where(
+      (point) => painter.hitTestOnlyThumbInteractive(
+        barBox.globalToLocal(point),
+        PointerDeviceKind.mouse,
+      ),
+    );
+    expect(thumb, isNotEmpty);
+    await tester.dragFrom(
+      thumb.first + const Offset(0, 4),
+      const Offset(0, 60),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(60));
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.general),
+    ]);
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('auto routing opens inside the Tools workspace', (tester) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.advanced));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(currentAppLocalizations.rcxTitle));
+    await tester.pumpAndSettle();
+
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.advanced),
+      const ToolRoute(ToolPage.routing),
+    ]);
+    expect(
+      ModalRoute.of(tester.element(find.byType(RoutingSettingsView)))!.settings,
+      isA<Page<void>>(),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a scenario opens on the auto routing path inside Tools', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.routing));
+    await tester.pumpAndSettle();
+    unawaited(
+      openScenarioEditor(tester.element(find.byType(RoutingSettingsView))),
+    );
+    // Without a Core the scenario never lints, so its bar keeps loading.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final editor = find.byType(ScenarioEditor);
+    final route = ModalRoute.of(tester.element(editor))!;
+    expect(route, isNot(isA<CommonDesktopRoute<void>>()));
+    expect(
+      find.ancestor(of: editor, matching: find.byType(PageViewport)),
+      findsWidgets,
+    );
+    final title = tester.widget<NavigationTitle>(
+      find.descendant(of: editor, matching: find.byType(NavigationTitle)),
+    );
+    final routing =
+        '${currentAppLocalizations.advancedConfig} › '
+        '${currentAppLocalizations.rcxTitle}';
+    expect(title.previous, routing);
+    expect(title.title, startsWith('$routing › '));
+    final pane = tester.getRect(
+      find.descendant(of: editor, matching: find.byType(Scaffold)).first,
+    );
+    final list = find.descendant(of: editor, matching: find.byType(ListView));
+    expect(tester.getSize(list.first).width, closeTo(pane.width, 0.5));
+    final padding = tester.widget<ListView>(list.first).padding! as EdgeInsets;
+    expect(padding.left, closeTo((pane.width - 840) / 2 + 16, 0.5));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in [const Size(1800, 1000), const Size(390, 844)]) {
+    testWidgets('pushed pages keep the Tools path and return at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size);
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.routing));
+      await tester.pumpAndSettle();
+      unawaited(
+        BaseNavigator.push<void>(
+          tester.element(find.byType(RoutingSettingsView)),
+          const CommonScaffold(title: 'Group', body: Text('group body')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      unawaited(
+        BaseNavigator.push<void>(
+          tester.element(find.text('group body')),
+          const CommonScaffold(title: 'Profile', body: Text('profile body')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final routing =
+          '${currentAppLocalizations.advancedConfig} › '
+          '${currentAppLocalizations.rcxTitle}';
+      final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+      if (size.width < 960) {
+        expect(find.byType(NavigationTitle), findsNothing);
+        expect(await host.handleBack(), isTrue);
+        await tester.pumpAndSettle();
+        expect(find.text('profile body'), findsNothing);
+        expect(find.text('group body'), findsOneWidget);
+      } else {
+        final title = tester.widget<NavigationTitle>(
+          find.byType(NavigationTitle).last,
+        );
+        expect(title.previous, '$routing › Group');
+        expect(title.title, '$routing › Group › Profile');
+        title.onSelect!(2);
+        await tester.pumpAndSettle();
+        expect(find.text('profile body'), findsNothing);
+        expect(find.text('group body'), findsOneWidget);
+        tester
+            .widget<NavigationTitle>(find.byType(NavigationTitle).last)
+            .onSelect!(0);
+        await tester.pumpAndSettle();
+        expect(find.text('group body'), findsNothing);
+        expect(container.read(toolsSessionProvider).path, [
+          const ToolRoute(ToolPage.advanced),
+        ]);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('custom resource sections open as Tools pages', (tester) async {
+    final container = await pumpTools(tester, size: const Size(1800, 1000));
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.customResources));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(currentAppLocalizations.filters).last);
+    await tester.pumpAndSettle();
+
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.customResources),
+      const ToolRoute(ToolPage.filters),
+    ]);
+    expect(
+      ModalRoute.of(tester.element(find.byType(FiltersView)))!.settings,
+      isA<Page<void>>(),
     );
     expect(tester.takeException(), isNull);
   });
@@ -1085,7 +1538,10 @@ void main() {
           .read(toolsSessionProvider.notifier)
           .open(const ToolRoute(ToolPage.application));
       await tester.pumpAndSettle();
-      final applicationRect = tester.getRect(find.byType(SettingsPageScroll));
+      final applicationRect = settingsColumn(
+        tester,
+        find.byType(SettingsPageScroll),
+      );
       final initialRegion = container.read(appSettingProvider).regionCode;
       final target = find.byWidgetPredicate(
         (widget) =>
@@ -1101,15 +1557,13 @@ void main() {
         of: find.byType(RegionView),
         matching: find.byType(SettingsPageScroll),
       );
-      final regionRect = tester.getRect(regionScroll);
+      final regionRect = settingsColumn(tester, regionScroll);
       expect(regionRect.width, closeTo(applicationRect.width, 0.5));
       expect(regionRect.center.dx, closeTo(applicationRect.center.dx, 0.5));
       if (size.width >= 960) {
         expect(regionRect.width, lessThanOrEqualTo(840));
       }
-      await tester.tap(find.text('Choose a country'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Iran').last);
+      await tester.tap(find.text('Iran'));
       await tester.pumpAndSettle();
       expect(container.read(appSettingProvider).regionCode, initialRegion);
       final back = find.byTooltip('Back');
@@ -1124,9 +1578,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(target);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Choose a country'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Iran').last);
+      await tester.tap(find.text('Iran'));
       await tester.pumpAndSettle();
       final apply = find.byTooltip('Apply region');
       await tester.ensureVisible(apply);
@@ -1171,11 +1623,15 @@ void main() {
     await tester.tap(find.text('Log level').first);
     await tester.pumpAndSettle();
     expect(
+      container.read(toolsSessionProvider).path.last.page,
+      ToolPage.application,
+    );
+    expect(
       container.read(toolsSessionProvider).path.last.settingId,
-      'general.logLevel',
+      'application.logLevel',
     );
     final target = find.byWidgetPredicate(
-      (w) => w is SettingTarget && w.spec.id == 'general.logLevel',
+      (w) => w is SettingTarget && w.spec.id == 'application.logLevel',
     );
     expect(target, findsOneWidget);
     final rect = tester.getRect(target);
@@ -1353,44 +1809,53 @@ void main() {
     expect(tester.getTopLeft(find.byType(SearchField)).dy, bar.bottom);
   });
 
-  testWidgets(
-    'mobile page grows out of its row and drags back to the catalogue',
-    (tester) async {
-      final container = await pumpTools(tester, size: const Size(420, 860));
-      final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
-      final rowRect = tester.getRect(row);
+  testWidgets('mobile page slides in over the catalogue and drags back to it', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester, size: const Size(420, 860));
+    final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
+    final rowRect = tester.getRect(row);
 
-      await tester.tap(row);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 60));
-      final growing = tester.getRect(find.byType(SettingsPageScroll));
-      expect(growing.top, greaterThan(0));
-      expect(growing.top, lessThan(rowRect.top));
-      expect(find.text('Tools'), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(find.text('Tools'), findsNothing);
-      expect(container.read(toolsSessionProvider).path, [
-        const ToolRoute(ToolPage.general),
-      ]);
-      expect(find.byType(SearchField), findsNothing);
+    await tester.tap(row);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 160));
+    final entering = tester.getRect(find.byType(SettingsPageScroll));
+    expect(entering.left, greaterThan(0));
+    expect(entering.left, lessThan(420));
+    expect(entering.top, 0);
+    final trailing = tester.getRect(row);
+    expect(trailing.left, lessThan(rowRect.left));
+    expect(trailing.left, greaterThan(rowRect.left - 420 * 0.25));
+    expect(find.byType(NavigationTitle), findsNothing);
+    expect(find.text('Tools'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Tools'), findsNothing);
+    expect(container.read(toolsSessionProvider).path, [
+      const ToolRoute(ToolPage.general),
+    ]);
+    expect(find.byType(SearchField), findsNothing);
 
-      final gesture = await tester.startGesture(const Offset(10, 400));
-      for (var step = 0; step < 6; step++) {
-        await gesture.moveBy(const Offset(50, 0));
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-      expect(find.byType(SearchField), findsOneWidget);
-      expect(find.text('Tools'), findsNothing);
-      await gesture.up();
-      await tester.pump(const Duration(milliseconds: 60));
-      expect(find.text('Tools'), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(container.read(toolsSessionProvider).path, isEmpty);
-      expect(find.byType(SearchField), findsOneWidget);
-    },
-  );
+    final gesture = await tester.startGesture(const Offset(10, 400));
+    for (var step = 0; step < 6; step++) {
+      await gesture.moveBy(const Offset(50, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(find.byType(SearchField), findsOneWidget);
+    expect(find.text('Tools'), findsOneWidget);
+    final header = tester.getRect(find.text('General').last);
+    expect(header.left, greaterThan(200));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(find.text('Tools'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Tools'), findsOneWidget);
+    expect(container.read(toolsSessionProvider).path, isEmpty);
+    expect(find.byType(SearchField), findsOneWidget);
+  });
 
-  testWidgets('mobile Back shrinks the page into its row', (tester) async {
+  testWidgets('mobile Back slides the page out over the catalogue', (
+    tester,
+  ) async {
     await pumpTools(tester, size: const Size(420, 860));
     final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
     final rowRect = tester.getRect(row);
@@ -1401,13 +1866,327 @@ void main() {
     await host.handleBack();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
-    final shrinking = tester.getRect(find.byType(SettingsPageScroll));
-    expect(shrinking.top, greaterThan(0));
-    expect(shrinking.top, lessThan(rowRect.top));
+    final leaving = tester.getRect(find.byType(SettingsPageScroll));
+    expect(leaving.left, greaterThan(0));
+    expect(leaving.top, 0);
+    expect(tester.getRect(row).left, lessThan(rowRect.left));
+    expect(find.byType(NavigationTitle), findsNothing);
     expect(find.text('Tools'), findsOneWidget);
 
     await tester.pumpAndSettle();
+    expect(find.text('Tools'), findsOneWidget);
     expect(find.byType(SearchField), findsOneWidget);
+    expect(tester.getRect(row), rowRect);
+  });
+
+  testWidgets('a nested page slides over a parent that trails it on Back '
+      'and on a drag', (tester) async {
+    await pumpTools(tester, size: const Size(420, 860));
+    await tester.tap(
+      find.widgetWithText(ListItem<dynamic>, 'Application settings').first,
+    );
+    await tester.pumpAndSettle();
+    final row = find.byWidgetPredicate(
+      (widget) =>
+          widget is SettingTarget && widget.spec.id == 'application.region',
+      skipOffstage: false,
+    );
+    final rowRect = tester.getRect(row);
+    await tester.tap(row);
+    await tester.pump();
+    var parentLeft = rowRect.left;
+    for (var frame = 0; frame < 12; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      final left = tester.getRect(row).left;
+      expect(left, lessThanOrEqualTo(parentLeft));
+      parentLeft = left;
+    }
+    expect(parentLeft, lessThan(rowRect.left));
+    await tester.pumpAndSettle();
+
+    final host = tester.state<ToolsViewState>(find.byType(ToolsView));
+    unawaited(host.handleBack());
+    await tester.pump();
+    var pageLeft = 0.0;
+    while (find.byType(RegionView).evaluate().isNotEmpty) {
+      final left = tester.getRect(find.byType(RegionView)).left;
+      expect(left, greaterThanOrEqualTo(pageLeft));
+      expect(tester.getRect(row).left, lessThanOrEqualTo(rowRect.left));
+      pageLeft = left;
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(pageLeft, greaterThan(0));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(row), rowRect);
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(const Offset(10, 400));
+    for (var step = 0; step < 4; step++) {
+      await gesture.moveBy(const Offset(50, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    final uncovering = tester.getRect(row);
+    expect(uncovering.left, lessThan(rowRect.left));
+    expect(uncovering.left, greaterThan(rowRect.left - 420 * 0.25));
+    await gesture.moveBy(const Offset(150, 0));
+    await tester.pump(const Duration(milliseconds: 16));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(RegionView), findsNothing);
+    expect(tester.getRect(row), rowRect);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final size in [const Size(1200, 900), const Size(420, 860)]) {
+    testWidgets('Tools owns its root route and animates header at $size', (
+      tester,
+    ) async {
+      final container = await pumpTools(tester, size: size);
+      final catalog = find.byType(ToolsCatalogPanel);
+      final catalogRoute = ModalRoute.of(tester.element(catalog))!;
+      final catalogHeader = tester.getRect(find.byType(FloatingHeader).first);
+      expect(catalogRoute.isFirst, isTrue);
+      container
+          .read(toolsSessionProvider.notifier)
+          .open(const ToolRoute(ToolPage.general));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 240));
+      expect(
+        find.byType(NavigationTitle),
+        size.width >= 960 ? findsOneWidget : findsNothing,
+      );
+      final back = find.byType(BackButton);
+      expect(
+        tester
+            .widgetList<Transform>(
+              find.ancestor(of: back, matching: find.byType(Transform)),
+            )
+            .any((transform) => transform.transform.entry(0, 0) > 1),
+        size.width >= 960,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        ModalRoute.of(tester.element(find.byType(SettingsPageScroll)))!.isFirst,
+        isFalse,
+      );
+      await tester.tap(find.byType(BackButton));
+      await tester.pump();
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        if (size.width > 960) {
+          final header = find.descendant(
+            of: catalog,
+            matching: find.byType(FloatingHeader),
+          );
+          expect(tester.getRect(header), catalogHeader);
+          expect(
+            find.descendant(of: header, matching: find.text('Tools')),
+            findsOneWidget,
+          );
+        }
+      }
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      expect(find.byType(NavigationTitle), findsNothing);
+      expect(find.byType(SearchField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final floating in [true, false]) {
+    testWidgets('compact route covers its dock and moves its own header '
+        'with floating=$floating', (tester) async {
+      final container = await pumpTools(
+        tester,
+        size: const Size(420, 860),
+        home: true,
+        wallpaper: true,
+        safeArea: true,
+      );
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(floatingNavigationBar: floating));
+      container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+      await tester.pumpAndSettle();
+      final navigation = find.byType(
+        floating ? FloatingNavigationBar : NavigationBar,
+        skipOffstage: false,
+      );
+      final dock = tester.getRect(navigation);
+      final row = find.widgetWithText(ListItem<dynamic>, 'General').first;
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationTitle), findsNothing);
+      expect(
+        tester.getRect(navigation),
+        dock.shift(const Offset(-420 * 0.25, 0)),
+      );
+      final boundary = find.byKey(const ValueKey('workspace-render'));
+      final body = tester.getRect(find.byType(SettingsPageScroll));
+      expect(
+        await _pixelAt(tester, boundary, Offset(body.right - 2, 500)),
+        const Color(0xff2060a0),
+      );
+      final bar = find.byType(AppBar).last;
+      final before = tester.getRect(bar);
+      final gesture = await tester.startGesture(const Offset(10, 400));
+      await gesture.moveBy(const Offset(180, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(50, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(tester.getRect(bar).left, greaterThan(before.left + 40));
+      final trailing = tester.getRect(navigation);
+      expect(trailing.left, greaterThan(dock.left - 420 * 0.25));
+      expect(trailing.left, lessThan(dock.left));
+      expect(
+        find.descendant(of: find.byType(AppBar), matching: find.text('Tools')),
+        findsOneWidget,
+      );
+      final catalogRow = find
+          .widgetWithText(ListItem<dynamic>, 'General')
+          .first;
+      expect(tester.widget<ListItem<dynamic>>(catalogRow).isSelected, isFalse);
+      expect(find.byType(NavigationTitle), findsNothing);
+      await gesture.moveBy(const Offset(220, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(container.read(toolsSessionProvider).path, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('split header animates complete paths and actual replacements', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester);
+    final session = container.read(toolsSessionProvider.notifier);
+    session.open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    session.open(const ToolRoute(ToolPage.application), push: true);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    var title = tester.widget<NavigationTitle>(find.byType(NavigationTitle));
+    expect(title.previous, 'General');
+    expect(title.title, 'General › Application settings');
+    await tester.pumpAndSettle();
+    session.open(const ToolRoute(ToolPage.general));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    title = tester.widget<NavigationTitle>(find.byType(NavigationTitle));
+    expect(title.previous, 'General');
+    expect(title.title, 'General › Application settings');
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    session.open(const ToolRoute(ToolPage.application));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    title = tester.widget<NavigationTitle>(find.byType(NavigationTitle));
+    expect(title.previous, 'General');
+    expect(title.title, 'Application settings');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('split headers stay while a menu or dialog covers a page', (
+    tester,
+  ) async {
+    final container = await pumpTools(tester);
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final headers = find.byType(FloatingHeader);
+    expect(headers, findsNWidgets(2));
+    final detail = tester.element(find.byType(SettingsPageScroll));
+    unawaited(
+      showMenu<void>(
+        context: detail,
+        position: RelativeRect.fill,
+        items: const [PopupMenuItem(child: Text('menu item'))],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('menu item'), findsOneWidget);
+    expect(headers, findsNWidgets(2));
+    expect(find.byType(NavigationTitle), findsOneWidget);
+    Navigator.of(tester.element(find.text('menu item'))).pop();
+    await tester.pumpAndSettle();
+    unawaited(
+      showDialog<void>(
+        context: detail,
+        builder: (_) => const AlertDialog(content: Text('dialog body')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog body'), findsOneWidget);
+    expect(headers, findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('compact detail leaves its tab like any page', (tester) async {
+    final container = await pumpTools(
+      tester,
+      size: const Size(420, 860),
+      home: true,
+      wallpaper: true,
+    );
+    container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+    await tester.pumpAndSettle();
+    container
+        .read(toolsSessionProvider.notifier)
+        .open(const ToolRoute(ToolPage.general));
+    await tester.pumpAndSettle();
+    final backdrop = find.byType(PageBackdrop);
+    bool barShown() => tester
+        .widgetList<Opacity>(
+          find.ancestor(
+            of: find.byType(BackButton),
+            matching: find.byType(Opacity),
+          ),
+        )
+        .every((opacity) => opacity.opacity == 1);
+    expect(barShown(), isTrue);
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(barShown(), isFalse);
+    expect(
+      tester
+          .widgetList<Opacity>(
+            find.ancestor(of: backdrop, matching: find.byType(Opacity)),
+          )
+          .any((opacity) => opacity.opacity < 1),
+      isTrue,
+    );
+    expect(find.text('second content'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the floating bar a tab switch starts from plays it out', (
+    tester,
+  ) async {
+    final container = await pumpTools(
+      tester,
+      size: const Size(420, 860),
+      home: true,
+    );
+    container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+    await tester.pumpAndSettle();
+    final bar = find.byType(FloatingNavigationBar);
+    for (final target in [PageLabel.dashboard, PageLabel.tools]) {
+      final state = tester.state(bar);
+      container.read(currentPageLabelProvider.notifier).toPage(target);
+      await tester.pump();
+      for (var frame = 0; frame < 10; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(tester.state(bar), same(state));
+      }
+      await tester.pumpAndSettle();
+      expect(bar, findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('desktop Tools routes do not pop on a horizontal drag', (

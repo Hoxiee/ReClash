@@ -50,9 +50,11 @@ class RoutingSettingsView extends ConsumerWidget {
         ),
       ],
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            context.bodyInsets,
         children: [
           if (hasProfile) _ScenarioSection(library: library, status: status),
           if (status != null && status.groups.isNotEmpty)
@@ -386,9 +388,11 @@ class _RoutingGroupSettingsState extends ConsumerState<RoutingGroupSettings> {
     return CommonScaffold(
       title: widget.groupName,
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        padding:
+            const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20) +
+            context.bodyInsets,
         children: [
           generateSection(
             title: l.rcxProfile,

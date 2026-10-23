@@ -95,5 +95,21 @@
   "telegramWebFallback": "在浏览器中打开",
   "telegramAppUnavailable": "无法在此设备上打开 Telegram。",
   "urlSchemeFormats": "格式",
-  "urlSchemeFormatsTip": "链接格式。请将占位符替换为你的 URL 或数据。"
+  "urlSchemeFormatsTip": "链接格式。请将占位符替换为你的 URL 或数据。",
+  "profileImportTitle": "新订阅",
+  "profileImportChecking": "正在检查订阅…",
+  "profileImportPreviewFailed": "无法查看订阅内容，但仍可添加。",
+  "profileImportEncrypted": "订阅已加密，添加时会要求输入密钥。",
+  "profileImportFormat": "订阅格式",
+  "profileImportFormatClient": "与 {client} 应用收到的一致",
+  "profileImportFormatReclash": "为 ReClash 自动选择最佳格式",
+  "profileImportServerCount": "{count, plural, other{{count} 个服务器}}",
+  "profileImportAlreadyAdded": "已作为“{name}”添加",
+  "profileImportLosses": "部分内容不受支持，添加前会让你查看。",
+  "profileImportServers": "服务器",
+  "profileImportValidUntil": "有效期至",
+  "profileImportUnlimited": "不限",
+  "profileImportExpired": "已过期",
+  "profileImportFromProvider": "来自服务商",
+  "profileImportSingleServer": "单个服务器"
 }

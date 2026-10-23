@@ -103,13 +103,22 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/images/avatar/
+    - assets/images/icon_variants/
     - assets/images/services/
     - core/mihomo/component/ca/ca-certificates.crt
     - path: assets/images/tray/unix/
       platforms: [ linux ]
+    - path: assets/images/tray/unix/light/
+      platforms: [ linux ]
+    - path: assets/images/tray/unix/dark/
+      platforms: [ linux ]
     - path: assets/images/tray/macos/
       platforms: [ macos ]
     - path: assets/images/tray/windows/
+      platforms: [ windows ]
+    - path: assets/images/tray/windows/light/
+      platforms: [ windows ]
+    - path: assets/images/tray/windows/dark/
       platforms: [ windows ]
   shaders:
     - shaders/liquid_glass.frag

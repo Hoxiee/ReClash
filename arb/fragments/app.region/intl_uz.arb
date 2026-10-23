@@ -2,104 +2,23 @@
   "appRegion": "Ilova hududi",
   "regionalAdaptation": "Hududiy moslashuv",
   "regionTitle": "Hudud profili",
-  "regionIntro": "Interfeys tilidan mustaqil hududiy tarmoq sozlamalari va xizmat tekshiruvlari.",
-  "regionWarning": "Mamlakatni tanlash faqat oldindan ko‘rishni yangilaydi. Hududiy qiymatlar qo‘llangandan keyin o‘zgaradi.",
-  "regionChoose": "Mamlakatni tanlang",
-  "regionDetected": "Tavsiya: {region} · {source}",
-  "@regionDetected": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "regionUseDetected": "Aniqlangan hududni tanlash",
-  "regionPreviewTitle": "Ko‘rib chiqish",
-  "regionPreviewBase": "Mamlakat profili: {region}",
-  "@regionPreviewBase": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewMtu": "TUN MTU: {value}",
-  "@regionPreviewMtu": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewServices": "Standart xizmat tekshiruvlari: {value}",
-  "@regionPreviewServices": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "regionPreviewRules": "Proksi tanlovi va marshrutlash qoidalaringiz o‘zgarmaydi.",
-  "regionPreviewAndroid": "Android tizimida MTU yoki chetlab o‘tish o‘zgarishlari VPN qayta ishga tushirilishini tasdiqlashni talab qilishi mumkin. Ilovalar alohida tanlanadi.",
-  "regionCustomPreserved": "Qo‘lda kiritilgan DNS va MTU, chetlab o‘tish ro‘yxati, marshrutlash qoidalari va xizmat tanlovi saqlanadi.",
-  "regionNoChanges": "Tarmoq qiymatlari va xizmat tekshiruvlari o‘zgarmaydi.",
+  "regionIntro": "Mamlakatingiz uchun DNS serverlari, TUN MTU, chetlab o‘tish ro‘yxati va xizmat tekshiruvlarini tanlaydi. Interfeys tili o‘zgarmaydi.",
+  "regionCustomPreserved": "O‘zingiz o‘zgartirgan qiymatlar o‘z holicha qoladi.",
+  "regionNoChanges": "Sozlamalar o‘zgarmaydi.",
   "regionApply": "Hududni qo‘llash",
-  "regionNoDetected": "Mos tavsiya topilmadi. Faqat vaqt mintaqasi va tizim lokali ishlatiladi.",
   "regionSelectBeforeApps": "Hududiy ilova tavsiyalaridan foydalanish uchun avval qo‘llab-quvvatlanadigan hududni tanlang.",
-  "regionNotSet": "O‘chirilgan",
-  "regionOther": "Boshqa / umumiy",
+  "regionNotSet": "Tanlanmagan",
+  "regionOther": "Boshqa mamlakat",
   "regionRussia": "Rossiya",
   "regionIran": "Eron",
   "regionChina": "Xitoy",
   "regionEgypt": "Misr",
-  "regionSourceTimeZone": "vaqt zonasi",
-  "regionSourceLocaleCountry": "tizim tili sozlamasidagi mamlakat",
-  "regionSourceLocaleLanguage": "tizim tili",
-  "regionCurrent": "Joriy hudud",
-  "regionDetectionTitle": "Qurilma tavsiyasi",
-  "regionProfileDefaults": "Profil qiymatlari",
   "regionNoServices": "Xizmat tekshiruvlari o‘chirilgan",
-  "regionDnsSettings": "{region} hududining DNS qiymatlari: {value}. Bu ekrandagi qo‘lda kiritilgan qiymatlar ustun.",
-  "regionTunSettings": "{region} hududining MTU qiymati: {value}. O‘z qiymatingizni ishlatish uchun MTU sozlamasini qo‘shing.",
-  "regionBypassSettings": "{region} hududining ro‘yxati: {value}. Maxsus ro‘yxat hududiy qiymatlarni almashtiradi.",
   "regionSelectApps": "Ilovalarni hudud bo‘yicha tanlash",
   "regionAppsPreviewTitle": "Ilova tanlovini oldindan ko‘rish",
   "regionAppsPreview": "{region}: VPNni chetlab o‘tish ro‘yxatiga {bypassed} ta, VPN ro‘yxatiga {proxied} ta ilova kiradi. Ikkala ro‘yxat almashtiriladi; rejim va boshqa sozlamalar o‘zgarmaydi. Paket va SDK mosligi faqat tavsiya: qo‘llagandan keyin natijani tekshiring.",
   "regionAppsEmpty": "Bu hududga mos ilovalar topilmadi. Ro‘yxatlaringiz o‘zgarmadi.",
   "regionAppsChanged": "Hudud yoki ilova ro‘yxatlari o‘zgardi. Joriy sozlamalar bilan tanlovni takrorlang.",
-  "@regionDnsSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionTunSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "@regionBypassSettings": {
-    "placeholders": {
-      "region": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "@regionAppsPreview": {
     "placeholders": {
       "region": {
@@ -112,5 +31,13 @@
         "type": "int"
       }
     }
-  }
+  },
+  "regionRecommended": "Ushbu qurilma uchun tavsiya etiladi",
+  "regionChangesTitle": "Nima o‘zgaradi",
+  "regionChangeDns": "DNS serverlari",
+  "regionChangeMtu": "TUN MTU",
+  "regionChangeServices": "Xizmat tekshiruvlari",
+  "restoreDefaults": "Standart qiymatlarni tiklash",
+  "networkRestoreDefaultsTip": "Chetlab o‘tish ro‘yxati va TUN MTU tanlangan hududning standart qiymatlariga qaytadi.",
+  "dnsRestoreDefaultsTip": "Barcha DNS qayta belgilashlari o‘chiriladi va tanlangan hududning DNS serverlari qayta o‘rnatiladi."
 }

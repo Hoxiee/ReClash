@@ -2,8 +2,6 @@
   "appearanceTheme": "Тема",
   "appearanceBackground": "Фон",
   "wallpaperTitle": "Пользовательский фон",
-  "wallpaperGalleryHint": "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
-  "wallpaperChoose": "Выбрать изображение",
   "wallpaperRemove": "Удалить изображение",
   "wallpaperEnabled": "Использовать свой фон",
   "wallpaperFit": "Размещение изображения",

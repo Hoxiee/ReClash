@@ -3,11 +3,11 @@ kind: feature
 state: active
 risk: routine
 must:
-  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a four-image library.
+  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a four-image library, added from a gallery tile that gives way to the fourth image.
   lifecycle: Import, select, remove and reset preserve the previous setting on save failure; only unreferenced files are cleaned up.
   rendering: Workspace panes share one stationary wallpaper and retain card opacity across their routes; real pushed routes and modal surfaces keep their own backgrounds, state colors and Liquid Glass behavior.
   backup: Full backups carry only referenced wallpaper files; full restore validates and rolls back files and settings, while onlyProfiles leaves both untouched.
-  appearance: Theme, Background and Interface stay bottom-aligned; categories retain independent scroll and phone preview state, follow the chosen tab motion and reveal settings after settling. Background groups share their glyph headers and single settings gutter with Theme and Interface. The live phone preview is shown only at phone window widths; option thumbnails remain in every layout.
+  appearance: Theme, Background and Interface switch from a glyph segmented control at the app bar's trailing edge whose indicator springs between glyphs while the page title rolls to the category's name in step with it; categories retain independent scroll and phone preview state, follow the chosen tab motion on taps and reveal settings after settling. Horizontal swipes follow the finger to an available adjacent category, yielding to drag back at the first category's leading boundary and to horizontal controls. Background groups share their glyph headers and single settings gutter with Theme and Interface; framing and effects reset from the trailing side of their own group headers. The live phone preview is shown only at phone window widths; option thumbnails remain in every layout.
   localization: Wallpaper labels belong to this feature fragment in every supported locale.
 watch:
   - lib/models/wallpaper.dart

@@ -49,6 +49,27 @@ _AppSettingProps _$AppSettingPropsFromJson(
         unknownValue: NavigationLayout.auto,
       ) ??
       NavigationLayout.auto,
+  navigationLabels:
+      $enumDecodeNullable(
+        _$NavigationLabelsEnumMap,
+        json['navigationLabels'],
+        unknownValue: NavigationLabels.always,
+      ) ??
+      NavigationLabels.always,
+  appIcon:
+      $enumDecodeNullable(
+        _$AppIconEnumMap,
+        json['appIcon'],
+        unknownValue: AppIcon.standard,
+      ) ??
+      AppIcon.standard,
+  trayIconStyle:
+      $enumDecodeNullable(
+        _$TrayIconStyleEnumMap,
+        json['trayIconStyle'],
+        unknownValue: TrayIconStyle.color,
+      ) ??
+      TrayIconStyle.color,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   autoDownloadUpdate: json['autoDownloadUpdate'] as bool? ?? false,
   autoInstallUpdate: json['autoInstallUpdate'] as bool? ?? false,
@@ -63,6 +84,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   setupCoverage: json['setupCoverage'] as String?,
   setupRegionCode: json['setupRegionCode'] as String?,
   setupRegionChosen: json['setupRegionChosen'] as bool? ?? false,
+  setupDirectRoutes: json['setupDirectRoutes'] as bool? ?? true,
   minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
   hidden: json['hidden'] as bool? ?? false,
   developerMode: json['developerMode'] as bool? ?? false,
@@ -139,6 +161,9 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'navigationLayout': _$NavigationLayoutEnumMap[instance.navigationLayout]!,
+      'navigationLabels': _$NavigationLabelsEnumMap[instance.navigationLabels]!,
+      'appIcon': _$AppIconEnumMap[instance.appIcon]!,
+      'trayIconStyle': _$TrayIconStyleEnumMap[instance.trayIconStyle]!,
       'autoCheckUpdate': instance.autoCheckUpdate,
       'autoDownloadUpdate': instance.autoDownloadUpdate,
       'autoInstallUpdate': instance.autoInstallUpdate,
@@ -151,6 +176,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'setupCoverage': instance.setupCoverage,
       'setupRegionCode': instance.setupRegionCode,
       'setupRegionChosen': instance.setupRegionChosen,
+      'setupDirectRoutes': instance.setupDirectRoutes,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
       'developerMode': instance.developerMode,
@@ -180,6 +206,33 @@ const _$NavigationLayoutEnumMap = {
   NavigationLayout.auto: 'auto',
   NavigationLayout.bar: 'bar',
   NavigationLayout.sidebar: 'sidebar',
+};
+
+const _$NavigationLabelsEnumMap = {
+  NavigationLabels.always: 'always',
+  NavigationLabels.selected: 'selected',
+  NavigationLabels.never: 'never',
+};
+
+const _$AppIconEnumMap = {
+  AppIcon.standard: 'standard',
+  AppIcon.velvet: 'velvet',
+  AppIcon.solar: 'solar',
+  AppIcon.circuit: 'circuit',
+  AppIcon.echo: 'echo',
+  AppIcon.ink: 'ink',
+  AppIcon.blueprint: 'blueprint',
+  AppIcon.strata: 'strata',
+  AppIcon.shatter: 'shatter',
+  AppIcon.trace: 'trace',
+  AppIcon.topo: 'topo',
+  AppIcon.spark: 'spark',
+};
+
+const _$TrayIconStyleEnumMap = {
+  TrayIconStyle.color: 'color',
+  TrayIconStyle.light: 'light',
+  TrayIconStyle.dark: 'dark',
 };
 
 const _$RestoreStrategyEnumMap = {
@@ -432,6 +485,13 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
         _readColorStyle(json, 'colorStyle'),
       ) ??
       ColorStyle.vivid,
+  contrast:
+      $enumDecodeNullable(
+        _$ColorContrastEnumMap,
+        json['contrast'],
+        unknownValue: ColorContrast.standard,
+      ) ??
+      ColorContrast.standard,
   pureBlack: json['pureBlack'] as bool? ?? false,
   sidebarBlur: json['sidebarBlur'] as bool? ?? true,
   liquidGlass:
@@ -455,6 +515,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'primaryColors': instance.primaryColors,
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'colorStyle': _$ColorStyleEnumMap[instance.colorStyle]!,
+      'contrast': _$ColorContrastEnumMap[instance.contrast]!,
       'pureBlack': instance.pureBlack,
       'sidebarBlur': instance.sidebarBlur,
       'liquidGlass': _$LiquidGlassModeEnumMap[instance.liquidGlass]!,
@@ -474,6 +535,12 @@ const _$ColorStyleEnumMap = {
   ColorStyle.tinted: 'tinted',
   ColorStyle.soft: 'soft',
   ColorStyle.monochrome: 'monochrome',
+};
+
+const _$ColorContrastEnumMap = {
+  ColorContrast.standard: 'standard',
+  ColorContrast.medium: 'medium',
+  ColorContrast.high: 'high',
 };
 
 const _$LiquidGlassModeEnumMap = {

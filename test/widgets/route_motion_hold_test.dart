@@ -110,6 +110,29 @@ void main() {
     expect(find.text('shown 2', skipOffstage: false), findsOneWidget);
   });
 
+  testWidgets('holds updates while tickers are muted and replays the latest', (
+    tester,
+  ) async {
+    Future<void> pumpMuted({required bool muted}) => tester.pumpWidget(
+      MaterialApp(
+        home: TickerMode(
+          enabled: !muted,
+          child: _Feed(source: source),
+        ),
+      ),
+    );
+    await pumpMuted(muted: true);
+
+    source.value = 4;
+    source.value = 5;
+    await tester.pump();
+    expect(find.text('shown 0'), findsOneWidget);
+
+    await pumpMuted(muted: false);
+    await tester.pump();
+    expect(find.text('shown 5'), findsOneWidget);
+  });
+
   testWidgets('holds updates through a user gesture', (tester) async {
     await pumpFeed(tester);
 

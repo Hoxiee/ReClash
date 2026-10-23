@@ -346,19 +346,6 @@ class ListItem<T> extends StatelessWidget {
             !openDelegate.preferSheet &&
             navigation != null &&
             navigation.canOpen(child)) {
-          if (context.isMobileView) {
-            return OpenContainer<void>(
-              clipBehavior: Clip.none,
-              closedBuilder: (context, action) => _buildListTile(
-                context,
-                position: position,
-                trailing: _pageTrailing,
-                onTap: action,
-              ),
-              onOpen: (origin) => navigation.open(child, origin: origin),
-              openBuilder: (_, _) => child,
-            );
-          }
           return _buildListTile(
             context,
             position: position,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/widgets/settings/setting_spec.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/common/common.dart';
@@ -11,6 +13,7 @@ import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -376,7 +379,9 @@ abstract class OverrideSpec<K extends OverrideKey, M> {
 
   SettingSpec? settingOf(K key) => null;
 
-  String? noticeOf(WidgetRef ref, AppLocalizations l) => null;
+  /// Where Restore defaults takes [state]; null leaves the action out.
+  OverrideState<K, M>? restoredOf(WidgetRef ref, OverrideState<K, M> state) =>
+      null;
 
   /// Also resets the values of [keys], so a profile with no keys is untouched.
   OverrideState<K, M> withoutKeys(OverrideState<K, M> state, Set<K> keys) {
@@ -464,6 +469,17 @@ class OverrideView<K extends OverrideKey, M> extends ConsumerWidget {
   void _handleAdd(BuildContext context, WidgetRef ref) =>
       showOverrideAddSheet(context, ref, spec);
 
+  Future<void> _handleRestore(BuildContext context, WidgetRef ref) async {
+    final l = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      title: l.restoreDefaults,
+      message: TextSpan(text: l.dnsRestoreDefaultsTip),
+      confirmText: l.restore,
+    );
+    if (confirmed != true || !context.mounted) return;
+    spec.target.update(ref, (state) => spec.restoredOf(ref, state) ?? state);
+  }
+
   Future<void> _handleQuickEdit(
     BuildContext context,
     WidgetRef ref,
@@ -542,10 +558,21 @@ class OverrideView<K extends OverrideKey, M> extends ConsumerWidget {
       ),
     );
     final addEntry = target.addEntry(appLocalizations);
-    final notice = spec.noticeOf(ref, appLocalizations);
+    final current = ref.watch(target.select((state) => state));
+    final restored = spec.restoredOf(ref, current);
     return CommonScaffold(
       title: spec.title(appLocalizations),
       iconActions: [
+        if (restored != null)
+          IconButtonData(
+            glyph: AppGlyphs.reset,
+            tooltip: appLocalizations.restoreDefaults,
+            onPressed:
+                setEquals(restored.keys, current.keys) &&
+                    restored.model == current.model
+                ? null
+                : () => unawaited(_handleRestore(context, ref)),
+          ),
         if (!isEmpty)
           IconButtonData(
             glyph: AppGlyphs.addCircle,
@@ -563,10 +590,7 @@ class OverrideView<K extends OverrideKey, M> extends ConsumerWidget {
         isEmpty: isEmpty,
         nullStatus: NullStatus(
           label: appLocalizations.nullTip(target.entries(appLocalizations)),
-          description: [
-            target.description(appLocalizations),
-            ?notice,
-          ].join('\n\n'),
+          description: target.description(appLocalizations),
           illustration: spec.illustration,
           action: TonalButton(
             size: TonalButtonSize.bar,
@@ -591,7 +615,6 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final keys = ref.watch(spec.target.select((state) => state.keys));
     final entries = spec.values.where(keys.contains);
-    final notice = spec.noticeOf(ref, appLocalizations);
     return SettingsPageScroll(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -646,7 +669,6 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
                 text: spec.target.description(appLocalizations),
               ),
             ),
-            if (notice != null) ListFooter(text: notice),
           ],
         ),
       ),

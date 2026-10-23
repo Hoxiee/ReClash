@@ -5,12 +5,9 @@ import 'dart:async';
 import 'on_demand_network_picker.dart';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -34,61 +31,12 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
 
   bool get _isMacOS => widget.isMacOS ?? system.isMacOS;
 
-  void _handlePermanentlyDeniedLocationPermission() {
-    if (_isMacOS) {
-      final appLocalizations = context.appLocalizations;
-      dialogs.showMessage(
-        title: appLocalizations.locationPermissionRequired,
-        cancelable: false,
-        message: TextSpan(
-          style: AppTextStyle.subheadline.of(context),
-          text: appLocalizations.locationPermissionGuide(appName),
-        ),
-      );
-    } else if (_isAndroid) {
-      app?.openAppSettings();
-    }
-  }
-
-  Future<void> _handleRequestLocationPermission() async {
-    final appLocalizations = context.appLocalizations;
-    final permission = ref.read(locationPermissionsProvider);
-    if (permission == WifiSsidPermission.granted) {
-      return;
-    }
-    if (permission == WifiSsidPermission.permanentlyDenied) {
-      _handlePermanentlyDeniedLocationPermission();
-      return;
-    }
-    final WifiSsidPermission? res;
-    try {
-      res = await ref.read(locationPermissionsProvider.notifier).request();
-    } on PlatformException catch (e) {
-      commonPrint.log('requestPermission error $e', logLevel: LogLevel.warning);
-      return;
-    }
-    if (res == null || !mounted) {
-      return;
-    }
-    switch (res) {
-      case WifiSsidPermission.granted:
-        return;
-      case WifiSsidPermission.permanentlyDenied:
-        _handlePermanentlyDeniedLocationPermission();
-        return;
-      case WifiSsidPermission.denied:
-        break;
-    }
-    final needGo = await dialogs.showMessage(
-      title: appLocalizations.locationPermissionRequired,
-      message: TextSpan(text: appLocalizations.locationPermissionDeniedMessage),
-      confirmText: appLocalizations.go,
-    );
-    if (needGo != true) {
-      return;
-    }
-    unawaited(app?.openAppSettings());
-  }
+  Future<void> _handleRequestLocationPermission() => requestLocationPermission(
+    context,
+    ref,
+    isAndroid: _isAndroid,
+    isMacOS: _isMacOS,
+  );
 
   void _handleRequestIgnoreBatteryOptimization() {
     if (ref.read(batteryOptimizationIgnoredProvider).value == true) {
@@ -99,11 +47,6 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
 
   Future<void> _handleAddOrUpdate([String? ssid]) async {
     if (ssid == null) {
-      if ((_isAndroid || _isMacOS) &&
-          ref.read(locationPermissionsProvider) != WifiSsidPermission.granted) {
-        await _handleRequestLocationPermission();
-        if (!mounted) return;
-      }
       final selected = await showOnDemandNetworkPicker(
         context,
         selected: ref.read(excludeSSIDsProvider).toSet(),
@@ -445,71 +388,82 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
       body: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 0),
-            sliver: SliverToBoxAdapter(child: _buildOptions()),
-          ),
-          if (ref.watch(vpnSettingProvider).onDemandEnabled &&
-              excludeSSIDs.isNotEmpty)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              sliver: SliverToBoxAdapter(
-                child: generateSection(
-                  items: [
-                    DecorationListItem(
-                      leading: GlyphIcon(
-                        matched.isEmpty
-                            ? AppGlyphs.wifi
-                            : AppGlyphs.playPause(1),
-                      ),
-                      title: Text(
-                        matched.isEmpty
-                            ? context.appLocalizations.notTrustedNow
-                            : context.appLocalizations.trustedNow,
-                      ),
-                      subtitle: matched.isEmpty
-                          ? null
-                          : Text(matched.join(', ')),
-                      trailing: ref.watch(isStartProvider)
-                          ? TextButton(
-                              onPressed: () => ref
-                                  .read(onDemandOverrideProvider.notifier)
-                                  .setPaused(!ref.read(suspendProvider)),
-                              child: Text(
-                                ref.watch(suspendProvider)
-                                    ? context.appLocalizations.onDemandResume
-                                    : context.appLocalizations.onDemandPause,
-                              ),
-                            )
-                          : null,
-                    ),
-                  ],
+            padding: context.bodyInsets,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 0),
+                  sliver: SliverToBoxAdapter(child: _buildOptions()),
                 ),
-              ),
-            ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-            ).copyWith(top: 12),
-            sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: SettingTarget(
-                spec: onDemandToolSettings[2],
-                child: _buildExcludeSsidsHeader(),
-              ),
-            ),
-          ),
-          _buildExcludeSsidsList(excludeSSIDs, selectedItems),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-            ).copyWith(bottom: 16),
-            sliver: SliverToBoxAdapter(
-              child: ListFooter(
-                text: context.appLocalizations.trustedNetworksDesc,
-              ),
+                if (ref.watch(vpnSettingProvider).onDemandEnabled &&
+                    excludeSSIDs.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    sliver: SliverToBoxAdapter(
+                      child: generateSection(
+                        items: [
+                          DecorationListItem(
+                            leading: GlyphIcon(
+                              matched.isEmpty
+                                  ? AppGlyphs.wifi
+                                  : AppGlyphs.playPause(1),
+                            ),
+                            title: Text(
+                              matched.isEmpty
+                                  ? context.appLocalizations.notTrustedNow
+                                  : context.appLocalizations.trustedNow,
+                            ),
+                            subtitle: matched.isEmpty
+                                ? null
+                                : Text(matched.join(', ')),
+                            trailing: ref.watch(isStartProvider)
+                                ? TextButton(
+                                    onPressed: () => ref
+                                        .read(onDemandOverrideProvider.notifier)
+                                        .setPaused(!ref.read(suspendProvider)),
+                                    child: Text(
+                                      ref.watch(suspendProvider)
+                                          ? context
+                                                .appLocalizations
+                                                .onDemandResume
+                                          : context
+                                                .appLocalizations
+                                                .onDemandPause,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                  ).copyWith(top: 12),
+                  sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: SettingTarget(
+                      spec: onDemandToolSettings[2],
+                      child: _buildExcludeSsidsHeader(),
+                    ),
+                  ),
+                ),
+                _buildExcludeSsidsList(excludeSSIDs, selectedItems),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                  ).copyWith(bottom: 16),
+                  sliver: SliverToBoxAdapter(
+                    child: ListFooter(
+                      text: context.appLocalizations.trustedNetworksDesc,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

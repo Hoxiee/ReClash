@@ -7,6 +7,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
+import 'package:reclash/subscriptions/compatibility/settings_form.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/models/tool_route.dart';
@@ -111,11 +112,6 @@ class GeneralSettings {
       title: (l) => l.userAgent,
     ),
     SettingSpec(
-      id: 'general.logLevel',
-      page: ToolPage.general,
-      title: (l) => l.logLevel,
-    ),
-    SettingSpec(
       id: 'general.subscriptionIdentity',
       keywords: ['subscription', 'hwid', 'device identifier'],
       page: ToolPage.general,
@@ -124,24 +120,6 @@ class GeneralSettings {
   ];
 
   static SettingSpec spec(String id) => all.firstWhere((item) => item.id == id);
-}
-
-class LogLevelItem extends ConsumerWidget {
-  const LogLevelItem({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    return ConfigOptionsItem<LogLevel>(
-      setting: GeneralSettings.spec('general.logLevel'),
-      title: (l) => l.logLevel,
-      options: LogLevel.values,
-      textBuilder: (logLevel) => logLevel.name,
-      selector: patchClashConfigProvider.select((state) => state.logLevel),
-      onChanged: (ref, value) => ref
-          .read(patchClashConfigProvider.notifier)
-          .update((state) => state.copyWith(logLevel: value)),
-    );
-  }
 }
 
 class UaItem extends ConsumerWidget {
@@ -374,29 +352,16 @@ ConfigToggleItem _clashToggle({
   );
 }
 
-ConfigToggleItem _appSettingToggle({
-  required ConfigLabel title,
-  required bool Function(AppSettingProps state) select,
-  required AppSettingProps Function(AppSettingProps state, bool value) update,
-}) {
-  return ConfigToggleItem(
-    title: title,
-    selector: appSettingProvider.select(select),
-    onChanged: (ref, value) => ref
-        .read(appSettingProvider.notifier)
-        .update((state) => update(state, value)),
-  );
-}
-
-class _SubscriptionIdentityItem extends StatefulWidget {
+class _SubscriptionIdentityItem extends ConsumerStatefulWidget {
   const _SubscriptionIdentityItem();
 
   @override
-  State<_SubscriptionIdentityItem> createState() =>
+  ConsumerState<_SubscriptionIdentityItem> createState() =>
       _SubscriptionIdentityItemState();
 }
 
-class _SubscriptionIdentityItemState extends State<_SubscriptionIdentityItem> {
+class _SubscriptionIdentityItemState
+    extends ConsumerState<_SubscriptionIdentityItem> {
   bool _enabled = false;
   bool _loading = true;
   bool _saving = false;
@@ -407,13 +372,16 @@ class _SubscriptionIdentityItemState extends State<_SubscriptionIdentityItem> {
     _load();
   }
 
+  bool get _regionDefault =>
+      sendsDeviceIdentityByDefault(ref.read(appSettingProvider).regionCode);
+
   Future<void> _load() async {
     try {
       final enabled = await (await DeviceIdentityStore.create())
-          .globalSendEnabled();
+          .globalSendEnabled(byDefault: _regionDefault);
       if (mounted) setState(() => _enabled = enabled);
     } on Object {
-      if (mounted) setState(() => _enabled = false);
+      if (mounted) setState(() => _enabled = _regionDefault);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -421,6 +389,14 @@ class _SubscriptionIdentityItemState extends State<_SubscriptionIdentityItem> {
 
   Future<void> _setEnabled(bool value) async {
     if (_loading || _saving) return;
+    if (!value &&
+        !await confirmDeviceIdentityOff(
+          context,
+          ref.read(appSettingProvider).regionCode,
+        )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _saving = true);
     try {
       await (await DeviceIdentityStore.create()).setGlobalSendEnabled(value);
@@ -536,17 +512,6 @@ class GeneralView extends ConsumerWidget {
     ];
   }
 
-  List<Widget> _logItems() {
-    return [
-      const LogLevelItem(),
-      _appSettingToggle(
-        title: (l) => l.logcat,
-        select: (state) => state.openLogs,
-        update: (state, value) => state.copyWith(openLogs: value),
-      ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
@@ -585,17 +550,11 @@ class GeneralView extends ConsumerWidget {
               generateSection(
                 title: appLocalizations.subscriptionIdentitySettingsTitle,
                 items: const [_SubscriptionIdentityItem()],
-                footer: appLocalizations.subscriptionIdentityGlobalHint,
               ),
               generateSection(
                 title: appLocalizations.core,
                 items: _coreItems(),
                 footer: appLocalizations.ipv6Desc,
-              ),
-              generateSection(
-                title: appLocalizations.logsAndDiagnostics,
-                items: _logItems(),
-                footer: [appLocalizations.logcatDesc].join('\n'),
               ),
             ],
           ),

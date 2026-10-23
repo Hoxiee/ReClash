@@ -181,12 +181,14 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     );
   }
 
-  EdgeInsets _listPadding(BuildContext context) => EdgeInsets.fromLTRB(
-    16,
-    context.contentTopPadding,
-    16,
-    16 + BottomInsetScope.of(context),
-  );
+  EdgeInsets _listPadding(BuildContext context) =>
+      EdgeInsets.fromLTRB(
+        16,
+        context.contentTopPadding,
+        16,
+        16 + BottomInsetScope.of(context),
+      ) +
+      context.bodyInsets;
 
   Widget _buildRuleItem(List<Rule> rules, int index, Set<dynamic> selected) {
     final rule = rules[index];
