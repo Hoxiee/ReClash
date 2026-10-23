@@ -24,6 +24,10 @@ on:
         description: Build installable packages without publishing
         type: boolean
         default: false
+      run_tests:
+        description: Run checks on this push
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -45,7 +49,7 @@ jobs:
     name: Dart
     # A private copy pays for its Actions minutes, so it runs the checks only when
     # started by hand.
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -53,6 +57,9 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+
+      - name: Test Telegram release publishing
+        run: python3 -I -m unittest discover -s test/tool -p changelog_telegram_test.py
 
       - name: Test git hooks
         run: bash tool/hooks/test.sh
@@ -109,7 +116,7 @@ jobs:
 
   plugins:
     name: Plugins
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -202,7 +209,7 @@ jobs:
 
   go:
     name: Go core
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -245,7 +252,7 @@ jobs:
 
   android:
     name: Android unit tests
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -311,7 +318,7 @@ jobs:
 
   rust:
     name: Rust
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -337,7 +344,7 @@ jobs:
 
   windows-helper-test:
     name: Windows native backend test (${{ matrix.arch }})
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/v') || inputs.run_tests || inputs.build_packages) && (github.event_name == 'workflow_dispatch' || !github.event.repository.private)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -763,22 +770,22 @@ jobs:
             sort -z | xargs -0 sha256sum > SHA256SUMS
 
       - name: Release
-        if: ${{ env.IS_STABLE == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           files: ./dist/*
           body_path: './release.md'
+          prerelease: ${{ env.IS_STABLE != 'true' }}
+          make_latest: ${{ env.IS_STABLE == 'true' && 'true' || 'false' }}
+          fail_on_unmatched_files: true
 
       - name: Detect optional publishing credentials
         id: publishing
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           HOMEBREW_KEY: ${{ secrets.HOMEBREW_SSH_DEPLOY_KEY }}
           FDROID_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         run: |
-          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_API_ID" && -n "$TELEGRAM_API_HASH" ]]; then
+          if [[ -n "$TELEGRAM_BOT_TOKEN" ]]; then
             echo 'telegram=true' >> "$GITHUB_OUTPUT"
           fi
           if [[ -n "$HOMEBREW_KEY" ]]; then echo 'homebrew=true' >> "$GITHUB_OUTPUT"; fi
@@ -847,13 +854,6 @@ jobs:
         if: steps.publishing.outputs.telegram == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           TAG: ${{ github.ref_name }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          docker run --detach --name telegram-bot-api -p 8081:8081 \
-            -e TELEGRAM_API_ID -e TELEGRAM_API_HASH aiogram/telegram-bot-api:latest
-          curl --silent --show-error --retry 10 --retry-connrefused --retry-delay 2 http://localhost:8081/ > /dev/null
-          pip install requests
-          python release_telegram.py
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID || '@ReClashApp' }}
+        run: python3 -I release_telegram.py

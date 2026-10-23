@@ -1,98 +1,154 @@
+import argparse
 import html
 import json
 import os
+import re
 import sys
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
 
-import requests
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TAG = os.getenv("TAG")
-RUN_ID = os.getenv("RUN_ID")
+REPOSITORY = 'Hoxiee/ReClash'
+TAG_PATTERN = re.compile(r'v\d+\.\d+\.\d+(?:-pre\.[1-9]\d*)?')
 
-IS_STABLE = "-" not in TAG
 
-CHAT_ID = "@ReClashApp"
-API_URL = f"http://localhost:8081/bot{TELEGRAM_BOT_TOKEN}/sendMediaGroup"
+def download_rows():
+    return [
+        [('Android · ARM64', 'android-arm64-v8a.apk'),
+         ('Android · ARMv7', 'android-armeabi-v7a.apk'),
+         ('Android · x64', 'android-x86_64.apk')],
+        [('Windows · x64', 'windows-amd64-setup.exe'),
+         ('Windows · ARM64', 'windows-arm64-setup.exe')],
+        [('Portable · x64', 'windows-amd64.zip'),
+         ('Portable · ARM64', 'windows-arm64.zip')],
+        [('macOS · Apple Silicon', 'macos-arm64.dmg'),
+         ('macOS · Intel', 'macos-amd64.dmg')],
+        [('Linux · AppImage x64', 'linux-amd64.AppImage')],
+        [('DEB · x64', 'linux-amd64.deb'), ('DEB · ARM64', 'linux-arm64.deb')],
+        [('RPM · x64', 'linux-amd64.rpm'), ('RPM · ARM64', 'linux-arm64.rpm')],
+        [('Arch · x64', 'linux-amd64.pkg.tar.xz'),
+         ('Arch · ARM64', 'linux-arm64.pkg.tar.xz')],
+    ]
 
-DIST_DIR = os.path.join(os.getcwd(), "dist")
-# Rendered by `tool/changelog.dart render telegram`: plain bullets, already
-# truncated to fit the caption limit. release.md carries the download table and
-# would blow past that limit.
-release = os.path.join(os.getcwd(), "telegram.md")
 
-text = ""
+def visible_length(markup):
+    plain = html.unescape(re.sub(r'<[^>]*>', '', markup))
+    return len(plain.encode('utf-16-le')) // 2
 
-media = []
-files = {}
 
-i = 1
+def build_post(tag, notes, dist, chat_id):
+    if not TAG_PATTERN.fullmatch(tag):
+        raise ValueError('Expected a release tag such as v0.1.0-pre.1')
+    version = tag[1:]
+    release_url = f'https://github.com/{REPOSITORY}/releases/tag/{tag}'
+    download_url = f'https://github.com/{REPOSITORY}/releases/download/{tag}'
+    keyboard = []
+    for row in download_rows():
+        buttons = []
+        for label, suffix in row:
+            name = f'ReClash-{version}-{suffix}'
+            file = dist / name
+            if not file.is_file() or file.stat().st_size == 0:
+                raise ValueError(f'Missing or empty release asset: {name}')
+            buttons.append({'text': label, 'url': f'{download_url}/{quote(name)}'})
+        keyboard.append(buttons)
+    checksums = dist / 'SHA256SUMS'
+    if not checksums.is_file() or checksums.stat().st_size == 0:
+        raise ValueError('Missing or empty release asset: SHA256SUMS')
+    keyboard.append([
+        {'text': '📋 Full changelog', 'url': release_url},
+        {'text': '🔐 SHA256', 'url': f'{download_url}/SHA256SUMS'},
+    ])
 
-releaseKeywords = [
-    "windows-amd64-setup",
-    "android-arm64",
-    "macos-arm64",
-    "macos-amd64"
-]
+    prerelease = '-pre.' in version
+    status = '🧪 Pre-release' if prerelease else '✨ Stable release'
+    heading = f'<b>ReClash {html.escape(version)}</b>\n{status}'
+    if prerelease:
+        heading += '\nTesting build — may contain bugs.'
+    kept = []
+    bullets = 0
+    pending_heading = None
+    for line in notes.strip().splitlines():
+        if line.startswith('<b>') and line.endswith('</b>'):
+            pending_heading = line
+            continue
+        if not line.strip():
+            continue
+        if line.startswith('…') or bullets >= 6:
+            kept.append('… See the full changelog below.')
+            break
+        candidate = [*kept]
+        if pending_heading:
+            candidate.extend(['', pending_heading])
+        candidate.append(line)
+        if visible_length('\n'.join(candidate)) > 2800:
+            kept.append('… See the full changelog below.')
+            break
+        kept = candidate
+        pending_heading = None
+        if line.startswith('• '):
+            bullets += 1
+    body = '\n'.join(kept).strip() or 'Maintenance and stability improvements.'
+    text = f'{heading}\n\n{body}\n\n<b>Download for your platform ↓</b>'
+    if visible_length(text) > 4096:
+        raise ValueError('Telegram post exceeds the message limit')
+    return {
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': 'HTML',
+        'link_preview_options': {'is_disabled': True},
+        'reply_markup': {'inline_keyboard': keyboard},
+    }
 
-for file in os.listdir(DIST_DIR):
-    file_path = os.path.join(DIST_DIR, file)
-    if os.path.isfile(file_path):
-        file_lower = file.lower()
-        if any(kw in file_lower for kw in releaseKeywords):
-            file_key = f"file{i}"
-            media.append({
-                "type": "document",
-                "media": f"attach://{file_key}"
-            })
-            files[file_key] = open(file_path, 'rb')
-            i += 1
 
-if TAG:
-    text += f"\n<b>{html.escape(TAG)}</b>\n"
-
-if IS_STABLE:
-    text += f"\nhttps://github.com/Hoxiee/ReClash/releases/tag/{TAG}\n"
-else:
-    text += f"\nhttps://github.com/Hoxiee/ReClash/actions/runs/{RUN_ID}\n"
-
-if os.path.exists(release):
-    text += "\n"
-    with open(release, 'r') as f:
-        text += f.read()
-    text += "\n"
-
-if media:
-    media[-1]["caption"] = text
-    # HTML, not Markdown: the caption carries changelog entries written by
-    # whoever wrote the commit, and HTML is the one Telegram parse mode with a
-    # defined escape for them. `tool/changelog.dart render telegram` emits the
-    # matching markup.
-    media[-1]["parse_mode"] = "HTML"
-
-try:
-    response = requests.post(
-        API_URL,
-        data={
-            "chat_id": CHAT_ID,
-            "media": json.dumps(media)
-        },
-        files=files,
-        timeout=300
+def send_post(token, post):
+    request = Request(
+        f'https://api.telegram.org/bot{token}/sendMessage',
+        data=json.dumps(post).encode('utf-8'),
+        headers={'Content-Type': 'application/json'},
+        method='POST',
     )
-finally:
-    for handle in files.values():
-        handle.close()
+    try:
+        with urlopen(request, timeout=60) as response:
+            payload = json.load(response)
+    except HTTPError as error:
+        raise ValueError(f'Telegram rejected the post (HTTP {error.code})') from None
+    except URLError:
+        raise ValueError('Could not connect to Telegram') from None
+    if not payload.get('ok'):
+        raise ValueError('Telegram rejected the release post')
+    return payload['result']['message_id']
 
-# A rejected caption comes back as a 400 with a description, not an exception.
-# Without this the release job stays green while the announcement never posted.
-try:
-    payload = response.json()
-except ValueError:
-    payload = None
 
-print("Response JSON:", payload if payload is not None else response.text)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--tag', default=os.getenv('TAG', ''))
+    parser.add_argument('--notes', type=Path, default=Path('telegram.md'))
+    parser.add_argument('--dist', type=Path, default=Path('dist'))
+    args = parser.parse_args()
+    try:
+        post = build_post(
+            args.tag,
+            args.notes.read_text(encoding='utf-8'),
+            args.dist,
+            os.getenv('TELEGRAM_CHAT_ID', '@ReClashApp'),
+        )
+        if args.dry_run:
+            print(json.dumps(post, ensure_ascii=False, indent=2))
+            return 0
+        token = os.getenv('TELEGRAM_BOT_TOKEN')
+        if not token:
+            raise ValueError('TELEGRAM_BOT_TOKEN is required')
+        message_id = send_post(token, post)
+        print(f'Telegram release post published: message {message_id}')
+        return 0
+    except (ValueError, OSError, KeyError) as error:
+        print(f'Telegram publishing failed: {error}', file=sys.stderr)
+        return 1
 
-if not response.ok or not (payload or {}).get("ok"):
-    description = (payload or {}).get("description", response.text)
-    print(f"Telegram rejected the release post: {description}", file=sys.stderr)
-    sys.exit(1)
+
+if __name__ == '__main__':
+    sys.exit(main())

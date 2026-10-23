@@ -77,7 +77,11 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
   final arch = _detectArch();
-  final targets = createPackageTargets(platform, results['targets']);
+  final targets = createPackageTargets(
+    platform,
+    results['targets'],
+    arch: arch,
+  );
   final androidArch = results['arch'] as String?;
   final verbose = results['verbose'] as bool;
 
@@ -153,8 +157,14 @@ List<String> packagesNotBuildingAssets(String pubspec) {
   ]..sort();
 }
 
-String createPackageTargets(String platform, String? customTargets) {
-  return customTargets ?? _allTargets[platform]!;
+String createPackageTargets(
+  String platform,
+  String? customTargets, {
+  String? arch,
+}) {
+  if (customTargets != null) return customTargets;
+  if (platform == 'linux' && arch == 'arm64') return 'deb,rpm,pacman';
+  return _allTargets[platform]!;
 }
 
 void _showHelp(ArgParser parser) {
