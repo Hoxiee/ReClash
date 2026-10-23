@@ -6,7 +6,7 @@ This note records the import entrypoints and route/error rules shared by the pro
 
 | Entry point | Route | Consent / key handling | Result |
 | --- | --- | --- | --- |
-| OS URL scheme and argv | `Application._handleLink` → `UrlSchemeAction.handleLink` → `resolveProfileLink` | A compact confirmation shows the name and origin host, not the URL path or query. Happ/INCY offers its hinted client and Auto. The selected client reaches the import action. | URL fetch, embedded-config import, or local proxy-link conversion through the common importer. |
+| OS URL scheme and argv | `Application._handleLink` → `UrlSchemeAction.handleLink` → `resolveProfileLink` | Confirmation reads only the browser page without HWID or client negotiation. Remnawave/3x-ui embedded page data, Marzban default page fields and generic HTML metadata are display-only. Happ/INCY client selection is local. Config download starts only after Add. | URL fetch, embedded-config import, or local proxy-link conversion through the common importer. |
 | Manual single URL | Profiles → Add → Link → `showNamedUrlsForm` → `addProfileFromLink` | The Save action is consent. The form's initial client setting is not treated as an explicit choice; changing the selection is. AGE key can be entered with the URL. | One profile, after compatibility checks and any required loss review. |
 | Manual batch | Same form in batch mode → `addProfilesFromLinks` | Existing URLs are filtered only when duplicate prevention is enabled; repeated lines follow the same setting. A provided AGE key is carried to every row; missing keys can be requested per encrypted source. | Independent imports run with bounded concurrency and finish with one added/skipped/failed summary; failure details are grouped. Proxy share links remain grouped, and successful profiles are not rolled back by a failed row. |
 | Camera QR | `ScanPage` → `addProfileFromLink` | The scan returns a link; normal URL/deep-link resolution and any AGE prompt follow. | Same URL, wrapper, embedded-config, or proxy-link paths as other links. |
@@ -48,3 +48,18 @@ flutter test test/views/add_profile_view_test.dart test/providers/profiles_actio
 ```
 
 Real Android VPN protection and a desktop TUN interface binding still require platform hosts for end-to-end confirmation.
+
+## Browser-only link preview
+
+- Preview uses a fixed browser User-Agent and HTML Accept header, never the subscription identity store, client presets or custom profile headers.
+- It fetches only the supplied URL through the bounded transport; HTML is parsed in an isolate without running scripts or loading assets. No guessed API endpoints, client-format retries or config validation run before consent.
+- Remnawave's `#sbpg[data-panel]` contains base64 JSON account data. 3x-ui's `window.__SUB_PAGE_DATA__` carries JSON usage fields and is parsed without executing JavaScript. Marzban's default page exposes labeled account fields. Custom pages fall back to HTML title and description; missing values stay unknown rather than becoming zero/unlimited.
+- Preview metadata is never a prepared update and cannot be committed. Add performs the ordinary authenticated/device-aware subscription import.
+- Browser requests still reach the server. Arbitrary provider implementations may count any request; the client cannot guarantee a side-effect-free page on every deployment.
+
+References checked for the browser routes:
+- https://github.com/remnawave/subscription-page/blob/main/backend/src/modules/subscription/subscription.controller.ts
+- https://github.com/remnawave/subscription-page/blob/main/backend/src/modules/webpage/webpage.service.ts
+- https://github.com/Gozargah/Marzban/blob/master/app/routers/subscription.py
+- https://github.com/Gozargah/Marzban/blob/master/app/templates/subscription/index.html
+- https://github.com/MHSanaei/3x-ui/blob/main/internal/sub/controller.go

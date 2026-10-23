@@ -1464,7 +1464,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "配置文件已经修改，是否关闭自动更新？",
     ),
     "profileImportAlreadyAdded": m65,
-    "profileImportChecking": MessageLookupByLibrary.simpleMessage("正在检查订阅…"),
+    "profileImportChecking": MessageLookupByLibrary.simpleMessage("正在加载订阅页面…"),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "已存在使用该订阅链接的配置",
     ),
@@ -1482,7 +1482,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "部分内容不受支持，添加前会让你查看。",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "无法查看订阅内容，但仍可添加。",
+      "无法加载订阅页面，仍可添加此订阅。",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("服务器"),

@@ -20,25 +20,14 @@ class ProfilesAction extends _$ProfilesAction {
     Profile candidate,
   ) => _lastSuccessfulProfileClient(candidate);
 
-  Future<ProfileLinkPreview> previewProfileLinkSource(
-    ProfileLinkSource source,
-    SubscriptionClientSettings settings, {
+  Future<SubscriptionPagePreview> previewProfileLinkSource(
+    ProfileLinkSource source, {
     SubscriptionCancellation? cancellation,
-  }) async {
-    final draft = _linkSourceDraft(
-      source.url!,
-      label: source.name,
-      ageSecretKey: '',
-      settings: settings,
-    );
-    return (
-      draft: draft,
-      prepared: await _prepareProfileCompatibility(
-        draft,
-        cancellation: cancellation,
-      ),
-    );
-  }
+  }) => previewSubscriptionPage(
+    source.url!,
+    transport: _subscriptionTransport(),
+    cancellation: cancellation,
+  );
 
   String? duplicateProfileLabel(ProfileLinkSource source) {
     final url = source.url?.trim();
@@ -613,7 +602,6 @@ class ProfilesAction extends _$ProfilesAction {
     String ageSecretKey = '',
     bool select = true,
     SubscriptionClientSettings? clientSettings,
-    ProfileLinkPreview? preview,
     BuildContext? reviewContext,
     SubscriptionCancellation? cancellation,
   }) async {
@@ -661,7 +649,6 @@ class ProfilesAction extends _$ProfilesAction {
           label: name,
           ageSecretKey: ageSecretKey,
           settings: settings,
-          id: preview?.draft.id,
         );
         if (settings.sendDeviceIdentity case final send?) {
           final store = await DeviceIdentityStore.create();
@@ -673,7 +660,6 @@ class ProfilesAction extends _$ProfilesAction {
         }
         profile = await _download(
           draft,
-          prepared: preview?.prepared,
           reviewContext: reviewContext,
           cancellation: cancellation,
           onCommitted: save,
@@ -906,7 +892,6 @@ class ProfilesAction extends _$ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
-    ProfileLinkPreview? preview,
   }) async {
     _showProfiles();
     await globalState.loadingRun(
@@ -916,7 +901,6 @@ class ProfilesAction extends _$ProfilesAction {
         label: label,
         ageSecretKey: ageSecretKey,
         clientSettings: clientSettings,
-        preview: preview,
       ),
       title: currentAppLocalizations.addProfile,
     );
@@ -940,14 +924,12 @@ class ProfilesAction extends _$ProfilesAction {
     String? label,
     String ageSecretKey = '',
     SubscriptionClientSettings? clientSettings,
-    ProfileLinkPreview? preview,
   }) async {
     Future<Profile> save(String key) => importProfileLinkSource(
       source,
       label: label,
       ageSecretKey: key,
       clientSettings: clientSettings,
-      preview: preview,
     );
     try {
       return await save(ageSecretKey);

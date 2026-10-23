@@ -8,18 +8,16 @@ import 'package:reclash/subscriptions/compatibility/client_labels.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/external_link.dart';
 import 'package:reclash/subscriptions/imports/import.dart';
-import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
-import 'package:reclash/widgets/provider_logo.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 typedef ProfileLinkPreviewer =
-    Future<ProfileLinkPreview> Function(
-      ProfileLinkSource source,
-      SubscriptionClientSettings settings, {
+    Future<SubscriptionPagePreview> Function(
+      ProfileLinkSource source, {
       SubscriptionCancellation? cancellation,
     });
 
@@ -38,7 +36,7 @@ Future<ProfileLinkImport?> showProfileImportDialog(
 class _Preview {
   const _Preview({this.value, this.failure});
 
-  final ProfileLinkPreview? value;
+  final SubscriptionPagePreview? value;
   final Object? failure;
 
   bool get loading => value == null && failure == null;
@@ -65,17 +63,17 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
   late final _nameController = TextEditingController(
     text: widget.source.name ?? '',
   );
-  final _previews = <SubscriptionClientPreset, _Preview>{};
+  _Preview? _preview;
   final _cancellations = <SubscriptionCancellation>{};
   SubscriptionImportResult? _embedded;
   bool _nameEdited = false;
 
-  ProfileLinkPreview? get _current => _previews[_preset]?.value;
+  SubscriptionPagePreview? get _current => _preview?.value;
 
   @override
   void initState() {
     super.initState();
-    _load(_preset);
+    _load();
     if (widget.source.bytes case final bytes?) {
       unawaited(
         prepareSubscriptionImport(bytes).then((result) {
@@ -97,32 +95,32 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
   SubscriptionClientSettings _settings(SubscriptionClientPreset preset) =>
       const SubscriptionClientSettings.forNewProfile().copyWith(preset: preset);
 
-  void _load(SubscriptionClientPreset preset) {
+  void _load() {
     final preview = widget.preview;
     if (preview == null ||
         widget.source.url == null ||
         widget.duplicateOf != null ||
-        _previews.containsKey(preset)) {
+        _preview != null) {
       return;
     }
     final cancellation = SubscriptionCancellation();
     _cancellations.add(cancellation);
-    _previews[preset] = const _Preview();
+    _preview = const _Preview();
     unawaited(
-      preview(widget.source, _settings(preset), cancellation: cancellation)
+      preview(widget.source, cancellation: cancellation)
           .then<void>(
             (value) {
               if (!mounted || cancellation.cancelled) return;
               setState(() {
-                _previews[preset] = _Preview(value: value);
-                if (!_nameEdited && preset == _preset) {
-                  _nameController.text = value.prepared.label;
+                _preview = _Preview(value: value);
+                if (!_nameEdited && value.label != null) {
+                  _nameController.text = value.label!;
                 }
               });
             },
             onError: (Object error) {
               if (!mounted || cancellation.cancelled) return;
-              setState(() => _previews[preset] = _Preview(failure: error));
+              setState(() => _preview = _Preview(failure: error));
             },
           )
           .whenComplete(() => _cancellations.remove(cancellation)),
@@ -130,20 +128,13 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
   }
 
   void _retry() {
-    setState(() => _previews.remove(_preset));
-    _load(_preset);
+    setState(() => _preview = null);
+    _load();
   }
 
   void _select(SubscriptionClientPreset preset) {
     if (preset == _preset) return;
-    setState(() {
-      _preset = preset;
-      final current = _current;
-      if (!_nameEdited && current != null) {
-        _nameController.text = current.prepared.label;
-      }
-    });
-    _load(preset);
+    setState(() => _preset = preset);
   }
 
   void _submit() {
@@ -152,7 +143,6 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
       ProfileLinkImport(
         clientSettings: _settings(_preset),
         label: label.isEmpty ? null : label,
-        preview: _current,
       ),
     );
   }
@@ -162,13 +152,13 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
     final l10n = context.appLocalizations;
     final source = widget.source;
     final current = _current;
-    final metadata = current?.prepared.snapshot.metadata;
-    final summary = current?.prepared.summary ?? _embedded?.summary;
-    final format = current?.prepared.payload.format ?? _embedded?.format;
+    final metadata = current?.metadata;
+    final summary = _embedded?.summary;
+    final format = _embedded?.format;
     final host = source.url == null ? null : Uri.tryParse(source.url!)?.host;
     final title =
         metadata?.name ??
-        current?.prepared.label ??
+        current?.label ??
         source.name ??
         (source.url != null ? host : null) ??
         l10n.addProfile;
@@ -183,7 +173,7 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
       if (format != null) format.label,
     ].where((part) => part.isNotEmpty).join('  ·  ');
     final duplicateOf = widget.duplicateOf;
-    final state = _previews[_preset];
+    final state = _preview;
     return CommonScaffold(
       title: source.url != null ? l10n.profileImportTitle : l10n.addProfile,
       body: Column(
@@ -199,7 +189,6 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _Hero(
-                    logo: metadata?.logo,
                     monogram: metadata?.name,
                     glyph: source.bytes != null
                         ? AppGlyphs.code
@@ -220,11 +209,9 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                         if (metadata?.announce case final announce?
                             when announce.trim().isNotEmpty)
                           _Announce(text: announce.trim()),
-                        if (summary != null && source.shareLink == null)
-                          _Stats(
-                            summary: summary,
-                            info: current?.prepared.subscriptionInfo,
-                          ),
+                        if ((summary != null || current?.info != null) &&
+                            source.shareLink == null)
+                          _Stats(summary: summary, info: current?.info),
                         if (duplicateOf != null)
                           _Notice(
                             glyph: AppGlyphs.info,
@@ -246,13 +233,6 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                             action: failure is AgeSecretKeyRequiredException
                                 ? null
                                 : (l10n.retry, _retry),
-                          ),
-                        if (current?.prepared.snapshot.deviceStatus ==
-                            SubscriptionDeviceStatus.limitReached)
-                          _Notice(
-                            glyph: AppGlyphs.devices,
-                            text: l10n.subscriptionDeviceLimit,
-                            warning: true,
                           ),
                         if (summary?.hasLosses == true)
                           _Notice(
@@ -298,7 +278,6 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                                   : l10n.profileImportFormatClient(
                                       preset.label,
                                     ),
-                              preview: _previews[preset],
                               selected: preset == _preset,
                               onPressed: () => _select(preset),
                             ),
@@ -330,7 +309,6 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
 
 class _Hero extends StatelessWidget {
   const _Hero({
-    required this.logo,
     required this.monogram,
     required this.glyph,
     required this.loading,
@@ -341,7 +319,6 @@ class _Hero extends StatelessWidget {
   static const _side = 104.0;
   static const _well = 76.0;
 
-  final String? logo;
   final String? monogram;
   final Glyph glyph;
   final bool loading;
@@ -388,16 +365,7 @@ class _Hero extends StatelessWidget {
                 ),
                 ClipPath(
                   clipper: const ShapeBorderClipper(shape: AppShape.lg),
-                  child: SizedBox.square(
-                    dimension: _well,
-                    child: logo == null
-                        ? fallback
-                        : ProviderLogo(
-                            url: logo!,
-                            size: _well,
-                            fallback: fallback,
-                          ),
-                  ),
+                  child: SizedBox.square(dimension: _well, child: fallback),
                 ),
               ],
             ),
@@ -484,7 +452,7 @@ class _Announce extends StatelessWidget {
 class _Stats extends StatelessWidget {
   const _Stats({required this.summary, required this.info});
 
-  final SubscriptionImportSummary summary;
+  final SubscriptionImportSummary? summary;
   final SubscriptionInfo? info;
 
   @override
@@ -503,11 +471,12 @@ class _Stats extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 8,
           children: [
-            _StatTile(
-              flex: 2,
-              label: l10n.profileImportServers,
-              value: '${summary.nodes}',
-            ),
+            if (summary case final summary?)
+              _StatTile(
+                flex: 2,
+                label: l10n.profileImportServers,
+                value: '${summary.nodes}',
+              ),
             if (info != null) ...[
               _StatTile(
                 flex: 3,
@@ -650,27 +619,17 @@ class _FormatOption extends StatelessWidget {
   const _FormatOption({
     required this.title,
     required this.description,
-    required this.preview,
     required this.selected,
     required this.onPressed,
   });
 
   final String title;
   final String description;
-  final _Preview? preview;
   final bool selected;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.appLocalizations;
-    final prepared = preview?.value?.prepared;
-    final result = prepared != null
-        ? '${prepared.payload.format.label}  ·  '
-              '${l10n.profileImportServerCount(prepared.summary.nodes)}'
-        : preview?.loading == true
-        ? l10n.profileImportChecking
-        : null;
     final muted = AppTextStyle.footnote
         .of(context)
         .copyWith(color: context.colorScheme.onSurfaceVariant);
@@ -678,13 +637,7 @@ class _FormatOption extends StatelessWidget {
       isSelected: selected,
       onPressed: onPressed,
       title: Text(title),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(description, style: muted),
-          if (result != null) Text(result, style: muted),
-        ],
-      ),
+      subtitle: Text(description, style: muted),
       trailing: selected ? const SelectionCheck() : null,
     );
   }

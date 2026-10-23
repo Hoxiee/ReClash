@@ -1982,7 +1982,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Vérification de l’abonnement…",
+      "Chargement de la page d’abonnement…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Un profil avec cette URL d\'abonnement existe déjà",
@@ -2005,7 +2005,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Certaines parties ne sont pas prises en charge ; vous les examinerez avant l’ajout.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Impossible d’afficher le contenu de l’abonnement. Vous pouvez quand même l’ajouter.",
+      "Impossible de charger la page d’abonnement. Vous pouvez quand même l’ajouter.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Serveurs"),

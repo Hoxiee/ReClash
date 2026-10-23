@@ -10495,20 +10495,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Checking the subscription…`
+  /// `Loading subscription page…`
   String get profileImportChecking {
     return Intl.message(
-      'Checking the subscription…',
+      'Loading subscription page…',
       name: 'profileImportChecking',
       desc: '',
       args: [],
     );
   }
 
-  /// `Couldn’t look inside the subscription. You can still add it.`
+  /// `Couldn’t load the subscription page. You can still add it.`
   String get profileImportPreviewFailed {
     return Intl.message(
-      'Couldn’t look inside the subscription. You can still add it.',
+      'Couldn’t load the subscription page. You can still add it.',
       name: 'profileImportPreviewFailed',
       desc: '',
       args: [],

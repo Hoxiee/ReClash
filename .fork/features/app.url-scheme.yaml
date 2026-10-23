@@ -7,7 +7,7 @@ deps: [app.setup, localization.catalog, profiles.no-duplicates, subscription.com
 must:
   commands: Known connection and window commands use existing lifecycle owners and explicit confirmation; unknown commands never dispatch.
   imports: Subscription URLs, embedded configs, INCY/Happ wrappers and proxy links resolve locally, retain names and presets, and reuse validation, encryption-key retry, loss approval and durable save. Happ/INCY presets only seed selection; an explicit Auto choice is retained.
-  preview: The import confirmation previews a wrapped or plain subscription with the chosen client before consent, offers the wrapper's own format beside ReClash's, skips already-added URLs, and the import commits that preview instead of fetching again when its request still matches.
+  preview: Before consent, import requests only the browser subscription page without device identity, client negotiation, config validation or remote assets. Remnawave and 3x-ui page data, Marzban page fields and generic HTML metadata are display-only; unknown pages never trigger a config fallback. Client selection is local and config download starts only after Add; already-added URLs skip preview.
   telegram: Telegram support links use a destination-aware confirmation, preserve parameters, and offer HTTPS fallback only for convertible tg destinations.
   batch-results: Batch profile imports report added, skipped and failed counts once, with details available for failed entries.
   safety: Parsing and external decoding are bounded and never log or display credential-bearing URLs or embedded payloads.
@@ -36,7 +36,6 @@ watch:
   - lib/models/tool_route.dart
   - lib/widgets/url_scheme_*.dart
   - lib/widgets/profile_import_dialog.dart
-  - lib/widgets/provider_logo.dart
   - android/app/src/main/AndroidManifest.xml
   - macos/Runner/Info.plist
   - windows/packaging/exe/inno_setup.iss

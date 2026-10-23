@@ -1931,7 +1931,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Жазылым тексерілуде…",
+      "Жазылым беті жүктелуде…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Бұл жазылым сілтемесі бар профиль қазірдің өзінде бар",
@@ -1956,7 +1956,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Кейбір бөліктерге қолдау жоқ — қосар алдында оларды көрсетеміз.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "Жазылым мазмұнын көру мүмкін болмады. Оны бәрібір қосуға болады.",
+      "Жазылым бетін жүктеу мүмкін болмады. Оны бәрібір қосуға болады.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Серверлер"),

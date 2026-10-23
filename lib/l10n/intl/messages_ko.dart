@@ -1576,7 +1576,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "구독을 확인하는 중…",
+      "구독 페이지 불러오는 중…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "이 구독 URL의 프로필이 이미 있습니다",
@@ -1597,7 +1597,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "일부 항목은 지원되지 않습니다. 추가하기 전에 확인할 수 있습니다.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "구독 내용을 확인하지 못했습니다. 그래도 추가할 수 있습니다.",
+      "구독 페이지를 불러오지 못했습니다. 그래도 추가할 수 있습니다.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("서버"),

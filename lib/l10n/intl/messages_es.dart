@@ -1976,7 +1976,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "Comprobando la suscripción…",
+      "Cargando la página de suscripción…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "Ya existe un perfil con esta URL de suscripción",
@@ -1999,7 +1999,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Algunas partes no son compatibles; las revisarás antes de añadirla.",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "No se pudo ver el contenido de la suscripción. Aun así puedes añadirla.",
+      "No se pudo cargar la página de suscripción. Aún puedes añadirla.",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("Servidores"),

@@ -1599,7 +1599,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "profileImportAlreadyAdded": m65,
     "profileImportChecking": MessageLookupByLibrary.simpleMessage(
-      "サブスクリプションを確認しています…",
+      "サブスクリプションページを読み込み中…",
     ),
     "profileImportDuplicate": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションURLのプロファイルは既に存在します",
@@ -1620,7 +1620,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "一部の項目は非対応です。追加前に確認できます。",
     ),
     "profileImportPreviewFailed": MessageLookupByLibrary.simpleMessage(
-      "サブスクリプションの内容を確認できませんでした。このまま追加することもできます。",
+      "サブスクリプションページを読み込めませんでした。そのまま追加できます。",
     ),
     "profileImportServerCount": m67,
     "profileImportServers": MessageLookupByLibrary.simpleMessage("サーバー"),
