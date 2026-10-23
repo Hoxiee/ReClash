@@ -180,6 +180,60 @@ void main() {
       expect(utf8.decode(result.bytes), source);
     });
 
+    test('converts full Xray profiles with repeated routing data', () {
+      final profiles = List.generate(
+        55,
+        (index) => {
+          'remarks': 'Profile $index',
+          'routing': {
+            'rules': [
+              {
+                'type': 'field',
+                'domain': List.generate(
+                  600,
+                  (index) => 'domain:site$index.test',
+                ),
+                'outboundTag': 'direct',
+              },
+            ],
+          },
+          'outbounds': [
+            {
+              'tag': 'proxy',
+              'protocol': 'vless',
+              'settings': {
+                'vnext': [
+                  {
+                    'address': 'edge$index.example',
+                    'port': 443,
+                    'users': [
+                      {'id': '11111111-1111-4111-8111-111111111111'},
+                    ],
+                  },
+                ],
+              },
+            },
+            {'tag': 'direct', 'protocol': 'freedom'},
+          ],
+        },
+      );
+      final result = convertSubscriptionImport(_bytes(jsonEncode(profiles)));
+      expect(result.format, SubscriptionFormat.xray);
+      expect(result.summary.nodes, 55);
+    });
+
+    test('bounds total parsed values across nested containers', () {
+      final values = List.filled(1024, null);
+      final nested = List.filled(
+        maxSubscriptionImportValues ~/ values.length + 1,
+        values,
+      );
+      expect(
+        () => convertSubscriptionImport(_bytes(jsonEncode({'items': nested}))),
+        throwsA(isA<SubscriptionImportException>()),
+      );
+    });
+
     test('rejects oversized YAML node lists', () {
       final entries = List.filled(
         maxSubscriptionImportNodes + 1,
