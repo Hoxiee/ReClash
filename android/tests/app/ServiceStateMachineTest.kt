@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -164,10 +165,12 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     override var onDemandPaused = false
     val pauseCalls = mutableListOf<Pair<Boolean, Boolean>>()
     var pauseGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+    var pauseSucceeds = true
 
     override suspend fun setOnDemandPaused(paused: Boolean, fullStop: Boolean): Boolean {
         pauseCalls += paused to fullStop
         pauseGate?.await()
+        if (!pauseSucceeds) return false
         onDemandPaused = paused
         return true
     }
@@ -203,6 +206,26 @@ class ServiceStateMachineTest {
         machine.reconcileOnDemand(PhysicalNetworks(listOf("10.0.0.3"), listOf("Office")))
         assertFalse(host.onDemandPaused)
         assertEquals(listOf(true to false, false to false), host.pauseCalls)
+    }
+
+    @Test
+    fun `reconcile asks for a recheck only while the guard runs or a pause is refused`() = runTest {
+        val host = FakeHost(this)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState().copy(vpnOptions = vpnOptions().copy(onDemandNetworks = listOf("Home"))))
+        machine.requestStart().await()
+        val home = PhysicalNetworks(ssids = listOf("Home"))
+        host.runtime = host.runtime!!.copy(startedAtMillis = System.currentTimeMillis())
+        val guard = machine.reconcileOnDemand(home)
+        assertTrue(guard != null && guard in 1..8_000L)
+        assertFalse(host.onDemandPaused)
+        host.runtime = host.runtime!!.copy(startedAtMillis = STARTED_AT)
+        host.pauseSucceeds = false
+        assertEquals(ServiceStateMachine.ON_DEMAND_RETRY_MILLIS, machine.reconcileOnDemand(home))
+        host.pauseSucceeds = true
+        assertNull(machine.reconcileOnDemand(home))
+        assertTrue(host.onDemandPaused)
+        assertNull(machine.reconcileOnDemand(home))
     }
 
     @Test

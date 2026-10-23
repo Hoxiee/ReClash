@@ -55,7 +55,8 @@ suspend fun PackageManager.getPackageIconPath(packageName: String): String =
             if (iconFile.exists() && !isExpired(iconFile)) {
                 return@withContext iconFile.absolutePath
             }
-            iconDir.listFiles { f -> f.name.startsWith("${packageName}_") }?.forEach(File::delete)
+            val cachedIcon = Regex("${Regex.escape(packageName)}_-?\\d+\\.webp")
+            iconDir.listFiles { f -> cachedIcon.matches(f.name) }?.forEach(File::delete)
 
             val icon = getApplicationIcon(packageName)
             saveDrawableToFile(icon, iconFile)
