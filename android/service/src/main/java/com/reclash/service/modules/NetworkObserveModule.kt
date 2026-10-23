@@ -22,6 +22,8 @@ import com.reclash.common.GlobalState
 import com.reclash.core.Core
 import com.reclash.service.ServiceConfig
 import com.reclash.service.PhysicalNetworks
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
@@ -55,8 +57,11 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
     }.build()
 
+    private val registrationLock = Any()
     private var callback: ConnectivityManager.NetworkCallback? = null
     private var includesSsid = false
+    private var optionsRevision = -1L
+    private var revisionJob: Job? = null
     @Volatile
     private var observing = false
 
@@ -67,6 +72,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         override fun onAvailable(network: Network) {
             networkInfos[network] = NetworkInfo()
             scheduleUpdateDns()
+            requestRegistrationCheck()
         }
 
         override fun onLosing(network: Network, maxMsToLive: Int) {
@@ -112,39 +118,57 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         handler.postDelayed(updateDnsTask, DNS_UPDATE_DELAY_MILLIS)
     }
 
-    private var optionsRevision = -1L
-    private val refreshNetworks = object : Runnable {
-        override fun run() {
-            if (!observing) return
-            runCatching {
-                val needsSsid = ServiceConfig.vpnOptions?.let { options ->
-                    options.onDemandEnabled && options.onDemandNetworks.any {
-                        !TrustedNetworkMatcher.isSubnetRule(it)
-                    }
-                } == true && ContextCompat.checkSelfPermission(
-                    service, Manifest.permission.ACCESS_FINE_LOCATION,
-                ) == PackageManager.PERMISSION_GRANTED
-                val revision = ServiceConfig.onDemandRevision.value
-                if (callback == null || revision != optionsRevision || includesSsid != needsSsid) {
-                    callback?.let { runCatching { connectivity?.unregisterNetworkCallback(it) } }
-                    wifiInfos.clear()
-                    val next = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && needsSsid) {
-                        ObserverCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO)
-                    } else ObserverCallback()
-                    connectivity?.registerNetworkCallback(request, next)
-                    callback = next
-                    includesSsid = needsSsid
-                    optionsRevision = revision
-                }
-                updateDns()
-            }.onFailure { GlobalState.log("Unable to refresh physical networks: $it") }
-            if (observing) handler.postDelayed(this, 2_000)
+    private fun requestRegistrationCheck() {
+        if (!observing) return
+        handler.removeCallbacks(checkRegistration)
+        handler.post(checkRegistration)
+    }
+
+    // Android sends nothing when location is granted while the service runs (a revoke kills the
+    // process), so only a missing grant is polled, and only while an SSID rule wants it.
+    private val checkRegistration: Runnable = Runnable {
+        val ssidRules = ServiceConfig.vpnOptions?.let { options ->
+            options.onDemandEnabled && options.onDemandNetworks.any { !TrustedNetworkMatcher.isSubnetRule(it) }
+        } == true
+        val needsSsid = ssidRules && ContextCompat.checkSelfPermission(
+            service, Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+        val registered = runCatching { register(needsSsid) }
+            .onFailure { GlobalState.log("Unable to refresh physical networks: $it") }
+            .getOrDefault(false)
+        if (!observing) return@Runnable
+        if (registered) scheduleUpdateDns()
+        when {
+            synchronized(registrationLock) { callback == null } ->
+                handler.postDelayed(checkRegistration, REGISTRATION_RETRY_MILLIS)
+            ssidRules && !needsSsid ->
+                handler.postDelayed(checkRegistration, LOCATION_PERMISSION_POLL_MILLIS)
         }
+    }
+
+    private fun register(needsSsid: Boolean): Boolean = synchronized(registrationLock) {
+        val revision = ServiceConfig.onDemandRevision.value
+        if (!observing || callback != null && revision == optionsRevision && includesSsid == needsSsid) {
+            return@synchronized false
+        }
+        callback?.let { runCatching { connectivity?.unregisterNetworkCallback(it) } }
+        callback = null
+        wifiInfos.clear()
+        val next = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && needsSsid) {
+            ObserverCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO)
+        } else ObserverCallback()
+        connectivity?.registerNetworkCallback(request, next)
+        callback = next
+        includesSsid = needsSsid
+        optionsRevision = revision
+        true
     }
 
     override fun start() {
         observing = true
-        handler.post(refreshNetworks)
+        revisionJob = GlobalState.launch {
+            ServiceConfig.onDemandRevision.collect { requestRegistrationCheck() }
+        }
     }
 
     private fun networkPriority(entry: Map.Entry<Network, NetworkInfo>): Int {
@@ -235,11 +259,14 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     }
 
     override fun stop() {
-        observing = false
+        revisionJob?.cancel()
+        val registered = synchronized(registrationLock) {
+            observing = false
+            callback.also { callback = null }
+        }
         handler.removeCallbacksAndMessages(null)
         try {
-            callback?.let { connectivity?.unregisterNetworkCallback(it) }
-            callback = null
+            registered?.let { connectivity?.unregisterNetworkCallback(it) }
         } finally {
             networkInfos.clear()
             wifiInfos.clear()
@@ -259,6 +286,8 @@ private val NetworkCapabilities.transportName: String
 
 private const val DNS_PORT = 53
 private const val DNS_UPDATE_DELAY_MILLIS = 200L
+private const val REGISTRATION_RETRY_MILLIS = 2_000L
+private const val LOCATION_PERMISSION_POLL_MILLIS = 30_000L
 
 private val networkObserveLooper: Looper by lazy {
     HandlerThread("NetworkObserve").apply { start() }.looper

@@ -10,6 +10,7 @@ import com.reclash.showNotice
 import com.reclash.SUBSCRIPTION_NOTICE_CHANNEL
 import com.reclash.common.ensureNotificationChannel
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -180,6 +181,23 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             "moveTaskToBack" -> {
                 activity?.moveTaskToBack(true)
                 result.success(true)
+            }
+
+            "getAppIcon" -> reply(result) {
+                LauncherIconAliases.current(enabledAppIcons(GlobalState.application.packageManager))
+            }
+
+            "setAppIcon" -> {
+                val key = call.arguments as? String
+                if (key == null) {
+                    result.error("INVALID_ARGUMENT", "App icon must be a string", null)
+                } else {
+                    requestedAppIcon = LauncherIconAliases.resolve(key)
+                    reply(result) {
+                        applyAppIcon()
+                        true
+                    }
+                }
             }
 
             "updateExcludeFromRecents" -> {
@@ -366,6 +384,45 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             } catch (error: Exception) {
                 GlobalState.log("Platform call failed: $error")
                 result.error("PLATFORM_ERROR", error.toString(), null)
+            }
+        }
+    }
+
+    @Volatile
+    private var requestedAppIcon = LauncherIconAliases.STANDARD
+
+    private val appIconLock = Any()
+
+    private fun appIconComponent(key: String) =
+        ComponentName(GlobalState.application.packageName, LauncherIconAliases.className(key))
+
+    private fun enabledAppIcons(manager: PackageManager): Set<String> =
+        LauncherIconAliases.keys.filterTo(mutableSetOf()) { key ->
+            LauncherIconAliases.isEnabled(key, manager.getComponentEnabledSetting(appIconComponent(key)))
+        }
+
+    // Workers may run out of call order, so each applies the latest request.
+    private fun applyAppIcon() = synchronized(appIconLock) {
+        val manager = GlobalState.application.packageManager
+        val change = LauncherIconAliases.change(requestedAppIcon, enabledAppIcons(manager))
+            ?: return@synchronized
+        val settings = listOfNotNull(
+            change.enable?.let { it to PackageManager.COMPONENT_ENABLED_STATE_ENABLED },
+        ) + change.disable.map { it to PackageManager.COMPONENT_ENABLED_STATE_DISABLED }
+        // Batched, the launcher never draws two entries; earlier APIs enable first.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            manager.setComponentEnabledSettings(
+                settings.map { (key, state) ->
+                    PackageManager.ComponentEnabledSetting(
+                        appIconComponent(key),
+                        state,
+                        PackageManager.DONT_KILL_APP,
+                    )
+                },
+            )
+        } else {
+            for ((key, state) in settings) {
+                manager.setComponentEnabledSetting(appIconComponent(key), state, PackageManager.DONT_KILL_APP)
             }
         }
     }
