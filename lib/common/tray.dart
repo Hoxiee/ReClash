@@ -164,7 +164,7 @@ class AppTray implements TrayPort {
           onSelected: commonAction.updateSpeedStatistics,
         ),
       const TrayMenuSeparator(),
-      for (final mode in Mode.values)
+      for (final mode in trayState.modes)
         TrayMenuCheckbox(
           label: mode.label,
           checked: mode == trayState.mode,

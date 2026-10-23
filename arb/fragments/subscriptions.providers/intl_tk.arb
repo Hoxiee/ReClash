@@ -1,0 +1,11 @@
+{
+  "providerSettingManaged": "Üpjün edijiden",
+  "providerSettingReturn": "Üpjün edijä gaýtar",
+  "providerSettingsReturnAll": "Sazlamalary üpjün edijä gaýtar",
+  "providerSettingsReturnAllDesc": "Üýtgeden sazlamalaryňyz ýene abuna eýerer",
+  "providerAnnouncement": "Bildiriş",
+  "providerAnnouncementOpen": "Giňişleýin",
+  "accessReturnToProvider": "Programmalary üpjün edijä gaýtar",
+  "accessProviderDisabledDesc": "Üpjün edijiňiziň VPN-den daşarda goýýan programmalary: {count}. Sanawy üýtgetmek üçin elýeterlilik dolandyryşyny açyň.",
+  "webDashboardRestricted": "Paneli ulanmak üpjünçi tarapyndan öçürilen."
+}

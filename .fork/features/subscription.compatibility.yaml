@@ -5,7 +5,7 @@ risk: routine
 must:
   bounded: Auto requests a bounded number of unique client identities; a fixed client makes one attempt.
   no-device-identity: Client presets never attach device identity headers, and custom User-Agent rejects controls.
-  client-adapters: Response metadata aliases are normalized only by the selected client's compatibility adapter.
+  client-adapters: Client-prefixed response names are normalized only by the selected client's compatibility adapter; the registry lists the few common names it accepts itself.
   safe-retries: Automatic negotiation retries only response-format incompatibility and stops on transport, authorization, consent, timeout, and rate-limit failures.
   lossy-preview: Imports with omitted sections or skipped nodes are staged and cannot commit without explicit acceptance.
   preserve-old-profile: Failed, cancelled, or rejected updates leave the stored config and metadata unchanged.

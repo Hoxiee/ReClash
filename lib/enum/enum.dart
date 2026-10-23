@@ -404,6 +404,7 @@ enum WebDashboardFailure {
   storage,
   busy,
   safeMode,
+  restricted,
   noProfile,
   coreUnavailable,
   apply,

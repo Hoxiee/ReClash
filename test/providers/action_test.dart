@@ -250,6 +250,7 @@ void main() {
       when(() => core.updateGeoData('MMDB')).thenAnswer((_) async => '');
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
         ],
       );
@@ -268,6 +269,7 @@ void main() {
       ).thenThrow(StateError('disconnected'));
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
         ],
       );
@@ -304,6 +306,7 @@ void main() {
     test('applies the profile after restarting a stopped core', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -329,6 +332,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -354,6 +358,7 @@ void main() {
     test('restart preserves the current run intent owner', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -380,6 +385,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -407,6 +413,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -437,6 +444,7 @@ void main() {
     test('reapplies the latest request without restarting twice', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -472,6 +480,7 @@ void main() {
     test('surfaces a failed restart to its caller as a rejection', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -503,6 +512,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -529,6 +539,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -548,6 +559,7 @@ void main() {
     test('startCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -573,6 +585,7 @@ void main() {
       () async {
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -606,6 +619,7 @@ void main() {
     test('restartCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -641,6 +655,7 @@ void main() {
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
             initProvider.overrideWithBuild((_, _) => true),
+            profilesProvider.overrideWith(TestProfiles.new),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
           ],
@@ -674,6 +689,7 @@ void main() {
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
             initProvider.overrideWithBuild((_, _) => true),
+            profilesProvider.overrideWith(TestProfiles.new),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
           ],
@@ -714,6 +730,7 @@ void main() {
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
             initProvider.overrideWithBuild((_, _) => true),
+            profilesProvider.overrideWith(TestProfiles.new),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
             // Bypassing private addresses computes the routes in an isolate,
@@ -753,6 +770,7 @@ void main() {
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
             initProvider.overrideWithBuild((_, _) => true),
+            profilesProvider.overrideWith(TestProfiles.new),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_RaceSetupAction.new),
           ],
@@ -785,6 +803,7 @@ void main() {
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
             initProvider.overrideWithBuild((_, _) => true),
+            profilesProvider.overrideWith(TestProfiles.new),
             commonActionProvider.overrideWith(_RaceCommonAction.new),
             setupActionProvider.overrideWith(_InitializingSetupAction.new),
           ],
@@ -820,6 +839,7 @@ void main() {
               suspendProvider.overrideWithValue(true),
               commonActionProvider.overrideWith(_RaceCommonAction.new),
               setupActionProvider.overrideWith(_RaceSetupAction.new),
+              profilesProvider.overrideWith(TestProfiles.new),
             ],
           );
           addTearDown(container.dispose);
@@ -845,6 +865,7 @@ void main() {
         late _RestartRecordingCoreAction coreAction;
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreStatusProvider.overrideWithValue(CoreStatus.connected),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
@@ -886,6 +907,7 @@ void main() {
         late _RestartRecordingCoreAction coreAction;
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),
@@ -920,6 +942,7 @@ void main() {
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -956,6 +979,7 @@ void main() {
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
           coreHandlerProvider.overrideWithValue(
             CoreController.scoped(_MockCoreHandlerInterface()),
           ),
@@ -986,6 +1010,7 @@ void main() {
         late _AuthorizationSetupAction setupAction;
         final container = ProviderContainer(
           overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
             coreHandlerProvider.overrideWithValue(
               CoreController.scoped(_MockCoreHandlerInterface()),
             ),

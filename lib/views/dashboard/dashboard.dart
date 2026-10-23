@@ -4,8 +4,10 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/announcement_card.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -51,7 +53,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     final sideWidth = ref.watch(sideWidthProvider);
     final scale = math.max(1.0, MediaQuery.textScalerOf(context).scale(1));
     final size = Size(viewSize.width - sideWidth, viewSize.height) / scale;
-    final editable = !DashboardDensity.of(size).isDesktop;
+    final editable =
+        !DashboardDensity.of(size).isDesktop &&
+        !ref.watch(
+          providerRestrictionsProvider.select(
+            (restrictions) =>
+                restrictions.contains(ProviderRestriction.denyWidgets),
+          ),
+        );
     if (!editable) {
       _editing = false;
     }
@@ -64,7 +73,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           ? appLocalizations.editDashboard
           : appLocalizations.dashboard,
       backAction: editing ? () => _setEditing(false) : null,
-      actions: [if (!editing && coreLib == null) const CoreStatusButton()],
+      actions: [
+        if (!editing && coreLib == null) const CoreStatusButton(),
+        if (editing) ?providerSettingTag(ref, const ['widgets']),
+      ],
       confirmationAction: editing
           ? IconButtonData(
               glyph: AppGlyphs.check,
@@ -127,6 +139,9 @@ class _DesktopDashboard extends ConsumerWidget {
     final hasUpdate = ref.watch(
       appUpdateActionProvider.select((state) => state.hasUpdate),
     );
+    final hasAnnouncement = ref.watch(
+      providerAnnouncementProvider.select((card) => card != null),
+    );
     final density = DashboardDensityScope.of(context);
     final compact = density.isCompact;
     final scale = DashboardDensityScope.scaleOf(context);
@@ -186,6 +201,8 @@ class _DesktopDashboard extends ConsumerWidget {
               spacing: gap,
               children: [
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
+                if (hasAnnouncement)
+                  sized(updateHeight, const AnnouncementCard()),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
@@ -217,6 +234,7 @@ class _DesktopDashboard extends ConsumerWidget {
         }
         final rows = [
           if (hasUpdate) sized(updateHeight, const UpdateCard()),
+          if (hasAnnouncement) sized(updateHeight, const AnnouncementCard()),
           sized(
             topHeight,
             row(const [
@@ -248,7 +266,8 @@ class _DesktopDashboard extends ConsumerWidget {
             controlHeight +
             middleHeight +
             gap * 3 +
-            (hasUpdate ? updateHeight + gap : 0);
+            (hasUpdate ? updateHeight + gap : 0) +
+            (hasAnnouncement ? updateHeight + gap : 0);
         final tablesFit = constraints.maxHeight >= rowsHeight + tablesHeight;
         final fills = constraints.maxHeight >= rowsHeight + summaryHeight;
         return SingleChildScrollView(
@@ -353,6 +372,7 @@ class _MobileDashboard extends ConsumerWidget {
                       ),
                     ))
                       const UpdateCard(),
+                    const AnnouncementCard(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),

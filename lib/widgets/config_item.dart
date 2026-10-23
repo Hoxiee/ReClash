@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
+import 'provider_setting.dart';
 import 'settings/setting_spec.dart';
 import 'settings/setting_target.dart';
 
@@ -93,6 +94,7 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
     this.subtitle,
     this.leading,
     this.setting,
+    this.providerSettings,
   });
 
   final ProviderListenable<T> selector;
@@ -101,6 +103,10 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
   final ConfigWriter<T> onChanged;
   final Widget? leading;
   final SettingSpec? setting;
+
+  /// The provider settings this row edits, when it has no [setting] that
+  /// names them in [providerSettingsBySpec].
+  final List<String>? providerSettings;
 
   Widget buildItem(
     BuildContext context,
@@ -117,9 +123,17 @@ abstract class _ConfigItem<T> extends ConsumerWidget {
     return setting == null ? item : SettingTarget(spec: setting, child: item);
   }
 
-  Widget? buildSubtitle(AppLocalizations appLocalizations) {
+  Widget? buildSubtitle(WidgetRef ref, AppLocalizations appLocalizations) {
     final subtitle = this.subtitle;
-    return subtitle == null ? null : Text(subtitle(appLocalizations));
+    final text = subtitle == null ? null : Text(subtitle(appLocalizations));
+    final ids = providerSettings ?? providerSettingsBySpec[setting?.id];
+    final tag = ids == null ? null : providerSettingTag(ref, ids);
+    if (tag == null || text == null) return tag ?? text;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [text, const SizedBox(height: 4), tag],
+    );
   }
 }
 
@@ -131,6 +145,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     required super.onChanged,
     super.leading,
     super.setting,
+    super.providerSettings,
   });
 
   @override
@@ -143,6 +158,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     return ListItem.toggle(
       leading: leading,
       title: Text(title(appLocalizations)),
+      subtitle: buildSubtitle(ref, appLocalizations),
       value: value,
       onChanged: (value) => onChanged(ref, value),
     );
@@ -160,6 +176,7 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     super.subtitle,
     super.leading,
     super.setting,
+    super.providerSettings,
   });
 
   final List<T> options;
@@ -175,7 +192,7 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     return ListItem<T>.options(
       leading: leading,
       title: Text(title(appLocalizations)),
-      subtitle: buildSubtitle(appLocalizations),
+      subtitle: buildSubtitle(ref, appLocalizations),
       options: options,
       value: value,
       textBuilder: textBuilder,
@@ -276,7 +293,7 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
       leading: leading,
       title: Text(label),
       subtitle:
-          buildSubtitle(appLocalizations) ??
+          buildSubtitle(ref, appLocalizations) ??
           Text(
             value.isEmpty
                 ? appLocalizations.none

@@ -657,6 +657,7 @@ class _PrimaryColorItem extends ConsumerWidget {
               glyph: AppGlyphs.palette,
             ),
             actions: [
+              ?providerSpecTag(ref, themeToolSettings[1]),
               if (!themeColors.isDefault)
                 _ResetButton(onPressed: () => _handleReset(context, ref)),
             ],
@@ -1015,6 +1016,7 @@ class _PureBlackItem extends ConsumerWidget {
           label: themeToolSettings[2].title(appLocalizations),
           glyph: AppGlyphs.pureBlack,
         ),
+        actions: [?providerSpecTag(ref, themeToolSettings[2])],
         value: pureBlack,
         choices: [
           PreviewChoice(
@@ -1591,6 +1593,7 @@ class _NavigationBarItem extends ConsumerWidget {
           label: themeToolSettings[3].title(appLocalizations),
           glyph: AppGlyphs.layers,
         ),
+        actions: [?providerSpecTag(ref, themeToolSettings[3])],
         value: floatingBar,
         choices: [
           PreviewChoice(
@@ -1652,6 +1655,7 @@ class _TabAnimationItem extends ConsumerWidget {
           label: themeToolSettings[4].title(appLocalizations),
           glyph: AppGlyphs.motion,
         ),
+        actions: [?providerSpecTag(ref, themeToolSettings[4])],
         value: tabAnimation,
         choices: [
           PreviewChoice(
@@ -1702,6 +1706,7 @@ class _LiquidGlassItem extends ConsumerWidget {
           label: appLocalizations.liquidGlass,
           glyph: AppGlyphs.liquidGlass,
         ),
+        actions: [?providerSpecTag(ref, themeToolSettings[5])],
         value: mode,
         choices: [
           PreviewChoice(

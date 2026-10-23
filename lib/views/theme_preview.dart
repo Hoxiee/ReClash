@@ -30,9 +30,11 @@ class PreviewChoiceGroup<T> extends StatelessWidget {
     required this.choices,
     required this.value,
     required this.onChanged,
+    this.actions = const [],
   });
 
   final Info info;
+  final List<Widget> actions;
   final List<PreviewChoice<T>> choices;
   final T value;
   final ValueChanged<T> onChanged;
@@ -42,7 +44,7 @@ class PreviewChoiceGroup<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InfoHeader(info: info),
+        InfoHeader(info: info, actions: actions),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: generateSection(

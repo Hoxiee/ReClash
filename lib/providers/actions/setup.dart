@@ -486,6 +486,7 @@ class SetupAction extends _$SetupAction {
 
   /// A mode the user picks wins over a scenario's until they pick Auto.
   void changeMode(Mode mode) {
+    if (!ref.read(availableModesProvider).contains(mode)) return;
     if (ref.read(rcxStatusStateProvider)?.autoMode ?? false) {
       unawaited(
         ref.read(rcxRoutingActionProvider.notifier).setManualMode(true),

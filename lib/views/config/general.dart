@@ -523,6 +523,7 @@ class GeneralView extends ConsumerWidget {
         (state) => state.externalController == ExternalControllerStatus.open,
       ),
     );
+    final secure = ref.watch(providerSecureNetworkProvider);
     return BaseScaffold(
       title: appLocalizations.general,
       body: SettingsPageScroll(
@@ -532,17 +533,18 @@ class GeneralView extends ConsumerWidget {
           ).copyWith(top: context.appBarInset, bottom: 16),
           child: Column(
             children: [
-              generateSection(
-                title: appLocalizations.inbound,
-                items: _inboundItems(
-                  authentication: authentication,
-                  externalController: externalController,
+              if (!secure)
+                generateSection(
+                  title: appLocalizations.inbound,
+                  items: _inboundItems(
+                    authentication: authentication,
+                    externalController: externalController,
+                  ),
+                  footer: [
+                    appLocalizations.externalControllerDesc,
+                    appLocalizations.authenticationDesc,
+                  ].join('\n'),
                 ),
-                footer: [
-                  appLocalizations.externalControllerDesc,
-                  appLocalizations.authenticationDesc,
-                ].join('\n'),
-              ),
               generateSection(
                 title: appLocalizations.connection,
                 items: _connectionItems(),

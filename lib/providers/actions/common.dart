@@ -71,9 +71,10 @@ class CommonAction extends _$CommonAction {
 
   void updateMode() {
     final mode = ref.read(effectiveModeProvider);
+    final modes = ref.read(availableModesProvider);
     ref
         .read(setupActionProvider.notifier)
-        .changeMode(Mode.values[(mode.index + 1) % Mode.values.length]);
+        .changeMode(modes[(modes.indexOf(mode) + 1) % modes.length]);
   }
 
   Future<void> updateTraffic() async {

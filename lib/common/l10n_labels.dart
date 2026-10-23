@@ -195,6 +195,7 @@ extension WebDashboardFailureL10n on WebDashboardFailure {
       WebDashboardFailure.storage => l.webDashboardStorageFailed,
       WebDashboardFailure.busy => l.webDashboardBusy,
       WebDashboardFailure.safeMode => l.webDashboardSafeMode,
+      WebDashboardFailure.restricted => l.webDashboardRestricted,
       WebDashboardFailure.noProfile => l.webDashboardNoProfile,
       WebDashboardFailure.coreUnavailable => l.webDashboardCoreUnavailable,
       WebDashboardFailure.apply => l.webDashboardApplyFailed,

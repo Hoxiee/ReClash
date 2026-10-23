@@ -35,8 +35,32 @@ A scenario is a connection-wide auto control above smart groups: it sets the tun
 - A scenario whose diagnostics contact third-party hosts needs the user's consent, as for profiles.
 - The user picks the scenario or turns auto control off. A mode the user sets by hand wins until they choose Auto again.
 
+## App settings from the subscription
+
+A subscription may set app settings. They apply when the profile is current, without a confirmation, and each carries a "From provider" tag where the user edits it. A setting the user changes stops following the provider until "Return to provider" hands it back, per setting or for the whole profile.
+
+- `reclash-view`: `key:value;...` over `proxies.type`, `proxies.sort`, `proxies.layout`, `proxies.icon`, `proxies.card`, `app.navbar`, `app.tabs`, `app.glass`, `app.color`, `app.style`, `app.black`. Unknown keys and values are ignored.
+- `reclash-widgets`: dashboard cards, comma-separated. `reclash-background`: image URL, optionally `,<opacity percent>`.
+- `reclash-settings`: `minimize`, `autorun`, `shadowstart`, `autostart`, `autoupdate`, `openlogs`, `closeconnections`.
+- `reclash-restrictions`: `noglobal` removes the Global mode, `androidsecure` opens no local ports on Android, `denywidgets` removes dashboard editing.
+- `reclash-announce` with `reclash-announceurl` shows a dismissible card on the dashboard; a changed text shows again.
+- `reclash-expiredays`, `reclash-trafficpercent`: reminder thresholds. `reclash-buyplan` and `reclash-buytraffic` take a `,<n>` suffix: the action is offered from `<n>` days left or `<n>` percent used.
+- `reclash-serverinfo`: a proxy group whose selected node is shown on the status card.
+
+## Apps outside the tunnel (Android)
+
+- Excludes come from `reclash-excludeapps`, a Clash config's `tun.exclude-package`, and `reclash-approuting: domestic` (the home region's apps, `domestic:<cc>` for a given region). They apply in the blacklist mode and while access control is off, and the user's own list adds to them.
+- `reclash-includeapps` (or `tun.include-package`) adds to the whitelist in the whitelist mode only. Modes are never mixed.
+- Provider apps carry the tag in Access control. Unticking one records that the user took it back into the tunnel; "Return apps to provider" resets that.
+
+## Hosts
+
+- `reclash-fallbackhosts` (up to 5 `host[:port]`): tried for the same path and query when the main host fails with a transport, TLS, timeout, rate-limit or invalid response. They never replace the stored URL.
+- `reclash-newdomain` (one host): after the update succeeds, the new host is fetched and validated like the main one; only then the profile URL moves. A failing new host is ignored.
+- Both are used only for `https` subscriptions.
+
 ## Boundaries
 
-Provider responses cannot migrate subscription URLs, select fallback hosts, change local appearance or settings, or trigger reports and telemetry. Routing profiles are offers, not commands. These actions require explicit local workflows and are not part of the current provider contract.
+Provider responses cannot trigger reports or telemetry, and cannot change settings outside the lists above. Routing profiles are offers, not commands. The `flclashx-*` names map onto the same fields only under the FlClashX preset; `flclashx-newdomain` maps to `reclash-fallbackhosts`.
 
 Client compatibility selection and import-format adaptation are separate layers. Neither implies permission to send device identity. `reclash-hideurl` only masks the URL in the editor; it does not prevent disclosure or modification.

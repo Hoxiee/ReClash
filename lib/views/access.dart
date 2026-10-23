@@ -136,14 +136,26 @@ class _AccessViewState extends ConsumerState<AccessView>
   }) {
     void onPressed() {
       ref.read(accessControlStateProvider.notifier).update((state) {
-        final newSet = Set<String>.from(state.currentList);
-        final isSelectedAll = newSet.containsAll(allValueList);
-        if (isSelectedAll) {
-          newSet.removeAll(allValueList);
-        } else {
-          newSet.addAll(allValueList);
+        final provided = _providedApps(state.mode);
+        final released = state.currentReleased.toSet();
+        final selected = _effectiveList(state, provided);
+        final shown = allValueList.toSet();
+        if (selected.containsAll(shown)) {
+          return state
+              .copyWithNewList(
+                state.currentList
+                    .where((name) => !shown.contains(name))
+                    .toList(),
+              )
+              .copyWithReleased(
+                {...released, ...shown.intersection(provided)}.toList()..sort(),
+              );
         }
-        return state.copyWithNewList(newSet.toList());
+        return state
+            .copyWithNewList(
+              {...state.currentList, ...shown.difference(provided)}.toList(),
+            )
+            .copyWithReleased(released.difference(shown).toList()..sort());
       });
     }
 
@@ -241,12 +253,40 @@ class _AccessViewState extends ConsumerState<AccessView>
     );
   }
 
+  Set<String> _providedApps(AccessControlMode mode) =>
+      ref.read(providerAppsProvider).asData?.value.of(mode) ?? const {};
+
+  static Set<String> _effectiveList(
+    AccessControlProps state,
+    Set<String> provided,
+  ) => {
+    ...state.currentList,
+    ...provided.difference(state.currentReleased.toSet()),
+  };
+
+  /// Unticking one of the provider's apps records that the user wants it the
+  /// other way; ticking it again hands it back.
   void _handleSelected(String packageName) {
     ref.read(accessControlStateProvider.notifier).update((state) {
-      final newSet = Set<String>.from(state.currentList)
+      if (!_providedApps(state.mode).contains(packageName)) {
+        final newSet = Set<String>.from(state.currentList)
+          ..addOrRemove(packageName);
+        return state.copyWithNewList(newSet.toList());
+      }
+      final released = Set<String>.from(state.currentReleased)
         ..addOrRemove(packageName);
-      return state.copyWithNewList(newSet.toList());
+      return state
+          .copyWithNewList(
+            state.currentList.where((name) => name != packageName).toList(),
+          )
+          .copyWithReleased(released.toList()..sort());
     });
+  }
+
+  void _returnToProvider() {
+    ref
+        .read(accessControlStateProvider.notifier)
+        .update((state) => state.copyWithReleased(const []));
   }
 
   void _handleEnable(bool enable) {
@@ -328,6 +368,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     BuildContext context, {
     required bool enable,
     required bool isLoading,
+    required bool hasReleased,
   }) {
     final appLocalizations = context.appLocalizations;
     return [
@@ -361,6 +402,12 @@ class _AccessViewState extends ConsumerState<AccessView>
             label: appLocalizations.regionSelectApps,
             onPressed: isLoading ? null : _intelligentSelected,
           ),
+          if (hasReleased)
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.undo,
+              label: appLocalizations.accessReturnToProvider,
+              onPressed: _returnToProvider,
+            ),
           CommonPopupMenuItem(
             glyph: AppGlyphs.copy,
             label: appLocalizations.clipboardExport,
@@ -379,6 +426,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   Widget _buildContent({
     required List<Package> packages,
     required Set<String> selected,
+    required Set<String> provided,
     required bool isSearching,
   }) {
     return FutureBuilder(
@@ -411,6 +459,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                   key: Key(package.packageName),
                   package: package,
                   value: selected.contains(package.packageName),
+                  fromProvider: provided.contains(package.packageName),
                   onChanged: (value) {
                     _handleSelected(package.packageName);
                   },
@@ -442,6 +491,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     required bool enable,
     required AccessControlMode mode,
     required int count,
+    required int providerExcluded,
   }) {
     final appLocalizations = context.appLocalizations;
     final level = context.raisedSurfaceLevel;
@@ -452,7 +502,9 @@ class _AccessViewState extends ConsumerState<AccessView>
         dividerColor: Colors.transparent,
         leading: GlyphIcon(AppGlyphs.info, color: context.colorScheme.outline),
         content: Text(
-          appLocalizations.accessControlDisabledDesc,
+          providerExcluded > 0
+              ? appLocalizations.accessProviderDisabledDesc(providerExcluded)
+              : appLocalizations.accessControlDisabledDesc,
           style: TextStyle(color: context.colorScheme.onSurfaceVariant),
         ),
         actions: [
@@ -519,7 +571,10 @@ class _AccessViewState extends ConsumerState<AccessView>
         .whereMatches(query, (package) => [package.label, package.packageName])
         .toList();
     final mode = accessControl.mode;
-    final currentList = accessControl.currentList;
+    final providerApps =
+        ref.watch(providerAppsProvider).asData?.value ?? const ProviderApps();
+    final provided = providerApps.of(mode);
+    final currentList = _effectiveList(accessControl, provided).toList();
     final viewPackageNameList = viewPackages.map((e) => e.packageName).toList();
     final valueList = currentList.intersection(viewPackageNameList);
     final needsInstalledAppsPermission =
@@ -559,6 +614,7 @@ class _AccessViewState extends ConsumerState<AccessView>
             context,
             enable: accessControl.enable,
             isLoading: isLoading,
+            hasReleased: accessControl.currentReleased.any(provided.contains),
           ),
           if (selectAllAction != null)
             CommonPopupMenuItem(
@@ -577,6 +633,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                   enable: accessControl.enable,
                   mode: mode,
                   count: valueList.length,
+                  providerExcluded: providerApps.excluded.length,
                 ),
               ),
               const SizedBox(height: 8),
@@ -588,6 +645,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                         child: _buildContent(
                           packages: viewPackages,
                           selected: valueList.toSet(),
+                          provided: provided,
                           isSearching: query.isNotEmpty,
                         ),
                       ),
@@ -603,12 +661,14 @@ class _AccessViewState extends ConsumerState<AccessView>
 class PackageListItem extends StatelessWidget {
   final Package package;
   final bool value;
+  final bool fromProvider;
   final void Function(bool?) onChanged;
 
   const PackageListItem({
     super.key,
     required this.package,
     required this.value,
+    this.fromProvider = false,
     required this.onChanged,
   });
 
@@ -621,10 +681,18 @@ class PackageListItem extends StatelessWidget {
         style: const TextStyle(overflow: TextOverflow.ellipsis),
         maxLines: 1,
       ),
-      subtitle: Text(
-        package.packageName,
-        style: const TextStyle(overflow: TextOverflow.ellipsis),
-        maxLines: 1,
+      subtitle: Row(
+        spacing: 6,
+        children: [
+          Flexible(
+            child: Text(
+              package.packageName,
+              style: const TextStyle(overflow: TextOverflow.ellipsis),
+              maxLines: 1,
+            ),
+          ),
+          if (fromProvider) const ProviderTag(),
+        ],
       ),
       value: value,
       onChanged: onChanged,

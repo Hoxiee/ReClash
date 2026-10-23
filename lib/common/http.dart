@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/provider_settings.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +46,7 @@ class ReClashHttpOverrides extends HttpOverrides {
     final mixedPort = read(
       patchClashConfigProvider.select((state) => state.mixedPort),
     );
+    if (mixedPort == 0 || read(providerSecureNetworkProvider)) return 'DIRECT';
     final authentication = read(
       networkSettingProvider.select((state) => state.authentication),
     );

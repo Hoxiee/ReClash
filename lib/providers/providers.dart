@@ -5,6 +5,7 @@ export 'config.dart';
 export 'core.dart';
 export 'database.dart';
 export 'on_demand.dart';
+export 'provider_settings.dart';
 export 'route_state.dart';
 export 'routing.dart';
 export 'state.dart';

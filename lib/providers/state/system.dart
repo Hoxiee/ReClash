@@ -9,6 +9,18 @@ Future<RegionDetectionResult?> detectedRegion(Ref ref) async {
   );
 }
 
+PatchClashConfig _providerPatchConfig(Ref ref) {
+  final config = ref.watch(patchClashConfigProvider);
+  if (!ref.watch(providerSecureNetworkProvider)) return config;
+  return config.copyWith(
+    mixedPort: 0,
+    port: 0,
+    socksPort: 0,
+    redirPort: 0,
+    tproxyPort: 0,
+  );
+}
+
 @riverpod
 UpdateParams updateParams(Ref ref) {
   final authentication = ref.watch(
@@ -22,7 +34,8 @@ UpdateParams updateParams(Ref ref) {
     temporarySecret: ref.watch(
       webDashboardAccessProvider.select((state) => state.temporarySecret),
     ),
-    safeMode: ref.watch(safeModeProvider),
+    safeMode:
+        ref.watch(safeModeProvider) || ref.watch(providerSecureNetworkProvider),
   ).toUpdateParams(
     authentication: authentication.credentials,
     skipCertVerify: !checkCertificate,
@@ -33,7 +46,7 @@ UpdateParams updateParams(Ref ref) {
 ({PatchClashConfig patchConfig, bool appendSystemDns, bool bypassPrivateRoute})
 setupPatch(Ref ref) {
   return (
-    patchConfig: ref.watch(patchClashConfigProvider).setupOnly,
+    patchConfig: _providerPatchConfig(ref).setupOnly,
     appendSystemDns: ref.watch(
       networkSettingProvider.select((state) => state.appendSystemDns),
     ),
@@ -80,6 +93,7 @@ TrayState trayState(Ref ref) {
 
   return TrayState(
     mode: clashConfig.mode,
+    modes: ref.watch(availableModesProvider),
     port: clashConfig.mixedPort,
     autoLaunch: appSetting.autoLaunch,
     systemProxy: systemProxy,
@@ -250,21 +264,28 @@ Future<VpnOptions> vpnOptions(Ref ref) async {
       (state) => state.authentication.credentials.isNotEmpty,
     ),
   );
-  final clashConfig = ref.watch(patchClashConfigProvider);
+  final clashConfig = _providerPatchConfig(ref);
   final vpnSetting = ref.watch(vpnSettingProvider);
   final safeMode = ref.watch(safeModeProvider);
   final routeAddress = ref.watch(vpnRouteAddressProvider.future);
+  final providerApps = ref.watch(providerAppsProvider.future);
   final tun = clashConfig.tun;
   return VpnOptions(
     enable: vpnSetting.enable && !safeMode,
     stack: tun.stack.name,
     // VpnService.setHttpProxy cannot carry credentials, so an authenticated
     // mixed port is left to TUN instead of declared as the system proxy.
-    systemProxy: vpnSetting.systemProxy && !authenticated && !safeMode,
+    systemProxy:
+        vpnSetting.systemProxy &&
+        !authenticated &&
+        !safeMode &&
+        clashConfig.mixedPort != 0,
     port: clashConfig.mixedPort,
     ipv6: vpnSetting.ipv6,
     dnsHijacking: vpnSetting.dnsHijacking,
-    accessControlProps: vpnSetting.accessControlProps,
+    accessControlProps: vpnSetting.accessControlProps.withProviderApps(
+      await providerApps,
+    ),
     allowBypass: vpnSetting.allowBypass,
     bypassDomain: ref.watch(
       networkSettingProvider.select((state) => state.bypassDomain),

@@ -137,7 +137,7 @@ final class WebDashboardAccessProvider
 }
 
 String _$webDashboardAccessHash() =>
-    r'08e8cf901c449d6738946a38b369faf7a2a4aafa';
+    r'58bd68d7ca28e8e0e0519f1396e407c76e9e2cd0';
 
 abstract class _$WebDashboardAccess extends $Notifier<WebDashboardAccessState> {
   WebDashboardAccessState build();
@@ -191,7 +191,7 @@ final class WebDashboardActionProvider
 }
 
 String _$webDashboardActionHash() =>
-    r'5b1ba0916c3e2a70190fde3459115d871e7c5a99';
+    r'a2c3faefcd4321d542ae8d700388356580593cdd';
 
 abstract class _$WebDashboardAction extends $Notifier<WebDashboardState> {
   WebDashboardState build();

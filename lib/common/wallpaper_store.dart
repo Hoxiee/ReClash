@@ -33,6 +33,31 @@ class WallpaperStore {
       source.readAsByteStream(),
       maxWallpaperBytes,
     );
+    final random = Random.secure();
+    final id = List.generate(
+      16,
+      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+    return _store(bytes, '$id.png');
+  }
+
+  /// Stores [bytes] under [fileName], which must pass [isWallpaperFileName].
+  Future<String> importBytes(Uint8List bytes, String fileName) {
+    if (bytes.length > maxWallpaperBytes) {
+      throw const WallpaperImportException(WallpaperImportFailure.tooLarge);
+    }
+    return _store(bytes, fileName);
+  }
+
+  Future<bool> hasImage(String fileName) async =>
+      isWallpaperFileName(fileName) &&
+      await FileSystemEntity.type(
+            join((await directory()).path, fileName),
+            followLinks: false,
+          ) ==
+          FileSystemEntityType.file;
+
+  Future<String> _store(Uint8List bytes, String fileName) async {
     final image = await _decode(bytes);
     final Uint8List normalized;
     try {
@@ -54,12 +79,6 @@ class WallpaperStore {
     }
     final root = await directory();
     await root.create(recursive: true);
-    final random = Random.secure();
-    final id = List.generate(
-      16,
-      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-    ).join();
-    final fileName = '$id.png';
     final file = File(join(root.path, fileName));
     final staged = File(join(root.path, '.$fileName.tmp'));
     try {

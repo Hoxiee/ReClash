@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:yaml/yaml.dart';
 
+import '../metadata/metadata.dart';
+
 import 'config/amnezia_config.dart';
 import 'config/singbox_config.dart';
 import 'config/xray_config.dart';
@@ -36,6 +38,8 @@ class SubscriptionImportSummary {
     this.hasLosses = false,
     this.hasOtherLosses = false,
     this.rejectCoreFallback = false,
+    this.excludedPackages = const [],
+    this.includedPackages = const [],
   });
 
   final int nodes;
@@ -48,6 +52,10 @@ class SubscriptionImportSummary {
   final bool hasLosses;
   final bool hasOtherLosses;
   final bool rejectCoreFallback;
+
+  /// The Clash config's `tun.exclude-package` and `tun.include-package`.
+  final List<String> excludedPackages;
+  final List<String> includedPackages;
 }
 
 class SubscriptionImportResult {
@@ -315,10 +323,23 @@ SubscriptionImportSummary _clashSummary(Object? value) {
       providersCount > maxSubscriptionImportNodes) {
     throw const SubscriptionImportException('Import exceeds node limit');
   }
+  final tun = value['tun'];
+  List<String> packages(String key) {
+    final list = tun is Map ? tun[key] : null;
+    if (list is! List) return const [];
+    return list
+        .whereType<String>()
+        .where(isAndroidPackageName)
+        .toSet()
+        .toList();
+  }
+
   return SubscriptionImportSummary(
     nodes: nodesCount,
     groups: groupsCount,
     remoteProviders: providersCount,
+    excludedPackages: packages('exclude-package'),
+    includedPackages: packages('include-package'),
   );
 }
 

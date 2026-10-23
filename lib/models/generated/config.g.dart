@@ -291,6 +291,16 @@ _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>
           AccessSortType.none,
       isFilterSystemApp: json['isFilterSystemApp'] as bool? ?? true,
       isFilterNonInternetApp: json['isFilterNonInternetApp'] as bool? ?? true,
+      rejectReleased:
+          (json['rejectReleased'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      acceptReleased:
+          (json['acceptReleased'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$AccessControlPropsToJson(_AccessControlProps instance) =>
@@ -302,6 +312,8 @@ Map<String, dynamic> _$AccessControlPropsToJson(_AccessControlProps instance) =>
       'sort': _$AccessSortTypeEnumMap[instance.sort]!,
       'isFilterSystemApp': instance.isFilterSystemApp,
       'isFilterNonInternetApp': instance.isFilterNonInternetApp,
+      'rejectReleased': instance.rejectReleased,
+      'acceptReleased': instance.acceptReleased,
     };
 
 const _$AccessControlModeEnumMap = {
@@ -597,6 +609,11 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
             MapEntry(k, RcxUserProfile.fromJson(e as Map<String, dynamic>)),
       ) ??
       const {},
+  providerSettings: json['providerSettings'] == null
+      ? const ProviderSettingsState()
+      : ProviderSettingsState.safeFromJson(
+          json['providerSettings'] as Map<String, Object?>?,
+        ),
 );
 
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
@@ -612,4 +629,5 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'patchClashConfig': instance.patchClashConfig,
   'excludeSSIDs': instance.excludeSSIDs,
   'rcxProfiles': instance.rcxProfiles,
+  'providerSettings': instance.providerSettings,
 };

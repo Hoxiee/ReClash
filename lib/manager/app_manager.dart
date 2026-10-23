@@ -39,6 +39,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         _updateVisible(WidgetsBinding.instance.lifecycleState);
       }
     });
+    ref.listenManual(providerSettingsSyncProvider, (_, _) {});
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
         ref.read(storeActionProvider.notifier).savePreferencesDebounce();

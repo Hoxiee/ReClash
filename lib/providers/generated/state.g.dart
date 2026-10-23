@@ -89,7 +89,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'f091ce22bbd45e82bc68c0c871bda95e9bcd1556';
+String _$updateParamsHash() => r'1adfbfee809b66299642073eb87c7b6eb6299fc3';
 
 @ProviderFor(setupPatch)
 final setupPatchProvider = SetupPatchProvider._();
@@ -179,7 +179,7 @@ final class SetupPatchProvider
   }
 }
 
-String _$setupPatchHash() => r'd00226339d4e544208e40155c966a66d844dc621';
+String _$setupPatchHash() => r'cda57cf7e6b23f495885733db6be67c4969376f5';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -220,7 +220,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'a5551c7170639c7b1839e28508d633014fd72f45';
+String _$trayStateHash() => r'b6d6e75b265806518c543536775a1d1fa632dbd8';
 
 /// Measured delays of the proxies the tray lists, by group and then proxy
 /// name. Resolved like a proxy card, so a nested group shows its selection.
@@ -555,7 +555,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'8611cf1b35bb407c776e7346974fa90644fdd053';
+String _$vpnOptionsHash() => r'5735007c7d5b0d394f766aed0e83359bb23588e9';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();

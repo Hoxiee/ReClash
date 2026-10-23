@@ -36,6 +36,7 @@ class ProxiesSetting extends ConsumerWidget {
             items: [
               ConfigOptionsItem<ProxiesType>(
                 title: (l) => l.style,
+                providerSettings: const ['proxies.type'],
                 options: ProxiesType.values,
                 textBuilder: (type) => type.label,
                 selector: proxiesStyleSettingProvider.select(
@@ -47,6 +48,7 @@ class ProxiesSetting extends ConsumerWidget {
               ),
               ConfigOptionsItem<ProxiesSortType>(
                 title: (l) => l.sort,
+                providerSettings: const ['proxies.sort'],
                 options: ProxiesSortType.values,
                 textBuilder: (type) => switch (type) {
                   ProxiesSortType.none => appLocalizations.defaultText,
@@ -62,6 +64,7 @@ class ProxiesSetting extends ConsumerWidget {
               ),
               ConfigOptionsItem<ProxiesLayout>(
                 title: (l) => l.layout,
+                providerSettings: const ['proxies.layout'],
                 options: ProxiesLayout.values,
                 textBuilder: (layout) => switch (layout) {
                   ProxiesLayout.tight => appLocalizations.tight,
@@ -77,6 +80,7 @@ class ProxiesSetting extends ConsumerWidget {
               ),
               ConfigOptionsItem<ProxyCardType>(
                 title: (l) => l.size,
+                providerSettings: const ['proxies.card'],
                 options: ProxyCardType.values,
                 textBuilder: (type) => type.label,
                 selector: proxiesStyleSettingProvider.select(
@@ -89,6 +93,7 @@ class ProxiesSetting extends ConsumerWidget {
               if (isList)
                 ConfigOptionsItem<ProxiesIconStyle>(
                   title: (l) => l.iconStyle,
+                  providerSettings: const ['proxies.icon'],
                   options: ProxiesIconStyle.values,
                   textBuilder: (style) => switch (style) {
                     ProxiesIconStyle.filled => appLocalizations.iconStyleFilled,

@@ -46,7 +46,13 @@ class SubscriptionReminder {
     final now = _now();
     var record = await _read();
     var changed = false;
-    final day = subscriptionNoticeDay(expire: info.expire, now: now);
+    final metadata = snapshot?.metadata ?? const SubscriptionMetadata();
+    final expireDays = metadata.numbers('reminder.expireDays');
+    final day = subscriptionNoticeDay(
+      expire: info.expire,
+      now: now,
+      thresholds: expireDays.isEmpty ? defaultExpireNotifyDays : expireDays,
+    );
     if (snapshot?.metadata.perpetual != true &&
         day != null &&
         record.isPending(
@@ -61,7 +67,13 @@ class SubscriptionReminder {
           ? l.subscriptionExpiresToday
           : l.subscriptionExpiresInDays(days);
       if (await _show(
-        _request(profile, 'subscription', message, traffic: false),
+        _request(
+          profile,
+          'subscription',
+          message,
+          traffic: false,
+          daysLeft: day == subscriptionExpiredDay ? 0 : days,
+        ),
       )) {
         record = record.mark(
           profileId: profile.id,
@@ -73,21 +85,40 @@ class SubscriptionReminder {
     }
     if (info.total > 0 && snapshot?.metadata.unlimited != true) {
       final percent = (info.upload + info.download) * 100 / info.total;
-      if (percent < 90 &&
-          !record.isTrafficPending(profileId: profile.id, percent: 90)) {
-        record = record.rearmTraffic(profileId: profile.id, percent: 90);
-        changed = true;
-      } else if (percent >= 90 &&
-          record.isTrafficPending(profileId: profile.id, percent: 90) &&
+      final configured = metadata.numbers('reminder.trafficPercent');
+      final levels = configured.isEmpty
+          ? defaultTrafficNotifyPercent
+          : configured;
+      var reached = false;
+      for (final level in levels) {
+        if (percent < level) {
+          if (record.isTrafficPending(profileId: profile.id, percent: level)) {
+            continue;
+          }
+          record = record.rearmTraffic(profileId: profile.id, percent: level);
+          changed = true;
+        } else if (record.isTrafficPending(
+          profileId: profile.id,
+          percent: level,
+        )) {
+          reached = true;
+        }
+      }
+      if (reached &&
           await _show(
             _request(
               profile,
               'subscription-traffic',
               l.subscriptionTrafficLow(percent.floor()),
               traffic: true,
+              percent: percent,
             ),
           )) {
-        record = record.markTraffic(profileId: profile.id, percent: 90);
+        for (final level in levels) {
+          if (percent >= level) {
+            record = record.markTraffic(profileId: profile.id, percent: level);
+          }
+        }
         changed = true;
       }
     }
@@ -101,11 +132,20 @@ class SubscriptionReminder {
     String kind,
     String message, {
     required bool traffic,
+    int? daysLeft,
+    double? percent,
   }) {
     final metadata =
         profile.subscriptionSnapshot?.metadata ?? const SubscriptionMetadata();
-    final topUp = traffic ? metadata.text('provider.buyTrafficUrl') : null;
-    final renew = metadata.text('provider.buyPlanUrl');
+    final planDays = metadata.count('provider.buyPlanDays');
+    final trafficPercent = metadata.count('provider.buyTrafficPercent');
+    final topUp =
+        traffic && (trafficPercent == null || (percent ?? 0) >= trafficPercent)
+        ? metadata.text('provider.buyTrafficUrl')
+        : null;
+    final renew = planDays == null || daysLeft == null || daysLeft <= planDays
+        ? metadata.text('provider.buyPlanUrl')
+        : null;
     final raw = topUp ?? renew ?? metadata.text('provider.supportUrl');
     final url = raw == null ? null : safeSubscriptionLink(raw)?.toString();
     final l = currentAppLocalizations;

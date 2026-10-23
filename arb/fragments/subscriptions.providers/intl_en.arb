@@ -1,0 +1,24 @@
+{
+  "providerSettingManaged": "From provider",
+  "@providerSettingManaged": {
+    "description": "Tag on a setting or app that the subscription provider currently sets"
+  },
+  "providerSettingReturn": "Return to provider",
+  "@providerSettingReturn": {
+    "description": "Action on a setting the user changed: let the subscription set it again"
+  },
+  "providerSettingsReturnAll": "Return settings to provider",
+  "providerSettingsReturnAllDesc": "Settings you changed follow the subscription again",
+  "providerAnnouncement": "Announcement",
+  "providerAnnouncementOpen": "Learn more",
+  "accessReturnToProvider": "Return apps to provider",
+  "accessProviderDisabledDesc": "Apps your provider keeps out of the VPN: {count}. Turn on access control to change the list.",
+  "@accessProviderDisabledDesc": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "webDashboardRestricted": "Dashboard access is disabled by your provider."
+}

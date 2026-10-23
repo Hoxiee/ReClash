@@ -7797,8 +7797,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -9826,8 +9825,7 @@ class AppLocalizations {
     return Intl.message(
       'Resume',
       name: 'updateResumeShort',
-      desc:
-          'Short button on the dashboard update banner that resumes a paused or failed update download.',
+      desc: 'Short button on the dashboard update banner that resumes a paused or failed update download.',
       args: [],
     );
   }
@@ -13428,8 +13426,7 @@ class AppLocalizations {
     return Intl.message(
       'not',
       name: 'rcxCondNotPrefix',
-      desc:
-          'Lowercase word placed before a negated clause, e.g. \'not Exit country is RU\'',
+      desc: 'Lowercase word placed before a negated clause, e.g. \'not Exit country is RU\'',
       args: [],
     );
   }
@@ -15427,6 +15424,96 @@ class AppLocalizations {
   /// `Black`
   String get trayIconDark {
     return Intl.message('Black', name: 'trayIconDark', desc: '', args: []);
+  }
+
+  /// `From provider`
+  String get providerSettingManaged {
+    return Intl.message(
+      'From provider',
+      name: 'providerSettingManaged',
+      desc: 'Tag on a setting or app that the subscription provider currently sets',
+      args: [],
+    );
+  }
+
+  /// `Return to provider`
+  String get providerSettingReturn {
+    return Intl.message(
+      'Return to provider',
+      name: 'providerSettingReturn',
+      desc: 'Action on a setting the user changed: let the subscription set it again',
+      args: [],
+    );
+  }
+
+  /// `Return settings to provider`
+  String get providerSettingsReturnAll {
+    return Intl.message(
+      'Return settings to provider',
+      name: 'providerSettingsReturnAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settings you changed follow the subscription again`
+  String get providerSettingsReturnAllDesc {
+    return Intl.message(
+      'Settings you changed follow the subscription again',
+      name: 'providerSettingsReturnAllDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Announcement`
+  String get providerAnnouncement {
+    return Intl.message(
+      'Announcement',
+      name: 'providerAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Learn more`
+  String get providerAnnouncementOpen {
+    return Intl.message(
+      'Learn more',
+      name: 'providerAnnouncementOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Return apps to provider`
+  String get accessReturnToProvider {
+    return Intl.message(
+      'Return apps to provider',
+      name: 'accessReturnToProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apps your provider keeps out of the VPN: {count}. Turn on access control to change the list.`
+  String accessProviderDisabledDesc(int count) {
+    return Intl.message(
+      'Apps your provider keeps out of the VPN: $count. Turn on access control to change the list.',
+      name: 'accessProviderDisabledDesc',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Dashboard access is disabled by your provider.`
+  String get webDashboardRestricted {
+    return Intl.message(
+      'Dashboard access is disabled by your provider.',
+      name: 'webDashboardRestricted',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Application settings`

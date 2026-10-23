@@ -1,0 +1,11 @@
+{
+  "providerSettingManaged": "Провайдерден",
+  "providerSettingReturn": "Провайдерге қайтару",
+  "providerSettingsReturnAll": "Баптауларды провайдерге қайтару",
+  "providerSettingsReturnAllDesc": "Сіз өзгерткен баптаулар қайтадан жазылымға бағынады",
+  "providerAnnouncement": "Хабарландыру",
+  "providerAnnouncementOpen": "Толығырақ",
+  "accessReturnToProvider": "Қолданбаларды провайдерге қайтару",
+  "accessProviderDisabledDesc": "Провайдер VPN-нен тыс қалдыратын қолданбалар: {count}. Тізімді өзгерту үшін қолжетімділікті басқаруды қосыңыз.",
+  "webDashboardRestricted": "Панельге қолжетімділікті провайдер өшірген."
+}

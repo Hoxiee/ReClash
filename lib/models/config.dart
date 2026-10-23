@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/country_profile.dart';
 import 'package:reclash/enum/enum.dart';
@@ -320,6 +321,12 @@ abstract class AccessControlProps with _$AccessControlProps {
     @Default(AccessSortType.none) AccessSortType sort,
     @Default(true) bool isFilterSystemApp,
     @Default(true) bool isFilterNonInternetApp,
+
+    /// Apps the subscription keeps out of the tunnel that the user put back.
+    @Default([]) List<String> rejectReleased,
+
+    /// Apps the subscription routes through the tunnel that the user took out.
+    @Default([]) List<String> acceptReleased,
   }) = _AccessControlProps;
 
   factory AccessControlProps.fromJson(Map<String, Object?> json) =>
@@ -338,6 +345,66 @@ extension AccessControlPropsExt on AccessControlProps {
     AccessControlMode.acceptSelected => copyWith(acceptList: value),
     AccessControlMode.rejectSelected => copyWith(rejectList: value),
   };
+
+  List<String> get currentReleased => switch (mode) {
+    AccessControlMode.acceptSelected => acceptReleased,
+    AccessControlMode.rejectSelected => rejectReleased,
+  };
+
+  AccessControlProps copyWithReleased(List<String> value) => switch (mode) {
+    AccessControlMode.acceptSelected => copyWith(acceptReleased: value),
+    AccessControlMode.rejectSelected => copyWith(rejectReleased: value),
+  };
+
+  /// A subscription's exclusions apply with access control off too, so its
+  /// apps work without the user having to set anything up.
+  AccessControlProps withProviderApps(ProviderApps apps) {
+    if (!enable || mode == AccessControlMode.rejectSelected) {
+      final excluded = apps.excluded.difference(rejectReleased.toSet());
+      if (!enable) {
+        return excluded.isEmpty
+            ? this
+            : copyWith(
+                enable: true,
+                mode: AccessControlMode.rejectSelected,
+                rejectList: excluded.toList()..sort(),
+              );
+      }
+      return copyWith(
+        rejectList: ({...rejectList, ...excluded}.toList()..sort()),
+      );
+    }
+    final included = apps.included.difference(acceptReleased.toSet());
+    return copyWith(
+      acceptList: ({...acceptList, ...included}.toList()..sort()),
+    );
+  }
+}
+
+/// The apps the current subscription keeps out of the tunnel or, for the
+/// whitelist mode, routes through it.
+class ProviderApps {
+  const ProviderApps({this.excluded = const {}, this.included = const {}});
+
+  final Set<String> excluded;
+  final Set<String> included;
+
+  Set<String> of(AccessControlMode mode) => switch (mode) {
+    AccessControlMode.acceptSelected => included,
+    AccessControlMode.rejectSelected => excluded,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProviderApps &&
+      const SetEquality<String>().equals(excluded, other.excluded) &&
+      const SetEquality<String>().equals(included, other.included);
+
+  @override
+  int get hashCode => Object.hash(
+    const SetEquality<String>().hash(excluded),
+    const SetEquality<String>().hash(included),
+  );
 }
 
 @freezed
@@ -552,6 +619,9 @@ abstract class Config with _$Config {
 
     /// The user's own routing profiles, shared by every subscription.
     @Default({}) Map<String, RcxUserProfile> rcxProfiles,
+    @Default(ProviderSettingsState())
+    @JsonKey(fromJson: ProviderSettingsState.safeFromJson)
+    ProviderSettingsState providerSettings,
   }) = _Config;
 
   factory Config.fromJson(Map<String, Object?> json) =>

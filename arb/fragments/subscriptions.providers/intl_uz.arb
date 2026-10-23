@@ -1,0 +1,11 @@
+{
+  "providerSettingManaged": "Provayderdan",
+  "providerSettingReturn": "Provayderga qaytarish",
+  "providerSettingsReturnAll": "Sozlamalarni provayderga qaytarish",
+  "providerSettingsReturnAllDesc": "Siz o‘zgartirgan sozlamalar yana obunaga bo‘ysunadi",
+  "providerAnnouncement": "E’lon",
+  "providerAnnouncementOpen": "Batafsil",
+  "accessReturnToProvider": "Ilovalarni provayderga qaytarish",
+  "accessProviderDisabledDesc": "Provayder VPN’dan tashqarida qoldiradigan ilovalar: {count}. Ro‘yxatni o‘zgartirish uchun kirishni boshqarishni yoqing.",
+  "webDashboardRestricted": "Panelga kirish provayderingiz tomonidan o‘chirilgan."
+}
