@@ -15756,6 +15756,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Press back again to exit`
+  String get pressBackAgainToExit {
+    return Intl.message(
+      'Press back again to exit',
+      name: 'pressBackAgainToExit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Web dashboard`
   String get webDashboard {
     return Intl.message(

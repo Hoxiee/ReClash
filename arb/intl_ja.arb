@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "先にカスタムネットワークインターフェースを選択してください",
   "toolsNeedsWebdav": "先に WebDAV を設定してください",
   "toolsNeedsMipsStack": "先に MIPS ネットワークスタックを選択してください",
+  "pressBackAgainToExit": "終了するには、もう一度戻るを押してください",
   "webDashboard": "ウェブパネル",
   "webDashboardDesc": "コアを管理するローカルウェブパネル",
   "webDashboardFlavor": "パネル",

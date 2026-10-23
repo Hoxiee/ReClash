@@ -1904,6 +1904,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Алдын ала бөлінген кілт",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Алғышарттар"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Шығу үшін артқа тағы бір рет басыңыз",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("Пернені басыңыз"),
     "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
       "Жазылым қайталануын болдырмау",

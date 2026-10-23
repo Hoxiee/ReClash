@@ -2681,6 +2681,7 @@
   "toolsNeedsCustomInterface": "Select a custom network interface first",
   "toolsNeedsWebdav": "Configure WebDAV first",
   "toolsNeedsMipsStack": "Select the MIPS network stack first",
+  "pressBackAgainToExit": "Press back again to exit",
   "webDashboard": "Web dashboard",
   "webDashboardDesc": "Manage local web dashboards for the Core",
   "webDashboardFlavor": "Dashboard",

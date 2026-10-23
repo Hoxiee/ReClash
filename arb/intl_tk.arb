@@ -1882,6 +1882,7 @@
   "toolsUpdateResources": "Serişdeleri täzele",
   "toolsUpdateResourcesConfirm": "Düzgünleriň we skriptleriň täzelenmegi konfigurasiýany ýene-de ulanyp, baglanyşyklara täsir edip biler. Dowam edilsinmi?",
   "applicationSettings": "Programma sazlamalary",
+  "pressBackAgainToExit": "Çykmak üçin yza ýene bir gezek basyň",
   "webDashboard": "Web panel",
   "webDashboardDesc": "Ýadrony dolandyrmak üçin ýerli web paneller",
   "webDashboardFlavor": "Panel",

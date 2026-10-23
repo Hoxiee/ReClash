@@ -1949,6 +1949,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("Ports"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("Clé prépartagée"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Prérequis"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Appuyez à nouveau sur Retour pour quitter",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Appuyez sur une combinaison de touches",
     ),

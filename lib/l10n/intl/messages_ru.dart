@@ -1901,6 +1901,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "prerequisites": MessageLookupByLibrary.simpleMessage(
       "Предварительные условия",
     ),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Нажмите ещё раз, чтобы выйти",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Нажмите сочетание клавиш",
     ),

@@ -1551,6 +1551,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("포트"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("사전 공유 키"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("사전 요건"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "종료하려면 뒤로 버튼을 한 번 더 누르세요",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("키 조합을 누르세요"),
     "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
       "구독 중복 방지",
