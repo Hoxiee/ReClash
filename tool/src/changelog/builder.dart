@@ -51,7 +51,9 @@ class ChangelogBuilder {
   final String boundary;
 
   ChangelogBuildResult build({PendingVersion? pending}) {
-    final boundaryTag = VersionTag.tryParse(boundary);
+    final boundaryTag = git.tagExists(boundary)
+        ? VersionTag.tryParse(boundary)
+        : null;
     final stable = git
         .stableTags()
         .where((tag) => boundaryTag == null || tag.compareTo(boundaryTag) > 0)
