@@ -1,0 +1,54 @@
+name: Nix development shell
+
+on:
+  push:
+    paths:
+      - flake.nix
+      - flake.lock
+      - .github/workflows/nix.yaml
+      - .agents/nix.md
+      - plugins/rust_api/rust/rust-toolchain.toml
+  pull_request:
+    paths:
+      - flake.nix
+      - flake.lock
+      - .github/workflows/nix.yaml
+      - .agents/nix.md
+      - plugins/rust_api/rust/rust-toolchain.toml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nix-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    name: Evaluate Linux shells
+    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - name: Resolve inputs and evaluate both architectures
+        run: |
+          nix flake lock
+          nix flake check --all-systems --no-build --no-update-lock-file
+          for system in x86_64-linux aarch64-linux; do
+            nix eval --raw --no-update-lock-file ".#devShells.$system.default.drvPath"
+          done
+      - name: Check Nix formatting and workflow syntax
+        run: |
+          nix develop --no-update-lock-file --command nixfmt --check flake.nix
+          nix develop --no-update-lock-file --command actionlint .github/workflows/nix.yaml
+      - name: Inspect development SDKs
+        run: |
+          nix develop --no-update-lock-file --command bash -euc '
+            flutter --version
+            go version
+            rustup --version
+            command -v cargo rustc clang cmake ninja pkg-config reclash-prepare
+            pkg-config --exists gtk+-3.0 ayatana-appindicator3-0.1 libsecret-1 x11
+          '

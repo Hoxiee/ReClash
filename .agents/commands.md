@@ -167,7 +167,9 @@ dart run tool/l10n.dart audit [--fragment <f>]     # locale gaps, placeholders, 
 
 Metadata (`@key`) lives in the English fragment only; `intl_utils` reads it from the main ARB alone.
 
-`arb/intl_<locale>.arb` is generated output. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
+`arb/intl_<locale>.arb` is ignored generated output, assembled automatically in CI before localization checks.
+After a fresh checkout, run the assembly command above before running localization tests locally.
+`lib/l10n/` remains tracked, and CI verifies that regenerating it produces no changes. Edit `arb_upstream/` only for vendor-base review, `arb/locales/` only for a new downstream-only locale baseline, and `arb/fragments/<feature>/` for feature-owned messages.
 
 Application and tray icons are generated from `assets_source/images/icon/`; the
 script requires `rsvg-convert` (librsvg) and ImageMagick 7 (`magick`) on `PATH`:
@@ -315,6 +317,13 @@ emulator validation; Kotlin compilation cannot prove those system callbacks.
 
 ## Changelog And Release
 
+CI validates the pubspec version against a release tag with `tool/check_release_version.dart` and rejects missing,
+empty, or unexpected packages with `tool/check_release_assets.dart`. Linux pacman packages are queried and the x64
+package is installed in an isolated Arch container; Windows packages retain the install/upgrade/launch checks on both
+architectures. Every tag run produces `SHA256SUMS`, available as a separate Actions artifact. Stable tags publish a
+GitHub release; prerelease tags retain the existing Actions-artifact and optional Telegram delivery policy.
+Homebrew, F-Droid, and Telegram publishing require their configured secrets; manual builds never publish.
+
 The changelog is derived from Conventional Commits by `tool/changelog.dart` and written to two committed files:
 `CHANGELOG.md` for readers and `changelog.json` for the renderers. See `.agents/rules.md` for the `Changelog:` trailers
 that decide the wording.
@@ -411,10 +420,13 @@ The `dart` job performs these root-package checks in order:
 ```bash
 bash tool/hooks/test.sh
 flutter pub get
-dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
+dart run tool/assemble_l10n.dart
+dart run intl_utils:generate
+dart run tool/check_release_version.dart
+dart tool/check_format.dart
 flutter analyze --no-fatal-infos
 dart run tool/changelog.dart verify   # main and tags only
-flutter test --reporter expanded --coverage
+dart run tool/test.dart -- --reporter expanded --coverage
 dart run tool/check_coverage.dart coverage/lcov.info 75
 ```
 
@@ -423,7 +435,10 @@ new hook script needs only its test file next to it, not a workflow step.
 
 Run `flutter analyze` before committing; CI fails on anything it reports.
 
-Release builds run only for `v*` tag pushes; pull requests trigger nothing.
+Release builds run for `v*` tag pushes. Pull requests to `main` and `dev` run the checks.
+A manual run checks the repository by default; enable `build_packages` to also build the complete package matrix
+without publishing. Manual package artifacts are retained for seven days. Android packages without signing secrets
+use the debug signing key and `com.reclash.dev`; tag builds require release signing secrets.
 Root analysis excludes `plugins/**`, and root tests do not discover nested
 plugin packages, so parallel jobs validate the rest from their own package
 directories: `plugins` (local Flutter packages and the setup build tool), `go`
@@ -432,9 +447,9 @@ for `:common`, `:service` and `:app`, with the Flutter compile tasks excluded
 and the gomobile AAR built for one ABI), `rust` (both crates), and a
 Windows runner for the helper's `windows-service` feature. On branch pushes a
 `desktop` job also compiles a debug build per desktop platform; a tag skips it,
-since its release matrix compiles the same native code. Release builds run only
-in the public repository and start alongside the checks; `upload` publishes
-only once every build and every check job passes.
+since its release matrix compiles the same native code. Automatic release builds run only in the public repository,
+after the checks pass.
+`upload` runs only on public release-tag pushes and waits for package validation as well.
 
 `bash tool/check_plugins.sh` is that plugin gate, and CI runs the same script.
 It discovers every `plugins/*/pubspec.yaml`, analyzes each package, and runs
@@ -493,3 +508,7 @@ For a pushed review branch with multiple commits, squash-merge it instead of rew
 - `dart run tool/fork.dart context --paths <path>`: bounded intent packet; use `--changed` or `--staged` for existing edits.
 - `dart run tool/fork.dart --json bootstrap --inspect --source <local-oid>`: read-only baseline audit.
 - Vendor preparation/verification/acceptance and authority: [fork-maintenance.md](fork-maintenance.md).
+
+## Nix Development Shell
+
+See [nix.md](nix.md) for the separate Linux flake, toolchain pins, preparation command, and packaging limitations.

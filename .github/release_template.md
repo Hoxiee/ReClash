@@ -1,58 +1,18 @@
-<div align=center>
+<div align="center">
 
-[![Release Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/vVERSION/total?style=flat-square&logo=github)](https://img.shields.io/github/downloads/Hoxiee/ReClash/vVERSION/)
+[![Downloads](https://img.shields.io/github/downloads/Hoxiee/ReClash/vVERSION/total?style=for-the-badge&logo=github&label=DOWNLOADS&labelColor=0d1117&color=2ea043)](https://github.com/Hoxiee/ReClash/releases/tag/vVERSION)
 
-</div>
-
-**Download based on your OS:**
-
-<div align=left>
-<table>
-    <thead align=left>
-        <tr>
-            <th>OS</th>
-            <th>Download</th>
-        </tr>
-    </thead>
-    <tbody align=left>
-        <tr>
-        <td>Android</td>
-            <td>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-arm64-v8a.apk"><img src="https://img.shields.io/badge/APK-ARMv8-168039.svg?logo=android"></a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-armeabi-v7a.apk"><img src="https://img.shields.io/badge/APK-ARMv7-45bf55.svg?logo=android"></a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-x86_64.apk"><img src="https://img.shields.io/badge/APK-x64-96ed89.svg?logo=android"></a>
-            </td>
-        </tr>
-        <tr>
-            <td>Windows</td>
-            <td>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-amd64-setup.exe"><img src="https://img.shields.io/badge/Setup-x64-2d7d9a.svg?logo=windows"></a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-amd64.zip"><img src="https://img.shields.io/badge/Portable-x64-67b7d1.svg?logo=windows"></a>
-            </td>
-        </tr>
-        <tr>
-            <td>macOS</td>
-            <td>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-arm64.dmg"><img src="https://img.shields.io/badge/DMG-Apple%20Silicon-%23000000.svg?logo=apple"></a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-amd64.dmg"><img src="https://img.shields.io/badge/DMG-Intel%20X64-%2300A9E0.svg?logo=apple"></a><br>
-            </td>
-        </tr>
-        <tr>
-            <td>Linux</td>
-            <td>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.AppImage"><img src="https://img.shields.io/badge/AppImage-x64-f84e29.svg?logo=linux"> </a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.deb"><img src="https://img.shields.io/badge/DebPackage-x64-FF9966.svg?logo=debian"> </a><br>
-                <a href="https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.rpm"><img src="https://img.shields.io/badge/RpmPackage-x64-F1B42F.svg?logo=redhat"> </a>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
+**Grab the build for your operating system.**
 
 </div>
 
-<div dir="ltr">
+| OS | Packages |
+| :--: | :-- |
+| **Android** | [![APK arm64](https://img.shields.io/badge/APK-arm64-3ddc84?style=flat-square&logo=android&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-arm64-v8a.apk) [![APK armv7](https://img.shields.io/badge/APK-armv7-3ddc84?style=flat-square&logo=android&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-armeabi-v7a.apk) [![APK x86__64](https://img.shields.io/badge/APK-x86__64-3ddc84?style=flat-square&logo=android&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-android-x86_64.apk) |
+| **Windows** | [![Installer x64](https://img.shields.io/badge/Installer-x64-0078d6?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2Y1ZjVmNSIgZD0iTTAgMy41IDEwIDIuMnY5LjNIMHpNMTEuMiAyIDI0IDB2MTEuNUgxMS4yek0wIDEyLjdoMTBWMjJMMCAyMC42ek0xMS4yIDEyLjdIMjRWMjRsLTEyLjgtMS43eiIvPjwvc3ZnPg==&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-amd64-setup.exe) [![Portable x64](https://img.shields.io/badge/Portable-x64-3a6ea5?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2Y1ZjVmNSIgZD0iTTAgMy41IDEwIDIuMnY5LjNIMHpNMTEuMiAyIDI0IDB2MTEuNUgxMS4yek0wIDEyLjdoMTBWMjJMMCAyMC42ek0xMS4yIDEyLjdIMjRWMjRsLTEyLjgtMS43eiIvPjwvc3ZnPg==&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-amd64.zip)<br>[![Installer ARM64](https://img.shields.io/badge/Installer-ARM64-0078d6?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2Y1ZjVmNSIgZD0iTTAgMy41IDEwIDIuMnY5LjNIMHpNMTEuMiAyIDI0IDB2MTEuNUgxMS4yek0wIDEyLjdoMTBWMjJMMCAyMC42ek0xMS4yIDEyLjdIMjRWMjRsLTEyLjgtMS43eiIvPjwvc3ZnPg==&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-arm64-setup.exe) [![Portable ARM64](https://img.shields.io/badge/Portable-ARM64-3a6ea5?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2Y1ZjVmNSIgZD0iTTAgMy41IDEwIDIuMnY5LjNIMHpNMTEuMiAyIDI0IDB2MTEuNUgxMS4yek0wIDEyLjdoMTBWMjJMMCAyMC42ek0xMS4yIDEyLjdIMjRWMjRsLTEyLjgtMS43eiIvPjwvc3ZnPg==&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-windows-arm64.zip) |
+| **macOS** | [![DMG Apple_silicon](https://img.shields.io/badge/DMG-Apple_silicon-000000?style=flat-square&logo=apple&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-arm64.dmg) [![DMG Intel](https://img.shields.io/badge/DMG-Intel-555555?style=flat-square&logo=apple&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-amd64.dmg) |
+| **Linux** | [![AppImage x64](https://img.shields.io/badge/AppImage-x64-f57900?style=flat-square&logo=linux&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.AppImage) [![DEB x64](https://img.shields.io/badge/DEB-x64-a80030?style=flat-square&logo=debian&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.deb) [![RPM x64](https://img.shields.io/badge/RPM-x64-cc0000?style=flat-square&logo=redhat&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.rpm) [![Arch x64](https://img.shields.io/badge/Arch-x64-1793d1?style=flat-square&logo=archlinux&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.pkg.tar.xz)<br>[![DEB ARM64](https://img.shields.io/badge/DEB-ARM64-a80030?style=flat-square&logo=debian&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.deb) [![RPM ARM64](https://img.shields.io/badge/RPM-ARM64-cc0000?style=flat-square&logo=redhat&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.rpm) [![Arch ARM64](https://img.shields.io/badge/Arch-ARM64-1793d1?style=flat-square&logo=archlinux&logoColor=f5f5f5)](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.pkg.tar.xz) |
 
-**List of all changes:** [ChangeLog](https://github.com/Hoxiee/ReClash/blob/main/CHANGELOG.md)
+<sub>Every release ships `SHA256SUMS` for verification. Pre-release builds are for testing and may be unstable — only assets attached to releases in this repository are official ReClash builds.</sub>
 
-</div>
+See the complete [changelog](https://github.com/Hoxiee/ReClash/blob/main/CHANGELOG.md).
