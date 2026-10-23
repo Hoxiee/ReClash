@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/global_search.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
+import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -548,13 +551,76 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
   }
 }
 
-class HomeBackScopeContainer extends ConsumerWidget {
+class HomeBackScopeContainer extends ConsumerStatefulWidget {
   final Widget child;
+  final bool? isDesktop;
+  final bool? isAndroid;
+  final bool? isTV;
 
-  const HomeBackScopeContainer({super.key, required this.child});
+  const HomeBackScopeContainer({
+    super.key,
+    this.isDesktop,
+    this.isAndroid,
+    this.isTV,
+    required this.child,
+  });
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<HomeBackScopeContainer> createState() =>
+      _HomeBackScopeContainerState();
+}
+
+class _HomeBackScopeContainerState
+    extends ConsumerState<HomeBackScopeContainer> {
+  Timer? _exitTimer;
+  late final AppLifecycleListener _lifecycle;
+  bool _closing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(
+      onStateChange: (state) {
+        if (state != AppLifecycleState.resumed) _resetExit();
+      },
+    );
+  }
+
+  void _resetExit() {
+    _exitTimer?.cancel();
+    _exitTimer = null;
+  }
+
+  Future<void> _handleRootBack(BuildContext context) async {
+    if ((widget.isDesktop ?? system.isDesktop) || _closing) return;
+    if ((widget.isAndroid ?? system.isAndroid) && _exitTimer == null) {
+      _exitTimer = Timer(const Duration(seconds: 2), _resetExit);
+      try {
+        await App().tip(context.appLocalizations.pressBackAgainToExit);
+      } catch (_) {
+        _resetExit();
+        rethrow;
+      }
+      return;
+    }
+    _resetExit();
+    _closing = true;
+    try {
+      await ref.read(systemActionProvider.notifier).handleClose();
+    } finally {
+      _closing = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _resetExit();
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return CommonPopScope(
       onPop: (context) async {
         final pageLabel = ref.read(shownPageLabelProvider);
@@ -562,22 +628,28 @@ class HomeBackScopeContainer extends ConsumerWidget {
             GlobalObjectKey(pageLabel).currentContext ?? context;
         if (pageLabel == PageLabel.tools) {
           final host = const GlobalObjectKey(PageLabel.tools).currentState;
-          if (host is ToolsViewState && await host.handleBack()) return false;
+          if (host is ToolsViewState && await host.handleBack()) {
+            _resetExit();
+            return false;
+          }
           if (!context.mounted) return false;
         }
         final canPop = Navigator.canPop(realContext);
         if (canPop) {
+          _resetExit();
           Navigator.of(realContext).pop();
-        } else if (system.isTV && pageLabel != PageLabel.dashboard) {
+        } else if ((widget.isTV ?? system.isTV) &&
+            pageLabel != PageLabel.dashboard) {
+          _resetExit();
           ref
               .read(currentPageLabelProvider.notifier)
               .toPage(PageLabel.dashboard);
         } else {
-          await ref.read(systemActionProvider.notifier).handleClose();
+          await _handleRootBack(context);
         }
         return false;
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

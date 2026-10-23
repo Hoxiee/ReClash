@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "请先选择自定义网络接口",
   "toolsNeedsWebdav": "请先配置 WebDAV",
   "toolsNeedsMipsStack": "请先选择 MIPS 网络栈",
+  "pressBackAgainToExit": "再按一次返回键退出",
   "webDashboard": "网页面板",
   "webDashboardDesc": "管理核心的本地网页面板",
   "webDashboardFlavor": "面板",

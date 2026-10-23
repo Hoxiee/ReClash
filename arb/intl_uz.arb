@@ -1882,6 +1882,7 @@
   "toolsUpdateResources": "Resurslarni yangilash",
   "toolsUpdateResourcesConfirm": "Qoidalar va skriptlarni yangilash konfiguratsiyani qayta qoʻllashi va ulanishlarga taʼsir koʻrsatishi mumkin. Davom etasizmi?",
   "applicationSettings": "Ilova sozlamalari",
+  "pressBackAgainToExit": "Chiqish uchun orqaga tugmasini yana bir marta bosing",
   "webDashboard": "Veb panel",
   "webDashboardDesc": "Yadroni boshqarish uchun mahalliy veb panellar",
   "webDashboardFlavor": "Panel",

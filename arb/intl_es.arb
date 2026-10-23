@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "Selecciona primero una interfaz de red personalizada",
   "toolsNeedsWebdav": "Configura primero WebDAV",
   "toolsNeedsMipsStack": "Selecciona primero la pila de red MIPS",
+  "pressBackAgainToExit": "Pulsa Atrás otra vez para salir",
   "webDashboard": "Panel web",
   "webDashboardDesc": "Paneles web locales para administrar el núcleo",
   "webDashboardFlavor": "Panel",

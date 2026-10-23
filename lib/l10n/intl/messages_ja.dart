@@ -1574,6 +1574,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("ポート"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("事前共有鍵"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "終了するには、もう一度戻るを押してください",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーの組み合わせを押してください"),
     "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションの重複を防ぐ",

@@ -1442,6 +1442,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("端口"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("预共享密钥"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage("再按一次返回键退出"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下组合键"),
     "preventDuplicateProfiles": MessageLookupByLibrary.simpleMessage("防止重复订阅"),
     "preventDuplicateProfilesDesc": MessageLookupByLibrary.simpleMessage(

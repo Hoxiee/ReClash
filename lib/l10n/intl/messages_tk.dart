@@ -1873,6 +1873,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("Portlar"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("Pre-shared açar"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Öň şertler"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Çykmak üçin yza ýene bir gezek basyň",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Bir düwme utgaşmasyna basyň",
     ),

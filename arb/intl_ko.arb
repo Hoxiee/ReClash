@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "먼저 사용자 지정 네트워크 인터페이스를 선택하세요",
   "toolsNeedsWebdav": "먼저 WebDAV를 설정하세요",
   "toolsNeedsMipsStack": "먼저 MIPS 네트워크 스택을 선택하세요",
+  "pressBackAgainToExit": "종료하려면 뒤로 버튼을 한 번 더 누르세요",
   "webDashboard": "웹 패널",
   "webDashboardDesc": "코어를 관리하는 로컬 웹 패널",
   "webDashboardFlavor": "패널",

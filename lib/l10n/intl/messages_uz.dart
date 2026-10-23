@@ -1924,6 +1924,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Oldindan boʻlishilgan kalit",
     ),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Talablar"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Chiqish uchun orqaga tugmasini yana bir marta bosing",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Biror tugmani bosing",
     ),

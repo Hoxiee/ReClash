@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "Сначала выберите пользовательский сетевой интерфейс",
   "toolsNeedsWebdav": "Сначала настройте WebDAV",
   "toolsNeedsMipsStack": "Сначала выберите сетевой стек MIPS",
+  "pressBackAgainToExit": "Нажмите ещё раз, чтобы выйти",
   "webDashboard": "Веб-панель",
   "webDashboardDesc": "Локальные веб-панели управления ядром",
   "webDashboardFlavor": "Панель",

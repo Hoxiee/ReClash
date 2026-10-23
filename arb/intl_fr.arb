@@ -1882,6 +1882,7 @@
   "toolsNeedsCustomInterface": "Sélectionnez d’abord une interface réseau personnalisée",
   "toolsNeedsWebdav": "Configurez d’abord WebDAV",
   "toolsNeedsMipsStack": "Sélectionnez d’abord la pile réseau MIPS",
+  "pressBackAgainToExit": "Appuyez à nouveau sur Retour pour quitter",
   "webDashboard": "Interface web",
   "webDashboardDesc": "Interfaces web locales de gestion du cœur",
   "webDashboardFlavor": "Interface",

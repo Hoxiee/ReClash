@@ -1943,6 +1943,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ports": MessageLookupByLibrary.simpleMessage("Puertos"),
     "preSharedKey": MessageLookupByLibrary.simpleMessage("Clave precompartida"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Requisitos previos"),
+    "pressBackAgainToExit": MessageLookupByLibrary.simpleMessage(
+      "Pulsa Atrás otra vez para salir",
+    ),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Pulsa una combinación de teclas",
     ),
