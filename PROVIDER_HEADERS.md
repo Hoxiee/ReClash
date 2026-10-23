@@ -23,6 +23,8 @@ Version: 1
 | `provider.buyTrafficUrl` | `reclash-buytraffic` | url | display | panel | suffix `provider.buyTrafficPercent` 1-100 |
 | `provider.announce` | `reclash-announce` | text | display | panel | alias `announce` |
 | `provider.announceUrl` | `reclash-announceurl` | url | display | panel |  |
+| `provider.notice` | `reclash-notice` | text | display | panel |  |
+| `provider.noticeUrl` | `reclash-noticeurl` | url | display | panel |  |
 | `account.title` | `profile-title` | text | display | panel |  |
 | `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler | alias `profile-update-interval` x60 |
 | `routing.bundleUrl` | `reclash-routing` | url | hint | routing |  |

@@ -1853,6 +1853,7 @@
   "accessReturnToProvider": "アプリをプロバイダー設定に戻す",
   "accessProviderDisabledDesc": "プロバイダーが VPN を経由させないアプリ: {count}。リストを変更するにはアクセス制御をオンにしてください。",
   "webDashboardRestricted": "プロバイダーによりダッシュボードへのアクセスが無効にされています。",
+  "providerNotice": "お知らせ",
   "applicationSettings": "アプリの設定",
   "toolsConfiguration": "設定",
   "toolsData": "リソースとデータ",

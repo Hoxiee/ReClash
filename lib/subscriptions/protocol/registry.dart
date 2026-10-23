@@ -169,6 +169,19 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'panel',
   ),
   SubscriptionField(
+    'provider.notice',
+    'reclash-notice',
+    SubscriptionFieldType.text,
+    multiline: true,
+    consumer: 'panel',
+  ),
+  SubscriptionField(
+    'provider.noticeUrl',
+    'reclash-noticeurl',
+    SubscriptionFieldType.url,
+    consumer: 'panel',
+  ),
+  SubscriptionField(
     'account.title',
     'profile-title',
     SubscriptionFieldType.text,

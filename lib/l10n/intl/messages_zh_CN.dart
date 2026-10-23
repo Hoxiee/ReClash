@@ -1515,6 +1515,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerAnnouncement": MessageLookupByLibrary.simpleMessage("公告"),
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage("了解详情"),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("通知"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage("来自服务商"),
     "providerSettingReturn": MessageLookupByLibrary.simpleMessage("交还给服务商"),
     "providerSettingsReturnAll": MessageLookupByLibrary.simpleMessage(

@@ -46,11 +46,11 @@ final availableModesProvider = Provider<List<Mode>>(
       : Mode.values,
 );
 
-class DismissedAnnouncements extends Notifier<Set<String>> {
+class DismissedNotices extends Notifier<Set<String>> {
   @override
   Set<String> build() {
     unawaited(
-      preferences.getDismissedAnnouncements().then((stored) {
+      preferences.getDismissedNotices().then((stored) {
         if (ref.mounted) state = {...stored, ...state};
       }),
     );
@@ -61,33 +61,34 @@ class DismissedAnnouncements extends Notifier<Set<String>> {
     state = {...state, id};
     final kept = state.toList();
     unawaited(
-      preferences.saveDismissedAnnouncements(
+      preferences.saveDismissedNotices(
         kept.skip(kept.length > 20 ? kept.length - 20 : 0).toList(),
       ),
     );
   }
 }
 
-final dismissedAnnouncementsProvider =
-    NotifierProvider<DismissedAnnouncements, Set<String>>(
-      DismissedAnnouncements.new,
-    );
+final dismissedNoticesProvider =
+    NotifierProvider<DismissedNotices, Set<String>>(DismissedNotices.new);
 
-typedef ProviderAnnouncementCard = ({
-  ProviderAnnouncement announcement,
-  String id,
+typedef ProviderNoticeCard = ({ProviderAnnouncement announcement, String id});
+
+final providerAnnouncementProvider = Provider<ProviderAnnouncement?>((ref) {
+  return ref.watch(
+    providerHintsProvider.select((hints) => hints?.announcement),
+  );
 });
 
 /// The subscription's notice, until the user dismisses that very text.
-final providerAnnouncementProvider = Provider<ProviderAnnouncementCard?>((ref) {
+final providerNoticeProvider = Provider<ProviderNoticeCard?>((ref) {
   final announcement = ref.watch(
-    providerHintsProvider.select((hints) => hints?.announcement),
+    providerHintsProvider.select((hints) => hints?.notice),
   );
   if (announcement == null) return null;
   final id = md5
       .convert(utf8.encode('${announcement.text}\n${announcement.link}'))
       .toString();
-  if (ref.watch(dismissedAnnouncementsProvider).contains(id)) return null;
+  if (ref.watch(dismissedNoticesProvider).contains(id)) return null;
   return (announcement: announcement, id: id);
 });
 

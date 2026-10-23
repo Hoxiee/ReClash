@@ -1630,6 +1630,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "providerAnnouncement": MessageLookupByLibrary.simpleMessage("공지"),
     "providerAnnouncementOpen": MessageLookupByLibrary.simpleMessage("자세히 보기"),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("알림"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage("제공자 설정"),
     "providerSettingReturn": MessageLookupByLibrary.simpleMessage(
       "제공자 설정으로 되돌리기",

@@ -29,14 +29,60 @@ void main() {
     expect(container.read(availableModesProvider), Mode.values);
   });
 
-  test('the announcement shows until its text is dismissed', () {
+  test('only notices are dismissible and changed content shows again', () {
     final container = _container({
-      'announce': ['Maintenance tonight'],
+      'announce': ['Plan description'],
+      'reclash-notice': ['Maintenance tonight'],
+      'reclash-noticeurl': ['https://status.example.test'],
     });
     addTearDown(container.dispose);
-    final card = container.read(providerAnnouncementProvider)!;
+    final card = container.read(providerNoticeProvider)!;
     expect(card.announcement.text, 'Maintenance tonight');
-    container.read(dismissedAnnouncementsProvider.notifier).state = {card.id};
-    expect(container.read(providerAnnouncementProvider), isNull);
+    container.read(dismissedNoticesProvider.notifier).state = {card.id};
+    expect(container.read(providerNoticeProvider), isNull);
+    expect(
+      container.read(providerAnnouncementProvider)?.text,
+      'Plan description',
+    );
+
+    container.updateOverrides([
+      providerHintsProvider.overrideWithValue(
+        ProviderHints(
+          readSubscriptionMetadata({
+            'announce': ['Plan description'],
+            'reclash-notice': ['Maintenance tomorrow'],
+            'reclash-noticeurl': ['https://status.example.test'],
+          }).metadata,
+        ),
+      ),
+    ]);
+    expect(
+      container.read(providerNoticeProvider)?.announcement.text,
+      'Maintenance tomorrow',
+    );
+  });
+
+  test('a changed notice link shows again', () {
+    final container = _container({
+      'reclash-notice': ['Maintenance'],
+      'reclash-noticeurl': ['https://status.example.test/one'],
+    });
+    addTearDown(container.dispose);
+    final card = container.read(providerNoticeProvider)!;
+    container.read(dismissedNoticesProvider.notifier).state = {card.id};
+    container.updateOverrides([
+      providerHintsProvider.overrideWithValue(
+        ProviderHints(
+          readSubscriptionMetadata({
+            'reclash-notice': ['Maintenance'],
+            'reclash-noticeurl': ['https://status.example.test/two'],
+          }).metadata,
+        ),
+      ),
+    ]);
+    expect(
+      container.read(providerNoticeProvider)?.announcement.link?.path,
+      '/two',
+    );
   });
 }

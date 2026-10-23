@@ -1853,6 +1853,7 @@
   "accessReturnToProvider": "Қолданбаларды провайдерге қайтару",
   "accessProviderDisabledDesc": "Провайдер VPN-нен тыс қалдыратын қолданбалар: {count}. Тізімді өзгерту үшін қолжетімділікті басқаруды қосыңыз.",
   "webDashboardRestricted": "Панельге қолжетімділікті провайдер өшірген.",
+  "providerNotice": "Хабарландыру",
   "toolsAction": "Әрекет",
   "toolsChoose": "Бөлімді таңдаңыз немесе баптауды іздеңіз",
   "toolsCloseConnectionsConfirm": "Бұл барлық белсенді қосылымдарды жабады. Жалғастырасыз ба?",

@@ -7,5 +7,6 @@
   "providerAnnouncementOpen": "Giňişleýin",
   "accessReturnToProvider": "Programmalary üpjün edijä gaýtar",
   "accessProviderDisabledDesc": "Üpjün edijiňiziň VPN-den daşarda goýýan programmalary: {count}. Sanawy üýtgetmek üçin elýeterlilik dolandyryşyny açyň.",
-  "webDashboardRestricted": "Paneli ulanmak üpjünçi tarapyndan öçürilen."
+  "webDashboardRestricted": "Paneli ulanmak üpjünçi tarapyndan öçürilen.",
+  "providerNotice": "Bildiriş"
 }

@@ -1999,6 +1999,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Толығырақ",
     ),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("Хабарландыру"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
       "Провайдерден",
     ),

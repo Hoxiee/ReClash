@@ -1853,6 +1853,7 @@
   "accessReturnToProvider": "앱을 제공자 설정으로 되돌리기",
   "accessProviderDisabledDesc": "제공자가 VPN에서 제외한 앱: {count}개. 목록을 바꾸려면 접근 제어를 켜세요.",
   "webDashboardRestricted": "제공업체에서 대시보드 접근을 비활성화했습니다.",
+  "providerNotice": "알림",
   "applicationSettings": "앱 설정",
   "toolsConfiguration": "구성",
   "toolsData": "리소스 및 데이터",

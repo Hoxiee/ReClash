@@ -1,6 +1,9 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/protocol/codec.dart';
+import 'package:reclash/widgets/announcement_card.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,7 +17,10 @@ void main() {
 
   setUp(() {
     container = ProviderContainer(
-      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+      overrides: [
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(ProviderHints.empty),
+      ],
     );
     globalState.container = container;
   });
@@ -71,6 +77,36 @@ void main() {
 
     await teardown(tester);
   });
+
+  for (final size in [const Size(412, 700), const Size(1600, 1100)]) {
+    testWidgets('long description scrolls without clipping at $size', (
+      tester,
+    ) async {
+      container.updateOverrides([
+        profilesProvider.overrideWith(TestProfiles.new),
+        providerHintsProvider.overrideWithValue(
+          ProviderHints(
+            readSubscriptionMetadata({
+              'announce': [
+                List.filled(30, 'Your subscription description.').join('\n'),
+              ],
+              'reclash-notice': ['Maintenance tonight'],
+            }).metadata,
+          ),
+        ),
+      ]);
+      final position = await pumpDashboard(tester, size, SupportPlatform.MacOS);
+      expect(find.byType(AnnouncementCard), findsOneWidget);
+      expect(find.byType(NoticeCard), findsOneWidget);
+      final end = position.maxScrollExtent;
+      expect(end, greaterThan(0));
+      position.jumpTo(end);
+      await tester.pump();
+      expect(position.maxScrollExtent, closeTo(end, 1));
+      expect(tester.takeException(), isNull);
+      await teardown(tester);
+    });
+  }
 
   testWidgets('the desktop grid bounces when it fits the window', (
     tester,

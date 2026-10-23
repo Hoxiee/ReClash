@@ -1996,6 +1996,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Подробнее",
     ),
     "providerInUse": m69,
+    "providerNotice": MessageLookupByLibrary.simpleMessage("Уведомление"),
     "providerSettingManaged": MessageLookupByLibrary.simpleMessage(
       "От провайдера",
     ),

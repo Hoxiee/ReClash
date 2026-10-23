@@ -7,5 +7,6 @@
   "providerAnnouncementOpen": "Толығырақ",
   "accessReturnToProvider": "Қолданбаларды провайдерге қайтару",
   "accessProviderDisabledDesc": "Провайдер VPN-нен тыс қалдыратын қолданбалар: {count}. Тізімді өзгерту үшін қолжетімділікті басқаруды қосыңыз.",
-  "webDashboardRestricted": "Панельге қолжетімділікті провайдер өшірген."
+  "webDashboardRestricted": "Панельге қолжетімділікті провайдер өшірген.",
+  "providerNotice": "Хабарландыру"
 }

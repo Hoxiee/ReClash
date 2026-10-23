@@ -142,6 +142,9 @@ class _DesktopDashboard extends ConsumerWidget {
     final hasAnnouncement = ref.watch(
       providerAnnouncementProvider.select((card) => card != null),
     );
+    final hasNotice = ref.watch(
+      providerNoticeProvider.select((card) => card != null),
+    );
     final density = DashboardDensityScope.of(context);
     final compact = density.isCompact;
     final scale = DashboardDensityScope.scaleOf(context);
@@ -201,8 +204,8 @@ class _DesktopDashboard extends ConsumerWidget {
               spacing: gap,
               children: [
                 if (hasUpdate) sized(updateHeight, const UpdateCard()),
-                if (hasAnnouncement)
-                  sized(updateHeight, const AnnouncementCard()),
+                if (hasNotice) const NoticeCard(),
+                if (hasAnnouncement) const AnnouncementCard(),
                 sized(
                   topHeight,
                   const RepaintBoundary(child: CurrentOutboundCard()),
@@ -234,7 +237,6 @@ class _DesktopDashboard extends ConsumerWidget {
         }
         final rows = [
           if (hasUpdate) sized(updateHeight, const UpdateCard()),
-          if (hasAnnouncement) sized(updateHeight, const AnnouncementCard()),
           sized(
             topHeight,
             row(const [
@@ -260,53 +262,91 @@ class _DesktopDashboard extends ConsumerWidget {
             ]),
           ),
         ];
-        final rowsHeight =
-            padding.vertical +
-            topHeight +
-            controlHeight +
-            middleHeight +
-            gap * 3 +
-            (hasUpdate ? updateHeight + gap : 0) +
-            (hasAnnouncement ? updateHeight + gap : 0);
-        final tablesFit = constraints.maxHeight >= rowsHeight + tablesHeight;
-        final fills = constraints.maxHeight >= rowsHeight + summaryHeight;
-        return SingleChildScrollView(
+        return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: fills ? constraints.maxHeight : null,
-            child: Padding(
-              padding: padding,
-              child: Column(
-                spacing: gap,
-                children: [
-                  ...rows,
-                  if (tablesFit)
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: gap,
-                        children: const [
-                          Expanded(
-                            flex: 3,
-                            child: RepaintBoundary(
-                              child: ConnectionsTableCard(),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: RepaintBoundary(child: ProxyGroupsCard()),
-                          ),
-                        ],
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsetsDirectional.only(
+                start: padding.start,
+                end: padding.end,
+                top: padding.top,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (hasNotice)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: const NoticeCard(),
                       ),
-                    )
-                  else if (fills)
-                    Expanded(child: summaries)
-                  else
-                    sized(summaryHeight, summaries),
-                ],
+                    if (hasAnnouncement)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: gap),
+                        child: const AnnouncementCard(),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
+            SliverLayoutBuilder(
+              builder: (context, constraints) {
+                final available = math.max(
+                  0.0,
+                  constraints.viewportMainAxisExtent -
+                      constraints.precedingScrollExtent,
+                );
+                final rowsHeight =
+                    padding.bottom +
+                    topHeight +
+                    controlHeight +
+                    middleHeight +
+                    gap * 3 +
+                    (hasUpdate ? updateHeight + gap : 0);
+                final tablesFit = available >= rowsHeight + tablesHeight;
+                final fills = available >= rowsHeight + summaryHeight;
+                return SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: fills ? available : null,
+                    child: Padding(
+                      padding: padding.copyWith(top: 0),
+                      child: Column(
+                        spacing: gap,
+                        children: [
+                          ...rows,
+                          if (tablesFit)
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                spacing: gap,
+                                children: const [
+                                  Expanded(
+                                    flex: 3,
+                                    child: RepaintBoundary(
+                                      child: ConnectionsTableCard(),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: RepaintBoundary(
+                                      child: ProxyGroupsCard(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else if (fills)
+                            Expanded(child: summaries)
+                          else
+                            sized(summaryHeight, summaries),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );
@@ -372,7 +412,10 @@ class _MobileDashboard extends ConsumerWidget {
                       ),
                     ))
                       const UpdateCard(),
-                    const AnnouncementCard(),
+                    if (ref.watch(providerNoticeProvider) != null)
+                      const NoticeCard(),
+                    if (ref.watch(providerAnnouncementProvider) != null)
+                      const AnnouncementCard(),
                     for (final widget in widgets)
                       RepaintBoundary(
                         key: cardKeyOf(widget),

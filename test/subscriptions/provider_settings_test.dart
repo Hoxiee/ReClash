@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/protocol/codec.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 
@@ -135,6 +136,67 @@ void main() {
       }).announcement!;
       expect(announcement.text, 'Maintenance tonight');
       expect(announcement.link?.host, 'status.example.test');
+    });
+  });
+
+  group('provider messages', () {
+    test(
+      'notice and announcement decode independently and survive storage',
+      () {
+        final result = readSubscriptionMetadata({
+          'announce': ['Plan description'],
+          'reclash-announceurl': ['https://example.test/plan'],
+          'reclash-notice': ['Maintenance tonight'],
+          'reclash-noticeurl': ['https://example.test/status'],
+        });
+        final hints = ProviderHints(
+          SubscriptionMetadata.fromJson(result.metadata.toJson()),
+        );
+        expect(hints.announcement?.text, 'Plan description');
+        expect(hints.announcement?.link?.path, '/plan');
+        expect(hints.notice?.text, 'Maintenance tonight');
+        expect(hints.notice?.link?.path, '/status');
+        expect(
+          encodeSubscriptionMetadata(result.metadata)['reclash-notice'],
+          'Maintenance tonight',
+        );
+      },
+    );
+
+    test('notice accepts body metadata and HTTP takes precedence', () {
+      final result = readSubscriptionMetadata(
+        {
+          'reclash-notice': ['HTTP notice'],
+        },
+        body:
+            '#reclash-notice: Body notice\n'
+            '#reclash-noticeurl: https://example.test/status\n',
+      );
+      final hints = ProviderHints(result.metadata);
+      expect(hints.notice?.text, 'HTTP notice');
+      expect(hints.notice?.link?.path, '/status');
+      expect(hints.announcement, isNull);
+    });
+
+    test('notice needs text and drops unsafe links', () {
+      expect(
+        _hints({
+          'reclash-noticeurl': ['https://example.test'],
+        }).notice,
+        isNull,
+      );
+      expect(
+        _hints({
+          'reclash-notice': ['   '],
+        }).notice,
+        isNull,
+      );
+      final notice = _hints({
+        'reclash-notice': ['Maintenance'],
+        'reclash-noticeurl': ['javascript:alert(1)'],
+      }).notice;
+      expect(notice?.text, 'Maintenance');
+      expect(notice?.link, isNull);
     });
   });
 

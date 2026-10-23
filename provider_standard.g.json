@@ -178,6 +178,42 @@
       "available": true
     },
     {
+      "path": "provider.notice",
+      "name": "reclash-notice",
+      "type": "text",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "trust": "display",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "panel",
+      "available": true
+    },
+    {
+      "path": "provider.noticeUrl",
+      "name": "reclash-noticeurl",
+      "type": "url",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "url",
+      "multiplicity": "singleton",
+      "limit": 1024,
+      "trust": "display",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "panel",
+      "available": true
+    },
+    {
       "path": "account.title",
       "name": "profile-title",
       "type": "text",

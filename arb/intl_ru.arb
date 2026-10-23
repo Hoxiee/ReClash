@@ -1853,6 +1853,7 @@
   "accessReturnToProvider": "Вернуть приложения провайдеру",
   "accessProviderDisabledDesc": "Приложений, которые провайдер пускает мимо VPN: {count}. Включите контроль доступа, чтобы изменить список.",
   "webDashboardRestricted": "Доступ к панели отключён вашим провайдером.",
+  "providerNotice": "Уведомление",
   "applicationSettings": "Настройки приложения",
   "toolsConfiguration": "Конфигурация",
   "toolsData": "Ресурсы и данные",
