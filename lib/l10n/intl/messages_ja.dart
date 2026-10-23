@@ -2854,9 +2854,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "trafficPeak": m147,
     "trafficTotal": m148,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
-    "translationNotice": MessageLookupByLibrary.simpleMessage(
-      "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
-    ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("翻訳の修正を提案する"),
     "transport": MessageLookupByLibrary.simpleMessage("トランスポート"),
     "trayIcon": MessageLookupByLibrary.simpleMessage("トレイアイコン"),

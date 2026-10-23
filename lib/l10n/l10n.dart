@@ -11407,16 +11407,6 @@ class AppLocalizations {
     );
   }
 
-  /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
-  String get translationNotice {
-    return Intl.message(
-      'ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.',
-      name: 'translationNotice',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Suggest a translation fix`
   String get translationSuggestFix {
     return Intl.message(

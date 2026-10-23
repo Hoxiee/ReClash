@@ -3429,9 +3429,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "trafficPeak": m147,
     "trafficTotal": m148,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
-    "translationNotice": MessageLookupByLibrary.simpleMessage(
-      "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
-    ),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
       "Terjime düzedişini teklip et",
     ),

@@ -1401,7 +1401,6 @@
   "desktopHelperSystemdFailed": "systemd 无法启动 TUN Helper。请查看服务日志；安装程序已尝试恢复先前的安装。",
   "desktopHelperProtocolMismatch": "已安装的 Helper 使用不同的协议。请检查是否存在其他安装或服务覆盖配置，然后重新安装完整的软件包。",
   "desktopHelperSystemdRequired": "TUN 需要由 systemd 管理的 Linux 会话。此系统无法运行网络 Helper。",
-  "translationNotice": "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
   "translationSuggestFix": "提交翻译修改建议",
   "kk": "哈萨克语",
   "tk": "土库曼语",

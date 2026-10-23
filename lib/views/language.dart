@@ -58,7 +58,7 @@ class LanguageView extends ConsumerWidget {
                     ),
                 ],
               ),
-              const _TranslationNotice(),
+              const _TranslationSuggestion(),
             ],
           ),
         ),
@@ -67,29 +67,22 @@ class LanguageView extends ConsumerWidget {
   }
 }
 
-class _TranslationNotice extends StatelessWidget {
-  const _TranslationNotice();
+class _TranslationSuggestion extends StatelessWidget {
+  const _TranslationSuggestion();
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 4,
-        children: [
-          Text(l.translationNotice, style: context.listCaptionStyle),
-          TextButton.icon(
-            onPressed: () {
-              dialogs.openUrl(
-                'https://github.com/$repository/issues/new?template=translation.yml',
-              );
-            },
-            icon: const GlyphIcon(AppGlyphs.language, size: 18),
-            label: Text(l.translationSuggestFix),
-          ),
-        ],
+      child: TextButton.icon(
+        onPressed: () {
+          dialogs.openUrl(
+            'https://github.com/$repository/issues/new?template=translation.yml',
+          );
+        },
+        icon: const GlyphIcon(AppGlyphs.language, size: 18),
+        label: Text(l.translationSuggestFix),
       ),
     );
   }
