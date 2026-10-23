@@ -1,57 +1,98 @@
-name: 问题反馈 / Bug report
-title: "[BUG] "
-description: 反馈你遇到的问题 / Report the issue you are experiencing
-
+name: Bug report / Сообщение об ошибке
+description: Report a reproducible problem in ReClash / Сообщить о воспроизводимой проблеме в ReClash
+title: '[Bug] '
 body:
   - type: markdown
     attributes:
       value: |
-        ## 在提交问题之前，请确认以下事项：
-        1. 请务必给issue填写一个简洁明了的标题，以便他人快速检索
-        2. 请确保[已有的问题](https://github.com/Hoxiee/ReClash/issues?q=is%3Aissue) 中没有人提交过相似issue，否则请在已有的issue下进行讨论
-        3. 请务必按照模板规范详细描述问题，否则issue将会被直接关闭
-        ## Before submitting the issue, please make sure of the following checklist:
-        1. Please be sure to fill in a concise and clear title for the issue so that others can quickly search
-        2. Please make sure there is no similar issue in the [existing issues](https://github.com/Hoxiee/ReClash/issues?q=is%3Aissue), otherwise please discuss under the existing issue
-        3. Please describe the problem in detail according to the template specification, otherwise issue will be closed directly.
-  - type: textarea
-    id: description
+        Thanks for helping improve ReClash. Search existing issues first and keep the report focused on one problem.
+
+        Спасибо за помощь в улучшении ReClash. Сначала поищите похожие issues и описывайте одну проблему в одном обращении.
+
+        **Privacy:** logs and profiles may contain subscription URLs, tokens, server addresses, local paths, and browsing activity. Remove sensitive data before posting. Do not upload an unreviewed log archive or full profile.
+
+        **Конфиденциальность:** логи и профили могут содержать ссылки на подписки, токены, адреса серверов, локальные пути и историю посещений. Удалите личные данные перед публикацией. Не загружайте непроверенные архивы логов или полные профили.
+
+  - type: input
+    id: version
     attributes:
-      label: 问题描述 / Describe the bug
-      description: 详细清晰地描述你遇到的问题，并配合截图 / Describe the problem you encountered in detail and clearly, and provide screenshots
+      label: ReClash version / Версия ReClash
+      description: Copy the complete version from About, including a pre-release suffix if present. / Скопируйте полную версию из раздела «О приложении», включая суффикс предварительной версии.
+      placeholder: 0.1.0-pre.1
     validations:
       required: true
-  - type: textarea
-    attributes:
-      label: 软件版本 / Version
-      description: 请提供ReClash的具体版本 / Please provide the specific version of ReClash.
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: 复现步骤 / To Reproduce
-      description: 请提供复现问题的步骤 / Steps to reproduce the behavior
-    validations:
-      required: true
+
   - type: dropdown
+    id: source
     attributes:
-      label: 操作系统 / OS
+      label: Build source / Источник сборки
+      options:
+        - GitHub Release
+        - Built from source / Собрано из исходников
+        - Other / Другое
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform / Платформа
       options:
         - Android
         - Windows
-        - MacOS
+        - macOS
         - Linux
     validations:
       required: true
+
   - type: input
+    id: platform-version
     attributes:
-      label: 操作系统版本 / OS Version
-      description: 请提供你的操作系统版本，Linux请额外提供桌面环境及窗口系统 / Please provide your OS version, for Linux, please also provide the desktop environment and window system
+      label: Platform details / Сведения о системе
+      description: Include the OS version and architecture. On Linux, also include the distribution, desktop environment, and display server. / Укажите версию ОС и архитектуру. Для Linux также укажите дистрибутив, окружение рабочего стола и графический сервер.
+      placeholder: Android 16, arm64; Windows 11 24H2, x64; Arch Linux, KDE Plasma, Wayland, x64
     validations:
       required: true
+
   - type: textarea
+    id: problem
     attributes:
-      label: 日志(勿上传日志文件，请粘贴日志内容) / Log (Do not upload the log file, paste the log content directly)
-      description: 请提供完整或相关部分的Debug日志（请在“软件左侧菜单”->“设置”->“日志等级”调整到debug / Please provide a complete or relevant Debug log (please adjust it to debug in the left menu of software-> Settings-> Log Level)
+      label: What happened? / Что произошло?
+      description: Describe the actual behavior and what you expected instead. / Опишите фактическое и ожидаемое поведение.
     validations:
       required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Шаги воспроизведения
+      description: Give the smallest reliable sequence, including relevant settings. / Укажите минимальную последовательность для стабильного воспроизведения, включая значимые настройки.
+      placeholder: |
+        1. Open …
+        2. Enable …
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: regression
+    attributes:
+      label: Regression / Регрессия
+      description: If this worked before, give the last known working ReClash version. / Если раньше всё работало, укажите последнюю рабочую версию ReClash.
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Relevant diagnostics / Диагностические данные
+      description: Paste only relevant text logs, stack traces, screenshots, or screen recordings after removing sensitive data. / После удаления личных данных добавьте относящиеся к проблеме текстовые логи, стеки ошибок, скриншоты или запись экрана.
+      render: text
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation / Подтверждение
+      options:
+        - label: I searched existing issues and did not find this problem. / Похожие проблемы в существующих issues не найдены.
+          required: true
+        - label: I removed subscriptions, credentials, tokens, and personal data from this report. / Из обращения удалены подписки, учётные данные, токены и личная информация.
+          required: true

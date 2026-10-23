@@ -1,5 +1,5 @@
-name: Translation fix
-description: Suggest a better wording for a ReClash translation
+name: Translation fix / Исправление перевода
+description: Suggest a better wording for a ReClash translation / Предложить улучшение перевода ReClash
 title: '[Translation] '
 body:
   - type: markdown
@@ -7,10 +7,12 @@ body:
       value: |
         Thanks for helping improve ReClash translations. Submit one phrase per issue and search existing issues first to avoid duplicates.
 
+        Спасибо за помощь с переводом ReClash. Предлагайте одну фразу в одном обращении и сначала поищите похожие issues.
+
   - type: dropdown
     id: language
     attributes:
-      label: Language
+      label: Language / Язык
       options:
         - English
         - Spanish
@@ -28,8 +30,8 @@ body:
   - type: input
     id: location
     attributes:
-      label: Where does it appear?
-      description: Name the screen or setting where you saw the phrase.
+      label: Where does it appear? / Где встречается?
+      description: Name the screen or setting where you saw the phrase. / Укажите экран или настройку, где встретилась фраза.
       placeholder: Tools → Language; profile list empty state
     validations:
       required: true
@@ -37,21 +39,21 @@ body:
   - type: textarea
     id: current
     attributes:
-      label: Current text
-      description: Copy the phrase exactly as shown in the app.
+      label: Current text / Текущий текст
+      description: Copy the phrase exactly as shown in the app. / Скопируйте фразу в точности из приложения.
     validations:
       required: true
 
   - type: textarea
     id: suggested
     attributes:
-      label: Suggested wording
-      description: Write how a native speaker would say it.
+      label: Suggested wording / Предлагаемый перевод
+      description: Write how a native speaker would say it. / Предложите естественную формулировку на выбранном языке.
     validations:
       required: true
 
   - type: textarea
     id: context
     attributes:
-      label: Screenshot or context
-      description: A screenshot helps; paste it here.
+      label: Screenshot or context / Скриншот или контекст
+      description: A screenshot helps; remove subscriptions, tokens, and personal data before posting. / Скриншот поможет; перед публикацией удалите подписки, токены и личные данные.
