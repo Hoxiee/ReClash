@@ -42,6 +42,7 @@ const _systemLibraries = {
   'gdi32.dll',
   'hid.dll',
   'imm32.dll',
+  'icu.dll',
   'iphlpapi.dll',
   'kernel32.dll',
   'ksuser.dll',

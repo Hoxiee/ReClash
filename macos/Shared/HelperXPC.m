@@ -7,7 +7,7 @@
 #import <xpc/xpc.h>
 
 NSDictionary *RCCopySystemJob(NSString *label) {
-    return CFBridgingRelease(SMCopyDictionary(kSMDomainSystemLaunchd, (__bridge CFStringRef)label));
+    return CFBridgingRelease(SMJobCopyDictionary(kSMDomainSystemLaunchd, (__bridge CFStringRef)label));
 }
 
 static NSError *RCXPCError(NSString *detail) {
