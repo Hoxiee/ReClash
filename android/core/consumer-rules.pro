@@ -1,0 +1,2 @@
+-keep class go.** { *; }
+-keep class com.reclash.core.mobile.** { *; }

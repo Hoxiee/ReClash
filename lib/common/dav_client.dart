@@ -1,0 +1,92 @@
+import 'dart:async';
+import 'dart:io' as io;
+
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:flutter/foundation.dart';
+
+typedef DAVClientFactory = DAVClient Function(DAVProps props);
+
+class DAVClient {
+  DAVClient(DAVProps dav)
+    : _transport = DAVTransport(
+        uri: dav.uri,
+        user: dav.user,
+        password: dav.password,
+      ),
+      fileName = dav.fileName;
+
+  final DAVTransport _transport;
+  final String fileName;
+
+  Future<bool> ping() async {
+    try {
+      await _transport.options('/');
+      return true;
+    } catch (e) {
+      commonPrint.log(
+        'dav ping error ${e.toString()}',
+        logLevel: LogLevel.warning,
+      );
+      return false;
+    }
+  }
+
+  String get root => '/$appName';
+
+  String get backupFile => '$root/$fileName';
+
+  Future<void> upload(String localPath) async {
+    await _transport.mkcol(root);
+    await _transport.put(backupFile, await io.File(localPath).readAsBytes());
+  }
+
+  Future<void> download(String localPath) async {
+    final bytes = await _transport.get(backupFile);
+    await io.File(localPath).safeWriteAsBytes(bytes);
+  }
+}
+
+class DAVConnectionController extends ValueNotifier<bool?> {
+  DAVConnectionController({DAVClientFactory? createClient})
+    : _createClient = createClient ?? DAVClient.new,
+      super(null);
+
+  final DAVClientFactory _createClient;
+
+  DAVProps? _lastProps;
+  bool _hasUpdated = false;
+  int _requestId = 0;
+  bool _disposed = false;
+
+  DAVClient? client;
+
+  Future<void> update(DAVProps? props) async {
+    final nextClient = props == null ? null : _createClient(props);
+    client = nextClient;
+
+    final rawProps = props?.copyWith(fileName: '');
+    final rawLastProps = _lastProps?.copyWith(fileName: '');
+    final isSameCredentials = _hasUpdated && rawProps == rawLastProps;
+    _lastProps = props;
+    _hasUpdated = true;
+    if (isSameCredentials) {
+      return;
+    }
+
+    final requestId = ++_requestId;
+    value = null;
+    final result = await nextClient?.ping() ?? false;
+    if (!_disposed && requestId == _requestId) {
+      value = result;
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _requestId++;
+    super.dispose();
+  }
+}

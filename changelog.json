@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 2,
+  "versions": [
+    {
+      "version": "0.9.2",
+      "tag": "v0.9.2",
+      "date": "2026-10-24",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "e8aac17",
+              "scope": "access",
+              "text": "Access control state shown in a bar at the bottom"
+            },
+            {
+              "id": "5d6552d",
+              "scope": "config",
+              "text": "Optional general overrides; settings apply sooner"
+            },
+            {
+              "id": "8176cce",
+              "scope": "dashboard",
+              "text": "IP quality cached for 3 days; simpler Android dashboard"
+            },
+            {
+              "id": "0817c3b",
+              "text": "Update the core to mihomo v1.19.33"
+            },
+            {
+              "id": "bbfafde",
+              "scope": "tray",
+              "text": "Colored tray status icons; monochrome option on macOS"
+            },
+            {
+              "id": "6928521",
+              "scope": "desktop",
+              "text": "Sidebar blur; Windows fixes; keeps system proxies FlClash didn't set"
+            },
+            {
+              "id": "eaaf3e3",
+              "scope": "profiles",
+              "text": "Profile QR codes, phone-to-TV links, more proxy fields"
+            },
+            {
+              "id": "0f9f89c",
+              "scope": "proxies",
+              "text": "Add proxies to local proxies; adjustable delay test timeout"
+            },
+            {
+              "id": "a4fc067",
+              "scope": "theme",
+              "text": "Higher-contrast dark mode and a refreshed app icon"
+            },
+            {
+              "id": "0d98a9d",
+              "scope": "ui",
+              "text": "iOS-style docked search and menus; bar buttons lift on hover"
+            },
+            {
+              "id": "ae902ed",
+              "scope": "ui",
+              "text": "iOS-style switches, stretchy sheets, menus and long-press reordering"
+            },
+            {
+              "id": "4837fb3",
+              "scope": "ui",
+              "text": "Pages scroll under the Android navigation bar"
+            },
+            {
+              "id": "09e7e56",
+              "scope": "core",
+              "text": "Clear the DNS cache by hand or on network change"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "99b3381",
+              "scope": "android",
+              "text": "Opening the app no longer reloads a running VPN"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "entries": [
+            {
+              "id": "7035edd",
+              "scope": "editor",
+              "text": "Smoother editor for large files and in sheets"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.9.1",
+      "tag": "v0.9.1",
+      "date": "2026-10-17",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "breaking",
+          "entries": [
+            {
+              "id": "cb08088",
+              "scope": "network",
+              "text": "Desktop TUN keys follow the profile unless picked; changed values carry over"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "f43755c",
+              "scope": "l10n",
+              "text": "French, Spanish and Korean translations"
+            },
+            {
+              "id": "bc72bba",
+              "scope": "android",
+              "text": "No more Firebase analytics or crash reporting"
+            },
+            {
+              "id": "cb08088",
+              "scope": "network",
+              "text": "Per-key desktop TUN settings; system proxy and tray fixes"
+            },
+            {
+              "id": "5eafd7a",
+              "scope": "theme",
+              "text": "Redesigned theme colors and color styles"
+            },
+            {
+              "id": "9bd258f",
+              "scope": "dashboard",
+              "text": "A redesigned dashboard around the current exit"
+            },
+            {
+              "id": "0bac500",
+              "scope": "profiles",
+              "text": "Profile-detail resources and include-all in custom groups"
+            },
+            {
+              "id": "2ea52fd",
+              "scope": "proxies",
+              "text": "Proxy groups as cards, group tabs as chips"
+            },
+            {
+              "id": "da6fb0a",
+              "scope": "views",
+              "text": "Sortable tables for connections, requests and DNS"
+            },
+            {
+              "id": "7c9627f",
+              "scope": "ui",
+              "text": "Optional two-tier Liquid Glass and slide-to-pick menus"
+            },
+            {
+              "id": "9bd2286",
+              "scope": "ui",
+              "text": "iOS-style surfaces, alerts and sheets; clearer TV focus"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "5607f70",
+              "scope": "ui",
+              "text": "Fix pasting and Chinese input in text fields"
+            },
+            {
+              "id": "5984c16",
+              "scope": "core",
+              "text": "Large profiles no longer crash; downloads trust core CAs"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "entries": [
+            {
+              "id": "2201c19",
+              "scope": "android",
+              "text": "Smoother Android UI while the proxy is busy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.9.0",
+      "tag": "v0.9.0",
+      "date": "2026-10-14",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "breaking",
+          "entries": [
+            {
+              "id": "491fae1",
+              "scope": "views",
+              "text": "DNS and NTP override toggles are removed; picked keys apply to every profile"
+            },
+            {
+              "id": "1677024",
+              "scope": "database",
+              "text": "Custom overwrites are removed; rebuild them as custom profiles"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "491fae1",
+              "scope": "views",
+              "text": "Per-key DNS, NTP, sniffer and TUN settings"
+            },
+            {
+              "id": "3abda78",
+              "scope": "profiles",
+              "text": "Custom profiles"
+            },
+            {
+              "id": "8c43053",
+              "scope": "ui",
+              "text": "Stacked sheets, context menus and a sort mode"
+            },
+            {
+              "id": "532ebf0",
+              "scope": "providers",
+              "text": "DNS, Hosts and ports apply without a restart"
+            },
+            {
+              "id": "d3fa225",
+              "scope": "android",
+              "text": "Launcher shortcuts and one-step on-demand access"
+            },
+            {
+              "id": "2fa2f7f",
+              "scope": "core",
+              "text": "Share link import and mrs rule sets"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "1677024",
+              "scope": "database",
+              "text": "Unreadable settings no longer block startup or restores"
+            },
+            {
+              "id": "94a25f4",
+              "scope": "desktop",
+              "text": "Windows and Linux desktop fixes"
+            },
+            {
+              "id": "d780cb8",
+              "scope": "core,helper",
+              "text": "The elevated Core only answers its owner"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.8.99",
+      "tag": "v0.8.99",
+      "date": "2026-10-03",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "e131675",
+              "scope": "editor",
+              "text": "Editor word wrap and snippets"
+            },
+            {
+              "id": "e62afb7",
+              "scope": "dashboard",
+              "text": "More dashboard cards"
+            },
+            {
+              "id": "8378c70",
+              "scope": "views",
+              "text": "Hide timed-out nodes and search every list"
+            },
+            {
+              "id": "841d603",
+              "scope": "ui",
+              "text": "Sidebar, floating dock and drag to go back"
+            },
+            {
+              "id": "ee6a497",
+              "scope": "ui",
+              "text": "New app glyphs, empty states and theme page"
+            },
+            {
+              "id": "46fb7fe",
+              "scope": "overwrite",
+              "text": "Invalid override warnings and rule presets"
+            },
+            {
+              "id": "a390a42",
+              "scope": "config",
+              "text": "DNS query log and per-key DNS/NTP overrides"
+            },
+            {
+              "id": "8068e68",
+              "scope": "core",
+              "text": "Proxied service checks and outbound IP risk"
+            },
+            {
+              "id": "1e97716",
+              "scope": "platform",
+              "text": "Tray hotkeys, node delays and a delay test"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "ff23f30",
+              "scope": "core",
+              "text": "A changed resource link is now used by the next sync and by auto update"
+            },
+            {
+              "id": "e55f6d1",
+              "scope": "core",
+              "text": "DNS lookups no longer fail on networks that report no DNS servers"
+            },
+            {
+              "id": "786a6ab",
+              "scope": "proxies",
+              "text": "Smaller icons in icon-only group headers"
+            },
+            {
+              "id": "1e9955d",
+              "scope": "core,android",
+              "text": "Push notifications reconnect in Doze"
+            },
+            {
+              "id": "bee8f24",
+              "scope": "backup,database",
+              "text": "Restores never apply halfway"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.8.98",
+      "tag": "v0.8.98",
+      "date": "2026-09-14",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "c5bf5bd",
+              "scope": "resources",
+              "text": "Refresh the geo file size and time after an update finishes"
+            },
+            {
+              "id": "60f371a",
+              "scope": "core",
+              "text": "Keep the core running while Windows sleeps with the app suspended"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.8.97",
+      "tag": "v0.8.97",
+      "date": "2026-09-10",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "26cfbaf",
+              "scope": "ui",
+              "text": "Rework the app UI and refresh the localization"
+            },
+            {
+              "id": "aaf934c",
+              "scope": "app",
+              "text": "Rework the app layer and window handling, and add proxy authentication"
+            },
+            {
+              "id": "c0fcbc0",
+              "scope": "desktop",
+              "text": "Rework the desktop runners, packaging, and native build"
+            },
+            {
+              "id": "ae29f38",
+              "scope": "android",
+              "text": "Rework the Android VPN service and lifecycle handling"
+            },
+            {
+              "id": "adf715f",
+              "scope": "plugins",
+              "text": "Rework the desktop plugins and add the Helper service and Rust bridge"
+            },
+            {
+              "id": "c6eaa0a",
+              "scope": "core",
+              "text": "Rework the core IPC and process lifecycle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
