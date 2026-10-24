@@ -26,17 +26,30 @@ class TelegramReleaseTest(unittest.TestCase):
     def post(self, notes='<b>Features</b>\n• Faster imports'):
         return telegram.build_post(self.tag, notes, self.dist, '@test')
 
-    def test_all_assets_have_direct_versioned_download_buttons(self):
+    def test_primary_assets_have_direct_versioned_download_buttons(self):
         post = self.post()
         buttons = [button for row in post['reply_markup']['inline_keyboard'] for button in row]
         downloads = [button for button in buttons if '/download/' in button['url']]
-        self.assertEqual(len(downloads), 17)
+        self.assertEqual(len(downloads), 6)
+        self.assertEqual(len(buttons), 7)
+        self.assertEqual(buttons[-1]['text'], 'Other')
+        self.assertIn('/releases/tag/', buttons[-1]['url'])
+        for label in ['Release', 'Changelog', 'GitHub', 'SHA256']:
+            self.assertIn(f'>{label}</a>', post['text'])
         for button in downloads:
             name = button['url'].rsplit('/', 1)[1]
             self.assertTrue((self.dist / name).is_file())
             self.assertIn(f'/download/{self.tag}/', button['url'])
         self.assertIn('Pre-release', post['text'])
         self.assertTrue(post['link_preview_options']['is_disabled'])
+
+    def test_prerelease_warning_is_a_quote_and_version_is_monospace(self):
+        text = self.post()['text']
+        self.assertIn('<b>ReClash</b> <code>0.1.0-pre.1</code>', text)
+        self.assertIn(
+            '<blockquote><b>🧪 Pre-release</b>\nTesting build — may contain bugs.</blockquote>',
+            text,
+        )
 
     def test_stable_has_no_testing_warning(self):
         for file in self.dist.glob('ReClash-*'):
@@ -45,6 +58,7 @@ class TelegramReleaseTest(unittest.TestCase):
         post = self.post()
         self.assertIn('Stable release', post['text'])
         self.assertNotIn('Testing build', post['text'])
+        self.assertNotIn('<blockquote>', post['text'])
 
     def test_missing_and_empty_assets_fail_before_sending(self):
         file = next(self.dist.glob('*.apk'))
@@ -65,18 +79,13 @@ class TelegramReleaseTest(unittest.TestCase):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 telegram.build_post(tag, '', self.dist, '@test')
 
-    def test_long_notes_keep_whole_html_lines_within_message_limit(self):
-        post = self.post('\n'.join(['<b>Changes</b>', *['• ' + '😀' * 150] * 40]))
-        self.assertLessEqual(telegram.visible_length(post['text']), 4096)
-        self.assertIn('full changelog below', post['text'])
+    def test_long_notes_fail_without_silently_dropping_warnings(self):
+        with self.assertRaises(ValueError):
+            self.post('😀' * 2200)
 
-    def test_preview_limits_bullets_without_dangling_section_headings(self):
-        notes = '<b>Features</b>\n' + '\n'.join(f'• Change {i}' for i in range(6))
-        notes += '\n<b>Fixes</b>\n• Another fix'
-        text = self.post(notes)['text']
-        self.assertEqual(text.count('• '), 6)
-        self.assertNotIn('<b>Fixes</b>', text)
-        self.assertIn('full changelog below', text)
+    def test_authored_overview_preserves_markup_and_warnings(self):
+        notes = '<b>A new release line</b>\nAuto-routing &amp; profiles\n⚠️ Reinstall older builds.'
+        self.assertIn(notes, self.post(notes)['text'])
 
     def test_import_and_post_rendering_do_not_send_requests(self):
         with patch.object(telegram, 'urlopen') as request:

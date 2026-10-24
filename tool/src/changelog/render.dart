@@ -104,7 +104,35 @@ String escapeTelegramHtml(String value) => value
 
 /// Telegram captions are capped at 1024 characters, so the text is truncated
 /// with a pointer to the full notes instead of failing the upload.
-String renderTelegram(ChangelogVersion version, {String? moreUrl}) {
+String renderTelegram(
+  ChangelogVersion version, {
+  String? moreUrl,
+  ReleaseSummary? summary,
+}) {
+  if (summary != null) {
+    if (summary.tag != version.tag) {
+      throw const FormatException('Release summary must match the release tag');
+    }
+    final content = summary.locales['en']!;
+    final text = [
+      '<b>${escapeTelegramHtml(content.headline)}</b>',
+      '',
+      '<b>${escapeTelegramHtml(content.spotlight.title)}</b>',
+      escapeTelegramHtml(content.spotlight.description),
+      if (content.highlights.isNotEmpty) '',
+      for (final highlight in content.highlights)
+        '• ${escapeTelegramHtml(highlight.title)}',
+      for (final warning in content.warnings) ...[
+        '',
+        '<blockquote>⚠️ <b>${escapeTelegramHtml(warning.title)}</b>\n'
+            '${escapeTelegramHtml(warning.description)}</blockquote>',
+      ],
+    ].join('\n');
+    if (_telegramVisibleLength(text) > 3000) {
+      throw const FormatException('Telegram release summary is too long');
+    }
+    return text;
+  }
   final buffer = StringBuffer();
   if (version.isEmpty) {
     buffer.writeln('• ${escapeTelegramHtml(emptyVersionNote)}');

@@ -34,6 +34,7 @@ void main(List<String> arguments) {
   sync.addCommand('prepare')
     ..addOption('id', mandatory: true)
     ..addOption('source')
+    ..addOption('after')
     ..addFlag('recipe-migration', negatable: false)
     ..addOption('audit');
   sync.addCommand('verify')
@@ -166,6 +167,7 @@ void main(List<String> arguments) {
             id,
             source: action.option('source'),
             recipeMigration: action.flag('recipe-migration'),
+            after: action.option('after'),
             audit: action.option('audit'),
           ),
           'verify' => service.verify(

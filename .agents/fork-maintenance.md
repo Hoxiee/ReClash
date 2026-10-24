@@ -129,6 +129,32 @@ This creates a separate vendor observation with the same raw source. It cannot m
 Review label `normalization-policy` is additionally required. Reproduce old normalization using the archived downstream
 implementation/config revision, not today's script.
 
+### Continue Before Accepting a Recipe Migration
+
+When a reviewed recipe migration must remain unaccepted while the next source is investigated:
+
+```bash
+dart run tool/fork.dart sync prepare --after <migration-id> --id <next-id> --source <local-raw-oid>
+```
+
+`--after` accepts only an unaccepted standalone recipe-migration receipt with unchanged accepted refs and policy.
+Its candidate must be clean, on its recorded branch, outside any rebase/merge/cherry-pick/revert operation, and linear
+above its prepared product base. Provenance, normalized base, owned files, release version and conflict markers are
+checked before preparation. Committed candidate adaptations are replay inputs, not proof of authorized review.
+The next vendor snapshot parents the migration's prepared vendor; replay starts from its prepared product base and
+candidate HEAD, not accepted `dev`. A changed upstream tree is required. `--after` cannot be combined with
+`--recipe-migration` or `--audit`, and chained predecessors are not supported.
+
+The new receipt retains original accepted `dev`, vendor and product-base OIDs, plus a predecessor receipt snapshot,
+digest and exact candidate commit/tree. Its bundle pins predecessor source/vendor/base/candidate and captured dev
+objects under observation-owned lineage refs. Preparation does not modify the predecessor or accepted refs, and
+uses the ordinary locked candidate worktree rather than a staging clone.
+
+These candidates are **preparation-only**: both `verify` and `accept` explicitly reject them, even if a verification
+record is supplied. No acceptance readiness, inherited review, passed checks or permission to publish is implied.
+A separately reviewed chain verification/acceptance/recovery protocol is required before accepting such a chain;
+do not edit receipts or relabel it as an ordinary sync to bypass this restriction.
+
 ## Verify and Accept
 
 ```bash

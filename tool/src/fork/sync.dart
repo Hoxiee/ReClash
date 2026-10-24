@@ -86,6 +86,7 @@ class VendorSync {
     bool bootstrap = false,
     String? audit,
     bool recipeMigration = false,
+    String? after,
   }) {
     identifier(id);
     sourceIdentity();
@@ -129,6 +130,14 @@ class VendorSync {
     if (bootstrap && (audit == null || audit.trim().isEmpty)) {
       reject('Bootstrap requires --audit with the reviewed inspection digest');
     }
+    if (after != null && (bootstrap || recipeMigration || audit != null)) {
+      reject('--after cannot be combined with bootstrap or recipe migration');
+    }
+    final predecessor = after == null ? null : migrationPredecessor(after);
+    final replayHead = predecessor?['candidate'] as String? ?? dev;
+    final replayBase =
+        predecessor?['preparedBase'] as String? ?? oldProductBase;
+    final replayVendor = predecessor?['prepared'] as String? ?? oldVendor;
     assertSafeCheckout();
     String raw;
     if (source != null) {
@@ -153,16 +162,19 @@ class VendorSync {
     if (recipeMigration && (bootstrap || oldVendor == null)) {
       reject('Recipe migration requires an accepted vendor');
     }
-    final base = bootstrap ? raw : oldProductBase!;
-    if (!git.firstParentAncestor(base, dev)) {
+    final base = bootstrap ? raw : replayBase!;
+    if (!git.firstParentAncestor(base, replayHead)) {
       reject('Replay base must be on the development first-parent history');
     }
-    if (git.run(['rev-list', '--merges', '$base..$dev']).trim().isNotEmpty) {
+    if (git
+        .run(['rev-list', '--merges', '$base..$replayHead'])
+        .trim()
+        .isNotEmpty) {
       reject('Development history after replay base must be linear');
     }
     final rawRef = 'refs/reclash/upstream/$id';
-    if (oldVendor != null) {
-      final old = provenance(oldVendor);
+    if (replayVendor != null) {
+      final old = provenance(replayVendor);
       final changedRecipe = old['Normalizer'] != normalizer.fingerprint;
       if (recipeMigration) {
         if (!changedRecipe ||
@@ -179,8 +191,11 @@ class VendorSync {
       }
       if (!recipeMigration &&
           git.tree(old['Upstream-Commit']!) == git.tree(raw)) {
+        if (after != null) {
+          reject('--after requires a changed upstream tree');
+        }
         if (!git.exists(rawRef)) git.createRef(rawRef, raw);
-        git.createRef('refs/reclash/prepared/$id', oldVendor);
+        git.createRef('refs/reclash/prepared/$id', replayVendor);
         final dir = receiptFile(id).parent..createSync(recursive: true);
         final archive = p.join(dir.path, 'snapshot.bundle');
         git.run([
@@ -207,7 +222,7 @@ class VendorSync {
     final tree = normalized.write();
     final vendor = git.commitTree(
       tree,
-      [?oldVendor],
+      [?replayVendor],
       'chore(sync): observe upstream snapshot $id\n\nChangelog: skip\nUpstream-Commit: $raw\nUpstream-Tree: ${git.tree(raw)}\nNormalizer: ${normalizer.fingerprint}\nNormalized-Tree: $tree',
     );
     git.createRef('refs/reclash/prepared/$id', vendor);
@@ -219,15 +234,15 @@ class VendorSync {
     }
     final paths = bootstrap
         ? normalized.residual(dev)
-        : git.changed(oldVendor!, vendor);
+        : git.changed(replayVendor!, vendor);
     final rawPaths = bootstrap
         ? <String>[]
-        : git.changed(provenance(oldVendor!)['Upstream-Commit']!, raw);
+        : git.changed(provenance(replayVendor!)['Upstream-Commit']!, raw);
     final gitlinkPaths = {
       for (final e in [
         ...git.entries(raw),
-        if (oldVendor != null)
-          ...git.entries(provenance(oldVendor)['Upstream-Commit']!),
+        if (replayVendor != null)
+          ...git.entries(provenance(replayVendor)['Upstream-Commit']!),
       ])
         if (e.mode == '160000') e.path,
     };
@@ -243,8 +258,14 @@ class VendorSync {
       'preparedBase': preparedBase,
       'worktree': checkout,
       'base': base,
+      'lineage': ?predecessor,
       'replaySource': git
-          .run(['rev-list', '--reverse', '--first-parent', '$base..$dev'])
+          .run([
+            'rev-list',
+            '--reverse',
+            '--first-parent',
+            '$base..$replayHead',
+          ])
           .trim()
           .split('\n')
           .where((commit) => commit.isNotEmpty)
@@ -264,7 +285,7 @@ class VendorSync {
       ),
     };
     save(id, r);
-    git.run(['worktree', 'add', '-b', 'sync/$id', '--', checkout, dev]);
+    git.run(['worktree', 'add', '-b', 'sync/$id', '--', checkout, replayHead]);
     git.run([
       'worktree',
       'lock',
@@ -286,16 +307,90 @@ class VendorSync {
       if (bootstrap && target.tree('HEAD') != git.tree(dev)) {
         reject('Bootstrap replay changed the downstream tree');
       }
-      preserveOwned(target, dev);
+      preserveOwned(target, replayHead);
     }
     bundle(id, r);
     return {
       'id': id,
-      'status': bootstrap ? 'bootstrap-candidate' : 'rebase-candidate',
+      'status': predecessor != null
+          ? 'chained-candidate-preparation-only'
+          : bootstrap
+          ? 'bootstrap-candidate'
+          : 'rebase-candidate',
+      'after': ?after,
       'worktree': checkout,
       'productBase': preparedBase,
       'impact': r['impact'],
       'coreReview': r['coreReview'],
+    };
+  }
+
+  Map<String, dynamic> migrationPredecessor(String id) {
+    final r = receipt(id);
+    if (r['recipeMigration'] != true ||
+        r['bootstrap'] == true ||
+        r.containsKey('lineage') ||
+        r.containsKey('accepted')) {
+      reject('--after requires an unaccepted, standalone recipe migration');
+    }
+    assertInputs(r);
+    final target = ForkGit(r['worktree'] as String);
+    if (target.common != git.common ||
+        target.run(['symbolic-ref', '-q', 'HEAD']).trim() !=
+            'refs/heads/sync/$id' ||
+        git.worktrees()['refs/heads/sync/$id'] != target.root) {
+      reject('Predecessor candidate worktree changed');
+    }
+    if (target.rebaseInProgress ||
+        ['MERGE_HEAD', 'CHERRY_PICK_HEAD', 'REVERT_HEAD'].any(target.exists) ||
+        Directory(
+          target.run([
+            'rev-parse',
+            '--path-format=absolute',
+            '--git-path',
+            'sequencer',
+          ]).trim(),
+        ).existsSync()) {
+      reject('Finish the predecessor operation before chained preparation');
+    }
+    target.assertClean();
+    final candidate = target.oid('HEAD');
+    final base = r['preparedBase'] as String;
+    if (!target.firstParentAncestor(base, candidate) ||
+        target
+            .run(['rev-list', '--merges', '$base..$candidate'])
+            .trim()
+            .isNotEmpty) {
+      reject(
+        'Predecessor must be a linear replay on its prepared product base',
+      );
+    }
+    final current = VendorSync(Registry(target));
+    if (current.registry.fingerprint != registry.fingerprint ||
+        current.normalizer.fingerprint != normalizer.fingerprint) {
+      reject('Predecessor candidate policy/normalizer changed');
+    }
+    preservePolicyCheck(target, r['dev'] as String);
+    if (markers(target, candidate).isNotEmpty) {
+      reject('Conflict markers in predecessor candidate');
+    }
+    final source = provenance(r['prepared'] as String);
+    final accepted = provenance(r['vendor'] as String);
+    if (source['Upstream-Commit'] != r['source'] ||
+        source['Upstream-Commit'] != accepted['Upstream-Commit'] ||
+        source['Normalizer'] != normalizer.fingerprint ||
+        source['Normalizer'] == accepted['Normalizer'] ||
+        normalizer.apply(r['source'] as String).residual(base).isNotEmpty) {
+      reject('Predecessor recipe migration provenance changed');
+    }
+    return {
+      'id': id,
+      'candidate': candidate,
+      'tree': target.tree(candidate),
+      'prepared': r['prepared'],
+      'preparedBase': base,
+      'receiptDigest': digest(r),
+      'receipt': r,
     };
   }
 
@@ -363,7 +458,29 @@ class VendorSync {
 
   void bundle(String id, Map<String, dynamic> r) {
     final dir = receiptFile(id).parent;
+    final lineage = r['lineage'] == null
+        ? null
+        : object(r['lineage'], 'lineage');
+    final lineageRefs = <String>[];
+    if (lineage != null) {
+      final predecessor = object(lineage['receipt'], 'predecessor receipt');
+      for (final entry in {
+        'candidate': lineage['candidate'] as String,
+        'dev': r['dev'] as String,
+        'vendor': predecessor['prepared'] as String,
+        'product-base': predecessor['preparedBase'] as String,
+        'source': predecessor['source'] as String,
+      }.entries) {
+        final ref = 'refs/reclash/lineage/$id/${entry.key}';
+        if (!git.exists(ref)) git.createRef(ref, entry.value);
+        if (git.oid(ref) != entry.value) {
+          reject('Protected lineage ref changed');
+        }
+        lineageRefs.add(ref);
+      }
+    }
     final refs = [
+      ...lineageRefs,
       'refs/reclash/upstream/$id',
       'refs/reclash/prepared/$id',
       productBaseObservationRef(id),
@@ -437,6 +554,11 @@ class VendorSync {
     final r = receipt(id);
     r.remove('verified');
     save(id, r);
+    if (r.containsKey('lineage')) {
+      reject(
+        'Chained candidates are preparation-only; verification and acceptance require a separately reviewed chain protocol',
+      );
+    }
     assertInputs(r);
     final target = ForkGit(r['worktree'] as String);
     if (target.rebaseInProgress) {
@@ -672,6 +794,9 @@ class VendorSync {
 
   Map<String, dynamic> accept(String id) {
     final r = receipt(id);
+    if (r.containsKey('lineage')) {
+      reject('Chained candidates are preparation-only and cannot be accepted');
+    }
     final verified = object(r['verified'], 'verified receipt required');
     final target = ForkGit(r['worktree'] as String);
     target.assertClean();
