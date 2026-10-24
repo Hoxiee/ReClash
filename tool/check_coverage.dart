@@ -31,7 +31,7 @@ const _groupFloors = <String, double>{
   'enum': 86.0,
   'pages': 71.0,
   'plugins': 67.0,
-  'subscriptions': 79.0,
+  'subscriptions': 70.0,
   'lib': 20.0,
 };
 
