@@ -34,7 +34,7 @@ keywords:
 generic_name: ReClash
 
 categories:
-  - Network
+  - Network;
 
 startup_notify: true
 

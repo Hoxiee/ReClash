@@ -184,6 +184,14 @@ void main() {
     },
   );
 
+  test('Windows ICU imports resolve to the operating system', () {
+    final files = _bundle();
+    files['flutter_windows.dll'] = _pe(
+      imports: [const PeImport('icu.dll', name: 'u_getVersion')],
+    );
+    validate(files);
+  });
+
   test('delay-loaded runtime is mandatory too', () {
     final files = _bundle(delay: true);
     validate(files);
