@@ -381,6 +381,18 @@ class VendorSync {
     if (markers(target, candidate).isNotEmpty) {
       reject('Conflict markers in predecessor');
     }
+    final source = provenance(r['prepared'] as String);
+    final accepted = provenance(r['vendor'] as String);
+    if (source['Upstream-Commit'] != r['source'] ||
+        source['Upstream-Commit'] != accepted['Upstream-Commit'] ||
+        source['Normalizer'] != normalizer.fingerprint ||
+        source['Normalizer'] == accepted['Normalizer'] ||
+        normalizer
+            .apply(r['source'] as String)
+            .residual(r['preparedBase'] as String)
+            .isNotEmpty) {
+      reject('Predecessor recipe migration provenance changed');
+    }
     final archive = p.join(receiptFile(id).parent.path, 'snapshot.bundle');
     rejectSymlinks(archive);
     git.run(['bundle', 'verify', archive]);

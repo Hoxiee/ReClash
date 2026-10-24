@@ -489,4 +489,23 @@ void main() {
     expect(() => f.service.accept('child'), throwsA(isA<ForkException>()));
     expect(f.git.oid(f.service.devRef), old);
   });
+  test('predecessor source identity must match its observed vendor', () {
+    final r = f.service.receipt('recipe');
+    r['source'] = nextSource();
+    f.service.save('recipe', r);
+    f.git.run([
+      'update-ref',
+      'refs/reclash/upstream/recipe',
+      r['source'] as String,
+    ]);
+    expect(
+      () => f.service.prepare(
+        'forged-source',
+        source: nextSource(),
+        after: 'recipe',
+      ),
+      throwsA(isA<ForkException>()),
+    );
+    expect(f.git.exists('refs/reclash/prepared/forged-source'), isFalse);
+  });
 }
