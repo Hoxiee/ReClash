@@ -813,7 +813,7 @@ void main() {
       expect(container.read(shownPageLabelProvider), PageLabel.tools);
       expect(
         container.read(toolsSessionProvider).path.last.page,
-        ToolPage.general,
+        ToolPage.application,
       );
       expect(
         container.read(toolsSessionProvider).path.last.settingId,
@@ -1820,7 +1820,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       container.read(toolsSessionProvider).path.last.page,
-      ToolPage.general,
+      ToolPage.application,
     );
     expect(
       container.read(toolsSessionProvider).path.last.settingId,

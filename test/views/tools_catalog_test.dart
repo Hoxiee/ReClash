@@ -231,7 +231,7 @@ void main() {
     },
   );
 
-  test('localized log search leads to General settings', () async {
+  test('localized log search leads to application settings', () async {
     for (final locale in ['en', 'ru']) {
       final l = await AppLocalizations.load(Locale(locale));
       final catalog = buildToolCatalog(l, _environment());
@@ -241,9 +241,9 @@ void main() {
         ('application.logLevel', l.logLevel),
       ]) {
         final entry = catalog.singleWhere((entry) => entry.id == id);
-        expect(entry.route, ToolRoute(ToolPage.general, settingId: id));
-        expect(entry.category, ToolCategory.configuration);
-        expect(entry.path, contains(l.general));
+        expect(entry.route, ToolRoute(ToolPage.application, settingId: id));
+        expect(entry.category, ToolCategory.application);
+        expect(entry.path, contains(l.applicationSettings));
         expect(
           search.search(title).map((match) => match.document.id),
           contains(id),
@@ -251,26 +251,35 @@ void main() {
       }
       expect(
         catalog.map((entry) => entry.id),
-        contains('application.logLevel'),
+        isNot(contains('general.logLevel')),
       );
     }
   });
 
-  test('settings retain unique destinations after upstream grouping', () {
-    final all = [...ApplicationSettings.all, ...GeneralSettings.all];
-    final ids = all.map((s) => s.id).toList();
-    expect(ids.toSet(), hasLength(ids.length));
+  test('application and general settings have disjoint destinations', () {
+    final app = ApplicationSettings.all;
+    final general = GeneralSettings.all;
+    expect(app.every((s) => s.page == ToolPage.application), isTrue);
+    expect(general.every((s) => s.page == ToolPage.general), isTrue);
     expect(
-      GeneralSettings.all.map((s) => s.id),
-      containsAll(['general.port', 'general.userAgent']),
+      app.map((s) => s.id),
+      containsAll([
+        'application.autoRun',
+        'application.openLogs',
+        'application.logLevel',
+        'application.checkCertificate',
+      ]),
     );
     expect(
-      all.map((s) => s.id),
-      containsAll(['application.openLogs', 'application.logLevel']),
+      general.map((s) => s.id),
+      containsAll(['general.port', 'general.testUrl', 'general.userAgent']),
     );
     expect(
-      ApplicationSettings.all.map((s) => s.id),
-      containsAll(['application.region', 'application.updatePreferences']),
+      app
+          .map((s) => s.id)
+          .toSet()
+          .intersection(general.map((s) => s.id).toSet()),
+      isEmpty,
     );
   });
 }

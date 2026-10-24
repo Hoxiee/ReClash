@@ -3390,6 +3390,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionImportSourceFormat": m148,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("Abuna maglumaty"),
+    "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("Ösüş"),
+    "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("Promo"),
+    "subscriptionKindTest": MessageLookupByLibrary.simpleMessage("Synag"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Abuna ýatlatmalary",
     ),

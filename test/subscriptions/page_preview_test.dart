@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/page_preview.dart';
 import 'package:reclash/subscriptions/transport/transport.dart';
 
@@ -216,6 +217,7 @@ void main() {
           'description': 'Welcome',
         },
         'account': {'name': 'Alice'},
+        'subscription': {'type': 'promo'},
         'settings': {'sendHwid': true},
       }),
       baseUri: base,
@@ -223,6 +225,7 @@ void main() {
     expect(result.name, 'Service');
     expect(result.logo, 'https://panel.test/logo.png');
     expect(result.accountTitle, 'Alice');
+    expect(result.kind, SubscriptionKind.promo);
     expect(result.text('provider.supportUrl'), isNull);
     expect(result.fields.containsKey('settings'), isFalse);
     for (final source in ['{}', '{"version":2}', '{"version":1.0}', 'broken']) {

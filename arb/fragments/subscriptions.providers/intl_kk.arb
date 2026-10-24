@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Провайдер VPN-нен тыс қалдыратын қолданбалар: {count}. Тізімді өзгерту үшін қолжетімділікті басқаруды қосыңыз.",
   "webDashboardRestricted": "Панельге қолжетімділікті провайдер өшірген.",
   "providerNotice": "Хабарландыру",
-  "providerAnnouncementRead": "Оқу"
+  "providerAnnouncementRead": "Оқу",
+  "subscriptionKindTest": "Тест",
+  "subscriptionKindPromo": "Промо",
+  "subscriptionKindDev": "Әзірлеу"
 }

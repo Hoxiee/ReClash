@@ -25,6 +25,7 @@ Version: 1
 | `provider.announceUrl` | `reclash-announceurl` | url | display | panel |  |
 | `provider.notice` | `reclash-notice` | text | display | panel |  |
 | `provider.noticeUrl` | `reclash-noticeurl` | url | display | panel |  |
+| `subscription.type` | `reclash-subscriptiontype` | text | display | panel |  |
 | `account.title` | `profile-title` | text | display | panel |  |
 | `update.intervalMinutes` | `reclash-autoupdateinterval` | integer | hint | scheduler | alias `profile-update-interval` x60 |
 | `routing.bundleUrl` | `reclash-routing` | url | hint | routing |  |

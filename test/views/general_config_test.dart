@@ -45,36 +45,6 @@ void main() {
 
   PatchClashConfig config() => container.read(patchClashConfigProvider);
 
-  testWidgets('uses the upstream General section order and destinations', (
-    tester,
-  ) async {
-    await pumpGeneralView(tester);
-    final l = currentAppLocalizations;
-    final titles = [
-      l.startupAndBackground,
-      l.requestsAndUpdates,
-      l.inbound,
-      l.connection,
-      l.core,
-      l.logsAndDiagnostics,
-    ];
-    final positions = [
-      for (final title in titles) tester.getTopLeft(find.text(title)).dy,
-    ];
-    expect(positions, orderedEquals([...positions]..sort()));
-    expect(
-      tester.getTopLeft(find.text(l.userAgent)).dy,
-      greaterThan(positions[1]),
-    );
-    expect(
-      tester.getTopLeft(find.text(l.userAgent)).dy,
-      lessThan(positions[2]),
-    );
-    expect(find.text(l.autoCloseConnections), findsOneWidget);
-    expect(find.text(l.onlyStatisticsProxy), findsOneWidget);
-    expect(find.text(l.subscriptionIdentityTitle), findsOneWidget);
-  });
-
   testWidgets('lists no override until one is added', (tester) async {
     await pumpGeneralView(tester);
     final l = currentAppLocalizations;

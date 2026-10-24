@@ -53,7 +53,7 @@ class SubscriptionCompatibilityEntryRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 4,
         children: [
-          PopupValueText(preset.label),
+          Flexible(child: PopupValueText(preset.label)),
           const GlyphIcon(AppGlyphs.chevronForward),
         ],
       ),

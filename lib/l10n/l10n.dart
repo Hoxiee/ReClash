@@ -15881,6 +15881,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Test`
+  String get subscriptionKindTest {
+    return Intl.message(
+      'Test',
+      name: 'subscriptionKindTest',
+      desc: 'Badge on a subscription card: the provider declared a trial or test subscription',
+      args: [],
+    );
+  }
+
+  /// `Promo`
+  String get subscriptionKindPromo {
+    return Intl.message(
+      'Promo',
+      name: 'subscriptionKindPromo',
+      desc: 'Badge on a subscription card: the provider declared a promotional subscription',
+      args: [],
+    );
+  }
+
+  /// `Dev`
+  String get subscriptionKindDev {
+    return Intl.message(
+      'Dev',
+      name: 'subscriptionKindDev',
+      desc: 'Badge on a subscription card: the provider declared a subscription for provider developers',
+      args: [],
+    );
+  }
+
   /// `Application settings`
   String get applicationSettings {
     return Intl.message(

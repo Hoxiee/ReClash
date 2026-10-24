@@ -1,5 +1,6 @@
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -214,6 +215,17 @@ extension WallpaperFitL10n on WallpaperFit {
       WallpaperFit.cover => appLocalizations.wallpaperFitCover,
       WallpaperFit.contain => appLocalizations.wallpaperFitContain,
       WallpaperFit.fill => appLocalizations.wallpaperFitFill,
+    };
+  }
+}
+
+extension SubscriptionKindL10n on SubscriptionKind {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      SubscriptionKind.test => appLocalizations.subscriptionKindTest,
+      SubscriptionKind.promo => appLocalizations.subscriptionKindPromo,
+      SubscriptionKind.dev => appLocalizations.subscriptionKindDev,
     };
   }
 }

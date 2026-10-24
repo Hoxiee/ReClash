@@ -54,16 +54,18 @@ Future<ProviderContainer> _pumpHost(
   return container;
 }
 
-SubscriptionPagePreview _preview({String? announce}) => SubscriptionPagePreview(
-  label: 'Acme Home',
-  metadata: SubscriptionMetadata({
-    'provider.name': 'Acme VPN',
-    'account.title': 'Account Alice',
-    'provider.supportUrl': 'https://support.example/help',
-    'provider.announce': ?announce,
-  }),
-  info: const SubscriptionInfo(download: 1 << 30, total: 100 << 30),
-);
+SubscriptionPagePreview _preview({String? announce, String? type}) =>
+    SubscriptionPagePreview(
+      label: 'Acme Home',
+      metadata: SubscriptionMetadata({
+        'provider.name': 'Acme VPN',
+        'account.title': 'Account Alice',
+        'provider.supportUrl': 'https://support.example/help',
+        'provider.announce': ?announce,
+        'subscription.type': ?type,
+      }),
+      info: const SubscriptionInfo(download: 1 << 30, total: 100 << 30),
+    );
 
 FilledButton _disclaimerAgreeButton(WidgetTester tester) {
   return tester.widget<FilledButton>(
@@ -170,7 +172,7 @@ void main() {
       final l10n = currentAppLocalizations;
       var requests = 0;
       final pending = Completer<SubscriptionPagePreview>();
-      final preview = _preview(announce: 'Welcome aboard');
+      final preview = _preview(announce: 'Welcome aboard', type: 'test');
       final result = showProfileImportDialog(
         const ProfileLinkSource(
           url: 'https://sub.example/private?token=secret',
@@ -194,6 +196,7 @@ void main() {
       expect(find.text('Account Alice'), findsOneWidget);
       expect(find.byTooltip(l10n.subscriptionProviderSupport), findsOneWidget);
       expect(find.text('Welcome aboard'), findsOneWidget);
+      expect(find.text(l10n.subscriptionKindTest), findsOneWidget);
       expect(find.text(l10n.profileImportServers), findsNothing);
       await tester.ensureVisible(find.text(l10n.subscriptionClientReclash));
       await tester.pumpAndSettle();

@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "服务商让 {count} 个应用绕过 VPN。打开访问控制即可修改列表。",
   "webDashboardRestricted": "控制面板访问已被您的服务商禁用。",
   "providerNotice": "通知",
-  "providerAnnouncementRead": "阅读"
+  "providerAnnouncementRead": "阅读",
+  "subscriptionKindTest": "测试",
+  "subscriptionKindPromo": "推广",
+  "subscriptionKindDev": "开发"
 }

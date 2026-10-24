@@ -5,6 +5,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/profiles/custom/custom.dart';
 import 'package:reclash/views/profiles/extend/extend.dart';
@@ -328,9 +329,11 @@ class ProfileItem extends ConsumerWidget {
   }
 
   void _handleShowEditExtendPage(BuildContext context) {
-    showExtend(
-      context,
-      builder: (context) => EditProfileView(profile: profile),
+    showSheet<void>(
+      context: context,
+      props: nestedPagedSheetProps,
+      builder: (_) =>
+          NestedPagedSheet(builder: (_) => EditProfileView(profile: profile)),
     );
   }
 
@@ -539,6 +542,9 @@ class ProfileItem extends ConsumerWidget {
           title: _ProfileCardTitle(
             profile: profile,
             expire: subscriptionInfo?.expireDate,
+            kind: profile.type == ProfileType.url
+                ? profile.subscriptionSnapshot?.metadata.kind
+                : null,
             subtitle: _subtitle(context),
           ),
         ),
@@ -551,11 +557,13 @@ class _ProfileCardTitle extends StatelessWidget {
   const _ProfileCardTitle({
     required this.profile,
     required this.expire,
+    required this.kind,
     required this.subtitle,
   });
 
   final Profile profile;
   final DateTime? expire;
+  final SubscriptionKind? kind;
   final String subtitle;
 
   @override
@@ -566,6 +574,8 @@ class _ProfileCardTitle extends StatelessWidget {
       children: [
         ChipTitle(
           title: profile.realLabel,
+          chip: kind?.label,
+          chipForeground: kind?.foregroundOf(context.colorScheme),
           expire: expire,
           style: AppTextStyle.headline.of(context),
         ),

@@ -28,7 +28,7 @@ class _NoopSetupAction extends SetupAction {
 Profile _urlProfile() =>
     Profile.normal(label: 'test', url: 'https://example.com/sub');
 
-/// Pumps [EditProfileView] inside a page route (as `showExtend` does), with an
+/// Pumps [EditProfileView] inside a page route, with an
 /// outside focus node so escape behavior can be asserted.
 Future<FocusNode> pumpEditProfile(
   WidgetTester tester, {

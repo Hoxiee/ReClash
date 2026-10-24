@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Apps que tu proveedor deja fuera de la VPN: {count}. Activa el control de acceso para cambiar la lista.",
   "webDashboardRestricted": "El acceso al panel está desactivado por tu proveedor.",
   "providerNotice": "Aviso",
-  "providerAnnouncementRead": "Leer"
+  "providerAnnouncementRead": "Leer",
+  "subscriptionKindTest": "Prueba",
+  "subscriptionKindPromo": "Promo",
+  "subscriptionKindDev": "Dev"
 }

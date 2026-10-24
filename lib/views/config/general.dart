@@ -5,9 +5,6 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/override.dart';
-import 'package:reclash/views/application_setting.dart';
-import 'package:reclash/views/application_notification.dart';
-import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
@@ -410,68 +407,6 @@ class _SubscriptionIdentityItemState
 class GeneralView extends ConsumerWidget {
   const GeneralView({super.key});
 
-  ConfigToggleItem _appToggle({
-    required String id,
-    required bool Function(AppSettingProps state) select,
-    required AppSettingProps Function(AppSettingProps state, bool value) update,
-  }) {
-    final spec = ApplicationSettings.spec(id);
-    return ConfigToggleItem(
-      title: spec.title,
-      setting: spec,
-      selector: appSettingProvider.select(select),
-      onChanged: (ref, value) => ref
-          .read(appSettingProvider.notifier)
-          .update((state) => update(state, value)),
-    );
-  }
-
-  List<Widget> _startupItems(AppLocalizations l) => <Widget>[
-    if (system.isDesktop) ...[
-      _appToggle(
-        id: 'application.autoLaunch',
-        select: (s) => s.autoLaunch,
-        update: (s, v) => s.copyWith(autoLaunch: v),
-      ),
-      _appToggle(
-        id: 'application.silentLaunch',
-        select: (s) => s.silentLaunch,
-        update: (s, v) => s.copyWith(silentLaunch: v),
-      ),
-    ],
-    _appToggle(
-      id: 'application.autoRun',
-      select: (s) => s.autoRun,
-      update: (s, v) => s.copyWith(autoRun: v),
-    ),
-    SettingTarget(
-      spec: ApplicationSettings.spec('application.onDemand'),
-      child: ListItem.open(
-        title: Text(ApplicationSettings.spec('application.onDemand').title(l)),
-        widget: const OnDemandView(),
-      ),
-    ),
-    _appToggle(
-      id: 'application.minimizeOnExit',
-      select: (s) => s.minimizeOnExit,
-      update: (s, v) => s.copyWith(minimizeOnExit: v),
-    ),
-    if (system.isAndroid) ...[
-      _appToggle(
-        id: 'application.hidden',
-        select: (s) => s.hidden,
-        update: (s, v) => s.copyWith(hidden: v),
-      ),
-      SettingTarget(
-        spec: ApplicationSettings.spec('application.notification'),
-        child: ListItem.open(
-          title: Text(l.notification),
-          widget: const NotificationSettingsView(),
-        ),
-      ),
-    ],
-  ];
-
   List<Widget> _inboundItems({
     required bool authentication,
     required bool externalController,
@@ -515,53 +450,12 @@ class GeneralView extends ConsumerWidget {
           findProcessMode: value ? FindProcessMode.always : FindProcessMode.off,
         ),
       ),
-      _appToggle(
-        id: 'application.closeConnections',
-        select: (s) => s.closeConnections,
-        update: (s, v) => s.copyWith(closeConnections: v),
-      ),
-      _appToggle(
-        id: 'application.onlyStatisticsProxy',
-        select: (s) => s.onlyStatisticsProxy,
-        update: (s, v) => s.copyWith(onlyStatisticsProxy: v),
-      ),
     ];
   }
 
-  List<Widget> _requestItems() => [
-    const UaItem(),
-    _appToggle(
-      id: 'application.checkCertificate',
-      select: (s) => s.checkCertificate,
-      update: (s, v) => s.copyWith(checkCertificate: v),
-    ),
-    _appToggle(
-      id: 'application.autoCheckUpdate',
-      select: (s) => s.autoCheckUpdate,
-      update: (s, v) => s.copyWith(autoCheckUpdate: v),
-    ),
-  ];
-
-  List<Widget> _logItems() => [
-    _appToggle(
-      id: 'application.openLogs',
-      select: (s) => s.openLogs,
-      update: (s, v) => s.copyWith(openLogs: v),
-    ),
-    ConfigOptionsItem<LogLevel>(
-      setting: ApplicationSettings.spec('application.logLevel'),
-      title: (l) => l.logLevel,
-      options: LogLevel.values,
-      textBuilder: (logLevel) => logLevel.name,
-      selector: patchClashConfigProvider.select((state) => state.logLevel),
-      onChanged: (ref, value) => ref
-          .read(patchClashConfigProvider.notifier)
-          .update((state) => state.copyWith(logLevel: value)),
-    ),
-  ];
-
   List<Widget> _coreItems() {
     return [
+      const UaItem(),
       const HostsItem(key: ValueKey(#hosts)),
       ConfigToggleItem(
         key: const ValueKey(#appendSystemDns),
@@ -598,20 +492,6 @@ class GeneralView extends ConsumerWidget {
           ).copyWith(top: context.appBarInset, bottom: 16),
           child: Column(
             children: [
-              generateSection(
-                title: appLocalizations.startupAndBackground,
-                items: _startupItems(appLocalizations),
-                footer: [
-                  if (system.isDesktop) appLocalizations.silentLaunchDesc,
-                  appLocalizations.autoRunDesc,
-                  appLocalizations.onDemandDesc,
-                ].join('\n'),
-              ),
-              generateSection(
-                title: appLocalizations.requestsAndUpdates,
-                items: _requestItems(),
-                footer: appLocalizations.checkCertificateDesc,
-              ),
               if (!secure)
                 generateSection(
                   title: appLocalizations.inbound,
@@ -627,17 +507,11 @@ class GeneralView extends ConsumerWidget {
               generateSection(
                 title: appLocalizations.connection,
                 items: _connectionItems(),
-                footer: appLocalizations.autoCloseConnectionsDesc,
               ),
               OverrideSection(
                 title: appLocalizations.core,
                 spec: _generalOverrideSpec,
                 items: _coreItems(),
-              ),
-              generateSection(
-                title: appLocalizations.logsAndDiagnostics,
-                items: _logItems(),
-                footer: appLocalizations.logcatDesc,
               ),
               generateSection(
                 title: appLocalizations.subscriptionIdentitySettingsTitle,

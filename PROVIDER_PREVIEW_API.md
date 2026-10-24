@@ -29,6 +29,9 @@ Return `Content-Type: application/json` and at most 64 KiB of UTF-8 JSON:
   },
   "account": {
     "name": "Personal account"
+  },
+  "subscription": {
+    "type": "test"
   }
 }
 ```
@@ -40,6 +43,7 @@ All fields except the integer `version` are optional. Unknown fields are ignored
 - `provider.logoUrl`: absolute or response-relative HTTP(S) image URL. HTTPS pages cannot downgrade to HTTP. Supported response types: PNG, JPEG, WebP, GIF, SVG and ICO (subject to decoder support). Images exceeding 512 KiB are not displayed. Failed images keep the monogram; external SVG resources are not fetched by the widget.
 - `provider.supportUrl`: HTTP(S) or a validated Telegram destination. Relative links resolve against the API URL. The support action appears in the top bar and uses the existing external-link/Telegram confirmation flow; it never opens automatically.
 - `account.name`: account display name, shown separately from the provider and the editable local profile name.
+- `subscription.type`: `test`, `promo` or `dev`, up to 32 characters. Shows a badge under the name in the confirmation; an unknown value shows none. The same value in the `reclash-subscriptiontype` header marks the saved profile.
 
 Priority: valid API fields override recognized panel branding, which overrides generic HTML metadata. Missing API fields preserve lower-priority values. A logo request sends no session cookies, authorization, Referer or device identity, including for a same-origin image. No scripts, styles, application lists, telemetry endpoints or configuration URLs from JSON are executed or followed.
 

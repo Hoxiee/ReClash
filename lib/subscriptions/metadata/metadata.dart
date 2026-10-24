@@ -9,6 +9,22 @@ enum SubscriptionDeviceStatus { required, accepted, unsupported, limitReached }
 
 enum SubscriptionDataSource { http, body }
 
+/// Unknown provider kinds omit the badge without rejecting the subscription.
+enum SubscriptionKind {
+  test('test'),
+  promo('promo'),
+  dev('dev');
+
+  const SubscriptionKind(this.token);
+
+  final String token;
+
+  static SubscriptionKind? fromToken(String? value) {
+    final token = value?.trim().toLowerCase();
+    return values.where((kind) => kind.token == token).firstOrNull;
+  }
+}
+
 class SubscriptionMetadata {
   const SubscriptionMetadata([this.fields = const {}]);
 
@@ -32,6 +48,8 @@ class SubscriptionMetadata {
 
   String? get name => text('provider.name');
   String? get accountTitle => text('account.title');
+  SubscriptionKind? get kind =>
+      SubscriptionKind.fromToken(text('subscription.type'));
   String? get announce => text('provider.announce');
   String? get logo => text('provider.logo');
   bool get hideUrl => flag('presentation.hideUrl') ?? false;

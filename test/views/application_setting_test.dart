@@ -75,7 +75,7 @@ void main() {
     },
   );
 
-  testWidgets('log settings are grouped only in General settings', (
+  testWidgets('log settings are grouped only in application settings', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 1800);
@@ -89,7 +89,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: GeneralView()),
+        child: const TestApp(child: ApplicationSettingView()),
       ),
     );
     await tester.pumpAndSettle();
@@ -121,7 +121,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: ApplicationSettingView()),
+        child: const TestApp(child: GeneralView()),
       ),
     );
     await tester.pumpAndSettle();
@@ -136,7 +136,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: GeneralView()),
+        child: const TestApp(child: ApplicationSettingView()),
       ),
     );
     await tester.pumpAndSettle();

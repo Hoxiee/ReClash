@@ -256,6 +256,18 @@ void main() {
     expect(find.byKey(const ValueKey('app-update-card')), findsOneWidget);
   });
 
+  testWidgets('the footer button closes the whole sheet', (tester) async {
+    container.read(appUpdateActionProvider.notifier).noUpdates();
+    await pump(tester, const SizedBox.shrink());
+    final shown = UpdateSheet.show(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(currentAppLocalizations.updateGotIt));
+    await tester.pumpAndSettle();
+    await shown;
+    expect(find.byType(UpdateSheet), findsNothing);
+    expect(find.byType(NestedPagedSheet), findsNothing);
+  });
+
   Future<void> openAutoInstallConsent(WidgetTester tester) async {
     final toggle = find.text(currentAppLocalizations.updateAutoInstall);
     await tester.ensureVisible(toggle);

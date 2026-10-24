@@ -226,20 +226,24 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   Future<void> _openCompatibility() async {
     _compatibilityPageOpen = true;
     try {
-      await BaseNavigator.push<void>(
-        context,
-        SubscriptionCompatibilityPage(
-          listenable: _compatibilityTick,
-          read: _compatibilityView,
-          userAgentController: _customUserAgentController,
-          onPresetChanged: _setClientPreset,
-          onUserAgentChanged: _handleChanged,
-          onCheck: _checkCompatibility,
-          onCancel: _preview.invalidate,
-          onApply: _applyCompatibility,
-          onForgetConsent: _forgetImportConsent,
-        ),
+      final page = SubscriptionCompatibilityPage(
+        listenable: _compatibilityTick,
+        read: _compatibilityView,
+        userAgentController: _customUserAgentController,
+        onPresetChanged: _setClientPreset,
+        onUserAgentChanged: _handleChanged,
+        onCheck: _checkCompatibility,
+        onCancel: _preview.invalidate,
+        onApply: _applyCompatibility,
+        onForgetConsent: _forgetImportConsent,
       );
+      if (isSheetPage(context)) {
+        await Navigator.of(
+          context,
+        ).push<void>(PagedSheetRoute<void>(builder: (_) => page));
+      } else {
+        await BaseNavigator.push<void>(context, page);
+      }
     } finally {
       _compatibilityPageOpen = false;
     }
@@ -317,7 +321,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       if (saved != null) {
         if (_compatibilityPageOpen) Navigator.of(context).pop();
         if (!mounted) return;
-        Navigator.of(context).pop();
+        context.safeNestedPop();
       } else {
         _preview.invalidate();
         setState(
@@ -524,7 +528,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       );
     }
     if (mounted) {
-      Navigator.of(context).pop();
+      context.safeNestedPop();
     }
   }
 
@@ -631,7 +635,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       unawaited(_handleConfirm());
     } else {
       if (mounted) {
-        Navigator.of(context).pop();
+        context.safeNestedPop();
       }
     }
   }
@@ -747,10 +751,14 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             ),
           ],
         ),
-      _ProfileFileItem(
-        fileInfoNotifier: _fileInfoNotifier,
-        onEdit: _editProfileFile,
-        onUpload: _uploadProfileFile,
+      generateSection(
+        items: [
+          _ProfileFileItem(
+            fileInfoNotifier: _fileInfoNotifier,
+            onEdit: _editProfileFile,
+            onUpload: _uploadProfileFile,
+          ),
+        ],
       ),
     ];
     return FocusTraversalGroup(
@@ -781,7 +789,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                 ),
                 children: [
                   ErrorBanner(message: _bannerMessage(issue)),
-                  ...sections.separated(const SizedBox(height: 24)),
+                  ...sections,
                 ],
               ),
             ),

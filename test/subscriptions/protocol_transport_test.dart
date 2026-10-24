@@ -117,6 +117,24 @@ void main() {
       );
     });
 
+    test('subscription kind is display only and tolerates unknown tokens', () {
+      SubscriptionKind? kindOf(String value) => readSubscriptionMetadata({
+        'reclash-subscriptiontype': [value],
+      }).metadata.kind;
+      expect(kindOf('test'), SubscriptionKind.test);
+      expect(kindOf(' Promo '), SubscriptionKind.promo);
+      expect(kindOf('base64:ZGV2'), SubscriptionKind.dev);
+      expect(kindOf('vip'), isNull);
+      expect(kindOf('x' * 33), isNull);
+      expect(
+        readSubscriptionMetadata(
+          const {},
+          body: '# ReClash-SubscriptionType: test\nproxies: []',
+        ).metadata.kind,
+        SubscriptionKind.test,
+      );
+    });
+
     test('provider hosts are kept as validated authorities', () {
       final result = readSubscriptionMetadata({
         'reclash-newdomain': ['https://Other.example.test/'],

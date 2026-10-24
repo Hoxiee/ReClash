@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Üpjün edijiňiziň VPN-den daşarda goýýan programmalary: {count}. Sanawy üýtgetmek üçin elýeterlilik dolandyryşyny açyň.",
   "webDashboardRestricted": "Paneli ulanmak üpjünçi tarapyndan öçürilen.",
   "providerNotice": "Bildiriş",
-  "providerAnnouncementRead": "Oka"
+  "providerAnnouncementRead": "Oka",
+  "subscriptionKindTest": "Synag",
+  "subscriptionKindPromo": "Promo",
+  "subscriptionKindDev": "Ösüş"
 }

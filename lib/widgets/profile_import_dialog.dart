@@ -275,6 +275,7 @@ class _ProfileImportSheetState extends State<_ProfileImportSheet> {
                     logoBytes: current?.logoBytes,
                     logoIsSvg: current?.logoIsSvg ?? false,
                     account: metadata?.accountTitle,
+                    kind: metadata?.kind,
                     glyph: source.bytes != null
                         ? AppGlyphs.code
                         : source.shareLink != null
@@ -463,6 +464,7 @@ class _Hero extends StatelessWidget {
     required this.logoBytes,
     required this.logoIsSvg,
     required this.account,
+    required this.kind,
     required this.glyph,
     required this.loading,
     required this.title,
@@ -476,6 +478,7 @@ class _Hero extends StatelessWidget {
   final Uint8List? logoBytes;
   final bool logoIsSvg;
   final String? account;
+  final SubscriptionKind? kind;
   final Glyph glyph;
   final bool loading;
   final String title;
@@ -576,7 +579,7 @@ class _Hero extends StatelessWidget {
                 children: [...previous, ?current],
               ),
               child: Column(
-                key: ValueKey((title, account, caption)),
+                key: ValueKey((title, account, kind, caption)),
                 children: [
                   Text(
                     title,
@@ -585,6 +588,10 @@ class _Hero extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyle.title2.of(context, emphasized: true),
                   ),
+                  if (kind case final kind?) ...[
+                    const SizedBox(height: 6),
+                    SubscriptionKindChip(kind: kind),
+                  ],
                   if (account case final account?) ...[
                     const SizedBox(height: 4),
                     Text(

@@ -214,6 +214,24 @@
       "available": true
     },
     {
+      "path": "subscription.type",
+      "name": "reclash-subscriptiontype",
+      "type": "text",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "text-or-base64-prefixed",
+      "multiplicity": "singleton",
+      "limit": 32,
+      "trust": "display",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "panel",
+      "available": true
+    },
+    {
       "path": "account.title",
       "name": "profile-title",
       "type": "text",

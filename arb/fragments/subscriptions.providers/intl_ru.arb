@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Приложений, которые провайдер пускает мимо VPN: {count}. Включите контроль доступа, чтобы изменить список.",
   "webDashboardRestricted": "Доступ к панели отключён вашим провайдером.",
   "providerNotice": "Уведомление",
-  "providerAnnouncementRead": "Читать"
+  "providerAnnouncementRead": "Читать",
+  "subscriptionKindTest": "Тестовая",
+  "subscriptionKindPromo": "Промо",
+  "subscriptionKindDev": "Разработка"
 }

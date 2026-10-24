@@ -3423,6 +3423,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),
+    "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("Разработка"),
+    "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("Промо"),
+    "subscriptionKindTest": MessageLookupByLibrary.simpleMessage("Тестовая"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Напоминания о подписке",
     ),

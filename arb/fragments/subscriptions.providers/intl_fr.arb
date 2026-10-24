@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Applications que votre fournisseur laisse hors du VPN : {count}. Activez le contrôle d’accès pour modifier la liste.",
   "webDashboardRestricted": "L'accès au tableau de bord est désactivé par votre fournisseur.",
   "providerNotice": "Avis",
-  "providerAnnouncementRead": "Lire"
+  "providerAnnouncementRead": "Lire",
+  "subscriptionKindTest": "Test",
+  "subscriptionKindPromo": "Promo",
+  "subscriptionKindDev": "Dev"
 }

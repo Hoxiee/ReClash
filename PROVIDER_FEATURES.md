@@ -45,6 +45,7 @@ A subscription may set app settings. They apply when the profile is current, wit
 - `reclash-restrictions`: `noglobal` removes the Global mode, `androidsecure` opens no local ports on Android, `denywidgets` removes dashboard editing.
 - `announce` / `reclash-announce` shows the subscription description in a persistent dashboard card, with full selectable text and an optional `reclash-announceurl` link. It can be reordered with the other cards in the dashboard editor, but cannot be removed.
 - `reclash-notice` shows a separate dismissible dashboard notification with an optional `reclash-noticeurl` link; changed text or a changed link shows again. Closing it never hides the subscription description.
+- `reclash-subscriptiontype`: `test`, `promo` or `dev`. Shows a badge on the subscription in the import dialog and the profile list. Display only; an unknown value shows no badge.
 - `reclash-expiredays`, `reclash-trafficpercent`: reminder thresholds. `reclash-buyplan` and `reclash-buytraffic` take a `,<n>` suffix: the action is offered from `<n>` days left or `<n>` percent used.
 - `reclash-serverinfo`: a proxy group whose selected node is shown on the status card.
 

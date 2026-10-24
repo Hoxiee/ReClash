@@ -3496,6 +3496,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Obuna ma’lumotlari",
     ),
+    "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("Ishlanma"),
+    "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("Promo"),
+    "subscriptionKindTest": MessageLookupByLibrary.simpleMessage("Sinov"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Obuna eslatmalari",
     ),

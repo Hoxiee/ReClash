@@ -45,6 +45,7 @@ class ExpireChip extends StatelessWidget {
 class ChipTitle extends StatelessWidget {
   final String title;
   final String? chip;
+  final Color? chipForeground;
   final DateTime? expire;
   final TextStyle? style;
 
@@ -52,6 +53,7 @@ class ChipTitle extends StatelessWidget {
     super.key,
     required this.title,
     this.chip,
+    this.chipForeground,
     this.expire,
     this.style,
   });
@@ -99,8 +101,10 @@ class ChipTitle extends StatelessWidget {
         if (chip != null)
           TonalChip(
             label: chip,
-            color: context.raisedSurfaceLevel.colorOf(colorScheme),
-            foregroundColor: colorScheme.onSurfaceVariant,
+            color:
+                chipForeground?.opacity15 ??
+                context.raisedSurfaceLevel.colorOf(colorScheme),
+            foregroundColor: chipForeground ?? colorScheme.onSurfaceVariant,
           ),
         if (showExpire && expire != null) ExpireChip(expire: expire),
       ],

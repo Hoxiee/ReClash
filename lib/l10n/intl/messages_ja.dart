@@ -2824,6 +2824,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionImportSourceFormat": m148,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
+    "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("開発"),
+    "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("プロモ"),
+    "subscriptionKindTest": MessageLookupByLibrary.simpleMessage("テスト"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのリマインダー",
     ),

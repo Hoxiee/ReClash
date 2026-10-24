@@ -182,6 +182,13 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'panel',
   ),
   SubscriptionField(
+    'subscription.type',
+    'reclash-subscriptiontype',
+    SubscriptionFieldType.text,
+    limit: 32,
+    consumer: 'panel',
+  ),
+  SubscriptionField(
     'account.title',
     'profile-title',
     SubscriptionFieldType.text,

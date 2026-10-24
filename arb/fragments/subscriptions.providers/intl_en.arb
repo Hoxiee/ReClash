@@ -22,5 +22,17 @@
   },
   "webDashboardRestricted": "Dashboard access is disabled by your provider.",
   "providerNotice": "Notice",
-  "providerAnnouncementRead": "Read"
+  "providerAnnouncementRead": "Read",
+  "subscriptionKindTest": "Test",
+  "@subscriptionKindTest": {
+    "description": "Badge on a subscription card: the provider declared a trial or test subscription"
+  },
+  "subscriptionKindPromo": "Promo",
+  "@subscriptionKindPromo": {
+    "description": "Badge on a subscription card: the provider declared a promotional subscription"
+  },
+  "subscriptionKindDev": "Dev",
+  "@subscriptionKindDev": {
+    "description": "Badge on a subscription card: the provider declared a subscription for provider developers"
+  }
 }

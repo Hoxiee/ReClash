@@ -9,5 +9,8 @@
   "accessProviderDisabledDesc": "Provayder VPN’dan tashqarida qoldiradigan ilovalar: {count}. Ro‘yxatni o‘zgartirish uchun kirishni boshqarishni yoqing.",
   "webDashboardRestricted": "Panelga kirish provayderingiz tomonidan o‘chirilgan.",
   "providerNotice": "Bildirishnoma",
-  "providerAnnouncementRead": "O‘qish"
+  "providerAnnouncementRead": "O‘qish",
+  "subscriptionKindTest": "Sinov",
+  "subscriptionKindPromo": "Promo",
+  "subscriptionKindDev": "Ishlanma"
 }

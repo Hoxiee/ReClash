@@ -297,6 +297,7 @@ SubscriptionMetadata parseProviderPreviewApi(
   }
   final provider = data['provider'];
   final account = data['account'];
+  final subscription = data['subscription'];
   String? text(Object? value, int limit) {
     final result = _text(value);
     return result != null && result.length <= limit ? result : null;
@@ -314,6 +315,8 @@ SubscriptionMetadata parseProviderPreviewApi(
       ),
     },
     if (account is Map) 'account.title': ?text(account['name'], 256),
+    if (subscription is Map)
+      'subscription.type': ?text(subscription['type'], 32),
   });
 }
 

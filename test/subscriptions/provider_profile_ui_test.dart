@@ -9,9 +9,8 @@ import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/identity/device_identity.dart';
 import 'package:reclash/subscriptions/compatibility/client_picker.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
-import 'package:reclash/ui/popup.dart';
-import 'package:reclash/ui/list.dart';
-import 'package:reclash/ui/switch.dart';
+import 'package:reclash/subscriptions/compatibility/editor_section.dart';
+import 'package:reclash/ui/ui.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
 import 'package:reclash/views/config/general.dart';
@@ -193,6 +192,53 @@ void main() {
     );
     await tester.pump();
     expect(tester.widget<TextField>(editableUrl).obscureText, isTrue);
+  });
+
+  testWidgets('compatibility opens inside the edit sheet and returns to it', (
+    tester,
+  ) async {
+    final profile = _profile();
+    await pumpProfile(tester, profile);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: globalState.container,
+        child: TestApp(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showSheet<void>(
+                context: context,
+                props: nestedPagedSheetProps,
+                builder: (_) => NestedPagedSheet(
+                  builder: (_) => EditProfileView(profile: profile),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.text(currentAppLocalizations.subscriptionCompatibilityTitle),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SubscriptionCompatibilityPage), findsOneWidget);
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+
+    await tester.tap(
+      find
+          .byTooltip(
+            UiLocalizations.of(
+              tester.element(find.byType(NestedPagedSheet)),
+            ).back,
+          )
+          .last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SubscriptionCompatibilityPage), findsNothing);
+    expect(find.byType(EditProfileView), findsOneWidget);
   });
 
   testWidgets('request-as uses the standard options row', (tester) async {

@@ -3411,6 +3411,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Жазылыс туралы ақпарат",
     ),
+    "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("Әзірлеу"),
+    "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("Промо"),
+    "subscriptionKindTest": MessageLookupByLibrary.simpleMessage("Тест"),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Жазылыс ескертулері",
     ),

@@ -113,7 +113,7 @@ class _UpdateSheetState extends ConsumerState<UpdateSheet> {
     super.dispose();
   }
 
-  void _close() => Navigator.of(context).pop();
+  void _close() => context.safeNestedPop();
 
   @override
   Widget build(BuildContext context) {

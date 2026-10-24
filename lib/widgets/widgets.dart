@@ -9,4 +9,5 @@ export 'provider_setting.dart';
 export 'record.dart';
 export 'record_table.dart';
 export 'subscription_info_view.dart';
+export 'subscription_kind_chip.dart';
 export 'package:reclash/ui/ui.dart';
