@@ -69,13 +69,21 @@ enum CodeTrust {
         return value
     }
 
+    static func staticCode(_ code: SecCode) throws -> SecStaticCode {
+        var value: SecStaticCode?
+        guard SecCodeCopyStaticCode(code, [], &value) == errSecSuccess, let value else {
+            throw HelperFailure(code: "bundleInvalid", detail: "The executable signing information is unavailable.")
+        }
+        return value
+    }
+
     static func currentSigningInfo() throws -> [String: Any] {
         var code: SecCode?
         guard SecCodeCopySelf([], &code) == errSecSuccess, let code else {
             throw HelperFailure(code: "bundleInvalid", detail: "The current executable is not signed.")
         }
         var info: CFDictionary?
-        guard SecCodeCopySigningInformation(code, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
+        guard SecCodeCopySigningInformation(try staticCode(code), SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
               let info = info as? [String: Any] else {
             throw HelperFailure(code: "bundleInvalid", detail: "The executable signing information is unavailable.")
         }
@@ -109,7 +117,7 @@ enum CodeTrust {
 
     static func location(_ code: SecCode) throws -> URL {
         var information: CFDictionary?
-        guard SecCodeCopySigningInformation(code, SecCSFlags(rawValue: kSecCSSigningInformation), &information) == errSecSuccess,
+        guard SecCodeCopySigningInformation(try staticCode(code), SecCSFlags(rawValue: kSecCSSigningInformation), &information) == errSecSuccess,
               let value = information as? [String: Any],
               let location = value[kSecCodeInfoMainExecutable as String] as? URL else {
             throw HelperFailure(code: "clientRejected", detail: "The signed client executable could not be determined.")
