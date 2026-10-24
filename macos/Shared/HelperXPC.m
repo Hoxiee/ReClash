@@ -1,9 +1,14 @@
 #import "HelperXPC.h"
+#import <ServiceManagement/ServiceManagement.h>
 #import <bsm/libbsm.h>
 #import <sys/socket.h>
 #import <sys/ucred.h>
 #import <sys/un.h>
 #import <xpc/xpc.h>
+
+NSDictionary *RCCopySystemJob(NSString *label) {
+    return CFBridgingRelease(SMCopyDictionary(kSMDomainSystemLaunchd, (__bridge CFStringRef)label));
+}
 
 static NSError *RCXPCError(NSString *detail) {
     return [NSError errorWithDomain:@"com.reclash.helper.xpc" code:1

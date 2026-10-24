@@ -3,6 +3,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NSDictionary *_Nullable RCCopySystemJob(NSString *label);
+
 @interface RCHelperPeer : NSObject
 @property(nonatomic, readonly) SecCodeRef code;
 @property(nonatomic, readonly) uid_t uid;
