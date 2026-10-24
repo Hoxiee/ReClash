@@ -52,7 +52,7 @@ final class PrivilegedHelperBridge {
             @unknown default: return "notFound"
             }
         }
-        guard let job = SMCopyDictionary(kSMDomainSystemLaunchd, identity.serviceName as CFString)?.takeRetainedValue() as? [String: Any] else {
+        guard let job = RCCopySystemJob(identity.serviceName) as? [String: Any] else {
             return "notRegistered"
         }
         guard job["Label"] as? String == identity.serviceName,
