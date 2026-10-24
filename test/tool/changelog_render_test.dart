@@ -275,6 +275,48 @@ void main() {
   });
 
   group('renderTelegram', () {
+    test('uses the app overview and preserves release warnings', () {
+      final summary = ReleaseSummary.fromJson({
+        'schemaVersion': 1,
+        'tag': 'v0.8.96',
+        'automaticInstall': false,
+        'locales': {
+          'en': {
+            'headline': 'A clearer & safer release',
+            'spotlight': {
+              'title': 'Auto-routing',
+              'description': 'Profiles choose routes.',
+            },
+            'highlights': [
+              {'title': 'New navigation', 'description': 'New transitions.'},
+            ],
+            'warnings': [
+              {
+                'title': 'Reinstall',
+                'description': 'Do not update old builds.',
+              },
+            ],
+          },
+        },
+      });
+      final text = renderTelegram(version(), summary: summary);
+      expect(text, contains('<b>A clearer &amp; safer release</b>'));
+      expect(text, contains('Profiles choose routes.'));
+      expect(text, contains('• New navigation'));
+      expect(
+        text,
+        contains(
+          '<blockquote>⚠️ <b>Reinstall</b>\n'
+          'Do not update old builds.</blockquote>',
+        ),
+      );
+      expect(text, isNot(contains(emptyVersionNote)));
+      expect(
+        () => renderTelegram(version(tag: 'v0.8.97'), summary: summary),
+        throwsFormatException,
+      );
+    });
+
     test('renders bullets without markdown scopes', () {
       final text = renderTelegram(
         version(

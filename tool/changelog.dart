@@ -8,8 +8,6 @@ import 'src/changelog/models.dart';
 import 'src/changelog/render.dart';
 import 'src/changelog/summary.dart';
 
-const _repository = 'Hoxiee/ReClash';
-
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('root', help: 'Repository root, defaults to the cwd.');
@@ -127,13 +125,9 @@ int _render(String root, ArgResults command) {
       version,
       summary: readReleaseSummary(root, version.tag),
     ),
-    // Only stable builds pass --tag, and only they get a release page; a
-    // prerelease caption already links its workflow run.
     'telegram' => renderTelegram(
       version,
-      moreUrl: tag == null
-          ? null
-          : 'https://github.com/$_repository/releases/tag/$tag',
+      summary: readReleaseSummary(root, version.tag),
     ),
     _ => _fail('Unknown render target: ${rest.first}'),
   };

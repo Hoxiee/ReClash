@@ -16,20 +16,12 @@ TAG_PATTERN = re.compile(r'v\d+\.\d+\.\d+(?:-pre\.[1-9]\d*)?')
 
 def download_rows():
     return [
-        [('Android · ARM64', 'android-arm64-v8a.apk'),
-         ('Android · ARMv7', 'android-armeabi-v7a.apk'),
-         ('Android · x64', 'android-x86_64.apk')],
+        [('Android · ARM64', 'android-arm64-v8a.apk')],
         [('Windows · x64', 'windows-amd64-setup.exe'),
-         ('Windows · ARM64', 'windows-arm64-setup.exe')],
-        [('Portable · x64', 'windows-amd64.zip'),
-         ('Portable · ARM64', 'windows-arm64.zip')],
+         ('Portable · x64', 'windows-amd64.zip')],
         [('macOS · Apple Silicon', 'macos-arm64.dmg'),
          ('macOS · Intel', 'macos-amd64.dmg')],
         [('Linux · AppImage x64', 'linux-amd64.AppImage')],
-        [('DEB · x64', 'linux-amd64.deb'), ('DEB · ARM64', 'linux-arm64.deb')],
-        [('RPM · x64', 'linux-amd64.rpm'), ('RPM · ARM64', 'linux-arm64.rpm')],
-        [('Arch · x64', 'linux-amd64.pkg.tar.xz'),
-         ('Arch · ARM64', 'linux-arm64.pkg.tar.xz')],
     ]
 
 
@@ -57,41 +49,24 @@ def build_post(tag, notes, dist, chat_id):
     checksums = dist / 'SHA256SUMS'
     if not checksums.is_file() or checksums.stat().st_size == 0:
         raise ValueError('Missing or empty release asset: SHA256SUMS')
-    keyboard.append([
-        {'text': '📋 Full changelog', 'url': release_url},
-        {'text': '🔐 SHA256', 'url': f'{download_url}/SHA256SUMS'},
-    ])
+    keyboard.append([{'text': 'Other', 'url': release_url}])
 
     prerelease = '-pre.' in version
     status = '🧪 Pre-release' if prerelease else '✨ Stable release'
-    heading = f'<b>ReClash {html.escape(version)}</b>\n{status}'
+    heading = f'<b>ReClash</b> <code>{html.escape(version)}</code>'
     if prerelease:
-        heading += '\nTesting build — may contain bugs.'
-    kept = []
-    bullets = 0
-    pending_heading = None
-    for line in notes.strip().splitlines():
-        if line.startswith('<b>') and line.endswith('</b>'):
-            pending_heading = line
-            continue
-        if not line.strip():
-            continue
-        if line.startswith('…') or bullets >= 6:
-            kept.append('… See the full changelog below.')
-            break
-        candidate = [*kept]
-        if pending_heading:
-            candidate.extend(['', pending_heading])
-        candidate.append(line)
-        if visible_length('\n'.join(candidate)) > 2800:
-            kept.append('… See the full changelog below.')
-            break
-        kept = candidate
-        pending_heading = None
-        if line.startswith('• '):
-            bullets += 1
-    body = '\n'.join(kept).strip() or 'Maintenance and stability improvements.'
-    text = f'{heading}\n\n{body}\n\n<b>Download for your platform ↓</b>'
+        heading += f'\n\n<blockquote><b>{status}</b>\nTesting build — may contain bugs.</blockquote>'
+    else:
+        heading += f'\n<i>{status}</i>'
+    body = notes.strip() or 'Maintenance and stability improvements.'
+    repository_url = f'https://github.com/{REPOSITORY}'
+    links = ' · '.join([
+        f'<a href="{release_url}">Release</a>',
+        f'<a href="{repository_url}/blob/{tag}/CHANGELOG.md">Changelog</a>',
+        f'<a href="{repository_url}">GitHub</a>',
+        f'<a href="{download_url}/SHA256SUMS">SHA256</a>',
+    ])
+    text = f'{heading}\n\n{body}\n\n{links}'
     if visible_length(text) > 4096:
         raise ValueError('Telegram post exceeds the message limit')
     return {
