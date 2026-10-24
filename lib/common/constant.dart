@@ -11,6 +11,8 @@ import 'package:material_ui/material_ui.dart';
 
 const appName = 'ReClash';
 const appHelperService = 'ReClashHelperService';
+const windowsServiceName = 'ReClashService';
+const windowsServiceExecutable = '$windowsServiceName.exe';
 const coreManifestName = 'manifest.json';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -19,11 +21,11 @@ final unixSocketPath = '/tmp/ReClashSocket_${Random().nextInt(10000)}.sock';
 final windowsPipeName = '\\\\.\\pipe\\ReClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperPortKey =
-    'SYSTEM\\CurrentControlSet\\Services\\$appHelperService\\Runtime';
+    'SYSTEM\\CurrentControlSet\\Services\\$windowsServiceName\\Runtime';
 const helperPortValue = 'Port';
 const helperSocketPath = '/run/reclash/helper.sock';
 const helperProtocolVersionHeader = 'x-reclash-helper-protocol';
-final helperProtocolVersion = Platform.isWindows ? '8' : '9';
+final helperProtocolVersion = Platform.isWindows ? '10' : '9';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
 

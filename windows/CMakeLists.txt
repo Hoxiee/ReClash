@@ -105,6 +105,7 @@ endif()
 set(CORE_ARTIFACTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../libclash/windows")
 install(FILES
   "${CORE_ARTIFACTS_DIR}/ReClashCore.exe"
+  "${CORE_ARTIFACTS_DIR}/ReClashService.exe"
   "${CORE_ARTIFACTS_DIR}/manifest.json"
   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)

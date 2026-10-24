@@ -302,8 +302,9 @@ choose one for a new setting.
 - An unexpected disconnect or transport failure while running is converted to `DesktopCoreFailure`, the owned process is
   cleaned up, and `CoreService` emits a Core crash event for the normal UI recovery path.
 
-Direct launch is used on macOS, inside an AppImage, and as the Windows/Linux fallback when the privileged Helper is not
-ready. When the Helper is ready, it owns the Core child and Dart owns it through a session-scoped lease.
+Direct launch is used whenever TUN is off, and whenever TUN has no usable privileged backend without a prompt: an
+unregistered or outdated Helper or service, a background start, or a privileged start that just failed. TUN then stays
+off instead of the Core failing. When the Helper is ready, it owns the Core child and Dart owns it through a session-scoped lease.
 
 ### Android Service Lifecycle
 
@@ -1603,8 +1604,9 @@ Platform projects copy the artifacts out of `libclash/`; application code must n
   missing or lacks a slice for `ARCHS`, so a skipped hook cannot stage a stale Core silently.
 - Linux: `ReClashCore`, the Rust `ReClashHelperService`, and a `manifest.json` holding the pair's hashes and Helper
   protocol; the Core builds first because the Helper embeds its hash. CMake copies the verified pair.
-- Windows: `ReClashCore.exe` and `manifest.json` beside the GUI; no SCM Helper is bundled. CMake requires app-local
-  MSVC runtime DLLs. `setup.dart` validates the staged native dependencies before either package format and validates
+- Windows: `ReClashCore.exe`, `ReClashService.exe` and `manifest.json` beside the GUI. The service links the CRT
+  statically and both run from `%ProgramFiles%\ReClash Service\`, so they may import only system DLLs; the legacy
+  `ReClashHelperService.exe` is still rejected anywhere in the payload. CMake requires app-local MSVC runtime DLLs for the GUI. `setup.dart` validates the staged native dependencies before either package format and validates
   the final ZIP. Release CI installs, launches, upgrades and uninstalls both native architectures, checks Core init
   RPC and verifies owned shutdown before publication. `WINDOWS_SIGNING_REQUIRED=true` also requires valid Authenticode
   signatures; this check does not supply a signing certificate.
@@ -1631,10 +1633,12 @@ a Rust helper:
 
 Desktop artifact integrity:
 
-- `setup_hooks` builds Core before the Linux Helper and records both final hashes and protocol `9`. Windows records
-  only the Core hash; its privileged runtime uses the verified managed UAC launch described under Desktop Privileged Core.
+- `setup_hooks` builds Core before the Helper and records both final hashes: protocol `9` for the Linux Helper,
+  `10` for the Windows `ReClashService`. The service embeds the Core hash, so a Core signed after the hook needs the
+  service rebuilt, not only `--finalize-manifest`.
 - `tool/windows_package.dart` resolves imports, delay imports and forwarded exports from the app-local bundle, checks
-  reachable PE architecture and Core SHA256, and rejects an SCM Helper anywhere in the payload. `--compare-installed`
+  reachable PE architecture, the Core and service SHA256 and protocol, system-only imports of both, and rejects the
+  legacy `ReClashHelperService` anywhere in the payload. `--compare-installed`
   checks every installed file against the ZIP, allowing only Inno's own uninstaller files as additions.
 - `--require-signed` checks for embedded certificates in the primary app images; `check_windows_package.ps1` performs
   Windows Authenticode trust verification of those images and the installer. `--finalize-manifest` is available when
@@ -1903,7 +1907,13 @@ All subscription entrypoints, route selection, cancellation, failure handling an
 
 `DesktopPrivilegeCoordinator` selects one desktop launcher through `DesktopCoreLifecycle`. Ordinary Core runs without
 privileges. TUN enable, an explicit start/restart, and the connection wizard may grant one authorization attempt;
-bootstrap, recovery and Safe Mode never raise a system prompt. Registration/readiness, an active privileged lease and
+bootstrap, recovery and Safe Mode never raise a system prompt. A ready Linux Helper or Windows service needs no prompt
+at all, so TUN starts with the app and at login. Installing or updating either needs a separate one-shot install grant
+that only `TunPrivilegeSetupDialog` gives: `SetupAction.requestAdmin` degrades to an unprivileged Core, publishes the
+missing setup (`install`, `update`, `approval`, `unavailable`) through `tunPrivilegeSetupProvider`, and the app shell
+shows the dialog, which `authorizeTun` answers. "Not now" quiets it until the user asks for TUN again. A privileged
+start that fails is retried once unprivileged by `CoreAction`, and the coordinator stays suspended until an explicit
+grant so a broken Helper cannot loop restarts. Core RPCs answer null at once while the lifecycle is failed or closed. Registration/readiness, an active privileged lease and
 `CoreInfo.tunActive` are separate. System DNS follows applied TUN, not merely the saved switch or authorization.
 Cancellation revokes pending grants; a late launch is stopped, and an unconfirmed exit prevents replacement.
 
@@ -1932,7 +1942,17 @@ Linux Helper accepts bounded, same-owner `/ping`, `/start`, `/stop` and `/logs` 
 non-local hosts, and checks the current hash/protocol. Start and stop use a 32-character lowercase-hex session ID.
 A successful stop confirms the child exited; failure retains the child and prevents replacement or direct fallback.
 
-Windows uses managed `ShellExecuteExW` UAC launch, not a runtime SCM service. A verified fixed Core image and a local
+Windows runs TUN through the `ReClashService` SCM service (protocol `10`). `ReClashService.exe install --owner-pid`,
+run once through UAC by the GUI (or `upgrade` by the elevated installer, reading the owner SID from the existing
+registration), copies the hash-verified pair into `%ProgramFiles%\ReClash Service\<core>-<helper>\` under an
+Administrators-owned protected DACL and registers LocalSystem auto-start there; `uninstall` removes both. The service
+answers only loopback connections from the owner SID and starts the installed Core as
+`--managed-service <address> <session> <home> <hostPid> <hostCreated> <ownerSid>`. That Core refuses anything but
+LocalSystem, binds the GUI's PID, creation time and SID, pins a home owned by that SID without reparse points,
+confines file RPCs to it and exits with the GUI. Same-account processes can therefore drive a SYSTEM Core without a
+prompt, the accepted trade-off of service mode. A GUI started as administrator keeps the managed launch below.
+
+The managed launch elevates through `ShellExecuteExW`. A verified fixed Core image and a local
 first-instance bootstrap pipe bind PID, creation time, session and elevated token identity, including alternate-admin
 UAC. Temporary DACL grants are restored, and Core joins a kill-on-job-close job before readiness. A cancelled or late
 UAC result cannot become the active lease. Installed-product maintenance alone may gracefully terminate a verified

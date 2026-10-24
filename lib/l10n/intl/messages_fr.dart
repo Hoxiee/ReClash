@@ -3713,6 +3713,58 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "Les entrées ajoutées ici remplacent les réglages TUN de tous les profils ; tout ce qui n’est pas ajouté garde le réglage du profil. Les entrées qu’un profil personnalisé ajoute lui-même priment.",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "Autorisez le Helper TUN",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("Configurer"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN est activé"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage(
+      "Configurer TUN",
+    ),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "Ensuite, TUN démarre aussitôt, y compris à la connexion",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("Pas maintenant"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "Pour faire passer tout le trafic du système par ReClash, TUN a besoin d’un Helper système : un service systemd qui lance le Core uniquement avec les droits réseau.",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Le Helper ne lance que le Core ReClash vérifié et ne lui accorde que des droits réseau",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash a été mis à jour, et le Helper TUN doit se mettre à jour avec lui pour continuer à fonctionner.",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUN a besoin du Helper ReClash. macOS vous demandera de l’autoriser une seule fois.",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "Windows demande une confirmation une seule fois pour cette version",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "Le mot de passe administrateur est demandé une seule fois pour cette version",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Saisissez le mot de passe uniquement dans la fenêtre système : ReClash ne le voit jamais.",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN est indisponible",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "Mettre à jour le Helper TUN",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "En attente de confirmation dans la fenêtre système…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "Pour faire passer tout le trafic du système par ReClash, TUN a besoin de ReClash Service, un service Windows qui lance le Core avec les droits qu’exige l’adaptateur réseau.",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "Le service ne lance que le Core ReClash vérifié et n’accepte que votre compte",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash a été mis à jour, et ReClash Service doit se mettre à jour avec lui pour que TUN continue de fonctionner.",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("Sans TUN"),
     "turnOff": MessageLookupByLibrary.simpleMessage("Désactiver"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Activer"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("Mode de relais UDP"),

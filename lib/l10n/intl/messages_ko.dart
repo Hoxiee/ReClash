@@ -2928,6 +2928,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "여기에 추가한 항목은 모든 프로필의 TUN 설정을 대체합니다. 추가하지 않은 항목은 프로필 자체 설정을 유지합니다. 사용자 지정 프로필이 직접 추가한 항목이 우선합니다.",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper 허용",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("설정"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN이 켜졌습니다"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage("TUN 설정"),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "그 후에는 로그인할 때도 TUN이 바로 시작됩니다",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("나중에"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "시스템의 모든 트래픽을 ReClash로 보내려면 TUN에 시스템 Helper가 필요합니다. 네트워크 권한만으로 Core를 시작하는 systemd 서비스입니다.",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Helper는 검증된 ReClash Core만 실행하며 네트워크 권한만 부여합니다",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 업데이트되었습니다. 계속 작동하려면 TUN Helper도 함께 업데이트해야 합니다.",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUN에는 ReClash Helper가 필요합니다. macOS에서 한 번만 허용하도록 요청합니다.",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "이 버전에서는 Windows 확인을 한 번 요청합니다",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "이 버전에서는 관리자 비밀번호가 한 번 필요합니다",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "비밀번호는 시스템 창에서만 입력하세요. ReClash는 비밀번호를 보지 않습니다.",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN을 사용할 수 없습니다",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper 업데이트",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "시스템 창에서 확인을 기다리는 중…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "시스템의 모든 트래픽을 ReClash로 보내려면 TUN에 ReClash Service가 필요합니다. 네트워크 어댑터에 필요한 권한으로 Core를 실행하는 Windows 서비스입니다.",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "서비스는 검증된 ReClash Core만 실행하며 사용자 계정의 요청만 받습니다",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 업데이트되었습니다. TUN이 계속 작동하려면 ReClash Service도 함께 업데이트해야 합니다.",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("TUN 없이"),
     "turnOff": MessageLookupByLibrary.simpleMessage("끄기"),
     "turnOn": MessageLookupByLibrary.simpleMessage("켜기"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP 릴레이 모드"),

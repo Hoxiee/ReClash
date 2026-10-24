@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui' show ImageFilter;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -11,6 +13,7 @@ import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/widgets/icon.dart';
+import 'package:reclash/widgets/tun_privilege_setup_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,11 +85,39 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(onDemandOverrideProvider.notifier).clear();
       }
     });
+    if (system.isDesktop) {
+      ref.listenManual(tunPrivilegeSetupProvider, (_, next) {
+        if (next != null) _showTunPrivilegeSetup(next);
+      });
+    }
     final systemDns = systemDnsCoordinator;
     if (systemDns != null) {
       ref.listenManual(shouldPatchSystemDnsProvider, (prev, next) {
         unawaited(systemDns.sync(next));
       }, fireImmediately: true);
+    }
+  }
+
+  bool _tunPrivilegeSetupOpen = false;
+
+  // The first-run wizard owns its own TUN step and its own prompts.
+  Future<void> _showTunPrivilegeSetup(DesktopPrivilegeSetup setup) async {
+    if (_tunPrivilegeSetupOpen ||
+        ref.read(appSettingProvider).setupCompleted != true) {
+      return;
+    }
+    _tunPrivilegeSetupOpen = true;
+    try {
+      await dialogs.showCommonDialog<void>(
+        dismissible: false,
+        child: TunPrivilegeSetupDialog(
+          setup: setup,
+          platform: Platform.operatingSystem,
+        ),
+      );
+    } finally {
+      _tunPrivilegeSetupOpen = false;
+      if (mounted) ref.read(tunPrivilegeSetupProvider.notifier).clear();
     }
   }
 

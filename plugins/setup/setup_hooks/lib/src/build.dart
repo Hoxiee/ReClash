@@ -84,7 +84,7 @@ Future<BuildReport> buildPlatform(BuildRequest request) async {
     helperSha256: helper == null
         ? null
         : await calcSha256(helper.primaryOutput),
-    helperProtocolVersion: target.hasHelper ? '9' : null,
+    helperProtocolVersion: helper == null ? null : target.helperProtocolVersion,
   );
 
   _log.info('Done in ${stopwatch.elapsed}: ${core.primaryOutput}');

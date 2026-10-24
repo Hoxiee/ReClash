@@ -135,7 +135,8 @@ void writeCoreManifest({
   if (helperSha256 != null && !hashPattern.hasMatch(helperSha256)) {
     throw BuildException('Invalid Helper SHA256: $helperSha256');
   }
-  if (helperProtocolVersion != null && helperProtocolVersion != '9') {
+  if (helperProtocolVersion != null &&
+      !const {'9', '10'}.contains(helperProtocolVersion)) {
     throw BuildException('Invalid Helper protocol: $helperProtocolVersion');
   }
   final manifest = File(path);

@@ -5,11 +5,14 @@ use std::net::SocketAddrV4;
 const OWNER_SID_FLAG: &str = "--owner-sid";
 const OWNER_PID_FLAG: &str = "--owner-pid";
 const MAX_SID_SUBAUTHORITIES: usize = 15;
+const MANAGED_SERVICE_FLAG: &str = "--managed-service";
+const MAX_HOME_CHARS: usize = 1024;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ServiceCommand {
     Run { owner_sid: String },
     Install { owner_pid: u32 },
+    Upgrade,
     Uninstall,
 }
 
@@ -31,6 +34,7 @@ pub fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<Servi
             })
         }
         [command] if *command == OsStr::new("uninstall") => Ok(ServiceCommand::Uninstall),
+        [command] if *command == OsStr::new("upgrade") => Ok(ServiceCommand::Upgrade),
         [command, flag, pid]
             if *command == OsStr::new("install") && *flag == OsStr::new(OWNER_PID_FLAG) =>
         {
@@ -50,6 +54,73 @@ pub fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<Servi
 
 pub fn owner_sid_arguments(owner_sid: &str) -> Vec<OsString> {
     vec![OsString::from(OWNER_SID_FLAG), OsString::from(owner_sid)]
+}
+
+/// Reads the owner back from the SCM command line `owner_sid_arguments`
+/// registered: the executable, quoted when it has spaces, then `--owner-sid <SID>`.
+pub fn configured_owner_sid(command_line: &str) -> Option<String> {
+    let command_line = command_line.trim();
+    let arguments = match command_line.strip_prefix('"') {
+        Some(quoted) => quoted.split_once('"')?.1,
+        None => command_line
+            .split_once(char::is_whitespace)
+            .map_or("", |(_, rest)| rest),
+    };
+    match arguments.split_whitespace().collect::<Vec<_>>().as_slice() {
+        [flag, sid] if *flag == OWNER_SID_FLAG && is_sid_string(sid) => Some(sid.to_string()),
+        _ => None,
+    }
+}
+
+/// Mirrors `windowsLocalPath` in `core/cmd/core/managed_windows.go`, which the
+/// Core applies again, plus the length bound of the service contract.
+pub fn is_local_home(value: &str) -> bool {
+    if value.chars().count() > MAX_HOME_CHARS {
+        return false;
+    }
+    let value = value.strip_prefix(r"\\?\").unwrap_or(value);
+    let bytes = value.as_bytes();
+    if bytes.len() <= 3 || !bytes[0].is_ascii_alphabetic() || bytes[1] != b':' || bytes[2] != b'\\'
+    {
+        return false;
+    }
+    value[3..].split('\\').all(|component| {
+        !component.is_empty()
+            && component != "."
+            && component != ".."
+            && !component.ends_with('.')
+            && !component.ends_with(' ')
+            && !component.contains(|c: char| "/:<>|\"?*".contains(c) || (c as u32) < 32)
+    })
+}
+
+/// The creation time keeps a recycled PID from standing in for the client.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ManagedHost {
+    pub pid: u32,
+    pub created: u64,
+    pub owner_sid: String,
+}
+
+/// Bound to the `--managed-service` parser in `core/cmd/core/managed_windows.go`.
+pub fn managed_core_arguments(
+    address: &str,
+    session_id: &str,
+    home: &str,
+    host: &ManagedHost,
+) -> Vec<OsString> {
+    [
+        MANAGED_SERVICE_FLAG,
+        address,
+        session_id,
+        home,
+        &host.pid.to_string(),
+        &host.created.to_string(),
+        &host.owner_sid,
+    ]
+    .into_iter()
+    .map(OsString::from)
+    .collect()
 }
 
 fn is_sid_string(value: &str) -> bool {
@@ -120,6 +191,10 @@ mod tests {
             service_command(os(&["uninstall"])).unwrap(),
             ServiceCommand::Uninstall
         );
+        assert_eq!(
+            service_command(os(&["upgrade"])).unwrap(),
+            ServiceCommand::Upgrade
+        );
     }
 
     #[test]
@@ -164,6 +239,108 @@ mod tests {
     fn rejects_unknown_or_extra_commands() {
         assert!(service_command(os(&["unknown"])).is_err());
         assert!(service_command(os(&["uninstall", "extra"])).is_err());
+        assert!(service_command(os(&["upgrade", "--owner-sid", SID])).is_err());
+    }
+
+    #[test]
+    fn reads_the_owner_from_the_registered_command_line() {
+        for command_line in [
+            format!(
+                r#""C:\Program Files\ReClash Service\a-b\ReClashService.exe" --owner-sid {SID}"#
+            ),
+            format!(r"C:\ReClash\ReClashService.exe --owner-sid {SID}"),
+            format!(r#"  "C:\x y\ReClashService.exe"   --owner-sid   {SID}  "#),
+        ] {
+            assert_eq!(
+                configured_owner_sid(&command_line).as_deref(),
+                Some(SID),
+                "{command_line}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_command_line_without_exactly_one_valid_owner_has_none() {
+        for command_line in [
+            String::new(),
+            r#""C:\Program Files\ReClashService.exe""#.to_string(),
+            r"C:\ReClash\ReClashService.exe".to_string(),
+            format!(r#""C:\Program Files\ReClashService.exe --owner-sid {SID}"#),
+            format!(r#""C:\x\ReClashService.exe" --owner-sid {SID} extra"#),
+            r#""C:\x\ReClashService.exe" --owner-sid alice"#.to_string(),
+            format!(r#""C:\x\ReClashService.exe" --owner-pid {SID}"#),
+        ] {
+            assert_eq!(configured_owner_sid(&command_line), None, "{command_line}");
+        }
+    }
+
+    #[test]
+    fn accepts_only_absolute_local_drive_homes() {
+        for home in [
+            r"C:\Users\alice\AppData\Roaming\com.follow\reclash",
+            r"d:\ReClash Data\home",
+            r"\\?\C:\Users\alice\reclash",
+        ] {
+            assert!(is_local_home(home), "{home}");
+        }
+        for home in [
+            "",
+            r"C:\",
+            r"C:",
+            r"C:relative\home",
+            r"relative\home",
+            r"\\server\share\home",
+            r"\\?\UNC\server\share",
+            r"C:\Users\..\Windows",
+            r"C:\Users\.\alice",
+            r"C:\Users\alice\",
+            r"C:\Users\\alice",
+            r"C:\Users\alice.",
+            r"C:\Users\alice ",
+            r"C:\Users\alice:stream",
+            "C:/Users/alice",
+            "C:\\Users\\a\u{1}b",
+            r"C:\Users\a*b",
+        ] {
+            assert!(!is_local_home(home), "{home:?}");
+        }
+    }
+
+    #[test]
+    fn bounds_the_home_length() {
+        let longest = format!(r"C:\{}", "a".repeat(1021));
+        assert_eq!(longest.chars().count(), 1024);
+        assert!(is_local_home(&longest));
+        assert!(!is_local_home(&format!("{longest}a")));
+    }
+
+    #[test]
+    fn launches_the_core_with_the_managed_service_arguments_in_order() {
+        let host = ManagedHost {
+            pid: 4242,
+            created: 133_456_789_012_345_678,
+            owner_sid: SID.to_string(),
+        };
+
+        let arguments = managed_core_arguments(
+            r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef",
+            "0123456789abcdef0123456789abcdef",
+            r"C:\Users\alice\Ro ming\reclash",
+            &host,
+        );
+
+        assert_eq!(
+            arguments,
+            os(&[
+                "--managed-service",
+                r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef",
+                "0123456789abcdef0123456789abcdef",
+                r"C:\Users\alice\Ro ming\reclash",
+                "4242",
+                "133456789012345678",
+                SID,
+            ])
+        );
     }
 
     #[test]

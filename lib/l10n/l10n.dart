@@ -11683,6 +11683,207 @@ class AppLocalizations {
     );
   }
 
+  /// `Set up TUN`
+  String get tunSetupInstallTitle {
+    return Intl.message(
+      'Set up TUN',
+      name: 'tunSetupInstallTitle',
+      desc: 'Title of the alert asking to install the TUN helper',
+      args: [],
+    );
+  }
+
+  /// `Update the TUN helper`
+  String get tunSetupUpdateTitle {
+    return Intl.message(
+      'Update the TUN helper',
+      name: 'tunSetupUpdateTitle',
+      desc: 'Title of the alert asking to update the installed TUN helper',
+      args: [],
+    );
+  }
+
+  /// `Allow the TUN helper`
+  String get tunSetupApprovalTitle {
+    return Intl.message(
+      'Allow the TUN helper',
+      name: 'tunSetupApprovalTitle',
+      desc: 'Title of the alert asking the user to allow the TUN helper in system settings',
+      args: [],
+    );
+  }
+
+  /// `TUN is unavailable`
+  String get tunSetupUnavailableTitle {
+    return Intl.message(
+      'TUN is unavailable',
+      name: 'tunSetupUnavailableTitle',
+      desc: 'Title of the alert shown when TUN cannot start',
+      args: [],
+    );
+  }
+
+  /// `To route all system traffic through ReClash, TUN needs a system helper: a systemd service that starts the core with network permissions only.`
+  String get tunSetupLinuxInstall {
+    return Intl.message(
+      'To route all system traffic through ReClash, TUN needs a system helper: a systemd service that starts the core with network permissions only.',
+      name: 'tunSetupLinuxInstall',
+      desc: 'Body of the install alert on Linux: explains the systemd helper service',
+      args: [],
+    );
+  }
+
+  /// `ReClash has been updated, and the TUN helper needs to update with it to keep working.`
+  String get tunSetupLinuxUpdate {
+    return Intl.message(
+      'ReClash has been updated, and the TUN helper needs to update with it to keep working.',
+      name: 'tunSetupLinuxUpdate',
+      desc: 'Body of the update alert on Linux: the helper must update together with ReClash',
+      args: [],
+    );
+  }
+
+  /// `To route all system traffic through ReClash, TUN needs ReClash Service, a Windows service that runs the core with the rights the network adapter requires.`
+  String get tunSetupWindowsInstall {
+    return Intl.message(
+      'To route all system traffic through ReClash, TUN needs ReClash Service, a Windows service that runs the core with the rights the network adapter requires.',
+      name: 'tunSetupWindowsInstall',
+      desc:
+          'Body of the install alert on Windows: explains the ReClash Service',
+      args: [],
+    );
+  }
+
+  /// `ReClash has been updated, and ReClash Service needs to update with it to keep TUN working.`
+  String get tunSetupWindowsUpdate {
+    return Intl.message(
+      'ReClash has been updated, and ReClash Service needs to update with it to keep TUN working.',
+      name: 'tunSetupWindowsUpdate',
+      desc: 'Body of the update alert on Windows: ReClash Service must update together with ReClash',
+      args: [],
+    );
+  }
+
+  /// `TUN needs the ReClash helper. macOS will ask you to allow it once.`
+  String get tunSetupMacosInstall {
+    return Intl.message(
+      'TUN needs the ReClash helper. macOS will ask you to allow it once.',
+      name: 'tunSetupMacosInstall',
+      desc: 'Body of the install alert on macOS: the system asks for approval once',
+      args: [],
+    );
+  }
+
+  /// `The administrator password is needed once for this version`
+  String get tunSetupOncePassword {
+    return Intl.message(
+      'The administrator password is needed once for this version',
+      name: 'tunSetupOncePassword',
+      desc: 'Note in the TUN setup alert: the administrator password is asked once',
+      args: [],
+    );
+  }
+
+  /// `Windows asks for confirmation once for this version`
+  String get tunSetupOnceConfirm {
+    return Intl.message(
+      'Windows asks for confirmation once for this version',
+      name: 'tunSetupOnceConfirm',
+      desc: 'Note in the TUN setup alert on Windows: a confirmation prompt appears once',
+      args: [],
+    );
+  }
+
+  /// `After that, TUN starts right away, including at login`
+  String get tunSetupInstantStart {
+    return Intl.message(
+      'After that, TUN starts right away, including at login',
+      name: 'tunSetupInstantStart',
+      desc: 'Note in the TUN setup alert: TUN starts right away after setup, including at login',
+      args: [],
+    );
+  }
+
+  /// `The helper starts only the verified ReClash core and grants it network permissions only`
+  String get tunSetupLinuxScope {
+    return Intl.message(
+      'The helper starts only the verified ReClash core and grants it network permissions only',
+      name: 'tunSetupLinuxScope',
+      desc: 'Note in the TUN setup alert on Linux: what the helper is allowed to do',
+      args: [],
+    );
+  }
+
+  /// `The service starts only the verified ReClash core and accepts only your account`
+  String get tunSetupWindowsScope {
+    return Intl.message(
+      'The service starts only the verified ReClash core and accepts only your account',
+      name: 'tunSetupWindowsScope',
+      desc: 'Note in the TUN setup alert on Windows: what ReClash Service is allowed to do',
+      args: [],
+    );
+  }
+
+  /// `Enter the password only in the system window: ReClash never sees it.`
+  String get tunSetupPasswordPrivacy {
+    return Intl.message(
+      'Enter the password only in the system window: ReClash never sees it.',
+      name: 'tunSetupPasswordPrivacy',
+      desc: 'Note in the TUN setup alert: ReClash never sees the administrator password',
+      args: [],
+    );
+  }
+
+  /// `Set up`
+  String get tunSetupConfirm {
+    return Intl.message(
+      'Set up',
+      name: 'tunSetupConfirm',
+      desc: 'Primary button that starts installing the TUN helper',
+      args: [],
+    );
+  }
+
+  /// `Not now`
+  String get tunSetupLater {
+    return Intl.message(
+      'Not now',
+      name: 'tunSetupLater',
+      desc: 'Secondary button that dismisses the TUN setup alert',
+      args: [],
+    );
+  }
+
+  /// `Without TUN`
+  String get tunSetupWithoutTun {
+    return Intl.message(
+      'Without TUN',
+      name: 'tunSetupWithoutTun',
+      desc: 'Button that continues the connection without TUN',
+      args: [],
+    );
+  }
+
+  /// `Waiting for confirmation in the system window…`
+  String get tunSetupWaiting {
+    return Intl.message(
+      'Waiting for confirmation in the system window…',
+      name: 'tunSetupWaiting',
+      desc: 'Status shown while the system authorization window is open',
+      args: [],
+    );
+  }
+
+  /// `TUN is on`
+  String get tunSetupDone {
+    return Intl.message(
+      'TUN is on',
+      name: 'tunSetupDone',
+      desc: 'Status shown once TUN has been enabled after setup',
+      args: [],
+    );
+  }
+
   /// `Suggest a translation fix`
   String get translationSuggestFix {
     return Intl.message(

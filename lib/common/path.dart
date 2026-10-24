@@ -66,7 +66,10 @@ class AppPath {
   }
 
   String get helperPath {
-    return join(executableDirPath, '$appHelperService$executableExtension');
+    return join(
+      executableDirPath,
+      Platform.isWindows ? windowsServiceExecutable : appHelperService,
+    );
   }
 
   Future<String> get downloadDirPath async {

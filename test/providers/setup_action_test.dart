@@ -146,6 +146,10 @@ class TestSetupAction extends SetupAction {
   }
 
   @override
+  Future<DesktopPrivilegeSetup> inspectPrivilege() async =>
+      DesktopPrivilegeSetup.install;
+
+  @override
   Future<bool> setCoreRunning(bool running) async {
     coreRunningCalls.add(running);
     if (!firstCoreCall.isCompleted) firstCoreCall.complete();
@@ -957,24 +961,20 @@ void main() {
     );
 
     test(
-      'both silent and visible failures preserve the selected TUN setting',
+      'missing authorization continues without TUN and asks for setup',
       () async {
         container
             .read(patchClashConfigProvider.notifier)
             .update((state) => state.copyWith.tun(enable: true));
         action.authorizeResult = DesktopPrivilegeDecision.authorizationRequired;
         for (final silence in [false, true]) {
-          await expectLater(
-            action.requestAdmin(true, silence: silence),
-            throwsA(
-              isA<DesktopPrivilegeException>().having(
-                (error) => error.code,
-                'code',
-                'authorization_required',
-              ),
-            ),
-          );
+          expect(await action.requestAdmin(true, silence: silence), isTrue);
         }
+        await pumpEventQueue();
+        expect(
+          container.read(tunPrivilegeSetupProvider),
+          DesktopPrivilegeSetup.install,
+        );
         expect(action.authorizationPrompts, [false, false]);
         expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
         expect(

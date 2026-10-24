@@ -37,12 +37,15 @@ Future<void> main(List<String> arguments) async {
         );
       }
       final core = File(p.join(bundlePath, 'ReClashCore.exe'));
+      final service = File(p.join(bundlePath, 'ReClashService.exe'));
       final manifest = File(p.join(bundlePath, 'manifest.json'));
       final value = jsonDecode(await manifest.readAsString());
       if (value is! Map<String, dynamic>) {
         throw const FormatException('Invalid Core manifest');
       }
       value['coreSha256'] = (await sha256.bind(core.openRead()).first)
+          .toString();
+      value['helperSha256'] = (await sha256.bind(service.openRead()).first)
           .toString();
       await manifest.writeAsString('${jsonEncode(value)}\n', flush: true);
     }

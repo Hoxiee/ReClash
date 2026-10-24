@@ -111,8 +111,24 @@ Uint8List _pe({
   return bytes;
 }
 
-Map<String, Uint8List> _bundle({bool delay = false}) {
+Uint8List _manifest(
+  Uint8List core,
+  Uint8List service, {
+  String protocol = windowsServiceProtocolVersion,
+}) => Uint8List.fromList(
+  utf8.encode(
+    jsonEncode({
+      'coreSha256': sha256.convert(core).toString(),
+      'helperSha256': sha256.convert(service).toString(),
+      'helperProtocolVersion': protocol,
+    }),
+  ),
+);
+
+Map<String, Uint8List> _bundle({bool delay = false, Uint8List? service}) {
   final core = _pe();
+  final serviceImage =
+      service ?? _pe(imports: [const PeImport('kernel32.dll', name: 'Sleep')]);
   final imports = [const PeImport('MSVCP140.dll', name: 'run')];
   return {
     'ReClash.exe': _pe(
@@ -120,6 +136,7 @@ Map<String, Uint8List> _bundle({bool delay = false}) {
       delayImports: delay ? imports : [],
     ),
     'ReClashCore.exe': core,
+    'ReClashService.exe': serviceImage,
     'rust_api.dll': _pe(),
     'sqlite3.dll': _pe(),
     'flutter_windows.dll': _pe(),
@@ -127,9 +144,7 @@ Map<String, Uint8List> _bundle({bool delay = false}) {
     'data/icudtl.dat': Uint8List.fromList([1]),
     'data/app.so': Uint8List.fromList([1]),
     'data/flutter_assets/AssetManifest.bin': Uint8List.fromList([1]),
-    'manifest.json': Uint8List.fromList(
-      utf8.encode(jsonEncode({'coreSha256': sha256.convert(core).toString()})),
-    ),
+    'manifest.json': _manifest(core, serviceImage),
   };
 }
 
@@ -164,7 +179,7 @@ void main() {
     final report = WindowsBundle(
       _bundle(),
     ).validate(machine: windowsMachineAmd64);
-    expect(report.nativeFiles, 6);
+    expect(report.nativeFiles, 7);
     expect(report.unsigned, contains('reclash.exe'));
   });
 
@@ -227,6 +242,38 @@ void main() {
       validate(files);
     },
   );
+
+  test('requires the service its manifest attests with protocol 10', () {
+    final missing = _bundle()..remove('ReClashService.exe');
+    expect(() => validate(missing), throwsFormatException);
+    final files = _bundle();
+    final core = files['ReClashCore.exe']!;
+    files['manifest.json'] = _manifest(core, _pe());
+    expect(() => validate(files), throwsFormatException);
+    files['manifest.json'] = _manifest(
+      core,
+      files['ReClashService.exe']!,
+      protocol: '9',
+    );
+    expect(() => validate(files), throwsFormatException);
+    final arm = _pe(machine: windowsMachineArm64);
+    final wrongArch = _bundle(service: arm);
+    expect(() => validate(wrongArch), throwsFormatException);
+  });
+
+  test('installed service images import only operating system libraries', () {
+    final service = _pe(imports: [const PeImport('MSVCP140.dll', name: 'run')]);
+    expect(() => validate(_bundle(service: service)), throwsFormatException);
+    final files = _bundle();
+    files['ReClashCore.exe'] = _pe(
+      delayImports: [const PeImport('msvcp140.dll', name: 'run')],
+    );
+    files['manifest.json'] = _manifest(
+      files['ReClashCore.exe']!,
+      files['ReClashService.exe']!,
+    );
+    expect(() => validate(files), throwsFormatException);
+  });
 
   test('rejects helper in any subdirectory and unsigned required payload', () {
     final files = _bundle();

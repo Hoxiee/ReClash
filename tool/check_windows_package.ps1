@@ -14,6 +14,7 @@ $installed = Join-Path $root 'installed'
 $expanded = Join-Path $root 'zip'
 $diagnostics = Join-Path $root 'logs'
 $corePath = Join-Path $installed 'ReClashCore.exe'
+$serviceRoot = Join-Path ([Environment]::GetFolderPath('ProgramFiles')) 'ReClash Service'
 $process = $null
 $uninstaller = $null
 $coreProcess = $null
@@ -79,6 +80,13 @@ function Get-InstalledCores {
         }
 }
 
+function Assert-NoReClashService([string]$Context) {
+    if (Get-Service -Name 'ReClashService' -ErrorAction SilentlyContinue) {
+        throw "${Context}: ReClashService is still registered"
+    }
+    if (Test-Path -LiteralPath $serviceRoot) { throw "${Context}: $serviceRoot still exists" }
+}
+
 function Invoke-Setup([string]$Path, [string[]]$Arguments) {
     $setup = Start-Process -FilePath $Path -ArgumentList $Arguments -PassThru
     if (-not $setup.WaitForExit(180000)) {
@@ -100,13 +108,15 @@ try {
     & dart run "$PSScriptRoot/windows_package.dart" @validation
     if ($LASTEXITCODE -ne 0) { throw 'ZIP validation failed' }
     Expand-Archive -LiteralPath $ZipPath -DestinationPath $expanded
-    foreach ($file in @($SetupPath, "$expanded/ReClash.exe", "$expanded/ReClashCore.exe", "$expanded/rust_api.dll")) {
+    foreach ($file in @($SetupPath, "$expanded/ReClash.exe", "$expanded/ReClashCore.exe",
+            "$expanded/ReClashService.exe", "$expanded/rust_api.dll")) {
         Assert-Signature $file
     }
     if (-not $AllowInstall) { return }
-    if (Get-Process -Name 'ReClash', 'ReClashCore', 'ReClashHelperService' -ErrorAction SilentlyContinue) {
+    if (Get-Process -Name 'ReClash', 'ReClashCore', 'ReClashService', 'ReClashHelperService' -ErrorAction SilentlyContinue) {
         throw 'Installation smoke requires a disposable Windows session with no running ReClash'
     }
+    Assert-NoReClashService 'Installation smoke requires a disposable Windows session'
     $appIds = @('E642C6C1-B712-41C2-969E-3C2049CA883F_is1', '728B3532-C74B-4870-9068-BE70FE12A3E6_is1')
     foreach ($hive in @('HKLM:', 'HKCU:')) {
         foreach ($view in @('Software', 'Software\WOW6432Node')) {
@@ -159,6 +169,8 @@ try {
             Confirm-OwnedExit
             if (Test-Path "$installed/ReClash.exe") { throw 'Uninstaller left the installed GUI behind' }
             if (Test-Path "$installed/ReClashCore.exe") { throw 'Uninstaller left the installed Core behind' }
+            if (Test-Path "$installed/ReClashService.exe") { throw 'Uninstaller left the installed service behind' }
+            Assert-NoReClashService 'After uninstall'
         } catch { $cleanupErrors += $_ }
     }
     if ($null -ne $process) {

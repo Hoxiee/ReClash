@@ -16,5 +16,85 @@
   "desktopHelperRegistrationConflict": "The existing Linux Helper registration cannot be safely replaced. Inspect the owned service and registration; retrying authorization will not resolve this conflict.",
   "desktopHelperSystemdFailed": "systemd could not start the TUN Helper. Check the service journal; the installer attempted to restore the previous installation.",
   "desktopHelperProtocolMismatch": "The installed Helper uses a different protocol. Check for another installation or a service override, then reinstall the complete package.",
-  "desktopHelperSystemdRequired": "TUN requires a Linux session managed by systemd. This system cannot run the network Helper."
+  "desktopHelperSystemdRequired": "TUN requires a Linux session managed by systemd. This system cannot run the network Helper.",
+  "tunSetupInstallTitle": "Set up TUN",
+  "@tunSetupInstallTitle": {
+    "description": "Title of the alert asking to install the TUN helper"
+  },
+  "tunSetupUpdateTitle": "Update the TUN helper",
+  "@tunSetupUpdateTitle": {
+    "description": "Title of the alert asking to update the installed TUN helper"
+  },
+  "tunSetupApprovalTitle": "Allow the TUN helper",
+  "@tunSetupApprovalTitle": {
+    "description": "Title of the alert asking the user to allow the TUN helper in system settings"
+  },
+  "tunSetupUnavailableTitle": "TUN is unavailable",
+  "@tunSetupUnavailableTitle": {
+    "description": "Title of the alert shown when TUN cannot start"
+  },
+  "tunSetupLinuxInstall": "To route all system traffic through ReClash, TUN needs a system helper: a systemd service that starts the core with network permissions only.",
+  "@tunSetupLinuxInstall": {
+    "description": "Body of the install alert on Linux: explains the systemd helper service"
+  },
+  "tunSetupLinuxUpdate": "ReClash has been updated, and the TUN helper needs to update with it to keep working.",
+  "@tunSetupLinuxUpdate": {
+    "description": "Body of the update alert on Linux: the helper must update together with ReClash"
+  },
+  "tunSetupWindowsInstall": "To route all system traffic through ReClash, TUN needs ReClash Service, a Windows service that runs the core with the rights the network adapter requires.",
+  "@tunSetupWindowsInstall": {
+    "description": "Body of the install alert on Windows: explains the ReClash Service"
+  },
+  "tunSetupWindowsUpdate": "ReClash has been updated, and ReClash Service needs to update with it to keep TUN working.",
+  "@tunSetupWindowsUpdate": {
+    "description": "Body of the update alert on Windows: ReClash Service must update together with ReClash"
+  },
+  "tunSetupMacosInstall": "TUN needs the ReClash helper. macOS will ask you to allow it once.",
+  "@tunSetupMacosInstall": {
+    "description": "Body of the install alert on macOS: the system asks for approval once"
+  },
+  "tunSetupOncePassword": "The administrator password is needed once for this version",
+  "@tunSetupOncePassword": {
+    "description": "Note in the TUN setup alert: the administrator password is asked once"
+  },
+  "tunSetupOnceConfirm": "Windows asks for confirmation once for this version",
+  "@tunSetupOnceConfirm": {
+    "description": "Note in the TUN setup alert on Windows: a confirmation prompt appears once"
+  },
+  "tunSetupInstantStart": "After that, TUN starts right away, including at login",
+  "@tunSetupInstantStart": {
+    "description": "Note in the TUN setup alert: TUN starts right away after setup, including at login"
+  },
+  "tunSetupLinuxScope": "The helper starts only the verified ReClash core and grants it network permissions only",
+  "@tunSetupLinuxScope": {
+    "description": "Note in the TUN setup alert on Linux: what the helper is allowed to do"
+  },
+  "tunSetupWindowsScope": "The service starts only the verified ReClash core and accepts only your account",
+  "@tunSetupWindowsScope": {
+    "description": "Note in the TUN setup alert on Windows: what ReClash Service is allowed to do"
+  },
+  "tunSetupPasswordPrivacy": "Enter the password only in the system window: ReClash never sees it.",
+  "@tunSetupPasswordPrivacy": {
+    "description": "Note in the TUN setup alert: ReClash never sees the administrator password"
+  },
+  "tunSetupConfirm": "Set up",
+  "@tunSetupConfirm": {
+    "description": "Primary button that starts installing the TUN helper"
+  },
+  "tunSetupLater": "Not now",
+  "@tunSetupLater": {
+    "description": "Secondary button that dismisses the TUN setup alert"
+  },
+  "tunSetupWithoutTun": "Without TUN",
+  "@tunSetupWithoutTun": {
+    "description": "Button that continues the connection without TUN"
+  },
+  "tunSetupWaiting": "Waiting for confirmation in the system window…",
+  "@tunSetupWaiting": {
+    "description": "Status shown while the system authorization window is open"
+  },
+  "tunSetupDone": "TUN is on",
+  "@tunSetupDone": {
+    "description": "Status shown once TUN has been enabled after setup"
+  }
 }

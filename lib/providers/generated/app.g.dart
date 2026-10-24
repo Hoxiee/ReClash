@@ -153,6 +153,69 @@ abstract class _$TunApplied extends $Notifier<bool> {
   }
 }
 
+/// What the TUN setup prompt should offer, or null when it has nothing to ask.
+/// A prompt the user put off stays quiet until they ask for TUN again.
+
+@ProviderFor(TunPrivilegeSetup)
+final tunPrivilegeSetupProvider = TunPrivilegeSetupProvider._();
+
+/// What the TUN setup prompt should offer, or null when it has nothing to ask.
+/// A prompt the user put off stays quiet until they ask for TUN again.
+final class TunPrivilegeSetupProvider
+    extends $NotifierProvider<TunPrivilegeSetup, DesktopPrivilegeSetup?> {
+  /// What the TUN setup prompt should offer, or null when it has nothing to ask.
+  /// A prompt the user put off stays quiet until they ask for TUN again.
+  TunPrivilegeSetupProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tunPrivilegeSetupProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tunPrivilegeSetupHash();
+
+  @$internal
+  @override
+  TunPrivilegeSetup create() => TunPrivilegeSetup();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DesktopPrivilegeSetup? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DesktopPrivilegeSetup?>(value),
+    );
+  }
+}
+
+String _$tunPrivilegeSetupHash() => r'1e931792bc086d71e3aef7298b6cb71876e67876';
+
+/// What the TUN setup prompt should offer, or null when it has nothing to ask.
+/// A prompt the user put off stays quiet until they ask for TUN again.
+
+abstract class _$TunPrivilegeSetup extends $Notifier<DesktopPrivilegeSetup?> {
+  DesktopPrivilegeSetup? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<DesktopPrivilegeSetup?, DesktopPrivilegeSetup?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DesktopPrivilegeSetup?, DesktopPrivilegeSetup?>,
+              DesktopPrivilegeSetup?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Logs)
 final logsProvider = LogsProvider._();
 

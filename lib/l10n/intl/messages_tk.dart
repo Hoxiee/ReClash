@@ -3559,6 +3559,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ýerde goşulan ýazgylar ähli profilleriň TUN sazlamalaryny üstünden ýazýar; goşulmaganlar profiliň öz sazlamasy ulanýar. Özbaşdak profil özi goşan ýazgylar üste çykýar.",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper-e rugsat ber",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("Sazla"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN açykdyr"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage("TUN-y sazla"),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "Ondan soň TUN, ulgama girende-de, derrew işe başlaýar",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("Häzir däl"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "Ulgamyň ähli trafigini ReClash arkaly ugrukdyrmak üçin TUN-a ulgam Helper-i gerek: ol Core-ny diňe tor rugsatlary bilen başlaýan systemd hyzmatydyr.",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Helper diňe barlanan ReClash Core-ny işledýär we oňa diňe tor hukuklaryny berýär",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash täzelendi, şonuň üçin dowam etmek üçin TUN Helper hem onuň bilen bile täzelenmeli.",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUN üçin ReClash Helper gerek. macOS ony bir gezek rugsat bermegiňizi soraýar.",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "Bu wersiýa üçin Windows bir gezek tassyklamagy soraýar",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "Bu wersiýa üçin administrator paroly bir gezek gerek",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Paroly diňe ulgam penjiresinde giriziň: ReClash ony hiç haçan görmeýär.",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN elýeterli däl",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper-i täzele",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "Ulgam penjiresinde tassyklamagyna garaşylýar…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "Ulgamyň ähli trafigini ReClash arkaly ugrukdyrmak üçin TUN-a ReClash Service gerek — ol Core-ny tor adapteriniň talap edýän hukuklary bilen işledýän Windows hyzmatydyr.",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat diňe barlanan ReClash Core-ny işledýär we diňe siziň hasabyňyzy kabul edýär",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash täzelendi, şonuň üçin TUN-yň işlemegini dowam etdirmek üçin ReClash Service hem onuň bilen bile täzelenmeli.",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("TUN-syz"),
     "turnOff": MessageLookupByLibrary.simpleMessage("Ýap"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Aç"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP relýed usuly"),

@@ -64,6 +64,17 @@ void main() {
           '{"coreSha256":"$coreHash","helperSha256":"$helperHash",'
           '"helperProtocolVersion":"9"}\n',
         );
+        writeCoreManifest(
+          path: path,
+          coreSha256: coreHash,
+          helperSha256: helperHash,
+          helperProtocolVersion: '10',
+        );
+        expect(
+          File(path).readAsStringSync(),
+          '{"coreSha256":"$coreHash","helperSha256":"$helperHash",'
+          '"helperProtocolVersion":"10"}\n',
+        );
         expect(
           () => writeCoreManifest(
             path: path,

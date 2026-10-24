@@ -34,7 +34,13 @@ class Target {
     throw BuildException('No $platform Core target for GOARCH $goarch');
   }
 
-  bool get hasHelper => goos == 'linux';
+  bool get hasHelper => goos == 'linux' || goos == 'windows';
+
+  String get helperProtocolVersion => switch (goos) {
+    'linux' => '9',
+    'windows' => '10',
+    _ => throw BuildException('No Helper protocol for $this'),
+  };
 
   String get executableExtension => goos == 'windows' ? '.exe' : '';
 

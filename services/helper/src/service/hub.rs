@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::VecDeque;
 use std::convert::Infallible;
+use std::ffi::OsString;
 use std::fs::{File, OpenOptions};
 #[cfg(all(
     not(all(feature = "windows-service", target_os = "windows")),
@@ -52,7 +53,7 @@ const CORE_SOCKET_PREFIX: &str = "/tmp/ReClashSocket_";
 const CORE_SOCKET_SUFFIX: &str = ".sock";
 const PROTOCOL_VERSION_HEADER: &str = "x-reclash-helper-protocol";
 #[cfg(windows)]
-const PROTOCOL_VERSION: &str = "8";
+const PROTOCOL_VERSION: &str = "10";
 #[cfg(target_os = "linux")]
 const PROTOCOL_VERSION: &str = "9";
 #[cfg(not(any(windows, target_os = "linux")))]
@@ -70,6 +71,15 @@ pub struct StartParams {
     pub address: String,
     #[serde(rename = "sessionId")]
     pub session_id: String,
+    #[cfg(windows)]
+    pub home: String,
+}
+
+/// What the accepting transport knows about the client of one connection.
+#[derive(Debug, Clone, Default)]
+pub(super) struct Caller {
+    #[cfg(windows)]
+    pub(super) host: Option<super::owner::ManagedHost>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -245,12 +255,12 @@ impl VerifiedCore {
         })
     }
 
-    fn spawn(&self, address: &str) -> Result<Child, Error> {
+    fn spawn(&self, arguments: &[OsString]) -> Result<Child, Error> {
         let mut command = Command::new(&self.path);
         command
             .current_dir(&self.directory)
             .stderr(Stdio::piped())
-            .arg(address);
+            .args(arguments);
         #[cfg(target_os = "linux")]
         super::linux::ensure_core_owner()?;
         #[cfg(target_os = "linux")]
@@ -448,7 +458,7 @@ fn launch_failure_response(error: &Error) -> warp::reply::Response {
     )
 }
 
-fn start(start_params: StartParams) -> warp::reply::Response {
+fn start(start_params: StartParams, caller: Caller) -> warp::reply::Response {
     if !is_allowed_core_address(&start_params.address) {
         return error_response(
             "invalidRequest",
@@ -467,11 +477,49 @@ fn start(start_params: StartParams) -> warp::reply::Response {
     if let Err(error) = super::linux::ensure_owner_socket(&start_params.address) {
         return error_response("invalidRequest", error.to_string(), StatusCode::BAD_REQUEST);
     }
-    launch(start_params)
+    match core_arguments(&start_params, caller) {
+        Ok(arguments) => launch(start_params.session_id, arguments),
+        Err((code, message, status)) => error_response(code, message, status),
+    }
+}
+
+type StartRefusal = (&'static str, &'static str, StatusCode);
+
+#[cfg(not(windows))]
+fn core_arguments(
+    start_params: &StartParams,
+    _caller: Caller,
+) -> Result<Vec<OsString>, StartRefusal> {
+    Ok(vec![OsString::from(&start_params.address)])
+}
+
+#[cfg(windows)]
+fn core_arguments(
+    start_params: &StartParams,
+    caller: Caller,
+) -> Result<Vec<OsString>, StartRefusal> {
+    if !super::owner::is_local_home(&start_params.home) {
+        return Err((
+            "invalidRequest",
+            "invalid Core home directory",
+            StatusCode::BAD_REQUEST,
+        ));
+    }
+    let host = caller.host.ok_or((
+        "internalError",
+        "the client process of this connection is unknown",
+        StatusCode::INTERNAL_SERVER_ERROR,
+    ))?;
+    Ok(super::owner::managed_core_arguments(
+        &start_params.address,
+        &start_params.session_id,
+        &start_params.home,
+        &host,
+    ))
 }
 
 /// A pre-spawn fallback is safe only after any previously owned Core has exited.
-fn launch(start_params: StartParams) -> warp::reply::Response {
+fn launch(session_id: String, arguments: Vec<OsString>) -> warp::reply::Response {
     let mut managed = lock_surviving_poison(&MANAGED_CORE);
     #[cfg(target_os = "linux")]
     {
@@ -493,7 +541,7 @@ fn launch(start_params: StartParams) -> warp::reply::Response {
                     )
                 }
                 Ok(None) => {
-                    if core.session_id == start_params.session_id {
+                    if core.session_id == session_id {
                         return json_response(
                             &StartResponse {
                                 session_id: core.session_id.clone(),
@@ -532,12 +580,12 @@ fn launch(start_params: StartParams) -> warp::reply::Response {
         }
     };
 
-    match core.spawn(&start_params.address) {
+    match core.spawn(&arguments) {
         Ok(mut child) => {
             let process_id = child.id();
             if let Some(stderr) = child.stderr.take() {
                 let reader = io::BufReader::new(stderr);
-                let session_id = start_params.session_id.clone();
+                let session_id = session_id.clone();
                 thread::spawn(move || {
                     for line in reader.lines() {
                         match line {
@@ -552,7 +600,7 @@ fn launch(start_params: StartParams) -> warp::reply::Response {
                     reap_core_exit(&session_id, Some(process_id));
                 });
             }
-            *managed = match ManagedCore::adopt(start_params.session_id.clone(), child) {
+            *managed = match ManagedCore::adopt(session_id.clone(), child) {
                 Ok(core) => Some(core),
                 Err(error) => {
                     log_message(format!("Helper could not confine the Core: {error}"));
@@ -565,7 +613,7 @@ fn launch(start_params: StartParams) -> warp::reply::Response {
             };
             json_response(
                 &StartResponse {
-                    session_id: start_params.session_id,
+                    session_id,
                     pid: process_id,
                 },
                 StatusCode::OK,
@@ -697,9 +745,12 @@ fn ping(ping_params: PingParams) -> warp::reply::Response {
     ping_response(result)
 }
 
-async fn start_request(start_params: StartParams) -> Result<warp::reply::Response, Infallible> {
+async fn start_request(
+    caller: Caller,
+    start_params: StartParams,
+) -> Result<warp::reply::Response, Infallible> {
     Ok(
-        match tokio::task::spawn_blocking(move || start(start_params)).await {
+        match tokio::task::spawn_blocking(move || start(start_params, caller)).await {
             Ok(response) => response,
             Err(error) => error_response(
                 "internalError",
@@ -820,7 +871,14 @@ struct ForbiddenClient;
 
 impl warp::reject::Reject for ForbiddenClient {}
 
+#[cfg(any(test, not(all(feature = "windows-service", target_os = "windows"))))]
 pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+    caller_routes(Caller::default())
+}
+
+pub(super) fn caller_routes(
+    caller: Caller,
+) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     let native_client = warp::header::optional::<String>("origin")
         .and(warp::header::optional::<String>("host"))
         .and_then(|origin: Option<String>, host: Option<String>| async move {
@@ -849,6 +907,7 @@ pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallibl
     let api_start = warp::path("start")
         .and(warp::path::end())
         .and(warp::post())
+        .and(warp::any().map(move || caller.clone()))
         .and(warp::body::content_length_limit(MAX_REQUEST_BODY_BYTES))
         .and(warp::body::json())
         .and_then(start_request);
@@ -945,6 +1004,8 @@ mod tests {
     const ALLOWED_CORE_ADDRESS: &str = r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef";
     #[cfg(target_os = "linux")]
     const ALLOWED_CORE_ADDRESS: &str = "/tmp/ReClashSocket_4821.sock";
+    #[cfg(windows)]
+    const ALLOWED_HOME: &str = r"C:\Users\alice\AppData\Roaming\reclash";
 
     fn spawn_placeholder_core() -> Child {
         #[cfg(windows)]
@@ -992,7 +1053,7 @@ mod tests {
         assert_eq!(
             PROTOCOL_VERSION,
             if cfg!(windows) {
-                "8"
+                "10"
             } else if cfg!(target_os = "linux") {
                 "9"
             } else {
@@ -1022,7 +1083,7 @@ mod tests {
 
     #[tokio::test]
     async fn ping_returns_running_helper_path_for_verified_core() {
-        let response = ping_response(Ok(PathBuf::from("ReClashHelperService.exe")));
+        let response = ping_response(Ok(PathBuf::from("ReClashService.exe")));
 
         assert_eq!(response.status(), StatusCode::OK);
         assert_eq!(
@@ -1033,7 +1094,7 @@ mod tests {
             warp::hyper::body::to_bytes(response.into_body())
                 .await
                 .unwrap(),
-            "ReClashHelperService.exe"
+            "ReClashService.exe"
         );
     }
 
@@ -1206,10 +1267,10 @@ mod tests {
         );
 
         reap_exited_core("fedcba9876543210fedcba9876543210");
-        let response = launch(StartParams {
-            address: ALLOWED_CORE_ADDRESS.to_string(),
-            session_id: "0123456789abcdef0123456789abcdef".to_string(),
-        });
+        let response = launch(
+            "0123456789abcdef0123456789abcdef".to_string(),
+            vec![OsString::from(ALLOWED_CORE_ADDRESS)],
+        );
 
         assert_eq!(response.status(), StatusCode::CONFLICT);
         assert!(lock_surviving_poison(&MANAGED_CORE).is_none());
@@ -1234,10 +1295,10 @@ mod tests {
             .unwrap()
             .child
             .id();
-        let response = launch(StartParams {
-            address: ALLOWED_CORE_ADDRESS.to_string(),
-            session_id: "fedcba9876543210fedcba9876543210".to_string(),
-        });
+        let response = launch(
+            "fedcba9876543210fedcba9876543210".to_string(),
+            vec![OsString::from(ALLOWED_CORE_ADDRESS)],
+        );
         assert_eq!(response.status(), StatusCode::CONFLICT);
         let body: serde_json::Value = serde_json::from_slice(
             &warp::hyper::body::to_bytes(response.into_body())
@@ -1256,10 +1317,10 @@ mod tests {
     fn linux_shutdown_blocks_core_replacement() {
         let _state = lock_process_state();
         begin_shutdown();
-        let response = launch(StartParams {
-            address: ALLOWED_CORE_ADDRESS.to_string(),
-            session_id: "0123456789abcdef0123456789abcdef".to_string(),
-        });
+        let response = launch(
+            "0123456789abcdef0123456789abcdef".to_string(),
+            vec![OsString::from(ALLOWED_CORE_ADDRESS)],
+        );
         assert_eq!(response.status(), StatusCode::CONFLICT);
         assert!(lock_surviving_poison(&MANAGED_CORE).is_none());
         SHUTTING_DOWN.store(false, Ordering::Release);
@@ -1448,6 +1509,8 @@ mod tests {
             .json(&StartParams {
                 address: ALLOWED_CORE_ADDRESS.to_string(),
                 session_id: "ABCDEF0123456789abcdef0123456789".to_string(),
+                #[cfg(windows)]
+                home: ALLOWED_HOME.to_string(),
             })
             .reply(&routes())
             .await;
@@ -1455,6 +1518,84 @@ mod tests {
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
         let body: serde_json::Value = serde_json::from_slice(response.body()).unwrap();
         assert_eq!(body["code"], "invalidRequest");
+    }
+
+    #[cfg(windows)]
+    async fn start_with(
+        body: serde_json::Value,
+        caller: Caller,
+    ) -> (StatusCode, serde_json::Value) {
+        let response = warp::test::request()
+            .method("POST")
+            .path("/start")
+            .json(&body)
+            .reply(&caller_routes(caller))
+            .await;
+        (
+            response.status(),
+            serde_json::from_slice(response.body()).unwrap(),
+        )
+    }
+
+    #[cfg(windows)]
+    fn windows_start_body(home: &str) -> serde_json::Value {
+        serde_json::json!({
+            "address": ALLOWED_CORE_ADDRESS,
+            "sessionId": "0123456789abcdef0123456789abcdef",
+            "home": home,
+        })
+    }
+
+    #[cfg(windows)]
+    fn known_caller() -> Caller {
+        Caller {
+            host: Some(super::super::owner::ManagedHost {
+                pid: std::process::id(),
+                created: 1,
+                owner_sid: "S-1-5-21-1-2-3-1001".to_string(),
+            }),
+        }
+    }
+
+    #[cfg(windows)]
+    #[tokio::test]
+    async fn windows_start_requires_a_local_home() {
+        let mut body = windows_start_body(ALLOWED_HOME);
+        body.as_object_mut().unwrap().remove("home");
+        let (status, response) = start_with(body, known_caller()).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+        assert_eq!(response["code"], "invalidRequest");
+
+        for home in [
+            r"relative\home",
+            r"\\server\share\home",
+            r"C:\Users\..\Windows",
+        ] {
+            let (status, response) = start_with(windows_start_body(home), known_caller()).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{home}");
+            assert_eq!(response["code"], "invalidRequest");
+        }
+    }
+
+    #[cfg(windows)]
+    #[tokio::test]
+    async fn windows_start_refuses_a_connection_without_a_known_client() {
+        let (status, response) =
+            start_with(windows_start_body(ALLOWED_HOME), Caller::default()).await;
+
+        assert_eq!(status, StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(response["code"], "internalError");
+    }
+
+    #[cfg(windows)]
+    #[tokio::test]
+    #[allow(clippy::await_holding_lock)]
+    async fn windows_start_launches_only_a_verified_core_for_a_known_client() {
+        let _state = lock_process_state();
+        let (status, response) = start_with(windows_start_body(ALLOWED_HOME), known_caller()).await;
+
+        assert_eq!(status, StatusCode::CONFLICT);
+        assert_eq!(response["code"], "coreVerificationFailed");
     }
 
     #[test]

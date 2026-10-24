@@ -84,6 +84,7 @@ void main() {
             'RemoveUserData',
             'CloseInstalledApp',
             'LegacyServiceRemovalFailed',
+            'ServiceRemovalFailed',
           ]),
         );
         for (final entry in entries.entries) {
@@ -202,12 +203,42 @@ void main() {
   );
 
   test(
-    'Windows bundle stages no SCM helper and requires app-local runtime',
+    'installer upgrades the registered service and removes it before files',
+    () {
+      final postInstall = installer
+          .split('procedure CurStepChanged')
+          .last
+          .split('function InitializeUninstall')
+          .first;
+      expect(postInstall, contains('ssPostInstall'));
+      expect(postInstall, contains("RunReClashService('upgrade')"));
+      final uninstall = installer
+          .split('procedure CurUninstallStepChanged')
+          .last
+          .split('usPostUninstall')
+          .first;
+      expect(uninstall, contains('CurUninstallStep = usUninstall'));
+      expect(uninstall, contains("RunReClashService('uninstall')"));
+      expect(uninstall, contains("CustomMessage('ServiceRemovalFailed')"));
+      final runner = installer
+          .split('function RunReClashService')
+          .last
+          .split('procedure ClearStaleProxy')
+          .first;
+      expect(runner, contains("ExpandConstant('{app}\\ReClashService.exe')"));
+      expect(runner, contains('SW_HIDE, ewWaitUntilTerminated, ResultCode'));
+      expect(runner, contains('Log('));
+    },
+  );
+
+  test(
+    'Windows bundle stages ReClashService, no legacy helper, and app-local runtime',
     () {
       final cmake = File('windows/CMakeLists.txt').readAsStringSync();
       expect(cmake, isNot(contains('ReClashHelperService.exe')));
       expect(cmake, isNot(contains('Stop-Process')));
       expect(cmake, contains('ReClashCore.exe'));
+      expect(cmake, contains('ReClashService.exe'));
       expect(cmake, contains('manifest.json'));
       expect(cmake, contains('if(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)'));
       expect(cmake, contains('message(FATAL_ERROR "MSVC runtime'));

@@ -23,6 +23,14 @@ mixin CoreInterface {
 
   void revokePrivilegePrompt() {}
 
+  void allowPrivilegeInstall() {}
+
+  void suspendPrivilege() {}
+
+  Future<DesktopPrivilegeSetup> inspectPrivilege({
+    required bool tunEnabled,
+  }) async => DesktopPrivilegeSetup.notRequired;
+
   Future<DesktopPrivilegeDecision> preparePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,

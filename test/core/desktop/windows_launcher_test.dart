@@ -5,7 +5,6 @@ import 'package:reclash/core/desktop/launcher.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/desktop/windows_launcher.dart';
 
-import 'fakes.dart';
 import 'windows_fakes.dart';
 
 const _session = '0123456789abcdef0123456789abcdef';
@@ -24,69 +23,18 @@ void main() {
   CoreLaunchAttempt begin() =>
       launcher.begin(sessionId: _session, address: _address);
 
-  test('ordinary proxy session uses the direct launcher', () async {
-    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 20);
-    final resolver = WindowsLauncherResolver(
-      direct: direct,
-      elevated: launcher,
-    );
-    expect(await resolver.resolve(), same(direct));
-    expect(port.launches, 0);
-  });
-
-  test('an already elevated GUI still uses the managed launcher', () async {
+  test('reports the GUI token elevation', () async {
+    final elevation = WindowsGuiElevation(launcher);
+    expect(await elevation.isElevated(), isFalse);
     port.elevated = true;
-    final resolver = WindowsLauncherResolver(
-      direct: FakeLauncher(owner: CoreProcessOwner.direct, pid: 20),
-      elevated: launcher,
-    );
-    expect(await resolver.resolve(), same(launcher));
-  });
-
-  test('TUN requires explicit consent before opening UAC', () async {
-    final resolver = WindowsLauncherResolver(
-      direct: FakeLauncher(owner: CoreProcessOwner.direct, pid: 20),
-      elevated: launcher,
-    )..elevationRequired = true;
-    await expectLater(
-      resolver.resolve(),
-      throwsA(
-        isA<WindowsLaunchException>().having(
-          (error) => error.detail,
-          'detail',
-          'windows_authorization_required',
-        ),
-      ),
-    );
+    expect(await elevation.isElevated(), isTrue);
     expect(port.launches, 0);
   });
 
-  test('consent is consumed once and never reused by recovery', () async {
-    final resolver =
-        WindowsLauncherResolver(
-            direct: FakeLauncher(owner: CoreProcessOwner.direct, pid: 20),
-            elevated: launcher,
-          )
-          ..elevationRequired = true
-          ..promptAllowed = true;
-    expect(await resolver.resolve(), same(launcher));
-    expect(resolver.promptAllowed, isFalse);
-    await expectLater(
-      resolver.resolve(),
-      throwsA(isA<WindowsLaunchException>()),
-    );
-    resolver.promptAllowed = true;
-    expect(await resolver.resolve(), same(launcher));
-  });
-
-  test('failed token query consumes consent and cannot fall back', () async {
-    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 20);
-    final resolver = WindowsLauncherResolver(direct: direct, elevated: launcher)
-      ..elevationRequired = true
-      ..promptAllowed = true;
+  test('a failed token query is typed and opens nothing', () async {
     port.elevationError = StateError('token query denied');
     await expectLater(
-      resolver.resolve(),
+      WindowsGuiElevation(launcher).isElevated(),
       throwsA(
         isA<WindowsLaunchException>().having(
           (error) => error.detail,
@@ -95,32 +43,7 @@ void main() {
         ),
       ),
     );
-    expect(resolver.promptAllowed, isFalse);
-    port.elevationError = null;
-    await expectLater(
-      resolver.resolve(),
-      throwsA(isA<WindowsLaunchException>()),
-    );
-    expect(direct.startCount, 0);
     expect(port.launches, 0);
-  });
-
-  test('proxy-only startup does not request elevation', () async {
-    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 20);
-    final resolver = WindowsLauncherResolver(direct: direct, elevated: launcher)
-      ..promptAllowed = true;
-    expect(await resolver.resolve(), same(direct));
-    expect(port.launches, 0);
-  });
-
-  test('already elevated GUI does not need repeated consent', () async {
-    port.elevated = true;
-    final resolver = WindowsLauncherResolver(
-      direct: FakeLauncher(owner: CoreProcessOwner.direct, pid: 20),
-      elevated: launcher,
-    )..elevationRequired = true;
-    expect(await resolver.resolve(), same(launcher));
-    expect(await resolver.resolve(), same(launcher));
   });
 
   test('missing manifest fails before a native ticket exists', () async {

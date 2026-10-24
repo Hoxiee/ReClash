@@ -10,9 +10,18 @@ import 'pe_image.dart';
 
 const windowsMachineAmd64 = 0x8664;
 const windowsMachineArm64 = 0xaa64;
+const windowsServiceProtocolVersion = '10';
+const _signedImages = [
+  'reclash.exe',
+  'reclashcore.exe',
+  'reclashservice.exe',
+  'rust_api.dll',
+];
+const _installedServiceImages = ['reclashcore.exe', 'reclashservice.exe'];
 const _nativeRoots = [
   'reclash.exe',
   'reclashcore.exe',
+  'reclashservice.exe',
   'flutter_windows.dll',
   'rust_api.dll',
   'sqlite3.dll',
@@ -220,6 +229,20 @@ final class WindowsBundle {
         'Core manifest SHA256 does not match the packaged Core',
       );
     }
+    final serviceHash = sha256
+        .convert(require('reclashservice.exe'))
+        .toString();
+    if (manifest['helperSha256'] != serviceHash) {
+      throw const FormatException(
+        'Service manifest SHA256 does not match the packaged ReClashService',
+      );
+    }
+    if (manifest['helperProtocolVersion'] != windowsServiceProtocolVersion) {
+      throw FormatException(
+        'Windows service protocol must be $windowsServiceProtocolVersion: '
+        '${manifest['helperProtocolVersion']}',
+      );
+    }
     final images = <String, PeImage>{};
     final pending = [..._nativeRoots];
     final checked = <String>{};
@@ -278,8 +301,18 @@ final class WindowsBundle {
         resolve(symbol, {});
       }
     }
+    for (final name in _installedServiceImages) {
+      for (final symbol in image(name).imports) {
+        if (!_isSystemLibrary(symbol.library)) {
+          throw FormatException(
+            'Installed service image $name must not import app-local '
+            '${symbol.library}',
+          );
+        }
+      }
+    }
     final unsigned = [
-      for (final name in ['reclash.exe', 'reclashcore.exe', 'rust_api.dll'])
+      for (final name in _signedImages)
         if (!image(name).hasCertificate) name,
     ];
     if (requireSigned && unsigned.isNotEmpty) {

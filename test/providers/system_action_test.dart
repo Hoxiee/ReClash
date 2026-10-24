@@ -519,16 +519,7 @@ void main() {
       expect(scoped.read(patchClashConfigProvider).tun.enable, isTrue);
       expect(setup.updates, 1);
       expect(await setup.requestAdmin(true), isFalse);
-      await expectLater(
-        setup.requestAdmin(true),
-        throwsA(
-          isA<DesktopPrivilegeException>().having(
-            (error) => error.code,
-            'code',
-            'authorization_required',
-          ),
-        ),
-      );
+      expect(await setup.requestAdmin(true), isTrue);
       expect(setup.prompts, [true, false]);
     });
 
@@ -552,10 +543,7 @@ void main() {
       expect(core.revocations, 1);
       final setup =
           scoped.read(setupActionProvider.notifier) as _TunSetupAction;
-      await expectLater(
-        setup.requestAdmin(true),
-        throwsA(isA<DesktopPrivilegeException>()),
-      );
+      expect(await setup.requestAdmin(true), isTrue);
       expect(setup.prompts, [false]);
       expect(setup.updates, 2);
     });

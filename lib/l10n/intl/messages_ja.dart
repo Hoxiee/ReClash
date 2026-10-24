@@ -2963,6 +2963,56 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "ここで追加した項目は、すべてのプロファイルの TUN 設定を上書きします。追加していない項目はプロファイル自身の設定のままです。カスタムプロファイル自身が追加した項目が優先されます。",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "TUNのHelperを許可",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("設定"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUNはオンです"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage("TUNを設定"),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "その後は、ログイン時を含めてTUNがすぐに起動します",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("今はしない"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "システム全体の通信をReClashに通すには、TUNにシステムのHelperが必要です。ネットワーク権限だけでCoreを起動するsystemdサービスです。",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Helperは検証済みのReClash Coreのみを起動し、ネットワーク権限だけを与えます",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClashが更新されました。動作を続けるには、TUNのHelperも一緒に更新する必要があります。",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUNにはReClash Helperが必要です。macOSから一度だけ許可を求められます。",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "このバージョンでは、Windowsの確認が一度だけ求められます",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "このバージョンでは管理者パスワードが一度だけ必要です",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "パスワードはシステムの画面にだけ入力してください。ReClashがパスワードを見ることはありません。",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUNは利用できません",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "TUNのHelperを更新",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "システムのウィンドウで確認されるのを待っています…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "システム全体の通信をReClashに通すには、TUNにReClash Serviceが必要です。ネットワークアダプターが必要とする権限でCoreを実行するWindowsサービスです。",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "サービスは検証済みのReClash Coreのみを起動し、あなたのアカウントからの要求だけを受け付けます",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClashが更新されました。TUNを引き続き動作させるには、ReClash Serviceも一緒に更新する必要があります。",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("TUNなしで"),
     "turnOff": MessageLookupByLibrary.simpleMessage("オフにする"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オンにする"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP リレーモード"),

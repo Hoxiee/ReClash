@@ -775,6 +775,11 @@ class SetupSession extends Notifier<SetupSessionState> {
       }
       _guard(generation);
       _phase(SetupPhase.core, SetupPhaseStatus.running);
+      // Choosing TUN coverage here is the consent the app's TUN setup prompt
+      // would otherwise ask for, so the wizard may install its Helper.
+      if (!isAndroid && state.draft.coverage == SetupCoverage.tun) {
+        ref.read(coreHandlerProvider).allowPrivilegeInstall();
+      }
       if (!await prepareCore()) {
         throw MessageException(currentAppLocalizations.setupUnknownError);
       }

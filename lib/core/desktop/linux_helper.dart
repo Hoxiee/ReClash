@@ -240,6 +240,8 @@ final class LinuxHelperInstaller {
   static bool _systemdAvailable() =>
       Directory('/run/systemd/system').existsSync();
 
+  bool get systemdAvailable => _isLinux && _hasSystemd();
+
   Future<HelperReadiness> _readiness() {
     final probe = _helperReadiness;
     if (probe != null) return probe();

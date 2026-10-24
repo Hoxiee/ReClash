@@ -154,7 +154,7 @@ final class HelperClient {
     final context = _pathContext;
     return context.join(
       context.dirname(Platform.resolvedExecutable),
-      Platform.isWindows ? '$appHelperService.exe' : appHelperService,
+      Platform.isWindows ? windowsServiceExecutable : appHelperService,
     );
   }
 
@@ -193,7 +193,11 @@ final class HelperClient {
           ? _readyFromOk(response, logFailure)
           : _notReadyFromPing(response, logFailure));
     } catch (error) {
-      _logPingFailure('helper ping failed: $error', logFailure);
+      _logPingFailure(
+        'helper ping failed: $error',
+        logFailure,
+        code: 'unreachable',
+      );
       return HelperReadiness.notReady;
     } finally {
       timeoutTimer?.cancel();
@@ -290,12 +294,13 @@ final class HelperClient {
   Future<HelperStartResponse> start({
     required String address,
     required String sessionId,
+    String? home,
   }) async {
     _validateSessionId(sessionId);
     try {
       final response = await _dio.post<Object?>(
         '$baseUrl/start',
-        data: {'address': address, 'sessionId': sessionId},
+        data: {'address': address, 'sessionId': sessionId, 'home': ?home},
         options: _options(ResponseType.json, receiveTimeout: startTimeout),
       );
       final data = _responseMap(response, operation: 'start');
@@ -468,7 +473,15 @@ final class HelperLauncher implements CoreProcessLauncher {
   final HelperClient client;
   final ProcessLivenessProbe livenessProbe;
 
-  const HelperLauncher(this.client, {this.livenessProbe = isProcessAlive});
+  /// The Windows service runs its Core as SYSTEM, which confines itself to the
+  /// home it is given; the Linux Helper's Core runs as the owner and takes none.
+  final Future<String> Function()? homeDirectory;
+
+  const HelperLauncher(
+    this.client, {
+    this.livenessProbe = isProcessAlive,
+    this.homeDirectory,
+  });
 
   @override
   Future<CoreProcessLease> start({
@@ -479,6 +492,7 @@ final class HelperLauncher implements CoreProcessLauncher {
       final response = await client.start(
         address: address,
         sessionId: sessionId,
+        home: await homeDirectory?.call(),
       );
       return HelperCoreLease(
         sessionId: response.sessionId,
@@ -622,7 +636,26 @@ final class HelperCoreLease implements CoreProcessLease {
   }
 }
 
+/// The path an elevated `install` copies the verified service pair to; the
+/// SCM runs it from there, never from the app directory.
+Future<String> windowsInstalledServicePath() async {
+  final core = await CoreManifest.readCoreSha256();
+  final helper = await CoreManifest.readHelperSha256();
+  if (core == null || helper == null) {
+    throw const FormatException('Windows service manifest is invalid');
+  }
+  return p.windows.join(
+    Platform.environment['ProgramFiles'] ?? r'C:\Program Files',
+    'ReClash Service',
+    '$core-$helper',
+    windowsServiceExecutable,
+  );
+}
+
 HelperClient _createHelperClient() {
+  if (Platform.isWindows) {
+    return HelperClient(expectedHelperPath: windowsInstalledServicePath);
+  }
   if (!Platform.isLinux) return HelperClient();
   final environment = LinuxHelperEnvironment();
   return HelperClient(

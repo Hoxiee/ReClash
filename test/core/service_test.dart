@@ -25,11 +25,14 @@ void main() {
     outcome: CoreLifecycleOutcome.applied,
   );
 
+  setUpAll(() => registerFallbackValue(CoreMethod.getIsInit));
+
   setUp(() {
     lifecycle = _MockLifecycle();
     rpcClient = _MockRpcClient();
     crashes = StreamController<DesktopCoreFailure>.broadcast();
     when(() => lifecycle.crashEvents).thenAnswer((_) => crashes.stream);
+    when(() => lifecycle.state).thenReturn(const DesktopCoreIdle());
     when(() => lifecycle.start()).thenAnswer((_) async => result);
     when(() => lifecycle.restart()).thenAnswer((_) async => result);
     when(() => lifecycle.stop()).thenAnswer((_) async => result);
@@ -71,6 +74,30 @@ void main() {
     expect(
       await service.invokeMethod<bool>(method: CoreMethod.getIsInit),
       isTrue,
+    );
+  });
+
+  test('answers null at once while no Core can connect', () async {
+    when(() => lifecycle.state).thenReturn(
+      const DesktopCoreFailed(
+        DesktopCoreFailure(
+          code: 'start_failed',
+          phase: DesktopCorePhase.starting,
+          revision: 1,
+        ),
+      ),
+    );
+
+    expect(
+      await service.invokeMethod<bool>(method: CoreMethod.getIsInit),
+      isNull,
+    );
+    verifyNever(
+      () => rpcClient.invoke<bool>(
+        method: any(named: 'method'),
+        arguments: any(named: 'arguments'),
+        timeout: any(named: 'timeout'),
+      ),
     );
   });
 

@@ -185,6 +185,28 @@ begin
   Result := False;
 end;
 
+// A failed upgrade keeps the previous registration, whose bundle hashes the app
+// no longer accepts as ready, so it only needs logging.
+function RunReClashService(Command: String): Boolean;
+var
+  ServicePath: String;
+  ResultCode: Integer;
+begin
+  Result := True;
+  ServicePath := ExpandConstant('{app}\ReClashService.exe');
+  if not FileExists(ServicePath) then Exit;
+  if not Exec(ServicePath, Command, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    Log(Format('ReClashService %s could not start: %s', [Command, SysErrorMessage(ResultCode)]));
+    Result := False;
+  end
+  else if ResultCode <> 0 then
+  begin
+    Log(Format('ReClashService %s exited with code %d', [Command, ResultCode]));
+    Result := False;
+  end;
+end;
+
 procedure ClearStaleProxy;
 var
   AppPath: String;
@@ -257,6 +279,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
+    RunReClashService('upgrade');
     ClearStaleProxy;
   end;
 end;
@@ -288,6 +311,11 @@ end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
+  if CurUninstallStep = usUninstall then
+  begin
+    if not RunReClashService('uninstall') then
+      SuppressibleMsgBox(FmtMessage(CustomMessage('ServiceRemovalFailed'), ['{{DISPLAY_NAME}}']), mbError, MB_OK, IDOK);
+  end;
   if CurUninstallStep = usPostUninstall then
   begin
     RemoveUserRegistrations;
@@ -334,15 +362,19 @@ Name: "chineseSimplified"; MessagesFile: {% if locale.file %}{{ locale.file }}{%
 english.RemoveUserData=Also delete your profiles and settings?
 english.CloseInstalledApp=Close %1 running from this installation before continuing.
 english.LegacyServiceRemovalFailed=The legacy %1 service could not be safely removed.
+english.ServiceRemovalFailed=The %1 service could not be fully removed. See the setup log for details.
 russian.RemoveUserData=Также удалить ваши профили и настройки?
 russian.CloseInstalledApp=Чтобы продолжить, закройте %1, запущенный из этой папки установки.
 russian.LegacyServiceRemovalFailed=Не удалось безопасно удалить службу предыдущей версии %1.
+russian.ServiceRemovalFailed=Не удалось полностью удалить службу %1. Подробности в журнале установки.
 chineseSimplified.RemoveUserData=是否同时删除配置文件和设置？
 chineseSimplified.CloseInstalledApp=请关闭从此安装目录运行的 %1，然后继续。
 chineseSimplified.LegacyServiceRemovalFailed=无法安全移除旧版 %1 服务。
+chineseSimplified.ServiceRemovalFailed=无法完全移除 %1 服务。详情请参阅安装日志。
 korean.RemoveUserData=프로필과 설정도 삭제하시겠습니까?
 korean.CloseInstalledApp=계속하려면 이 설치 경로에서 실행 중인 %1을(를) 종료하세요.
 korean.LegacyServiceRemovalFailed=설치된 이전 버전의 %1 서비스를 안전하게 제거하지 못했습니다.
+korean.ServiceRemovalFailed=%1 서비스를 완전히 제거하지 못했습니다. 자세한 내용은 설치 로그를 확인하세요.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}

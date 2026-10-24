@@ -3584,6 +3584,58 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "Осы жерге қосылған жазбалар әр профильдің TUN баптауларын алмастырады; қосылмағаны профильдің өз баптауын сақтайды. Арнайы профиль өзі қосқан жазбалар басым болады.",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper-ге рұқсат беру",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("Орнату"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN қосулы"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN-ды орнату",
+    ),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "Осыдан кейін TUN бірден іске қосылады, соның ішінде жүйеге кіру кезінде де",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("Қазір емес"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "Жүйенің барлық трафигін ReClash арқылы бағыттау үшін TUN-ға жүйелік Helper керек: ол Core-ды тек желі құқықтарымен іске қосатын systemd қызметі.",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Helper тек тексерілген ReClash Core-ын іске қосады және оған тек желі құқықтарын береді",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash жаңартылды, сондықтан жұмысын жалғастыру үшін TUN Helper де бірге жаңартылуы керек.",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUN үшін ReClash Helper керек. macOS оны бір рет рұқсат етуді сұрайды.",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "Бұл нұсқа үшін Windows бір рет растау сұрайды",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "Бұл нұсқа үшін әкімші құпиясөзі бір рет қажет",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Құпиясөзді тек жүйе терезесінде енгізіңіз: ReClash оны ешқашан көрмейді.",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN қолжетімсіз",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN Helper-ді жаңарту",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "Жүйе терезесінде растауды күтудеміз…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "Жүйенің барлық трафигін ReClash арқылы бағыттау үшін TUN-ға ReClash Service керек — ол Core-ды желі адаптері талап ететін құқықтармен іске қосатын Windows қызметі.",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "Қызмет тек тексерілген ReClash Core-ын іске қосады және тек сіздің тіркелгіңізді ғана қабылдайды",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash жаңартылды, сондықтан TUN жұмысын жалғастыру үшін ReClash Service де бірге жаңартылуы керек.",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("TUN-сыз"),
     "turnOff": MessageLookupByLibrary.simpleMessage("Өшіру"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Қосу"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP реле режимі"),

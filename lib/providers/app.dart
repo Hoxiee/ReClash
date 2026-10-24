@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui' show Locale;
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
@@ -29,6 +30,30 @@ class AuthorizedTunEnable extends _$AuthorizedTunEnable
 class TunApplied extends _$TunApplied with AutoDisposeNotifierMixin {
   @override
   bool build() => false;
+}
+
+/// What the TUN setup prompt should offer, or null when it has nothing to ask.
+/// A prompt the user put off stays quiet until they ask for TUN again.
+@Riverpod(keepAlive: true)
+class TunPrivilegeSetup extends _$TunPrivilegeSetup {
+  bool _dismissed = false;
+
+  @override
+  DesktopPrivilegeSetup? build() => null;
+
+  void request(DesktopPrivilegeSetup setup, {required bool explicit}) {
+    if (explicit) _dismissed = false;
+    if (!_dismissed) state = setup;
+  }
+
+  void dismiss() {
+    _dismissed = true;
+    state = null;
+  }
+
+  void clear() {
+    state = null;
+  }
 }
 
 @Riverpod(keepAlive: true)

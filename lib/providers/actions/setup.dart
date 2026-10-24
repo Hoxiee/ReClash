@@ -861,7 +861,10 @@ class SetupAction extends _$SetupAction {
   Future<void> setTunEnabled(bool enabled) async {
     _privilegeIntentRevision++;
     _allowPrivilegePrompt = enabled;
-    if (!enabled) _core.revokePrivilegePrompt();
+    if (!enabled) {
+      _core.revokePrivilegePrompt();
+      ref.read(tunPrivilegeSetupProvider.notifier).clear();
+    }
     ref
         .read(patchClashConfigProvider.notifier)
         .update((state) => state.copyWith.tun(enable: enabled));
@@ -896,6 +899,9 @@ class SetupAction extends _$SetupAction {
       tunEnabled: enableTun,
       allowPrompt: allowPrompt,
     );
+    if (decision == DesktopPrivilegeDecision.active && ref.mounted) {
+      ref.read(tunPrivilegeSetupProvider.notifier).clear();
+    }
     if (!ref.mounted ||
         revision != _runIntentRevision ||
         privilegeRevision != _privilegeIntentRevision) {
@@ -914,8 +920,61 @@ class SetupAction extends _$SetupAction {
         return false;
       case DesktopPrivilegeDecision.authorizationRequired:
         notifier.value = TunAuthorizationState.unauthorized;
-        throw const DesktopPrivilegeException('authorization_required');
+        unawaited(_requestPrivilegeSetup(explicit: allowPrompt));
+        return true;
     }
+  }
+
+  @protected
+  Future<DesktopPrivilegeSetup> inspectPrivilege() =>
+      _core.inspectPrivilege(tunEnabled: true);
+
+  Future<void> _requestPrivilegeSetup({required bool explicit}) async {
+    final DesktopPrivilegeSetup setup;
+    try {
+      setup = await inspectPrivilege();
+    } catch (error) {
+      commonPrint.log(
+        'TUN setup inspection failed: $error',
+        logLevel: LogLevel.warning,
+      );
+      return;
+    }
+    if (!ref.mounted || !ref.read(patchClashConfigProvider).tun.enable) return;
+    switch (setup) {
+      case DesktopPrivilegeSetup.install ||
+          DesktopPrivilegeSetup.update ||
+          DesktopPrivilegeSetup.approval ||
+          DesktopPrivilegeSetup.unavailable:
+        ref
+            .read(tunPrivilegeSetupProvider.notifier)
+            .request(setup, explicit: explicit);
+      case DesktopPrivilegeSetup.notRequired ||
+          DesktopPrivilegeSetup.active ||
+          DesktopPrivilegeSetup.ready:
+        break;
+    }
+  }
+
+  /// Runs what the TUN setup prompt confirmed, installing or updating the
+  /// Helper or service, and moves the Core onto it. Returns the failure that
+  /// kept TUN off, or null once the privileged Core runs.
+  Future<Object?> authorizeTun() async {
+    ref.read(tunPrivilegeSetupProvider.notifier).clear();
+    _core.allowPrivilegeInstall();
+    final coreAction = ref.read(coreActionProvider.notifier);
+    try {
+      await coreAction.restartCore(silence: true, allowPrompt: true);
+    } catch (error) {
+      return error;
+    }
+    if (!ref.mounted) return null;
+    final failure = coreAction.takePrivilegeFailure();
+    if (failure != null) return failure;
+    if (!isPrivilegedCoreOwner(_core.processOwner)) {
+      return const DesktopPrivilegeException('authorization_required');
+    }
+    return null;
   }
 
   /// An empty profile list is left alone: it is the first-run state, and it is

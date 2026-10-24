@@ -3596,6 +3596,58 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "Добавленные здесь параметры заменяют настройки TUN всех профилей; остальные остаются такими, как в профиле. Параметры, добавленные в самом пользовательском профиле, имеют приоритет.",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "Разрешите помощник TUN",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("Настроить"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN включён"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage(
+      "Настроить TUN",
+    ),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "Дальше TUN включается сразу, в том числе при автозапуске",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("Не сейчас"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "Чтобы TUN направлял через ReClash весь трафик системы, нужен системный помощник — служба systemd, которая запускает ядро только с сетевыми правами.",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Помощник запускает только проверенное ядро ReClash и даёт ему лишь сетевые права",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash обновился, и помощнику TUN нужно обновиться вместе с ним, чтобы продолжить работу.",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "Для TUN нужен помощник ReClash. macOS один раз попросит его разрешить.",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "Windows попросит подтверждение один раз для этой версии",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "Пароль администратора понадобится один раз для этой версии",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "Вводите пароль только в системном окне: ReClash его не видит.",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage(
+      "TUN недоступен",
+    ),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "Обновить помощник TUN",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage(
+      "Ждём подтверждения в системном окне…",
+    ),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "Чтобы TUN направлял через ReClash весь трафик системы, нужна служба ReClash Service — она запускает ядро с правами, которых требует сетевой адаптер.",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "Служба запускает только проверенное ядро ReClash и принимает запросы только от вашей учётной записи",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash обновился, и службе ReClash Service нужно обновиться вместе с ним, чтобы TUN продолжил работать.",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("Без TUN"),
     "turnOff": MessageLookupByLibrary.simpleMessage("Выключить"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Включить"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage(

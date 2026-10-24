@@ -64,29 +64,19 @@ final class NativeWindowsCorePort implements WindowsCorePort {
       );
 }
 
-final class WindowsLauncherResolver implements DesktopCoreLauncherResolver {
-  final CoreProcessLauncher direct;
-  final WindowsCoreLauncher elevated;
-  bool elevationRequired = false;
-  bool promptAllowed = false;
+/// A GUI started as administrator runs its Core through the managed elevated
+/// launch; every other TUN session goes through the ReClash service.
+final class WindowsGuiElevation {
+  final WindowsCoreLauncher launcher;
 
-  WindowsLauncherResolver({required this.direct, required this.elevated});
+  const WindowsGuiElevation(this.launcher);
 
-  @override
-  Future<CoreProcessLauncher> resolve() async {
-    final allowPrompt = promptAllowed;
-    promptAllowed = false;
-    final bool guiElevated;
+  Future<bool> isElevated() async {
     try {
-      guiElevated = await elevated.port.isElevated();
+      return await launcher.port.isElevated();
     } catch (error) {
       throw WindowsLaunchException('windows_elevation_query_failed: $error');
     }
-    if (!elevationRequired && !guiElevated) return direct;
-    if (!guiElevated && !allowPrompt) {
-      throw const WindowsLaunchException('windows_authorization_required');
-    }
-    return elevated;
   }
 }
 

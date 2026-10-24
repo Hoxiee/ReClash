@@ -8,6 +8,7 @@ class CoreAction extends _$CoreAction {
   Future<bool>? _restartOperation;
   bool _restartSilence = false;
   int _launchRevision = 0;
+  Object? _privilegeFailure;
 
   @override
   void build() {
@@ -27,6 +28,46 @@ class CoreAction extends _$CoreAction {
           !ref.read(safeModeProvider),
       allowPrompt: allowPrompt,
     );
+  }
+
+  /// The privileged launch failure the last start recovered from without TUN.
+  Object? takePrivilegeFailure() {
+    final failure = _privilegeFailure;
+    _privilegeFailure = null;
+    return failure;
+  }
+
+  Future<CoreLifecycleResult> _launch(
+    Future<CoreLifecycleResult> Function() run, {
+    required int revision,
+    required bool silence,
+  }) async {
+    _privilegeFailure = null;
+    try {
+      return await run();
+    } catch (error) {
+      if (!system.isDesktop ||
+          !isPrivilegedLaunchFailure(error) ||
+          !ref.mounted ||
+          revision != _launchRevision) {
+        rethrow;
+      }
+      commonPrint.log(
+        'Privileged Core launch failed, starting it without TUN: $error',
+        logLevel: LogLevel.warning,
+      );
+      _core.suspendPrivilege();
+      final result = await startLifecycle();
+      if (silence) {
+        _privilegeFailure = error;
+      } else {
+        dialogs.showNotifier(
+          userFacingErrorMessage(error, currentAppLocalizations),
+          level: MessageLevel.error,
+        );
+      }
+      return result;
+    }
   }
 
   Future<void> cancelCoreStart() async {
@@ -60,7 +101,11 @@ class CoreAction extends _$CoreAction {
     _configureLaunch(allowPrompt: allowPrompt);
     ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     try {
-      final result = await startLifecycle();
+      final result = await _launch(
+        startLifecycle,
+        revision: revision,
+        silence: silence,
+      );
       if (revision != _launchRevision || !ref.mounted) return false;
       return await _applyLifecycleResult(result, launchRevision: revision);
     } catch (error) {
@@ -163,7 +208,11 @@ class CoreAction extends _$CoreAction {
     final launchRevision = ++_launchRevision;
     try {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
-      final result = await restartLifecycle();
+      final result = await _launch(
+        restartLifecycle,
+        revision: launchRevision,
+        silence: _restartSilence,
+      );
       if (!ref.mounted || launchRevision != _launchRevision) return false;
       if (!await _applyLifecycleResult(
         result,

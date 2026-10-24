@@ -108,9 +108,9 @@ func windowsProcessImage(handle windows.Handle) (string, error) {
 	return windows.UTF16ToString(buffer[:size]), nil
 }
 
-func verifyWindowsParent(handle windows.Handle, launch windowsLaunch, expectedImage string) error {
+func verifyWindowsProcess(handle windows.Handle, expectedPID uint32, expectedCreated uint64, sid string) error {
 	pid, err := windows.GetProcessId(handle)
-	if err != nil || pid != launch.parentPID {
+	if err != nil || pid != expectedPID {
 		return errors.New("windows_parent_pid_mismatch")
 	}
 	status, err := windows.WaitForSingleObject(handle, 0)
@@ -118,15 +118,8 @@ func verifyWindowsParent(handle windows.Handle, launch windowsLaunch, expectedIm
 		return errors.New("windows_parent_exited")
 	}
 	created, err := windowsProcessCreated(handle)
-	if err != nil || created != launch.parentCreated {
+	if err != nil || created != expectedCreated {
 		return errors.New("windows_parent_creation_mismatch")
-	}
-	var terminal uint32
-	if err := windows.ProcessIdToSessionId(launch.parentPID, &terminal); err != nil || terminal != launch.terminalSession {
-		return errors.New("windows_parent_session_mismatch")
-	}
-	if err := windows.ProcessIdToSessionId(uint32(os.Getpid()), &terminal); err != nil || terminal != launch.terminalSession {
-		return errors.New("windows_core_session_mismatch")
 	}
 	var token windows.Token
 	if err := windows.OpenProcessToken(handle, windows.TOKEN_QUERY, &token); err != nil {
@@ -134,8 +127,22 @@ func verifyWindowsParent(handle windows.Handle, launch windowsLaunch, expectedIm
 	}
 	defer token.Close()
 	user, err := token.GetTokenUser()
-	if err != nil || user.User.Sid.String() != launch.sid {
+	if err != nil || user.User.Sid.String() != sid {
 		return errors.New("windows_parent_sid_mismatch")
+	}
+	return nil
+}
+
+func verifyWindowsParent(handle windows.Handle, launch windowsLaunch, expectedImage string) error {
+	if err := verifyWindowsProcess(handle, launch.parentPID, launch.parentCreated, launch.sid); err != nil {
+		return err
+	}
+	var terminal uint32
+	if err := windows.ProcessIdToSessionId(launch.parentPID, &terminal); err != nil || terminal != launch.terminalSession {
+		return errors.New("windows_parent_session_mismatch")
+	}
+	if err := windows.ProcessIdToSessionId(uint32(os.Getpid()), &terminal); err != nil || terminal != launch.terminalSession {
+		return errors.New("windows_core_session_mismatch")
 	}
 	image, err := windowsProcessImage(handle)
 	if err != nil || !windowsLocalPath(image) || !windowsLocalPath(expectedImage) {
@@ -344,15 +351,52 @@ func (access *windowsTokenAccess) close() error {
 	return access.token.Close()
 }
 
+func windowsRunningAsSystem() (bool, error) {
+	user, err := windows.GetCurrentProcessToken().GetTokenUser()
+	if err != nil {
+		return false, err
+	}
+	return user.User.Sid.IsWellKnown(windows.WinLocalSystemSid), nil
+}
+
+func watchWindowsParent(parent windows.Handle, handles []windows.Handle) (func(), error) {
+	stop, err := windows.CreateEvent(nil, 1, 0, nil)
+	if err != nil {
+		return nil, fmt.Errorf("windows_stop_event_failed: %w", err)
+	}
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		event, err := windows.WaitForMultipleObjects([]windows.Handle{parent, stop}, false, windows.INFINITE)
+		if err != nil || event != windows.WAIT_OBJECT_0+1 {
+			os.Exit(1)
+		}
+	}()
+	var cleanup sync.Once
+	return func() {
+		cleanup.Do(func() {
+			_ = windows.SetEvent(stop)
+			<-done
+			_ = windows.CloseHandle(parent)
+			closeWindowsHandles(handles)
+			_ = windows.CloseHandle(stop)
+		})
+	}, nil
+}
+
 func prepareDesktopStartup(args []string) (string, func(), error) {
 	if len(args) == 1 && validWindowsRPCAddress(args[0]) {
-		if windows.GetCurrentProcessToken().IsElevated() {
+		system, err := windowsRunningAsSystem()
+		if err != nil || system || windows.GetCurrentProcessToken().IsElevated() {
 			return "", nil, errors.New("windows_elevated_core_requires_managed_session")
 		}
 		if err := core.ConfigureDesktopLaunch("", verifyWindowsRPCServer); err != nil {
 			return "", nil, err
 		}
 		return args[0], func() {}, nil
+	}
+	if len(args) > 0 && args[0] == "--managed-service" {
+		return prepareWindowsServiceStartup(args)
 	}
 	launch, err := parseWindowsLaunch(args)
 	if err != nil {
@@ -450,33 +494,16 @@ func prepareDesktopStartup(args []string) (string, func(), error) {
 	if string(commit[:]) != "RCXGO001" {
 		return "", nil, errors.New("windows_launch_not_committed")
 	}
-	stop, err := windows.CreateEvent(nil, 1, 0, nil)
-	if err != nil {
-		return "", nil, fmt.Errorf("windows_stop_event_failed: %w", err)
-	}
-	handles = append(handles, stop)
 	identity := &windowsParent{handle: parent, pid: launch.parentPID, created: launch.parentCreated, home: launch.home}
 	if err := core.ConfigureDesktopLaunch(launch.home, windowsRPCVerifier(identity)); err != nil {
 		return "", nil, err
 	}
+	cleanup, err := watchWindowsParent(parent, handles)
+	if err != nil {
+		return "", nil, err
+	}
 	keepParent = true
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		event, err := windows.WaitForMultipleObjects([]windows.Handle{parent, stop}, false, windows.INFINITE)
-		if err != nil || event != windows.WAIT_OBJECT_0+1 {
-			os.Exit(1)
-		}
-	}()
-	var cleanup sync.Once
-	return launch.address, func() {
-		cleanup.Do(func() {
-			_ = windows.SetEvent(stop)
-			<-done
-			_ = windows.CloseHandle(parent)
-			closeWindowsHandles(handles)
-		})
-	}, nil
+	return launch.address, cleanup, nil
 }
 
 func windowsRPCVerifier(parent *windowsParent) func(net.Conn) error {

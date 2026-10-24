@@ -67,6 +67,13 @@ class CoreController {
 
   void revokePrivilegePrompt() => _interface.revokePrivilegePrompt();
 
+  void allowPrivilegeInstall() => _interface.allowPrivilegeInstall();
+
+  void suspendPrivilege() => _interface.suspendPrivilege();
+
+  Future<DesktopPrivilegeSetup> inspectPrivilege({required bool tunEnabled}) =>
+      _interface.inspectPrivilege(tunEnabled: tunEnabled);
+
   Future<DesktopPrivilegeDecision> preparePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,

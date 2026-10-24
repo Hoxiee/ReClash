@@ -1054,10 +1054,7 @@ void main() {
             .update((state) => state.copyWith.tun(enable: true));
         container.read(setupActionProvider);
 
-        await expectLater(
-          setupAction.requestAdmin(true),
-          throwsA(isA<DesktopPrivilegeException>()),
-        );
+        expect(await setupAction.requestAdmin(true), isTrue);
 
         expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
         expect(container.read(shouldPatchSystemDnsProvider), isFalse);

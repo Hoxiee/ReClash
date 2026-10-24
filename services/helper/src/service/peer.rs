@@ -1,8 +1,10 @@
 use crate::service::hub::{
-    ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown, routes,
+    caller_routes, ensure_core_sha256_configured, log_message, release_managed_core_on_shutdown,
+    Caller,
 };
-use crate::service::owner::{client_pid, same_sid, TcpConnection};
+use crate::service::owner::{client_pid, same_sid, ManagedHost, TcpConnection};
 
+use std::convert::Infallible;
 use std::ffi::c_void;
 use std::future::Future;
 use std::io::{Error, Result as IoResult};
@@ -12,11 +14,15 @@ use std::ptr::{null, null_mut};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::task::{Context, Poll};
 use std::time::Duration;
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::Sleep;
 use tokio_stream::Stream;
+use warp::hyper::server::accept;
+use warp::hyper::service::make_service_fn;
+use warp::hyper::Server;
 use windows_sys::Win32::Foundation::{
-    CloseHandle, LocalFree, ERROR_INSUFFICIENT_BUFFER, ERROR_SUCCESS, HANDLE, NO_ERROR,
+    CloseHandle, LocalFree, ERROR_INSUFFICIENT_BUFFER, ERROR_SUCCESS, FILETIME, HANDLE, NO_ERROR,
 };
 use windows_sys::Win32::NetworkManagement::IpHelper::{
     GetExtendedTcpTable, MIB_TCPTABLE_OWNER_PID, TCP_TABLE_OWNER_PID_ALL,
@@ -28,13 +34,13 @@ use windows_sys::Win32::System::Registry::{
     KEY_SET_VALUE, REG_DWORD, REG_OPTION_VOLATILE,
 };
 use windows_sys::Win32::System::Threading::{
-    OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION,
+    GetProcessTimes, OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION,
 };
 
 const AF_INET: u32 = 2;
 /// Hyper-V and WinNAT reserve ranges that can cover any fixed port; only admins
 /// write this volatile key under the service's own, and a reboot clears it.
-const PORT_KEY: &str = r"SYSTEM\CurrentControlSet\Services\ReClashHelperService\Runtime";
+const PORT_KEY: &str = r"SYSTEM\CurrentControlSet\Services\ReClashService\Runtime";
 const PORT_VALUE: &str = "Port";
 const TABLE_ATTEMPTS: usize = 5;
 const ACCEPT_RETRY_DELAY: Duration = Duration::from_secs(1);
@@ -53,15 +59,49 @@ impl Drop for Handle {
 }
 
 pub fn process_sid(pid: u32) -> IoResult<String> {
-    // SAFETY: both handles are owned by a Handle; the u64 buffer gives the
+    token_sid(&open_process(pid)?)
+}
+
+/// One handle for both, so a PID reused in between cannot mix two processes.
+fn process_identity(pid: u32) -> IoResult<(String, u64)> {
+    let process = open_process(pid)?;
+    let sid = token_sid(&process)?;
+    let mut created = FILETIME {
+        dwLowDateTime: 0,
+        dwHighDateTime: 0,
+    };
+    let mut unused = created;
+    // SAFETY: the handle is open and every out pointer is a live FILETIME.
+    if unsafe {
+        GetProcessTimes(
+            process.0,
+            &mut created,
+            &mut unused,
+            &mut unused,
+            &mut unused,
+        )
+    } == 0
+    {
+        return Err(Error::last_os_error());
+    }
+    Ok((
+        sid,
+        (u64::from(created.dwHighDateTime) << 32) | u64::from(created.dwLowDateTime),
+    ))
+}
+
+fn open_process(pid: u32) -> IoResult<Handle> {
+    let process = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) };
+    if process == 0 {
+        return Err(Error::last_os_error());
+    }
+    Ok(Handle(process))
+}
+
+fn token_sid(process: &Handle) -> IoResult<String> {
+    // SAFETY: the token is owned by a Handle; the u64 buffer gives the
     // pointer-bearing TOKEN_USER the alignment it needs.
     unsafe {
-        let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
-        if process == 0 {
-            return Err(Error::last_os_error());
-        }
-        let process = Handle(process);
-
         let mut token: HANDLE = 0;
         if OpenProcessToken(process.0, TOKEN_QUERY, &mut token) == 0 {
             return Err(Error::last_os_error());
@@ -89,7 +129,7 @@ pub fn process_sid(pid: u32) -> IoResult<String> {
     }
 }
 
-unsafe fn sid_to_string(sid: *mut c_void) -> IoResult<String> {
+pub(super) unsafe fn sid_to_string(sid: *mut c_void) -> IoResult<String> {
     let mut wide: *mut u16 = null_mut();
     if ConvertSidToStringSidW(sid, &mut wide) == 0 {
         return Err(Error::last_os_error());
@@ -148,19 +188,53 @@ fn socket_address(address: u32, port: u32) -> SocketAddrV4 {
     )
 }
 
-fn is_owner_connection(stream: &TcpStream, owner_sid: &str) -> bool {
+fn owner_client(stream: &TcpStream, owner_sid: &str) -> Option<ManagedHost> {
     let (Ok(SocketAddr::V4(client)), Ok(SocketAddr::V4(server))) =
         (stream.peer_addr(), stream.local_addr())
     else {
-        return false;
+        return None;
     };
-    let Ok(connections) = tcp_connections() else {
-        return false;
-    };
-    let Some(pid) = client_pid(&connections, client, server) else {
-        return false;
-    };
-    matches!(process_sid(pid), Ok(sid) if same_sid(&sid, owner_sid))
+    let pid = client_pid(&tcp_connections().ok()?, client, server)?;
+    let (sid, created) = process_identity(pid).ok()?;
+    same_sid(&sid, owner_sid).then(|| ManagedHost {
+        pid,
+        created,
+        owner_sid: owner_sid.to_string(),
+    })
+}
+
+/// warp forgets a custom stream's peer, so each connection gets its own router.
+struct CallerStream {
+    stream: TcpStream,
+    caller: Caller,
+}
+
+impl AsyncRead for CallerStream {
+    fn poll_read(
+        mut self: Pin<&mut Self>,
+        context: &mut Context<'_>,
+        buffer: &mut ReadBuf<'_>,
+    ) -> Poll<IoResult<()>> {
+        Pin::new(&mut self.stream).poll_read(context, buffer)
+    }
+}
+
+impl AsyncWrite for CallerStream {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        context: &mut Context<'_>,
+        buffer: &[u8],
+    ) -> Poll<IoResult<usize>> {
+        Pin::new(&mut self.stream).poll_write(context, buffer)
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<IoResult<()>> {
+        Pin::new(&mut self.stream).poll_flush(context)
+    }
+
+    fn poll_shutdown(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<IoResult<()>> {
+        Pin::new(&mut self.stream).poll_shutdown(context)
+    }
 }
 
 /// Loopback TCP has no peer credential, so the TCP table names the process
@@ -173,7 +247,7 @@ struct AuthorizedIncoming {
 }
 
 impl Stream for AuthorizedIncoming {
-    type Item = IoResult<TcpStream>;
+    type Item = IoResult<CallerStream>;
 
     /// hyper ends the whole server on an accept error, so retry after a pause.
     fn poll_next(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -186,8 +260,11 @@ impl Stream for AuthorizedIncoming {
             }
             match self.listener.poll_accept(context) {
                 Poll::Ready(Ok((stream, _))) => {
-                    if is_owner_connection(&stream, &self.owner_sid) {
-                        return Poll::Ready(Some(Ok(stream)));
+                    if let Some(host) = owner_client(&stream, &self.owner_sid) {
+                        return Poll::Ready(Some(Ok(CallerStream {
+                            stream,
+                            caller: Caller { host: Some(host) },
+                        })));
                     }
                     if !REJECTION_LOGGED.swap(true, Ordering::Relaxed) {
                         log_message(
@@ -287,9 +364,17 @@ where
         owner_sid,
         retry: None,
     };
-    warp::serve(routes())
-        .serve_incoming_with_graceful_shutdown(incoming, shutdown)
+    let make_service = make_service_fn(|connection: &CallerStream| {
+        let service = warp::service(caller_routes(connection.caller.clone()));
+        async move { Ok::<_, Infallible>(service) }
+    });
+    let served = Server::builder(accept::from_stream(incoming))
+        .serve(make_service)
+        .with_graceful_shutdown(shutdown)
         .await;
+    if let Err(error) = served {
+        log_message(format!("Helper server stopped: {error}"));
+    }
     drop(published);
     release_managed_core_on_shutdown();
 
@@ -331,14 +416,29 @@ mod tests {
         assert!(process_sid(u32::MAX - 3).is_err());
     }
 
+    #[test]
+    fn identifies_a_process_by_account_and_creation_time() {
+        let (sid, created) = process_identity(std::process::id()).unwrap();
+
+        assert_eq!(sid, process_sid(std::process::id()).unwrap());
+        assert!(created > 0);
+        assert_eq!(process_identity(std::process::id()).unwrap().1, created);
+    }
+
     #[tokio::test]
-    async fn admits_the_owner_and_refuses_any_other_account() {
+    async fn admits_the_owner_with_its_process_and_refuses_any_other_account() {
         let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).await.unwrap();
         let _client = std::net::TcpStream::connect(listener.local_addr().unwrap()).unwrap();
         let (accepted, _) = listener.accept().await.unwrap();
         let owner = process_sid(std::process::id()).unwrap();
 
-        assert!(is_owner_connection(&accepted, &owner));
-        assert!(!is_owner_connection(&accepted, "S-1-5-21-1-2-3-1001"));
+        let host = owner_client(&accepted, &owner).expect("the owner is admitted");
+        assert_eq!(host.pid, std::process::id());
+        assert_eq!(host.owner_sid, owner);
+        assert_eq!(
+            host.created,
+            process_identity(std::process::id()).unwrap().1
+        );
+        assert!(owner_client(&accepted, "S-1-5-21-1-2-3-1001").is_none());
     }
 }

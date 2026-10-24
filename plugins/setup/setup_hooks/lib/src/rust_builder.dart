@@ -29,15 +29,26 @@ class RustBuilder {
   String get _helperPath => p.join(rootDir, config.helperDir);
   String get _outputPath => p.join(rootDir, config.outputDir);
 
-  Future<BuildExecution> build(Target target, String coreSha256) async {
+  static List<String> cargoArguments(Target target) {
     final triple = target.rustTriple;
-    final args = [
+    return [
       'build',
       '--target',
       triple,
-      if (target.goos == 'windows') ...['--features', 'windows-service'],
+      if (target.goos == 'windows') ...[
+        '--features',
+        'windows-service',
+        // The SCM runs an installed copy that has no app-local MSVC runtime.
+        '--config',
+        'target.$triple.rustflags=["-C", "target-feature=+crt-static"]',
+      ],
       '--release',
     ];
+  }
+
+  Future<BuildExecution> build(Target target, String coreSha256) async {
+    final triple = target.rustTriple;
+    final args = cargoArguments(target);
     final env = {
       'CORE_SHA256': coreSha256,
       'CORE_NAME': '${config.coreName}${target.executableExtension}',
@@ -51,10 +62,7 @@ class RustBuilder {
       'helper${target.executableExtension}',
     );
     final destDir = p.join(_outputPath, target.platformDir);
-    final destPath = p.join(
-      destDir,
-      '${config.helperName}${target.executableExtension}',
-    );
+    final destPath = p.join(destDir, config.helperFileName(target));
     return cache.run(
       key: '${target.platformDir}-${target.goarch}-helper-release',
       fingerprint: () => _calculateFingerprint(

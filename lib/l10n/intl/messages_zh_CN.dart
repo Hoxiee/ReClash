@@ -2706,6 +2706,52 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunOverrideDesc": MessageLookupByLibrary.simpleMessage(
       "添加的项会覆写所有配置的虚拟网卡设置，未添加的项沿用配置自身的设置。自定义配置自己添加的项优先。",
     ),
+    "tunSetupApprovalTitle": MessageLookupByLibrary.simpleMessage(
+      "允许 TUN Helper",
+    ),
+    "tunSetupConfirm": MessageLookupByLibrary.simpleMessage("设置"),
+    "tunSetupDone": MessageLookupByLibrary.simpleMessage("TUN 已开启"),
+    "tunSetupInstallTitle": MessageLookupByLibrary.simpleMessage("设置 TUN"),
+    "tunSetupInstantStart": MessageLookupByLibrary.simpleMessage(
+      "之后 TUN 会立即启动，包括登录时",
+    ),
+    "tunSetupLater": MessageLookupByLibrary.simpleMessage("暂不"),
+    "tunSetupLinuxInstall": MessageLookupByLibrary.simpleMessage(
+      "要让系统全部流量经过 ReClash，TUN 需要一个系统 Helper：这是一项 systemd 服务，只以网络权限启动 Core。",
+    ),
+    "tunSetupLinuxScope": MessageLookupByLibrary.simpleMessage(
+      "Helper 只启动已验证的 ReClash Core，并且只授予其网络权限",
+    ),
+    "tunSetupLinuxUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash 已更新，TUN Helper 需要同步更新才能继续工作。",
+    ),
+    "tunSetupMacosInstall": MessageLookupByLibrary.simpleMessage(
+      "TUN 需要 ReClash Helper。macOS 会请您允许一次。",
+    ),
+    "tunSetupOnceConfirm": MessageLookupByLibrary.simpleMessage(
+      "此版本需要 Windows 确认一次",
+    ),
+    "tunSetupOncePassword": MessageLookupByLibrary.simpleMessage(
+      "此版本需要一次管理员密码",
+    ),
+    "tunSetupPasswordPrivacy": MessageLookupByLibrary.simpleMessage(
+      "请只在系统窗口中输入密码：ReClash 永远看不到它。",
+    ),
+    "tunSetupUnavailableTitle": MessageLookupByLibrary.simpleMessage("TUN 不可用"),
+    "tunSetupUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "更新 TUN Helper",
+    ),
+    "tunSetupWaiting": MessageLookupByLibrary.simpleMessage("正在等待系统窗口中的确认…"),
+    "tunSetupWindowsInstall": MessageLookupByLibrary.simpleMessage(
+      "要让系统全部流量经过 ReClash，TUN 需要 ReClash Service。这是一项 Windows 服务，会以网络适配器所需的权限运行 Core。",
+    ),
+    "tunSetupWindowsScope": MessageLookupByLibrary.simpleMessage(
+      "服务只启动已验证的 ReClash Core，并且只接受您的账户",
+    ),
+    "tunSetupWindowsUpdate": MessageLookupByLibrary.simpleMessage(
+      "ReClash 已更新，ReClash Service 需要同步更新，TUN 才能继续正常工作。",
+    ),
+    "tunSetupWithoutTun": MessageLookupByLibrary.simpleMessage("不使用 TUN"),
     "turnOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "turnOn": MessageLookupByLibrary.simpleMessage("开启"),
     "udpRelayMode": MessageLookupByLibrary.simpleMessage("UDP 中继模式"),

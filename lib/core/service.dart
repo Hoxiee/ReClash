@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/path.dart';
 import 'package:reclash/common/system.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/core.dart';
@@ -14,6 +15,7 @@ import 'desktop/privilege.dart';
 import 'desktop/linux_helper.dart';
 import 'desktop/macos_helper.dart';
 import 'desktop/windows_launcher.dart';
+import 'desktop/windows_service.dart';
 import 'desktop/rpc_client.dart';
 import 'desktop/transport.dart';
 import 'event.dart';
@@ -43,16 +45,24 @@ class CoreService extends CoreHandlerInterface {
     final directLauncher = DirectCoreLauncher();
 
     late final DesktopCoreLifecycle lifecycle;
+    Future<HelperReadiness> serviceReady() =>
+        helperClient.readiness(logFailure: false);
     final privileges = DesktopPrivilegeCoordinator(
       direct: directLauncher,
       linux: HelperLauncher(helperClient),
-      windows: WindowsLauncherResolver(
-        direct: directLauncher,
-        elevated: WindowsCoreLauncher(),
+      windows: WindowsGuiElevation(WindowsCoreLauncher()),
+      windowsService: HelperLauncher(
+        helperClient,
+        homeDirectory: () => appPath.homeDirPath,
       ),
+      windowsServiceReady: serviceReady,
+      windowsInstaller: system.isWindows
+          ? WindowsServiceInstaller(readiness: serviceReady)
+          : null,
       macos: MacOSHelperLauncher(),
       linuxInstaller: LinuxHelperInstaller(),
-      linuxReady: () => helperClient.readiness(logFailure: false),
+      linuxReady: serviceReady,
+      readinessFailure: () => helperClient.readinessFailure,
       currentOwner: () => switch (lifecycle.state) {
         DesktopCoreRunning(:final session) => session.owner,
         _ => null,
@@ -117,6 +127,19 @@ class CoreService extends CoreHandlerInterface {
   void revokePrivilegePrompt() => _privileges?.revokePrompt();
 
   @override
+  void allowPrivilegeInstall() => _privileges?.allowInstall();
+
+  @override
+  void suspendPrivilege() => _privileges?.suspend();
+
+  @override
+  Future<DesktopPrivilegeSetup> inspectPrivilege({
+    required bool tunEnabled,
+  }) async =>
+      await _privileges?.inspect(tunEnabled: tunEnabled) ??
+      DesktopPrivilegeSetup.notRequired;
+
+  @override
   Future<DesktopPrivilegeDecision> preparePrivilege({
     required bool tunEnabled,
     bool allowPrompt = false,
@@ -157,6 +180,11 @@ class CoreService extends CoreHandlerInterface {
     Object? arguments,
     Duration? timeout,
   }) {
+    // No Core will connect until a new start, so a call would only sit out
+    // its connect window and answer null anyway.
+    if (_lifecycle.state case DesktopCoreFailed() || DesktopCoreClosed()) {
+      return Future.value();
+    }
     return _rpcClient.invoke<T>(
       method: method,
       arguments: arguments,
