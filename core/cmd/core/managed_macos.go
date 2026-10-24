@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"path/filepath"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -53,18 +53,18 @@ func readMacOSBootstrap(reader io.Reader) (macOSBootstrap, error) {
 	if !canonicalMacOSPath(bootstrap.AccountHome) || !canonicalMacOSPath(bootstrap.HomeDir) {
 		return bootstrap, errors.New("managed macOS home must be an absolute canonical path")
 	}
-	expectedHome := filepath.Join(bootstrap.AccountHome, "Library", "Application Support", bootstrap.AppIdentifier)
+	expectedHome := path.Join(bootstrap.AccountHome, "Library", "Application Support", bootstrap.AppIdentifier)
 	if bootstrap.HomeDir != expectedHome {
 		return bootstrap, errors.New("managed macOS home is outside the signed client's application scope")
 	}
-	expectedCore := filepath.Join("/Library/Application Support/ReClash/ManagedCore", bootstrap.AppIdentifier, bootstrap.CoreSHA256, "ReClashCore")
+	expectedCore := path.Join("/Library/Application Support/ReClash/ManagedCore", bootstrap.AppIdentifier, bootstrap.CoreSHA256, "ReClashCore")
 	if bootstrap.CorePath != expectedCore {
 		return bootstrap, errors.New("managed macOS Core is outside its fixed hash-addressed scope")
 	}
 	return bootstrap, nil
 }
 
-func canonicalMacOSPath(path string) bool {
-	return filepath.IsAbs(path) && filepath.Clean(path) == path &&
-		len(path) < 1024 && !strings.ContainsAny(path, "\x00\r\n")
+func canonicalMacOSPath(value string) bool {
+	return path.IsAbs(value) && path.Clean(value) == value &&
+		len(value) < 1024 && !strings.ContainsAny(value, "\x00\r\n")
 }
