@@ -9,7 +9,7 @@ app_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$bundle/Conten
 helper_id="$app_id.helper"
 core="$bundle/Contents/MacOS/ReClashCore"
 helper="$bundle/Contents/Library/LaunchServices/$helper_id"
-manifest="$bundle/Contents/MacOS/manifest.json"
+manifest="$bundle/Contents/Resources/manifest.json"
 plist="$bundle/Contents/Library/LaunchDaemons/$helper_id.plist"
 for binary in "$bundle" "$core" "$helper"; do
     /usr/bin/codesign --verify --strict --all-architectures "$binary"
