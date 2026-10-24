@@ -807,7 +807,7 @@ void main() {
         action.startCompleter = startCompleter;
 
         final firstStart = action.setRunning(true);
-        await Future<void>.delayed(Duration.zero);
+        await action.firstTransition.future;
         final stop = action.setRunning(false);
         final latestStart = action.setRunning(true);
 
@@ -1211,6 +1211,7 @@ class _RaceSetupAction extends SetupAction {
   int applyProfileDebounceCount = 0;
   int resetCoreTrafficCount = 0;
   final transitions = <bool>[];
+  final firstTransition = Completer<void>();
   Completer<bool>? startCompleter;
   Completer<bool>? stopCompleter;
 
@@ -1222,6 +1223,7 @@ class _RaceSetupAction extends SetupAction {
   @override
   Future<bool> setCoreRunning(bool running) async {
     transitions.add(running);
+    if (!firstTransition.isCompleted) firstTransition.complete();
     return running
         ? await startCompleter?.future ?? true
         : await stopCompleter?.future ?? true;

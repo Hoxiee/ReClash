@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Навигация",
   "navigationLayoutBar": "Қойынды тақтасы",
-  "navigationLayoutSidebar": "Бүйірлік панель"
+  "navigationLayoutSidebar": "Бүйірлік панель",
+  "sidebarBlur": "Бүйірлік панельді бұлыңғырлау"
 }

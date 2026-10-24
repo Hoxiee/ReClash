@@ -72,5 +72,7 @@
   "trayIcon": "Icono de la bandeja",
   "trayIconColor": "Color",
   "trayIconLight": "Blanco",
-  "trayIconDark": "Negro"
+  "trayIconDark": "Negro",
+  "accessControlSettings": "Ajustes de control de acceso",
+  "hideTimeoutProxiesDesc": "Omite los proxies cuya última prueba de latencia superó el tiempo de espera"
 }

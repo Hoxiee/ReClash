@@ -10,7 +10,7 @@ helper_id="$app_id.helper"
 helper="$BUILT_PRODUCTS_DIR/$helper_id"
 core="$macos/ReClashCore"
 info="$bundle/Contents/Info.plist"
-mkdir -p "$launch_services" "$launch_daemons"
+mkdir -p "$launch_services" "$launch_daemons" "$bundle/Contents/Resources"
 if [[ ! -f "$helper" || ! -f "$core" ]]; then
     echo "error: signed Helper target or staged Core is missing"
     exit 1
@@ -56,5 +56,5 @@ requirement="anchor apple generic and identifier \"$helper_id\" and certificate 
 /usr/libexec/PlistBuddy -c "Add :SMPrivilegedExecutables:$helper_id string $requirement" "$info"
 core_hash="$(/usr/bin/shasum -a 256 "$core" | /usr/bin/awk '{print $1}')"
 helper_hash="$(/usr/bin/shasum -a 256 "$launch_services/$helper_id" | /usr/bin/awk '{print $1}')"
-printf '{"coreSha256":"%s","helperSha256":"%s","helperProtocolVersion":1}\n' "$core_hash" "$helper_hash" > "$macos/manifest.json"
+printf '{"coreSha256":"%s","helperSha256":"%s","helperProtocolVersion":1}\n' "$core_hash" "$helper_hash" > "$bundle/Contents/Resources/manifest.json"
 /usr/bin/plutil -lint "$launch_daemons/$helper_id.plist" "$info"

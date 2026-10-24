@@ -210,8 +210,14 @@ void main() {
         final config = await Migration(store: store).run();
 
         final theme = config.themeProps;
-        expect(theme.primaryColor, defaultPrimaryColor);
-        expect(theme.primaryColors, defaultPrimaryColors);
+        expect(theme.primaryColor, 0xFFFF8D28);
+        expect(
+          theme.primaryColors,
+          {
+            for (final color in defaultPrimaryColors)
+              color == defaultPrimaryColor ? 0xFFFF8D28 : color,
+          }.toList(),
+        );
         expect(theme.colorStyle, ColorStyle.vivid);
         expect(theme.themeMode, ThemeMode.dark);
         expect(theme.pureBlack, isTrue);

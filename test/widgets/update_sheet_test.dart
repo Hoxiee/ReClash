@@ -269,13 +269,13 @@ void main() {
   }
 
   bool autoInstallSwitch(WidgetTester tester) => tester
-      .widget<Switch>(
+      .widget<CommonSwitch>(
         find.descendant(
           of: find.ancestor(
             of: find.text(currentAppLocalizations.updateAutoInstall),
             matching: find.byType(ListItem),
           ),
-          matching: find.byType(Switch),
+          matching: find.byType(CommonSwitch),
         ),
       )
       .value;
@@ -448,7 +448,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(currentAppLocalizations.updateAutoInstall), findsNothing);
-    expect(find.byType(Switch), findsOneWidget);
+    expect(find.byType(CommonSwitch), findsOneWidget);
     await tester.tap(
       find.widgetWithText(TextButton, currentAppLocalizations.cancel),
     );

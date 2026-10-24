@@ -29,7 +29,7 @@ ToolEnvironment watchToolEnvironment(WidgetRef ref) {
     logs: settings.$2,
     macos: system.isMacOS,
     webdav: ref.watch(davSettingProvider.select((dav) => dav != null)),
-    sidebarBlur: feature.sidebarBlur && (system.isMacOS || system.isWindows),
+    sidebarBlur: system.isMacOS || system.isWindows,
     customInterface: ref.watch(
       patchClashConfigProvider.select(
         (s) => s.interfaceNameMode == InterfaceNameMode.custom,
@@ -315,7 +315,7 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                     controller: _scroll,
                     padding: EdgeInsetsDirectional.only(
                       end: 12,
-                      bottom: 20 + BottomInsetScope.of(context),
+                      bottom: 20 + context.bottomInset,
                     ),
                     children: searching
                         ? [

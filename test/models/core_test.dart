@@ -268,19 +268,22 @@ void main() {
   });
 
   group('ProbeResult', () {
-    test('round-trips Core epoch and proxy picks version', () {
+    test('round-trips Core epoch, route version, and route evidence', () {
       const result = ProbeResult(
         statusCode: 204,
         coreEpoch: 2,
-        picksVersion: 5,
+        routeVersion: 5,
+        hits: [RouteHit(host: 'example.com', proxy: 'Proxy', exit: 'node-a')],
       );
       final json = jsonDecode(jsonEncode(result.toJson()));
       final restored = ProbeResult.fromJson(json);
 
       expect(json['core-epoch'], 2);
-      expect(json['picks-version'], 5);
+      expect(json['route-version'], 5);
       expect(restored.coreEpoch, 2);
-      expect(restored.picksVersion, 5);
+      expect(restored.routeVersion, 5);
+      expect(restored.hits, result.hits);
+      expect(json, isNot(contains('picks-version')));
     });
   });
 

@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Nawigasiýa",
   "navigationLayoutBar": "Bellikler paneli",
-  "navigationLayoutSidebar": "Gapdal panel"
+  "navigationLayoutSidebar": "Gapdal panel",
+  "sidebarBlur": "Gapdal paneliň bulaňňylamasy"
 }

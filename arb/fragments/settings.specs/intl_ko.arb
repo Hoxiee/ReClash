@@ -72,5 +72,7 @@
   "trayIcon": "트레이 아이콘",
   "trayIconColor": "컬러",
   "trayIconLight": "흰색",
-  "trayIconDark": "검정"
+  "trayIconDark": "검정",
+  "accessControlSettings": "접근 제어 설정",
+  "hideTimeoutProxiesDesc": "마지막 지연 테스트에서 시간 초과된 프록시를 제외합니다"
 }

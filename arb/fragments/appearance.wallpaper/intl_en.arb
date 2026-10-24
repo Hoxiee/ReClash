@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Navigation",
   "navigationLayoutBar": "Tab bar",
-  "navigationLayoutSidebar": "Sidebar"
+  "navigationLayoutSidebar": "Sidebar",
+  "sidebarBlur": "Sidebar blur"
 }

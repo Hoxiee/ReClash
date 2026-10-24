@@ -72,5 +72,7 @@
   "trayIcon": "Трей таңбашасы",
   "trayIconColor": "Түрлі",
   "trayIconLight": "Ақ",
-  "trayIconDark": "Қара"
+  "trayIconDark": "Қара",
+  "accessControlSettings": "Рұқсатты басқару баптаулары",
+  "hideTimeoutProxiesDesc": "Соңғы кідіріс сынағының уақыты өткен проксилерді көрсетпеу"
 }

@@ -15,7 +15,12 @@ abstract final class CoreManifest {
     try {
       final file = File(
         path ??
-            p.join(p.dirname(Platform.resolvedExecutable), coreManifestName),
+            p.joinAll([
+              p.dirname(Platform.resolvedExecutable),
+              if (Platform.isMacOS) '..',
+              if (Platform.isMacOS) 'Resources',
+              coreManifestName,
+            ]),
       );
       final value = jsonDecode(await file.readAsString());
       if (value is! Map<String, dynamic>) return null;

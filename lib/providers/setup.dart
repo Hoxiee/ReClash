@@ -131,8 +131,8 @@ class _SetupRouteProbe extends Notifier<RoutedProbeState<String, ProbeResult>>
       target: ProbeAnswer(
         value: result,
         coreEpoch: result?.coreEpoch,
-        picksVersion: result?.picksVersion,
-        chains: result?.chains ?? const [],
+        routeVersion: result?.routeVersion,
+        hits: result?.hits ?? const [],
       ),
     };
   }
@@ -203,8 +203,7 @@ class SetupSession extends Notifier<SetupSessionState> {
     ref.listen(vpnSettingProvider, invalidateInputs);
     ref.listen(
       appSettingProvider.select(
-        (settings) =>
-            (settings.regionCode, settings.testUrl, settings.checkCertificate),
+        (settings) => (settings.regionCode, settings.checkCertificate),
       ),
       invalidateInputs,
     );
@@ -838,7 +837,7 @@ class SetupSession extends Notifier<SetupSessionState> {
       }
       await _syncRoute(generation);
       _probing = true;
-      final testUrl = ref.read(appSettingProvider).testUrl;
+      final testUrl = ref.read(patchClashConfigProvider).testUrl;
       _phase(SetupPhase.route, SetupPhaseStatus.running);
       ProbeEntry<ProbeResult>? answer;
       try {

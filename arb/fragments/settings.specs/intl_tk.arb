@@ -72,5 +72,7 @@
   "trayIcon": "Tray nyşany",
   "trayIconColor": "Reňkli",
   "trayIconLight": "Ak",
-  "trayIconDark": "Gara"
+  "trayIconDark": "Gara",
+  "accessControlSettings": "Elyetmäge gözegçiligiň sazlamalary",
+  "hideTimeoutProxiesDesc": "Soňky gijikme synagy wagty çykan proksileri goýup geçiň"
 }

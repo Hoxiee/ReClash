@@ -55,6 +55,7 @@ class Dialogs {
     String? cancelText,
     bool? dismissible,
     bool destructive = false,
+    bool cancelable = true,
   }) {
     return _showMessage(
       message: message,
@@ -64,7 +65,7 @@ class Dialogs {
       cancelText: cancelText,
       dismissible: dismissible,
       destructive: destructive,
-      cancelable: true,
+      cancelable: cancelable,
     );
   }
 

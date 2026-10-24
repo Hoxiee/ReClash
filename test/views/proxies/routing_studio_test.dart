@@ -271,7 +271,7 @@ void main() {
       await tester.tap(find.text(l.rcxCondMatch));
       await _pumpFrames(tester);
       await tester.tap(find.text(l.rcxCondAny));
-      await _pumpFrames(tester);
+      await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 200));
 
       final conds = action.requests.where((r) => r['op'] == 'cond').toList();
@@ -299,7 +299,7 @@ void main() {
       await tester.tap(find.text(rcxOpLabel(l, 'in')));
       await _pumpFrames(tester);
       await tester.tap(find.text(negated));
-      await _pumpFrames(tester);
+      await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 200));
 
       final conds = action.requests.where((r) => r['op'] == 'cond').toList();

@@ -7,7 +7,7 @@ must:
   tabs: The default tab transition remains fade unless the user selects otherwise.
   specs: Settings retain their declared state and apply semantics across the specification-based views.
   routes: Real setting specification lists have unique IDs and routes retain their page and setting ID.
-  log-capture: Log capture and the Core log level share the application settings diagnostics section and search destination; general settings expose neither.
+  log-capture: Log capture and the Core log level share the General settings diagnostics section and search destination, following the upstream section order without duplicate controls in application settings.
   dashboard-selection: The selected web dashboard is a Flutter-only preference; changing it does not modify controller settings or trigger a profile apply.
 watch: ['lib/views/config/**', 'lib/models/config.dart', 'lib/models/tool_route.dart', 'lib/widgets/settings/**', 'lib/widgets/config_item.dart', 'arb/fragments/settings.specs/**', 'lib/providers/setting*', 'lib/common/preferences.dart', 'lib/views/application_setting.dart', 'lib/views/backup_and_restore.dart', 'lib/views/developer.dart', 'lib/views/disclaimer.dart', 'lib/views/hotkey.dart', 'lib/views/resources.dart', 'lib/views/theme.dart', test/models/config_test.dart, test/providers/config_test.dart, test/views/resources_view_test.dart, test/views/theme_test.dart, test/widgets/fork_setting_spec_contract_test.dart, test/widgets/tools_workspace_test.dart, lib/providers/setup.dart, lib/views/setup.dart, test/views/application_setting_test.dart]
 checks:

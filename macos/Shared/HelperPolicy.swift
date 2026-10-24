@@ -166,7 +166,7 @@ struct HelperBundle {
         try CodeTrust.staticCode(at: app, requirement: identity.appRequirement)
         let core = app.appendingPathComponent("Contents/MacOS/ReClashCore")
         let helper = app.appendingPathComponent("Contents/Library/LaunchServices/\(identity.helperIdentifier)")
-        let manifest = app.appendingPathComponent("Contents/MacOS/manifest.json")
+        let manifest = app.appendingPathComponent("Contents/Resources/manifest.json")
         try SecurePaths.noSymlinks(core.path)
         try SecurePaths.noSymlinks(helper.path)
         try SecurePaths.noSymlinks(manifest.path)

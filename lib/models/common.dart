@@ -23,6 +23,7 @@ abstract class NavigationItem with _$NavigationItem {
     required PageLabel label,
     required WidgetBuilder builder,
     String? path,
+    @Default(true) bool keep,
     @Default([NavigationItemMode.mobile, NavigationItemMode.desktop])
     List<NavigationItemMode> modes,
   }) = _NavigationItem;

@@ -44,5 +44,6 @@
   },
   "navigationLayout": "내비게이션",
   "navigationLayoutBar": "탭 바",
-  "navigationLayoutSidebar": "사이드바"
+  "navigationLayoutSidebar": "사이드바",
+  "sidebarBlur": "사이드바 블러"
 }

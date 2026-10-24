@@ -97,7 +97,7 @@ class SubscriptionCompatibilityPage extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
                 top: context.contentTopPadding,
-                bottom: BottomInsetScope.of(context) + 16,
+                bottom: context.bottomInset + 16,
               ),
               children: [
                 ErrorBanner(message: view.error),

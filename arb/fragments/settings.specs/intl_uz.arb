@@ -72,5 +72,7 @@
   "trayIcon": "Tray belgisi",
   "trayIconColor": "Rangli",
   "trayIconLight": "Oq",
-  "trayIconDark": "Qora"
+  "trayIconDark": "Qora",
+  "accessControlSettings": "Kirish nazorati sozlamalari",
+  "hideTimeoutProxiesDesc": "Oxirgi kechikish testida vaqti tugagan proksilarni tashlab ketish"
 }

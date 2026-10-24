@@ -13,6 +13,7 @@ import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/subscriptions/metadata/preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 import '../helpers/app_paths.dart';
 
@@ -818,6 +819,41 @@ void main() {
         failsWith(BackupFailure.newerVersion),
       );
     });
+
+    test(
+      'imports a FlClash v0.9.2 schema 21 archive without changing its source',
+      () async {
+        await seedDatabase();
+        final source = sqlite.sqlite3.open(databasePath);
+        source.execute(
+          'ALTER TABLE profiles DROP COLUMN subscription_preferences',
+        );
+        source.execute(
+          'ALTER TABLE profiles DROP COLUMN subscription_snapshot',
+        );
+        source.execute(
+          'ALTER TABLE clash_providers DROP COLUMN request_headers',
+        );
+        source.execute('PRAGMA user_version = 21');
+        source.close();
+        final archivePath = await backup();
+        final before = await File(archivePath).readAsBytes();
+        final data = await restore(archivePath);
+        expect(data.profiles.single.label, 'Backed up');
+        expect(data.profiles.single.subscriptionSnapshot, isNull);
+        expect(data.clashProviders.single.label, 'Local rules');
+        expect(data.clashProviders.single.headers, isEmpty);
+        expect(data.scripts.single.label, 'Script');
+        expect(data.rules.single.content, 'example.com');
+        expect(await File(archivePath).readAsBytes(), before);
+        final original = sqlite.sqlite3.open(databasePath);
+        expect(
+          original.select('PRAGMA user_version').single['user_version'],
+          21,
+        );
+        original.close();
+      },
+    );
 
     test('a database from a newer schema is rejected', () async {
       await seedDatabase();

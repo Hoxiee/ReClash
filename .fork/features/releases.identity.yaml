@@ -1,0 +1,13 @@
+v: 1
+kind: identity
+state: active
+risk: critical
+must:
+  metadata: Sync preserves downstream version, release notes and changelog instead of adopting upstream release identity.
+  packages: Product package identity and engine source ownership require explicit review independently of successful compilation.
+watch: [pubspec.yaml, CHANGELOG.md, changelog.json, android/app/build.gradle.kts, .gitmodules, core/mihomo, test/tool/fork_identity_test.dart, test/tool/fork_sync_test.dart, test/tool/packaging_config_test.dart]
+checks:
+  fork-tests: [metadata]
+  packaging: [metadata, packages]
+  identity: [packages]
+drop: Product release identity is no longer maintained independently of upstream.

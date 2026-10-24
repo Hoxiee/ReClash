@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Navigation",
   "navigationLayoutBar": "Barre d’onglets",
-  "navigationLayoutSidebar": "Barre latérale"
+  "navigationLayoutSidebar": "Barre latérale",
+  "sidebarBlur": "Flou de la barre latérale"
 }

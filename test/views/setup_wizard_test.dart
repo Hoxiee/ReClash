@@ -93,7 +93,7 @@ class _TestSetupSession extends SetupSession {
 
   @override
   Future<RouteSnapshot?> routeSnapshot() async =>
-      const RouteSnapshot(coreEpoch: 1, picksVersion: 1);
+      const RouteSnapshot(coreEpoch: 1, routeVersion: 1);
 
   @override
   Future<ProbeResult?> probeRoute(String url) async =>

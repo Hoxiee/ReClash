@@ -72,5 +72,7 @@
   "trayIcon": "トレイアイコン",
   "trayIconColor": "カラー",
   "trayIconLight": "白",
-  "trayIconDark": "黒"
+  "trayIconDark": "黒",
+  "accessControlSettings": "アクセス制御の設定",
+  "hideTimeoutProxiesDesc": "前回の遅延テストがタイムアウトしたプロキシを表示しない"
 }

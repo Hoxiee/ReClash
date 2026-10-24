@@ -63,6 +63,11 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'chains': ['DIRECT'],
         'rule': 'Match',
         'rule-payload': '',
+        'core-epoch': 2,
+        'route-version': 7,
+        'hits': [
+          {'host': 'example.com', 'proxy': 'DIRECT', 'exit': 'DIRECT'},
+        ],
       },
       CoreMethod.getConnections => {
         'connections': [
@@ -502,6 +507,9 @@ void main() {
         url: 'https://example.com/',
         chains: ['DIRECT'],
         rule: 'Match',
+        coreEpoch: 2,
+        routeVersion: 7,
+        hits: [RouteHit(host: 'example.com', proxy: 'DIRECT', exit: 'DIRECT')],
       ),
     );
     expect((await handler.getConnections()).single.id, 'connection-1');

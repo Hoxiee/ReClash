@@ -1,3 +1,4 @@
+import 'package:reclash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -74,7 +75,7 @@ void main() {
     },
   );
 
-  testWidgets('log settings are grouped only in application settings', (
+  testWidgets('log settings are grouped only in General settings', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 1800);
@@ -88,7 +89,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: ApplicationSettingView()),
+        child: const TestApp(child: GeneralView()),
       ),
     );
     await tester.pumpAndSettle();
@@ -97,12 +98,12 @@ void main() {
     final level = find.text('Log level');
     final captureSwitch = find.descendant(
       of: find.widgetWithText(ListTile, 'Logcat'),
-      matching: find.byType(Switch),
+      matching: find.byType(CommonSwitch),
     );
     expect(capture, findsOneWidget);
     expect(level, findsOneWidget);
     expect(find.text('warning'), findsOneWidget);
-    expect(tester.widget<Switch>(captureSwitch).value, isFalse);
+    expect(tester.widget<CommonSwitch>(captureSwitch).value, isFalse);
     await tester.ensureVisible(level);
     await tester.tap(level);
     await tester.pumpAndSettle();
@@ -115,12 +116,12 @@ void main() {
     await tester.tap(capture);
     await tester.pumpAndSettle();
     expect(container.read(appSettingProvider).openLogs, isTrue);
-    expect(tester.widget<Switch>(captureSwitch).value, isTrue);
+    expect(tester.widget<CommonSwitch>(captureSwitch).value, isTrue);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: GeneralView()),
+        child: const TestApp(child: ApplicationSettingView()),
       ),
     );
     await tester.pumpAndSettle();
@@ -135,19 +136,19 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: ApplicationSettingView()),
+        child: const TestApp(child: GeneralView()),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(level, findsOneWidget);
     expect(find.text('debug'), findsOneWidget);
-    expect(tester.widget<Switch>(captureSwitch).value, isTrue);
+    expect(tester.widget<CommonSwitch>(captureSwitch).value, isTrue);
     await tester.ensureVisible(capture);
     await tester.tap(capture);
     await tester.pumpAndSettle();
     expect(container.read(appSettingProvider).openLogs, isFalse);
-    expect(tester.widget<Switch>(captureSwitch).value, isFalse);
+    expect(tester.widget<CommonSwitch>(captureSwitch).value, isFalse);
     expect(container.read(patchClashConfigProvider).logLevel, LogLevel.debug);
   });
 

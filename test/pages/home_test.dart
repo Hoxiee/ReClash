@@ -10,7 +10,7 @@ import 'package:reclash/pages/home.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
-import 'package:reclash/views/application_setting.dart';
+import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/navigation.dart';
@@ -478,7 +478,7 @@ void main() {
       );
       await tester.pump();
 
-      final applicationItem = find.text('Application settings').last;
+      final applicationItem = find.text('General').last;
       await tester.scrollUntilVisible(
         applicationItem,
         500,
@@ -486,7 +486,7 @@ void main() {
       );
       await tester.tap(applicationItem);
       await tester.pumpAndSettle();
-      expect(find.byType(ApplicationSettingView), findsOneWidget);
+      expect(find.byType(GeneralView), findsOneWidget);
 
       final logItem = find.text('Logcat');
       await tester.scrollUntilVisible(
@@ -494,7 +494,7 @@ void main() {
         500,
         scrollable: find
             .descendant(
-              of: find.byType(ApplicationSettingView),
+              of: find.byType(GeneralView),
               matching: find.byType(Scrollable),
             )
             .first,
@@ -504,7 +504,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(container.read(appSettingProvider).openLogs, isTrue);
-      expect(find.byType(ApplicationSettingView), findsOneWidget);
+      expect(find.byType(GeneralView), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

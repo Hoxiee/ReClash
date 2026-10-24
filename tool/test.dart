@@ -7,6 +7,9 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 
 import 'src/test_select/graph.dart';
+import 'src/fork/git.dart';
+import 'src/fork/registry.dart';
+import 'src/fork/report.dart';
 import 'src/test_select/report.dart';
 import 'src/test_select/selection.dart';
 
@@ -43,7 +46,9 @@ A changed Dart file selects the tests that import it, directly or through
 the libraries it reaches. Through a barrel's export, a file counts only when it
 names a declaration the change reaches. ARB and l10n changes select the l10n
 tests, any lib/ change test/lint/, a tool/<name> change test/tool/<name>*, and
-a pubspec change the whole suite; other paths are listed as unmapped.''';
+a pubspec change the whole suite. Other paths list external maintenance checks
+when classified in .fork/maintenance.yaml; unknown paths require explicit review.
+External checks are not executed by this selector.''';
 
 // Fixed, so a commit groups its files the same way on every machine.
 const _bundleCount = 32;
@@ -236,8 +241,28 @@ Future<List<String>> _select(_Options options) async {
     changed,
     previousSource: (path) => previous[path],
   );
-  for (final path in selection.unmapped) {
-    stdout.writeln('unmapped: $path');
+  if (selection.unmapped.isNotEmpty) {
+    final metadata = File('$root/.fork/maintenance.yaml');
+    final report = metadata.existsSync()
+        ? MaintenanceReport(Registry(ForkGit(root)))
+        : null;
+    final policy = report?.policy();
+    for (final path in selection.unmapped) {
+      final classification = report?.classification(path, policy!);
+      if (classification == null ||
+          classification['kind'] == 'unclassified' ||
+          classification['kind'] == 'contract') {
+        stdout.writeln(
+          'unmapped: $path (no Dart test selection; explicit review required)',
+        );
+      } else {
+        stdout.writeln(
+          'external: $path [${classification['kind']}] '
+          'checks=${(classification['checks'] as List).join(',')} '
+          '(not run by this test selector)',
+        );
+      }
+    }
   }
   if (selection.fullSuite case final path?) {
     stdout.writeln('full suite recommended: $path changed');

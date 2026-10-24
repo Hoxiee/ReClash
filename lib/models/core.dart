@@ -258,7 +258,8 @@ abstract class ProbeResult with _$ProbeResult {
     String? error,
     String? message,
     @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
-    @JsonKey(name: 'picks-version') @Default(0) int picksVersion,
+    @JsonKey(name: 'route-version') @Default(0) int routeVersion,
+    @Default([]) List<RouteHit> hits,
   }) = _ProbeResult;
 
   factory ProbeResult.fromJson(Map<String, Object?> json) =>

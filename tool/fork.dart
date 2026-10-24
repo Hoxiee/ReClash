@@ -6,12 +6,14 @@ import 'package:args/args.dart';
 import 'src/fork/git.dart';
 import 'src/fork/model.dart';
 import 'src/fork/registry.dart';
+import 'src/fork/report.dart';
 import 'src/fork/sync.dart';
 
 void main(List<String> arguments) {
   final parser = ArgParser()
     ..addOption('root', defaultsTo: Directory.current.path)
-    ..addFlag('json', negatable: false);
+    ..addFlag('json', negatable: false)
+    ..addFlag('markdown', negatable: false);
   parser.addCommand('check').addFlag('staged', negatable: false);
   parser.addCommand('context')
     ..addMultiOption('paths', splitCommas: false)
@@ -21,6 +23,14 @@ void main(List<String> arguments) {
   parser.addCommand('impact')
     ..addOption('from', mandatory: true)
     ..addOption('to', mandatory: true);
+  parser.addCommand('status').addOption('id', mandatory: true);
+  parser.addCommand('lineage').addOption('id', mandatory: true);
+  parser.addCommand('report')
+    ..addFlag('changed', negatable: false)
+    ..addOption('from')
+    ..addOption('to')
+    ..addOption('downstream-from')
+    ..addOption('downstream-to');
   parser.addCommand('stats')
     ..addOption('vendor', mandatory: true)
     ..addOption('downstream', defaultsTo: 'HEAD');
@@ -35,7 +45,9 @@ void main(List<String> arguments) {
     ..addOption('id', mandatory: true)
     ..addOption('source')
     ..addFlag('recipe-migration', negatable: false)
-    ..addOption('audit');
+    ..addOption('audit')
+    ..addOption('after');
+  sync.addCommand('status').addOption('id', mandatory: true);
   sync.addCommand('verify')
     ..addOption('id', mandatory: true)
     ..addMultiOption('reviewed')
@@ -49,6 +61,13 @@ void main(List<String> arguments) {
         'Usage: dart run tool/fork.dart [--root PATH] [--json] <command>\n${parser.usage}',
       );
     }
+    if (options.flag('markdown') &&
+        (options.flag('json') ||
+            !['report', 'status', 'lineage'].contains(command.name))) {
+      reject(
+        '--markdown is exclusive with --json and supports report/status/lineage',
+      );
+    }
     final git = ForkGit(options.option('root')!);
     final staged =
         (command.name == 'check' || command.name == 'context') &&
@@ -58,8 +77,10 @@ void main(List<String> arguments) {
     Object output;
     switch (command.name) {
       case 'check':
+        MaintenanceReport(registry).policy();
         output = {
           'status': 'valid',
+          'meaning': 'schema-valid-only-not-ready-for-acceptance',
           'features': registry.features.length,
           'gaps': {
             for (final f in registry.features.values.where(
@@ -104,6 +125,33 @@ void main(List<String> arguments) {
           'changes': git.changes(from, to),
           'clusters': clusters(registry, paths),
         };
+      case 'lineage':
+        output = MaintenanceReport(registry).lineage(command.option('id')!);
+      case 'status':
+        output = MaintenanceReport(registry).status(command.option('id')!);
+      case 'report':
+        final changed = command.flag('changed');
+        final from = command.option('from');
+        final to = command.option('to');
+        if ((changed && (from != null || to != null)) ||
+            (!changed && (from == null || to == null))) {
+          reject('Choose --changed or both --from and --to');
+        }
+        final downstreamFrom = command.option('downstream-from');
+        final downstreamTo = command.option('downstream-to');
+        if ((downstreamFrom == null) != (downstreamTo == null) ||
+            (changed && downstreamFrom != null)) {
+          reject(
+            'Overlap requires --from, --to, --downstream-from and --downstream-to',
+          );
+        }
+        output = MaintenanceReport(registry).paths(
+          changed ? git.changedPaths : git.changed(from!, to!),
+          from: from,
+          to: to,
+          downstreamFrom: downstreamFrom,
+          downstreamTo: downstreamTo,
+        );
       case 'stats':
         final vendor = command.option('vendor')!;
         final downstream = command.option('downstream')!;
@@ -159,7 +207,7 @@ void main(List<String> arguments) {
       case 'sync':
         final action =
             command.command ??
-            reject('sync requires prepare, verify, or accept');
+            reject('sync requires prepare, status, verify, or accept');
         final id = action.option('id')!;
         output = switch (action.name) {
           'prepare' => service.prepare(
@@ -167,7 +215,9 @@ void main(List<String> arguments) {
             source: action.option('source'),
             recipeMigration: action.flag('recipe-migration'),
             audit: action.option('audit'),
+            after: action.option('after'),
           ),
+          'status' => MaintenanceReport(registry).status(id),
           'verify' => service.verify(
             id,
             reviews: action.multiOption('reviewed'),
@@ -178,6 +228,10 @@ void main(List<String> arguments) {
         };
       default:
         reject('Unknown command');
+    }
+    if (options.flag('markdown')) {
+      stdout.writeln(renderMaintenanceMarkdown(output as Map<String, dynamic>));
+      return;
     }
     final rendered = const JsonEncoder.withIndent('  ').convert(output);
     if (!options.flag('json') &&

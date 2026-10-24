@@ -216,3 +216,112 @@ feat: support FlClash
 New engine changes are folded into one of the two commits, never added as a third. An upstream bump rebases both
 commits onto the new release tag. After any history rewrite, check that `git log --oneline <tag>..HEAD` lists exactly two
 commits, keep a local backup branch, and push with `--force-with-lease` pinned to the previous remote SHA.
+
+## Operator Quick Start
+
+1. Inspect the exact released raw commit, not an upstream development branch guessed from a tag name.
+2. Review the residuals and use `report` for owners, invariants, dependencies and check argv.
+3. Prepare once with a unique ID. Preparation creates objects and a candidate but never accepts it.
+4. Resolve replay conflicts in the assigned candidate. Keep release identity and Core ownership separate.
+5. Run focused checks, then inspect `status`. Missing checks and missing platform hosts remain missing evidence.
+6. Commit the candidate only with separate authority. `verify` requires a clean committed candidate and authorized reviews.
+7. Accept and publish only after separate explicit authorization. A valid schema or green report grants neither.
+
+```bash
+dart run tool/fork.dart --json report --changed
+dart run tool/fork.dart --json report --from vendor/flclash --to refs/reclash/prepared/<id>
+dart run tool/fork.dart --json status --id <id>
+```
+
+`status` is read-only: it compares captured refs, candidate cleanliness, current verification, release identity,
+review labels and platform/check evidence. It never executes checks, refreshes receipts, issues waivers or accepts.
+`check` validates schema only. `report` describes impact only. `verified` describes evidence for one exact commit.
+External checks recorded outside a verification receipt are not silently imported as proof.
+
+### Maintenance Metadata
+
+`.fork/maintenance.yaml` extends reporting without changing the existing feature schema or normalization algorithm.
+Feature entries declare path ownership (`upstream`, `downstream`, `shared`), evidence types per existing invariant,
+and review guidance. Types describe required evidence, not assertions that it exists. Unmatched paths remain unclassified.
+`release` names downstream identity fields or complete files to compare with captured development state; it does not
+rewrite them. The normalizer still preserves upstream gitlinks; the downstream replay owns the selected engine pin.
+`paths` classifies non-Dart changes and lists external checks. The changed-test selector prints those checks but does
+not run them or label them passed. Add real checks before adding classification; do not hide unknown changes as docs.
+
+### Database Compatibility Cookbook
+
+The SQLite `user_version` is scoped to a product lineage, not a global compatibility number. FlClash schema 21 and
+ReClash schema 21 have different columns. `.fork/maintenance.yaml` records supported source shapes, target schema,
+fixture tests and downgrade policy. A supported shape has migration and backup tests; a matching integer alone is not proof.
+
+- Local upgrade: run the normal Drift transaction, adding only missing columns/tables in the next release step.
+- Foreign backup: extract and migrate the staging copy, validate all rows, then apply through the existing restore owner.
+- Source archive: never rewrite it or stamp its schema number to bypass incompatibility.
+- Unknown newer schema: reject explicitly; inspect the new release and add a tested source shape before supporting it.
+- Same-number collision: converge the two known shapes in a higher ReClash migration, preserving existing fields.
+
+```bash
+dart run tool/database_schema.dart inspect <staged-database>
+dart run tool/database_schema.dart diff <before-database> <after-database>
+dart run tool/check_generated_contracts.dart
+```
+
+The inspector opens SQLite read-only. Compare schema shape and rows in regression tests; a schema diff alone cannot
+prove semantic preservation. Generated-binding checks catch mismatched Dart/Rust generation identity, while native
+builds remain required for ABI, toolchain and platform integration.
+
+### Recipe Migration and Chained Preparation
+
+Finish and commit a standalone recipe-migration candidate first, with separate commit authority. A following sync may
+use that exact clean candidate without temporarily accepting the recipe into development:
+
+```bash
+dart run tool/fork.dart sync prepare --id <next-id> --source <released-raw-commit> --after <recipe-id>
+dart run tool/fork.dart --json lineage --id <next-id>
+dart run tool/fork.dart --markdown status --id <next-id>
+```
+
+The predecessor must be an unaccepted standalone recipe migration with matching policy, protected refs and recovery
+bundle. Its receipt digest and exact candidate are captured and checked again; a create-only predecessor ref is included
+in the child bundle. Accepted development/vendor/product-base refs are not moved. `--after` cannot combine with
+bootstrap, audit or recipe migration. Final chain verification validates the captured predecessor again, unions predecessor and final candidate impact, and
+requires `normalization-policy` plus all affected critical/Core review labels. It binds predecessor metadata into the
+verification receipt and checks it again after tests. Accept revalidates the exact predecessor before any development
+change; only the final child is accepted. The predecessor receipt stays immutable, preserving the captured digest.
+Interrupted acceptance tolerates only the original or expected final vendor/product-base refs; it never accepts an
+unrelated ref movement. Do not edit receipts to bypass stale inputs.
+
+For overlap triage, compare normalized upstream snapshots and the corresponding downstream product range, not unrelated
+raw and branded trees. Both ranges are explicit; shared path names prioritize review but do not prove semantic conflicts:
+
+```bash
+dart run tool/fork.dart --markdown report --from <old-vendor> --to <new-prepared-vendor> --downstream-from <old-product-base> --downstream-to <candidate>
+```
+
+The existing `specs` and `tools` checks exercise setting destinations, nested navigation and rendered workspace behavior.
+When upstream moves a setting, keep its stable ID, update its actual page and catalog parent, and test scrolling and taps
+at the real viewport. A source-pattern scan or a matching route object alone is not visual or interaction evidence.
+
+### Managed Development Archives
+
+Every acceptance creates `archive/dev-before-<sync-id>` at the captured old `dev`, before moving development. Use
+unique descriptive sync IDs such as `flclash-v0.9.2-20261024`; the corresponding archive is
+`archive/dev-before-flclash-v0.9.2-20261024`. Archive names are stable, not rotating `previous-1`/`previous-2` aliases.
+The accepted receipt records its ref, exact commit and acceptance order. A verified `development-before.bundle` in
+the observation directory preserves that history independently of retention. Submodules still need separate bundles.
+
+Keep the latest **two** receipt-managed accepted archive branches, ordered by acceptance, not commit date or name.
+After acceptance succeeds, prune older managed refs using expected-old OIDs. Never prune unknown/manual branches,
+release tags, vendor snapshots, receipts or recovery bundles. An archive collision, changed OID or checked-out archive
+blocks the affected operation instead of overwriting or force-deleting it. A retention failure after acceptance is
+reported as an error; inspect refs and retry the same acceptance, never silently roll development back.
+This local policy neither pushes nor deletes remote branches. Remote archive publication/pruning needs explicit
+publication authority and must preserve the old remote development OID before a force-with-lease update.
+
+### Current Native Host Limitation
+
+The maintainer currently has no Windows or macOS host and accepts deferring their native checks. For verification,
+record explicit waivers for `windows-build` and `macos-build` only when selected and unavailable; do not remove these
+checks from contracts or call them passed. Record the missing hosts and residual packaging/service/ABI risk in the
+handoff. This allowance does not waive Linux, Android, portable tests, critical reviews, commit, acceptance or push
+authority. A later available host must run the native checks before claiming platform verification.

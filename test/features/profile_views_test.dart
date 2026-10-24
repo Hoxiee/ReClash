@@ -81,6 +81,7 @@ class _RecordingSetupAction extends SetupAction {
   @override
   Future<bool> applyProfile({
     bool silence = false,
+    bool suppressErrors = false,
     bool force = false,
     Future<void> Function()? preloadInvoke,
   }) async {

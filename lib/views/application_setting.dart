@@ -2,41 +2,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/regional/region_labels.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/update_sheet.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
-import 'package:reclash/views/config/on_demand.dart';
 import 'package:reclash/views/region.dart';
-import 'application_notification.dart';
 import 'package:reclash/widgets/settings/setting_target.dart';
 
 class ApplicationSettings {
   static final all = <SettingSpec>[
     SettingSpec(
       id: 'application.autoLaunch',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.autoLaunch,
       condition: SettingCondition.desktop,
     ),
     SettingSpec(
       id: 'application.silentLaunch',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.silentLaunch,
       condition: SettingCondition.desktop,
     ),
     SettingSpec(
       id: 'application.autoRun',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.autoRun,
     ),
     SettingSpec(
       id: 'application.onDemand',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.onDemand,
     ),
     SettingSpec(
@@ -46,29 +42,29 @@ class ApplicationSettings {
     ),
     SettingSpec(
       id: 'application.minimizeOnExit',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.minimizeOnExit,
     ),
     SettingSpec(
       id: 'application.hidden',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.exclude,
       condition: SettingCondition.android,
     ),
     SettingSpec(
       id: 'application.notification',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.notification,
       condition: SettingCondition.android,
     ),
     SettingSpec(
       id: 'application.closeConnections',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.autoCloseConnections,
     ),
     SettingSpec(
       id: 'application.onlyStatisticsProxy',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.onlyStatisticsProxy,
     ),
     SettingSpec(
@@ -78,12 +74,12 @@ class ApplicationSettings {
     ),
     SettingSpec(
       id: 'application.checkCertificate',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.checkCertificate,
     ),
     SettingSpec(
       id: 'application.autoCheckUpdate',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.autoCheckUpdate,
     ),
     SettingSpec(
@@ -93,12 +89,12 @@ class ApplicationSettings {
     ),
     SettingSpec(
       id: 'application.openLogs',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.logcat,
     ),
     SettingSpec(
       id: 'application.logLevel',
-      page: ToolPage.application,
+      page: ToolPage.general,
       title: (l) => l.logLevel,
     ),
   ];
@@ -109,122 +105,9 @@ class ApplicationSettings {
 class ApplicationSettingView extends ConsumerWidget {
   const ApplicationSettingView({super.key});
 
-  ConfigToggleItem _toggle({
-    required String id,
-    required bool Function(AppSettingProps state) select,
-    required AppSettingProps Function(AppSettingProps state, bool value) update,
-  }) {
-    final spec = ApplicationSettings.spec(id);
-    return ConfigToggleItem(
-      title: spec.title,
-      setting: spec,
-      selector: appSettingProvider.select(select),
-      onChanged: (ref, value) => ref
-          .read(appSettingProvider.notifier)
-          .update((state) => update(state, value)),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
-    final startup = <Widget>[
-      if (system.isDesktop) ...[
-        _toggle(
-          id: 'application.autoLaunch',
-          select: (s) => s.autoLaunch,
-          update: (s, v) => s.copyWith(autoLaunch: v),
-        ),
-        _toggle(
-          id: 'application.silentLaunch',
-          select: (s) => s.silentLaunch,
-          update: (s, v) => s.copyWith(silentLaunch: v),
-        ),
-      ],
-      _toggle(
-        id: 'application.autoRun',
-        select: (s) => s.autoRun,
-        update: (s, v) => s.copyWith(autoRun: v),
-      ),
-      SettingTarget(
-        spec: ApplicationSettings.spec('application.onDemand'),
-        child: ListItem.open(
-          title: Text(
-            ApplicationSettings.spec('application.onDemand').title(l),
-          ),
-          widget: const OnDemandView(),
-        ),
-      ),
-      _toggle(
-        id: 'application.minimizeOnExit',
-        select: (s) => s.minimizeOnExit,
-        update: (s, v) => s.copyWith(minimizeOnExit: v),
-      ),
-      if (system.isAndroid) ...[
-        _toggle(
-          id: 'application.hidden',
-          select: (s) => s.hidden,
-          update: (s, v) => s.copyWith(hidden: v),
-        ),
-        SettingTarget(
-          spec: ApplicationSettings.spec('application.notification'),
-          child: ListItem.open(
-            title: Text(l.notification),
-            widget: const NotificationSettingsView(),
-          ),
-        ),
-      ],
-    ];
-    final appOptions = <Widget>[
-      _toggle(
-        id: 'application.closeConnections',
-        select: (s) => s.closeConnections,
-        update: (s, v) => s.copyWith(closeConnections: v),
-      ),
-      _toggle(
-        id: 'application.onlyStatisticsProxy',
-        select: (s) => s.onlyStatisticsProxy,
-        update: (s, v) => s.copyWith(onlyStatisticsProxy: v),
-      ),
-      _toggle(
-        id: 'application.preventDuplicateProfiles',
-        select: (s) => s.preventDuplicateProfiles,
-        update: (s, v) => s.copyWith(preventDuplicateProfiles: v),
-      ),
-      _toggle(
-        id: 'application.checkCertificate',
-        select: (s) => s.checkCertificate,
-        update: (s, v) => s.copyWith(checkCertificate: v),
-      ),
-      _toggle(
-        id: 'application.autoCheckUpdate',
-        select: (s) => s.autoCheckUpdate,
-        update: (s, v) => s.copyWith(autoCheckUpdate: v),
-      ),
-      SettingTarget(
-        spec: ApplicationSettings.spec('application.updatePreferences'),
-        child: ListItem(
-          title: Text(l.updatePreferencesTitle),
-          trailing: const GlyphIcon(AppGlyphs.chevronForward),
-          onTap: () => UpdateSheet.show(context, preferences: true),
-        ),
-      ),
-      _toggle(
-        id: 'application.openLogs',
-        select: (s) => s.openLogs,
-        update: (s, v) => s.copyWith(openLogs: v),
-      ),
-      ConfigOptionsItem<LogLevel>(
-        setting: ApplicationSettings.spec('application.logLevel'),
-        title: (l) => l.logLevel,
-        options: LogLevel.values,
-        textBuilder: (logLevel) => logLevel.name,
-        selector: patchClashConfigProvider.select((state) => state.logLevel),
-        onChanged: (ref, value) => ref
-            .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith(logLevel: value)),
-      ),
-    ];
     return BaseScaffold(
       title: l.applicationSettings,
       body: SettingsPageScroll(
@@ -258,28 +141,32 @@ class ApplicationSettingView extends ConsumerWidget {
                 footer: l.regionIntro,
               ),
               generateSection(
-                title: l.startupAndBackground,
-                items: [...startup],
-                footer: [
-                  if (system.isDesktop) l.silentLaunchDesc,
-                  l.autoRunDesc,
-                  l.onDemandDesc,
-                ].join('\n'),
-              ),
-              generateSection(
-                title: l.applicationSettings,
-                items: appOptions.take(3),
-                footer: l.autoCloseConnectionsDesc,
-              ),
-              generateSection(
-                title: l.requestsAndUpdates,
-                items: appOptions.skip(3).take(3),
-                footer: l.checkCertificateDesc,
-              ),
-              generateSection(
-                title: l.logsAndDiagnostics,
-                items: appOptions.skip(6),
-                footer: [l.logcatDesc].join('\n'),
+                items: [
+                  ConfigToggleItem(
+                    title: (l) => l.preventDuplicateProfiles,
+                    setting: ApplicationSettings.spec(
+                      'application.preventDuplicateProfiles',
+                    ),
+                    selector: appSettingProvider.select(
+                      (s) => s.preventDuplicateProfiles,
+                    ),
+                    onChanged: (ref, value) => ref
+                        .read(appSettingProvider.notifier)
+                        .update(
+                          (s) => s.copyWith(preventDuplicateProfiles: value),
+                        ),
+                  ),
+                  SettingTarget(
+                    spec: ApplicationSettings.spec(
+                      'application.updatePreferences',
+                    ),
+                    child: ListItem(
+                      title: Text(l.updatePreferencesTitle),
+                      trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                      onTap: () => UpdateSheet.show(context, preferences: true),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

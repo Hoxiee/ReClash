@@ -11,6 +11,7 @@ import 'package:reclash/subscriptions/compatibility/client_picker.dart';
 import 'package:reclash/subscriptions/compatibility/clients.dart';
 import 'package:reclash/ui/popup.dart';
 import 'package:reclash/ui/list.dart';
+import 'package:reclash/ui/switch.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/views/dashboard/widgets/profile_detail.dart';
 import 'package:reclash/views/config/general.dart';
@@ -240,43 +241,37 @@ void main() {
     addTearDown(() async => tester.pumpWidget(const SizedBox()));
     globalState.container = container;
     container.read(viewSizeProvider.notifier).value = size;
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: GeneralView()),
-      ),
-    );
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: GeneralView()),
+        ),
+      );
+      final store = await DeviceIdentityStore.create();
+      await store.globalSendEnabled();
+    });
     await tester.pumpAndSettle();
 
     final row = find.ancestor(
       of: find.text(currentAppLocalizations.subscriptionIdentityTitle),
       matching: find.byType(ListItem),
     );
-    final toggle = find.descendant(of: row, matching: find.byType(Switch));
-    for (var attempt = 0; attempt < 20; attempt++) {
-      if (tester.widget<Switch>(toggle).onChanged != null) break;
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 20)),
-      );
-      await tester.pump();
-    }
-    expect(tester.widget<Switch>(toggle).value, isFalse);
-    await tester.tap(
-      find.text(currentAppLocalizations.subscriptionIdentityTitle),
+    final toggle = find.descendant(
+      of: row,
+      matching: find.byType(CommonSwitch),
     );
-    for (var attempt = 0; attempt < 20; attempt++) {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 20)),
-      );
-      await tester.pump();
-      final store = DeviceIdentityStore(
-        storage: FileDeviceIdentityStorage(
-          File('${tempDir.path}/${FileDeviceIdentityStorage.fileName}'),
-        ),
-        source: () async => null,
-      );
-      if (await tester.runAsync(store.globalSendEnabled) == true) break;
-    }
+    expect(tester.widget<CommonSwitch>(toggle).onChanged, isNotNull);
+    expect(tester.widget<CommonSwitch>(toggle).value, isFalse);
+    final title = find.text(currentAppLocalizations.subscriptionIdentityTitle);
+    await tester.ensureVisible(title);
+    await tester.pumpAndSettle();
+    expect(title.hitTestable(), findsOneWidget);
+    await tester.runAsync(() async {
+      await tester.tap(title);
+      final store = await DeviceIdentityStore.create();
+      await store.globalSendEnabled();
+    });
     final store = DeviceIdentityStore(
       storage: FileDeviceIdentityStorage(
         File('${tempDir.path}/${FileDeviceIdentityStorage.fileName}'),
@@ -285,7 +280,7 @@ void main() {
     );
     expect(await tester.runAsync(store.globalSendEnabled), isTrue);
     await tester.pumpAndSettle();
-    expect(tester.widget<Switch>(toggle).value, isTrue);
+    expect(tester.widget<CommonSwitch>(toggle).value, isTrue);
   });
 
   testWidgets('profile identity policy offers global and local choices', (

@@ -3,5 +3,8 @@
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control ReClashCore.exe dasturini imzo yoʻqligi sababli blokladi. Windows Security → App & browser control → Smart App Control sozlamalariga oʻting, Off ni tanlang va ReClashni qayta ishga tushiring. Smart App Controlni Windowsni qayta oʻrnatmasdan qayta yoqib boʻlmaydi.",
   "disclaimerDesc": "ReClash («Dastur»)dan foydalanishdan avval ushbu bayonni sinchkovlik bilan oʻqing va barcha mazmunini tushunib yetganingizga ishonch hosil qiling. «Rozi boʻlaman»ni bosish — quyidagi barcha shartlarni oʻqiganingiz, tushunganingiz va qabul qilganingizni bildiradi. Agar rozi boʻlmasangiz, «Chiqish»ni bosing va Dasturdan foydalanishni toʻxtating.",
   "helperCorruptTip": "Yordamchi xizmat mavjud emas, TUN rejimini yoqib boʻlmaydi. Tiklash uchun ReClashni qayta oʻrnating.",
-  "initFailedTip": "ReClash ishga tushayotganda xatoga uchradi va davom etolmaydi. Muammoni xabar qilish uchun tafsilotlarni nusxalang. Agar bu takrorlansa, maʼlumotlarni tozalash odatda ilovani qayta ishga tushirish imkonini beradi."
+  "initFailedTip": "ReClash ishga tushayotganda xatoga uchradi va davom etolmaydi. Muammoni xabar qilish uchun tafsilotlarni nusxalang. Agar bu takrorlansa, maʼlumotlarni tozalash odatda ilovani qayta ishga tushirish imkonini beradi.",
+  "sendFromPhonePageTitle": "ReClash ilovasiga havola yuborish",
+  "sendFromPhonePermissionDenied": "Telefondan havola olish uchun ReClash ilovasiga mahalliy tarmoqqa kirish imkonini beruvchi «Yaqin-atrofdagi qurilmalar» ruxsati kerak. Uni ilova sozlamalarida yoqing.",
+  "shareQrcodeTip": "Bu profilni import qilish uchun kodni boshqa qurilmadagi ReClash orqali skanerlang."
 }

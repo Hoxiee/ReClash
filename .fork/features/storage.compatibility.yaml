@@ -1,0 +1,12 @@
+v: 1
+kind: integration
+state: active
+risk: critical
+must:
+  shapes: Known FlClash and ReClash schema-21 shapes converge at ReClash schema 22 without discarding existing profile, provider or subscription data.
+  staging: Backup migration modifies only the extracted staging database; the source archive and active database remain untouched until validated restore.
+  newer: Unknown newer config or database versions are rejected, never relabeled to bypass compatibility checks.
+watch: [lib/database/database.dart, lib/common/backup.dart, lib/providers/actions/backup.dart, test/database/migration_v1_to_v2_test.dart, test/common/backup_task_test.dart, test/providers/backup_action_test.dart, tool/database_schema.dart, test/tool/database_schema_tool_test.dart]
+checks:
+  database-compatibility: [shapes, staging, newer]
+drop: Upstream and downstream storage shapes converge and all supported backup fixtures remain readable.

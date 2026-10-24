@@ -228,7 +228,7 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
               ],
             ),
           ),
-          SizedBox(height: BottomInsetScope.of(context) + 32),
+          SizedBox(height: context.bottomInset + 32),
         ],
       ),
     );

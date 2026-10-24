@@ -72,5 +72,7 @@
   "trayIcon": "Иконка в трее",
   "trayIconColor": "Цветная",
   "trayIconLight": "Белая",
-  "trayIconDark": "Чёрная"
+  "trayIconDark": "Чёрная",
+  "accessControlSettings": "Настройки контроля доступа",
+  "hideTimeoutProxiesDesc": "Не показывать прокси, у которых последний тест задержки завершился таймаутом"
 }

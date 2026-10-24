@@ -3,5 +3,8 @@
   "coreBlockedBySmartAppControlTip": "Windows 智能应用控制拦截了未签名的 ReClashCore.exe。请打开 Windows 安全中心 → 应用和浏览器控制 → 智能应用控制设置，选择「关闭」后重新启动 ReClash。智能应用控制关闭后无法再开启，除非重装 Windows。",
   "disclaimerDesc": "在使用 ReClash（以下简称“本软件”）前，请仔细阅读并充分理解本声明的全部内容。点击“同意”即表示你已阅读、理解并接受以下全部条款；如不同意，请点击“退出”并停止使用本软件。",
   "helperCorruptTip": "Helper 服务不可用，无法启用 TUN 模式，请重新安装 ReClash。",
-  "initFailedTip": "ReClash 启动时出错，无法继续运行。可以复制错误详情用于反馈；如果问题反复出现，清除数据后通常可以重新启动。"
+  "initFailedTip": "ReClash 启动时出错，无法继续运行。可以复制错误详情用于反馈；如果问题反复出现，清除数据后通常可以重新启动。",
+  "sendFromPhonePageTitle": "把链接发送到 ReClash",
+  "sendFromPhonePermissionDenied": "从手机接收链接需要「附近的设备」权限，ReClash 才能访问局域网。请在应用设置中开启。",
+  "shareQrcodeTip": "在另一台设备上用 ReClash 扫码即可导入此配置。"
 }

@@ -80,10 +80,16 @@ void main() {
       for (final entries in messages.values) {
         expect(
           entries.keys,
-          unorderedEquals(['CloseInstalledApp', 'LegacyServiceRemovalFailed']),
+          unorderedEquals([
+            'RemoveUserData',
+            'CloseInstalledApp',
+            'LegacyServiceRemovalFailed',
+          ]),
         );
-        for (final value in entries.values) {
-          expect(value, contains('%1'));
+        for (final entry in entries.entries) {
+          if (entry.key != 'RemoveUserData') {
+            expect(entry.value, contains('%1'));
+          }
         }
       }
       for (final language in messages.keys.where((key) => key != 'english')) {

@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Navigatsiya",
   "navigationLayoutBar": "Varaqlar paneli",
-  "navigationLayoutSidebar": "Yon panel"
+  "navigationLayoutSidebar": "Yon panel",
+  "sidebarBlur": "Yon panelni xiralashtirish"
 }

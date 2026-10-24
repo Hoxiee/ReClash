@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -68,6 +69,29 @@ func TestHandleProbePinsTheNamedProxy(t *testing.T) {
 	}
 	if userAgent != "probe-test" {
 		t.Errorf("user agent = %q, want the header the caller passed", userAgent)
+	}
+}
+
+func TestProbeResultSerializesRouteEvidence(t *testing.T) {
+	result := &ProbeResult{
+		CoreEpoch:    2,
+		RouteVersion: 7,
+		Hits:         []RouteHit{{Host: "example.com", Proxy: "Proxy", Exit: "node-a"}},
+	}
+	encoded, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded struct {
+		CoreEpoch    uint64     `json:"core-epoch"`
+		RouteVersion uint64     `json:"route-version"`
+		Hits         []RouteHit `json:"hits"`
+	}
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	if decoded.CoreEpoch != result.CoreEpoch || decoded.RouteVersion != result.RouteVersion || !slices.Equal(decoded.Hits, result.Hits) {
+		t.Fatalf("encoded route evidence = %s, want %+v", encoded, result)
 	}
 }
 

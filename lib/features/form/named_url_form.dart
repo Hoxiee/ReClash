@@ -327,10 +327,8 @@ class _NamedUrlFormState extends State<NamedUrlForm> {
             ),
         ] else
           _buildFields(appLocalizations, issue?.field),
-        if (widget.additionalSectionsBuilder case final builder?) ...[
-          const SizedBox(height: 24),
+        if (widget.additionalSectionsBuilder case final builder?)
           builder(context, () => _handleChanged('')),
-        ],
       ],
     );
   }

@@ -1,0 +1,100 @@
+v: 1
+features:
+  meta.maintenance:
+    owners:
+      downstream: ['.fork/**', 'tool/fork.dart', 'tool/src/fork/**', '.agents/fork-maintenance.md']
+    evidence:
+      preserve: [integration, security]
+      provenance: [integration]
+      history: [structural, integration]
+    review: Review normalization and acceptance policy separately; status is not authority.
+  core.integration:
+    owners:
+      upstream: ['core/mihomo/**']
+      downstream: ['lib/core/**', 'core/*.go']
+      shared: [core/mihomo, .gitmodules, 'plugins/rust_api/**']
+    evidence:
+      source: [integration, security]
+      protocol: [integration]
+    review: Review the engine gitlink, provenance, patch chain and platform builds before acceptance.
+  storage.compatibility:
+    owners:
+      shared: [lib/database/database.dart]
+      downstream: [lib/common/backup.dart, lib/providers/actions/backup.dart]
+    evidence:
+      shapes: [migration, integration]
+      staging: [integration, security]
+      newer: [security]
+    review: Review source schema shape, fixture provenance, defaults and staged restore before accepting storage changes.
+  releases.identity:
+    owners:
+      downstream: [pubspec.yaml, CHANGELOG.md, changelog.json]
+      shared: [android/app/build.gradle.kts, core/mihomo, .gitmodules]
+    evidence:
+      metadata: [structural, integration]
+      packages: [platform, security]
+    review: Preserve downstream release identity; engine gitlink requires a separate core-source review.
+  settings.specs:
+    owners:
+      shared: ['lib/views/config/**', lib/database/database.dart]
+    evidence:
+      routes: [structural, behavioral]
+      specs: [behavioral]
+  tools.catalog:
+    owners:
+      shared: ['lib/views/tools/**', lib/views/tools.dart]
+    evidence:
+      workspace-presentation: [behavioral]
+      workspace-surfaces: [behavioral]
+    review: Verify nested breadcrumbs, leading motion, stationary backdrop and full-pane scrolling in rendered widgets.
+migrations:
+  - id: database.schema-22
+    target: 22
+    sources:
+      - product: FlClash
+        release: v0.9.2
+        schema: 21
+        shape: ip_qualities present; subscription columns and request_headers absent
+      - product: ReClash
+        release: 0.1.0-pre.1
+        schema: 21
+        shape: subscription columns and request_headers present; ip_qualities absent
+    fixtures: [test/database/migration_v1_to_v2_test.dart, test/common/backup_task_test.dart]
+    checks: [database-compatibility]
+    downgrade: reject
+release:
+  version:
+    path: pubspec.yaml
+    pattern: '^version:.*$'
+  changelog:
+    path: CHANGELOG.md
+  release-notes:
+    path: changelog.json
+  android-id:
+    path: android/app/build.gradle.kts
+    pattern: '^\s*applicationId\s*=.*$'
+paths:
+  '.agents/**':
+    kind: documentation
+    checks: [fork-tests]
+    reason: Maintenance instructions are policy inputs, not executable application tests.
+  'plugins/rust_api/**/frb_generated*':
+    kind: generated
+    checks: [generated-contracts, linux-build, windows-build, macos-build]
+    reason: Generated language bindings require shared generation identity and native builds.
+  'android/**':
+    kind: platform
+    checks: [android-build, android-notifications]
+    reason: Kotlin and service changes require Android compilation and native tests.
+  'windows/**':
+    kind: platform
+    checks: [windows-build, packaging]
+    reason: Portable packaging tests do not replace Windows native verification.
+  'macos/**':
+    kind: platform
+    checks: [macos-build]
+    reason: Signed bundle and service integration require a macOS host.
+  'core/**':
+    kind: engine
+    checks: [core-tests, core-contracts]
+    reason: Go and engine gitlinks require explicit source review and native checks.

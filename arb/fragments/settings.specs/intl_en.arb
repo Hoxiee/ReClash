@@ -93,5 +93,7 @@
   "trayIcon": "Tray icon",
   "trayIconColor": "Color",
   "trayIconLight": "White",
-  "trayIconDark": "Black"
+  "trayIconDark": "Black",
+  "accessControlSettings": "Access control settings",
+  "hideTimeoutProxiesDesc": "Leave out proxies whose last delay test timed out"
 }

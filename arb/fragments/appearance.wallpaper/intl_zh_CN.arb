@@ -44,5 +44,6 @@
   },
   "navigationLayout": "导航",
   "navigationLayoutBar": "标签栏",
-  "navigationLayoutSidebar": "侧边栏"
+  "navigationLayoutSidebar": "侧边栏",
+  "sidebarBlur": "侧边栏背景模糊"
 }

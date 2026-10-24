@@ -154,7 +154,7 @@ class _NotificationSettingsViewState
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
               top: context.contentTopPadding,
-              bottom: 24 + BottomInsetScope.of(context),
+              bottom: 24 + context.bottomInset,
             ),
             child: Column(
               children: [

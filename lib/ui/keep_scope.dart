@@ -2,8 +2,9 @@ import 'package:material_ui/material_ui.dart';
 
 class KeepScope extends StatefulWidget {
   final Widget child;
+  final bool keep;
 
-  const KeepScope({super.key, required this.child});
+  const KeepScope({super.key, this.keep = true, required this.child});
 
   @override
   State<KeepScope> createState() => _KeepContainerState();
@@ -18,5 +19,11 @@ class _KeepContainerState extends State<KeepScope>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => widget.keep;
+
+  @override
+  void didUpdateWidget(covariant KeepScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.keep != widget.keep) updateKeepAlive();
+  }
 }

@@ -255,11 +255,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Check`
-  String get serviceCheck {
-    return Intl.message('Check', name: 'serviceCheck', desc: '', args: []);
-  }
-
   /// `Check all`
   String get serviceCheckAll {
     return Intl.message(
@@ -267,16 +262,6 @@ class AppLocalizations {
       name: 'serviceCheckAll',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `Checked at {time}`
-  String serviceCheckedAt(Object time) {
-    return Intl.message(
-      'Checked at $time',
-      name: 'serviceCheckedAt',
-      desc: '',
-      args: [time],
     );
   }
 
@@ -610,29 +595,9 @@ class AppLocalizations {
     return Intl.message('Link', name: 'link', desc: '', args: []);
   }
 
-  /// `Obtain a profile from a subscription link or a proxy share link`
-  String get linkDesc {
-    return Intl.message(
-      'Obtain a profile from a subscription link or a proxy share link',
-      name: 'linkDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `File`
   String get file {
     return Intl.message('File', name: 'file', desc: '', args: []);
-  }
-
-  /// `Upload a profile file directly`
-  String get fileDesc {
-    return Intl.message(
-      'Upload a profile file directly',
-      name: 'fileDesc',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Name`
@@ -750,6 +715,111 @@ class AppLocalizations {
     );
   }
 
+  /// `Send from phone`
+  String get sendFromPhone {
+    return Intl.message(
+      'Send from phone',
+      name: 'sendFromPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan the code with your phone's camera and paste the link on the page that opens. Both devices need to be on the same network.`
+  String get sendFromPhoneTip {
+    return Intl.message(
+      'Scan the code with your phone\'s camera and paste the link on the page that opens. Both devices need to be on the same network.',
+      name: 'sendFromPhoneTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This device is not connected to a local network`
+  String get sendFromPhoneNoNetwork {
+    return Intl.message(
+      'This device is not connected to a local network',
+      name: 'sendFromPhoneNoNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receiving a link from your phone needs the Nearby devices permission, which lets ReClash reach the local network. Turn it on in the app's settings.`
+  String get sendFromPhonePermissionDenied {
+    return Intl.message(
+      'Receiving a link from your phone needs the Nearby devices permission, which lets ReClash reach the local network. Turn it on in the app\'s settings.',
+      name: 'sendFromPhonePermissionDenied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send a link to ReClash`
+  String get sendFromPhonePageTitle {
+    return Intl.message(
+      'Send a link to ReClash',
+      name: 'sendFromPhonePageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription link or proxy share link`
+  String get sendFromPhonePageHint {
+    return Intl.message(
+      'Subscription link or proxy share link',
+      name: 'sendFromPhonePageHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send`
+  String get send {
+    return Intl.message('Send', name: 'send', desc: '', args: []);
+  }
+
+  /// `Sent. Confirm the import on the other device.`
+  String get sendFromPhonePageSent {
+    return Intl.message(
+      'Sent. Confirm the import on the other device.',
+      name: 'sendFromPhonePageSent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import the link from your phone?`
+  String get sendFromPhoneConfirmTitle {
+    return Intl.message(
+      'Import the link from your phone?',
+      name: 'sendFromPhoneConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan with ReClash on another device to import this profile.`
+  String get shareQrcodeTip {
+    return Intl.message(
+      'Scan with ReClash on another device to import this profile.',
+      name: 'shareQrcodeTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link is too long for a QR code. Use Copy link instead.`
+  String get qrcodeTooLongTip {
+    return Intl.message(
+      'This link is too long for a QR code. Use Copy link instead.',
+      name: 'qrcodeTooLongTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Submit`
   String get submit {
     return Intl.message('Submit', name: 'submit', desc: '', args: []);
@@ -855,9 +925,15 @@ class AppLocalizations {
     );
   }
 
-  /// `Selected`
-  String get selected {
-    return Intl.message('Selected', name: 'selected', desc: '', args: []);
+  /// `{count, plural, other{{count} selected}}`
+  String accessControlSelectedCount(num count) {
+    return Intl.plural(
+      count,
+      other: '$count selected',
+      name: 'accessControlSelectedCount',
+      desc: '',
+      args: [count],
+    );
   }
 
   /// `Port`
@@ -1395,6 +1471,16 @@ class AppLocalizations {
     return Intl.message('Test URL', name: 'testUrl', desc: '', args: []);
   }
 
+  /// `Delay test timeout`
+  String get delayTestTimeout {
+    return Intl.message(
+      'Delay test timeout',
+      name: 'delayTestTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sync`
   String get sync {
     return Intl.message('Sync', name: 'sync', desc: '', args: []);
@@ -1540,20 +1626,25 @@ class AppLocalizations {
     );
   }
 
-  /// `Sidebar blur`
-  String get sidebarBlur {
+  /// `Sidebar`
+  String get sidebar {
+    return Intl.message('Sidebar', name: 'sidebar', desc: '', args: []);
+  }
+
+  /// `Background blur`
+  String get backgroundBlur {
     return Intl.message(
-      'Sidebar blur',
-      name: 'sidebarBlur',
+      'Background blur',
+      name: 'backgroundBlur',
       desc: '',
       args: [],
     );
   }
 
-  /// `Show the blurred desktop behind the window through the sidebar`
+  /// `Background blur lets the desktop behind the window show through the sidebar.`
   String get sidebarBlurDesc {
     return Intl.message(
-      'Show the blurred desktop behind the window through the sidebar',
+      'Background blur lets the desktop behind the window show through the sidebar.',
       name: 'sidebarBlurDesc',
       desc: '',
       args: [],
@@ -2800,16 +2891,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Leave out proxies whose last delay test timed out`
-  String get hideTimeoutProxiesDesc {
-    return Intl.message(
-      'Leave out proxies whose last delay test timed out',
-      name: 'hideTimeoutProxiesDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Stack mode`
   String get stackMode {
     return Intl.message('Stack mode', name: 'stackMode', desc: '', args: []);
@@ -3283,6 +3364,16 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Apply now`
+  String get applyNow {
+    return Intl.message('Apply now', name: 'applyNow', desc: '', args: []);
+  }
+
+  /// `Applied`
+  String get applied {
+    return Intl.message('Applied', name: 'applied', desc: '', args: []);
   }
 
   /// `Can't save`
@@ -4385,16 +4476,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Access control settings`
-  String get accessControlSettings {
-    return Intl.message(
-      'Access control settings',
-      name: 'accessControlSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Turn on`
   String get turnOn {
     return Intl.message('Turn on', name: 'turnOn', desc: '', args: []);
@@ -4445,16 +4526,6 @@ class AppLocalizations {
     return Intl.message('Custom', name: 'customProfile', desc: '', args: []);
   }
 
-  /// `Assemble proxy groups and rules from app proxies and other profiles`
-  String get customProfileDesc {
-    return Intl.message(
-      'Assemble proxy groups and rules from app proxies and other profiles',
-      name: 'customProfileDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Custom profile resources`
   String get customProfileResources {
     return Intl.message(
@@ -4465,10 +4536,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Custom profile resources hold proxies, rule providers, filters, and icon sets.`
+  /// `Custom profile resources are the proxies, rule providers, filters, and icon sets you add yourself for custom profiles to use.`
   String get customProfileResourcesDesc {
     return Intl.message(
-      'Custom profile resources hold proxies, rule providers, filters, and icon sets.',
+      'Custom profile resources are the proxies, rule providers, filters, and icon sets you add yourself for custom profiles to use.',
       name: 'customProfileResourcesDesc',
       desc: '',
       args: [],
@@ -4510,6 +4581,16 @@ class AppLocalizations {
     return Intl.message(
       'Couldn\'t resolve the server address. Check that the URL is correct and DNS is working',
       name: 'networkHostLookupError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monochrome icon`
+  String get monochromeIcon {
+    return Intl.message(
+      'Monochrome icon',
+      name: 'monochromeIcon',
       desc: '',
       args: [],
     );
@@ -6818,10 +6899,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Strict route keeps traffic such as DNS from bypassing TUN, and other devices can no longer reach this one.`
+  /// `Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device's IPv6 connections.`
   String get strictRouteDesc {
     return Intl.message(
-      'Strict route keeps traffic such as DNS from bypassing TUN, and other devices can no longer reach this one.',
+      'Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device\'s IPv6 connections.',
       name: 'strictRouteDesc',
       desc: '',
       args: [],
@@ -7078,6 +7159,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Entries added here replace the setting of every profile; anything not added keeps the profile's own setting, or the core default when the profile has none.`
+  String get generalOverrideDesc {
+    return Intl.message(
+      'Entries added here replace the setting of every profile; anything not added keeps the profile\'s own setting, or the core default when the profile has none.',
+      name: 'generalOverrideDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Applies to this profile only and takes precedence over the TUN override entries in the network settings.`
   String get profileTunSettingsDesc {
     return Intl.message(
@@ -7327,6 +7418,41 @@ class AppLocalizations {
     return Intl.message('Plugin host', name: 'pluginHost', desc: '', args: []);
   }
 
+  /// `Plugin path`
+  String get pluginPath {
+    return Intl.message('Plugin path', name: 'pluginPath', desc: '', args: []);
+  }
+
+  /// `Plugin username`
+  String get pluginUsername {
+    return Intl.message(
+      'Plugin username',
+      name: 'pluginUsername',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plugin password`
+  String get pluginPassword {
+    return Intl.message(
+      'Plugin password',
+      name: 'pluginPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plugin cipher`
+  String get pluginCipher {
+    return Intl.message(
+      'Plugin cipher',
+      name: 'pluginCipher',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Private key`
   String get privateKey {
     return Intl.message('Private key', name: 'privateKey', desc: '', args: []);
@@ -7459,6 +7585,26 @@ class AppLocalizations {
       name: 'clientFingerprint',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Request headers`
+  String get requestHeaders {
+    return Intl.message(
+      'Request headers',
+      name: 'requestHeaders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{transport} Headers`
+  String transportHeaders(Object transport) {
+    return Intl.message(
+      '$transport Headers',
+      name: 'transportHeaders',
+      desc: '',
+      args: [transport],
     );
   }
 
@@ -7833,6 +7979,76 @@ class AppLocalizations {
       name: 'allReferencedProxyProviders',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Clear DNS cache`
+  String get clearDnsCache {
+    return Intl.message(
+      'Clear DNS cache',
+      name: 'clearDnsCache',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS cache cleared`
+  String get dnsCacheCleared {
+    return Intl.message(
+      'DNS cache cleared',
+      name: 'dnsCacheCleared',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to clear DNS cache`
+  String get clearDnsCacheFailed {
+    return Intl.message(
+      'Failed to clear DNS cache',
+      name: 'clearDnsCacheFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select`
+  String get select {
+    return Intl.message('Select', name: 'select', desc: '', args: []);
+  }
+
+  /// `Preferred`
+  String get preferred {
+    return Intl.message('Preferred', name: 'preferred', desc: '', args: []);
+  }
+
+  /// `Add to local proxies`
+  String get addToLocalProxies {
+    return Intl.message(
+      'Add to local proxies',
+      name: 'addToLocalProxies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added {name} to local proxies`
+  String addedToLocalProxies(Object name) {
+    return Intl.message(
+      'Added $name to local proxies',
+      name: 'addedToLocalProxies',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} is already in local proxies`
+  String alreadyInLocalProxies(Object name) {
+    return Intl.message(
+      '$name is already in local proxies',
+      name: 'alreadyInLocalProxies',
+      desc: '',
+      args: [name],
     );
   }
 
@@ -10977,6 +11193,16 @@ class AppLocalizations {
     return Intl.message(
       'Sidebar',
       name: 'navigationLayoutSidebar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sidebar blur`
+  String get sidebarBlur {
+    return Intl.message(
+      'Sidebar blur',
+      name: 'sidebarBlur',
       desc: '',
       args: [],
     );
@@ -15530,6 +15756,26 @@ class AppLocalizations {
     return Intl.message('Black', name: 'trayIconDark', desc: '', args: []);
   }
 
+  /// `Access control settings`
+  String get accessControlSettings {
+    return Intl.message(
+      'Access control settings',
+      name: 'accessControlSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave out proxies whose last delay test timed out`
+  String get hideTimeoutProxiesDesc {
+    return Intl.message(
+      'Leave out proxies whose last delay test timed out',
+      name: 'hideTimeoutProxiesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `From provider`
   String get providerSettingManaged {
     return Intl.message(
@@ -15888,6 +16134,11 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Selected`
+  String get selected {
+    return Intl.message('Selected', name: 'selected', desc: '', args: []);
   }
 
   /// `Web dashboard`

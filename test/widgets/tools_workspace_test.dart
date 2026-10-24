@@ -258,7 +258,7 @@ void main() {
         ),
       );
       final container = await pumpTools(tester, home: true, theme: theme);
-      container.read(windowBlurProvider.notifier).value = true;
+      container.read(windowBlurProvider.notifier).value = 0.75;
       const boundaryKey = ValueKey('native-shell-render');
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpWidget(
@@ -282,9 +282,7 @@ void main() {
       final sample = Offset(sidebar.left + 2, sidebar.bottom - 100);
       final boundary = find.byKey(boundaryKey);
       final colorScheme = tester.element(sidebarFinder).colorScheme;
-      final expected = colorScheme.chromeSurface.withValues(
-        alpha: kSidebarBlurOpacity,
-      );
+      final expected = colorScheme.chromeSurface.withValues(alpha: 0.75);
       final actual = await _pixelAt(tester, boundary, sample);
       expect(actual.a, closeTo(expected.a, 1 / 255));
       expect(actual.r, closeTo(expected.r * actual.a, 1 / 255));
@@ -302,7 +300,7 @@ void main() {
         SurfaceLevel.page.colorOf(colorScheme),
       );
       final sidebarState = tester.state(sidebarFinder);
-      container.read(windowBlurProvider.notifier).value = false;
+      container.read(windowBlurProvider.notifier).value = null;
       await tester.pumpAndSettle();
       expect(
         await _pixelAt(tester, boundary, sample),
@@ -815,7 +813,7 @@ void main() {
       expect(container.read(shownPageLabelProvider), PageLabel.tools);
       expect(
         container.read(toolsSessionProvider).path.last.page,
-        ToolPage.application,
+        ToolPage.general,
       );
       expect(
         container.read(toolsSessionProvider).path.last.settingId,
@@ -962,7 +960,7 @@ void main() {
     expect(target, findsOneWidget);
     final initial = container.read(patchClashConfigProvider).allowLan;
     await tester.tap(
-      find.descendant(of: target, matching: find.byType(Switch)),
+      find.descendant(of: target, matching: find.byType(CommonSwitch)),
     );
     await tester.pumpAndSettle();
 
@@ -1822,7 +1820,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       container.read(toolsSessionProvider).path.last.page,
-      ToolPage.application,
+      ToolPage.general,
     );
     expect(
       container.read(toolsSessionProvider).path.last.settingId,

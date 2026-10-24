@@ -3,5 +3,8 @@
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control blocked ReClashCore.exe because it is not signed. Open Windows Security → App & browser control → Smart App Control settings, choose Off, then start ReClash again. Smart App Control cannot be turned back on without reinstalling Windows.",
   "disclaimerDesc": "Before using ReClash (\"the Software\"), please read this statement carefully and make sure you understand all of it. Tapping \"Agree\" means you have read, understood, and accept every term below. If you do not agree, tap \"Exit\" and stop using the Software.",
   "helperCorruptTip": "Helper service unavailable; TUN mode cannot be enabled. Reinstall ReClash to restore it.",
-  "initFailedTip": "ReClash ran into an error while starting and can't continue. Copy the details to report the problem. If it keeps happening, clearing the data usually lets the app start again."
+  "initFailedTip": "ReClash ran into an error while starting and can't continue. Copy the details to report the problem. If it keeps happening, clearing the data usually lets the app start again.",
+  "sendFromPhonePageTitle": "Send a link to ReClash",
+  "sendFromPhonePermissionDenied": "Receiving a link from your phone needs the Nearby devices permission, which lets ReClash reach the local network. Turn it on in the app's settings.",
+  "shareQrcodeTip": "Scan with ReClash on another device to import this profile."
 }

@@ -260,7 +260,7 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                 left: 16,
                 top: context.appBarInset,
                 right: 16,
-                bottom: BottomInsetScope.of(context),
+                bottom: context.bottomInset,
               ) +
               context.bodyInsets,
           children: [

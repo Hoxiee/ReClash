@@ -172,13 +172,19 @@ void main() {
         child: TestApp(
           child: Scaffold(
             body: Builder(
-              builder: (context) =>
-                  AddProfileView(context: context, origin: context),
+              builder: (context) => AddProfileMenu(
+                builder: (open) => TextButton(
+                  onPressed: open,
+                  child: const Text('Add profile'),
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add profile'));
     await tester.pumpAndSettle();
 
     final l10n = currentAppLocalizations;
@@ -258,18 +264,35 @@ void main() {
         child: TestApp(
           child: Scaffold(
             body: Builder(
-              builder: (context) =>
-                  AddProfileView(context: context, origin: context),
+              builder: (context) => AddProfileMenu(
+                builder: (open) => TextButton(
+                  onPressed: open,
+                  child: const Text('Add profile'),
+                ),
+              ),
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Add profile'));
+    await tester.pumpAndSettle();
 
     final l10n = currentAppLocalizations;
     await tester.tap(find.text(l10n.link));
     await tester.pumpAndSettle();
+    final identity = find.ancestor(
+      of: find.text(l10n.subscriptionIdentityTitle),
+      matching: find.byType(FormRow),
+    );
+    final request = find.ancestor(
+      of: find.text(l10n.subscriptionClientRequestAs),
+      matching: find.byType(ListTile),
+    );
+    final gap =
+        tester.getTopLeft(request).dy - tester.getBottomLeft(identity).dy;
+    expect(gap, lessThanOrEqualTo(32));
     await tester.enterText(_field(l10n.link), 'https://example.com/sub');
     await tester.tap(find.text(l10n.subscriptionClientRequestAs));
     await tester.pumpAndSettle();

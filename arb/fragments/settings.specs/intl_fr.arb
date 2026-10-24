@@ -72,5 +72,7 @@
   "trayIcon": "Icône de notification",
   "trayIconColor": "Couleur",
   "trayIconLight": "Blanc",
-  "trayIconDark": "Noir"
+  "trayIconDark": "Noir",
+  "accessControlSettings": "Réglages du contrôle d’accès",
+  "hideTimeoutProxiesDesc": "Ignorer les proxys dont le dernier test de délai a expiré"
 }

@@ -72,5 +72,7 @@
   "trayIcon": "托盘图标",
   "trayIconColor": "彩色",
   "trayIconLight": "白色",
-  "trayIconDark": "黑色"
+  "trayIconDark": "黑色",
+  "accessControlSettings": "访问控制设置",
+  "hideTimeoutProxiesDesc": "不显示上次延迟测试超时的代理"
 }

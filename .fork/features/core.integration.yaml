@@ -19,5 +19,6 @@ checks:
   core-contracts: [latest-intent, protocol, controller]
   native-privileges: [privilege-intent, privileged-files, privilege-state, native-backends, helper-installation, windows-packaging]
   fork-tests: [source]
+  generated-contracts: [protocol]
   web-dashboard-access: [dashboard-controller]
 drop: An approved upstream engine supplies all required ReClash hooks.

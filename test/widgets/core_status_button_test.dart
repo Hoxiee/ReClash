@@ -152,6 +152,11 @@ void main() {
     await tester.tap(find.byTooltip('Retry'));
     await tester.pumpAndSettle();
     expect(find.text('Could not read core information'), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text('/home/reclash/.config'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('/home/reclash/.config'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -184,6 +189,11 @@ void main() {
     expect(find.text('1.19.31-2-gf77b7475'), findsOneWidget);
     expect(find.text('Running'), findsOneWidget);
     expect(find.text('go1.27.0'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('/home/reclash/.config'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('/home/reclash/.config'), findsOneWidget);
     expect(find.text('/usr/bin/ReClashCore'), findsOneWidget);
     expect(tester.takeException(), isNull);

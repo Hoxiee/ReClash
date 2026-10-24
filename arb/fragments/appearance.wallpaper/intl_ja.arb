@@ -44,5 +44,6 @@
   },
   "navigationLayout": "ナビゲーション",
   "navigationLayoutBar": "タブバー",
-  "navigationLayoutSidebar": "サイドバー"
+  "navigationLayoutSidebar": "サイドバー",
+  "sidebarBlur": "サイドバーのぼかし"
 }

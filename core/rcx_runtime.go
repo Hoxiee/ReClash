@@ -110,7 +110,7 @@ func (rcxRuntime) Select(group string, via []string, node string) error {
 			return err
 		}
 	}
-	refreshRouteLocked(false)
+	refreshRouteLocked(routeUnchanged)
 	return nil
 }
 

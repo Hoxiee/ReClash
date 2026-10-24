@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Навигация",
   "navigationLayoutBar": "Панель вкладок",
-  "navigationLayoutSidebar": "Боковая панель"
+  "navigationLayoutSidebar": "Боковая панель",
+  "sidebarBlur": "Размытие боковой панели"
 }

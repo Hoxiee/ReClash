@@ -96,7 +96,7 @@ class _TestSetupSession extends SetupSession {
   bool android = false;
   bool connectThroughAction = false;
   DateTime? nativeAcknowledgement;
-  RouteSnapshot snapshot = const RouteSnapshot(coreEpoch: 2, picksVersion: 5);
+  RouteSnapshot snapshot = const RouteSnapshot(coreEpoch: 2, routeVersion: 5);
   int saveCalls = 0;
   Completer<bool>? saveGate;
   final Completer<void> saveStarted = Completer<void>();
@@ -189,7 +189,7 @@ class _TestSetupSession extends SetupSession {
     if (gates != null) return gates[probeCalls - 1].future;
     return probeGate?.future ??
         Future.value(
-          const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+          const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
         );
   }
 }
@@ -233,7 +233,7 @@ void main() {
     final setupAction = _TestSetupAction(startResult: startResult);
     final core = _MockCoreHandlerInterface();
     when(() => core.watchRoute(true)).thenAnswer(
-      (_) async => const RouteSnapshot(coreEpoch: 2, picksVersion: 5),
+      (_) async => const RouteSnapshot(coreEpoch: 2, routeVersion: 5),
     );
     when(() => core.watchRoute(false)).thenAnswer((_) async => null);
     final container = ProviderContainer(
@@ -573,7 +573,7 @@ void main() {
       expect(harness.action.stops, 0);
       expect(fake.probeCalls, 1);
       expect(fake.probedUrls, [
-        harness.container.read(appSettingProvider).testUrl,
+        harness.container.read(patchClashConfigProvider).testUrl,
       ]);
       expect(fake.snapshotCalls, 2);
       expect(report.verdict, SetupVerdict.connected);
@@ -747,7 +747,7 @@ void main() {
         isNot(contains(SetupPhaseStatus.running)),
       );
       gate.complete(
-        const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+        const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
       );
       await operation;
 
@@ -777,7 +777,7 @@ void main() {
       final retry = session.check();
       await fake.retryProbeStarted.future;
       oldGate.complete(
-        const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+        const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
       );
       await Future<void>.delayed(Duration.zero);
       expect(harness.container.read(setupSessionProvider).checking, isTrue);
@@ -787,7 +787,7 @@ void main() {
           statusCode: 503,
           error: 'current probe failed',
           coreEpoch: 2,
-          picksVersion: 5,
+          routeVersion: 5,
         ),
       );
       await retry;
@@ -809,7 +809,7 @@ void main() {
     await fake.probeStarted.future;
     session.selectCoverage(SetupCoverage.tun);
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -830,7 +830,7 @@ void main() {
     await fake.probeStarted.future;
     session.selectRegion('RU');
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -854,7 +854,7 @@ void main() {
         .read(profilesProvider.notifier)
         .put(harness.profile.copyWith(label: 'Changed profile'));
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -873,9 +873,9 @@ void main() {
 
     final operation = session.check();
     await fake.probeStarted.future;
-    fake.snapshot = const RouteSnapshot(coreEpoch: 3, picksVersion: 5);
+    fake.snapshot = const RouteSnapshot(coreEpoch: 3, routeVersion: 5);
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -900,11 +900,11 @@ void main() {
 
     final operation = session.check();
     await fake.probeStarted.future;
-    final settings = harness.container.read(appSettingProvider);
-    harness.container.read(appSettingProvider.notifier).value = settings
+    final settings = harness.container.read(patchClashConfigProvider);
+    harness.container.read(patchClashConfigProvider.notifier).value = settings
         .copyWith(testUrl: 'https://example.org/');
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -925,7 +925,7 @@ void main() {
     await fake.probeStarted.future;
     harness.container.read(runTimeProvider.notifier).value = null;
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
 
@@ -963,7 +963,7 @@ void main() {
     await fake.probeStarted.future;
     harness.container.dispose();
     gate.complete(
-      const ProbeResult(statusCode: 204, coreEpoch: 2, picksVersion: 5),
+      const ProbeResult(statusCode: 204, coreEpoch: 2, routeVersion: 5),
     );
     await operation;
   });

@@ -44,5 +44,6 @@
   },
   "navigationLayout": "Navegación",
   "navigationLayoutBar": "Barra de pestañas",
-  "navigationLayoutSidebar": "Barra lateral"
+  "navigationLayoutSidebar": "Barra lateral",
+  "sidebarBlur": "Desenfoque de la barra lateral"
 }

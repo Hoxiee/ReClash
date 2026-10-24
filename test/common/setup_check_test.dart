@@ -119,7 +119,7 @@ void main() {
         ],
         stamp: RouteStamp(
           coreEpoch: 2,
-          picksVersion: 3,
+          routeVersion: 3,
           hostEpoch: 4,
           proxied: true,
         ),

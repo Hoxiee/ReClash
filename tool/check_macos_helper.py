@@ -78,6 +78,14 @@ def run(root):
     require('<key>BundleProgram</key><string>Contents/Library/LaunchServices/' in embed,
             'SMAppService daemon must use its bundled executable')
     require('helperProtocolVersion' in embed and 'helperSha256' in embed, 'Final manifest omits Helper identity')
+    for name in ['macos/Shared/HelperPolicy.swift',
+                 'macos/packaging/helper/embed_helper.sh',
+                 'macos/packaging/helper/verify_bundle.sh']:
+        text = read(root, name)
+        require('Contents/Resources/manifest.json' in text,
+                f'{name} must keep the integrity manifest in the signed resources')
+        require('Contents/MacOS/manifest.json' not in text and '$macos/manifest.json' not in text,
+                f'{name} puts unsigned data in a code-only directory')
     metadata = read(root, 'macos/packaging/helper/prepare_metadata.sh')
     require('SMAuthorizedClients' in metadata and 'ProgramArguments' in metadata,
             'Legacy SMJobBless metadata is incomplete')

@@ -3,5 +3,8 @@
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control a bloqué ReClashCore.exe car il n’est pas signé. Ouvrez Sécurité Windows → Contrôle des applications et du navigateur → Paramètres de Smart App Control, choisissez Désactivé, puis relancez ReClash. Smart App Control ne peut pas être réactivé sans réinstaller Windows.",
   "disclaimerDesc": "Avant d’utiliser ReClash (« le Logiciel »), veuillez lire attentivement cette déclaration et vous assurer de l’avoir comprise dans son intégralité. Appuyer sur « Accepter » signifie que vous avez lu, compris et accepté chacune des conditions ci-dessous. Si vous n’êtes pas d’accord, appuyez sur « Quitter » et cessez d’utiliser le Logiciel.",
   "helperCorruptTip": "Service Helper indisponible ; le mode TUN ne peut pas être activé. Réinstallez ReClash pour le rétablir.",
-  "initFailedTip": "ReClash a rencontré une erreur au démarrage et ne peut pas continuer. Copiez les détails pour signaler le problème. Si cela se reproduit, effacer les données permet généralement de relancer l’app."
+  "initFailedTip": "ReClash a rencontré une erreur au démarrage et ne peut pas continuer. Copiez les détails pour signaler le problème. Si cela se reproduit, effacer les données permet généralement de relancer l’app.",
+  "sendFromPhonePageTitle": "Envoyer un lien à ReClash",
+  "sendFromPhonePermissionDenied": "Pour recevoir un lien depuis le téléphone, ReClash a besoin de l'autorisation Appareils à proximité, qui lui donne accès au réseau local. Activez-la dans les paramètres de l'application.",
+  "shareQrcodeTip": "Scannez avec ReClash sur un autre appareil pour importer ce profil."
 }
