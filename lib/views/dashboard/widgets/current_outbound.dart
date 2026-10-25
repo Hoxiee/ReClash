@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:reclash/views/config/on_demand_network_picker.dart';
 
@@ -763,7 +764,7 @@ class _StartToggleState extends ConsumerState<_StartToggle>
   }
 
   void _toggle() {
-    ref.read(commonActionProvider.notifier).toggleRunning();
+    unawaited(ref.read(commonActionProvider.notifier).toggleRunning());
   }
 
   @override

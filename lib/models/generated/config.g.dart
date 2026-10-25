@@ -22,6 +22,16 @@ _AppSettingProps _$AppSettingPropsFromJson(
   dashboardWidgets: json['dashboardWidgets'] == null
       ? defaultDashboardWidgets
       : dashboardWidgetsFromJson(json['dashboardWidgets'] as List?),
+  dashboardStyle:
+      $enumDecodeNullable(
+        _$DashboardStyleEnumMap,
+        json['dashboardStyle'],
+        unknownValue: DashboardStyle.detailed,
+      ) ??
+      DashboardStyle.detailed,
+  simpleDashboardWidgets: json['simpleDashboardWidgets'] == null
+      ? defaultSimpleDashboardWidgets
+      : simpleDashboardWidgetsFromJson(json['simpleDashboardWidgets'] as List?),
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
   notificationSettings:
       readNotificationSettings(json, 'notificationSettings') == null
@@ -156,6 +166,10 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
+      'dashboardStyle': _$DashboardStyleEnumMap[instance.dashboardStyle]!,
+      'simpleDashboardWidgets': instance.simpleDashboardWidgets
+          .map((e) => _$SimpleDashboardWidgetEnumMap[e]!)
+          .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'notificationSettings': instance.notificationSettings,
       'autoLaunch': instance.autoLaunch,
@@ -206,6 +220,11 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'webDashboardFlavor':
           _$WebDashboardFlavorEnumMap[instance.webDashboardFlavor]!,
     };
+
+const _$DashboardStyleEnumMap = {
+  DashboardStyle.simple: 'simple',
+  DashboardStyle.detailed: 'detailed',
+};
 
 const _$TabAnimationEnumMap = {
   TabAnimation.slide: 'slide',
@@ -274,6 +293,14 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
   DashboardWidget.announcement: 'announcement',
+};
+
+const _$SimpleDashboardWidgetEnumMap = {
+  SimpleDashboardWidget.outboundMode: 'outboundMode',
+  SimpleDashboardWidget.speed: 'speed',
+  SimpleDashboardWidget.services: 'services',
+  SimpleDashboardWidget.ipQuality: 'ipQuality',
+  SimpleDashboardWidget.trustedNetworks: 'trustedNetworks',
 };
 
 const _$UpdateChannelEnumMap = {

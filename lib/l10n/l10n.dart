@@ -11383,6 +11383,833 @@ class AppLocalizations {
     );
   }
 
+  /// `Home`
+  String get simpleDashboardHome {
+    return Intl.message(
+      'Home',
+      name: 'simpleDashboardHome',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Widgets`
+  String get simpleDashboardWidgets {
+    return Intl.message(
+      'Widgets',
+      name: 'simpleDashboardWidgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed dashboard`
+  String get simpleDashboardDetailed {
+    return Intl.message(
+      'Detailed dashboard',
+      name: 'simpleDashboardDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Simple dashboard`
+  String get simpleDashboardSimple {
+    return Intl.message(
+      'Simple dashboard',
+      name: 'simpleDashboardSimple',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit widgets`
+  String get simpleDashboardEditWidgets {
+    return Intl.message(
+      'Edit widgets',
+      name: 'simpleDashboardEditWidgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard`
+  String get dashboardStyle {
+    return Intl.message(
+      'Dashboard',
+      name: 'dashboardStyle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Simple`
+  String get dashboardStyleSimple {
+    return Intl.message(
+      'Simple',
+      name: 'dashboardStyleSimple',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed`
+  String get dashboardStyleDetailed {
+    return Intl.message(
+      'Detailed',
+      name: 'dashboardStyleDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not protected`
+  String get simpleStatusOff {
+    return Intl.message(
+      'Not protected',
+      name: 'simpleStatusOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to connect`
+  String get simpleStatusOffHint {
+    return Intl.message(
+      'Tap to connect',
+      name: 'simpleStatusOffHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connecting…`
+  String get simpleStatusConnecting {
+    return Intl.message(
+      'Connecting…',
+      name: 'simpleStatusConnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Picking the best server`
+  String get simpleStatusConnectingHint {
+    return Intl.message(
+      'Picking the best server',
+      name: 'simpleStatusConnectingHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protected`
+  String get simpleStatusOn {
+    return Intl.message(
+      'Protected',
+      name: 'simpleStatusOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paused`
+  String get simpleStatusPaused {
+    return Intl.message(
+      'Paused',
+      name: 'simpleStatusPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted network “{network}”`
+  String simpleStatusPausedOn(String network) {
+    return Intl.message(
+      'Trusted network “$network”',
+      name: 'simpleStatusPausedOn',
+      desc: '',
+      args: [network],
+    );
+  }
+
+  /// `Trusted network`
+  String get simpleStatusPausedHint {
+    return Intl.message(
+      'Trusted network',
+      name: 'simpleStatusPausedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No subscription`
+  String get simpleStatusNoProfile {
+    return Intl.message(
+      'No subscription',
+      name: 'simpleStatusNoProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a subscription to connect`
+  String get simpleStatusNoProfileHint {
+    return Intl.message(
+      'Add a subscription to connect',
+      name: 'simpleStatusNoProfileHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `picked automatically`
+  String get simpleLocationAuto {
+    return Intl.message(
+      'picked automatically',
+      name: 'simpleLocationAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `picked by you`
+  String get simpleLocationManual {
+    return Intl.message(
+      'picked by you',
+      name: 'simpleLocationManual',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get simpleLocationAll {
+    return Intl.message('All', name: 'simpleLocationAll', desc: '', args: []);
+  }
+
+  /// `No server yet`
+  String get simpleLocationNone {
+    return Intl.message(
+      'No server yet',
+      name: 'simpleLocationNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Servers appear after connecting`
+  String get simpleLocationNoneHint {
+    return Intl.message(
+      'Servers appear after connecting',
+      name: 'simpleLocationNoneHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{delay} ms`
+  String simpleLatency(int delay) {
+    return Intl.message(
+      '$delay ms',
+      name: 'simpleLatency',
+      desc: '',
+      args: [delay],
+    );
+  }
+
+  /// `left of {total}`
+  String simpleTrafficLeft(String total) {
+    return Intl.message(
+      'left of $total',
+      name: 'simpleTrafficLeft',
+      desc: '',
+      args: [total],
+    );
+  }
+
+  /// `unlimited traffic`
+  String get simpleTrafficUnlimited {
+    return Intl.message(
+      'unlimited traffic',
+      name: 'simpleTrafficUnlimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `until {date}`
+  String simpleUntilDate(String date) {
+    return Intl.message(
+      'until $date',
+      name: 'simpleUntilDate',
+      desc: '',
+      args: [date],
+    );
+  }
+
+  /// `no end date`
+  String get simpleNoExpiry {
+    return Intl.message(
+      'no end date',
+      name: 'simpleNoExpiry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mode`
+  String get simpleModeTitle {
+    return Intl.message('Mode', name: 'simpleModeTitle', desc: '', args: []);
+  }
+
+  /// `Smart`
+  String get simpleModeRule {
+    return Intl.message('Smart', name: 'simpleModeRule', desc: '', args: []);
+  }
+
+  /// `Only what does not open goes through VPN`
+  String get simpleModeRuleDesc {
+    return Intl.message(
+      'Only what does not open goes through VPN',
+      name: 'simpleModeRuleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Everything via VPN`
+  String get simpleModeGlobal {
+    return Intl.message(
+      'Everything via VPN',
+      name: 'simpleModeGlobal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All traffic goes through the server`
+  String get simpleModeGlobalDesc {
+    return Intl.message(
+      'All traffic goes through the server',
+      name: 'simpleModeGlobalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct`
+  String get simpleModeDirect {
+    return Intl.message('Direct', name: 'simpleModeDirect', desc: '', args: []);
+  }
+
+  /// `Traffic goes without VPN`
+  String get simpleModeDirectDesc {
+    return Intl.message(
+      'Traffic goes without VPN',
+      name: 'simpleModeDirectDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto`
+  String get simpleModeAuto {
+    return Intl.message('Auto', name: 'simpleModeAuto', desc: '', args: []);
+  }
+
+  /// `The network scenario picks the mode`
+  String get simpleModeAutoDesc {
+    return Intl.message(
+      'The network scenario picks the mode',
+      name: 'simpleModeAutoDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Services`
+  String get simpleServicesTitle {
+    return Intl.message(
+      'Services',
+      name: 'simpleServicesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All in place`
+  String get simpleServicesAllGood {
+    return Intl.message(
+      'All in place',
+      name: 'simpleServicesAllGood',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After connecting`
+  String get simpleServicesAfterConnect {
+    return Intl.message(
+      'After connecting',
+      name: 'simpleServicesAfterConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Through VPN`
+  String get simpleServicesViaVpn {
+    return Intl.message(
+      'Through VPN',
+      name: 'simpleServicesViaVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct, as without VPN`
+  String get simpleServicesDirect {
+    return Intl.message(
+      'Direct, as without VPN',
+      name: 'simpleServicesDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{service} shows only its own titles here`
+  String simpleServiceOriginalsOnly(String service) {
+    return Intl.message(
+      '$service shows only its own titles here',
+      name: 'simpleServiceOriginalsOnly',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `{service} does not work in this country`
+  String simpleServiceUnsupportedRegion(String service) {
+    return Intl.message(
+      '$service does not work in this country',
+      name: 'simpleServiceUnsupportedRegion',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `{service} blocks this address`
+  String simpleServiceBlocked(String service) {
+    return Intl.message(
+      '$service blocks this address',
+      name: 'simpleServiceBlocked',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `{service} works with limits`
+  String simpleServiceRestricted(String service) {
+    return Intl.message(
+      '$service works with limits',
+      name: 'simpleServiceRestricted',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `{service} is not available here yet`
+  String simpleServiceComingSoon(String service) {
+    return Intl.message(
+      '$service is not available here yet',
+      name: 'simpleServiceComingSoon',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `{service} does not open`
+  String simpleServiceUnavailable(String service) {
+    return Intl.message(
+      '$service does not open',
+      name: 'simpleServiceUnavailable',
+      desc: '',
+      args: [service],
+    );
+  }
+
+  /// `How sites see you`
+  String get simpleIpTitle {
+    return Intl.message(
+      'How sites see you',
+      name: 'simpleIpTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ordinary home address`
+  String get simpleIpResidential {
+    return Intl.message(
+      'Ordinary home address',
+      name: 'simpleIpResidential',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile network address`
+  String get simpleIpMobile {
+    return Intl.message(
+      'Mobile network address',
+      name: 'simpleIpMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Organization address`
+  String get simpleIpBusiness {
+    return Intl.message(
+      'Organization address',
+      name: 'simpleIpBusiness',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data center address`
+  String get simpleIpHosting {
+    return Intl.message(
+      'Data center address',
+      name: 'simpleIpHosting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `CAPTCHAs and “VPN” blocks are unlikely.`
+  String get simpleIpGoodDesc {
+    return Intl.message(
+      'CAPTCHAs and “VPN” blocks are unlikely.',
+      name: 'simpleIpGoodDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some sites may ask for a CAPTCHA.`
+  String get simpleIpNormalDesc {
+    return Intl.message(
+      'Some sites may ask for a CAPTCHA.',
+      name: 'simpleIpNormalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sites may block or check you more often.`
+  String get simpleIpRiskyDesc {
+    return Intl.message(
+      'Sites may block or check you more often.',
+      name: 'simpleIpRiskyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your real address`
+  String get simpleIpReal {
+    return Intl.message(
+      'Your real address',
+      name: 'simpleIpReal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your ISP and sites see where you are and what you open.`
+  String get simpleIpRealDesc {
+    return Intl.message(
+      'Your ISP and sites see where you are and what you open.',
+      name: 'simpleIpRealDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not check the address`
+  String get simpleIpUnknown {
+    return Intl.message(
+      'Could not check the address',
+      name: 'simpleIpUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Risk`
+  String get simpleIpLevelRisky {
+    return Intl.message('Risk', name: 'simpleIpLevelRisky', desc: '', args: []);
+  }
+
+  /// `Normal`
+  String get simpleIpLevelNormal {
+    return Intl.message(
+      'Normal',
+      name: 'simpleIpLevelNormal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clean`
+  String get simpleIpLevelClean {
+    return Intl.message(
+      'Clean',
+      name: 'simpleIpLevelClean',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause on my networks`
+  String get simpleTrustedTitle {
+    return Intl.message(
+      'Pause on my networks',
+      name: 'simpleTrustedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On these networks the VPN pauses by itself and comes back when you leave.`
+  String get simpleTrustedDesc {
+    return Intl.message(
+      'On these networks the VPN pauses by itself and comes back when you leave.',
+      name: 'simpleTrustedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This network`
+  String get simpleTrustedThisNetwork {
+    return Intl.message(
+      'This network',
+      name: 'simpleTrustedThisNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No networks yet`
+  String get simpleTrustedEmpty {
+    return Intl.message(
+      'No networks yet',
+      name: 'simpleTrustedEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Speed`
+  String get simpleSpeedTitle {
+    return Intl.message('Speed', name: 'simpleSpeedTitle', desc: '', args: []);
+  }
+
+  /// `Measure`
+  String get simpleSpeedMeasure {
+    return Intl.message(
+      'Measure',
+      name: 'simpleSpeedMeasure',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Again`
+  String get simpleSpeedAgain {
+    return Intl.message('Again', name: 'simpleSpeedAgain', desc: '', args: []);
+  }
+
+  /// `Measuring…`
+  String get simpleSpeedMeasuring {
+    return Intl.message(
+      'Measuring…',
+      name: 'simpleSpeedMeasuring',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mbit/s`
+  String get simpleSpeedUnit {
+    return Intl.message('Mbit/s', name: 'simpleSpeedUnit', desc: '', args: []);
+  }
+
+  /// `Downloads about {size} through the VPN, only when you tap.`
+  String simpleSpeedIdleDesc(String size) {
+    return Intl.message(
+      'Downloads about $size through the VPN, only when you tap.',
+      name: 'simpleSpeedIdleDesc',
+      desc: '',
+      args: [size],
+    );
+  }
+
+  /// `Couldn't measure. Try again.`
+  String get simpleSpeedFailed {
+    return Intl.message(
+      'Couldn\'t measure. Try again.',
+      name: 'simpleSpeedFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Slow: even pages will take a while`
+  String get simpleSpeedSlow {
+    return Intl.message(
+      'Slow: even pages will take a while',
+      name: 'simpleSpeedSlow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enough for messages and music`
+  String get simpleSpeedChat {
+    return Intl.message(
+      'Enough for messages and music',
+      name: 'simpleSpeedChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enough for HD video`
+  String get simpleSpeedHd {
+    return Intl.message(
+      'Enough for HD video',
+      name: 'simpleSpeedHd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enough for 4K video`
+  String get simpleSpeed4k {
+    return Intl.message(
+      'Enough for 4K video',
+      name: 'simpleSpeed4k',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fast: enough for everything at once`
+  String get simpleSpeedAll {
+    return Intl.message(
+      'Fast: enough for everything at once',
+      name: 'simpleSpeedAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chats`
+  String get simpleSpeedLevelChat {
+    return Intl.message(
+      'Chats',
+      name: 'simpleSpeedLevelChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HD`
+  String get simpleSpeedLevelHd {
+    return Intl.message('HD', name: 'simpleSpeedLevelHd', desc: '', args: []);
+  }
+
+  /// `4K`
+  String get simpleSpeedLevel4k {
+    return Intl.message('4K', name: 'simpleSpeedLevel4k', desc: '', args: []);
+  }
+
+  /// `Everything`
+  String get simpleSpeedLevelAll {
+    return Intl.message(
+      'Everything',
+      name: 'simpleSpeedLevelAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No widgets yet. Add them in the editor.`
+  String get simpleDashboardEmpty {
+    return Intl.message(
+      'No widgets yet. Add them in the editor.',
+      name: 'simpleDashboardEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider announcement`
+  String get simpleProviderAnnouncement {
+    return Intl.message(
+      'Provider announcement',
+      name: 'simpleProviderAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 day} other{{count} days}}`
+  String simpleDaysCount(int count) {
+    return Intl.plural(
+      count,
+      one: '1 day',
+      other: '$count days',
+      name: 'simpleDaysCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Downloads about {size} without the VPN, only when you tap.`
+  String simpleSpeedDirectIdleDesc(String size) {
+    return Intl.message(
+      'Downloads about $size without the VPN, only when you tap.',
+      name: 'simpleSpeedDirectIdleDesc',
+      desc: '',
+      args: [size],
+    );
+  }
+
+  /// `without VPN`
+  String get simpleSpeedDirectTag {
+    return Intl.message(
+      'without VPN',
+      name: 'simpleSpeedDirectTag',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manual`
+  String get simpleServicesManual {
+    return Intl.message(
+      'Manual',
+      name: 'simpleServicesManual',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `These combinations work while the app window is focused. For global shortcuts, connect desktop commands using the section below.`
   String get hotkeyLocalDesc {
     return Intl.message(

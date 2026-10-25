@@ -1422,4 +1422,48 @@ void main() {
       }
     });
   });
+
+  group('simple dashboard widgets JSON', () {
+    test('a missing list shows every simple widget', () {
+      expect(
+        simpleDashboardWidgetsFromJson(null),
+        SimpleDashboardWidget.values,
+      );
+    });
+
+    test('unknown names are dropped', () {
+      expect(
+        simpleDashboardWidgetsFromJson([
+          'speed',
+          'retiredWidget',
+          'services',
+          7,
+        ]),
+        [SimpleDashboardWidget.speed, SimpleDashboardWidget.services],
+      );
+    });
+
+    test('duplicates are removed, keeping the first place', () {
+      expect(
+        simpleDashboardWidgetsFromJson(['services', 'speed', 'services']),
+        [SimpleDashboardWidget.services, SimpleDashboardWidget.speed],
+      );
+    });
+
+    test('the saved order is kept, and an empty list stays empty', () {
+      expect(
+        simpleDashboardWidgetsFromJson([
+          'trustedNetworks',
+          'outboundMode',
+          'ipQuality',
+        ]),
+        [
+          SimpleDashboardWidget.trustedNetworks,
+          SimpleDashboardWidget.outboundMode,
+          SimpleDashboardWidget.ipQuality,
+        ],
+      );
+      expect(simpleDashboardWidgetsFromJson(const []), isEmpty);
+    });
+  });
 }

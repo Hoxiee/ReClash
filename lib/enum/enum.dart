@@ -522,6 +522,16 @@ enum DashboardWidget {
   const DashboardWidget({this.platforms = SupportPlatform.values});
 }
 
+enum DashboardStyle { simple, detailed }
+
+enum SimpleDashboardWidget {
+  outboundMode,
+  speed,
+  services,
+  ipQuality,
+  trustedNetworks,
+}
+
 enum DnsQueryInitiator { app, rule, direct, proxy, other }
 
 enum IpType { residential, mobile, business, hosting }

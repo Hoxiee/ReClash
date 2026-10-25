@@ -101,6 +101,13 @@ class ProviderAnnouncement {
   final Uri? link;
 }
 
+/// `networkSpeed` is the live traffic meter, not the on-demand speed test, so
+/// it has no simple counterpart.
+const _simpleCounterparts = {
+  DashboardWidget.outboundMode: SimpleDashboardWidget.outboundMode,
+  DashboardWidget.serviceStatus: SimpleDashboardWidget.services,
+};
+
 class ProviderHints {
   const ProviderHints(this.metadata);
 
@@ -122,6 +129,17 @@ class ProviderHints {
             .firstOrNull,
     ];
     return widgets.isEmpty ? null : widgets;
+  }
+
+  /// Null when none of the listed widgets has a simple counterpart, so the
+  /// user's simple list stays as it is.
+  List<SimpleDashboardWidget>? get simpleWidgets {
+    final names = widgets;
+    if (names == null) return null;
+    final mapped = {
+      for (final widget in names) ?_simpleCounterparts[widget],
+    }.toList();
+    return mapped.isEmpty ? null : mapped;
   }
 
   ProviderBackground? get background {

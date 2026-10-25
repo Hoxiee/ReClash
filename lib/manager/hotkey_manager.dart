@@ -175,7 +175,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       case HotAction.mode:
         commonAction.updateMode();
       case HotAction.start:
-        commonAction.toggleRunning();
+        unawaited(commonAction.toggleRunning());
       case HotAction.view:
         unawaited(systemAction.updateVisible());
       case HotAction.proxy:

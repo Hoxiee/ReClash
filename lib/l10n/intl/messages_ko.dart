@@ -324,63 +324,89 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m140(link) => "읽을 수 있는 프록시가 없습니다: ${link}";
 
-  static String m141(label) => "${label}은(는) 하나만 입력해야 합니다";
+  static String m141(count) => "${Intl.plural(count, other: '${count}일')}";
 
-  static String m142(client, format, count) =>
+  static String m142(delay) => "${delay} ms";
+
+  static String m143(service) => "${service}은(는) 이 주소를 차단합니다";
+
+  static String m144(service) => "${service}은(는) 아직 여기서 이용할 수 없습니다";
+
+  static String m145(service) => "${service}은(는) 여기서 자체 작품만 보여 줍니다";
+
+  static String m146(service) => "${service}은(는) 일부 제한이 있습니다";
+
+  static String m147(service) => "${service}이(가) 열리지 않습니다";
+
+  static String m148(service) => "${service}은(는) 이 나라에서 작동하지 않습니다";
+
+  static String m149(size) => "탭할 때만 VPN 없이 약 ${size} 데이터를 내려받습니다.";
+
+  static String m150(size) => "탭할 때만 VPN으로 약 ${size} 데이터를 내려받습니다.";
+
+  static String m151(network) => "신뢰하는 네트워크 “${network}”";
+
+  static String m152(total) => "${total} 중 남음";
+
+  static String m153(date) => "${date}까지";
+
+  static String m154(label) => "${label}은(는) 하나만 입력해야 합니다";
+
+  static String m155(client, format, count) =>
       "${client}로 수신: ${format}, 프록시 노드 ${count}개.";
 
-  static String m143(count) =>
+  static String m156(count) =>
       "${Intl.plural(count, one: '구독이 내일 만료됩니다', other: '구독이 ${count}일 후에 만료됩니다')}";
 
-  static String m144(count) => "서버 ${count}개 추가";
+  static String m157(count) => "서버 ${count}개 추가";
 
-  static String m145(count) => "서버 ${count}개가 모두 추가됩니다";
+  static String m158(count) => "서버 ${count}개가 모두 추가됩니다";
 
-  static String m146(count, total) => "서버 ${total}개 중 ${count}개가 추가됩니다";
+  static String m159(count, total) => "서버 ${total}개 중 ${count}개가 추가됩니다";
 
-  static String m147(count) => "모두 보기 (${count})";
+  static String m160(count) => "모두 보기 (${count})";
 
-  static String m148(format) => "형식: ${format}";
+  static String m161(format) => "형식: ${format}";
 
-  static String m149(percent) => "트래픽의 ${percent}%를 사용했습니다";
+  static String m162(percent) => "트래픽의 ${percent}%를 사용했습니다";
 
-  static String m150(count) => "결과 ${count}개";
+  static String m163(count) => "결과 ${count}개";
 
-  static String m151(value) => "최고 ${value}";
+  static String m164(value) => "최고 ${value}";
 
-  static String m152(value) => "합계 ${value}";
+  static String m165(value) => "합계 ${value}";
 
-  static String m153(transport) => "${transport} 요청 헤더";
+  static String m166(transport) => "${transport} 요청 헤더";
 
-  static String m154(version) => "설치된 버전: ${version}";
+  static String m167(version) => "설치된 버전: ${version}";
 
-  static String m155(count) => "${count}분";
+  static String m168(count) => "${count}분";
 
-  static String m156(time) => "${time} 남음";
+  static String m169(time) => "${time} 남음";
 
-  static String m157(count) => "${count}초";
+  static String m170(count) => "${count}초";
 
-  static String m158(speed) => "${speed}/초";
+  static String m171(speed) => "${speed}/초";
 
-  static String m159(nodes, groups, providers) =>
+  static String m172(nodes, groups, providers) =>
       "프록시 ${nodes}개, 그룹 ${groups}개, 원격 공급자 ${providers}개";
 
-  static String m160(action) =>
+  static String m173(action) =>
       "이 링크가 “${action}” 동작을 요청합니다. ReClash에서 실행하도록 허용할까요?";
 
-  static String m161(name, source) =>
+  static String m174(name, source) =>
       "${source}에서 “${name}”을 가져올까요? 확인 후 프로필 검증과 변환 검토가 진행됩니다.";
 
-  static String m162(label) => "${label}은(는) URL이어야 합니다";
+  static String m175(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m163(index) => "배경 ${index}";
+  static String m176(index) => "배경 ${index}";
 
-  static String m164(count) =>
+  static String m177(count) =>
       "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
 
-  static String m165(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m178(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
-  static String m166(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m179(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -719,6 +745,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("다크"),
     "dashboard": MessageLookupByLibrary.simpleMessage("대시보드"),
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage("추가 가능"),
+    "dashboardStyle": MessageLookupByLibrary.simpleMessage("대시보드"),
+    "dashboardStyleDetailed": MessageLookupByLibrary.simpleMessage("상세"),
+    "dashboardStyleSimple": MessageLookupByLibrary.simpleMessage("간단"),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "변경 사항을 저장하지 못해 되돌렸습니다",
     ),
@@ -2562,12 +2591,135 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage(
       "백그라운드 실행은 창을 표시하지 않고 시작합니다.",
     ),
+    "simpleDashboardDetailed": MessageLookupByLibrary.simpleMessage("상세 대시보드"),
+    "simpleDashboardEditWidgets": MessageLookupByLibrary.simpleMessage("위젯 편집"),
+    "simpleDashboardEmpty": MessageLookupByLibrary.simpleMessage(
+      "아직 위젯이 없어요. 편집 화면에서 추가하세요.",
+    ),
+    "simpleDashboardHome": MessageLookupByLibrary.simpleMessage("홈"),
+    "simpleDashboardSimple": MessageLookupByLibrary.simpleMessage("간단한 대시보드"),
+    "simpleDashboardWidgets": MessageLookupByLibrary.simpleMessage("위젯"),
+    "simpleDaysCount": m141,
+    "simpleIpBusiness": MessageLookupByLibrary.simpleMessage("기관 주소"),
+    "simpleIpGoodDesc": MessageLookupByLibrary.simpleMessage(
+      "CAPTCHA나 “VPN” 차단은 거의 없습니다.",
+    ),
+    "simpleIpHosting": MessageLookupByLibrary.simpleMessage("데이터 센터 주소"),
+    "simpleIpLevelClean": MessageLookupByLibrary.simpleMessage("깨끗함"),
+    "simpleIpLevelNormal": MessageLookupByLibrary.simpleMessage("보통"),
+    "simpleIpLevelRisky": MessageLookupByLibrary.simpleMessage("위험"),
+    "simpleIpMobile": MessageLookupByLibrary.simpleMessage("모바일 네트워크 주소"),
+    "simpleIpNormalDesc": MessageLookupByLibrary.simpleMessage(
+      "일부 사이트에서 CAPTCHA를 요구할 수 있습니다.",
+    ),
+    "simpleIpReal": MessageLookupByLibrary.simpleMessage("실제 주소"),
+    "simpleIpRealDesc": MessageLookupByLibrary.simpleMessage(
+      "인터넷 제공업체와 사이트는 사용자가 어디에 있고 무엇을 여는지 볼 수 있습니다.",
+    ),
+    "simpleIpResidential": MessageLookupByLibrary.simpleMessage("일반 가정용 주소"),
+    "simpleIpRiskyDesc": MessageLookupByLibrary.simpleMessage(
+      "사이트에서 더 자주 차단하거나 확인할 수 있습니다.",
+    ),
+    "simpleIpTitle": MessageLookupByLibrary.simpleMessage("사이트에서 보는 내 모습"),
+    "simpleIpUnknown": MessageLookupByLibrary.simpleMessage("주소를 확인하지 못했습니다"),
+    "simpleLatency": m142,
+    "simpleLocationAll": MessageLookupByLibrary.simpleMessage("전체"),
+    "simpleLocationAuto": MessageLookupByLibrary.simpleMessage("자동 선택"),
+    "simpleLocationManual": MessageLookupByLibrary.simpleMessage("직접 선택"),
+    "simpleLocationNone": MessageLookupByLibrary.simpleMessage("아직 서버가 없습니다"),
+    "simpleLocationNoneHint": MessageLookupByLibrary.simpleMessage(
+      "서버는 연결한 후에 표시됩니다",
+    ),
+    "simpleModeAuto": MessageLookupByLibrary.simpleMessage("자동"),
+    "simpleModeAutoDesc": MessageLookupByLibrary.simpleMessage(
+      "네트워크 시나리오가 모드를 정합니다",
+    ),
+    "simpleModeDirect": MessageLookupByLibrary.simpleMessage("직접 연결"),
+    "simpleModeDirectDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN 없이 트래픽이 흐릅니다",
+    ),
+    "simpleModeGlobal": MessageLookupByLibrary.simpleMessage("모두 VPN 경유"),
+    "simpleModeGlobalDesc": MessageLookupByLibrary.simpleMessage(
+      "모든 트래픽이 서버를 거칩니다",
+    ),
+    "simpleModeRule": MessageLookupByLibrary.simpleMessage("스마트"),
+    "simpleModeRuleDesc": MessageLookupByLibrary.simpleMessage(
+      "직접 열리지 않는 것만 VPN을 거칩니다",
+    ),
+    "simpleModeTitle": MessageLookupByLibrary.simpleMessage("모드"),
+    "simpleNoExpiry": MessageLookupByLibrary.simpleMessage("종료일 없음"),
+    "simpleProviderAnnouncement": MessageLookupByLibrary.simpleMessage(
+      "제공자 공지",
+    ),
+    "simpleServiceBlocked": m143,
+    "simpleServiceComingSoon": m144,
+    "simpleServiceOriginalsOnly": m145,
+    "simpleServiceRestricted": m146,
+    "simpleServiceUnavailable": m147,
+    "simpleServiceUnsupportedRegion": m148,
+    "simpleServicesAfterConnect": MessageLookupByLibrary.simpleMessage(
+      "연결 후 확인",
+    ),
+    "simpleServicesAllGood": MessageLookupByLibrary.simpleMessage("모두 정상"),
+    "simpleServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "VPN 없을 때처럼 직접",
+    ),
+    "simpleServicesManual": MessageLookupByLibrary.simpleMessage("수동"),
+    "simpleServicesTitle": MessageLookupByLibrary.simpleMessage("서비스"),
+    "simpleServicesViaVpn": MessageLookupByLibrary.simpleMessage("VPN 경유"),
+    "simpleSpeed4k": MessageLookupByLibrary.simpleMessage("4K 영상에 충분해요"),
+    "simpleSpeedAgain": MessageLookupByLibrary.simpleMessage("다시"),
+    "simpleSpeedAll": MessageLookupByLibrary.simpleMessage(
+      "빠름: 모든 것을 동시에 써도 충분해요",
+    ),
+    "simpleSpeedChat": MessageLookupByLibrary.simpleMessage("메시지와 음악에 충분해요"),
+    "simpleSpeedDirectIdleDesc": m149,
+    "simpleSpeedDirectTag": MessageLookupByLibrary.simpleMessage("VPN 없이"),
+    "simpleSpeedFailed": MessageLookupByLibrary.simpleMessage(
+      "측정하지 못했습니다. 다시 시도해 주세요.",
+    ),
+    "simpleSpeedHd": MessageLookupByLibrary.simpleMessage("HD 영상에 충분해요"),
+    "simpleSpeedIdleDesc": m150,
+    "simpleSpeedLevel4k": MessageLookupByLibrary.simpleMessage("4K"),
+    "simpleSpeedLevelAll": MessageLookupByLibrary.simpleMessage("모두 동시에"),
+    "simpleSpeedLevelChat": MessageLookupByLibrary.simpleMessage("채팅"),
+    "simpleSpeedLevelHd": MessageLookupByLibrary.simpleMessage("HD"),
+    "simpleSpeedMeasure": MessageLookupByLibrary.simpleMessage("측정"),
+    "simpleSpeedMeasuring": MessageLookupByLibrary.simpleMessage("측정 중…"),
+    "simpleSpeedSlow": MessageLookupByLibrary.simpleMessage("느림: 페이지도 한참 걸려요"),
+    "simpleSpeedTitle": MessageLookupByLibrary.simpleMessage("속도"),
+    "simpleSpeedUnit": MessageLookupByLibrary.simpleMessage("Mbps"),
+    "simpleStatusConnecting": MessageLookupByLibrary.simpleMessage("연결 중…"),
+    "simpleStatusConnectingHint": MessageLookupByLibrary.simpleMessage(
+      "가장 좋은 서버를 고르는 중",
+    ),
+    "simpleStatusNoProfile": MessageLookupByLibrary.simpleMessage("구독 없음"),
+    "simpleStatusNoProfileHint": MessageLookupByLibrary.simpleMessage(
+      "연결하려면 구독을 추가하세요",
+    ),
+    "simpleStatusOff": MessageLookupByLibrary.simpleMessage("보호되지 않음"),
+    "simpleStatusOffHint": MessageLookupByLibrary.simpleMessage("탭하여 연결"),
+    "simpleStatusOn": MessageLookupByLibrary.simpleMessage("보호됨"),
+    "simpleStatusPaused": MessageLookupByLibrary.simpleMessage("일시 중지됨"),
+    "simpleStatusPausedHint": MessageLookupByLibrary.simpleMessage("신뢰하는 네트워크"),
+    "simpleStatusPausedOn": m151,
+    "simpleTrafficLeft": m152,
+    "simpleTrafficUnlimited": MessageLookupByLibrary.simpleMessage("무제한 트래픽"),
+    "simpleTrustedDesc": MessageLookupByLibrary.simpleMessage(
+      "이 네트워크에서는 VPN이 자동으로 일시 중지되고, 벗어나면 다시 켜집니다.",
+    ),
+    "simpleTrustedEmpty": MessageLookupByLibrary.simpleMessage("아직 네트워크가 없습니다"),
+    "simpleTrustedThisNetwork": MessageLookupByLibrary.simpleMessage("이 네트워크"),
+    "simpleTrustedTitle": MessageLookupByLibrary.simpleMessage(
+      "내 네트워크에서 일시 중지",
+    ),
+    "simpleUntilDate": m153,
     "singleAdd": MessageLookupByLibrary.simpleMessage("개별 추가"),
     "singleImport": MessageLookupByLibrary.simpleMessage("개별 가져오기"),
     "singleShareLinkOnly": MessageLookupByLibrary.simpleMessage(
       "여기에는 링크를 하나만 입력하세요. 여러 개는 목록의 빠른 편집에서 편집하세요",
     ),
-    "singleValueTip": m141,
+    "singleValueTip": m154,
     "size": MessageLookupByLibrary.simpleMessage("크기"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("인증서 검증 건너뛰기"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("건너뛸 도메인"),
@@ -2685,7 +2837,7 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "subscriptionCompatibilityPinSuccessful":
         MessageLookupByLibrary.simpleMessage("이 클라이언트 사용"),
-    "subscriptionCompatibilityPrepared": m142,
+    "subscriptionCompatibilityPrepared": m155,
     "subscriptionCompatibilityPreparedHint":
         MessageLookupByLibrary.simpleMessage(
           "Core가 이 결과를 분석했습니다. 아직 저장하거나 적용하지 않았습니다.",
@@ -2714,7 +2866,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 구독은 기기 등록이 필요합니다. 제공업체의 안내를 따르세요.",
     ),
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("구독이 만료됐습니다"),
-    "subscriptionExpiresInDays": m143,
+    "subscriptionExpiresInDays": m156,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "구독이 오늘 만료됩니다",
     ),
@@ -2738,8 +2890,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionIdentityUseGlobal": MessageLookupByLibrary.simpleMessage(
       "전역 설정 사용",
     ),
-    "subscriptionImportAdd": m144,
-    "subscriptionImportAllAdded": m145,
+    "subscriptionImportAdd": m157,
+    "subscriptionImportAllAdded": m158,
     "subscriptionImportFormatClash": MessageLookupByLibrary.simpleMessage(
       "Clash 구성",
     ),
@@ -2767,7 +2919,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportOtherLosses": MessageLookupByLibrary.simpleMessage(
       "일부 서버 옵션은 지원되지 않아 제외됩니다",
     ),
-    "subscriptionImportPartial": m146,
+    "subscriptionImportPartial": m159,
     "subscriptionImportReasonBandwidth": MessageLookupByLibrary.simpleMessage(
       "업로드·다운로드 속도가 없습니다",
     ),
@@ -2785,11 +2937,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionImportReviewTitle": MessageLookupByLibrary.simpleMessage(
       "일부는 옮겨지지 않습니다",
     ),
-    "subscriptionImportShowAll": m147,
+    "subscriptionImportShowAll": m160,
     "subscriptionImportSkippedTitle": MessageLookupByLibrary.simpleMessage(
       "추가되지 않음",
     ),
-    "subscriptionImportSourceFormat": m148,
+    "subscriptionImportSourceFormat": m161,
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("구독 정보"),
     "subscriptionKindDev": MessageLookupByLibrary.simpleMessage("개발"),
     "subscriptionKindPromo": MessageLookupByLibrary.simpleMessage("프로모"),
@@ -2806,7 +2958,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderLogo": MessageLookupByLibrary.simpleMessage("로고 URL"),
     "subscriptionProviderSupport": MessageLookupByLibrary.simpleMessage("지원"),
     "subscriptionProviderWebsite": MessageLookupByLibrary.simpleMessage("웹사이트"),
-    "subscriptionTrafficLow": m149,
+    "subscriptionTrafficLow": m162,
     "subscriptionUseProviderInterval": MessageLookupByLibrary.simpleMessage(
       "제공자 업데이트 간격 사용",
     ),
@@ -2886,7 +3038,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toolsPin": MessageLookupByLibrary.simpleMessage("고정"),
     "toolsPinned": MessageLookupByLibrary.simpleMessage("고정됨"),
     "toolsRestartCore": MessageLookupByLibrary.simpleMessage("코어 다시 시작"),
-    "toolsResults": m150,
+    "toolsResults": m163,
     "toolsRun": MessageLookupByLibrary.simpleMessage("실행"),
     "toolsSection": MessageLookupByLibrary.simpleMessage("섹션"),
     "toolsSetting": MessageLookupByLibrary.simpleMessage("설정"),
@@ -2903,12 +3055,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m151,
-    "trafficTotal": m152,
+    "trafficPeak": m164,
+    "trafficTotal": m165,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationSuggestFix": MessageLookupByLibrary.simpleMessage("번역 수정 제안하기"),
     "transport": MessageLookupByLibrary.simpleMessage("전송"),
-    "transportHeaders": m153,
+    "transportHeaders": m166,
     "trayIcon": MessageLookupByLibrary.simpleMessage("트레이 아이콘"),
     "trayIconColor": MessageLookupByLibrary.simpleMessage("컬러"),
     "trayIconDark": MessageLookupByLibrary.simpleMessage("검정"),
@@ -3053,12 +3205,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "updateInstallNow": MessageLookupByLibrary.simpleMessage("지금 설치"),
     "updateInstalledTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 완료"),
-    "updateInstalledVersion": m154,
+    "updateInstalledVersion": m167,
     "updateInstallingDescription": MessageLookupByLibrary.simpleMessage(
       "Android가 설치를 마무리하고 있습니다. 이 과정에서 ReClash가 닫힐 수 있습니다.",
     ),
     "updateInstallingTitle": MessageLookupByLibrary.simpleMessage("업데이트 설치 중"),
-    "updateMinutes": m155,
+    "updateMinutes": m168,
     "updateNotNow": MessageLookupByLibrary.simpleMessage("나중에"),
     "updateNotesUnavailable": MessageLookupByLibrary.simpleMessage(
       "릴리스 노트가 없습니다.",
@@ -3094,18 +3246,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "updatePreload": MessageLookupByLibrary.simpleMessage("Wi-Fi로 미리 다운로드"),
     "updateReadyTitle": MessageLookupByLibrary.simpleMessage("설치 준비 완료"),
     "updateReleaseDetails": MessageLookupByLibrary.simpleMessage("릴리스 상세 정보"),
-    "updateRemainingTime": m156,
+    "updateRemainingTime": m169,
     "updateResumeAction": MessageLookupByLibrary.simpleMessage("다운로드 재개"),
     "updateResumeShort": MessageLookupByLibrary.simpleMessage("재개"),
     "updateRetryCheck": MessageLookupByLibrary.simpleMessage("다시 확인"),
     "updateRetryInstall": MessageLookupByLibrary.simpleMessage("설치 재시도"),
-    "updateSeconds": m157,
+    "updateSeconds": m170,
     "updateSeeFullReleaseNotes": MessageLookupByLibrary.simpleMessage(
       "전체 릴리스 노트 보기",
     ),
     "updateShowAllNotes": MessageLookupByLibrary.simpleMessage("모든 변경 사항 보기"),
     "updateTitle": MessageLookupByLibrary.simpleMessage("업데이트"),
-    "updateTransferSpeed": m158,
+    "updateTransferSpeed": m171,
     "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
       "다운로드한 업데이트의 무결성을 확인할 수 없습니다.",
     ),
@@ -3137,12 +3289,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
       "설정한 종료 동작을 사용합니다.",
     ),
-    "urlSchemeConfigCounts": m159,
+    "urlSchemeConfigCounts": m172,
     "urlSchemeConfigHint": MessageLookupByLibrary.simpleMessage(
       "YAML 또는 JSON 설정을 붙여넣으세요",
     ),
     "urlSchemeConfigSummary": MessageLookupByLibrary.simpleMessage("설정 내용"),
-    "urlSchemeConfirmMessage": m160,
+    "urlSchemeConfirmMessage": m173,
     "urlSchemeConfirmTitle": MessageLookupByLibrary.simpleMessage("외부 앱 명령"),
     "urlSchemeConfirmationTip": MessageLookupByLibrary.simpleMessage(
       "외부 연결 및 종료 명령은 확인을 요청합니다.",
@@ -3174,7 +3326,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "링크 형식입니다. 자리표시자를 URL이나 데이터로 바꾸세요.",
     ),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
-    "urlSchemeImportConfirm": m161,
+    "urlSchemeImportConfirm": m174,
     "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
       "링크에 YAML 또는 JSON 설정을 포함합니다.",
     ),
@@ -3252,7 +3404,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 암호화 버전은 지원되지 않습니다. 일반 구독 링크를 요청하세요.",
     ),
     "urlSchemeUseExample": MessageLookupByLibrary.simpleMessage("예시 사용"),
-    "urlTip": m162,
+    "urlTip": m175,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -3285,9 +3437,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
-    "wallpaperImageLabel": m163,
+    "wallpaperImageLabel": m176,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m164,
+    "wallpaperLibraryFull": m177,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
@@ -3400,8 +3552,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m165,
-    "yearsAgoShort": m166,
+    "yearsAgo": m178,
+    "yearsAgoShort": m179,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

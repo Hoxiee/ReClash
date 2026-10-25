@@ -108,6 +108,7 @@ flutter:
     - assets/images/avatar/
     - assets/images/icon_variants/
     - assets/images/services/
+    - assets/images/flags/
     - core/mihomo/component/ca/ca-certificates.crt
     - path: assets/images/tray/unix/
       platforms: [ linux ]

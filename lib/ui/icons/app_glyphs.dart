@@ -1086,6 +1086,52 @@ abstract final class AppGlyphs {
     ),
   ]);
 
+  static const power = Glyph([
+    GlyphArc(
+      12,
+      13,
+      7.6,
+      -math.pi / 2 + 0.72,
+      2 * math.pi - 1.44,
+      role: GlyphRole.line,
+    ),
+    GlyphPolyline([
+      GlyphVertex(12, 3.4),
+      GlyphVertex(12, 11.4),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const support = Glyph([
+    GlyphArc(12, 11, 8.2, math.pi, math.pi, role: GlyphRole.line),
+    GlyphBox(3.8, 11, 7.2, 17.6, 1.6),
+    GlyphBox(16.8, 11, 20.2, 17.6, 1.6),
+    GlyphPolyline([
+      GlyphVertex(18.5, 17.6),
+      GlyphVertex(18.5, 19.6, 1.6),
+      GlyphVertex(14.2, 20.6, 1),
+    ], role: GlyphRole.detail),
+    GlyphCircle(12.6, 20.6, 1.2, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const megaphone = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 9.2, 1.5),
+      GlyphVertex(8.5, 9.2, 1),
+      GlyphVertex(17.5, 4.5, 1.5),
+      GlyphVertex(17.5, 19.5, 1.5),
+      GlyphVertex(8.5, 14.8, 1),
+      GlyphVertex(4, 14.8, 1.5),
+    ], closed: true),
+    GlyphPolyline([
+      GlyphVertex(7.2, 15),
+      GlyphVertex(8.6, 20.2),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(20.8, 10.2),
+      GlyphVertex(20.8, 13.8),
+    ], role: GlyphRole.detail),
+  ]);
+
   static const toggle = Glyph([
     GlyphBox(2.9, 6.5, 21.1, 17.5, 5.5),
     GlyphCircle(8.4, 12, 2.8, role: GlyphRole.detail, solid: true),

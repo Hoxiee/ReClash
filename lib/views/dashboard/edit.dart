@@ -28,9 +28,7 @@ const _appearDuration = Duration(milliseconds: 200);
 const _appearScale = 0.92;
 const _liftGrowth = 0.03;
 
-/// Edits the shown cards where they stand: each sways, a removable one wears
-/// a remove badge, and a held card drags to a new place.
-class DashboardEditor extends ConsumerStatefulWidget {
+class DashboardEditor extends ConsumerWidget {
   const DashboardEditor({
     super.key,
     required this.platform,
@@ -50,20 +48,111 @@ class DashboardEditor extends ConsumerStatefulWidget {
   final double gap;
   final VoidCallback onDone;
 
+  /// Cards this platform cannot show stay where they were among the rest.
+  List<DashboardWidget> _keepingOtherPlatforms(
+    WidgetRef ref,
+    List<DashboardWidget> saved,
+    List<DashboardWidget> shown,
+  ) {
+    final result = [...shown];
+    var at = 0;
+    for (final card in saved) {
+      if (card.platforms.contains(platform) &&
+          (card != DashboardWidget.announcement ||
+              ref.read(providerAnnouncementProvider) != null)) {
+        final index = result.indexOf(card);
+        if (index != -1) at = index + 1;
+      } else {
+        result.insert(at++, card);
+      }
+    }
+    return result;
+  }
+
   @override
-  ConsumerState<DashboardEditor> createState() => _DashboardEditorState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DashboardCardEditor<DashboardWidget>(
+      cards: widgets,
+      candidates: [
+        for (final card in DashboardWidget.values)
+          if (card != DashboardWidget.announcement &&
+              card.platforms.contains(platform))
+            card,
+      ],
+      cardOf: (card) => card.card,
+      cardKeyOf: cardKeyOf,
+      labelOf: (context, card) => card.label(context),
+      descriptionOf: (context, card) => card.description(context),
+      glyphOf: (card) => card.glyph,
+      removable: (card) => card.removable,
+      padding: padding,
+      gap: gap,
+      onDone: onDone,
+      onChanged: (shown) => ref
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              dashboardWidgets: _keepingOtherPlatforms(
+                ref,
+                state.dashboardWidgets,
+                shown,
+              ),
+            ),
+          ),
+    );
+  }
 }
 
-class _DashboardEditorState extends ConsumerState<DashboardEditor>
+class DashboardCardEditor<T extends Enum> extends StatefulWidget {
+  const DashboardCardEditor({
+    super.key,
+    required this.cards,
+    required this.candidates,
+    required this.cardOf,
+    required this.labelOf,
+    required this.glyphOf,
+    required this.padding,
+    required this.gap,
+    required this.onChanged,
+    required this.onDone,
+    this.cardKeyOf,
+    this.descriptionOf,
+    this.removable,
+  });
+
+  final List<T> cards;
+
+  /// Every card that may be shown, in the order the ones to add are offered.
+  final List<T> candidates;
+  final Widget Function(T card) cardOf;
+  final String Function(BuildContext context, T card) labelOf;
+  final Glyph Function(T card) glyphOf;
+  final EdgeInsets padding;
+  final double gap;
+
+  final ValueChanged<List<T>> onChanged;
+  final VoidCallback onDone;
+
+  /// Shared with the cards outside edit mode, so each keeps its state.
+  final GlobalKey Function(T card)? cardKeyOf;
+  final String? Function(BuildContext context, T card)? descriptionOf;
+  final bool Function(T card)? removable;
+
+  @override
+  State<DashboardCardEditor<T>> createState() => _DashboardCardEditorState<T>();
+}
+
+class _DashboardCardEditorState<T extends Enum>
+    extends State<DashboardCardEditor<T>>
     with SingleTickerProviderStateMixin {
   late final _sway = AnimationController(vsync: this, duration: _swayLoop);
 
   /// The saved cards and any removed one still on its way out.
-  late var _cards = widget.widgets;
-  final _leaving = <DashboardWidget>{};
-  final _entering = <DashboardWidget>{};
+  late var _cards = widget.cards;
+  final _leaving = <T>{};
+  final _entering = <T>{};
 
-  List<DashboardWidget> get _shown => [
+  List<T> get _shown => [
     for (final card in _cards)
       if (!_leaving.contains(card)) card,
   ];
@@ -79,10 +168,10 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
   }
 
   @override
-  void didUpdateWidget(DashboardEditor oldWidget) {
+  void didUpdateWidget(DashboardCardEditor<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(widget.widgets, _shown)) {
-      _cards = widget.widgets;
+    if (!listEquals(widget.cards, _shown)) {
+      _cards = widget.cards;
       _leaving.clear();
       _entering.clear();
     }
@@ -94,46 +183,14 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
     super.dispose();
   }
 
-  void _save() {
-    final shown = _shown;
-    ref
-        .read(appSettingProvider.notifier)
-        .update(
-          (state) => state.copyWith(
-            dashboardWidgets: _keepingOtherPlatforms(
-              state.dashboardWidgets,
-              shown,
-            ),
-          ),
-        );
-  }
+  void _save() => widget.onChanged(_shown);
 
-  /// Cards this platform cannot show stay where they were among the rest.
-  List<DashboardWidget> _keepingOtherPlatforms(
-    List<DashboardWidget> saved,
-    List<DashboardWidget> shown,
-  ) {
-    final result = [...shown];
-    var at = 0;
-    for (final card in saved) {
-      if (card.platforms.contains(widget.platform) &&
-          (card != DashboardWidget.announcement ||
-              ref.read(providerAnnouncementProvider) != null)) {
-        final index = result.indexOf(card);
-        if (index != -1) at = index + 1;
-      } else {
-        result.insert(at++, card);
-      }
-    }
-    return result;
-  }
-
-  void _remove(DashboardWidget card) {
+  void _remove(T card) {
     setState(() => _leaving.add(card));
     _save();
   }
 
-  void _add(DashboardWidget card) {
+  void _add(T card) {
     setState(() {
       if (!_leaving.remove(card)) {
         _entering.add(card);
@@ -148,7 +205,7 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
     _save();
   }
 
-  void _settle(DashboardWidget card) {
+  void _settle(T card) {
     _entering.remove(card);
     if (mounted && _leaving.remove(card)) {
       setState(() => _cards = [..._cards]..remove(card));
@@ -160,15 +217,14 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
     final cards = _cards;
     final shown = _shown;
     final addable = [
-      for (final card in DashboardWidget.values)
-        if (card != DashboardWidget.announcement &&
-            card.platforms.contains(widget.platform) &&
-            !shown.contains(card))
-          card,
+      for (final card in widget.candidates)
+        if (!shown.contains(card)) card,
     ];
+    final density = DashboardDensityScope.of(context);
     final scale = DashboardDensityScope.scaleOf(context);
     final sway = context.disableAnimations ? null : _sway;
     final appLocalizations = context.appLocalizations;
+    final removable = widget.removable;
 
     final revealPadding = EdgeInsets.only(
       top: widget.padding.top,
@@ -198,11 +254,15 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
                   onSettled: () => _settle(card),
                   child: spaced(
                     _EditableCard(
-                      item: card,
-                      cardKey: widget.cardKeyOf(card),
+                      card: widget.cardOf(card),
+                      label: widget.labelOf(context, card),
+                      cardKey: widget.cardKeyOf?.call(card),
                       index: index,
+                      seed: card.index,
                       sway: sway,
-                      onRemove: card.removable ? () => _remove(card) : null,
+                      onRemove: removable == null || removable(card)
+                          ? () => _remove(card)
+                          : null,
                     ),
                   ),
                 );
@@ -210,15 +270,15 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
               // The held card rides in the overlay, outside the density scope,
               // and takes its key along while the list leaves its place empty.
               proxyDecorator: (_, index, animation) => DashboardDensityScope(
-                density: DashboardDensity.mobile,
+                density: density,
                 scale: scale,
                 child: spaced(
                   _LiftedCard(
                     animation: animation,
                     child: AbsorbPointer(
                       child: RepaintBoundary(
-                        key: widget.cardKeyOf(cards[index]),
-                        child: cards[index].card,
+                        key: widget.cardKeyOf?.call(cards[index]),
+                        child: widget.cardOf(cards[index]),
                       ),
                     ),
                   ),
@@ -235,7 +295,15 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
                     for (final card in addable)
                       Padding(
                         padding: const EdgeInsets.only(bottom: _rowGap),
-                        child: _AddRow(item: card, onAdd: () => _add(card)),
+                        child: _AddRow(
+                          label: widget.labelOf(context, card),
+                          description: widget.descriptionOf?.call(
+                            context,
+                            card,
+                          ),
+                          glyph: widget.glyphOf(card),
+                          onAdd: () => _add(card),
+                        ),
                       ),
                   ],
                 ),
@@ -407,16 +475,22 @@ class _PresenceState extends State<_Presence>
 
 class _EditableCard extends StatelessWidget {
   const _EditableCard({
-    required this.item,
+    required this.card,
+    required this.label,
     required this.cardKey,
     required this.index,
+    required this.seed,
     required this.sway,
     required this.onRemove,
   });
 
-  final DashboardWidget item;
-  final GlobalKey cardKey;
+  final Widget card;
+  final String label;
+  final GlobalKey? cardKey;
   final int index;
+
+  /// Sets the card's own rhythm, so neighbours do not sway in step.
+  final int seed;
   final Animation<double>? sway;
   final VoidCallback? onRemove;
 
@@ -424,7 +498,7 @@ class _EditableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final card = AbsorbPointer(
-      child: RepaintBoundary(key: cardKey, child: item.card),
+      child: RepaintBoundary(key: cardKey, child: this.card),
     );
     final onRemove = this.onRemove;
     final content = Stack(
@@ -437,8 +511,7 @@ class _EditableCard extends StatelessWidget {
             end: 0,
             child: _RoundButton(
               glyph: AppGlyphs.remove,
-              tooltip:
-                  '${context.appLocalizations.remove} ${item.label(context)}',
+              tooltip: '${context.appLocalizations.remove} $label',
               background: colorScheme.errorContainer,
               foreground: colorScheme.onErrorContainer,
               onPressed: onRemove,
@@ -451,7 +524,7 @@ class _EditableCard extends StatelessWidget {
     return RepaintBoundary(
       child: sway == null
           ? content
-          : _Sway(sway: sway, seed: item.index, child: content),
+          : _Sway(sway: sway, seed: seed, child: content),
     );
   }
 }
@@ -534,17 +607,23 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _AddRow extends StatelessWidget {
-  const _AddRow({required this.item, required this.onAdd});
+  const _AddRow({
+    required this.label,
+    required this.description,
+    required this.glyph,
+    required this.onAdd,
+  });
 
-  final DashboardWidget item;
+  final String label;
+  final String? description;
+  final Glyph glyph;
   final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final colors = DashboardColors.of(context);
-    final label = item.label(context);
-    final description = item.description(context);
+    final description = this.description;
     return Container(
       height: _rowHeight,
       padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
@@ -571,7 +650,7 @@ class _AddRow extends StatelessWidget {
             ),
             child: Center(
               child: GlyphIcon(
-                item.glyph,
+                glyph,
                 size: 20,
                 color: colorScheme.onSurfaceVariant,
               ),

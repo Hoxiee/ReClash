@@ -90,6 +90,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
             tooltip: appLocalizations.editDashboard,
             onPressed: () => _setEditing(true),
           ),
+        if (!editing)
+          IconButtonData(
+            glyph: AppGlyphs.sliders,
+            tooltip: appLocalizations.simpleDashboardSimple,
+            onPressed: () => ref
+                .read(appSettingProvider.notifier)
+                .update(
+                  (state) =>
+                      state.copyWith(dashboardStyle: DashboardStyle.simple),
+                ),
+          ),
       ],
       // The providers learn a resize a frame late, too late for the cards.
       body: LayoutBuilder(

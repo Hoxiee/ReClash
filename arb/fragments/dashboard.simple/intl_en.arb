@@ -1,0 +1,181 @@
+{
+  "simpleDashboardHome": "Home",
+  "simpleDashboardWidgets": "Widgets",
+  "simpleDashboardDetailed": "Detailed dashboard",
+  "simpleDashboardSimple": "Simple dashboard",
+  "simpleDashboardEditWidgets": "Edit widgets",
+  "dashboardStyle": "Dashboard",
+  "dashboardStyleSimple": "Simple",
+  "dashboardStyleDetailed": "Detailed",
+  "simpleStatusOff": "Not protected",
+  "simpleStatusOffHint": "Tap to connect",
+  "simpleStatusConnecting": "Connecting…",
+  "simpleStatusConnectingHint": "Picking the best server",
+  "simpleStatusOn": "Protected",
+  "simpleStatusPaused": "Paused",
+  "simpleStatusPausedOn": "Trusted network “{network}”",
+  "@simpleStatusPausedOn": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleStatusPausedHint": "Trusted network",
+  "simpleStatusNoProfile": "No subscription",
+  "simpleStatusNoProfileHint": "Add a subscription to connect",
+  "simpleLocationAuto": "picked automatically",
+  "simpleLocationManual": "picked by you",
+  "simpleLocationAll": "All",
+  "simpleLocationNone": "No server yet",
+  "simpleLocationNoneHint": "Servers appear after connecting",
+  "simpleLatency": "{delay} ms",
+  "@simpleLatency": {
+    "placeholders": {
+      "delay": {
+        "type": "int"
+      }
+    }
+  },
+  "simpleTrafficLeft": "left of {total}",
+  "@simpleTrafficLeft": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleTrafficUnlimited": "unlimited traffic",
+  "simpleUntilDate": "until {date}",
+  "@simpleUntilDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleNoExpiry": "no end date",
+  "simpleModeTitle": "Mode",
+  "simpleModeRule": "Smart",
+  "simpleModeRuleDesc": "Only what does not open goes through VPN",
+  "simpleModeGlobal": "Everything via VPN",
+  "simpleModeGlobalDesc": "All traffic goes through the server",
+  "simpleModeDirect": "Direct",
+  "simpleModeDirectDesc": "Traffic goes without VPN",
+  "simpleModeAuto": "Auto",
+  "simpleModeAutoDesc": "The network scenario picks the mode",
+  "simpleServicesTitle": "Services",
+  "simpleServicesAllGood": "All in place",
+  "simpleServicesAfterConnect": "After connecting",
+  "simpleServicesViaVpn": "Through VPN",
+  "simpleServicesDirect": "Direct, as without VPN",
+  "simpleServiceOriginalsOnly": "{service} shows only its own titles here",
+  "@simpleServiceOriginalsOnly": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleServiceUnsupportedRegion": "{service} does not work in this country",
+  "@simpleServiceUnsupportedRegion": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleServiceBlocked": "{service} blocks this address",
+  "@simpleServiceBlocked": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleServiceRestricted": "{service} works with limits",
+  "@simpleServiceRestricted": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleServiceComingSoon": "{service} is not available here yet",
+  "@simpleServiceComingSoon": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleServiceUnavailable": "{service} does not open",
+  "@simpleServiceUnavailable": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleIpTitle": "How sites see you",
+  "simpleIpResidential": "Ordinary home address",
+  "simpleIpMobile": "Mobile network address",
+  "simpleIpBusiness": "Organization address",
+  "simpleIpHosting": "Data center address",
+  "simpleIpGoodDesc": "CAPTCHAs and “VPN” blocks are unlikely.",
+  "simpleIpNormalDesc": "Some sites may ask for a CAPTCHA.",
+  "simpleIpRiskyDesc": "Sites may block or check you more often.",
+  "simpleIpReal": "Your real address",
+  "simpleIpRealDesc": "Your ISP and sites see where you are and what you open.",
+  "simpleIpUnknown": "Could not check the address",
+  "simpleIpLevelRisky": "Risk",
+  "simpleIpLevelNormal": "Normal",
+  "simpleIpLevelClean": "Clean",
+  "simpleTrustedTitle": "Pause on my networks",
+  "simpleTrustedDesc": "On these networks the VPN pauses by itself and comes back when you leave.",
+  "simpleTrustedThisNetwork": "This network",
+  "simpleTrustedEmpty": "No networks yet",
+  "simpleSpeedTitle": "Speed",
+  "simpleSpeedMeasure": "Measure",
+  "simpleSpeedAgain": "Again",
+  "simpleSpeedMeasuring": "Measuring…",
+  "simpleSpeedUnit": "Mbit/s",
+  "simpleSpeedIdleDesc": "Downloads about {size} through the VPN, only when you tap.",
+  "@simpleSpeedIdleDesc": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleSpeedFailed": "Couldn't measure. Try again.",
+  "simpleSpeedSlow": "Slow: even pages will take a while",
+  "simpleSpeedChat": "Enough for messages and music",
+  "simpleSpeedHd": "Enough for HD video",
+  "simpleSpeed4k": "Enough for 4K video",
+  "simpleSpeedAll": "Fast: enough for everything at once",
+  "simpleSpeedLevelChat": "Chats",
+  "simpleSpeedLevelHd": "HD",
+  "simpleSpeedLevel4k": "4K",
+  "simpleSpeedLevelAll": "Everything",
+  "simpleDashboardEmpty": "No widgets yet. Add them in the editor.",
+  "simpleProviderAnnouncement": "Provider announcement",
+  "simpleDaysCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@simpleDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "simpleSpeedDirectIdleDesc": "Downloads about {size} without the VPN, only when you tap.",
+  "@simpleSpeedDirectIdleDesc": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "simpleSpeedDirectTag": "without VPN",
+  "simpleServicesManual": "Manual"
+}

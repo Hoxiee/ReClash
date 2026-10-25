@@ -160,6 +160,16 @@ const _retiredDashboardWidgets = {
   'overrideNtpButton',
 };
 
+const defaultSimpleDashboardWidgets = SimpleDashboardWidget.values;
+
+List<SimpleDashboardWidget> simpleDashboardWidgetsFromJson(
+  List<dynamic>? widgets,
+) {
+  if (widgets == null) return defaultSimpleDashboardWidgets;
+  final byName = SimpleDashboardWidget.values.asNameMap();
+  return widgets.map((name) => byName[name]).nonNulls.toSet().toList();
+}
+
 /// The current outbound card cannot be removed: a list without it predates it.
 List<DashboardWidget> dashboardWidgetsFromJson(
   List<dynamic>? dashboardWidgets,
@@ -245,6 +255,12 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsFromJson)
     List<DashboardWidget> dashboardWidgets,
+    @Default(DashboardStyle.detailed)
+    @JsonKey(unknownEnumValue: DashboardStyle.detailed)
+    DashboardStyle dashboardStyle,
+    @Default(defaultSimpleDashboardWidgets)
+    @JsonKey(fromJson: simpleDashboardWidgetsFromJson)
+    List<SimpleDashboardWidget> simpleDashboardWidgets,
     @Default(false) bool onlyStatisticsProxy,
     @Default(NotificationSettings())
     @JsonKey(

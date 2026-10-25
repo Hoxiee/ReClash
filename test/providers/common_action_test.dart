@@ -100,7 +100,9 @@ void main() {
             suspendProvider.overrideWithValue(true),
           ],
         );
-        container.read(commonActionProvider.notifier).toggleRunning();
+        unawaited(
+          container.read(commonActionProvider.notifier).toggleRunning(),
+        );
         await Future<void>.delayed(Duration.zero);
         expect(container.read(onDemandOverrideProvider).paused, isFalse);
         expect(setup.calls, isEmpty);
@@ -117,7 +119,7 @@ void main() {
         ],
       );
 
-      container.read(commonActionProvider.notifier).toggleRunning();
+      unawaited(container.read(commonActionProvider.notifier).toggleRunning());
       await coreAction.started.future;
       for (var i = 0; i < 4 && setupAction.calls.isEmpty; i++) {
         await Future<void>.delayed(Duration.zero);
@@ -143,7 +145,9 @@ void main() {
             CoreStatus.connected;
         container.read(initProvider.notifier).value = true;
 
-        container.read(commonActionProvider.notifier).toggleRunning();
+        unawaited(
+          container.read(commonActionProvider.notifier).toggleRunning(),
+        );
         for (var i = 0; i < 4 && setupAction.calls.isEmpty; i++) {
           await Future<void>.delayed(Duration.zero);
         }
@@ -163,7 +167,7 @@ void main() {
         ],
       );
 
-      container.read(commonActionProvider.notifier).toggleRunning();
+      unawaited(container.read(commonActionProvider.notifier).toggleRunning());
       await coreAction.started.future;
       await Future<void>.delayed(Duration.zero);
 
@@ -181,7 +185,7 @@ void main() {
         ],
       );
 
-      container.read(commonActionProvider.notifier).toggleRunning();
+      unawaited(container.read(commonActionProvider.notifier).toggleRunning());
       await coreAction.started.future;
       await setupAction.setRunning(false);
       coreAction.pendingStart!.complete(true);

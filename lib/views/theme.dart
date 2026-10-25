@@ -329,6 +329,8 @@ class _ThemeViewState extends ConsumerState<ThemeView>
     _ => const _ThemeSettingsPage(
       id: 'interface',
       items: [
+        _DashboardStyleItem(),
+        SizedBox(height: 16),
         _NavigationLayoutItem(),
         SizedBox(height: 16),
         _NavigationBarItem(),
@@ -474,15 +476,18 @@ class _ThemeModeItem extends ConsumerWidget {
     );
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final light = MiniScreen(
       colorScheme: ref.watch(genColorSchemeProvider(Brightness.light)),
       floatingBar: floatingBar,
       liquidGlass: liquidGlass,
+      simpleDashboard: simpleDashboard,
     );
     final dark = MiniScreen(
       colorScheme: ref.watch(genColorSchemeProvider(Brightness.dark)),
       floatingBar: floatingBar,
       liquidGlass: liquidGlass,
+      simpleDashboard: simpleDashboard,
     );
     return SettingTarget(
       spec: themeToolSettings[0],
@@ -1002,6 +1007,10 @@ final _liquidGlassProvider = themeSettingProvider.select(
   (state) => state.liquidGlass != LiquidGlassMode.none,
 );
 
+final _simpleDashboardProvider = appSettingProvider.select(
+  (state) => state.dashboardStyle == DashboardStyle.simple,
+);
+
 class _PureBlackItem extends ConsumerWidget {
   const _PureBlackItem();
 
@@ -1013,6 +1022,7 @@ class _PureBlackItem extends ConsumerWidget {
     );
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     Widget preview(bool pureBlack) => MiniScreenThumb(
       screen: MiniScreen(
         colorScheme: ref.watch(
@@ -1020,6 +1030,7 @@ class _PureBlackItem extends ConsumerWidget {
         ),
         floatingBar: floatingBar,
         liquidGlass: liquidGlass,
+        simpleDashboard: simpleDashboard,
       ),
     );
     return SettingTarget(
@@ -1065,6 +1076,7 @@ class _ContrastItem extends ConsumerWidget {
     final brightness = Theme.of(context).brightness;
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     Widget preview(ColorContrast contrast) => MiniScreenThumb(
       screen: MiniScreen(
         colorScheme: ref.watch(
@@ -1072,6 +1084,7 @@ class _ContrastItem extends ConsumerWidget {
         ),
         floatingBar: floatingBar,
         liquidGlass: liquidGlass,
+        simpleDashboard: simpleDashboard,
       ),
     );
     return SettingTarget(
@@ -1125,6 +1138,9 @@ extension on AppIcon {
 
 class _AppIconItem extends ConsumerWidget {
   const _AppIconItem();
+
+  static const double _minTileWidth = 84;
+  static const double _icon = 56;
 
   Future<void> _select(
     BuildContext context,
@@ -1185,7 +1201,7 @@ class _AppIconItem extends ConsumerWidget {
                     builder: (_, constraints) {
                       final columns = max(
                         3,
-                        (constraints.maxWidth / _AppIconTile.minWidth).floor(),
+                        (constraints.maxWidth / _minTileWidth).floor(),
                       );
                       final width = constraints.maxWidth / columns;
                       return Wrap(
@@ -1194,13 +1210,24 @@ class _AppIconItem extends ConsumerWidget {
                           for (final icon in AppIcon.values)
                             SizedBox(
                               width: width,
-                              child: _AppIconTile(
-                                icon: icon,
+                              child: _ChoiceTile(
+                                size: const Size.square(_icon),
+                                corner: AppCorner.fit(_icon),
                                 label: icon.label(appLocalizations),
                                 isSelected: icon == selected,
                                 onPressed: icon == selected
                                     ? null
                                     : () => _select(context, ref, icon),
+                                child: Image.asset(
+                                  icon.asset,
+                                  cacheWidth:
+                                      (_icon *
+                                              MediaQuery.devicePixelRatioOf(
+                                                context,
+                                              ))
+                                          .round(),
+                                  filterQuality: FilterQuality.medium,
+                                ),
                               ),
                             ),
                         ],
@@ -1217,31 +1244,33 @@ class _AppIconItem extends ConsumerWidget {
   }
 }
 
-class _AppIconTile extends StatelessWidget {
-  const _AppIconTile({
-    required this.icon,
+/// A picture to pick, ringed and checked while it is the choice.
+class _ChoiceTile extends StatelessWidget {
+  const _ChoiceTile({
+    required this.size,
+    required this.corner,
     required this.label,
     required this.isSelected,
     required this.onPressed,
+    required this.child,
   });
 
-  static const double minWidth = 84;
-  static const double _image = 56;
   static const double _ring = 2.5;
   static const double _ringGap = 3;
   static const double _badge = 22;
   static const _duration = Duration(milliseconds: 220);
 
-  final AppIcon icon;
+  final Size size;
+  final double corner;
   final String label;
   final bool isSelected;
   final VoidCallback? onPressed;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    const frame = _image + (_ring + _ringGap) * 2;
-    final imageCorner = AppCorner.fit(_image);
+    const inset = (_ring + _ringGap) * 2;
     return Semantics(
       button: true,
       selected: isSelected,
@@ -1259,8 +1288,9 @@ class _AppIconTile extends StatelessWidget {
             child: Column(
               spacing: 6,
               children: [
-                SizedBox.square(
-                  dimension: frame,
+                SizedBox(
+                  width: size.width + inset,
+                  height: size.height + inset,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -1269,7 +1299,7 @@ class _AppIconTile extends StatelessWidget {
                         duration: _duration,
                         child: DecoratedBox(
                           decoration: ShapeDecoration(
-                            shape: AppShape.all(imageCorner + _ring + _ringGap)
+                            shape: AppShape.all(corner + _ring + _ringGap)
                                 .copyWith(
                                   side: BorderSide(
                                     color: colorScheme.primary,
@@ -1285,17 +1315,8 @@ class _AppIconTile extends StatelessWidget {
                         duration: _duration,
                         curve: Curves.easeOutCubic,
                         child: ClipRSuperellipse(
-                          borderRadius: AppRadius.all(imageCorner),
-                          child: Image.asset(
-                            icon.asset,
-                            width: _image,
-                            height: _image,
-                            cacheWidth:
-                                (_image *
-                                        MediaQuery.devicePixelRatioOf(context))
-                                    .round(),
-                            filterQuality: FilterQuality.medium,
-                          ),
+                          borderRadius: AppRadius.all(corner),
+                          child: SizedBox.fromSize(size: size, child: child),
                         ),
                       ),
                       Positioned(
@@ -1428,6 +1449,7 @@ class _NavigationLabelsItem extends ConsumerWidget {
     );
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final colorScheme = context.colorScheme;
     return SettingTarget(
       spec: themeToolSettings[12],
@@ -1454,6 +1476,7 @@ class _NavigationLabelsItem extends ConsumerWidget {
                   colorScheme: colorScheme,
                   floatingBar: floatingBar,
                   liquidGlass: liquidGlass,
+                  simpleDashboard: simpleDashboard,
                   labels: value,
                 ),
               ),
@@ -1540,6 +1563,95 @@ class _TrayIconItem extends ConsumerWidget {
   }
 }
 
+class _DashboardStyleItem extends ConsumerWidget {
+  const _DashboardStyleItem();
+
+  static const Size _screen = Size(96, 128);
+  static const double _scale = 0.875;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final level = context.raisedSurfaceLevel;
+    final style = ref.watch(
+      appSettingProvider.select((state) => state.dashboardStyle),
+    );
+    final floatingBar = ref.watch(_floatingBarProvider);
+    final liquidGlass = ref.watch(_liquidGlassProvider);
+    final labels = ref.watch(
+      appSettingProvider.select((state) => state.navigationLabels),
+    );
+    Widget tile(DashboardStyle value, String label) => _ChoiceTile(
+      size: _screen * _scale,
+      corner: AppCorner.md * _scale,
+      label: label,
+      isSelected: value == style,
+      onPressed: value == style
+          ? null
+          : () => ref
+                .read(appSettingProvider.notifier)
+                .update((state) => state.copyWith(dashboardStyle: value)),
+      child: FittedBox(
+        child: SizedBox.fromSize(
+          size: _screen,
+          child: MiniScreen(
+            colorScheme: colorScheme,
+            floatingBar: floatingBar,
+            liquidGlass: liquidGlass,
+            labels: labels,
+            simpleDashboard: value == DashboardStyle.simple,
+          ),
+        ),
+      ),
+    );
+    return SettingTarget(
+      spec: themeToolSettings[14],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InfoHeader(
+            info: Info(
+              label: themeToolSettings[14].title(appLocalizations),
+              glyph: AppGlyphs.dashboard,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              decoration: ShapeDecoration(
+                color: level.colorOf(colorScheme),
+                shape: AppShape.xl,
+              ),
+              child: SurfaceScope(
+                level: level,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 40,
+                  children: [
+                    for (final (value, label) in [
+                      (
+                        DashboardStyle.simple,
+                        appLocalizations.dashboardStyleSimple,
+                      ),
+                      (
+                        DashboardStyle.detailed,
+                        appLocalizations.dashboardStyleDetailed,
+                      ),
+                    ])
+                      tile(value, label),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _NavigationLayoutItem extends ConsumerWidget {
   const _NavigationLayoutItem();
 
@@ -1549,9 +1661,30 @@ class _NavigationLayoutItem extends ConsumerWidget {
     final layout = ref.watch(
       appSettingProvider.select((state) => state.navigationLayout),
     );
+    final floatingBar = ref.watch(_floatingBarProvider);
+    final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
+    final labels = ref.watch(
+      appSettingProvider.select((state) => state.navigationLabels),
+    );
+    final expanded = ref.watch(
+      appSettingProvider.select((state) => state.sidebarExpanded),
+    );
     final colorScheme = context.colorScheme;
-    final bar = MiniLayoutThumb(colorScheme: colorScheme, sidebar: false);
-    final sidebar = MiniLayoutThumb(colorScheme: colorScheme, sidebar: true);
+    final bar = MiniScreenThumb(
+      screen: MiniScreen(
+        colorScheme: colorScheme,
+        floatingBar: floatingBar,
+        liquidGlass: liquidGlass,
+        labels: labels,
+        simpleDashboard: simpleDashboard,
+      ),
+    );
+    final sidebar = MiniSidebarThumb(
+      colorScheme: colorScheme,
+      expanded: expanded,
+      simpleDashboard: simpleDashboard,
+    );
     return SettingTarget(
       spec: themeToolSettings[9],
       child: PreviewChoiceGroup<NavigationLayout>(
@@ -1566,7 +1699,14 @@ class _NavigationLayoutItem extends ConsumerWidget {
             label: appLocalizations.auto,
             pictogram: SizedBox.fromSize(
               size: MiniScreenThumb.size,
-              child: MiniSplitScreen(light: bar, dark: sidebar),
+              // The split would cut the power button in half.
+              child: MiniSplitScreen(
+                light: MiniSidebarThumb(
+                  colorScheme: colorScheme,
+                  expanded: expanded,
+                ),
+                dark: bar,
+              ),
             ),
           ),
           PreviewChoice(
@@ -1598,6 +1738,7 @@ class _NavigationBarItem extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final colorScheme = context.colorScheme;
     return SettingTarget(
       spec: themeToolSettings[3],
@@ -1617,6 +1758,7 @@ class _NavigationBarItem extends ConsumerWidget {
                 colorScheme: colorScheme,
                 floatingBar: true,
                 liquidGlass: liquidGlass,
+                simpleDashboard: simpleDashboard,
               ),
             ),
           ),
@@ -1624,7 +1766,11 @@ class _NavigationBarItem extends ConsumerWidget {
             value: false,
             label: appLocalizations.docked,
             pictogram: MiniScreenThumb(
-              screen: MiniScreen(colorScheme: colorScheme, floatingBar: false),
+              screen: MiniScreen(
+                colorScheme: colorScheme,
+                floatingBar: false,
+                simpleDashboard: simpleDashboard,
+              ),
             ),
           ),
         ],
@@ -1649,12 +1795,14 @@ class _TabAnimationItem extends ConsumerWidget {
     );
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final colorScheme = context.colorScheme;
     Widget switching(TabAnimation tabAnimation) => MiniScreenThumb(
       screen: MiniScreen(
         colorScheme: colorScheme,
         floatingBar: floatingBar,
         liquidGlass: liquidGlass,
+        simpleDashboard: simpleDashboard,
         selected: 1,
         previous: 0,
         progress: 0.55,
@@ -2158,6 +2306,7 @@ class _CustomColorPreview extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final floatingBar = ref.watch(_floatingBarProvider);
     final liquidGlass = ref.watch(_liquidGlassProvider);
+    final simpleDashboard = ref.watch(_simpleDashboardProvider);
     final level = context.raisedSurfaceLevel;
     Widget screen(Brightness brightness) => ExcludeSemantics(
       child: SizedBox.fromSize(
@@ -2173,6 +2322,7 @@ class _CustomColorPreview extends ConsumerWidget {
                 ),
                 floatingBar: floatingBar,
                 liquidGlass: liquidGlass,
+                simpleDashboard: simpleDashboard,
               ),
             ),
           ),
@@ -2289,6 +2439,12 @@ final themeToolSettings = <SettingSpec>[
     title: (l) => l.trayIcon,
     keywords: ['trayIcon'],
     condition: SettingCondition.linuxOrWindows,
+  ),
+  SettingSpec(
+    id: 'theme.dashboardStyle',
+    page: ToolPage.theme,
+    title: (l) => l.dashboardStyle,
+    keywords: ['dashboardStyle', 'dashboardStyleSimple'],
   ),
   ...wallpaperToolSettings,
 ];

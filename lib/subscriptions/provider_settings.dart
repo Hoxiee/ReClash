@@ -198,6 +198,25 @@ final providerSettingsCatalog = <ProviderSetting>[
         : config,
   ),
   ProviderSetting(
+    'simpleWidgets',
+    provided: (input) => switch (input.hints.simpleWidgets) {
+      final widgets? => [for (final widget in widgets) widget.name],
+      null => null,
+    },
+    read: (config) => [
+      for (final widget in config.appSettingProps.simpleDashboardWidgets)
+        widget.name,
+    ],
+    write: (config, value) => value is List
+        ? _app(
+            config,
+            (p) => p.copyWith(
+              simpleDashboardWidgets: simpleDashboardWidgetsFromJson(value),
+            ),
+          )
+        : config,
+  ),
+  ProviderSetting(
     'background',
     pending: (input) => input.backgroundPending,
     provided: (input) =>

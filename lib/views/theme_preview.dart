@@ -101,17 +101,19 @@ class MiniScreenThumb extends StatelessWidget {
   }
 }
 
-/// A page beside a sidebar, or above a bar when not [sidebar], drawn in the
-/// box of a [MiniScreenThumb].
-class MiniLayoutThumb extends StatelessWidget {
-  const MiniLayoutThumb({
+/// A page beside the sidebar, folded to its icons unless [expanded], drawn
+/// in the box of a [MiniScreenThumb].
+class MiniSidebarThumb extends StatelessWidget {
+  const MiniSidebarThumb({
     super.key,
     required this.colorScheme,
-    required this.sidebar,
+    required this.expanded,
+    this.simpleDashboard = false,
   });
 
   final ColorScheme colorScheme;
-  final bool sidebar;
+  final bool expanded;
+  final bool simpleDashboard;
 
   @override
   Widget build(BuildContext context) {
@@ -120,42 +122,135 @@ class MiniLayoutThumb extends StatelessWidget {
       child: ClipRSuperellipse(
         borderRadius: AppRadius.sm,
         child: CustomPaint(
-          painter: _MiniLayoutPainter(colorScheme, sidebar: sidebar),
+          painter: _MiniSidebarPainter(
+            colorScheme,
+            expanded: expanded,
+            simpleDashboard: simpleDashboard,
+          ),
         ),
       ),
     );
   }
 }
 
-class _MiniLayoutPainter extends CustomPainter {
-  const _MiniLayoutPainter(this.colorScheme, {required this.sidebar});
+class _MiniSidebarPainter extends CustomPainter {
+  const _MiniSidebarPainter(
+    this.colorScheme, {
+    required this.expanded,
+    required this.simpleDashboard,
+  });
 
   static const int _destinations = 4;
 
   final ColorScheme colorScheme;
-  final bool sidebar;
+  final bool expanded;
+  final bool simpleDashboard;
 
   @override
   void paint(Canvas canvas, Size size) {
     final unit = size.height / 10;
-    final navigation = SurfaceLevel.floatingOf(colorScheme);
+    void fill(Rect rect, Color color, ShapeBorder shape) =>
+        _MiniScreenPainter._fill(canvas, rect, color, shape);
     canvas.drawRect(
       Offset.zero & size,
       Paint()..color = SurfaceLevel.page.colorOf(colorScheme),
     );
-    final rail = sidebar
-        ? Rect.fromLTWH(0, 0, unit * 3, size.height)
-        : Rect.fromLTWH(0, size.height - unit * 2.6, size.width, unit * 2.6);
-    canvas.drawRect(rail, Paint()..color = navigation.colorOf(colorScheme));
-    final page = sidebar
-        ? Rect.fromLTRB(rail.right, 0, size.width, size.height)
-        : Rect.fromLTRB(0, 0, size.width, rail.top);
-    final body = page.deflate(unit);
+    final rail = Rect.fromLTWH(
+      0,
+      0,
+      unit * (expanded ? 5.6 : 2.6),
+      size.height,
+    );
+    canvas
+      ..drawRect(rail, Paint()..color = colorScheme.chromeSurface)
+      ..drawRect(
+        Rect.fromLTWH(rail.right - unit * 0.08, 0, unit * 0.08, size.height),
+        Paint()..color = colorScheme.outlineVariant.withValues(alpha: 0.6),
+      );
+    for (var i = 0; i < _destinations; i++) {
+      final row = Rect.fromLTWH(
+        rail.left + unit * 0.5,
+        unit * (1.4 + i * 1.9),
+        rail.width - unit,
+        unit * 1.4,
+      );
+      final selected = i == 0;
+      if (selected) {
+        fill(row, colorScheme.onSurface.withValues(alpha: 0.08), AppShape.sm);
+        fill(
+          Rect.fromLTWH(
+            row.left + unit * 0.15,
+            row.top + unit * 0.35,
+            unit * 0.2,
+            unit * 0.7,
+          ),
+          colorScheme.primary,
+          AppShape.full,
+        );
+      }
+      final icon = Offset(row.left + unit * 0.95, row.center.dy);
+      fill(
+        Rect.fromCircle(center: icon, radius: unit * 0.35),
+        selected ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+        AppShape.circle,
+      );
+      if (!expanded) continue;
+      fill(
+        Rect.fromLTWH(
+          icon.dx + unit * 0.7,
+          row.center.dy - unit * 0.2,
+          unit * (2.4 - i % 2 * 0.6),
+          unit * 0.4,
+        ),
+        colorScheme.onSurface.withValues(alpha: selected ? 0.72 : 0.4),
+        AppShape.full,
+      );
+    }
+    final body = Rect.fromLTRB(
+      rail.right,
+      0,
+      size.width,
+      size.height,
+    ).deflate(unit);
     final card = SurfaceLevel.card.colorOf(colorScheme);
+    ShapeBorder cardShape(double height) => AppShape.all(AppCorner.fit(height));
+    if (simpleDashboard) {
+      final half = (body.width - unit * 0.6) / 2;
+      final plan = unit * 2.2;
+      fill(
+        Rect.fromCircle(
+          center: Offset(
+            body.left + half / 2,
+            (body.top + body.bottom - plan) / 2,
+          ),
+          radius: math.min(half / 2, (body.height - plan) / 2) * 0.85,
+        ),
+        colorScheme.primary,
+        AppShape.circle,
+      );
+      fill(
+        Rect.fromLTWH(body.left, body.bottom - plan, half, plan),
+        card,
+        cardShape(plan),
+      );
+      final cardHeight = (body.height - unit * 0.6) / 2;
+      for (var i = 0; i < 2; i++) {
+        fill(
+          Rect.fromLTWH(
+            body.right - half,
+            body.top + i * (cardHeight + unit * 0.6),
+            half,
+            cardHeight,
+          ),
+          card,
+          cardShape(cardHeight),
+        );
+      }
+      return;
+    }
     final cardHeight = (body.height - unit) / 2;
     for (var i = 0; i < 2; i++) {
-      _MiniScreenPainter._fill(
-        canvas,
+      fill(
         Rect.fromLTWH(
           body.left,
           body.top + i * (cardHeight + unit),
@@ -163,34 +258,16 @@ class _MiniLayoutPainter extends CustomPainter {
           cardHeight,
         ),
         card,
-        AppShape.all(AppCorner.fit(cardHeight)),
-      );
-    }
-    final step = sidebar ? unit * 2 : rail.width / _destinations;
-    for (var i = 0; i < _destinations; i++) {
-      final center = sidebar
-          ? Offset(rail.center.dx, unit * 1.6 + step * i)
-          : Offset(step * (i + 0.5), rail.center.dy);
-      if (i == 0) {
-        _MiniScreenPainter._fill(
-          canvas,
-          Rect.fromCenter(center: center, width: unit * 2, height: unit * 1.2),
-          navigation.next.colorOf(colorScheme),
-          AppShape.full,
-        );
-      }
-      _MiniScreenPainter._fill(
-        canvas,
-        Rect.fromCircle(center: center, radius: unit * 0.35),
-        i == 0 ? colorScheme.primary : colorScheme.onSurfaceVariant,
-        AppShape.circle,
+        cardShape(cardHeight),
       );
     }
   }
 
   @override
-  bool shouldRepaint(_MiniLayoutPainter oldDelegate) =>
-      oldDelegate.colorScheme != colorScheme || oldDelegate.sidebar != sidebar;
+  bool shouldRepaint(_MiniSidebarPainter oldDelegate) =>
+      oldDelegate.colorScheme != colorScheme ||
+      oldDelegate.expanded != expanded ||
+      oldDelegate.simpleDashboard != simpleDashboard;
 }
 
 class _ColorSchemeTween extends Tween<ColorScheme> {
@@ -356,6 +433,7 @@ class MiniScreen extends StatelessWidget {
     this.progress = 1,
     this.tabAnimation = TabAnimation.slide,
     this.labels = NavigationLabels.always,
+    this.simpleDashboard = false,
     this.onSelect,
   });
 
@@ -375,6 +453,7 @@ class MiniScreen extends StatelessWidget {
   final double progress;
   final TabAnimation tabAnimation;
   final NavigationLabels labels;
+  final bool simpleDashboard;
   final ValueChanged<int>? onSelect;
 
   @override
@@ -393,6 +472,7 @@ class MiniScreen extends StatelessWidget {
           progress: progress,
           tabAnimation: tabAnimation,
           labels: labels,
+          simpleDashboard: simpleDashboard,
           cardOpacity: active ? wallpaper.cardOpacity : 1,
         ),
         child: const SizedBox.expand(),
@@ -502,6 +582,7 @@ class _MiniScreenPainter extends CustomPainter {
     required this.progress,
     required this.tabAnimation,
     required this.labels,
+    required this.simpleDashboard,
     required this.cardOpacity,
   });
 
@@ -513,6 +594,7 @@ class _MiniScreenPainter extends CustomPainter {
   final double progress;
   final TabAnimation tabAnimation;
   final NavigationLabels labels;
+  final bool simpleDashboard;
   final double cardOpacity;
 
   bool get _glass => floatingBar && liquidGlass;
@@ -663,6 +745,8 @@ class _MiniScreenPainter extends CustomPainter {
       colorScheme,
       geometry.unit,
       content,
+      clear: math.min(content.bottom, geometry.bar.top - geometry.margin / 2),
+      simpleDashboard: simpleDashboard,
       cardOpacity: cardOpacity,
     ).paint(_pageOf(index));
     canvas.restore();
@@ -734,6 +818,7 @@ class _MiniScreenPainter extends CustomPainter {
         oldDelegate.progress != progress ||
         oldDelegate.tabAnimation != tabAnimation ||
         oldDelegate.labels != labels ||
+        oldDelegate.simpleDashboard != simpleDashboard ||
         oldDelegate.cardOpacity != cardOpacity;
   }
 }
@@ -746,8 +831,11 @@ class _PageSketch {
     this.colorScheme,
     this.unit,
     this.content, {
+    required double clear,
+    required this.simpleDashboard,
     required double cardOpacity,
   }) : width = content.width / unit,
+       height = (clear - content.top) / unit,
        card = SurfaceLevel.card
            .colorOf(colorScheme)
            .withValues(alpha: cardOpacity),
@@ -763,6 +851,10 @@ class _PageSketch {
   final double unit;
   final Rect content;
   final double width;
+
+  /// How far down the page shows clear of the bar.
+  final double height;
+  final bool simpleDashboard;
   final Color card;
   final Color inset;
   final Color text;
@@ -771,6 +863,8 @@ class _PageSketch {
 
   void paint(_MiniPage page) {
     switch (page) {
+      case _MiniPage.dashboard when simpleDashboard:
+        _simpleDashboard(_header(actions: 1));
       case _MiniPage.dashboard:
         _dashboard(_header(actions: 1));
       case _MiniPage.proxies:
@@ -892,6 +986,79 @@ class _PageSketch {
       _pill(1, y + 0.9, 3.5 + i % 2, 0.7, line);
       y += 4.5 + _gap;
     }
+  }
+
+  /// The power button over its status, the server and plan cards at the
+  /// foot, as a phone shows the simple dashboard.
+  void _simpleDashboard(double top) {
+    const location = 3.2;
+    const plan = 5.6;
+    final planY = height - plan;
+    final locationY = planY - _gap - location;
+
+    _block(_rect(0, locationY, width, location), card);
+    _dot(1.9, locationY + 1.6, 1, colorScheme.primary.withValues(alpha: 0.5));
+    _pill(3.6, locationY + 0.95, 5, 0.75, text);
+    _pill(3.6, locationY + 2, 3.4, 0.55, faint);
+    for (var i = 0; i < 4; i++) {
+      _pill(
+        width - 2.6 + i * 0.45,
+        locationY + 2.15 - i * 0.3,
+        0.25,
+        0.45 + i * 0.3,
+        colorScheme.primary,
+      );
+    }
+
+    _block(_rect(0, planY, width, plan), card);
+    _dot(1.7, planY + 1.3, 0.75, inset);
+    _pill(3, planY + 0.95, 4, 0.7, line);
+    final gauge = (width - 2.6) / 2;
+    for (var i = 0; i < 2; i++) {
+      final x = 1 + i * (gauge + 0.6);
+      _block(_rect(x, planY + 2.4, gauge, 2.4), inset, extent: 2.4);
+      canvas.drawCircle(
+        _rect(x + 1.2, planY + 3.6, 0, 0).topLeft,
+        unit * 0.7,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = unit * 0.25
+          ..color = i == 0 ? colorScheme.primary : colorScheme.tertiary,
+      );
+      _pill(x + 2.4, planY + 3.3, gauge - 3, 0.6, line);
+    }
+
+    final hero = locationY - _gap - top;
+    final radius = math.min(width * 0.27, (hero - 3.2) / 2);
+    if (radius <= 0) return;
+    final centerY = top + (hero - 3.2) / 2;
+    final center = _rect(width / 2, centerY, 0, 0).topLeft;
+    canvas.drawCircle(
+      center,
+      unit * radius * 1.25,
+      Paint()..color = colorScheme.primary.withValues(alpha: 0.12),
+    );
+    _dot(width / 2, centerY, radius, colorScheme.primary);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: unit * radius * 0.38),
+      -math.pi / 2 + 0.7,
+      2 * math.pi - 1.4,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = unit * radius * 0.11
+        ..color = colorScheme.onPrimary,
+    );
+    _pill(
+      width / 2 - radius * 0.055,
+      centerY - radius * 0.5,
+      radius * 0.11,
+      radius * 0.42,
+      colorScheme.onPrimary,
+    );
+    _pill(width / 2 - 3.5, centerY + radius + 1, 7, 1, text);
+    _pill(width / 2 - 2.5, centerY + radius + 2.4, 5, 0.6, line);
   }
 
   void _speedGraph(Rect tile, {required double phase, required Color color}) {

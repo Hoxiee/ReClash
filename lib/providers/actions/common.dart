@@ -10,14 +10,11 @@ class CommonAction extends _$CommonAction {
   @override
   void build() {}
 
-  void toggleRunning() {
+  Future<void> toggleRunning() {
     if (ref.read(isStartProvider) && ref.read(suspendProvider)) {
-      unawaited(ref.read(onDemandOverrideProvider.notifier).setPaused(false));
-      return;
+      return ref.read(onDemandOverrideProvider.notifier).setPaused(false);
     }
-    unawaited(
-      setRunning(!(_pendingToggleRunning ?? ref.read(isStartProvider))),
-    );
+    return setRunning(!(_pendingToggleRunning ?? ref.read(isStartProvider)));
   }
 
   Future<void> setRunning(bool running) async {

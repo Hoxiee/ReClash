@@ -157,15 +157,14 @@ Each path watches its own provider, so a single setting can take more than one o
 - Local authentication: update applies it to the inbounds. It also switches the VPN system proxy, which needs a
   restart.
 
-## Региональные значения по умолчанию
+## Regional Defaults
 
-`SystemAction.applyRegion` записывает DNS, MTU и список обхода региона в обычные настройки (`PatchClashConfig`,
-`NetworkProps.bypassDomain`), поэтому редакторы показывают реальные значения. При смене региона заменяются только
-значения, совпадающие с умолчаниями прежнего региона; изменённые вручную остаются. «Восстановить по умолчанию» на
-страницах «Сеть» и DNS возвращает значения текущего региона. Пользовательские профили получают DNS региона из
-`regionCode` для ключей, которые они не задают. Проверки сервисов остаются Flutter-настройкой, а Android-подбор
-приложений — отдельным действием с подтверждением. Автоопределение не применяет регион, VPN перезапускается только
-через существующее подтверждение `VpnManager`.
+`SystemAction.applyRegion` writes DNS, MTU, and the region bypass list into the ordinary settings (`PatchClashConfig`,
+`NetworkProps.bypassDomain`), so editors show the real values. When the region changes, only values that match the
+previous region's defaults are replaced; manually changed ones stay. "Restore defaults" on the Network and DNS pages
+returns the current region's values. User profiles get the region's DNS from `regionCode` for keys they do not set.
+Service checks remain a Flutter setting, and Android app selection is a separate action with confirmation.
+Auto-detection does not apply a region; the VPN restarts only through the existing confirmation in `VpnManager`.
 
 ## Web Dashboard
 

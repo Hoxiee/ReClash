@@ -34,7 +34,7 @@ class _CommonAction extends CommonAction {
   int toggles = 0;
 
   @override
-  void toggleRunning() => toggles++;
+  Future<void> toggleRunning() async => toggles++;
 }
 
 class _SystemAction extends SystemAction {

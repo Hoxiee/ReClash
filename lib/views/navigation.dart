@@ -18,7 +18,7 @@ class Navigation implements NavigationPort {
         glyph: AppGlyphs.dashboard,
         label: PageLabel.dashboard,
         builder: (_) =>
-            const DashboardView(key: GlobalObjectKey(PageLabel.dashboard)),
+            const DashboardPage(key: GlobalObjectKey(PageLabel.dashboard)),
       ),
       NavigationItem(
         glyph: AppGlyphs.proxies,
