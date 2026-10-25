@@ -7,6 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
 import 'package:reclash/views/proxies/routing_condition.dart';
+import 'package:reclash/views/proxies/routing_ladder.dart';
 import 'package:reclash/views/proxies/routing_scenario.dart';
 import 'package:reclash/views/proxies/routing_studio.dart';
 
@@ -17,6 +18,7 @@ import '../../helpers/test_profiles.dart';
 const _profileMap = <String, Object?>{
   'rcx': 1,
   'title': 'My EU servers',
+  'description': 'Premium first',
   'level': 'simple',
   'prefer': [
     {'label': 'Premium', 'when': 'tag(premium) and not dead'},
@@ -58,6 +60,22 @@ class _FakeAction extends RcxRoutingAction {
   @override
   Future<void> saveProfile(String name, RcxUserProfile? profile) async {
     saved.add((name, profile));
+  }
+}
+
+/// Words exit.country as the Core does, a country field.
+class _CountryAction extends _FakeAction {
+  _CountryAction() : super(const RcxStudioResult());
+
+  @override
+  Future<RcxStudioResult?> studio(Map<String, Object?> request) async {
+    final result = await super.studio(request);
+    if (request['op'] != 'cond') return result;
+    return result?.copyWith(
+      fields: const [
+        RcxField(name: 'exit.country', kind: 'country', ops: ['in']),
+      ],
+    );
   }
 }
 
@@ -207,9 +225,8 @@ void main() {
       await mockPreferences();
     });
 
-    testWidgets('shows the tiers and saves under a name from the title', (
-      tester,
-    ) async {
+    testWidgets('shows the server order and saves under a name from the '
+        'title', (tester) async {
       final action = _FakeAction(const RcxStudioResult(profile: _profileMap));
       await _openPage(
         tester,
@@ -217,6 +234,10 @@ void main() {
         const RoutingStudio(text: 'rcx: 1\n', groupName: 'Proxy'),
       );
 
+      final ladder = tester.widget<RoutingLadderSection>(
+        find.byType(RoutingLadderSection),
+      );
+      expect(ladder.steps, _profileMap['prefer']);
       expect(find.textContaining('Premium'), findsWidgets);
       expect(find.textContaining('Working'), findsWidgets);
 
@@ -228,6 +249,24 @@ void main() {
       expect(action.saved.single.$1, 'my-eu-servers');
       expect(action.saved.single.$2?.text, 'rcx: 1\n');
       expect(find.byType(RoutingStudio), findsNothing);
+    });
+
+    testWidgets('edits the description under the title', (tester) async {
+      final action = _FakeAction(const RcxStudioResult(profile: _profileMap));
+      await _openPage(
+        tester,
+        action,
+        const RoutingStudio(text: 'rcx: 1\n', groupName: 'Proxy'),
+      );
+      final field = find.widgetWithText(TextField, 'Premium first');
+      expect(field, findsOneWidget);
+
+      await tester.enterText(field, 'Premium, then any');
+      await tester.pump(const Duration(seconds: 1));
+      await _pumpFrames(tester);
+
+      final format = action.requests.lastWhere((r) => r['op'] == 'format');
+      expect((format['profile']! as Map)['description'], 'Premium, then any');
     });
 
     testWidgets('disables save and shows the first error', (tester) async {
@@ -278,6 +317,24 @@ void main() {
       expect(conds, hasLength(2));
       expect(conds.first['text'], 'not dead');
       expect((conds.last['form'] as Map)['join'], 'or');
+    });
+
+    testWidgets('a country field picks countries by name', (tester) async {
+      await _openPage(
+        tester,
+        _CountryAction(),
+        const ConditionEditor(
+          title: 'Condition',
+          text: 'exit.country in [DE, NL]',
+          profile: {},
+          network: false,
+        ),
+      );
+
+      expect(
+        find.text('🇩🇪 Germany, 🇳🇱 Netherlands', findRichText: true),
+        findsOneWidget,
+      );
     });
 
     testWidgets('picking a negated condition sends a negated clause', (

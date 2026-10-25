@@ -19,6 +19,19 @@ abstract class RcxPool with _$RcxPool {
       _$RcxPoolFromJson(json);
 }
 
+/// One step of a server order: the first step with a live server wins.
+@freezed
+abstract class RcxTier with _$RcxTier {
+  const factory RcxTier({
+    @Default('') String label,
+    @Default('') String when,
+    @JsonKey(name: 'last-resort') @Default(false) bool lastResort,
+  }) = _RcxTier;
+
+  factory RcxTier.fromJson(Map<String, Object?> json) =>
+      _$RcxTierFromJson(json);
+}
+
 /// A pool the group switches to in one tap from "Change to".
 @freezed
 abstract class RcxChip with _$RcxChip {
@@ -41,6 +54,9 @@ abstract class RcxBinding with _$RcxBinding {
     @JsonKey(includeIfNull: false) String? feel,
     @JsonKey(includeIfNull: false) String? energy,
     @Default([]) List<RcxChip> chips,
+
+    /// Replaces the profile's server order; empty keeps it.
+    @Default([]) List<RcxTier> prefer,
 
     /// Honoured from the user's layer only; a provider cannot turn it on.
     @Default(false) bool directSplit,
@@ -210,6 +226,9 @@ abstract class RcxGroupStatus with _$RcxGroupStatus {
 
     /// The tunnel mode routes nothing through the group.
     @Default(false) bool idle,
+
+    /// A scenario route made the group.
+    @Default(false) bool route,
     @Default(RcxControl()) RcxControl control,
     @Default('') String now,
 
@@ -262,6 +281,10 @@ abstract class RcxStatus with _$RcxStatus {
     @Default(0) int library,
     RcxScenarioStatus? scenario,
     @Default('') String tunnelMode,
+
+    /// The running config was built with other routes than the scenario
+    /// wants now, so the profile has to be applied again.
+    @Default(false) bool reload,
   }) = _RcxStatus;
 
   factory RcxStatus.fromJson(Map<String, Object?> json) =>
@@ -282,10 +305,25 @@ abstract class RcxScenarioStatus with _$RcxScenarioStatus {
     @Default(false) bool manual,
     @Default(false) bool holdsMode,
     @Default({}) Map<String, String> groups,
+    @Default([]) List<RcxRouteStatus> routes,
   }) = _RcxScenarioStatus;
 
   factory RcxScenarioStatus.fromJson(Map<String, Object?> json) =>
       _$RcxScenarioStatusFromJson(json);
+}
+
+/// One route of the scenario, in priority order; [to] is set when it sends
+/// its traffic to a fixed target instead of a group of its own.
+@freezed
+abstract class RcxRouteStatus with _$RcxRouteStatus {
+  const factory RcxRouteStatus({
+    required String name,
+    @Default('') String to,
+    RcxReason? problem,
+  }) = _RcxRouteStatus;
+
+  factory RcxRouteStatus.fromJson(Map<String, Object?> json) =>
+      _$RcxRouteStatusFromJson(json);
 }
 
 extension RcxStatusExt on RcxStatus {
@@ -341,6 +379,7 @@ abstract class RcxProfileInfo with _$RcxProfileInfo {
     /// `scenario` for an auto control, empty for a group profile.
     @Default('') String kind,
     @Default('') String title,
+    @Default('') String description,
     @Default('') String level,
     @Default('') String source,
     @JsonKey(name: 'extends') @Default('') String extendsId,
@@ -485,10 +524,41 @@ abstract class RcxStudioResult with _$RcxStudioResult {
     @Default([]) List<String> conflicts,
     RcxDecision? current,
     RcxDecision? candidate,
+    @Default([]) List<RcxCountry> countries,
+    @Default([]) List<RcxBundleItem> items,
   }) = _RcxStudioResult;
 
   factory RcxStudioResult.fromJson(Map<String, Object?> json) =>
       _$RcxStudioResultFromJson(json);
+}
+
+/// A country servers exit in or name, with how many do; [verified] when
+/// an exit check confirmed it for at least one of them.
+@freezed
+abstract class RcxCountry with _$RcxCountry {
+  const factory RcxCountry({
+    required String code,
+    @Default(0) int count,
+    @Default(false) bool verified,
+  }) = _RcxCountry;
+
+  factory RcxCountry.fromJson(Map<String, Object?> json) =>
+      _$RcxCountryFromJson(json);
+}
+
+/// One scenario or profile unpacked from an imported bundle, renamed so it
+/// does not replace one the user already has.
+@freezed
+abstract class RcxBundleItem with _$RcxBundleItem {
+  const factory RcxBundleItem({
+    @Default('') String kind,
+    required String name,
+    @Default('') String title,
+    required String text,
+  }) = _RcxBundleItem;
+
+  factory RcxBundleItem.fromJson(Map<String, Object?> json) =>
+      _$RcxBundleItemFromJson(json);
 }
 
 enum RcxAction { change, pin, auto, manual, check }

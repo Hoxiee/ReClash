@@ -1,5 +1,6 @@
 rcx: 1
 title: Russia · bypass blocks
+description: "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort."
 level: advanced
 checks:
   open: { http: 'https://api.telegram.org/', expect: [200, 301, 302, 404] }
@@ -25,31 +26,37 @@ l10n:
     Opens blocked: Abre bloqueados
     Abroad: En el extranjero
     Home exit: Salida local
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "Para usar en Rusia: prefiere servidores en el extranjero que abren los sitios bloqueados en casa y usa una salida local solo como último recurso."
   fr:
     Russia · bypass blocks: Russie · contourner les blocages
     Opens blocked: Ouvre les bloqués
     Abroad: À l’étranger
     Home exit: Sortie locale
-  ja: { Russia · bypass blocks: ロシア · 遮断回避, Opens blocked: 遮断サイトを開く, Abroad: 国外, Home exit: 国内出口 }
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "À utiliser en Russie : préfère les serveurs à l’étranger qui ouvrent les sites bloqués sur place, et n’utilise une sortie locale qu’en dernier recours."
+  ja: { Russia · bypass blocks: ロシア · 遮断回避, Opens blocked: 遮断サイトを開く, Abroad: 国外, Home exit: 国内出口, "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "ロシアで使う設定です。国内で遮断されたサイトを開ける国外のサーバーを優先し、国内出口は最後の手段としてのみ使います。" }
   kk:
     Russia · bypass blocks: Ресей · бұғаттауды айналып өту
     Opens blocked: Бұғатталғанды ашады
     Abroad: Шетелде
     Home exit: Ішкі шығыс
-  ko: { Russia · bypass blocks: 러시아 · 차단 우회, Opens blocked: 차단 사이트 열림, Abroad: 해외, Home exit: 국내 출구 }
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "Ресей үшін: үйде бұғатталған сайттарды ашатын шетелдегі серверлерді қалайды, ішкі шығысты тек соңғы амал ретінде пайдаланады."
+  ko: { Russia · bypass blocks: 러시아 · 차단 우회, Opens blocked: 차단 사이트 열림, Abroad: 해외, Home exit: 국내 출구, "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "러시아에서 사용하는 설정입니다. 국내에서 차단된 사이트를 여는 해외 서버를 우선하고, 국내 출구는 마지막 수단으로만 씁니다." }
   ru:
     Russia · bypass blocks: Россия · обход блокировок
     Opens blocked: Открывает заблокированное
     Abroad: За рубежом
     Home exit: Выход в своей стране
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "Для России: предпочитает серверы за рубежом, открывающие заблокированные дома сайты; выход в своей стране берёт лишь в крайнем случае."
   tk:
     Russia · bypass blocks: Russiýa · petiklenmäni aýlanmak
     Opens blocked: Petikleniňi açýar
     Abroad: Daşary ýurtda
     Home exit: Içerki çykyş
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "Russiýada ulanmak üçin: öýde petiklenen sahypalary açýan daşary ýurt serwerlerini saýlaýar, içerki çykyşy diňe iň soňky çäre hökmünde ulanýar."
   uz:
     Russia · bypass blocks: Rossiya · bloklarni chetlab o‘tish
     Opens blocked: Bloklanganni ochadi
     Abroad: Chet elda
     Home exit: Mahalliy chiqish
-  zh-CN: { Russia · bypass blocks: 俄罗斯 · 绕过封锁, Opens blocked: 可打开被屏蔽站点, Abroad: 境外, Home exit: 境内出口 }
+    "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "Rossiyada: uyda bloklangan saytlarni ochadigan chet el serverlarini afzal ko‘radi, mahalliy chiqishni faqat oxirgi chora sifatida ishlatadi."
+  zh-CN: { Russia · bypass blocks: 俄罗斯 · 绕过封锁, Opens blocked: 可打开被屏蔽站点, Abroad: 境外, Home exit: 境内出口, "For use in Russia: prefers servers abroad that open sites blocked at home, and uses a local exit only as a last resort.": "适用于俄罗斯：优先选择能打开境内被屏蔽网站的境外服务器，仅在万不得已时才使用境内出口。" }

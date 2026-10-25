@@ -38,6 +38,10 @@ var (
 	rcxSubscription rcx.SubscriptionLayer
 	// Persisted, so a headless restart of the Android service keeps it.
 	rcxUser rcx.UserLayer
+	// rcxUserPending: the user layer waits to reach the engine with the
+	// topology of the config it was applied with.
+	rcxUserPending bool
+	rcxRoutes      rcx.AppliedRoutes
 	// Hints the Android service sends before the core is initialized.
 	rcxPendingHints []rcx.Hints
 	// Flattened nested selector → its smart group; replaced whole, never mutated.
@@ -272,8 +276,16 @@ func rcxRefreshTopology() {
 	}
 	proxies := tunnel.AllProxies()
 	rcxMu.Lock()
-	subscription := rcxSubscription
+	subscription, routes := rcxSubscription, rcxRoutes
+	var user *rcx.UserLayer
+	if rcxUserPending {
+		layer := rcxUser
+		user, rcxUserPending = &layer, false
+	}
 	smart := map[string]bool{}
+	for _, name := range rcxRoutes.Groups {
+		smart[name] = true
+	}
 	for name := range rcxSubscription.Groups {
 		smart[name] = true
 	}
@@ -305,6 +317,7 @@ func rcxRefreshTopology() {
 	}
 	topology, flat := rcxTopologyOf(proxies, names, smart, rcxReferences(proxies, names, rules))
 	topology.Subscription, topology.Main = subscription, main
+	topology.Leaves, topology.Routes, topology.User = rcxLeaves(proxies), routes, user
 	geo := rcxGeo()
 	for i := range topology.Groups {
 		for j := range topology.Groups[i].Members {
@@ -323,6 +336,22 @@ func rcxRefreshTopology() {
 	if again, fixedAgain := e.Targets(rcxSelectors(proxies, names), main); !slices.Equal(again, targets) || !slices.Equal(fixedAgain, fixed) {
 		requestRcxTopologyRefresh()
 	}
+}
+
+func rcxLeaves(proxies map[string]constant.Proxy) []string {
+	var leaves []string
+	for name, p := range proxies {
+		if p == nil || isProxyGroupType(p.Type()) {
+			continue
+		}
+		switch p.Type() {
+		case constant.Direct, constant.Reject, constant.RejectDrop, constant.Pass, constant.Compatible, constant.Dns:
+			continue
+		}
+		leaves = append(leaves, name)
+	}
+	slices.Sort(leaves)
+	return leaves
 }
 
 func rcxTopologyOf(proxies map[string]constant.Proxy, names []string, smart map[string]bool, refs map[string]int) (rcx.Topology, map[string]string) {
@@ -558,20 +587,38 @@ func rcxReadBundle(path string) rcx.SubscriptionLayer {
 	return layer
 }
 
-func rcxApplySubscription(layer rcx.SubscriptionLayer) {
+// rcxApplyConfig hands the engine what an applied config was built with;
+// the user layer travels with its topology.
+func rcxApplyConfig(user *rcx.UserLayer, subscription rcx.SubscriptionLayer, routes rcx.AppliedRoutes) {
 	rcxMu.Lock()
-	rcxSubscription = layer
+	rcxSubscription, rcxRoutes = subscription, routes
+	if user != nil {
+		rcxUser, rcxUserPending = *user, true
+	}
 	rcxMu.Unlock()
+	if user != nil {
+		rcxSaveUser(*user)
+	}
 	requestRcxTopologyRefresh()
+}
+
+func rcxCurrentUser() rcx.UserLayer {
+	rcxMu.Lock()
+	defer rcxMu.Unlock()
+	return rcxUser
+}
+
+func rcxSaveUser(layer rcx.UserLayer) {
+	if data, err := json.Marshal(layer); err == nil {
+		_ = rcxFileStore{rcxUserFile}.Save(data)
+	}
 }
 
 func rcxSetUser(layer rcx.UserLayer) {
 	rcxMu.Lock()
 	rcxUser = layer
 	rcxMu.Unlock()
-	if data, err := json.Marshal(layer); err == nil {
-		_ = rcxFileStore{rcxUserFile}.Save(data)
-	}
+	rcxSaveUser(layer)
 	if e := rcxReady(); e != nil {
 		e.SetUserLayer(layer)
 	}

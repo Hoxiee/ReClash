@@ -22,6 +22,9 @@ type Status struct {
 	Scenario *ScenarioStatus `json:"scenario,omitempty"`
 	// TunnelMode is the mode in force: the scenario's, else the user's.
 	TunnelMode string `json:"tunnelMode"`
+	// Reload: the running config was built with other routes than the
+	// scenario wants, so the host applies the profile again.
+	Reload bool `json:"reload,omitempty"`
 }
 
 // ScenarioStatus is the auto control in force. Mode is what it holds on
@@ -40,6 +43,16 @@ type ScenarioStatus struct {
 	// Groups maps each group it names now to the key that named it
 	// ($main, * or the group's name).
 	Groups map[string]string `json:"groups,omitempty"`
+	Routes []RouteStatus     `json:"routes,omitempty"`
+}
+
+// RouteStatus is one route of the scenario in priority order; To is set
+// when it sends its traffic to a fixed target, Problem when the running
+// config could not take it.
+type RouteStatus struct {
+	Name    string  `json:"name"`
+	To      string  `json:"to,omitempty"`
+	Problem *Reason `json:"problem,omitempty"`
 }
 
 type GroupStatus struct {
@@ -54,6 +67,7 @@ type GroupStatus struct {
 	// Fixed the member it holds the group on.
 	Program      string         `json:"program,omitempty"`
 	Fixed        string         `json:"fixed,omitempty"`
+	Route        bool           `json:"route,omitempty"`
 	Idle         bool           `json:"idle,omitempty"`
 	Control      Control        `json:"control"`
 	Now          string         `json:"now"`
@@ -169,6 +183,10 @@ func (m *machine) status(now time.Time) Status {
 		if c := m.scn.c; c != nil {
 			scn.Mode = c.modeFor(m.scn.kind)
 			scn.HoldsMode = c.holdsMode()
+			scn.Routes = m.routeStatus(c)
+			if len(c.routes) > 0 && s.TunnelMode != "rule" {
+				s.Problems = append(s.Problems, Reason{Code: "route.not-rule-mode", Args: map[string]any{"mode": s.TunnelMode}})
+			}
 			if len(c.kinds()) > 0 {
 				scn.Network = &GroupNetwork{Kind: m.scn.kind, Next: m.scn.kindNext}
 				for _, rule := range c.kinds() {
@@ -178,6 +196,7 @@ func (m *machine) status(now time.Time) Status {
 		}
 		s.Scenario = scn
 	}
+	s.Reload = m.reloadWanted()
 	for _, name := range m.order {
 		g := m.groups[name]
 		ctl := m.controls[name]
@@ -193,6 +212,7 @@ func (m *machine) status(now time.Time) Status {
 			Decision:     g.decision,
 			Problem:      g.problem,
 			Program:      g.program,
+			Route:        slices.Contains(m.topology.Routes.Groups, name),
 			Idle:         m.idle(g),
 			Members:      len(g.members),
 			SwitchesHour: ctl.switchesSince(now.Add(-time.Hour)),
@@ -234,4 +254,31 @@ func (m *machine) status(now time.Time) Status {
 		s.Groups = append(s.Groups, gs)
 	}
 	return s
+}
+
+func (m *machine) routeStatus(c *compiledScenario) []RouteStatus {
+	applied := m.topology.Routes
+	out := make([]RouteStatus, 0, len(c.routes))
+	for _, route := range c.routes {
+		status := RouteStatus{Name: route.Name, To: route.To}
+		if problem, ok := applied.Problems[route.Name]; ok && applied.Key == c.routesKey {
+			status.Problem = &problem
+		}
+		out = append(out, status)
+	}
+	return out
+}
+
+// reloadWanted compares the routes the scenario wants with the ones the
+// running config was given; the applied key is of the routes offered, not
+// of those that made it in, so a rejected route asks for nothing.
+func (m *machine) reloadWanted() bool {
+	if !m.topology.Routes.Applied {
+		return false
+	}
+	want := ""
+	if m.scn.c != nil {
+		want = m.scn.c.routesKey
+	}
+	return want != m.topology.Routes.Key
 }

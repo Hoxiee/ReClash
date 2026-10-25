@@ -1,5 +1,6 @@
 rcx: 1
 title: Fastest
+description: "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads."
 level: simple
 prefer:
   - { label: Working, when: 'not dead' }
@@ -8,12 +9,12 @@ switch: { improve: true, feel: balanced }
 stranded: hold
 energy: balanced
 l10n:
-  es: { Fastest: Más rápido, Working: Funcionando }
-  fr: { Fastest: Le plus rapide, Working: Fonctionne }
-  ja: { Fastest: 最速, Working: 動作中 }
-  kk: { Fastest: Ең жылдам, Working: Жұмыс істейді }
-  ko: { Fastest: 가장 빠름, Working: 작동 중 }
-  ru: { Fastest: Самый быстрый, Working: Работает }
-  tk: { Fastest: Iň çalt, Working: Işleýär }
-  uz: { Fastest: Eng tezkor, Working: Ishlayapti }
-  zh-CN: { Fastest: 最快, Working: 可用 }
+  es: { Fastest: Más rápido, Working: Funcionando, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Te mantiene en el servidor con menor retraso y pasa a uno más rápido cuando aparece. Elígelo para juegos, llamadas y páginas rápidas." }
+  fr: { Fastest: Le plus rapide, Working: Fonctionne, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Vous garde sur le serveur le plus réactif et passe à un plus rapide dès qu’il apparaît. À choisir pour les jeux, les appels et le chargement rapide des pages." }
+  ja: { Fastest: 最速, Working: 動作中, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "遅延が最も小さいサーバーを使い、より速いものが現れたら切り替えます。ゲームや通話、ページの素早い表示に向いています。" }
+  kk: { Fastest: Ең жылдам, Working: Жұмыс істейді, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Ең аз кідірісі бар серверде ұстайды және жылдамырағы пайда болса соған ауысады. Ойын, қоңыраулар және беттерді жылдам ашу үшін таңдаңыз." }
+  ko: { Fastest: 가장 빠름, Working: 작동 중, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "지연 시간이 가장 짧은 서버를 사용하고, 더 빠른 서버가 나타나면 옮겨 갑니다. 게임, 통화, 빠른 페이지 로딩에 알맞습니다." }
+  ru: { Fastest: Самый быстрый, Working: Работает, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Держит вас на сервере с наименьшей задержкой и переходит на более быстрый, когда тот появляется. Подходит для игр, звонков и быстрой загрузки страниц." }
+  tk: { Fastest: Iň çalt, Working: Işleýär, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Iň kiçi gijikmeli serwerde saklaýar we has çalty tapylanda oňa geçýär. Oýunlar, jaň etmek we sahypalary çalt açmak üçin saýlaň." }
+  uz: { Fastest: Eng tezkor, Working: Ishlayapti, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "Eng kam kechikishli serverda ushlab turadi va tezroq server paydo bo‘lsa, unga o‘tadi. O‘yin, qo‘ng‘iroq va tez yuklanish uchun tanlang." }
+  zh-CN: { Fastest: 最快, Working: 可用, "Keeps you on the server with the lowest delay and moves to a faster one when it appears. Pick it for gaming, calls and quick page loads.": "始终使用延迟最低的服务器，出现更快的就切换过去。适合游戏、通话和快速打开网页。" }

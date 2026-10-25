@@ -1,6 +1,7 @@
 package rcx
 
 import (
+	"slices"
 	"testing"
 	"time"
 )
@@ -176,5 +177,120 @@ func TestDecideIsDeterministic(t *testing.T) {
 		if d := Decide(in); d.Target != first.Target || d.Ranking[0].Name != first.Ranking[0].Name {
 			t.Fatal("decision depends on iteration order")
 		}
+	}
+}
+
+func ladderMembers(facts map[string]*Facts, countries map[string]string) []Member {
+	ms := members(facts, "A", "B", "C", "D")
+	for i := range ms {
+		ms[i].NameCountry = countries[ms[i].Name]
+	}
+	return ms
+}
+
+func TestLadderFallsThroughStepsWhoseServersAreDown(t *testing.T) {
+	ladder := []TierSpec{
+		{Label: "Germany", When: "country = DE"},
+		{Label: "Nearby", When: "country in [NL, PL]"},
+		{Label: "Any", When: "not dead", LastResort: true},
+	}
+	countries := map[string]string{"A": "US", "B": "DE", "C": "NL", "D": ""}
+	for _, tc := range []struct {
+		name  string
+		dead  []string
+		first string
+		tier  string
+	}{
+		{"first step wins over a faster server", nil, "B", "Germany"},
+		{"a dead step falls through", []string{"B"}, "C", "Nearby"},
+		{"every step down reaches the last resort", []string{"B", "C"}, "A", "Any"},
+		{"nothing alive", []string{"A", "B", "C", "D"}, "", ""},
+	} {
+		facts := map[string]*Facts{"A": measuredFacts(t0, 40, 40), "B": measuredFacts(t0, 300, 300), "C": measuredFacts(t0, 90, 90), "D": measuredFacts(t0, 60, 60)}
+		for _, name := range tc.dead {
+			facts[name] = deadFacts(t0)
+		}
+		d := Decide(input(compiled(t, "builtin/fastest", Binding{Prefer: ladder}), "", ladderMembers(facts, countries)))
+		top := d.Ranking[0]
+		if tc.first == "" {
+			if top.Excluded == nil {
+				t.Errorf("%s: %s ranked usable", tc.name, top.Name)
+			}
+			continue
+		}
+		if top.Name != tc.first || top.TierLabel != tc.tier || top.Excluded != nil {
+			t.Errorf("%s: first %s in %q (%v), want %s in %q", tc.name, top.Name, top.TierLabel, top.Excluded, tc.first, tc.tier)
+		}
+		for _, row := range d.Ranking {
+			if slices.Contains(tc.dead, row.Name) && (row.Excluded == nil || row.Excluded.Code != "dead") {
+				t.Errorf("%s: dead %s ranked %+v", tc.name, row.Name, row)
+			}
+		}
+	}
+}
+
+func TestCountryNeverWaitsForACheck(t *testing.T) {
+	ladder := []TierSpec{{Label: "Germany", When: "country = DE"}}
+	facts := map[string]*Facts{"A": measuredFacts(t0, 40), "B": measuredFacts(t0, 90), "C": measuredFacts(t0, 90), "D": measuredFacts(t0, 90)}
+	ms := ladderMembers(facts, map[string]string{"B": "DE", "C": "US"})
+	ms[2].Exit = &ExitFact{Country: "DE", At: t0}
+	ms[1].Exit = &ExitFact{Country: "FR", At: t0}
+	d := Decide(input(compiled(t, "builtin/fastest", Binding{Prefer: ladder}), "", ms))
+	byName := map[string]Ranked{}
+	for _, row := range d.Ranking {
+		byName[row.Name] = row
+	}
+	if row := byName["C"]; row.Excluded != nil || row.TierLabel != "Germany" {
+		t.Errorf("a verified exit did not beat the name: %+v", row)
+	}
+	if row := byName["B"]; row.Excluded == nil || row.Excluded.Code != "no-tier" {
+		t.Errorf("the name beat a verified exit: %+v", row)
+	}
+	if row := byName["D"]; row.Excluded == nil || row.Excluded.Code != "no-tier" || len(d.Needs) != 0 {
+		t.Errorf("a server with no country waits for a check: %+v, needs %v", row, d.Needs)
+	}
+}
+
+func TestServerOrderPrecedence(t *testing.T) {
+	own := []TierSpec{{Label: "Own", When: "country = US"}}
+	program := []TierSpec{{Label: "Program", When: "country = DE"}}
+	for _, tc := range []struct {
+		name string
+		b    Binding
+		want string
+	}{
+		{"profile", Binding{}, "Working"},
+		{"binding over profile", Binding{Prefer: own}, "Own"},
+		{"program over binding", Binding{Prefer: own, prefer: program}, "Program"},
+	} {
+		policy := compiled(t, "builtin/fastest", tc.b)
+		if got := policy.Tiers[0].Label; got != tc.want {
+			t.Errorf("%s: first step %q, want %q", tc.name, got, tc.want)
+		}
+	}
+	if _, err := NewLibrary(SubscriptionLayer{}, UserLayer{}).Compile("builtin/fastest", Binding{Prefer: []TierSpec{{When: "country ="}}}); err == nil {
+		t.Error("a broken step compiled")
+	}
+}
+
+func TestLastResortYieldsToStepsBelowIt(t *testing.T) {
+	profile, err := ParseProfile([]byte(`rcx: 1
+title: T
+prefer:
+  - { label: Spare, when: 'name ~ /spare/', last-resort: true }
+  - { label: Main, when: 'not dead' }
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	policy, err := compileProfile("user/t", profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := []string{policy.Tiers[0].Label, policy.Tiers[1].Label}; got[0] != "Main" || got[1] != "Spare" {
+		t.Fatalf("tiers = %v, want the last-resort step after Main", got)
+	}
+	if policy.Tiers[1].Source != 0 {
+		t.Fatalf("source = %d, want 0", policy.Tiers[1].Source)
 	}
 }

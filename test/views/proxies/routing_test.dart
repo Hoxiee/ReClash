@@ -68,10 +68,13 @@ void main() {
     final codes = <String>{};
     final pattern = RegExp(
       r'"((?:hold|switch|stranded|until|pool|profile|group|network|pin|auto|'
-      r'manual|change|failure|select|store|split)\.[a-z-]+|cooldown|dead|'
-      r'no-tier|pending|manual)"',
+      r'manual|change|failure|select|store|split|route)\.[a-z-]+|cooldown|'
+      r'dead|no-tier|pending|manual)"',
     );
-    for (final file in Directory('core/rcx').listSync()) {
+    for (final file in [
+      ...Directory('core/rcx').listSync(),
+      File('core/rcx_routes.go'),
+    ]) {
       // cond.go names condition fields such as network.kind, and studio.go
       // lint codes, which rcxIssueText words; neither are reasons.
       if (file is! File ||
@@ -85,7 +88,7 @@ void main() {
         codes.add(match.group(1)!);
       }
     }
-    expect(codes, contains('switch.failover'));
+    expect(codes, containsAll(['switch.failover', 'route.to-missing']));
     final l = AppLocalizations.current;
     for (final code in codes) {
       final text = rcxReasonText(l, RcxReason(code: code));

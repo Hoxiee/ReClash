@@ -10,26 +10,40 @@ import 'package:reclash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'routing_country.dart';
+
 const _parseDelay = Duration(milliseconds: 400);
 
 /// Edits one condition of [profile] as clauses or as text and returns the
 /// new text; the Core owns the grammar, so both views go through it.
+/// [scenario] says [profile] is a scenario document.
 Future<String?> editCondition(
   BuildContext context, {
   required String title,
   required String text,
   required Map<String, Object?> profile,
   bool network = false,
+  bool scenario = false,
 }) {
-  return BaseNavigator.push<String>(
+  return pushRoutingPage<String>(
     context,
     ConditionEditor(
       title: title,
       text: text,
       profile: profile,
       network: network,
+      scenario: scenario,
     ),
   );
+}
+
+/// Opens [page] among the sheet's own pages when [context] is in a sheet,
+/// else as a page of its own.
+Future<T?> pushRoutingPage<T>(BuildContext context, Widget page) {
+  if (isSheetPage(context)) {
+    return Navigator.of(context).push(PagedSheetRoute<T>(builder: (_) => page));
+  }
+  return BaseNavigator.push<T>(context, page);
 }
 
 /// Every clause is edited in place: field, condition and value are menus on
@@ -41,12 +55,14 @@ class ConditionEditor extends ConsumerStatefulWidget {
     required this.text,
     required this.profile,
     required this.network,
+    this.scenario = false,
   });
 
   final String title;
   final String text;
   final Map<String, Object?> profile;
   final bool network;
+  final bool scenario;
 
   @override
   ConsumerState<ConditionEditor> createState() => _ConditionEditorState();
@@ -80,7 +96,7 @@ class _ConditionEditorState extends ConsumerState<ConditionEditor> {
     final id = ++_request;
     final result = await ref.read(rcxRoutingActionProvider.notifier).studio({
       'op': 'cond',
-      'profile': widget.profile,
+      widget.scenario ? 'scenario' : 'profile': widget.profile,
       'network': widget.network,
       ...request,
     });
@@ -157,15 +173,19 @@ class _ConditionEditorState extends ConsumerState<ConditionEditor> {
                 ),
               ],
             ),
-          for (final (index, clause) in form.clauses.indexed)
-            _ClauseSection(
-              key: ValueKey(_ids.elementAtOrNull(index) ?? -index - 1),
-              index: index,
-              clause: clause,
-              fields: _fields,
-              onChanged: (clause) => _setClause(index, clause),
-              onRemove: () => _removeClause(index),
-            ),
+          AnimatedEntries(
+            children: [
+              for (final (index, clause) in form.clauses.indexed)
+                _ClauseSection(
+                  key: ValueKey(_ids.elementAtOrNull(index) ?? -index - 1),
+                  index: index,
+                  clause: clause,
+                  fields: _fields,
+                  onChanged: (clause) => _setClause(index, clause),
+                  onRemove: () => _removeClause(index),
+                ),
+            ],
+          ),
           if (form.clauses.isNotEmpty) const SizedBox(height: 16),
           generateSection(
             footer: form.clauses.isEmpty
@@ -301,83 +321,128 @@ class _ClauseSectionState extends State<_ClauseSection> {
     final field = _field;
     final tests = field == null ? const <_Test>[] : _testsOf(field);
     final test = (op: _clause.op, negated: _clause.negated);
-    return generateSection(
-      title: l.rcxCondClause(widget.index + 1),
-      actions: [
-        IconButtonData(
-          glyph: AppGlyphs.delete,
-          tooltip: l.delete,
-          onPressed: widget.onRemove,
+    return Column(
+      children: [
+        ListHeader(
+          title: l.rcxCondClause(widget.index + 1),
+          actions: [
+            IconButtonData(
+              glyph: AppGlyphs.delete,
+              tooltip: l.delete,
+              onPressed: widget.onRemove,
+            ),
+          ],
         ),
-      ],
-      items: [
-        ListItem<String>.options(
-          title: Text(l.rcxCondField),
-          options: [for (final f in widget.fields) f.name],
-          value: _clause.field,
-          textBuilder: (name) => rcxFieldLabel(l, name),
-          onChanged: (name) {
-            if (name != _clause.field) _setField(name);
-          },
-        ),
-        if (tests.length > 1)
-          ListItem<_Test>.options(
-            title: Text(l.rcxCondOp),
-            options: tests,
-            value: tests.contains(test) ? test : tests.first,
-            textBuilder: (test) => _testLabel(l, test),
-            onChanged: (test) => widget.onChanged(
-              _clause.copyWith(op: test.op, negated: test.negated),
-            ),
-          ),
-        if (_named(field))
-          if (field!.values.isEmpty)
-            DecorationListItem(title: Text(l.rcxCondNoNames))
-          else
-            ListItem<String>.options(
-              title: Text(rcxFieldLabel(l, _clause.field)),
-              options: field.values,
-              value: _clause.values.firstOrNull ?? field.values.first,
-              textBuilder: (name) => name,
-              onChanged: (name) =>
-                  widget.onChanged(_clause.copyWith(values: [name])),
-            )
-        else if (field?.kind != 'bool')
-          FormRow(
-            title: switch (_clause.op) {
-              'in' => l.rcxCondValues,
-              '~' => l.rcxCondPattern,
-              _ => l.rcxCondValue,
-            },
-            trailing: FormRowTextField(
-              controller: _value,
-              autocorrect: false,
-              hintText: l.required,
-              keyboardType: field?.kind == 'number'
-                  ? TextInputType.number
-                  : null,
-              onChanged: _setValues,
-            ),
-          ),
-        if (_clause.op == '~')
-          FormRow(
-            title: l.rcxCondIgnoreCase,
-            onPressed: () => widget.onChanged(
-              _clause.copyWith(ignoreCase: !_clause.ignoreCase),
-            ),
-            trailing: Switch(
-              value: _clause.ignoreCase,
-              onChanged: (value) =>
-                  widget.onChanged(_clause.copyWith(ignoreCase: value)),
-            ),
-          ),
+        AnimatedEntries(grouped: true, children: _rows(l, field, tests, test)),
       ],
     );
+  }
+
+  Future<void> _pickCountries() async {
+    final codes = await pickCountries(
+      context,
+      selected: _clause.values,
+      multiple: _clause.op == 'in',
+    );
+    if (codes == null || !mounted) return;
+    widget.onChanged(_clause.copyWith(values: codes));
+  }
+
+  List<Widget> _rows(
+    AppLocalizations l,
+    RcxField? field,
+    List<_Test> tests,
+    _Test test,
+  ) {
+    final language = Localizations.localeOf(context).languageCode;
+    return [
+      ListItem<String>.options(
+        key: const ValueKey('field'),
+        title: Text(l.rcxCondField),
+        options: [for (final f in widget.fields) f.name],
+        value: _clause.field,
+        textBuilder: (name) => rcxFieldLabel(l, name),
+        onChanged: (name) {
+          if (name != _clause.field) _setField(name);
+        },
+      ),
+      if (tests.length > 1)
+        ListItem<_Test>.options(
+          key: const ValueKey('op'),
+          title: Text(l.rcxCondOp),
+          options: tests,
+          value: tests.contains(test) ? test : tests.first,
+          textBuilder: (test) => _testLabel(l, test),
+          onChanged: (test) => widget.onChanged(
+            _clause.copyWith(op: test.op, negated: test.negated),
+          ),
+        ),
+      if (_named(field))
+        if (field!.values.isEmpty)
+          DecorationListItem(
+            key: const ValueKey('none'),
+            title: Text(l.rcxCondNoNames),
+          )
+        else
+          ListItem<String>.options(
+            key: const ValueKey('named'),
+            title: Text(rcxFieldLabel(l, _clause.field)),
+            options: field.values,
+            value: _clause.values.firstOrNull ?? field.values.first,
+            textBuilder: (name) => name,
+            onChanged: (name) =>
+                widget.onChanged(_clause.copyWith(values: [name])),
+          )
+      else if (field?.kind == 'country')
+        DecorationListItem(
+          key: const ValueKey('country'),
+          title: Text(rcxFieldLabel(l, _clause.field)),
+          subtitle: EmojiText(
+            _clause.values.isEmpty
+                ? l.required
+                : _clause.values
+                      .map((code) => rcxCountryNameIn(language, code))
+                      .join(', '),
+          ),
+          onPressed: () => unawaited(_pickCountries()),
+          trailing: const DisclosureIndicator(),
+        )
+      else if (field?.kind != 'bool')
+        FormRow(
+          key: const ValueKey('value'),
+          title: switch (_clause.op) {
+            'in' => l.rcxCondValues,
+            '~' => l.rcxCondPattern,
+            _ => l.rcxCondValue,
+          },
+          trailing: FormRowTextField(
+            controller: _value,
+            autocorrect: false,
+            hintText: l.required,
+            keyboardType: field?.kind == 'number' ? TextInputType.number : null,
+            onChanged: _setValues,
+          ),
+        ),
+      if (_clause.op == '~')
+        FormRow(
+          key: const ValueKey('case'),
+          title: l.rcxCondIgnoreCase,
+          onPressed: () => widget.onChanged(
+            _clause.copyWith(ignoreCase: !_clause.ignoreCase),
+          ),
+          trailing: Switch(
+            value: _clause.ignoreCase,
+            onChanged: (value) =>
+                widget.onChanged(_clause.copyWith(ignoreCase: value)),
+          ),
+        ),
+    ];
   }
 }
 
 String rcxFieldLabel(AppLocalizations l, String field) => switch (field) {
   'name' => l.rcxFieldName,
+  'country' => l.rcxCondCountry,
   'provider' => l.rcxFieldProvider,
   'type' => l.rcxFieldType,
   'server' => l.rcxFieldServer,
@@ -407,6 +472,10 @@ String rcxOpLabel(AppLocalizations l, String op) => switch (op) {
   '~' => l.rcxOpMatches,
   'ok' => l.rcxOpOk,
   'fail' => l.rcxOpFail,
+  '<' => l.rcxCondLess,
+  '<=' => l.rcxCondAtMost,
+  '>' => l.rcxCondMore,
+  '>=' => l.rcxCondAtLeast,
   _ => op,
 };
 

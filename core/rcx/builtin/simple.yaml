@@ -1,5 +1,6 @@
 rcx: 1
 title: Simple
+description: "Uses any working server and changes only when it stops working. A calm default when you just want things to work."
 level: simple
 prefer:
   - { label: Working, when: 'not dead' }
@@ -8,12 +9,12 @@ switch: { improve: false, feel: calm }
 stranded: hold
 energy: balanced
 l10n:
-  es: { Simple: Simple, Working: Funcionando }
-  fr: { Simple: Simple, Working: Fonctionne }
-  ja: { Simple: シンプル, Working: 動作中 }
-  kk: { Simple: Қарапайым, Working: Жұмыс істейді }
-  ko: { Simple: 단순, Working: 작동 중 }
-  ru: { Simple: Простой, Working: Работает }
-  tk: { Simple: Ýönekeý, Working: Işleýär }
-  uz: { Simple: Oddiy, Working: Ishlayapti }
-  zh-CN: { Simple: 简单, Working: 可用 }
+  es: { Simple: Simple, Working: Funcionando, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Usa cualquier servidor que funcione y solo cambia cuando deja de funcionar. Una opción tranquila si solo quieres que todo funcione." }
+  fr: { Simple: Simple, Working: Fonctionne, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Utilise n’importe quel serveur qui fonctionne et ne change que lorsqu’il cesse de fonctionner. Un choix serein pour que tout marche simplement." }
+  ja: { Simple: シンプル, Working: 動作中, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "動作しているサーバーを使い、止まったときだけ切り替えます。とにかく普通に使いたいときの落ち着いた標準設定です。" }
+  kk: { Simple: Қарапайым, Working: Жұмыс істейді, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Жұмыс істейтін кез келген серверді пайдаланады және ол істемей қалғанда ғана ауысады. Тек жұмыс істесе болғанда ыңғайлы тыныш әдепкі нұсқа." }
+  ko: { Simple: 단순, Working: 작동 중, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "작동하는 서버를 사용하고, 작동이 멈출 때만 바꿉니다. 그냥 잘 되기만 바랄 때 알맞은 차분한 기본 설정입니다." }
+  ru: { Simple: Простой, Working: Работает, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Использует любой рабочий сервер и меняет его только когда он перестаёт работать. Спокойный вариант, если просто нужно, чтобы всё работало." }
+  tk: { Simple: Ýönekeý, Working: Işleýär, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Islendik işleýän serweri ulanýar we diňe işlemeýän wagty çalyşýar. Diňe işlemegini isleseňiz, ýuwaş we ynamly saýlaw." }
+  uz: { Simple: Oddiy, Working: Ishlayapti, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "Ishlayotgan istalgan serverdan foydalanadi va faqat ishlamay qolganda almashtiradi. Hammasi shunchaki ishlashini xohlasangiz, xotirjam tanlov." }
+  zh-CN: { Simple: 简单, Working: 可用, "Uses any working server and changes only when it stops working. A calm default when you just want things to work.": "使用任意可用的服务器，仅在其失效时才切换。适合只想让网络正常使用的人，切换平稳。" }

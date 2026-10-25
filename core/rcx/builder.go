@@ -39,13 +39,14 @@ type FieldInfo struct {
 }
 
 var (
-	stringOps = []string{"=", "!=", "in", "~"}
-	numberOps = []string{"=", "!=", "<", "<=", ">", ">="}
-	keywords  = map[string]bool{"and": true, "or": true, "not": true, "in": true, "ok": true, "fail": true}
+	stringOps  = []string{"=", "!=", "in", "~"}
+	numberOps  = []string{"=", "!=", "<", "<=", ">", ">="}
+	countryOps = []string{"=", "!=", "in"}
+	keywords   = map[string]bool{"and": true, "or": true, "not": true, "in": true, "ok": true, "fail": true}
 )
 
 func studioCond(req StudioRequest) (StudioResult, error) {
-	scope, fields := builderScope(req.Profile, req.Network)
+	scope, fields := builderScope(req.Profile, req.Scenario, req.Network)
 	out := StudioResult{Fields: fields}
 	text := req.Text
 	if req.Form != nil {
@@ -72,12 +73,17 @@ func studioCond(req StudioRequest) (StudioResult, error) {
 	return out, nil
 }
 
-func builderScope(profile *Profile, network bool) (condScope, []FieldInfo) {
+// builderScope: a condition inside a scenario sees the scenario's tags and
+// diagnostics beside those of the profile its program names.
+func builderScope(profile *Profile, scenario *Scenario, network bool) (condScope, []FieldInfo) {
 	if profile == nil {
 		profile = &Profile{}
 	}
+	if scenario == nil {
+		scenario = &Scenario{}
+	}
 	scope := condScope{tags: map[string]bool{}, checks: map[string]bool{}}
-	for name := range profile.Tags {
+	for _, name := range slices.Concat(slices.Collect(maps.Keys(profile.Tags)), slices.Collect(maps.Keys(scenario.Tags))) {
 		scope.tags[name] = true
 	}
 	for id := range profile.Checks {
@@ -93,6 +99,8 @@ func builderScope(profile *Profile, network bool) (condScope, []FieldInfo) {
 		switch spec.kind {
 		case stringField:
 			field.Kind, field.Ops = "string", stringOps
+		case countryField:
+			field.Kind, field.Ops = "country", countryOps
 		case numberField:
 			field.Kind, field.Ops = "number", numberOps
 		default:
@@ -102,7 +110,7 @@ func builderScope(profile *Profile, network bool) (condScope, []FieldInfo) {
 	}
 	if network {
 		scope = condScope{diags: map[string]bool{}}
-		for name := range profile.Network.Diagnose {
+		for _, name := range slices.Concat(slices.Collect(maps.Keys(profile.Network.Diagnose)), slices.Collect(maps.Keys(scenario.Network.Diagnose))) {
 			scope.diags[name] = true
 		}
 		return scope, append(fields, FieldInfo{Name: "diag", Kind: "diag", Network: true, Ops: []string{"ok", "fail"}, Values: slices.Sorted(maps.Keys(scope.diags))})

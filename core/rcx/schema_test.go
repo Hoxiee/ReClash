@@ -12,7 +12,11 @@ import (
 func yamlKeys(t reflect.Type) []string {
 	var keys []string
 	for i := range t.NumField() {
-		name, _, _ := strings.Cut(t.Field(i).Tag.Get("yaml"), ",")
+		name, options, _ := strings.Cut(t.Field(i).Tag.Get("yaml"), ",")
+		if options == "inline" {
+			keys = append(keys, yamlKeys(t.Field(i).Type)...)
+			continue
+		}
 		if name != "" && name != "-" {
 			keys = append(keys, name)
 		}
@@ -52,6 +56,7 @@ func TestSchemaMatchesProfileTypes(t *testing.T) {
 		"scenario":      reflect.TypeFor[Scenario](),
 		"scenarioLayer": reflect.TypeFor[ScenarioLayer](),
 		"program":       reflect.TypeFor[Program](),
+		"route":         reflect.TypeFor[Route](),
 	}
 	for name, typ := range types {
 		def, ok := schema.Defs[name]

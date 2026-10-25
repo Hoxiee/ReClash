@@ -34,6 +34,13 @@ type Topology struct {
 	Main string
 	// Providers maps each member name to the providers that serve it.
 	Providers map[string][]string
+	// Leaves names every server of the running config, for the country
+	// picker outside a smart group.
+	Leaves []string
+	Routes AppliedRoutes
+	// User, when set, arrives with the config it was applied with, so the
+	// routes it wants are never compared against an older config.
+	User *UserLayer
 }
 
 type controlRecord struct {
@@ -114,6 +121,8 @@ type machine struct {
 	groups   map[string]*groupState
 	order    []string
 	keyNames map[string][]string
+	// nameCountries caches CountryOfName across rebuilds.
+	nameCountries map[string]string
 
 	running     bool
 	power       Power
@@ -226,6 +235,9 @@ func (m *machine) rebuild(now time.Time) {
 		merged := bound[name]
 		merged.Profile, merged.Pool, merged.Feel, merged.Energy = b.Profile, b.Pool, b.Feel, b.Energy
 		merged.DirectSplit = b.DirectSplit
+		if len(b.Prefer) > 0 {
+			merged.Prefer = b.Prefer
+		}
 		merged.Chips = append(slices.Clip(merged.Chips), b.Chips...)
 		if _, fromSub := sources[name]; !fromSub {
 			sources[name] = UserSource
@@ -303,6 +315,7 @@ func (m *machine) rebuild(now time.Time) {
 			g.now = t.Now
 			for range t.Members {
 				node := all[index]
+				node.NameCountry = m.countryOf(node.Name)
 				member := Member{Node: node, Key: keys[index]}
 				g.byName[node.Name] = len(g.members)
 				g.members = append(g.members, member)
@@ -327,10 +340,7 @@ func (m *machine) rebuild(now time.Time) {
 // subscription's default; a scenario that cannot run leaves the groups on
 // their own bindings and says why.
 func (m *machine) loadScenario(now time.Time) {
-	id := ""
-	if !m.user.ScenarioOff {
-		id = cmp.Or(CanonicalID(m.user.Scenario), CanonicalID(m.topology.Subscription.Scenario))
-	}
+	id := activeScenario(m.topology.Subscription, m.user)
 	previous := m.scn.id
 	m.scn.id, m.scn.c, m.scn.problem = id, nil, nil
 	if id != previous {
@@ -364,12 +374,12 @@ func (m *machine) applyScenario(bound map[string]Binding, sources map[string]str
 	for _, g := range m.topology.Groups {
 		names = append(names, g.Name)
 	}
-	for name, a := range m.scn.c.targets(m.scn.kind, names, m.topology.Main) {
+	for name, a := range m.scn.c.targets(m.scn.kind, names, m.topology.Main, m.topology.Routes.Groups) {
 		b := bound[name]
 		if a.Profile != "" {
 			b.Profile = a.Profile
 		}
-		b.fixed, b.extra, b.tags = a.To, a.Pool, m.scn.c.tags
+		b.fixed, b.extra, b.tags, b.prefer = a.To, a.Pool, m.scn.c.tags, a.Prefer
 		bound[name] = b
 		if _, ok := sources[name]; !ok {
 			sources[name] = "scenario"

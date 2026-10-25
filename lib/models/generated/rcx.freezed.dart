@@ -287,6 +287,282 @@ as String?,
 
 
 /// @nodoc
+mixin _$RcxTier {
+
+ String get label; String get when;@JsonKey(name: 'last-resort') bool get lastResort;
+/// Create a copy of RcxTier
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxTierCopyWith<RcxTier> get copyWith => _$RcxTierCopyWithImpl<RcxTier>(this as RcxTier, _$identity);
+
+  /// Serializes this RcxTier to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxTier;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxTier&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.when, _this.when) || other.when == _this.when)&&(identical(other.lastResort, _this.lastResort) || other.lastResort == _this.lastResort));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxTier;
+  return Object.hash(runtimeType,_this.label,_this.when,_this.lastResort);
+}
+
+@override
+String toString() {
+  final _this = this as RcxTier;
+  return 'RcxTier(label: ${_this.label}, when: ${_this.when}, lastResort: ${_this.lastResort})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxTierCopyWith<$Res>  {
+  factory $RcxTierCopyWith(RcxTier value, $Res Function(RcxTier) _then) = _$RcxTierCopyWithImpl;
+@useResult
+$Res call({
+ String label, String when,@JsonKey(name: 'last-resort') bool lastResort
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxTierCopyWithImpl<$Res>
+    implements $RcxTierCopyWith<$Res> {
+  _$RcxTierCopyWithImpl(this._self, this._then);
+
+  final RcxTier _self;
+  final $Res Function(RcxTier) _then;
+
+/// Create a copy of RcxTier
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? when = null,Object? lastResort = null,}) {
+  return _then(RcxTier(
+label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,when: null == when ? _self.when : when // ignore: cast_nullable_to_non_nullable
+as String,lastResort: null == lastResort ? _self.lastResort : lastResort // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxTier].
+extension RcxTierPatterns on RcxTier {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxTier value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxTier() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxTier value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxTier():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxTier value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxTier() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String label,  String when, @JsonKey(name: 'last-resort')  bool lastResort)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxTier() when $default != null:
+return $default(_that.label,_that.when,_that.lastResort);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String label,  String when, @JsonKey(name: 'last-resort')  bool lastResort)  $default,) {final _that = this;
+switch (_that) {
+case _RcxTier():
+return $default(_that.label,_that.when,_that.lastResort);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String label,  String when, @JsonKey(name: 'last-resort')  bool lastResort)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxTier() when $default != null:
+return $default(_that.label,_that.when,_that.lastResort);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxTier implements RcxTier {
+  const _RcxTier({this.label = '', this.when = '', @JsonKey(name: 'last-resort') this.lastResort = false});
+  factory _RcxTier.fromJson(Map<String, dynamic> json) => _$RcxTierFromJson(json);
+
+@override@JsonKey() final  String label;
+@override@JsonKey() final  String when;
+@override@JsonKey(name: 'last-resort') final  bool lastResort;
+
+/// Create a copy of RcxTier
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxTierCopyWith<_RcxTier> get copyWith => __$RcxTierCopyWithImpl<_RcxTier>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxTierToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxTier&&(identical(other.label, label) || other.label == label)&&(identical(other.when, when) || other.when == when)&&(identical(other.lastResort, lastResort) || other.lastResort == lastResort));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,label,when,lastResort);
+}
+
+@override
+String toString() {
+    return 'RcxTier(label: $label, when: $when, lastResort: $lastResort)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxTierCopyWith<$Res> implements $RcxTierCopyWith<$Res> {
+  factory _$RcxTierCopyWith(_RcxTier value, $Res Function(_RcxTier) _then) = __$RcxTierCopyWithImpl;
+@override @useResult
+$Res call({
+ String label, String when,@JsonKey(name: 'last-resort') bool lastResort
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxTierCopyWithImpl<$Res>
+    implements _$RcxTierCopyWith<$Res> {
+  __$RcxTierCopyWithImpl(this._self, this._then);
+
+  final _RcxTier _self;
+  final $Res Function(_RcxTier) _then;
+
+/// Create a copy of RcxTier
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? when = null,Object? lastResort = null,}) {
+  return _then(_RcxTier(
+label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String,when: null == when ? _self.when : when // ignore: cast_nullable_to_non_nullable
+as String,lastResort: null == lastResort ? _self.lastResort : lastResort // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RcxChip {
 
  String get label; String get include;
@@ -562,7 +838,8 @@ as String,
 /// @nodoc
 mixin _$RcxBinding {
 
- List<String> get profiles;@JsonKey(name: 'default', includeIfNull: false) String? get defaultProfile;@JsonKey(includeIfNull: false) String? get profile; RcxPool get pool;@JsonKey(includeIfNull: false) String? get feel;@JsonKey(includeIfNull: false) String? get energy; List<RcxChip> get chips;/// Honoured from the user's layer only; a provider cannot turn it on.
+ List<String> get profiles;@JsonKey(name: 'default', includeIfNull: false) String? get defaultProfile;@JsonKey(includeIfNull: false) String? get profile; RcxPool get pool;@JsonKey(includeIfNull: false) String? get feel;@JsonKey(includeIfNull: false) String? get energy; List<RcxChip> get chips;/// Replaces the profile's server order; empty keeps it.
+ List<RcxTier> get prefer;/// Honoured from the user's layer only; a provider cannot turn it on.
  bool get directSplit;
 /// Create a copy of RcxBinding
 /// with the given fields replaced by the non-null parameter values.
@@ -577,20 +854,20 @@ $RcxBindingCopyWith<RcxBinding> get copyWith => _$RcxBindingCopyWithImpl<RcxBind
 @override
 bool operator ==(Object other) {
   final _this = this as RcxBinding;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxBinding&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&(identical(other.defaultProfile, _this.defaultProfile) || other.defaultProfile == _this.defaultProfile)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.pool, _this.pool) || other.pool == _this.pool)&&(identical(other.feel, _this.feel) || other.feel == _this.feel)&&(identical(other.energy, _this.energy) || other.energy == _this.energy)&&const DeepCollectionEquality().equals(other.chips, _this.chips)&&(identical(other.directSplit, _this.directSplit) || other.directSplit == _this.directSplit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxBinding&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&(identical(other.defaultProfile, _this.defaultProfile) || other.defaultProfile == _this.defaultProfile)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.pool, _this.pool) || other.pool == _this.pool)&&(identical(other.feel, _this.feel) || other.feel == _this.feel)&&(identical(other.energy, _this.energy) || other.energy == _this.energy)&&const DeepCollectionEquality().equals(other.chips, _this.chips)&&const DeepCollectionEquality().equals(other.prefer, _this.prefer)&&(identical(other.directSplit, _this.directSplit) || other.directSplit == _this.directSplit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxBinding;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.profiles),_this.defaultProfile,_this.profile,_this.pool,_this.feel,_this.energy,const DeepCollectionEquality().hash(_this.chips),_this.directSplit);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.profiles),_this.defaultProfile,_this.profile,_this.pool,_this.feel,_this.energy,const DeepCollectionEquality().hash(_this.chips),const DeepCollectionEquality().hash(_this.prefer),_this.directSplit);
 }
 
 @override
 String toString() {
   final _this = this as RcxBinding;
-  return 'RcxBinding(profiles: ${_this.profiles}, defaultProfile: ${_this.defaultProfile}, profile: ${_this.profile}, pool: ${_this.pool}, feel: ${_this.feel}, energy: ${_this.energy}, chips: ${_this.chips}, directSplit: ${_this.directSplit})';
+  return 'RcxBinding(profiles: ${_this.profiles}, defaultProfile: ${_this.defaultProfile}, profile: ${_this.profile}, pool: ${_this.pool}, feel: ${_this.feel}, energy: ${_this.energy}, chips: ${_this.chips}, prefer: ${_this.prefer}, directSplit: ${_this.directSplit})';
 }
 
 
@@ -601,7 +878,7 @@ abstract mixin class $RcxBindingCopyWith<$Res>  {
   factory $RcxBindingCopyWith(RcxBinding value, $Res Function(RcxBinding) _then) = _$RcxBindingCopyWithImpl;
 @useResult
 $Res call({
- List<String> profiles,@JsonKey(name: 'default', includeIfNull: false) String? defaultProfile,@JsonKey(includeIfNull: false) String? profile, RcxPool pool,@JsonKey(includeIfNull: false) String? feel,@JsonKey(includeIfNull: false) String? energy, List<RcxChip> chips, bool directSplit
+ List<String> profiles,@JsonKey(name: 'default', includeIfNull: false) String? defaultProfile,@JsonKey(includeIfNull: false) String? profile, RcxPool pool,@JsonKey(includeIfNull: false) String? feel,@JsonKey(includeIfNull: false) String? energy, List<RcxChip> chips, List<RcxTier> prefer, bool directSplit
 });
 
 
@@ -618,7 +895,7 @@ class _$RcxBindingCopyWithImpl<$Res>
 
 /// Create a copy of RcxBinding
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? profiles = null,Object? defaultProfile = freezed,Object? profile = freezed,Object? pool = null,Object? feel = freezed,Object? energy = freezed,Object? chips = null,Object? directSplit = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? profiles = null,Object? defaultProfile = freezed,Object? profile = freezed,Object? pool = null,Object? feel = freezed,Object? energy = freezed,Object? chips = null,Object? prefer = null,Object? directSplit = null,}) {
   return _then(RcxBinding(
 profiles: null == profiles ? _self.profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<String>,defaultProfile: freezed == defaultProfile ? _self.defaultProfile : defaultProfile // ignore: cast_nullable_to_non_nullable
@@ -627,7 +904,8 @@ as String?,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_no
 as RcxPool,feel: freezed == feel ? _self.feel : feel // ignore: cast_nullable_to_non_nullable
 as String?,energy: freezed == energy ? _self.energy : energy // ignore: cast_nullable_to_non_nullable
 as String?,chips: null == chips ? _self.chips : chips // ignore: cast_nullable_to_non_nullable
-as List<RcxChip>,directSplit: null == directSplit ? _self.directSplit : directSplit // ignore: cast_nullable_to_non_nullable
+as List<RcxChip>,prefer: null == prefer ? _self.prefer : prefer // ignore: cast_nullable_to_non_nullable
+as List<RcxTier>,directSplit: null == directSplit ? _self.directSplit : directSplit // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -722,10 +1000,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  bool directSplit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  List<RcxTier> prefer,  bool directSplit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxBinding() when $default != null:
-return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.directSplit);case _:
+return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.prefer,_that.directSplit);case _:
   return orElse();
 
 }
@@ -743,10 +1021,10 @@ return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  bool directSplit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  List<RcxTier> prefer,  bool directSplit)  $default,) {final _that = this;
 switch (_that) {
 case _RcxBinding():
-return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.directSplit);case _:
+return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.prefer,_that.directSplit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -763,10 +1041,10 @@ return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  bool directSplit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> profiles, @JsonKey(name: 'default', includeIfNull: false)  String? defaultProfile, @JsonKey(includeIfNull: false)  String? profile,  RcxPool pool, @JsonKey(includeIfNull: false)  String? feel, @JsonKey(includeIfNull: false)  String? energy,  List<RcxChip> chips,  List<RcxTier> prefer,  bool directSplit)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxBinding() when $default != null:
-return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.directSplit);case _:
+return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_that.feel,_that.energy,_that.chips,_that.prefer,_that.directSplit);case _:
   return null;
 
 }
@@ -778,7 +1056,7 @@ return $default(_that.profiles,_that.defaultProfile,_that.profile,_that.pool,_th
 @JsonSerializable()
 
 class _RcxBinding implements RcxBinding {
-  const _RcxBinding({ List<String> profiles = const [], @JsonKey(name: 'default', includeIfNull: false) this.defaultProfile, @JsonKey(includeIfNull: false) this.profile, this.pool = const RcxPool(), @JsonKey(includeIfNull: false) this.feel, @JsonKey(includeIfNull: false) this.energy,  List<RcxChip> chips = const [], this.directSplit = false}): _profiles = profiles,_chips = chips;
+  const _RcxBinding({ List<String> profiles = const [], @JsonKey(name: 'default', includeIfNull: false) this.defaultProfile, @JsonKey(includeIfNull: false) this.profile, this.pool = const RcxPool(), @JsonKey(includeIfNull: false) this.feel, @JsonKey(includeIfNull: false) this.energy,  List<RcxChip> chips = const [],  List<RcxTier> prefer = const [], this.directSplit = false}): _profiles = profiles,_chips = chips,_prefer = prefer;
   factory _RcxBinding.fromJson(Map<String, dynamic> json) => _$RcxBindingFromJson(json);
 
  final  List<String> _profiles;
@@ -800,6 +1078,15 @@ class _RcxBinding implements RcxBinding {
   return EqualUnmodifiableListView(_chips);
 }
 
+/// Replaces the profile's server order; empty keeps it.
+ final  List<RcxTier> _prefer;
+/// Replaces the profile's server order; empty keeps it.
+@override@JsonKey() List<RcxTier> get prefer {
+  if (_prefer is EqualUnmodifiableListView) return _prefer;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_prefer);
+}
+
 /// Honoured from the user's layer only; a provider cannot turn it on.
 @override@JsonKey() final  bool directSplit;
 
@@ -816,18 +1103,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxBinding&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&(identical(other.defaultProfile, defaultProfile) || other.defaultProfile == defaultProfile)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.feel, feel) || other.feel == feel)&&(identical(other.energy, energy) || other.energy == energy)&&const DeepCollectionEquality().equals(other.chips, _chips)&&(identical(other.directSplit, directSplit) || other.directSplit == directSplit));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxBinding&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&(identical(other.defaultProfile, defaultProfile) || other.defaultProfile == defaultProfile)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.feel, feel) || other.feel == feel)&&(identical(other.energy, energy) || other.energy == energy)&&const DeepCollectionEquality().equals(other.chips, _chips)&&const DeepCollectionEquality().equals(other.prefer, _prefer)&&(identical(other.directSplit, directSplit) || other.directSplit == directSplit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),defaultProfile,profile,pool,feel,energy,const DeepCollectionEquality().hash(_chips),directSplit);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_profiles),defaultProfile,profile,pool,feel,energy,const DeepCollectionEquality().hash(_chips),const DeepCollectionEquality().hash(_prefer),directSplit);
 }
 
 @override
 String toString() {
-    return 'RcxBinding(profiles: $profiles, defaultProfile: $defaultProfile, profile: $profile, pool: $pool, feel: $feel, energy: $energy, chips: $chips, directSplit: $directSplit)';
+    return 'RcxBinding(profiles: $profiles, defaultProfile: $defaultProfile, profile: $profile, pool: $pool, feel: $feel, energy: $energy, chips: $chips, prefer: $prefer, directSplit: $directSplit)';
 }
 
 
@@ -838,7 +1125,7 @@ abstract mixin class _$RcxBindingCopyWith<$Res> implements $RcxBindingCopyWith<$
   factory _$RcxBindingCopyWith(_RcxBinding value, $Res Function(_RcxBinding) _then) = __$RcxBindingCopyWithImpl;
 @override @useResult
 $Res call({
- List<String> profiles,@JsonKey(name: 'default', includeIfNull: false) String? defaultProfile,@JsonKey(includeIfNull: false) String? profile, RcxPool pool,@JsonKey(includeIfNull: false) String? feel,@JsonKey(includeIfNull: false) String? energy, List<RcxChip> chips, bool directSplit
+ List<String> profiles,@JsonKey(name: 'default', includeIfNull: false) String? defaultProfile,@JsonKey(includeIfNull: false) String? profile, RcxPool pool,@JsonKey(includeIfNull: false) String? feel,@JsonKey(includeIfNull: false) String? energy, List<RcxChip> chips, List<RcxTier> prefer, bool directSplit
 });
 
 
@@ -855,7 +1142,7 @@ class __$RcxBindingCopyWithImpl<$Res>
 
 /// Create a copy of RcxBinding
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? profiles = null,Object? defaultProfile = freezed,Object? profile = freezed,Object? pool = null,Object? feel = freezed,Object? energy = freezed,Object? chips = null,Object? directSplit = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? profiles = null,Object? defaultProfile = freezed,Object? profile = freezed,Object? pool = null,Object? feel = freezed,Object? energy = freezed,Object? chips = null,Object? prefer = null,Object? directSplit = null,}) {
   return _then(_RcxBinding(
 profiles: null == profiles ? _self._profiles : profiles // ignore: cast_nullable_to_non_nullable
 as List<String>,defaultProfile: freezed == defaultProfile ? _self.defaultProfile : defaultProfile // ignore: cast_nullable_to_non_nullable
@@ -864,7 +1151,8 @@ as String?,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_no
 as RcxPool,feel: freezed == feel ? _self.feel : feel // ignore: cast_nullable_to_non_nullable
 as String?,energy: freezed == energy ? _self.energy : energy // ignore: cast_nullable_to_non_nullable
 as String?,chips: null == chips ? _self._chips : chips // ignore: cast_nullable_to_non_nullable
-as List<RcxChip>,directSplit: null == directSplit ? _self.directSplit : directSplit // ignore: cast_nullable_to_non_nullable
+as List<RcxChip>,prefer: null == prefer ? _self._prefer : prefer // ignore: cast_nullable_to_non_nullable
+as List<RcxTier>,directSplit: null == directSplit ? _self.directSplit : directSplit // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -3280,7 +3568,8 @@ mixin _$RcxGroupStatus {
  String get name; String get source; String get profile; String get profileTitle; String get level; List<String> get offered; RcxBinding get binding;/// The scenario key naming the group now ($main, * or its name), and
 /// the member the scenario holds it on.
  String get program; String get fixed;/// The tunnel mode routes nothing through the group.
- bool get idle; RcxControl get control; String get now;/// Nested selectors the group reaches [now] through, outermost first.
+ bool get idle;/// A scenario route made the group.
+ bool get route; RcxControl get control; String get now;/// Nested selectors the group reaches [now] through, outermost first.
  List<String> get via; RcxDecision get decision; RcxReason? get problem; int get members; int get candidates; List<RcxExcludedNode> get excluded; int get switchesHour; int get maxPerHour; bool get improve; RcxCurrentNode? get current; RcxGroupNetwork? get network;/// Empty when the profile cannot split, else off, standby or active.
  String get directSplit;
 /// Create a copy of RcxGroupStatus
@@ -3296,20 +3585,20 @@ $RcxGroupStatusCopyWith<RcxGroupStatus> get copyWith => _$RcxGroupStatusCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as RcxGroupStatus;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxGroupStatus&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.profileTitle, _this.profileTitle) || other.profileTitle == _this.profileTitle)&&(identical(other.level, _this.level) || other.level == _this.level)&&const DeepCollectionEquality().equals(other.offered, _this.offered)&&(identical(other.binding, _this.binding) || other.binding == _this.binding)&&(identical(other.program, _this.program) || other.program == _this.program)&&(identical(other.fixed, _this.fixed) || other.fixed == _this.fixed)&&(identical(other.idle, _this.idle) || other.idle == _this.idle)&&(identical(other.control, _this.control) || other.control == _this.control)&&(identical(other.now, _this.now) || other.now == _this.now)&&const DeepCollectionEquality().equals(other.via, _this.via)&&(identical(other.decision, _this.decision) || other.decision == _this.decision)&&(identical(other.problem, _this.problem) || other.problem == _this.problem)&&(identical(other.members, _this.members) || other.members == _this.members)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates)&&const DeepCollectionEquality().equals(other.excluded, _this.excluded)&&(identical(other.switchesHour, _this.switchesHour) || other.switchesHour == _this.switchesHour)&&(identical(other.maxPerHour, _this.maxPerHour) || other.maxPerHour == _this.maxPerHour)&&(identical(other.improve, _this.improve) || other.improve == _this.improve)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.network, _this.network) || other.network == _this.network)&&(identical(other.directSplit, _this.directSplit) || other.directSplit == _this.directSplit));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxGroupStatus&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.profileTitle, _this.profileTitle) || other.profileTitle == _this.profileTitle)&&(identical(other.level, _this.level) || other.level == _this.level)&&const DeepCollectionEquality().equals(other.offered, _this.offered)&&(identical(other.binding, _this.binding) || other.binding == _this.binding)&&(identical(other.program, _this.program) || other.program == _this.program)&&(identical(other.fixed, _this.fixed) || other.fixed == _this.fixed)&&(identical(other.idle, _this.idle) || other.idle == _this.idle)&&(identical(other.route, _this.route) || other.route == _this.route)&&(identical(other.control, _this.control) || other.control == _this.control)&&(identical(other.now, _this.now) || other.now == _this.now)&&const DeepCollectionEquality().equals(other.via, _this.via)&&(identical(other.decision, _this.decision) || other.decision == _this.decision)&&(identical(other.problem, _this.problem) || other.problem == _this.problem)&&(identical(other.members, _this.members) || other.members == _this.members)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates)&&const DeepCollectionEquality().equals(other.excluded, _this.excluded)&&(identical(other.switchesHour, _this.switchesHour) || other.switchesHour == _this.switchesHour)&&(identical(other.maxPerHour, _this.maxPerHour) || other.maxPerHour == _this.maxPerHour)&&(identical(other.improve, _this.improve) || other.improve == _this.improve)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.network, _this.network) || other.network == _this.network)&&(identical(other.directSplit, _this.directSplit) || other.directSplit == _this.directSplit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxGroupStatus;
-  return Object.hashAll([runtimeType,_this.name,_this.source,_this.profile,_this.profileTitle,_this.level,const DeepCollectionEquality().hash(_this.offered),_this.binding,_this.program,_this.fixed,_this.idle,_this.control,_this.now,const DeepCollectionEquality().hash(_this.via),_this.decision,_this.problem,_this.members,_this.candidates,const DeepCollectionEquality().hash(_this.excluded),_this.switchesHour,_this.maxPerHour,_this.improve,_this.current,_this.network,_this.directSplit]);
+  return Object.hashAll([runtimeType,_this.name,_this.source,_this.profile,_this.profileTitle,_this.level,const DeepCollectionEquality().hash(_this.offered),_this.binding,_this.program,_this.fixed,_this.idle,_this.route,_this.control,_this.now,const DeepCollectionEquality().hash(_this.via),_this.decision,_this.problem,_this.members,_this.candidates,const DeepCollectionEquality().hash(_this.excluded),_this.switchesHour,_this.maxPerHour,_this.improve,_this.current,_this.network,_this.directSplit]);
 }
 
 @override
 String toString() {
   final _this = this as RcxGroupStatus;
-  return 'RcxGroupStatus(name: ${_this.name}, source: ${_this.source}, profile: ${_this.profile}, profileTitle: ${_this.profileTitle}, level: ${_this.level}, offered: ${_this.offered}, binding: ${_this.binding}, program: ${_this.program}, fixed: ${_this.fixed}, idle: ${_this.idle}, control: ${_this.control}, now: ${_this.now}, via: ${_this.via}, decision: ${_this.decision}, problem: ${_this.problem}, members: ${_this.members}, candidates: ${_this.candidates}, excluded: ${_this.excluded}, switchesHour: ${_this.switchesHour}, maxPerHour: ${_this.maxPerHour}, improve: ${_this.improve}, current: ${_this.current}, network: ${_this.network}, directSplit: ${_this.directSplit})';
+  return 'RcxGroupStatus(name: ${_this.name}, source: ${_this.source}, profile: ${_this.profile}, profileTitle: ${_this.profileTitle}, level: ${_this.level}, offered: ${_this.offered}, binding: ${_this.binding}, program: ${_this.program}, fixed: ${_this.fixed}, idle: ${_this.idle}, route: ${_this.route}, control: ${_this.control}, now: ${_this.now}, via: ${_this.via}, decision: ${_this.decision}, problem: ${_this.problem}, members: ${_this.members}, candidates: ${_this.candidates}, excluded: ${_this.excluded}, switchesHour: ${_this.switchesHour}, maxPerHour: ${_this.maxPerHour}, improve: ${_this.improve}, current: ${_this.current}, network: ${_this.network}, directSplit: ${_this.directSplit})';
 }
 
 
@@ -3320,7 +3609,7 @@ abstract mixin class $RcxGroupStatusCopyWith<$Res>  {
   factory $RcxGroupStatusCopyWith(RcxGroupStatus value, $Res Function(RcxGroupStatus) _then) = _$RcxGroupStatusCopyWithImpl;
 @useResult
 $Res call({
- String name, String source, String profile, String profileTitle, String level, List<String> offered, RcxBinding binding, String program, String fixed, bool idle, RcxControl control, String now, List<String> via, RcxDecision decision, RcxReason? problem, int members, int candidates, List<RcxExcludedNode> excluded, int switchesHour, int maxPerHour, bool improve, RcxCurrentNode? current, RcxGroupNetwork? network, String directSplit
+ String name, String source, String profile, String profileTitle, String level, List<String> offered, RcxBinding binding, String program, String fixed, bool idle, bool route, RcxControl control, String now, List<String> via, RcxDecision decision, RcxReason? problem, int members, int candidates, List<RcxExcludedNode> excluded, int switchesHour, int maxPerHour, bool improve, RcxCurrentNode? current, RcxGroupNetwork? network, String directSplit
 });
 
 
@@ -3337,7 +3626,7 @@ class _$RcxGroupStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxGroupStatus
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? source = null,Object? profile = null,Object? profileTitle = null,Object? level = null,Object? offered = null,Object? binding = null,Object? program = null,Object? fixed = null,Object? idle = null,Object? control = null,Object? now = null,Object? via = null,Object? decision = null,Object? problem = freezed,Object? members = null,Object? candidates = null,Object? excluded = null,Object? switchesHour = null,Object? maxPerHour = null,Object? improve = null,Object? current = freezed,Object? network = freezed,Object? directSplit = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? source = null,Object? profile = null,Object? profileTitle = null,Object? level = null,Object? offered = null,Object? binding = null,Object? program = null,Object? fixed = null,Object? idle = null,Object? route = null,Object? control = null,Object? now = null,Object? via = null,Object? decision = null,Object? problem = freezed,Object? members = null,Object? candidates = null,Object? excluded = null,Object? switchesHour = null,Object? maxPerHour = null,Object? improve = null,Object? current = freezed,Object? network = freezed,Object? directSplit = null,}) {
   return _then(RcxGroupStatus(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -3349,6 +3638,7 @@ as List<String>,binding: null == binding ? _self.binding : binding // ignore: ca
 as RcxBinding,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,fixed: null == fixed ? _self.fixed : fixed // ignore: cast_nullable_to_non_nullable
 as String,idle: null == idle ? _self.idle : idle // ignore: cast_nullable_to_non_nullable
+as bool,route: null == route ? _self.route : route // ignore: cast_nullable_to_non_nullable
 as bool,control: null == control ? _self.control : control // ignore: cast_nullable_to_non_nullable
 as RcxControl,now: null == now ? _self.now : now // ignore: cast_nullable_to_non_nullable
 as String,via: null == via ? _self.via : via // ignore: cast_nullable_to_non_nullable
@@ -3511,10 +3801,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  bool route,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxGroupStatus() when $default != null:
-return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
+return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.route,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
   return orElse();
 
 }
@@ -3532,10 +3822,10 @@ return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  bool route,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)  $default,) {final _that = this;
 switch (_that) {
 case _RcxGroupStatus():
-return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
+return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.route,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3552,10 +3842,10 @@ return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String source,  String profile,  String profileTitle,  String level,  List<String> offered,  RcxBinding binding,  String program,  String fixed,  bool idle,  bool route,  RcxControl control,  String now,  List<String> via,  RcxDecision decision,  RcxReason? problem,  int members,  int candidates,  List<RcxExcludedNode> excluded,  int switchesHour,  int maxPerHour,  bool improve,  RcxCurrentNode? current,  RcxGroupNetwork? network,  String directSplit)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxGroupStatus() when $default != null:
-return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
+return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.level,_that.offered,_that.binding,_that.program,_that.fixed,_that.idle,_that.route,_that.control,_that.now,_that.via,_that.decision,_that.problem,_that.members,_that.candidates,_that.excluded,_that.switchesHour,_that.maxPerHour,_that.improve,_that.current,_that.network,_that.directSplit);case _:
   return null;
 
 }
@@ -3567,7 +3857,7 @@ return $default(_that.name,_that.source,_that.profile,_that.profileTitle,_that.l
 @JsonSerializable()
 
 class _RcxGroupStatus implements RcxGroupStatus {
-  const _RcxGroupStatus({required this.name, this.source = '', this.profile = '', this.profileTitle = '', this.level = 'simple',  List<String> offered = const [], this.binding = const RcxBinding(), this.program = '', this.fixed = '', this.idle = false, this.control = const RcxControl(), this.now = '',  List<String> via = const [], this.decision = const RcxDecision(), this.problem, this.members = 0, this.candidates = 0,  List<RcxExcludedNode> excluded = const [], this.switchesHour = 0, this.maxPerHour = 0, this.improve = false, this.current, this.network, this.directSplit = ''}): _offered = offered,_via = via,_excluded = excluded;
+  const _RcxGroupStatus({required this.name, this.source = '', this.profile = '', this.profileTitle = '', this.level = 'simple',  List<String> offered = const [], this.binding = const RcxBinding(), this.program = '', this.fixed = '', this.idle = false, this.route = false, this.control = const RcxControl(), this.now = '',  List<String> via = const [], this.decision = const RcxDecision(), this.problem, this.members = 0, this.candidates = 0,  List<RcxExcludedNode> excluded = const [], this.switchesHour = 0, this.maxPerHour = 0, this.improve = false, this.current, this.network, this.directSplit = ''}): _offered = offered,_via = via,_excluded = excluded;
   factory _RcxGroupStatus.fromJson(Map<String, dynamic> json) => _$RcxGroupStatusFromJson(json);
 
 @override final  String name;
@@ -3589,6 +3879,8 @@ class _RcxGroupStatus implements RcxGroupStatus {
 @override@JsonKey() final  String fixed;
 /// The tunnel mode routes nothing through the group.
 @override@JsonKey() final  bool idle;
+/// A scenario route made the group.
+@override@JsonKey() final  bool route;
 @override@JsonKey() final  RcxControl control;
 @override@JsonKey() final  String now;
 /// Nested selectors the group reaches [now] through, outermost first.
@@ -3632,18 +3924,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxGroupStatus&&(identical(other.name, name) || other.name == name)&&(identical(other.source, source) || other.source == source)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.profileTitle, profileTitle) || other.profileTitle == profileTitle)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.offered, _offered)&&(identical(other.binding, binding) || other.binding == binding)&&(identical(other.program, program) || other.program == program)&&(identical(other.fixed, fixed) || other.fixed == fixed)&&(identical(other.idle, idle) || other.idle == idle)&&(identical(other.control, control) || other.control == control)&&(identical(other.now, now) || other.now == now)&&const DeepCollectionEquality().equals(other.via, _via)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.problem, problem) || other.problem == problem)&&(identical(other.members, members) || other.members == members)&&(identical(other.candidates, candidates) || other.candidates == candidates)&&const DeepCollectionEquality().equals(other.excluded, _excluded)&&(identical(other.switchesHour, switchesHour) || other.switchesHour == switchesHour)&&(identical(other.maxPerHour, maxPerHour) || other.maxPerHour == maxPerHour)&&(identical(other.improve, improve) || other.improve == improve)&&(identical(other.current, current) || other.current == current)&&(identical(other.network, network) || other.network == network)&&(identical(other.directSplit, directSplit) || other.directSplit == directSplit));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxGroupStatus&&(identical(other.name, name) || other.name == name)&&(identical(other.source, source) || other.source == source)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.profileTitle, profileTitle) || other.profileTitle == profileTitle)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.offered, _offered)&&(identical(other.binding, binding) || other.binding == binding)&&(identical(other.program, program) || other.program == program)&&(identical(other.fixed, fixed) || other.fixed == fixed)&&(identical(other.idle, idle) || other.idle == idle)&&(identical(other.route, route) || other.route == route)&&(identical(other.control, control) || other.control == control)&&(identical(other.now, now) || other.now == now)&&const DeepCollectionEquality().equals(other.via, _via)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.problem, problem) || other.problem == problem)&&(identical(other.members, members) || other.members == members)&&(identical(other.candidates, candidates) || other.candidates == candidates)&&const DeepCollectionEquality().equals(other.excluded, _excluded)&&(identical(other.switchesHour, switchesHour) || other.switchesHour == switchesHour)&&(identical(other.maxPerHour, maxPerHour) || other.maxPerHour == maxPerHour)&&(identical(other.improve, improve) || other.improve == improve)&&(identical(other.current, current) || other.current == current)&&(identical(other.network, network) || other.network == network)&&(identical(other.directSplit, directSplit) || other.directSplit == directSplit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,name,source,profile,profileTitle,level,const DeepCollectionEquality().hash(_offered),binding,program,fixed,idle,control,now,const DeepCollectionEquality().hash(_via),decision,problem,members,candidates,const DeepCollectionEquality().hash(_excluded),switchesHour,maxPerHour,improve,current,network,directSplit]);
+    return Object.hashAll([runtimeType,name,source,profile,profileTitle,level,const DeepCollectionEquality().hash(_offered),binding,program,fixed,idle,route,control,now,const DeepCollectionEquality().hash(_via),decision,problem,members,candidates,const DeepCollectionEquality().hash(_excluded),switchesHour,maxPerHour,improve,current,network,directSplit]);
 }
 
 @override
 String toString() {
-    return 'RcxGroupStatus(name: $name, source: $source, profile: $profile, profileTitle: $profileTitle, level: $level, offered: $offered, binding: $binding, program: $program, fixed: $fixed, idle: $idle, control: $control, now: $now, via: $via, decision: $decision, problem: $problem, members: $members, candidates: $candidates, excluded: $excluded, switchesHour: $switchesHour, maxPerHour: $maxPerHour, improve: $improve, current: $current, network: $network, directSplit: $directSplit)';
+    return 'RcxGroupStatus(name: $name, source: $source, profile: $profile, profileTitle: $profileTitle, level: $level, offered: $offered, binding: $binding, program: $program, fixed: $fixed, idle: $idle, route: $route, control: $control, now: $now, via: $via, decision: $decision, problem: $problem, members: $members, candidates: $candidates, excluded: $excluded, switchesHour: $switchesHour, maxPerHour: $maxPerHour, improve: $improve, current: $current, network: $network, directSplit: $directSplit)';
 }
 
 
@@ -3654,7 +3946,7 @@ abstract mixin class _$RcxGroupStatusCopyWith<$Res> implements $RcxGroupStatusCo
   factory _$RcxGroupStatusCopyWith(_RcxGroupStatus value, $Res Function(_RcxGroupStatus) _then) = __$RcxGroupStatusCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String source, String profile, String profileTitle, String level, List<String> offered, RcxBinding binding, String program, String fixed, bool idle, RcxControl control, String now, List<String> via, RcxDecision decision, RcxReason? problem, int members, int candidates, List<RcxExcludedNode> excluded, int switchesHour, int maxPerHour, bool improve, RcxCurrentNode? current, RcxGroupNetwork? network, String directSplit
+ String name, String source, String profile, String profileTitle, String level, List<String> offered, RcxBinding binding, String program, String fixed, bool idle, bool route, RcxControl control, String now, List<String> via, RcxDecision decision, RcxReason? problem, int members, int candidates, List<RcxExcludedNode> excluded, int switchesHour, int maxPerHour, bool improve, RcxCurrentNode? current, RcxGroupNetwork? network, String directSplit
 });
 
 
@@ -3671,7 +3963,7 @@ class __$RcxGroupStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxGroupStatus
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? source = null,Object? profile = null,Object? profileTitle = null,Object? level = null,Object? offered = null,Object? binding = null,Object? program = null,Object? fixed = null,Object? idle = null,Object? control = null,Object? now = null,Object? via = null,Object? decision = null,Object? problem = freezed,Object? members = null,Object? candidates = null,Object? excluded = null,Object? switchesHour = null,Object? maxPerHour = null,Object? improve = null,Object? current = freezed,Object? network = freezed,Object? directSplit = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? source = null,Object? profile = null,Object? profileTitle = null,Object? level = null,Object? offered = null,Object? binding = null,Object? program = null,Object? fixed = null,Object? idle = null,Object? route = null,Object? control = null,Object? now = null,Object? via = null,Object? decision = null,Object? problem = freezed,Object? members = null,Object? candidates = null,Object? excluded = null,Object? switchesHour = null,Object? maxPerHour = null,Object? improve = null,Object? current = freezed,Object? network = freezed,Object? directSplit = null,}) {
   return _then(_RcxGroupStatus(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -3683,6 +3975,7 @@ as List<String>,binding: null == binding ? _self.binding : binding // ignore: ca
 as RcxBinding,program: null == program ? _self.program : program // ignore: cast_nullable_to_non_nullable
 as String,fixed: null == fixed ? _self.fixed : fixed // ignore: cast_nullable_to_non_nullable
 as String,idle: null == idle ? _self.idle : idle // ignore: cast_nullable_to_non_nullable
+as bool,route: null == route ? _self.route : route // ignore: cast_nullable_to_non_nullable
 as bool,control: null == control ? _self.control : control // ignore: cast_nullable_to_non_nullable
 as RcxControl,now: null == now ? _self.now : now // ignore: cast_nullable_to_non_nullable
 as String,via: null == via ? _self._via : via // ignore: cast_nullable_to_non_nullable
@@ -4062,7 +4355,9 @@ as Map<String, int>,
 /// @nodoc
 mixin _$RcxStatus {
 
- bool get running; String get mode; String get network; List<RcxGroupStatus> get groups; RcxEnergy get energy; List<RcxReason> get problems; String get split; int get library; RcxScenarioStatus? get scenario; String get tunnelMode;
+ bool get running; String get mode; String get network; List<RcxGroupStatus> get groups; RcxEnergy get energy; List<RcxReason> get problems; String get split; int get library; RcxScenarioStatus? get scenario; String get tunnelMode;/// The running config was built with other routes than the scenario
+/// wants now, so the profile has to be applied again.
+ bool get reload;
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4076,20 +4371,20 @@ $RcxStatusCopyWith<RcxStatus> get copyWith => _$RcxStatusCopyWithImpl<RcxStatus>
 @override
 bool operator ==(Object other) {
   final _this = this as RcxStatus;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStatus&&(identical(other.running, _this.running) || other.running == _this.running)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.network, _this.network) || other.network == _this.network)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.energy, _this.energy) || other.energy == _this.energy)&&const DeepCollectionEquality().equals(other.problems, _this.problems)&&(identical(other.split, _this.split) || other.split == _this.split)&&(identical(other.library, _this.library) || other.library == _this.library)&&(identical(other.scenario, _this.scenario) || other.scenario == _this.scenario)&&(identical(other.tunnelMode, _this.tunnelMode) || other.tunnelMode == _this.tunnelMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStatus&&(identical(other.running, _this.running) || other.running == _this.running)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.network, _this.network) || other.network == _this.network)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.energy, _this.energy) || other.energy == _this.energy)&&const DeepCollectionEquality().equals(other.problems, _this.problems)&&(identical(other.split, _this.split) || other.split == _this.split)&&(identical(other.library, _this.library) || other.library == _this.library)&&(identical(other.scenario, _this.scenario) || other.scenario == _this.scenario)&&(identical(other.tunnelMode, _this.tunnelMode) || other.tunnelMode == _this.tunnelMode)&&(identical(other.reload, _this.reload) || other.reload == _this.reload));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxStatus;
-  return Object.hash(runtimeType,_this.running,_this.mode,_this.network,const DeepCollectionEquality().hash(_this.groups),_this.energy,const DeepCollectionEquality().hash(_this.problems),_this.split,_this.library,_this.scenario,_this.tunnelMode);
+  return Object.hash(runtimeType,_this.running,_this.mode,_this.network,const DeepCollectionEquality().hash(_this.groups),_this.energy,const DeepCollectionEquality().hash(_this.problems),_this.split,_this.library,_this.scenario,_this.tunnelMode,_this.reload);
 }
 
 @override
 String toString() {
   final _this = this as RcxStatus;
-  return 'RcxStatus(running: ${_this.running}, mode: ${_this.mode}, network: ${_this.network}, groups: ${_this.groups}, energy: ${_this.energy}, problems: ${_this.problems}, split: ${_this.split}, library: ${_this.library}, scenario: ${_this.scenario}, tunnelMode: ${_this.tunnelMode})';
+  return 'RcxStatus(running: ${_this.running}, mode: ${_this.mode}, network: ${_this.network}, groups: ${_this.groups}, energy: ${_this.energy}, problems: ${_this.problems}, split: ${_this.split}, library: ${_this.library}, scenario: ${_this.scenario}, tunnelMode: ${_this.tunnelMode}, reload: ${_this.reload})';
 }
 
 
@@ -4100,7 +4395,7 @@ abstract mixin class $RcxStatusCopyWith<$Res>  {
   factory $RcxStatusCopyWith(RcxStatus value, $Res Function(RcxStatus) _then) = _$RcxStatusCopyWithImpl;
 @useResult
 $Res call({
- bool running, String mode, String network, List<RcxGroupStatus> groups, RcxEnergy energy, List<RcxReason> problems, String split, int library, RcxScenarioStatus? scenario, String tunnelMode
+ bool running, String mode, String network, List<RcxGroupStatus> groups, RcxEnergy energy, List<RcxReason> problems, String split, int library, RcxScenarioStatus? scenario, String tunnelMode, bool reload
 });
 
 
@@ -4117,7 +4412,7 @@ class _$RcxStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? running = null,Object? mode = null,Object? network = null,Object? groups = null,Object? energy = null,Object? problems = null,Object? split = null,Object? library = null,Object? scenario = freezed,Object? tunnelMode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? running = null,Object? mode = null,Object? network = null,Object? groups = null,Object? energy = null,Object? problems = null,Object? split = null,Object? library = null,Object? scenario = freezed,Object? tunnelMode = null,Object? reload = null,}) {
   return _then(RcxStatus(
 running: null == running ? _self.running : running // ignore: cast_nullable_to_non_nullable
 as bool,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
@@ -4129,7 +4424,8 @@ as List<RcxReason>,split: null == split ? _self.split : split // ignore: cast_nu
 as String,library: null == library ? _self.library : library // ignore: cast_nullable_to_non_nullable
 as int,scenario: freezed == scenario ? _self.scenario : scenario // ignore: cast_nullable_to_non_nullable
 as RcxScenarioStatus?,tunnelMode: null == tunnelMode ? _self.tunnelMode : tunnelMode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,reload: null == reload ? _self.reload : reload // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of RcxStatus
@@ -4235,10 +4531,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode,  bool reload)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxStatus() when $default != null:
-return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode);case _:
+return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode,_that.reload);case _:
   return orElse();
 
 }
@@ -4256,10 +4552,10 @@ return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode,  bool reload)  $default,) {final _that = this;
 switch (_that) {
 case _RcxStatus():
-return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode);case _:
+return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode,_that.reload);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4276,10 +4572,10 @@ return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool running,  String mode,  String network,  List<RcxGroupStatus> groups,  RcxEnergy energy,  List<RcxReason> problems,  String split,  int library,  RcxScenarioStatus? scenario,  String tunnelMode,  bool reload)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxStatus() when $default != null:
-return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode);case _:
+return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy,_that.problems,_that.split,_that.library,_that.scenario,_that.tunnelMode,_that.reload);case _:
   return null;
 
 }
@@ -4291,7 +4587,7 @@ return $default(_that.running,_that.mode,_that.network,_that.groups,_that.energy
 @JsonSerializable()
 
 class _RcxStatus implements RcxStatus {
-  const _RcxStatus({this.running = false, this.mode = 'stopped', this.network = '',  List<RcxGroupStatus> groups = const [], this.energy = const RcxEnergy(),  List<RcxReason> problems = const [], this.split = '', this.library = 0, this.scenario, this.tunnelMode = ''}): _groups = groups,_problems = problems;
+  const _RcxStatus({this.running = false, this.mode = 'stopped', this.network = '',  List<RcxGroupStatus> groups = const [], this.energy = const RcxEnergy(),  List<RcxReason> problems = const [], this.split = '', this.library = 0, this.scenario, this.tunnelMode = '', this.reload = false}): _groups = groups,_problems = problems;
   factory _RcxStatus.fromJson(Map<String, dynamic> json) => _$RcxStatusFromJson(json);
 
 @override@JsonKey() final  bool running;
@@ -4316,6 +4612,9 @@ class _RcxStatus implements RcxStatus {
 @override@JsonKey() final  int library;
 @override final  RcxScenarioStatus? scenario;
 @override@JsonKey() final  String tunnelMode;
+/// The running config was built with other routes than the scenario
+/// wants now, so the profile has to be applied again.
+@override@JsonKey() final  bool reload;
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
@@ -4330,18 +4629,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStatus&&(identical(other.running, running) || other.running == running)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.network, network) || other.network == network)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.energy, energy) || other.energy == energy)&&const DeepCollectionEquality().equals(other.problems, _problems)&&(identical(other.split, split) || other.split == split)&&(identical(other.library, library) || other.library == library)&&(identical(other.scenario, scenario) || other.scenario == scenario)&&(identical(other.tunnelMode, tunnelMode) || other.tunnelMode == tunnelMode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStatus&&(identical(other.running, running) || other.running == running)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.network, network) || other.network == network)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.energy, energy) || other.energy == energy)&&const DeepCollectionEquality().equals(other.problems, _problems)&&(identical(other.split, split) || other.split == split)&&(identical(other.library, library) || other.library == library)&&(identical(other.scenario, scenario) || other.scenario == scenario)&&(identical(other.tunnelMode, tunnelMode) || other.tunnelMode == tunnelMode)&&(identical(other.reload, reload) || other.reload == reload));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,running,mode,network,const DeepCollectionEquality().hash(_groups),energy,const DeepCollectionEquality().hash(_problems),split,library,scenario,tunnelMode);
+    return Object.hash(runtimeType,running,mode,network,const DeepCollectionEquality().hash(_groups),energy,const DeepCollectionEquality().hash(_problems),split,library,scenario,tunnelMode,reload);
 }
 
 @override
 String toString() {
-    return 'RcxStatus(running: $running, mode: $mode, network: $network, groups: $groups, energy: $energy, problems: $problems, split: $split, library: $library, scenario: $scenario, tunnelMode: $tunnelMode)';
+    return 'RcxStatus(running: $running, mode: $mode, network: $network, groups: $groups, energy: $energy, problems: $problems, split: $split, library: $library, scenario: $scenario, tunnelMode: $tunnelMode, reload: $reload)';
 }
 
 
@@ -4352,7 +4651,7 @@ abstract mixin class _$RcxStatusCopyWith<$Res> implements $RcxStatusCopyWith<$Re
   factory _$RcxStatusCopyWith(_RcxStatus value, $Res Function(_RcxStatus) _then) = __$RcxStatusCopyWithImpl;
 @override @useResult
 $Res call({
- bool running, String mode, String network, List<RcxGroupStatus> groups, RcxEnergy energy, List<RcxReason> problems, String split, int library, RcxScenarioStatus? scenario, String tunnelMode
+ bool running, String mode, String network, List<RcxGroupStatus> groups, RcxEnergy energy, List<RcxReason> problems, String split, int library, RcxScenarioStatus? scenario, String tunnelMode, bool reload
 });
 
 
@@ -4369,7 +4668,7 @@ class __$RcxStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? running = null,Object? mode = null,Object? network = null,Object? groups = null,Object? energy = null,Object? problems = null,Object? split = null,Object? library = null,Object? scenario = freezed,Object? tunnelMode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? running = null,Object? mode = null,Object? network = null,Object? groups = null,Object? energy = null,Object? problems = null,Object? split = null,Object? library = null,Object? scenario = freezed,Object? tunnelMode = null,Object? reload = null,}) {
   return _then(_RcxStatus(
 running: null == running ? _self.running : running // ignore: cast_nullable_to_non_nullable
 as bool,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
@@ -4381,7 +4680,8 @@ as List<RcxReason>,split: null == split ? _self.split : split // ignore: cast_nu
 as String,library: null == library ? _self.library : library // ignore: cast_nullable_to_non_nullable
 as int,scenario: freezed == scenario ? _self.scenario : scenario // ignore: cast_nullable_to_non_nullable
 as RcxScenarioStatus?,tunnelMode: null == tunnelMode ? _self.tunnelMode : tunnelMode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,reload: null == reload ? _self.reload : reload // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -4414,7 +4714,7 @@ $RcxScenarioStatusCopyWith<$Res>? get scenario {
 mixin _$RcxScenarioStatus {
 
  String get id; String get title; String get source; RcxReason? get problem; RcxGroupNetwork? get network;/// The mode it holds on this network; empty leaves it to the user.
- String get mode; bool get manual; bool get holdsMode; Map<String, String> get groups;
+ String get mode; bool get manual; bool get holdsMode; Map<String, String> get groups; List<RcxRouteStatus> get routes;
 /// Create a copy of RcxScenarioStatus
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4428,20 +4728,20 @@ $RcxScenarioStatusCopyWith<RcxScenarioStatus> get copyWith => _$RcxScenarioStatu
 @override
 bool operator ==(Object other) {
   final _this = this as RcxScenarioStatus;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxScenarioStatus&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.problem, _this.problem) || other.problem == _this.problem)&&(identical(other.network, _this.network) || other.network == _this.network)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.holdsMode, _this.holdsMode) || other.holdsMode == _this.holdsMode)&&const DeepCollectionEquality().equals(other.groups, _this.groups));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxScenarioStatus&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.problem, _this.problem) || other.problem == _this.problem)&&(identical(other.network, _this.network) || other.network == _this.network)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.holdsMode, _this.holdsMode) || other.holdsMode == _this.holdsMode)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&const DeepCollectionEquality().equals(other.routes, _this.routes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxScenarioStatus;
-  return Object.hash(runtimeType,_this.id,_this.title,_this.source,_this.problem,_this.network,_this.mode,_this.manual,_this.holdsMode,const DeepCollectionEquality().hash(_this.groups));
+  return Object.hash(runtimeType,_this.id,_this.title,_this.source,_this.problem,_this.network,_this.mode,_this.manual,_this.holdsMode,const DeepCollectionEquality().hash(_this.groups),const DeepCollectionEquality().hash(_this.routes));
 }
 
 @override
 String toString() {
   final _this = this as RcxScenarioStatus;
-  return 'RcxScenarioStatus(id: ${_this.id}, title: ${_this.title}, source: ${_this.source}, problem: ${_this.problem}, network: ${_this.network}, mode: ${_this.mode}, manual: ${_this.manual}, holdsMode: ${_this.holdsMode}, groups: ${_this.groups})';
+  return 'RcxScenarioStatus(id: ${_this.id}, title: ${_this.title}, source: ${_this.source}, problem: ${_this.problem}, network: ${_this.network}, mode: ${_this.mode}, manual: ${_this.manual}, holdsMode: ${_this.holdsMode}, groups: ${_this.groups}, routes: ${_this.routes})';
 }
 
 
@@ -4452,7 +4752,7 @@ abstract mixin class $RcxScenarioStatusCopyWith<$Res>  {
   factory $RcxScenarioStatusCopyWith(RcxScenarioStatus value, $Res Function(RcxScenarioStatus) _then) = _$RcxScenarioStatusCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String source, RcxReason? problem, RcxGroupNetwork? network, String mode, bool manual, bool holdsMode, Map<String, String> groups
+ String id, String title, String source, RcxReason? problem, RcxGroupNetwork? network, String mode, bool manual, bool holdsMode, Map<String, String> groups, List<RcxRouteStatus> routes
 });
 
 
@@ -4469,7 +4769,7 @@ class _$RcxScenarioStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxScenarioStatus
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? source = null,Object? problem = freezed,Object? network = freezed,Object? mode = null,Object? manual = null,Object? holdsMode = null,Object? groups = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? source = null,Object? problem = freezed,Object? network = freezed,Object? mode = null,Object? manual = null,Object? holdsMode = null,Object? groups = null,Object? routes = null,}) {
   return _then(RcxScenarioStatus(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -4480,7 +4780,8 @@ as RcxGroupNetwork?,mode: null == mode ? _self.mode : mode // ignore: cast_nulla
 as String,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as bool,holdsMode: null == holdsMode ? _self.holdsMode : holdsMode // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self.groups : groups // ignore: cast_nullable_to_non_nullable
-as Map<String, String>,
+as Map<String, String>,routes: null == routes ? _self.routes : routes // ignore: cast_nullable_to_non_nullable
+as List<RcxRouteStatus>,
   ));
 }
 /// Create a copy of RcxScenarioStatus
@@ -4589,10 +4890,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups,  List<RcxRouteStatus> routes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxScenarioStatus() when $default != null:
-return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups);case _:
+return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups,_that.routes);case _:
   return orElse();
 
 }
@@ -4610,10 +4911,10 @@ return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups,  List<RcxRouteStatus> routes)  $default,) {final _that = this;
 switch (_that) {
 case _RcxScenarioStatus():
-return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups);case _:
+return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups,_that.routes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4630,10 +4931,10 @@ return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String source,  RcxReason? problem,  RcxGroupNetwork? network,  String mode,  bool manual,  bool holdsMode,  Map<String, String> groups,  List<RcxRouteStatus> routes)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxScenarioStatus() when $default != null:
-return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups);case _:
+return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_that.mode,_that.manual,_that.holdsMode,_that.groups,_that.routes);case _:
   return null;
 
 }
@@ -4645,7 +4946,7 @@ return $default(_that.id,_that.title,_that.source,_that.problem,_that.network,_t
 @JsonSerializable()
 
 class _RcxScenarioStatus implements RcxScenarioStatus {
-  const _RcxScenarioStatus({required this.id, this.title = '', this.source = '', this.problem, this.network, this.mode = '', this.manual = false, this.holdsMode = false,  Map<String, String> groups = const {}}): _groups = groups;
+  const _RcxScenarioStatus({required this.id, this.title = '', this.source = '', this.problem, this.network, this.mode = '', this.manual = false, this.holdsMode = false,  Map<String, String> groups = const {},  List<RcxRouteStatus> routes = const []}): _groups = groups,_routes = routes;
   factory _RcxScenarioStatus.fromJson(Map<String, dynamic> json) => _$RcxScenarioStatusFromJson(json);
 
 @override final  String id;
@@ -4664,6 +4965,13 @@ class _RcxScenarioStatus implements RcxScenarioStatus {
   return EqualUnmodifiableMapView(_groups);
 }
 
+ final  List<RcxRouteStatus> _routes;
+@override@JsonKey() List<RcxRouteStatus> get routes {
+  if (_routes is EqualUnmodifiableListView) return _routes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_routes);
+}
+
 
 /// Create a copy of RcxScenarioStatus
 /// with the given fields replaced by the non-null parameter values.
@@ -4678,18 +4986,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxScenarioStatus&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.source, source) || other.source == source)&&(identical(other.problem, problem) || other.problem == problem)&&(identical(other.network, network) || other.network == network)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.holdsMode, holdsMode) || other.holdsMode == holdsMode)&&const DeepCollectionEquality().equals(other.groups, _groups));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxScenarioStatus&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.source, source) || other.source == source)&&(identical(other.problem, problem) || other.problem == problem)&&(identical(other.network, network) || other.network == network)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.holdsMode, holdsMode) || other.holdsMode == holdsMode)&&const DeepCollectionEquality().equals(other.groups, _groups)&&const DeepCollectionEquality().equals(other.routes, _routes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,title,source,problem,network,mode,manual,holdsMode,const DeepCollectionEquality().hash(_groups));
+    return Object.hash(runtimeType,id,title,source,problem,network,mode,manual,holdsMode,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_routes));
 }
 
 @override
 String toString() {
-    return 'RcxScenarioStatus(id: $id, title: $title, source: $source, problem: $problem, network: $network, mode: $mode, manual: $manual, holdsMode: $holdsMode, groups: $groups)';
+    return 'RcxScenarioStatus(id: $id, title: $title, source: $source, problem: $problem, network: $network, mode: $mode, manual: $manual, holdsMode: $holdsMode, groups: $groups, routes: $routes)';
 }
 
 
@@ -4700,7 +5008,7 @@ abstract mixin class _$RcxScenarioStatusCopyWith<$Res> implements $RcxScenarioSt
   factory _$RcxScenarioStatusCopyWith(_RcxScenarioStatus value, $Res Function(_RcxScenarioStatus) _then) = __$RcxScenarioStatusCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String source, RcxReason? problem, RcxGroupNetwork? network, String mode, bool manual, bool holdsMode, Map<String, String> groups
+ String id, String title, String source, RcxReason? problem, RcxGroupNetwork? network, String mode, bool manual, bool holdsMode, Map<String, String> groups, List<RcxRouteStatus> routes
 });
 
 
@@ -4717,7 +5025,7 @@ class __$RcxScenarioStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxScenarioStatus
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? source = null,Object? problem = freezed,Object? network = freezed,Object? mode = null,Object? manual = null,Object? holdsMode = null,Object? groups = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? source = null,Object? problem = freezed,Object? network = freezed,Object? mode = null,Object? manual = null,Object? holdsMode = null,Object? groups = null,Object? routes = null,}) {
   return _then(_RcxScenarioStatus(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -4728,7 +5036,8 @@ as RcxGroupNetwork?,mode: null == mode ? _self.mode : mode // ignore: cast_nulla
 as String,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
 as bool,holdsMode: null == holdsMode ? _self.holdsMode : holdsMode // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self._groups : groups // ignore: cast_nullable_to_non_nullable
-as Map<String, String>,
+as Map<String, String>,routes: null == routes ? _self._routes : routes // ignore: cast_nullable_to_non_nullable
+as List<RcxRouteStatus>,
   ));
 }
 
@@ -4755,6 +5064,306 @@ $RcxGroupNetworkCopyWith<$Res>? get network {
 
   return $RcxGroupNetworkCopyWith<$Res>(_self.network!, (value) {
     return _then(_self.copyWith(network: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$RcxRouteStatus {
+
+ String get name; String get to; RcxReason? get problem;
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxRouteStatusCopyWith<RcxRouteStatus> get copyWith => _$RcxRouteStatusCopyWithImpl<RcxRouteStatus>(this as RcxRouteStatus, _$identity);
+
+  /// Serializes this RcxRouteStatus to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxRouteStatus;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxRouteStatus&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.problem, _this.problem) || other.problem == _this.problem));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxRouteStatus;
+  return Object.hash(runtimeType,_this.name,_this.to,_this.problem);
+}
+
+@override
+String toString() {
+  final _this = this as RcxRouteStatus;
+  return 'RcxRouteStatus(name: ${_this.name}, to: ${_this.to}, problem: ${_this.problem})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxRouteStatusCopyWith<$Res>  {
+  factory $RcxRouteStatusCopyWith(RcxRouteStatus value, $Res Function(RcxRouteStatus) _then) = _$RcxRouteStatusCopyWithImpl;
+@useResult
+$Res call({
+ String name, String to, RcxReason? problem
+});
+
+
+$RcxReasonCopyWith<$Res>? get problem;
+
+}
+/// @nodoc
+class _$RcxRouteStatusCopyWithImpl<$Res>
+    implements $RcxRouteStatusCopyWith<$Res> {
+  _$RcxRouteStatusCopyWithImpl(this._self, this._then);
+
+  final RcxRouteStatus _self;
+  final $Res Function(RcxRouteStatus) _then;
+
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? to = null,Object? problem = freezed,}) {
+  return _then(RcxRouteStatus(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,problem: freezed == problem ? _self.problem : problem // ignore: cast_nullable_to_non_nullable
+as RcxReason?,
+  ));
+}
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxReasonCopyWith<$Res>? get problem {
+    if (_self.problem == null) {
+    return null;
+  }
+
+  return $RcxReasonCopyWith<$Res>(_self.problem!, (value) {
+    return _then(_self.copyWith(problem: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [RcxRouteStatus].
+extension RcxRouteStatusPatterns on RcxRouteStatus {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxRouteStatus value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxRouteStatus() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxRouteStatus value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxRouteStatus():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxRouteStatus value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxRouteStatus() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String to,  RcxReason? problem)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxRouteStatus() when $default != null:
+return $default(_that.name,_that.to,_that.problem);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String to,  RcxReason? problem)  $default,) {final _that = this;
+switch (_that) {
+case _RcxRouteStatus():
+return $default(_that.name,_that.to,_that.problem);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String to,  RcxReason? problem)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxRouteStatus() when $default != null:
+return $default(_that.name,_that.to,_that.problem);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxRouteStatus implements RcxRouteStatus {
+  const _RcxRouteStatus({required this.name, this.to = '', this.problem});
+  factory _RcxRouteStatus.fromJson(Map<String, dynamic> json) => _$RcxRouteStatusFromJson(json);
+
+@override final  String name;
+@override@JsonKey() final  String to;
+@override final  RcxReason? problem;
+
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxRouteStatusCopyWith<_RcxRouteStatus> get copyWith => __$RcxRouteStatusCopyWithImpl<_RcxRouteStatus>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxRouteStatusToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxRouteStatus&&(identical(other.name, name) || other.name == name)&&(identical(other.to, to) || other.to == to)&&(identical(other.problem, problem) || other.problem == problem));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,name,to,problem);
+}
+
+@override
+String toString() {
+    return 'RcxRouteStatus(name: $name, to: $to, problem: $problem)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxRouteStatusCopyWith<$Res> implements $RcxRouteStatusCopyWith<$Res> {
+  factory _$RcxRouteStatusCopyWith(_RcxRouteStatus value, $Res Function(_RcxRouteStatus) _then) = __$RcxRouteStatusCopyWithImpl;
+@override @useResult
+$Res call({
+ String name, String to, RcxReason? problem
+});
+
+
+@override $RcxReasonCopyWith<$Res>? get problem;
+
+}
+/// @nodoc
+class __$RcxRouteStatusCopyWithImpl<$Res>
+    implements _$RcxRouteStatusCopyWith<$Res> {
+  __$RcxRouteStatusCopyWithImpl(this._self, this._then);
+
+  final _RcxRouteStatus _self;
+  final $Res Function(_RcxRouteStatus) _then;
+
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? to = null,Object? problem = freezed,}) {
+  return _then(_RcxRouteStatus(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,problem: freezed == problem ? _self.problem : problem // ignore: cast_nullable_to_non_nullable
+as RcxReason?,
+  ));
+}
+
+/// Create a copy of RcxRouteStatus
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxReasonCopyWith<$Res>? get problem {
+    if (_self.problem == null) {
+    return null;
+  }
+
+  return $RcxReasonCopyWith<$Res>(_self.problem!, (value) {
+    return _then(_self.copyWith(problem: value));
   });
 }
 }
@@ -5370,7 +5979,7 @@ $RcxReasonCopyWith<$Res> get reason {
 mixin _$RcxProfileInfo {
 
  String get id;/// `scenario` for an auto control, empty for a group profile.
- String get kind; String get title; String get level; String get source;@JsonKey(name: 'extends') String get extendsId; String get error; Map<String, Map<String, String>> get l10n; List<String> get consent;
+ String get kind; String get title; String get description; String get level; String get source;@JsonKey(name: 'extends') String get extendsId; String get error; Map<String, Map<String, String>> get l10n; List<String> get consent;
 /// Create a copy of RcxProfileInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5384,20 +5993,20 @@ $RcxProfileInfoCopyWith<RcxProfileInfo> get copyWith => _$RcxProfileInfoCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as RcxProfileInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxProfileInfo&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.extendsId, _this.extendsId) || other.extendsId == _this.extendsId)&&(identical(other.error, _this.error) || other.error == _this.error)&&const DeepCollectionEquality().equals(other.l10n, _this.l10n)&&const DeepCollectionEquality().equals(other.consent, _this.consent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxProfileInfo&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.extendsId, _this.extendsId) || other.extendsId == _this.extendsId)&&(identical(other.error, _this.error) || other.error == _this.error)&&const DeepCollectionEquality().equals(other.l10n, _this.l10n)&&const DeepCollectionEquality().equals(other.consent, _this.consent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxProfileInfo;
-  return Object.hash(runtimeType,_this.id,_this.kind,_this.title,_this.level,_this.source,_this.extendsId,_this.error,const DeepCollectionEquality().hash(_this.l10n),const DeepCollectionEquality().hash(_this.consent));
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.title,_this.description,_this.level,_this.source,_this.extendsId,_this.error,const DeepCollectionEquality().hash(_this.l10n),const DeepCollectionEquality().hash(_this.consent));
 }
 
 @override
 String toString() {
   final _this = this as RcxProfileInfo;
-  return 'RcxProfileInfo(id: ${_this.id}, kind: ${_this.kind}, title: ${_this.title}, level: ${_this.level}, source: ${_this.source}, extendsId: ${_this.extendsId}, error: ${_this.error}, l10n: ${_this.l10n}, consent: ${_this.consent})';
+  return 'RcxProfileInfo(id: ${_this.id}, kind: ${_this.kind}, title: ${_this.title}, description: ${_this.description}, level: ${_this.level}, source: ${_this.source}, extendsId: ${_this.extendsId}, error: ${_this.error}, l10n: ${_this.l10n}, consent: ${_this.consent})';
 }
 
 
@@ -5408,7 +6017,7 @@ abstract mixin class $RcxProfileInfoCopyWith<$Res>  {
   factory $RcxProfileInfoCopyWith(RcxProfileInfo value, $Res Function(RcxProfileInfo) _then) = _$RcxProfileInfoCopyWithImpl;
 @useResult
 $Res call({
- String id, String kind, String title, String level, String source,@JsonKey(name: 'extends') String extendsId, String error, Map<String, Map<String, String>> l10n, List<String> consent
+ String id, String kind, String title, String description, String level, String source,@JsonKey(name: 'extends') String extendsId, String error, Map<String, Map<String, String>> l10n, List<String> consent
 });
 
 
@@ -5425,11 +6034,12 @@ class _$RcxProfileInfoCopyWithImpl<$Res>
 
 /// Create a copy of RcxProfileInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? title = null,Object? level = null,Object? source = null,Object? extendsId = null,Object? error = null,Object? l10n = null,Object? consent = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? title = null,Object? description = null,Object? level = null,Object? source = null,Object? extendsId = null,Object? error = null,Object? l10n = null,Object? consent = null,}) {
   return _then(RcxProfileInfo(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,extendsId: null == extendsId ? _self.extendsId : extendsId // ignore: cast_nullable_to_non_nullable
@@ -5521,10 +6131,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String kind,  String title,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String kind,  String title,  String description,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxProfileInfo() when $default != null:
-return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
+return $default(_that.id,_that.kind,_that.title,_that.description,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
   return orElse();
 
 }
@@ -5542,10 +6152,10 @@ return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.e
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String kind,  String title,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String kind,  String title,  String description,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)  $default,) {final _that = this;
 switch (_that) {
 case _RcxProfileInfo():
-return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
+return $default(_that.id,_that.kind,_that.title,_that.description,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5562,10 +6172,10 @@ return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.e
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String kind,  String title,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String kind,  String title,  String description,  String level,  String source, @JsonKey(name: 'extends')  String extendsId,  String error,  Map<String, Map<String, String>> l10n,  List<String> consent)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxProfileInfo() when $default != null:
-return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
+return $default(_that.id,_that.kind,_that.title,_that.description,_that.level,_that.source,_that.extendsId,_that.error,_that.l10n,_that.consent);case _:
   return null;
 
 }
@@ -5577,13 +6187,14 @@ return $default(_that.id,_that.kind,_that.title,_that.level,_that.source,_that.e
 @JsonSerializable()
 
 class _RcxProfileInfo implements RcxProfileInfo {
-  const _RcxProfileInfo({required this.id, this.kind = '', this.title = '', this.level = '', this.source = '', @JsonKey(name: 'extends') this.extendsId = '', this.error = '',  Map<String, Map<String, String>> l10n = const {},  List<String> consent = const []}): _l10n = l10n,_consent = consent;
+  const _RcxProfileInfo({required this.id, this.kind = '', this.title = '', this.description = '', this.level = '', this.source = '', @JsonKey(name: 'extends') this.extendsId = '', this.error = '',  Map<String, Map<String, String>> l10n = const {},  List<String> consent = const []}): _l10n = l10n,_consent = consent;
   factory _RcxProfileInfo.fromJson(Map<String, dynamic> json) => _$RcxProfileInfoFromJson(json);
 
 @override final  String id;
 /// `scenario` for an auto control, empty for a group profile.
 @override@JsonKey() final  String kind;
 @override@JsonKey() final  String title;
+@override@JsonKey() final  String description;
 @override@JsonKey() final  String level;
 @override@JsonKey() final  String source;
 @override@JsonKey(name: 'extends') final  String extendsId;
@@ -5616,18 +6227,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxProfileInfo&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.title, title) || other.title == title)&&(identical(other.level, level) || other.level == level)&&(identical(other.source, source) || other.source == source)&&(identical(other.extendsId, extendsId) || other.extendsId == extendsId)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.l10n, _l10n)&&const DeepCollectionEquality().equals(other.consent, _consent));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxProfileInfo&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.level, level) || other.level == level)&&(identical(other.source, source) || other.source == source)&&(identical(other.extendsId, extendsId) || other.extendsId == extendsId)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.l10n, _l10n)&&const DeepCollectionEquality().equals(other.consent, _consent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,kind,title,level,source,extendsId,error,const DeepCollectionEquality().hash(_l10n),const DeepCollectionEquality().hash(_consent));
+    return Object.hash(runtimeType,id,kind,title,description,level,source,extendsId,error,const DeepCollectionEquality().hash(_l10n),const DeepCollectionEquality().hash(_consent));
 }
 
 @override
 String toString() {
-    return 'RcxProfileInfo(id: $id, kind: $kind, title: $title, level: $level, source: $source, extendsId: $extendsId, error: $error, l10n: $l10n, consent: $consent)';
+    return 'RcxProfileInfo(id: $id, kind: $kind, title: $title, description: $description, level: $level, source: $source, extendsId: $extendsId, error: $error, l10n: $l10n, consent: $consent)';
 }
 
 
@@ -5638,7 +6249,7 @@ abstract mixin class _$RcxProfileInfoCopyWith<$Res> implements $RcxProfileInfoCo
   factory _$RcxProfileInfoCopyWith(_RcxProfileInfo value, $Res Function(_RcxProfileInfo) _then) = __$RcxProfileInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String kind, String title, String level, String source,@JsonKey(name: 'extends') String extendsId, String error, Map<String, Map<String, String>> l10n, List<String> consent
+ String id, String kind, String title, String description, String level, String source,@JsonKey(name: 'extends') String extendsId, String error, Map<String, Map<String, String>> l10n, List<String> consent
 });
 
 
@@ -5655,11 +6266,12 @@ class __$RcxProfileInfoCopyWithImpl<$Res>
 
 /// Create a copy of RcxProfileInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? title = null,Object? level = null,Object? source = null,Object? extendsId = null,Object? error = null,Object? l10n = null,Object? consent = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? title = null,Object? description = null,Object? level = null,Object? source = null,Object? extendsId = null,Object? error = null,Object? l10n = null,Object? consent = null,}) {
   return _then(_RcxProfileInfo(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,extendsId: null == extendsId ? _self.extendsId : extendsId // ignore: cast_nullable_to_non_nullable
@@ -7676,7 +8288,7 @@ as List<String>,
 /// @nodoc
 mixin _$RcxStudioResult {
 
- String get text; Map<String, Object?>? get profile; Map<String, Object?>? get scenario; RcxProfileInfo? get info; List<RcxIssue> get errors; List<RcxIssue> get warnings; List<RcxEndpoint> get endpoints; RcxCondForm? get form; List<RcxField> get fields; List<String> get conflicts; RcxDecision? get current; RcxDecision? get candidate;
+ String get text; Map<String, Object?>? get profile; Map<String, Object?>? get scenario; RcxProfileInfo? get info; List<RcxIssue> get errors; List<RcxIssue> get warnings; List<RcxEndpoint> get endpoints; RcxCondForm? get form; List<RcxField> get fields; List<String> get conflicts; RcxDecision? get current; RcxDecision? get candidate; List<RcxCountry> get countries; List<RcxBundleItem> get items;
 /// Create a copy of RcxStudioResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7690,20 +8302,20 @@ $RcxStudioResultCopyWith<RcxStudioResult> get copyWith => _$RcxStudioResultCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as RcxStudioResult;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStudioResult&&(identical(other.text, _this.text) || other.text == _this.text)&&const DeepCollectionEquality().equals(other.profile, _this.profile)&&const DeepCollectionEquality().equals(other.scenario, _this.scenario)&&(identical(other.info, _this.info) || other.info == _this.info)&&const DeepCollectionEquality().equals(other.errors, _this.errors)&&const DeepCollectionEquality().equals(other.warnings, _this.warnings)&&const DeepCollectionEquality().equals(other.endpoints, _this.endpoints)&&(identical(other.form, _this.form) || other.form == _this.form)&&const DeepCollectionEquality().equals(other.fields, _this.fields)&&const DeepCollectionEquality().equals(other.conflicts, _this.conflicts)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.candidate, _this.candidate) || other.candidate == _this.candidate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStudioResult&&(identical(other.text, _this.text) || other.text == _this.text)&&const DeepCollectionEquality().equals(other.profile, _this.profile)&&const DeepCollectionEquality().equals(other.scenario, _this.scenario)&&(identical(other.info, _this.info) || other.info == _this.info)&&const DeepCollectionEquality().equals(other.errors, _this.errors)&&const DeepCollectionEquality().equals(other.warnings, _this.warnings)&&const DeepCollectionEquality().equals(other.endpoints, _this.endpoints)&&(identical(other.form, _this.form) || other.form == _this.form)&&const DeepCollectionEquality().equals(other.fields, _this.fields)&&const DeepCollectionEquality().equals(other.conflicts, _this.conflicts)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.candidate, _this.candidate) || other.candidate == _this.candidate)&&const DeepCollectionEquality().equals(other.countries, _this.countries)&&const DeepCollectionEquality().equals(other.items, _this.items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxStudioResult;
-  return Object.hash(runtimeType,_this.text,const DeepCollectionEquality().hash(_this.profile),const DeepCollectionEquality().hash(_this.scenario),_this.info,const DeepCollectionEquality().hash(_this.errors),const DeepCollectionEquality().hash(_this.warnings),const DeepCollectionEquality().hash(_this.endpoints),_this.form,const DeepCollectionEquality().hash(_this.fields),const DeepCollectionEquality().hash(_this.conflicts),_this.current,_this.candidate);
+  return Object.hash(runtimeType,_this.text,const DeepCollectionEquality().hash(_this.profile),const DeepCollectionEquality().hash(_this.scenario),_this.info,const DeepCollectionEquality().hash(_this.errors),const DeepCollectionEquality().hash(_this.warnings),const DeepCollectionEquality().hash(_this.endpoints),_this.form,const DeepCollectionEquality().hash(_this.fields),const DeepCollectionEquality().hash(_this.conflicts),_this.current,_this.candidate,const DeepCollectionEquality().hash(_this.countries),const DeepCollectionEquality().hash(_this.items));
 }
 
 @override
 String toString() {
   final _this = this as RcxStudioResult;
-  return 'RcxStudioResult(text: ${_this.text}, profile: ${_this.profile}, scenario: ${_this.scenario}, info: ${_this.info}, errors: ${_this.errors}, warnings: ${_this.warnings}, endpoints: ${_this.endpoints}, form: ${_this.form}, fields: ${_this.fields}, conflicts: ${_this.conflicts}, current: ${_this.current}, candidate: ${_this.candidate})';
+  return 'RcxStudioResult(text: ${_this.text}, profile: ${_this.profile}, scenario: ${_this.scenario}, info: ${_this.info}, errors: ${_this.errors}, warnings: ${_this.warnings}, endpoints: ${_this.endpoints}, form: ${_this.form}, fields: ${_this.fields}, conflicts: ${_this.conflicts}, current: ${_this.current}, candidate: ${_this.candidate}, countries: ${_this.countries}, items: ${_this.items})';
 }
 
 
@@ -7714,7 +8326,7 @@ abstract mixin class $RcxStudioResultCopyWith<$Res>  {
   factory $RcxStudioResultCopyWith(RcxStudioResult value, $Res Function(RcxStudioResult) _then) = _$RcxStudioResultCopyWithImpl;
 @useResult
 $Res call({
- String text, Map<String, Object?>? profile, Map<String, Object?>? scenario, RcxProfileInfo? info, List<RcxIssue> errors, List<RcxIssue> warnings, List<RcxEndpoint> endpoints, RcxCondForm? form, List<RcxField> fields, List<String> conflicts, RcxDecision? current, RcxDecision? candidate
+ String text, Map<String, Object?>? profile, Map<String, Object?>? scenario, RcxProfileInfo? info, List<RcxIssue> errors, List<RcxIssue> warnings, List<RcxEndpoint> endpoints, RcxCondForm? form, List<RcxField> fields, List<String> conflicts, RcxDecision? current, RcxDecision? candidate, List<RcxCountry> countries, List<RcxBundleItem> items
 });
 
 
@@ -7731,7 +8343,7 @@ class _$RcxStudioResultCopyWithImpl<$Res>
 
 /// Create a copy of RcxStudioResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? profile = freezed,Object? scenario = freezed,Object? info = freezed,Object? errors = null,Object? warnings = null,Object? endpoints = null,Object? form = freezed,Object? fields = null,Object? conflicts = null,Object? current = freezed,Object? candidate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? profile = freezed,Object? scenario = freezed,Object? info = freezed,Object? errors = null,Object? warnings = null,Object? endpoints = null,Object? form = freezed,Object? fields = null,Object? conflicts = null,Object? current = freezed,Object? candidate = freezed,Object? countries = null,Object? items = null,}) {
   return _then(RcxStudioResult(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
@@ -7745,7 +8357,9 @@ as RcxCondForm?,fields: null == fields ? _self.fields : fields // ignore: cast_n
 as List<RcxField>,conflicts: null == conflicts ? _self.conflicts : conflicts // ignore: cast_nullable_to_non_nullable
 as List<String>,current: freezed == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
 as RcxDecision?,candidate: freezed == candidate ? _self.candidate : candidate // ignore: cast_nullable_to_non_nullable
-as RcxDecision?,
+as RcxDecision?,countries: null == countries ? _self.countries : countries // ignore: cast_nullable_to_non_nullable
+as List<RcxCountry>,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
+as List<RcxBundleItem>,
   ));
 }
 /// Create a copy of RcxStudioResult
@@ -7878,10 +8492,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate,  List<RcxCountry> countries,  List<RcxBundleItem> items)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxStudioResult() when $default != null:
-return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate);case _:
+return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate,_that.countries,_that.items);case _:
   return orElse();
 
 }
@@ -7899,10 +8513,10 @@ return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate,  List<RcxCountry> countries,  List<RcxBundleItem> items)  $default,) {final _that = this;
 switch (_that) {
 case _RcxStudioResult():
-return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate);case _:
+return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate,_that.countries,_that.items);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7919,10 +8533,10 @@ return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  Map<String, Object?>? profile,  Map<String, Object?>? scenario,  RcxProfileInfo? info,  List<RcxIssue> errors,  List<RcxIssue> warnings,  List<RcxEndpoint> endpoints,  RcxCondForm? form,  List<RcxField> fields,  List<String> conflicts,  RcxDecision? current,  RcxDecision? candidate,  List<RcxCountry> countries,  List<RcxBundleItem> items)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxStudioResult() when $default != null:
-return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate);case _:
+return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,_that.warnings,_that.endpoints,_that.form,_that.fields,_that.conflicts,_that.current,_that.candidate,_that.countries,_that.items);case _:
   return null;
 
 }
@@ -7934,7 +8548,7 @@ return $default(_that.text,_that.profile,_that.scenario,_that.info,_that.errors,
 @JsonSerializable()
 
 class _RcxStudioResult implements RcxStudioResult {
-  const _RcxStudioResult({this.text = '',  Map<String, Object?>? profile,  Map<String, Object?>? scenario, this.info,  List<RcxIssue> errors = const [],  List<RcxIssue> warnings = const [],  List<RcxEndpoint> endpoints = const [], this.form,  List<RcxField> fields = const [],  List<String> conflicts = const [], this.current, this.candidate}): _profile = profile,_scenario = scenario,_errors = errors,_warnings = warnings,_endpoints = endpoints,_fields = fields,_conflicts = conflicts;
+  const _RcxStudioResult({this.text = '',  Map<String, Object?>? profile,  Map<String, Object?>? scenario, this.info,  List<RcxIssue> errors = const [],  List<RcxIssue> warnings = const [],  List<RcxEndpoint> endpoints = const [], this.form,  List<RcxField> fields = const [],  List<String> conflicts = const [], this.current, this.candidate,  List<RcxCountry> countries = const [],  List<RcxBundleItem> items = const []}): _profile = profile,_scenario = scenario,_errors = errors,_warnings = warnings,_endpoints = endpoints,_fields = fields,_conflicts = conflicts,_countries = countries,_items = items;
   factory _RcxStudioResult.fromJson(Map<String, dynamic> json) => _$RcxStudioResultFromJson(json);
 
 @override@JsonKey() final  String text;
@@ -7995,6 +8609,20 @@ class _RcxStudioResult implements RcxStudioResult {
 
 @override final  RcxDecision? current;
 @override final  RcxDecision? candidate;
+ final  List<RcxCountry> _countries;
+@override@JsonKey() List<RcxCountry> get countries {
+  if (_countries is EqualUnmodifiableListView) return _countries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_countries);
+}
+
+ final  List<RcxBundleItem> _items;
+@override@JsonKey() List<RcxBundleItem> get items {
+  if (_items is EqualUnmodifiableListView) return _items;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_items);
+}
+
 
 /// Create a copy of RcxStudioResult
 /// with the given fields replaced by the non-null parameter values.
@@ -8009,18 +8637,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStudioResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other.profile, _profile)&&const DeepCollectionEquality().equals(other.scenario, _scenario)&&(identical(other.info, info) || other.info == info)&&const DeepCollectionEquality().equals(other.errors, _errors)&&const DeepCollectionEquality().equals(other.warnings, _warnings)&&const DeepCollectionEquality().equals(other.endpoints, _endpoints)&&(identical(other.form, form) || other.form == form)&&const DeepCollectionEquality().equals(other.fields, _fields)&&const DeepCollectionEquality().equals(other.conflicts, _conflicts)&&(identical(other.current, current) || other.current == current)&&(identical(other.candidate, candidate) || other.candidate == candidate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStudioResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other.profile, _profile)&&const DeepCollectionEquality().equals(other.scenario, _scenario)&&(identical(other.info, info) || other.info == info)&&const DeepCollectionEquality().equals(other.errors, _errors)&&const DeepCollectionEquality().equals(other.warnings, _warnings)&&const DeepCollectionEquality().equals(other.endpoints, _endpoints)&&(identical(other.form, form) || other.form == form)&&const DeepCollectionEquality().equals(other.fields, _fields)&&const DeepCollectionEquality().equals(other.conflicts, _conflicts)&&(identical(other.current, current) || other.current == current)&&(identical(other.candidate, candidate) || other.candidate == candidate)&&const DeepCollectionEquality().equals(other.countries, _countries)&&const DeepCollectionEquality().equals(other.items, _items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,text,const DeepCollectionEquality().hash(_profile),const DeepCollectionEquality().hash(_scenario),info,const DeepCollectionEquality().hash(_errors),const DeepCollectionEquality().hash(_warnings),const DeepCollectionEquality().hash(_endpoints),form,const DeepCollectionEquality().hash(_fields),const DeepCollectionEquality().hash(_conflicts),current,candidate);
+    return Object.hash(runtimeType,text,const DeepCollectionEquality().hash(_profile),const DeepCollectionEquality().hash(_scenario),info,const DeepCollectionEquality().hash(_errors),const DeepCollectionEquality().hash(_warnings),const DeepCollectionEquality().hash(_endpoints),form,const DeepCollectionEquality().hash(_fields),const DeepCollectionEquality().hash(_conflicts),current,candidate,const DeepCollectionEquality().hash(_countries),const DeepCollectionEquality().hash(_items));
 }
 
 @override
 String toString() {
-    return 'RcxStudioResult(text: $text, profile: $profile, scenario: $scenario, info: $info, errors: $errors, warnings: $warnings, endpoints: $endpoints, form: $form, fields: $fields, conflicts: $conflicts, current: $current, candidate: $candidate)';
+    return 'RcxStudioResult(text: $text, profile: $profile, scenario: $scenario, info: $info, errors: $errors, warnings: $warnings, endpoints: $endpoints, form: $form, fields: $fields, conflicts: $conflicts, current: $current, candidate: $candidate, countries: $countries, items: $items)';
 }
 
 
@@ -8031,7 +8659,7 @@ abstract mixin class _$RcxStudioResultCopyWith<$Res> implements $RcxStudioResult
   factory _$RcxStudioResultCopyWith(_RcxStudioResult value, $Res Function(_RcxStudioResult) _then) = __$RcxStudioResultCopyWithImpl;
 @override @useResult
 $Res call({
- String text, Map<String, Object?>? profile, Map<String, Object?>? scenario, RcxProfileInfo? info, List<RcxIssue> errors, List<RcxIssue> warnings, List<RcxEndpoint> endpoints, RcxCondForm? form, List<RcxField> fields, List<String> conflicts, RcxDecision? current, RcxDecision? candidate
+ String text, Map<String, Object?>? profile, Map<String, Object?>? scenario, RcxProfileInfo? info, List<RcxIssue> errors, List<RcxIssue> warnings, List<RcxEndpoint> endpoints, RcxCondForm? form, List<RcxField> fields, List<String> conflicts, RcxDecision? current, RcxDecision? candidate, List<RcxCountry> countries, List<RcxBundleItem> items
 });
 
 
@@ -8048,7 +8676,7 @@ class __$RcxStudioResultCopyWithImpl<$Res>
 
 /// Create a copy of RcxStudioResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? profile = freezed,Object? scenario = freezed,Object? info = freezed,Object? errors = null,Object? warnings = null,Object? endpoints = null,Object? form = freezed,Object? fields = null,Object? conflicts = null,Object? current = freezed,Object? candidate = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? profile = freezed,Object? scenario = freezed,Object? info = freezed,Object? errors = null,Object? warnings = null,Object? endpoints = null,Object? form = freezed,Object? fields = null,Object? conflicts = null,Object? current = freezed,Object? candidate = freezed,Object? countries = null,Object? items = null,}) {
   return _then(_RcxStudioResult(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self._profile : profile // ignore: cast_nullable_to_non_nullable
@@ -8062,7 +8690,9 @@ as RcxCondForm?,fields: null == fields ? _self._fields : fields // ignore: cast_
 as List<RcxField>,conflicts: null == conflicts ? _self._conflicts : conflicts // ignore: cast_nullable_to_non_nullable
 as List<String>,current: freezed == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
 as RcxDecision?,candidate: freezed == candidate ? _self.candidate : candidate // ignore: cast_nullable_to_non_nullable
-as RcxDecision?,
+as RcxDecision?,countries: null == countries ? _self._countries : countries // ignore: cast_nullable_to_non_nullable
+as List<RcxCountry>,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
+as List<RcxBundleItem>,
   ));
 }
 
@@ -8115,6 +8745,561 @@ $RcxDecisionCopyWith<$Res>? get candidate {
     return _then(_self.copyWith(candidate: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$RcxCountry {
+
+ String get code; int get count; bool get verified;
+/// Create a copy of RcxCountry
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxCountryCopyWith<RcxCountry> get copyWith => _$RcxCountryCopyWithImpl<RcxCountry>(this as RcxCountry, _$identity);
+
+  /// Serializes this RcxCountry to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxCountry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCountry&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.count, _this.count) || other.count == _this.count)&&(identical(other.verified, _this.verified) || other.verified == _this.verified));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxCountry;
+  return Object.hash(runtimeType,_this.code,_this.count,_this.verified);
+}
+
+@override
+String toString() {
+  final _this = this as RcxCountry;
+  return 'RcxCountry(code: ${_this.code}, count: ${_this.count}, verified: ${_this.verified})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxCountryCopyWith<$Res>  {
+  factory $RcxCountryCopyWith(RcxCountry value, $Res Function(RcxCountry) _then) = _$RcxCountryCopyWithImpl;
+@useResult
+$Res call({
+ String code, int count, bool verified
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxCountryCopyWithImpl<$Res>
+    implements $RcxCountryCopyWith<$Res> {
+  _$RcxCountryCopyWithImpl(this._self, this._then);
+
+  final RcxCountry _self;
+  final $Res Function(RcxCountry) _then;
+
+/// Create a copy of RcxCountry
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? count = null,Object? verified = null,}) {
+  return _then(RcxCountry(
+code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxCountry].
+extension RcxCountryPatterns on RcxCountry {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxCountry value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxCountry() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxCountry value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCountry():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxCountry value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCountry() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  int count,  bool verified)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxCountry() when $default != null:
+return $default(_that.code,_that.count,_that.verified);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  int count,  bool verified)  $default,) {final _that = this;
+switch (_that) {
+case _RcxCountry():
+return $default(_that.code,_that.count,_that.verified);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  int count,  bool verified)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxCountry() when $default != null:
+return $default(_that.code,_that.count,_that.verified);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxCountry implements RcxCountry {
+  const _RcxCountry({required this.code, this.count = 0, this.verified = false});
+  factory _RcxCountry.fromJson(Map<String, dynamic> json) => _$RcxCountryFromJson(json);
+
+@override final  String code;
+@override@JsonKey() final  int count;
+@override@JsonKey() final  bool verified;
+
+/// Create a copy of RcxCountry
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxCountryCopyWith<_RcxCountry> get copyWith => __$RcxCountryCopyWithImpl<_RcxCountry>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxCountryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCountry&&(identical(other.code, code) || other.code == code)&&(identical(other.count, count) || other.count == count)&&(identical(other.verified, verified) || other.verified == verified));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,code,count,verified);
+}
+
+@override
+String toString() {
+    return 'RcxCountry(code: $code, count: $count, verified: $verified)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxCountryCopyWith<$Res> implements $RcxCountryCopyWith<$Res> {
+  factory _$RcxCountryCopyWith(_RcxCountry value, $Res Function(_RcxCountry) _then) = __$RcxCountryCopyWithImpl;
+@override @useResult
+$Res call({
+ String code, int count, bool verified
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxCountryCopyWithImpl<$Res>
+    implements _$RcxCountryCopyWith<$Res> {
+  __$RcxCountryCopyWithImpl(this._self, this._then);
+
+  final _RcxCountry _self;
+  final $Res Function(_RcxCountry) _then;
+
+/// Create a copy of RcxCountry
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? code = null,Object? count = null,Object? verified = null,}) {
+  return _then(_RcxCountry(
+code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,verified: null == verified ? _self.verified : verified // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxBundleItem {
+
+ String get kind; String get name; String get title; String get text;
+/// Create a copy of RcxBundleItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxBundleItemCopyWith<RcxBundleItem> get copyWith => _$RcxBundleItemCopyWithImpl<RcxBundleItem>(this as RcxBundleItem, _$identity);
+
+  /// Serializes this RcxBundleItem to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxBundleItem;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxBundleItem&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.text, _this.text) || other.text == _this.text));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxBundleItem;
+  return Object.hash(runtimeType,_this.kind,_this.name,_this.title,_this.text);
+}
+
+@override
+String toString() {
+  final _this = this as RcxBundleItem;
+  return 'RcxBundleItem(kind: ${_this.kind}, name: ${_this.name}, title: ${_this.title}, text: ${_this.text})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxBundleItemCopyWith<$Res>  {
+  factory $RcxBundleItemCopyWith(RcxBundleItem value, $Res Function(RcxBundleItem) _then) = _$RcxBundleItemCopyWithImpl;
+@useResult
+$Res call({
+ String kind, String name, String title, String text
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxBundleItemCopyWithImpl<$Res>
+    implements $RcxBundleItemCopyWith<$Res> {
+  _$RcxBundleItemCopyWithImpl(this._self, this._then);
+
+  final RcxBundleItem _self;
+  final $Res Function(RcxBundleItem) _then;
+
+/// Create a copy of RcxBundleItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? name = null,Object? title = null,Object? text = null,}) {
+  return _then(RcxBundleItem(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxBundleItem].
+extension RcxBundleItemPatterns on RcxBundleItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxBundleItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxBundleItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxBundleItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxBundleItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxBundleItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxBundleItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String kind,  String name,  String title,  String text)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxBundleItem() when $default != null:
+return $default(_that.kind,_that.name,_that.title,_that.text);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String kind,  String name,  String title,  String text)  $default,) {final _that = this;
+switch (_that) {
+case _RcxBundleItem():
+return $default(_that.kind,_that.name,_that.title,_that.text);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String kind,  String name,  String title,  String text)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxBundleItem() when $default != null:
+return $default(_that.kind,_that.name,_that.title,_that.text);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxBundleItem implements RcxBundleItem {
+  const _RcxBundleItem({this.kind = '', required this.name, this.title = '', required this.text});
+  factory _RcxBundleItem.fromJson(Map<String, dynamic> json) => _$RcxBundleItemFromJson(json);
+
+@override@JsonKey() final  String kind;
+@override final  String name;
+@override@JsonKey() final  String title;
+@override final  String text;
+
+/// Create a copy of RcxBundleItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxBundleItemCopyWith<_RcxBundleItem> get copyWith => __$RcxBundleItemCopyWithImpl<_RcxBundleItem>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxBundleItemToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxBundleItem&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.name, name) || other.name == name)&&(identical(other.title, title) || other.title == title)&&(identical(other.text, text) || other.text == text));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,kind,name,title,text);
+}
+
+@override
+String toString() {
+    return 'RcxBundleItem(kind: $kind, name: $name, title: $title, text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxBundleItemCopyWith<$Res> implements $RcxBundleItemCopyWith<$Res> {
+  factory _$RcxBundleItemCopyWith(_RcxBundleItem value, $Res Function(_RcxBundleItem) _then) = __$RcxBundleItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String kind, String name, String title, String text
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxBundleItemCopyWithImpl<$Res>
+    implements _$RcxBundleItemCopyWith<$Res> {
+  __$RcxBundleItemCopyWithImpl(this._self, this._then);
+
+  final _RcxBundleItem _self;
+  final $Res Function(_RcxBundleItem) _then;
+
+/// Create a copy of RcxBundleItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? name = null,Object? title = null,Object? text = null,}) {
+  return _then(_RcxBundleItem(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 // dart format on

@@ -1,15 +1,15 @@
 {
   "rcxTitle": "Auto routing",
-  "rcxMakeSmart": "Make this group smart",
+  "rcxMakeSmart": "Turn on auto routing",
   "rcxMakeSmartHint": "ReClash keeps a working server selected in this group and switches when it fails. Checks run only while you use the network.",
-  "rcxTurnOff": "Turn off auto routing",
+  "rcxTurnOff": "Turn off auto routing for this group",
   "rcxChangeServer": "Change server",
   "rcxBackToAuto": "Back to auto",
   "rcxControl": "Control",
   "rcxModeAuto": "Auto",
-  "rcxModeAutoHint": "Chooses and switches servers by the profile",
+  "rcxModeAutoHint": "Picks the best working server in the server order and switches when it fails.",
   "rcxModeManual": "Manual",
-  "rcxModeManualHint": "You choose; auto routing never switches",
+  "rcxModeManualHint": "You pick the server in the proxies list; auto routing never switches it.",
   "rcxPinned": "Pinned: {node}",
   "@rcxPinned": {
     "placeholders": {
@@ -19,7 +19,6 @@
     }
   },
   "rcxPinnedLabel": "Pinned",
-  "rcxPinnedHint": "Left only when it fails, returned to when it recovers",
   "rcxProfile": "Profile",
   "rcxSourceBuiltin": "Built-in",
   "rcxSourceProvider": "From provider",
@@ -266,10 +265,6 @@
   "rcxAddTag": "Add tag",
   "@rcxAddTag": {
     "description": "Row: add a named server filter (tag) to a routing profile"
-  },
-  "rcxAddTier": "Add tier",
-  "@rcxAddTier": {
-    "description": "Row/title: add a preference tier to a routing profile"
   },
   "rcxAdvanced": "Advanced",
   "@rcxAdvanced": {
@@ -560,10 +555,6 @@
   "@rcxLastResort": {
     "description": "Switch/label: tier used only when better tiers are empty"
   },
-  "rcxLastResortHint": "A last-resort tier is used only when no better tier has a server.",
-  "@rcxLastResortHint": {
-    "description": "Footer"
-  },
   "rcxLevel": "Level",
   "@rcxLevel": {
     "description": "Row: simple or advanced"
@@ -657,14 +648,6 @@
       }
     }
   },
-  "rcxMoveDown": "Move down",
-  "@rcxMoveDown": {
-    "description": "Menu"
-  },
-  "rcxMoveUp": "Move up",
-  "@rcxMoveUp": {
-    "description": "Menu"
-  },
   "rcxNeedsConsent": "Needs your permission",
   "@rcxNeedsConsent": {
     "description": "Subtitle/reason"
@@ -757,25 +740,9 @@
   "@rcxThirdParty": {
     "description": "Lowercase marker on a host"
   },
-  "rcxTier": "Tier",
-  "@rcxTier": {
-    "description": "Title"
-  },
   "rcxTierLabel": "Label",
   "@rcxTierLabel": {
     "description": "Row"
-  },
-  "rcxTierWhen": "Servers in this tier",
-  "@rcxTierWhen": {
-    "description": "Row: the tier's condition"
-  },
-  "rcxTiers": "Preference order",
-  "@rcxTiers": {
-    "description": "Section title: ordered tiers"
-  },
-  "rcxTiersHint": "A server lands in the first tier it fits; the best tier with servers wins. Long press to reorder.",
-  "@rcxTiersHint": {
-    "description": "Footer"
   },
   "rcxTranslations": "Translations",
   "@rcxTranslations": {
@@ -941,5 +908,258 @@
   "rcxScenarioOff": "Off",
   "rcxScenarios": "Scenarios",
   "rcxScenariosHint": "A scenario drives the whole connection. Tap one of yours to edit it, any other to edit a copy.",
-  "rcxSmartGroups": "Smart groups"
+  "rcxSmartGroups": "Smart groups",
+  "rcxHubOverview": "Overview",
+  "rcxHubRoutes": "Routes",
+  "rcxHubLibrary": "Library",
+  "rcxHubAuto": "Auto routing",
+  "rcxHubOffHint": "Turn on to let a scenario pick servers for your groups and routes.",
+  "rcxHubChange": "Change",
+  "rcxHubNoProfile": "No subscription",
+  "rcxHubNoProfileHint": "Add a subscription first; auto routing works with its groups.",
+  "rcxHubNeedsCore": "Start the connection to see auto routing",
+  "rcxHubGroupsEmpty": "No group is driven by auto routing yet.",
+  "rcxHubCopyTitle": "Make your own copy?",
+  "rcxHubCopyMessage": "“{title}” is not yours to change. Your edits go to a copy, and the copy becomes the running scenario.",
+  "@rcxHubCopyMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxHubCopyConfirm": "Make a copy",
+  "rcxHubRoutesOff": "No scenario is running",
+  "rcxHubRoutesOffHint": "Routes send chosen traffic, such as one service, through its own servers.",
+  "rcxHubStartScenario": "Start a scenario",
+  "rcxHubOtherGroups": "Other groups",
+  "rcxHubOtherGroupsHint": "Groups of the subscription this scenario also drives.",
+  "rcxHubRoutesHint": "Traffic takes the first route it matches, top to bottom.",
+  "rcxHubRoutesRuleOnly": "Routes apply in rule mode; the connection is in {mode} mode now.",
+  "@rcxHubRoutesRuleOnly": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxHubEverythingElse": "Everything else",
+  "rcxHubEverythingElseHint": "Traffic no route matched goes through the subscription’s main group.",
+  "rcxHubNetworks": "Networks",
+  "rcxHubNetworksTitle": "Mode and networks",
+  "rcxHubDescriptionHint": "What this scenario does",
+  "rcxHubBundle": "In this file",
+  "rcxRouteNew": "New route",
+  "rcxRouteAdd": "Add route",
+  "rcxRouteName": "Name",
+  "rcxRouteNameLong": "The name is too long",
+  "rcxRouteNameReserved": "This name is reserved",
+  "rcxRouteSend": "Send through",
+  "rcxRouteSendFixed": "One server",
+  "rcxRouteSendAutoHint": "The route’s own group picks the best server in the order below.",
+  "rcxRouteSendDirectHint": "This traffic bypasses the proxy.",
+  "rcxRouteSendFixedHint": "This traffic always goes through the chosen server or group.",
+  "rcxRouteTarget": "Server",
+  "rcxRouteChoose": "Choose",
+  "rcxOwnProfileHint": "The group keeps the behaviour set in its own settings.",
+  "rcxMatchServices": "Services",
+  "rcxMatchCustom": "Custom",
+  "rcxMatchHint": "Domains, IP ranges, apps or rule sets this route also takes.",
+  "rcxMatchAdd": "Add entry",
+  "rcxMatchNone": "No traffic chosen",
+  "rcxMatchMore": "{name} and {count} more",
+  "@rcxMatchMore": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxMatchNext": "Next",
+  "rcxMatchPickHint": "Pick the services this route takes; you can add your own entries too.",
+  "rcxMatchType": "Type",
+  "rcxMatchValue": "Value",
+  "rcxMatchTypeHint": "A domain suffix also covers every subdomain.",
+  "rcxMatchNoResolve": "Don’t resolve domains",
+  "rcxMatchInvalid": "Invalid value",
+  "rcxMatchDomain": "Domain",
+  "rcxMatchSuffix": "Domain and subdomains",
+  "rcxMatchKeyword": "Domain keyword",
+  "rcxMatchGeosite": "Site category",
+  "rcxMatchGeoip": "IP category",
+  "rcxMatchCidr": "IP range",
+  "rcxMatchProcess": "App",
+  "rcxMatchRuleSet": "Rule set",
+  "rcxCountryPickMany": "Choose countries",
+  "rcxCountryPickOne": "Choose a country",
+  "rcxCountryServers": "{count, plural, one{{count} server} other{{count} servers}}",
+  "@rcxCountryServers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxCountryVerified": "verified",
+  "rcxCountryOnServers": "On your servers",
+  "rcxCountryAll": "All countries",
+  "rcxLadderTitle": "Server order",
+  "rcxLadderAdd": "Add a step",
+  "rcxLadderStep": "Step {number}",
+  "@rcxLadderStep": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxLadderFallThrough": "if none of them works",
+  "rcxLadderInherited": "From the behaviour — edit a step to make the order your own",
+  "rcxLadderEmptyHint": "Add steps to prefer some servers over others",
+  "rcxLadderStranded": "If no step has a working server: {action}",
+  "@rcxLadderStranded": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxLadderNameHas": "{text} in name",
+  "@rcxLadderNameHas": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxLadderNot": "not {what}",
+  "@rcxLadderNot": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxLadderProvider": "from {provider}",
+  "@rcxLadderProvider": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxLadderTag": "tag {tag}",
+  "@rcxLadderTag": {
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxLadderUdp": "UDP",
+  "rcxLadderLatency": "under {ms} ms",
+  "@rcxLadderLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxLadderAnyWorking": "Any working server",
+  "rcxLadderServersIn": "Servers in this step",
+  "rcxLadderNameContains": "Name contains",
+  "rcxLadderCountry": "Country",
+  "rcxLadderExceptCountries": "All but these countries",
+  "rcxLadderAdvanced": "Advanced condition…",
+  "rcxLadderOther": "Other conditions",
+  "rcxLadderLatencyUnder": "Latency under, ms",
+  "rcxLadderFits": "{count, plural, one{{count} server fits now} other{{count} servers fit now}}",
+  "@rcxLadderFits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxLadderLastResortHint": "Servers in a last-resort step are used only when no other step has a working server, even a step below it.",
+  "rcxCondCountry": "Country",
+  "rcxCondLess": "is under",
+  "rcxCondAtMost": "is at most",
+  "rcxCondMore": "is over",
+  "rcxCondAtLeast": "is at least",
+  "rcxModePinnedHint": "Stays on {node}; leaves it only when it fails and comes back when it recovers.",
+  "@rcxModePinnedHint": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxTurnOffHint": "The group keeps its current server and stops switching on its own.",
+  "rcxWouldDo": "With auto routing on",
+  "rcxWouldServers": "{count, plural, one{It chooses from the {count} server of this group.} other{It chooses among the {count} servers of this group.}}",
+  "@rcxWouldServers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxGroupSettings": "Group settings",
+  "rcxSettingsLink": "Auto routing settings",
+  "rcxSettingsLinkHint": "Profiles, scenarios and routes",
+  "rcxRouteGroup": "Made by a route",
+  "rcxRouteGroupHint": "A route in the scenario «{scenario}» created this group. Edit or remove it there.",
+  "@rcxRouteGroupHint": {
+    "placeholders": {
+      "scenario": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxRouteEdit": "Edit the route",
+  "rcxReasonRouteNameTaken": "The route «{route}» was skipped: a group with its name already exists.",
+  "@rcxReasonRouteNameTaken": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxReasonRouteToMissing": "The route «{route}» sends traffic to «{to}», which is not in the profile.",
+  "@rcxReasonRouteToMissing": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxReasonRouteInvalid": "The route «{route}» could not be applied: {error}",
+  "@rcxReasonRouteInvalid": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rcxWhyCount": "{count, plural, one{{count} server compared} other{{count} servers compared}}",
+  "@rcxWhyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rcxLadderGroupHint": "This order is for this group only. Leave it empty to follow the profile’s order.",
+  "rcxLadderScenarioFirst": "A scenario drives this group now: a server order the scenario gives it comes before this one.",
+  "rcxProfileDescriptionHint": "What this profile does"
 }

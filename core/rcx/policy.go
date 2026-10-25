@@ -111,6 +111,8 @@ type Tier struct {
 	Label      string
 	When       *Cond
 	LastResort bool
+	// Source is the step's place in the profile's prefer list.
+	Source int
 }
 
 // ProfileInfo is one entry of the chooser.
@@ -118,12 +120,13 @@ type ProfileInfo struct {
 	ID string `json:"id"`
 	// Kind is "scenario" for the connection-wide auto control, empty for a
 	// group profile.
-	Kind    string `json:"kind,omitempty"`
-	Title   string `json:"title"`
-	Level   string `json:"level"`
-	Source  string `json:"source"`
-	Extends string `json:"extends,omitempty"`
-	Error   string `json:"error,omitempty"`
+	Kind        string `json:"kind,omitempty"`
+	Title       string `json:"title"`
+	Description string `json:"description,omitempty"`
+	Level       string `json:"level"`
+	Source      string `json:"source"`
+	Extends     string `json:"extends,omitempty"`
+	Error       string `json:"error,omitempty"`
 	// L10n is resolved through extends, so a fork keeps its base's text.
 	L10n map[string]map[string]string `json:"l10n,omitempty"`
 	// Consent lists the third-party hosts the user must allow before this
@@ -188,7 +191,7 @@ func NewLibrary(sub SubscriptionLayer, user UserLayer) *Library {
 		}
 		entry.info.L10n = entry.profile.L10n
 		if resolved, err := lib.Resolve(id); err == nil {
-			entry.info.L10n = resolved.L10n
+			entry.info.L10n, entry.info.Description = resolved.L10n, resolved.Description
 		}
 		var consent *ConsentError
 		if errors.As(lib.consent(id), &consent) {
@@ -206,7 +209,7 @@ func (lib *Library) add(id, source string, data []byte, profile *Profile, err er
 		if profile.Title != "" {
 			entry.info.Title = profile.Title
 		}
-		entry.info.Level = profile.Level
+		entry.info.Level, entry.info.Description = profile.Level, profile.Description
 		entry.info.Extends = profile.Extends
 	}
 	if err != nil {
@@ -283,7 +286,7 @@ func (lib *Library) addScenario(id, source string, data []byte) {
 		return
 	}
 	entry.scenario = s
-	entry.info.Title, entry.info.L10n = cmp.Or(s.Title, id), s.L10n
+	entry.info.Title, entry.info.Description, entry.info.L10n = cmp.Or(s.Title, id), s.Description, s.L10n
 	if _, err := lib.compileScenario(id, s); err != nil {
 		entry.info.Error = err.Error()
 	}
@@ -384,6 +387,9 @@ func mergeProfile(base, child *Profile) *Profile {
 	if child.Title != "" {
 		out.Title = child.Title
 	}
+	if child.Description != "" {
+		out.Description = child.Description
+	}
 	if child.Level != "" {
 		out.Level = child.Level
 	}
@@ -483,10 +489,24 @@ func narrowPool(base, child Pool) Pool {
 
 // Compile builds the policy a group runs: its profile with the binding's
 // narrowing and slider choices on top.
+//
+// A program's or binding's server order stands in for the profile's own
+// base tiers; a network override that sets its own order still wins on its
+// network, since it says which servers work there at all.
 func (lib *Library) Compile(id string, binding Binding) (*Policy, error) {
 	profile, err := lib.Resolve(id)
 	if err != nil {
 		return nil, err
+	}
+	order := binding.prefer
+	if len(order) == 0 {
+		order = binding.Prefer
+	}
+	if len(order) > 0 {
+		if len(order) > maxTiers {
+			return nil, atPath(fmt.Errorf("more than %d preference tiers", maxTiers), "prefer")
+		}
+		profile = mergeProfile(profile, &Profile{Prefer: order})
 	}
 	if err := lib.consent(id); err != nil {
 		return nil, err
@@ -584,8 +604,18 @@ func compileProfile(id string, profile *Profile) (*Policy, error) {
 		if label == "" {
 			label = fmt.Sprintf("Tier %d", i+1)
 		}
-		policy.Tiers = append(policy.Tiers, Tier{Label: label, When: when, LastResort: spec.LastResort})
+		policy.Tiers = append(policy.Tiers, Tier{Label: label, When: when, LastResort: spec.LastResort, Source: i})
 	}
+	// A last-resort step yields to every other step, even one below it.
+	slices.SortStableFunc(policy.Tiers, func(a, b Tier) int {
+		switch {
+		case a.LastResort == b.LastResort:
+			return 0
+		case a.LastResort:
+			return 1
+		}
+		return -1
+	})
 	if len(policy.Tiers) == 0 {
 		when, _ := ParseCond("not dead", nil)
 		policy.Tiers = []Tier{{Label: "Working", When: when}}

@@ -276,12 +276,12 @@ func TestLoadSetupConfigReadsConfigYamlWithoutABase(t *testing.T) {
 		t.Fatalf("write config: %v", err)
 	}
 
-	cfg, err := loadSetupConfig(defaultSetupParams())
+	load, err := loadSetupConfig(defaultSetupParams())
 
 	if err != nil {
 		t.Fatalf("loadSetupConfig = %v", err)
 	}
-	if got := ruleStrings(cfg); !reflect.DeepEqual(got, []string{"Match,,REJECT"}) {
+	if got := ruleStrings(load.cfg); !reflect.DeepEqual(got, []string{"Match,,REJECT"}) {
 		t.Errorf("rules = %v, want config.yaml's", got)
 	}
 }

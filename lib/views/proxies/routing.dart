@@ -8,31 +8,62 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
+import 'package:reclash/views/config/routing.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import 'routing_country.dart';
+import 'routing_ladder.dart';
+import 'routing_studio.dart';
 
 const _whyRows = 8;
 const _historyRows = 20;
 const _maxFlagChips = 8;
 
 /// The sheet holds its own pages, so the profile chooser opens inside it.
+/// Opened from the auto-routing settings, its link back only closes it.
 Future<void> showRoutingSheet(BuildContext context, String groupName) {
+  final fromHub =
+      context.findAncestorWidgetOfExactType<RoutingSettingsView>() != null;
   return showSheet<void>(
     context: context,
     props: nestedPagedSheetProps,
-    builder: (_) =>
-        NestedPagedSheet(builder: (_) => RoutingSheet(groupName: groupName)),
+    builder: (sheetContext) => NestedPagedSheet(
+      builder: (_) => RoutingSheet(
+        groupName: groupName,
+        onOpenSettings: () {
+          Navigator.of(sheetContext).pop();
+          if (!fromHub && context.mounted) {
+            unawaited(
+              BaseNavigator.push<void>(context, const RoutingSettingsView()),
+            );
+          }
+        },
+        onOpenRoute: () {
+          Navigator.of(sheetContext).pop();
+          if (context.mounted) {
+            RoutingSettingsView.showRoute(context, groupName);
+          }
+        },
+      ),
+    ),
   );
 }
 
-/// One smart group at a glance: what it holds and why, quick pools, which
-/// profile it runs, and manual control. Profiles and scenarios are made and
-/// edited in the auto-routing settings, not here.
+/// One smart group: what it holds and why, how it is controlled, where it
+/// may change to, how it picks, and its own settings.
 class RoutingSheet extends ConsumerStatefulWidget {
-  const RoutingSheet({super.key, required this.groupName});
+  const RoutingSheet({
+    super.key,
+    required this.groupName,
+    this.onOpenSettings,
+    this.onOpenRoute,
+  });
 
   final String groupName;
+  final VoidCallback? onOpenSettings;
+  final VoidCallback? onOpenRoute;
 
   @override
   ConsumerState<RoutingSheet> createState() => _RoutingSheetState();
@@ -41,7 +72,11 @@ class RoutingSheet extends ConsumerStatefulWidget {
 class _RoutingSheetState extends ConsumerState<RoutingSheet> {
   RcxExplanation? _explanation;
   List<RcxJournalEntry> _journal = const [];
+  Map<String, Object?> _profileDoc = const {};
+  String? _profileId;
   bool _busy = false;
+  bool _whyOpen = false;
+  bool _historyOpen = false;
 
   RcxRoutingAction get _action => ref.read(rcxRoutingActionProvider.notifier);
 
@@ -49,9 +84,15 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
   void initState() {
     super.initState();
     unawaited(_load());
+    unawaited(
+      _loadProfile(ref.read(rcxGroupProvider(widget.groupName))?.profile),
+    );
     ref.listenManual(rcxGroupProvider(widget.groupName), (previous, next) {
       if (previous?.decision != next?.decision || previous?.now != next?.now) {
         unawaited(_load());
+      }
+      if (previous?.profile != next?.profile) {
+        unawaited(_loadProfile(next?.profile));
       }
     });
   }
@@ -69,6 +110,24 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
     });
   }
 
+  /// The group's profile as a document: its server order is what the
+  /// group's own order replaces, and its tags are what steps may name.
+  Future<void> _loadProfile(String? id) async {
+    if (id == null || id.isEmpty || id == _profileId) return;
+    _profileId = id;
+    final source = await _action.studio({'op': 'source', 'id': id});
+    final text = source?.text ?? '';
+    final lint = text.isEmpty
+        ? null
+        : await _action.studio({'op': 'lint', 'text': text, 'id': id});
+    if (!mounted || _profileId != id) return;
+    setState(() => _profileDoc = lint?.profile ?? const {});
+  }
+
+  List<Map<String, Object?>> get _inherited => [
+    for (final step in rcxList(_profileDoc['prefer'])) rcxMap(step),
+  ];
+
   Future<void> _run(Future<void> Function() work) async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -81,13 +140,6 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
 
   RcxBinding _bindingOf(RcxGroupStatus? group) =>
       rcxSavedBinding(ref, widget.groupName, group);
-
-  Future<void> _updateBinding(RcxBinding Function(RcxBinding) update) {
-    final group = ref.read(rcxGroupProvider(widget.groupName));
-    return _run(
-      () => _action.setBinding(widget.groupName, update(_bindingOf(group))),
-    );
-  }
 
   Future<void> _pickPool(RcxGroupStatus group, RcxChip? chip) {
     return _run(() async {
@@ -146,14 +198,18 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
   }
 
   Future<void> _removePool(RcxGroupStatus group, RcxChip chip) {
-    return _updateBinding(
-      (b) => b.copyWith(
-        chips: b.chips.where((c) => c != chip).toList(),
-        pool: b.pool.include == chip.include
-            ? b.pool.copyWith(include: null)
-            : b.pool,
-      ),
-    );
+    return _run(() {
+      final binding = _bindingOf(group);
+      return _action.setBinding(
+        widget.groupName,
+        binding.copyWith(
+          chips: binding.chips.where((c) => c != chip).toList(),
+          pool: binding.pool.include == chip.include
+              ? binding.pool.copyWith(include: null)
+              : binding.pool,
+        ),
+      );
+    });
   }
 
   Future<void> _act(RcxAction action, {String? node}) {
@@ -163,13 +219,43 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
     });
   }
 
+  void _setControl(RcxGroupStatus group, String mode) {
+    switch (mode) {
+      case 'pinned' when group.now.isNotEmpty:
+        unawaited(_act(RcxAction.pin, node: group.now));
+      case 'manual':
+        unawaited(_act(RcxAction.manual));
+      case 'auto':
+        unawaited(_act(RcxAction.auto));
+    }
+  }
+
+  Future<void> _enable() {
+    return _run(
+      () => _action.setBinding(
+        widget.groupName,
+        const RcxBinding(profile: rcxDefaultProfile),
+      ),
+    );
+  }
+
+  void _openLadder() {
+    unawaited(
+      showInSheet<void>(
+        context,
+        builder: (_) => _GroupLadderPage(
+          groupName: widget.groupName,
+          inherited: _inherited,
+          scope: _profileDoc,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final group = ref.watch(rcxGroupProvider(widget.groupName));
-    final scenario = ref.watch(
-      rcxStatusStateProvider.select((status) => status?.scenario),
-    );
     final problems = ref.watch(
       rcxStatusStateProvider.select(
         (status) => status?.problems ?? const <RcxReason>[],
@@ -187,112 +273,213 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
         ? direct
         : [for (final row in ranking) row.name];
     return CommonScaffold(
-      title: l.rcxTitle,
+      title: widget.groupName,
       body: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
         ).copyWith(top: context.contentTopPadding, bottom: 20),
-        children: group == null
-            ? [_Intro(busy: _busy, onEnable: _enable)]
-            : [
-                for (final problem in problems)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      rcxReasonText(l, problem, own: own),
-                      style: AppTextStyle.footnote
-                          .of(context)
-                          .copyWith(color: context.colorScheme.error),
+        children: [
+          AnimatedEntries(
+            children: group == null
+                ? [
+                    _Intro(
+                      key: const ValueKey('intro'),
+                      groupName: widget.groupName,
+                      busy: _busy,
+                      onEnable: _enable,
                     ),
-                  ),
-                if (group.problem case RcxReason(
-                  code: 'profile.consent',
-                  :final args,
-                ))
-                  RoutingConsentSection(
-                    hosts: [
-                      for (final host in args['hosts'] as List? ?? const [])
-                        '$host',
-                    ],
-                    title: own(group.profileTitle),
-                  ),
-                _StatusSection(
-                  group: group,
-                  own: own,
-                  busy: _busy,
-                  onChange: () => _act(RcxAction.change),
-                  onAuto: () => _act(RcxAction.auto),
-                ),
-                if (group.fixed.isEmpty)
-                  _ChangeToSection(
-                    group: group,
-                    names: names,
-                    enabled: !_busy && !group.control.isManual,
-                    onPick: (chip) => _pickPool(group, chip),
-                    onAdd: (names) => _addPool(group, names),
-                    onRemove: (chip) => _removePool(group, chip),
-                  ),
-                _profileSection(l, group, scenario, library, locale),
-                _modeSection(l, group),
-                _whySection(l, own),
-                if (_journal.isNotEmpty) _historySection(l),
-                if (group.source == 'user')
-                  generateSection(
-                    items: [
-                      DecorationListItem(
-                        title: Text(l.rcxTurnOff),
-                        onPressed: _busy
-                            ? null
-                            : () => _run(
-                                () =>
-                                    _action.setBinding(widget.groupName, null),
-                              ),
-                      ),
-                    ],
-                  ),
-              ],
+                  ]
+                : _sections(l, group, problems, own, names),
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _enable() {
-    return _run(
-      () => _action.setBinding(
-        widget.groupName,
-        const RcxBinding(profile: rcxDefaultProfile),
-      ),
-    );
-  }
-
-  /// The profile the group runs, chosen on a page of its own; while a
-  /// scenario names the group, what it set is said here too.
-  Widget _profileSection(
+  List<Widget> _sections(
     AppLocalizations l,
     RcxGroupStatus group,
-    RcxScenarioStatus? scenario,
-    List<RcxProfileInfo> library,
-    String locale,
+    List<RcxReason> problems,
+    String Function(String) own,
+    List<String> names,
   ) {
+    final control = group.control;
+    final onOpenSettings = widget.onOpenSettings;
+    return [
+      for (final (index, problem) in problems.indexed)
+        Padding(
+          key: ValueKey('problem-$index-${problem.code}'),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            rcxReasonText(l, problem, own: own),
+            style: AppTextStyle.footnote
+                .of(context)
+                .copyWith(color: context.colorScheme.error),
+          ),
+        ),
+      if (group.problem case RcxReason(code: 'profile.consent', :final args))
+        RoutingConsentSection(
+          key: const ValueKey('consent'),
+          hosts: [
+            for (final host in args['hosts'] as List? ?? const []) '$host',
+          ],
+          title: own(group.profileTitle),
+        ),
+      _StatusSection(
+        key: const ValueKey('status'),
+        group: group,
+        own: own,
+        busy: _busy,
+        onChange: () => _act(RcxAction.change),
+      ),
+      KeyedSubtree(
+        key: const ValueKey('control'),
+        child: generateSection(
+          title: l.rcxControl,
+          footer: switch (control.mode) {
+            'pinned' => l.rcxModePinnedHint(control.pinName),
+            'manual' => l.rcxModeManualHint,
+            _ => l.rcxModeAutoHint,
+          },
+          items: [
+            SegmentedControl<String>(
+              segments: [
+                ('auto', l.rcxModeAuto),
+                ('pinned', l.rcxPinnedLabel),
+                ('manual', l.rcxModeManual),
+              ],
+              value: control.mode,
+              onChanged: (mode) => _setControl(group, mode),
+            ),
+          ],
+        ),
+      ),
+      if (group.fixed.isEmpty)
+        _ChangeToSection(
+          key: const ValueKey('change-to'),
+          group: group,
+          names: names,
+          enabled: !_busy && !control.isManual,
+          onPick: (chip) => _pickPool(group, chip),
+          onAdd: (names) => _addPool(group, names),
+          onRemove: (chip) => _removePool(group, chip),
+        ),
+      KeyedSubtree(
+        key: const ValueKey('behaviour'),
+        child: _behaviourSection(l, group),
+      ),
+      if (_explanation?.decision.ranking case final ranking?
+          when ranking.isNotEmpty)
+        KeyedSubtree(
+          key: const ValueKey('why'),
+          child: _whySection(l, ranking, own),
+        ),
+      if (_journal.isNotEmpty)
+        KeyedSubtree(key: const ValueKey('history'), child: _historySection(l)),
+      if (onOpenSettings != null)
+        KeyedSubtree(
+          key: const ValueKey('settings-link'),
+          child: generateSection(
+            items: [
+              DecorationListItem(
+                leading: const GlyphIcon(AppGlyphs.shuffle),
+                title: Text(l.rcxSettingsLink),
+                subtitle: Text(l.rcxSettingsLinkHint),
+                onPressed: onOpenSettings,
+                trailing: const DisclosureIndicator(),
+              ),
+            ],
+          ),
+        ),
+      if (group.route)
+        KeyedSubtree(
+          key: const ValueKey('route'),
+          child: generateSection(
+            title: l.rcxRouteGroup,
+            items: [
+              DecorationListItem(
+                title: Text(l.rcxRouteEdit),
+                subtitle: EmojiText(l.rcxRouteGroupHint(_scenarioTitle())),
+                onPressed: widget.onOpenRoute,
+                trailing: widget.onOpenRoute == null
+                    ? null
+                    : const DisclosureIndicator(),
+              ),
+            ],
+          ),
+        )
+      else if (group.source == 'user')
+        KeyedSubtree(
+          key: const ValueKey('turn-off'),
+          child: generateSection(
+            footer: l.rcxTurnOffHint,
+            items: [
+              DecorationListItem(
+                title: Text(
+                  l.rcxTurnOff,
+                  style: TextStyle(color: context.colorScheme.error),
+                ),
+                onPressed: _busy
+                    ? null
+                    : () => _run(
+                        () => _action.setBinding(widget.groupName, null),
+                      ),
+              ),
+            ],
+          ),
+        ),
+    ];
+  }
+
+  String _scenarioTitle() {
+    final scenario = ref.read(rcxStatusStateProvider)?.scenario;
+    if (scenario == null) return '';
+    final library = ref.read(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
+    return library
+            .where((p) => p.isScenario && p.id == scenario.id)
+            .firstOrNull
+            ?.displayTitle(locale) ??
+        scenario.title;
+  }
+
+  /// How the group picks: its profile with what that does, its server
+  /// order, and its own settings. While a scenario names the group, what
+  /// the scenario set is said here too.
+  Widget _behaviourSection(AppLocalizations l, RcxGroupStatus group) {
+    final library = ref.watch(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
     final info = library.where((p) => p.id == group.profile).firstOrNull;
-    final byScenario = group.program.isNotEmpty && scenario != null;
-    final scenarioTitle = byScenario
-        ? library
-                  .where((p) => p.isScenario && p.id == scenario.id)
-                  .firstOrNull
-                  ?.displayTitle(locale) ??
-              scenario.title
-        : '';
+    final description = info == null
+        ? ''
+        : info.localize(info.description, locale);
+    final byScenario = group.program.isNotEmpty;
+    final saved = ref.watch(
+      currentRoutingLayerProvider.select(
+        (layer) => layer.groups[widget.groupName],
+      ),
+    );
+    final own = [for (final tier in saved?.prefer ?? const []) _stepOf(tier)];
+    final steps = own.isEmpty ? _inherited : own;
+    final binding = saved ?? group.binding;
+    final feel =
+        binding.feel ??
+        rcxMap(_profileDoc['switch'])['feel'] as String? ??
+        'balanced';
+    final energy =
+        binding.energy ?? _profileDoc['energy'] as String? ?? 'balanced';
+    final footer = [
+      if (byScenario) l.rcxScenarioDrives(_scenarioTitle()),
+      if (group.problem case final problem?
+          when problem.code != 'profile.consent')
+        rcxReasonText(l, problem),
+    ];
     return generateSection(
-      title: l.rcxProfile,
-      footer: [
-        if (byScenario) l.rcxScenarioDrives(scenarioTitle),
-        if (group.problem case final problem?
-            when problem.code != 'profile.consent')
-          rcxReasonText(l, problem),
-        l.rcxManageHint,
-      ].join('\n'),
+      title: l.rcxBehaviour,
+      footer: footer.isEmpty ? null : footer.join('\n'),
       items: [
         DecorationListItem(
+          invalid: group.problem != null,
           title: EmojiText(
             group.fixed.isNotEmpty
                 ? l.rcxFixedOn(group.fixed)
@@ -300,7 +487,10 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
           ),
           subtitle: Text(
             [
-              if (group.fixed.isEmpty) rcxLevelLabel(l, group.level),
+              if (description.isNotEmpty)
+                description
+              else if (group.fixed.isEmpty)
+                rcxLevelLabel(l, group.level),
               if (byScenario && group.program != group.name)
                 rcxProgramLabel(l, group.program),
             ].join(' · '),
@@ -309,55 +499,79 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
             context,
             builder: (_) => RoutingProfileChooser(groupName: widget.groupName),
           ),
-          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+          trailing: const DisclosureIndicator(),
         ),
-      ],
-    );
-  }
-
-  Widget _modeSection(AppLocalizations l, RcxGroupStatus group) {
-    final control = group.control;
-    return generateSection(
-      title: l.rcxControl,
-      items: [
-        SelectedDecorationListItem(
-          isSelected: control.mode == 'auto',
-          title: Text(l.rcxModeAuto),
-          subtitle: Text(l.rcxModeAutoHint),
-          onSelected: () => _act(RcxAction.auto),
-          onPressed: () => _act(RcxAction.auto),
-        ),
-        if (control.isPinned)
-          SelectedDecorationListItem(
-            isSelected: true,
-            title: EmojiText(l.rcxPinned(control.pinName)),
-            subtitle: Text(l.rcxPinnedHint),
-            onSelected: () {},
-            onPressed: () {},
-          ),
-        SelectedDecorationListItem(
-          isSelected: control.isManual,
-          title: Text(l.rcxModeManual),
-          subtitle: Text(l.rcxModeManualHint),
-          onSelected: () => _act(RcxAction.manual),
-          onPressed: () => _act(RcxAction.manual),
-        ),
-      ],
-    );
-  }
-
-  Widget _whySection(AppLocalizations l, String Function(String) own) {
-    final ranking = _explanation?.decision.ranking ?? const <RcxRanked>[];
-    return generateSection(
-      title: l.rcxWhy,
-      items: [
-        for (final row in ranking.take(_whyRows))
+        if (group.fixed.isEmpty)
           DecorationListItem(
-            isSelected: row.current,
-            title: EmojiText(row.name, maxLines: 1),
-            subtitle: EmojiText(_rowDetail(l, row, own)),
-            trailing: row.latencyMs > 0 ? Text('${row.latencyMs} ms') : null,
+            title: Text(l.rcxLadderTitle),
+            subtitle: EmojiText(
+              rcxLadderSummary(l, steps),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            onPressed: _openLadder,
+            trailing: const DisclosureIndicator(),
           ),
+        DecorationListItem(
+          title: Text(l.rcxGroupSettings),
+          subtitle: Text(
+            [
+              '${l.rcxSwitching}: ${rcxFeelLabel(l, feel)}',
+              '${l.rcxChecks}: ${rcxEnergyLabel(l, energy)}',
+            ].join(' · '),
+          ),
+          onPressed: () => showInSheet<void>(
+            context,
+            builder: (_) => _GroupSettingsPage(groupName: widget.groupName),
+          ),
+          trailing: const DisclosureIndicator(),
+        ),
+      ],
+    );
+  }
+
+  Widget _foldRow({
+    required String title,
+    required String summary,
+    required bool open,
+    required VoidCallback onToggle,
+  }) {
+    return DecorationListItem(
+      key: const ValueKey('fold'),
+      title: Text(title),
+      subtitle: open ? null : EmojiText(summary, maxLines: 1),
+      onPressed: onToggle,
+      trailing: SizedBox.square(
+        dimension: kMinInteractiveDimension,
+        child: Center(
+          child: GlyphIcon(open ? AppGlyphs.chevronUp : AppGlyphs.chevronDown),
+        ),
+      ),
+    );
+  }
+
+  Widget _whySection(
+    AppLocalizations l,
+    List<RcxRanked> ranking,
+    String Function(String) own,
+  ) {
+    return generateAnimatedSection(
+      items: [
+        _foldRow(
+          title: l.rcxWhy,
+          summary: l.rcxWhyCount(ranking.length),
+          open: _whyOpen,
+          onToggle: () => setState(() => _whyOpen = !_whyOpen),
+        ),
+        if (_whyOpen)
+          for (final row in ranking.take(_whyRows))
+            DecorationListItem(
+              key: ValueKey('why-${row.name}'),
+              isSelected: row.current,
+              title: EmojiText(row.name, maxLines: 1),
+              subtitle: EmojiText(_rowDetail(l, row, own)),
+              trailing: row.latencyMs > 0 ? Text('${row.latencyMs} ms') : null,
+            ),
       ],
     );
   }
@@ -385,15 +599,214 @@ class _RoutingSheetState extends ConsumerState<RoutingSheet> {
   }
 
   Widget _historySection(AppLocalizations l) {
-    return generateSection(
-      title: l.rcxHistory,
+    return generateAnimatedSection(
       items: [
-        for (final entry in _journal.take(_historyRows))
-          DecorationListItem(
-            title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
-            subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
-          ),
+        _foldRow(
+          title: l.rcxHistory,
+          summary: rcxJournalText(l, _journal.first),
+          open: _historyOpen,
+          onToggle: () => setState(() => _historyOpen = !_historyOpen),
+        ),
+        if (_historyOpen)
+          for (final entry in _journal.take(_historyRows))
+            DecorationListItem(
+              key: ValueKey('history-${entry.seq}'),
+              title: EmojiText(rcxJournalText(l, entry), maxLines: 3),
+              subtitle: Text(entry.at.getLastUpdateTimeDesc(context)),
+            ),
       ],
+    );
+  }
+}
+
+Map<String, Object?> _stepOf(RcxTier tier) => {
+  if (tier.label.isNotEmpty) 'label': tier.label,
+  'when': tier.when,
+  if (tier.lastResort) 'last-resort': true,
+};
+
+/// The group's own server order; empty follows its profile's.
+class _GroupLadderPage extends ConsumerWidget {
+  const _GroupLadderPage({
+    required this.groupName,
+    required this.inherited,
+    required this.scope,
+  });
+
+  final String groupName;
+  final List<Map<String, Object?>> inherited;
+  final Map<String, Object?> scope;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.appLocalizations;
+    final group = ref.watch(rcxGroupProvider(groupName));
+    final prefer = ref.watch(
+      currentRoutingLayerProvider.select(
+        (layer) => layer.groups[groupName]?.prefer ?? const <RcxTier>[],
+      ),
+    );
+    void save(List<Map<String, Object?>> steps) {
+      final binding = rcxSavedBinding(ref, groupName, group);
+      unawaited(
+        ref
+            .read(rcxRoutingActionProvider.notifier)
+            .setBinding(
+              groupName,
+              binding.copyWith(
+                prefer: [for (final step in steps) RcxTier.fromJson(step)],
+              ),
+            ),
+      );
+    }
+
+    return CommonScaffold(
+      title: l.rcxLadderTitle,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        children: [
+          RoutingLadderSection(
+            steps: [for (final tier in prefer) _stepOf(tier)],
+            onChanged: save,
+            scope: scope,
+            groupName: groupName,
+            inherited: inherited,
+            title: groupName,
+            footer: group != null && group.program.isNotEmpty
+                ? l.rcxLadderScenarioFirst
+                : l.rcxLadderGroupHint,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The servers the group may use, how eagerly it switches and checks, and
+/// direct split.
+class _GroupSettingsPage extends ConsumerStatefulWidget {
+  const _GroupSettingsPage({required this.groupName});
+
+  final String groupName;
+
+  @override
+  ConsumerState<_GroupSettingsPage> createState() => _GroupSettingsPageState();
+}
+
+class _GroupSettingsPageState extends ConsumerState<_GroupSettingsPage> {
+  late final _pattern = TextEditingController(
+    text: rcxPatternOf(
+      ref.read(rcxGroupProvider(widget.groupName))?.binding.pool.include,
+    ),
+  );
+
+  @override
+  void dispose() {
+    _pattern.dispose();
+    super.dispose();
+  }
+
+  void _update(RcxBinding Function(RcxBinding) update) {
+    final group = ref.read(rcxGroupProvider(widget.groupName));
+    unawaited(
+      ref
+          .read(rcxRoutingActionProvider.notifier)
+          .setBinding(
+            widget.groupName,
+            update(rcxSavedBinding(ref, widget.groupName, group)),
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    final group = ref.watch(rcxGroupProvider(widget.groupName));
+    ref.watch(currentRoutingLayerProvider);
+    final binding = rcxSavedBinding(ref, widget.groupName, group);
+    final names = _watchNames(ref, widget.groupName);
+    final matched = rcxCountMatches(_pattern.text.trim(), names);
+    return CommonScaffold(
+      title: l.rcxGroupSettings,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+        ).copyWith(top: context.contentTopPadding, bottom: 20),
+        children: [
+          generateSection(
+            title: l.rcxServers,
+            footer: matched == null
+                ? l.rcxPatternInvalid
+                : l.rcxServersMatch(matched, names.length),
+            items: [
+              FormRow(
+                title: l.rcxServersPattern,
+                trailing: FormRowTextField(
+                  controller: _pattern,
+                  autocorrect: false,
+                  hintText: l.rcxAnyServer,
+                  onChanged: (_) => setState(() {}),
+                  onFieldSubmitted: (value) {
+                    if (rcxCountMatches(value.trim(), names) != null) {
+                      _update(
+                        (b) => b.copyWith(
+                          pool: b.pool.copyWith(
+                            include: rcxIncludeOf(value.trim()),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          generateSection(
+            title: l.rcxBehaviour,
+            items: [
+              ListItem<String>.options(
+                title: Text(l.rcxSwitching),
+                options: rcxFeels,
+                value: binding.feel ?? 'balanced',
+                textBuilder: (v) => rcxFeelLabel(l, v),
+                onChanged: (v) => _update((b) => b.copyWith(feel: v)),
+              ),
+              ListItem<String>.options(
+                title: Text(l.rcxChecks),
+                options: rcxEnergies,
+                value: binding.energy ?? 'balanced',
+                textBuilder: (v) => rcxEnergyLabel(l, v),
+                onChanged: (v) => _update((b) => b.copyWith(energy: v)),
+              ),
+            ],
+          ),
+          if (group != null && group.directSplit.isNotEmpty)
+            generateAnimatedSection(
+              title: l.network,
+              footer: l.rcxDirectSplitHint,
+              items: [
+                ListItem.toggle(
+                  key: const ValueKey('split'),
+                  title: Text(l.rcxDirectSplit),
+                  value: binding.directSplit,
+                  onChanged: (on) =>
+                      _update((b) => b.copyWith(directSplit: on)),
+                ),
+                if (binding.directSplit)
+                  DecorationListItem(
+                    key: const ValueKey('split-state'),
+                    title: Text(
+                      group.directSplit == 'active'
+                          ? l.rcxDirectSplitActive
+                          : l.rcxDirectSplitStandby,
+                    ),
+                  ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
@@ -469,7 +882,10 @@ class RoutingProfileChooser extends ConsumerWidget {
                         profile.error.isNotEmpty
                             ? profile.error
                             : [
-                                rcxLevelLabel(l, profile.level),
+                                if (profile.description.isNotEmpty)
+                                  profile.localize(profile.description, locale)
+                                else
+                                  rcxLevelLabel(l, profile.level),
                                 if (profile.consent.isNotEmpty)
                                   l.rcxNeedsConsent,
                               ].join(' · '),
@@ -543,19 +959,42 @@ class _RoutingConsentSectionState extends ConsumerState<RoutingConsentSection> {
   }
 }
 
-class _Intro extends StatelessWidget {
-  const _Intro({required this.busy, required this.onEnable});
+/// A group without auto routing: what turning it on would do, and the one
+/// button that does it.
+class _Intro extends ConsumerWidget {
+  const _Intro({
+    super.key,
+    required this.groupName,
+    required this.busy,
+    required this.onEnable,
+  });
 
+  final String groupName;
   final bool busy;
   final VoidCallback onEnable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.appLocalizations;
+    final library = ref.watch(rcxLibraryProvider).value ?? const [];
+    final locale = Localizations.localeOf(context).toString();
+    final info = library.where((p) => p.id == rcxDefaultProfile).firstOrNull;
+    final servers = _watchNames(ref, groupName).length;
+    final description = info?.localize(info.description, locale) ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l.rcxMakeSmartHint, style: AppTextStyle.body.of(context)),
+        generateSection(
+          title: l.rcxWouldDo,
+          footer: l.rcxWouldServers(servers),
+          items: [
+            DecorationListItem(
+              title: EmojiText(info?.displayTitle(locale) ?? l.rcxProfile),
+              subtitle: description.isEmpty ? null : Text(description),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         FilledButton(
           onPressed: busy ? null : onEnable,
@@ -566,20 +1005,21 @@ class _Intro extends StatelessWidget {
   }
 }
 
+/// What the group holds now: the server with its flag and latency, why in
+/// one line, and the button that moves it on.
 class _StatusSection extends StatelessWidget {
   const _StatusSection({
+    super.key,
     required this.group,
     required this.own,
     required this.busy,
     required this.onChange,
-    required this.onAuto,
   });
 
   final RcxGroupStatus group;
   final String Function(String) own;
   final bool busy;
   final VoidCallback onChange;
-  final VoidCallback onAuto;
 
   @override
   Widget build(BuildContext context) {
@@ -588,28 +1028,34 @@ class _StatusSection extends StatelessWidget {
     final until = decision.until;
     final latency = group.current?.latencyMs ?? 0;
     final exit = group.current?.exit ?? '';
+    final country = exit.isNotEmpty ? exit : rcxCountryOfName(group.now);
+    final flag = country == null ? '' : rcxCountryFlag(country);
     final network = group.network;
     final kind = switch (network) {
       RcxGroupNetwork(kind: final kind) when kind.isNotEmpty => kind,
       RcxGroupNetwork(next: final next) when next.isNotEmpty => '',
       _ => null,
     };
+    final details = [
+      if (country != null) rcxCountryName(context, country),
+      if (decision.tier.isNotEmpty) own(decision.tier),
+      if (kind != null) l.rcxNetwork(rcxKindLabel(l, kind, own: own)),
+    ].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         generateSection(
           items: [
             DecorationListItem(
+              leading: flag.isEmpty || group.now.contains(flag)
+                  ? null
+                  : EmojiText(flag, style: AppTextStyle.title2.of(context)),
               title: EmojiText(group.now.isEmpty ? '—' : group.now),
               subtitle: EmojiText(
                 [
                   rcxReasonText(l, decision.reason, own: own),
                   if (until != null) rcxReasonText(l, until, own: own),
-                  [
-                    if (exit.isNotEmpty) l.rcxExit(rcxCountryLabel(exit)),
-                    if (kind != null)
-                      l.rcxNetwork(rcxKindLabel(l, kind, own: own)),
-                  ].join(' · '),
+                  details,
                 ].where((line) => line.isNotEmpty).join('\n'),
               ),
               trailing: latency > 0 ? Text('$latency ms') : null,
@@ -617,24 +1063,9 @@ class _StatusSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.tonal(
-                onPressed: busy || group.control.isManual ? null : onChange,
-                child: Text(l.rcxChangeServer),
-              ),
-            ),
-            if (group.control.isPinned) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: busy ? null : onAuto,
-                  child: Text(l.rcxBackToAuto),
-                ),
-              ),
-            ],
-          ],
+        FilledButton.tonal(
+          onPressed: busy || group.control.isManual ? null : onChange,
+          child: Text(l.rcxChangeServer),
         ),
       ],
     );
@@ -645,6 +1076,7 @@ class _StatusSection extends StatelessWidget {
 /// server. Pools come from the provider, the user, and the flags in names.
 class _ChangeToSection extends ConsumerWidget {
   const _ChangeToSection({
+    super.key,
     required this.group,
     required this.names,
     required this.enabled,
@@ -958,6 +1390,18 @@ String rcxReasonText(
   'switch.fixed' => l.rcxReasonSwitchFixed(_arg(r, 'node')),
   'fixed.missing' => l.rcxReasonFixedMissing(_arg(r, 'node')),
   'hold.idle' => l.rcxReasonIdle(rcxModeLabel(_arg(r, 'mode'))),
+  'route.name-taken' => l.rcxReasonRouteNameTaken(_arg(r, 'route')),
+  'route.to-missing' => l.rcxReasonRouteToMissing(
+    _arg(r, 'route'),
+    _arg(r, 'to'),
+  ),
+  'route.invalid' => l.rcxReasonRouteInvalid(
+    _arg(r, 'route'),
+    _arg(r, 'error'),
+  ),
+  'route.not-rule-mode' => l.rcxHubRoutesRuleOnly(
+    rcxModeLabel(_arg(r, 'mode')),
+  ),
   _ => r.code,
 };
 

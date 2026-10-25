@@ -26,6 +26,8 @@ type Node struct {
 	Endpoint string `json:"-"`
 	// Entry is the country of the node's server address, when it is an IP.
 	Entry string `json:"-"`
+	// NameCountry is the country the name declares (CountryOfName).
+	NameCountry string `json:"-"`
 	// Via lists the nested selectors between the group and the node, which
 	// must all be set for the group to use it.
 	Via []string `json:"-"`
@@ -458,6 +460,7 @@ var verdictLabels = map[tri]string{triYes: "pass", triNo: "fail", triNeither: "s
 
 func subjectOf(m Member, facts *Facts, in DecideInput) Subject {
 	p50, _, measured := facts.Latency(in.At)
+	exit := m.Exit.country(in.At)
 	var checks map[string]tri
 	if ids := in.Policy.CheckIDs; len(ids) > 0 {
 		checks = make(map[string]tri, len(ids))
@@ -466,7 +469,8 @@ func subjectOf(m Member, facts *Facts, in DecideInput) Subject {
 		}
 	}
 	return Subject{
-		Exit:     m.Exit.country(in.At),
+		Exit:     exit,
+		Country:  cmp.Or(exit, m.NameCountry),
 		Entry:    m.Entry,
 		Checks:   checks,
 		Net:      in.Net,

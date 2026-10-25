@@ -15,6 +15,7 @@ import 'package:material_ui/material_ui.dart';
 import 'routing.dart';
 import 'routing_condition.dart';
 import 'routing_import.dart';
+import 'routing_ladder.dart';
 
 const rcxFeels = ['calm', 'balanced', 'eager'];
 const rcxEnergies = ['eco', 'balanced', 'precise'];
@@ -71,6 +72,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
   late RcxUserProfile _saved;
   late String _text;
   final _title = TextEditingController();
+  final _description = TextEditingController();
   Timer? _titleDebounce;
   RcxStudioResult? _lint;
   Map<String, Object?> _profile = const {};
@@ -106,6 +108,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
   void dispose() {
     _titleDebounce?.cancel();
     _title.dispose();
+    _description.dispose();
     super.dispose();
   }
 
@@ -131,8 +134,12 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
       if (result.profile case final profile?) {
         _profile = profile;
         final title = profile['title'] as String? ?? '';
-        if (_title.text != title && _titleDebounce?.isActive != true) {
-          _title.text = title;
+        final description = profile['description'] as String? ?? '';
+        if (_titleDebounce?.isActive != true) {
+          if (_title.text != title) _title.text = title;
+          if (_description.text != description) {
+            _description.text = description;
+          }
         }
       }
     });
@@ -154,10 +161,15 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     _setText(result.text);
   }
 
-  void _onTitleChanged(String title) {
+  void _onTextChanged(String _) {
     _titleDebounce?.cancel();
     _titleDebounce = Timer(_titleDelay, () {
-      unawaited(_edit((p) => p['title'] = title.trim()));
+      unawaited(
+        _edit((p) {
+          p['title'] = _title.text.trim();
+          p['description'] = _description.text.trim();
+        }),
+      );
     });
   }
 
@@ -360,7 +372,7 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
     final p = _profile;
     final pool = rcxMap(p['pool']);
     final tags = rcxMap(p['tags']);
-    final tiers = rcxList(p['prefer']);
+    final steps = rcxList(p['prefer']);
     final switching = rcxMap(p['switch']);
     return [
       generateSection(
@@ -371,7 +383,20 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
             trailing: FormRowTextField(
               controller: _title,
               hintText: l.rcxNewProfile,
-              onChanged: _onTitleChanged,
+              onChanged: _onTextChanged,
+            ),
+          ),
+          DecorationListItem(
+            title: TextField(
+              controller: _description,
+              minLines: 2,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              onChanged: _onTextChanged,
+              decoration: InputDecoration.collapsed(
+                border: const NoInputBorder(),
+                hintText: l.rcxProfileDescriptionHint,
+              ),
             ),
           ),
           _options(
@@ -405,18 +430,12 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           ),
         ],
       ),
-      generateSection(
-        title: l.rcxTiers,
-        footer: l.rcxTiersHint,
-        items: [
-          for (final (index, tier) in tiers.indexed)
-            _tierRow(index, rcxMap(tier), tiers.length),
-          FormRow(
-            title: l.rcxAddTier,
-            leading: EntryButton.add(onPressed: () => _editTier(null)),
-            onPressed: () => _editTier(null),
-          ),
-        ],
+      RoutingLadderSection(
+        steps: [for (final step in steps) rcxMap(step)],
+        onChanged: (steps) => _edit((p) => p['prefer'] = steps),
+        scope: p,
+        groupName: _group,
+        stranded: _strandedLabel(l, p['stranded'] as String? ?? 'hold'),
       ),
       generateSection(
         title: l.rcxTags,
@@ -522,81 +541,6 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
           trailing: const GlyphIcon(AppGlyphs.code),
         ),
     ];
-  }
-
-  Widget _tierRow(int index, Map<String, Object?> tier, int count) {
-    final l = context.appLocalizations;
-    final when = tier['when'] as String? ?? '';
-    final lastResort = tier['last-resort'] == true;
-    void move(int to) => _edit((p) {
-      final tiers = [...rcxList(p['prefer'])];
-      tiers.insert(to, tiers.removeAt(index));
-      p['prefer'] = tiers;
-    });
-    return ContextMenuRegion(
-      menuItems: [
-        if (index > 0)
-          CommonPopupMenuItem(
-            glyph: AppGlyphs.arrowUp,
-            label: l.rcxMoveUp,
-            onPressed: () => move(index - 1),
-          ),
-        if (index < count - 1)
-          CommonPopupMenuItem(
-            glyph: AppGlyphs.arrowDown,
-            label: l.rcxMoveDown,
-            onPressed: () => move(index + 1),
-          ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.delete,
-          label: l.delete,
-          danger: true,
-          onPressed: () => _edit(
-            (p) => p['prefer'] = [...rcxList(p['prefer'])]..removeAt(index),
-          ),
-        ),
-      ],
-      child: DecorationListItem(
-        leading: Text(
-          '${index + 1}',
-          style: context.listTitleStyle.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        title: EmojiText(tier['label'] as String? ?? ''),
-        subtitle: Text(
-          [
-            if (when.isEmpty) l.rcxCondAnyServer else when,
-            if (lastResort) l.rcxLastResort,
-          ].join(' · '),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        onPressed: () => _editTier(index),
-        trailing: const GlyphIcon(AppGlyphs.chevronForward),
-      ),
-    );
-  }
-
-  Future<void> _editTier(int? index) async {
-    final tiers = rcxList(_profile['prefer']);
-    final tier = await BaseNavigator.push<Map<String, Object?>>(
-      context,
-      _TierEditor(
-        tier: index == null ? null : rcxMap(tiers[index]),
-        profile: _profile,
-      ),
-    );
-    if (tier == null) return;
-    await _edit((p) {
-      final next = [...rcxList(p['prefer'])];
-      if (index == null) {
-        next.add(tier);
-      } else {
-        next[index] = tier;
-      }
-      p['prefer'] = next;
-    });
   }
 
   Future<void> _addTag() async {
@@ -763,87 +707,6 @@ class _RoutingStudioState extends ConsumerState<RoutingStudio> {
               ].join(' · '),
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _TierEditor extends StatefulWidget {
-  const _TierEditor({required this.tier, required this.profile});
-
-  final Map<String, Object?>? tier;
-  final Map<String, Object?> profile;
-
-  @override
-  State<_TierEditor> createState() => _TierEditorState();
-}
-
-class _TierEditorState extends State<_TierEditor> {
-  late final _label = TextEditingController(
-    text: widget.tier?['label'] as String? ?? '',
-  );
-  late String _when = widget.tier?['when'] as String? ?? 'not dead';
-  late bool _lastResort = widget.tier?['last-resort'] == true;
-
-  @override
-  void dispose() {
-    _label.dispose();
-    super.dispose();
-  }
-
-  Future<void> _editWhen() async {
-    final text = await editCondition(
-      context,
-      title: _label.text.isEmpty
-          ? context.appLocalizations.rcxTier
-          : _label.text,
-      text: _when,
-      profile: widget.profile,
-    );
-    if (text != null && mounted) setState(() => _when = text);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final label = _label.text.trim();
-    return FormPage(
-      title: widget.tier == null ? l.rcxAddTier : l.rcxTier,
-      onSave: label.isEmpty
-          ? null
-          : () => Navigator.of(context).pop(<String, Object?>{
-              'label': label,
-              'when': _when,
-              if (_lastResort) 'last-resort': true,
-            }),
-      children: [
-        generateSection(
-          items: [
-            FormRow(
-              title: l.rcxTierLabel,
-              trailing: FormRowTextField(
-                controller: _label,
-                hintText: l.required,
-                onChanged: (_) => setState(() {}),
-              ),
-            ),
-            DecorationListItem(
-              title: Text(l.rcxTierWhen),
-              subtitle: Text(_when.isEmpty ? l.rcxCondAnyServer : _when),
-              onPressed: _editWhen,
-              trailing: const GlyphIcon(AppGlyphs.chevronForward),
-            ),
-            FormRow(
-              title: l.rcxLastResort,
-              onPressed: () => setState(() => _lastResort = !_lastResort),
-              trailing: Switch(
-                value: _lastResort,
-                onChanged: (value) => setState(() => _lastResort = value),
-              ),
-            ),
-          ],
-          footer: l.rcxLastResortHint,
-        ),
       ],
     );
   }

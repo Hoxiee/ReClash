@@ -1,6 +1,7 @@
 rcx: 1
 title: Every group automatically
+description: "Automatically manages every proxy group in your profile with the selected profile. Handy when you want the same behavior everywhere."
 groups:
   '*': {}
 l10n:
-  ru: { Every group automatically: Все группы автоматически }
+  ru: { Every group automatically: Все группы автоматически, "Automatically manages every proxy group in your profile with the selected profile. Handy when you want the same behavior everywhere.": "Автоматически управляет всеми группами прокси в вашем профиле с помощью выбранного профиля. Удобно, если везде нужно одинаковое поведение." }

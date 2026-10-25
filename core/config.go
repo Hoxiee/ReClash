@@ -20,7 +20,6 @@ import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/hub"
-	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
 	authStore "github.com/metacubex/mihomo/listener/auth"
 	LC "github.com/metacubex/mihomo/listener/config"
@@ -118,15 +117,23 @@ func handleDecryptConfig(params DecryptConfigParams) (string, error) {
 var systemTimeWritable = runtime.GOOS != "android"
 
 func loadConfig(path string) (*config.Config, error) {
-	buf, err := readCoreFile(path)
+	raw, err := loadRawConfig(path)
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := executor.ParseWithBytes(buf)
+	cfg, err := config.ParseRawConfig(raw)
 	if err != nil {
 		return nil, err
 	}
 	return withPlatformLimits(cfg), nil
+}
+
+func loadRawConfig(path string) (*config.RawConfig, error) {
+	buf, err := readCoreFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return config.UnmarshalRawConfig(buf)
 }
 
 func withPlatformLimits(cfg *config.Config) *config.Config {
@@ -141,12 +148,40 @@ func runningConfigPath() string {
 	return filepath.Join(constant.Path.HomeDir(), "config.yaml")
 }
 
-func loadSetupConfig(params *SetupParams) (*config.Config, error) {
+// setupLoad is a config ready to apply with the routing it was built for.
+type setupLoad struct {
+	cfg          *config.Config
+	subscription rcx.SubscriptionLayer
+	routes       rcx.AppliedRoutes
+}
+
+// loadSetupConfig builds the scenario's routes into the config, from the
+// user layer the setup brings, else the one in force.
+func loadSetupConfig(params *SetupParams) (setupLoad, error) {
 	path := runningConfigPath()
+	var raw *config.RawConfig
+	var err error
 	if params.Base != nil {
-		return loadConfigWithBase(params.Base, path)
+		raw, err = loadRawConfigWithBase(params.Base, path)
+	} else {
+		raw, err = loadRawConfig(path)
 	}
-	return loadConfig(path)
+	if err != nil {
+		return setupLoad{}, err
+	}
+	load := setupLoad{subscription: rcxReadSubscription(path)}
+	user := rcxCurrentUser()
+	if params.Rcx != nil {
+		user = *params.Rcx
+	}
+	routes, key := rcx.ScenarioRoutes(load.subscription, user)
+	load.cfg, load.routes, err = parseRouted(raw, routes, key)
+	if err != nil {
+		// Applying again would fail the same way, so the wanted routes count
+		// as applied.
+		load = setupLoad{routes: rcx.AppliedRoutes{Applied: true, Key: key}}
+	}
+	return load, err
 }
 
 func applyConfig(params *SetupParams) error {
@@ -156,7 +191,8 @@ func applyConfig(params *SetupParams) error {
 
 	setTestURL(params.TestURL)
 	skipCertVerify.Store(params.SkipCertVerify)
-	cfg, err := loadSetupConfig(params)
+	load, err := loadSetupConfig(params)
+	cfg := load.cfg
 	if err != nil {
 		// The fallback is what keeps the listeners serving while the host
 		// reports the error, but it applies a config with no proxies in it.
@@ -179,14 +215,7 @@ func applyConfig(params *SetupParams) error {
 	tunnel.SetMode(rcxSetUserMode(cfg.General.Mode))
 	patchSelectGroup(params.SelectedMap)
 	bumpRouteEpoch()
-	if params.Rcx != nil {
-		rcxSetUser(*params.Rcx)
-	}
-	if err == nil {
-		rcxApplySubscription(rcxReadSubscription(runningConfigPath()))
-	} else {
-		rcxApplySubscription(rcx.SubscriptionLayer{})
-	}
+	rcxApplyConfig(params.Rcx, load.subscription, load.routes)
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	scheduleLoadMemoryRelease()

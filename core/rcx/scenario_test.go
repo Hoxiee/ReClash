@@ -115,7 +115,8 @@ func TestScenarioValidation(t *testing.T) {
 		"mode: tunnel\n",
 		"groups: { A: { to: x, profile: builtin/simple } }\n",
 		"on: { WiFi: { mode: rule } }\n",
-		"groups: { A: { prefer: [] } }\n",
+		"groups: { A: { to: x, prefer: [{ label: L, when: alive }] } }\n",
+		"groups: { A: { rank: {} } }\n",
 	} {
 		if _, err := ParseScenario([]byte(doc)); err == nil {
 			t.Errorf("%q parsed", doc)

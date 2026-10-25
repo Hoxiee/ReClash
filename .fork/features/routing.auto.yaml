@@ -14,10 +14,13 @@ must:
   studio: Lint, simulation, format and merge are read-only; a profile changes what a group runs only once saved.
   profile-text: A profile carries its own translations; the app shows the user's language and falls back to the source text.
   scenario: A scenario sets the tunnel mode only until the user picks one, and drives only the groups it names; the rest keep their own profile.
-watch: ['core/rcx/**', 'core/rcx_*.go', core/hooks.go, core/proxy.go, core/mihomo/adapter/provider/patch.go, core/mihomo/adapter/route_identity.go, core/mihomo/tunnel/patch.go, android/service/src/main/java/com/reclash/service/modules/NetworkObserveModule.kt, lib/models/rcx.dart, lib/providers/routing.dart, lib/views/proxies/routing.dart, 'lib/views/proxies/routing_*.dart', lib/views/config/routing.dart, lib/views/dashboard/widgets/outbound_mode.dart, lib/common/rcx_link.dart, rcx-profile.schema.json, tool/rcx.dart, android/service/src/main/java/com/reclash/service/modules/RoutingHintsModule.kt, 'arb/fragments/routing.auto/**', test/views/proxies/routing_test.dart, test/views/proxies/routing_studio_test.dart]
+  routes: A scenario's routes become groups and rules only at a config apply and steer traffic only in rule mode, never over a group the config already has; a route that cannot apply is a visible problem.
+  ladder: A server order falls through to the next step once every server on a step is down, and a last-resort step yields to every other step; a scenario program's order beats the user's, which beats the profile's.
+  bundle: An exported setup carries every non-built-in profile it references, and importing it never replaces a profile the user already has.
+watch: ['core/rcx/**', 'core/rcx_*.go', core/hooks.go, core/proxy.go, core/mihomo/adapter/provider/patch.go, core/mihomo/adapter/route_identity.go, core/mihomo/tunnel/patch.go, android/service/src/main/java/com/reclash/service/modules/NetworkObserveModule.kt, lib/models/rcx.dart, lib/providers/routing.dart, lib/views/proxies/routing.dart, 'lib/views/proxies/routing_*.dart', lib/views/config/routing.dart, lib/views/dashboard/widgets/outbound_mode.dart, lib/common/rcx_link.dart, rcx-profile.schema.json, tool/rcx.dart, android/service/src/main/java/com/reclash/service/modules/RoutingHintsModule.kt, 'arb/fragments/routing.auto/**', test/views/proxies/routing_test.dart, test/views/proxies/routing_studio_test.dart, test/views/proxies/routing_hub_test.dart, test/views/proxies/routing_route_test.dart, test/views/proxies/routing_scenario_test.dart, core/config.go, PROVIDER_FEATURES.md, 'docs/auto-routing/**']
 checks:
-  routing-engine: [pure-decision, energy, escrow, layers, manual-control, direct-split, consent, studio, scenario]
-  routing-ui: [layers, manual-control, studio, profile-text, scenario]
+  routing-engine: [pure-decision, energy, escrow, layers, manual-control, direct-split, consent, studio, scenario, routes, ladder, bundle]
+  routing-ui: [layers, manual-control, studio, profile-text, scenario, routes, bundle]
   fork-tests: [thin-fork]
 deps: [core.integration, proxies.groups]
 drop: Upstream ships an auto-routing engine with the same transparency, energy limits and provider tolerance.

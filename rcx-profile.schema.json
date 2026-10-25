@@ -7,7 +7,7 @@
   "$defs": {
     "condition": {
       "type": "string",
-      "maxLength": 160,
+      "maxLength": 2048,
       "description": "Condition in the RCX condition language (core/rcx/cond.go): tags, node properties and boolean operators."
     },
     "name": {
@@ -60,6 +60,12 @@
         "when": { "$ref": "#/$defs/condition" },
         "last-resort": { "type": "boolean" }
       }
+    },
+    "prefer": {
+      "type": "array",
+      "maxItems": 16,
+      "items": { "$ref": "#/$defs/tier" },
+      "description": "Server order: a node lands in the first tier it satisfies, and the first tier with a live node wins."
     },
     "rank": {
       "type": "object",
@@ -175,6 +181,7 @@
       "properties": {
         "rcx": { "type": "integer", "maximum": 1, "description": "Format version." },
         "title": { "type": "string" },
+        "description": { "type": "string", "description": "What the profile does and when to pick it, in plain words; translated through l10n." },
         "level": { "enum": ["simple", "advanced"] },
         "extends": { "type": "string", "description": "Profile id such as builtin/simple or provider/<name>; at most 4 levels deep." },
         "pool": { "$ref": "#/$defs/pool" },
@@ -240,6 +247,7 @@
         "pool": { "$ref": "#/$defs/pool" },
         "feel": { "$ref": "#/$defs/feel" },
         "energy": { "$ref": "#/$defs/energy" },
+        "prefer": { "$ref": "#/$defs/prefer", "description": "Replaces the profile's server order for this group; a scenario program's order beats it." },
         "chips": {
           "type": "array",
           "maxItems": 12,
@@ -259,6 +267,7 @@
       "properties": {
         "profile": { "type": "string", "description": "Group profile id that replaces the group's own." },
         "pool": { "$ref": "#/$defs/pool" },
+        "prefer": { "$ref": "#/$defs/prefer", "description": "Replaces the server order of the group's profile while the program applies." },
         "to": { "type": "string", "description": "Hold the group on one member, a server or a whole nested group, with no search." }
       }
     },
@@ -268,6 +277,30 @@
       "propertyNames": { "type": "string", "minLength": 1, "maxLength": 64 },
       "additionalProperties": { "$ref": "#/$defs/program" },
       "description": "Keyed by target: a group name, $main (the select group the final MATCH rule routes to), * (every other select group, not GLOBAL) or GLOBAL. Own name wins over $main, which wins over *."
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "match"],
+      "description": "Traffic the match selects goes ahead of the config's rules: to a select group of this name holding every server, driven like a program, or with `to` straight to one target.",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 64, "not": { "enum": ["$main", "*", "GLOBAL", "DIRECT", "REJECT", "REJECT-DROP", "PASS", "COMPATIBLE"] } },
+        "description": { "type": "string", "maxLength": 240 },
+        "match": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "pattern": "^(DOMAIN|DOMAIN-SUFFIX|DOMAIN-KEYWORD|DOMAIN-WILDCARD|DOMAIN-REGEX|GEOSITE|GEOIP|IP-CIDR|IP-CIDR6|IP-ASN|SRC-IP-CIDR|DST-PORT|PROCESS-NAME|PROCESS-PATH|RULE-SET),.+$"
+          },
+          "description": "TYPE,value entries; GEOIP, IP-CIDR, IP-CIDR6, IP-ASN and RULE-SET may end with ,no-resolve."
+        },
+        "profile": { "$ref": "#/$defs/program/properties/profile" },
+        "pool": { "$ref": "#/$defs/pool" },
+        "prefer": { "$ref": "#/$defs/prefer" },
+        "to": { "type": "string", "description": "A proxy, group or DIRECT/REJECT the traffic goes to instead of a group of its own." }
+      }
     },
     "scenarioLayer": {
       "type": "object",
@@ -285,6 +318,7 @@
       "properties": {
         "rcx": { "type": "integer", "maximum": 1 },
         "title": { "type": "string" },
+        "description": { "type": "string", "description": "What the scenario does and when to pick it, in plain words; translated through l10n." },
         "tags": {
           "type": "object",
           "maxProperties": 32,
@@ -294,6 +328,12 @@
         "network": { "$ref": "#/$defs/network" },
         "mode": { "$ref": "#/$defs/scenarioMode" },
         "groups": { "$ref": "#/$defs/scenarioGroups" },
+        "routes": {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/route" },
+          "description": "In priority order, ahead of the config's rules; names are unique and not under groups. Apply in rule mode only."
+        },
         "on": {
           "type": "object",
           "description": "Per network kind declared in network.kinds.",
@@ -306,10 +346,12 @@
     "bundle": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Routing bundle served at the reclash-routing URL: at most 256 KiB, binds to groups by name.",
+      "description": "Routing bundle served at the reclash-routing URL, or shared by export (kind: bundle): at most 256 KiB, binds to groups by name.",
       "required": ["profiles"],
       "properties": {
         "rcx": { "type": "integer", "maximum": 1 },
+        "kind": { "const": "bundle", "description": "Marks a shared scenario or profile with what it needs; the first scenario, else the first profile, is the main item." },
+        "title": { "type": "string" },
         "profiles": {
           "type": "object",
           "propertyNames": { "$ref": "#/$defs/name" },

@@ -16,6 +16,18 @@ Map<String, dynamic> _$RcxPoolToJson(_RcxPool instance) => <String, dynamic>{
   'exclude': ?instance.exclude,
 };
 
+_RcxTier _$RcxTierFromJson(Map<String, dynamic> json) => _RcxTier(
+  label: json['label'] as String? ?? '',
+  when: json['when'] as String? ?? '',
+  lastResort: json['last-resort'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$RcxTierToJson(_RcxTier instance) => <String, dynamic>{
+  'label': instance.label,
+  'when': instance.when,
+  'last-resort': instance.lastResort,
+};
+
 _RcxChip _$RcxChipFromJson(Map<String, dynamic> json) => _RcxChip(
   label: json['label'] as String,
   include: json['include'] as String,
@@ -42,6 +54,11 @@ _RcxBinding _$RcxBindingFromJson(Map<String, dynamic> json) => _RcxBinding(
           ?.map((e) => RcxChip.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  prefer:
+      (json['prefer'] as List<dynamic>?)
+          ?.map((e) => RcxTier.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   directSplit: json['directSplit'] as bool? ?? false,
 );
 
@@ -54,6 +71,7 @@ Map<String, dynamic> _$RcxBindingToJson(_RcxBinding instance) =>
       'feel': ?instance.feel,
       'energy': ?instance.energy,
       'chips': instance.chips,
+      'prefer': instance.prefer,
       'directSplit': instance.directSplit,
     };
 
@@ -259,6 +277,7 @@ _RcxGroupStatus _$RcxGroupStatusFromJson(Map<String, dynamic> json) =>
       program: json['program'] as String? ?? '',
       fixed: json['fixed'] as String? ?? '',
       idle: json['idle'] as bool? ?? false,
+      route: json['route'] as bool? ?? false,
       control: json['control'] == null
           ? const RcxControl()
           : RcxControl.fromJson(json['control'] as Map<String, dynamic>),
@@ -303,6 +322,7 @@ Map<String, dynamic> _$RcxGroupStatusToJson(_RcxGroupStatus instance) =>
       'program': instance.program,
       'fixed': instance.fixed,
       'idle': instance.idle,
+      'route': instance.route,
       'control': instance.control,
       'now': instance.now,
       'via': instance.via,
@@ -365,6 +385,7 @@ _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
       ? null
       : RcxScenarioStatus.fromJson(json['scenario'] as Map<String, dynamic>),
   tunnelMode: json['tunnelMode'] as String? ?? '',
+  reload: json['reload'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
@@ -379,6 +400,7 @@ Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
       'library': instance.library,
       'scenario': instance.scenario,
       'tunnelMode': instance.tunnelMode,
+      'reload': instance.reload,
     };
 
 _RcxScenarioStatus _$RcxScenarioStatusFromJson(Map<String, dynamic> json) =>
@@ -400,6 +422,11 @@ _RcxScenarioStatus _$RcxScenarioStatusFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
+      routes:
+          (json['routes'] as List<dynamic>?)
+              ?.map((e) => RcxRouteStatus.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$RcxScenarioStatusToJson(_RcxScenarioStatus instance) =>
@@ -413,6 +440,23 @@ Map<String, dynamic> _$RcxScenarioStatusToJson(_RcxScenarioStatus instance) =>
       'manual': instance.manual,
       'holdsMode': instance.holdsMode,
       'groups': instance.groups,
+      'routes': instance.routes,
+    };
+
+_RcxRouteStatus _$RcxRouteStatusFromJson(Map<String, dynamic> json) =>
+    _RcxRouteStatus(
+      name: json['name'] as String,
+      to: json['to'] as String? ?? '',
+      problem: json['problem'] == null
+          ? null
+          : RcxReason.fromJson(json['problem'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$RcxRouteStatusToJson(_RcxRouteStatus instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'to': instance.to,
+      'problem': instance.problem,
     };
 
 _RcxExplanation _$RcxExplanationFromJson(Map<String, dynamic> json) =>
@@ -464,6 +508,7 @@ _RcxProfileInfo _$RcxProfileInfoFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       kind: json['kind'] as String? ?? '',
       title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
       level: json['level'] as String? ?? '',
       source: json['source'] as String? ?? '',
       extendsId: json['extends'] as String? ?? '',
@@ -485,6 +530,7 @@ Map<String, dynamic> _$RcxProfileInfoToJson(_RcxProfileInfo instance) =>
       'id': instance.id,
       'kind': instance.kind,
       'title': instance.title,
+      'description': instance.description,
       'level': instance.level,
       'source': instance.source,
       'extends': instance.extendsId,
@@ -660,6 +706,16 @@ _RcxStudioResult _$RcxStudioResultFromJson(Map<String, dynamic> json) =>
       candidate: json['candidate'] == null
           ? null
           : RcxDecision.fromJson(json['candidate'] as Map<String, dynamic>),
+      countries:
+          (json['countries'] as List<dynamic>?)
+              ?.map((e) => RcxCountry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      items:
+          (json['items'] as List<dynamic>?)
+              ?.map((e) => RcxBundleItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$RcxStudioResultToJson(_RcxStudioResult instance) =>
@@ -676,4 +732,35 @@ Map<String, dynamic> _$RcxStudioResultToJson(_RcxStudioResult instance) =>
       'conflicts': instance.conflicts,
       'current': instance.current,
       'candidate': instance.candidate,
+      'countries': instance.countries,
+      'items': instance.items,
+    };
+
+_RcxCountry _$RcxCountryFromJson(Map<String, dynamic> json) => _RcxCountry(
+  code: json['code'] as String,
+  count: (json['count'] as num?)?.toInt() ?? 0,
+  verified: json['verified'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$RcxCountryToJson(_RcxCountry instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'count': instance.count,
+      'verified': instance.verified,
+    };
+
+_RcxBundleItem _$RcxBundleItemFromJson(Map<String, dynamic> json) =>
+    _RcxBundleItem(
+      kind: json['kind'] as String? ?? '',
+      name: json['name'] as String,
+      title: json['title'] as String? ?? '',
+      text: json['text'] as String,
+    );
+
+Map<String, dynamic> _$RcxBundleItemToJson(_RcxBundleItem instance) =>
+    <String, dynamic>{
+      'kind': instance.kind,
+      'name': instance.name,
+      'title': instance.title,
+      'text': instance.text,
     };

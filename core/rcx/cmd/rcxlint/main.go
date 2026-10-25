@@ -47,12 +47,15 @@ func lintFile(file string) bool {
 	if len(doc.Content) > 0 {
 		root = doc.Content[0]
 	}
+	if result, ok := rcx.LintBundle(string(data)); ok {
+		return report(file, "", result, func(issue rcx.Issue) int { return issue.Line })
+	}
 	if child(root, "profiles") != nil || child(root, "scenarios") != nil {
 		return lintBundle(file, data, root)
 	}
 	name := strings.TrimSuffix(strings.TrimSuffix(filepath.Base(file), ".yaml"), ".rcx")
-	// Only a scenario names groups or a tunnel mode.
-	if child(root, "groups") != nil || child(root, "mode") != nil {
+	// Only a scenario names groups, routes or a tunnel mode.
+	if child(root, "groups") != nil || child(root, "routes") != nil || child(root, "mode") != nil {
 		result := rcx.LintScenario(rcx.SubscriptionLayer{}, "provider/"+name, string(data))
 		return report(file, "", result, func(issue rcx.Issue) int { return issue.Line })
 	}

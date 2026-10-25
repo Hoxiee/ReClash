@@ -1,14 +1,15 @@
 rcx: 1
 title: From list
+description: "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used."
 level: simple
 extends: builtin/simple
 l10n:
-  es: { From list: De la lista }
-  fr: { From list: De la liste }
-  ja: { From list: リストから }
-  kk: { From list: Тізімнен }
-  ko: { From list: 목록에서 }
-  ru: { From list: Из списка }
-  tk: { From list: Sanawdan }
-  uz: { From list: Ro‘yxatdan }
-  zh-CN: { From list: 从列表选择 }
+  es: { From list: De la lista, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "Funciona como Simple y está pensado para elegir tú mismo el servidor de la lista. Elígelo cuando quieras decidir qué servidor se usa." }
+  fr: { From list: De la liste, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "Fonctionne comme Simple et sert à choisir soi-même le serveur dans la liste. À choisir pour décider du serveur utilisé." }
+  ja: { From list: リストから, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "「シンプル」と同じ動作で、リストから自分でサーバーを選ぶためのものです。使うサーバーを自分で決めたいときに選びます。" }
+  kk: { From list: Тізімнен, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "«Қарапайым» сияқты жұмыс істейді және серверді тізімнен өзіңіз таңдауға арналған. Қай сервер қолданылатынын өзіңіз шешкіңіз келсе таңдаңыз." }
+  ko: { From list: 목록에서, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "‘단순’처럼 동작하며, 목록에서 서버를 직접 고르는 용도입니다. 사용할 서버를 직접 정하고 싶을 때 선택하세요." }
+  ru: { From list: Из списка, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "Работает как «Простой» и предназначен для выбора сервера самостоятельно из списка. Выбирайте, если хотите сами решать, какой сервер используется." }
+  tk: { From list: Sanawdan, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "«Ýönekeý» ýaly işleýär we serweri sanawdan özüňiziň saýlamagyňyz üçin niýetlenen. Haýsy serweriň ulanyljakdygyny özüňiz kesgitlemek isleseňiz saýlaň." }
+  uz: { From list: Ro‘yxatdan, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "«Oddiy» kabi ishlaydi va serverni ro‘yxatdan o‘zingiz tanlashingiz uchun mo‘ljallangan. Qaysi server ishlatilishini o‘zingiz hal qilmoqchi bo‘lsangiz tanlang." }
+  zh-CN: { From list: 从列表选择, "Works like Simple, and is meant for choosing the server yourself from the list. Pick it when you want to decide which server is used.": "工作方式与“简单”相同，用于让你自己从列表中选择服务器。想自己决定使用哪个服务器时选它。" }

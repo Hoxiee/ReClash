@@ -1,5 +1,6 @@
 rcx: 1
 title: Russia · mobile whitelists
+description: "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere."
 level: advanced
 extends: builtin/bypass-ru
 tags:
@@ -20,26 +21,32 @@ l10n:
     Russia · mobile whitelists: Rusia · listas blancas móviles
     Bypass node: Nodo de bypass
     Any working: Cualquiera que funcione
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Para redes móviles rusas que solo permiten sitios en listas blancas. Allí usa nodos de bypass y, en otros casos, funciona como el bypass de Rusia."
   fr:
     Russia · mobile whitelists: Russie · listes blanches mobiles
     Bypass node: Nœud de contournement
     Any working: Tout serveur actif
-  ja: { Russia · mobile whitelists: ロシア · モバイルホワイトリスト, Bypass node: バイパスノード, Any working: 動作中のもの }
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Pour les réseaux mobiles russes n’autorisant que les sites en liste blanche. Utilise des nœuds de contournement, sinon agit comme le contournement Russie."
+  ja: { Russia · mobile whitelists: ロシア · モバイルホワイトリスト, Bypass node: バイパスノード, Any working: 動作中のもの, "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "ホワイトリストのサイトのみ許可するロシアのモバイル回線向け。その場合はバイパスノードを使い、それ以外はロシアの遮断回避と同じ動作です。" }
   kk:
     Russia · mobile whitelists: Ресей · мобильді ақ тізімдер
     Bypass node: Айналып өту түйіні
     Any working: Кез келген жұмыс істейтіні
-  ko: { Russia · mobile whitelists: 러시아 · 모바일 화이트리스트, Bypass node: 우회 노드, Any working: 작동하는 아무거나 }
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Тек ақ тізімдегі сайттарға рұқсат беретін Ресей мобильді желілеріне арналған. Онда айналып өту түйіндерін пайдаланады, өзге жерде Ресейдегідей."
+  ko: { Russia · mobile whitelists: 러시아 · 모바일 화이트리스트, Bypass node: 우회 노드, Any working: 작동하는 아무거나, "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "화이트리스트 사이트만 허용하는 러시아 모바일 망용입니다. 그 경우 우회 노드를 쓰고, 그 외에는 러시아 차단 우회처럼 동작합니다." }
   ru:
     Russia · mobile whitelists: Россия · мобильные белые списки
     Bypass node: Узел обхода
     Any working: Любой рабочий
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Для мобильных сетей России, пропускающих только сайты из белых списков. Там использует узлы обхода, в остальных случаях работает как обход для России."
   tk:
     Russia · mobile whitelists: Russiýa · mobil ak sanawlar
     Bypass node: Aýlanyp geçiş düwüni
     Any working: Islendik işleýän
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Diňe ak sanawdaky sahypalara rugsat berýän Russiýanyň mobil ulgamlary üçin. Şol ýerde aýlanyp geçiş düwünlerini ulanýar, galanda Russiýa ýaly."
   uz:
     Russia · mobile whitelists: Rossiya · mobil oq ro‘yxatlar
     Bypass node: Aylanib o‘tish tuguni
     Any working: Istalgan ishlaydigani
-  zh-CN: { Russia · mobile whitelists: 俄罗斯 · 移动白名单, Bypass node: 绕过节点, Any working: 任意可用 }
+    "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "Faqat oq ro‘yxatdagi saytlarga ruxsat beradigan Rossiya mobil tarmoqlari uchun. U yerda bypass tugunlarini ishlatadi, boshqa joyda Rossiya bypass kabi."
+  zh-CN: { Russia · mobile whitelists: 俄罗斯 · 移动白名单, Bypass node: 绕过节点, Any working: 任意可用, "For Russian mobile networks that allow only whitelisted sites. Uses bypass-node servers there, and works like Russia bypass elsewhere.": "适用于只允许白名单网站的俄罗斯移动网络。此时使用绕过节点，其他情况下与俄罗斯绕过封锁相同。" }

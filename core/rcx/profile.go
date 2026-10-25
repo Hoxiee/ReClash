@@ -36,20 +36,23 @@ const (
 // Profile is the routing policy document: built-in, provider and user
 // profiles, import and export all use it.
 type Profile struct {
-	RCX      int               `yaml:"rcx,omitempty" json:"rcx,omitempty"`
-	Title    string            `yaml:"title,omitempty" json:"title,omitempty"`
-	Level    string            `yaml:"level,omitempty" json:"level,omitempty"`
-	Extends  string            `yaml:"extends,omitempty" json:"extends,omitempty"`
-	Pool     Pool              `yaml:"pool,omitempty" json:"pool,omitzero"`
-	Tags     map[string]string `yaml:"tags,omitempty" json:"tags,omitempty"`
-	Prefer   []TierSpec        `yaml:"prefer,omitempty" json:"prefer,omitempty"`
-	Rank     RankSpec          `yaml:"rank,omitempty" json:"rank,omitzero"`
-	Switch   SwitchSpec        `yaml:"switch,omitempty" json:"switch,omitzero"`
-	Stranded string            `yaml:"stranded,omitempty" json:"stranded,omitempty"`
-	Energy   string            `yaml:"energy,omitempty" json:"energy,omitempty"`
-	Checks   map[string]Check  `yaml:"checks,omitempty" json:"checks,omitempty"`
-	Network  NetworkSpec       `yaml:"network,omitempty" json:"network,omitzero"`
-	On       map[string]Layer  `yaml:"on,omitempty" json:"on,omitempty"`
+	RCX   int    `yaml:"rcx,omitempty" json:"rcx,omitempty"`
+	Title string `yaml:"title,omitempty" json:"title,omitempty"`
+	// Description says in plain words what the profile does and when to
+	// pick it; l10n translates it like the title.
+	Description string            `yaml:"description,omitempty" json:"description,omitempty"`
+	Level       string            `yaml:"level,omitempty" json:"level,omitempty"`
+	Extends     string            `yaml:"extends,omitempty" json:"extends,omitempty"`
+	Pool        Pool              `yaml:"pool,omitempty" json:"pool,omitzero"`
+	Tags        map[string]string `yaml:"tags,omitempty" json:"tags,omitempty"`
+	Prefer      []TierSpec        `yaml:"prefer,omitempty" json:"prefer,omitempty"`
+	Rank        RankSpec          `yaml:"rank,omitempty" json:"rank,omitzero"`
+	Switch      SwitchSpec        `yaml:"switch,omitempty" json:"switch,omitzero"`
+	Stranded    string            `yaml:"stranded,omitempty" json:"stranded,omitempty"`
+	Energy      string            `yaml:"energy,omitempty" json:"energy,omitempty"`
+	Checks      map[string]Check  `yaml:"checks,omitempty" json:"checks,omitempty"`
+	Network     NetworkSpec       `yaml:"network,omitempty" json:"network,omitzero"`
+	On          map[string]Layer  `yaml:"on,omitempty" json:"on,omitempty"`
 	// DirectSplit is a network condition under which DIRECT rules go through
 	// the group; it applies only once the user turns it on for the group.
 	DirectSplit string `yaml:"direct-split,omitempty" json:"direct-split,omitempty"`
@@ -409,13 +412,17 @@ type Binding struct {
 	Feel     string   `yaml:"feel,omitempty" json:"feel,omitempty"`
 	Energy   string   `yaml:"energy,omitempty" json:"energy,omitempty"`
 	Chips    []Chip   `yaml:"chips,omitempty" json:"chips,omitempty"`
+	// Prefer replaces the profile's server order; a scenario program's
+	// own order beats it.
+	Prefer []TierSpec `yaml:"prefer,omitempty" json:"prefer,omitempty"`
 	// DirectSplit is honoured from the user layer only.
 	DirectSplit bool `yaml:"-" json:"directSplit,omitempty"`
 
 	// What the active scenario adds while it names the group.
-	fixed string
-	extra Pool
-	tags  map[string]string
+	fixed  string
+	extra  Pool
+	tags   map[string]string
+	prefer []TierSpec
 }
 
 // Chip is a pool the user can switch the group to in one tap ("Change to").

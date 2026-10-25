@@ -18,7 +18,7 @@ import (
 
 // What makes a profile large stays in the Core; the overlay the host sends
 // back replaces every other section.
-var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules", "rcx-profiles"}
+var profileBaseSections = []string{"proxies", "proxy-groups", "sub-rules", "rcx-profiles", "rcx-scenarios", "rcx-scenario"}
 
 func handleGetProfileBase(path string) (*ProfileBase, error) {
 	defer scheduleLoadMemoryRelease()
@@ -98,6 +98,18 @@ func isMatchRule(rule string) bool {
 }
 
 func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, error) {
+	raw, err := loadRawConfigWithBase(base, configPath)
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := config.ParseRawConfig(raw)
+	if err != nil {
+		return nil, err
+	}
+	return withPlatformLimits(cfg), nil
+}
+
+func loadRawConfigWithBase(base *SetupBase, configPath string) (*config.RawConfig, error) {
 	document, err := mergeProfileBase(base)
 	if err != nil {
 		return nil, err
@@ -109,11 +121,7 @@ func loadConfigWithBase(base *SetupBase, configPath string) (*config.Config, err
 	if err := writeConfigDocument(configPath, document); err != nil {
 		return nil, err
 	}
-	cfg, err := config.ParseRawConfig(raw)
-	if err != nil {
-		return nil, err
-	}
-	return withPlatformLimits(cfg), nil
+	return raw, nil
 }
 
 func mergeProfileBase(base *SetupBase) (*yaml.Node, error) {

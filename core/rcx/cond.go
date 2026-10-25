@@ -31,8 +31,11 @@ type Subject struct {
 	Tags     map[string]bool
 	Exit     string
 	Entry    string
-	Checks   map[string]tri
-	Net      *NetSubject
+	// Country is the verified exit, else what the name declares; empty is
+	// a known "none", so it never waits for a check.
+	Country string
+	Checks  map[string]tri
+	Net     *NetSubject
 }
 
 // NetSubject is what a network condition reads: the network itself and the
@@ -111,6 +114,7 @@ type fieldKind int
 
 const (
 	stringField fieldKind = iota
+	countryField
 	boolField
 	numberField
 )
@@ -130,8 +134,9 @@ var condFields = map[string]struct {
 	"provider":          {stringField, nodeField},
 	"type":              {stringField, nodeField},
 	"server":            {stringField, nodeField},
-	"exit.country":      {stringField, nodeField},
-	"entry.country":     {stringField, nodeField},
+	"country":           {countryField, nodeField},
+	"exit.country":      {countryField, nodeField},
+	"entry.country":     {countryField, nodeField},
 	"udp":               {boolField, nodeField},
 	"alive":             {boolField, nodeField},
 	"dead":              {boolField, nodeField},
@@ -154,6 +159,8 @@ func stringOf(s *Subject, field string) (string, bool) {
 		return s.Type, true
 	case "server":
 		return s.Server, true
+	case "country":
+		return s.Country, true
 	case "exit.country":
 		return s.Exit, s.Exit != ""
 	case "entry.country":

@@ -309,6 +309,10 @@ func (e *Engine) with(run func(now time.Time)) {
 
 func (e *Engine) SetTopology(topology Topology) {
 	e.with(func(now time.Time) {
+		if topology.User != nil {
+			e.m.user = *topology.User
+			topology.User = nil
+		}
 		e.m.topology = topology
 		e.m.rebuild(now)
 	})

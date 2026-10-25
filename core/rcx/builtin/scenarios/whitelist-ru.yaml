@@ -1,5 +1,6 @@
 rcx: 1
 title: Russia · whitelists through GLOBAL
+description: "For Russian mobile whitelists. Follows Russia bypass normally; when only whitelisted sites open, it sends everything through GLOBAL using bypass nodes."
 tags:
   bypass: 'name ~ /(?i)lte|bypass|whitelist|обход|белы[ей]/'
 network:
@@ -18,4 +19,4 @@ on:
     groups:
       GLOBAL: { profile: builtin/simple, pool: { include: tag(bypass) } }
 l10n:
-  ru: { Russia · whitelists through GLOBAL: Россия · белые списки через GLOBAL }
+  ru: { Russia · whitelists through GLOBAL: Россия · белые списки через GLOBAL, "For Russian mobile whitelists. Follows Russia bypass normally; when only whitelisted sites open, it sends everything through GLOBAL using bypass nodes.": "Для белых списков мобильных сетей России. Обычно как обход для России; если открываются лишь разрешённые сайты, весь трафик идёт через GLOBAL с узлами обхода." }

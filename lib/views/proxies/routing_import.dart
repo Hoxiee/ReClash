@@ -83,6 +83,32 @@ String _fromLink(String text) {
   }
 }
 
+/// Exports a saved profile or scenario [id] together with the profiles it
+/// relies on; [text] is what goes out when the core cannot bundle it.
+Future<void> exportRoutingDocument(
+  BuildContext context,
+  WidgetRef ref, {
+  required String? id,
+  required String kind,
+  required String text,
+  required String title,
+}) async {
+  final bundled = id == null
+      ? null
+      : await ref.read(rcxRoutingActionProvider.notifier).studio({
+          'op': 'export',
+          'id': id,
+          'kind': kind,
+        });
+  if (!context.mounted) return;
+  final exported = bundled?.text ?? '';
+  await showRoutingExport(
+    context,
+    text: exported.isEmpty ? text : exported,
+    title: title,
+  );
+}
+
 /// Copies or saves [text] as YAML, or as a link that carries it.
 Future<void> showRoutingExport(
   BuildContext context, {
@@ -138,13 +164,18 @@ class RoutingImportPage extends ConsumerStatefulWidget {
   ConsumerState<RoutingImportPage> createState() => _RoutingImportPageState();
 }
 
-// Only a scenario names groups or a tunnel mode at its top level.
-final _scenarioKeys = RegExp(r'^(groups|mode):', multiLine: true);
+// Only a scenario names groups, routes or a tunnel mode at its top level.
+final _scenarioKeys = RegExp(r'^(groups|routes|mode):', multiLine: true);
 
 class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
   RcxStudioResult? _lint;
+  List<RcxBundleItem> _items = const [];
+  List<RcxStudioResult> _itemLints = const [];
   bool _loaded = false;
+  bool _saving = false;
   late final bool _scenario = _scenarioKeys.hasMatch(widget.text);
+
+  RcxRoutingAction get _action => ref.read(rcxRoutingActionProvider.notifier);
 
   @override
   void initState() {
@@ -153,7 +184,26 @@ class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
   }
 
   Future<void> _check() async {
-    final result = await ref.read(rcxRoutingActionProvider.notifier).studio({
+    final unpacked = await _action.studio({
+      'op': 'unpack',
+      'text': widget.text,
+      'taken': ref.read(rcxProfilesProvider).keys.toList(),
+    });
+    final items = unpacked?.items ?? const <RcxBundleItem>[];
+    if (items.length > 1) {
+      // A scenario names profiles that are not saved yet, so the bundle is
+      // linted as a whole, each item against the others.
+      final lint = await _action.studio({'op': 'lint', 'text': widget.text});
+      if (!mounted) return;
+      setState(() {
+        _items = items;
+        _itemLints = [?lint];
+        _lint = lint;
+        _loaded = true;
+      });
+      return;
+    }
+    final result = await _action.studio({
       'op': 'lint',
       'text': widget.text,
       if (_scenario) 'kind': 'scenario' else 'group': ?widget.groupName,
@@ -161,24 +211,44 @@ class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
     if (mounted) {
       setState(() {
         _lint = result;
+        _itemLints = [?result];
         _loaded = true;
       });
     }
   }
 
   Future<void> _add() async {
-    final document = _scenario ? _lint?.scenario : _lint?.profile;
-    final title = document?['title'] as String? ?? '';
-    final name = rcxFreeProfileName(ref.read(rcxProfilesProvider), title);
-    await ref
-        .read(rcxRoutingActionProvider.notifier)
-        .saveProfile(
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      final String title;
+      if (_items.isNotEmpty) {
+        for (final item in _items) {
+          await _action.saveProfile(
+            item.name,
+            RcxUserProfile(text: item.text, kind: item.kind),
+          );
+        }
+        final head = _items.firstWhere(
+          (item) => item.kind == 'scenario',
+          orElse: () => _items.first,
+        );
+        title = head.title.isEmpty ? head.name : head.title;
+      } else {
+        final document = _scenario ? _lint?.scenario : _lint?.profile;
+        title = document?['title'] as String? ?? '';
+        final name = rcxFreeProfileName(ref.read(rcxProfilesProvider), title);
+        await _action.saveProfile(
           name,
           RcxUserProfile(text: widget.text, kind: _scenario ? 'scenario' : ''),
         );
-    if (!mounted) return;
-    context.showNotifier(context.appLocalizations.rcxImported(title));
-    Navigator.of(context).pop();
+      }
+      if (!mounted) return;
+      context.showNotifier(context.appLocalizations.rcxImported(title));
+      Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -187,20 +257,41 @@ class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
     final lint = _lint;
     final info = lint?.info;
     final locale = Localizations.localeOf(context).toString();
+    final errors = [for (final result in _itemLints) ...result.errors];
+    final warnings = [for (final result in _itemLints) ...result.warnings];
+    final endpoints = {
+      for (final result in _itemLints)
+        for (final endpoint in result.endpoints) endpoint.host: endpoint,
+    }.values;
     final error = !_loaded
         ? null
         : lint == null
         ? l.rcxImportNeedsCore
-        : lint.errors.isEmpty
+        : errors.isEmpty
         ? null
-        : rcxIssueText(l, lint.errors.first);
+        : rcxIssueText(l, errors.first);
     return FormPage(
       title: l.rcxImportTitle,
       saveLabel: l.rcxImportAdd,
       error: error,
-      onSave: lint != null && lint.errors.isEmpty ? _add : null,
+      saving: _saving,
+      onSave: lint != null && errors.isEmpty ? _add : null,
       children: [
-        if (info != null)
+        if (_items.isNotEmpty)
+          generateSection(
+            title: l.rcxHubBundle,
+            footer: widget.origin,
+            items: [
+              for (final item in _items)
+                DecorationListItem(
+                  title: EmojiText(item.title.isEmpty ? item.name : item.title),
+                  subtitle: Text(
+                    item.kind == 'scenario' ? l.rcxScenario : l.rcxProfile,
+                  ),
+                ),
+            ],
+          )
+        else if (info != null)
           generateSection(
             items: [
               DecorationListItem(
@@ -219,21 +310,24 @@ class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
                   ].join(' · '),
                 ),
               ),
+              if (info.localize(info.description, locale) case final description
+                  when description.isNotEmpty)
+                DecorationListItem(title: EmojiText(description)),
             ],
           ),
-        if (lint?.candidate != null)
+        if (_items.isEmpty && lint?.candidate != null)
           generateSection(
             title: l.rcxCheckOn(widget.groupName ?? ''),
             items: [
               DecorationListItem(title: EmojiText(rcxCheckHeadline(l, lint!))),
             ],
           ),
-        if (lint != null && lint.endpoints.isNotEmpty)
+        if (endpoints.isNotEmpty)
           generateSection(
             title: l.rcxContacts,
             footer: l.rcxContactsHint,
             items: [
-              for (final endpoint in lint.endpoints)
+              for (final endpoint in endpoints)
                 DecorationListItem(
                   title: Text(endpoint.host),
                   subtitle: Text(
@@ -245,11 +339,11 @@ class _RoutingImportPageState extends ConsumerState<RoutingImportPage> {
                 ),
             ],
           ),
-        if (lint != null && lint.warnings.isNotEmpty)
+        if (warnings.isNotEmpty)
           generateSection(
             title: l.rcxWarnings,
             items: [
-              for (final warning in lint.warnings)
+              for (final warning in warnings)
                 DecorationListItem(title: Text(rcxIssueText(l, warning))),
             ],
           ),

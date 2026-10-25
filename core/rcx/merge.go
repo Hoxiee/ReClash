@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"slices"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -14,6 +15,22 @@ import (
 // conflict that keeps the user's value. Nested maps merge the same way, so
 // two edits of different checks do not collide. The user's comments survive.
 func MergeProfiles(base, theirs, mine []byte) (string, []string, error) {
+	return mergeDocument(base, theirs, mine, "profile", func(data []byte) error {
+		_, err := ParseProfile(data)
+		return err
+	})
+}
+
+// MergeScenarios merges a scenario fork the same way; routes merge one by
+// one by name and keep the user's order.
+func MergeScenarios(base, theirs, mine []byte) (string, []string, error) {
+	return mergeDocument(base, theirs, mine, "scenario", func(data []byte) error {
+		_, err := ParseScenario(data)
+		return err
+	})
+}
+
+func mergeDocument(base, theirs, mine []byte, kind string, parse func([]byte) error) (string, []string, error) {
 	b, err := mergeRoot(base)
 	if err != nil {
 		return "", nil, fmt.Errorf("base: %w", err)
@@ -24,10 +41,10 @@ func MergeProfiles(base, theirs, mine []byte) (string, []string, error) {
 	}
 	var doc yaml.Node
 	if err := yaml.Unmarshal(mine, &doc); err != nil {
-		return "", nil, fmt.Errorf("your profile: %w", err)
+		return "", nil, fmt.Errorf("your %s: %w", kind, err)
 	}
 	if len(doc.Content) == 0 || doc.Content[0].Kind != yaml.MappingNode {
-		return "", nil, errors.New("your profile is not a mapping")
+		return "", nil, fmt.Errorf("your %s is not a mapping", kind)
 	}
 	conflicts := mergeMapping(b, t, doc.Content[0], "")
 	var buf bytes.Buffer
@@ -37,8 +54,8 @@ func MergeProfiles(base, theirs, mine []byte) (string, []string, error) {
 		return "", nil, err
 	}
 	_ = encoder.Close()
-	if _, err := ParseProfile(buf.Bytes()); err != nil {
-		return "", conflicts, fmt.Errorf("the merged profile does not parse: %w", err)
+	if err := parse(buf.Bytes()); err != nil {
+		return "", conflicts, fmt.Errorf("the merged %s does not parse: %w", kind, err)
 	}
 	return buf.String(), conflicts, nil
 }
@@ -76,10 +93,88 @@ func mergeMapping(base, theirs, mine *yaml.Node, prefix string) []string {
 				b = &yaml.Node{Kind: yaml.MappingNode}
 			}
 			conflicts = append(conflicts, mergeMapping(b, t, m, prefix+key+".")...)
+		case namedList(m) && namedList(t) && (b == nil || namedList(b)):
+			conflicts = append(conflicts, mergeNamed(b, t, m, prefix+key+".")...)
 		default:
 			conflicts = append(conflicts, prefix+key)
 		}
 	}
+	return conflicts
+}
+
+// namedList is a sequence of mappings each keyed by a name, like routes.
+func namedList(node *yaml.Node) bool {
+	if node == nil || node.Kind != yaml.SequenceNode {
+		return false
+	}
+	for _, item := range node.Content {
+		if item.Kind != yaml.MappingNode || itemName(item) == "" {
+			return false
+		}
+	}
+	return true
+}
+
+func itemName(item *yaml.Node) string {
+	if name := mappingValue(item, "name"); name != nil && name.Kind == yaml.ScalarNode {
+		return name.Value
+	}
+	return ""
+}
+
+func namedItem(list *yaml.Node, name string) *yaml.Node {
+	for i := 0; list != nil && i < len(list.Content); i++ {
+		if itemName(list.Content[i]) == name {
+			return list.Content[i]
+		}
+	}
+	return nil
+}
+
+// mergeNamed merges list items by name. A new item from the source lands
+// after the item it follows there.
+func mergeNamed(base, theirs, mine *yaml.Node, prefix string) []string {
+	var conflicts []string
+	var kept []*yaml.Node
+	for _, m := range mine.Content {
+		name := itemName(m)
+		b, t := namedItem(base, name), namedItem(theirs, name)
+		switch {
+		case t == nil && b == nil:
+			kept = append(kept, m)
+		case t == nil && sameNode(m, b):
+		case t == nil:
+			conflicts = append(conflicts, prefix+name)
+			kept = append(kept, m)
+		default:
+			if b == nil {
+				b = &yaml.Node{Kind: yaml.MappingNode}
+			}
+			conflicts = append(conflicts, mergeMapping(b, t, m, prefix+name+".")...)
+			kept = append(kept, m)
+		}
+	}
+	for i, t := range theirs.Content {
+		name := itemName(t)
+		if namedItem(mine, name) != nil {
+			continue
+		}
+		if b := namedItem(base, name); b != nil {
+			if !sameNode(b, t) {
+				conflicts = append(conflicts, prefix+name)
+			}
+			continue
+		}
+		at := 0
+		for j := i - 1; j >= 0; j-- {
+			if k := slices.IndexFunc(kept, func(n *yaml.Node) bool { return itemName(n) == itemName(theirs.Content[j]) }); k >= 0 {
+				at = k + 1
+				break
+			}
+		}
+		kept = slices.Insert(kept, at, t)
+	}
+	mine.Content = kept
 	return conflicts
 }
 

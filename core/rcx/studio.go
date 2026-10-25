@@ -35,6 +35,9 @@ type StudioRequest struct {
 	Form     *CondForm `json:"form,omitempty"`
 	Base     string    `json:"base,omitempty"`
 	Theirs   string    `json:"theirs,omitempty"`
+	// Taken names the user's profiles and scenarios an unpack must not
+	// replace.
+	Taken []string `json:"taken,omitempty"`
 }
 
 type StudioResult struct {
@@ -50,8 +53,10 @@ type StudioResult struct {
 	Conflicts []string     `json:"conflicts,omitempty"`
 	// Current and Candidate are the group's decision under its policy and
 	// under the draft, from the same evidence.
-	Current   *Decision `json:"current,omitempty"`
-	Candidate *Decision `json:"candidate,omitempty"`
+	Current   *Decision      `json:"current,omitempty"`
+	Candidate *Decision      `json:"candidate,omitempty"`
+	Countries []CountryCount `json:"countries,omitempty"`
+	Items     []BundleItem   `json:"items,omitempty"`
 }
 
 // Issue is a lint finding; Code and Args let the UI word it, Message is the
@@ -70,6 +75,21 @@ const draftName = "draft"
 var yamlLine = regexp.MustCompile(`line (\d+)`)
 
 func (m *machine) studio(req StudioRequest, now time.Time) (StudioResult, error) {
+	switch req.Op {
+	case "countries":
+		return StudioResult{Countries: m.countries(req.Group, now)}, nil
+	case "export":
+		text, err := m.library.Export(req.ID, req.Kind)
+		return StudioResult{Text: text}, err
+	case "unpack":
+		items, err := Unpack([]byte(req.Text), req.Taken)
+		return StudioResult{Items: items}, err
+	}
+	if req.Op == "lint" {
+		if docs, _, _ := readBundle([]byte(req.Text)); docs != nil {
+			return m.lintBundle(req.Text, docs), nil
+		}
+	}
 	if req.Kind == "scenario" {
 		return m.studioScenario(req)
 	}
@@ -230,7 +250,7 @@ func matchWarnings(policy *Policy, d Decision, group, text string) []Issue {
 	for i, tier := range policy.Tiers {
 		if !reached[i] && !tier.LastResort {
 			out = append(out, issueAt(text, "tier.empty", map[string]any{"tier": tier.Label, "group": group},
-				fmt.Sprintf("no server of %s is in %s right now", group, tier.Label), "prefer", i, "when"))
+				fmt.Sprintf("no server of %s is in %s right now", group, tier.Label), "prefer", tier.Source, "when"))
 		}
 	}
 	return out
@@ -366,6 +386,8 @@ func flowWidthOf(node *yaml.Node) (int, bool) {
 
 func (m *machine) studioScenario(req StudioRequest) (StudioResult, error) {
 	switch req.Op {
+	case "cond":
+		return studioCond(req)
 	case "lint":
 		id := cmp.Or(req.ID, UserSource+"/"+draftName)
 		groups := make([]string, 0, len(m.topology.Groups))
@@ -382,6 +404,9 @@ func (m *machine) studioScenario(req StudioRequest) (StudioResult, error) {
 	case "source":
 		data, err := m.library.ScenarioSource(req.ID)
 		return StudioResult{Text: string(data)}, err
+	case "merge":
+		text, conflicts, err := MergeScenarios([]byte(req.Base), []byte(req.Theirs), []byte(req.Text))
+		return StudioResult{Text: text, Conflicts: conflicts}, err
 	}
 	return StudioResult{}, fmt.Errorf("unknown scenario operation %q", req.Op)
 }
@@ -412,15 +437,26 @@ func lintScenarioIn(library *Library, id, text string, groups []string) StudioRe
 		return out
 	}
 	used := map[string]bool{}
+	use := func(program Program) {
+		conds := []string{program.Pool.Include, program.Pool.Exclude}
+		for _, tier := range program.Prefer {
+			conds = append(conds, tier.When)
+		}
+		for _, cond := range conds {
+			for name := range s.Tags {
+				used[name] = used[name] || strings.Contains(cond, "tag("+name+")")
+			}
+		}
+	}
+	routes := map[string]bool{}
+	for _, route := range s.Routes {
+		use(route.Program)
+		routes[route.Name] = route.To == ""
+	}
 	missing := func(programs map[string]Program, path ...any) {
 		for _, target := range slices.Sorted(maps.Keys(programs)) {
-			program := programs[target]
-			for _, cond := range []string{program.Pool.Include, program.Pool.Exclude} {
-				for name := range s.Tags {
-					used[name] = used[name] || strings.Contains(cond, "tag("+name+")")
-				}
-			}
-			if groups == nil || target == MainTarget || target == AllTarget || target == GlobalTarget || slices.Contains(groups, target) {
+			use(programs[target])
+			if groups == nil || routes[target] || target == MainTarget || target == AllTarget || target == GlobalTarget || slices.Contains(groups, target) {
 				continue
 			}
 			out.Warnings = append(out.Warnings, issueAt(text, "group.missing", map[string]any{"group": target},

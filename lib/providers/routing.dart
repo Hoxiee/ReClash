@@ -50,6 +50,7 @@ class RcxStatusState extends _$RcxStatusState {
   /// through every nested selector it took.
   void apply(RcxStatus status) {
     state = status;
+    _reapplyForRoutes(status.reload);
     final picks = <String, String>{};
     for (final group in status.groups) {
       if (group.control.isManual || group.now.isEmpty) continue;
@@ -59,6 +60,23 @@ class RcxStatusState extends _$RcxStatusState {
       }
     }
     ref.read(profilesActionProvider.notifier).mergeCurrentSelectedMap(picks);
+  }
+
+  bool _reapplied = false;
+
+  /// Routes are built into the config, so a scenario that wants other
+  /// routes needs one re-apply; the Core keys its answer over the wanted
+  /// routes, problems included, and stops asking once they are in force.
+  void _reapplyForRoutes(bool reload) {
+    if (!reload) {
+      _reapplied = false;
+      return;
+    }
+    if (_reapplied) return;
+    _reapplied = true;
+    ref
+        .read(setupActionProvider.notifier)
+        .applyProfileDebounce(silence: true, force: true);
   }
 
   /// The Core also pauses per-request traffic reports on this hint, so it

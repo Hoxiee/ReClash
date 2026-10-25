@@ -27,14 +27,17 @@ const (
 // narrower pool, or one fixed member. A group it does not name keeps its
 // own binding.
 type Scenario struct {
-	RCX     int                          `yaml:"rcx,omitempty" json:"rcx,omitempty"`
-	Title   string                       `yaml:"title,omitempty" json:"title,omitempty"`
-	Tags    map[string]string            `yaml:"tags,omitempty" json:"tags,omitempty"`
-	Network NetworkSpec                  `yaml:"network,omitempty" json:"network,omitzero"`
-	Mode    string                       `yaml:"mode,omitempty" json:"mode,omitempty"`
-	Groups  map[string]Program           `yaml:"groups,omitempty" json:"groups,omitempty"`
-	On      map[string]ScenarioLayer     `yaml:"on,omitempty" json:"on,omitempty"`
-	L10n    map[string]map[string]string `yaml:"l10n,omitempty" json:"l10n,omitempty"`
+	RCX         int                `yaml:"rcx,omitempty" json:"rcx,omitempty"`
+	Title       string             `yaml:"title,omitempty" json:"title,omitempty"`
+	Description string             `yaml:"description,omitempty" json:"description,omitempty"`
+	Tags        map[string]string  `yaml:"tags,omitempty" json:"tags,omitempty"`
+	Network     NetworkSpec        `yaml:"network,omitempty" json:"network,omitzero"`
+	Mode        string             `yaml:"mode,omitempty" json:"mode,omitempty"`
+	Groups      map[string]Program `yaml:"groups,omitempty" json:"groups,omitempty"`
+	// Routes go ahead of the config's rules, in this order.
+	Routes []Route                      `yaml:"routes,omitempty" json:"routes,omitempty"`
+	On     map[string]ScenarioLayer     `yaml:"on,omitempty" json:"on,omitempty"`
+	L10n   map[string]map[string]string `yaml:"l10n,omitempty" json:"l10n,omitempty"`
 }
 
 // ScenarioLayer applies on one network kind; a group it names replaces the
@@ -48,6 +51,8 @@ type ScenarioLayer struct {
 type Program struct {
 	Profile string `yaml:"profile,omitempty" json:"profile,omitempty"`
 	Pool    Pool   `yaml:"pool,omitempty" json:"pool,omitzero"`
+	// Prefer replaces the server order of the group's profile.
+	Prefer []TierSpec `yaml:"prefer,omitempty" json:"prefer,omitempty"`
 	// To holds the group on one member, a server or a whole nested group
 	// such as a load balancer, with no search.
 	To string `yaml:"to,omitempty" json:"to,omitempty"`
@@ -83,6 +88,9 @@ func (s *Scenario) validate() error {
 	if err := validatePrograms(s.Groups); err != nil {
 		return atPath(err, "groups")
 	}
+	if err := validateRoutes(s.Routes, s.Groups); err != nil {
+		return atPath(err, "routes")
+	}
 	if err := s.Network.validate(); err != nil {
 		return atPath(err, "network")
 	}
@@ -113,9 +121,19 @@ func validatePrograms(programs map[string]Program) error {
 		if strings.TrimSpace(target) == "" || utf8.RuneCountInString(target) > maxTargetLength {
 			return atPath(fmt.Errorf("group %q needs a name of 1 to %d characters", target, maxTargetLength), target)
 		}
-		if program.To != "" && (program.Profile != "" || program.Pool != (Pool{})) {
-			return atPath(fmt.Errorf("group %s: to holds one member, so profile and pool do not apply", target), target, "to")
+		if err := program.validate(); err != nil {
+			return atPath(fmt.Errorf("group %s: %w", target, err), target)
 		}
+	}
+	return nil
+}
+
+func (p Program) validate() error {
+	if p.To != "" && (p.Profile != "" || p.Pool != (Pool{}) || len(p.Prefer) > 0) {
+		return atPath(errors.New("to holds one member, so profile, pool and prefer do not apply"), "to")
+	}
+	if len(p.Prefer) > maxTiers {
+		return atPath(fmt.Errorf("more than %d preference tiers", maxTiers), "prefer")
 	}
 	return nil
 }
@@ -131,6 +149,9 @@ type compiledScenario struct {
 	modeOn map[string]string
 	base   map[string]Program
 	on     map[string]map[string]Program
+	// routes drive only the route groups the running config gained.
+	routes    []Route
+	routesKey string
 }
 
 func (s *compiledScenario) kinds() []KindRule { return s.net.Kinds }
@@ -162,12 +183,17 @@ type assignment struct {
 // targets resolves program keys to group names: a group's own name, the
 // group the final MATCH rule routes to, or every other select group. A
 // group's own name wins over $main, and both over *.
-func (s *compiledScenario) targets(kind string, groups []string, main string) map[string]assignment {
+func (s *compiledScenario) targets(kind string, groups []string, main string, routeGroups []string) map[string]assignment {
 	programs := s.programs(kind)
 	out := map[string]assignment{}
 	for key, program := range programs {
 		if key != AllTarget && key != MainTarget {
 			out[key] = assignment{key, program}
+		}
+	}
+	for _, route := range s.routes {
+		if _, named := out[route.Name]; !named && route.To == "" && slices.Contains(routeGroups, route.Name) {
+			out[route.Name] = assignment{route.Name, route.Program}
 		}
 	}
 	if program, ok := programs[MainTarget]; ok && main != "" {
@@ -189,7 +215,7 @@ func (s *compiledScenario) targets(kind string, groups []string, main string) ma
 func (s *compiledScenario) allTargets(groups []string, main string) []string {
 	seen := map[string]bool{}
 	for _, kind := range append([]string{""}, slices.Collect(maps.Keys(s.on))...) {
-		for name := range s.targets(kind, groups, main) {
+		for name := range s.targets(kind, groups, main, nil) {
 			seen[name] = true
 		}
 	}
@@ -214,7 +240,7 @@ func (lib *Library) CompileScenario(id string) (*compiledScenario, error) {
 
 func (lib *Library) compileScenario(id string, s *Scenario) (*compiledScenario, error) {
 	out := &compiledScenario{id: id, title: s.Title, tags: s.Tags, mode: s.Mode, modeOn: map[string]string{},
-		base: maps.Clone(s.Groups), on: map[string]map[string]Program{}}
+		base: maps.Clone(s.Groups), on: map[string]map[string]Program{}, routes: s.Routes, routesKey: routesKey(s.Routes)}
 	if out.base == nil {
 		out.base = map[string]Program{}
 	}
@@ -233,6 +259,11 @@ func (lib *Library) compileScenario(id string, s *Scenario) (*compiledScenario, 
 	}
 	if err := lib.checkPrograms(s.Groups, tags, "groups"); err != nil {
 		return nil, err
+	}
+	for i, route := range s.Routes {
+		if err := lib.checkProgram(route.Name, route.Program, tags, "routes", i); err != nil {
+			return nil, err
+		}
 	}
 	declared := map[string]bool{}
 	for _, rule := range out.net.Kinds {
@@ -259,31 +290,41 @@ func (lib *Library) compileScenario(id string, s *Scenario) (*compiledScenario, 
 // once it runs.
 func (lib *Library) checkPrograms(programs map[string]Program, tags map[string]bool, path ...any) error {
 	for _, target := range slices.Sorted(maps.Keys(programs)) {
-		program := programs[target]
-		at := append(slices.Clip(path), target)
-		scope := condScope{tags: maps.Clone(tags), checks: map[string]bool{}}
-		if program.Profile != "" {
-			profile, err := lib.Resolve(program.Profile)
-			if err != nil {
-				return atPath(fmt.Errorf("group %s: %w", target, err), append(at, "profile")...)
-			}
-			for name := range profile.Tags {
-				scope.tags[name] = true
-			}
-			for check := range profile.Checks {
-				scope.checks[check] = true
-			}
+		if err := lib.checkProgram(target, programs[target], tags, append(slices.Clip(path), target)...); err != nil {
+			return err
 		}
-		if program.Profile == "" && program.Pool != (Pool{}) {
-			// The group's own profile is not known here; its tags resolve
-			// when it runs.
-			continue
+	}
+	return nil
+}
+
+func (lib *Library) checkProgram(target string, program Program, tags map[string]bool, at ...any) error {
+	scope := condScope{tags: maps.Clone(tags), checks: map[string]bool{}}
+	if program.Profile != "" {
+		profile, err := lib.Resolve(program.Profile)
+		if err != nil {
+			return atPath(fmt.Errorf("group %s: %w", target, err), append(at, "profile")...)
 		}
-		if _, err := parseCond(program.Pool.Include, scope); err != nil {
-			return atPath(fmt.Errorf("group %s pool include: %w", target, err), append(at, "pool", "include")...)
+		for name := range profile.Tags {
+			scope.tags[name] = true
 		}
-		if _, err := parseCond(program.Pool.Exclude, scope); err != nil {
-			return atPath(fmt.Errorf("group %s pool exclude: %w", target, err), append(at, "pool", "exclude")...)
+		for check := range profile.Checks {
+			scope.checks[check] = true
+		}
+	}
+	if program.Profile == "" && (program.Pool != (Pool{}) || len(program.Prefer) > 0) {
+		// The group's own profile is not known here; its tags resolve
+		// when it runs.
+		return nil
+	}
+	if _, err := parseCond(program.Pool.Include, scope); err != nil {
+		return atPath(fmt.Errorf("group %s pool include: %w", target, err), append(at, "pool", "include")...)
+	}
+	if _, err := parseCond(program.Pool.Exclude, scope); err != nil {
+		return atPath(fmt.Errorf("group %s pool exclude: %w", target, err), append(at, "pool", "exclude")...)
+	}
+	for i, tier := range program.Prefer {
+		if _, err := parseCond(tier.When, scope); err != nil {
+			return atPath(fmt.Errorf("group %s prefer %d: %w", target, i+1, err), append(at, "prefer", i, "when")...)
 		}
 	}
 	return nil

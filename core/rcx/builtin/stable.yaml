@@ -1,5 +1,6 @@
 rcx: 1
 title: Stable
+description: "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls."
 level: simple
 prefer:
   - { label: Working, when: 'not dead' }
@@ -8,12 +9,12 @@ switch: { improve: true, feel: calm }
 stranded: hold
 energy: balanced
 l10n:
-  es: { Stable: Estable, Working: Funcionando }
-  fr: { Stable: Stable, Working: Fonctionne }
-  ja: { Stable: 安定, Working: 動作中 }
-  kk: { Stable: Тұрақты, Working: Жұмыс істейді }
-  ko: { Stable: 안정적, Working: 작동 중 }
-  ru: { Stable: Стабильный, Working: Работает }
-  tk: { Stable: Durnukly, Working: Işleýär }
-  uz: { Stable: Barqaror, Working: Ishlayapti }
-  zh-CN: { Stable: 稳定, Working: 可用 }
+  es: { Stable: Estable, Working: Funcionando, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Prefiere el servidor más constante a lo largo del tiempo y evita cambiar por pequeñas mejoras. Elígelo para descargas largas y videollamadas." }
+  fr: { Stable: Stable, Working: Fonctionne, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Privilégie le serveur le plus constant dans le temps et évite de changer pour un petit gain. À choisir pour les longs téléchargements et les appels vidéo." }
+  ja: { Stable: 安定, Working: 動作中, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "長期間もっとも安定しているサーバーを優先し、わずかな改善では切り替えません。長いダウンロードやビデオ通話に向いています。" }
+  kk: { Stable: Тұрақты, Working: Жұмыс істейді, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Уақыт өте ең тұрақты серверді таңдайды және шағын артықшылық үшін ауыспайды. Ұзақ жүктеулер мен бейнеқоңыраулар үшін таңдаңыз." }
+  ko: { Stable: 안정적, Working: 작동 중, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "시간이 지나도 가장 꾸준한 서버를 선호하며, 작은 이득 때문에 바꾸지 않습니다. 긴 다운로드와 화상 통화에 알맞습니다." }
+  ru: { Stable: Стабильный, Working: Работает, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Предпочитает сервер, который дольше всего работает ровно, и не переключается ради небольшого выигрыша. Подходит для долгих загрузок и видеозвонков." }
+  tk: { Stable: Durnukly, Working: Işleýär, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Wagtyň geçmegi bilen iň durnukly serweri saýlaýar we kiçi peýda üçin çalyşmaýar. Uzak ýüklemeler we wideo jaňlar üçin saýlaň." }
+  uz: { Stable: Barqaror, Working: Ishlayapti, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "Vaqt o‘tishi bilan eng barqaror serverni afzal ko‘radi va kichik foyda uchun almashtirmaydi. Uzoq yuklab olish va video qo‘ng‘iroqlar uchun tanlang." }
+  zh-CN: { Stable: 稳定, Working: 可用, "Prefers the server that has been the steadiest over time and avoids switching for small gains. Pick it for long downloads and video calls.": "优先选择长期最稳定的服务器，不会为了微小的提升而切换。适合长时间下载和视频通话。" }
