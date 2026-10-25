@@ -206,6 +206,7 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
         (profile) => profile?.subscriptionSnapshot?.metadata.logo ?? '',
       ),
     );
+    final look = ref.watch(providerPowerButtonProvider);
     final tooltip = switch (link) {
       PowerLink.paused => appLocalizations.onDemandResume,
       PowerLink.on || PowerLink.connecting => appLocalizations.stop,
@@ -229,6 +230,7 @@ class _SimplePowerState extends ConsumerState<SimplePower> {
                 link: link,
                 size: size,
                 logo: logo,
+                look: look,
                 tooltip: tooltip,
                 onPressed: hasProfile ? _toggle : null,
               ),

@@ -111,13 +111,13 @@ class ServiceStatus extends _$ServiceStatus
   }
 }
 
-/// How many of [enabledServiceTargets] the dashboard card has room for, which
-/// its sheet marks as shown there.
+/// The targets the dashboard card on screen lists, which the sheet marks as
+/// shown there.
 @Riverpod(keepAlive: true)
-class ShownServiceCount extends _$ShownServiceCount
+class ShownServiceTargets extends _$ShownServiceTargets
     with AutoDisposeNotifierMixin {
   @override
-  int build() => 2;
+  Set<ServiceTarget> build() => const {};
 }
 
 @riverpod

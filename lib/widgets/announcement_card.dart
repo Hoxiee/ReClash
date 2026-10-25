@@ -194,110 +194,40 @@ Future<void> _openAnnouncement(
   await route.completed;
 }
 
-/// The lines shown before the rest moves to the reader.
-const _openLines = 8;
-
-/// The announcement laid open on top of the simple dashboard's widgets, a long
-/// one finished in the reader.
-class OpenAnnouncementCard extends ConsumerStatefulWidget {
+/// The announcement laid open on top of the simple dashboard's widgets, in
+/// full: it never folds into a preview.
+class OpenAnnouncementCard extends ConsumerWidget {
   const OpenAnnouncementCard({super.key});
 
   @override
-  ConsumerState<OpenAnnouncementCard> createState() =>
-      _OpenAnnouncementCardState();
-}
-
-class _OpenAnnouncementCardState extends ConsumerState<OpenAnnouncementCard> {
-  final _cardKey = GlobalKey();
-  bool _opening = false;
-
-  Future<void> _open(ProviderAnnouncement announcement) async {
-    if (_opening) return;
-    setState(() => _opening = true);
-    try {
-      await _openAnnouncement(context, _cardKey, announcement);
-    } finally {
-      if (mounted) setState(() => _opening = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final announcement = ref.watch(providerAnnouncementProvider);
     if (announcement == null) return const SizedBox.shrink();
     final l = context.appLocalizations;
-    final style = AppTextStyle.subheadline.of(context);
-    return Visibility(
-      visible: !_opening,
-      maintainState: true,
-      maintainAnimation: true,
-      maintainSize: true,
-      child: DashboardCard(
-        key: _cardKey,
-        semanticLabel: l.providerAnnouncement,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            DashboardCardHeader(
-              glyph: AppGlyphs.megaphone,
-              title: l.providerAnnouncement,
-              trailing: [
-                if (announcement.link case final link?)
-                  Transform.translate(
-                    offset: const Offset(8, 0),
-                    child: DashboardIconButton(
-                      glyph: AppGlyphs.openExternal,
-                      tooltip: l.providerAnnouncementOpen,
-                      onPressed: () =>
-                          unawaited(dialogs.openUrl(link.toString())),
-                    ),
+    return DashboardCard(
+      semanticLabel: l.providerAnnouncement,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          DashboardCardHeader(
+            glyph: AppGlyphs.megaphone,
+            title: l.providerAnnouncement,
+            trailing: [
+              if (announcement.link case final link?)
+                Transform.translate(
+                  offset: const Offset(8, 0),
+                  child: DashboardIconButton(
+                    glyph: AppGlyphs.openExternal,
+                    tooltip: l.providerAnnouncementOpen,
+                    onPressed: () =>
+                        unawaited(dialogs.openUrl(link.toString())),
                   ),
-              ],
-            ),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final painter = TextPainter(
-                  text: TextSpan(text: announcement.text, style: style),
-                  maxLines: _openLines,
-                  textDirection: Directionality.of(context),
-                  textScaler: MediaQuery.textScalerOf(context),
-                )..layout(maxWidth: constraints.maxWidth);
-                final clipped = painter.didExceedMaxLines;
-                painter.dispose();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      announcement.text,
-                      maxLines: _openLines,
-                      overflow: TextOverflow.ellipsis,
-                      style: style,
-                    ),
-                    if (clipped)
-                      Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: TextButton(
-                          onPressed: () => unawaited(_open(announcement)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 6,
-                            children: [
-                              Text(l.providerAnnouncementRead),
-                              const GlyphIcon(
-                                AppGlyphs.chevronForward,
-                                size: 16,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                ),
+            ],
+          ),
+          Text(announcement.text, style: AppTextStyle.subheadline.of(context)),
+        ],
       ),
     );
   }

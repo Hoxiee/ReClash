@@ -395,6 +395,24 @@
       "available": true
     },
     {
+      "path": "presentation.powerButton",
+      "name": "reclash-powerbutton",
+      "type": "pairs",
+      "direction": "response",
+      "context": [
+        "http-response",
+        "body-comment"
+      ],
+      "encoding": "semicolon-separated-pairs",
+      "multiplicity": "singleton",
+      "limit": 8,
+      "trust": "hint",
+      "introduced": 1,
+      "absence": "retain-last-known-stale",
+      "consumer": "appearance",
+      "available": true
+    },
+    {
       "path": "reminder.expireDays",
       "name": "reclash-expiredays",
       "type": "numbers",

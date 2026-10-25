@@ -34,6 +34,7 @@ Version: 1
 | `presentation.widgets` | `reclash-widgets` | tokens | hint | appearance |  |
 | `presentation.background` | `reclash-background` | url | hint | appearance | suffix `presentation.backgroundOpacity` 1-100 |
 | `presentation.view` | `reclash-view` | pairs | hint | appearance |  |
+| `presentation.powerButton` | `reclash-powerbutton` | pairs | hint | appearance |  |
 | `reminder.expireDays` | `reclash-expiredays` | numbers | hint | reminder |  |
 | `reminder.trafficPercent` | `reclash-trafficpercent` | numbers | hint | reminder |  |
 | `settings.flags` | `reclash-settings` | tokens | hint | settings |  |

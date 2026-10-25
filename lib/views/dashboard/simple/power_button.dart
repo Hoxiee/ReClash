@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
@@ -20,12 +21,41 @@ const _connectingProgress = 0.45;
 const _haloSize = 1.34;
 const _plateSize = 0.54;
 
-final _morph = Morph(MaterialShapes.circle, MaterialShapes.cookie9Sided);
+const _outlineStroke = BorderSide(width: 4);
 
-Path _morphPath(double progress) =>
-    _morph.toPath(progress: progress, rotationPivotX: 0.5, rotationPivotY: 0.5);
+/// A running shape and the number of identical turns it has, so one step of
+/// the morph's rotation lands it on itself.
+typedef _Silhouette = ({RoundedPolygon polygon, int symmetry});
 
-double _morphTurn(double progress) => progress * 2 * math.pi / 9;
+final _silhouettes = <ProviderPowerShape, _Silhouette>{
+  ProviderPowerShape.cookie: (
+    polygon: MaterialShapes.cookie9Sided,
+    symmetry: 9,
+  ),
+  ProviderPowerShape.circle: (polygon: MaterialShapes.circle, symmetry: 1),
+  ProviderPowerShape.scallop: (
+    polygon: MaterialShapes.cookie12Sided,
+    symmetry: 12,
+  ),
+  ProviderPowerShape.sunny: (polygon: MaterialShapes.sunny, symmetry: 8),
+  ProviderPowerShape.flower: (polygon: MaterialShapes.flower, symmetry: 8),
+  ProviderPowerShape.clover: (polygon: MaterialShapes.clover4Leaf, symmetry: 4),
+  ProviderPowerShape.burst: (polygon: MaterialShapes.softBurst, symmetry: 10),
+};
+
+final _morphs = <ProviderPowerShape, Morph>{};
+
+Morph _morphOf(ProviderPowerShape shape) => _morphs.putIfAbsent(
+  shape,
+  () => Morph(MaterialShapes.circle, _silhouettes[shape]!.polygon),
+);
+
+Path _morphPath(ProviderPowerShape shape, double progress) => _morphOf(
+  shape,
+).toPath(progress: progress, rotationPivotX: 0.5, rotationPivotY: 0.5);
+
+double _morphTurn(ProviderPowerShape shape, double progress) =>
+    progress * 2 * math.pi / _silhouettes[shape]!.symmetry;
 
 const _greyscale = ColorFilter.matrix([
   0.33, 0.59, 0.11, 0, 0, //
@@ -44,10 +74,14 @@ class PowerButton extends StatefulWidget {
     required this.logo,
     required this.tooltip,
     required this.onPressed,
+    this.look = defaultProviderPowerButton,
   });
 
   final PowerLink link;
   final double size;
+
+  /// The shape and fill of the running button, which the provider picks.
+  final ProviderPowerButton look;
 
   /// The provider's logo URL or data URI; empty draws the power glyph.
   final String logo;
@@ -144,16 +178,30 @@ class _PowerButtonState extends State<PowerButton>
     final size = widget.size;
     final link = widget.link;
     final enabled = widget.onPressed != null;
+    final shape = widget.look.shape;
+    final type = widget.look.type;
+    final tonal = link == PowerLink.on && type == ProviderPowerType.tonal;
+    final hollow = link == PowerLink.on && type == ProviderPowerType.outline;
     final fill = switch (link) {
       PowerLink.off => colors.tone,
       PowerLink.connecting || PowerLink.paused => colorScheme.primaryContainer,
-      PowerLink.on => colorScheme.primary,
+      PowerLink.on =>
+        tonal
+            ? colorScheme.primaryContainer
+            : hollow
+            ? Colors.transparent
+            : colorScheme.primary,
     };
     final ink = switch (link) {
       PowerLink.off => colorScheme.onSurface,
       PowerLink.connecting ||
       PowerLink.paused => colorScheme.onPrimaryContainer,
-      PowerLink.on => colorScheme.onPrimary,
+      PowerLink.on =>
+        tonal
+            ? colorScheme.onPrimaryContainer
+            : hollow
+            ? colorScheme.primary
+            : colorScheme.onPrimary,
     };
     final stateDuration = context.motionDuration(_stateDuration);
     final body = TweenAnimationBuilder<Color?>(
@@ -172,21 +220,24 @@ class _PowerButtonState extends State<PowerButton>
             );
             final painted = CustomPaint(
               painter: _BodyPainter(
+                shape: shape,
                 progress: progress,
-                color: glass ? null : color,
+                color: glass || hollow ? null : color,
                 shadow: link == PowerLink.off
                     ? Colors.black.withValues(alpha: 0.25)
                     : colorScheme.primary.withValues(alpha: 0.3),
                 ring: _focused
                     ? focusRingSide(colorScheme, standsOff: true)
+                    : hollow
+                    ? _outlineStroke.copyWith(color: ink)
                     : null,
               ),
               child: SizedBox.square(dimension: size),
             );
-            if (!glass) return painted;
+            if (!glass || hollow) return painted;
             return LiquidGlass(
               style: LiquidGlassStyle.tinted(colorScheme, color),
-              clipper: _BodyClipper(progress),
+              clipper: _BodyClipper(shape, progress),
               pressed: _pressed,
               child: painted,
             );
@@ -200,35 +251,42 @@ class _PowerButtonState extends State<PowerButton>
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          _Halo(link: link, size: size, turns: _halo),
+          _Halo(link: link, shape: shape, size: size, turns: _halo),
           Tooltip(
             message: widget.tooltip,
             child: Semantics(
               button: true,
               enabled: enabled,
               label: widget.tooltip,
-              child: InkResponse(
-                onTap: widget.onPressed,
-                onHover: (value) => setState(() => _hovered = value),
-                onHighlightChanged: (value) => setState(() => _pressed = value),
-                onFocusChange: (value) => setState(() => _focused = value),
-                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-                splashFactory: NoSplash.splashFactory,
-                customBorder: AppShape.circle,
-                child: ElasticPress(
-                  enabled: enabled,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      body,
-                      _LogoPlate(
-                        size: size * _plateSize,
-                        logo: widget.logo,
-                        muted: link == PowerLink.off,
-                        raised: link == PowerLink.on,
-                      ),
-                    ],
+              child: GestureDetector(
+                onHorizontalDragUpdate: (_) {},
+                onVerticalDragUpdate: (_) {},
+                child: InkResponse(
+                  onTap: widget.onPressed,
+                  onHover: (value) => setState(() => _hovered = value),
+                  onHighlightChanged: (value) =>
+                      setState(() => _pressed = value),
+                  onFocusChange: (value) => setState(() => _focused = value),
+                  overlayColor: const WidgetStatePropertyAll(
+                    Colors.transparent,
+                  ),
+                  splashFactory: NoSplash.splashFactory,
+                  customBorder: AppShape.circle,
+                  child: ElasticPress(
+                    enabled: enabled,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        body,
+                        _LogoPlate(
+                          size: size * _plateSize,
+                          logo: widget.logo,
+                          muted: link == PowerLink.off,
+                          raised: link == PowerLink.on,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -241,9 +299,15 @@ class _PowerButtonState extends State<PowerButton>
 }
 
 class _Halo extends StatelessWidget {
-  const _Halo({required this.link, required this.size, required this.turns});
+  const _Halo({
+    required this.link,
+    required this.shape,
+    required this.size,
+    required this.turns,
+  });
 
   final PowerLink link;
+  final ProviderPowerShape shape;
   final double size;
   final Animation<double> turns;
 
@@ -269,7 +333,9 @@ class _Halo extends StatelessWidget {
       PowerLink.on || PowerLink.paused => AnimatedBuilder(
         animation: turns,
         builder: (_, _) {
-          final rotation = 0.12 + turns.value * 2 * math.pi / 9;
+          final silhouette = _silhouettes[shape]!;
+          final rotation =
+              0.12 + turns.value * 2 * math.pi / silhouette.symmetry;
           final tint = link == PowerLink.on
               ? colorScheme.primary
               : colorScheme.onSurfaceVariant;
@@ -277,13 +343,13 @@ class _Halo extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               ShapeBadge(
-                shape: MaterialShapes.cookie9Sided,
+                shape: silhouette.polygon,
                 color: tint.withValues(alpha: 0.06),
                 size: halo,
                 rotation: rotation,
               ),
               ShapeBadge(
-                shape: MaterialShapes.cookie9Sided,
+                shape: silhouette.polygon,
                 color: tint.withValues(alpha: 0.12),
                 size: size * 1.17,
                 rotation: rotation,
@@ -388,6 +454,7 @@ class _LogoPlate extends StatelessWidget {
 /// [shadow] only outside it, as one under glass would show through.
 class _BodyPainter extends CustomPainter {
   const _BodyPainter({
+    required this.shape,
     required this.progress,
     required this.color,
     required this.shadow,
@@ -397,6 +464,7 @@ class _BodyPainter extends CustomPainter {
   static const _shadowOffset = Offset(0, 10);
   static const _shadowBlur = 28.0;
 
+  final ProviderPowerShape shape;
   final double progress;
   final Color? color;
   final Color shadow;
@@ -404,12 +472,12 @@ class _BodyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = _morphPath(progress);
+    final path = _morphPath(shape, progress);
     final color = this.color;
     canvas
       ..save()
       ..translate(size.width / 2, size.height / 2)
-      ..rotate(_morphTurn(progress))
+      ..rotate(_morphTurn(shape, progress))
       ..scale(size.width, size.height)
       ..translate(-0.5, -0.5);
     canvas.save();
@@ -444,6 +512,7 @@ class _BodyPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BodyPainter oldDelegate) =>
+      oldDelegate.shape != shape ||
       oldDelegate.progress != progress ||
       oldDelegate.color != color ||
       oldDelegate.shadow != shadow ||
@@ -451,20 +520,22 @@ class _BodyPainter extends CustomPainter {
 }
 
 class _BodyClipper extends CustomClipper<Path> {
-  const _BodyClipper(this.progress);
+  const _BodyClipper(this.shape, this.progress);
 
+  final ProviderPowerShape shape;
   final double progress;
 
   @override
   Path getClip(Size size) {
     final transform =
         Matrix4.translationValues(size.width / 2, size.height / 2, 0)
-          ..rotateZ(_morphTurn(progress))
+          ..rotateZ(_morphTurn(shape, progress))
           ..scaleByDouble(size.width, size.height, 1, 1)
           ..translateByDouble(-0.5, -0.5, 0, 1);
-    return _morphPath(progress).transform(transform.storage);
+    return _morphPath(shape, progress).transform(transform.storage);
   }
 
   @override
-  bool shouldReclip(_BodyClipper oldClipper) => oldClipper.progress != progress;
+  bool shouldReclip(_BodyClipper oldClipper) =>
+      oldClipper.shape != shape || oldClipper.progress != progress;
 }

@@ -252,6 +252,14 @@ const subscriptionFields = <SubscriptionField>[
     consumer: 'appearance',
   ),
   SubscriptionField(
+    'presentation.powerButton',
+    'reclash-powerbutton',
+    SubscriptionFieldType.pairs,
+    limit: 8,
+    trust: SubscriptionTrust.hint,
+    consumer: 'appearance',
+  ),
+  SubscriptionField(
     'reminder.expireDays',
     'reclash-expiredays',
     SubscriptionFieldType.numbers,

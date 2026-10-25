@@ -132,6 +132,7 @@ class _SimpleServicesCardState extends ConsumerState<SimpleServicesCard>
         _services.unwatch(target);
       }
       _watched = shown;
+      ref.read(shownServiceTargetsProvider.notifier).value = shown;
     });
   }
 

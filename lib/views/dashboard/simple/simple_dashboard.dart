@@ -25,6 +25,9 @@ const _columnGap = 32.0;
 
 const _side = 24.0;
 
+const _swipeDistance = 48.0;
+const _swipeVelocity = 400.0;
+
 /// The dashboard the appearance setting picks.
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -61,6 +64,7 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
   final _pager = PageController();
   var _page = 0;
   var _editing = false;
+  var _swipe = 0.0;
 
   @override
   void dispose() {
@@ -77,6 +81,20 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
       duration: context.motionDuration(const Duration(milliseconds: 360)),
       curve: Curves.easeInOutCubicEmphasized,
     );
+  }
+
+  /// A swipe turns the page once and never holds it between two: the pager
+  /// ignores the finger and flips on the gesture's distance or fling.
+  void _endSwipe(DragEndDetails details) {
+    final sign = Directionality.of(context) == TextDirection.rtl ? -1 : 1;
+    final distance = _swipe * sign;
+    final velocity = details.primaryVelocity ?? 0;
+    _swipe = 0;
+    final forward =
+        velocity * sign < -_swipeVelocity || distance <= -_swipeDistance;
+    final back = velocity * sign > _swipeVelocity || distance >= _swipeDistance;
+    if (forward == back) return;
+    _showPage((_page + (forward ? 1 : -1)).clamp(0, 1));
   }
 
   @override
@@ -161,26 +179,34 @@ class _SimpleDashboardViewState extends ConsumerState<SimpleDashboardView> {
     final side = dashboardMobileSideOf(width);
     final top = context.contentTopPadding;
     final bottom = 12 + context.bottomInset;
-    return PageView(
-      controller: _pager,
-      onPageChanged: (page) => setState(() => _page = page),
-      children: [
-        _Page(
-          active: _page == 0,
-          child: SimpleHome(
-            padding: EdgeInsets.fromLTRB(side, top, side, bottom),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onHorizontalDragStart: (_) => _swipe = 0,
+      onHorizontalDragUpdate: (details) => _swipe += details.primaryDelta ?? 0,
+      onHorizontalDragCancel: () => _swipe = 0,
+      onHorizontalDragEnd: _endSwipe,
+      child: PageView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _pager,
+        onPageChanged: (page) => setState(() => _page = page),
+        children: [
+          _Page(
+            active: _page == 0,
+            child: SimpleHome(
+              padding: EdgeInsets.fromLTRB(side, top, side, bottom),
+            ),
           ),
-        ),
-        _Page(
-          active: _page == 1,
-          child: SimpleWidgetList(
-            editing: editing,
-            onDone: () => _setEditing(false),
-            padding: EdgeInsets.fromLTRB(side, top, side, bottom),
-            leading: [if (announcement) const OpenAnnouncementCard()],
+          _Page(
+            active: _page == 1,
+            child: SimpleWidgetList(
+              editing: editing,
+              onDone: () => _setEditing(false),
+              padding: EdgeInsets.fromLTRB(side, top, side, bottom),
+              leading: [if (announcement) const OpenAnnouncementCard()],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -79,61 +79,62 @@ abstract class _$ServiceStatus
   }
 }
 
-/// How many of [enabledServiceTargets] the dashboard card has room for, which
-/// its sheet marks as shown there.
+/// The targets the dashboard card on screen lists, which the sheet marks as
+/// shown there.
 
-@ProviderFor(ShownServiceCount)
-final shownServiceCountProvider = ShownServiceCountProvider._();
+@ProviderFor(ShownServiceTargets)
+final shownServiceTargetsProvider = ShownServiceTargetsProvider._();
 
-/// How many of [enabledServiceTargets] the dashboard card has room for, which
-/// its sheet marks as shown there.
-final class ShownServiceCountProvider
-    extends $NotifierProvider<ShownServiceCount, int> {
-  /// How many of [enabledServiceTargets] the dashboard card has room for, which
-  /// its sheet marks as shown there.
-  ShownServiceCountProvider._()
+/// The targets the dashboard card on screen lists, which the sheet marks as
+/// shown there.
+final class ShownServiceTargetsProvider
+    extends $NotifierProvider<ShownServiceTargets, Set<ServiceTarget>> {
+  /// The targets the dashboard card on screen lists, which the sheet marks as
+  /// shown there.
+  ShownServiceTargetsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'shownServiceCountProvider',
+        name: r'shownServiceTargetsProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$shownServiceCountHash();
+  String debugGetCreateSourceHash() => _$shownServiceTargetsHash();
 
   @$internal
   @override
-  ShownServiceCount create() => ShownServiceCount();
+  ShownServiceTargets create() => ShownServiceTargets();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(int value) {
+  Override overrideWithValue(Set<ServiceTarget> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<int>(value),
+      providerOverride: $SyncValueProvider<Set<ServiceTarget>>(value),
     );
   }
 }
 
-String _$shownServiceCountHash() => r'5ed23369fc7ba6ce8d809f06ff026cdbe60f5233';
+String _$shownServiceTargetsHash() =>
+    r'3743ed18861044d373705a7a616bf7fe66fb6bfa';
 
-/// How many of [enabledServiceTargets] the dashboard card has room for, which
-/// its sheet marks as shown there.
+/// The targets the dashboard card on screen lists, which the sheet marks as
+/// shown there.
 
-abstract class _$ShownServiceCount extends $Notifier<int> {
-  int build();
+abstract class _$ShownServiceTargets extends $Notifier<Set<ServiceTarget>> {
+  Set<ServiceTarget> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<int, int>;
+    final ref = this.ref as $Ref<Set<ServiceTarget>, Set<ServiceTarget>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<int, int>,
-              int,
+              AnyNotifier<Set<ServiceTarget>, Set<ServiceTarget>>,
+              Set<ServiceTarget>,
               Object?,
               Object?
             >;

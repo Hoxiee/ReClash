@@ -17,6 +17,33 @@ enum ProviderSettingFlag {
   closeconnections,
 }
 
+/// The shape the simple dashboard's power button takes while it runs.
+enum ProviderPowerShape {
+  cookie,
+  circle,
+  scallop,
+  sunny,
+  flower,
+  clover,
+  burst,
+}
+
+/// How the running power button is drawn: filled with the accent, with its
+/// container tone, or as a bare outline.
+enum ProviderPowerType { solid, tonal, outline }
+
+/// What `reclash-powerbutton` asks of the power button; only a provider sets
+/// it, and a missing or unknown key leaves the default.
+typedef ProviderPowerButton = ({
+  ProviderPowerShape shape,
+  ProviderPowerType type,
+});
+
+const defaultProviderPowerButton = (
+  shape: ProviderPowerShape.cookie,
+  type: ProviderPowerType.solid,
+);
+
 /// The `reclash-view` keys ReClash has a setting for, and what each holds.
 class ProviderView {
   const ProviderView({
@@ -117,6 +144,17 @@ class ProviderHints {
 
   ProviderView get view =>
       ProviderView.fromPairs(metadata.pairs('presentation.view'));
+
+  ProviderPowerButton get powerButton {
+    final pairs = metadata.pairs('presentation.powerButton');
+    T pick<T extends Enum>(String key, List<T> values) =>
+        values.where((value) => value.name == pairs[key]).firstOrNull ??
+        values.first;
+    return (
+      shape: pick('shape', ProviderPowerShape.values),
+      type: pick('type', ProviderPowerType.values),
+    );
+  }
 
   /// Null when the provider sends no list or no name it lists is known, so
   /// the user's dashboard stays as it is.

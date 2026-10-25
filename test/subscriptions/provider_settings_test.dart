@@ -103,6 +103,22 @@ void main() {
       expect(view.primaryColor, 0xffff8800);
     });
 
+    test('power button pairs fall back to the default per key', () {
+      expect(_hints({}).powerButton, defaultProviderPowerButton);
+      expect(
+        _hints({
+          'reclash-powerbutton': ['shape:flower;type:outline'],
+        }).powerButton,
+        (shape: ProviderPowerShape.flower, type: ProviderPowerType.outline),
+      );
+      expect(
+        _hints({
+          'reclash-powerbutton': ['shape:bogus;type:tonal;unknown:x'],
+        }).powerButton,
+        (shape: ProviderPowerShape.cookie, type: ProviderPowerType.tonal),
+      );
+    });
+
     test('domestic routing names the region optionally', () {
       expect(
         _hints({

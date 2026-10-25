@@ -25,6 +25,14 @@ final providerHintsProvider = Provider<ProviderHints?>((ref) {
   return metadata == null ? ProviderHints.empty : ProviderHints(metadata);
 });
 
+final providerPowerButtonProvider = Provider<ProviderPowerButton>(
+  (ref) => ref.watch(
+    providerHintsProvider.select(
+      (hints) => hints?.powerButton ?? defaultProviderPowerButton,
+    ),
+  ),
+);
+
 final providerRestrictionsProvider = Provider<Set<ProviderRestriction>>(
   (ref) => ref.watch(
     providerHintsProvider.select(

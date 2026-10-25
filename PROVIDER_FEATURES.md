@@ -68,6 +68,7 @@ rcx-scenarios:
 A subscription may set app settings. They apply when the profile is current, without a confirmation, and each carries a "From provider" tag where the user edits it. A setting the user changes stops following the provider until "Return to provider" hands it back, per setting or for the whole profile.
 
 - `reclash-view`: `key:value;...` over `proxies.type`, `proxies.sort`, `proxies.layout`, `proxies.icon`, `proxies.card`, `app.navbar`, `app.tabs`, `app.glass`, `app.color`, `app.style`, `app.black`. Unknown keys and values are ignored.
+- `reclash-powerbutton`: `key:value;...` over `shape` (`cookie`, `circle`, `scallop`, `sunny`, `flower`, `clover`, `burst`) and `type` (`solid`, `tonal`, `outline`) for the simple dashboard's power button while it runs. Only the provider sets it; unknown keys and values are ignored.
 - `reclash-widgets`: dashboard cards, comma-separated. `reclash-background`: image URL, optionally `,<opacity percent>`.
 - `reclash-settings`: `minimize`, `autorun`, `shadowstart`, `autostart`, `autoupdate`, `openlogs`, `closeconnections`.
 - `reclash-restrictions`: `noglobal` removes the Global mode, `androidsecure` opens no local ports on Android, `denywidgets` removes dashboard editing.

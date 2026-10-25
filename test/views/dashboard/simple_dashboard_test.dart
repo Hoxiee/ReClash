@@ -13,12 +13,15 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/subscriptions/metadata/hints.dart';
 import 'package:reclash/subscriptions/metadata/metadata.dart';
+import 'package:reclash/providers/service_status.dart';
 import 'package:reclash/subscriptions/provider_settings.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/simple/flag.dart';
 import 'package:reclash/views/dashboard/simple/home.dart';
 import 'package:reclash/views/dashboard/simple/location_card.dart';
+import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/simple/simple_dashboard.dart';
+import 'package:reclash/views/dashboard/simple/services_card.dart';
 import 'package:reclash/views/dashboard/simple/subscription_card.dart';
 import 'package:reclash/views/dashboard/simple/widget_list.dart';
 import 'package:reclash/widgets/announcement_card.dart';
@@ -220,6 +223,85 @@ void main() {
     );
     expect(find.byTooltip('Edit widgets'), findsOneWidget);
     expect(find.byTooltip('Detailed dashboard'), findsNothing);
+  });
+
+  group('swipe pager', () {
+    double? pagerAt(WidgetTester tester) =>
+        tester.widget<PageView>(find.byType(PageView)).controller?.page;
+
+    Future<void> swipe(WidgetTester tester, Finder from, double dx) async {
+      await tester.drag(from, Offset(dx, 0));
+      await settle(tester);
+    }
+
+    testWidgets('a swipe turns the page and never holds it between two', (
+      tester,
+    ) async {
+      chooseSimple();
+      await pumpPage(tester);
+
+      final gesture = await tester.startGesture(const Offset(200, 120));
+      await gesture.moveBy(const Offset(-60, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(pagerAt(tester), 0);
+      await gesture.up();
+      await settle(tester);
+
+      expect(find.byTooltip('Edit widgets'), findsOneWidget);
+      expect(pagerAt(tester), 1);
+
+      await swipe(tester, find.byType(SimpleWidgetList), 200);
+      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(pagerAt(tester), 0);
+    });
+
+    testWidgets('a short slow drag leaves the page where it was', (
+      tester,
+    ) async {
+      chooseSimple();
+      await pumpPage(tester);
+
+      final gesture = await tester.startGesture(const Offset(200, 120));
+      await gesture.moveBy(const Offset(-20, 0));
+      await tester.pump(const Duration(seconds: 1));
+      await gesture.up();
+      await settle(tester);
+
+      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(pagerAt(tester), 0);
+    });
+
+    testWidgets('dragging the power button swipes nothing', (tester) async {
+      chooseSimple();
+      await pumpPage(tester);
+
+      await swipe(tester, find.byType(PowerButton), -250);
+
+      expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
+      expect(pagerAt(tester), 0);
+    });
+  });
+
+  testWidgets('the services card tells the manager which services it shows', (
+    tester,
+  ) async {
+    chooseSimple();
+    await pumpPage(tester);
+    await openWidgets(tester);
+
+    final shown = container.read(shownServiceTargetsProvider);
+    expect(shown, isNotEmpty);
+    expect(shown.length, lessThanOrEqualTo(4));
+    for (final target in shown) {
+      expect(
+        find.descendant(
+          of: find.byType(SimpleServicesCard),
+          matching: find.text(target.label),
+        ),
+        findsOneWidget,
+        reason: target.label,
+      );
+    }
   });
 
   testWidgets('entering edit keeps the pager on the widget list', (

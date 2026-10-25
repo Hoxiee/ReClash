@@ -130,7 +130,6 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
   late final ServiceStatus _services;
   Set<ServiceTarget> _shown = const {};
   Set<ServiceTarget> _watched = const {};
-  int? _shownCount;
   var _syncScheduled = false;
 
   @override
@@ -147,17 +146,16 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
     super.dispose();
   }
 
-  void _syncShown(Set<ServiceTarget> shown, int count) {
-    if (setEquals(shown, _shown) && count == _shownCount) return;
+  void _syncShown(Set<ServiceTarget> shown) {
+    if (setEquals(shown, _shown)) return;
     _shown = shown;
-    _shownCount = count;
     if (_syncScheduled) return;
     _syncScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _syncScheduled = false;
       if (!mounted) return;
-      ref.read(shownServiceCountProvider.notifier).value = _shownCount!;
       final shown = _shown;
+      ref.read(shownServiceTargetsProvider.notifier).value = shown;
       for (final target in shown.difference(_watched)) {
         _services.watch(target);
       }
@@ -180,7 +178,7 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard>
         .watch(enabledServiceTargetsProvider)
         .take(shownCount)
         .toList();
-    _syncShown(shown.toSet(), shownCount);
+    _syncShown(shown.toSet());
     final state = ref.watch(serviceStatusProvider);
     final services = [
       for (final target in shown)
@@ -757,7 +755,7 @@ class ServiceManageView extends ConsumerWidget {
       });
     }
 
-    final shown = enabled.take(ref.watch(shownServiceCountProvider)).toSet();
+    final shown = ref.watch(shownServiceTargetsProvider);
 
     Widget itemAt(int index) {
       final target = targets[index];

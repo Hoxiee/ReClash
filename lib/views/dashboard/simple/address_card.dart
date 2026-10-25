@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/service_probe.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/ip_quality/ip_quality_sheet.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/ip_quality.dart';
 import 'package:reclash/providers/outbound_ip.dart';
@@ -13,14 +16,6 @@ import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/probe_start_hold.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
-
-/// Enough of the address to recognize it without handing it to a screenshot.
-String _maskedIp(String ip) {
-  final octets = ip.split('.');
-  if (octets.length == 4) return '${octets[0]}.${octets[1]}.•••.${octets[3]}';
-  final groups = ip.split(':');
-  return groups.length > 2 ? '${groups.first}:${groups[1]}:•••' : ip;
-}
 
 /// The IP check put as the question it answers: will sites treat this
 /// address as a person or as a VPN.
@@ -97,7 +92,11 @@ class _SimpleAddressCardState extends ConsumerState<SimpleAddressCard>
         : (appLocalizations.loading, null, false);
     return DashboardCard(
       semanticLabel: appLocalizations.simpleIpTitle,
-      onTap: live ? () => _refresh(ip) : null,
+      onTap: !live
+          ? null
+          : ip == null || (qualityState?.hasError ?? false)
+          ? () => _refresh(ip)
+          : () => unawaited(showIpQualitySheet(context, ip: ip)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
@@ -107,7 +106,7 @@ class _SimpleAddressCardState extends ConsumerState<SimpleAddressCard>
             title: appLocalizations.simpleIpTitle,
             trailing: [
               if (live && ip != null && !hideIp)
-                Text(_maskedIp(ip), style: DashboardText.label(context)),
+                Text(ip, style: DashboardText.label(context)),
             ],
           ),
           Text(
