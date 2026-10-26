@@ -6,6 +6,8 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/config/routing.dart';
+import 'package:reclash/views/proxies/routing_scenario.dart';
+import 'package:reclash/views/proxies/routing_studio.dart';
 
 import '../../helpers/preferences.dart';
 import '../../helpers/test_app.dart';
@@ -107,8 +109,13 @@ void main() {
     l = await AppLocalizations.load(const Locale('en'));
   });
 
-  Future<_FakeAction> pumpHub(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(412, 915);
+  Future<_FakeAction> pumpHub(
+    WidgetTester tester, {
+    Size size = const Size(412, 915),
+    List<RcxProfileInfo> library = _library,
+    Widget Function(Widget child)? wrap,
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -124,10 +131,12 @@ void main() {
           ),
           currentProfileIdProvider.overrideWithBuild((_, _) => 1),
           rcxStatusStateProvider.overrideWith(_FixedStatus.new),
-          rcxLibraryProvider.overrideWith((_) async => _library),
+          rcxLibraryProvider.overrideWith((_) async => library),
           rcxRoutingActionProvider.overrideWith(() => action),
         ],
-        child: const RoutingSettingsView(),
+        child:
+            wrap?.call(const RoutingSettingsView()) ??
+            const RoutingSettingsView(),
       ),
     );
     await _pumpFrames(tester);
@@ -153,6 +162,92 @@ void main() {
     expect(_text('Bank'), findsOneWidget);
     expect(_text(l.direct), findsOneWidget);
     expect(find.textContaining('NL-2', findRichText: true), findsOneWidget);
+  });
+
+  for (final scenario in [true, false]) {
+    testWidgets(
+      'the compact library opens a new ${scenario ? 'scenario' : 'profile'} without overflow actions',
+      (tester) async {
+        final action = await pumpHub(
+          tester,
+          size: const Size(320, 740),
+          library: const [],
+        );
+        expect(find.byTooltip(l.more), findsNothing);
+
+        await tester.tap(destination(l.rcxHubLibrary));
+        await _pumpFrames(tester);
+
+        expect(find.text(l.rcxNewScenario).hitTestable(), findsOneWidget);
+        expect(find.text(l.rcxNewProfile).hitTestable(), findsOneWidget);
+        expect(find.text(l.import).hitTestable(), findsOneWidget);
+        final importRow = find.ancestor(
+          of: find.text(l.import),
+          matching: find.byType(ListItem),
+        );
+        expect(
+          tester.getTopLeft(find.byType(SegmentedControl<bool>)).dy,
+          greaterThan(tester.getBottomLeft(importRow).dy),
+        );
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(
+          find.text(scenario ? l.rcxNewScenario : l.rcxNewProfile),
+        );
+        await _pumpFrames(tester);
+
+        expect(
+          find.byType(scenario ? ScenarioEditor : RoutingStudio),
+          findsOneWidget,
+        );
+        expect(action.saved, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('library creation actions stay in the owning workspace', (
+    tester,
+  ) async {
+    final opened = <Widget>[];
+    await pumpHub(
+      tester,
+      size: const Size(320, 740),
+      wrap: (child) => PageNavigationScope(
+        canOpen: (_) => false,
+        open: (_) {},
+        push: <T>(context, page) async {
+          opened.add(page);
+          return null;
+        },
+        child: child,
+      ),
+    );
+    await tester.tap(destination(l.rcxHubLibrary));
+    await _pumpFrames(tester);
+
+    await tester.tap(find.text(l.rcxNewScenario));
+    await _pumpFrames(tester);
+    expect(opened, [isA<ScenarioEditor>()]);
+
+    await tester.tap(find.text(l.rcxNewProfile));
+    await _pumpFrames(tester);
+    expect(opened, [isA<ScenarioEditor>(), isA<RoutingStudio>()]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the library keeps import available when it is empty', (
+    tester,
+  ) async {
+    await pumpHub(tester, library: const []);
+    await tester.tap(destination(l.rcxHubLibrary));
+    await _pumpFrames(tester);
+    await tester.tap(find.text(l.import));
+    await _pumpFrames(tester);
+
+    expect(find.text(l.clipboardImport), findsOneWidget);
+    expect(find.text(l.importFile), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('the master switch turns the scenario off', (tester) async {

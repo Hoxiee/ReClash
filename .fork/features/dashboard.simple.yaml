@@ -6,10 +6,11 @@ must:
   opt-in: The classic dashboard stays the default; the simple one is chosen in Appearance or from either dashboard's app bar.
   layout: Phones show home and widgets as two pager pages and desktops side by side; entering or leaving edit mode keeps the page in view; a swipe turns the page once on distance or fling and never leaves it between two.
   widgets: The simple widget set and order persist apart from the classic dashboard's, unknown names are dropped, a provider's denyWidgets disables editing, and a provider's presentation.widgets list sets the simple set where it has a counterpart; only the provider's presentation.powerButton header sets the on-state shape and type of the power button.
+  mode: Auto is a separate switch below the manual choices; while active, those choices are disabled but show the live effective tunnel mode.
   provider: Announcements and notices sit on the widgets page; support, renewal and top-up links come only from the subscription's safe links.
   speed: The speed test runs only by hand through the app's HTTP route, labels direct results, and cancels a running measurement when that route changes.
-watch: ['lib/views/dashboard/simple/**', lib/providers/speed_test.dart, lib/widgets/announcement_card.dart, 'assets/images/flags/**', 'arb/fragments/dashboard.simple/**', lib/views/navigation.dart, lib/views/theme.dart, lib/views/theme_preview.dart, lib/views/dashboard/dashboard.dart, lib/models/config.dart, lib/enum/enum.dart, lib/subscriptions/metadata/hints.dart, lib/subscriptions/provider_settings.dart, test/views/dashboard/simple_dashboard_test.dart, test/providers/speed_test_test.dart, test/models/config_test.dart]
+watch: ['lib/views/dashboard/simple/**', lib/views/dashboard/widgets/card.dart, lib/providers/speed_test.dart, lib/widgets/announcement_card.dart, 'assets/images/flags/**', 'arb/fragments/dashboard.simple/**', lib/views/navigation.dart, lib/views/theme.dart, lib/views/theme_preview.dart, lib/views/dashboard/dashboard.dart, lib/models/config.dart, lib/enum/enum.dart, lib/subscriptions/metadata/hints.dart, lib/subscriptions/provider_settings.dart, test/views/dashboard/simple_dashboard_test.dart, test/providers/speed_test_test.dart, test/models/config_test.dart]
 checks:
-  simple-dashboard: [opt-in, layout, widgets, provider, speed]
+  simple-dashboard: [opt-in, layout, widgets, mode, provider, speed]
 deps: [subscriptions.providers, settings.specs]
 drop: Upstream ships an equivalent opt-in simple dashboard.

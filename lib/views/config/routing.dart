@@ -265,23 +265,6 @@ class _RoutingSettingsViewState extends ConsumerState<RoutingSettingsView>
             )
           : tabTitle,
       animateTrailingPress: false,
-      menuItems: [
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.add,
-          label: l.rcxNewScenario,
-          onPressed: () => unawaited(openScenarioEditor(context)),
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.add,
-          label: l.rcxNewProfile,
-          onPressed: () => unawaited(openRoutingStudio(context)),
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.importFile,
-          label: l.import,
-          onPressed: () => unawaited(pickRoutingImport(context)),
-        ),
-      ],
       trailing: GlyphSegmentedControl<int>(
         segments: segments,
         value: _tab,
@@ -746,6 +729,28 @@ class _LibraryTabState extends ConsumerState<_LibraryTab> {
     return _TabList(
       id: 'library',
       children: [
+        generateSection(
+          items: [
+            ListItem(
+              leading: const GlyphIcon(AppGlyphs.add),
+              title: Text(l.rcxNewScenario),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward),
+              onTap: () => unawaited(openScenarioEditor(context)),
+            ),
+            ListItem(
+              leading: const GlyphIcon(AppGlyphs.add),
+              title: Text(l.rcxNewProfile),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward),
+              onTap: () => unawaited(openRoutingStudio(context)),
+            ),
+            ListItem(
+              leading: const GlyphIcon(AppGlyphs.importFile),
+              title: Text(l.import),
+              onTap: () => unawaited(pickRoutingImport(context)),
+            ),
+          ],
+        ),
+        const ListSectionGap(),
         SegmentedControl<bool>(
           segments: [(true, l.rcxScenarios), (false, l.rcxGroupProfiles)],
           value: _scenarios,

@@ -295,6 +295,9 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                   child: SearchField(
                     controller: _controller,
                     focusNode: _focus,
+                    fill: context.raisedSurfaceLevel.colorOf(
+                      context.colorScheme,
+                    ),
                     onChanged: _search,
                   ),
                 ),

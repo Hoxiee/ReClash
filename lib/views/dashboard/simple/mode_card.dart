@@ -1,57 +1,62 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/style.dart';
 import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/widgets/outbound_mode.dart';
 
-String _labelOf(BuildContext context, Mode? mode) =>
-    mode?.label ?? context.appLocalizations.rcxModeAuto;
-
-String _hintOf(BuildContext context, Mode? mode) {
+String _hintOf(BuildContext context, Mode mode) {
   final appLocalizations = context.appLocalizations;
   return switch (mode) {
-    null => appLocalizations.simpleModeAutoDesc,
     Mode.rule => appLocalizations.simpleModeRuleDesc,
     Mode.global => appLocalizations.simpleModeGlobalDesc,
     Mode.direct => appLocalizations.simpleModeDirectDesc,
   };
 }
 
-/// Outbound mode in words a person has: what goes through the tunnel.
 class SimpleModeCard extends ConsumerWidget {
   const SimpleModeCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (:items, :selected) = watchOutboundModeChoices(ref);
+    final modes = items.whereType<Mode>().toList();
+    final automatic = selected == null;
+    final effective = ref.watch(effectiveModeProvider);
+    final appLocalizations = context.appLocalizations;
     final style = AppTextStyle.footnote.of(context, emphasized: true);
     return DashboardCard(
-      semanticLabel: context.appLocalizations.simpleModeTitle,
+      semanticLabel: appLocalizations.simpleModeTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 8,
         children: [
           DashboardCardHeader(
             glyph: AppGlyphs.shuffle,
-            title: context.appLocalizations.simpleModeTitle,
+            title: appLocalizations.simpleModeTitle,
           ),
           DashboardConnectedGroup(
             children: [
-              for (final (index, item) in items.indexed)
+              for (final (index, mode) in modes.indexed)
                 Expanded(
                   child: DashboardConnectedButton(
-                    selected: item == selected,
+                    selected: mode == effective,
                     first: index == 0,
-                    last: index == items.length - 1,
+                    last: index == modes.length - 1,
                     outer: 18,
                     inner: 8,
                     background: DashboardColors.of(context).tone,
-                    semanticLabel: _labelOf(context, item),
-                    onTap: () => changeOutboundMode(ref, item, selected),
+                    semanticLabel: mode.label,
+                    onTap: automatic
+                        ? null
+                        : () => changeOutboundMode(ref, mode, selected),
                     builder: (foreground) => SizedBox(
                       height: 38,
                       child: Center(
@@ -62,13 +67,13 @@ class SimpleModeCard extends ConsumerWidget {
                             spacing: 6,
                             children: [
                               GlyphIcon(
-                                outboundModeGlyph(item),
+                                outboundModeGlyph(mode),
                                 size: 16,
                                 color: foreground,
                               ),
                               Flexible(
                                 child: Text(
-                                  _labelOf(context, item),
+                                  mode.label,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: style.copyWith(color: foreground),
@@ -84,11 +89,51 @@ class SimpleModeCard extends ConsumerWidget {
             ],
           ),
           Text(
-            _hintOf(context, selected),
+            _hintOf(context, effective),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: DashboardText.label(context).copyWith(height: 1.3),
           ),
+          if (items.contains(null))
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                spacing: 12,
+                children: [
+                  GlyphIcon(
+                    AppGlyphs.sparkle,
+                    size: 18,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 2,
+                      children: [
+                        Text(appLocalizations.rcxModeAuto, style: style),
+                        Text(
+                          appLocalizations.simpleModeAutoDesc,
+                          style: DashboardText.label(
+                            context,
+                          ).copyWith(height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  DashboardSwitch(
+                    value: automatic,
+                    semanticLabel: appLocalizations.rcxModeAuto,
+                    onChanged: (value) => unawaited(
+                      globalState.safeRun(
+                        () => ref
+                            .read(rcxRoutingActionProvider.notifier)
+                            .setManualMode(!value),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

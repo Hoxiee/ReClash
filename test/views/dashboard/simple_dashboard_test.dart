@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
@@ -19,6 +20,8 @@ import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/simple/flag.dart';
 import 'package:reclash/views/dashboard/simple/home.dart';
 import 'package:reclash/views/dashboard/simple/location_card.dart';
+import 'package:reclash/views/dashboard/simple/mode_card.dart';
+import 'package:reclash/views/dashboard/widgets/card.dart';
 import 'package:reclash/views/dashboard/simple/power_button.dart';
 import 'package:reclash/views/dashboard/simple/simple_dashboard.dart';
 import 'package:reclash/views/dashboard/simple/services_card.dart';
@@ -31,6 +34,31 @@ import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
 
 class _MockCore extends Mock implements CoreHandlerInterface {}
+
+class _ModeStatus extends RcxStatusState {
+  _ModeStatus(this.initial);
+
+  final RcxStatus? initial;
+
+  @override
+  RcxStatus? build() => initial;
+}
+
+class _ModeAction extends RcxRoutingAction {
+  final manualCalls = <bool>[];
+  bool fail = false;
+
+  @override
+  Future<void> setManualMode(bool manual) async {
+    manualCalls.add(manual);
+    if (fail) throw StateError('mode failed');
+  }
+}
+
+const _automaticMode = RcxStatus(
+  tunnelMode: 'direct',
+  scenario: RcxScenarioStatus(id: 'user/home', holdsMode: true),
+);
 
 const _phone = Size(412, 915);
 const _desktop = Size(1280, 800);
@@ -164,6 +192,180 @@ void main() {
 
   double centerX(WidgetTester tester, Finder finder) =>
       tester.getCenter(finder).dx;
+
+  Future<_ModeAction> pumpMode(
+    WidgetTester tester, {
+    RcxStatus? status = _automaticMode,
+    List<Mode> modes = Mode.values,
+  }) async {
+    final action = _ModeAction();
+    useContainer(
+      overrides: [
+        rcxStatusStateProvider.overrideWith(() => _ModeStatus(status)),
+        rcxRoutingActionProvider.overrideWith(() => action),
+        availableModesProvider.overrideWithValue(modes),
+      ],
+    );
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(mode: Mode.rule));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 320,
+              child: SingleChildScrollView(child: SimpleModeCard()),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    return action;
+  }
+
+  Finder modeButton(Mode mode) => find.byWidgetPredicate(
+    (widget) =>
+        widget is DashboardConnectedButton &&
+        widget.semanticLabel == mode.label,
+  );
+
+  testWidgets('Auto is separate and disabled choices follow the live mode', (
+    tester,
+  ) async {
+    final action = await pumpMode(tester);
+
+    expect(find.text('Auto'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(DashboardConnectedGroup),
+        matching: find.text('Auto'),
+      ),
+      findsNothing,
+    );
+    expect(find.byType(DashboardConnectedButton), findsNWidgets(3));
+
+    for (final effective in Mode.values) {
+      container
+          .read(rcxStatusStateProvider.notifier)
+          .apply(_automaticMode.copyWith(tunnelMode: effective.name));
+      await tester.pump();
+      for (final mode in Mode.values) {
+        expect(
+          tester.getSemantics(modeButton(mode)),
+          isSemantics(
+            isButton: true,
+            isEnabled: false,
+            isSelected: mode == effective,
+            hasTapAction: false,
+          ),
+        );
+        await tester.tap(modeButton(mode));
+        await tester.pump();
+      }
+    }
+    expect(container.read(patchClashConfigProvider).mode, Mode.rule);
+    expect(action.manualCalls, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'turning Auto off unlocks choices and turning it on restores control',
+    (tester) async {
+      final action = await pumpMode(tester);
+      await tester.tap(find.byType(DashboardSwitch));
+      await tester.pump();
+      expect(action.manualCalls, [true]);
+      expect(
+        tester.widget<DashboardSwitch>(find.byType(DashboardSwitch)).value,
+        isTrue,
+      );
+
+      container
+          .read(rcxStatusStateProvider.notifier)
+          .apply(
+            _automaticMode.copyWith(
+              scenario: _automaticMode.scenario!.copyWith(manual: true),
+            ),
+          );
+      await tester.pump();
+      expect(
+        tester.widget<DashboardSwitch>(find.byType(DashboardSwitch)).value,
+        isFalse,
+      );
+      await tester.tap(modeButton(Mode.direct));
+      await tester.pump();
+      expect(container.read(patchClashConfigProvider).mode, Mode.direct);
+
+      await tester.tap(find.byType(DashboardSwitch));
+      await tester.pump();
+      expect(action.manualCalls, [true, false]);
+      container.read(rcxStatusStateProvider.notifier).apply(_automaticMode);
+      await tester.pump();
+      await tester.tap(modeButton(Mode.global));
+      await tester.pump();
+      expect(container.read(patchClashConfigProvider).mode, Mode.direct);
+      expect(
+        tester.widget<DashboardSwitch>(find.byType(DashboardSwitch)).value,
+        isTrue,
+      );
+    },
+  );
+
+  testWidgets('losing the scenario removes Auto and restores manual choices', (
+    tester,
+  ) async {
+    await pumpMode(tester);
+    container.read(rcxStatusStateProvider.notifier).apply(const RcxStatus());
+    await tester.pump();
+
+    expect(find.byType(DashboardSwitch), findsNothing);
+    await tester.tap(modeButton(Mode.direct));
+    await tester.pump();
+    expect(container.read(patchClashConfigProvider).mode, Mode.direct);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a scenario without mode control offers only manual choices', (
+    tester,
+  ) async {
+    await pumpMode(
+      tester,
+      status: const RcxStatus(scenario: RcxScenarioStatus(id: 'user/groups')),
+      modes: const [Mode.rule, Mode.direct],
+    );
+
+    expect(find.byType(DashboardSwitch), findsNothing);
+    expect(modeButton(Mode.global), findsNothing);
+    await tester.tap(modeButton(Mode.direct));
+    await tester.pump();
+    expect(container.read(patchClashConfigProvider).mode, Mode.direct);
+  });
+
+  testWidgets('a failed Auto toggle keeps authoritative state and can retry', (
+    tester,
+  ) async {
+    final action = await pumpMode(tester);
+    action.fail = true;
+    await tester.tap(find.byType(DashboardSwitch));
+    await tester.pump();
+    expect(action.manualCalls, [true]);
+    expect(
+      tester.widget<DashboardSwitch>(find.byType(DashboardSwitch)).value,
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+
+    action.fail = false;
+    await tester.tap(find.byType(DashboardSwitch));
+    await tester.pump();
+    expect(action.manualCalls, [true, true]);
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'DashboardPage shows the detailed dashboard until simple is chosen',
