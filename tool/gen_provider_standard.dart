@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:reclash/subscriptions/protocol/registry.dart';
 
 const _jsonPath = 'provider_standard.g.json';
-const _markdownPath = 'PROVIDER_HEADERS.md';
+const _markdownPath = 'docs/en/PROVIDER_HEADERS.md';
 
 void main(List<String> arguments) {
   final json = const JsonEncoder.withIndent('  ').convert({

@@ -26,7 +26,7 @@ watch:
   - lib/application.dart
   - lib/providers/actions/url_scheme.dart
   - lib/providers/actions/profiles.dart
-  - PROVIDER_PREVIEW_API.md
+  - docs/en/PROVIDER_PREVIEW_API.md
   - lib/subscriptions/external_link.dart
   - lib/features/url_scheme/**
   - lib/features/form/named_url_form.dart

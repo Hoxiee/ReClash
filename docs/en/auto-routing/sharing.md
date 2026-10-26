@@ -79,7 +79,7 @@ The v3 design calls for a round-trip test (export, then unpack) that reproduces 
 ## Provider delivery
 
 A provider can ship profiles and scenarios inside the subscription. Everything below is described in full in
-[PROVIDER_FEATURES.md](../../PROVIDER_FEATURES.md); this is the summary.
+[PROVIDER_FEATURES.md](../PROVIDER_FEATURES.md); this is the summary.
 
 ### Profiles
 
