@@ -15,7 +15,7 @@ class Picker {
     return FilePicker.pickFile(
       initialDirectory: await appPath.downloadDirPath,
       type: FileType.custom,
-      allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp'],
+      allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp', 'svg'],
     );
   }
 

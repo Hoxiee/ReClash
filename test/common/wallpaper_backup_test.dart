@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:reclash/common/backup.dart';
+import 'package:reclash/common/wallpaper_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 
@@ -49,8 +50,34 @@ void main() {
     );
   });
 
+  test('резервная копия сохраняет и восстанавливает исходный SVG', () async {
+    const name = '0123456789abcdef0123456789abcdef.svg';
+    final svg = utf8.encode(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">'
+      '<rect width="1080" height="1920" fill="#ff6b1a"/>'
+      '</svg>',
+    );
+    final wallpapers = Directory(join(home.path, 'wallpapers'))..createSync();
+    File(join(wallpapers.path, name)).writeAsBytesSync(svg);
+    final database = File(join(root.path, 'database.sqlite'))
+      ..writeAsBytesSync([1]);
+    final archive = join(root.path, 'backup.zip');
+    await writeBackupArchive(
+      archivePath: archive,
+      configMap: const {},
+      databaseSnapshotPath: database.path,
+      homeDirPath: home.path,
+      entries: [BackupEntries.wallpaper(name)],
+    );
+    final staging = join(root.path, 'stage');
+    await readBackupArchive(archivePath: archive, stagingDirPath: staging);
+    final restored = File(join(staging, 'wallpapers', name));
+    expect(await WallpaperStore.readStoredImage(restored), svg);
+    expect(restored.readAsBytesSync(), svg);
+  });
+
   test(
-    'skips unsafe and non-PNG wallpaper entries during restore staging',
+    'skips unsafe and unsupported wallpaper entries during restore staging',
     () async {
       const name = '0123456789abcdef0123456789abcdef.png';
       final archive = Archive()

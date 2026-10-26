@@ -3626,7 +3626,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "가로 위치",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
+      "올바른 PNG, JPEG, WebP 또는 SVG 이미지를 선택하세요.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),

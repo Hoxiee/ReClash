@@ -15,7 +15,7 @@
   "wallpaperDimming": "Затемнение",
   "wallpaperBlur": "Размытие",
   "wallpaperCardOpacity": "Непрозрачность карточек",
-  "wallpaperImageError": "Выберите корректное изображение PNG, JPEG или WebP.",
+  "wallpaperImageError": "Выберите корректное изображение PNG, JPEG, WebP или SVG.",
   "wallpaperTooLarge": "Выберите изображение размером до 20 МБ и 50 мегапикселей.",
   "wallpaperSaveError": "Не удалось сохранить фон. Прежний фон сохранён.",
   "wallpaperSelectHint": "PNG, JPEG или WebP · до 20 МБ",

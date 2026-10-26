@@ -32,6 +32,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/models/tools.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/wallpaper.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/ui/ui.dart';
@@ -165,9 +166,11 @@ void main() {
         ),
         if (wallpaper)
           effectiveWallpaperImageProvider.overrideWithValue(
-            MemoryImage(
-              base64Decode(
-                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+            RasterWallpaperSource(
+              MemoryImage(
+                base64Decode(
+                  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+                ),
               ),
             ),
           ),

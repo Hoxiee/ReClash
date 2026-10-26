@@ -3,7 +3,7 @@ kind: feature
 state: active
 risk: routine
 must:
-  storage: Wallpaper files stay app-owned, normalized PNGs with bounded size and a four-image library, added from a gallery tile that gives way to the fourth image.
+  storage: Wallpaper files stay app-owned and size-bounded; raster imports become normalized PNGs, while SVGs retain their original bytes and render as vectors. The four-image library accepts both formats, added from a gallery tile that gives way to the fourth image.
   lifecycle: Import, select, remove and reset preserve the previous setting on save failure; only unreferenced files are cleaned up.
   rendering: Workspace panes share one stationary wallpaper and retain card opacity across their routes; real pushed routes and modal surfaces keep their own backgrounds, state colors and Liquid Glass behavior.
   backup: Full backups carry only referenced wallpaper files; full restore validates and rolls back files and settings, while onlyProfiles leaves both untouched.
@@ -21,6 +21,7 @@ watch:
   - lib/providers/actions/backup.dart
   - lib/providers/action.dart
   - lib/ui/page_background.dart
+  - lib/ui/wallpaper_image.dart
   - lib/ui/page_viewport.dart
   - lib/ui/scaffold.dart
   - lib/ui/surface.dart

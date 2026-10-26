@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path/path.dart';
 import 'package:reclash/models/wallpaper.dart';
 
@@ -41,7 +42,7 @@ class WallpaperStore {
     return _store(bytes, '$id.png');
   }
 
-  /// Stores [bytes] under [fileName], which must pass [isWallpaperFileName].
+  /// Расширение возвращённого имени определяется содержимым.
   Future<String> importBytes(Uint8List bytes, String fileName) {
     if (bytes.length > maxWallpaperBytes) {
       throw const WallpaperImportException(WallpaperImportFailure.tooLarge);
@@ -58,6 +59,13 @@ class WallpaperStore {
           FileSystemEntityType.file;
 
   Future<String> _store(Uint8List bytes, String fileName) async {
+    if (!isWallpaperFileName(fileName)) {
+      throw const WallpaperImportException(WallpaperImportFailure.invalidImage);
+    }
+    if (!_isRaster(bytes)) {
+      await _validateSvg(bytes);
+      return _write(bytes, setExtension(fileName, '.svg'));
+    }
     final image = await _decode(bytes);
     final Uint8List normalized;
     try {
@@ -77,12 +85,16 @@ class WallpaperStore {
     } finally {
       image.dispose();
     }
+    return _write(normalized, setExtension(fileName, '.png'));
+  }
+
+  Future<String> _write(Uint8List bytes, String fileName) async {
     final root = await directory();
     await root.create(recursive: true);
     final file = File(join(root.path, fileName));
     final staged = File(join(root.path, '.$fileName.tmp'));
     try {
-      await staged.writeAsBytes(normalized, flush: true);
+      await staged.writeAsBytes(bytes, flush: true);
       await staged.rename(file.path);
     } catch (_) {
       if (await staged.exists()) await staged.delete();
@@ -115,12 +127,18 @@ class WallpaperStore {
         FileSystemEntityType.file) {
       throw const WallpaperImportException(WallpaperImportFailure.invalidImage);
     }
-    if (await file.length() > maxStoredWallpaperBytes) {
+    final isSvg = extension(file.path) == '.svg';
+    final limit = isSvg ? maxWallpaperBytes : maxStoredWallpaperBytes;
+    if (await file.length() > limit) {
       throw const WallpaperImportException(WallpaperImportFailure.tooLarge);
     }
-    final bytes = await _readLimited(file.openRead(), maxStoredWallpaperBytes);
-    final image = await _decode(bytes, stored: true);
-    image.dispose();
+    final bytes = await _readLimited(file.openRead(), limit);
+    if (isSvg) {
+      await _validateSvg(bytes);
+    } else {
+      final image = await _decode(bytes, stored: true);
+      image.dispose();
+    }
     return bytes;
   }
 
@@ -138,20 +156,18 @@ class WallpaperStore {
     return builder.takeBytes();
   }
 
-  static Future<ui.Image> _decode(
-    Uint8List bytes, {
-    bool stored = false,
-  }) async {
-    final png =
-        bytes.length >= 8 &&
-        bytes[0] == 137 &&
-        bytes[1] == 80 &&
-        bytes[2] == 78 &&
-        bytes[3] == 71 &&
-        bytes[4] == 13 &&
-        bytes[5] == 10 &&
-        bytes[6] == 26 &&
-        bytes[7] == 10;
+  static bool _isPng(Uint8List bytes) =>
+      bytes.length >= 8 &&
+      bytes[0] == 137 &&
+      bytes[1] == 80 &&
+      bytes[2] == 78 &&
+      bytes[3] == 71 &&
+      bytes[4] == 13 &&
+      bytes[5] == 10 &&
+      bytes[6] == 26 &&
+      bytes[7] == 10;
+
+  static bool _isRaster(Uint8List bytes) {
     final jpeg =
         bytes.length >= 3 &&
         bytes[0] == 255 &&
@@ -167,7 +183,38 @@ class WallpaperStore {
         bytes[9] == 69 &&
         bytes[10] == 66 &&
         bytes[11] == 80;
-    if (!png && (stored || (!jpeg && !webp))) {
+    return _isPng(bytes) || jpeg || webp;
+  }
+
+  static Future<void> _validateSvg(Uint8List bytes) async {
+    final loader = SvgBytesLoader(bytes);
+    PictureInfo? picture;
+    try {
+      picture = await vg.loadPicture(loader, null);
+      final size = picture.size;
+      if (!size.width.isFinite ||
+          !size.height.isFinite ||
+          size.width <= 0 ||
+          size.height <= 0) {
+        throw const WallpaperImportException(
+          WallpaperImportFailure.invalidImage,
+        );
+      }
+    } on WallpaperImportException {
+      rethrow;
+    } catch (_) {
+      throw const WallpaperImportException(WallpaperImportFailure.invalidImage);
+    } finally {
+      picture?.picture.dispose();
+      svg.cache.evict(loader.cacheKey(null));
+    }
+  }
+
+  static Future<ui.Image> _decode(
+    Uint8List bytes, {
+    bool stored = false,
+  }) async {
+    if (!_isPng(bytes) && (stored || !_isRaster(bytes))) {
       throw const WallpaperImportException(WallpaperImportFailure.invalidImage);
     }
     ui.ImmutableBuffer? buffer;

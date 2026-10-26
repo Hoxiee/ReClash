@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/ui/page_background.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 
 class WallpaperLayer extends StatelessWidget {
   const WallpaperLayer({
@@ -14,13 +17,13 @@ class WallpaperLayer extends StatelessWidget {
     required this.settings,
   });
 
-  final ImageProvider image;
+  final WallpaperSource image;
   final WallpaperProps settings;
 
   @override
   Widget build(BuildContext context) {
     final alignment = Alignment(settings.positionX, settings.positionY);
-    Widget content = Image(
+    Widget content = WallpaperImage(
       image: image,
       fit: switch (settings.fit) {
         WallpaperFit.cover => BoxFit.cover,
@@ -28,9 +31,6 @@ class WallpaperLayer extends StatelessWidget {
         WallpaperFit.fill => BoxFit.fill,
       },
       alignment: alignment,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (_, _, _) => const SizedBox.expand(),
     );
     if (settings.scale != 1) {
       content = Transform.scale(
@@ -97,7 +97,7 @@ class WallpaperBackdrop extends StatefulWidget {
     required this.builder,
   });
 
-  final ImageProvider? image;
+  final WallpaperSource? image;
   final WallpaperProps settings;
   final Color baseColor;
   final Widget Function(BuildContext context, bool active) builder;
@@ -118,12 +118,13 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
     duration: const Duration(milliseconds: 280),
     value: 1,
   )..addStatusListener(_onReplacementStatus);
-  ImageProvider? _image;
-  ImageProvider? _outgoing;
-  ImageProvider? _requested;
+  WallpaperSource? _image;
+  WallpaperSource? _outgoing;
+  WallpaperSource? _requested;
   ImageConfiguration? _configuration;
   ImageStream? _stream;
   ImageStreamListener? _listener;
+  int _loadGeneration = 0;
   bool _failed = false;
   bool _built = false;
 
@@ -159,6 +160,7 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
     final configuration = createLocalImageConfiguration(context);
     if (image == _requested && configuration == _configuration) return;
     _removeListener();
+    final generation = ++_loadGeneration;
     _requested = image;
     _configuration = configuration;
     _failed = false;
@@ -166,45 +168,69 @@ class _WallpaperBackdropState extends State<WallpaperBackdrop>
       _setVisibility(false);
       return;
     }
-    final stream = image.resolve(configuration);
+    if (image is SvgWallpaperSource) {
+      unawaited(_resolveSvg(image, generation));
+      return;
+    }
+    final stream = (image as RasterWallpaperSource).image.resolve(
+      configuration,
+    );
     final listener = ImageStreamListener(
       (info, _) {
         info.dispose();
         if (!mounted || _stream != stream) return;
         _removeListener();
-        setState(() {
-          if (image != _image) {
-            _outgoing = _image;
-            _image = image;
-            _replacement.value = _outgoing == null ? 1 : 0;
-          }
-          _failed = false;
-        });
-        final visible = _requested == image && widget.settings.enabled;
-        // An image decoded before the first frame shows with the page it
-        // backs, as a page backdrop finds it in the image cache.
-        if (_built) {
-          _setVisibility(visible);
-        } else {
-          _visibility.value = visible ? 1 : 0;
-        }
-        if (MediaQuery.disableAnimationsOf(context)) {
-          _replacement.value = 1;
-          _outgoing = null;
-        } else {
-          _replacement.forward();
-        }
+        _imageReady(image);
       },
       onError: (Object error, StackTrace? stackTrace) {
         if (!mounted || _stream != stream) return;
         _removeListener();
-        setState(() => _failed = true);
-        _setVisibility(false);
+        _imageFailed();
       },
     );
     _stream = stream;
     _listener = listener;
     stream.addListener(listener);
+  }
+
+  Future<void> _resolveSvg(SvgWallpaperSource image, int generation) async {
+    try {
+      final picture = await vg.loadPicture(image.loader, context);
+      picture.picture.dispose();
+    } catch (_) {
+      if (mounted && generation == _loadGeneration) _imageFailed();
+      return;
+    }
+    if (mounted && generation == _loadGeneration) _imageReady(image);
+  }
+
+  void _imageReady(WallpaperSource image) {
+    setState(() {
+      if (image != _image) {
+        _outgoing = _image;
+        _image = image;
+        _replacement.value = _outgoing == null ? 1 : 0;
+      }
+      _failed = false;
+    });
+    final visible = _requested == image && widget.settings.enabled;
+    // Готовое до первого кадра изображение появляется вместе со страницей.
+    if (_built) {
+      _setVisibility(visible);
+    } else {
+      _visibility.value = visible ? 1 : 0;
+    }
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _replacement.value = 1;
+      _outgoing = null;
+    } else {
+      _replacement.forward();
+    }
+  }
+
+  void _imageFailed() {
+    setState(() => _failed = true);
+    _setVisibility(false);
   }
 
   void _setVisibility(bool visible) {

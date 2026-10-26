@@ -15,7 +15,7 @@
   "wallpaperDimming": "Dimming",
   "wallpaperBlur": "Blur",
   "wallpaperCardOpacity": "Card opacity",
-  "wallpaperImageError": "Choose a valid PNG, JPEG or WebP image.",
+  "wallpaperImageError": "Choose a valid PNG, JPEG, WebP or SVG image.",
   "wallpaperTooLarge": "Choose an image up to 20 MB and 50 megapixels.",
   "wallpaperSaveError": "Could not save the background. Your previous background has been kept.",
   "wallpaperSelectHint": "PNG, JPEG or WebP · up to 20 MB",

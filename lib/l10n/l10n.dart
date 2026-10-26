@@ -11043,10 +11043,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Choose a valid PNG, JPEG or WebP image.`
+  /// `Choose a valid PNG, JPEG, WebP or SVG image.`
   String get wallpaperImageError {
     return Intl.message(
-      'Choose a valid PNG, JPEG or WebP image.',
+      'Choose a valid PNG, JPEG, WebP or SVG image.',
       name: 'wallpaperImageError',
       desc: '',
       args: [],

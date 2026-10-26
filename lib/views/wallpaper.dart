@@ -4,6 +4,7 @@ import 'package:reclash/models/tool_route.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/wallpaper.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/theme_preview.dart';
 import 'package:reclash/widgets/settings/setting_spec.dart';
@@ -559,7 +560,7 @@ class _WallpaperTile extends ConsumerWidget {
                     fit: StackFit.expand,
                     children: [
                       if (image != null)
-                        Image(image: image, fit: BoxFit.cover)
+                        WallpaperImage(image: image)
                       else
                         Center(
                           child: GlyphIcon(

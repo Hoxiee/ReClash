@@ -149,12 +149,15 @@ final _providerBackgroundProvider = FutureProvider<String?>((ref) async {
     providerHintsProvider.select((hints) => hints?.background?.url.toString()),
   );
   if (url == null) return null;
-  final fileName = '${md5.convert(utf8.encode(url))}.png';
+  final id = md5.convert(utf8.encode(url));
   final store = ref.read(wallpaperStoreProvider);
-  if (await store.hasImage(fileName)) return fileName;
+  for (final extension in ['png', 'svg']) {
+    final fileName = '$id.$extension';
+    if (await store.hasImage(fileName)) return fileName;
+  }
   final response = await request.getFileResponseForUrl(url);
   final bytes = response.data;
-  return bytes == null ? null : store.importBytes(bytes, fileName);
+  return bytes == null ? null : store.importBytes(bytes, '$id.png');
 });
 
 final providerSettingsInputProvider = Provider<ProviderSettingsInput?>((ref) {

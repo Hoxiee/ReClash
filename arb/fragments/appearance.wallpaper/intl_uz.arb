@@ -15,7 +15,7 @@
   "wallpaperDimming": "Qoraytirish",
   "wallpaperBlur": "Xiralashtirish",
   "wallpaperCardOpacity": "Kartochkalarning noshaffofligi",
-  "wallpaperImageError": "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
+  "wallpaperImageError": "PNG, JPEG, WebP yoki SVG formatidagi yaroqli rasmni tanlang.",
   "wallpaperTooLarge": "Hajmi 20 MB dan, aniqligi 50 megapikseldan oshmaydigan rasmni tanlang.",
   "wallpaperSaveError": "Fonni saqlab boʻlmadi. Oldingi fon saqlab qolindi.",
   "wallpaperSelectHint": "PNG, JPEG yoki WebP · 20 MB gacha",

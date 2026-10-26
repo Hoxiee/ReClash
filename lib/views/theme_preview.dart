@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/providers/wallpaper.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/widgets/wallpaper.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
@@ -442,7 +443,7 @@ class MiniScreen extends StatelessWidget {
   final ColorScheme colorScheme;
   final bool floatingBar;
   final WallpaperProps wallpaper;
-  final ImageProvider? wallpaperImage;
+  final WallpaperSource? wallpaperImage;
 
   /// Draws a floating bar as glass; a docked one stays a fill, as the app's
   /// does.

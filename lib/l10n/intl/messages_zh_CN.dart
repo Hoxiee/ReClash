@@ -3328,7 +3328,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("拉伸"),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage("水平位置"),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "请选择有效的 PNG、JPEG 或 WebP 图片。",
+      "请选择有效的 PNG、JPEG、WebP 或 SVG 图片。",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),

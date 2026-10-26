@@ -15,7 +15,7 @@
   "wallpaperDimming": "Garaňkylatmak",
   "wallpaperBlur": "Bulaňňylaşdyrmak",
   "wallpaperCardOpacity": "Kartoçkalaryň dury dälligi",
-  "wallpaperImageError": "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
+  "wallpaperImageError": "PNG, JPEG, WebP ýa-da SVG formatyndaky dogry suraty saýlaň.",
   "wallpaperTooLarge": "Ölçegi 20 MB-dan we piksel sany 50 milliondan geçmeýän suraty saýlaň.",
   "wallpaperSaveError": "Fony ýatda saklap bolmady. Öňki fon saklandy.",
   "wallpaperSelectHint": "PNG, JPEG ýa-da WebP · 20 MB-a çenli",

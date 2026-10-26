@@ -15,7 +15,7 @@
   "wallpaperDimming": "Oscurecimiento",
   "wallpaperBlur": "Desenfoque",
   "wallpaperCardOpacity": "Opacidad de tarjetas",
-  "wallpaperImageError": "Elige una imagen PNG, JPEG o WebP válida.",
+  "wallpaperImageError": "Elige una imagen PNG, JPEG, WebP o SVG válida.",
   "wallpaperTooLarge": "Elige una imagen de hasta 20 MB y 50 megapíxeles.",
   "wallpaperSaveError": "No se pudo guardar el fondo. Se ha conservado el anterior.",
   "wallpaperSelectHint": "PNG, JPEG o WebP · hasta 20 MB",

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:reclash/common/app_localizations.dart';
 import 'package:reclash/common/exception.dart';
 import 'package:reclash/common/path.dart';
@@ -12,6 +13,7 @@ import 'package:reclash/common/preferences.dart';
 import 'package:reclash/common/wallpaper_store.dart';
 import 'package:reclash/models/wallpaper.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 
 final wallpaperStoreProvider = Provider<WallpaperStore>(
   (_) => WallpaperStore(
@@ -29,21 +31,26 @@ final wallpaperSaveProvider = Provider<Future<bool> Function()>(
 );
 
 final wallpaperThumbnailProvider = FutureProvider.autoDispose
-    .family<MemoryImage?, String>((ref, fileName) async {
+    .family<WallpaperSource?, String>((ref, fileName) async {
       try {
         final bytes = await ref
             .watch(wallpaperStoreProvider)
             .readImage(fileName);
         if (bytes == null || !ref.mounted) return null;
+        if (fileName.endsWith('.svg')) {
+          final loader = SvgBytesLoader(bytes);
+          ref.onDispose(() => svg.cache.evict(loader.cacheKey(null)));
+          return SvgWallpaperSource(loader);
+        }
         final image = MemoryImage(bytes);
         ref.onDispose(() => unawaited(image.evict()));
-        return image;
+        return RasterWallpaperSource(image);
       } catch (_) {
         return null;
       }
     });
 
-final wallpaperImageProvider = FutureProvider<MemoryImage?>((ref) async {
+final wallpaperImageProvider = FutureProvider<WallpaperSource?>((ref) async {
   final fileName = ref.watch(
     themeSettingProvider.select((theme) => theme.wallpaper.fileName),
   );
@@ -51,7 +58,7 @@ final wallpaperImageProvider = FutureProvider<MemoryImage?>((ref) async {
   return ref.watch(wallpaperThumbnailProvider(fileName).future);
 });
 
-final effectiveWallpaperImageProvider = Provider<MemoryImage?>((ref) {
+final effectiveWallpaperImageProvider = Provider<WallpaperSource?>((ref) {
   final enabled = ref.watch(
     themeSettingProvider.select((theme) => theme.wallpaper.enabled),
   );

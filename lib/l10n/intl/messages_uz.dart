@@ -4585,7 +4585,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Gorizontal joylashuv",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
+      "PNG, JPEG, WebP yoki SVG formatidagi yaroqli rasmni tanlang.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),

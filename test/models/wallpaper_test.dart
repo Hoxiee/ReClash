@@ -29,6 +29,25 @@ void main() {
     expect(Config.fromJson(decoded).themeProps.wallpaper, wallpaper);
   });
 
+  test('SVG в смешанной библиотеке сохраняется после перезапуска', () {
+    const library = [
+      '00000000000000000000000000000001.png',
+      '00000000000000000000000000000002.svg',
+    ];
+    const wallpaper = WallpaperProps(
+      enabled: true,
+      fileName: '00000000000000000000000000000002.svg',
+      library: library,
+    );
+    const config = Config(themeProps: ThemeProps(wallpaper: wallpaper));
+    final json =
+        jsonDecode(jsonEncode(config.toJson())) as Map<String, Object?>;
+    expect(Config.fromJson(json).themeProps.wallpaper, wallpaper);
+    expect(wallpaperLibraryOf(json), library);
+    expect(isWallpaperFileName('../${library.last}'), isFalse);
+    expect(isWallpaperFileName('${library.last}.png'), isFalse);
+  });
+
   test('four images and the selected fourth survive a config round trip', () {
     const library = [
       '00000000000000000000000000000001.png',

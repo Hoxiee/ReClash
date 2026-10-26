@@ -4492,7 +4492,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Положение по горизонтали",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "Выберите корректное изображение PNG, JPEG или WebP.",
+      "Выберите корректное изображение PNG, JPEG, WebP или SVG.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),

@@ -4452,7 +4452,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Keseligine ýerleşiş",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
+      "PNG, JPEG, WebP ýa-da SVG formatyndaky dogry suraty saýlaň.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),

@@ -4461,7 +4461,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Көлденең орналасуы",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
+      "PNG, JPEG, WebP немесе SVG пішіміндегі жарамды суретті таңдаңыз.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),

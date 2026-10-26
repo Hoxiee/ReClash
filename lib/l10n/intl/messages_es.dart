@@ -4598,7 +4598,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Posición horizontal",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "Elige una imagen PNG, JPEG o WebP válida.",
+      "Elige una imagen PNG, JPEG, WebP o SVG válida.",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Encuadre"),

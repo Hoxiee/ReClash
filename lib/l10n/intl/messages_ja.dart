@@ -3689,7 +3689,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "水平方向の位置",
     ),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
-      "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
+      "有効な PNG、JPEG、WebP、SVG 形式の画像を選択してください。",
     ),
     "wallpaperImageLabel": m195,
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),

@@ -10,6 +10,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/wallpaper.dart';
+import 'package:reclash/ui/wallpaper_image.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/font_family.dart';
 import 'package:reclash/views/theme.dart';
@@ -825,7 +826,9 @@ void main() {
       container = ProviderContainer(
         overrides: [
           profilesProvider.overrideWith(TestProfiles.new),
-          wallpaperThumbnailProvider.overrideWith((ref, name) async => image),
+          wallpaperThumbnailProvider.overrideWith(
+            (ref, name) async => RasterWallpaperSource(image),
+          ),
           wallpaperSaveProvider.overrideWithValue(() async => true),
         ],
       );

@@ -7,7 +7,7 @@ enum WallpaperFit { cover, contain, fill }
 
 const maxWallpaperLibrary = 4;
 
-final _wallpaperFileName = RegExp(r'^[a-f0-9]{32}\.png$');
+final _wallpaperFileName = RegExp(r'^[a-f0-9]{32}\.(png|svg)$');
 
 bool isWallpaperFileName(Object? value) =>
     value is String && _wallpaperFileName.hasMatch(value);

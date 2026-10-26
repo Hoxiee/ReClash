@@ -15,7 +15,7 @@
   "wallpaperDimming": "Қараңғылату",
   "wallpaperBlur": "Бұлыңғырлау",
   "wallpaperCardOpacity": "Карточкалардың мөлдір еместігі",
-  "wallpaperImageError": "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
+  "wallpaperImageError": "PNG, JPEG, WebP немесе SVG пішіміндегі жарамды суретті таңдаңыз.",
   "wallpaperTooLarge": "Көлемі 20 МБ-тан, ал ажыратымдылығы 50 мегапиксельден аспайтын суретті таңдаңыз.",
   "wallpaperSaveError": "Фонды сақтау мүмкін болмады. Алдыңғы фон сақталды.",
   "wallpaperSelectHint": "PNG, JPEG немесе WebP · 20 МБ-қа дейін",
