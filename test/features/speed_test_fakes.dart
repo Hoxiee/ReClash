@@ -45,6 +45,8 @@ class FakeSpeedBackend implements SpeedTestBackend {
   Uri get website => Uri.https('example.test');
   @override
   Uri get measurementUri => website.resolve('/download');
+  @override
+  int get streams => 4;
 
   @override
   SpeedTestSession open(SpeedTestClientFactory createClient) {
@@ -58,9 +60,13 @@ class FakeSpeedSession implements SpeedTestSession {
     this.failUpload = false,
     this.holdDownload = false,
     this.holdLatency = false,
+    this.dropDownloads = 0,
   });
 
   final bool failUpload;
+
+  /// Number of first downloads that fail as a dropped connection would.
+  final int dropDownloads;
   final bool holdDownload;
   final bool holdLatency;
   final held = Completer<void>();
@@ -86,6 +92,9 @@ class FakeSpeedSession implements SpeedTestSession {
     int lane = 0,
   }) async {
     downloads++;
+    if (downloads <= dropDownloads) {
+      throw StateError('connection dropped');
+    }
     lanes.add(lane);
     if (holdDownload) {
       await held.future;

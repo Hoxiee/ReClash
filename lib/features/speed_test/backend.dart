@@ -9,6 +9,9 @@ abstract interface class SpeedTestBackend {
   Uri get website;
   Uri get measurementUri;
 
+  /// Parallel connections per direction the service needs to fill a link.
+  int get streams;
+
   SpeedTestSession open(SpeedTestClientFactory createClient);
 }
 

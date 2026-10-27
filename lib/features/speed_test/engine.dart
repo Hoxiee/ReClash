@@ -13,7 +13,6 @@ class SpeedTestPlan {
     this.directionDuration = const Duration(seconds: 8),
     this.minimumDuration = const Duration(seconds: 2),
     this.runTimeout = const Duration(seconds: 70),
-    this.streams = 4,
     this.sampleInterval = const Duration(milliseconds: 250),
   });
 
@@ -22,10 +21,6 @@ class SpeedTestPlan {
   final Duration directionDuration;
   final Duration minimumDuration;
   final Duration runTimeout;
-
-  /// Parallel connections per direction; one TCP stream rarely fills a link
-  /// with a long round trip, which every proxied route has.
-  final int streams;
   final Duration sampleInterval;
 }
 
@@ -36,6 +31,7 @@ class SpeedTestEngine {
     required this.onUpdate,
     required this.viaVpn,
     this.plan = const SpeedTestPlan(),
+    this.streams = 4,
   });
 
   final SpeedTestSession session;
@@ -43,6 +39,15 @@ class SpeedTestEngine {
   final void Function(SpeedTestState state) onUpdate;
   final bool viaVpn;
   final SpeedTestPlan plan;
+
+  /// Parallel connections per direction; one TCP stream rarely fills a link
+  /// with a long round trip, which every proxied route has.
+  final int streams;
+  static const _laneAttempts = 3;
+
+  /// Upload bytes count only when a request completes, so uploads stay short.
+  static const _uploadRequest = 500000;
+  static const _downloadRequest = 2000000;
   final _watch = Stopwatch();
   final _stop = Completer<void>();
   final _errors = <SpeedTestStage>{};
@@ -174,13 +179,19 @@ class SpeedTestEngine {
     });
 
     Future<void> lane(int index) async {
-      var block = math.min(256 * 1024, math.max(budget ~/ plan.streams, 1));
+      var block = math.min(
+        upload ? 64 * 1024 : 1024 * 1024,
+        math.max(budget ~/ streams, 1),
+      );
+      var failures = 0;
       while (reserved < budget && !deadline.isCompleted) {
         _ensureActive();
         final bytes = math.min(block, budget - reserved);
         reserved += bytes;
         final start = clock.elapsedMicroseconds;
+        var delivered = 0;
         void consume(int count) {
+          delivered += count;
           _consume(count);
           if (!deadline.isCompleted) {
             shown.add(clock.elapsedMicroseconds, count);
@@ -203,22 +214,31 @@ class SpeedTestEngine {
         } on _Stopped {
           rethrow;
         } on Object {
-          if (!deadline.isCompleted) failed = true;
+          reserved -= bytes - math.min(delivered, bytes);
+          if (deadline.isCompleted) return;
+          // Long routes drop single connections; losing a lane skews the rate.
+          if (++failures < _laneAttempts) continue;
+          failed = true;
           return;
         }
+        failures = 0;
         final end = clock.elapsedMicroseconds;
         if (upload) measured.spread(start, end, bytes);
+        // Whole-chunk backends may serve less than reserved.
+        reserved -= bytes - math.min(delivered, bytes);
         if (end > start) {
-          block = (bytes * 500000 / (end - start)).round().clamp(
-            64 * 1024,
-            16 * 1024 * 1024,
-          );
+          block =
+              (math.max(delivered, 1) *
+                      (upload ? _uploadRequest : _downloadRequest) /
+                      (end - start))
+                  .round()
+                  .clamp(64 * 1024, 16 * 1024 * 1024);
         }
       }
     }
 
     try {
-      await Future.wait([for (var i = 0; i < plan.streams; i++) lane(i)]);
+      await Future.wait([for (var i = 0; i < streams; i++) lane(i)]);
     } finally {
       timer.cancel();
       ticker.cancel();

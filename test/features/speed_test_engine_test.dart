@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/features/speed_test/cloudflare.dart';
 import 'package:reclash/features/speed_test/engine.dart';
+import 'package:reclash/features/speed_test/librespeed.dart';
 import 'package:reclash/features/speed_test/types.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/models/speed_test.dart';
@@ -165,6 +166,22 @@ void main() {
       expect(states.last.uploadMbps, isNull);
       expect(states.last.latency, isNotNull);
       expect(states.last.byteLimit, 0);
+    });
+
+    test('a lane reconnects after a dropped download', () async {
+      final session = FakeSpeedSession(dropDownloads: 3);
+      final states = <SpeedTestState>[];
+      final engine = SpeedTestEngine(
+        session: session,
+        settings: const SpeedTestSettings(budgetMiB: 25),
+        onUpdate: states.add,
+        viaVpn: false,
+        plan: _plan,
+        streams: 1,
+      );
+      await engine.run();
+      expect(states.last.downloadMbps, greaterThan(0));
+      expect(states.last.errors, isNot(contains(SpeedTestStage.download)));
     });
 
     test(
@@ -344,5 +361,129 @@ void main() {
         await expectLater(session.latency(), throwsA(isA<TimeoutException>()));
       },
     );
+  });
+
+  group('LibreSpeed adapter with local servers', () {
+    final servers = <HttpServer>[];
+    HttpOverrides? overrides;
+
+    setUp(() {
+      overrides = HttpOverrides.current;
+      HttpOverrides.global = null;
+    });
+
+    tearDown(() async {
+      for (final server in servers) {
+        await server.close(force: true);
+      }
+      servers.clear();
+      HttpOverrides.global = overrides;
+    });
+
+    Future<HttpServer> serve(
+      Future<void> Function(HttpRequest request) handle,
+    ) async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      servers.add(server);
+      server.listen(handle);
+      return server;
+    }
+
+    Future<void> speedServer(HttpRequest request, {Duration? delay}) async {
+      if (delay != null) await Future<void>.delayed(delay);
+      if (request.uri.path.endsWith('garbage.php')) {
+        final chunks = int.parse(request.uri.queryParameters['ckSize']!);
+        request.response.headers.contentType = ContentType.binary;
+        for (var i = 0; i < chunks; i++) {
+          request.response.add(List.filled(1024 * 1024, 1));
+        }
+      } else {
+        await request.drain<void>();
+      }
+      await request.response.close();
+    }
+
+    Future<LibreSpeedBackend> backendFor(List<Object?> list) async {
+      final index = await serve((request) async {
+        request.response.write(jsonEncode(list));
+        await request.response.close();
+      });
+      return LibreSpeedBackend(
+        serverList: Uri.parse('http://127.0.0.1:${index.port}/servers'),
+        timeout: const Duration(seconds: 2),
+        pingTimeout: const Duration(seconds: 1),
+      );
+    }
+
+    test('measures against the nearest server in whole chunks', () async {
+      final paths = <String>[];
+      final near = await serve((request) async {
+        paths.add(request.uri.path);
+        await speedServer(request);
+      });
+      final far = await serve(
+        (request) =>
+            speedServer(request, delay: const Duration(milliseconds: 150)),
+      );
+      final backend = await backendFor([
+        {'name': 'broken', 'server': 42},
+        {
+          'name': 'far',
+          'server': 'http://127.0.0.1:${far.port}/speed',
+          'dlURL': 'garbage.php',
+        },
+        {
+          'name': 'near',
+          'server': 'http://127.0.0.1:${near.port}/speed',
+          'dlURL': 'garbage.php',
+        },
+      ]);
+      final session = backend.open(HttpClient.new);
+      addTearDown(session.close);
+      expect(await session.latency(), lessThan(150));
+      var downloaded = 0;
+      await session.download(
+        2 * 1024 * 1024 + 4096,
+        (value) => downloaded += value,
+      );
+      var sent = 0;
+      await session.upload(8192, (value) => sent += value);
+      expect(downloaded, 2 * 1024 * 1024);
+      expect(sent, 8192);
+      expect(paths, containsAll(['/speed/garbage.php', '/speed/empty.php']));
+    });
+
+    test('resolves endpoints under a server path without a slash', () {
+      final server = LibreSpeedServer.tryParse({
+        'name': 'remote',
+        'server': '//example.test/backend',
+      })!;
+      expect(
+        server.download,
+        Uri.parse('https://example.test/backend/garbage.php'),
+      );
+      expect(server.ping, Uri.parse('https://example.test/backend/empty.php'));
+    });
+
+    test('stops a download below one chunk at the requested size', () async {
+      final server = await serve(speedServer);
+      final backend = await backendFor([
+        {'name': 'only', 'server': 'http://127.0.0.1:${server.port}/'},
+      ]);
+      final session = backend.open(HttpClient.new);
+      addTearDown(session.close);
+      var downloaded = 0;
+      await session.download(4096, (value) => downloaded += value);
+      expect(downloaded, 4096);
+    });
+
+    test('fails when no listed server answers', () async {
+      final backend = await backendFor([
+        {'name': 'gone', 'server': 'http://127.0.0.1:1/'},
+      ]);
+      final session = backend.open(HttpClient.new);
+      addTearDown(session.close);
+      await expectLater(session.latency(), throwsA(isA<HttpException>()));
+    });
   });
 }

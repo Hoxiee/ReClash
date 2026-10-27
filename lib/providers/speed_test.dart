@@ -7,6 +7,7 @@ import 'package:reclash/common/network_cost.dart';
 import 'package:reclash/features/speed_test/backend.dart';
 import 'package:reclash/features/speed_test/cloudflare.dart';
 import 'package:reclash/features/speed_test/engine.dart';
+import 'package:reclash/features/speed_test/librespeed.dart';
 import 'package:reclash/features/speed_test/types.dart';
 import 'package:reclash/models/speed_test.dart';
 
@@ -19,7 +20,7 @@ import 'state.dart';
 export 'package:reclash/features/speed_test/types.dart';
 
 final speedTestBackendsProvider = Provider<List<SpeedTestBackend>>(
-  (ref) => [CloudflareSpeedTestBackend()],
+  (ref) => [CloudflareSpeedTestBackend(), LibreSpeedBackend()],
 );
 
 final speedTestNetworkProvider = Provider<NetworkCostMonitor>(
@@ -160,6 +161,7 @@ class SpeedTest extends Notifier<SpeedTestState> {
         settings: settings,
         viaVpn: proxy != 'DIRECT',
         plan: ref.read(speedTestPlanProvider),
+        streams: backend.streams,
         onUpdate: (next) {
           if (!_disposed && run == _run) state = next;
         },
