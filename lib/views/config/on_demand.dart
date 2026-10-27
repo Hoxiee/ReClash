@@ -32,6 +32,29 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
   static const _authorizeButtonPadding = 12.0;
   static const _minAuthorizeButtonWidth = 80.0;
 
+  (String?, int)? _handledSettingsRequest;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final scope = SettingsRevealScope.maybeOf(context);
+    if (scope == null ||
+        !scope.active ||
+        (scope.targetId, scope.nonce) == _handledSettingsRequest ||
+        !onDemandOptionSettings.any((spec) => spec.id == scope.targetId)) {
+      return;
+    }
+    _handledSettingsRequest = (scope.targetId, scope.nonce);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_showOptions());
+    });
+  }
+
+  Future<void> _showOptions() => showSheet<void>(
+    context: context,
+    builder: (_) => const OnDemandOptionsSheet(),
+  );
+
   bool get _isAndroid => widget.isAndroid ?? system.isAndroid;
 
   bool get _isMacOS => widget.isMacOS ?? system.isMacOS;
@@ -404,48 +427,6 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     );
   }
 
-  Widget _buildOptions() => generateSection(
-    items: [
-      ConfigToggleItem(
-        selector: vpnSettingProvider.select((s) => s.onDemandEnabled),
-        title: (l) => l.onDemand,
-        setting: onDemandToolSettings[3],
-        onChanged: (ref, value) => ref
-            .read(vpnSettingProvider.notifier)
-            .update((s) => s.copyWith(onDemandEnabled: value)),
-      ),
-      ConfigToggleItem(
-        selector: vpnSettingProvider.select((s) => s.onDemandFullStop),
-        title: (l) => l.onDemandFullStop,
-        setting: onDemandToolSettings[4],
-        onChanged: (ref, value) => ref
-            .read(vpnSettingProvider.notifier)
-            .update((s) => s.copyWith(onDemandFullStop: value)),
-      ),
-      ConfigToggleItem(
-        selector: vpnSettingProvider.select((s) => s.onDemandCloseConnections),
-        title: (l) => l.onDemandCloseConnections,
-        setting: onDemandToolSettings[5],
-        onChanged: (ref, value) => ref
-            .read(vpnSettingProvider.notifier)
-            .update((s) => s.copyWith(onDemandCloseConnections: value)),
-      ),
-      ConfigToggleItem(
-        selector: vpnSettingProvider.select((s) => s.onDemandStrict),
-        title: (l) => l.onDemandStrict,
-        setting: onDemandToolSettings[6],
-        onChanged: (ref, value) => ref
-            .read(vpnSettingProvider.notifier)
-            .update((s) => s.copyWith(onDemandStrict: value)),
-      ),
-    ],
-    footer: [
-      context.appLocalizations.onDemandFullStopDesc,
-      context.appLocalizations.closeConnectionsDesc,
-      context.appLocalizations.onDemandStrictDesc,
-    ].join('\n'),
-  );
-
   @override
   Widget build(BuildContext context) {
     final excludeSSIDs = ref.watch(excludeSSIDsProvider);
@@ -457,15 +438,12 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
             padding:
                 EdgeInsets.fromLTRB(16, context.appBarInset, 16, 0) +
                 context.bodyInsets,
-            sliver: SliverToBoxAdapter(child: _buildOptions()),
-          ),
-          SliverPadding(
-            padding:
-                const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ).copyWith(top: context.sectionsTopPadding) +
-                context.bodyInsets,
-            sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
+            sliver: SliverToBoxAdapter(
+              child: AnimatedReveal(
+                visible: _needsLocationPermission,
+                child: _buildPrerequisites(),
+              ),
+            ),
           ),
           SliverPadding(
             padding:
@@ -493,6 +471,71 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
         ],
       ),
       title: context.appLocalizations.onDemand,
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.settings,
+          tooltip: context.appLocalizations.options,
+          onPressed: _showOptions,
+        ),
+      ],
+    );
+  }
+}
+
+class OnDemandOptionsSheet extends StatelessWidget {
+  const OnDemandOptionsSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.appLocalizations;
+    return CommonScaffold(
+      title: l.options,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
+        child: generateSection(
+          items: [
+            ConfigToggleItem(
+              selector: vpnSettingProvider.select((s) => s.onDemandEnabled),
+              title: (l) => l.onDemand,
+              setting: onDemandToolSettings[3],
+              onChanged: (ref, value) => ref
+                  .read(vpnSettingProvider.notifier)
+                  .update((s) => s.copyWith(onDemandEnabled: value)),
+            ),
+            ConfigToggleItem(
+              selector: vpnSettingProvider.select((s) => s.onDemandFullStop),
+              title: (l) => l.onDemandFullStop,
+              setting: onDemandToolSettings[4],
+              onChanged: (ref, value) => ref
+                  .read(vpnSettingProvider.notifier)
+                  .update((s) => s.copyWith(onDemandFullStop: value)),
+            ),
+            ConfigToggleItem(
+              selector: vpnSettingProvider.select(
+                (s) => s.onDemandCloseConnections,
+              ),
+              title: (l) => l.onDemandCloseConnections,
+              setting: onDemandToolSettings[5],
+              onChanged: (ref, value) => ref
+                  .read(vpnSettingProvider.notifier)
+                  .update((s) => s.copyWith(onDemandCloseConnections: value)),
+            ),
+            ConfigToggleItem(
+              selector: vpnSettingProvider.select((s) => s.onDemandStrict),
+              title: (l) => l.onDemandStrict,
+              setting: onDemandToolSettings[6],
+              onChanged: (ref, value) => ref
+                  .read(vpnSettingProvider.notifier)
+                  .update((s) => s.copyWith(onDemandStrict: value)),
+            ),
+          ],
+          footer: [
+            l.onDemandFullStopDesc,
+            l.closeConnectionsDesc,
+            l.onDemandStrictDesc,
+          ].join('\n'),
+        ),
+      ),
     );
   }
 }
@@ -537,3 +580,5 @@ final onDemandToolSettings = <SettingSpec>[
     title: (l) => l.onDemandStrict,
   ),
 ];
+
+final onDemandOptionSettings = onDemandToolSettings.sublist(3);

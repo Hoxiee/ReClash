@@ -43,7 +43,7 @@ void main() {
     expect(find.text('Office'), findsOneWidget);
     await tester.tap(find.text('Office'));
     expect(chosen, 'Office');
-    await tester.tap(find.text('Enter manually'));
+    await tester.tap(find.byTooltip('Enter manually'));
     expect(manual, isTrue);
   });
 
@@ -111,7 +111,7 @@ void main() {
       expect(calls, 0);
       expect(find.text('Location permission required'), findsOneWidget);
       expect(find.text('Authorize'), findsOneWidget);
-      expect(find.text('Enter manually'), findsOneWidget);
+      expect(find.byTooltip('Enter manually'), findsOneWidget);
 
       container.read(locationPermissionsProvider.notifier).state =
           WifiSsidPermission.granted;

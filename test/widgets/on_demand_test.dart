@@ -8,6 +8,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/widgets/settings/setting_target.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -55,6 +56,11 @@ class _TestBatteryOptimizationIgnored extends BatteryOptimizationIgnored {
 void main() {
   late ProviderContainer container;
 
+  Future<void> openOptions(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('Options'));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> pumpView(
     WidgetTester tester, {
     List<String> ssids = const [],
@@ -64,6 +70,7 @@ void main() {
     bool isMacOS = false,
     bool isWindows = false,
     bool isStart = false,
+    Widget Function(Widget)? wrapView,
     Locale? locale,
     Size size = const Size(1400, 1000),
   }) async {
@@ -87,17 +94,15 @@ void main() {
     addTearDown(container.dispose);
     globalState.container = container;
 
+    final view = OnDemandView(
+      isAndroid: isAndroid,
+      isMacOS: isMacOS,
+      isWindows: isWindows,
+    );
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: TestApp(
-          locale: locale,
-          child: OnDemandView(
-            isAndroid: isAndroid,
-            isMacOS: isMacOS,
-            isWindows: isWindows,
-          ),
-        ),
+        child: TestApp(locale: locale, child: wrapView?.call(view) ?? view),
       ),
     );
     await tester.pumpAndSettle();
@@ -120,6 +125,129 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Office'), findsOneWidget);
     expect(find.text('SSIDs are empty'), findsNothing);
+  });
+
+  testWidgets('options live in a sheet and leave the page to the networks', (
+    tester,
+  ) async {
+    await pumpView(
+      tester,
+      ssids: ['Home', 'Office'],
+      isAndroid: true,
+      size: const Size(390, 844),
+    );
+
+    expect(find.byType(ConfigToggleItem), findsNothing);
+    expect(find.text('Prerequisites'), findsOneWidget);
+    expect(find.text('Location permission'), findsOneWidget);
+    expect(find.text('Ignore battery optimization'), findsOneWidget);
+    expect(find.text('Home').hitTestable(), findsOneWidget);
+    expect(find.byTooltip('Add').hitTestable(), findsOneWidget);
+
+    await openOptions(tester);
+    expect(find.byType(ConfigToggleItem), findsNWidgets(4));
+    expect(find.text('Location permission').hitTestable(), findsNothing);
+  });
+
+  testWidgets('the options sheet writes the settings', (tester) async {
+    await pumpView(tester);
+    await openOptions(tester);
+
+    for (var index = 0; index < 4; index++) {
+      await tester.tap(find.byType(ConfigToggleItem).at(index));
+      await tester.pumpAndSettle();
+    }
+    final updated = container.read(vpnSettingProvider);
+    expect(updated.onDemandEnabled, isFalse);
+    expect(updated.onDemandFullStop, isTrue);
+    expect(updated.onDemandCloseConnections, isTrue);
+    expect(updated.onDemandStrict, isTrue);
+  });
+
+  for (final id in [
+    'onDemand.enabled',
+    'onDemand.fullStop',
+    'onDemand.closeConnections',
+    'onDemand.strict',
+  ]) {
+    testWidgets('a search result opens the options sheet for $id', (
+      tester,
+    ) async {
+      await pumpView(
+        tester,
+        size: const Size(390, 844),
+        wrapView: (child) => SettingsRevealScope(targetId: id, child: child),
+      );
+
+      final target = find.byWidgetPredicate(
+        (widget) => widget is SettingTarget && widget.spec.id == id,
+      );
+      expect(target.hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final id in ['onDemand.battery', 'onDemand.location']) {
+    testWidgets('a search result reveals $id on the page', (tester) async {
+      await pumpView(
+        tester,
+        isAndroid: true,
+        size: const Size(390, 844),
+        wrapView: (child) => SettingsRevealScope(targetId: id, child: child),
+      );
+
+      final target = find.byWidgetPredicate(
+        (widget) => widget is SettingTarget && widget.spec.id == id,
+      );
+      expect(target.hitTestable(), findsOneWidget);
+      expect(find.byType(ConfigToggleItem), findsNothing);
+    });
+  }
+
+  testWidgets('a networks search result leaves the options closed', (
+    tester,
+  ) async {
+    await pumpView(
+      tester,
+      ssids: ['Home'],
+      wrapView: (child) =>
+          SettingsRevealScope(targetId: 'onDemand.excludeSSIDs', child: child),
+    );
+
+    expect(find.byType(ConfigToggleItem), findsNothing);
+    expect(find.text('Home').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('the options sheet only opens for a new active search request', (
+    tester,
+  ) async {
+    final request = ValueNotifier<(int, bool)>((0, false));
+    addTearDown(request.dispose);
+    await pumpView(
+      tester,
+      wrapView: (child) => ValueListenableBuilder<(int, bool)>(
+        valueListenable: request,
+        builder: (_, value, _) => SettingsRevealScope(
+          targetId: 'onDemand.strict',
+          nonce: value.$1,
+          active: value.$2,
+          child: child,
+        ),
+      ),
+    );
+    expect(find.byType(ConfigToggleItem), findsNothing);
+
+    request.value = (0, true);
+    await tester.pumpAndSettle();
+    expect(find.byType(ConfigToggleItem), findsNWidgets(4));
+
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.byType(ConfigToggleItem), findsNothing);
+
+    request.value = (1, true);
+    await tester.pumpAndSettle();
+    expect(find.byType(ConfigToggleItem), findsNWidgets(4));
   });
 
   testWidgets('selecting an item swaps the header into selection mode', (
@@ -373,6 +501,7 @@ void main() {
   ) async {
     await pumpView(tester);
 
+    expect(find.text('Prerequisites'), findsNothing);
     expect(find.text('Ignore battery optimization'), findsNothing);
     expect(find.text('Location permission'), findsNothing);
     expect(find.bySemanticsLabel('Tap to authorize'), findsNothing);

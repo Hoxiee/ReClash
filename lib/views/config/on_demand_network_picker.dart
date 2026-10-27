@@ -273,26 +273,17 @@ class _OnDemandNetworkPickerState extends ConsumerState<OnDemandNetworkPicker> {
         .toList();
     return CommonScaffold(
       title: l.pickNetwork,
+      iconActions: [
+        if (onEnterManually != null)
+          IconButtonData(
+            glyph: AppGlyphs.keyboard,
+            tooltip: l.enterManually,
+            onPressed: onEnterManually,
+          ),
+      ],
       body: Padding(
         padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
-        child: Column(
-          children: [
-            if (onEnterManually != null) ...[
-              generateSection(
-                items: [
-                  DecorationListItem(
-                    leading: const GlyphIcon(AppGlyphs.keyboard),
-                    title: Text(l.enterManually),
-                    subtitle: Text(l.networkEntryHint),
-                    onPressed: onEnterManually,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-            Expanded(child: _buildContent(visible)),
-          ],
-        ),
+        child: _buildContent(visible),
       ),
     );
   }
