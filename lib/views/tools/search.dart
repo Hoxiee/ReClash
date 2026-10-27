@@ -286,6 +286,8 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
       );
     }
 
+    // Rows keep clear of the scrollbar, which touch platforms do not show.
+    final gutter = isTouchPlatform(Theme.of(context).platform) ? 0.0 : 12.0;
     return CommonScaffold(
       title: l.tools,
       backAction: widget.onDismiss,
@@ -297,7 +299,7 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 12),
+                  padding: EdgeInsetsDirectional.only(end: gutter),
                   child: SearchField(
                     controller: _controller,
                     focusNode: _focus,
@@ -323,7 +325,7 @@ class _ToolsCatalogPanelState extends ConsumerState<ToolsCatalogPanel> {
                   child: ListView(
                     controller: _scroll,
                     padding: EdgeInsetsDirectional.only(
-                      end: 12,
+                      end: gutter,
                       bottom: 20 + context.bottomInset,
                     ),
                     children: searching

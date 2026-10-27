@@ -152,7 +152,7 @@ class ToolsViewState extends ConsumerState<ToolsView> {
             confirm: () async =>
                 mounted &&
                 await dialogs.showMessage(
-                      context: context,
+                      context: sheetNavigatorOf(context).context,
                       message: TextSpan(text: confirmation),
                     ) ==
                     true &&

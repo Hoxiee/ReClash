@@ -26,15 +26,22 @@ class System {
     return _instance!;
   }
 
+  /// Lets a headless preview lay out another platform's screens; it never
+  /// reaches the plugins, which still run on the host.
+  @visibleForTesting
+  String? debugOperatingSystem;
+
+  String get _os => debugOperatingSystem ?? Platform.operatingSystem;
+
   bool get isDesktop => isWindows || isMacOS || isLinux;
 
-  bool get isWindows => Platform.isWindows;
+  bool get isWindows => _os == 'windows';
 
-  bool get isMacOS => Platform.isMacOS;
+  bool get isMacOS => _os == 'macos';
 
-  bool get isAndroid => Platform.isAndroid;
+  bool get isAndroid => _os == 'android';
 
-  bool get isLinux => Platform.isLinux;
+  bool get isLinux => _os == 'linux';
 
   bool get isTV => _isTV;
 

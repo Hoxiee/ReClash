@@ -114,7 +114,7 @@ class ProviderSettingsReturnSection extends ConsumerWidget {
           onTap: () => globalState.safeRun(() async {
             final profileId = ref.read(currentProfileIdProvider);
             final confirmed = await dialogs.showMessage(
-              context: context,
+              context: sheetNavigatorOf(context).context,
               title: l10n.providerSettingsReturnAll,
               message: TextSpan(text: l10n.providerSettingsReturnAllDesc),
             );

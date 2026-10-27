@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:code_forge/code_forge.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -57,6 +58,8 @@ import '../helpers/test_app.dart';
 import '../helpers/test_database_providers.dart';
 import '../helpers/test_profiles.dart';
 import '../plugins/code_forge/support.dart' show initEditorNative, settle;
+
+double get _scrollbarGutter => isTouchPlatform(defaultTargetPlatform) ? 0 : 12;
 
 class _WorkspaceCore extends CoreHandlerInterface {
   @override
@@ -1043,7 +1046,7 @@ void main() {
         .widget<ListView>(catalogList)
         .padding!
         .resolve(TextDirection.ltr);
-    expect(listPadding.right, 12);
+    expect(listPadding.right, _scrollbarGutter);
     expect(tester.takeException(), isNull);
   });
 
@@ -1072,7 +1075,21 @@ void main() {
     expect(searchRect.left, closeTo(rowRect.left, 0.5));
     expect(searchRect.right, closeTo(rowRect.right, 0.5));
     expect(listRect.left, closeTo(searchRect.left, 0.5));
-    expect(listRect.right - searchRect.right, 12);
+    expect(listRect.right - searchRect.right, _scrollbarGutter);
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('touch catalog keeps equal side gutters', (tester) async {
+    await pumpTools(tester, size: const Size(400, 800));
+    final panel = find.byType(ToolsCatalogPanel);
+    final searchRect = tester.getRect(
+      find.descendant(of: panel, matching: find.byType(SearchField)),
+    );
+    final panelRect = tester.getRect(panel);
+    expect(
+      searchRect.left - panelRect.left,
+      closeTo(panelRect.right - searchRect.right, 0.5),
+    );
     expect(tester.takeException(), isNull);
   });
 

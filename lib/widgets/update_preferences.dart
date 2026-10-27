@@ -47,7 +47,7 @@ class _UpdatePreferencesState extends ConsumerState<UpdatePreferences> {
     }
     final l = context.appLocalizations;
     final allowed = await dialogs.showMessage(
-      context: context,
+      context: sheetNavigatorOf(context).context,
       title: l.updateAutoConsentTitle,
       message: TextSpan(text: l.updateAutoConsentDescription),
       confirmText: l.updateAllowAutomatic,

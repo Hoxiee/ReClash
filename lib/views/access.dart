@@ -213,7 +213,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     }
     final accepted = packages.difference(domestic).toList();
     final confirmed = await dialogs.showMessage(
-      context: context,
+      context: sheetNavigatorOf(context).context,
       title: l.intelligentSelected,
       confirmText: l.replace,
       message: TextSpan(
