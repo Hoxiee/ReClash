@@ -113,6 +113,15 @@ else
 fi
 package_version="${tag#v}"
 
+summary="release_summaries/$tag.json"
+if ! git cat-file -e "HEAD:$summary" 2>/dev/null; then
+  if ((dry_run)); then
+    echo "warning: $summary is not committed; the tag needs it, see .agents/rules.md"
+  else
+    die "$summary is not committed; author and commit it before tagging, see .agents/rules.md"
+  fi
+fi
+
 echo
 echo "mode      : $mode"
 echo "branch    : $branch"

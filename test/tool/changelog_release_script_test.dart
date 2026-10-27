@@ -61,11 +61,19 @@ void main() {
 
   String pubspec() => File('${root.path}/pubspec.yaml').readAsStringSync();
 
+  void summarize(String tag) {
+    Directory('${root.path}/release_summaries').createSync(recursive: true);
+    File('${root.path}/release_summaries/$tag.json').writeAsStringSync('{}\n');
+    git(['add', '.']);
+    git(['commit', '--quiet', '-m', 'docs: release summary for $tag']);
+  }
+
   test('successive prereleases keep package names aligned with tags', () {
     for (final number in [1, 2]) {
+      final tag = 'v0.1.0-pre.$number';
+      summarize(tag);
       final result = release(['pre', '--yes']);
       expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
-      final tag = 'v0.1.0-pre.$number';
       expect(validateReleaseVersion(pubspec(), tag), '0.1.0-pre.$number');
       expect(git(['tag', '--points-at', 'HEAD']).stdout, contains(tag));
       expect(git(['status', '--porcelain']).stdout, isEmpty);
@@ -73,6 +81,7 @@ void main() {
   });
 
   test('stable removes the prerelease suffix before tagging', () {
+    summarize('v0.1.0');
     final result = release(['stable', '--yes']);
     expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
     expect(validateReleaseVersion(pubspec(), 'v0.1.0'), '0.1.0');
@@ -80,6 +89,7 @@ void main() {
   });
 
   test('explicit target replaces the full prerelease version', () {
+    summarize('v0.2.0-pre.1');
     final result = release(['pre', '--version', '0.2.0', '--yes']);
     expect(result.exitCode, 0, reason: '${result.stdout}\n${result.stderr}');
     expect(validateReleaseVersion(pubspec(), 'v0.2.0-pre.1'), '0.2.0-pre.1');
@@ -94,6 +104,17 @@ void main() {
     expect(git(['rev-parse', 'HEAD']).stdout, head);
     expect(git(['tag']).stdout, isEmpty);
     expect(git(['status', '--porcelain']).stdout, isEmpty);
+  });
+
+  test('tag without a committed release summary changes nothing', () {
+    final before = pubspec();
+    final head = git(['rev-parse', 'HEAD']).stdout;
+    final result = release(['pre', '--yes']);
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('is not committed'));
+    expect(pubspec(), before);
+    expect(git(['rev-parse', 'HEAD']).stdout, head);
+    expect(git(['tag']).stdout, isEmpty);
   });
 
   test('missing version argument reports a usage error', () {
