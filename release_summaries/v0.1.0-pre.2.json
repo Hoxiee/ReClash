@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "tag": "v0.1.0-pre.2",
+  "automaticInstall": false,
+  "locales": {
+    "en": {
+      "headline": "A simpler dashboard, speed test and local web access",
+      "spotlight": {
+        "title": "Simple dashboard",
+        "description": "Turn on a big-button dashboard whose pages swipe for everyday controls.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Speed test on demand",
+          "description": "Measure the connection from a sheet; metered networks ask first.",
+          "kind": "speed"
+        },
+        {
+          "title": "Scenario routes and setup bundles",
+          "description": "Add routing scenarios and server ladders, and import them as one bundle.",
+          "kind": "link"
+        },
+        {
+          "title": "Local web dashboard",
+          "description": "Install the dashboard on your network and choose who can open it.",
+          "kind": "shield"
+        },
+        {
+          "title": "Desktop Core without prompts",
+          "description": "The privileged Core stays ready, so launches stop asking for access.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos",
+            "linux"
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    "ru": {
+      "headline": "Проще дашборд, проверка скорости и веб-доступ",
+      "spotlight": {
+        "title": "Простой дашборд",
+        "description": "Включите дашборд с крупными кнопками, страницы которого листаются свайпом.",
+        "kind": "dashboard"
+      },
+      "highlights": [
+        {
+          "title": "Проверка скорости по запросу",
+          "description": "Измеряйте соединение из отдельного листа; в сетях с оплатой за трафик приложение спросит заранее.",
+          "kind": "speed"
+        },
+        {
+          "title": "Сценарии и наборы настроек",
+          "description": "Добавляйте сценарии маршрутов и лестницы серверов, импортируя их одним набором.",
+          "kind": "link"
+        },
+        {
+          "title": "Локальная веб-панель",
+          "description": "Установите панель в свою сеть и выберите, кто может её открыть.",
+          "kind": "shield"
+        },
+        {
+          "title": "Ядро на десктопе без запросов",
+          "description": "Привилегированное ядро остаётся готовым, поэтому при запуске доступ больше не запрашивается.",
+          "kind": "shield",
+          "platforms": [
+            "windows",
+            "macos",
+            "linux"
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  }
+}
