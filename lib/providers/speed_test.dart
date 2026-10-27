@@ -1,138 +1,206 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/http.dart';
+import 'package:reclash/common/network_cost.dart';
+import 'package:reclash/features/speed_test/backend.dart';
+import 'package:reclash/features/speed_test/cloudflare.dart';
+import 'package:reclash/features/speed_test/engine.dart';
+import 'package:reclash/features/speed_test/types.dart';
+import 'package:reclash/models/speed_test.dart';
 
-/// One run's cap: a steady rate on a fast link, cheap on a mobile plan.
-const speedTestBytes = 25 * 1024 * 1024;
+import 'app.dart';
+import 'config.dart';
+import 'route_state.dart';
+import 'routing.dart';
+import 'state.dart';
 
-/// A slow link stops here and is rated by what arrived.
-const speedTestLimit = Duration(seconds: 12);
+export 'package:reclash/features/speed_test/types.dart';
 
-final speedTestUrl = Uri.parse(
-  'https://speed.cloudflare.com/__down?bytes=$speedTestBytes',
+final speedTestBackendsProvider = Provider<List<SpeedTestBackend>>(
+  (ref) => [CloudflareSpeedTestBackend()],
 );
+
+final speedTestNetworkProvider = Provider<NetworkCostMonitor>(
+  (ref) => createNetworkCostMonitor(),
+);
+
+final speedTestPlanProvider = Provider<SpeedTestPlan>(
+  (ref) => const SpeedTestPlan(),
+);
+
+final _selectedBackendProvider = Provider<SpeedTestBackend?>((ref) {
+  final id = ref.watch(
+    appSettingProvider.select((value) => value.speedTest.backendId),
+  );
+  return ref
+      .watch(speedTestBackendsProvider)
+      .where((value) => value.id == id)
+      .firstOrNull;
+});
+
+final _speedTestRouteProvider = Provider((ref) {
+  final backend = ref.watch(_selectedBackendProvider);
+  return (
+    proxy: backend == null
+        ? 'DIRECT'
+        : ReClashHttpOverrides.findProxyForReader(
+            ref.watch,
+            backend.measurementUri,
+          ),
+    profile: ref.watch(currentProfileIdProvider),
+    patch: ref.watch(patchClashConfigProvider),
+    selected: ref.watch(selectedMapProvider),
+    mode: ref.watch(effectiveModeProvider),
+  );
+});
 
 final speedTestViaVpnProvider = Provider<bool>(
-  (ref) =>
-      ReClashHttpOverrides.findProxyForReader(ref.watch, speedTestUrl) !=
-      'DIRECT',
+  (ref) => ref.watch(_speedTestRouteProvider).proxy != 'DIRECT',
 );
 
-enum SpeedTestPhase { idle, running, done, failed }
-
-@immutable
-class SpeedTestState {
-  const SpeedTestState({
-    this.phase = SpeedTestPhase.idle,
-    this.mbps,
-    this.progress = 0,
-    this.checkedAt,
-    this.viaVpn = true,
-  });
-
-  final SpeedTestPhase phase;
-
-  /// The live rate while running, else the last finished one.
-  final double? mbps;
-  final double progress;
-  final DateTime? checkedAt;
-
-  final bool viaVpn;
-
-  bool get running => phase == SpeedTestPhase.running;
-}
-
-/// Downloads through the app's HTTP client: through the core's mixed port when
-/// the tunnel is on, else straight, and the result remembers which. Only ever
-/// started by hand.
 class SpeedTest extends Notifier<SpeedTestState> {
-  HttpClient? _client;
+  SpeedTestEngine? _engine;
+  StreamSubscription<NetworkCostSnapshot>? _networkSubscription;
   int _run = 0;
-
-  SpeedTestState _settled = const SpeedTestState();
+  bool _disposed = false;
 
   @override
   SpeedTestState build() {
-    ref
-      ..listen(speedTestViaVpnProvider, (_, _) => cancel())
-      ..onDispose(() => _client?.close(force: true));
+    ref.listen(
+      _speedTestRouteProvider,
+      (_, _) => cancel(failure: 'routeChanged'),
+    );
+    ref.listen(appVisibleProvider, (_, visible) {
+      if (!visible) cancel();
+    });
+    ref.listen(routeTrackerProvider, (previous, next) {
+      if (previous?.synced == true &&
+          (previous!.coreEpoch != next.coreEpoch ||
+              previous.routeVersion != next.routeVersion ||
+              previous.hostEpoch != next.hostEpoch)) {
+        cancel(failure: 'routeChanged');
+      }
+    });
+    ref.onDispose(() {
+      _disposed = true;
+      _run++;
+      _engine?.cancel();
+      unawaited(_networkSubscription?.cancel());
+    });
     return const SpeedTestState();
   }
 
-  Future<void> start({@visibleForTesting Uri? url}) async {
-    final target = url ?? speedTestUrl;
+  Future<void> start({
+    SpeedTestSettings settings = const SpeedTestSettings(),
+    NetworkCostSnapshot? expectedNetwork,
+  }) async {
     if (state.running) return;
-    final viaVpn = ref.read(speedTestViaVpnProvider);
-    final run = ++_run;
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
-    _client = client;
-    state = SpeedTestState(phase: SpeedTestPhase.running, viaVpn: viaVpn);
-    final watch = Stopwatch();
-    var received = 0;
-    var shown = 0;
-    try {
-      final request = await client.getUrl(target);
-      final response = await request.close().timeout(speedTestLimit);
-      if (response.statusCode != HttpStatus.ok) {
-        throw HttpException('status ${response.statusCode}', uri: target);
-      }
-      await for (final chunk in response.timeout(speedTestLimit)) {
-        if (run != _run) return;
-        watch.start();
-        received += chunk.length;
-        final elapsed = watch.elapsedMilliseconds;
-        if (elapsed >= speedTestLimit.inMilliseconds) break;
-        if (elapsed - shown >= 120) {
-          shown = elapsed;
-          state = SpeedTestState(
-            phase: SpeedTestPhase.running,
-            mbps: _mbps(received, watch.elapsed),
-            progress: _progress(received, watch.elapsed),
-            viaVpn: viaVpn,
-          );
-        }
-      }
-      if (run != _run) return;
-      if (received == 0) throw const HttpException('empty body');
-      state = _settled = SpeedTestState(
-        phase: SpeedTestPhase.done,
-        mbps: _mbps(received, watch.elapsed),
-        progress: 1,
-        checkedAt: DateTime.now(),
-        viaVpn: viaVpn,
+    if (expectedNetwork == null) {
+      state = const SpeedTestState(
+        phase: SpeedTestPhase.failed,
+        failure: 'confirmationRequired',
       );
+      return;
+    }
+    final backend = ref
+        .read(speedTestBackendsProvider)
+        .where((value) => value.id == settings.backendId)
+        .firstOrNull;
+    if (backend == null) {
+      state = SpeedTestState(
+        phase: SpeedTestPhase.failed,
+        backendId: settings.backendId,
+        failure: 'backendUnavailable',
+      );
+      return;
+    }
+    final run = ++_run;
+    final route = _speedTestRouteProvider;
+    final before = ref.read(route);
+    final proxy = ReClashHttpOverrides.findProxyForReader(
+      ref.read,
+      backend.measurementUri,
+    );
+    final network = ref.read(speedTestNetworkProvider);
+    final tracker = ref.read(routeTrackerProvider.notifier);
+    var attached = false;
+    state = SpeedTestState(
+      phase: SpeedTestPhase.running,
+      byteLimit: settings.mode == SpeedTestMode.complete
+          ? settings.byteLimit
+          : 0,
+      viaVpn: proxy != 'DIRECT',
+      backendId: backend.id,
+    );
+    try {
+      final current = await network.read();
+      if (_disposed || run != _run) return;
+      if (current != expectedNetwork ||
+          current.cost == NetworkCost.offline ||
+          ref.read(route) != before) {
+        cancel(failure: 'routeChanged');
+        return;
+      }
+      _networkSubscription = network.changes.listen((next) {
+        if (run == _run && next != expectedNetwork) {
+          cancel(failure: 'routeChanged');
+        }
+      }, onError: (Object _) => cancel(failure: 'routeChanged'));
+      tracker.attach();
+      attached = true;
+      final session = backend.open(
+        () => HttpClient()
+          ..connectionTimeout = const Duration(seconds: 5)
+          ..findProxy = (_) => proxy,
+      );
+      final engine = SpeedTestEngine(
+        session: session,
+        settings: settings,
+        viaVpn: proxy != 'DIRECT',
+        plan: ref.read(speedTestPlanProvider),
+        onUpdate: (next) {
+          if (!_disposed && run == _run) state = next;
+        },
+      );
+      _engine = engine;
+      await engine.run();
     } on Object {
-      if (run == _run) {
+      if (!_disposed && run == _run) {
         state = SpeedTestState(
           phase: SpeedTestPhase.failed,
-          mbps: _settled.mbps,
-          checkedAt: _settled.checkedAt,
-          viaVpn: _settled.viaVpn,
+          backendId: settings.backendId,
+          failure: 'unavailable',
         );
       }
     } finally {
-      client.close(force: true);
-      if (identical(_client, client)) _client = null;
+      if (attached) tracker.detach();
+      if (run == _run) {
+        _engine = null;
+        final subscription = _networkSubscription;
+        _networkSubscription = null;
+        await subscription?.cancel();
+      }
     }
   }
 
-  void cancel() {
-    if (!state.running) return;
-    _run++;
-    _client?.close(force: true);
-    state = _settled;
-  }
-
-  static double _mbps(int bytes, Duration elapsed) =>
-      elapsed.inMicroseconds == 0 ? 0 : bytes * 8 / elapsed.inMicroseconds;
-
-  static double _progress(int bytes, Duration elapsed) {
-    final byBytes = bytes / speedTestBytes;
-    final byTime = elapsed.inMicroseconds / speedTestLimit.inMicroseconds;
-    return byBytes > byTime ? byBytes : byTime;
+  void cancel({String? failure}) {
+    if (_disposed || !state.running) return;
+    final engine = _engine;
+    if (engine != null) {
+      engine.cancel(failure: failure);
+    } else {
+      _run++;
+      state = SpeedTestState(
+        phase: failure == null
+            ? SpeedTestPhase.cancelled
+            : SpeedTestPhase.failed,
+        failure: failure,
+      );
+    }
+    unawaited(_networkSubscription?.cancel());
+    _networkSubscription = null;
   }
 }
 

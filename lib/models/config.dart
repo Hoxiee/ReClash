@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'models.dart';
+import 'speed_test.dart';
 
 part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
@@ -75,6 +76,8 @@ const defaultFilters = [
         r'|website|telegram|(?<![a-z])tg(?![a-z])',
   ),
 ];
+
+bool resolveSidebarNarrow(bool? narrow, {required bool isTV}) => narrow ?? isTV;
 
 const defaultAppSettingProps = AppSettingProps();
 const defaultVpnProps = VpnProps();
@@ -281,6 +284,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(NavigationLayout.auto)
     @JsonKey(unknownEnumValue: NavigationLayout.auto)
     NavigationLayout navigationLayout,
+    bool? sidebarNarrow,
     @Default(NavigationLabels.always)
     @JsonKey(unknownEnumValue: NavigationLabels.always)
     NavigationLabels navigationLabels,
@@ -330,6 +334,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(WebDashboardFlavor.zashboard)
     @JsonKey(unknownEnumValue: WebDashboardFlavor.zashboard)
     WebDashboardFlavor webDashboardFlavor,
+    @Default(SpeedTestSettings())
+    @JsonKey(fromJson: SpeedTestSettings.safeFromJson)
+    SpeedTestSettings speedTest,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
@@ -536,6 +543,7 @@ ProxyCardType proxyCardTypeSafeFromJson(Object? cardType) {
     'loose' || 'expand' => ProxyCardType.loose,
     'standard' || 'shrink' => ProxyCardType.standard,
     'compact' || 'min' => ProxyCardType.compact,
+    'oneline' => ProxyCardType.oneline,
     _ => ProxyCardType.standard,
   };
 }

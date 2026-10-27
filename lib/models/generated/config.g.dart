@@ -60,6 +60,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
         unknownValue: NavigationLayout.auto,
       ) ??
       NavigationLayout.auto,
+  sidebarNarrow: json['sidebarNarrow'] as bool?,
   navigationLabels:
       $enumDecodeNullable(
         _$NavigationLabelsEnumMap,
@@ -157,6 +158,9 @@ _AppSettingProps _$AppSettingPropsFromJson(
         unknownValue: WebDashboardFlavor.zashboard,
       ) ??
       WebDashboardFlavor.zashboard,
+  speedTest: json['speedTest'] == null
+      ? const SpeedTestSettings()
+      : SpeedTestSettings.safeFromJson(json['speedTest']),
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -181,6 +185,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'navigationLayout': _$NavigationLayoutEnumMap[instance.navigationLayout]!,
+      'sidebarNarrow': instance.sidebarNarrow,
       'navigationLabels': _$NavigationLabelsEnumMap[instance.navigationLabels]!,
       'appIcon': _$AppIconEnumMap[instance.appIcon]!,
       'trayIconStyle': _$TrayIconStyleEnumMap[instance.trayIconStyle]!,
@@ -219,6 +224,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tableColumnWidths': instance.tableColumnWidths,
       'webDashboardFlavor':
           _$WebDashboardFlavorEnumMap[instance.webDashboardFlavor]!,
+      'speedTest': instance.speedTest,
     };
 
 const _$DashboardStyleEnumMap = {
@@ -509,6 +515,7 @@ const _$ProxyCardTypeEnumMap = {
   ProxyCardType.loose: 'loose',
   ProxyCardType.standard: 'standard',
   ProxyCardType.compact: 'compact',
+  ProxyCardType.oneline: 'oneline',
 };
 
 _TextScale _$TextScaleFromJson(Map<String, dynamic> json) => _TextScale(

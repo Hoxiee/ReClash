@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/features/speed_test/sheet.dart';
 import 'package:reclash/providers/speed_test.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/views/dashboard/style.dart';
@@ -42,13 +43,10 @@ class SimpleSpeedCard extends ConsumerWidget {
     final description = switch (test.phase) {
       SpeedTestPhase.running => appLocalizations.simpleSpeedMeasuring,
       SpeedTestPhase.failed => appLocalizations.simpleSpeedFailed,
+      SpeedTestPhase.cancelled => appLocalizations.speedTestCancelled,
+      _ when test.limited => appLocalizations.speedTestLimited,
       _ when mbps != null => _verdict(context, mbps),
-      _ when !viaVpn => appLocalizations.simpleSpeedDirectIdleDesc(
-        dashboardTraffic(speedTestBytes),
-      ),
-      _ => appLocalizations.simpleSpeedIdleDesc(
-        dashboardTraffic(speedTestBytes),
-      ),
+      _ => appLocalizations.speedTestIdleDesc,
     };
     final stale =
         test.phase == SpeedTestPhase.failed ||
@@ -105,7 +103,7 @@ class SimpleSpeedCard extends ConsumerWidget {
                             if (!test.viaVpn)
                               TextSpan(
                                 text:
-                                    ' · ${appLocalizations.simpleSpeedDirectTag}',
+                                    ' · ${appLocalizations.speedTestRouteSystem}',
                                 style: DashboardText.unit(
                                   context,
                                   AppTextStyle.footnote,
@@ -137,12 +135,8 @@ class SimpleSpeedCard extends ConsumerWidget {
                 )
               else
                 FilledButton.tonal(
-                  onPressed: () => unawaited(notifier.start()),
-                  child: Text(
-                    mbps == null
-                        ? appLocalizations.simpleSpeedMeasure
-                        : appLocalizations.simpleSpeedAgain,
-                  ),
+                  onPressed: () => unawaited(showSpeedTestSheet(context)),
+                  child: Text(appLocalizations.speedTestOpen),
                 ),
             ],
           ),
