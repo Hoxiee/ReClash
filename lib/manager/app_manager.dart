@@ -17,6 +17,7 @@ import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/catalog.dart';
 import 'package:reclash/widgets/icon.dart';
+import 'package:reclash/widgets/subscription_promo.dart';
 import 'package:reclash/widgets/tun_privilege_setup_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -52,6 +53,15 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
         ref.read(storeActionProvider.notifier).savePreferencesDebounce();
+      }
+    });
+    ref.listenManual(profilesProvider, (prev, next) {
+      if (prev == null) return;
+      for (final profile in convertedPromos(prev, next)) {
+        dialogs.showNotifier(
+          currentAppLocalizations.promoConverted(profile.realLabel),
+          level: MessageLevel.success,
+        );
       }
     });
     ref.listenManual(groupsProvider, (prev, next) {
@@ -170,9 +180,12 @@ class AppEnvManager extends ConsumerWidget {
 
   const AppEnvManager({super.key, required this.child});
 
-  String? _bannerMessage({required bool safeMode}) {
+  String? _bannerMessage({required bool safeMode, required bool sandbox}) {
     if (safeMode) {
       return 'SAFE MODE';
+    }
+    if (sandbox) {
+      return 'TEST';
     }
     if (!globalState.isPre) {
       return null;
@@ -182,7 +195,10 @@ class AppEnvManager extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final message = _bannerMessage(safeMode: ref.watch(safeModeProvider));
+    final message = _bannerMessage(
+      safeMode: ref.watch(safeModeProvider),
+      sandbox: ref.watch(sandboxProvider),
+    );
     if (message == null) {
       return child;
     }

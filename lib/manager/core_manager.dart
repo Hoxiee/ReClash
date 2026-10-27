@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
+import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
@@ -52,6 +53,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         }
       });
     });
+    ref.listenManual(sandboxProvider, (_, next) {
+      _core.sandbox = next ? CoreSandbox() : null;
+    }, fireImmediately: true);
     ref.listenManual(updateParamsProvider, (prev, next) {
       if (prev != next && !_setupActive) {
         ref.read(setupActionProvider.notifier).updateConfigDebounce();

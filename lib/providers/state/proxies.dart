@@ -38,7 +38,7 @@ ProxyState proxyState(Ref ref) {
     patchClashConfigProvider.select((state) => state.mixedPort),
   );
   return ProxyState(
-    isStart: suspend ? false : isStart,
+    isStart: suspend || ref.watch(sandboxProvider) ? false : isStart,
     systemProxy: systemProxy,
     bassDomain: bypassDomain,
     port: mixedPort,

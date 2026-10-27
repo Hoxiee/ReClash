@@ -25,7 +25,8 @@ class CoreAction extends _$CoreAction {
     _core.configurePrivilege(
       tunEnabled:
           ref.read(patchClashConfigProvider).tun.enable &&
-          !ref.read(safeModeProvider),
+          !ref.read(safeModeProvider) &&
+          !ref.read(sandboxProvider),
       allowPrompt: allowPrompt,
     );
   }

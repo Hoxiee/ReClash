@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
+import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/core/spill.dart';
 import 'package:reclash/core/desktop/privilege.dart';
 import 'package:reclash/enum/enum.dart';
@@ -44,6 +45,9 @@ class CoreController {
     _instance ??= CoreController._internal();
     return _instance!;
   }
+
+  /// Answers network-facing requests while a test subscription is current.
+  CoreSandbox? sandbox;
 
   Future<CoreLifecycleResult> start() => _interface.start();
 
@@ -356,18 +360,20 @@ class CoreController {
   }
 
   Future<List<TrackerInfo>> getConnections() async {
-    return _interface.getConnections();
+    return sandbox?.connections() ?? _interface.getConnections();
   }
 
   Future<int> getConnectionCount() async {
-    return _interface.getConnectionCount();
+    return sandbox?.connections().length ?? _interface.getConnectionCount();
   }
 
   Future<void> closeConnection(String id) async {
+    if (sandbox case final sandbox?) return sandbox.closeConnection(id);
     await _interface.closeConnection(id);
   }
 
   Future<void> closeConnections() async {
+    if (sandbox case final sandbox?) return sandbox.closeConnections();
     await _interface.closeConnections();
   }
 
@@ -456,16 +462,18 @@ class CoreController {
     String proxyName,
     Duration timeout,
   ) async {
-    return _interface.asyncTestDelay(url, proxyName, timeout);
+    return sandbox?.delay(url, proxyName) ??
+        _interface.asyncTestDelay(url, proxyName, timeout);
   }
 
   Future<ProbeResult?> probe(ProbeParams params) => _interface.probe(params);
 
-  Future<OutboundIpResult?> outboundIp(OutboundIpParams params) =>
-      _interface.outboundIp(params);
+  Future<OutboundIpResult?> outboundIp(OutboundIpParams params) async =>
+      sandbox?.outboundIp(params) ?? _interface.outboundIp(params);
 
-  Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params) =>
-      _interface.serviceCheck(params);
+  Future<List<ServiceCheckItem>> serviceCheck(
+    ServiceCheckParams params,
+  ) async => sandbox?.serviceCheck(params) ?? _interface.serviceCheck(params);
 
   Future<Map<String, dynamic>> getConfig(int id) async {
     return _readConfig(await appPath.getProfilePath(id.toString()));
@@ -500,11 +508,12 @@ class CoreController {
   }
 
   Future<Traffic> getTraffic(bool onlyStatisticsProxy) async {
-    return _interface.getTraffic(onlyStatisticsProxy);
+    return sandbox?.traffic() ?? _interface.getTraffic(onlyStatisticsProxy);
   }
 
   Future<Traffic> getTotalTraffic(bool onlyStatisticsProxy) async {
-    return _interface.getTotalTraffic(onlyStatisticsProxy);
+    return sandbox?.totalTraffic() ??
+        _interface.getTotalTraffic(onlyStatisticsProxy);
   }
 
   Future<CoreMemoryStats?> getMemoryStats() async {

@@ -20,6 +20,7 @@ import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/desktop/privilege.dart';
+import 'package:reclash/core/sandbox.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';

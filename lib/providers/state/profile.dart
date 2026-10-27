@@ -15,6 +15,17 @@ Profile? currentProfile(Ref ref) {
   );
 }
 
+/// A test subscription has no working servers: it runs without listeners,
+/// TUN or system proxy, and the Core answers network requests with mocks.
+@Riverpod(keepAlive: true)
+bool sandbox(Ref ref) => ref.watch(
+  currentProfileProvider.select(
+    (profile) =>
+        profile?.type == ProfileType.url &&
+        profile?.subscriptionSnapshot?.metadata.kind == SubscriptionKind.test,
+  ),
+);
+
 @riverpod
 Profile? profile(Ref ref, int? profileId) {
   return ref.watch(

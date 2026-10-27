@@ -44,6 +44,7 @@ class SetupAction extends _$SetupAction {
   final _listenerScheduler = SerialTaskScheduler();
   _RunRequest? _latestRunRequest;
   DateTime? _startTime;
+  bool _sandboxedListener = false;
   _SetupInputs? _appliedInputs;
   var _lastPushDuration = Duration.zero;
   var _pendingForceApply = false;
@@ -93,7 +94,9 @@ class SetupAction extends _$SetupAction {
     if (!ref.read(initProvider)) return true;
     ref.read(proxiesActionProvider.notifier).cancelDelayTests();
     ref.read(delayDataSourceProvider.notifier).value = {};
-    final setupResult = applyProfile(force: true);
+    final setupResult = _sandboxSwitched
+        ? _restartRunning()
+        : applyProfile(force: true);
     ref.read(logsProvider.notifier).value = FixedList(maxLogsLength);
     ref.read(requestsProvider.notifier).value = FixedList(maxRequestsLength);
     ref.read(dnsQueriesProvider.notifier).value = FixedList(
@@ -107,6 +110,17 @@ class SetupAction extends _$SetupAction {
       commonPrint.log('fullSetup ===> ${compactError(e)}, $s');
       return false;
     }
+  }
+
+  /// A test subscription runs without a listener, so crossing into or out of
+  /// one restarts the session rather than only reapplying the profile.
+  bool get _sandboxSwitched =>
+      ref.read(isStartProvider) &&
+      _sandboxedListener != ref.read(sandboxProvider);
+
+  Future<bool> _restartRunning() async {
+    await setRunning(false);
+    return setRunning(true, initialize: true);
   }
 
   void _setLocalRunning(bool running) {
@@ -434,7 +448,14 @@ class SetupAction extends _$SetupAction {
   }
 
   @protected
-  Future<bool> setCoreRunning(bool running) {
+  Future<bool> setCoreRunning(bool running) async {
+    if (running && ref.read(sandboxProvider)) {
+      return _sandboxedListener = true;
+    }
+    if (!running && _sandboxedListener) {
+      _sandboxedListener = false;
+      return true;
+    }
     return running ? _core.startListener() : _core.stopListener();
   }
 
@@ -705,6 +726,9 @@ class SetupAction extends _$SetupAction {
     if (hasScript) {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
+    if (ref.read(sandboxProvider)) {
+      rawConfig = withSandboxNodes(rawConfig);
+    }
     final directory = await appPath.profilesPath;
     final webDashboardDirectory = await webDashboardServedDirectory(
       await appPath.homeDirPath,
@@ -736,7 +760,7 @@ class SetupAction extends _$SetupAction {
                 setupState.matchTarget?.trim().isNotEmpty == true
             ? setupState.matchTarget
             : lastMatchTarget(profileBase.base.matchRules),
-        safeMode: ref.read(safeModeProvider),
+        safeMode: ref.read(safeModeProvider) || ref.read(sandboxProvider),
         webDashboardDirectory: webDashboardDirectory,
       ),
     );

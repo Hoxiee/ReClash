@@ -1855,7 +1855,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'429190e584a04ddbccce2877830f13935c011729';
+String _$proxyStateHash() => r'f2ee286a1f1fa1d7abf51cd950d70f55e797da45';
 
 /// Watching the delay map instead would drop nodes one probe at a time, and
 /// reading it on any other rebuild would drop them whenever something
@@ -3276,6 +3276,54 @@ final class CurrentProfileProvider
 }
 
 String _$currentProfileHash() => r'55f3cb9570a0aa6b9e0b83a36693b69d52e753ab';
+
+/// A test subscription has no working servers: it runs without listeners,
+/// TUN or system proxy, and the Core answers network requests with mocks.
+
+@ProviderFor(sandbox)
+final sandboxProvider = SandboxProvider._();
+
+/// A test subscription has no working servers: it runs without listeners,
+/// TUN or system proxy, and the Core answers network requests with mocks.
+
+final class SandboxProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// A test subscription has no working servers: it runs without listeners,
+  /// TUN or system proxy, and the Core answers network requests with mocks.
+  SandboxProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sandboxProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sandboxHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return sandbox(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$sandboxHash() => r'8f6a469805dfc4c55861d4aefca2a637fa59d017';
 
 @ProviderFor(profile)
 final profileProvider = ProfileFamily._();

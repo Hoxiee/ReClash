@@ -324,6 +324,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
     rawConfig['vmess-config'] = '';
     rawConfig['tuic-server'] = {'enable': false};
     rawConfig['iptables'] = {'enable': false};
+    rawConfig['tun'] = {...rawConfig['tun'] as Map, 'enable': false};
     rawConfig['dns']['listen'] = '';
     final rawNtp = rawConfig['ntp'];
     if (rawNtp is Map) {
