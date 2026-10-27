@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:reclash/common/app_update_state.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
@@ -32,6 +34,7 @@ import 'package:reclash/widgets/announcement_card.dart';
 import '../../helpers/preferences.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
+import '../../helpers/test_update_runtime.dart';
 
 class _MockCore extends Mock implements CoreHandlerInterface {}
 
@@ -392,6 +395,38 @@ void main() {
     expect(find.text('Widgets'), findsOneWidget);
     expect(find.byTooltip('Detailed dashboard'), findsOneWidget);
     expect(find.byTooltip('Edit widgets'), findsNothing);
+  });
+
+  testWidgets('a pending app update sits above the button on Home', (
+    tester,
+  ) async {
+    globalState.packageInfo = PackageInfo(
+      appName: 'ReClash',
+      packageName: 'com.reclash',
+      version: '0.8.95',
+      buildNumber: '1',
+    );
+    useContainer(
+      overrides: [
+        appUpdateActionProvider.overrideWith(
+          () => _PendingUpdate(
+            AppUpdateState(
+              phase: UpdatePhase.offered,
+              release: testUpdateRelease(),
+            ),
+          ),
+        ),
+      ],
+    );
+    chooseSimple();
+    await pumpPage(tester);
+
+    final card = find.byKey(const ValueKey('app-update-card'));
+    expect(card, findsOneWidget);
+    expect(
+      tester.getRect(card).bottom,
+      lessThan(tester.getRect(find.byType(PowerButton)).top),
+    );
   });
 
   testWidgets('Detailed dashboard on Home switches the style back', (
@@ -960,4 +995,16 @@ void main() {
       expect(find.text('Server maintenance'), findsOneWidget);
     });
   });
+}
+
+class _PendingUpdate extends AppUpdateAction {
+  _PendingUpdate(this.initial);
+
+  final AppUpdateState initial;
+
+  @override
+  bool get isSupported => false;
+
+  @override
+  AppUpdateState build() => initial;
 }

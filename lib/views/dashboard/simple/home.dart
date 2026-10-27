@@ -9,6 +9,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/ui/icons/icons.dart';
 import 'package:reclash/ui/ui.dart';
 import 'package:reclash/views/dashboard/style.dart';
+import 'package:reclash/views/dashboard/widgets/update_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -16,23 +17,27 @@ import 'location_card.dart';
 import 'power_button.dart';
 import 'subscription_card.dart';
 
-/// The button, what it did and what is left to spend; on a phone also where
-/// traffic leaves, which a desktop shows beside the widgets.
-class SimpleHome extends StatelessWidget {
+/// The button, what it did and what is left to spend, under a pending app
+/// update; on a phone also where traffic leaves.
+class SimpleHome extends ConsumerWidget {
   const SimpleHome({super.key, required this.padding, this.wide = false});
 
   final EdgeInsets padding;
   final bool wide;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final (minSize, maxSize) = wide ? (184.0, 256.0) : (160.0, 220.0);
+    final hasUpdate = ref.watch(
+      appUpdateActionProvider.select((state) => state.hasUpdate),
+    );
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
         padding: padding,
         child: _FillHero(
           viewport: constraints.maxHeight - padding.vertical,
           minHero: SimplePower.heightOf(minSize),
+          above: hasUpdate ? const UpdateCard() : null,
           hero: SimplePower(minSize: minSize, maxSize: maxSize),
           below: Padding(
             padding: const EdgeInsets.only(top: 16),
@@ -51,16 +56,16 @@ class SimpleHome extends StatelessWidget {
   }
 }
 
-/// Lays [below] out at its own height and gives the hero the rest of the
-/// viewport, never less than [minHero], so a short window scrolls the page
-/// instead of shrinking the button.
+/// Lays [above] and [below] out at their own height; the hero gets the rest
+/// of the viewport, never less than [minHero].
 class _FillHero extends MultiChildRenderObjectWidget {
   _FillHero({
     required this.viewport,
     required this.minHero,
     required Widget hero,
     required Widget below,
-  }) : super(children: [hero, below]);
+    Widget? above,
+  }) : super(children: [hero, below, ?above]);
 
   final double viewport;
   final double minHero;
@@ -76,6 +81,8 @@ class _FillHero extends MultiChildRenderObjectWidget {
       ..minHero = minHero;
   }
 }
+
+const _aboveGap = 16.0;
 
 class _FillHeroParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -113,12 +120,20 @@ class _RenderFillHero extends RenderBox
     final width = constraints.maxWidth;
     final hero = firstChild!;
     final below = childAfter(hero)!;
+    final above = childAfter(below);
+    var top = 0.0;
+    if (above != null) {
+      above.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
+      top = above.size.height + _aboveGap;
+    }
     below.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
-    final heroHeight = math.max(_minHero, _viewport - below.size.height);
+    final heroHeight = math.max(_minHero, _viewport - top - below.size.height);
     hero.layout(BoxConstraints.tight(Size(width, heroHeight)));
-    (hero.parentData! as BoxParentData).offset = Offset.zero;
-    (below.parentData! as BoxParentData).offset = Offset(0, heroHeight);
-    size = constraints.constrain(Size(width, heroHeight + below.size.height));
+    (hero.parentData! as BoxParentData).offset = Offset(0, top);
+    (below.parentData! as BoxParentData).offset = Offset(0, top + heroHeight);
+    size = constraints.constrain(
+      Size(width, top + heroHeight + below.size.height),
+    );
   }
 
   @override
