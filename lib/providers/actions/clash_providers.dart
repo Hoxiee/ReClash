@@ -26,7 +26,7 @@ class ClashProvidersAction extends _$ClashProvidersAction {
     if (before != null &&
         (latest == null || latest.fileName != before.fileName)) {
       if (latest?.fileName != compiled.fileName) {
-        unawaited(_clearCache(compiled));
+        await _clearCache(compiled);
       }
       return latest ?? compiled;
     }
