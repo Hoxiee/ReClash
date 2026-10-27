@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "阅读",
   "subscriptionKindTest": "测试",
   "subscriptionKindPromo": "推广",
-  "subscriptionKindDev": "开发"
+  "subscriptionKindDev": "开发",
+  "subscriptionInspector": "订阅检查器",
+  "subscriptionFields": "字段",
+  "subscriptionReceivedAt": "接收时间",
+  "subscriptionDeviceStatus": "设备状态",
+  "promoDaysLeft": "剩余 {count} 天",
+  "promoHoursLeft": "剩余 {count} 小时",
+  "promoEnded": "已结束",
+  "promoRenew": "续订",
+  "promoConverted": "{name}：订阅已激活"
 }

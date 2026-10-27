@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "O‘qish",
   "subscriptionKindTest": "Sinov",
   "subscriptionKindPromo": "Promo",
-  "subscriptionKindDev": "Ishlanma"
+  "subscriptionKindDev": "Ishlanma",
+  "subscriptionInspector": "Obuna inspektori",
+  "subscriptionFields": "Maydonlar",
+  "subscriptionReceivedAt": "Qabul qilingan",
+  "subscriptionDeviceStatus": "Qurilma holati",
+  "promoDaysLeft": "{count} kun qoldi",
+  "promoHoursLeft": "{count} soat qoldi",
+  "promoEnded": "Tugadi",
+  "promoRenew": "Uzaytirish",
+  "promoConverted": "{name}: obuna faol"
 }

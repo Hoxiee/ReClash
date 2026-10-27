@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "Читать",
   "subscriptionKindTest": "Тестовая",
   "subscriptionKindPromo": "Промо",
-  "subscriptionKindDev": "Разработка"
+  "subscriptionKindDev": "Разработка",
+  "subscriptionInspector": "Инспектор подписки",
+  "subscriptionFields": "Поля",
+  "subscriptionReceivedAt": "Получено",
+  "subscriptionDeviceStatus": "Статус устройства",
+  "promoDaysLeft": "{count, plural, =1{Остался 1 день} one{Остался {count} день} few{Осталось {count} дня} other{Осталось {count} дней}}",
+  "promoHoursLeft": "{count, plural, =1{Остался 1 час} one{Остался {count} час} few{Осталось {count} часа} other{Осталось {count} часов}}",
+  "promoEnded": "Закончилось",
+  "promoRenew": "Продлить",
+  "promoConverted": "{name}: подписка активна"
 }

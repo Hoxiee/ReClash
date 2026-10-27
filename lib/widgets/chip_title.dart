@@ -6,13 +6,14 @@ import 'package:material_ui/material_ui.dart';
 
 class ExpireChip extends StatelessWidget {
   final DateTime expire;
+  final String? label;
 
-  const ExpireChip({super.key, required this.expire});
+  const ExpireChip({super.key, required this.expire, this.label});
 
   static const _padding = EdgeInsets.symmetric(horizontal: 8, vertical: 2);
 
-  static double widthOf(BuildContext context, DateTime expire) =>
-      chipLabelWidth(context, expire.show) + _padding.horizontal;
+  static double widthOf(BuildContext context, DateTime expire, String? label) =>
+      chipLabelWidth(context, label ?? expire.show) + _padding.horizontal;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class ExpireChip extends StatelessWidget {
         child: Padding(
           padding: _padding,
           child: Text(
-            expire.show,
+            label ?? expire.show,
             maxLines: 1,
             style: AppTextStyle.caption1
                 .of(context, emphasized: true)
@@ -47,6 +48,7 @@ class ChipTitle extends StatelessWidget {
   final String? chip;
   final Color? chipForeground;
   final DateTime? expire;
+  final String? expireLabel;
   final TextStyle? style;
 
   const ChipTitle({
@@ -55,6 +57,7 @@ class ChipTitle extends StatelessWidget {
     this.chip,
     this.chipForeground,
     this.expire,
+    this.expireLabel,
     this.style,
   });
 
@@ -69,7 +72,7 @@ class ChipTitle extends StatelessWidget {
         .width;
     final chipsWidth =
         (chip == null ? 0 : TonalChip.widthOf(context, chip) + _gap) +
-        ExpireChip.widthOf(context, expire) +
+        ExpireChip.widthOf(context, expire, expireLabel) +
         _gap;
     return maxWidth - chipsWidth >= min(titleWidth, maxWidth / 2);
   }
@@ -106,7 +109,8 @@ class ChipTitle extends StatelessWidget {
                 context.raisedSurfaceLevel.colorOf(colorScheme),
             foregroundColor: chipForeground ?? colorScheme.onSurfaceVariant,
           ),
-        if (showExpire && expire != null) ExpireChip(expire: expire),
+        if (showExpire && expire != null)
+          ExpireChip(expire: expire, label: expireLabel),
       ],
     );
     if (expire == null) {

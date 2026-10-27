@@ -18247,6 +18247,90 @@ class AppLocalizations {
     );
   }
 
+  /// `Subscription inspector`
+  String get subscriptionInspector {
+    return Intl.message(
+      'Subscription inspector',
+      name: 'subscriptionInspector',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fields`
+  String get subscriptionFields {
+    return Intl.message(
+      'Fields',
+      name: 'subscriptionFields',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Received`
+  String get subscriptionReceivedAt {
+    return Intl.message(
+      'Received',
+      name: 'subscriptionReceivedAt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device status`
+  String get subscriptionDeviceStatus {
+    return Intl.message(
+      'Device status',
+      name: 'subscriptionDeviceStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 day left} other{{count} days left}}`
+  String promoDaysLeft(int count) {
+    return Intl.plural(
+      count,
+      one: '1 day left',
+      other: '$count days left',
+      name: 'promoDaysLeft',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =1{1 hour left} other{{count} hours left}}`
+  String promoHoursLeft(int count) {
+    return Intl.plural(
+      count,
+      one: '1 hour left',
+      other: '$count hours left',
+      name: 'promoHoursLeft',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Ended`
+  String get promoEnded {
+    return Intl.message('Ended', name: 'promoEnded', desc: '', args: []);
+  }
+
+  /// `Renew`
+  String get promoRenew {
+    return Intl.message('Renew', name: 'promoRenew', desc: '', args: []);
+  }
+
+  /// `{name}: subscription is active`
+  String promoConverted(String name) {
+    return Intl.message(
+      '$name: subscription is active',
+      name: 'promoConverted',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Application settings`
   String get applicationSettings {
     return Intl.message(

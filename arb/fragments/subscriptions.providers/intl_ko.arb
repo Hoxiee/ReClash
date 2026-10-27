@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "읽기",
   "subscriptionKindTest": "테스트",
   "subscriptionKindPromo": "프로모",
-  "subscriptionKindDev": "개발"
+  "subscriptionKindDev": "개발",
+  "subscriptionInspector": "구독 검사기",
+  "subscriptionFields": "필드",
+  "subscriptionReceivedAt": "수신 시각",
+  "subscriptionDeviceStatus": "기기 상태",
+  "promoDaysLeft": "{count}일 남음",
+  "promoHoursLeft": "{count}시간 남음",
+  "promoEnded": "종료됨",
+  "promoRenew": "연장",
+  "promoConverted": "{name}: 구독이 활성화되었습니다"
 }

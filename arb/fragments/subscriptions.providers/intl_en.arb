@@ -34,5 +34,35 @@
   "subscriptionKindDev": "Dev",
   "@subscriptionKindDev": {
     "description": "Badge on a subscription card: the provider declared a subscription for provider developers"
+  },
+  "subscriptionInspector": "Subscription inspector",
+  "subscriptionFields": "Fields",
+  "subscriptionReceivedAt": "Received",
+  "subscriptionDeviceStatus": "Device status",
+  "promoDaysLeft": "{count, plural, =1{1 day left} other{{count} days left}}",
+  "@promoDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promoHoursLeft": "{count, plural, =1{1 hour left} other{{count} hours left}}",
+  "@promoHoursLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promoEnded": "Ended",
+  "promoRenew": "Renew",
+  "promoConverted": "{name}: subscription is active",
+  "@promoConverted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

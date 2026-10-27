@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "Oka",
   "subscriptionKindTest": "Synag",
   "subscriptionKindPromo": "Promo",
-  "subscriptionKindDev": "Ösüş"
+  "subscriptionKindDev": "Ösüş",
+  "subscriptionInspector": "Abuna gözegçisi",
+  "subscriptionFields": "Meýdanlar",
+  "subscriptionReceivedAt": "Alnan wagty",
+  "subscriptionDeviceStatus": "Enjamyň ýagdaýy",
+  "promoDaysLeft": "{count} gün galdy",
+  "promoHoursLeft": "{count} sagat galdy",
+  "promoEnded": "Tamamlandy",
+  "promoRenew": "Uzaltmak",
+  "promoConverted": "{name}: abuna işjeň"
 }

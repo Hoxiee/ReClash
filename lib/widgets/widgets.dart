@@ -1,5 +1,6 @@
 export 'active_polling.dart';
 export 'chip_title.dart';
+export 'subscription_inspector.dart';
 export 'config_item.dart';
 export 'icon.dart';
 export 'input.dart';
@@ -10,4 +11,5 @@ export 'record.dart';
 export 'record_table.dart';
 export 'subscription_info_view.dart';
 export 'subscription_kind_chip.dart';
+export 'subscription_promo.dart';
 export 'package:reclash/ui/ui.dart';

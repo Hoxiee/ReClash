@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "読む",
   "subscriptionKindTest": "テスト",
   "subscriptionKindPromo": "プロモ",
-  "subscriptionKindDev": "開発"
+  "subscriptionKindDev": "開発",
+  "subscriptionInspector": "サブスクリプションインスペクター",
+  "subscriptionFields": "フィールド",
+  "subscriptionReceivedAt": "受信日時",
+  "subscriptionDeviceStatus": "デバイスの状態",
+  "promoDaysLeft": "残り{count}日",
+  "promoHoursLeft": "残り{count}時間",
+  "promoEnded": "終了",
+  "promoRenew": "更新",
+  "promoConverted": "{name}: サブスクリプションが有効になりました"
 }

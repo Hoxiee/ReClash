@@ -7,8 +7,13 @@ const _expireGap = 12.0;
 
 class SubscriptionInfoView extends StatelessWidget {
   final SubscriptionInfo? subscriptionInfo;
+  final String? expireLabel;
 
-  const SubscriptionInfoView({super.key, this.subscriptionInfo});
+  const SubscriptionInfoView({
+    super.key,
+    this.subscriptionInfo,
+    this.expireLabel,
+  });
 
   double _textWidth(BuildContext context, String text, TextStyle? style) {
     final painter = TextPainter(
@@ -35,9 +40,11 @@ class SubscriptionInfoView extends StatelessWidget {
 
     final useShow = use.traffic.show;
     final totalShow = total.traffic.show;
-    final expireShow = info.expire != 0
-        ? DateTime.fromMillisecondsSinceEpoch(info.expire * 1000).show
-        : context.appLocalizations.infiniteTime;
+    final expireShow =
+        expireLabel ??
+        (info.expire != 0
+            ? DateTime.fromMillisecondsSinceEpoch(info.expire * 1000).show
+            : context.appLocalizations.infiniteTime);
     final valueStyle = AppTextStyle.subheadline
         .of(context, emphasized: true)
         .copyWith(color: context.colorScheme.onSurfaceVariant);

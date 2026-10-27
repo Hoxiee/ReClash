@@ -313,6 +313,13 @@ class ProfileItem extends ConsumerWidget {
     );
   }
 
+  void _handleInspect(BuildContext context, SubscriptionSnapshot snapshot) {
+    showSheet<void>(
+      context: context,
+      builder: (_) => SubscriptionInspectorSheet(snapshot: snapshot),
+    );
+  }
+
   Future updateProfile(WidgetRef ref) async {
     if (profile.type != ProfileType.url) return;
     final reviewContext = Navigator.of(ref.context).context;
@@ -421,6 +428,7 @@ class ProfileItem extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
     final isCustom = profile.type == ProfileType.custom;
+    final snapshot = isUrl ? profile.subscriptionSnapshot : null;
     return [
       CommonPopupMenuItem(
         glyph: AppGlyphs.edit,
@@ -490,6 +498,15 @@ class ProfileItem extends ConsumerWidget {
                   );
                 },
               ),
+            if (snapshot != null &&
+                snapshot.metadata.kind == SubscriptionKind.dev)
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.code,
+                label: appLocalizations.subscriptionInspector,
+                onPressed: () {
+                  _handleInspect(context, snapshot);
+                },
+              ),
             CommonPopupMenuItem(
               glyph: AppGlyphs.export,
               label: appLocalizations.exportFile,
@@ -515,6 +532,17 @@ class ProfileItem extends ConsumerWidget {
     final isUpdating = ref.watch(isUpdatingProvider(profile.updatingKey));
     final subscriptionInfo = _subscriptionInfo;
     final isSelected = profile.id == groupValue;
+    final metadata = profile.type == ProfileType.url
+        ? profile.subscriptionSnapshot?.metadata
+        : null;
+    final expire = subscriptionInfo?.expireDate;
+    final now = DateTime.now();
+    final promoExpire = metadata?.kind == SubscriptionKind.promo
+        ? expire
+        : null;
+    final renewUrl = promoExpire == null || isUpdating
+        ? null
+        : promoRenewUrl(metadata!, promoExpire, now);
     return ContextMenuRegion(
       menuItems: isUpdating ? null : _menuItems(context, ref),
       child: CommonCard(
@@ -534,6 +562,13 @@ class ProfileItem extends ConsumerWidget {
             children: [
               if (profile.type == ProfileType.custom)
                 _GroupsCountChip(profileId: profile.id)
+              else if (renewUrl != null)
+                TonalChip(
+                  label: context.appLocalizations.promoRenew,
+                  color: context.colorScheme.primary.opacity15,
+                  foregroundColor: context.colorScheme.primary,
+                  onPressed: () => unawaited(dialogs.openUrl('$renewUrl')),
+                )
               else
                 _buildTrailing(context, isUpdating: isUpdating),
               if (isSelected) const SelectionBadge(size: 24),
@@ -541,10 +576,12 @@ class ProfileItem extends ConsumerWidget {
           ),
           title: _ProfileCardTitle(
             profile: profile,
-            expire: subscriptionInfo?.expireDate,
-            kind: profile.type == ProfileType.url
-                ? profile.subscriptionSnapshot?.metadata.kind
-                : null,
+            expire: expire,
+            expireLabel: promoExpire == null
+                ? null
+                : promoCountdown(context.appLocalizations, promoExpire, now),
+            ended: promoExpire != null && !promoExpire.isAfter(now),
+            kind: metadata?.kind,
             subtitle: _subtitle(context),
           ),
         ),
@@ -557,12 +594,16 @@ class _ProfileCardTitle extends StatelessWidget {
   const _ProfileCardTitle({
     required this.profile,
     required this.expire,
+    required this.expireLabel,
+    required this.ended,
     required this.kind,
     required this.subtitle,
   });
 
   final Profile profile;
   final DateTime? expire;
+  final String? expireLabel;
+  final bool ended;
   final SubscriptionKind? kind;
   final String subtitle;
 
@@ -577,7 +618,10 @@ class _ProfileCardTitle extends StatelessWidget {
           chip: kind?.label,
           chipForeground: kind?.foregroundOf(context.colorScheme),
           expire: expire,
-          style: AppTextStyle.headline.of(context),
+          expireLabel: expireLabel,
+          style: ended
+              ? AppTextStyle.headline.of(context).toLight
+              : AppTextStyle.headline.of(context),
         ),
         const SizedBox(height: _infoGap),
         Text(

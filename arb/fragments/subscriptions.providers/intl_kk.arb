@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "Оқу",
   "subscriptionKindTest": "Тест",
   "subscriptionKindPromo": "Промо",
-  "subscriptionKindDev": "Әзірлеу"
+  "subscriptionKindDev": "Әзірлеу",
+  "subscriptionInspector": "Жазылым инспекторы",
+  "subscriptionFields": "Өрістер",
+  "subscriptionReceivedAt": "Алынды",
+  "subscriptionDeviceStatus": "Құрылғы күйі",
+  "promoDaysLeft": "{count} күн қалды",
+  "promoHoursLeft": "{count} сағат қалды",
+  "promoEnded": "Аяқталды",
+  "promoRenew": "Ұзарту",
+  "promoConverted": "{name}: жазылым белсенді"
 }

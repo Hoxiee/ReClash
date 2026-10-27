@@ -12,5 +12,14 @@
   "providerAnnouncementRead": "Leer",
   "subscriptionKindTest": "Prueba",
   "subscriptionKindPromo": "Promo",
-  "subscriptionKindDev": "Dev"
+  "subscriptionKindDev": "Dev",
+  "subscriptionInspector": "Inspector de suscripción",
+  "subscriptionFields": "Campos",
+  "subscriptionReceivedAt": "Recibido",
+  "subscriptionDeviceStatus": "Estado del dispositivo",
+  "promoDaysLeft": "{count, plural, =1{Queda 1 día} other{Quedan {count} días}}",
+  "promoHoursLeft": "{count, plural, =1{Queda 1 hora} other{Quedan {count} horas}}",
+  "promoEnded": "Terminada",
+  "promoRenew": "Renovar",
+  "promoConverted": "{name}: la suscripción está activa"
 }

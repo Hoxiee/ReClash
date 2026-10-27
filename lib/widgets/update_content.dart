@@ -135,14 +135,6 @@ class _UpdateReleaseContentState extends State<UpdateReleaseContent> {
                 subtitle: Text(highlight.description),
               ),
           ]),
-          if (changelog?.tag != release.tag)
-            ReleaseNotes(
-              body: release.body,
-              tag: release.tag,
-              fullReleaseUrl: release.source
-                  .releasePage(release.tag)
-                  .toString(),
-            ),
         ] else
           ReleaseNotes(
             body: release.body,
