@@ -157,8 +157,12 @@ void main() {
       );
       final without = renderRelease(release);
       final withSummary = renderRelease(release, summary: summary);
-      expect(withSummary, startsWith(without));
       expect(without, isNot(contains(releaseSummaryMarker)));
+      expect(withSummary, contains('**An authored release**'));
+      expect(
+        withSummary.split(releaseEndMarker).first,
+        isNot(contains('Backups need re-import')),
+      );
       expect(
         decodeChangelog(
           _payloadOf(withSummary),
@@ -183,6 +187,39 @@ void main() {
         contains(String.fromCharCodes([92, 117, 48, 48, 51, 101])),
       );
       expect(withSummary.substring(end), '-->\n');
+    });
+
+    test('lists the authored highlights on the page, not the commit list', () {
+      final body = renderRelease(
+        version(
+          groups: [
+            entryGroup(ChangelogType.feat, [
+              ('1a2b3c4', 'profiles', 'Scripts'),
+            ]),
+          ],
+        ),
+        summary: const ReleaseSummary(
+          tag: 'v0.8.96',
+          locales: {
+            'en': ReleaseSummaryLocale(
+              headline: 'An authored release',
+              spotlight: ReleaseHighlight(
+                title: 'Spotlight',
+                description: 'Spotlight text.',
+              ),
+              highlights: [
+                ReleaseHighlight(
+                  title: 'Faster sync',
+                  description: 'Sync finishes sooner.',
+                ),
+              ],
+            ),
+          },
+        ),
+      );
+      final page = body.split(releaseEndMarker).first;
+      expect(page, contains('- **Faster sync**: Sync finishes sooner.'));
+      expect(page, isNot(contains('Scripts')));
     });
 
     test('refuses a summary authored for another tag', () {
@@ -410,6 +447,14 @@ void main() {
   });
 
   group('readPubspecVersion', () {
+    test('preserves the prerelease suffix without the build number', () {
+      expect(
+        readPubspecVersion('version: 0.1.0-pre.2+2026102701\n'),
+        '0.1.0-pre.2',
+      );
+      expect(readPubspecVersion('version: 0.1.0-pre.2\n'), '0.1.0-pre.2');
+    });
+
     test('reads the app version without the build number', () {
       expect(
         readPubspecVersion('name: reclash\nversion: 0.8.96+2026081501\n'),

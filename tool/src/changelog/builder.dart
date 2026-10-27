@@ -54,25 +54,32 @@ class ChangelogBuilder {
     final boundaryTag = git.tagExists(boundary)
         ? VersionTag.tryParse(boundary)
         : null;
+    final pendingTag = pending?.tag;
+    final taggedPrerelease =
+        pending?.prerelease == true &&
+        pendingTag != null &&
+        VersionTag.tryParse(pendingTag)?.isPrerelease == true &&
+        git.tagExists(pendingTag);
+    final revision = taggedPrerelease ? pendingTag : 'HEAD';
     final stable = git
-        .stableTags()
+        .stableTags(revision: revision)
         .where((tag) => boundaryTag == null || tag.compareTo(boundaryTag) > 0)
         .toList();
     final parser = ChangelogParser();
     final versions = <ChangelogVersion>[];
     final commitIdsByTag = <String, Set<String>>{};
 
-    if (pending != null && !git.tagExists(pending.tag)) {
+    if (pending != null && (!git.tagExists(pending.tag) || taggedPrerelease)) {
       final commits = git.commits(
         from: stable.isEmpty ? boundaryTag?.name : stable.first.name,
-        to: 'HEAD',
+        to: revision,
       );
       commitIdsByTag[pending.tag] = _idsOf(commits);
       versions.add(
         ChangelogVersion(
           version: pending.version,
           tag: pending.tag,
-          date: pending.date,
+          date: taggedPrerelease ? git.tagDate(pending.tag) : pending.date,
           prerelease: pending.prerelease,
           groups: groupItems(parser.parseAll(commits)),
         ),
@@ -167,7 +174,7 @@ Changelog decodeChangelog(String source) =>
 
 String readPubspecVersion(String pubspec) {
   final match = RegExp(
-    r'^version:\s*(\d+\.\d+\.\d+)',
+    r'^version:\s*(\d+\.\d+\.\d+(?:-pre\.\d+)?)',
     multiLine: true,
   ).firstMatch(pubspec);
   if (match == null) {

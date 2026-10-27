@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:reclash/common/changelog.dart';
+import 'package:reclash/common/update_summary.dart';
 import 'package:test/test.dart';
 
 import '../../tool/src/changelog/builder.dart';
@@ -134,6 +137,116 @@ void main() {
 
     expect(versions.map((version) => version.tag), ['v1.1.0']);
     expect(versions.single.date, '2026-01-02');
+  });
+
+  test('a tagged prerelease keeps its range before the later stable tag', () {
+    final versions = build(
+      pending: const PendingVersion(
+        version: '1.1.0-pre.1',
+        date: '2026-02-03',
+        prerelease: true,
+      ),
+    ).changelog.versions;
+
+    expect(versions.map((version) => version.tag), ['v1.1.0-pre.1']);
+    expect(versions.single.date, '2026-01-02');
+    final entries = versions.single.groups
+        .expand((group) => group.entries)
+        .map((entry) => entry.text);
+    expect(entries, containsAll(['First feature', 'First fix']));
+    expect(entries, isNot(contains('The old flag is gone')));
+    expect(entries, isNot(contains('Second feature')));
+  });
+
+  for (final tagged in [false, true]) {
+    test(
+      'CLI renders the exact ${tagged ? 'tagged' : 'pending'} prerelease',
+      () {
+        commit('feat(preview): a prerelease improvement');
+        if (tagged) git(['tag', 'v1.2.0-pre.2']);
+        if (tagged) commit('feat(later): not part of the tagged release');
+        File('${repo.path}/pubspec.yaml').writeAsStringSync(
+          'name: release_fixture\nversion: 1.2.0-pre.2+2026102701\n',
+        );
+        const summary = ReleaseSummary(
+          tag: 'v1.2.0-pre.2',
+          locales: {
+            'en': ReleaseSummaryLocale(
+              headline: 'The prerelease overview',
+              spotlight: ReleaseHighlight(
+                title: 'Preview feature',
+                description: 'A prerelease improvement.',
+              ),
+            ),
+          },
+        );
+        final author = File('${repo.path}/release_summaries/v1.2.0-pre.2.json');
+        author.parent.createSync();
+        author.writeAsStringSync(jsonEncode(summary.toJson()));
+        final result = Process.runSync('dart', [
+          'run',
+          'tool/changelog.dart',
+          '--root',
+          repo.path,
+          'build',
+          '--unreleased',
+        ]);
+        expect(
+          result.exitCode,
+          0,
+          reason: '${result.stdout}\n${result.stderr}',
+        );
+        final generated = decodeChangelog(
+          File('${repo.path}/changelog.json').readAsStringSync(),
+        ).versions.first;
+        expect(generated.tag, summary.tag);
+        expect(generated.version, '1.2.0-pre.2');
+        final entries = generated.groups
+            .expand((group) => group.entries)
+            .map((entry) => entry.text);
+        expect(entries, contains('A prerelease improvement'));
+        expect(entries, isNot(contains('Not part of the tagged release')));
+
+        final rendered = Process.runSync('dart', [
+          'run',
+          'tool/changelog.dart',
+          '--root',
+          repo.path,
+          'render',
+          'release',
+          '--tag',
+          summary.tag,
+        ]);
+        expect(
+          rendered.exitCode,
+          0,
+          reason: '${rendered.stdout}\n${rendered.stderr}',
+        );
+        final body = rendered.stdout as String;
+        expect(parseReleaseChangelog(body)?.tag, summary.tag);
+        expect(
+          parseReleaseSummary(body, tag: summary.tag)?.locales['en']?.headline,
+          'The prerelease overview',
+        );
+      },
+    );
+  }
+
+  test('CLI refuses an already tagged stable version for unreleased notes', () {
+    File(
+      '${repo.path}/pubspec.yaml',
+    ).writeAsStringSync('name: release_fixture\nversion: 1.1.0+2026102701\n');
+    final result = Process.runSync('dart', [
+      'run',
+      'tool/changelog.dart',
+      '--root',
+      repo.path,
+      'build',
+      '--unreleased',
+    ]);
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('is already tagged'));
+    expect(File('${repo.path}/changelog.json').existsSync(), isFalse);
   });
 
   test('a release tag on another branch is not reachable from this one', () {

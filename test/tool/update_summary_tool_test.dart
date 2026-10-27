@@ -127,10 +127,10 @@ void main() {
         (((json['locales'] as Map)['en'] as Map)['spotlight'] as Map)['title'] =
             'x' * 121,
     'too many highlights': (json) =>
-        ((json['locales'] as Map)['en'] as Map)['highlights'] = List.filled(5, {
-          'title': 'Title',
-          'description': 'Description',
-        }),
+        ((json['locales'] as Map)['en'] as Map)['highlights'] = List.filled(
+          11,
+          {'title': 'Title', 'description': 'Description'},
+        ),
     'too many warnings': (json) =>
         ((json['locales'] as Map)['en'] as Map)['warnings'] = List.filled(13, {
           'title': 'Title',

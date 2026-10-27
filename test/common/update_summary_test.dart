@@ -154,7 +154,7 @@ void main() {
         json['locales']['en']['spotlight']['platforms'] = ['ios'],
     (Map<String, dynamic> json) => json['locales']['en']['headline'] = '',
     (Map<String, dynamic> json) => json['locales']['en']['highlights'] =
-        List.filled(5, json['locales']['en']['spotlight']),
+        List.filled(11, json['locales']['en']['spotlight']),
   ];
   for (var index = 0; index < invalidCases.length; index++) {
     test('rejects invalid authored summary case $index', () {

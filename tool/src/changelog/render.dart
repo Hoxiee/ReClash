@@ -62,15 +62,19 @@ String renderRelease(ChangelogVersion version, {ReleaseSummary? summary}) {
     throw const FormatException('Release summary must match the release tag');
   }
   final buffer = StringBuffer()..writeln(releaseBeginMarker);
-  if (version.isEmpty) {
-    buffer.writeln('- $emptyVersionNote');
-  }
-  for (final group in version.groups) {
-    buffer.writeln('### ${group.type.title}');
-    for (final entry in group.entries) {
-      buffer.writeln('- ${_prefix(entry)}${entry.text}');
+  if (summary != null) {
+    _writeOverview(buffer, summary.locales['en']!);
+  } else {
+    if (version.isEmpty) {
+      buffer.writeln('- $emptyVersionNote');
     }
-    buffer.writeln();
+    for (final group in version.groups) {
+      buffer.writeln('### ${group.type.title}');
+      for (final entry in group.entries) {
+        buffer.writeln('- ${_prefix(entry)}${entry.text}');
+      }
+      buffer.writeln();
+    }
   }
   buffer
     ..writeln(releaseEndMarker)
@@ -78,6 +82,21 @@ String renderRelease(ChangelogVersion version, {ReleaseSummary? summary}) {
     ..write(renderReleaseJson(version));
   if (summary != null) buffer.write(renderReleaseSummary(summary));
   return buffer.toString();
+}
+
+/// The release page shows the authored overview; the commit list stays in the
+/// hidden JSON and in CHANGELOG.md, so the download block stays on screen.
+void _writeOverview(StringBuffer buffer, ReleaseSummaryLocale content) {
+  buffer
+    ..writeln('**${content.headline}**')
+    ..writeln();
+  for (final highlight in content.highlights) {
+    buffer.writeln('- **${highlight.title}**: ${highlight.description}');
+  }
+  for (final warning in content.warnings) {
+    buffer.writeln('- ⚠️ **${warning.title}**: ${warning.description}');
+  }
+  buffer.writeln();
 }
 
 /// The same version as machine readable JSON, wrapped in an HTML comment so it

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/common/app_localizations.dart';
 import 'package:reclash/common/app_update.dart';
 import 'package:reclash/common/app_update_state.dart';
+import 'package:reclash/common/update.dart';
+import 'package:reclash/common/update_summary.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -139,6 +142,107 @@ void main() {
       find.text(currentAppLocalizations.updatePackageDevice),
       findsOneWidget,
     );
+  });
+
+  for (final changelogPayload in [
+    null,
+    'invalid JSON',
+    jsonEncode({
+      'schemaVersion': 2,
+      'versions': [
+        {
+          'version': '0.1.0',
+          'tag': 'v0.1.0',
+          'groups': [
+            {
+              'type': 'feat',
+              'entries': [
+                {'id': 'example', 'text': 'Notes from another version.'},
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  ]) {
+    final scenario = changelogPayload == null
+        ? 'missing'
+        : changelogPayload == 'invalid JSON'
+        ? 'invalid'
+        : 'mismatched';
+    testWidgets(
+      'authored overview keeps $scenario changelog in release details',
+      (tester) async {
+        final base = testUpdateRelease(tag: 'v0.1.0-pre.2', warning: true);
+        final release = AppUpdateRelease(
+          source: base.source,
+          data: {
+            ...base.data,
+            'body':
+                '<!-- reclash:changelog:begin -->\n'
+                '- Markdown release details.\n'
+                '<!-- reclash:changelog:end -->\n'
+                '${renderReleaseSummary(base.summary!)}'
+                '${changelogPayload == null ? '' : '<!-- reclash:changelog:json\n$changelogPayload\n-->\n'}'
+                '## Downloads\n- Download boilerplate.\n',
+          },
+        );
+        await pump(
+          tester,
+          SingleChildScrollView(
+            child: UpdateReleaseContent(
+              release: release,
+              currentVersion: '0.1.0-pre.1',
+              platform: SupportPlatform.Android,
+            ),
+          ),
+        );
+        expect(find.text('Updates without interruption'), findsOneWidget);
+        expect(find.text('Your background'), findsOneWidget);
+        expect(find.text('Make an explicit choice.'), findsOneWidget);
+        expect(find.text('Markdown release details.'), findsNothing);
+        expect(find.text('Notes from another version.'), findsNothing);
+        final disclosure = find.byKey(const ValueKey('update-release-details'));
+        await tester.ensureVisible(disclosure);
+        await tester.tap(disclosure);
+        await tester.pump();
+        expect(find.text('Markdown release details.'), findsOneWidget);
+        expect(find.text('Notes from another version.'), findsNothing);
+        expect(find.text('Download boilerplate.'), findsNothing);
+        await tester.tap(disclosure);
+        await tester.pump();
+        expect(find.text('Markdown release details.'), findsNothing);
+        expect(find.text('Make an explicit choice.'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('authored prerelease keeps structured notes in release details', (
+    tester,
+  ) async {
+    final release = testUpdateRelease(tag: 'v0.1.0-pre.2');
+    await pump(
+      tester,
+      SingleChildScrollView(
+        child: UpdateReleaseContent(
+          release: release,
+          currentVersion: '0.1.0-pre.1',
+          platform: SupportPlatform.Android,
+        ),
+      ),
+    );
+    expect(find.text('Your background'), findsOneWidget);
+    expect(find.text('Improved updates.'), findsNothing);
+    final disclosure = find.byKey(const ValueKey('update-release-details'));
+    await tester.ensureVisible(disclosure);
+    await tester.tap(disclosure);
+    await tester.pump();
+    expect(find.text('Improved updates.'), findsOneWidget);
+    await tester.tap(disclosure);
+    await tester.pump();
+    expect(find.text('Improved updates.'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('automatic checking shows a card but no modal', (tester) async {

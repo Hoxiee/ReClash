@@ -80,7 +80,7 @@ class ReleaseSummaryLocale {
     return ReleaseSummaryLocale(
       headline: _text(json['headline'], 120),
       spotlight: ReleaseHighlight.fromJson(json['spotlight']),
-      highlights: _items(json['highlights'], 4),
+      highlights: _items(json['highlights'], 10),
       warnings: _items(json['warnings'], 12),
     );
   }

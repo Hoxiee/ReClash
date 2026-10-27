@@ -82,11 +82,8 @@ int _build(String root, ArgResults command) {
       date: today(),
       prerelease: true,
     );
-    // The builder drops a pending version whose tag already exists, which for a
-    // prerelease build is silent and wrong: render then picks the newest
-    // version in the file, and the prerelease ships the previous release's
-    // notes under its own name.
-    if (git.tagExists(pending.tag)) {
+    if (git.tagExists(pending.tag) &&
+        VersionTag.tryParse(pending.tag)?.isPrerelease != true) {
       _fail(
         'build --unreleased has nothing to collect: ${pending.tag} is already '
         'tagged. Bump the version in pubspec.yaml first, or this build would '

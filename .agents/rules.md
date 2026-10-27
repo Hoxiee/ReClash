@@ -648,8 +648,9 @@ Every version bump, stable or prerelease, ships an authored `release_summaries/<
 bump, before the tag is pushed. The file is the short, formatted overview the update sheet shows; the changelog stays the
 full list.
 
-- Keep it brief: one headline, one spotlight, at most four highlights, and warnings only for something the user must act
-  on. Titles stay short; each description is one sentence.
+- Keep it short: one headline, one spotlight, at most ten highlights (usually five), and warnings only for something the
+  user must act on. Write what changed for the user, not one bullet per commit. Titles stay short; each description is
+  one sentence. The release page shows this overview, so the commit list must not be copied into it.
 - Write `en` and `ru`, following the schema in [release_summaries/README.md](../release_summaries/README.md). `en` is the
   fallback and the two locales keep the same warning count, order and platform coverage.
 - Run `dart run tool/changelog.dart verify` with the file in place. A tag without a file still renders, but the release
