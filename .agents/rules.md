@@ -642,6 +642,19 @@ Changelog: Per-profile override scripts
 carries a `Changelog:` trailer. Commits missing a trailer reuse their subject; for `feat`, `fix` and `perf` the hook
 says so without blocking.
 
+## Version Bumps and Release Summaries
+
+Every version bump, stable or prerelease, ships an authored `release_summaries/<exact-tag>.json` in the same change as the
+bump, before the tag is pushed. The file is the short, formatted overview the update sheet shows; the changelog stays the
+full list.
+
+- Keep it brief: one headline, one spotlight, at most four highlights, and warnings only for something the user must act
+  on. Titles stay short; each description is one sentence.
+- Write `en` and `ru`, following the schema in [release_summaries/README.md](../release_summaries/README.md). `en` is the
+  fallback and the two locales keep the same warning count, order and platform coverage.
+- Run `dart run tool/changelog.dart verify` with the file in place. A tag without a file still renders, but the release
+  then has no authored overview, so do not push it without one unless the user says so.
+
 ## Migrations
 
 An upgrade starts from the last release, not from the previous development build. Before writing a legacy reader, a
