@@ -95,4 +95,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(row('c'), findsNothing);
   });
+
+  testWidgets('unkeyed entries of distinct types are told apart', (
+    tester,
+  ) async {
+    Widget build({required bool middle}) => MaterialApp(
+      home: Scaffold(
+        body: AnimatedEntries(
+          children: [
+            const SizedBox(height: 40),
+            if (middle) const FlutterLogo(size: 40),
+            const Placeholder(fallbackHeight: 40),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(middle: false));
+    await tester.pumpWidget(build(middle: true));
+    await tester.pump();
+    expect(find.byType(FlutterLogo), findsOneWidget);
+    await tester.pumpWidget(build(middle: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(FlutterLogo), findsNothing);
+    expect(find.byType(Placeholder), findsOneWidget);
+  });
+
+  testWidgets('a reveal unfolds, then folds away showing its last child', (
+    tester,
+  ) async {
+    Widget build(String? text) => MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: [
+            AnimatedReveal(
+              visible: text != null,
+              child: SizedBox(height: 40, child: Text(text ?? 'hidden')),
+            ),
+            const SizedBox(key: ValueKey('below'), height: 40),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(null));
+    expect(topOf(tester, 'below'), 0);
+
+    await tester.pumpWidget(build('shown'));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(topOf(tester, 'below'), inExclusiveRange(0, 40));
+    await tester.pumpAndSettle();
+    expect(topOf(tester, 'below'), 40);
+
+    await tester.pumpWidget(build(null));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('shown'), findsOneWidget);
+    expect(find.text('hidden'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('shown'), findsNothing);
+    expect(topOf(tester, 'below'), 0);
+  });
 }

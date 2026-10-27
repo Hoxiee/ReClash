@@ -476,7 +476,7 @@ class TunSection extends ConsumerWidget {
           (state) => state.tun.stack == TunStack.mips,
         ),
       );
-      return generateSection(
+      return generateAnimatedSection(
         title: appLocalizations.tun,
         items: tunItems(isMipsStack: isMipsStack),
         footer: appLocalizations.bypassPrivateRouteDesc,
@@ -571,7 +571,7 @@ class VpnSections extends ConsumerWidget {
           items: const [VPNItem()],
           footer: appLocalizations.vpnEnableDesc,
         ),
-        generateSection(
+        generateAnimatedSection(
           title: 'VPN',
           items: const [
             VpnSystemProxyItem(),
@@ -627,7 +627,7 @@ class NetworkOptionsSection extends ConsumerWidget {
         if (isCustomInterfaceName) appLocalizations.interfaceNameDesc,
       ],
     ];
-    return generateSection(
+    return generateAnimatedSection(
       title: appLocalizations.options,
       items: networkOptionsItems(
         isDesktop: system.isDesktop,

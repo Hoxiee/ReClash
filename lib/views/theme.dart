@@ -328,10 +328,13 @@ class _ThemeViewState extends ConsumerState<ThemeView>
         id: 'theme',
         items: [
           const _ThemeModeItem(),
-          if (visible(SettingCondition.darkTheme)) ...const [
-            SizedBox(height: 16),
-            _PureBlackItem(),
-          ],
+          AnimatedReveal(
+            visible: visible(SettingCondition.darkTheme),
+            child: const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: _PureBlackItem(),
+            ),
+          ),
           const SizedBox(height: 16),
           const _PrimaryColorItem(),
           const SizedBox(height: 16),
@@ -346,23 +349,34 @@ class _ThemeViewState extends ConsumerState<ThemeView>
           const _DashboardStyleItem(),
           const SizedBox(height: 16),
           const _NavigationLayoutItem(),
-          if (visible(SettingCondition.navigationSidebar))
-            const _SidebarWidthItem(),
-          if (visible(SettingCondition.navigationBar)) ...const [
-            SizedBox(height: 16),
-            _NavigationBarItem(),
-            SizedBox(height: 16),
-            _NavigationLabelsItem(),
-          ],
+          AnimatedReveal(
+            visible: visible(SettingCondition.navigationSidebar),
+            child: const _SidebarWidthItem(),
+          ),
+          AnimatedReveal(
+            visible: visible(SettingCondition.navigationBar),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 16),
+                _NavigationBarItem(),
+                SizedBox(height: 16),
+                _NavigationLabelsItem(),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
           const _TabAnimationItem(),
           const SizedBox(height: 16),
           const _LiquidGlassItem(),
-          if (visible(SettingCondition.sidebarBlur) &&
-              (system.isMacOS || system.isWindows)) ...const [
-            SizedBox(height: 16),
-            _SidebarBlurItem(),
-          ],
+          if (system.isMacOS || system.isWindows)
+            AnimatedReveal(
+              visible: visible(SettingCondition.sidebarBlur),
+              child: const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: _SidebarBlurItem(),
+              ),
+            ),
           const _FontFamilyItem(),
           const SizedBox(height: 16),
           const _TextScaleFactorItem(),
@@ -698,8 +712,10 @@ class _PrimaryColorItem extends ConsumerWidget {
             ),
             actions: [
               ?providerSpecTag(ref, themeToolSettings[1]),
-              if (!themeColors.isDefault)
-                _ResetButton(onPressed: () => _handleReset(context, ref)),
+              _ResetButton(
+                visible: !themeColors.isDefault,
+                onPressed: () => _handleReset(context, ref),
+              ),
             ],
           ),
           Padding(
@@ -2113,10 +2129,10 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
               glyph: AppGlyphs.textSize,
             ),
             actions: [
-              if (textScale.enable && textScale.scale != 1)
-                _ResetButton(
-                  onPressed: () => _update((state) => state.copyWith(scale: 1)),
-                ),
+              _ResetButton(
+                visible: textScale.enable && textScale.scale != 1,
+                onPressed: () => _update((state) => state.copyWith(scale: 1)),
+              ),
             ],
           ),
           Padding(
@@ -2260,21 +2276,26 @@ class _TextScaleFactorItemState extends ConsumerState<_TextScaleFactorItem> {
 }
 
 class _ResetButton extends StatelessWidget {
-  const _ResetButton({required this.onPressed});
+  const _ResetButton({required this.visible, required this.onPressed});
 
+  final bool visible;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return TonalButtonTheme(
-      size: TonalButtonSize.section,
-      child: ElasticPress(
-        child: IconButton(
-          tooltip: context.appLocalizations.reset,
-          onPressed: onPressed,
-          icon: const GlyphIcon(AppGlyphs.reset),
-        ),
-      ),
+    return FadeScaleBox(
+      child: visible
+          ? TonalButtonTheme(
+              size: TonalButtonSize.section,
+              child: ElasticPress(
+                child: IconButton(
+                  tooltip: context.appLocalizations.reset,
+                  onPressed: onPressed,
+                  icon: const GlyphIcon(AppGlyphs.reset),
+                ),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

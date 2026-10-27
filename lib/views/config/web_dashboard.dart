@@ -79,7 +79,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
   Future<void> _remove(WebDashboardFlavor flavor) async {
     final l = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
-      context: context,
+      context: sheetNavigatorOf(context).context,
       title: l.webDashboard,
       message: TextSpan(text: l.deleteTip(flavor.label)),
       destructive: true,
@@ -177,13 +177,25 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
             ).copyWith(top: context.contentTopPadding, bottom: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 20,
               children: [
-                if (failure != null)
-                  _Notice(text: failure.label, error: true)
-                else if (unavailable != null)
-                  _Notice(text: unavailable.label),
-                if (progress != null) _Progress(progress: progress),
+                AnimatedReveal(
+                  visible: failure != null || unavailable != null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: failure != null
+                        ? _Notice(text: failure.label, error: true)
+                        : _Notice(text: unavailable?.label ?? ''),
+                  ),
+                ),
+                AnimatedReveal(
+                  visible: progress != null,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: progress != null
+                        ? _Progress(progress: progress)
+                        : const SizedBox.shrink(),
+                  ),
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -217,6 +229,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                     ListFooter(text: l.webDashboardInstallTip),
                   ],
                 ),
+                const SizedBox(height: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

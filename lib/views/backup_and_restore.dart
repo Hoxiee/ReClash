@@ -163,11 +163,12 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
           ).copyWith(top: context.appBarInset, bottom: 16),
           child: Column(
             children: [
-              generateSection(
+              generateAnimatedSection(
                 title: appLocalizations.remote,
                 items: [
                   if (dav == null)
                     SettingTarget(
+                      key: const ValueKey(0),
                       spec: backupToolSettings[0],
                       child: ListItem(
                         leading: const GlyphIcon(AppGlyphs.account),
@@ -215,6 +216,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                       ),
                     ),
                     SettingTarget(
+                      key: const ValueKey(1),
                       spec: backupToolSettings[1],
                       child: ListItem.input(
                         title: Text(
@@ -231,6 +233,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                       ),
                     ),
                     SettingTarget(
+                      key: const ValueKey(2),
                       spec: backupToolSettings[2],
                       child: ListItem(
                         onTap: () {
@@ -242,6 +245,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                       ),
                     ),
                     SettingTarget(
+                      key: const ValueKey(3),
                       spec: backupToolSettings[3],
                       child: ListItem(
                         onTap: () {

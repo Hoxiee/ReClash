@@ -333,7 +333,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     if (confirm) {
       final l = context.appLocalizations;
       final leave = await dialogs.showMessage(
-        context: context,
+        context: sheetNavigatorOf(context).context,
         title: l.setupLeaveTitle,
         message: TextSpan(text: l.setupLeaveMessage),
         confirmText: l.exit,
@@ -350,7 +350,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     if (_locked) return;
     if (ref.read(setupSessionProvider).needsVpnRestart) {
       final consent = await dialogs.showMessage(
-        context: context,
+        context: sheetNavigatorOf(context).context,
         message: TextSpan(
           text: context.appLocalizations.vpnConfigChangeDetected,
         ),
@@ -426,11 +426,13 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
               return Column(
                 children: [
                   _header(state, l, locked, stepBar: journey && !wide),
-                  if (error != null)
-                    Padding(
+                  AnimatedReveal(
+                    visible: error != null,
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ErrorBanner(message: error),
+                      child: ErrorBanner(message: error ?? ''),
                     ),
+                  ),
                   Expanded(
                     child: state.step == SetupStep.agreement
                         ? DisclaimerView(
@@ -740,102 +742,143 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                 ),
             ],
           ),
-        if (_importError != null) ErrorBanner(message: _importError),
-        CommonCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 16,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  Text(
-                    profiles.isEmpty
-                        ? l.setupProfileImport
-                        : l.setupProfileImportAnother,
-                    style: AppTextStyle.headline.of(context),
-                  ),
-                  _note(l.setupProfileImportHint),
-                ],
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AnimatedReveal(
+              visible: _importError != null,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: ErrorBanner(message: _importError ?? ''),
               ),
-              FilledInputTheme(
-                child: TextField(
-                  controller: _linkController,
-                  enabled: !locked,
-                  autocorrect: false,
-                  keyboardType: TextInputType.url,
-                  textInputAction: TextInputAction.go,
-                  onSubmitted: (_) => _importLink(),
-                  decoration: InputDecoration(
-                    hintText: l.setupProfileLinkHint,
-                    suffixIcon: IconButton(
-                      tooltip: l.paste,
-                      onPressed: locked ? null : () => unawaited(_pasteLink()),
-                      icon: const GlyphIcon(AppGlyphs.paste, size: 20),
+            ),
+            CommonCard(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 16,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
+                    children: [
+                      Text(
+                        profiles.isEmpty
+                            ? l.setupProfileImport
+                            : l.setupProfileImportAnother,
+                        style: AppTextStyle.headline.of(context),
+                      ),
+                      _note(l.setupProfileImportHint),
+                    ],
+                  ),
+                  FilledInputTheme(
+                    child: TextField(
+                      controller: _linkController,
+                      enabled: !locked,
+                      autocorrect: false,
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.go,
+                      onSubmitted: (_) => _importLink(),
+                      decoration: InputDecoration(
+                        hintText: l.setupProfileLinkHint,
+                        suffixIcon: IconButton(
+                          tooltip: l.paste,
+                          onPressed: locked
+                              ? null
+                              : () => unawaited(_pasteLink()),
+                          icon: const GlyphIcon(AppGlyphs.paste, size: 20),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              ExcludeFocus(
-                excluding: locked,
-                child: IgnorePointer(
-                  ignoring: locked,
-                  child: SubscriptionClientSettingsSection(
-                    initial: _clientSettings,
-                    onChanged: (value) =>
-                        setState(() => _clientSettings = value),
-                    onFormChanged: () {},
+                  ExcludeFocus(
+                    excluding: locked,
+                    child: IgnorePointer(
+                      ignoring: locked,
+                      child: SubscriptionClientSettingsSection(
+                        initial: _clientSettings,
+                        onChanged: (value) =>
+                            setState(() => _clientSettings = value),
+                        onFormChanged: () {},
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              OverflowBar(
-                alignment: MainAxisAlignment.start,
-                spacing: 12,
-                overflowSpacing: 8,
-                children: [
-                  FilledButton.icon(
-                    onPressed: locked ? null : _importLink,
-                    icon: _importing
-                        ? const CommonCircleLoading(size: 18)
-                        : const GlyphIcon(AppGlyphs.link, fill: 1, size: 18),
-                    label: Text(l.import),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      OverflowBar(
+                        alignment: MainAxisAlignment.start,
+                        spacing: 12,
+                        overflowSpacing: 8,
+                        children: [
+                          FilledButton.icon(
+                            onPressed: locked ? null : _importLink,
+                            icon: _importing
+                                ? const CommonCircleLoading(size: 18)
+                                : const GlyphIcon(
+                                    AppGlyphs.link,
+                                    fill: 1,
+                                    size: 18,
+                                  ),
+                            label: Text(l.import),
+                          ),
+                          TextButton.icon(
+                            onPressed: locked ? null : _importFile,
+                            icon: const GlyphIcon(
+                              AppGlyphs.importFile,
+                              size: 18,
+                            ),
+                            label: Text(l.file),
+                          ),
+                          TextButton.icon(
+                            onPressed: locked ? null : _importQr,
+                            icon: const GlyphIcon(AppGlyphs.qrCode, size: 18),
+                            label: Text(l.qrcode),
+                          ),
+                          if (_importing)
+                            TextButton(
+                              onPressed: _cancelImport,
+                              child: Text(l.cancel),
+                            ),
+                        ],
+                      ),
+                      AnimatedReveal(
+                        visible: _encryptedImport != null,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: 16,
+                            children: [
+                              Text(
+                                l.setupAgeKeyDescription,
+                                style: AppTextStyle.subheadline.of(context),
+                              ),
+                              FilledInputTheme(
+                                child: SecretTextFormField(
+                                  controller: _keyController,
+                                  decoration: InputDecoration(
+                                    hintText: l.ageSecretKey,
+                                  ),
+                                ),
+                              ),
+                              FilledButton(
+                                onPressed: locked || _encryptedImport == null
+                                    ? null
+                                    : () =>
+                                          unawaited(_import(_encryptedImport!)),
+                                child: Text(l.setupLanguageContinue),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton.icon(
-                    onPressed: locked ? null : _importFile,
-                    icon: const GlyphIcon(AppGlyphs.importFile, size: 18),
-                    label: Text(l.file),
-                  ),
-                  TextButton.icon(
-                    onPressed: locked ? null : _importQr,
-                    icon: const GlyphIcon(AppGlyphs.qrCode, size: 18),
-                    label: Text(l.qrcode),
-                  ),
-                  if (_importing)
-                    TextButton(onPressed: _cancelImport, child: Text(l.cancel)),
                 ],
               ),
-              if (_encryptedImport != null) ...[
-                Text(
-                  l.setupAgeKeyDescription,
-                  style: AppTextStyle.subheadline.of(context),
-                ),
-                FilledInputTheme(
-                  child: SecretTextFormField(
-                    controller: _keyController,
-                    decoration: InputDecoration(hintText: l.ageSecretKey),
-                  ),
-                ),
-                FilledButton(
-                  onPressed: locked
-                      ? null
-                      : () => unawaited(_import(_encryptedImport!)),
-                  child: Text(l.setupLanguageContinue),
-                ),
-              ],
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );

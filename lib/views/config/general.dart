@@ -323,6 +323,7 @@ ConfigToggleItem _clashToggle({
 }) {
   final spec = GeneralSettings.spec(id);
   return ConfigToggleItem(
+    key: ValueKey(id),
     title: spec.title,
     setting: spec,
     selector: patchClashConfigProvider.select(select),
@@ -492,8 +493,9 @@ class GeneralView extends ConsumerWidget {
           ).copyWith(top: context.appBarInset, bottom: 16),
           child: Column(
             children: [
-              if (!secure)
-                generateSection(
+              AnimatedReveal(
+                visible: !secure,
+                child: generateAnimatedSection(
                   title: appLocalizations.inbound,
                   items: _inboundItems(
                     authentication: authentication,
@@ -504,6 +506,7 @@ class GeneralView extends ConsumerWidget {
                     appLocalizations.authenticationDesc,
                   ].join('\n'),
                 ),
+              ),
               generateSection(
                 title: appLocalizations.connection,
                 items: _connectionItems(),

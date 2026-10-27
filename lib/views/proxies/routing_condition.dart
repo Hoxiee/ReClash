@@ -160,8 +160,9 @@ class _ConditionEditorState extends ConsumerState<ConditionEditor> {
           : null,
       children: [
         if (form != null && form.flat) ...[
-          if (form.clauses.length > 1)
-            generateSection(
+          AnimatedReveal(
+            visible: form.clauses.length > 1,
+            child: generateSection(
               items: [
                 ListItem<String>.options(
                   title: Text(l.rcxCondMatch),
@@ -173,6 +174,7 @@ class _ConditionEditorState extends ConsumerState<ConditionEditor> {
                 ),
               ],
             ),
+          ),
           AnimatedEntries(
             children: [
               for (final (index, clause) in form.clauses.indexed)

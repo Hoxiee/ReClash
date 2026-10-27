@@ -59,7 +59,7 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
     try {
       final l10n = context.appLocalizations;
       final confirmed = await dialogs.showMessage(
-        context: context,
+        context: sheetNavigatorOf(context).context,
         message: TextSpan(
           text: status == CoreStatus.connected
               ? l10n.forceRestartCoreTip
@@ -205,6 +205,7 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
       value.isEmpty ? context.appLocalizations.unknown : value;
 
   Widget _field(String title, String value) => DetailRow(
+    key: ValueKey(title),
     title: title,
     value: Text(
       _valueOrUnknown(value),
@@ -221,8 +222,13 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
         : DateFormat('yyyy-MM-dd HH:mm:ss', 'en');
     final buildTime = info.buildTime?.toUtc();
     return [
-      DetailRow.text(title: 'mihomo', value: _valueOrUnknown(info.version)),
+      DetailRow.text(
+        key: const ValueKey(#version),
+        title: 'mihomo',
+        value: _valueOrUnknown(info.version),
+      ),
       DetailRow(
+        key: const ValueKey(#buildTime),
         title: context.appLocalizations.coreBuildTime,
         value: Text(
           buildTime == null
@@ -264,16 +270,22 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
               ) +
               context.bodyInsets,
           children: [
-            generateSection(
+            generateAnimatedSection(
               items: [
-                DetailRow(title: l10n.status, value: Text(_statusText(status))),
+                DetailRow(
+                  key: const ValueKey(#status),
+                  title: l10n.status,
+                  value: Text(_statusText(status)),
+                ),
                 if (_loading)
                   DecorationListItem(
+                    key: const ValueKey(#loading),
                     leading: const CommonCircleLoading(),
                     title: Text(l10n.loading),
                   ),
                 if (_failed)
                   DecorationListItem(
+                    key: const ValueKey(#failed),
                     title: Text(l10n.coreInfoUnavailable),
                     trailing: IconButton(
                       tooltip: l10n.retry,
@@ -284,10 +296,10 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                 if (info != null) ..._identityRows(info),
               ],
             ),
-            if (info != null)
-              generateSection(
-                title: l10n.coreEnvironment,
-                items: [
+            generateAnimatedSection(
+              title: l10n.coreEnvironment,
+              items: [
+                if (info != null) ...[
                   _field('Go', info.goVersion),
                   _field(l10n.corePlatform, info.platform),
                   _field(l10n.coreArchitecture, info.architecture),
@@ -297,16 +309,18 @@ class _CoreDetailViewState extends ConsumerState<CoreDetailView> {
                   ),
                   _field(l10n.coreLaunchMode, _launchMode(info)),
                 ],
-              ),
-            if (info != null)
-              generateSection(
-                title: l10n.coreLocation,
-                items: [
+              ],
+            ),
+            generateAnimatedSection(
+              title: l10n.coreLocation,
+              items: [
+                if (info != null) ...[
                   _field(l10n.coreWorkingDirectory, info.workingDirectory),
                   if (info.platform != 'android')
                     _field(l10n.coreExecutable, info.executablePath),
                 ],
-              ),
+              ],
+            ),
             generateSection(
               items: [
                 ListItem.open(

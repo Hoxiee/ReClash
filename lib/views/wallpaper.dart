@@ -108,17 +108,15 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
           _WallpaperSection(
             info: Info(label: l.wallpaperLayout, glyph: AppGlyphs.layers),
             actions: [
-              if (framingChanged)
-                _WallpaperResetButton(
-                  tooltip: l.wallpaperResetLayout,
-                  onPressed: busy
-                      ? null
-                      : () => globalState.safeRun(
-                          ref
-                              .read(wallpaperActionProvider.notifier)
-                              .resetFraming,
-                        ),
-                ),
+              _WallpaperResetButton(
+                visible: framingChanged,
+                tooltip: l.wallpaperResetLayout,
+                onPressed: busy
+                    ? null
+                    : () => globalState.safeRun(
+                        ref.read(wallpaperActionProvider.notifier).resetFraming,
+                      ),
+              ),
             ],
             child: generateGroup([
               _WallpaperControl(
@@ -175,17 +173,15 @@ class _WallpaperViewState extends ConsumerState<WallpaperView> {
           _WallpaperSection(
             info: Info(label: l.wallpaperEffects, glyph: AppGlyphs.sliders),
             actions: [
-              if (effectsChanged)
-                _WallpaperResetButton(
-                  tooltip: l.wallpaperReset,
-                  onPressed: busy
-                      ? null
-                      : () => globalState.safeRun(
-                          ref
-                              .read(wallpaperActionProvider.notifier)
-                              .resetEffects,
-                        ),
-                ),
+              _WallpaperResetButton(
+                visible: effectsChanged,
+                tooltip: l.wallpaperReset,
+                onPressed: busy
+                    ? null
+                    : () => globalState.safeRun(
+                        ref.read(wallpaperActionProvider.notifier).resetEffects,
+                      ),
+              ),
             ],
             child: generateGroup([
               _WallpaperSlider(
@@ -258,21 +254,30 @@ class _WallpaperSection extends StatelessWidget {
 }
 
 class _WallpaperResetButton extends StatelessWidget {
-  const _WallpaperResetButton({required this.tooltip, required this.onPressed});
+  const _WallpaperResetButton({
+    required this.visible,
+    required this.tooltip,
+    required this.onPressed,
+  });
 
+  final bool visible;
   final String tooltip;
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => TonalButtonTheme(
-    size: TonalButtonSize.section,
-    child: ElasticPress(
-      child: IconButton(
-        tooltip: tooltip,
-        onPressed: onPressed,
-        icon: const GlyphIcon(AppGlyphs.reset),
-      ),
-    ),
+  Widget build(BuildContext context) => FadeScaleBox(
+    child: visible
+        ? TonalButtonTheme(
+            size: TonalButtonSize.section,
+            child: ElasticPress(
+              child: IconButton(
+                tooltip: tooltip,
+                onPressed: onPressed,
+                icon: const GlyphIcon(AppGlyphs.reset),
+              ),
+            ),
+          )
+        : const SizedBox.shrink(),
   );
 }
 

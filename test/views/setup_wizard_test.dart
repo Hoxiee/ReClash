@@ -803,6 +803,7 @@ void main() {
     );
     expect(filePicker.calls, 1);
     expect(importAction.importCalls, 1);
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.enterText(find.byType(TextField).last, 'AGE-SECRET-KEY-1A');
     final retry = find

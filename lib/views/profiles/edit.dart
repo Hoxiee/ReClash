@@ -705,9 +705,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ],
       ),
       if (isUrl)
-        generateSection(
+        generateAnimatedSection(
           items: [
             FormRow(
+              key: const ValueKey(#autoUpdate),
               title: appLocalizations.autoUpdate,
               onPressed: () => _setAutoUpdate(!_autoUpdate),
               trailing: CommonSwitch(
@@ -722,6 +723,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                 onChanged: _handleChanged,
               ),
             FormRow(
+              key: const ValueKey(#providerInterval),
               title: appLocalizations.subscriptionUseProviderInterval,
               onPressed: () => setState(() {
                 _intervalOverride = !_intervalOverride;
