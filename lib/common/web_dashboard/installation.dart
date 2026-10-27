@@ -10,6 +10,7 @@ import 'package:reclash/enum/enum.dart';
 
 import 'archive.dart';
 import 'dashboard.dart';
+import 'hosting.dart';
 
 typedef WebDashboardDownload =
     Future<String?> Function(
@@ -136,6 +137,47 @@ class WebDashboardStore {
       }
     }
     return result;
+  }
+
+  Future<void> prepareForOpen(WebDashboardFlavor flavor) async {
+    if (_busy) throw const WebDashboardException(WebDashboardFailure.busy);
+    _busy = true;
+    Directory? work;
+    try {
+      final root = await _root();
+      await _requireDirectory(root);
+      if (await _installation(p.join(root, flavor.name), flavor) == null) {
+        throw const WebDashboardException(WebDashboardFailure.storage);
+      }
+      final target = File(p.join(root, webDashboardRecoveryFileName));
+      final type = await FileSystemEntity.type(target.path, followLinks: false);
+      if (type != FileSystemEntityType.notFound &&
+          type != FileSystemEntityType.file) {
+        throw const WebDashboardException(WebDashboardFailure.storage);
+      }
+      final contents = utf8.encode(webDashboardRecoveryWorker);
+      if (type == FileSystemEntityType.file &&
+          await target.length() == contents.length &&
+          listEquals(await target.readAsBytes(), contents)) {
+        return;
+      }
+      final workRoot = p.join(p.dirname(root), webDashboardWorkDirectoryName);
+      await _requireDirectory(workRoot, create: true);
+      work = await Directory(workRoot).createTemp('recovery-');
+      final next = File(p.join(work.path, webDashboardRecoveryFileName));
+      await next.writeAsBytes(contents, flush: true);
+      await next.rename(target.path);
+    } on WebDashboardException {
+      rethrow;
+    } catch (_) {
+      throw const WebDashboardException(WebDashboardFailure.storage);
+    } finally {
+      try {
+        if (work != null) await _deleteManagedTree(work.path);
+      } finally {
+        _busy = false;
+      }
+    }
   }
 
   Future<void> install(

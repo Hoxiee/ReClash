@@ -35,5 +35,6 @@
   "webDashboardAccess": "Giriş",
   "webDashboardAccessOff": "Ýapyk",
   "webDashboardAccessInApp": "Programmada",
-  "webDashboardAccessInBrowser": "Brauzerde"
+  "webDashboardAccessInBrowser": "Brauzerde",
+  "webDashboardReinstall": "Dolandyryş panelini gaýtadan gurmak"
 }

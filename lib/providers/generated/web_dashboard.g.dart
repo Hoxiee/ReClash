@@ -191,7 +191,7 @@ final class WebDashboardActionProvider
 }
 
 String _$webDashboardActionHash() =>
-    r'a2c3faefcd4321d542ae8d700388356580593cdd';
+    r'93c12ed1e7425d64b6cc2b0dfdf210786cb9c4c0';
 
 abstract class _$WebDashboardAction extends $Notifier<WebDashboardState> {
   WebDashboardState build();

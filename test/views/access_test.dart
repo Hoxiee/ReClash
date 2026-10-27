@@ -124,14 +124,16 @@ void main() {
         .copyWith(accessControlProps: props);
   }
 
-  Future<void> pumpAccessView(WidgetTester tester, {String? settingId}) async {
-    tester.view.physicalSize = const Size(1400, 1400);
+  Future<void> pumpAccessView(
+    WidgetTester tester, {
+    String? settingId,
+    Size size = const Size(1400, 1400),
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    container
-        .read(viewSizeProvider.notifier)
-        .update((_) => const Size(1400, 1400));
+    container.read(viewSizeProvider.notifier).update((_) => size);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -147,6 +149,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 301));
   }
+
+  Finder smartSelectButton() => find.widgetWithText(
+    TonalButton,
+    AppLocalizations.current.intelligentSelected,
+  );
+
+  Finder selectionDialog() => find.widgetWithText(
+    CommonDialog,
+    AppLocalizations.current.intelligentSelected,
+  );
 
   Future<void> teardownView(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
@@ -344,16 +356,23 @@ void main() {
     ) async {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
+      final l10n = AppLocalizations.current;
+      expect(smartSelectButton(), findsOneWidget);
+      expect(find.text(l10n.accessControlSelectedCount(0)), findsNothing);
 
       await tester.tap(find.text('Browser'));
       await tester.pump();
       expect(container.read(accessControlStateProvider).currentList, [
         'com.example.browser',
       ]);
+      expect(smartSelectButton(), findsNothing);
+      expect(find.text(l10n.accessControlSelectedCount(1)), findsOneWidget);
 
       await tester.tap(find.text('Browser'));
       await tester.pump();
       expect(container.read(accessControlStateProvider).currentList, isEmpty);
+      expect(smartSelectButton(), findsOneWidget);
+      expect(find.text(l10n.accessControlSelectedCount(0)), findsNothing);
 
       await teardownView(tester);
     });
@@ -365,6 +384,7 @@ void main() {
       final l10n = AppLocalizations.current;
 
       expect(find.text(l10n.accessControlDisabledDesc), findsOneWidget);
+      expect(smartSelectButton(), findsNothing);
       await tester.tap(find.widgetWithText(TonalButton, l10n.turnOn));
       await tester.pump();
 
@@ -400,7 +420,8 @@ void main() {
           );
       await tester.pump();
       expect(find.text(l10n.accessControlAllowDesc), findsOneWidget);
-      expect(find.text(l10n.accessControlSelectedCount(0)), findsOneWidget);
+      expect(find.text(l10n.accessControlSelectedCount(0)), findsNothing);
+      expect(smartSelectButton(), findsOneWidget);
 
       await teardownView(tester);
     });
@@ -451,7 +472,7 @@ void main() {
       await openBarMenu(tester);
       await tester.tap(find.text('Action'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.regionSelectApps));
+      await tester.tap(find.text(AppLocalizations.current.intelligentSelected));
       await tester.pumpAndSettle();
 
       expect(container.read(appSettingProvider).regionCode, isNull);
@@ -570,7 +591,7 @@ void main() {
       await openBarMenu(tester);
       await tester.tap(find.text('Action'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.regionSelectApps));
+      await tester.tap(find.text(AppLocalizations.current.intelligentSelected));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       await tester.pump();
@@ -585,6 +606,119 @@ void main() {
       await openSelection(tester);
     }
 
+    testWidgets('the empty selection shortcut confirms before replacing '
+        'either list', (tester) async {
+      final empty = initial.copyWith(acceptList: []);
+      seedAccessControl(empty);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      systemAction.match = (_) async => ['com.example.chat'];
+      await pumpAccessView(tester);
+      final l10n = AppLocalizations.current;
+
+      await tester.tap(smartSelectButton());
+      await tester.pumpAndSettle();
+      expect(selectionDialog(), findsOneWidget);
+      final message = tester.widget<SelectableText>(
+        find.descendant(
+          of: selectionDialog(),
+          matching: find.byType(SelectableText),
+        ),
+      );
+      expect(
+        message.textSpan!.toPlainText(),
+        l10n.regionAppsPreview(l10n.regionRussia, 1, 3),
+      );
+      expect(container.read(accessControlStateProvider), empty);
+      await tester.tap(find.widgetWithText(TextButton, l10n.cancel));
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider), empty);
+      expect(smartSelectButton(), findsOneWidget);
+
+      await tester.tap(smartSelectButton());
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, l10n.replace));
+      await tester.pumpAndSettle();
+      final selected = container.read(accessControlStateProvider);
+      expect(selected.rejectList, ['com.example.chat']);
+      expect(selected.acceptList, [
+        'com.example.browser',
+        'com.android.settings',
+        'com.example.offline',
+      ]);
+      expect(selected.mode, empty.mode);
+      expect(smartSelectButton(), findsNothing);
+      expect(container.read(vpnSettingProvider).accessControlProps, empty);
+      await teardownView(tester);
+    });
+
+    testWidgets('the shortcut is disabled during scanning and recovers '
+        'after a failure', (tester) async {
+      final empty = initial.copyWith(acceptList: []);
+      seedAccessControl(empty);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      final gate = Completer<List<String>>();
+      systemAction.match = (_) => gate.future;
+      await pumpAccessView(tester);
+      final picked = tester.widget<TonalButton>(smartSelectButton()).onPressed;
+
+      await tester.tap(smartSelectButton());
+      await tester.pump();
+      expect(container.read(loadingProvider(LoadingTag.access)), isTrue);
+      expect(tester.widget<TonalButton>(smartSelectButton()).onPressed, isNull);
+      picked!();
+      expect(systemAction.matchCount, 1);
+
+      gate.completeError(PlatformException(code: 'unavailable'));
+      await tester.pumpAndSettle();
+      expect(selectionDialog(), findsNothing);
+      expect(container.read(accessControlStateProvider), empty);
+      expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
+      await tester.tap(
+        find.widgetWithText(TextButton, AppLocalizations.current.confirm),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TonalButton>(smartSelectButton()).onPressed,
+        isNotNull,
+      );
+      expect(smartSelectButton().hitTestable(), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await teardownView(tester);
+    });
+
+    testWidgets('the shortcut stays usable after scrolling a narrow page', (
+      tester,
+    ) async {
+      seedAccessControl(const AccessControlProps(enable: true));
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(regionCode: 'RU'));
+      container.read(packagesProvider.notifier).value = List.generate(
+        30,
+        (index) => _package('com.example.app$index'),
+      );
+      systemAction.match = (_) async => ['com.example.app0'];
+      await pumpAccessView(tester, size: const Size(360, 640));
+
+      expect(smartSelectButton().hitTestable(), findsOneWidget);
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(smartSelectButton().hitTestable(), findsOneWidget);
+      await tester.tap(smartSelectButton());
+      await tester.pumpAndSettle();
+      expect(selectionDialog(), findsOneWidget);
+      await tester.tap(
+        find.widgetWithText(TextButton, AppLocalizations.current.cancel),
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(accessControlStateProvider).currentList, isEmpty);
+      await teardownView(tester);
+    });
+
     testWidgets('replaces both draft lists only after confirmation', (
       tester,
     ) async {
@@ -594,10 +728,12 @@ void main() {
       };
       await start(tester);
       await tester.pumpAndSettle();
-      expect(find.text('App selection preview'), findsOneWidget);
+      expect(selectionDialog(), findsOneWidget);
       expect(container.read(accessControlStateProvider), initial);
       expect(container.read(vpnSettingProvider).accessControlProps, initial);
-      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.tap(
+        find.widgetWithText(TextButton, AppLocalizations.current.replace),
+      );
       await tester.pumpAndSettle();
       final selected = container.read(accessControlStateProvider);
       expect(selected.rejectList, ['com.example.browser']);
@@ -635,7 +771,7 @@ void main() {
         systemAction.match = (_) async => matches;
         await start(tester);
         await tester.pumpAndSettle();
-        expect(find.text('App selection preview'), findsNothing);
+        expect(selectionDialog(), findsNothing);
         expect(container.read(accessControlStateProvider), initial);
         expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
         await teardownView(tester);
@@ -649,7 +785,7 @@ void main() {
           throw PlatformException(code: 'unavailable');
       await start(tester);
       await tester.pumpAndSettle();
-      expect(find.text('App selection preview'), findsNothing);
+      expect(selectionDialog(), findsNothing);
       expect(container.read(accessControlStateProvider), initial);
       expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
       await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
@@ -669,7 +805,7 @@ void main() {
           .update((state) => state.copyWith(regionCode: 'IR'));
       gate.complete(['com.example.chat']);
       await tester.pumpAndSettle();
-      expect(find.text('App selection preview'), findsNothing);
+      expect(selectionDialog(), findsNothing);
       expect(container.read(accessControlStateProvider), initial);
       expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
       await teardownView(tester);
@@ -683,7 +819,9 @@ void main() {
       await tester.pumpAndSettle();
       final updated = initial.copyWith(rejectList: ['manual.app']);
       container.read(accessControlStateProvider.notifier).value = updated;
-      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.tap(
+        find.widgetWithText(TextButton, AppLocalizations.current.replace),
+      );
       await tester.pumpAndSettle();
       expect(container.read(accessControlStateProvider), updated);
       await teardownView(tester);
@@ -699,7 +837,9 @@ void main() {
         ..._packages,
         _package('new.app'),
       ];
-      await tester.tap(find.widgetWithText(TextButton, 'Apply region'));
+      await tester.tap(
+        find.widgetWithText(TextButton, AppLocalizations.current.replace),
+      );
       await tester.pumpAndSettle();
       expect(container.read(accessControlStateProvider), initial);
       await teardownView(tester);
@@ -721,7 +861,8 @@ void main() {
           .firstWhere((item) => item.label == 'Action')
           .subItems
           .firstWhere(
-            (item) => item.label == AppLocalizations.current.regionSelectApps,
+            (item) =>
+                item.label == AppLocalizations.current.intelligentSelected,
           );
       final picked = selection().onPressed;
       await openSelection(tester);
@@ -747,7 +888,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(container.read(accessControlStateProvider), initial);
         expect(container.read(loadingProvider(LoadingTag.access)), isFalse);
-        expect(find.text('App selection preview'), findsNothing);
+        expect(selectionDialog(), findsNothing);
         expect(tester.takeException(), isNull);
       },
     );

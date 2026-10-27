@@ -35,5 +35,6 @@
   "webDashboardAccess": "访问",
   "webDashboardAccessOff": "关闭",
   "webDashboardAccessInApp": "在应用内",
-  "webDashboardAccessInBrowser": "在浏览器中"
+  "webDashboardAccessInBrowser": "在浏览器中",
+  "webDashboardReinstall": "重新安装仪表盘"
 }

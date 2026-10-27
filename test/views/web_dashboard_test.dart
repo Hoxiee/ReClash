@@ -345,8 +345,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Update'), findsNothing);
     expect(find.text('Reload'), findsNothing);
-    await tester.tapAt(Offset.zero);
+    expect(find.text('Reinstall dashboard'), findsOneWidget);
+    await tester.tap(find.text('Reinstall dashboard'));
     await tester.pumpAndSettle();
+    expect(
+      action.calls.where((call) => call == 'install:zashboard'),
+      hasLength(3),
+    );
     action.show(const WebDashboardState(failure: WebDashboardFailure.storage));
     await tester.pumpAndSettle();
     await menu(tester, 'Reload');

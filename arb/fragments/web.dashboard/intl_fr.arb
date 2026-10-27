@@ -35,5 +35,6 @@
   "webDashboardAccess": "Accès",
   "webDashboardAccessOff": "Désactivé",
   "webDashboardAccessInApp": "Dans l’app",
-  "webDashboardAccessInBrowser": "Dans le navigateur"
+  "webDashboardAccessInBrowser": "Dans le navigateur",
+  "webDashboardReinstall": "Réinstaller le tableau de bord"
 }

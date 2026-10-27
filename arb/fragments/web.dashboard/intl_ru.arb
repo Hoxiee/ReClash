@@ -35,5 +35,6 @@
   "webDashboardAccess": "Доступ",
   "webDashboardAccessOff": "Выключен",
   "webDashboardAccessInApp": "В приложении",
-  "webDashboardAccessInBrowser": "В браузере"
+  "webDashboardAccessInBrowser": "В браузере",
+  "webDashboardReinstall": "Переустановить панель"
 }

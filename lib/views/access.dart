@@ -214,8 +214,8 @@ class _AccessViewState extends ConsumerState<AccessView>
     final accepted = packages.difference(domestic).toList();
     final confirmed = await dialogs.showMessage(
       context: context,
-      title: l.regionAppsPreviewTitle,
-      confirmText: l.regionApply,
+      title: l.intelligentSelected,
+      confirmText: l.replace,
       message: TextSpan(
         text: l.regionAppsPreview(
           regionLabel(l, regionCode),
@@ -435,7 +435,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         subItems: [
           CommonPopupMenuItem(
             glyph: AppGlyphs.sparkle,
-            label: appLocalizations.regionSelectApps,
+            label: appLocalizations.intelligentSelected,
             onPressed: isLoading ? null : _intelligentSelected,
           ),
           if (hasReleased)
@@ -597,6 +597,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                 bar: _AccessStatus(
                   accessControl: accessControl,
                   selectedCount: valueList.length,
+                  onSmartSelect: isLoading ? null : _intelligentSelected,
                   onEnable: () =>
                       _update((state) => state.copyWith(enable: true)),
                 ),
@@ -619,11 +620,13 @@ class _AccessStatus extends StatelessWidget {
   const _AccessStatus({
     required this.accessControl,
     required this.selectedCount,
+    required this.onSmartSelect,
     required this.onEnable,
   });
 
   final AccessControlProps accessControl;
   final int selectedCount;
+  final VoidCallback? onSmartSelect;
   final VoidCallback onEnable;
 
   @override
@@ -640,7 +643,12 @@ class _AccessStatus extends StatelessWidget {
           }
         : appLocalizations.accessControlDisabledDesc;
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(16, 6, enabled ? 16 : 8, 6),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        16,
+        6,
+        enabled && selectedCount > 0 ? 16 : 8,
+        6,
+      ),
       child: Row(
         spacing: 12,
         children: [
@@ -659,17 +667,30 @@ class _AccessStatus extends StatelessWidget {
                   .copyWith(color: colorScheme.onSurface),
             ),
           ),
-          if (enabled)
-            TonalChip(
-              label: appLocalizations.accessControlSelectedCount(selectedCount),
-              color: colorScheme.primary.opacity15,
-              foregroundColor: colorScheme.primary,
-            )
-          else
+          if (!enabled)
             TonalButton(
               size: TonalButtonSize.compact,
               label: appLocalizations.turnOn,
               onPressed: onEnable,
+            )
+          else if (selectedCount == 0)
+            Flexible(
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                heightFactor: 1,
+                child: TonalButton(
+                  size: TonalButtonSize.compact,
+                  glyph: AppGlyphs.sparkle,
+                  label: appLocalizations.intelligentSelected,
+                  onPressed: onSmartSelect,
+                ),
+              ),
+            )
+          else
+            TonalChip(
+              label: appLocalizations.accessControlSelectedCount(selectedCount),
+              color: colorScheme.primary.opacity15,
+              foregroundColor: colorScheme.primary,
             ),
         ],
       ),
@@ -756,7 +777,7 @@ class AccessControlPanel extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
-      ).copyWith(top: context.contentTopPadding, bottom: 32),
+      ).copyWith(top: context.sectionsTopPadding, bottom: 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

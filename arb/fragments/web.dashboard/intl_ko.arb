@@ -35,5 +35,6 @@
   "webDashboardAccess": "접근",
   "webDashboardAccessOff": "꺼짐",
   "webDashboardAccessInApp": "앱 내",
-  "webDashboardAccessInBrowser": "브라우저"
+  "webDashboardAccessInBrowser": "브라우저",
+  "webDashboardReinstall": "대시보드 다시 설치"
 }

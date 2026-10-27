@@ -36,6 +36,8 @@ class _Store extends WebDashboardStore {
       flavor: const WebDashboardInstallation(version: 'fixture'),
   };
   int downloads = 0;
+  int preparations = 0;
+  WebDashboardException? preparationError;
   WebDashboardException? error;
   Completer<void>? installStarted;
   Completer<void>? installGate;
@@ -43,6 +45,13 @@ class _Store extends WebDashboardStore {
   @override
   Future<Map<WebDashboardFlavor, WebDashboardInstallation>>
   installations() async => Map.of(installed);
+
+  @override
+  Future<void> prepareForOpen(WebDashboardFlavor flavor) async {
+    preparations++;
+    final failure = preparationError;
+    if (failure != null) throw failure;
+  }
 
   @override
   Future<void> install(
@@ -339,6 +348,7 @@ void main() {
       WebDashboardFailure.safeMode,
     );
     expect(store.downloads, 0);
+    expect(store.preparations, 0);
     expect(setup.preparations, 0);
     expect(endpoints, isEmpty);
     expect(launched, isEmpty);
@@ -385,6 +395,27 @@ void main() {
       expect(setup.preparations, 0);
     },
   );
+
+  test('opening prepares browser recovery before acquiring access', () async {
+    final session = await open(browser: true);
+    expect(session, isNotNull);
+    expect(store.preparations, 1);
+    expect(store.downloads, 0);
+    await action.endAccess();
+    store.preparationError = const WebDashboardException(
+      WebDashboardFailure.storage,
+    );
+    expect(await open(browser: true), isNull);
+    expect(store.preparations, 2);
+    expect(setup.preparations, 1);
+    expect(launched, hasLength(1));
+    expect(access().active, isFalse);
+    expect(container.read(webDashboardActionProvider).busy, isFalse);
+    expect(
+      container.read(webDashboardActionProvider).failure,
+      WebDashboardFailure.storage,
+    );
+  });
 
   test('first open installs only the selected dashboard', () async {
     store.installed.remove(WebDashboardFlavor.zashboard);

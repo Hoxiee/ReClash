@@ -377,6 +377,8 @@ class WebDashboardAction extends _$WebDashboardAction {
           .installations();
       if (!installed.containsKey(flavor)) await _install(flavor, token);
       _requireAvailable(token);
+      await ref.read(webDashboardStoreProvider).prepareForOpen(flavor);
+      _requireAvailable(token);
       final acquiredAccess = ref.read(webDashboardAccessProvider.notifier);
       access = acquiredAccess;
       owner = acquiredAccess.acquire(flavor);

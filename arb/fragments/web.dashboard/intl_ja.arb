@@ -35,5 +35,6 @@
   "webDashboardAccess": "アクセス",
   "webDashboardAccessOff": "オフ",
   "webDashboardAccessInApp": "アプリ内",
-  "webDashboardAccessInBrowser": "ブラウザー"
+  "webDashboardAccessInBrowser": "ブラウザー",
+  "webDashboardReinstall": "ダッシュボードを再インストール"
 }

@@ -35,5 +35,6 @@
   "webDashboardAccess": "Access",
   "webDashboardAccessOff": "Off",
   "webDashboardAccessInApp": "In the app",
-  "webDashboardAccessInBrowser": "In the browser"
+  "webDashboardAccessInBrowser": "In the browser",
+  "webDashboardReinstall": "Reinstall dashboard"
 }

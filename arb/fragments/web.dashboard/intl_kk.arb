@@ -35,5 +35,6 @@
   "webDashboardAccess": "Қолжетімділік",
   "webDashboardAccessOff": "Өшірулі",
   "webDashboardAccessInApp": "Қолданбада",
-  "webDashboardAccessInBrowser": "Браузерде"
+  "webDashboardAccessInBrowser": "Браузерде",
+  "webDashboardReinstall": "Басқару тақтасын қайта орнату"
 }

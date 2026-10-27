@@ -35,5 +35,6 @@
   "webDashboardAccess": "Acceso",
   "webDashboardAccessOff": "Desactivado",
   "webDashboardAccessInApp": "En la app",
-  "webDashboardAccessInBrowser": "En el navegador"
+  "webDashboardAccessInBrowser": "En el navegador",
+  "webDashboardReinstall": "Reinstalar el panel"
 }

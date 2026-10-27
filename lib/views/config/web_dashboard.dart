@@ -142,16 +142,17 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                 ? () => unawaited(_open(flavor, browser: true))
                 : null,
           ),
-        if (installed == null || outdated)
-          CommonPopupMenuItem(
-            glyph: installed == null
-                ? AppGlyphs.cloudDownload
-                : AppGlyphs.refresh,
-            label: installed == null ? l.webDashboardInstall : l.update,
-            onPressed: enabled
-                ? () => unawaited(_action.install(flavor))
-                : null,
-          ),
+        CommonPopupMenuItem(
+          glyph: installed == null
+              ? AppGlyphs.cloudDownload
+              : AppGlyphs.refresh,
+          label: installed == null
+              ? l.webDashboardInstall
+              : outdated
+              ? l.update
+              : l.webDashboardReinstall,
+          onPressed: enabled ? () => unawaited(_action.install(flavor)) : null,
+        ),
         if (installed != null)
           CommonPopupMenuItem(
             glyph: AppGlyphs.delete,
@@ -183,56 +184,64 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                 else if (unavailable != null)
                   _Notice(text: unavailable.label),
                 if (progress != null) _Progress(progress: progress),
-                generateSection(
-                  items: [
-                    IgnorePointer(
-                      ignoring: state.busy,
-                      child: ConfigOptionsItem<WebDashboardFlavor>(
-                        title: (l) => l.webDashboardFlavor,
-                        options: WebDashboardFlavor.values,
-                        textBuilder: (flavor) => flavor.label,
-                        selector: appSettingProvider.select(
-                          (setting) => setting.webDashboardFlavor,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    generateGroup([
+                      IgnorePointer(
+                        ignoring: state.busy,
+                        child: ConfigOptionsItem<WebDashboardFlavor>(
+                          title: (l) => l.webDashboardFlavor,
+                          options: WebDashboardFlavor.values,
+                          textBuilder: (flavor) => flavor.label,
+                          selector: appSettingProvider.select(
+                            (setting) => setting.webDashboardFlavor,
+                          ),
+                          onChanged: (ref, value) => ref
+                              .read(appSettingProvider.notifier)
+                              .update(
+                                (setting) =>
+                                    setting.copyWith(webDashboardFlavor: value),
+                              ),
                         ),
-                        onChanged: (ref, value) => ref
-                            .read(appSettingProvider.notifier)
-                            .update(
-                              (setting) =>
-                                  setting.copyWith(webDashboardFlavor: value),
-                            ),
                       ),
-                    ),
-                    _ValueRow(
-                      title: l.webDashboardVersion,
-                      value: Text(switch (installed?.version) {
-                        null => l.webDashboardNotInstalled,
-                        final version when outdated => '$version → $latest',
-                        final version => version,
-                      }),
-                    ),
+                      _ValueRow(
+                        title: l.webDashboardVersion,
+                        value: Text(switch (installed?.version) {
+                          null => l.webDashboardNotInstalled,
+                          final version when outdated => '$version → $latest',
+                          final version => version,
+                        }),
+                      ),
+                    ]),
+                    ListFooter(text: l.webDashboardInstallTip),
                   ],
-                  footer: l.webDashboardInstallTip,
                 ),
-                generateSection(
-                  items: [
-                    _ValueRow(
-                      title: l.webDashboardAccess,
-                      value: access.active
-                          ? TonalChip(
-                              label: access.browser
-                                  ? l.webDashboardAccessInBrowser
-                                  : l.webDashboardAccessInApp,
-                              color: colorScheme.successContainer,
-                              foregroundColor: colorScheme.onSuccessContainer,
-                            )
-                          : Text(l.webDashboardAccessOff),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    generateGroup([
+                      _ValueRow(
+                        title: l.webDashboardAccess,
+                        value: access.active
+                            ? TonalChip(
+                                label: access.browser
+                                    ? l.webDashboardAccessInBrowser
+                                    : l.webDashboardAccessInApp,
+                                color: colorScheme.successContainer,
+                                foregroundColor: colorScheme.onSuccessContainer,
+                              )
+                            : Text(l.webDashboardAccessOff),
+                      ),
+                    ]),
+                    ListFooter(
+                      text: access.active
+                          ? access.browser
+                                ? l.webDashboardBrowserAccess
+                                : l.webDashboardEmbeddedAccess
+                          : l.webDashboardAccessTip,
                     ),
                   ],
-                  footer: access.active
-                      ? access.browser
-                            ? l.webDashboardBrowserAccess
-                            : l.webDashboardEmbeddedAccess
-                      : l.webDashboardAccessTip,
                 ),
               ],
             ),

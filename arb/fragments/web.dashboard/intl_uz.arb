@@ -35,5 +35,6 @@
   "webDashboardAccess": "Kirish",
   "webDashboardAccessOff": "Oʻchirilgan",
   "webDashboardAccessInApp": "Ilovada",
-  "webDashboardAccessInBrowser": "Brauzerda"
+  "webDashboardAccessInBrowser": "Brauzerda",
+  "webDashboardReinstall": "Boshqaruv panelini qayta o‘rnatish"
 }

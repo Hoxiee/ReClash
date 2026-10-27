@@ -12,6 +12,7 @@ import 'package:reclash/common/task.dart';
 import 'package:reclash/common/web_dashboard/access.dart';
 import 'package:reclash/common/web_dashboard/archive.dart';
 import 'package:reclash/common/web_dashboard/dashboard.dart';
+import 'package:reclash/common/web_dashboard/hosting.dart';
 import 'package:reclash/common/web_dashboard/installation.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -451,6 +452,104 @@ void main() {
       isEmpty,
     );
 
+    for (final flavor in WebDashboardFlavor.values) {
+      test('opening ${flavor.name} repairs the legacy root worker', () async {
+        _seed(home, WebDashboardFlavor.zashboard);
+        _seed(home, WebDashboardFlavor.metacubexd);
+        final recovery = File(
+          p.join(
+            home.path,
+            webDashboardDirectoryName,
+            webDashboardRecoveryFileName,
+          ),
+        );
+        await recovery.writeAsString('old cached dashboard');
+        await store.prepareForOpen(flavor);
+        expect(await recovery.readAsString(), webDashboardRecoveryWorker);
+        expect(entry(WebDashboardFlavor.zashboard), '<html>old</html>');
+        expect(entry(WebDashboardFlavor.metacubexd), '<html>old</html>');
+        expect(phases, isEmpty);
+        noWork();
+        final preserved = DateTime.utc(2020);
+        await recovery.setLastModified(preserved);
+        await store.prepareForOpen(flavor);
+        expect(await recovery.lastModified(), preserved.toLocal());
+        noWork();
+      });
+    }
+    test(
+      'opening an existing panel creates recovery without downloading',
+      () async {
+        _seed(home, WebDashboardFlavor.zashboard);
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+        expect(
+          await File(
+            p.join(
+              home.path,
+              webDashboardDirectoryName,
+              webDashboardRecoveryFileName,
+            ),
+          ).readAsString(),
+          webDashboardRecoveryWorker,
+        );
+        expect(phases, isEmpty);
+        noWork();
+      },
+    );
+    test(
+      'recovery replaces malformed worker contents of the same size',
+      () async {
+        _seed(home, WebDashboardFlavor.zashboard);
+        final recovery = File(
+          p.join(
+            home.path,
+            webDashboardDirectoryName,
+            webDashboardRecoveryFileName,
+          ),
+        );
+        await recovery.writeAsBytes(
+          List.filled(utf8.encode(webDashboardRecoveryWorker).length, 0xff),
+        );
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+        expect(await recovery.readAsString(), webDashboardRecoveryWorker);
+        noWork();
+      },
+    );
+    test(
+      'recovery rejects an uninstalled panel and resets ownership',
+      () async {
+        await expectLater(
+          store.prepareForOpen(WebDashboardFlavor.zashboard),
+          throwsA(_failure(WebDashboardFailure.storage)),
+        );
+        await install();
+        await store.prepareForOpen(WebDashboardFlavor.zashboard);
+        noWork();
+      },
+    );
+    test('recovery refuses symlinks without changing their target', () async {
+      _seed(home, WebDashboardFlavor.zashboard);
+      final outside = File(p.join(home.path, 'untouched'));
+      await outside.writeAsString('keep');
+      final link = Link(
+        p.join(
+          home.path,
+          webDashboardDirectoryName,
+          webDashboardRecoveryFileName,
+        ),
+      );
+      await link.create(outside.path);
+      await expectLater(
+        store.prepareForOpen(WebDashboardFlavor.zashboard),
+        throwsA(_failure(WebDashboardFailure.storage)),
+      );
+      expect(await outside.readAsString(), 'keep');
+      expect(await link.exists(), isTrue);
+      await link.delete();
+      await store.prepareForOpen(WebDashboardFlavor.zashboard);
+      noWork();
+    }, skip: Platform.isWindows);
+
     test('publishes verified staging and preserves the other panel', () async {
       _seed(home, WebDashboardFlavor.zashboard);
       _seed(home, WebDashboardFlavor.metacubexd);
@@ -772,12 +871,29 @@ void main() {
       );
     }
 
+    const document =
+        '<!doctype html><html><head>'
+        '<script type="module" src="./assets/main.js"></script>'
+        '<link rel="stylesheet" href="./assets/main.css">'
+        '</head><body><div id="app"></div></body></html>';
+
     void respond(
       HttpRequest request,
       String body, {
       int status = HttpStatus.ok,
+      String? mimeType,
     }) {
       request.response.statusCode = status;
+      request.response.headers.contentType = ContentType.parse(
+        mimeType ??
+            (request.uri.path.endsWith('.js')
+                ? 'text/javascript'
+                : request.uri.path.endsWith('.css')
+                ? 'text/css'
+                : request.uri.path == '/version'
+                ? 'application/json'
+                : 'text/html'),
+      );
       request.response.write(body);
       unawaited(request.response.close().catchError((Object _) {}));
     }
@@ -800,14 +916,185 @@ void main() {
                 request.headers.value(HttpHeaders.authorizationHeader),
                 isNull,
               );
-              respond(request, '<!doctype html><html>dashboard</html>');
+              expect(
+                request.headers.value(HttpHeaders.cacheControlHeader),
+                'no-cache',
+              );
+              respond(
+                request,
+                request.uri.path.endsWith('/') ? document : '/* asset */',
+              );
             }
           });
           await probeWebDashboard(endpoint, flavor);
-          expect(paths, ['/version', '/ui/${flavor.name}/']);
+          expect(paths, [
+            '/version',
+            '/ui/${flavor.name}/',
+            '/ui/${flavor.name}/assets/main.js',
+            '/ui/${flavor.name}/assets/main.css',
+          ]);
         },
       );
     }
+    for (final extension in ['js', 'css']) {
+      for (final problem in ['missing', 'mime', 'empty']) {
+        test(
+          '$problem $extension cannot pass a successful HTML probe',
+          () async {
+            final endpoint = await server((request) {
+              final path = request.uri.path;
+              if (path == '/version') {
+                respond(request, '{"version":"test"}');
+              } else if (path.endsWith('/')) {
+                respond(request, document);
+              } else if (path.endsWith('.$extension')) {
+                respond(
+                  request,
+                  problem == 'empty' ? '' : 'not a usable asset',
+                  status: problem == 'missing'
+                      ? HttpStatus.notFound
+                      : HttpStatus.ok,
+                  mimeType: problem == 'mime' ? 'text/html' : null,
+                );
+              } else {
+                respond(request, '/* asset */');
+              }
+            });
+            await expectLater(
+              probeWebDashboard(
+                endpoint,
+                WebDashboardFlavor.zashboard,
+                timeout: const Duration(milliseconds: 150),
+              ),
+              throwsA(_failure(WebDashboardFailure.unreachable)),
+            );
+          },
+        );
+      }
+    }
+    for (final reference in [
+      'https://dashboard.invalid/main.js',
+      '/configs',
+      '../metacubexd/main.js',
+      './%2e%2e/%2e%2e/configs',
+    ]) {
+      test('startup assets never escape the panel: $reference', () async {
+        final paths = <String>[];
+        final endpoint = await server((request) {
+          paths.add(request.uri.path);
+          respond(
+            request,
+            request.uri.path == '/version'
+                ? '{"version":"test"}'
+                : document.replaceFirst('./assets/main.js', reference),
+          );
+        });
+        await expectLater(
+          probeWebDashboard(endpoint, WebDashboardFlavor.zashboard),
+          throwsA(_failure(WebDashboardFailure.unreachable)),
+        );
+        expect(paths, ['/version', '/ui/zashboard/']);
+      });
+    }
+    test('an external document base never receives a probe', () async {
+      final paths = <String>[];
+      final endpoint = await server((request) {
+        paths.add(request.uri.path);
+        respond(
+          request,
+          request.uri.path == '/version'
+              ? '{"version":"test"}'
+              : document.replaceFirst(
+                  '<head>',
+                  '<head><base href="https://dashboard.invalid/">',
+                ),
+        );
+      });
+      await expectLater(
+        probeWebDashboard(endpoint, WebDashboardFlavor.zashboard),
+        throwsA(_failure(WebDashboardFailure.unreachable)),
+      );
+      expect(paths, ['/version', '/ui/zashboard/']);
+    });
+    test('an empty application shell is not a ready dashboard', () async {
+      final endpoint = await server(
+        (request) => respond(
+          request,
+          request.uri.path == '/version'
+              ? '{"version":"test"}'
+              : '<html><body><div id="app"></div></body></html>',
+        ),
+      );
+      await expectLater(
+        probeWebDashboard(endpoint, WebDashboardFlavor.zashboard),
+        throwsA(_failure(WebDashboardFailure.unreachable)),
+      );
+    });
+    test('optional configuration scripts do not block the dashboard', () async {
+      final paths = <String>[];
+      final endpoint = await server((request) {
+        paths.add(request.uri.path);
+        respond(
+          request,
+          request.uri.path == '/version'
+              ? '{"version":"test"}'
+              : request.uri.path.endsWith('/')
+              ? document.replaceFirst(
+                  '<head>',
+                  '<head><script src="config.js" onerror="fallback()"></script>',
+                )
+              : '/* asset */',
+        );
+      });
+      await probeWebDashboard(endpoint, WebDashboardFlavor.metacubexd);
+      expect(paths, isNot(contains('/ui/metacubexd/config.js')));
+    });
+    test('JavaScript can exceed the small API response limit', () async {
+      final endpoint = await server(
+        (request) => respond(
+          request,
+          request.uri.path == '/version'
+              ? '{"version":"test"}'
+              : request.uri.path.endsWith('/')
+              ? document
+              : ' ' * (1024 * 1024 + 1),
+        ),
+      );
+      await probeWebDashboard(endpoint, WebDashboardFlavor.zashboard);
+    });
+    test('asset loading shares the deadline and cancellation', () async {
+      final entered = Completer<void>();
+      final endpoint = await server((request) {
+        if (request.uri.path == '/version') {
+          respond(request, '{"version":"test"}');
+        } else if (request.uri.path.endsWith('/')) {
+          respond(request, document);
+        } else if (!entered.isCompleted) {
+          entered.complete();
+        }
+      });
+      await expectLater(
+        probeWebDashboard(
+          endpoint,
+          WebDashboardFlavor.zashboard,
+          timeout: const Duration(milliseconds: 100),
+        ),
+        throwsA(_failure(WebDashboardFailure.unreachable)),
+      );
+      await entered.future;
+      final token = CancelToken();
+      final pending = probeWebDashboard(
+        endpoint,
+        WebDashboardFlavor.zashboard,
+        cancelToken: token,
+      );
+      token.cancel();
+      await expectLater(
+        pending,
+        throwsA(_failure(WebDashboardFailure.cancelled)),
+      );
+    });
+
     test('reports authentication failure without credentials', () async {
       final endpoint = await server(
         (request) => respond(request, '{}', status: HttpStatus.unauthorized),
